@@ -57,7 +57,7 @@ extension SwiftSyntaxProducer {
     
     func generateSizeOf(_ exp: SizeOfExpression) -> ExprSyntax {
         func _forType(_ type: SwiftType) -> ExprSyntax {
-            return MemberAccessExprSyntax { builder in
+            MemberAccessExprSyntax { builder in
                 let base = SpecializeExprSyntax { builder in
                     let token = prepareStartToken(
                         SyntaxFactory.makeIdentifier("MemoryLayout")
@@ -103,7 +103,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateParens(_ exp: ParensExpression) -> ExprSyntax {
-        return TupleExprSyntax { builder in
+        TupleExprSyntax { builder in
             builder.useLeftParen(makeStartToken(SyntaxFactory.makeLeftParenToken))
             builder.useRightParen(SyntaxFactory.makeRightParenToken())
             builder.addElement(TupleElementSyntax { builder in
@@ -113,13 +113,13 @@ extension SwiftSyntaxProducer {
     }
     
     func generateIdentifier(_ exp: IdentifierExpression) -> IdentifierExprSyntax {
-        return IdentifierExprSyntax { builder in
+        IdentifierExprSyntax { builder in
             builder.useIdentifier(prepareStartToken(makeIdentifier(exp.identifier)))
         }
     }
     
     func generateCast(_ exp: CastExpression) -> SequenceExprSyntax {
-        return SequenceExprSyntax { builder in
+        SequenceExprSyntax { builder in
             builder.addElement(generateExpression(exp.exp))
             
             builder.addElement(AsExprSyntax { builder in
@@ -136,7 +136,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateClosure(_ exp: BlockLiteralExpression) -> ClosureExprSyntax {
-        return ClosureExprSyntax { builder in
+        ClosureExprSyntax { builder in
             builder.useLeftBrace(makeStartToken(SyntaxFactory.makeLeftBraceToken))
             
             let hasParameters = !exp.parameters.isEmpty
@@ -213,7 +213,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateArrayLiteral(_ exp: ArrayLiteralExpression) -> ArrayExprSyntax {
-        return ArrayExprSyntax { builder in
+        ArrayExprSyntax { builder in
             builder.useLeftSquare(makeStartToken(SyntaxFactory.makeLeftSquareBracketToken))
             builder.useRightSquare(SyntaxFactory.makeRightSquareBracketToken())
             
@@ -230,7 +230,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateDictionaryLiteral(_ exp: DictionaryLiteralExpression) -> DictionaryExprSyntax {
-        return DictionaryExprSyntax { builder in
+        DictionaryExprSyntax { builder in
             builder.useLeftSquare(makeStartToken(SyntaxFactory.makeLeftSquareBracketToken))
             builder.useRightSquare(SyntaxFactory.makeRightSquareBracketToken())
             
@@ -259,7 +259,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateAssignment(_ exp: AssignmentExpression) -> SequenceExprSyntax {
-        return SequenceExprSyntax { builder in
+        SequenceExprSyntax { builder in
             builder.addElement(generateExpression(exp.lhs))
             
             addExtraLeading(.spaces(1))
@@ -273,15 +273,15 @@ extension SwiftSyntaxProducer {
     }
     
     func generateUnary(_ exp: UnaryExpression) -> ExprSyntax {
-        return generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNeccessary(exp.exp) }))
+        generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNeccessary(exp.exp) }))
     }
     
     func generatePrefix(_ exp: PrefixExpression) -> ExprSyntax {
-        return generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNeccessary(exp.exp) }))
+        generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNeccessary(exp.exp) }))
     }
     
     func generateBinary(_ exp: BinaryExpression) -> SequenceExprSyntax {
-        return SequenceExprSyntax { builder in
+        SequenceExprSyntax { builder in
             builder.addElement(generateExpression(exp.lhs))
             
             if exp.op.category != .range {
@@ -398,7 +398,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateTernary(_ exp: TernaryExpression) -> ExprSyntax {
-        return TernaryExprSyntax { builder in
+        TernaryExprSyntax { builder in
             builder.useConditionExpression(generateExpression(exp.exp))
             builder.useQuestionMark(SyntaxFactory.makeInfixQuestionMarkToken().addingSurroundingSpaces())
             builder.useFirstChoice(generateExpression(exp.ifTrue))

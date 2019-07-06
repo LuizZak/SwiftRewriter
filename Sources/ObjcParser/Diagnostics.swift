@@ -6,15 +6,15 @@ public class Diagnostics {
     private(set) public var diagnostics: [DiagnosticMessage] = []
     
     public var errors: [DiagnosticMessage] {
-        return diagnostics.filter { if case .error = $0 { return true }; return false }
+        diagnostics.filter { if case .error = $0 { return true }; return false }
     }
     
     public var warnings: [DiagnosticMessage] {
-        return diagnostics.filter { if case .warning = $0 { return true }; return false }
+        diagnostics.filter { if case .warning = $0 { return true }; return false }
     }
     
     public var notes: [DiagnosticMessage] {
-        return diagnostics.filter { if case .note = $0 { return true }; return false }
+        diagnostics.filter { if case .note = $0 { return true }; return false }
     }
     
     public init() {
@@ -77,7 +77,7 @@ public class Diagnostics {
     }
     
     public func errorDiagnostics() -> [ErrorDiagnostic] {
-        return diagnostics.compactMap {
+        diagnostics.compactMap {
             switch $0 {
             case .error(let error):
                 return error

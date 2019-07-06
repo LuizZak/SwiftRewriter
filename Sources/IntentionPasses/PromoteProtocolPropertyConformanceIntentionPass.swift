@@ -10,7 +10,7 @@ public class PromoteProtocolPropertyConformanceIntentionPass: IntentionPass {
     
     /// Textual tag this intention pass applies to history tracking entries.
     private var historyTag: String {
-        return "\(PromoteProtocolPropertyConformanceIntentionPass.self)"
+        "\(PromoteProtocolPropertyConformanceIntentionPass.self)"
     }
     
     public init() {

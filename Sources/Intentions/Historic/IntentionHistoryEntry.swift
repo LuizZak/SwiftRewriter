@@ -8,7 +8,7 @@ public struct IntentionHistoryEntry: CustomStringConvertible, Codable {
     
     /// Returns a brief formatted summary string.
     public var summary: String {
-        return "[\(tag)] \(description)"
+        "[\(tag)] \(description)"
     }
     
     public init(tag: String, description: String) {

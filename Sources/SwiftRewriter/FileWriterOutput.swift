@@ -4,7 +4,7 @@ import WriterTargetOutput
 
 class FileDiskWriterOutput: WriterOutput {
     func createFile(path: String) throws -> FileOutput {
-        return try FileOutputImpl(path: path)
+        try FileOutputImpl(path: path)
     }
 }
 
@@ -33,7 +33,7 @@ class FileOutputImpl: FileOutput {
     }
     
     func outputTarget() -> RewriterOutputTarget {
-        return file
+        file
     }
 }
 

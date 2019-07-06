@@ -64,9 +64,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         
         if types.isEmpty {
             if $typesCache.usingCache {
-                $typesCache.modifyingValue {
-                    $0[name] = nil
-                }
+                $typesCache.wrappedValue[name] = nil
             }
             return nil
         }
@@ -74,9 +72,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         let type = CompoundKnownType(typeName: name, types: types)
         
         if $typesCache.usingCache {
-            $typesCache.modifyingValue {
-                $0[name] = type
-            }
+            $typesCache.wrappedValue[name] = type
         }
         
         return type
@@ -105,9 +101,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
             }
             
             if $canonicalTypenameCache.usingCache {
-                $canonicalTypenameCache.modifyingValue {
-                    $0[typeName] = canonical
-                }
+                $canonicalTypenameCache.wrappedValue[typeName] = canonical
             }
             
             return canonical
@@ -147,14 +141,14 @@ public class CollectionKnownTypeProvider: KnownTypeProvider {
     }
     
     public func knownType(withName name: String) -> KnownType? {
-        return knownTypesByName[name]?.first
+        knownTypesByName[name]?.first
     }
     
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
-        return knownTypes.filter { $0.kind == kind }
+        knownTypes.filter { $0.kind == kind }
     }
     
     public func canonicalName(for typeName: String) -> String? {
-        return canonicalMappings[typeName]
+        canonicalMappings[typeName]
     }
 }

@@ -17,19 +17,19 @@ public struct StringCodeSource: CodeSource {
     }
     
     public func fetchSource() -> String {
-        return source
+        source
     }
     
     public func stringIndex(forCharOffset offset: Int) -> String.Index {
-        return _indices[offset]
+        _indices[offset]
     }
     
     public func charOffset(forStringIndex index: String.Index) -> Int {
-        return _indices.firstIndex(of: index) ?? 0
+        _indices.firstIndex(of: index) ?? 0
     }
     
     public func utf8Index(forCharOffset offset: Int) -> Int {
-        return offset
+        offset
     }
     
     public func isEqual(to other: Source) -> Bool {

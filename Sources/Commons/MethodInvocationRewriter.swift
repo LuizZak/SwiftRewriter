@@ -42,7 +42,7 @@ public class MethodInvocationRewriter {
     public let requiredArgumentCount: Int
     
     var argumentRewritingStrategies: [ArgumentRewritingStrategy]? {
-        return argumentRewriting?.map { $0.0 }
+        argumentRewriting?.map { $0.0 }
     }
     
     public init(renaming: String?,
@@ -56,7 +56,7 @@ public class MethodInvocationRewriter {
     }
     
     public func rewriteName(_ name: String) -> String {
-        return renaming ?? name
+        renaming ?? name
     }
     
     public func rewriteIdentifier(_ identifier: FunctionIdentifier,
@@ -89,7 +89,7 @@ public class MethodInvocationRewriter {
     }
     
     public func replaceReturnType(_ returnType: SwiftType) -> SwiftType {
-        return self.returnType ?? returnType
+        self.returnType ?? returnType
     }
     
     /// - precondition: If `argumentRewriting != nil`, `arguments.count >= requiredArgumentCount`
@@ -195,9 +195,9 @@ public class MethodInvocationRewriterBuilder {
     }
     
     public func build() -> MethodInvocationRewriter {
-        return MethodInvocationRewriter(renaming: _renaming,
-                                        argumentRewriting: _argumentRewriting,
-                                        returnType: _returnType)
+        MethodInvocationRewriter(renaming: _renaming,
+                                 argumentRewriting: _argumentRewriting,
+                                 returnType: _returnType)
     }
 }
 

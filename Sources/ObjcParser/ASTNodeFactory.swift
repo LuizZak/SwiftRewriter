@@ -14,7 +14,7 @@ class ASTNodeFactory {
     }
     
     func isInNonnullContext(_ context: ParserRuleContext) -> Bool {
-        return nonnullContextQuerier.isInNonnullContext(context)
+        nonnullContextQuerier.isInNonnullContext(context)
     }
     
     func makeIdentifier(from context: Parser.IdentifierContext) -> Identifier {

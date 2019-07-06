@@ -17,7 +17,7 @@ public enum CalendarCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "Calendar")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {
@@ -43,7 +43,7 @@ public enum NSArrayCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "NSArray")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {
@@ -145,7 +145,7 @@ public enum NSMutableArrayCompoundType {
     private static var singleton: CompoundedMappingType = createType()
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func createType() -> CompoundedMappingType {
@@ -237,7 +237,7 @@ public enum NSDateFormatterCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "DateFormatter")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {
@@ -263,7 +263,7 @@ public enum NSDateCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "Date")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {
@@ -312,7 +312,7 @@ public enum NSLocaleCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "Locale")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {
@@ -333,7 +333,7 @@ public enum NSStringCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "NSString")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {
@@ -350,7 +350,7 @@ public enum NSMutableStringCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "NSMutableString")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {

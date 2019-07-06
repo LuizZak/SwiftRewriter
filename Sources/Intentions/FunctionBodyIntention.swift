@@ -6,7 +6,7 @@ import KnownType
 /// source.
 public class FunctionBodyIntention: FromSourceIntention, KnownMethodBody {
     public var typedSource: MethodBody? {
-        return source as? MethodBody
+        source as? MethodBody
     }
     
     /// Original source code body to generate

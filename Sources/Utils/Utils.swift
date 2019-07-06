@@ -4,7 +4,7 @@ extension Sequence {
     /// for the same value passed in, so values can be grouped correctly
     @inlinable
     public func groupBy<T: Hashable>(_ key: (Iterator.Element) -> T) -> [T: [Iterator.Element]] {
-        return Dictionary(grouping: self, by: key)
+        Dictionary(grouping: self, by: key)
     }
 }
 

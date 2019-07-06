@@ -11,7 +11,7 @@ final class ObjcParserStatePool {
     ///
     /// - Returns: An `ObjcParserState` ready to parse data.
     func pull() -> ObjcParserState {
-        return mutex.locking {
+        mutex.locking {
             if !pool.isEmpty {
                 return pool.removeFirst()
             }
@@ -24,7 +24,7 @@ final class ObjcParserStatePool {
     ///
     /// - Parameter parserState: Parser state to reuse.
     func repool(_ parserState: ObjcParserState) {
-        return mutex.locking {
+        mutex.locking {
             pool.append(parserState)
         }
     }

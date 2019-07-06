@@ -7,7 +7,7 @@ public class ExpressionsStatement: Statement {
     }
     
     public override var children: [SyntaxNode] {
-        return expressions
+        expressions
     }
     
     public init(expressions: [Expression]) {
@@ -30,14 +30,13 @@ public class ExpressionsStatement: Statement {
     
     @inlinable
     public override func copy() -> ExpressionsStatement {
-        return
-            ExpressionsStatement(expressions: expressions.map { $0.copy() })
+        ExpressionsStatement(expressions: expressions.map { $0.copy() })
                 .copyMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        return visitor.visitExpressions(self)
+        visitor.visitExpressions(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
@@ -64,6 +63,6 @@ public class ExpressionsStatement: Statement {
 public extension Statement {
     @inlinable
     var asExpressions: ExpressionsStatement? {
-        return cast()
+        cast()
     }
 }

@@ -25,23 +25,23 @@ public final class ControlFlowGraph: DirectedGraph {
     ///
     /// A reference equality test (===) is used to determine syntax node equality.
     public func containsNode(_ node: ControlFlowGraphNode) -> Bool {
-        return nodes.contains { $0 === node }
+        nodes.contains { $0 === node }
     }
     
     /// Returns `true` iff two node references represent the same underlying node
     /// in this graph.
     public func areNodesEqual(_ node1: ControlFlowGraphNode, _ node2: ControlFlowGraphNode) -> Bool {
-        return node1 === node2
+        node1 === node2
     }
     
     @inlinable
     public func startNode(for edge: ControlFlowGraphEdge) -> ControlFlowGraphNode {
-        return edge.start
+        edge.start
     }
     
     @inlinable
     public func endNode(for edge: ControlFlowGraphEdge) -> ControlFlowGraphNode {
-        return edge.end
+        edge.end
     }
     
     /// Returns the control flow graph node that represents a given syntax node,
@@ -50,21 +50,21 @@ public final class ControlFlowGraph: DirectedGraph {
     ///
     /// A reference equality test (===) is used to determine syntax node equality.
     public func graphNode(for node: SyntaxNode) -> ControlFlowGraphNode? {
-        return nodes.first { $0.node === node }
+        nodes.first { $0.node === node }
     }
     
     /// Returns all outgoing edges for a given control flow graph node.
     ///
     /// A reference equality test (===) is used to determine graph node equality.
     public func edges(from node: ControlFlowGraphNode) -> [ControlFlowGraphEdge] {
-        return edges.filter { $0.start === node }
+        edges.filter { $0.start === node }
     }
     
     /// Returns all ingoing edges for a given control flow graph node.
     ///
     /// A reference equality test (===) is used to determine graph node equality.
     public func edges(towards node: ControlFlowGraphNode) -> [ControlFlowGraphEdge] {
-        return edges.filter { $0.end === node }
+        edges.filter { $0.end === node }
     }
     
     /// Returns an existing edge between two nodes, or `nil`, if no edges between
@@ -72,7 +72,7 @@ public final class ControlFlowGraph: DirectedGraph {
     ///
     /// A reference equality test (===) is used to determine graph node equality.
     public func edge(from start: ControlFlowGraphNode, to end: ControlFlowGraphNode) -> ControlFlowGraphEdge? {
-        return edges.first { $0.start === start && $0.end === end }
+        edges.first { $0.start === start && $0.end === end }
     }
 }
 

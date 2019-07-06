@@ -41,7 +41,7 @@ public class QuickSpecPreprocessor: SourcePreprocessor {
         
         /// Returns true if the given range is contained within comment sections
         func overlapsComments(_ range: Range<String.Index>) -> Bool {
-            return commentSections.contains { $0.overlaps(range) }
+            commentSections.contains { $0.overlaps(range) }
         }
         
         repeat {

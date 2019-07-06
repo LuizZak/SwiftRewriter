@@ -9,7 +9,7 @@ public class TypeGenerationIntention: FromSourceIntention {
     public var typeName: String
     
     public var supertype: KnownTypeReference? {
-        return nil
+        nil
     }
     
     private(set) public var protocols: [ProtocolInheritanceIntention] = []
@@ -18,25 +18,25 @@ public class TypeGenerationIntention: FromSourceIntention {
     private(set) public var constructors: [InitGenerationIntention] = []
     
     public var isExtension: Bool {
-        return false
+        false
     }
     
     /// Returns `true` if this type has no inner members, or any protocol conformance.
     public var isEmptyType: Bool {
-        return protocols.isEmpty && properties.isEmpty && methods.isEmpty && constructors.isEmpty
+        protocols.isEmpty && properties.isEmpty && methods.isEmpty && constructors.isEmpty
     }
     
     // Cannot be in extension with others because Swift doesn't allow overriding
     // members defined in extensions
     public var knownFields: [KnownProperty] {
-        return []
+        []
     }
     
     public var knownTraits: [String: TraitType] = [:]
     public var knownAttributes: [KnownAttribute] = []
     
     public var kind: KnownTypeKind {
-        return .class
+        .class
     }
     
     public var semantics: Set<Semantic> = []
@@ -215,16 +215,16 @@ public class TypeGenerationIntention: FromSourceIntention {
     }
     
     public func hasProperty(named name: String) -> Bool {
-        return properties.contains(where: { $0.name == name })
+        properties.contains(where: { $0.name == name })
     }
     
     public func hasProtocol(named name: String) -> Bool {
-        return protocols.contains(where: { $0.protocolName == name })
+        protocols.contains(where: { $0.protocolName == name })
     }
     
     public func method(withSignature signature: FunctionSignature) -> MethodGenerationIntention? {
-        return methods.first {
-            return signature.droppingNullability == $0.signature.droppingNullability
+        methods.first {
+            signature.droppingNullability == $0.signature.droppingNullability
         }
     }
     
@@ -233,14 +233,14 @@ public class TypeGenerationIntention: FromSourceIntention {
     ///
     /// Ignores method variable names and types of return/parameters.
     public func method(matchingSelector selector: SelectorSignature) -> MethodGenerationIntention? {
-        return methods.first {
-            return $0.signature.asSelector == selector
+        methods.first {
+            $0.signature.asSelector == selector
         }
     }
     
     /// Returns all methods that match a given function identifier.
     public func methods(matching identifier: FunctionIdentifier) -> [MethodGenerationIntention] {
-        return methods.filter {
+        methods.filter {
             $0.signature.asIdentifier == identifier
         }
     }
@@ -260,15 +260,15 @@ public class TypeGenerationIntention: FromSourceIntention {
 
 extension TypeGenerationIntention: KnownType {
     public var knownMethods: [KnownMethod] {
-        return methods
+        methods
     }
     public var knownConstructors: [KnownConstructor] {
-        return constructors
+        constructors
     }
     public var knownProperties: [KnownProperty] {
-        return properties
+        properties
     }
     public var knownProtocolConformances: [KnownProtocolConformance] {
-        return protocols
+        protocols
     }
 }

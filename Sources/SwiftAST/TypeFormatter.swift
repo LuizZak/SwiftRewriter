@@ -60,6 +60,6 @@ public enum TypeFormatter {
     }
     
     public static func stringify(_ type: SwiftType) -> String {
-        return type.description
+        type.description
     }
 }

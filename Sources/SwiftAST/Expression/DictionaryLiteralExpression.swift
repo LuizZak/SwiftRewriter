@@ -11,7 +11,7 @@ public class DictionaryLiteralExpression: Expression {
     }
     
     public override var subExpressions: [Expression] {
-        return _subExpressions
+        _subExpressions
     }
     
     public override var description: String {
@@ -44,12 +44,12 @@ public class DictionaryLiteralExpression: Expression {
     
     @inlinable
     public override func copy() -> DictionaryLiteralExpression {
-        return DictionaryLiteralExpression(pairs: pairs.map { $0.copy() }).copyTypeAndMetadata(from: self)
+        DictionaryLiteralExpression(pairs: pairs.map { $0.copy() }).copyTypeAndMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitDictionary(self)
+        visitor.visitDictionary(self)
     }
     
     public override func isEqual(to other: Expression) -> Bool {
@@ -84,7 +84,7 @@ public class DictionaryLiteralExpression: Expression {
 public extension Expression {
     @inlinable
     var asDictionary: DictionaryLiteralExpression? {
-        return cast()
+        cast()
     }
 }
 
@@ -105,7 +105,7 @@ public struct ExpressionDictionaryPair: Codable, Equatable {
     }
     
     public func copy() -> ExpressionDictionaryPair {
-        return ExpressionDictionaryPair(key: key.copy(), value: value.copy())
+        ExpressionDictionaryPair(key: key.copy(), value: value.copy())
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -123,6 +123,6 @@ public struct ExpressionDictionaryPair: Codable, Equatable {
 
 extension ExpressionDictionaryPair: CustomStringConvertible {
     public var description: String {
-        return key.description + ": " + value.description
+        key.description + ": " + value.description
     }
 }

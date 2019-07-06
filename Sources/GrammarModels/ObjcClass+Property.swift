@@ -1,16 +1,16 @@
 public class PropertyDefinition: ASTNode, InitializableNode {
     /// Type identifier
     public var type: TypeNameNode? {
-        return firstChild()
+        firstChild()
     }
     
     public var attributesList: PropertyAttributesList? {
-        return firstChild()
+        firstChild()
     }
     
     /// Identifier for this property
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     // For use in protocol methods only
@@ -26,11 +26,11 @@ public class PropertyDefinition: ASTNode, InitializableNode {
 
 public class PropertyAttributesList: ASTNode, InitializableNode {
     public var attributes: [PropertyAttributeNode] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     public var keywordAttributes: [String] {
-        return attributes.compactMap { mod in
+        attributes.compactMap { mod in
             switch mod.attribute {
             case .keyword(let kw):
                 return kw

@@ -30,18 +30,18 @@ public struct FunctionSignature: Hashable {
     }
     
     public var asIdentifier: FunctionIdentifier {
-        return _asIdentifier
+        _asIdentifier
     }
     
     /// The cannonical selector signature for this function signature.
     public var asSelector: SelectorSignature {
-        return _asSelector
+        _asSelector
     }
     
     // TODO: Support suplying type attributes for function signatures
     /// Returns a `SwiftType.block`-equivalent type for this function signature
     public var swiftClosureType: SwiftType {
-        return .swiftBlock(returnType: returnType,
+        .swiftBlock(returnType: returnType,
                            parameters: parameters.map { $0.type })
     }
     
@@ -183,7 +183,7 @@ public struct FunctionSignature: Hashable {
     /// Returns `true` iff `self` and `other` match using Objective-C signature
     /// matching rules.
     public func matchesAsSelector(_ other: FunctionSignature) -> Bool {
-        return asSelector == other.asSelector
+        asSelector == other.asSelector
     }
     
     /// Returns `true` iff `self` and `other` match using C signature matching
@@ -192,7 +192,7 @@ public struct FunctionSignature: Hashable {
     /// In C, function signatures match if they have the same name, and the same
     /// number of parameters.
     public func matchesAsCFunction(_ other: FunctionSignature) -> Bool {
-        return name == other.name && parameters.count == other.parameters.count
+        name == other.name && parameters.count == other.parameters.count
     }
 }
 
@@ -222,7 +222,7 @@ extension FunctionSignature: Codable {
 public extension Sequence where Element == ParameterSignature {
     
     func argumentLabels() -> [String?] {
-        return map { $0.label }
+        map { $0.label }
     }
 }
 

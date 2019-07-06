@@ -3,22 +3,22 @@ import ObjcParserAntlr
 public class VarDeclarationIdentifierNameExtractor: ObjectiveCParserBaseVisitor<ObjectiveCParser.IdentifierContext> {
     // MARK: Static shortcuts
     public static func extract(from ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> ObjectiveCParser.IdentifierContext? {
-        return ctx.accept(VarDeclarationIdentifierNameExtractor())
+        ctx.accept(VarDeclarationIdentifierNameExtractor())
     }
     public static func extract(from ctx: ObjectiveCParser.TypeVariableDeclaratorContext) -> ObjectiveCParser.IdentifierContext? {
-        return ctx.accept(VarDeclarationIdentifierNameExtractor())
+        ctx.accept(VarDeclarationIdentifierNameExtractor())
     }
     public static func extract(from ctx: ObjectiveCParser.DeclaratorContext) -> ObjectiveCParser.IdentifierContext? {
-        return ctx.accept(VarDeclarationIdentifierNameExtractor())
+        ctx.accept(VarDeclarationIdentifierNameExtractor())
     }
     public static func extract(from ctx: ObjectiveCParser.DirectDeclaratorContext) -> ObjectiveCParser.IdentifierContext? {
-        return ctx.accept(VarDeclarationIdentifierNameExtractor())
+        ctx.accept(VarDeclarationIdentifierNameExtractor())
     }
     public static func extract(from ctx: ObjectiveCParser.IdentifierContext) -> ObjectiveCParser.IdentifierContext? {
-        return ctx.accept(VarDeclarationIdentifierNameExtractor())
+        ctx.accept(VarDeclarationIdentifierNameExtractor())
     }
     public static func extract(from ctx: ObjectiveCParser.FunctionPointerContext) -> ObjectiveCParser.IdentifierContext? {
-        return ctx.accept(VarDeclarationIdentifierNameExtractor())
+        ctx.accept(VarDeclarationIdentifierNameExtractor())
     }
     
     public static func extractAll(from ctx: ObjectiveCParser.FieldDeclarationContext) -> [ObjectiveCParser.IdentifierContext] {
@@ -33,21 +33,21 @@ public class VarDeclarationIdentifierNameExtractor: ObjectiveCParserBaseVisitor<
     public override func visitTypeVariableDeclaratorOrName(
         _ ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> ObjectiveCParser.IdentifierContext? {
         
-        return ctx.typeVariableDeclarator()?.accept(self)
+        ctx.typeVariableDeclarator()?.accept(self)
     }
     public override func visitTypeVariableDeclarator(_ ctx: ObjectiveCParser.TypeVariableDeclaratorContext) -> ObjectiveCParser.IdentifierContext? {
-        return ctx.declarator()?.accept(self)
+        ctx.declarator()?.accept(self)
     }
     public override func visitDeclarator(_ ctx: ObjectiveCParser.DeclaratorContext) -> ObjectiveCParser.IdentifierContext? {
-        return ctx.directDeclarator()?.accept(self)
+        ctx.directDeclarator()?.accept(self)
     }
     public override func visitDirectDeclarator(_ ctx: ObjectiveCParser.DirectDeclaratorContext) -> ObjectiveCParser.IdentifierContext? {
-        return ctx.identifier()
+        ctx.identifier()
     }
     public override func visitIdentifier(_ ctx: ObjectiveCParser.IdentifierContext) -> ObjectiveCParser.IdentifierContext? {
-        return ctx
+        ctx
     }
     public override func visitFunctionPointer(_ ctx: ObjectiveCParser.FunctionPointerContext) -> ObjectiveCParser.IdentifierContext? {
-        return ctx.identifier()
+        ctx.identifier()
     }
 }

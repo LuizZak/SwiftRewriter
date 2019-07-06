@@ -37,7 +37,7 @@ public final class SwiftClassInterfaceParser {
     public static func parseDeclaration(from string: String,
                                         into typeBuilder: inout KnownTypeBuilder) throws {
         
-        return try parseDeclaration(from: Lexer(input: string), into: &typeBuilder)
+        try parseDeclaration(from: Lexer(input: string), into: &typeBuilder)
     }
     
     /// Parses a class type interface signature from a given lexer into a given

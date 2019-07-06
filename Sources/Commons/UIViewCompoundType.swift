@@ -5,7 +5,7 @@ public class UIViewCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "UIView")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {

@@ -4,7 +4,7 @@ import GrammarModels
 public class NodeCreationContext {
     /// Current top-most node
     public var topmostNode: ASTNode? {
-        return _nodeStack.last
+        _nodeStack.last
     }
     
     public var autoUpdatesSourceRange = true
@@ -40,7 +40,7 @@ public class NodeCreationContext {
     /// Gets the current context node as a given node type.
     /// Returns nil, if `topmostNode` is nil or if it is not castable to `T`.
     public func currentContextNode<T: ASTNode>(as node: T.Type = T.self) -> T? {
-        return topmostNode as? T
+        topmostNode as? T
     }
     
     /// Pushes a new node context using a given node

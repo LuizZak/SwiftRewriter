@@ -1,6 +1,6 @@
 public enum CompoundedMappingTypeList {
     public static func typeList() -> [CompoundedMappingType] {
-        return [
+        [
             FoundationCompoundTypes.nsCalendar.create(),
             FoundationCompoundTypes.nsArray.create(),
             FoundationCompoundTypes.nsMutableArray.create(),

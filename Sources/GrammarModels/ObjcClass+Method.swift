@@ -7,17 +7,17 @@ public final class ExpressionNode: ASTNode {
 public final class MethodBody: ASTNode {
     public var statements: ObjectiveCParser.CompoundStatementContext?
     
-    public override func shortDescription() -> String {
-        return statements?.getText() ?? ""
+    public override var shortDescription: String {
+        statements?.getText() ?? ""
     }
 }
 
 public class MethodDefinition: ASTNode, InitializableNode {
     public var returnType: MethodType? {
-        return firstChild()
+        firstChild()
     }
     public var methodSelector: MethodSelector? {
-        return firstChild()
+        firstChild()
     }
     public var body: MethodBody?
     
@@ -67,10 +67,10 @@ public final class KeywordDeclarator: ASTNode, InitializableNode {
         return children.first
     }
     public var type: MethodType? {
-        return firstChild()
+        firstChild()
     }
     public var identifier: Identifier? {
-        return childrenMatching().last
+        childrenMatching().last
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -80,10 +80,10 @@ public final class KeywordDeclarator: ASTNode, InitializableNode {
 
 public final class MethodType: ASTNode, InitializableNode {
     public var nullabilitySpecifiers: [NullabilitySpecifier] {
-        return childrenMatching()
+        childrenMatching()
     }
     public var type: TypeNameNode? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {

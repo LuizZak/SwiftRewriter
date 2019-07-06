@@ -12,7 +12,7 @@ class SwiftAttributeTransformationsExtractor {
     }
     
     func nonCanonicalNames() throws -> [String] {
-        return try aliases(in: type)
+        try aliases(in: type)
     }
     
     func transformations() throws -> [PostfixTransformation] {
@@ -189,7 +189,7 @@ class SwiftAttributeTransformationsExtractor {
             return .method(transformer)
         }
         func makeTransformation(signature: FunctionSignature) -> PostfixTransformation {
-            return makeTransformation(identifier: signature.asIdentifier)
+            makeTransformation(identifier: signature.asIdentifier)
         }
         
         var transforms: [PostfixTransformation] = []

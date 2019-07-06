@@ -173,7 +173,7 @@ private extension BaseExpressionPass {
     func methodRemapping(_ mapping: (MethodInvocationTransformerMatcher),
                          _ baseMatcher: ValueMatcher<Expression>) -> [PostfixInvocationTransformer] {
         
-        return [
+        [
             MethodInvocationTransformer(
                 baseExpressionMatcher: baseMatcher,
                 invocationMatcher: mapping
@@ -232,7 +232,7 @@ private extension BaseExpressionPass {
                              _ property: String,
                              _ resultType: SwiftType) -> [PostfixInvocationTransformer] {
         
-        return [
+        [
             MethodsToPropertyTransformer(
                 baseExpressionMatcher: matcher,
                 getterName: getterName,

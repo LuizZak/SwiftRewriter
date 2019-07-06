@@ -281,7 +281,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitArgumentExpression(_ ctx: ObjectiveCParser.ArgumentExpressionContext) -> Expression? {
-        return acceptFirst(from: ctx.expression)
+        acceptFirst(from: ctx.expression)
     }
     
     public override func visitPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) -> Expression? {
@@ -334,7 +334,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitBoxExpression(_ ctx: ObjectiveCParser.BoxExpressionContext) -> Expression? {
-        return acceptFirst(from: ctx.expression, ctx.constant, ctx.identifier)
+        acceptFirst(from: ctx.expression, ctx.constant, ctx.identifier)
     }
     
     public override func visitStringLiteral(_ ctx: ObjectiveCParser.StringLiteralContext) -> Expression? {
@@ -448,11 +448,11 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitSelectorName(_ ctx: ObjectiveCParser.SelectorNameContext) -> Expression? {
-        return .constant(.string(ctx.getText()))
+        .constant(.string(ctx.getText()))
     }
     
     public override func visitIdentifier(_ ctx: ObjectiveCParser.IdentifierContext) -> Expression? {
-        return .identifier(ctx.getText())
+        .identifier(ctx.getText())
     }
     
     private func acceptFirst(from rules: () -> ParserRuleContext?...) -> Expression? {
@@ -466,8 +466,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     private func compoundStatementVisitor() -> SwiftStatementASTReader.CompoundStatementVisitor {
-        return
-            SwiftStatementASTReader
+        SwiftStatementASTReader
                 .CompoundStatementVisitor(expressionReader: self,
                                           context: context)
     }
@@ -494,5 +493,5 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
 }
 
 private func swiftOperator(from string: String) -> SwiftOperator? {
-    return SwiftOperator(rawValue: string)
+    SwiftOperator(rawValue: string)
 }

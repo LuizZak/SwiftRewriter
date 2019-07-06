@@ -5,11 +5,11 @@ public class EnumCaseGenerationIntention: PropertyGenerationIntention {
     public var expression: Expression?
     
     public override var isStatic: Bool {
-        return true // Enum cases are always static
+        true // Enum cases are always static
     }
     
     public override var isEnumCase: Bool {
-        return true
+        true
     }
     
     public init(name: String,

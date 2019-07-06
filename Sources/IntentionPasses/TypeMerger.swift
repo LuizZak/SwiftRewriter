@@ -8,7 +8,7 @@ class TypeMerger {
     let invocatorTag: String
     
     var historyTag: String {
-        return "TypeMerge:\(invocatorTag)"
+        "TypeMerge:\(invocatorTag)"
     }
     
     init(typeSystem: TypeSystem, invocatorTag: String) {

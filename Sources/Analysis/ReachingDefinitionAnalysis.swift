@@ -227,7 +227,7 @@ public class ReachingDefinitionAnalyzer {
         }
         
         public static func == (lhs: Definition, rhs: Definition) -> Bool {
-            return lhs.definitionSite === rhs.definitionSite && lhs.definition == rhs.definition
+            lhs.definitionSite === rhs.definitionSite && lhs.definition == rhs.definition
         }
     }
 }

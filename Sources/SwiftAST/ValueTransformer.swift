@@ -83,24 +83,24 @@ public struct ValueTransformer<T, U> {
     
     @inlinable
     public func transform(value: T) -> U? {
-        return transformResult(value: value).value
+        transformResult(value: value).value
     }
     
     @inlinable
     public func transformResult(value: T) -> Result<U> {
-        return transformer.transform(value: value)
+        transformer.transform(value: value)
     }
     
     @inlinable
     public func debugTransform(value: T) -> U? {
-        return debugTransform(value: value) { (string: @autoclosure () -> String) in
+        debugTransform(value: value) { (string: @autoclosure () -> String) in
             print(string())
         }
     }
     
     @inlinable
     public func debugTransform(value: T, _ printer: (@autoclosure () -> String) -> Void) -> U? {
-        return debugTransformResult(value: value, printer).value
+        debugTransformResult(value: value, printer).value
     }
     
     @inlinable
@@ -124,7 +124,7 @@ public struct ValueTransformer<T, U> {
                                 line: Int = #line,
                                 _ callback: @escaping (U) -> Z?) -> ValueTransformer<T, Z> {
         
-        return ValueTransformer<T, Z>(file: file, line: line, previous: self) { value in
+        ValueTransformer<T, Z>(file: file, line: line, previous: self) { value in
             return callback(value)
         }
     }
@@ -134,7 +134,7 @@ public struct ValueTransformer<T, U> {
                                       line: Int = #line,
                                       _ callback: @escaping (U) -> Result<Z>) -> ValueTransformer<T, Z> {
         
-        return ValueTransformer<T, Z>(line: line, file: file, previous: self) { (value: U) -> Result<Z> in
+        ValueTransformer<T, Z>(line: line, file: file, previous: self) { (value: U) -> Result<Z> in
             return callback(value)
         }
     }
@@ -144,7 +144,7 @@ public struct ValueTransformer<T, U> {
                          line: Int = #line,
                          _ predicate: @escaping (U) -> Bool) -> ValueTransformer<T, U> {
         
-        return ValueTransformer<T, U>(file: file, line: line) { value in
+        ValueTransformer<T, U>(file: file, line: line) { value in
             guard let value = self.transform(value: value) else {
                 return nil
             }
@@ -158,7 +158,7 @@ public struct ValueTransformer<T, U> {
                                line: Int = #line,
                                _ predicate: @escaping (U) -> Result<U>) -> ValueTransformer<T, U> {
         
-        return ValueTransformer<T, U>(line: line, file: file) { (value: T) -> Result<U> in
+        ValueTransformer<T, U>(line: line, file: file) { (value: T) -> Result<U> in
             let result =
                 self.transformResult(value: value)
                     .flatMap {
@@ -180,7 +180,7 @@ public struct ValueTransformer<T, U> {
                          line: Int = #line,
                          matcher: ValueMatcher<U>) -> ValueTransformer<T, U> {
         
-        return ValueTransformer<T, U>(line: line, file: file, previous: self) { value in
+        ValueTransformer<T, U>(line: line, file: file, previous: self) { value in
             if matcher.matches(value) {
                 return .success(value: value)
             } else {
@@ -264,12 +264,12 @@ public struct ValueTransformer<T, U> {
         
         @usableFromInline
         func transform(value: T) -> Result<U> {
-            return closure(value)
+            closure(value)
         }
         
         @usableFromInline
         func debugTransform(value: T, _ print: (@autoclosure () -> String) -> Void) -> Result<U> {
-            return debugClosure(value, print)
+            debugClosure(value, print)
         }
     }
 }
@@ -328,7 +328,7 @@ public extension ValueTransformer where U: MutableCollection {
                         index: U.Index,
                         transformer: ValueTransformer<U.Element, U.Element>) -> ValueTransformer {
         
-        return transformingResult(file: file, line: line) { value in
+        transformingResult(file: file, line: line) { value in
             guard value.endIndex > index else {
                 return .failure(message: "\(index) >= \(value.endIndex)")
             }
@@ -347,7 +347,7 @@ public extension ValueTransformer where U: MutableCollection {
                    index: U.Index,
                    with newValue: U.Element) -> ValueTransformer {
         
-        return transforming(file: file, line: line) { value in
+        transforming(file: file, line: line) { value in
             guard value.endIndex > index else {
                 return nil
             }
@@ -366,7 +366,7 @@ public extension ValueTransformer where U: RangeReplaceableCollection {
                   line: Int = #line,
                   index: U.Index) -> ValueTransformer {
         
-        return transforming(file: file, line: line) { value in
+        transforming(file: file, line: line) { value in
             guard value.endIndex > index else {
                 return nil
             }
@@ -384,7 +384,7 @@ public extension ValueTransformer where U: Sequence {
     func removingFirst(file: String = #file,
                        line: Int = #line) -> ValueTransformer<T, DropFirstSequence<U>> {
         
-        return transforming(file: file, line: line) { value in
+        transforming(file: file, line: line) { value in
             return value.dropFirst()
         }
     }
