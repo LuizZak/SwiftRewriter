@@ -7,7 +7,7 @@ public protocol SwiftSyntaxProducerDelegate: class {
     /// with a given initial value.
     func swiftSyntaxProducer(_ producer: SwiftSyntaxProducer,
                              shouldEmitTypeFor storage: ValueStorage,
-                             intention: Intention?,
+                             intention: IntentionProtocol?,
                              initialValue: Expression?) -> Bool
     
     /// Returns the initial value for a given value storage intention of a property,

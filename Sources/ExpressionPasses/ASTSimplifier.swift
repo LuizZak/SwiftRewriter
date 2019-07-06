@@ -1,4 +1,3 @@
-import SwiftRewriterLib
 import SwiftAST
 
 /// Simplifies AST structures that may be unnecessarily complex.

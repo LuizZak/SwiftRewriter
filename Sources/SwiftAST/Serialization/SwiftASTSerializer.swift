@@ -289,7 +289,7 @@ public final class SwiftASTSerializer {
 
 public extension SwiftASTSerializer {
     
-    public static func encode(statement: Statement,
+    static func encode(statement: Statement,
                               encoder: JSONEncoder,
                               options: SerializationOptions = []) throws -> Data {
         
@@ -300,12 +300,12 @@ public extension SwiftASTSerializer {
         return try encoder.encode(container)
     }
     
-    public static func decodeStatement(decoder: JSONDecoder, data: Data) throws -> Statement {
+    static func decodeStatement(decoder: JSONDecoder, data: Data) throws -> Statement {
         let container = try decoder.decode(SwiftASTSerializer.StatementContainer.self, from: data)
         return container.statement
     }
     
-    public static func encode(expression: Expression,
+    static func encode(expression: Expression,
                               encoder: JSONEncoder,
                               options: SerializationOptions = []) throws -> Data {
         
@@ -316,7 +316,7 @@ public extension SwiftASTSerializer {
         return try encoder.encode(container)
     }
     
-    public static func decodeExpression(decoder: JSONDecoder, data: Data) throws -> Expression {
+    static func decodeExpression(decoder: JSONDecoder, data: Data) throws -> Expression {
         let container = try decoder.decode(SwiftASTSerializer.ExpressionContainer.self, from: data)
         return container.expression
     }

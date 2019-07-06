@@ -8,15 +8,22 @@ public protocol ValueStorageIntention: IntentionProtocol {
 }
 
 public extension ValueStorageIntention {
-    public var type: SwiftType {
+    var type: SwiftType {
         return storage.type
     }
     
-    public var ownership: Ownership {
+    var ownership: Ownership {
         return storage.ownership
     }
     
-    public var isConstant: Bool {
+    var isConstant: Bool {
         return storage.isConstant
     }
+}
+
+/// Defines a value storage intention that can be mutated at any point.
+public protocol MutableValueStorageIntention: ValueStorageIntention {
+    var name: String { get set }
+    var storage: ValueStorage { get set }
+    var initialValue: Expression? { get set }
 }

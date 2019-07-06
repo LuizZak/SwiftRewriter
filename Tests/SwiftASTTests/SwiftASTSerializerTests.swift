@@ -29,7 +29,7 @@ class SwiftASTSerializerTests: XCTestCase {
             Statement.do([
                 Statement.expression(
                     Expression.dictionaryLiteral([
-                        Expression.prefix(op: .subtract, .constant(0)):
+                        Expression.prefix(op: .subtract, .constant(.nil)):
                             Expression.sizeof(Expression.identifier("Int"))
                         ])
                 )
@@ -37,7 +37,7 @@ class SwiftASTSerializerTests: XCTestCase {
             Statement.if(
                 Expression.constant(true),
                 body: [
-                    Statement.return(nil)
+                    Statement.return(Expression.constant(1.0))
                 ],
                 else: [
                     Statement.return(Expression.constant(1))
@@ -49,7 +49,7 @@ class SwiftASTSerializerTests: XCTestCase {
                     SwitchCase(
                         patterns: [.expression(.constant("abc"))],
                         statements: [
-                            Statement.return(Expression.constant(1))
+                            Statement.return(Expression.constant(.rawConstant("raw_constant")))
                         ]
                     )
                 ],

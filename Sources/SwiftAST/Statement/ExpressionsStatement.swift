@@ -63,7 +63,7 @@ public class ExpressionsStatement: Statement {
 }
 public extension Statement {
     @inlinable
-    public var asExpressions: ExpressionsStatement? {
+    var asExpressions: ExpressionsStatement? {
         return cast()
     }
 }

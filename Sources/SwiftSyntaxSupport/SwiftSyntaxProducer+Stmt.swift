@@ -40,11 +40,12 @@ extension SwiftSyntaxProducer {
     func generateCompound(_ compoundStmt: CompoundStatement) -> CodeBlockSyntax {
         return CodeBlockSyntax { builder in
             builder.useLeftBrace(SyntaxFactory.makeLeftBraceToken().withLeadingSpace())
-            builder.useRightBrace(SyntaxFactory.makeRightBraceToken().onNewline().addingLeadingTrivia(indentation()))
             
             indent()
             defer {
                 deindent()
+                builder.useRightBrace(SyntaxFactory.makeRightBraceToken().onNewline().addingLeadingTrivia(indentation()))
+                extraLeading = nil
             }
             
             let stmts = _generateStatements(compoundStmt.statements)
@@ -136,8 +137,8 @@ extension SwiftSyntaxProducer {
         case let stmt as CompoundStatement:
             return stmt.statements.flatMap(generateStatementBlockItems)
             
-        case is UnknownStatement:
-            return [{ SyntaxFactory.makeBlankUnknownStmt().inCodeBlock() }]
+        case let stmt as UnknownStatement:
+            return [{ self.generateUnknown(stmt).inCodeBlock() }]
             
         default:
             return [{ SyntaxFactory.makeBlankExpressionStmt().inCodeBlock() }]
@@ -154,25 +155,23 @@ extension SwiftSyntaxProducer {
                         self.addExtraLeading(self.indentation())
                     }
                     
-                    return SyntaxFactory.makeCodeBlockItem(item: self.generateExpression(exp), semicolon: nil)
+                    return SyntaxFactory.makeCodeBlockItem(item: self.generateExpression(exp), semicolon: nil, errorTokens: nil)
                 }
             }
     }
     
     func generateVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> [() -> CodeBlockItemSyntax] {
-        return stmt.decl
-            .map { decl -> () -> CodeBlockItemSyntax in
-                return { SyntaxFactory.makeCodeBlockItem(item: self.generateVariableDecl(decl), semicolon: nil) }
+        if stmt.decl.isEmpty {
+            return []
+        }
+        
+        return varDeclGenerator
+            .generateVariableDeclarations(stmt)
+            .map { decl in
+                return {
+                    SyntaxFactory.makeCodeBlockItem(item: decl(), semicolon: nil, errorTokens: nil)
+                }
             }
-    }
-    
-    func generateVariableDecl(_ decl: StatementVariableDeclaration) -> VariableDeclSyntax {
-        return generateVariableDecl(name: decl.identifier,
-                                    storage: decl.storage,
-                                    attributes: [],
-                                    intention: nil,
-                                    modifiers: [],
-                                    initialization: decl.initialization)
     }
     
     func generateReturn(_ stmt: ReturnStatement) -> ReturnStmtSyntax {
@@ -359,6 +358,21 @@ extension SwiftSyntaxProducer {
             builder.useDeferKeyword(makeStartToken(SyntaxFactory.makeDeferKeyword))
             builder.useBody(generateCompound(stmt.body))
         }
+    }
+    
+    func generateUnknown(_ unknown: UnknownStatement) -> ExprSyntax {
+        var trivia = extraLeading ?? []
+        let indent = indentationString()
+        
+        trivia = trivia + Trivia.blockComment("""
+            /*
+            \(indent)\(unknown.context.description)
+            \(indent)*/
+            """)
+        
+        return SyntaxFactory
+            .makeBlankIdentifierExpr()
+            .withIdentifier(makeIdentifier("").withLeadingTrivia(trivia))
     }
     
     func generatePattern(_ pattern: Pattern) -> PatternSyntax {

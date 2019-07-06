@@ -1,7 +1,6 @@
 import Foundation
 import SwiftAST
 import Intentions
-import SwiftRewriterLib
 import MiniLexer
 
 /// Verifies the #import directives on every file and convert them to the appropriate

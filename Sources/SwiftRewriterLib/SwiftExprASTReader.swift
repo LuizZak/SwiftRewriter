@@ -1,8 +1,9 @@
-import GrammarModels
+import Antlr4
 import ObjcParserAntlr
 import ObjcParser
-import Antlr4
+import GrammarModels
 import SwiftAST
+import TypeSystem
 
 /// A visitor that reads simple Objective-C expressions and emits as Expression
 /// enum cases.

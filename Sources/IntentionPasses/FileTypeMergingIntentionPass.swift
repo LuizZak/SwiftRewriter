@@ -1,7 +1,6 @@
 import Foundation
 import SwiftAST
 import Intentions
-import SwiftRewriterLib
 
 public class FileTypeMergingIntentionPass: IntentionPass {
     private let headerExtensions: [String] = [".h"]
@@ -54,13 +53,21 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             }
         }
         
+        func strippingPathExtension(_ path: String) -> Substring {
+            return path[path.startIndex..<(path.lastIndex(of: ".") ?? path.endIndex)]
+        }
+        
+        let implByName =
+            implementations
+                .groupBy {
+                    strippingPathExtension($0.sourcePath)
+                }.compactMapValues { $0.first }
+        
         // Move all enum/protocol/global variables from header to implementation
         // files, when available
         for header in headers {
-            let path = (header.sourcePath as NSString).deletingPathExtension
-            guard let impl = implementations.first(where: {
-                ($0.sourcePath as NSString).deletingPathExtension == path
-            }) else {
+            let path = strippingPathExtension(header.sourcePath)
+            guard let impl = implByName[path] else {
                 continue
             }
             
@@ -99,10 +106,8 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         
         // Merge remaining global functions
         for header in headers {
-            let path = (header.sourcePath as NSString).deletingPathExtension
-            guard let impl = implementations.first(where: {
-                ($0.sourcePath as NSString).deletingPathExtension == path
-            }) else {
+            let path = strippingPathExtension(header.sourcePath)
+            guard let impl = implByName[path] else {
                 continue
             }
             
@@ -119,10 +124,8 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         
         // Move all directives from .h to matching .m files
         for header in headers where header.isEmptyExceptDirectives {
-            let path = (header.sourcePath as NSString).deletingPathExtension
-            guard let impl = implementations.first(where: {
-                ($0.sourcePath as NSString).deletingPathExtension == path
-            }) else {
+            let path = strippingPathExtension(header.sourcePath)
+            guard let impl = implByName[path] else {
                 continue
             }
             

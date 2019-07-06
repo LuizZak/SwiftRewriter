@@ -93,7 +93,7 @@ extension SwiftSyntaxProducerTests {
         initMethod.functionBody = FunctionBodyIntention(body: [])
         let sut = SwiftSyntaxProducer()
         
-        let output = sut.generateInitializer(initMethod).description
+        let output = sut.generateInitializer(initMethod, alwaysEmitBody: true).description
         
         let expected = """
             init?() {
@@ -109,7 +109,7 @@ extension SwiftSyntaxProducerTests {
         initMethod.functionBody = FunctionBodyIntention(body: [])
         let sut = SwiftSyntaxProducer()
         
-        let output = sut.generateInitializer(initMethod).description
+        let output = sut.generateInitializer(initMethod, alwaysEmitBody: true).description
         
         let expected = """
             convenience init() {
@@ -843,6 +843,27 @@ extension SwiftSyntaxProducerTests {
         
         assert(result, matches: """
             protocol A {
+            }
+            """)
+    }
+    
+    func testGenerateFileWithProtocolWithInitializerAndMethodRequirements() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createProtocol(withName: "A") { builder in
+                    builder.createConstructor()
+                    builder.createVoidMethod(named: "method")
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(result, matches: """
+            protocol A {
+                init()
+
+                func method()
             }
             """)
     }

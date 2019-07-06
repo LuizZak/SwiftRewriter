@@ -2,7 +2,7 @@ import GrammarModels
 import SwiftAST
 
 /// An intention to generate a global variable.
-public final class GlobalVariableGenerationIntention: FromSourceIntention, FileLevelIntention, ValueStorageIntention {
+public final class GlobalVariableGenerationIntention: FromSourceIntention, FileLevelIntention, MutableValueStorageIntention {
     public var variableSource: VariableDeclaration? {
         return source as? VariableDeclaration
     }
@@ -12,14 +12,33 @@ public final class GlobalVariableGenerationIntention: FromSourceIntention, FileL
     public var initialValueExpr: GlobalVariableInitialValueIntention?
     
     public var initialValue: Expression? {
-        return initialValueExpr?.expression
+        get {
+            return initialValueExpr?.expression
+        }
+        set {
+            initialValueExpr = newValue.map({ GlobalVariableInitialValueIntention(expression: $0, source: nil) })
+        }
     }
     
-    public init(name: String, storage: ValueStorage, accessLevel: AccessLevel = .internal,
+    public init(name: String,
+                storage: ValueStorage,
+                accessLevel: AccessLevel = .internal,
                 source: ASTNode? = nil) {
+        
         self.name = name
         self.storage = storage
         super.init(accessLevel: accessLevel, source: source)
+    }
+    
+    public convenience init(name: String,
+                            type: SwiftType,
+                            accessLevel: AccessLevel = .internal,
+                            source: ASTNode? = nil) {
+        
+        self.init(name: name,
+                  storage: ValueStorage(type: type, ownership: .strong, isConstant: false),
+                  accessLevel: accessLevel,
+                  source: source)
     }
     
     public required init(from decoder: Decoder) throws {

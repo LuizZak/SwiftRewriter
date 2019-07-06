@@ -1,5 +1,4 @@
 import SwiftAST
-import SwiftRewriterLib
 import MiniLexer
 
 func makeType(from typeString: String, typeName: String) -> CompoundedMappingType {

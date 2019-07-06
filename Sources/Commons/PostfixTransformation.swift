@@ -1,4 +1,3 @@
-import SwiftRewriterLib
 import SwiftAST
 
 /// Represents a transformation of a postfix invocation for types or instances of

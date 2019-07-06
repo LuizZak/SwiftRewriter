@@ -1,6 +1,5 @@
 import SwiftAST
 import KnownType
-import SwiftRewriterLib
 
 /// Corrects invocations of properties of types which are expressed as method
 /// invocations. This is a common construct in Objective-C.

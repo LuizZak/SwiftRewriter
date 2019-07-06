@@ -1,4 +1,5 @@
 import SwiftAST
+import TypeSystem
 import GrammarModels
 import ObjcParserAntlr
 import ObjcParser

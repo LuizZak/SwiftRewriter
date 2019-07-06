@@ -6,24 +6,24 @@ public class ObjcClassImplementation: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(isInNonnullContext: isInNonnullContext)
+        super.init(_isInNonnullContext: isInNonnullContext)
     }
 }
 
 public extension ObjcClassImplementation {
-    public var superclass: SuperclassName? {
+    var superclass: SuperclassName? {
         return firstChild()
     }
     
-    public var ivarsList: IVarsList? {
+    var ivarsList: IVarsList? {
         return firstChild()
     }
     
-    public var methods: [MethodDefinition] {
+    var methods: [MethodDefinition] {
         return childrenMatching()
     }
     
-    public var propertyImplementations: [PropertyImplementation] {
+    var propertyImplementations: [PropertyImplementation] {
         return childrenMatching()
     }
 }

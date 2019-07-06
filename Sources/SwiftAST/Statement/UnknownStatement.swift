@@ -35,7 +35,7 @@ public class UnknownStatement: Statement {
 }
 public extension Statement {
     @inlinable
-    public var asUnknown: UnknownStatement? {
+    var asUnknown: UnknownStatement? {
         return cast()
     }
 }

@@ -3,6 +3,7 @@ import ObjcParser
 import SwiftAST
 import KnownType
 import Intentions
+import TypeSystem
 
 public protocol IntentionCollectorDelegate: class {
     func isNodeInNonnullContext(_ node: ASTNode) -> Bool

@@ -107,7 +107,7 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral,
 }
 public extension Expression {
     @inlinable
-    public var asConstant: ConstantExpression? {
+    var asConstant: ConstantExpression? {
         return self as? ConstantExpression
     }
 }
@@ -145,27 +145,27 @@ public enum Constant: Codable, Equatable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        let discriminator = try container.decode(String.self, forKey: .discriminator)
+        let discriminator = try container.decode(Discriminator.self, forKey: .discriminator)
         
         switch discriminator {
-        case "float":
+        case .float:
             try self = .float(container.decode(Float.self, forKey: .payload0))
-        case "boolean":
+            
+        case .boolean:
             try self = .boolean(container.decode(Bool.self, forKey: .payload0))
-        case "int":
+            
+        case .int:
             try self = .int(container.decode(Int.self, forKey: .payload0),
                             container.decode(IntegerType.self, forKey: .payload1))
-        case "string":
+            
+        case .string:
             try self = .string(container.decode(String.self, forKey: .payload0))
-        case "rawConstant":
+            
+        case .rawConstant:
             try self = .rawConstant(container.decode(String.self, forKey: .payload0))
-        case "nil":
+            
+        case .nil:
             self = .nil
-        default:
-            throw DecodingError.dataCorruptedError(
-                forKey: CodingKeys.discriminator,
-                in: container,
-                debugDescription: "Invalid discriminator tag \(discriminator)")
         }
     }
     
@@ -174,28 +174,28 @@ public enum Constant: Codable, Equatable {
         
         switch self {
         case .float(let value):
-            try container.encode("float", forKey: .discriminator)
+            try container.encode(Discriminator.float, forKey: .discriminator)
             try container.encode(value, forKey: .payload0)
             
         case .boolean(let value):
-            try container.encode("boolean", forKey: .discriminator)
+            try container.encode(Discriminator.boolean, forKey: .discriminator)
             try container.encode(value, forKey: .payload0)
             
         case let .int(value, type):
-            try container.encode("int", forKey: .discriminator)
+            try container.encode(Discriminator.int, forKey: .discriminator)
             try container.encode(value, forKey: .payload0)
             try container.encode(type, forKey: .payload1)
             
         case .string(let value):
-            try container.encode("string", forKey: .discriminator)
+            try container.encode(Discriminator.string, forKey: .discriminator)
             try container.encode(value, forKey: .payload0)
             
         case .rawConstant(let value):
-            try container.encode("rawConstant", forKey: .discriminator)
+            try container.encode(Discriminator.rawConstant, forKey: .discriminator)
             try container.encode(value, forKey: .payload0)
             
         case .nil:
-            try container.encode("nil", forKey: .discriminator)
+            try container.encode(Discriminator.nil, forKey: .discriminator)
         }
     }
     
@@ -216,6 +216,15 @@ public enum Constant: Codable, Equatable {
         case binary
         case octal
         case hexadecimal
+    }
+    
+    private enum Discriminator: String, Codable {
+        case float
+        case boolean
+        case int
+        case string
+        case rawConstant
+        case `nil`
     }
     
     private enum CodingKeys: String, CodingKey {

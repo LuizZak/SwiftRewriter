@@ -6,7 +6,9 @@ import SwiftAST
 import Intentions
 import WriterTargetOutput
 import SwiftSyntaxSupport
+import ExpressionPasses
 @testable import SwiftRewriterLib
+import TypeSystem
 import SwiftAST
 
 class ExpressionPassTestCase: XCTestCase {

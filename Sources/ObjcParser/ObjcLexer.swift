@@ -80,7 +80,7 @@ public protocol RangeMarker {
 }
 
 public extension RangeMarker {
-    public func makeString() -> String {
+    func makeString() -> String {
         return String(makeSubstring())
     }
 }

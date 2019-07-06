@@ -69,7 +69,7 @@ public class ReturnStatement: Statement {
 }
 public extension Statement {
     @inlinable
-    public var asReturn: ReturnStatement? {
+    var asReturn: ReturnStatement? {
         return cast()
     }
 }

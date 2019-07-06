@@ -15,7 +15,7 @@ public class ObjcEnumDeclaration: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(isInNonnullContext: isInNonnullContext)
+        super.init(_isInNonnullContext: isInNonnullContext)
     }
 }
 

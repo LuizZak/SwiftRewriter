@@ -13,7 +13,7 @@ public class VariableDeclaration: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(isInNonnullContext: isInNonnullContext)
+        super.init(_isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -24,7 +24,7 @@ public class InitialExpression: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(isInNonnullContext: isInNonnullContext)
+        super.init(_isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -36,6 +36,6 @@ public class ConstantExpressionNode: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(isInNonnullContext: isInNonnullContext)
+        super.init(_isInNonnullContext: isInNonnullContext)
     }
 }

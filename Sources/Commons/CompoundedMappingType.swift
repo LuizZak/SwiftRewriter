@@ -1,7 +1,6 @@
 import Foundation
 import SwiftAST
 import KnownType
-import SwiftRewriterLib
 
 /// Represents a type that, as well as having a full type signature, describes
 /// information for converting invocations and implementations of methods on

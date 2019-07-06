@@ -1,7 +1,6 @@
 // swiftlint:disable file_length
 
 import Foundation
-import SwiftRewriterLib
 import SwiftAST
 import Utils
 import Commons

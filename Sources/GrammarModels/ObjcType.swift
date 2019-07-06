@@ -209,51 +209,6 @@ public enum ObjcType: Equatable, Codable, CustomStringConvertible {
         }
     }
     
-    /// Returns a normalized type for this type.
-    /// Normalizes qualified types with empty qualifiers to their base type.
-    public var normalized: ObjcType {
-        switch self {
-        case let .pointer(ptr):
-            return .pointer(ptr.normalized)
-            
-        case let .generic(type, parameters) where parameters.isEmpty:
-            return .struct(type)
-            
-        case let .generic(type, parameters):
-            return .generic(type, parameters: parameters.map { $0.normalized })
-            
-        case let .qualified(type, qualifiers) where qualifiers.isEmpty:
-            return type.normalized
-            
-        case let .specified(specifiers, type) where specifiers.isEmpty:
-            return type.normalized
-            
-        // Nested specified and qualified types can be unwrapped into one single
-        // qualified/specified type with all annotations in a row
-        case let .qualified(.qualified(innerType, innerQualifiers), qualifiers):
-            return .qualified(innerType.normalized, qualifiers: qualifiers + innerQualifiers)
-            
-        case let .specified(specifiers, .specified(innerSpecifiers, innerType)):
-            return .specified(specifiers: specifiers + innerSpecifiers, innerType.normalized)
-            
-        case let .blockType(name, returnType, parameters):
-            return .blockType(name: name,
-                              returnType: returnType.normalized,
-                              parameters: parameters.map { $0.normalized })
-            
-        case let .functionPointer(name, returnType, parameters):
-            return .functionPointer(name: name,
-                                    returnType: returnType.normalized,
-                                    parameters: parameters.map { $0.normalized })
-            
-        case let .fixedArray(inner, length):
-            return .fixedArray(inner.normalized, length: length)
-            
-        default:
-            return self
-        }
-    }
-    
     /// Returns true if this is a pointer type
     public var isPointer: Bool {
         switch self {

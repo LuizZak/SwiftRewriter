@@ -1,7 +1,7 @@
 import Foundation
 import SwiftAST
 import Intentions
-import SwiftRewriterLib
+import Analysis
 import Utils
 
 /// Promotes local variables in method bodies to non-nil if all assignment sites

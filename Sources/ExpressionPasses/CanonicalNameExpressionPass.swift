@@ -1,5 +1,5 @@
-import SwiftRewriterLib
 import SwiftAST
+import TypeSystem
 
 /// Given a set of canonical type providers, does lookups in expression trees to
 /// replace references of non-canonical names with the proper canonical ones.

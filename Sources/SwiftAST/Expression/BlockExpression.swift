@@ -96,7 +96,7 @@ public class BlockLiteralExpression: Expression {
 }
 public extension Expression {
     @inlinable
-    public var asBlock: BlockLiteralExpression? {
+    var asBlock: BlockLiteralExpression? {
         return cast()
     }
 }

@@ -39,21 +39,15 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
     func testVariableDeclarationsStatement() {
         let stmt = Statement
             .variableDeclarations([
-                StatementVariableDeclaration(identifier: "foo", type: .int),
-                StatementVariableDeclaration(identifier: "bar",
-                                             type: .float,
-                                             initialization: .constant(0.0))
+                StatementVariableDeclaration(identifier: "foo",
+                                             type: .int,
+                                             initialization: .constant(0))
             ])
         let syntax = SwiftSyntaxProducer().generateVariableDeclarations(stmt)
         
         assert(syntax[0](),
                matches: """
-                var foo: Int
-                """)
-        
-        assert(syntax[1](),
-               matches: """
-                var bar: Float = 0.0
+                var foo: Int = 0
                 """)
     }
     
@@ -187,6 +181,26 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             producer: SwiftSyntaxProducer.generateIfStmt,
             matches: """
                 if true {
+                } else {
+                }
+                """)
+    }
+    
+    func testIfElseIfElseStatement() {
+        assert(
+            Statement.if(
+                .constant(true),
+                body: [],
+                else: [
+                    .if(.constant(true),
+                        body: [],
+                        else: [])
+                ]
+            ),
+            producer: SwiftSyntaxProducer.generateIfStmt,
+            matches: """
+                if true {
+                } else if true {
                 } else {
                 }
                 """)
@@ -423,8 +437,12 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
     
     func testUnknownStatement() {
         let stmt = Statement.unknown(UnknownASTContext(context: "abc"))
-        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        let syntaxes = SwiftSyntaxProducer().generateUnknown(stmt)
         
-        assert(syntaxes, matches: "")
+        assert(syntaxes, matches: """
+            /*
+            abc
+            */
+            """)
     }
 }

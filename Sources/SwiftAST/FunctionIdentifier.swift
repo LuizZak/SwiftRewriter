@@ -10,7 +10,7 @@ public struct FunctionIdentifier: Hashable, Equatable, CustomStringConvertible {
     
     public var description: String {
         let parameters = parameterNames.map { ($0 ?? "_") + ":" }
-        return name + "(" + parameters.joined() + ")"
+        return "\(name)(\(parameters.joined()))"
     }
     
     public init(name: String, parameterNames: [String?]) {
@@ -20,7 +20,7 @@ public struct FunctionIdentifier: Hashable, Equatable, CustomStringConvertible {
 }
 
 public extension FunctionCallPostfix {
-    public func identifierWith(methodName: String) -> FunctionIdentifier {
+    func identifierWith(methodName: String) -> FunctionIdentifier {
         let arguments = self.arguments.map { $0.label }
         
         return FunctionIdentifier(name: methodName, parameterNames: arguments)

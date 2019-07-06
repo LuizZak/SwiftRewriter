@@ -1,5 +1,4 @@
 import SwiftAST
-import SwiftRewriterLib
 
 public enum UIViewControllerCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "UIViewController")

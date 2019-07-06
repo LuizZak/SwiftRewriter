@@ -14,9 +14,9 @@ public class Menu: MenuController {
     public override func initMenus() -> MenuController.MenuItem {
         
         return createMenu(name: "Main") { menu, item in
-            item.initAction = .closure {
+            item.initAction = .closure(executing: {
                 menu.console.printLine("Welcome to Swift Rewriter")
-            }
+            })
             
             makeFindFilesMenu(in: menu)
             makeExploreFilesMenu(in: menu)

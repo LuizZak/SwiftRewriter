@@ -3,6 +3,7 @@ import ExpressionPasses
 import SwiftAST
 import Intentions
 import SwiftRewriterLib
+import TypeSystem
 import TestCommons
 
 class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {

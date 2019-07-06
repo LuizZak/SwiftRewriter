@@ -85,7 +85,7 @@ public extension ValueMatcher {
     /// - Returns: A new matcher with the specified matcher rule appended along
     /// with all existing rules for this matcher.
     @inlinable
-    public func keyPath<U: Equatable>(_ kp: KeyPath<T, U>, equals value: U) -> ValueMatcher {
+    func keyPath<U: Equatable>(_ kp: KeyPath<T, U>, equals value: U) -> ValueMatcher {
         return keyPath(kp, .equals(value))
     }
     
@@ -98,7 +98,7 @@ public extension ValueMatcher {
     /// - Returns: A new matcher with the specified matcher rule appended along
     /// with all existing rules for this matcher.
     @inlinable
-    public func keyPath<U: Equatable>(_ kp: KeyPath<T, U?>, equals value: U) -> ValueMatcher {
+    func keyPath<U: Equatable>(_ kp: KeyPath<T, U?>, equals value: U) -> ValueMatcher {
         return keyPath(kp, .equals(value))
     }
     
@@ -111,7 +111,7 @@ public extension ValueMatcher {
     /// - Returns: A new matcher with the specified matcher rule appended along
     /// with all existing rules for this matcher.
     @inlinable
-    public func keyPath<U: Equatable>(_ kp: KeyPath<T, U>, _ rule: MatchRule<U>) -> ValueMatcher {
+    func keyPath<U: Equatable>(_ kp: KeyPath<T, U>, _ rule: MatchRule<U>) -> ValueMatcher {
         let matcher = KeyPathMatcher(keyPath: kp, rule: rule)
         let anyMatcher = AnyASTMatcherRule(matcher)
         
@@ -129,7 +129,7 @@ public extension ValueMatcher {
     /// - Returns: A new matcher with the specified matcher appended along with
     /// all existing rules for this matcher.
     @inlinable
-    public func keyPath<U>(_ kp: KeyPath<T, U>, _ matcher: ValueMatcher<U>) -> ValueMatcher {
+    func keyPath<U>(_ kp: KeyPath<T, U>, _ matcher: ValueMatcher<U>) -> ValueMatcher {
         let matcher = KeyPathValueMatcher(keyPath: kp, matcher: matcher)
         let anyMatcher = AnyASTMatcherRule(matcher)
         
@@ -147,7 +147,7 @@ public extension ValueMatcher {
     /// - Returns: A new matcher with the specified matcher appended along with
     /// all existing rules for this matcher.
     @inlinable
-    public func keyPath<U>(_ kp: KeyPath<T, U?>, _ matcher: ValueMatcher<U>) -> ValueMatcher {
+    func keyPath<U>(_ kp: KeyPath<T, U?>, _ matcher: ValueMatcher<U>) -> ValueMatcher {
         let matcher = KeyPathValueMatcher(keyPath: kp, matcher: matcher.matchNil())
         let anyMatcher = AnyASTMatcherRule(matcher)
         
@@ -168,7 +168,7 @@ public extension ValueMatcher {
     /// - Returns: A new matcher with the specified matcher appended along with
     /// all existing rules for this matcher.
     @inlinable
-    public func keyPath<U>(_ kp: KeyPath<T, U?>, _ closure: (ValueMatcher<U>) -> ValueMatcher<U>) -> ValueMatcher {
+    func keyPath<U>(_ kp: KeyPath<T, U?>, _ closure: (ValueMatcher<U>) -> ValueMatcher<U>) -> ValueMatcher {
         let valueMatcher = closure(ValueMatcher<U>())
         let closureMatcher = ClosureMatcher<T> { value in
             guard let value = value[keyPath: kp] else {
@@ -192,7 +192,7 @@ public extension ValueMatcher {
     ///   - value: A value to match under equality.
     /// - Returns: A new matcher with the specified matcher rule.
     @inlinable
-    public static func keyPath<U: Equatable>(_ kp: KeyPath<T, U>, equals value: U) -> ValueMatcher {
+    static func keyPath<U: Equatable>(_ kp: KeyPath<T, U>, equals value: U) -> ValueMatcher {
         return ValueMatcher().keyPath(kp, equals: value)
     }
     
@@ -203,7 +203,7 @@ public extension ValueMatcher {
     ///   - rule: A rule to match the value with.
     /// - Returns: A new matcher with the specified matcher rule.
     @inlinable
-    public static func keyPath<U: Equatable>(_ kp: KeyPath<T, U>, _ rule: MatchRule<U>) -> ValueMatcher {
+    static func keyPath<U: Equatable>(_ kp: KeyPath<T, U>, _ rule: MatchRule<U>) -> ValueMatcher {
         return ValueMatcher().keyPath(kp, rule)
     }
     
@@ -214,7 +214,7 @@ public extension ValueMatcher {
     ///   - matcher: A matcher to apply to the keypath.
     /// - Returns: A new matcher with the specified matcher.
     @inlinable
-    public static func keyPath<U>(_ kp: KeyPath<T, U>, _ matcher: ValueMatcher<U>) -> ValueMatcher {
+    static func keyPath<U>(_ kp: KeyPath<T, U>, _ matcher: ValueMatcher<U>) -> ValueMatcher {
         return ValueMatcher().keyPath(kp, matcher)
     }
     
@@ -225,7 +225,7 @@ public extension ValueMatcher {
     ///   - matcher: A matcher to apply to the keypath.
     /// - Returns: A new matcher with the specified matcher.
     @inlinable
-    public static func keyPath<U>(_ kp: KeyPath<T, U?>, _ matcher: ValueMatcher<U>) -> ValueMatcher {
+    static func keyPath<U>(_ kp: KeyPath<T, U?>, _ matcher: ValueMatcher<U>) -> ValueMatcher {
         return ValueMatcher().keyPath(kp, matcher)
     }
     
@@ -240,7 +240,7 @@ public extension ValueMatcher {
     /// value of the key-path.
     /// - Returns: A new matcher with the specified matcher.
     @inlinable
-    public static func keyPath<U>(_ kp: KeyPath<T, U?>,
+    static func keyPath<U>(_ kp: KeyPath<T, U?>,
                                   _ closure: (ValueMatcher<U>) -> ValueMatcher<U>) -> ValueMatcher {
         
         return ValueMatcher().keyPath(kp, closure)
@@ -300,7 +300,7 @@ extension ValueMatcher {
 public extension ValueMatcher {
     
     @inlinable
-    public static var any: ValueMatcher {
+    static var any: ValueMatcher {
         return ValueMatcher()
     }
     
@@ -433,8 +433,8 @@ public enum MatchRule<U: Equatable> {
     case lazyEquals(() -> U)
     case lazyEqualsNullable(() -> U?)
     case isType(U.Type)
-    indirect case all([MatchRule])
-    indirect case anyOf([MatchRule])
+    case all([MatchRule])
+    case anyOf([MatchRule])
     indirect case negated(MatchRule)
     case closure((U) -> Bool)
     indirect case extract(MatchRule, UnsafeMutablePointer<U>)

@@ -1,5 +1,4 @@
 import SwiftAST
-import SwiftRewriterLib
 
 // swiftlint:disable line_length
 public class UIViewCompoundType {

@@ -1,4 +1,5 @@
 import SwiftAST
+import ExpressionPasses
 
 /// A mandatory syntax node pass that tidies up typecast operations and other
 /// constructs that are not valid Swift syntax yet.

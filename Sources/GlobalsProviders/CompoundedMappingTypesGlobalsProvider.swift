@@ -1,5 +1,5 @@
 import SwiftAST
-import SwiftRewriterLib
+import TypeSystem
 import Commons
 
 public class CompoundedMappingTypesGlobalsProvider: GlobalsProvider {

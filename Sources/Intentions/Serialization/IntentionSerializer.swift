@@ -190,13 +190,13 @@ public final class IntentionSerializer {
 
 public extension IntentionSerializer {
     
-    public static func encode(intentions: IntentionCollection,
+    static func encode(intentions: IntentionCollection,
                               encoder: JSONEncoder) throws -> Data {
         
         return try encoder.encode(intentions)
     }
     
-    public static func decodeIntentions(decoder: JSONDecoder,
+    static func decodeIntentions(decoder: JSONDecoder,
                                         data: Data) throws -> IntentionCollection {
         
         return try decoder.decode(IntentionCollection.self, from: data)

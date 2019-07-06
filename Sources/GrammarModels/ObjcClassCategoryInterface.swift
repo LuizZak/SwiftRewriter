@@ -8,24 +8,24 @@ public class ObjcClassCategoryInterface: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(isInNonnullContext: isInNonnullContext)
+        super.init(_isInNonnullContext: isInNonnullContext)
     }
 }
 
 public extension ObjcClassCategoryInterface {
-    public var properties: [PropertyDefinition] {
+    var properties: [PropertyDefinition] {
         return childrenMatching()
     }
     
-    public var protocolList: ProtocolReferenceList? {
+    var protocolList: ProtocolReferenceList? {
         return firstChild()
     }
     
-    public var ivarsList: IVarsList? {
+    var ivarsList: IVarsList? {
         return firstChild()
     }
     
-    public var methods: [MethodDefinition] {
+    var methods: [MethodDefinition] {
         return childrenMatching()
     }
 }
@@ -41,16 +41,16 @@ public class ObjcClassCategoryImplementation: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(isInNonnullContext: isInNonnullContext)
+        super.init(_isInNonnullContext: isInNonnullContext)
     }
 }
 
 public extension ObjcClassCategoryImplementation {
-    public var ivarsList: IVarsList? {
+    var ivarsList: IVarsList? {
         return firstChild()
     }
     
-    public var methods: [MethodDefinition] {
+    var methods: [MethodDefinition] {
         return childrenMatching()
     }
 }

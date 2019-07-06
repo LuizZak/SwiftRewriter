@@ -1,7 +1,6 @@
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
 import Commons
 
 /// Makes correction for signatures of subclasses and conformeds of known UIKit

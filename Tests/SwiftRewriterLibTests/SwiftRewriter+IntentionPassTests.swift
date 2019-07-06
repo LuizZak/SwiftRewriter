@@ -1,7 +1,9 @@
 import XCTest
 import Intentions
 import SwiftRewriterLib
+import TypeSystem
 import IntentionPasses
+import GlobalsProviders
 
 class SwiftRewriter_IntentionPassTests: XCTestCase {
     func testIntentionPassHasExpressionTypesPreResolved() throws {

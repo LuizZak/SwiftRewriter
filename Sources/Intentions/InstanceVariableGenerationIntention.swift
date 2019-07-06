@@ -3,7 +3,7 @@ import SwiftAST
 import KnownType
 
 /// An intention to create an instance variable (Objective-C's 'ivar').
-public final class InstanceVariableGenerationIntention: MemberGenerationIntention, ValueStorageIntention {
+public final class InstanceVariableGenerationIntention: MemberGenerationIntention, MutableValueStorageIntention {
     public var typedSource: IVarDeclaration? {
         return source as? IVarDeclaration
     }

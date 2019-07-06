@@ -1,7 +1,5 @@
 import XCTest
 import SwiftSyntaxSupport
-import ObjcParser
-import GrammarModels
 import SwiftAST
 
 class SwiftTypeConversionTests: XCTestCase {

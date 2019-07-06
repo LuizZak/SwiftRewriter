@@ -1,5 +1,5 @@
 import SwiftAST
-import SwiftRewriterLib
+import TypeSystem
 
 extension IncompleteKnownType {
     

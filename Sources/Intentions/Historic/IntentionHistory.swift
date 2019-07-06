@@ -35,7 +35,7 @@ public protocol IntentionHistory {
 }
 
 public extension IntentionHistory {
-    public var summary: String {
+    var summary: String {
         if entries.isEmpty {
             return "<empty>"
         }
@@ -54,20 +54,20 @@ public extension IntentionHistory {
     }
     
     @discardableResult
-    public func recordCreation(description: String) -> IntentionHistoryEntryEcho {
+    func recordCreation(description: String) -> IntentionHistoryEntryEcho {
         return record(IntentionHistoryEntry(tag: "Creation",
                                             description: description))
     }
     
     @discardableResult
-    public func recordChange(tag: String,
+    func recordChange(tag: String,
                              description: String) -> IntentionHistoryEntryEcho {
         
         return recordChange(tag: tag, description: description, relatedIntentions: [])
     }
     
     @discardableResult
-    public func recordChange(tag: String,
+    func recordChange(tag: String,
                              description: String,
                              relatedIntentions: [Intention]) -> IntentionHistoryEntryEcho {
         
@@ -76,7 +76,7 @@ public extension IntentionHistory {
     }
     
     @discardableResult
-    public func recordMerge(with intentions: [Intention],
+    func recordMerge(with intentions: [Intention],
                             tag: String,
                             description: String) -> IntentionHistoryEntryEcho {
         
@@ -85,7 +85,7 @@ public extension IntentionHistory {
     }
     
     @discardableResult
-    public func recordSplit(from intention: Intention,
+    func recordSplit(from intention: Intention,
                             tag: String,
                             description: String) -> IntentionHistoryEntryEcho {
         
@@ -97,7 +97,7 @@ public extension IntentionHistory {
 public extension IntentionHistory {
     
     @discardableResult
-    public func recordSourceHistory(node: ASTNode) -> IntentionHistoryEntryEcho {
+    func recordSourceHistory(node: ASTNode) -> IntentionHistoryEntryEcho {
         guard let file = node.originalSource?.filePath else {
             return recordCreation(description: "from non-file node \(type(of: node))")
         }

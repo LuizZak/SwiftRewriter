@@ -1,5 +1,6 @@
 import XCTest
 import SwiftRewriterLib
+import ExpressionPasses
 import SwiftAST
 
 class ASTRewriterPassTests: XCTestCase {

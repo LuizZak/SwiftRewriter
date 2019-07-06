@@ -2,8 +2,13 @@ import Foundation
 import GrammarModels
 import ObjcParser
 import SwiftAST
+import TypeSystem
 import WriterTargetOutput
 import Intentions
+import IntentionPasses
+import ExpressionPasses
+import SourcePreprocessors
+import GlobalsProviders
 import SwiftSyntaxSupport
 import Utils
 
@@ -627,7 +632,7 @@ public final class SwiftRewriter {
 
 // MARK: - IntentionCollectorDelegate
 fileprivate extension SwiftRewriter {
-    fileprivate class CollectorDelegate: IntentionCollectorDelegate {
+    class CollectorDelegate: IntentionCollectorDelegate {
         var typeMapper: TypeMapper
         var typeParser: TypeParsing
         
@@ -740,4 +745,8 @@ internal func _typeNullability(inType type: ObjcType) -> TypeNullability? {
     default:
         return nil
     }
+}
+
+internal struct _PreprocessingContext: PreprocessingContext {
+    var filePath: String
 }

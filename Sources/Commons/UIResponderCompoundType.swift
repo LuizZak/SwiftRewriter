@@ -1,5 +1,4 @@
 import SwiftAST
-import SwiftRewriterLib
 
 public enum UIResponderCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "UIResponder")

@@ -1,4 +1,3 @@
-import SwiftRewriterLib
 import SwiftAST
 
 public class ASTCorrectorExpressionPass: ASTRewriterPass {

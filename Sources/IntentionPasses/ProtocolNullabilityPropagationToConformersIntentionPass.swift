@@ -2,7 +2,6 @@ import Foundation
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
 import Utils
 
 // TODO: This could be generalized into merging signatures from types such that

@@ -3,6 +3,7 @@ import ExpressionPasses
 import SwiftAST
 import KnownType
 import SwiftRewriterLib
+import TypeSystem
 
 class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
