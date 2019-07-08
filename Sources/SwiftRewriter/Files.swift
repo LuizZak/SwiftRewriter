@@ -1,3 +1,7 @@
+#if os(Linux)
+import Glibc
+#endif
+
 import Foundation
 
 /// Finds all files in a given directory recursively, optionaly specifying include
