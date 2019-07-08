@@ -351,8 +351,8 @@ open class ObjectiveCPreprocessorParser: Parser {
 	open class DirectiveContext:ParserRuleContext {
 		open override func getRuleIndex() -> Int { return ObjectiveCPreprocessorParser.RULE_directive }
 	 
-		public  func copyFrom(_ ctx: DirectiveContext) {
-			super.copyFrom(ctx)
+		public func copyFrom(_ ctx: DirectiveContext) {
+			copyFrom(ctx as ParserRuleContext)
 		}
 	}
 	public  final class PreprocessorDefContext: DirectiveContext {
@@ -825,8 +825,8 @@ open class ObjectiveCPreprocessorParser: Parser {
 	open class Preprocessor_expressionContext:ParserRuleContext {
 		open override func getRuleIndex() -> Int { return ObjectiveCPreprocessorParser.RULE_preprocessor_expression }
 	 
-		public  func copyFrom(_ ctx: Preprocessor_expressionContext) {
-			super.copyFrom(ctx)
+		public func copyFrom(_ ctx: Preprocessor_expressionContext) {
+			copyFrom(ctx as ParserRuleContext)
 		}
 	}
 	public  final class PreprocessorParenthesisContext: Preprocessor_expressionContext {
