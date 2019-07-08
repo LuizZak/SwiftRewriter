@@ -108,7 +108,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         
         notifyChange()
         
-        return super.visitStatement(stmt)
+        return visitStatement(stmt)
     }
     
     public override func visitExpression(_ exp: Expression) -> Expression {
