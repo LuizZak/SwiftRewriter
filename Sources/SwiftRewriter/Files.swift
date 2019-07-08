@@ -1,3 +1,7 @@
+#if os(Linux)
+import Glibc
+#endif
+
 import Foundation
 
 /// Finds all files in a given directory recursively, optionaly specifying include
@@ -11,7 +15,12 @@ import Foundation
 /// matching the pattern. Takes priority over `includePattern`.
 /// - Returns: The full file URL for each file found satisfying the patterns specified.
 func filesAt(path directoryPath: String, includePattern: String? = nil, excludePattern: String? = nil) -> [URL] {
-    let fnflags = FNM_CASEFOLD
+    let fnflags: Int32
+    #if os(macOS)
+    fnflags = FNM_CASEFOLD
+    #else
+    fnflags = 0
+    #endif
     
     let fileManager = FileManager.default
     guard var objcFiles = fileManager.enumerator(atPath: directoryPath)?.compactMap({ $0 as? String }) else {

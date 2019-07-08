@@ -15,7 +15,7 @@ public final class ASTRewriterPassApplier {
     
     public var passes: [ASTRewriterPass.Type]
     public var typeSystem: TypeSystem
-    public var numThreds: Int
+    public var numThreads: Int
     public var globals: DefinitionsSource
     
     public init(passes: [ASTRewriterPass.Type],
@@ -25,7 +25,7 @@ public final class ASTRewriterPassApplier {
         
         self.passes = passes
         self.typeSystem = typeSystem
-        self.numThreds = numThreds
+        self.numThreads = numThreds
         self.globals = globals
     }
     
@@ -68,7 +68,7 @@ public final class ASTRewriterPassApplier {
     
     private func internalApply(on intentions: IntentionCollection) {
         let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = numThreds
+        queue.maxConcurrentOperationCount = numThreads
         
         for file in intentions.fileIntentions() {
             queue.addOperation {
@@ -87,7 +87,7 @@ public final class ASTRewriterPassApplier {
                                passType: ASTRewriterPass.Type) {
         
         let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = numThreds
+        queue.maxConcurrentOperationCount = numThreads
         
         let delegate =
             TypeResolvingQueueDelegate(
@@ -102,9 +102,13 @@ public final class ASTRewriterPassApplier {
         
         for item in bodyQueue.items {
             queue.addOperation {
+                #if canImport(ObjectiveC)
                 autoreleasepool {
                     self.applyPassOnBody(item, passType: passType)
                 }
+                #else
+                self.applyPassOnBody(item, passType: passType)
+                #endif
             }
         }
         
@@ -115,9 +119,10 @@ public final class ASTRewriterPassApplier {
     
     private class DirtyFunctionBodyMap {
         var dirty: [FunctionBodyIntention] = []
+        let mutex = Mutex()
         
         func markDirty(_ body: FunctionBodyIntention) {
-            synchronized(self) {
+            mutex.locking {
                 if dirty.contains(where: { $0 === body }) {
                     return
                 }
@@ -127,8 +132,8 @@ public final class ASTRewriterPassApplier {
         }
         
         func isDirty(_ body: FunctionBodyIntention) -> Bool {
-            return synchronized(self) {
-                return dirty.contains(where: { $0 === body })
+            return mutex.locking {
+                dirty.contains(where: { $0 === body })
             }
         }
     }

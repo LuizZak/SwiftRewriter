@@ -1,4 +1,9 @@
+#if canImport(ObjectiveC)
+import ObjectiveC
+#endif
+
 import Foundation
+import Dispatch
 import GrammarModels
 import ObjcParser
 import SwiftAST
@@ -120,9 +125,10 @@ public final class SwiftRewriter {
         
         var outError: Error?
         let outErrorBarrier
-            = DispatchQueue(label: "br.com.swiftrewriter", qos: .default,
-                            attributes: .concurrent, autoreleaseFrequency: .inherit,
-                            target: nil)
+            = DispatchQueue(label: "br.com.swiftrewriter",
+                            attributes: .concurrent)
+        
+        let mutex = Mutex()
         
         for (i, src) in sources.enumerated() {
             queue.addOperation {
@@ -132,7 +138,7 @@ public final class SwiftRewriter {
                 
                 do {
                     try autoreleasepool {
-                        try self.loadObjcSource(from: src, index: i)
+                        try self.loadObjcSource(from: src, index: i, mutex: mutex)
                     }
                 } catch {
                     outErrorBarrier.sync(flags: .barrier) {
@@ -408,8 +414,9 @@ public final class SwiftRewriter {
                                    numThreds: settings.numThreads)
         
         if !settings.diagnoseFiles.isEmpty {
+            let mutex = Mutex()
             applier.afterFile = { file, passName in
-                synchronized(self) {
+                mutex.locking {
                     self.printDiagnosedFile(targetPath: file, step: "After applying \(passName) pass")
                 }
             }
@@ -448,7 +455,7 @@ public final class SwiftRewriter {
         }
     }
     
-    private func resolveIncludes(in directives: [String], basePath: String) {
+    private func resolveIncludes(in directives: [String], basePath: String, foundFileCallback: (_ path: String) -> Void) {
         if !followIncludes {
             return
         }
@@ -474,12 +481,11 @@ public final class SwiftRewriter {
                 continue
             }
             
-            // TODO: Do meaningful work here to open the files and parse their
-            // declarations
+            foundFileCallback(fullPath)
         }
     }
     
-    private func loadObjcSource(from source: InputSource, index: Int) throws {
+    private func loadObjcSource(from source: InputSource, index: Int, mutex: Mutex) throws {
         let state = parserStatePool.pull()
         defer { parserStatePool.repool(state) }
         
@@ -507,9 +513,7 @@ public final class SwiftRewriter {
             CollectorDelegate(typeMapper: typeMapper, typeParser: typeParser)
         
         if settings.stageDiagnostics.contains(.parsedAST) {
-            // TODO: Would be interesting if we could simply print ASTNodes
-            // directly, or not rely on ObjcParser to do that for us, at least.
-            parser.printParsedNodes()
+            parser.rootNode.printNode({ print($0) })
         }
         
         let ctx = IntentionBuildingContext()
@@ -524,15 +528,21 @@ public final class SwiftRewriter {
         
         ctx.popContext() // FileGenerationIntention
         
-        synchronized(self) {
+        mutex.locking {
             parsers.append(parser)
             lazyParse.append(contentsOf: collectorDelegate.lazyParse)
             lazyResolve.append(contentsOf: collectorDelegate.lazyResolve)
             diagnostics.merge(with: parser.diagnostics)
             intentionCollection.addIntention(fileIntent)
             
-            resolveIncludes(in: fileIntent.preprocessorDirectives,
-                            basePath: (src.filePath as NSString).deletingLastPathComponent)
+            resolveIncludes(
+                in: fileIntent.preprocessorDirectives,
+                basePath: (src.filePath as NSString).deletingLastPathComponent,
+                foundFileCallback: { filePath in
+                    // TODO: Do meaningful work here to open the files and parse their
+                    // declarations
+                }
+            )
         }
     }
     

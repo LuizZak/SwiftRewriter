@@ -304,9 +304,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
                 type += blockNullability.getText()
             }
             
-            type += ")"
-            
-            type += "(" + parameterTypes.joined(separator: ", ") + ")"
+            type += ")(\(parameterTypes.joined(separator: ", ")))"
             
             return type
         }

@@ -1,5 +1,5 @@
-import SwiftAST
 import SwiftSyntax
+import SwiftAST
 
 public class SwiftTypeConverter {
     public static func makeTypeSyntax(_ type: SwiftType) -> TypeSyntax {

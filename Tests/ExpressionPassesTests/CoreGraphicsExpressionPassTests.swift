@@ -93,6 +93,18 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
+    func testCoreGraphicsGetters() {
+        assertTransformParsed(
+            expression: "CGRectGetWidth(rect)",
+            into: Expression.identifier("rect").dot("width")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "CGRectGetHeight(rect)",
+            into: Expression.identifier("rect").dot("height")
+        ); assertNotifiedChange()
+    }
+    
     func testCoreGraphicsStaticConstants() {
         
         assertTransformParsed(

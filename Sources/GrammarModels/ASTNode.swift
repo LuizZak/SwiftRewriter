@@ -1,4 +1,3 @@
-import Foundation
 import Antlr4
 import ObjcParserAntlr
 
@@ -139,14 +138,47 @@ open class ASTNode {
         self.location = startNode.location
         self.length =
             SourceLength(newlines: endNode.location.line - startNode.location.line,
-                          columnsAtLastLine: endNode.location.column,
-                          utf8Length: endNode.location.utf8Offset - startNode.location.utf8Offset)
+                         columnsAtLastLine: endNode.location.column,
+                         utf8Length: endNode.location.utf8Offset - startNode.location.utf8Offset)
     }
     
     /// Overriden by subclasses to provide custom short descriptions to be used
     /// when printing AST nodes for diagnostics
     public func shortDescription() -> String {
         return ""
+    }
+}
+
+public extension ASTNode {
+    func printNode(_ printer: (String) -> Void) {
+        withoutActuallyEscaping(printer) { printer in
+            var ident = 0
+            func _printIndented(_ str: String) {
+                printer(String(repeating: " ", count: ident) + str)
+            }
+            
+            func _print(_ node: ASTNode) {
+                var nodeTitle = "\(type(of: node))"
+                let description = node.shortDescription()
+                if !description.isEmpty {
+                    nodeTitle += " (\(description))"
+                }
+                
+                _printIndented(nodeTitle)
+                
+                ident += 2
+                for child in node.children {
+                    _print(child)
+                }
+                ident -= 2
+            }
+            
+            // --
+            
+            printer("Begin print ASTNodes --")
+            _print(self)
+            printer("-- End print ASTNodes")
+        }
     }
 }
 

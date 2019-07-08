@@ -1,4 +1,4 @@
-import Foundation
+import Utils
 
 /// Defines settings for a rewriter output target to follow when writing code
 public struct RewriterOutputSettings {
@@ -156,7 +156,7 @@ public final class StringRewriterOutput: RewriterOutputTarget {
     }
     
     public func onAfterOutput() {
-        buffer = buffer.trimmingCharacters(in: .whitespacesAndNewlines)
+        buffer = trimWhitespace(buffer)
         
         callChangeCallback()
     }

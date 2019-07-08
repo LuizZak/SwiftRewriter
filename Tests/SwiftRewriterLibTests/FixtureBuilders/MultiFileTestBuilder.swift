@@ -302,11 +302,12 @@ class TestFileOutput: FileOutput {
 }
 
 class TestWriterOutput: WriterOutput {
+    let mutex = Mutex()
     var outputs: [TestFileOutput] = []
     
     func createFile(path: String) -> FileOutput {
         let output = TestFileOutput(path: path)
-        synchronized(self) {
+        mutex.locking {
             outputs.append(output)
         }
         return output

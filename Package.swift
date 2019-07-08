@@ -23,7 +23,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/LuizZak/MiniLexer.git", .exact("0.9.5")),
         .package(url: "https://github.com/apple/swift-package-manager.git", .exact("0.4.0")),
-        .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.26"),
+        .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.28"),
         .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.0")),
         .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50000.0"))
     ],
@@ -40,7 +40,10 @@ let package = Package(
             dependencies: []),
         .target(
             name: "WriterTargetOutput",
-            dependencies: []),
+            dependencies: ["Utils"]),
+        .target(
+            name: "SwiftAST",
+            dependencies: ["MiniLexer", "Utils"]),
         .target(
             name: "ObjcParserAntlr",
             dependencies: ["Antlr4"]),
@@ -52,17 +55,14 @@ let package = Package(
             dependencies: ["ObjcParserAntlr", "Antlr4", "GrammarModels", "MiniLexer",
                            "TypeLexing", "Utils"]),
         .target(
-            name: "SwiftAST",
-            dependencies: ["GrammarModels", "MiniLexer"]),
-        .target(
             name: "KnownType",
             dependencies: ["SwiftAST", "WriterTargetOutput"]),
         .target(
+            name: "Intentions",
+            dependencies: ["SwiftAST", "GrammarModels", "KnownType", "ObjcParser"]),
+        .target(
             name: "SwiftSyntaxSupport",
             dependencies: ["SwiftSyntax", "KnownType", "Intentions", "SwiftAST"]),
-        .target(
-            name: "Intentions",
-            dependencies: ["SwiftAST", "GrammarModels", "KnownType"]),
         .target(
             name: "TypeSystem",
             dependencies: ["SwiftAST", "ObjcParser", "TypeDefinitions", "Utils",
@@ -84,7 +84,7 @@ let package = Package(
         .target(
             name: "ExpressionPasses",
             dependencies: ["SwiftAST", "Commons", "Utils", "Analysis",
-                           "Intentions", "TypeSystem"]),
+                           "Intentions", "TypeSystem", "MiniLexer"]),
         .target(
             name: "SourcePreprocessors",
             dependencies: ["Utils", "MiniLexer"]),

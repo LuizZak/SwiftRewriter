@@ -1,5 +1,3 @@
-import Foundation
-
 /// Represents a centralization point where all source code generation intentions
 /// are placed and queried for.
 public class IntentionCollection: Codable {

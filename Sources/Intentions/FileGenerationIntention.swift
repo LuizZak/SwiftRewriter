@@ -1,4 +1,6 @@
+import Foundation
 import GrammarModels
+import KnownType
 import SwiftAST
 
 /// An intention to create a .swift file
@@ -231,5 +233,20 @@ public final class FileGenerationIntention: Intention {
         case typealiasIntentions
         case globalFunctionIntentions
         case globalVariableIntentions
+    }
+}
+
+extension FileGenerationIntention: KnownObjectiveCFile {
+    public var fileName: String {
+        return (sourcePath as NSString).lastPathComponent
+    }
+    
+    public var types: [KnownType] {
+        return typeIntentions
+    }
+    
+    public var globals: [KnownGlobal] {
+        return globalVariableIntentions
+            + globalFunctionIntentions
     }
 }

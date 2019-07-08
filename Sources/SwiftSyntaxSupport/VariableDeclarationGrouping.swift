@@ -1,6 +1,6 @@
 import SwiftSyntax
-import SwiftAST
 import Intentions
+import SwiftAST
 
 struct VariableDeclaration {
     var constant: Bool

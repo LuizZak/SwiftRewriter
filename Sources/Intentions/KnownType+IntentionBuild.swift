@@ -21,9 +21,6 @@ extension KnownTypeBuilder {
             typeIntention = StructGenerationIntention(typeName: type.typeName)
             
         case .enum:
-            // type.setKnownTrait(KnownTypeTraits.enumRawValue,
-            // value: .swiftType(rawValueType))
-            
             typeIntention = EnumGenerationIntention(typeName: type.typeName,
                                                     rawValueType: type.knownTrait(KnownTypeTraits.enumRawValue)?.asSwiftType ?? .int)
             

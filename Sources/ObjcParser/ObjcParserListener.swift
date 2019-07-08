@@ -48,32 +48,89 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     /// Used as a convenience over manually pushing and popping contexts every
     /// time a node of significance is entered.
     private func configureMappers() {
-        mapper.addRuleMap(rule: ObjectiveCParser.TranslationUnitContext.self, node: rootNode)
-        mapper.addRuleMap(rule: ObjectiveCParser.ClassInterfaceContext.self, nodeType: ObjcClassInterface.self)
+        typealias O = ObjectiveCParser
+        
         mapper.addRuleMap(
-            rule: ObjectiveCParser.ClassImplementationContext.self, nodeType: ObjcClassImplementation.self)
+            rule: O.TranslationUnitContext.self,
+            node: rootNode
+        )
         mapper.addRuleMap(
-            rule: ObjectiveCParser.CategoryInterfaceContext.self, nodeType: ObjcClassCategoryInterface.self)
+            rule: O.ClassInterfaceContext.self,
+            nodeType: ObjcClassInterface.self
+        )
         mapper.addRuleMap(
-            rule: ObjectiveCParser.CategoryImplementationContext.self, nodeType: ObjcClassCategoryImplementation.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.MethodDeclarationContext.self, nodeType: MethodDefinition.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.MethodDefinitionContext.self, nodeType: MethodDefinition.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.KeywordDeclaratorContext.self, nodeType: KeywordDeclarator.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.MethodSelectorContext.self, nodeType: MethodSelector.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.MethodTypeContext.self, nodeType: MethodType.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.InstanceVariablesContext.self, nodeType: IVarsList.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.TypedefDeclarationContext.self, nodeType: TypedefNode.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.BlockParametersContext.self, nodeType: BlockParametersNode.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.ProtocolDeclarationContext.self, nodeType: ProtocolDeclaration.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.EnumDeclarationContext.self, nodeType: ObjcEnumDeclaration.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.FunctionDeclarationContext.self, nodeType: FunctionDefinition.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.FunctionDefinitionContext.self, nodeType: FunctionDefinition.self)
+            rule: O.ClassImplementationContext.self,
+            nodeType: ObjcClassImplementation.self
+        )
         mapper.addRuleMap(
-            rule: ObjectiveCParser.PropertyImplementationContext.self, nodeType: PropertyImplementation.self)
+            rule: O.CategoryInterfaceContext.self,
+            nodeType: ObjcClassCategoryInterface.self
+        )
         mapper.addRuleMap(
-            rule: ObjectiveCParser.PropertySynthesizeListContext.self, nodeType: PropertySynthesizeList.self)
+            rule: O.CategoryImplementationContext.self,
+            nodeType: ObjcClassCategoryImplementation.self
+        )
         mapper.addRuleMap(
-            rule: ObjectiveCParser.PropertySynthesizeItemContext.self, nodeType: PropertySynthesizeItem.self)
+            rule: O.MethodDeclarationContext.self,
+            nodeType: MethodDefinition.self
+        )
+        mapper.addRuleMap(
+            rule: O.MethodDefinitionContext.self,
+            nodeType: MethodDefinition.self
+        )
+        mapper.addRuleMap(
+            rule: O.KeywordDeclaratorContext.self,
+            nodeType: KeywordDeclarator.self
+        )
+        mapper.addRuleMap(
+            rule: O.MethodSelectorContext.self,
+            nodeType: MethodSelector.self
+        )
+        mapper.addRuleMap(
+            rule: O.MethodTypeContext.self,
+            nodeType: MethodType.self
+        )
+        mapper.addRuleMap(
+            rule: O.InstanceVariablesContext.self,
+            nodeType: IVarsList.self
+        )
+        mapper.addRuleMap(
+            rule: O.TypedefDeclarationContext.self,
+            nodeType: TypedefNode.self
+        )
+        mapper.addRuleMap(
+            rule: O.BlockParametersContext.self,
+            nodeType: BlockParametersNode.self
+        )
+        mapper.addRuleMap(
+            rule: O.ProtocolDeclarationContext.self,
+            nodeType: ProtocolDeclaration.self
+        )
+        mapper.addRuleMap(
+            rule: O.EnumDeclarationContext.self,
+            nodeType: ObjcEnumDeclaration.self
+        )
+        mapper.addRuleMap(
+            rule: O.FunctionDeclarationContext.self,
+            nodeType: FunctionDefinition.self
+        )
+        mapper.addRuleMap(
+            rule: O.FunctionDefinitionContext.self,
+            nodeType: FunctionDefinition.self
+        )
+        mapper.addRuleMap(
+            rule: O.PropertyImplementationContext.self,
+            nodeType: PropertyImplementation.self
+        )
+        mapper.addRuleMap(
+            rule: O.PropertySynthesizeListContext.self,
+            nodeType: PropertySynthesizeList.self
+        )
+        mapper.addRuleMap(
+            rule: O.PropertySynthesizeItemContext.self,
+            nodeType: PropertySynthesizeItem.self
+        )
+        
     }
     
     override func enterEveryRule(_ ctx: ParserRuleContext) {
@@ -241,7 +298,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 guard let identifier = VarDeclarationIdentifierNameExtractor.extract(from: declarator) else {
                     continue
                 }
-                guard let type = typeParser.parseObjcType(inSpecifierQualifierList: specifierQualifierList,
+                guard let type = typeParser.parseObjcType(in: specifierQualifierList,
                                                           declarator: declarator) else {
                     continue
                 }
@@ -313,7 +370,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     override func enterTypeName(_ ctx: ObjectiveCParser.TypeNameContext) {
-        guard let type = typeParser.parseObjcType(fromTypeName: ctx) else {
+        guard let type = typeParser.parseObjcType(from: ctx) else {
             return
         }
         
@@ -478,7 +535,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 continue
             }
             
-            guard let type = typeParser.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,
+            guard let type = typeParser.parseObjcType(in: declarationSpecifiers,
                                                       declarator: typeDeclarator) else {
                 continue
             }
@@ -523,7 +580,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     override func enterBlockParameters(_ ctx: ObjectiveCParser.BlockParametersContext) {
         for typeVariableDeclaratorOrName in ctx.typeVariableDeclaratorOrName() {
             guard let type
-                = typeParser.parseObjcType(fromTypeVariableDeclaratorOrTypeName: typeVariableDeclaratorOrName) else {
+                = typeParser.parseObjcType(from: typeVariableDeclaratorOrName) else {
                 continue
             }
             
@@ -555,7 +612,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         if let declarationSpecifiers = ctx.declarationSpecifiers() {
-            let returnType = typeParser.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers)
+            let returnType = typeParser.parseObjcType(in: declarationSpecifiers)
             
             if let returnType = returnType {
                 let typeNameNode =
@@ -592,7 +649,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 guard let identifier = VarDeclarationIdentifierNameExtractor.extract(from: declarator) else {
                     continue
                 }
-                guard let type = typeParser.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,
+                guard let type = typeParser.parseObjcType(in: declarationSpecifiers,
                                                           declarator: declarator) else {
                     continue
                 }
@@ -798,7 +855,7 @@ private class StructListener: ObjectiveCParserBaseListener {
                     .extractAll(from: fieldDeclaration)
             
             let types
-                = typeParser.parseObjcTypes(inDeclaration: fieldDeclaration)
+                = typeParser.parseObjcTypes(in: fieldDeclaration)
             
             for (type, identifier) in zip(types, names) {
                 let field = ObjcStructField(isInNonnullContext: inNonnull)
@@ -875,7 +932,7 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         if let fieldDeclaration = ctx.fieldDeclaration() {
             let inNonnull = nonnullContextQuerier.isInNonnullContext(fieldDeclaration)
             
-            if let type = typeParser.parseObjcType(inDeclaration: fieldDeclaration) {
+            if let type = typeParser.parseObjcType(in: fieldDeclaration) {
                 let typeNode = TypeNameNode(type: type, isInNonnullContext: inNonnull)
                 updateSourceLocation(typeNode, fieldDeclaration)
                 property.addChild(typeNode)
@@ -937,7 +994,7 @@ private class FunctionPointerVisitor: ObjectiveCParserBaseVisitor<TypedefNode> {
         guard let identifier = VarDeclarationIdentifierNameExtractor.extract(from: ctx) else {
             return nil
         }
-        guard let type = typeParser.parseObjcType(fromFunctionPointer: ctx) else {
+        guard let type = typeParser.parseObjcType(from: ctx) else {
             return nil
         }
         
@@ -1031,11 +1088,11 @@ private class GenericParseTreeContextMapper {
     }
     
     private func match(ruleType: ParserRuleContext.Type) -> Pair? {
-        if exceptions.contains(where: { $0 === ruleType }) {
+        if exceptions.contains(where: { ObjectIdentifier($0) == ObjectIdentifier(ruleType) }) {
             return nil
         }
         
-        return pairs.first { $0.ruleType === ruleType }
+        return pairs.first { ObjectIdentifier($0.ruleType) == ObjectIdentifier(ruleType) }
     }
     
     private enum Pair {

@@ -12,8 +12,7 @@ public class TypeSystem {
     
     private var compoundKnownTypesCache: CompoundKnownTypesCache?
     private var protocolConformanceCache: ProtocolConformanceCache?
-    private var baseClassTypesByName: [String: ClassType] = [:]
-    private var initializedCache = false
+    private var baseClassTypesByNameCache = ConcurrentValue<[String: ClassType]>(value: [:])
     private var overloadResolverState = OverloadResolverState()
     var memberSearchCache = MemberSearchCache()
     var aliasCache = ConcurrentValue<[SwiftType: SwiftType]>(value: [:])
@@ -1021,20 +1020,18 @@ public class TypeSystem {
     }
     
     private func classTypeDefinition(name: String) -> ClassType? {
-        return synchronized(self) {
-            if !initializedCache {
-                baseClassTypesByName =
+        if !baseClassTypesByNameCache.usingCache {
+            baseClassTypesByNameCache
+                .setAsCaching(value:
                     TypeDefinitions
                         .classesList
                         .classes
                         .groupBy({ $0.typeName })
                         .mapValues { $0[0] }
-                
-                initializedCache = true
-            }
-            
-            return baseClassTypesByName[name]
+                )
         }
+        
+        return baseClassTypesByNameCache.readingValue { $0[name] }
     }
 }
 

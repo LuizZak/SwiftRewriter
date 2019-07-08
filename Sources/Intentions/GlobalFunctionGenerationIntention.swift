@@ -61,3 +61,13 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIn
         case functionBody
     }
 }
+
+extension GlobalFunctionGenerationIntention: KnownGlobalFunction {
+    public var identifier: FunctionIdentifier {
+        return signature.asIdentifier
+    }
+    
+    public var semantics: Set<Semantic> {
+        return []
+    }
+}

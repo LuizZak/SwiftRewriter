@@ -15,19 +15,25 @@ public extension ValueMatcher where T: SyntaxNode {
     
 }
 
-@inlinable
+// FIXME: Inline again once Linux bug is corrected
+// https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+// @inlinable
 public func ident(_ string: String) -> SyntaxMatcher<IdentifierExpression> {
     return SyntaxMatcher().keyPath(\.identifier, equals: string)
 }
 
-@inlinable
+// FIXME: Inline again once Linux bug is corrected
+// https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+// @inlinable
 public func ident(_ matcher: MatchRule<String>) -> SyntaxMatcher<IdentifierExpression> {
     return SyntaxMatcher().keyPath(\.identifier, matcher)
 }
 
 public extension ValueMatcher where T: Expression {
     
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     func isTyped(_ type: SwiftType, ignoringNullability: Bool = false) -> ValueMatcher {
         if !ignoringNullability {
             return keyPath(\.resolvedType, equals: type)
@@ -36,7 +42,9 @@ public extension ValueMatcher where T: Expression {
         return keyPath(\.resolvedType, .closure { $0?.deepUnwrapped == type })
     }
     
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     func isTyped(expected type: SwiftType, ignoringNullability: Bool = false) -> ValueMatcher {
         if !ignoringNullability {
             return keyPath(\.expectedType, equals: type)
@@ -45,7 +53,9 @@ public extension ValueMatcher where T: Expression {
         return keyPath(\.expectedType, .closure { $0?.deepUnwrapped == type })
     }
     
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     func dot<S>(_ member: S) -> SyntaxMatcher<PostfixExpression>
         where S: ValueMatcherConvertible, S.Target == String {
         
@@ -60,7 +70,9 @@ public extension ValueMatcher where T: Expression {
             .keyPath(\.op.asMember?.name, member.asMatcher())
     }
     
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     func subscribe<E>(_ matcher: E) -> SyntaxMatcher<PostfixExpression>
         where E: ValueMatcherConvertible, E.Target == Expression {
             
@@ -75,7 +87,9 @@ public extension ValueMatcher where T: Expression {
             .keyPath(\.op.asSubscription?.expression, matcher.asMatcher())
     }
     
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     func call(_ args: [FunctionArgument]) -> SyntaxMatcher<PostfixExpression> {
         return SyntaxMatcher<PostfixExpression>()
             .match { postfix -> Bool in
@@ -88,7 +102,9 @@ public extension ValueMatcher where T: Expression {
             .keyPath(\.op.asFunctionCall?.arguments, equals: args)
     }
     
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     func call(arguments matchers: [ValueMatcher<FunctionArgument>]) -> SyntaxMatcher<PostfixExpression> {
         return SyntaxMatcher<PostfixExpression>()
             .match { postfix -> Bool in
@@ -112,12 +128,16 @@ public extension ValueMatcher where T: Expression {
             }
     }
     
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     func call(_ method: String) -> SyntaxMatcher<PostfixExpression> {
         return dot(method).call([])
     }
     
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     func binary<E>(op: SwiftOperator, rhs: E) -> SyntaxMatcher<BinaryExpression>
         where E: ValueMatcherConvertible, E.Target == Expression {
                 
@@ -126,7 +146,9 @@ public extension ValueMatcher where T: Expression {
             .keyPath(\.rhs, rhs.asMatcher())
     }
     
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     func assignment<E>(op: SwiftOperator, rhs: E) -> SyntaxMatcher<AssignmentExpression>
         where E: ValueMatcherConvertible, E.Target == Expression {
         
@@ -137,12 +159,16 @@ public extension ValueMatcher where T: Expression {
 }
 
 public extension ValueMatcher where T == FunctionArgument {
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static func isLabeled(as label: String) -> ValueMatcher {
         return ValueMatcher().keyPath(\.label, equals: label)
     }
     
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static var isNotLabeled: ValueMatcher {
         return ValueMatcher().keyPath(\.label, isNil())
     }
@@ -153,27 +179,35 @@ public extension ValueMatcher where T: PostfixExpression {
     typealias PostfixMatcher = ValueMatcher<[PostfixChainInverter.Postfix]>
     
     /// Matches if the postfix is a function invocation.
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static var isFunctionCall: ValueMatcher<T> {
         return ValueMatcher<T>()
             .keyPath(\.op, .isType(FunctionCallPostfix.self))
     }
     
     /// Matches if the postfix is a member access.
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static var isMemberAccess: ValueMatcher<T> {
         return ValueMatcher<T>()
             .keyPath(\.op, .isType(MemberPostfix.self))
     }
     
     /// Matches if the postfix is a subscription.
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static var isSubscription: ValueMatcher<T> {
         return ValueMatcher<T>()
             .keyPath(\.op, .isType(SubscriptPostfix.self))
     }
     
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static func isMemberAccess(forMember name: String) -> ValueMatcher<T> {
         return ValueMatcher<T>()
             .keyPath(\.op, .isType(MemberPostfix.self))
@@ -190,7 +224,9 @@ public extension ValueMatcher where T: PostfixExpression {
     /// leftmost to rightmost.
     /// - Returns: A new `PostfixExpression` matcher with the left-to-right
     /// postfix matcher constructed using the closure.
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     func inverted(_ closure: (PostfixMatcher) -> PostfixMatcher) -> ValueMatcher<T> {
         
         let matcher = closure(PostfixMatcher())
@@ -206,21 +242,27 @@ public extension ValueMatcher where T: PostfixExpression {
 public extension ValueMatcher where T == PostfixChainInverter.Postfix {
     
     /// Matches if the postfix is a function invocation.
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static var isFunctionCall: ValueMatcher<T> {
         return ValueMatcher<T>()
             .keyPath(\.postfix, .isType(FunctionCallPostfix.self))
     }
     
     /// Matches if the postfix is a member access.
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static var isMemberAccess: ValueMatcher<T> {
         return ValueMatcher<T>()
             .keyPath(\.postfix, .isType(MemberPostfix.self))
     }
     
     /// Matches if the postfix is a subscription.
-    @inlinable
+    // FIXME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static var isSubscription: ValueMatcher<T> {
         return ValueMatcher<T>()
             .keyPath(\.postfix, .isType(SubscriptPostfix.self))
@@ -230,7 +272,9 @@ public extension ValueMatcher where T == PostfixChainInverter.Postfix {
 
 public extension ValueMatcher where T: Expression {
     
-    @inlinable
+    // FIX-ME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     func anyExpression() -> ValueMatcher<Expression> {
         return ValueMatcher<Expression>().match { (value) -> Bool in
             if let value = value as? T {
@@ -245,7 +289,9 @@ public extension ValueMatcher where T: Expression {
 
 public extension ValueMatcher where T: Expression {
     
-    @inlinable
+    // FIX-ME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static var `nil`: ValueMatcher<Expression> {
         return ValueMatcher<Expression>().match { exp in
             guard let constant = exp as? ConstantExpression else {
@@ -259,7 +305,9 @@ public extension ValueMatcher where T: Expression {
     // TODO: Revert implementation from both methods bellow to use `exp.asMatchable()`
     // and comparisons with dynamic matchers.
     // Currently, they crash the compiler on Xcode 10 beta 5.
-    @inlinable
+    // FIX-ME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static func nilCheck(against value: Expression) -> ValueMatcher<Expression> {
         return ValueMatcher<Expression>().match { exp in
             let valueCopy = value.copy()
@@ -281,7 +329,9 @@ public extension ValueMatcher where T: Expression {
         }
     }
     
-    @inlinable
+    // FIX-ME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static func nilCompare(against value: Expression) -> ValueMatcher<Expression> {
         return ValueMatcher<Expression>().match { exp in
             let valueCopy = value.copy()
@@ -303,7 +353,9 @@ public extension ValueMatcher where T: Expression {
         }
     }
     
-    @inlinable
+    // FIX-ME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static func findAny(thatMatches matcher: ValueMatcher) -> ValueMatcher {
         return ValueMatcher().match { exp in
             
@@ -323,7 +375,9 @@ public extension ValueMatcher where T: Expression {
 
 public extension ValueMatcher where T == Expression {
     
-    @inlinable
+    // FIX-ME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static func unary<O, E>(op: O, _ exp: E) -> ValueMatcher<Expression>
         where O: ValueMatcherConvertible, E: ValueMatcherConvertible,
         O.Target == SwiftOperator, E.Target == Expression {
@@ -335,7 +389,9 @@ public extension ValueMatcher where T == Expression {
                 .anyExpression()
     }
     
-    @inlinable
+    // FIX-ME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static func binary<O, E>(lhs: E, op: O, rhs: E) -> ValueMatcher<Expression>
         where O: ValueMatcherConvertible, E: ValueMatcherConvertible,
         O.Target == SwiftOperator, E.Target == Expression {
@@ -356,7 +412,9 @@ public extension Expression {
         return ExpressionMatchable(exp: self)
     }
     
-    @inlinable
+    // FIX-ME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     static func matcher<T: Expression>(_ matcher: SyntaxMatcher<T>) -> SyntaxMatcher<T> {
         return matcher
     }
@@ -366,7 +424,9 @@ public extension Expression {
 public struct ExpressionMatchable {
     public var exp: Expression
     
-    @inlinable
+    // FIX-ME: Inline again once Linux bug is corrected
+    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
+    // @inlinable
     public static func == (lhs: ExpressionMatchable, rhs: ValueMatcher<Expression>) -> Bool {
         return lhs.exp.matches(rhs)
     }
