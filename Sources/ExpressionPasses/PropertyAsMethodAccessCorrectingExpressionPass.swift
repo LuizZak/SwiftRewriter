@@ -12,7 +12,10 @@ public class PropertyAsMethodAccessCorrectingExpressionPass: BaseExpressionPass 
             if result.didWork {
                 notifyChange()
                 
-                return super.visitExpression(result.exp)
+                // FIXME: https://bugs.swift.org/browse/SR-10260
+                // Change back to super.visitExpression(result.exp) once that
+                // bug is fixed
+                return visitExpression(result.exp)
             }
         }
         
