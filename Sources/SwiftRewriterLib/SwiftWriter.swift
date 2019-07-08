@@ -1,7 +1,3 @@
-#if canImport(ObjectiveC)
-import ObjectiveC
-#endif
-
 import Foundation
 import GrammarModels
 import ObjcParser
