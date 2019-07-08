@@ -12,7 +12,7 @@ public class BaseExpressionPass: ASTRewriterPass {
         if let new = applyTransformers(exp) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         
         return super.visitPostfix(exp)
@@ -22,7 +22,7 @@ public class BaseExpressionPass: ASTRewriterPass {
         if let new = convertEnumIdentifier(exp) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         
         return super.visitIdentifier(exp)

@@ -19,35 +19,35 @@ public class UIKitExpressionPass: BaseExpressionPass {
                              swiftEnumName: "UIControlEvents") {
             notifyChange()
             
-            return super.visitExpression(exp)
+            return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UIGestureRecognizerState",
                              swiftEnumName: "UIGestureRecognizerState") {
             notifyChange()
             
-            return super.visitExpression(exp)
+            return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UITableViewCellSeparatorStyle",
                              swiftEnumName: "UITableViewCellSeparatorStyle") {
             notifyChange()
             
-            return super.visitExpression(exp)
+            return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UITableViewCellSelectionStyle",
                              swiftEnumName: "UITableViewCellSelectionStyle") {
             notifyChange()
             
-            return super.visitExpression(exp)
+            return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UIViewAnimationOption",
                              swiftEnumName: "UIViewAnimationOptions") {
             notifyChange()
             
-            return super.visitExpression(exp)
+            return visitExpression(exp)
         }
         
         return super.visitIdentifier(exp)
@@ -57,12 +57,12 @@ public class UIKitExpressionPass: BaseExpressionPass {
         if let exp = convertAddTargetForControlEvents(exp) {
             notifyChange()
             
-            return super.visitExpression(exp)
+            return visitExpression(exp)
         }
         if let exp = convertBooleanGetters(exp) {
             notifyChange()
             
-            return super.visitExpression(exp)
+            return visitExpression(exp)
         }
         
         return super.visitPostfix(exp)
