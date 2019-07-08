@@ -17,32 +17,32 @@ public class FoundationExpressionPass: BaseExpressionPass {
         if let new = convertIsEqualToString(exp, op: .equals) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         if let new = convertStringWithFormat(exp) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         if let new = convertAddObjectsFromArray(exp) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         if let new = convertClassCall(exp) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         if let new = convertDataStructureInit(exp) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         if let new = convertRespondsToSelector(exp) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         
         return super.visitPostfix(exp)
@@ -58,7 +58,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
             if let new = convertIsEqualToString(postfix, op: .unequals) {
                 notifyChange()
                 
-                return super.visitExpression(new)
+                return visitExpression(new)
             }
         }
         
@@ -69,7 +69,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
         if let new = convertNSPrefixedTypeName(exp) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         
         return super.visitIdentifier(exp)

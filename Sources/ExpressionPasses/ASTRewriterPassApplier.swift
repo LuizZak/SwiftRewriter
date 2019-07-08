@@ -1,7 +1,3 @@
-#if canImport(ObjectiveC)
-import ObjectiveC
-#endif
-
 import Foundation
 import SwiftAST
 import Intentions
