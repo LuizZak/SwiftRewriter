@@ -60,7 +60,7 @@ public class ASTSimplifier: ASTRewriterPass {
             
             notifyChange()
             
-            return super.visitStatement(statement)
+            return visitStatement(statement)
         }
         
         return super.visitIf(stmt)

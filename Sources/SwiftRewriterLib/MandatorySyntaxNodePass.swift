@@ -32,7 +32,7 @@ class MandatorySyntaxNodePass: ASTRewriterPass {
             
             result.resolvedType = exp.resolvedType
             
-            return super.visitExpression(result)
+            return visitExpression(result)
         }
         
         // Type.new
@@ -46,7 +46,7 @@ class MandatorySyntaxNodePass: ASTRewriterPass {
             
             result.resolvedType = exp.resolvedType
             
-            return super.visitExpression(result)
+            return visitExpression(result)
         }
         
         return super.visitPostfix(exp)

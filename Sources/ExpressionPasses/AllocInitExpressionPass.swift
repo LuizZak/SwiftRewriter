@@ -9,17 +9,17 @@ public class AllocInitExpressionPass: ASTRewriterPass {
         if let newInit = convertAllocInit(exp: exp) {
             notifyChange()
             
-            return super.visitExpression(newInit)
+            return visitExpression(newInit)
         }
         if let newInitParametrized = convertAllocInitWithParameters(exp: exp) {
             notifyChange()
             
-            return super.visitExpression(newInitParametrized)
+            return visitExpression(newInitParametrized)
         }
         if let newInit = convertExpressionInit(exp: exp) {
             notifyChange()
             
-            return super.visitExpression(newInit)
+            return visitExpression(newInit)
         }
         
         return super.visitPostfix(exp)
