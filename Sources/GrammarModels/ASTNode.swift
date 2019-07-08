@@ -151,32 +151,34 @@ open class ASTNode {
 
 public extension ASTNode {
     func printNode(_ printer: (String) -> Void) {
-        var ident = 0
-        func _printIndented(_ str: String) {
-            printer(String(repeating: " ", count: ident) + str)
-        }
-        
-        func _print(_ node: ASTNode) {
-            var nodeTitle = "\(type(of: node))"
-            let description = node.shortDescription()
-            if !description.isEmpty {
-                nodeTitle += " (\(description))"
+        withoutActuallyEscaping(printer) { printer in
+            var ident = 0
+            func _printIndented(_ str: String) {
+                printer(String(repeating: " ", count: ident) + str)
             }
             
-            _printIndented(nodeTitle)
-            
-            ident += 2
-            for child in node.children {
-                _print(child)
+            func _print(_ node: ASTNode) {
+                var nodeTitle = "\(type(of: node))"
+                let description = node.shortDescription()
+                if !description.isEmpty {
+                    nodeTitle += " (\(description))"
+                }
+                
+                _printIndented(nodeTitle)
+                
+                ident += 2
+                for child in node.children {
+                    _print(child)
+                }
+                ident -= 2
             }
-            ident -= 2
+            
+            // --
+            
+            printer("Begin print ASTNodes --")
+            _print(self)
+            printer("-- End print ASTNodes")
         }
-        
-        // --
-        
-        printer("Begin print ASTNodes --")
-        _print(self)
-        printer("-- End print ASTNodes")
     }
 }
 
