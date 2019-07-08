@@ -54,7 +54,6 @@ public extension ValueMatcher where T: Statement {
     
 }
 
-@inlinable
 public func hasElse() -> SyntaxMatcher<IfStatement> {
     return SyntaxMatcher().keyPath(\.elseBody, !isNil())
 }
