@@ -9,6 +9,7 @@ import SwiftRewriterLib
 import TypeSystem
 import WriterTargetOutput
 import ObjcParser
+import Utils
 
 class SwiftRewriterJobTests: XCTestCase {
     func testTranspile() {
@@ -53,12 +54,13 @@ class SwiftRewriterJobTests: XCTestCase {
 
 private class MockWriterOutput: WriterOutput {
     var files: [MockOutput] = []
+    let mutex = Mutex()
     
     func createFile(path: String) throws -> FileOutput {
         let output = MockOutput(filepath: path)
-        objc_sync_enter(self)
-        files.append(output)
-        objc_sync_exit(self)
+        mutex.locking {
+            files.append(output)
+        }
         
         return output
     }
