@@ -1,5 +1,4 @@
 import GrammarModels
-import Foundation
 import Utils
 import Intentions
 import TypeSystem

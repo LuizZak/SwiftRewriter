@@ -17,6 +17,9 @@ class StringTests: XCTestCase {
         XCTAssertEqual("abc", "Abc".lowercasedFirstLetter)
         XCTAssertEqual("abc", "abc".lowercasedFirstLetter)
         XCTAssertEqual("ábc", "Ábc".lowercasedFirstLetter)
+        XCTAssertEqual("aBC", "ABC".lowercasedFirstLetter)
+        XCTAssertEqual("aBc", "aBc".lowercasedFirstLetter)
+        XCTAssertEqual("ábC", "ÁbC".lowercasedFirstLetter)
         XCTAssertEqual("0", "0".lowercasedFirstLetter)
         XCTAssertEqual("", "".lowercasedFirstLetter)
         XCTAssertEqual(" ", " ".lowercasedFirstLetter)
@@ -27,6 +30,9 @@ class StringTests: XCTestCase {
         XCTAssertEqual("Abc", "abc".uppercasedFirstLetter)
         XCTAssertEqual("Abc", "Abc".uppercasedFirstLetter)
         XCTAssertEqual("Ábc", "ábc".uppercasedFirstLetter)
+        XCTAssertEqual("ABC", "aBC".uppercasedFirstLetter)
+        XCTAssertEqual("ABc", "ABc".uppercasedFirstLetter)
+        XCTAssertEqual("ÁbC", "ábC".uppercasedFirstLetter)
         XCTAssertEqual("0", "0".uppercasedFirstLetter)
         XCTAssertEqual("", "".uppercasedFirstLetter)
         XCTAssertEqual(" ", " ".uppercasedFirstLetter)
@@ -264,6 +270,18 @@ class StringTests: XCTestCase {
         XCTAssertEqual(ranges.count, 2)
         XCTAssertEqual(ranges[0], input.startIndex..<input.startIndex)
         XCTAssertEqual(ranges[1], input.endIndex..<input.endIndex)
+    }
+    
+    func testTrimWhitespace() {
+        XCTAssertEqual(trimWhitespace(""), "")
+        XCTAssertEqual(trimWhitespace("  "), "")
+        XCTAssertEqual(trimWhitespace("abc"), "abc")
+        XCTAssertEqual(trimWhitespace("abc "), "abc")
+        XCTAssertEqual(trimWhitespace(" abc"), "abc")
+        XCTAssertEqual(trimWhitespace("  abc "), "abc")
+        XCTAssertEqual(trimWhitespace("\nabc\n"), "abc")
+        XCTAssertEqual(trimWhitespace("\n abc def \t "), "abc def")
+        XCTAssertEqual(trimWhitespace("  abc def "), "abc def")
     }
 }
 

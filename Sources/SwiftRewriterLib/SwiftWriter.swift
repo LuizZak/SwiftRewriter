@@ -52,6 +52,8 @@ public final class SwiftWriter {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = numThreads
         
+        let mutex = Mutex()
+        
         for file in fileIntents {
             if unique.contains(file.targetPath) {
                 print("""
@@ -77,11 +79,11 @@ public final class SwiftWriter {
                     do {
                         try writer.outputFile(file)
                         
-                        synchronized(self) {
+                        mutex.locking {
                             self.diagnostics.merge(with: writer.diagnostics)
                         }
                     } catch {
-                        synchronized(self) {
+                        mutex.locking {
                             errors.append((file.targetPath, error))
                         }
                     }

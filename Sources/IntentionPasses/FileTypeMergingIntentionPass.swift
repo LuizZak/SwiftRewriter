@@ -53,8 +53,8 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             }
         }
         
-        func strippingPathExtension(_ path: String) -> Substring {
-            return path[path.startIndex..<(path.lastIndex(of: ".") ?? path.endIndex)]
+        func strippingPathExtension(_ path: String) -> String {
+            return (path as NSString).deletingPathExtension
         }
         
         let implByName =

@@ -2,6 +2,7 @@ import Foundation
 import SwiftAST
 import Intentions
 import MiniLexer
+import Utils
 
 /// Verifies the #import directives on every file and convert them to the appropriate
 /// Swift lib import declaration.
@@ -82,8 +83,8 @@ public class ImportDirectiveIntentionPass: IntentionPass {
         
         /// Returns `true` if any of the path components of this import decl's
         /// path match a given path component fully.
-        func matchesPathComponent(_ path: String) -> Bool {
-            return pathComponents.contains(path)
+        func matchesPathComponent<S: StringProtocol>(_ path: S) -> Bool {
+            return pathComponents.contains(where: { $0 == path })
         }
     }
 }

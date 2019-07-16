@@ -40,6 +40,8 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = context.numThreads
         
+        let mutex = Mutex()
+        
         // First roundtrip: Collect all known conformances
         for clsName in Set(classes.map { $0.typeName }) {
             queue.addOperation {
@@ -49,7 +51,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
                 
                 let conformances = context.typeSystem.allConformances(of: type)
                 
-                synchronized(self) {
+                mutex.locking {
                     classProtocols[type.typeName] = conformances
                 }
             }

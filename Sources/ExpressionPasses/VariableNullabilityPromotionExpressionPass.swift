@@ -1,4 +1,3 @@
-import Foundation
 import SwiftAST
 import Intentions
 import Analysis

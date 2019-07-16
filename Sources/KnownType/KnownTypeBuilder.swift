@@ -1,4 +1,6 @@
+#if canImport(Foundation)
 import Foundation
+#endif
 import SwiftAST
 
 /// Helper known-type builder used to come up with default types and during testing
@@ -477,6 +479,8 @@ public struct KnownTypeBuilder {
         return DummyType(type: type)
     }
     
+    #if canImport(Foundation)
+    
     /// Encodes the type represented by this known type builder
     ///
     /// - Returns: A data representation of the type being built which can be later
@@ -496,6 +500,8 @@ public struct KnownTypeBuilder {
         let decoder = JSONDecoder()
         type = try decoder.decode(BuildingKnownType.self, from: data)
     }
+    
+    #endif
 }
 
 // MARK: - Removal

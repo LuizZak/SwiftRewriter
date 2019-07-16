@@ -12,7 +12,7 @@ public class PropertyAsMethodAccessCorrectingExpressionPass: BaseExpressionPass 
             if result.didWork {
                 notifyChange()
                 
-                return super.visitExpression(result.exp)
+                return visitExpression(result.exp)
             }
         }
         

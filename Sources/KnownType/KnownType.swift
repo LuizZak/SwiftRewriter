@@ -1,4 +1,3 @@
-import Foundation
 import SwiftAST
 
 /// Describes a known type with known properties and methods and their signatures.

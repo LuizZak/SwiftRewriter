@@ -1,6 +1,6 @@
+import SwiftSyntax
 import Intentions
 import SwiftAST
-import SwiftSyntax
 
 typealias ModifiersDecoratorResult = [(SwiftSyntaxProducer) -> DeclModifierSyntax]
 

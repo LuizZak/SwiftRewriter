@@ -221,7 +221,7 @@ public extension String {
             }
         }
         
-        // Finish any open commentary ranges
+        // Finish any open comment ranges
         switch state {
         case .normal, .stringLiteral:
             break
@@ -232,4 +232,37 @@ public extension String {
         
         return ranges
     }
+}
+
+public func trimWhitespace(_ string: String) -> String {
+    if string.isEmpty {
+        return string
+    }
+    
+    var leading: String.Index = string.startIndex
+    var trailing: String.Index = string.index(before: string.endIndex)
+    
+    let whitespace: Set<Character> = [" ", "\t", "\n", "\r"]
+    
+    while leading != string.endIndex {
+        if whitespace.contains(string[leading]) {
+            string.formIndex(after: &leading)
+        } else {
+            break
+        }
+    }
+    
+    if leading == string.endIndex {
+        return ""
+    }
+    
+    while trailing != string.startIndex {
+        if whitespace.contains(string[trailing]) {
+            string.formIndex(before: &trailing)
+        } else {
+            break
+        }
+    }
+    
+    return String(string[leading...trailing])
 }

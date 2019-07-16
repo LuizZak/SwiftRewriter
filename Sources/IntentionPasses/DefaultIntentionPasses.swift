@@ -1,5 +1,3 @@
-import GrammarModels
-
 public struct DefaultIntentionPasses: IntentionPassSource {
     public var intentionPasses: [IntentionPass] = [
         FileTypeMergingIntentionPass(),
