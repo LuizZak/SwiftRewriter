@@ -22,30 +22,30 @@ public class CompoundTypealiasProvider: TypealiasProvider {
     }
     
     func makeCache() {
-        $aliasesCache.setAsCaching(value: [:])
-        $negativeLookups.setAsCaching(value: [])
+        _aliasesCache.setAsCaching(value: [:])
+        _negativeLookups.setAsCaching(value: [])
     }
     
     func tearDownCache() {
-        $aliasesCache.tearDownCaching(resetToValue: [:])
-        $negativeLookups.tearDownCaching(resetToValue: [])
+        _aliasesCache.tearDownCaching(resetToValue: [:])
+        _negativeLookups.tearDownCaching(resetToValue: [])
     }
     
     public func unalias(_ typeName: String) -> SwiftType? {
-        if $aliasesCache.usingCache, let type = aliasesCache[typeName.hashValue] {
+        if _aliasesCache.usingCache, let type = aliasesCache[typeName.hashValue] {
             return type
         }
         
         // Negative lookups
-        if $negativeLookups.usingCache, negativeLookups.contains(typeName) {
+        if _negativeLookups.usingCache, negativeLookups.contains(typeName) {
             return nil
         }
         
         for provider in providers {
             if let type = provider.unalias(typeName) {
                 
-                if $aliasesCache.usingCache {
-                    $aliasesCache.wrappedValue[typeName.hashValue] = type
+                if _aliasesCache.usingCache {
+                    _aliasesCache.wrappedValue[typeName.hashValue] = type
                 }
                 
                 return type
@@ -53,8 +53,8 @@ public class CompoundTypealiasProvider: TypealiasProvider {
         }
         
         // Store negative lookups
-        if $negativeLookups.usingCache {
-            $negativeLookups.wrappedValue.insert(typeName)
+        if _negativeLookups.usingCache {
+            _negativeLookups.wrappedValue.insert(typeName)
         }
         
         return nil
@@ -65,7 +65,7 @@ public class CompoundTypealiasProvider: TypealiasProvider {
         
         // Reset cache to allow types from this type alias provider to be
         // considered.
-        if $aliasesCache.usingCache {
+        if _aliasesCache.usingCache {
             tearDownCache()
             makeCache()
         }

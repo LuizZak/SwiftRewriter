@@ -43,10 +43,10 @@ public class TypeSystem {
         protocolConformanceCache = ProtocolConformanceCache()
         overloadResolverState.makeCache()
         memberSearchCache.makeCache()
-        $aliasCache.setAsCaching(value: [:])
-        $allConformancesCache.setAsCaching(value: [:])
-        $typeExistsCache.setAsCaching(value: [:])
-        $knownTypeForSwiftType.setAsCaching(value: [:])
+        _aliasCache.setAsCaching(value: [:])
+        _allConformancesCache.setAsCaching(value: [:])
+        _typeExistsCache.setAsCaching(value: [:])
+        _knownTypeForSwiftType.setAsCaching(value: [:])
     }
     
     public func tearDownCache() {
@@ -56,10 +56,10 @@ public class TypeSystem {
         protocolConformanceCache = nil
         overloadResolverState.tearDownCache()
         memberSearchCache.tearDownCache()
-        $aliasCache.tearDownCaching(resetToValue: [:])
-        $allConformancesCache.tearDownCaching(resetToValue: [:])
-        $typeExistsCache.tearDownCaching(resetToValue: [:])
-        $knownTypeForSwiftType.tearDownCaching(resetToValue: [:])
+        _aliasCache.tearDownCaching(resetToValue: [:])
+        _allConformancesCache.tearDownCaching(resetToValue: [:])
+        _typeExistsCache.tearDownCaching(resetToValue: [:])
+        _knownTypeForSwiftType.tearDownCaching(resetToValue: [:])
     }
     
     /// Gets the overload resolver instance for this type system
@@ -116,7 +116,7 @@ public class TypeSystem {
     
     /// Returns `true` if a type is known to exists with a given name.
     public func typeExists(_ name: String) -> Bool {
-        if $typeExistsCache.usingCache, let result = typeExistsCache[name] {
+        if _typeExistsCache.usingCache, let result = typeExistsCache[name] {
             return result
         }
         
@@ -130,8 +130,8 @@ public class TypeSystem {
             result = false
         }
         
-        if $typeExistsCache.usingCache {
-            $typeExistsCache.wrappedValue[name] = result
+        if _typeExistsCache.usingCache {
+            _typeExistsCache.wrappedValue[name] = result
         }
         
         return result
@@ -688,7 +688,7 @@ public class TypeSystem {
     /// Returns a plain `.typeName` with the passed type name within, in case no
     /// typealiases where found.
     public func resolveAlias(in type: SwiftType) -> SwiftType {
-        if $aliasCache.usingCache {
+        if _aliasCache.usingCache {
             if let result = aliasCache[type] {
                 return result
             }
@@ -697,8 +697,8 @@ public class TypeSystem {
         let resolver = TypealiasExpander(aliasesSource: typealiasProviders)
         let result = resolver.expand(in: type)
         
-        if $aliasCache.usingCache {
-            $aliasCache.wrappedValue[type] = result
+        if _aliasCache.usingCache {
+            _aliasCache.wrappedValue[type] = result
         }
         
         return result
@@ -802,7 +802,7 @@ public class TypeSystem {
         
         visitedTypes.insert(type.typeName)
         
-        if $allConformancesCache.usingCache {
+        if _allConformancesCache.usingCache {
             if let result = allConformancesCache[type.typeName] {
                 return result
             }
@@ -830,8 +830,8 @@ public class TypeSystem {
             )
         }
         
-        if $allConformancesCache.usingCache {
-            $allConformancesCache.wrappedValue[type.typeName] = protocols
+        if _allConformancesCache.usingCache {
+            _allConformancesCache.wrappedValue[type.typeName] = protocols
         }
         
         return protocols
@@ -883,7 +883,7 @@ public class TypeSystem {
     
     /// Returns a known type for a given SwiftType, if present.
     public func findType(for swiftType: SwiftType) -> KnownType? {
-        if $knownTypeForSwiftType.usingCache {
+        if _knownTypeForSwiftType.usingCache {
             if let result = knownTypeForSwiftType[swiftType] {
                 return result
             }
@@ -915,8 +915,8 @@ public class TypeSystem {
             result = nil
         }
         
-        if $knownTypeForSwiftType.usingCache {
-            $knownTypeForSwiftType.wrappedValue[swiftType] = result
+        if _knownTypeForSwiftType.usingCache {
+            _knownTypeForSwiftType.wrappedValue[swiftType] = result
         }
         
         return result
@@ -994,8 +994,8 @@ public class TypeSystem {
     }
     
     private func classTypeDefinition(name: String) -> ClassType? {
-        if !$baseClassTypesByNameCache.usingCache {
-            $baseClassTypesByNameCache
+        if !_baseClassTypesByNameCache.usingCache {
+            _baseClassTypesByNameCache
                 .setAsCaching(value:
                     TypeDefinitions
                         .classesList
@@ -1611,7 +1611,7 @@ private final class CompoundKnownTypesCache {
     }
     
     func record(type: KnownType, names: [String]) {
-        $types.wrappedValue[names] = type
+        _types.wrappedValue[names] = type
     }
 }
 
@@ -1619,11 +1619,11 @@ private final class ProtocolConformanceCache {
     @ConcurrentValue private var cache: [String: Entry] = [:]
     
     init() {
-        $cache.setAsCaching(value: [:])
+        _cache.setAsCaching(value: [:])
     }
     
     func record(typeName: String, conformsTo protocolName: String, _ value: Bool) {
-        $cache
+        _cache
             .wrappedValue[typeName, default: Entry()]
             .conformances[protocolName] = value
     }
@@ -1656,14 +1656,14 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
         
         let protocols = TypeDefinitions.protocolsList.protocols
         guard let prot = protocols.first(where: { $0.protocolName == name }) else {
-            $negativeLookupResults.wrappedValue.insert(name)
+            _negativeLookupResults.wrappedValue.insert(name)
             
             return nil
         }
         
         let type = makeType(from: prot)
         
-        $cache.wrappedValue[name] = type
+        _cache.wrappedValue[name] = type
         
         return type
     }
@@ -1737,14 +1737,14 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         }
         
         guard let prot = TypeDefinitions.classesList.classes.first(where: { $0.typeName == name }) else {
-            $negativeLookupResults.wrappedValue.insert(name)
+            _negativeLookupResults.wrappedValue.insert(name)
             
             return nil
         }
         
         let type = makeType(from: prot)
         
-        $cache.wrappedValue[name] = type
+        _cache.wrappedValue[name] = type
         
         return type
     }
@@ -1810,16 +1810,16 @@ internal final class MemberSearchCache {
 
     func makeCache() {
         usingCache = true
-        $methodsCache.setAsCaching(value: [:])
-        $propertiesCache.setAsCaching(value: [:])
-        $fieldsCache.setAsCaching(value: [:])
+        _methodsCache.setAsCaching(value: [:])
+        _propertiesCache.setAsCaching(value: [:])
+        _fieldsCache.setAsCaching(value: [:])
     }
 
     func tearDownCache() {
         usingCache = false
-        $methodsCache.tearDownCaching(resetToValue: [:])
-        $propertiesCache.tearDownCaching(resetToValue: [:])
-        $fieldsCache.tearDownCaching(resetToValue: [:])
+        _methodsCache.tearDownCaching(resetToValue: [:])
+        _propertiesCache.tearDownCaching(resetToValue: [:])
+        _fieldsCache.tearDownCaching(resetToValue: [:])
     }
 
     func storeMethod(withObjcSelector selector: SelectorSignature,
@@ -1835,7 +1835,7 @@ internal final class MemberSearchCache {
                                       includeOptional: includeOptional,
                                       typeName: typeName)
         
-        $methodsCache.wrappedValue[entry] = method
+        _methodsCache.wrappedValue[entry] = method
     }
 
     func storeProperty(named name: String,
@@ -1849,7 +1849,7 @@ internal final class MemberSearchCache {
                                         includeOptional: includeOptional,
                                         typeName: typeName)
         
-        $propertiesCache.wrappedValue[entry] = property
+        _propertiesCache.wrappedValue[entry] = property
     }
 
     func storeField(named name: String,
@@ -1861,7 +1861,7 @@ internal final class MemberSearchCache {
                                      isStatic: isStatic,
                                      typeName: typeName)
         
-        $fieldsCache.wrappedValue[entry] = field
+        _fieldsCache.wrappedValue[entry] = field
     }
 
     func lookupMethod(withObjcSelector selector: SelectorSignature,
