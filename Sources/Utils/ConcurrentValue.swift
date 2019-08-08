@@ -25,13 +25,29 @@ public final class ConcurrentValue<T> {
             pthread_rwlock_unlock(&lock)
         }
     }
+    
+    @inlinable
+    public var projectedValue: T {
+        get {
+            pthread_rwlock_rdlock(&lock)
+            defer {
+                pthread_rwlock_unlock(&lock)
+            }
+            return _value
+        }
+        _modify {
+            pthread_rwlock_wrlock(&lock)
+            yield &_value
+            pthread_rwlock_unlock(&lock)
+        }
+    }
 
     @inlinable
-    public init(initialValue: T) {
+    public init(wrappedValue: T) {
         lock = pthread_rwlock_t()
         pthread_rwlock_init(&lock, nil)
 
-        self._value = initialValue
+        self._value = wrappedValue
     }
 
     deinit {

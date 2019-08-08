@@ -123,7 +123,7 @@ public final class SwiftRewriter {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
-        let outError: ConcurrentValue<Error?> = ConcurrentValue(initialValue: nil)
+        let outError: ConcurrentValue<Error?> = ConcurrentValue(wrappedValue: nil)
         let mutex = Mutex()
         
         for (i, src) in sources.enumerated() {
