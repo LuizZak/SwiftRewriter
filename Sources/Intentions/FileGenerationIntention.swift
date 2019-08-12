@@ -242,15 +242,14 @@ extension FileGenerationIntention: KnownFile {
     }
     
     public var knownTypes: [KnownType] {
-        return typeIntentions
+        typeIntentions
     }
 
     public var types: [KnownType] {
         typeIntentions
     }
     
-    public var globals: [KnownGlobal] {
-        globalVariableIntentions
-            + globalFunctionIntentions
+    public var knownGlobals: [KnownGlobal] {
+        globalVariableIntentions + globalFunctionIntentions
     }
 }
