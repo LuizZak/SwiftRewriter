@@ -30,27 +30,27 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     }
     
     func makeCache() {
-        $typesCache.setAsCaching(value: [:])
-        $canonicalTypenameCache.setAsCaching(value: [:])
+        _typesCache.setAsCaching(value: [:])
+        _canonicalTypenameCache.setAsCaching(value: [:])
     }
     
     func tearDownCache() {
-        $typesCache.tearDownCaching(resetToValue: [:])
-        $canonicalTypenameCache.tearDownCaching(resetToValue: [:])
+        _typesCache.tearDownCaching(resetToValue: [:])
+        _canonicalTypenameCache.tearDownCaching(resetToValue: [:])
     }
     
     public func addKnownTypeProvider(_ typeProvider: KnownTypeProvider) {
         providers.append(typeProvider)
         
         // Reset cache to allow types from this type provider to be considered.
-        if $typesCache.usingCache {
+        if _typesCache.usingCache {
             tearDownCache()
             makeCache()
         }
     }
     
     public func knownType(withName name: String) -> KnownType? {
-        if $typesCache.usingCache, let type = typesCache[name] {
+        if _typesCache.usingCache, let type = typesCache[name] {
             return type
         }
         
@@ -63,16 +63,16 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         }
         
         if types.isEmpty {
-            if $typesCache.usingCache {
-                $typesCache.wrappedValue[name] = nil
+            if _typesCache.usingCache {
+                _typesCache.wrappedValue[name] = nil
             }
             return nil
         }
         
         let type = CompoundKnownType(typeName: name, types: types)
         
-        if $typesCache.usingCache {
-            $typesCache.wrappedValue[name] = type
+        if _typesCache.usingCache {
+            _typesCache.wrappedValue[name] = type
         }
         
         return type
@@ -89,7 +89,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     }
     
     public func canonicalName(for typeName: String) -> String? {
-        if $canonicalTypenameCache.usingCache {
+        if _canonicalTypenameCache.usingCache {
             if let canonical = canonicalTypenameCache[typeName] {
                 return canonical
             }
@@ -100,8 +100,8 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
                 continue
             }
             
-            if $canonicalTypenameCache.usingCache {
-                $canonicalTypenameCache.wrappedValue[typeName] = canonical
+            if _canonicalTypenameCache.usingCache {
+                _canonicalTypenameCache.wrappedValue[typeName] = canonical
             }
             
             return canonical

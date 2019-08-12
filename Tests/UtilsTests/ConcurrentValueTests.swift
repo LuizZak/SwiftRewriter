@@ -4,7 +4,7 @@ import Utils
 
 class ConcurrentValueTests: XCTestCase {
     @ConcurrentValue var value: Set<Int> = []
-    var valueNonWrapper: ConcurrentValue<Set<Int>> = ConcurrentValue(initialValue: [])
+    var valueNonWrapper: ConcurrentValue<Set<Int>> = ConcurrentValue(wrappedValue: [])
 
     override func setUp() {
         super.setUp()
@@ -98,7 +98,21 @@ class ConcurrentValueTests: XCTestCase {
         measure {
             for i in 0...10_000 {
                 queue.addOperation {
-                    self.$value.wrappedValue.insert(i)
+                    self._value.wrappedValue.insert(i)
+                }
+            }
+
+            queue.waitUntilAllOperationsAreFinished()
+        }
+    }
+    
+    func testPerformancePropertyWrapperConcurrentModification_ProjectedValue() {
+        let queue = makeTestOperationQueue()
+
+        measure {
+            for i in 0...10_000 {
+                queue.addOperation {
+                    self.$value.insert(i)
                 }
             }
 
