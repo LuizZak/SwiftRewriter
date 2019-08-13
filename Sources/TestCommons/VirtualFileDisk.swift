@@ -44,6 +44,11 @@ public class VirtualFileDisk {
         try directory.deleteDirectory(named: pathComponents[pathComponents.count - 1])
     }
 
+    public func contentsOfFile(atPath path: String) throws -> Data {
+        let file = try self.file(atPath: path)
+        return file.data
+    }
+
     public func files(atPath path: String) throws -> [String] {
         let dir = try directory(atPath: path)
         return dir.files.map { $0.fullPath }
@@ -52,6 +57,10 @@ public class VirtualFileDisk {
     public func contentsOfDirectory(atPath path: String) throws -> [String] {
         let dir = try directory(atPath: path)
         return dir.directories.map { $0.fullPath } + dir.files.map { $0.fullPath }
+    }
+
+    private func file(atPath path: String) throws -> File {
+        return try root.file(atPath: path)
     }
 
     private func directory(atPath path: String) throws -> Directory {
@@ -83,9 +92,11 @@ extension DirectoryEntry {
 fileprivate class File: DirectoryEntry {
     weak var parent: DirectoryEntry?
     var name: String
+    var data: Data
 
     init(name: String) {
         self.name = name
+        data = Data()
     }
 }
 
@@ -147,6 +158,27 @@ fileprivate class Directory: DirectoryEntry {
         if remaining.count > 1 {
             try directory.createDirectory(atPath: remaining.dropFirst().joinedFullPath())
         }
+    }
+
+    func file(atPath path: String) throws -> File {
+        let components = path.splitPathComponents()
+        if components.isEmpty {
+            throw VirtualFileDisk.Error.invalidPath("\(fullPath)/\(path)")
+        }
+        if components[0] != name {
+            throw VirtualFileDisk.Error.nonexistingPath(String(components[0]))
+        }
+        if components.count == 2 {
+            guard let file = files.first(where: { $0.name == components[1] }) else {
+                throw VirtualFileDisk.Error.nonexistingPath(String(components[1]))
+            }
+            return file
+        }
+        guard let directory = directories.first(where: { $0.name == components[1] }) else {
+            throw VirtualFileDisk.Error.invalidPath(path)
+        }
+        let remaining = components.dropFirst().joinedFullPath()
+        return try directory.file(atPath: remaining)
     }
 
     func directory(atPath path: String) throws -> Directory {

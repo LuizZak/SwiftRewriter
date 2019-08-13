@@ -62,4 +62,13 @@ class VirtualFileDiskTests: XCTestCase {
 
         XCTAssertEqual(contents, ["/directory", "/file.txt"])
     }
+
+    func testContentsOfFile() throws {
+        let sut = VirtualFileDisk()
+        try sut.createFile(atPath: "/file.txt")
+
+        let contents = try sut.contentsOfFile(atPath: "/file.txt")
+
+        XCTAssert(contents.isEmpty)
+    }
 }
