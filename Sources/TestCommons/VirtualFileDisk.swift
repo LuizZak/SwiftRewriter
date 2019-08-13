@@ -9,13 +9,21 @@ public class VirtualFileDisk {
     }
 
     public func createFile(atPath path: String) throws {
-        let pathComponents = path.split(separator: "/", omittingEmptySubsequences: false)
+        let pathComponents = path.splitPathComponents()
         let directoryPath = pathComponents.dropLast()
 
         try root.createDirectory(atPath: directoryPath.joined(separator: "/"))
 
         let directory = try self.directory(atPath: directoryPath.joined(separator: "/"))
         try directory.createFile(fileName: pathComponents[pathComponents.count - 1])
+    }
+
+    public func deleteFile(atPath path: String) throws {
+        let pathComponents = path.splitPathComponents()
+        let directoryPath = pathComponents.dropLast()
+
+        let directory = try self.directory(atPath: directoryPath.joined(separator: "/"))
+        try directory.deleteFile(fileName: pathComponents[pathComponents.count - 1])
     }
 
     public func files(atPath path: String) throws -> [String] {
@@ -77,12 +85,19 @@ fileprivate class Directory: DirectoryEntry {
         files.append(file)
     }
 
+    func deleteFile<S: StringProtocol>(fileName: S) throws {
+        guard let index = files.firstIndex(where: { $0.name == fileName }) else {
+            throw VirtualFileDisk.Error.invalidPath("\(fullPath)/\(fileName)")
+        }
+        files.remove(at: index)
+    }
+
     func createDirectory<S: StringProtocol>(name: S) throws {
         directories.append(Directory(name: String(name)))
     }
 
     func createDirectory(atPath path: String) throws {
-        let components = path.split(separator: "/", omittingEmptySubsequences: false)
+        let components = path.splitPathComponents()
         if components.isEmpty {
             throw VirtualFileDisk.Error.invalidPath("\(fullPath)/\(path)")
         }
@@ -100,7 +115,7 @@ fileprivate class Directory: DirectoryEntry {
     }
 
     func directory(atPath path: String) throws -> Directory {
-        let components = path.split(separator: "/", omittingEmptySubsequences: false)
+        let components = path.splitPathComponents()
         if components.isEmpty {
             throw VirtualFileDisk.Error.invalidPath("\(fullPath)/\(path)")
         }
@@ -115,5 +130,15 @@ fileprivate class Directory: DirectoryEntry {
         }
         let remaining = components.dropFirst().joined(separator: "/")
         return try directory.directory(atPath: remaining)
+    }
+}
+
+private extension StringProtocol {
+    func splitPathComponents() -> [SubSequence] {
+        let components = split(separator: "/", omittingEmptySubsequences: false)
+        if components.last == "" {
+            return components.dropLast()
+        }
+        return components
     }
 }

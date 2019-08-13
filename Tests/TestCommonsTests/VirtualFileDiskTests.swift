@@ -6,7 +6,7 @@ class VirtualFileDiskTests: XCTestCase {
         let sut = VirtualFileDisk()
         let files = try sut.files(atPath: "/")
 
-        XCTAssert(files.isEmpty)
+        XCTAssertEqual(files, [])
     }
 
     func testCreateFile() throws {
@@ -16,5 +16,15 @@ class VirtualFileDiskTests: XCTestCase {
 
         let files = try sut.files(atPath: "/directory")
         XCTAssertEqual(files, ["/directory/file.txt"])
+    }
+
+    func testDeleteFile() throws {
+        let sut = VirtualFileDisk()
+
+        try sut.createFile(atPath: "/directory/file.txt")
+        try sut.deleteFile(atPath: "/directory/file.txt")
+
+        let files = try sut.files(atPath: "/directory")
+        XCTAssertEqual(files, [])
     }
 }
