@@ -59,6 +59,22 @@ public class VirtualFileDisk {
         return dir.directories.map { $0.fullPath } + dir.files.map { $0.fullPath }
     }
 
+    public func filesInDirectory(atPath path: String, recursive: Bool) throws -> [String] {
+        var files: [String] = []
+        var stack: [String] = [path]
+
+        while let nextPath = stack.popLast() {
+            let dir = try directory(atPath: nextPath)
+            files.append(contentsOf: dir.files.map { $0.fullPath })
+
+            if recursive {
+                stack.append(contentsOf: dir.directories.map { $0.fullPath })
+            }
+        }
+
+        return files
+    }
+
     private func file(atPath path: String) throws -> File {
         return try root.file(atPath: path)
     }
@@ -154,7 +170,13 @@ fileprivate class Directory: DirectoryEntry {
         }
 
         let remaining = Array(components.dropFirst())
-        let directory = try createDirectory(name: String(remaining[0]))
+        let directory: Directory
+        if let dir = directories.first(where: { $0.name == remaining[0] }) {
+            directory = dir
+        } else {
+            directory = try createDirectory(name: String(remaining[0]))
+        }
+
         if remaining.count > 1 {
             try directory.createDirectory(atPath: remaining.dropFirst().joinedFullPath())
         }

@@ -18,6 +18,16 @@ class VirtualFileDiskTests: XCTestCase {
         XCTAssertEqual(files, ["/directory/file.txt"])
     }
 
+    func testCreateFileFullPath() throws {
+        let sut = VirtualFileDisk()
+
+        try sut.createFile(atPath: "/directory/file1.txt")
+        try sut.createFile(atPath: "/directory/file2.txt")
+
+        let directories = try sut.contentsOfDirectory(atPath: "/")
+        XCTAssertEqual(directories, ["/directory"])
+    }
+
     func testDeleteFile() throws {
         let sut = VirtualFileDisk()
 
@@ -70,5 +80,19 @@ class VirtualFileDiskTests: XCTestCase {
         let contents = try sut.contentsOfFile(atPath: "/file.txt")
 
         XCTAssert(contents.isEmpty)
+    }
+
+    func testFilesInDirectory() throws {
+        let sut = VirtualFileDisk()
+        try sut.createFile(atPath: "/file1.txt")
+        try sut.createFile(atPath: "/file2.txt")
+        try sut.createFile(atPath: "/directory/file1.txt")
+        try sut.createFile(atPath: "/directory/file2.txt")
+
+        let contents = try sut.filesInDirectory(atPath: "/", recursive: false)
+        let contentsRecursive = try sut.filesInDirectory(atPath: "/", recursive: true)
+
+        XCTAssertEqual(contents, ["/file1.txt", "/file2.txt"])
+        XCTAssertEqual(contentsRecursive, ["/file1.txt", "/file2.txt", "/directory/file1.txt", "/directory/file2.txt"])
     }
 }
