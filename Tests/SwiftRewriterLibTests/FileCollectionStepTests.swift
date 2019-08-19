@@ -13,6 +13,16 @@ class FileCollectionStepTests: XCTestCase {
         sut = FileCollectionStep(fileProvider: fileDisk)
     }
 
+    func testAddFileFromURL() throws {
+        try fileDisk.createFile(atPath: "/directory/file.h")
+
+        try sut.addFile(fromUrl: URL(string: "/directory/file.h")!)
+        try sut.addFile(fromUrl: URL(string: "/directory/file.m")!)
+
+        XCTAssertEqual(sut.files.map { $0.url.path },
+                       ["/directory/file.h"])
+    }
+
     func testAddFromDirectoryRecursive() throws {
         try fileDisk.createFile(atPath: "/directory/file.h")
         try fileDisk.createFile(atPath: "/directory/file.m")

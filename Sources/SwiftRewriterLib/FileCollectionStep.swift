@@ -8,6 +8,16 @@ public class FileCollectionStep {
         self.fileProvider = fileProvider
     }
 
+    public func addFile(fromUrl url: URL) throws {
+        if fileProvider.fileExists(atPath: url.path) {
+            files.append(InputFile(url: url, isPrimary: true))
+        }
+    }
+
+    public func addFile(_ file: InputFile) throws {
+        files.append(file)
+    }
+
     public func addFromDirectory(_ directory: URL,
                                  recursive: Bool,
                                  includePattern: String? = nil,
@@ -36,10 +46,6 @@ public class FileCollectionStep {
             let file = InputFile(url: fileUrl, isPrimary: true)
             try addFile(file)
         }
-    }
-
-    public func addFile(_ file: InputFile) throws {
-        files.append(file)
     }
 }
 
