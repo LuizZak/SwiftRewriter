@@ -28,6 +28,26 @@ class VirtualFileDiskTests: XCTestCase {
         XCTAssertEqual(directories, ["/directory"])
     }
 
+    func testCreateFileSubfolder() throws {
+        let sut = VirtualFileDisk()
+
+        try sut.createFile(atPath: "/directory/file.h")
+        try sut.createFile(atPath: "/directory/file.m")
+        try sut.createFile(atPath: "/directory/subPath/file.h")
+        try sut.createFile(atPath: "/directory/subPath/file.m")
+        try sut.createFile(atPath: "/directory/subPath/subPath/file.h")
+        try sut.createFile(atPath: "/directory/subPath/subPath/file.m")
+
+        let contentsDirectory = try sut.contentsOfDirectory(atPath: "/directory")
+        let contentsSubpath = try sut.contentsOfDirectory(atPath: "/directory/subPath")
+        XCTAssertEqual(contentsDirectory, ["/directory/subPath",
+                                           "/directory/file.h",
+                                           "/directory/file.m"])
+        XCTAssertEqual(contentsSubpath, ["/directory/subPath/subPath",
+                                         "/directory/subPath/file.h",
+                                         "/directory/subPath/file.m"])
+    }
+
     func testDeleteFile() throws {
         let sut = VirtualFileDisk()
 

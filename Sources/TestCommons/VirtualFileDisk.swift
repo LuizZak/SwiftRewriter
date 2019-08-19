@@ -1,4 +1,5 @@
 import Foundation
+import SwiftRewriterLib
 
 /// Represents a virtual file disk with files and folders to use during testing.
 public class VirtualFileDisk {
@@ -12,9 +13,7 @@ public class VirtualFileDisk {
         let pathComponents = path.splitPathComponents()
         let directoryPath = pathComponents.dropLast()
 
-        try root.createDirectory(atPath: directoryPath.joinedFullPath())
-
-        let directory = try self.directory(atPath: directoryPath.joinedFullPath())
+        let directory = try root.createDirectory(atPath: directoryPath.joinedFullPath())
         try directory.createFile(fileName: pathComponents[pathComponents.count - 1])
     }
 
@@ -22,9 +21,7 @@ public class VirtualFileDisk {
        let pathComponents = path.splitPathComponents()
        let directoryPath = pathComponents.dropLast()
 
-       try root.createDirectory(atPath: directoryPath.joinedFullPath())
-
-       let directory = try self.directory(atPath: directoryPath.joinedFullPath())
+       let directory = try root.createDirectory(atPath: directoryPath.joinedFullPath())
        try directory.createDirectory(name: pathComponents[pathComponents.count - 1])
    }
 
@@ -157,20 +154,23 @@ fileprivate class Directory: DirectoryEntry {
         directories.remove(at: index)
     }
 
-    func createDirectory(atPath path: String) throws {
+    @discardableResult
+    func createDirectory(atPath path: String) throws -> Directory {
+        let directory: Directory
         let components = path.splitPathComponents()
         if components.isEmpty {
             throw VirtualFileDisk.Error.invalidPath("\(fullPath)/\(path)")
         }
+
         if components[0] != name {
-            throw VirtualFileDisk.Error.nonexistingPath(String(components[0]))
+            throw VirtualFileDisk.Error.invalidPath("\(fullPath)/\(path)")
         }
         if components.count == 1 {
-            return
+            return self
         }
 
         let remaining = Array(components.dropFirst())
-        let directory: Directory
+
         if let dir = directories.first(where: { $0.name == remaining[0] }) {
             directory = dir
         } else {
@@ -178,8 +178,10 @@ fileprivate class Directory: DirectoryEntry {
         }
 
         if remaining.count > 1 {
-            try directory.createDirectory(atPath: remaining.dropFirst().joinedFullPath())
+            return try directory.createDirectory(atPath: remaining.joinedFullPath())
         }
+
+        return directory
     }
 
     func file(atPath path: String) throws -> File {
@@ -239,5 +241,23 @@ private extension Sequence where Element: StringProtocol {
             return "/"
         }
         return result
+    }
+}
+
+extension VirtualFileDisk: FileProvider {
+    public func enumerator(atPath path: String) -> [String]? {
+        do {
+            return try filesInDirectory(atPath: path, recursive: true)
+        } catch {
+            return nil
+        }
+    }
+    public func fileExists(atPath path: String) -> Bool {
+        do {
+            _ = try file(atPath: path)
+            return true
+        } catch {
+            return false
+        }
     }
 }

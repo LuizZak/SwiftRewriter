@@ -1,6 +1,7 @@
 import Foundation
 import Console
 import Utils
+import SwiftRewriterLib
 
 func showSearchPathUi(in menu: MenuController) -> String? {
     let console = menu.console
@@ -150,40 +151,48 @@ class SuggestConversionInterface {
                               options: Options = .default) {
         
         let console = menu.console
-        let fileManager = FileManager.default
         
         console.printLine("Inspecting path \(directoryPath)...")
         
         var overwriteCount = 0
+
+        let fileProvider = FileDiskProvider()
+        let searchStep = FileCollectionStep(fileProvider: fileProvider)
+        do {
+            try searchStep.addFromDirectory(URL(fileURLWithPath: directoryPath),
+                                            recursive: true,
+                                            includePattern: options.includePattern,
+                                            excludePattern: options.excludePattern)
+        } catch {
+            console.printLine("Error finding files: \(error).")
+            if !options.skipConfirm {
+                _=console.readLineWith(prompt: "Press [Enter] to continue.")
+            }
+
+            return
+        }
         
-        let objcFiles: [URL] =
-            filesAt(path: directoryPath,
-                    includePattern: options.includePattern,
-                    excludePattern: options.excludePattern)
-                // Filter down to .h/.m files
-                .filter { (path: URL) -> Bool in
-                    ((path.path as NSString).pathExtension == "m"
-                        || (path.path as NSString).pathExtension == "h")
+        let objcFiles: [URL] = searchStep
+            .files.map { $0.url }
+            // Check a matching .swift file doesn't already exist for the paths
+            // (if `overwrite` is not on)
+            .filter { (url: URL) -> Bool in
+                let swiftFile =
+                    ((url.path as NSString)
+                        .deletingPathExtension as NSString)
+                        .appendingPathExtension("swift")!
+
+                if !fileProvider.fileExists(atPath: swiftFile) {
+                    return true
                 }
-                // Check a matching .swift file doesn't already exist for the paths
-                // (if `overwrite` is not on)
-                .filter { (url: URL) -> Bool in
-                    let swiftFile =
-                        ((url.path as NSString)
-                            .deletingPathExtension as NSString)
-                            .appendingPathExtension("swift")!
-                    
-                    if !fileManager.fileExists(atPath: swiftFile) {
-                        return true
-                    }
-                    if options.overwrite {
-                        overwriteCount += 1
-                        return true
-                    }
-                    
-                    return false
+                if options.overwrite {
+                    overwriteCount += 1
+                    return true
                 }
-        
+
+                return false
+        }
+
         if objcFiles.isEmpty {
             console.printLine("No files where found to process.")
             if !options.skipConfirm {

@@ -2,9 +2,9 @@ import Foundation
 
 public class FileCollectionStep {
     var fileProvider: FileProvider
-    var files: [InputFile] = []
+    public private(set) var files: [InputFile] = []
 
-    public init(fileProvider: FileProvider) {
+    public init(fileProvider: FileProvider = FileDiskProvider()) {
         self.fileProvider = fileProvider
     }
 
@@ -31,20 +31,6 @@ public class FileCollectionStep {
                     ((path.path as NSString).pathExtension == "m"
                         || (path.path as NSString).pathExtension == "h")
                 }
-                // Check a matching .swift file doesn't already exist for the
-                // paths (if `overwrite` is not on)
-                .filter { (url: URL) -> Bool in
-                    let swiftFile =
-                        ((url.path as NSString)
-                            .deletingPathExtension as NSString)
-                            .appendingPathExtension("swift")!
-
-                    if !fileProvider.fileExists(atPath: swiftFile) {
-                        return true
-                    }
-
-                    return false
-                }
 
         for fileUrl in objcFileUrls {
             let file = InputFile(url: fileUrl, isPrimary: true)
@@ -58,6 +44,22 @@ public class FileCollectionStep {
 }
 
 public protocol FileProvider {
-    func enumerator(atPath: String) -> [String]?
-    func fileExists(atPath: String) -> Bool
+    func enumerator(atPath path: String) -> [String]?
+    func fileExists(atPath path: String) -> Bool
+}
+
+public class FileDiskProvider: FileProvider {
+    var fileManager: FileManager
+
+    public init(fileManager: FileManager = FileManager.default) {
+        self.fileManager = fileManager
+    }
+
+    public func enumerator(atPath path: String) -> [String]? {
+        return fileManager.enumerator(atPath: path)?.compactMap { $0 as? String }
+    }
+
+    public func fileExists(atPath path: String) -> Bool {
+        return fileManager.fileExists(atPath: path)
+    }
 }
