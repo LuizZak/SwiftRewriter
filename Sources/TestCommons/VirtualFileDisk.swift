@@ -9,12 +9,15 @@ public class VirtualFileDisk {
         root = Directory(name: "")
     }
 
-    public func createFile(atPath path: String) throws {
+    public func createFile(atPath path: String, data: Data? = nil) throws {
         let pathComponents = path.splitPathComponents()
         let directoryPath = pathComponents.dropLast()
 
         let directory = try root.createDirectory(atPath: directoryPath.joinedFullPath())
-        try directory.createFile(fileName: pathComponents[pathComponents.count - 1])
+        let file = try directory.createFile(fileName: pathComponents[pathComponents.count - 1])
+        if let data = data {
+            file.data = data
+        }
     }
 
     public func createDirectory(atPath path: String) throws {
@@ -44,6 +47,11 @@ public class VirtualFileDisk {
     public func contentsOfFile(atPath path: String) throws -> Data {
         let file = try self.file(atPath: path)
         return file.data
+    }
+
+    public func writeContentsOfFile(atPath path: String, data: Data) throws {
+        let file = try self.file(atPath: path)
+        file.data = data
     }
 
     public func files(atPath path: String) throws -> [String] {
@@ -126,10 +134,12 @@ fileprivate class Directory: DirectoryEntry {
         directories = []
     }
 
-    func createFile<S: StringProtocol>(fileName: S) throws {
+    @discardableResult
+    func createFile<S: StringProtocol>(fileName: S) throws -> File {
         let file = File(name: String(fileName))
         file.parent = self
         files.append(file)
+        return file
     }
 
     func deleteFile<S: StringProtocol>(named fileName: S) throws {

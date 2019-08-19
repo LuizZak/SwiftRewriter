@@ -18,6 +18,36 @@ class VirtualFileDiskTests: XCTestCase {
         XCTAssertEqual(files, ["/directory/file.txt"])
     }
 
+    func testCreateFileWithData() throws {
+        let data = Data([0x01, 0x02, 0x03])
+        let sut = VirtualFileDisk()
+
+        try sut.createFile(atPath: "/directory/file.txt", data: data)
+
+        let contents = try sut.contentsOfFile(atPath: "/directory/file.txt")
+        XCTAssertEqual(contents, data)
+    }
+
+    func testContentsOfFile() throws {
+        let sut = VirtualFileDisk()
+        try sut.createFile(atPath: "/file.txt")
+
+        let contents = try sut.contentsOfFile(atPath: "/file.txt")
+
+        XCTAssert(contents.isEmpty)
+    }
+
+    func testWriteContentsOfFile() throws {
+        let data = Data([0x01, 0x02, 0x03])
+        let sut = VirtualFileDisk()
+        try sut.createFile(atPath: "/file.txt")
+
+        try sut.writeContentsOfFile(atPath: "/file.txt", data: data)
+
+        let contents = try sut.contentsOfFile(atPath: "/file.txt")
+        XCTAssertEqual(contents, data)
+    }
+
     func testCreateFileFullPath() throws {
         let sut = VirtualFileDisk()
 
@@ -91,15 +121,6 @@ class VirtualFileDiskTests: XCTestCase {
         let contents = try sut.contentsOfDirectory(atPath: "/")
 
         XCTAssertEqual(contents, ["/directory", "/file.txt"])
-    }
-
-    func testContentsOfFile() throws {
-        let sut = VirtualFileDisk()
-        try sut.createFile(atPath: "/file.txt")
-
-        let contents = try sut.contentsOfFile(atPath: "/file.txt")
-
-        XCTAssert(contents.isEmpty)
     }
 
     func testFilesInDirectory() throws {
