@@ -73,6 +73,7 @@ public class FileCollectionStep {
 public protocol FileProvider {
     func enumerator(atPath path: String) -> [String]?
     func fileExists(atPath path: String) -> Bool
+    func contentsOfFile(atPath path: String) throws -> Data
 }
 
 public class FileDiskProvider: FileProvider {
@@ -88,5 +89,17 @@ public class FileDiskProvider: FileProvider {
 
     public func fileExists(atPath path: String) -> Bool {
         return fileManager.fileExists(atPath: path)
+    }
+
+    public func contentsOfFile(atPath path: String) throws -> Data {
+        guard let data = fileManager.contents(atPath: path) else {
+            throw Error.invalidFileData
+        }
+        
+        return data
+    }
+
+    public enum Error: Swift.Error {
+        case invalidFileData
     }
 }

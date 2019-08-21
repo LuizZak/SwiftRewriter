@@ -543,6 +543,17 @@ class ObjcParserTests: XCTestCase {
             }
             """)
     }
+
+    func testParseImportDirectives() throws {
+        let sut = ObjcParser(string: """
+            #define aDefine
+            #import <dir/file.h>
+            """)
+
+        try sut.parse()
+
+        XCTAssertEqual(sut.importDirectives.map { $0.path }, ["dir/file.h"])
+    }
 }
 
 extension ObjcParserTests {

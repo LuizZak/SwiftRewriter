@@ -1,3 +1,4 @@
+import Foundation
 import MiniLexer
 import GrammarModels
 import class Antlr4.BaseErrorListener
@@ -67,6 +68,8 @@ public class ObjcParser {
     /// A state used to instance single threaded parsers.
     /// The default parser state, in case the user did not provide one on init.
     private static var _singleThreadState: ObjcParserState = ObjcParserState()
+
+    var parsed: Bool = false
     
     // MARK: ANTLR parser
     var mainParser: AntlrParser<ObjectiveCLexer, ObjectiveCParser>?
@@ -95,6 +98,7 @@ public class ObjcParser {
     
     /// Preprocessor directives found on this file
     public var preprocessorDirectives: [String] = []
+    public var importDirectives: [ObjcImportDecl] = []
     
     public var antlrSettings: AntlrSettings = .default
     
@@ -153,6 +157,10 @@ public class ObjcParser {
     
     /// Parses the entire source string
     public func parse() throws {
+        if parsed {
+            return
+        }
+
         // Clear previous state
         preprocessorDirectives = []
         
@@ -169,6 +177,10 @@ public class ObjcParser {
         let visitor = AnyASTVisitor(visit: { $0.originalSource = self.source })
         let traverser = ASTTraverser(node: rootNode, visitor: visitor)
         traverser.traverse()
+
+        importDirectives = ObjcParser.parseObjcImports(in: preprocessorDirectives)
+
+        parsed = true
     }
     
     private func tryParse<T: ParserRuleContext, P: Parser>(from parser: P, _ operation: (P) throws -> T) throws -> T {
@@ -494,6 +506,33 @@ public class ObjcParser {
         
         return items
     }
+
+    private static func parseObjcImports(in directives: [String]) -> [ObjcImportDecl] {
+        var imports: [ObjcImportDecl] = []
+
+        for directive in directives {
+            do {
+                let lexer = MiniLexer.Lexer(input: directive)
+
+                // "#import <[PATH]>"
+                try lexer.advance(expectingCurrent: "#"); lexer.skipWhitespace()
+
+                guard lexer.advanceIf(equals: "import") else { continue }
+
+                lexer.skipWhitespace()
+
+                // Extract "<[PATH]>" now, e.g. "<UIKit/UIKit.h>" -> "UIKit/UIKit.h"
+                try lexer.advance(expectingCurrent: "<")
+                let path = lexer.consume(until: { $0 == ">"})
+
+                imports.append(ObjcImportDecl(path: String(path)))
+            } catch {
+                // Ignore silently
+            }
+        }
+
+        return imports
+    }
 }
 
 public class DiagnosticsErrorListener: BaseErrorListener {
@@ -517,5 +556,18 @@ public class DiagnosticsErrorListener: BaseErrorListener {
             msg,
             origin: source.filePath,
             location: SourceLocation(line: line, column: charPositionInLine, utf8Offset: 0))
+    }
+}
+
+public struct ObjcImportDecl {
+    public var path: String
+    public var pathComponents: [String] {
+        (path as NSString).pathComponents
+    }
+
+    /// Returns `true` if any of the path components of this import decl's
+    /// path match a given path component fully.
+    public func matchesPathComponent<S: StringProtocol>(_ path: S) -> Bool {
+        pathComponents.contains(where: { $0 == path })
     }
 }

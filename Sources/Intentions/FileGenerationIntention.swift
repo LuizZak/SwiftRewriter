@@ -24,7 +24,7 @@ public final class FileGenerationIntention: Intention {
     /// Gets the (Swift) import directives should be printed at this file's top
     /// header section.
     public var knownImportDirectives: [String] = []
-    
+
     /// Gets the intention collection that contains this file generation intention
     public internal(set) var intentionCollection: IntentionCollection?
     
