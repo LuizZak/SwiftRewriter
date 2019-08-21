@@ -3,19 +3,22 @@ import Foundation
 public class FileCollectionStep {
     var fileProvider: FileProvider
     public private(set) var files: [InputFile] = []
+    public weak var delegate: FileCollectionStepDelegate?
 
     public init(fileProvider: FileProvider = FileDiskProvider()) {
         self.fileProvider = fileProvider
     }
 
-    public func addFile(fromUrl url: URL) throws {
+    public func addFile(fromUrl url: URL, isPrimary: Bool) throws {
         if fileProvider.fileExists(atPath: url.path) {
-            files.append(InputFile(url: url, isPrimary: true))
+            let file = InputFile(url: url, isPrimary: isPrimary)
+            try addFile(file)
         }
     }
 
     public func addFile(_ file: InputFile) throws {
         files.append(file)
+        try resolveReferences(in: file)
     }
 
     public func addFromDirectory(_ directory: URL,
@@ -45,6 +48,24 @@ public class FileCollectionStep {
         for fileUrl in objcFileUrls {
             let file = InputFile(url: fileUrl, isPrimary: true)
             try addFile(file)
+        }
+    }
+
+    func hasFile(_ url: URL) -> Bool {
+        return files.contains { $0.url == url }
+    }
+
+    private func resolveReferences(in file: InputFile) throws {
+        guard let delegate = delegate else {
+            return
+        }
+
+        let references = try delegate.fileCollectionStep(self, referencedFilesForFile: file)
+
+        for url in references {
+            if !hasFile(url) {
+                try addFile(fromUrl: url, isPrimary: false)
+            }
         }
     }
 }
