@@ -36,6 +36,9 @@ public protocol KnownType: KnownTypeReferenceConvertible, AttributeTaggeableObje
     
     /// Gets an array of all known instance variable fields for this type
     var knownFields: [KnownProperty] { get }
+
+    /// Gets an array of all known subscriptable members for this type
+    var knownSubscripts: [KnownSubscript] { get }
     
     /// Gets an array of all known protocol conformances for this type
     var knownProtocolConformances: [KnownProtocolConformance] { get }
@@ -166,6 +169,18 @@ public protocol KnownProperty: KnownMember {
     
     /// `true` if this property actually represents an enumeration case.
     var isEnumCase: Bool { get }
+}
+
+/// A known type subscript
+public protocol KnownSubscript: AttributeTaggeableObject, SemanticalObject {
+    /// Gets the type for the indexing value of this subscription.
+    var subscriptType: SwiftType { get }
+
+    /// Gets the resulting type when this subscript is indexed into.
+    var type: SwiftType { get }
+
+    /// Gets whether this subscription is getter-only
+    var isConstant: Bool { get }
 }
 
 /// Describes the getter/setter states of a property

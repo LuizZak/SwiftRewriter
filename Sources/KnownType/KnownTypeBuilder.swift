@@ -558,6 +558,7 @@ private class DummyType: KnownType {
     var knownMethods: [KnownMethod] = []
     var knownProperties: [KnownProperty] = []
     var knownFields: [KnownProperty] = []
+    var knownSubscripts: [KnownSubscript] = []
     var knownProtocolConformances: [KnownProtocolConformance] = []
     var knownAttributes: [KnownAttribute] = []
     var supertype: KnownTypeReference?
@@ -572,6 +573,7 @@ private class DummyType: KnownType {
         knownMethods = type.knownMethods
         knownProperties = type.knownProperties
         knownFields = type.knownFields
+        knownSubscripts = type.knownSubscripts
         knownProtocolConformances = type.knownProtocolConformances
         knownAttributes = type.knownAttributes
         supertype = type.supertype
@@ -600,6 +602,7 @@ private struct BuildingKnownType: Codable {
     var methods: [BuildingKnownMethod] = []
     var properties: [BuildingKnownProperty] = []
     var fields: [BuildingKnownProperty] = []
+    var subscripts: [BuildingKnownSubscript] = []
     var protocols: [BuildingKnownProtocolConformance] = []
     var attributes: [KnownAttribute] = []
     var supertype: KnownTypeReference?
@@ -632,6 +635,9 @@ extension BuildingKnownType: KnownType {
     }
     var knownFields: [KnownProperty] {
         fields
+    }
+    var knownSubscripts: [KnownSubscript] {
+        subscripts
     }
     var knownProtocolConformances: [KnownProtocolConformance] {
         protocols
@@ -685,6 +691,14 @@ private struct BuildingKnownProperty: KnownProperty, Codable {
     var isEnumCase: Bool
     var semantics: Set<Semantic>
     var annotations: [String]
+}
+
+private struct BuildingKnownSubscript: KnownSubscript, Codable {
+    var subscriptType: SwiftType
+    var type: SwiftType
+    var isConstant: Bool
+    var knownAttributes: [KnownAttribute]
+    var semantics: Set<Semantic>
 }
 
 private struct BuildingKnownProtocolConformance: KnownProtocolConformance, Codable {

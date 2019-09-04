@@ -271,4 +271,7 @@ extension TypeGenerationIntention: KnownType {
     public var knownProtocolConformances: [KnownProtocolConformance] {
         protocols
     }
+    public var knownSubscripts: [KnownSubscript] {
+        []
+    }
 }
