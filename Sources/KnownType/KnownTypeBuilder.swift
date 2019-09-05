@@ -412,17 +412,22 @@ public struct KnownTypeBuilder {
     
     public func subscription(indexType: SwiftType,
                              type: SwiftType,
+                             isStatic: Bool = false,
                              isConstant: Bool = false,
                              attributes: [KnownAttribute] = [],
-                             semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+                             semantics: Set<Semantic> = [],
+                             annotations: [String] = []) -> KnownTypeBuilder {
         
         var new = clone()
         
-        let sub = BuildingKnownSubscript(subscriptType: indexType,
+        let sub = BuildingKnownSubscript(isStatic: isStatic,
+                                         ownerType: self.type.asKnownTypeReference,
+                                         subscriptType: indexType,
                                          type: type,
                                          isConstant: isConstant,
                                          knownAttributes: attributes,
-                                         semantics: semantics)
+                                         semantics: semantics,
+                                         annotations: annotations)
         
         new.type.subscripts.append(sub)
         
@@ -713,11 +718,14 @@ private struct BuildingKnownProperty: KnownProperty, Codable {
 }
 
 private struct BuildingKnownSubscript: KnownSubscript, Codable {
+    var isStatic: Bool
+    var ownerType: KnownTypeReference?
     var subscriptType: SwiftType
     var type: SwiftType
     var isConstant: Bool
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
+    var annotations: [String]
 }
 
 private struct BuildingKnownProtocolConformance: KnownProtocolConformance, Codable {

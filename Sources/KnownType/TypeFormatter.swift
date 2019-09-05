@@ -123,6 +123,25 @@ public extension TypeFormatter {
                 
                 _onFirstDeclaration = false
             }
+            let outputSubscript: (KnownSubscript) -> Void = { subscriptDecl in
+                let didPrintSameLine = outputAttributesAndAnnotations(subscriptDecl.knownAttributes,
+                                                                      subscriptDecl.annotations,
+                                                                      true)
+                
+                let line = asString(subscript: subscriptDecl,
+                                    ofType: type,
+                                    withTypeName: false,
+                                    includeAccessors: subscriptDecl.isConstant)
+                
+                if !didPrintSameLine {
+                    o.outputIdentation()
+                }
+                
+                o.outputInline(line)
+                o.outputLineFeed()
+                
+                _onFirstDeclaration = false
+            }
             
             let staticFields = type.knownFields.filter { $0.isStatic }
             let staticProperties = type.knownProperties.filter { $0.isStatic }
@@ -134,9 +153,10 @@ public extension TypeFormatter {
             staticProperties.forEach(outputProperty)
             instanceFields.forEach(outputField)
             instanceProperties.forEach(outputProperty)
+            type.knownSubscripts.forEach(outputSubscript)
             
-            // Output a spacing between fields/properties and initialiezers/methods
-            if (!type.knownFields.isEmpty || !type.knownProperties.isEmpty) &&
+            // Output a spacing between fields/properties/subscripts and initialiezers/methods
+            if (!type.knownFields.isEmpty || !type.knownProperties.isEmpty || !type.knownSubscripts.isEmpty) &&
                 (!type.knownConstructors.isEmpty || !type.knownMethods.isEmpty) {
                 o.output(line: "")
             }
@@ -172,8 +192,8 @@ public extension TypeFormatter {
     
     /// Generates a string representation of a given method's signature
     static func asString(method: KnownMethod,
-                                ofType type: KnownType,
-                                withTypeName typeName: Bool = true) -> String {
+                         ofType type: KnownType,
+                         withTypeName typeName: Bool = true) -> String {
         
         var result = ""
         
@@ -194,10 +214,10 @@ public extension TypeFormatter {
     /// Generates a string representation of a given property's signature, with
     /// type name, property name and property type.
     static func asString(property: KnownProperty,
-                                ofType type: KnownType,
-                                withTypeName typeName: Bool = true,
-                                includeVarKeyword: Bool = false,
-                                includeAccessors: Bool = false) -> String {
+                         ofType type: KnownType,
+                         withTypeName typeName: Bool = true,
+                         includeVarKeyword: Bool = false,
+                         includeAccessors: Bool = false) -> String {
         
         var result = ""
         
@@ -232,9 +252,9 @@ public extension TypeFormatter {
     /// Generates a string representation of a given field's signature, with
     /// type name, field name and field type.
     static func asString(field: KnownProperty,
-                                ofType type: KnownType,
-                                withTypeName typeName: Bool = true,
-                                includeVarKeyword: Bool = false) -> String {
+                         ofType type: KnownType,
+                         withTypeName typeName: Bool = true,
+                         includeVarKeyword: Bool = false) -> String {
         
         var result = ""
         
@@ -250,6 +270,35 @@ public extension TypeFormatter {
         }
         
         result += field.name + ": " + stringify(field.storage.type)
+        
+        return result
+    }
+    
+    static func asString(subscript decl: KnownSubscript,
+                         ofType type: KnownType,
+                         withTypeName typeName: Bool = true,
+                         includeAccessors: Bool = false) -> String {
+        
+        var result = ""
+        
+        // TODO: Support static subscript declarations
+        // result += decl.isStatic ? "static " : ""
+        
+        if typeName {
+            result += type.typeName + "."
+        }
+        
+        result += "subscript(index: " + stringify(decl.subscriptType) + ") -> " + stringify(decl.type)
+        
+        if includeAccessors {
+            result += " { "
+            if decl.isConstant {
+                result += "get"
+            } else {
+                result += "get set"
+            }
+            result += " }"
+        }
         
         return result
     }

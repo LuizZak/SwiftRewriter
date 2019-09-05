@@ -91,6 +91,18 @@ class TypeFormatterTests: XCTestCase {
         )
     }
     
+    func testAsStringSubscript() {
+        let type =
+            KnownTypeBuilder(typeName: "A")
+                .subscription(indexType: .int, type: .string)
+                .build()
+        
+        XCTAssertEqual(
+            "A.subscript(index: Int) -> String",
+            TypeFormatter.asString(subscript: type.knownSubscripts[0], ofType: type)
+        )
+    }
+    
     func testAsStringExtension() {
         let extA = ClassExtensionGenerationIntention(typeName: "A")
         let extB = ClassExtensionGenerationIntention(typeName: "B")
@@ -122,6 +134,11 @@ class TypeFormatterTests: XCTestCase {
                       accessor: .getter,
                       attributes: [KnownAttribute(name: "attr", parameters: nil)],
                       annotations: ["Annotation"])
+            .subscription(indexType: .int,
+                          type: .string,
+                          isConstant: true,
+                          attributes: [KnownAttribute(name: "attr", parameters: nil)],
+                          annotations: ["Annotation"])
             .protocolConformance(protocolName: "Protocol")
             .method(withSignature: FunctionSignature(
                 name: "methodA",
@@ -148,6 +165,9 @@ class TypeFormatterTests: XCTestCase {
                 
                 // Annotation
                 @attr var readOnlyProp: A { get }
+                
+                // Annotation
+                @attr subscript(index: Int) -> String { get }
                 
                 init()
                 

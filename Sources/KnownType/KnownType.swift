@@ -172,7 +172,7 @@ public protocol KnownProperty: KnownMember {
 }
 
 /// A known type subscript
-public protocol KnownSubscript: AttributeTaggeableObject, SemanticalObject {
+public protocol KnownSubscript: KnownMember {
     /// Gets the type for the indexing value of this subscription.
     var subscriptType: SwiftType { get }
 
@@ -210,6 +210,12 @@ public extension KnownProperty {
 public extension KnownMethod {
     var memberType: SwiftType {
         signature.swiftClosureType
+    }
+}
+
+public extension KnownSubscript {
+    var memberType: SwiftType {
+        type
     }
 }
 
