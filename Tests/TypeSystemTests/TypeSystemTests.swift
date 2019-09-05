@@ -1095,6 +1095,30 @@ class TypeSystemTests: XCTestCase {
         
         XCTAssertNil(sut.conformance(toProtocolName: "C", in: protA))
     }
+    
+    func testSubscriptLookupKnownType() {
+        let type = KnownTypeBuilder(typeName: "A")
+            .subscription(indexType: .int, type: .int)
+            .subscription(indexType: .string, type: .string)
+            .build()
+        sut.addType(type)
+        
+        XCTAssertNotNil(sut.subscription(indexType: .int, in: type))
+        XCTAssertNotNil(sut.subscription(indexType: .string, in: type))
+        XCTAssertNil(sut.subscription(indexType: .double, in: type))
+    }
+    
+    func testSubscriptLookupSwiftType() {
+        let type = KnownTypeBuilder(typeName: "A")
+            .subscription(indexType: .int, type: .int)
+            .subscription(indexType: .string, type: .string)
+            .build()
+        sut.addType(type)
+        
+        XCTAssertNotNil(sut.subscription(indexType: .int, in: .typeName("A")))
+        XCTAssertNotNil(sut.subscription(indexType: .string, in: .typeName("A")))
+        XCTAssertNil(sut.subscription(indexType: .double, in: .typeName("A")))
+    }
 }
 
 private extension TypeSystemTests {

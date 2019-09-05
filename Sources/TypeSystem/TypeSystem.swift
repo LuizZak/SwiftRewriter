@@ -881,6 +881,13 @@ public class TypeSystem {
         return lookup.field(named: name, static: isStatic, in: type)
     }
     
+    /// Gets a subscription for a given index type on a given type
+    public func subscription(indexType: SwiftType, in type: KnownType) -> KnownSubscript? {
+        let lookup = makeTypeMemberLookup()
+        
+        return lookup.subscription(indexType: indexType, in: type)
+    }
+    
     /// Returns a known type for a given SwiftType, if present.
     public func findType(for swiftType: SwiftType) -> KnownType? {
         if _knownTypeForSwiftType.usingCache {
@@ -987,6 +994,13 @@ public class TypeSystem {
         let lookup = makeTypeMemberLookup()
         
         return lookup.field(named: name, static: isStatic, in: type)
+    }
+    
+    /// Gets a subscription for a given index type on a given type
+    public func subscription(indexType: SwiftType, in type: SwiftType) -> KnownSubscript? {
+        let lookup = makeTypeMemberLookup()
+        
+        return lookup.subscription(indexType: indexType, in: type)
     }
     
     private func makeTypeMemberLookup() -> TypeMemberLookup {
@@ -1379,6 +1393,16 @@ private class TypeMemberLookup {
         }
     }
     
+    public func subscription(indexType: SwiftType, in type: KnownType) -> KnownSubscript? {
+        if let sub = type.knownSubscripts.first(where: { typeSystem.isType(indexType, assignableTo: $0.subscriptType) }) {
+            return sub
+        }
+        
+        return typeSystem.supertype(of: type).flatMap {
+            subscription(indexType: indexType, in: $0)
+        }
+    }
+    
     func method(withObjcSelector selector: SelectorSignature,
                 invocationTypeHints: [SwiftType?]?,
                 static isStatic: Bool,
@@ -1491,6 +1515,14 @@ private class TypeMemberLookup {
         }
         
         return result
+    }
+    
+    public func subscription(indexType: SwiftType, in type: SwiftType) -> KnownSubscript? {
+        guard let knownType = typeSystem.findType(for: type) else {
+            return nil
+        }
+        
+        return subscription(indexType: indexType, in: knownType)
     }
 }
 

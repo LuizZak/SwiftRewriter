@@ -649,6 +649,23 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(resolvedAs: .errorType)
     }
     
+    func testSubscriptLookup() {
+        // a[b]
+        let exp = Expression.identifier("a").sub(.identifier("b"))
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(named: "A") { builder in
+                return
+                    builder
+                        .subscription(indexType: .int, type: .int)
+                        .build()
+            }
+            .definingLocal(name: "b", type: .int)
+            .definingLocal(name: "a", type: .typeName("A"))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .int)
+    }
+    
     func testOptionalAccess() {
         // a?.b
         let exp = Expression.identifier("a").optional().dot("b")

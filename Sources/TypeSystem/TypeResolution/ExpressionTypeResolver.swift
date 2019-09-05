@@ -790,7 +790,7 @@ private class MemberInvocationResolver {
                 exp.resolvedType = .optional(.any)
                 
             default:
-                break
+                exp.resolvedType = typeSystem.subscription(indexType: subType, in: expType)?.type
             }
             
             sub.returnType = exp.resolvedType

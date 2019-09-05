@@ -410,6 +410,25 @@ public struct KnownTypeBuilder {
         return new
     }
     
+    public func subscription(indexType: SwiftType,
+                             type: SwiftType,
+                             isConstant: Bool = false,
+                             attributes: [KnownAttribute] = [],
+                             semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+        
+        var new = clone()
+        
+        let sub = BuildingKnownSubscript(subscriptType: indexType,
+                                         type: type,
+                                         isConstant: isConstant,
+                                         knownAttributes: attributes,
+                                         semantics: semantics)
+        
+        new.type.subscripts.append(sub)
+        
+        return new
+    }
+    
     public func protocolConformance(protocolName: String) -> KnownTypeBuilder {
         var new = clone()
         
