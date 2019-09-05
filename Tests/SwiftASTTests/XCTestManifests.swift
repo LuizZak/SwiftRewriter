@@ -6,7 +6,7 @@ extension AccessLevelTests {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__AccessLevelTests = [
-        ("testIsMoreVisibleThan", testIsMoreVisibleThan),
+        ("testIsMoreAccessibleThan", testIsMoreAccessibleThan),
     ]
 }
 
@@ -56,6 +56,8 @@ extension Expression_MatcherTests {
         ("testMatchFunctionArgumentIsNotLabeled", testMatchFunctionArgumentIsNotLabeled),
         ("testMatchInvertedPostfix", testMatchInvertedPostfix),
         ("testMatchInvertedPostfixPostfixAccess", testMatchInvertedPostfixPostfixAccess),
+        ("testMatchNilCheck", testMatchNilCheck),
+        ("testMatchNilCompare", testMatchNilCompare),
     ]
 }
 

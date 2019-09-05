@@ -48,8 +48,7 @@ extension FunctionInvocationTransformerTests {
         ("testTransformsTargetZeroArgumentCall", testTransformsTargetZeroArgumentCall),
         ("testTransformToPropertyGetter", testTransformToPropertyGetter),
         ("testTransformToPropertySetter", testTransformToPropertySetter),
-        ("testTransformToPropertySetterTransformer", testTransformToPropertySetterTransformer),
-        ("testTransformToPropertySetterTransformerBailsIfNotEnoughArguments", testTransformToPropertySetterTransformerBailsIfNotEnoughArguments),
+        ("testTransformToPropertySetterTransformerBailsIfNotTwoArguments", testTransformToPropertySetterTransformerBailsIfNotTwoArguments),
     ]
 }
 

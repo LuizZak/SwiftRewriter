@@ -2,12 +2,12 @@ import XCTest
 import SwiftAST
 
 class AccessLevelTests: XCTestCase {
-    func testIsMoreVisibleThan() {
+    func testIsMoreAccessibleThan() {
         XCTAssert(AccessLevel.open.isMoreAccessible(than: .private))
         XCTAssert(AccessLevel.open.isMoreAccessible(than: .fileprivate))
         XCTAssert(AccessLevel.open.isMoreAccessible(than: .internal))
-        XCTAssert(AccessLevel.open.isMoreAccessible(than: .open))
-        XCTAssertFalse(AccessLevel.open.isMoreAccessible(than: .public))
+        XCTAssert(AccessLevel.open.isMoreAccessible(than: .public))
+        XCTAssertFalse(AccessLevel.open.isMoreAccessible(than: .open))
 
         XCTAssert(AccessLevel.public.isMoreAccessible(than: .private))
         XCTAssert(AccessLevel.public.isMoreAccessible(than: .fileprivate))
