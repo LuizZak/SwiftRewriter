@@ -773,16 +773,7 @@ private class MemberInvocationResolver {
                 }
                 
                 exp.resolvedType = .optional(value)
-                
-            // Sub-types of NSArray index as .any
-            case .nominal(.typeName(let typeName))
-                where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSArray"):
-                if subType != .int {
-                    return exp.makeErrorTyped()
-                }
-                
-                exp.resolvedType = .any
-                
+            
             // Sub-types of NSDictionary index as .any
             case .nominal(.typeName(let typeName))
                 where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSDictionary"):
