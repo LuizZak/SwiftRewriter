@@ -333,35 +333,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         let exp = Expression.identifier("value").sub(.constant("Not an integer!"))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "value", type: .nsArray)
-            .resolve()
-            .thenAssertExpression(resolvedAs: .errorType)
-    }
-    
-    func testSubscriptionInNSArray() {
-        let exp = Expression.identifier("value").sub(.constant(1))
-        
-        startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "value", type: .nsArray)
-            .resolve()
-            .thenAssertExpression(resolvedAs: .any)
-        
-        startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "value", type: .typeName("NSMutableArray"))
-            .resolve()
-            .thenAssertExpression(resolvedAs: .any)
-    }
-    
-    func testSubscriptionInNSArrayWithNonInteger() {
-        let exp = Expression.identifier("value").sub(.constant("Not an integer!"))
-        
-        startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "value", type: .nsArray)
-            .resolve()
-            .thenAssertExpression(resolvedAs: .errorType)
-        
-        startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "value", type: .typeName("NSMutableArray"))
+            .definingLocal(name: "value", type: .array(.string))
             .resolve()
             .thenAssertExpression(resolvedAs: .errorType)
     }
@@ -647,6 +619,23 @@ class ExpressionTypeResolverTests: XCTestCase {
             .definingType(Atype)
             .resolve()
             .thenAssertExpression(resolvedAs: .errorType)
+    }
+    
+    func testSubscriptLookup() {
+        // a[b]
+        let exp = Expression.identifier("a").sub(.identifier("b"))
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(named: "A") { builder in
+                return
+                    builder
+                        .subscription(indexType: .int, type: .int)
+                        .build()
+            }
+            .definingLocal(name: "b", type: .int)
+            .definingLocal(name: "a", type: .typeName("A"))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .int)
     }
     
     func testOptionalAccess() {

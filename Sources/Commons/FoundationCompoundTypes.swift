@@ -59,6 +59,7 @@ public enum NSArrayCompoundType {
                 var description: String { get }
                 var sortedArrayHint: Data { get }
                 
+                subscript(index: Int) -> Any { get set }
                 
                 @_swiftrewriter(mapFrom: objectAtIndex(_:))
                 func object(at index: Int) -> Any

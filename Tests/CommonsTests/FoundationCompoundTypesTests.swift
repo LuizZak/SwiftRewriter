@@ -43,6 +43,7 @@ class FoundationCompoundTypesTests: XCTestCase {
                 var lastObject: Any? { get }
                 var description: String { get }
                 var sortedArrayHint: Data { get }
+                subscript(index: Int) -> Any
                 
                 
                 @_swiftrewriter(mapFrom: objectAtIndex(_:))

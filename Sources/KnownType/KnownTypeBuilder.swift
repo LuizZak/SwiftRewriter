@@ -410,6 +410,30 @@ public struct KnownTypeBuilder {
         return new
     }
     
+    public func subscription(indexType: SwiftType,
+                             type: SwiftType,
+                             isStatic: Bool = false,
+                             isConstant: Bool = false,
+                             attributes: [KnownAttribute] = [],
+                             semantics: Set<Semantic> = [],
+                             annotations: [String] = []) -> KnownTypeBuilder {
+        
+        var new = clone()
+        
+        let sub = BuildingKnownSubscript(isStatic: isStatic,
+                                         ownerType: self.type.asKnownTypeReference,
+                                         subscriptType: indexType,
+                                         type: type,
+                                         isConstant: isConstant,
+                                         knownAttributes: attributes,
+                                         semantics: semantics,
+                                         annotations: annotations)
+        
+        new.type.subscripts.append(sub)
+        
+        return new
+    }
+    
     public func protocolConformance(protocolName: String) -> KnownTypeBuilder {
         var new = clone()
         
@@ -558,6 +582,7 @@ private class DummyType: KnownType {
     var knownMethods: [KnownMethod] = []
     var knownProperties: [KnownProperty] = []
     var knownFields: [KnownProperty] = []
+    var knownSubscripts: [KnownSubscript] = []
     var knownProtocolConformances: [KnownProtocolConformance] = []
     var knownAttributes: [KnownAttribute] = []
     var supertype: KnownTypeReference?
@@ -572,6 +597,7 @@ private class DummyType: KnownType {
         knownMethods = type.knownMethods
         knownProperties = type.knownProperties
         knownFields = type.knownFields
+        knownSubscripts = type.knownSubscripts
         knownProtocolConformances = type.knownProtocolConformances
         knownAttributes = type.knownAttributes
         supertype = type.supertype
@@ -600,6 +626,7 @@ private struct BuildingKnownType: Codable {
     var methods: [BuildingKnownMethod] = []
     var properties: [BuildingKnownProperty] = []
     var fields: [BuildingKnownProperty] = []
+    var subscripts: [BuildingKnownSubscript] = []
     var protocols: [BuildingKnownProtocolConformance] = []
     var attributes: [KnownAttribute] = []
     var supertype: KnownTypeReference?
@@ -632,6 +659,9 @@ extension BuildingKnownType: KnownType {
     }
     var knownFields: [KnownProperty] {
         fields
+    }
+    var knownSubscripts: [KnownSubscript] {
+        subscripts
     }
     var knownProtocolConformances: [KnownProtocolConformance] {
         protocols
@@ -683,6 +713,17 @@ private struct BuildingKnownProperty: KnownProperty, Codable {
     var accessor: KnownPropertyAccessor
     var knownAttributes: [KnownAttribute]
     var isEnumCase: Bool
+    var semantics: Set<Semantic>
+    var annotations: [String]
+}
+
+private struct BuildingKnownSubscript: KnownSubscript, Codable {
+    var isStatic: Bool
+    var ownerType: KnownTypeReference?
+    var subscriptType: SwiftType
+    var type: SwiftType
+    var isConstant: Bool
+    var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
     var annotations: [String]
 }

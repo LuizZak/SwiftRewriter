@@ -34,7 +34,12 @@ public class ContinueStatement: Statement {
     }
     
     public override func isEqual(to other: Statement) -> Bool {
-        other is ContinueStatement
+        switch other {
+        case let rhs as ContinueStatement:
+            return targetLabel == rhs.targetLabel
+        default:
+            return false
+        }
     }
     
     public override func encode(to encoder: Encoder) throws {

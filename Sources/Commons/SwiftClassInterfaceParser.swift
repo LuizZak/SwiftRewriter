@@ -164,12 +164,6 @@ public final class SwiftClassInterfaceParser {
     /// type-members
     ///     : type-member+
     ///     ;
-    ///
-    /// type-member
-    ///     : var-declaration
-    ///     | function-declaration
-    ///     | initializer-declaration
-    ///     ;
     /// ```
     private static func parseTypeMembers(from tokenizer: Tokenizer,
                                          _ typeBuilder: inout KnownTypeBuilder) throws {
@@ -189,6 +183,7 @@ public final class SwiftClassInterfaceParser {
     ///     | let-declaration
     ///     | function-declaration
     ///     | initializer-declaration
+    ///     | subscript-declaration
     ///     ;
     /// ```
     private static func parseTypeMember(from tokenizer: Tokenizer,
@@ -252,6 +247,15 @@ public final class SwiftClassInterfaceParser {
                 typeBuilder.constructor(withParameters: initDecl.parameters,
                                         attributes: knownAttributes,
                                         isFailable: initDecl.isFailable)
+
+        case .subscript:
+            let subscriptDecl = try parseSubscriptDeclaration(from: tokenizer)
+
+            typeBuilder =
+                typeBuilder.subscription(indexType: subscriptDecl.subscriptType,
+                                         type: subscriptDecl.type,
+                                         isConstant: subscriptDecl.isConstant,
+                                         attributes: knownAttributes)
             
         default:
             throw tokenizer.lexer.syntaxError(
@@ -281,25 +285,12 @@ public final class SwiftClassInterfaceParser {
         
         // getter-setter-keywords
         if tokenizer.tokenType(is: .openBrace) {
-            try tokenizer.advance(overTokenType: .openBrace)
-            
-            // 'set' implies 'get'
-            if tokenizer.tokenType(is: .set) {
-                tokenizer.skipToken()
-                try tokenizer.advance(overTokenType: .get)
-                
+            switch try parseGetterSetterKeywords(from: tokenizer) {
+            case .getter:
+                isConstant = true
+            case .getterSetter:
                 isConstant = false
-            } else {
-                try tokenizer.advance(overTokenType: .get)
-                
-                if tokenizer.tokenType(is: .set) {
-                    tokenizer.skipToken()
-                    
-                    isConstant = false
-                }
             }
-            
-            try tokenizer.advance(overTokenType: .closeBrace)
         } else {
             isConstant = false
         }
@@ -308,6 +299,42 @@ public final class SwiftClassInterfaceParser {
                               type: type,
                               isProperty: true,
                               isConstant: isConstant)
+    }
+
+    /// ```
+    /// getter-setter-keywords
+    ///     : '{' 'get' '}'
+    ///     | '{' 'get' 'set' '}'
+    ///     | '{' 'set' 'get' '}'
+    ///     ;
+    /// ```
+    private static func parseGetterSetterKeywords(from tokenizer: Tokenizer) throws -> GetterSetterKeywords {
+        var getterSetter: GetterSetterKeywords
+
+        // getter-setter-keywords
+        try tokenizer.advance(overTokenType: .openBrace)
+
+        // 'set' implies 'get'
+        if tokenizer.tokenType(is: .set) {
+            tokenizer.skipToken()
+            try tokenizer.advance(overTokenType: .get)
+
+            getterSetter = .getterSetter
+        } else {
+            try tokenizer.advance(overTokenType: .get)
+
+            getterSetter = .getter
+
+            if tokenizer.tokenType(is: .set) {
+                tokenizer.skipToken()
+
+                getterSetter = .getterSetter
+            }
+        }
+
+        try tokenizer.advance(overTokenType: .closeBrace)
+
+        return getterSetter
     }
     
     /// ```
@@ -362,6 +389,39 @@ public final class SwiftClassInterfaceParser {
         
         return InitializerDeclaration(parameters: parameters,
                                       isFailable: isFailable)
+    }
+
+    /// ```
+    /// subscript-declaration
+    ///     : 'subscript' '(' identifier ':' swift-type ')' '->' swift-type getter-setter-keywords?
+    /// ```
+    private static func parseSubscriptDeclaration(from tokenizer: Tokenizer) throws -> SubscriptDeclaration {
+        try tokenizer.advance(overTokenType: .subscript)
+
+        try tokenizer.advance(overTokenType: .openParens)
+        // TODO: Consume subscription parameters as an array of ParameterSignatures
+        _=try identifier(from: tokenizer)
+        try tokenizer.advance(overTokenType: .colon)
+        let indexType = try SwiftTypeParser.parse(from: tokenizer.lexer)
+        try tokenizer.advance(overTokenType: .closeParens)
+
+        try tokenizer.advance(overTokenType: .functionArrow)
+        let returnType = try SwiftTypeParser.parse(from: tokenizer.lexer)
+
+        let isConstant: Bool
+
+        if tokenizer.tokenType(is: .openBrace) {
+            switch try parseGetterSetterKeywords(from: tokenizer) {
+            case .getter:
+                isConstant = true
+            case .getterSetter:
+                isConstant = false
+            }
+        } else {
+            isConstant = false
+        }
+
+        return SubscriptDeclaration(subscriptType: indexType, type: returnType, isConstant: isConstant)
     }
     
     /// ```
@@ -768,6 +828,17 @@ public final class SwiftClassInterfaceParser {
         var parameters: [ParameterSignature]
         var isFailable: Bool
     }
+
+    private struct SubscriptDeclaration {
+        var subscriptType: SwiftType
+        var type: SwiftType
+        var isConstant: Bool
+    }
+
+    private enum GetterSetterKeywords {
+        case getter
+        case getterSetter
+    }
     
     private enum Attribute {
         case generic(name: String, content: String?)
@@ -882,6 +953,7 @@ extension SwiftClassInterfaceParser {
         case `rethrows`
         case `required`
         case `override`
+        case `subscript`
         case `extension`
         case `convenience`
         case `fileprivate`
@@ -915,7 +987,7 @@ extension SwiftClassInterfaceParser {
                 return 7
             case .mutating, .rethrows, .required, .override, .optional:
                 return 8
-            case .extension:
+            case .subscript, .extension:
                 return 9
             case .fileprivate, .convenience:
                 return 11
@@ -1027,6 +1099,8 @@ extension SwiftClassInterfaceParser {
                 return "required"
             case .override:
                 return "override"
+            case .subscript:
+                return "subscript"
             case .extension:
                 return "extension"
             case .convenience:
@@ -1235,6 +1309,8 @@ extension SwiftClassInterfaceParser {
                     return .override
                 case "optional":
                     return .optional
+                case "subscript":
+                    return .subscript
                 case "extension":
                     return .extension
                 case "fileprivate":
