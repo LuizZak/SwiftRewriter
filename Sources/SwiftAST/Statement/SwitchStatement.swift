@@ -86,8 +86,8 @@ public class SwitchStatement: Statement {
     @inlinable
     public override func copy() -> SwitchStatement {
         SwitchStatement(exp: exp.copy(),
-                            cases: cases.map { $0.copy() },
-                            defaultCase: defaultCase?.map { $0.copy() }).copyMetadata(from: self)
+                        cases: cases.map { $0.copy() },
+                        defaultCase: defaultCase?.map { $0.copy() }).copyMetadata(from: self)
     }
     
     private func reloadChildrenNodes() {
