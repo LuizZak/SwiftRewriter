@@ -1077,27 +1077,6 @@ extension TypeSystem {
                 .property(named: "description", type: .string)
                 .build()
         
-        let nsDictionary =
-            KnownTypeBuilder(typeName: "NSDictionary", supertype: nsObject)
-                .build()
-        
-        let nsMutableDictionary =
-            KnownTypeBuilder(typeName: "NSMutableDictionary", supertype: nsDictionary)
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "setObject",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "anObject", type: .anyObject),
-                            ParameterSignature(label: "forKey", name: "aKey", type: .anyObject)
-                        ],
-                        returnType: .void,
-                        isStatic: false,
-                        isMutating: false
-                    ),
-                        semantics: Semantics.collectionMutator
-                )
-                .build()
-        
         let nsSet =
             KnownTypeBuilder(typeName: "NSSet", supertype: nsObject)
                 .build()
@@ -1118,8 +1097,6 @@ extension TypeSystem {
         
         addType(nsObjectProtocol)
         addType(nsObject)
-        addType(nsDictionary)
-        addType(nsMutableDictionary)
         addType(nsSet)
         addType(nsMutableSet)
         

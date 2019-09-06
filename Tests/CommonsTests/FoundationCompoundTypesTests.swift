@@ -173,6 +173,78 @@ class FoundationCompoundTypesTests: XCTestCase {
             """)
     }
     
+    func testNSMutableDefinition() {
+        let type = FoundationCompoundTypes.nsDictionary.create()
+        
+        XCTAssertEqual(type.nonCanonicalNames.count, 0)
+        XCTAssertEqual(type.transformations.count, 0)
+        
+        assertSignature(type: type, matches: """
+            class NSDictionary: NSObject, NSCopying, NSMutableCopying, NSSecureCoding, NSFastEnumeration {
+                var count: Int { get }
+                var allKeys: [Any] { get }
+                var allValues: [Any] { get }
+                var description: String { get }
+                var descriptionInStringsFileFormat: String { get }
+                subscript(index: NSCopying) -> Any? { get }
+                subscript(index: String) -> Any? { get }
+                
+                init()
+                func allKeys(for anObject: Any) -> [Any]
+                func object(forKey aKey: Any) -> Any?
+                func keyEnumerator() -> NSEnumerator
+                func description(withLocale locale: Any?) -> String
+                func description(withLocale locale: Any?, indent level: Int) -> String
+                func isEqual(to otherDictionary: [AnyHashable: Any]) -> Bool
+                func objectEnumerator() -> NSEnumerator
+                func objects(forKeys keys: [Any], notFoundMarker marker: Any) -> [Any]
+                
+                @available(OSX 10.13, *)
+                func write(to url: URL)
+                func keysSortedByValue(using comparator: Selector) -> [Any]
+                
+                @available(OSX 10.6, *)
+                func enumerateKeysAndObjects(_ block: (Any, Any, UnsafeMutablePointer<ObjCBool>) -> Void)
+                
+                @available(OSX 10.6, *)
+                func enumerateKeysAndObjects(options opts: NSEnumerationOptions = default, using block: (Any, Any, UnsafeMutablePointer<ObjCBool>) -> Void)
+                
+                @available(OSX 10.6, *)
+                func keysSortedByValue(comparator cmptr: (Any, Any) -> ComparisonResult) -> [Any]
+                
+                @available(OSX 10.6, *)
+                func keysSortedByValue(options opts: NSSortOptions = default, usingComparator cmptr: (Any, Any) -> ComparisonResult) -> [Any]
+                
+                @available(OSX 10.6, *)
+                func keysOfEntries(passingTest predicate: (Any, Any, UnsafeMutablePointer<ObjCBool>) -> Bool) -> Set<AnyHashable>
+                
+                @available(OSX 10.6, *)
+                func keysOfEntries(options opts: NSEnumerationOptions = default, passingTest predicate: (Any, Any, UnsafeMutablePointer<ObjCBool>) -> Bool) -> Set<AnyHashable>
+            }
+            """)
+    }
+    
+    func testNSMutableDictionaryDefinition() {
+        let type = FoundationCompoundTypes.nsMutableDictionary.create()
+        
+        XCTAssertEqual(type.nonCanonicalNames.count, 0)
+        XCTAssertEqual(type.transformations.count, 0)
+        
+        assertSignature(type: type, matches: """
+            class NSMutableDictionary: NSDictionary {
+                subscript(index: Any) -> Any?
+                
+                init(capacity numItems: Int)
+                func removeObject(forKey aKey: Any)
+                func setObject(_ anObject: Any, forKey aKey: NSCopying)
+                func addEntries(from otherDictionary: [AnyHashable: Any])
+                func removeAllObjects()
+                func removeObjects(forKeys keyArray: [Any])
+                func setDictionary(_ otherDictionary: [AnyHashable: Any])
+            }
+            """)
+    }
+    
     func testNSDateFormatterDefinition() {
         let type = FoundationCompoundTypes.nsDateFormatter.create()
         

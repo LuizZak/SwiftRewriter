@@ -480,36 +480,6 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .int)
     }
     
-    func testForLoopArrayTypeResolving_NSArray() {
-        // Iterating over an NSArray should produce `Any` values
-        
-        let exp = Expression.identifier("")
-        exp.resolvedType = .nsArray
-        
-        let stmt: ForStatement =
-            .for(.identifier("i"), exp, body: [])
-        
-        startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .usingCompoundedType(FoundationCompoundTypes.nsArray.create())
-            .usingCompoundedType(FoundationCompoundTypes.nsMutableArray.create())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .any)
-    }
-
-    func testForLoopArrayTypeResolving_NSMutableArray() {
-        // Iterating over an NSMutableArray should produce `Any` values
-        
-        let exp = Expression.identifier("")
-        exp.resolvedType = .typeName("NSMutableArray")
-        
-        let stmt: ForStatement =
-            .for(.identifier("i"), exp, body: [])
-        
-        startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .usingCompoundedType(FoundationCompoundTypes.nsArray.create())
-            .usingCompoundedType(FoundationCompoundTypes.nsMutableArray.create())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .any)
-    }
-    
     func testForLoopArrayTypeResolving_OpenRange() {
         // Iterating over an open range of integers should produce `Int` values
         
