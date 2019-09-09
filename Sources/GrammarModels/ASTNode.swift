@@ -184,7 +184,7 @@ public extension ASTNode {
 
 /// Describes a node with a default parametered `init` which is a known
 /// base node requirement initializer.
-public protocol InitializableNode {
+public protocol InitializableNode: ASTNode {
     init(isInNonnullContext: Bool)
 }
 
