@@ -625,10 +625,6 @@ extension SwiftSyntaxProducer {
             }
             // TODO: ...and again...
             iterating(intention.properties.filter { !($0 is EnumCaseGenerationIntention) }) { prop in
-                if prop is EnumCaseGenerationIntention {
-                    return
-                }
-                
                 addExtraLeading(indentation())
                 
                 builder.addMember(
