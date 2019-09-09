@@ -17,7 +17,7 @@ public class FunctionDefinition: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -32,7 +32,7 @@ public class ParameterList: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -47,7 +47,7 @@ public class FunctionParameter: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -55,6 +55,6 @@ public class FunctionParameter: ASTNode, InitializableNode {
 /// function parameter.
 public class VariadicParameter: ASTNode, InitializableNode {
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }

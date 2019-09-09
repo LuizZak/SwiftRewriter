@@ -18,7 +18,7 @@ public class PropertyImplementation: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
     
     public override func addChild(_ node: ASTNode) {
@@ -38,7 +38,7 @@ public class PropertySynthesizeList: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -53,6 +53,6 @@ public class PropertySynthesizeItem: ASTNode, InitializableNode {
     public var isDynamic: Bool = false
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }

@@ -8,7 +8,7 @@ public class ObjcClassCategoryInterface: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -41,7 +41,7 @@ public class ObjcClassCategoryImplementation: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
