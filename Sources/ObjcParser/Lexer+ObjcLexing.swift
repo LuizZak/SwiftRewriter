@@ -10,7 +10,7 @@ extension Lexer {
     ///         | 'null_resettable' | '__weak' | '__strong' | '__kindof' | '__block'
     ///         | '__unused';
     /// ```
-    @inline(__always)
+    @inlinable
     public func lexTypeQualifier() throws -> Substring {
         try consumeString { lexer in
             if !lexer.advanceIf(equals: "extern") &&
@@ -41,7 +41,7 @@ extension Lexer {
     /// ident:
     ///   LETTER (LETTER | 0-9)*
     /// ```
-    @inline(__always)
+    @inlinable
     public func lexIdentifier() throws -> Substring {
         try consumeString { lexer in
             try lexer.advance(validatingCurrent: Lexer.isIdentifierLetter)
@@ -69,7 +69,7 @@ extension Lexer {
     /// LETTER:
     ///   [$_a-zA-Z]
     /// ```
-    @inline(__always)
+    @inlinable
     public static func isIdentifierLetter(_ atom: Atom) -> Bool {
         Lexer.isLetter(atom) || atom == "_" || atom == "$"
     }
