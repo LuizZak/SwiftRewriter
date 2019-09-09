@@ -346,21 +346,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(resolvedAs: .optional(.string))
     }
-    
-    func testSubscriptionInNSDictionary() {
-        let exp = Expression.identifier("value").sub(.constant("abc"))
-        
-        startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "value", type: .nsDictionary)
-            .resolve()
-            .thenAssertExpression(resolvedAs: .optional(.any))
-        
-        startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "value", type: .typeName("NSMutableDictionary"))
-            .resolve()
-            .thenAssertExpression(resolvedAs: .optional(.any))
-    }
-    
+
     func testIdentifier() {
         let definition =
             CodeDefinition
