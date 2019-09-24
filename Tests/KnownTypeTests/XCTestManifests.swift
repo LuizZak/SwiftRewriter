@@ -32,6 +32,7 @@ extension TypeFormatterTests {
         ("testAsStringPropertyFromTypeWithArrayType", testAsStringPropertyFromTypeWithArrayType),
         ("testAsStringPropertyFromTypeWithOptionalArrayType", testAsStringPropertyFromTypeWithOptionalArrayType),
         ("testAsStringPropertyFromTypeWithTypeNameAndVarKeywordAndAccessors", testAsStringPropertyFromTypeWithTypeNameAndVarKeywordAndAccessors),
+        ("testAsStringSubscript", testAsStringSubscript),
         ("testLongAttributeProperty", testLongAttributeProperty),
     ]
 }
