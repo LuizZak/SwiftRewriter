@@ -13,6 +13,7 @@ class ConcurrentValueTests: XCTestCase {
     }
 
     func testPerformanceConcurrentReading() {
+        #if os(macOS)
         let queue = makeTestOperationQueue()
 
         measure {
@@ -24,9 +25,11 @@ class ConcurrentValueTests: XCTestCase {
 
             queue.waitUntilAllOperationsAreFinished()
         }
+        #endif
     }
 
     func testPerformanceConcurrentModification() {
+        #if os(macOS)
         let queue = makeTestOperationQueue()
 
         measure {
@@ -40,9 +43,11 @@ class ConcurrentValueTests: XCTestCase {
 
             queue.waitUntilAllOperationsAreFinished()
         }
+        #endif
     }
 
     func testPerformanceConcurrentReadingAndModification() {
+        #if os(macOS)
         let queue = makeTestOperationQueue()
 
         measure {
@@ -62,9 +67,11 @@ class ConcurrentValueTests: XCTestCase {
 
             queue.waitUntilAllOperationsAreFinished()
         }
+        #endif
     }
 
     func testPerformancePropertyWrapperConcurrentReading() {
+        #if os(macOS)
         let queue = makeTestOperationQueue()
 
         measure {
@@ -76,9 +83,11 @@ class ConcurrentValueTests: XCTestCase {
 
             queue.waitUntilAllOperationsAreFinished()
         }
+        #endif
     }
 
     func testPerformancePropertyWrapperConcurrentModification() {
+        #if os(macOS)
         let queue = makeTestOperationQueue()
 
         measure {
@@ -90,9 +99,11 @@ class ConcurrentValueTests: XCTestCase {
 
             queue.waitUntilAllOperationsAreFinished()
         }
+        #endif
     }
 
     func testPerformancePropertyWrapperConcurrentModification_WrappedValue() {
+        #if os(macOS)
         let queue = makeTestOperationQueue()
 
         measure {
@@ -104,9 +115,11 @@ class ConcurrentValueTests: XCTestCase {
 
             queue.waitUntilAllOperationsAreFinished()
         }
+        #endif
     }
     
     func testPerformancePropertyWrapperConcurrentModification_ProjectedValue() {
+        #if os(macOS)
         let queue = makeTestOperationQueue()
 
         measure {
@@ -118,9 +131,11 @@ class ConcurrentValueTests: XCTestCase {
 
             queue.waitUntilAllOperationsAreFinished()
         }
+        #endif
     }
 
     func testPerformancePropertyWrapperConcurrentReadingAndModification() {
+        #if os(macOS)
         let queue = makeTestOperationQueue()
 
         measure {
@@ -138,6 +153,7 @@ class ConcurrentValueTests: XCTestCase {
 
             queue.waitUntilAllOperationsAreFinished()
         }
+        #endif
     }
 
     func makeTestOperationQueue() -> OperationQueue {
