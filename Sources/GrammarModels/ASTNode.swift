@@ -33,12 +33,12 @@ open class ASTNode {
     
     /// Instantiates a bare ASTNode with a given range.
     /// Defaults to an invalid range
-    public init(_isInNonnullContext: Bool,
+    public init(isInNonnullContext: Bool,
                 location: SourceLocation = .invalid,
                 length: SourceLength = .zero,
                 existsInSource: Bool = true) {
         
-        self.isInNonnullContext = _isInNonnullContext
+        self.isInNonnullContext = isInNonnullContext
         self.location = location
         self.length = length
         self.existsInSource = existsInSource
@@ -184,7 +184,7 @@ public extension ASTNode {
 
 /// Describes a node with a default parametered `init` which is a known
 /// base node requirement initializer.
-public protocol InitializableNode {
+public protocol InitializableNode: ASTNode {
     init(isInNonnullContext: Bool)
 }
 

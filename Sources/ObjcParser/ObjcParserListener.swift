@@ -776,7 +776,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                 varDecl.addChild(typeNameNode)
                 
                 if let initializer = initDeclarator.initializer() {
-                    let expression = ExpressionNode(_isInNonnullContext: inNonnull)
+                    let expression = ExpressionNode(isInNonnullContext: inNonnull)
                     expression.expression = initializer.expression()
                     if let exp = initializer.expression() {
                         nodeFactory.updateSourceLocation(for: expression, with: exp)
@@ -1014,8 +1014,6 @@ private class FunctionPointerVisitor: ObjectiveCParserBaseVisitor<TypedefNode> {
 }
 
 private class GenericParseTreeContextMapper {
-    typealias NodeType = ASTNode & InitializableNode
-    
     private var pairs: [Pair] = []
     private var exceptions: [ParserRuleContext.Type] = []
     
@@ -1030,13 +1028,13 @@ private class GenericParseTreeContextMapper {
         self.nodeFactory = nodeFactory
     }
     
-    func addRuleMap<T: ParserRuleContext, U: NodeType>(rule: T.Type, nodeType: U.Type) {
+    func addRuleMap<T: ParserRuleContext, U: InitializableNode>(rule: T.Type, nodeType: U.Type) {
         assert(match(ruleType: rule) == nil, "Duplicated mapping rule for parser rule context \(rule)")
         
         pairs.append(.type(rule: rule, nodeType: nodeType))
     }
     
-    func addRuleMap<T: ParserRuleContext, U: NodeType>(rule: T.Type, node: U) {
+    func addRuleMap<T: ParserRuleContext, U: InitializableNode>(rule: T.Type, node: U) {
         assert(match(ruleType: rule) == nil, "Duplicated mapping rule for parser rule context \(rule)")
         
         pairs.append(.instance(rule: rule, node: node))
@@ -1096,8 +1094,8 @@ private class GenericParseTreeContextMapper {
     }
     
     private enum Pair {
-        case type(rule: ParserRuleContext.Type, nodeType: NodeType.Type)
-        case instance(rule: ParserRuleContext.Type, node: NodeType)
+        case type(rule: ParserRuleContext.Type, nodeType: InitializableNode.Type)
+        case instance(rule: ParserRuleContext.Type, node: InitializableNode)
         
         var ruleType: ParserRuleContext.Type {
             switch self {

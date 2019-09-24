@@ -267,8 +267,8 @@ public extension Collection where Element == ArgumentRewritingStrategy, Index ==
 public extension ValueTransformer where U == [FunctionArgument] {
     
     func rewritingArguments(_ transformers: [ArgumentRewritingStrategy],
-                                   file: String = #file,
-                                   line: Int = #line) -> ValueTransformer {
+                            file: String = #file,
+                            line: Int = #line) -> ValueTransformer {
         
         let required = transformers.requiredArgumentCount()
         

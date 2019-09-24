@@ -301,28 +301,6 @@ class TypeSystemTests: XCTestCase {
         )
     }
     
-    func testNSDictionaryDefinition() {
-        guard let type = sut.knownTypeWithName("NSDictionary") else {
-            XCTFail("Expected NSDictionary to be present")
-            return
-        }
-        
-        XCTAssertEqual(type.supertype?.asTypeName, "NSObject")
-        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
-                        "Missing NSDictionary's default parameterless constructor")
-    }
-    
-    func testNSMutableDictionaryDefinition() {
-        guard let type = sut.knownTypeWithName("NSMutableDictionary") else {
-            XCTFail("Expected NSMutableDictionary to be present")
-            return
-        }
-        
-        XCTAssertEqual(type.supertype?.asTypeName, "NSDictionary")
-        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
-                        "Missing NSMutableDictionary's default parameterless constructor")
-    }
-    
     func testNSSetDefinition() {
         guard let type = sut.knownTypeWithName("NSSet") else {
             XCTFail("Expected NSSet to be present")
@@ -1094,6 +1072,30 @@ class TypeSystemTests: XCTestCase {
         sut.addType(protB)
         
         XCTAssertNil(sut.conformance(toProtocolName: "C", in: protA))
+    }
+    
+    func testSubscriptLookupKnownType() {
+        let type = KnownTypeBuilder(typeName: "A")
+            .subscription(indexType: .int, type: .int)
+            .subscription(indexType: .string, type: .string)
+            .build()
+        sut.addType(type)
+        
+        XCTAssertNotNil(sut.subscription(indexType: .int, in: type))
+        XCTAssertNotNil(sut.subscription(indexType: .string, in: type))
+        XCTAssertNil(sut.subscription(indexType: .double, in: type))
+    }
+    
+    func testSubscriptLookupSwiftType() {
+        let type = KnownTypeBuilder(typeName: "A")
+            .subscription(indexType: .int, type: .int)
+            .subscription(indexType: .string, type: .string)
+            .build()
+        sut.addType(type)
+        
+        XCTAssertNotNil(sut.subscription(indexType: .int, in: .typeName("A")))
+        XCTAssertNotNil(sut.subscription(indexType: .string, in: .typeName("A")))
+        XCTAssertNil(sut.subscription(indexType: .double, in: .typeName("A")))
     }
 }
 

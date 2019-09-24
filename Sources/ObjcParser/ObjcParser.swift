@@ -142,7 +142,7 @@ public class ObjcParser {
         lexer.location()
     }
     
-    func withTemporaryContext<T: ASTNode & InitializableNode>(
+    func withTemporaryContext<T: InitializableNode>(
         nodeType: T.Type = T.self, do action: () throws -> Void) rethrows -> T {
         
         let node = context.pushContext(nodeType: nodeType)

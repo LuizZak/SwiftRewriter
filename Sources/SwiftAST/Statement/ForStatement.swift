@@ -60,7 +60,7 @@ public class ForStatement: Statement {
     @inlinable
     public override func copy() -> ForStatement {
         ForStatement(pattern: pattern.copy(), exp: exp.copy(), body: body.copy())
-                .copyMetadata(from: self)
+            .copyMetadata(from: self)
     }
     
     private func reloadChildrenNodes() {

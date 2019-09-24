@@ -15,7 +15,7 @@ public class NodeCreationContext {
     
     /// Pushes a new node context
     @discardableResult
-    public func pushContext<T: ASTNode & InitializableNode>(nodeType type: T.Type = T.self) -> T {
+    public func pushContext<T: InitializableNode>(nodeType type: T.Type = T.self) -> T {
         let node = T.init(isInNonnullContext: isInNonnullContext)
         
         pushContext(node: node)

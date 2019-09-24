@@ -23,6 +23,8 @@ extension FoundationCompoundTypesTests {
         ("testNSDateFormatterDefinition", testNSDateFormatterDefinition),
         ("testNSLocaleDefinition", testNSLocaleDefinition),
         ("testNSMutableArrayDefinition", testNSMutableArrayDefinition),
+        ("testNSMutableDefinition", testNSMutableDefinition),
+        ("testNSMutableDictionaryDefinition", testNSMutableDictionaryDefinition),
         ("testNSMutableStringDefinition", testNSMutableStringDefinition),
         ("testNSStringDefinition", testNSStringDefinition),
     ]
@@ -48,8 +50,7 @@ extension FunctionInvocationTransformerTests {
         ("testTransformsTargetZeroArgumentCall", testTransformsTargetZeroArgumentCall),
         ("testTransformToPropertyGetter", testTransformToPropertyGetter),
         ("testTransformToPropertySetter", testTransformToPropertySetter),
-        ("testTransformToPropertySetterTransformer", testTransformToPropertySetterTransformer),
-        ("testTransformToPropertySetterTransformerBailsIfNotEnoughArguments", testTransformToPropertySetterTransformerBailsIfNotEnoughArguments),
+        ("testTransformToPropertySetterTransformerBailsIfNotTwoArguments", testTransformToPropertySetterTransformerBailsIfNotTwoArguments),
     ]
 }
 
@@ -72,6 +73,8 @@ extension SwiftClassInterfaceParserTests {
         ("testParseProperty", testParseProperty),
         ("testParseProtocolConformances", testParseProtocolConformances),
         ("testParseStaticMembers", testParseStaticMembers),
+        ("testParseSubscription", testParseSubscription),
+        ("testParseSubscriptionWithGetterSetter", testParseSubscriptionWithGetterSetter),
         ("testParseSupertypes", testParseSupertypes),
         ("testParseSwiftAttribute", testParseSwiftAttribute),
         ("testParseSwiftAttributeInType", testParseSwiftAttributeInType),

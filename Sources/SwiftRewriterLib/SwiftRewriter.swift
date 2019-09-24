@@ -162,6 +162,13 @@ public final class SwiftRewriter {
             print("Parsing function bodies...")
         }
         
+        
+        // Register globals first
+        for provider in globalsProvidersSource.globalsProviders {
+            typeSystem.addTypealiasProvider(provider.typealiasProvider())
+            typeSystem.addKnownTypeProvider(provider.knownTypeProvider())
+        }
+        
         typeSystem.makeCache()
         defer {
             typeSystem.tearDownCache()
@@ -351,9 +358,6 @@ public final class SwiftRewriter {
         // Register globals first
         for provider in globalsProvidersSource.globalsProviders {
             globals.addSource(provider.definitionsSource())
-            
-            typeSystem.addTypealiasProvider(provider.typealiasProvider())
-            typeSystem.addKnownTypeProvider(provider.knownTypeProvider())
         }
         
         let typeResolverInvoker =

@@ -13,7 +13,7 @@ public class TypeNameNode: ASTNode {
     
         self.type = type
         
-        super.init(_isInNonnullContext: isInNonnullContext,
+        super.init(isInNonnullContext: isInNonnullContext,
                    location: location,
                    length: length)
     }

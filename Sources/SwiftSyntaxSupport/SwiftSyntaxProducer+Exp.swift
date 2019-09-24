@@ -442,7 +442,9 @@ extension SwiftSyntaxProducer {
             
         case .string(let string):
             return StringLiteralExprSyntax { builder in
-                builder.useStringLiteral(prepareStartToken(SyntaxFactory.makeStringLiteral("\"" + string + "\"")))
+                builder.useOpenQuote(prepareStartToken(SyntaxFactory.makeStringQuoteToken()))
+                builder.addSegment(SyntaxFactory.makeStringLiteral(string))
+                builder.useCloseQuote(SyntaxFactory.makeStringQuoteToken())
             }
             
         case .rawConstant(let constant):

@@ -36,6 +36,9 @@ public protocol KnownType: KnownTypeReferenceConvertible, KnownDeclaration, Attr
     
     /// Gets an array of all known instance variable fields for this type
     var knownFields: [KnownProperty] { get }
+
+    /// Gets an array of all known subscriptable members for this type
+    var knownSubscripts: [KnownSubscript] { get }
     
     /// Gets an array of all known protocol conformances for this type
     var knownProtocolConformances: [KnownProtocolConformance] { get }
@@ -168,6 +171,18 @@ public protocol KnownProperty: KnownMember {
     var isEnumCase: Bool { get }
 }
 
+/// A known type subscript
+public protocol KnownSubscript: KnownMember {
+    /// Gets the type for the indexing value of this subscription.
+    var subscriptType: SwiftType { get }
+
+    /// Gets the resulting type when this subscript is indexed into.
+    var type: SwiftType { get }
+
+    /// Gets whether this subscription is getter-only
+    var isConstant: Bool { get }
+}
+
 /// Describes the getter/setter states of a property
 public enum KnownPropertyAccessor: String, Codable {
     case getter
@@ -195,6 +210,12 @@ public extension KnownProperty {
 public extension KnownMethod {
     var memberType: SwiftType {
         signature.swiftClosureType
+    }
+}
+
+public extension KnownSubscript {
+    var memberType: SwiftType {
+        type
     }
 }
 

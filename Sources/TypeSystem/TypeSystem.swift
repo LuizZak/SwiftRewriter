@@ -881,6 +881,13 @@ public class TypeSystem {
         return lookup.field(named: name, static: isStatic, in: type)
     }
     
+    /// Gets a subscription for a given index type on a given type
+    public func subscription(indexType: SwiftType, in type: KnownType) -> KnownSubscript? {
+        let lookup = makeTypeMemberLookup()
+        
+        return lookup.subscription(indexType: indexType, in: type)
+    }
+    
     /// Returns a known type for a given SwiftType, if present.
     public func findType(for swiftType: SwiftType) -> KnownType? {
         if _knownTypeForSwiftType.usingCache {
@@ -989,6 +996,13 @@ public class TypeSystem {
         return lookup.field(named: name, static: isStatic, in: type)
     }
     
+    /// Gets a subscription for a given index type on a given type
+    public func subscription(indexType: SwiftType, in type: SwiftType) -> KnownSubscript? {
+        let lookup = makeTypeMemberLookup()
+        
+        return lookup.subscription(indexType: indexType, in: type)
+    }
+    
     private func makeTypeMemberLookup() -> TypeMemberLookup {
         TypeMemberLookup(typeSystem: self, memberSearchCache: memberSearchCache)
     }
@@ -1063,27 +1077,6 @@ extension TypeSystem {
                 .property(named: "description", type: .string)
                 .build()
         
-        let nsDictionary =
-            KnownTypeBuilder(typeName: "NSDictionary", supertype: nsObject)
-                .build()
-        
-        let nsMutableDictionary =
-            KnownTypeBuilder(typeName: "NSMutableDictionary", supertype: nsDictionary)
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "setObject",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "anObject", type: .anyObject),
-                            ParameterSignature(label: "forKey", name: "aKey", type: .anyObject)
-                        ],
-                        returnType: .void,
-                        isStatic: false,
-                        isMutating: false
-                    ),
-                        semantics: Semantics.collectionMutator
-                )
-                .build()
-        
         let nsSet =
             KnownTypeBuilder(typeName: "NSSet", supertype: nsObject)
                 .build()
@@ -1104,8 +1097,6 @@ extension TypeSystem {
         
         addType(nsObjectProtocol)
         addType(nsObject)
-        addType(nsDictionary)
-        addType(nsMutableDictionary)
         addType(nsSet)
         addType(nsMutableSet)
         
@@ -1379,6 +1370,16 @@ private class TypeMemberLookup {
         }
     }
     
+    public func subscription(indexType: SwiftType, in type: KnownType) -> KnownSubscript? {
+        if let sub = type.knownSubscripts.first(where: { typeSystem.isType(indexType, assignableTo: $0.subscriptType) }) {
+            return sub
+        }
+        
+        return typeSystem.supertype(of: type).flatMap {
+            subscription(indexType: indexType, in: $0)
+        }
+    }
+    
     func method(withObjcSelector selector: SelectorSignature,
                 invocationTypeHints: [SwiftType?]?,
                 static isStatic: Bool,
@@ -1491,6 +1492,14 @@ private class TypeMemberLookup {
         }
         
         return result
+    }
+    
+    public func subscription(indexType: SwiftType, in type: SwiftType) -> KnownSubscript? {
+        guard let knownType = typeSystem.findType(for: type) else {
+            return nil
+        }
+        
+        return subscription(indexType: indexType, in: knownType)
     }
 }
 
@@ -1700,6 +1709,7 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
         let knownMethods: [KnownMethod] = []
         let knownProperties: [KnownProperty] = []
         let knownFields: [KnownProperty] = []
+        let knownSubscripts: [KnownSubscript] = []
         let knownAttributes: [KnownAttribute] = []
         let knownProtocolConformances: [KnownProtocolConformance]
         let semantics: Set<Semantic> = []
@@ -1782,6 +1792,7 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         let knownMethods: [KnownMethod] = []
         let knownProperties: [KnownProperty] = []
         let knownFields: [KnownProperty] = []
+        let knownSubscripts: [KnownSubscript] = []
         let knownProtocolConformances: [KnownProtocolConformance]
         let knownAttributes: [KnownAttribute] = []
         let semantics: Set<Semantic> = []

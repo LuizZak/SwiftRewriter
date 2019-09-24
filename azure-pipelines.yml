@@ -16,7 +16,7 @@ jobs:
 
 - job: Linux
   container:
-    image: swift:5.0-bionic
+    image: swift:5.1-bionic
   pool:
     vmImage: ubuntu-16.04
   steps:

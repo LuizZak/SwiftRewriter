@@ -1,7 +1,7 @@
 /// A node that represents the global namespace
 public final class GlobalContextNode: ASTNode, InitializableNode {
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -26,7 +26,7 @@ public class Identifier: ASTNode {
         
         self.name = name
         
-        super.init(_isInNonnullContext: isInNonnullContext,
+        super.init(isInNonnullContext: isInNonnullContext,
                    location: location,
                    length: length)
     }
@@ -47,7 +47,7 @@ public class KeywordNode: ASTNode {
         
         self.keyword = keyword
         
-        super.init(_isInNonnullContext: isInNonnullContext,
+        super.init(isInNonnullContext: isInNonnullContext,
                    location: location,
                    length: length)
     }

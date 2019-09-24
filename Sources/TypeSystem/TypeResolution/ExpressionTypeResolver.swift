@@ -743,10 +743,7 @@ private class MemberInvocationResolver {
             if sub.expression.isErrorTyped {
                 return exp.makeErrorTyped()
             }
-            
-            // TODO: Resolving of subscriptions of Array/Dictionary types should
-            // happen by inspecting `subscript`-able members on the KnownType.
-            
+
             // Array<T> / Dictionary<T> resolving
             switch typeResolver.expandAliases(in: expType) {
             case .nominal(.generic("Array", let params)) where Array(params).count == 1:
@@ -773,24 +770,9 @@ private class MemberInvocationResolver {
                 }
                 
                 exp.resolvedType = .optional(value)
-                
-            // Sub-types of NSArray index as .any
-            case .nominal(.typeName(let typeName))
-                where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSArray"):
-                if subType != .int {
-                    return exp.makeErrorTyped()
-                }
-                
-                exp.resolvedType = .any
-                
-            // Sub-types of NSDictionary index as .any
-            case .nominal(.typeName(let typeName))
-                where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSDictionary"):
-                
-                exp.resolvedType = .optional(.any)
-                
+
             default:
-                break
+                exp.resolvedType = typeSystem.subscription(indexType: subType, in: expType)?.type
             }
             
             sub.returnType = exp.resolvedType

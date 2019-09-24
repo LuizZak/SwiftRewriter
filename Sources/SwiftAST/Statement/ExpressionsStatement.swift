@@ -31,7 +31,7 @@ public class ExpressionsStatement: Statement {
     @inlinable
     public override func copy() -> ExpressionsStatement {
         ExpressionsStatement(expressions: expressions.map { $0.copy() })
-                .copyMetadata(from: self)
+            .copyMetadata(from: self)
     }
     
     @inlinable

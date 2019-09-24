@@ -61,6 +61,9 @@ extension CompoundedMappingType: KnownType {
     public var knownFields: [KnownProperty] {
         knownType.knownFields
     }
+    public var knownSubscripts: [KnownSubscript] {
+        knownType.knownSubscripts
+    }
     public var knownProtocolConformances: [KnownProtocolConformance] {
         knownType.knownProtocolConformances
     }
