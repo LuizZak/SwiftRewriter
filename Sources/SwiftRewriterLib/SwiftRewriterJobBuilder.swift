@@ -57,7 +57,7 @@ public class SwiftRewriterJobInputFiles {
     }
     
     func createSourcesProvider() -> InputSourcesProvider {
-        return SwiftRewriterJobInputProvider(inputs: inputs)
+        SwiftRewriterJobInputProvider(inputs: inputs)
     }
 }
 
@@ -66,11 +66,11 @@ struct SwiftRewriterJobInputSource: InputSource {
     var source: String
     
     func sourceName() -> String {
-        return filePath
+        filePath
     }
     
     func loadSource() throws -> CodeSource {
-        return StringCodeSource(source: source, fileName: filePath)
+        StringCodeSource(source: source, fileName: filePath)
     }
 }
 
@@ -82,6 +82,6 @@ class SwiftRewriterJobInputProvider: InputSourcesProvider {
     }
     
     func sources() -> [InputSource] {
-        return inputs
+        inputs
     }
 }

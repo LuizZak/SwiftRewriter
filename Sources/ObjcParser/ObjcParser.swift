@@ -124,21 +124,21 @@ public class ObjcParser {
     }
     
     func startRange() -> RangeMarker {
-        return lexer.startRange()
+        lexer.startRange()
     }
     
     /// Creates and returns a backtracking point which can be activated to rewind
     /// the lexer to the point at which this method was called.
     func backtracker() -> Backtrack {
-        return lexer.backtracker()
+        lexer.backtracker()
     }
     
     /// Current lexer's location as a `SourceLocation`.
     func location() -> SourceLocation {
-        return lexer.location()
+        lexer.location()
     }
     
-    func withTemporaryContext<T: ASTNode & InitializableNode>(
+    func withTemporaryContext<T: InitializableNode>(
         nodeType: T.Type = T.self, do action: () throws -> Void) rethrows -> T {
         
         let node = context.pushContext(nodeType: nodeType)
@@ -345,7 +345,7 @@ public class ObjcParser {
                 
                 type = .id(protocols: types.map { String($0.value) })
             } else {
-                type = .id(protocols: [])
+                type = .id()
             }
         } else if lexer.tokenType(matches: { $0.isIdentifier }) {
             var typeName: String = String(try lexer.advance(matching: { $0.tokenType.isIdentifier }).value)

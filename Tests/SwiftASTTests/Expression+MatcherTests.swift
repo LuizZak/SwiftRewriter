@@ -79,4 +79,24 @@ class Expression_MatcherTests: XCTestCase {
         XCTAssertFalse(sut.matches(FunctionArgument(label: "label", expression: .identifier("a"))))
         XCTAssert(sut.matches(FunctionArgument(label: nil, expression: .identifier("a"))))
     }
+
+    func testMatchNilCheck() {
+        let exp = Expression.identifier("ident")
+        let sut = ValueMatcher<Expression>.nilCheck(against: exp)
+
+        XCTAssert(sut.matches(exp.binary(op: .unequals, rhs: .constant(.nil))))
+        XCTAssert(sut.matches(Expression.constant(.nil).binary(op: .unequals, rhs: exp)))
+        XCTAssert(sut.matches(exp))
+        XCTAssertFalse(sut.matches(exp.binary(op: .equals, rhs: .constant(.nil))))
+    }
+
+    func testMatchNilCompare() {
+        let exp = Expression.identifier("ident")
+        let sut = ValueMatcher<Expression>.nilCompare(against: exp)
+
+        XCTAssert(sut.matches(exp.binary(op: .equals, rhs: .constant(.nil))))
+        XCTAssert(sut.matches(Expression.constant(.nil).binary(op: .equals, rhs: exp)))
+        XCTAssert(sut.matches(Expression.unary(op: .negate, exp)))
+        XCTAssertFalse(sut.matches(exp.binary(op: .unequals, rhs: .constant(.nil))))
+    }
 }

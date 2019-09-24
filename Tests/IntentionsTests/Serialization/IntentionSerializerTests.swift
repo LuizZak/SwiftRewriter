@@ -16,7 +16,15 @@ class IntentionSerializerTests: XCTestCase {
                         type.createConformance(protocolName: "Protocol")
                             .createConstructor()
                             .createInstanceVariable(named: "a", type: .int)
-                            .createProperty(named: "b", type: .float)
+                            .createProperty(named: "b",
+                                            type: .float,
+                                            attributes: [
+                                                .getterName("getterName"),
+                                                .readonly,
+                                                .attribute("attribute1"),
+                                                .setterName("attribute1")
+                                            ]
+                            )
                             .createMethod("method(_ a: Int, b: Float)") { method in
                                 method
                                     .addHistory(tag: "Test", description: "A test history")

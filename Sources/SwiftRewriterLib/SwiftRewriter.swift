@@ -31,7 +31,7 @@ public final class SwiftRewriter {
     private var typeSystem: IntentionCollectionTypeSystem
     
     /// For pooling and reusing Antlr parser states to aid in performance
-    private var parserStatePool: ObjcParserStatePool { return SwiftRewriter._parserStatePool }
+    private var parserStatePool: ObjcParserStatePool { SwiftRewriter._parserStatePool }
     
     /// Items to type-parse after parsing is complete, and all types have been
     /// gathered.
@@ -129,16 +129,12 @@ public final class SwiftRewriter {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
-        var outError: Error?
-        let outErrorBarrier
-            = DispatchQueue(label: "br.com.swiftrewriter",
-                            attributes: .concurrent)
-        
+        let outError: ConcurrentValue<Error?> = ConcurrentValue(wrappedValue: nil)
         let mutex = Mutex()
         
         for (i, src) in sources.enumerated() {
             queue.addOperation {
-                if outErrorBarrier.sync(execute: { outError }) != nil {
+                if outError.wrappedValue != nil {
                     return
                 }
                 
@@ -147,10 +143,10 @@ public final class SwiftRewriter {
                         try self.loadObjcSource(from: src, index: i, mutex: mutex)
                     }
                 } catch {
-                    outErrorBarrier.sync(flags: .barrier) {
-                        if outError != nil { return }
+                    outError.modifyingValue {
+                        if $0 != nil { return }
                         
-                        outError = error
+                        $0 = error
                     }
                 }
             }
@@ -158,7 +154,7 @@ public final class SwiftRewriter {
         
         queue.waitUntilAllOperationsAreFinished()
         
-        if let error = outError {
+        if let error = outError.wrappedValue {
             throw error
         }
         
@@ -170,6 +166,13 @@ public final class SwiftRewriter {
     private func parseStatements() {
         if settings.verbose {
             print("Parsing function bodies...")
+        }
+        
+        
+        // Register globals first
+        for provider in globalsProvidersSource.globalsProviders {
+            typeSystem.addTypealiasProvider(provider.typealiasProvider())
+            typeSystem.addKnownTypeProvider(provider.knownTypeProvider())
         }
         
         typeSystem.makeCache()
@@ -361,9 +364,6 @@ public final class SwiftRewriter {
         // Register globals first
         for provider in globalsProvidersSource.globalsProviders {
             globals.addSource(provider.definitionsSource())
-            
-            typeSystem.addTypealiasProvider(provider.typealiasProvider())
-            typeSystem.addKnownTypeProvider(provider.knownTypeProvider())
         }
         
         let typeResolverInvoker =
@@ -582,7 +582,7 @@ public final class SwiftRewriter {
     }
     
     private func makeAntlrSettings() -> AntlrSettings {
-        return AntlrSettings(forceUseLLPrediction: settings.forceUseLLPrediction)
+        AntlrSettings(forceUseLLPrediction: settings.forceUseLLPrediction)
     }
     
     /// Settings for a `SwiftRewriter` instance
@@ -655,7 +655,7 @@ fileprivate extension SwiftRewriter {
         }
         
         func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
-            return node.isInNonnullContext
+            node.isInNonnullContext
         }
         
         func reportForLazyResolving(intention: Intention) {
@@ -709,11 +709,11 @@ fileprivate extension SwiftRewriter {
         }
         
         func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
-            return typeMapper
+            typeMapper
         }
         
         func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing {
-            return typeParser
+            typeParser
         }
     }
 }

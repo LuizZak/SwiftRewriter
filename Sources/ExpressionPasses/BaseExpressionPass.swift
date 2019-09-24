@@ -173,7 +173,7 @@ private extension BaseExpressionPass {
     func methodRemapping(_ mapping: (MethodInvocationTransformerMatcher),
                          _ baseMatcher: ValueMatcher<Expression>) -> [PostfixInvocationTransformer] {
         
-        return [
+        [
             MethodInvocationTransformer(
                 baseExpressionMatcher: baseMatcher,
                 invocationMatcher: mapping
@@ -196,8 +196,7 @@ private extension BaseExpressionPass {
             transformers.append(
                 FunctionInvocationTransformer(
                     objcFunctionName: setterName,
-                    toSwiftPropertySetter: property,
-                    argumentTransformer: .asIs
+                    toSwiftPropertySetter: property
                 )
             )
         }
@@ -210,7 +209,7 @@ private extension BaseExpressionPass {
         
         let args: [ArgumentRewritingStrategy] = new.map {
             if let label = $0 {
-                return .labeled(label, .asIs)
+                return .labeled(label)
             }
             
             return .asIs
@@ -233,7 +232,7 @@ private extension BaseExpressionPass {
                              _ property: String,
                              _ resultType: SwiftType) -> [PostfixInvocationTransformer] {
         
-        return [
+        [
             MethodsToPropertyTransformer(
                 baseExpressionMatcher: matcher,
                 getterName: getterName,

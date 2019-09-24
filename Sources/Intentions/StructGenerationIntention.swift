@@ -5,13 +5,13 @@ import KnownType
 /// An intention to generate a struct type
 public final class StructGenerationIntention: TypeGenerationIntention, InstanceVariableContainerIntention {
     public override var kind: KnownTypeKind {
-        return .struct
+        .struct
     }
     
     public override var isEmptyType: Bool {
         // Unlike with classes, constructors do not count when defining whether
         // the type definition is empty or not.
-        return protocols.isEmpty
+        protocols.isEmpty
             && properties.isEmpty
             && methods.isEmpty
             && instanceVariables.isEmpty

@@ -6,7 +6,7 @@ import TypeSystem
 /// functions on general floating-point types.
 public class NumberCommonsExpressionPass: ASTRewriterPass {
     public override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
-        return super.visitVariableDeclarations(stmt)
+        super.visitVariableDeclarations(stmt)
     }
     
     public override func visitExpression(_ exp: Expression) -> Expression {

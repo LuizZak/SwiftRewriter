@@ -38,7 +38,7 @@ public extension CodeScopeNode where Self: SyntaxNode {
     }
     
     func allDefinitions() -> [CodeDefinition] {
-        return definitions.allDefinitions()
+        definitions.allDefinitions()
     }
     
     func recordDefinition(_ definition: CodeDefinition) {
@@ -73,7 +73,7 @@ public extension SyntaxNode {
     /// Finds the nearest definition scope in the hierarchy chain for this syntax
     /// node which is not `self`
     internal var nearestScopeThatIsNotSelf: CodeScopeNode? {
-        return parent?.nearestScope
+        parent?.nearestScope
     }
 }
 
@@ -84,13 +84,13 @@ extension BlockLiteralExpression: CodeScopeNode { }
 /// are not contained within a valid compound statement.
 class EmptyCodeScope: CodeScope {
     func firstDefinition(named name: String) -> CodeDefinition? {
-        return nil
+        nil
     }
     func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
-        return []
+        []
     }
     func allDefinitions() -> [CodeDefinition] {
-        return []
+        []
     }
     func recordDefinition(_ definition: CodeDefinition) { }
     func recordDefinitions(_ definitions: [CodeDefinition]) { }
@@ -141,15 +141,15 @@ public struct ArrayDefinitionsSource: DefinitionsSource {
     }
     
     public func firstDefinition(named name: String) -> CodeDefinition? {
-        return definitionsByName[name]
+        definitionsByName[name]
     }
     
     public func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
-        return functionDefinitions[identifier] ?? []
+        functionDefinitions[identifier] ?? []
     }
     
     public func allDefinitions() -> [CodeDefinition] {
-        return definitions
+        definitions
     }
 }
 
@@ -193,7 +193,7 @@ public class CompoundDefinitionsSource: DefinitionsSource {
     }
     
     public func allDefinitions() -> [CodeDefinition] {
-        return sources.flatMap { $0.allDefinitions() }
+        sources.flatMap { $0.allDefinitions() }
     }
 }
 
@@ -223,15 +223,15 @@ public final class DefaultCodeScope: CodeScope {
     }
     
     public func firstDefinition(named name: String) -> CodeDefinition? {
-        return definitionsByName[name]
+        definitionsByName[name]
     }
     
     public func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
-        return functionDefinitions[identifier] ?? []
+        functionDefinitions[identifier] ?? []
     }
     
     public func allDefinitions() -> [CodeDefinition] {
-        return definitions
+        definitions
     }
     
     public func recordDefinition(_ definition: CodeDefinition) {
@@ -265,7 +265,7 @@ public extension IdentifierExpression {
     /// the syntax tree this identifier is contained in.
     var definition: CodeDefinition? {
         get {
-            return metadata[_identifierDefinitionKey] as? CodeDefinition
+            metadata[_identifierDefinitionKey] as? CodeDefinition
         }
         set {
             metadata[_identifierDefinitionKey] = newValue
@@ -283,7 +283,7 @@ public extension MemberPostfix {
     /// Gets the member this member postfix operation references
     var memberDefinition: KnownMember? {
         get {
-            return metadata[_identifierDefinitionKey] as? KnownMember
+            metadata[_identifierDefinitionKey] as? KnownMember
         }
         set {
             metadata[_identifierDefinitionKey] = newValue

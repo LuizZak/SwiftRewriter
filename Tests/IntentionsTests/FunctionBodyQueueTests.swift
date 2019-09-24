@@ -4,13 +4,13 @@ import Intentions
 import TestCommons
 
 class FunctionBodyQueueTests: XCTestCase {
-    private var sut: FunctionBodyQueue<TestQueueDelegate>!
-    private var delegate: TestQueueDelegate!
+    private var sut: FunctionBodyQueue<EmptyFunctionBodyQueueDelegate>!
+    private var delegate: EmptyFunctionBodyQueueDelegate!
     
     override func setUp() {
         super.setUp()
         
-        delegate = TestQueueDelegate()
+        delegate = EmptyFunctionBodyQueueDelegate()
     }
     
     func testQueueGlobalFunctionBody() {
@@ -21,7 +21,7 @@ class FunctionBodyQueueTests: XCTestCase {
                 }.build()
         let global = intentions.fileIntentions()[0].globalFunctionIntentions[0]
         
-        sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate)
+        sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate, numThreads: 8)
         let items = sut.items
         
         XCTAssertEqual(items.count, 1)
@@ -40,7 +40,7 @@ class FunctionBodyQueueTests: XCTestCase {
                 }.build()
         let body = intentions.fileIntentions()[0].typeIntentions[0].methods[0].functionBody
         
-        sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate)
+        sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate, numThreads: 8)
         let items = sut.items
         
         XCTAssertEqual(items.count, 1)
@@ -57,7 +57,7 @@ class FunctionBodyQueueTests: XCTestCase {
                 }.build()
         let body = intentions.fileIntentions()[0].typeIntentions[0].properties[0].getter
         
-        sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate)
+        sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate, numThreads: 8)
         let items = sut.items
         
         XCTAssertEqual(items.count, 1)
@@ -76,7 +76,7 @@ class FunctionBodyQueueTests: XCTestCase {
         let bodyGetter = intentions.fileIntentions()[0].typeIntentions[0].properties[0].getter
         let bodySetter = intentions.fileIntentions()[0].typeIntentions[0].properties[0].setter?.body
         
-        sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate)
+        sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate, numThreads: 8)
         let items = sut.items
         
         XCTAssertEqual(items.count, 2)
@@ -103,7 +103,7 @@ class FunctionBodyQueueTests: XCTestCase {
         let bodyGetter2 = intentions.fileIntentions()[1].typeIntentions[0].properties[0].getter
         let bodySetter = intentions.fileIntentions()[1].typeIntentions[0].properties[0].setter?.body
         
-        sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate)
+        sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate, numThreads: 8)
         let items = sut.items
         
         XCTAssertEqual(items.count, 4)
@@ -111,27 +111,5 @@ class FunctionBodyQueueTests: XCTestCase {
         XCTAssert(items.contains(where: { $0.body === bodyGetter1 }))
         XCTAssert(items.contains(where: { $0.body === bodyGetter2 }))
         XCTAssert(items.contains(where: { $0.body === bodySetter }))
-    }
-}
-
-private class TestQueueDelegate: FunctionBodyQueueDelegate {
-    func makeContext(forFunction function: GlobalFunctionGenerationIntention) -> Context {
-        return Context()
-    }
-    func makeContext(forMethod method: MethodGenerationIntention) -> Context {
-        return Context()
-    }
-    func makeContext(forInit ctor: InitGenerationIntention) -> Context {
-        return Context()
-    }
-    func makeContext(forPropertyGetter property: PropertyGenerationIntention, getter: FunctionBodyIntention) -> Context {
-        return Context()
-    }
-    func makeContext(forPropertySetter property: PropertyGenerationIntention, setter: PropertyGenerationIntention.Setter) -> Context {
-        return Context()
-    }
-    
-    struct Context {
-        
     }
 }

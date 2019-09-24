@@ -5,7 +5,7 @@ import SwiftAST
 /// An intention to generate a global variable.
 public final class GlobalVariableGenerationIntention: FromSourceIntention, FileLevelIntention, MutableValueStorageIntention {
     public var variableSource: VariableDeclaration? {
-        return source as? VariableDeclaration
+        source as? VariableDeclaration
     }
     
     public var name: String
@@ -14,7 +14,7 @@ public final class GlobalVariableGenerationIntention: FromSourceIntention, FileL
     
     public var initialValue: Expression? {
         get {
-            return initialValueExpr?.expression
+            initialValueExpr?.expression
         }
         set {
             initialValueExpr = newValue.map({ GlobalVariableInitialValueIntention(expression: $0, source: nil) })
@@ -71,6 +71,6 @@ public final class GlobalVariableGenerationIntention: FromSourceIntention, FileL
 
 extension GlobalVariableGenerationIntention: KnownGlobalVariable {
     public var semantics: Set<Semantic> {
-        return []
+        []
     }
 }

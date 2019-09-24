@@ -142,7 +142,7 @@ class FunctionInvocationTransformerTests: XCTestCase {
                 objcFunctionName: "objc", toSwiftFunction: "swift",
                 firstArgumentBecomesInstance: false,
                 arguments: [
-                    .omitIf(matches: .equals(to: .identifier("A")), .asIs)
+                    .omitIf(matches: .equals(to: .identifier("A")))
                 ]
             )
         
@@ -198,7 +198,7 @@ class FunctionInvocationTransformerTests: XCTestCase {
             FunctionInvocationTransformer(
                 objcFunctionName: "CGPointMake", toSwiftFunction: "CGPoint",
                 firstArgumentBecomesInstance: false,
-                arguments: [.labeled("x", .asIs), .labeled("y", .asIs)]
+                arguments: [.labeled("x"), .labeled("y")]
             )
         
         let exp =
@@ -256,12 +256,7 @@ class FunctionInvocationTransformerTests: XCTestCase {
     }
     
     func testTransformToPropertySetter() {
-        let sut =
-            FunctionInvocationTransformer(
-                objcFunctionName: "objc",
-                toSwiftPropertySetter: "swift",
-                argumentTransformer: .asIs
-            )
+        let sut = FunctionInvocationTransformer(objcFunctionName: "objc", toSwiftPropertySetter: "swift")
         
         XCTAssertEqual(
             // objc(a, b)
@@ -270,42 +265,15 @@ class FunctionInvocationTransformerTests: XCTestCase {
             Expression.identifier("a").dot("swift").assignment(op: .assign, rhs: .identifier("b")))
     }
     
-    func testTransformToPropertySetterTransformer() {
-        let sut =
-            FunctionInvocationTransformer(
-                objcFunctionName: "objc",
-                toSwiftPropertySetter: "swift",
-                argumentTransformer: .mergingArguments(arg0: 0, arg1: 1, { $0.binary(op: .add, rhs: $1) })
-        )
+    func testTransformToPropertySetterTransformerBailsIfNotTwoArguments() {
+        let sut = FunctionInvocationTransformer(objcFunctionName: "objc", toSwiftPropertySetter: "swift")
         
-        XCTAssertEqual(sut.requiredArgumentCount, 3)
-        
-        XCTAssertEqual(
+        XCTAssertNil(
             // objc(a, b, c)
             sut.attemptApply(on:
                 Expression
                     .identifier("objc")
-                    .call([.identifier("a"), .identifier("b"), .identifier("c")])),
-            // a.swift = b + c
-            Expression
-                .identifier("a").dot("swift")
-                .assignment(op: .assign, rhs: Expression.identifier("b").binary(op: .add, rhs: .identifier("c"))))
-    }
-    
-    func testTransformToPropertySetterTransformerBailsIfNotEnoughArguments() {
-        let sut =
-            FunctionInvocationTransformer(
-                objcFunctionName: "objc",
-                toSwiftPropertySetter: "swift",
-                argumentTransformer: .mergingArguments(arg0: 0, arg1: 1, { $0.binary(op: .add, rhs: $1) })
-        )
-        
-        XCTAssertNil(
-            // objc(a, b)
-            sut.attemptApply(on:
-                Expression
-                    .identifier("objc")
-                    .call([.identifier("a"), .identifier("b")])))
+                    .call([.identifier("a"), .identifier("b"), .identifier("c")])))
     }
     
     func testIgnoreFunctionWithExpectedLabeling() {
@@ -313,7 +281,7 @@ class FunctionInvocationTransformerTests: XCTestCase {
             FunctionInvocationTransformer(
                 objcFunctionName: "function", toSwiftFunction: "function",
                 firstArgumentBecomesInstance: false,
-                arguments: [.asIs, .labeled("label", .asIs)]
+                arguments: [.asIs, .labeled("label")]
         )
         
         XCTAssertEqual(

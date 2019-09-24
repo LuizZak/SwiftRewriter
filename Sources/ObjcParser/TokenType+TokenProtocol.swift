@@ -39,11 +39,11 @@ let operators: [(string: String, op: Operator)] = [
 
 extension TokenType: TokenProtocol {
     public static var eofToken: TokenType {
-        return .eof
+        .eof
     }
     
     public var tokenString: String {
-        return self.description
+        self.description
     }
     
     public func length(in lexer: Lexer) -> Int {

@@ -10,7 +10,7 @@ public class InitAnalysisIntentionPass: IntentionPass {
     private let tag = "\(InitAnalysisIntentionPass.self)"
     
     // Matches 'self.init'/'super.init' expressions, with or without parameters.
-    let invertedMatchSelfOrSuperInit =
+    let matchSelfOrSuperInit =
         ValueMatcher<PostfixExpression>()
             .inverted { inverted in
                 inverted
@@ -110,7 +110,7 @@ public class InitAnalysisIntentionPass: IntentionPass {
                          ValueMatcher<AssignmentExpression>()
                             .keyPath(\.lhs, ident("self" || "super").anyExpression())
                             .keyPath(\.op, equals: .assign)
-                            .keyPath(\.rhs, invertedMatchSelfOrSuperInit)
+                            .keyPath(\.rhs, matchSelfOrSuperInit)
                             .anyExpression()
                 ).anyExpression()
         

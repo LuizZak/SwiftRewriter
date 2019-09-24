@@ -172,7 +172,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
     }
     
     func functionBodies() -> [FunctionBodyIntention] {
-        return []
+        []
     }
 }
 
@@ -180,9 +180,16 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
 /// method bodies.
 public class IntentionCollectionUsageAnalyzer: BaseUsageAnalyzer {
     public var intentions: IntentionCollection
+    private let numThreads: Int
     
-    public init(intentions: IntentionCollection, typeSystem: TypeSystem) {
+    // TODO: Passing `numThreads` here seems arbitrary (it is passed to
+    // `FunctionBodyQueue` when collecting function bodies). Maybe we could store
+    // the maximal thread count in a global, and replace all of its usages,
+    // instead?
+    
+    public init(intentions: IntentionCollection, typeSystem: TypeSystem, numThreads: Int) {
         self.intentions = intentions
+        self.numThreads = numThreads
         
         super.init(typeSystem: typeSystem)
     }
@@ -190,7 +197,8 @@ public class IntentionCollectionUsageAnalyzer: BaseUsageAnalyzer {
     override func functionBodies() -> [FunctionBodyIntention] {
         let queue =
             FunctionBodyQueue.fromIntentionCollection(
-                intentions, delegate: EmptyFunctionBodyQueueDelegate())
+                intentions, delegate: EmptyFunctionBodyQueueDelegate(),
+                numThreads: numThreads)
         
         return queue.items.map { $0.body }
     }

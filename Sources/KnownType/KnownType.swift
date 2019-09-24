@@ -6,7 +6,7 @@ public protocol KnownType: KnownTypeReferenceConvertible, AttributeTaggeableObje
     /// This should be implemented by conformers by returning an as precise as
     /// possible set of informations that can help pinpoint the origin of this
     /// type, such as a file name/line number, if the type originated from a file,
-    /// etc.
+    /// or was synthesized, etc.
     var origin: String { get }
     
     /// Returns `true` if this known type represents an extension for another
@@ -36,6 +36,9 @@ public protocol KnownType: KnownTypeReferenceConvertible, AttributeTaggeableObje
     
     /// Gets an array of all known instance variable fields for this type
     var knownFields: [KnownProperty] { get }
+
+    /// Gets an array of all known subscriptable members for this type
+    var knownSubscripts: [KnownSubscript] { get }
     
     /// Gets an array of all known protocol conformances for this type
     var knownProtocolConformances: [KnownProtocolConformance] { get }
@@ -74,7 +77,7 @@ public enum KnownTypeReference: KnownTypeReferenceConvertible {
     }
     
     public var asKnownTypeReference: KnownTypeReference {
-        return self
+        self
     }
 }
 
@@ -84,14 +87,14 @@ public protocol KnownTypeReferenceConvertible {
 
 extension String: KnownTypeReferenceConvertible {
     public var asKnownTypeReference: KnownTypeReference {
-        return .typeName(self)
+        .typeName(self)
     }
 }
 
 /// Default implementations
 public extension KnownType {
     var asKnownTypeReference: KnownTypeReference {
-        return .knownType(self)
+        .knownType(self)
     }
 }
 
@@ -168,6 +171,18 @@ public protocol KnownProperty: KnownMember {
     var isEnumCase: Bool { get }
 }
 
+/// A known type subscript
+public protocol KnownSubscript: KnownMember {
+    /// Gets the type for the indexing value of this subscription.
+    var subscriptType: SwiftType { get }
+
+    /// Gets the resulting type when this subscript is indexed into.
+    var type: SwiftType { get }
+
+    /// Gets whether this subscription is getter-only
+    var isConstant: Bool { get }
+}
+
 /// Describes the getter/setter states of a property
 public enum KnownPropertyAccessor: String, Codable {
     case getter
@@ -182,19 +197,25 @@ public protocol KnownProtocolConformance {
 
 public extension KnownMethod {
     var isStatic: Bool {
-        return signature.isStatic
+        signature.isStatic
     }
 }
 
 public extension KnownProperty {
     var memberType: SwiftType {
-        return storage.type
+        storage.type
     }
 }
 
 public extension KnownMethod {
     var memberType: SwiftType {
-        return signature.swiftClosureType
+        signature.swiftClosureType
+    }
+}
+
+public extension KnownSubscript {
+    var memberType: SwiftType {
+        type
     }
 }
 
@@ -204,7 +225,7 @@ public enum KnownTypeTraits {
 
 public extension KnownType {
     func knownTrait(_ traitName: String) -> TraitType? {
-        return knownTraits[traitName]
+        knownTraits[traitName]
     }
 }
 
@@ -293,5 +314,12 @@ public struct KnownAttribute: Codable {
     public init(name: String, parameters: String? = nil) {
         self.name = name
         self.parameters = parameters
+    }
+}
+
+public extension SwiftRewriterAttribute {
+    var asKnownAttribute: KnownAttribute {
+        KnownAttribute(name: SwiftRewriterAttribute.name,
+                       parameters: content.asString)
     }
 }

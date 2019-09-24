@@ -5,10 +5,15 @@ public protocol ValueMatcherProtocol {
 }
 
 /// A matcher that can be used to check if a value matches an expected structure.
+@dynamicMemberLookup
 public struct ValueMatcher<T>: ValueMatcherProtocol {
     
     @usableFromInline
     var matchers: [AnyASTMatcherRule]
+    
+    public subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> PartialValueMatcher<T, U> {
+        PartialValueMatcher(keyPath: keyPath, baseMatcher: self)
+    }
     
     public init() {
         self.matchers = []
@@ -86,7 +91,7 @@ public extension ValueMatcher {
     /// with all existing rules for this matcher.
     @inlinable
     func keyPath<U: Equatable>(_ kp: KeyPath<T, U>, equals value: U) -> ValueMatcher {
-        return keyPath(kp, .equals(value))
+        keyPath(kp, .equals(value))
     }
     
     /// Returns a new matcher with the given keypath matching rule appended to
@@ -99,7 +104,7 @@ public extension ValueMatcher {
     /// with all existing rules for this matcher.
     @inlinable
     func keyPath<U: Equatable>(_ kp: KeyPath<T, U?>, equals value: U) -> ValueMatcher {
-        return keyPath(kp, .equals(value))
+        keyPath(kp, .equals(value))
     }
     
     /// Returns a new matcher with the given keypath matching rule appended to
@@ -193,7 +198,7 @@ public extension ValueMatcher {
     /// - Returns: A new matcher with the specified matcher rule.
     @inlinable
     static func keyPath<U: Equatable>(_ kp: KeyPath<T, U>, equals value: U) -> ValueMatcher {
-        return ValueMatcher().keyPath(kp, equals: value)
+        ValueMatcher().keyPath(kp, equals: value)
     }
     
     /// Returns a new matcher with the given keypath matching rule.
@@ -204,7 +209,7 @@ public extension ValueMatcher {
     /// - Returns: A new matcher with the specified matcher rule.
     @inlinable
     static func keyPath<U: Equatable>(_ kp: KeyPath<T, U>, _ rule: MatchRule<U>) -> ValueMatcher {
-        return ValueMatcher().keyPath(kp, rule)
+        ValueMatcher().keyPath(kp, rule)
     }
     
     /// Returns a new matcher with the given keypath matcher.
@@ -215,7 +220,7 @@ public extension ValueMatcher {
     /// - Returns: A new matcher with the specified matcher.
     @inlinable
     static func keyPath<U>(_ kp: KeyPath<T, U>, _ matcher: ValueMatcher<U>) -> ValueMatcher {
-        return ValueMatcher().keyPath(kp, matcher)
+        ValueMatcher().keyPath(kp, matcher)
     }
     
     /// Returns a new matcher with the given keypath matcher.
@@ -226,7 +231,7 @@ public extension ValueMatcher {
     /// - Returns: A new matcher with the specified matcher.
     @inlinable
     static func keyPath<U>(_ kp: KeyPath<T, U?>, _ matcher: ValueMatcher<U>) -> ValueMatcher {
-        return ValueMatcher().keyPath(kp, matcher)
+        ValueMatcher().keyPath(kp, matcher)
     }
     
     /// Returns a new matcher with the given optional-valued keypath matcher to
@@ -243,7 +248,7 @@ public extension ValueMatcher {
     static func keyPath<U>(_ kp: KeyPath<T, U?>,
                                   _ closure: (ValueMatcher<U>) -> ValueMatcher<U>) -> ValueMatcher {
         
-        return ValueMatcher().keyPath(kp, closure)
+        ValueMatcher().keyPath(kp, closure)
     }
 }
 
@@ -251,7 +256,7 @@ extension ValueMatcher {
     
     @inlinable
     public static func isType(_ type: T.Type) -> ValueMatcher<T> {
-        return ValueMatcher().match(closure: { Swift.type(of: $0) == type })
+        ValueMatcher().match(closure: { Swift.type(of: $0) == type })
     }
     
 }
@@ -273,7 +278,7 @@ extension ValueMatcher {
         
         @usableFromInline
         func matches(_ value: T) -> Bool {
-            return matcher.matches(value[keyPath: keyPath])
+            matcher.matches(value[keyPath: keyPath])
         }
     }
     
@@ -292,7 +297,7 @@ extension ValueMatcher {
         
         @usableFromInline
         func matches(_ value: T) -> Bool {
-            return rule.evaluate(value[keyPath: keyPath])
+            rule.evaluate(value[keyPath: keyPath])
         }
     }
 }
@@ -301,7 +306,7 @@ public extension ValueMatcher {
     
     @inlinable
     static var any: ValueMatcher {
-        return ValueMatcher()
+        ValueMatcher()
     }
     
 }
@@ -310,7 +315,7 @@ extension ValueMatcher {
     
     @inlinable
     public func bind<U>(keyPath: KeyPath<T, U>, to target: UnsafeMutablePointer<U>) -> ValueMatcher {
-        return self.match { value -> Bool in
+        self.match { value -> Bool in
             target.pointee = value[keyPath: keyPath]
             
             return true
@@ -319,7 +324,7 @@ extension ValueMatcher {
     
     @inlinable
     public func bind<U>(keyPath: KeyPath<T, U>, to target: UnsafeMutablePointer<U?>) -> ValueMatcher {
-        return self.match { value -> Bool in
+        self.match { value -> Bool in
             target.pointee = value[keyPath: keyPath]
             
             return true
@@ -351,17 +356,17 @@ extension ValueMatcher where T: Equatable {
     /// with all existing rules for this matcher.
     @inlinable
     public func match(if rule: MatchRule<T>) -> ValueMatcher {
-        return match(rule)
+        match(rule)
     }
     
     @inlinable
     public func bind(to target: UnsafeMutablePointer<T>) -> ValueMatcher {
-        return self.match(.extract(.any, target))
+        self.match(.extract(.any, target))
     }
     
     @inlinable
     public func bind(to target: UnsafeMutablePointer<T?>) -> ValueMatcher {
-        return self.match(.extractOptional(.any, target))
+        self.match(.extractOptional(.any, target))
     }
     
     @usableFromInline
@@ -376,18 +381,18 @@ extension ValueMatcher where T: Equatable {
         
         @usableFromInline
         func matches(_ value: T) -> Bool {
-            return rule.evaluate(value)
+            rule.evaluate(value)
         }
     }
     
     @inlinable
     public static func ->> (lhs: ValueMatcher, rhs: UnsafeMutablePointer<T>) -> ValueMatcher {
-        return lhs.match(.any ->> rhs)
+        lhs.match(.any ->> rhs)
     }
     
     @inlinable
     public static func ->> (lhs: ValueMatcher, rhs: UnsafeMutablePointer<T?>) -> ValueMatcher {
-        return lhs.match(.any ->> rhs)
+        lhs.match(.any ->> rhs)
     }
 }
 
@@ -404,7 +409,7 @@ extension ValueMatcher {
         
         @usableFromInline
         func matches(_ value: T) -> Bool {
-            return _matcher(value)
+            _matcher(value)
         }
     }
 }
@@ -421,7 +426,7 @@ struct ClosureMatcher<T>: ValueMatcherProtocol {
     
     @usableFromInline
     func matches(_ value: T) -> Bool {
-        return matcher(value)
+        matcher(value)
     }
 }
 
@@ -441,11 +446,11 @@ public enum MatchRule<U: Equatable> {
     indirect case extractOptional(MatchRule, UnsafeMutablePointer<U?>)
     
     public static func differentThan(_ value: U) -> MatchRule {
-        return .negated(.equals(value))
+        .negated(.equals(value))
     }
     
     public static func differentThan(_ value: U?) -> MatchRule {
-        return .negated(.equalsNullable(value))
+        .negated(.equalsNullable(value))
     }
     
     public func evaluate(_ value: U) -> Bool {
@@ -516,11 +521,11 @@ public enum MatchRule<U: Equatable> {
     }
     
     public static func ->> (lhs: MatchRule, rhs: UnsafeMutablePointer<U>) -> MatchRule {
-        return .extract(lhs, rhs)
+        .extract(lhs, rhs)
     }
     
     public static func ->> (lhs: MatchRule, rhs: UnsafeMutablePointer<U?>) -> MatchRule {
-        return .extractOptional(lhs, rhs)
+        .extractOptional(lhs, rhs)
     }
     
     public static func && (lhs: MatchRule, rhs: MatchRule) -> MatchRule {
@@ -554,7 +559,7 @@ public enum MatchRule<U: Equatable> {
 extension MatchRule {
     
     public static func ->> <Z>(lhs: MatchRule, rhs: UnsafeMutablePointer<Z>) -> MatchRule where U == Z? {
-        return .closure { v in
+        .closure { v in
             if let value = v, lhs.evaluate(v) {
                 rhs.pointee = value
                 

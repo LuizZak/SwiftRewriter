@@ -9,7 +9,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter exp: An Expression to visit
     /// - Returns: Result of visiting this expression node
     open func visitExpression(_ exp: Expression) -> Expression {
-        return exp.accept(self)
+        exp.accept(self)
     }
     
     /// Visits an assignment operation node
@@ -101,7 +101,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter exp: A ConstantExpression to visit
     /// - Returns: Result of visiting this constant node
     open func visitConstant(_ exp: ConstantExpression) -> Expression {
-        return exp
+        exp
     }
     
     /// Visits a parenthesized expression node
@@ -119,7 +119,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter exp: An IdentifierExpression to visit
     /// - Returns: Result of visiting this identifier node
     open func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
-        return exp
+        exp
     }
     
     /// Visits a type-casting expression node
@@ -182,7 +182,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter exp: An UnknownExpression to visit
     /// - Returns: Result of visiting this unknown expression node
     open func visitUnknown(_ exp: UnknownExpression) -> Expression {
-        return exp
+        exp
     }
     
     /// Visits a pattern from an expression
@@ -207,7 +207,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: A Statement to visit
     /// - Returns: Result of visiting the statement node
     open func visitStatement(_ stmt: Statement) -> Statement {
-        return stmt.accept(self)
+        stmt.accept(self)
     }
     
     /// Visits a compound statement with this visitor
@@ -321,7 +321,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: A BreakStatement to visit
     /// - Returns: Result of visiting the break statement
     open func visitBreak(_ stmt: BreakStatement) -> Statement {
-        return stmt
+        stmt
     }
 
     /// Visits a fallthrough statement
@@ -329,7 +329,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: A FallthroughStatement to visit
     /// - Returns: Result of visiting the fallthrough statement
     open func visitFallthrough(_ stmt: FallthroughStatement) -> Statement {
-        return stmt
+        stmt
     }
 
     /// Visits a continue statement
@@ -337,7 +337,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: A ContinueStatement to visit
     /// - Returns: Result of visiting the continue statement
     open func visitContinue(_ stmt: ContinueStatement) -> Statement {
-        return stmt
+        stmt
     }
     
     /// Visits an expression sequence statement
@@ -370,6 +370,6 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: An UnknownStatement to visit
     /// - Returns: Result of visiting the unknown statement context
     open func visitUnknown(_ stmt: UnknownStatement) -> Statement {
-        return stmt
+        stmt
     }
 }

@@ -219,17 +219,17 @@ public extension SwiftType {
     
     /// Returns `self` wrapped over an `.optional` case.
     var asOptional: SwiftType {
-        return .optional(self)
+        .optional(self)
     }
     
     /// Returns `self` wrapped over an `.implicitUnwrappedOptional` case.
     var asImplicitUnwrapped: SwiftType {
-        return .implicitUnwrappedOptional(self)
+        .implicitUnwrappedOptional(self)
     }
     
     /// Returns `self` wrapped over an `.nullabilityUnspecified` case.
     var asNullabilityUnspecified: SwiftType {
-        return .nullabilityUnspecified(self)
+        .nullabilityUnspecified(self)
     }
     
     /// Returns this type, wrapped in the same optionality depth as another given
@@ -238,7 +238,7 @@ public extension SwiftType {
     /// In case the other type is not an optional type, returns this type with
     /// no optionality.
     func withSameOptionalityAs(_ type: SwiftType) -> SwiftType {
-        return type.wrappingOther(self.deepUnwrapped)
+        type.wrappingOther(self.deepUnwrapped)
     }
     
     /// In case this type represents an optional value, returns a new optional
@@ -284,23 +284,23 @@ public extension SwiftType {
     static let errorType = SwiftType.typeName("<<error type>>")
     
     static func openRange(_ operand: SwiftType) -> SwiftType {
-        return .nominal(.generic("Range", parameters: .one(operand)))
+        .nominal(.generic("Range", parameters: .one(operand)))
     }
     
     static func closedRange(_ operand: SwiftType) -> SwiftType {
-        return .nominal(.generic("ClosedRange", parameters: .one(operand)))
+        .nominal(.generic("ClosedRange", parameters: .one(operand)))
     }
     
     static func typeName(_ name: String) -> SwiftType {
-        return .nominal(.typeName(name))
+        .nominal(.typeName(name))
     }
     
     static func generic(_ name: String, parameters: GenericArgumentSwiftType) -> SwiftType {
-        return .nominal(.generic(name, parameters: parameters))
+        .nominal(.generic(name, parameters: parameters))
     }
     
     static func swiftBlock(returnType: SwiftType, parameters: [SwiftType]) -> SwiftType {
-        return .block(returnType: returnType, parameters: parameters, attributes: [])
+        .block(returnType: returnType, parameters: parameters, attributes: [])
     }
     
     /// Returns a type that is the same as the input, but with any .optional or
@@ -379,7 +379,7 @@ extension ProtocolCompositionComponent: CustomStringConvertible {
     }
     
     public static func typeName(_ name: String) -> ProtocolCompositionComponent {
-        return .nominal(.typeName(name))
+        .nominal(.typeName(name))
     }
 }
 
@@ -486,11 +486,11 @@ public struct OneOrMore<T> {
     ///
     /// Due to semantics of this list type, this value is always `>= 1`.
     public var count: Int {
-        return remaining.count + 1
+        remaining.count + 1
     }
     
     public var last: T {
-        return remaining.last ?? first
+        remaining.last ?? first
     }
     
     public init(first: T, remaining: [T]) {
@@ -512,7 +512,7 @@ public struct OneOrMore<T> {
     
     /// Shortcut for creating a `OneOrMore` list with a given item
     public static func one(_ value: T) -> OneOrMore {
-        return OneOrMore(first: value, remaining: [])
+        OneOrMore(first: value, remaining: [])
     }
 }
 
@@ -525,11 +525,11 @@ public struct TwoOrMore<T> {
     ///
     /// Due to semantics of this list type, this value is always `>= 2`.
     public var count: Int {
-        return remaining.count + 2
+        remaining.count + 2
     }
     
     public var last: T {
-        return remaining.last ?? second
+        remaining.last ?? second
     }
     
     public init(first: T, second: T, remaining: [T]) {
@@ -552,14 +552,14 @@ public struct TwoOrMore<T> {
     
     /// Shortcut for creating a `TwoOrMore` list with two given items
     public static func two(_ value1: T, _ value2: T) -> TwoOrMore {
-        return TwoOrMore(first: value1, second: value2, remaining: [])
+        TwoOrMore(first: value1, second: value2, remaining: [])
     }
 }
 
 // MARK: Sequence protocol conformances
 extension OneOrMore: Sequence {
     public func makeIterator() -> Iterator {
-        return Iterator(current: self)
+        Iterator(current: self)
     }
     
     public struct Iterator: IteratorProtocol {
@@ -607,7 +607,7 @@ extension OneOrMore: Sequence {
 
 extension TwoOrMore: Sequence {
     public func makeIterator() -> Iterator {
-        return Iterator(current: self)
+        Iterator(current: self)
     }
     
     public struct Iterator: IteratorProtocol {
@@ -662,10 +662,10 @@ extension TwoOrMore: Sequence {
 // MARK: Collection conformance
 extension OneOrMore: Collection {
     public var startIndex: OneOrMore<T>.Index {
-        return .first
+        .first
     }
     public var endIndex: OneOrMore<T>.Index {
-        return .tail(remaining.count)
+        .tail(remaining.count)
     }
     
     public subscript(index: Index) -> T {
@@ -687,16 +687,16 @@ extension OneOrMore: Collection {
     }
     
     public func index(after i: OneOrMore<T>.Index) -> OneOrMore<T>.Index {
-        return i.next
+        i.next
     }
 }
 
 extension TwoOrMore: Collection {
     public var startIndex: TwoOrMore<T>.Index {
-        return .first
+        .first
     }
     public var endIndex: TwoOrMore<T>.Index {
-        return .tail(remaining.count)
+        .tail(remaining.count)
     }
     
     public subscript(index: Index) -> T {
@@ -722,7 +722,7 @@ extension TwoOrMore: Collection {
     }
     
     public func index(after i: TwoOrMore<T>.Index) -> TwoOrMore<T>.Index {
-        return i.next
+        i.next
     }
 }
 

@@ -17,15 +17,15 @@ public enum ArgumentRewritingStrategy {
     case fixed(() -> Expression)
     
     /// Transforms an argument using a given transformation method
-    indirect case transformed((Expression) -> Expression, ArgumentRewritingStrategy)
+    indirect case transformed((Expression) -> Expression, ArgumentRewritingStrategy = .asIs)
     
     /// Creates a rule that omits the argument in case it matches a given
     /// expression.
-    indirect case omitIf(matches: ValueMatcher<Expression>, ArgumentRewritingStrategy)
+    indirect case omitIf(matches: ValueMatcher<Expression>, ArgumentRewritingStrategy = .asIs)
     
     /// Allows adding a label to the result of an argument strategy for the
     /// current parameter.
-    indirect case labeled(String, ArgumentRewritingStrategy)
+    indirect case labeled(String, ArgumentRewritingStrategy = .asIs)
     
     /// In case this argument strategy is a labeled argument rewrite, returns
     /// the new label, otherwise, returns `nil`.
@@ -200,11 +200,11 @@ public extension Sequence where Element == ArgumentRewritingStrategy {
     }
     
     func argumentLabels() -> [String?] {
-        return map { $0.label }
+        map { $0.label }
     }
     
     static func addingLabels(_ labels: String?...) -> [Element] {
-        return labels.map { $0.map { .labeled($0, .asIs) } ?? .asIs }
+        labels.map { $0.map { .labeled($0) } ?? .asIs }
     }
 }
 
@@ -267,8 +267,8 @@ public extension Collection where Element == ArgumentRewritingStrategy, Index ==
 public extension ValueTransformer where U == [FunctionArgument] {
     
     func rewritingArguments(_ transformers: [ArgumentRewritingStrategy],
-                                   file: String = #file,
-                                   line: Int = #line) -> ValueTransformer {
+                            file: String = #file,
+                            line: Int = #line) -> ValueTransformer {
         
         let required = transformers.requiredArgumentCount()
         

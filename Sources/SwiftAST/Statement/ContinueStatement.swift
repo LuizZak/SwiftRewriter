@@ -1,6 +1,6 @@
 public class ContinueStatement: Statement {
     public override var isUnconditionalJump: Bool {
-        return true
+        true
     }
     
     public let targetLabel: String?
@@ -25,16 +25,21 @@ public class ContinueStatement: Statement {
     
     @inlinable
     public override func copy() -> ContinueStatement {
-        return ContinueStatement(targetLabel: targetLabel).copyMetadata(from: self)
+        ContinueStatement(targetLabel: targetLabel).copyMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        return visitor.visitContinue(self)
+        visitor.visitContinue(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
-        return other is ContinueStatement
+        switch other {
+        case let rhs as ContinueStatement:
+            return targetLabel == rhs.targetLabel
+        default:
+            return false
+        }
     }
     
     public override func encode(to encoder: Encoder) throws {
@@ -52,6 +57,6 @@ public class ContinueStatement: Statement {
 public extension Statement {
     @inlinable
     var asContinue: ContinueStatement? {
-        return cast()
+        cast()
     }
 }

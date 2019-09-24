@@ -9,7 +9,7 @@ public class MemberGenerationIntention: FromSourceIntention {
     
     /// Returns whether this member is static (i.e. class member).
     /// Defaults to `false`, unless overriden by a subclass.
-    public var isStatic: Bool { return false }
+    public var isStatic: Bool { false }
     
     public var semantics: Set<Semantic> = []
     public var knownAttributes: [KnownAttribute] = []
@@ -52,6 +52,6 @@ public class MemberGenerationIntention: FromSourceIntention {
 
 extension MemberGenerationIntention: KnownMember {
     public var ownerType: KnownTypeReference? {
-        return type?.asKnownTypeReference
+        type?.asKnownTypeReference
     }
 }

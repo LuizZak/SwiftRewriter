@@ -16,7 +16,7 @@ enum Target: String, ArgumentKind {
     }
     
     static var completion: ShellCompletion {
-        return ShellCompletion.values([
+        ShellCompletion.values([
             ("terminal", "Prints output of conversion to the terminal's standard output."),
             ("filedisk", """
                 Saves output of conversion to the filedisk as .swift files on the same folder as the input files.

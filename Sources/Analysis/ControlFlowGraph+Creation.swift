@@ -191,8 +191,7 @@ private extension ControlFlowGraph {
     }
     
     private static func _connections(for statements: [Statement]) -> _NodeCreationResult {
-        
-        return _connections(for: statements, start: .invalid)
+        _connections(for: statements, start: .invalid)
     }
     
     private static func _connections(for statement: Statement) -> _NodeCreationResult {
@@ -415,7 +414,7 @@ private extension ControlFlowGraph {
         static let invalid = _NodeCreationResult(startNode: ControlFlowGraphNode(node: _InvalidSyntaxNode()))
         
         var isValid: Bool {
-            return !(startNode.node is _InvalidSyntaxNode)
+            !(startNode.node is _InvalidSyntaxNode)
         }
         
         var startNode: ControlFlowGraphNode
@@ -521,11 +520,11 @@ private extension ControlFlowGraph {
         }
         
         func appendingDefers(_ defers: [ControlFlowSubgraphNode]) -> _NodeCreationResult {
-            return defers.reduce(self, { $0.appendingDefer($1) })
+            defers.reduce(self, { $0.appendingDefer($1) })
         }
         
         func appendingExitDefers(_ defers: [ControlFlowSubgraphNode]) -> _NodeCreationResult {
-            return defers.reduce(self, { $0.appendingExitDefer($1) })
+            defers.reduce(self, { $0.appendingExitDefer($1) })
         }
         
         func appendingExitDefer(_ node: ControlFlowSubgraphNode) -> _NodeCreationResult {
@@ -662,11 +661,11 @@ private extension ControlFlowGraph {
         }
         
         func matchingTargetLabel(_ targetLabel: String?) -> ControlFlowGraphJumpTarget {
-            return ControlFlowGraphJumpTarget(nodes: entriesForTargetLabel(targetLabel))
+            ControlFlowGraphJumpTarget(nodes: entriesForTargetLabel(targetLabel))
         }
         
         func entriesForTargetLabel(_ label: String?) -> [JumpNodeEntry] {
-            return nodes.filter({ $0.jumpLabel == label })
+            nodes.filter({ $0.jumpLabel == label })
         }
         
         mutating func appendDefer(_ node: ControlFlowSubgraphNode) {
@@ -699,7 +698,7 @@ private extension ControlFlowGraph {
         static func merge(_ first: ControlFlowGraphJumpTarget,
                           _ second: ControlFlowGraphJumpTarget) -> ControlFlowGraphJumpTarget {
             
-            return ControlFlowGraphJumpTarget(nodes: first.nodes + second.nodes)
+            ControlFlowGraphJumpTarget(nodes: first.nodes + second.nodes)
         }
         
         struct JumpNodeEntry {

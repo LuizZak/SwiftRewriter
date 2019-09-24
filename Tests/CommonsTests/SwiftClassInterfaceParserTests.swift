@@ -202,6 +202,32 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownConstructors.count, 1)
         XCTAssert(type.knownConstructors[0].isFailable)
     }
+
+    func testParseSubscription() throws {
+        let type = try parseType("""
+            class MyClass {
+                subscript(index: Int) -> String
+            }
+            """)
+
+        XCTAssertEqual(type.knownSubscripts.count, 1)
+        XCTAssertEqual(type.knownSubscripts[0].subscriptType, .int)
+        XCTAssertEqual(type.knownSubscripts[0].type, .string)
+        XCTAssertFalse(type.knownSubscripts[0].isConstant)
+    }
+
+    func testParseSubscriptionWithGetterSetter() throws {
+        let type = try parseType("""
+            class MyClass {
+                subscript(index: Int) -> String { get }
+            }
+            """)
+
+        XCTAssertEqual(type.knownSubscripts.count, 1)
+        XCTAssertEqual(type.knownSubscripts[0].subscriptType, .int)
+        XCTAssertEqual(type.knownSubscripts[0].type, .string)
+        XCTAssert(type.knownSubscripts[0].isConstant)
+    }
     
     func testParseExtensionDeclaration() throws {
         let type = try parseType("""
@@ -245,6 +271,8 @@ class SwiftClassInterfaceParserTests: XCTestCase {
                 init()
                 @attribute4(someTag:)
                 func f()
+                @attribute5
+                subscript(index: Int) -> String
             }
             """)
         
@@ -252,11 +280,16 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownAttributes[0].name, "attribute1")
         XCTAssertEqual(type.knownProperties[0].knownAttributes.count, 1)
         XCTAssertEqual(type.knownProperties[0].knownAttributes[0].name, "attribute2")
+        XCTAssertNil(type.knownProperties[0].knownAttributes[0].parameters)
         XCTAssertEqual(type.knownConstructors[0].knownAttributes.count, 1)
         XCTAssertEqual(type.knownConstructors[0].knownAttributes[0].name, "attribute3")
+        XCTAssertNil(type.knownConstructors[0].knownAttributes[0].parameters)
         XCTAssertEqual(type.knownMethods[0].knownAttributes.count, 1)
         XCTAssertEqual(type.knownMethods[0].knownAttributes[0].name, "attribute4")
         XCTAssertEqual(type.knownMethods[0].knownAttributes[0].parameters, "someTag:")
+        XCTAssertEqual(type.knownSubscripts[0].knownAttributes.count, 1)
+        XCTAssertEqual(type.knownSubscripts[0].knownAttributes[0].name, "attribute5")
+        XCTAssertNil(type.knownSubscripts[0].knownAttributes[0].parameters)
     }
     
     func testParseAttributesRoundtrip() throws {
@@ -385,7 +418,7 @@ extension SwiftClassInterfaceParserTests {
     
     func parseAttribute(_ string: String,
                         file: String = #file,
-                        line: Int = #line) throws -> SwiftClassInterfaceParser.SwiftRewriterAttribute {
+                        line: Int = #line) throws -> SwiftRewriterAttribute {
         
         do {
             let type =

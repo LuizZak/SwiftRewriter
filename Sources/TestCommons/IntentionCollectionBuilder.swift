@@ -298,7 +298,7 @@ public class FileIntentionBuilder {
     }
     
     public func build() -> FileGenerationIntention {
-        return intention
+        intention
     }
 }
 
@@ -341,7 +341,7 @@ public class FunctionSignatureBuilder {
     }
     
     func build() -> FunctionSignature {
-        return signature
+        signature
     }
 }
 
@@ -353,7 +353,7 @@ public class FunctionBuilder<T: FunctionIntention>: _FunctionBuilder {
     }
     
     public func build() -> T {
-        return target
+        target
     }
 }
 
@@ -374,6 +374,6 @@ public class EnumTypeBuilder {
     }
     
     public func build() -> EnumGenerationIntention {
-        return targetEnum
+        targetEnum
     }
 }

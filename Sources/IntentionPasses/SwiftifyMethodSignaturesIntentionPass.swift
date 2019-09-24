@@ -20,7 +20,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
     
     /// Textual tag this intention pass applies to history tracking entries.
     private var historyTag: String {
-        return "\(SwiftifyMethodSignaturesIntentionPass.self):\(operationsNumber)"
+        "\(SwiftifyMethodSignaturesIntentionPass.self):\(operationsNumber)"
     }
     
     public init() {

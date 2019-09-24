@@ -3,6 +3,6 @@ public class ProtocolPropertyGenerationIntention: PropertyGenerationIntention {
     public var isOptional: Bool = false
     
     public override var optional: Bool {
-        return isOptional
+        isOptional
     }
 }

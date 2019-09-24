@@ -43,7 +43,7 @@ public class SwitchStatement: Statement {
     }
     
     public override var children: [SyntaxNode] {
-        return _childrenNodes
+        _childrenNodes
     }
     
     public init(exp: Expression, cases: [SwitchCase], defaultCase: [Statement]?) {
@@ -85,10 +85,9 @@ public class SwitchStatement: Statement {
     
     @inlinable
     public override func copy() -> SwitchStatement {
-        return
-            SwitchStatement(exp: exp.copy(),
-                            cases: cases.map { $0.copy() },
-                            defaultCase: defaultCase?.map { $0.copy() }).copyMetadata(from: self)
+        SwitchStatement(exp: exp.copy(),
+                        cases: cases.map { $0.copy() },
+                        defaultCase: defaultCase?.map { $0.copy() }).copyMetadata(from: self)
     }
     
     private func reloadChildrenNodes() {
@@ -110,7 +109,7 @@ public class SwitchStatement: Statement {
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        return visitor.visitSwitch(self)
+        visitor.visitSwitch(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
@@ -144,7 +143,7 @@ public class SwitchStatement: Statement {
 public extension Statement {
     @inlinable
     var asSwitch: SwitchStatement? {
-        return cast()
+        cast()
     }
 }
 
@@ -168,7 +167,7 @@ public struct SwitchCase: Codable, Equatable {
     
     @inlinable
     public func copy() -> SwitchCase {
-        return SwitchCase(patterns: patterns.map { $0.copy() },
+        SwitchCase(patterns: patterns.map { $0.copy() },
                           statements: statements.map { $0.copy() })
     }
     

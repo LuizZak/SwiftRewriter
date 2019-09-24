@@ -11,6 +11,12 @@ open class ASTNode {
     /// Original source for this node.
     public var originalSource: Source?
     
+    /// Overriden by subclasses to provide custom short descriptions to be used
+    /// when printing AST nodes for diagnostics
+    public var shortDescription: String {
+        ""
+    }
+    
     /// Children nodes associated with this node
     private(set) public var children: [ASTNode] = []
     
@@ -27,12 +33,12 @@ open class ASTNode {
     
     /// Instantiates a bare ASTNode with a given range.
     /// Defaults to an invalid range
-    public init(_isInNonnullContext: Bool,
+    public init(isInNonnullContext: Bool,
                 location: SourceLocation = .invalid,
                 length: SourceLength = .zero,
                 existsInSource: Bool = true) {
         
-        self.isInNonnullContext = _isInNonnullContext
+        self.isInNonnullContext = isInNonnullContext
         self.location = location
         self.length = length
         self.existsInSource = existsInSource
@@ -101,7 +107,7 @@ open class ASTNode {
     
     /// Gets children of this node of a given type
     public func childrenMatching<T: ASTNode>(type: T.Type = T.self) -> [T] {
-        return children.compactMap { $0 as? T }
+        children.compactMap { $0 as? T }
     }
     
     /// Gets the first child of this `ASTNode` that passes a given predicate.
@@ -121,7 +127,7 @@ open class ASTNode {
     
     /// Gets the first child of this `ASTNode` that is derived from a given type.
     public func firstChild<T: ASTNode>(ofType type: T.Type = T.self) -> T? {
-        return firstChild { _ in true }
+        firstChild { _ in true }
     }
     
     /// Updates the source range by making it the union of all of this node's
@@ -141,12 +147,6 @@ open class ASTNode {
                          columnsAtLastLine: endNode.location.column,
                          utf8Length: endNode.location.utf8Offset - startNode.location.utf8Offset)
     }
-    
-    /// Overriden by subclasses to provide custom short descriptions to be used
-    /// when printing AST nodes for diagnostics
-    public func shortDescription() -> String {
-        return ""
-    }
 }
 
 public extension ASTNode {
@@ -159,7 +159,7 @@ public extension ASTNode {
             
             func _print(_ node: ASTNode) {
                 var nodeTitle = "\(type(of: node))"
-                let description = node.shortDescription()
+                let description = node.shortDescription
                 if !description.isEmpty {
                     nodeTitle += " (\(description))"
                 }
@@ -184,7 +184,7 @@ public extension ASTNode {
 
 /// Describes a node with a default parametered `init` which is a known
 /// base node requirement initializer.
-public protocol InitializableNode {
+public protocol InitializableNode: ASTNode {
     init(isInNonnullContext: Bool)
 }
 

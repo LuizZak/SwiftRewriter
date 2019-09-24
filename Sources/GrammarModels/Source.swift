@@ -31,26 +31,26 @@ public struct InvalidSource: Source {
     }
     
     public func stringIndex(forCharOffset offset: Int) -> String.Index {
-        return InvalidSource._stringIndex
+        InvalidSource._stringIndex
     }
     
     public func charOffset(forStringIndex index: String.Index) -> Int {
-        return 0
+        0
     }
     
     public func utf8Index(forCharOffset offset: Int) -> Int {
-        return 0
+        0
     }
     
     public func isEqual(to other: Source) -> Bool {
-        return other is InvalidSource
+        other is InvalidSource
     }
     
     public func lineNumber(at index: String.Index) -> Int {
-        return 0
+        0
     }
     
     public func columnNumber(at index: String.Index) -> Int {
-        return 0
+        0
     }
 }

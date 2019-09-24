@@ -7,17 +7,17 @@ public final class ExpressionNode: ASTNode {
 public final class MethodBody: ASTNode {
     public var statements: ObjectiveCParser.CompoundStatementContext?
     
-    public override func shortDescription() -> String {
-        return statements?.getText() ?? ""
+    public override var shortDescription: String {
+        statements?.getText() ?? ""
     }
 }
 
 public class MethodDefinition: ASTNode, InitializableNode {
     public var returnType: MethodType? {
-        return firstChild()
+        firstChild()
     }
     public var methodSelector: MethodSelector? {
-        return firstChild()
+        firstChild()
     }
     public var body: MethodBody?
     
@@ -27,7 +27,7 @@ public class MethodDefinition: ASTNode, InitializableNode {
     public var isOptionalMethod: Bool = false
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
     
     public override func addChild(_ node: ASTNode) {
@@ -48,7 +48,7 @@ public class MethodSelector: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
     
     public enum SelectorKind {
@@ -67,27 +67,27 @@ public final class KeywordDeclarator: ASTNode, InitializableNode {
         return children.first
     }
     public var type: MethodType? {
-        return firstChild()
+        firstChild()
     }
     public var identifier: Identifier? {
-        return childrenMatching().last
+        childrenMatching().last
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
 public final class MethodType: ASTNode, InitializableNode {
     public var nullabilitySpecifiers: [NullabilitySpecifier] {
-        return childrenMatching()
+        childrenMatching()
     }
     public var type: TypeNameNode? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 

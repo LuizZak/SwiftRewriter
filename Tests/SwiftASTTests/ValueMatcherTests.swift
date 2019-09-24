@@ -228,6 +228,16 @@ class ValueMatcherTests: XCTestCase {
         XCTAssert(rule.matches(123))
         XCTAssertEqual(output, 123)
     }
+    
+    func testCreateMatcherWithKeypath() {
+        let rule =
+            ValueMatcher<TestNode>()
+                .stringField
+                .count == 3
+        
+        XCTAssert(rule.matches(TestNode(intField: 123, stringField: "123")))
+        XCTAssertFalse(rule.matches(TestNode(intField: 123, stringField: "")))
+    }
 }
 
 private class TestNodeWithField: SyntaxNode {

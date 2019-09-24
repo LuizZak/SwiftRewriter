@@ -12,7 +12,7 @@ public class StdoutWriterOutput: WriterOutput {
     }
     
     public func createFile(path: String) -> FileOutput {
-        return StdFileOutput(path: path, colorize: colorize)
+        StdFileOutput(path: path, colorize: colorize)
     }
     
     private class StdFileOutput: FileOutput {

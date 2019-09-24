@@ -7,7 +7,7 @@ import Intentions
 public class CodeDefinition {
     public var name: String {
         get {
-            return kind.name
+            kind.name
         }
         set {
             kind.name = newValue
@@ -94,13 +94,13 @@ public extension CodeDefinition {
     /// Creates a set of code definitions that correspond to the parameters of a
     /// given function signature
     static func forParameters(inSignature signature: FunctionSignature) -> [CodeDefinition] {
-        return forParameters(signature.parameters)
+        forParameters(signature.parameters)
     }
     
     /// Creates a set of code definitions that correspond to the given set of
     /// parameters
     static func forParameters(_ parameters: [ParameterSignature]) -> [CodeDefinition] {
-        return parameters.enumerated().map { (i, param) in
+        parameters.enumerated().map { (i, param) in
             LocalCodeDefinition(variableNamed: param.name,
                                 type: param.type,
                                 location: .parameter(index: i))
@@ -110,7 +110,7 @@ public extension CodeDefinition {
     /// Creates a set of code definitions that correspond to the given set of
     /// block parameters
     static func forParameters(_ parameters: [BlockParameter]) -> [CodeDefinition] {
-        return parameters.enumerated().map { (i, param) in
+        parameters.enumerated().map { (i, param) in
             LocalCodeDefinition(variableNamed: param.name,
                                 type: param.type,
                                 location: .parameter(index: i))
@@ -121,7 +121,7 @@ public extension CodeDefinition {
     /// `type`.
     /// Used for creating self intrinsics for member bodies.
     static func forSelf(type: SwiftType, isStatic: Bool) -> CodeDefinition {
-        return LocalCodeDefinition(constantNamed: "self",
+        LocalCodeDefinition(constantNamed: "self",
                                    type: isStatic ? .metatype(for: type) : type,
                                    location: isStatic ? .staticSelf : .instanceSelf)
     }
@@ -130,14 +130,14 @@ public extension CodeDefinition {
     /// `super`.
     /// Used for creating self intrinsics for member bodies.
     static func forSuper(type: SwiftType, isStatic: Bool) -> CodeDefinition {
-        return LocalCodeDefinition(constantNamed: "super",
+        LocalCodeDefinition(constantNamed: "super",
                                    type: isStatic ? .metatype(for: type) : type,
                                    location: isStatic ? .staticSelf : .instanceSelf)
     }
     
     /// Creates a code definition for the setter of a setter method body.
     static func forSetterValue(named name: String, type: SwiftType) -> CodeDefinition {
-        return LocalCodeDefinition(constantNamed: name,
+        LocalCodeDefinition(constantNamed: name,
                                    type: type,
                                    location: .setterValue)
     }
@@ -160,7 +160,7 @@ public extension CodeDefinition {
     }
     
     static func forVarDeclStatement(_ stmt: VariableDeclarationsStatement) -> [LocalCodeDefinition] {
-        return stmt.decl.enumerated().map { (i, decl) in
+        stmt.decl.enumerated().map { (i, decl) in
             CodeDefinition
                 .forLocalIdentifier(
                     decl.identifier,
@@ -172,15 +172,15 @@ public extension CodeDefinition {
     }
     
     static func forGlobalFunction(_ function: GlobalFunctionGenerationIntention) -> CodeDefinition {
-        return GlobalIntentionCodeDefinition(intention: function)
+        GlobalIntentionCodeDefinition(intention: function)
     }
     
     static func forGlobalVariable(_ variable: GlobalVariableGenerationIntention) -> CodeDefinition {
-        return GlobalIntentionCodeDefinition(intention: variable)
+        GlobalIntentionCodeDefinition(intention: variable)
     }
     
     static func forGlobalFunction(signature: FunctionSignature) -> CodeDefinition {
-        return GlobalCodeDefinition(functionSignature: signature)
+        GlobalCodeDefinition(functionSignature: signature)
     }
     
     static func forGlobalVariable(name: String, isConstant: Bool, type: SwiftType) -> CodeDefinition {
@@ -192,11 +192,11 @@ public extension CodeDefinition {
     }
     
     static func forKnownMember(_ knownMember: KnownMember) -> CodeDefinition {
-        return KnownMemberCodeDefinition(knownMember: knownMember)
+        KnownMemberCodeDefinition(knownMember: knownMember)
     }
     
     static func forType(named name: String) -> TypeCodeDefinition {
-        return TypeCodeDefinition(constantNamed: name,
+        TypeCodeDefinition(constantNamed: name,
                                   type: .metatype(for: .typeName(name)))
     }
 }
@@ -225,18 +225,18 @@ public class TypeCodeDefinition: CodeDefinition {
 }
 extension TypeCodeDefinition: Equatable {
     public static func == (lhs: TypeCodeDefinition, rhs: TypeCodeDefinition) -> Bool {
-        return lhs.name == rhs.name
+        lhs.name == rhs.name
     }
 }
 
 public class GlobalCodeDefinition: CodeDefinition {
     fileprivate func isEqual(to other: GlobalCodeDefinition) -> Bool {
-        return kind == other.kind
+        kind == other.kind
     }
 }
 extension GlobalCodeDefinition: Equatable {
     public static func == (lhs: GlobalCodeDefinition, rhs: GlobalCodeDefinition) -> Bool {
-        return lhs.isEqual(to: rhs)
+        lhs.isEqual(to: rhs)
     }
 }
 
@@ -314,30 +314,6 @@ public class LocalCodeDefinition: CodeDefinition {
         case forLoop(ForStatement, PatternLocation)
         case ifLet(IfStatement, PatternLocation)
         
-        public static func == (lhs: DefinitionLocation, rhs: DefinitionLocation) -> Bool {
-            switch (lhs, rhs) {
-            case (.instanceSelf, .instanceSelf),
-                 (.staticSelf, .staticSelf),
-                 (.setterValue, .setterValue):
-                return true
-                
-            case let (.parameter(l), .parameter(r)):
-                return l == r
-                
-            case let (.variableDeclaration(d1, i1), .variableDeclaration(d2, i2)):
-                return d1 === d2 && i1 == i2
-                
-            case let (.forLoop(f1, loc1), .forLoop(f2, loc2)):
-                return f1 === f2 && loc1 == loc2
-                
-            case let (.ifLet(if1, loc1), .ifLet(if2, loc2)):
-                return if1 === if2 && loc1 == loc2
-                
-            default:
-                return false
-            }
-        }
-        
         public func hash(into hasher: inout Hasher) {
             switch self {
             case .instanceSelf:
@@ -374,7 +350,7 @@ public class LocalCodeDefinition: CodeDefinition {
 
 extension LocalCodeDefinition: Equatable {
     public static func == (lhs: LocalCodeDefinition, rhs: LocalCodeDefinition) -> Bool {
-        return lhs === rhs || lhs.location == rhs.location
+        lhs === rhs || lhs.location == rhs.location
     }
 }
 extension LocalCodeDefinition: Hashable {

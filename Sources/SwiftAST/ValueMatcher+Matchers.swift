@@ -1,87 +1,65 @@
 
 
-// FIX-ME: Inline again once Linux bug is corrected
-// https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-// @inlinable
+@inlinable
 public func not<T>(_ rule: ValueMatcher<T>) -> ValueMatcher<T> {
-    return ValueMatcher().match(closure: { !rule.matches($0) })
+    ValueMatcher().match(closure: { !rule.matches($0) })
 }
 
-// FIX-ME: Inline again once Linux bug is corrected
-// https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-// @inlinable
+@inlinable
 public func not<T>(_ rule: MatchRule<T>) -> MatchRule<T> {
-    return .negated(rule)
+    .negated(rule)
 }
 
-// FIX-ME: Inline again once Linux bug is corrected
-// https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-// @inlinable
+@inlinable
 public func equals<T: Equatable>(_ value: T) -> MatchRule<T> {
-    return MatchRule.equals(value)
+    MatchRule.equals(value)
 }
 
-// FIX-ME: Inline again once Linux bug is corrected
-// https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-// @inlinable
+@inlinable
 public func equals<T: Equatable>(_ value: T?) -> MatchRule<T> {
-    return MatchRule.equalsNullable(value)
+    MatchRule.equalsNullable(value)
 }
 
-// FIX-ME: Inline again once Linux bug is corrected
-// https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-// @inlinable
+@inlinable
 public func lazyEquals<T: Equatable>(_ value: @autoclosure @escaping () -> T) -> MatchRule<T> {
-    return MatchRule.lazyEquals(value)
+    MatchRule.lazyEquals(value)
 }
 
-// FIX-ME: Inline again once Linux bug is corrected
-// https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-// @inlinable
+@inlinable
 public func lazyEquals<T: Equatable>(_ value: @autoclosure @escaping () -> T?) -> MatchRule<T> {
-    return MatchRule.lazyEqualsNullable(value)
+    MatchRule.lazyEqualsNullable(value)
 }
 
-// FIX-ME: Inline again once Linux bug is corrected
-// https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-// @inlinable
+@inlinable
 public func isNil<T>() -> MatchRule<T?> {
-    return MatchRule.equals(nil)
+    MatchRule.equals(nil)
 }
 
-// FIX-ME: Inline again once Linux bug is corrected
-// https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-// @inlinable
+@inlinable
 public func hasCount<C: Collection>(_ count: MatchRule<Int>) -> ValueMatcher<C> {
-    return ValueMatcher().keyPath(\.count, count)
+    ValueMatcher().keyPath(\.count, count)
 }
 
 public extension ValueMatcher where T: Equatable {
-    // FIX-ME: Inline again once Linux bug is corrected
-    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-    // @inlinable
+    @inlinable
     static func equals(to value: T) -> ValueMatcher<T> {
-        return ValueMatcher().match(if: SwiftAST.equals(value))
+        ValueMatcher().match(if: SwiftAST.equals(value))
     }
     
 }
 
 public extension ValueMatcher where T: Collection {
-    // FIX-ME: Inline again once Linux bug is corrected
-    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-    // @inlinable
+    @inlinable
     func hasCount(_ count: MatchRule<Int>) -> ValueMatcher<T> {
-        return keyPath(\.count, count)
+        keyPath(\.count, count)
     }
     
 }
 
 public extension ValueMatcher where T: Collection {
-    // FIX-ME: Inline again once Linux bug is corrected
-    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-    // @inlinable
+    @inlinable
     func atIndex(_ index: T.Index, matcher: ValueMatcher<T.Element>) -> ValueMatcher<T> {
-        return match { value in
+        match { value in
             guard index < value.endIndex else {
                 return false
             }
@@ -93,18 +71,14 @@ public extension ValueMatcher where T: Collection {
 }
 
 public extension ValueMatcher where T: Collection, T.Element: Equatable {
-    // FIX-ME: Inline again once Linux bug is corrected
-    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-    // @inlinable
+    @inlinable
     func atIndex(_ index: T.Index, equals value: T.Element) -> ValueMatcher<T> {
-        return atIndex(index, rule: .equals(value))
+        atIndex(index, rule: .equals(value))
     }
     
-    // FIX-ME: Inline again once Linux bug is corrected
-    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-    // @inlinable
+    @inlinable
     func atIndex(_ index: T.Index, rule: MatchRule<T.Element>) -> ValueMatcher<T> {
-        return match { value in
+        match { value in
             guard index < value.endIndex else {
                 return false
             }
@@ -116,18 +90,14 @@ public extension ValueMatcher where T: Collection, T.Element: Equatable {
 }
 
 public extension ValueMatcher {
-    // FIX-ME: Inline again once Linux bug is corrected
-    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-    // @inlinable
+    @inlinable
     static prefix func ! (lhs: ValueMatcher) -> ValueMatcher {
-        return not(lhs)
+        not(lhs)
     }
 }
 
 public extension MatchRule {
-    // FIX-ME: Inline again once Linux bug is corrected
-    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-    // @inlinable
+    @inlinable
     static prefix func ! (lhs: MatchRule) -> MatchRule {
         switch lhs {
         case .negated(let rule):
@@ -139,17 +109,13 @@ public extension MatchRule {
 }
 
 public extension ValueMatcher {
-    // FIX-ME: Inline again once Linux bug is corrected
-    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-    // @inlinable
+    @inlinable
     static func == (lhs: Bool, rhs: ValueMatcher) -> ValueMatcher {
-        return lhs ? rhs : !rhs
+        lhs ? rhs : !rhs
     }
     
-    // FIX-ME: Inline again once Linux bug is corrected
-    // https://dev.azure.com/luiz-fs/SwiftRewriter/_build/results?buildId=375&view=logs&jobId=0da5d1d9-276d-5173-c4c4-9d4d4ed14fdb&taskId=8ef82b3b-1feb-5bbd-06f6-b1f7b5467f03&lineStart=71&lineEnd=71&colStart=243&colEnd=301
-    // @inlinable
+    @inlinable
     static func == (lhs: ValueMatcher, rhs: Bool) -> ValueMatcher {
-        return rhs ? lhs : !lhs
+        rhs ? lhs : !lhs
     }
 }

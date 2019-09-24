@@ -11,7 +11,7 @@ public class VariableDeclarationsStatement: Statement {
     }
     
     public override var children: [SyntaxNode] {
-        return decl.compactMap { $0.initialization }
+        decl.compactMap { $0.initialization }
     }
     
     public init(decl: [StatementVariableDeclaration]) {
@@ -38,12 +38,12 @@ public class VariableDeclarationsStatement: Statement {
     
     @inlinable
     public override func copy() -> VariableDeclarationsStatement {
-        return VariableDeclarationsStatement(decl: decl.map { $0.copy() }).copyMetadata(from: self)
+        VariableDeclarationsStatement(decl: decl.map { $0.copy() }).copyMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        return visitor.visitVariableDeclarations(self)
+        visitor.visitVariableDeclarations(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
@@ -70,7 +70,7 @@ public class VariableDeclarationsStatement: Statement {
 public extension Statement {
     @inlinable
     var asVariableDeclaration: VariableDeclarationsStatement? {
-        return cast()
+        cast()
     }
 }
 
@@ -82,7 +82,7 @@ public struct StatementVariableDeclaration: Codable, Equatable {
     
     public var type: SwiftType {
         get {
-            return storage.type
+            storage.type
         }
         set {
             storage.type = newValue
@@ -90,7 +90,7 @@ public struct StatementVariableDeclaration: Codable, Equatable {
     }
     public var ownership: Ownership {
         get {
-            return storage.ownership
+            storage.ownership
         }
         set {
             storage.ownership = newValue
@@ -98,7 +98,7 @@ public struct StatementVariableDeclaration: Codable, Equatable {
     }
     public var isConstant: Bool {
         get {
-            return storage.isConstant
+            storage.isConstant
         }
         set {
             storage.isConstant = newValue

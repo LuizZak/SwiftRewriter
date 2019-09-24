@@ -159,11 +159,11 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
     }
     
     public override func visitIf(_ stmt: IfStatement) -> Statement {
-        return super.visitIf(stmt)
+        super.visitIf(stmt)
     }
     
     public override func visitWhile(_ stmt: WhileStatement) -> Statement {
-        return super.visitWhile(stmt)
+        super.visitWhile(stmt)
     }
     
     public override func visitUnary(_ exp: UnaryExpression) -> Expression {

@@ -1,6 +1,4 @@
-#if canImport(Foundation)
 import Foundation
-#endif
 
 public final class IntentionSerializer {
     
@@ -190,21 +188,17 @@ public final class IntentionSerializer {
     }
 }
 
-#if canImport(Foundation)
-
 public extension IntentionSerializer {
     
     static func encode(intentions: IntentionCollection,
                        encoder: JSONEncoder) throws -> Data {
         
-        return try encoder.encode(intentions)
+        try encoder.encode(intentions)
     }
     
     static func decodeIntentions(decoder: JSONDecoder,
                                  data: Data) throws -> IntentionCollection {
         
-        return try decoder.decode(IntentionCollection.self, from: data)
+        try decoder.decode(IntentionCollection.self, from: data)
     }
 }
-
-#endif

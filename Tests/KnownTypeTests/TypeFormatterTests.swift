@@ -91,6 +91,18 @@ class TypeFormatterTests: XCTestCase {
         )
     }
     
+    func testAsStringSubscript() {
+        let type =
+            KnownTypeBuilder(typeName: "A")
+                .subscription(indexType: .int, type: .string)
+                .build()
+        
+        XCTAssertEqual(
+            "A.subscript(index: Int) -> String",
+            TypeFormatter.asString(subscript: type.knownSubscripts[0], ofType: type)
+        )
+    }
+    
     func testAsStringExtension() {
         let extA = ClassExtensionGenerationIntention(typeName: "A")
         let extB = ClassExtensionGenerationIntention(typeName: "B")
@@ -98,44 +110,6 @@ class TypeFormatterTests: XCTestCase {
         
         XCTAssertEqual("extension A", TypeFormatter.asString(extension: extA))
         XCTAssertEqual("extension B (Category)", TypeFormatter.asString(extension: extB))
-    }
-    
-    func testAsStringFunctionSignature() {
-        let sig1 = FunctionSignature(name: "abc", parameters: [],
-                                     returnType: .int, isStatic: false)
-        
-        let sig2 = FunctionSignature(name: "abc",
-                                     parameters: [ParameterSignature(label: "a", name: "b", type: .float)],
-                                     returnType: .void,
-                                     isStatic: false)
-        
-        let sig3 = FunctionSignature(name: "abc",
-                                     parameters: [ParameterSignature(label: "a", name: "b", type: .float),
-                                                  ParameterSignature(label: "c", name: "c", type: .int)],
-                                     returnType: .void,
-                                     isStatic: true)
-        
-        XCTAssertEqual("abc() -> Int", TypeFormatter.asString(signature: sig1, includeName: true))
-        XCTAssertEqual("() -> Int", TypeFormatter.asString(signature: sig1, includeName: false))
-        
-        XCTAssertEqual("abc(a b: Float)", TypeFormatter.asString(signature: sig2, includeName: true))
-        XCTAssertEqual("(a b: Float)", TypeFormatter.asString(signature: sig2, includeName: false))
-        
-        XCTAssertEqual("static abc(a b: Float, c: Int)", TypeFormatter.asString(signature: sig3, includeName: true))
-        XCTAssertEqual("static (a b: Float, c: Int)", TypeFormatter.asString(signature: sig3, includeName: false))
-        XCTAssertEqual("(a b: Float, c: Int)", TypeFormatter.asString(signature: sig3, includeName: false, includeStatic: false))
-        
-        // Test default values for `includeName`
-        XCTAssertEqual("() -> Int", TypeFormatter.asString(signature: sig1))
-        XCTAssertEqual("(a b: Float)", TypeFormatter.asString(signature: sig2))
-        XCTAssertEqual("static (a b: Float, c: Int)", TypeFormatter.asString(signature: sig3))
-    }
-    
-    func testAsStringParameterDefaultValue() {
-        let parameters = [
-            ParameterSignature(label: "label", name: "name", type: .int, hasDefaultValue: true)
-        ]
-        XCTAssertEqual("(label name: Int = default)", TypeFormatter.asString(parameters: parameters))
     }
     
     func testAsStringKnownType() {
@@ -160,6 +134,11 @@ class TypeFormatterTests: XCTestCase {
                       accessor: .getter,
                       attributes: [KnownAttribute(name: "attr", parameters: nil)],
                       annotations: ["Annotation"])
+            .subscription(indexType: .int,
+                          type: .string,
+                          isConstant: true,
+                          attributes: [KnownAttribute(name: "attr", parameters: nil)],
+                          annotations: ["Annotation"])
             .protocolConformance(protocolName: "Protocol")
             .method(withSignature: FunctionSignature(
                 name: "methodA",
@@ -186,6 +165,9 @@ class TypeFormatterTests: XCTestCase {
                 
                 // Annotation
                 @attr var readOnlyProp: A { get }
+                
+                // Annotation
+                @attr subscript(index: Int) -> String { get }
                 
                 init()
                 

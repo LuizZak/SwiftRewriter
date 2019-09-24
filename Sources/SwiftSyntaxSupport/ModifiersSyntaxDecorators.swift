@@ -139,7 +139,7 @@ class PropertySetterAccessModifiersDecorator: ModifiersSyntaxDecorator {
             return []
         }
         
-        guard let setterLevel = prop.setterAccessLevel, prop.accessLevel.isMoreVisible(than: setterLevel) else {
+        guard let setterLevel = prop.setterAccessLevel, prop.accessLevel.isMoreAccessible(than: setterLevel) else {
             return []
         }
         guard let setterAccessLevel = _accessModifierFor(accessLevel: setterLevel, omitInternal: false) else {

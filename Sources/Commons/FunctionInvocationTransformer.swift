@@ -12,8 +12,8 @@ import SwiftAST
 ///     toSwiftFunction: "CGPoint",
 ///     firstArgumentBecomesInstance: false,
 ///     arguments: [
-///         .labeled("x", .asIs),
-///         .labeled("y", .asIs)
+///         .labeled("x"),
+///         .labeled("y")
 ///     ])
 /// ```
 ///
@@ -73,8 +73,8 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
         case .propertyGetter:
             requiredArgumentCount = 1
             
-        case .propertySetter(_, let argument):
-            requiredArgumentCount = 2 + (argument.maxArgumentReferenced ?? 0)
+        case .propertySetter(_):
+            requiredArgumentCount = 2
         }
     }
     
@@ -126,12 +126,9 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
     /// the remaining arguments from the function into the final value on the right
     /// side of the assignment expression.
     public convenience init(objcFunctionName: String,
-                            toSwiftPropertySetter swiftProperty: String,
-                            argumentTransformer: ArgumentRewritingStrategy) {
+                            toSwiftPropertySetter swiftProperty: String) {
         
-        let target =
-            Target.propertySetter(swiftProperty,
-                                  argumentTransformer: argumentTransformer)
+        let target = Target.propertySetter(swiftProperty)
         
         self.init(fromObjcFunctionName: objcFunctionName, destinationMember: target)
     }
@@ -188,16 +185,14 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
             
             return functionCall.arguments[0].expression.copy().dot(name).typed(postfix.resolvedType)
             
-        case let .propertySetter(name, transformer):
-            if functionCall.arguments.count != 1 + transformer.argumentConsumeCount {
+        case let .propertySetter(name):
+            if functionCall.arguments.count != 2 {
                 return nil
             }
             
             let arguments = Array(functionCall.arguments.dropFirst())
             
-            guard let rhs = transformer.transform(argumentIndex: 0, arguments: arguments) else {
-                return nil
-            }
+            let rhs = arguments[0]
             
             let exp = functionCall.arguments[0].expression.copy().dot(name)
             exp.resolvedType = postfix.resolvedType
@@ -264,8 +259,8 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
     
     public enum Target {
         case propertyGetter(String)
-        
-        case propertySetter(String, argumentTransformer: ArgumentRewritingStrategy)
+
+        case propertySetter(String)
         
         ///   - firstArgumentBecomesInstance: Whether to convert the first argument
         /// of the call into a target instance, such that the free function call
@@ -276,7 +271,7 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
         public var memberName: String {
             switch self {
             case .propertyGetter(let name),
-                 .propertySetter(let name, _),
+                 .propertySetter(let name),
                  .method(let name, _, _):
                 return name
             }
@@ -286,10 +281,10 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
 
 extension Sequence where Element == FunctionArgument {
     public func hasLabeledArguments() -> Bool {
-        return any { $0.isLabeled }
+        any { $0.isLabeled }
     }
     
     public func argumentLabels() -> [String?] {
-        return map { $0.label }
+        map { $0.label }
     }
 }

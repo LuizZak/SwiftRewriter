@@ -55,15 +55,15 @@ public extension IntentionHistory {
     
     @discardableResult
     func recordCreation(description: String) -> IntentionHistoryEntryEcho {
-        return record(IntentionHistoryEntry(tag: "Creation",
-                                            description: description))
+        record(IntentionHistoryEntry(tag: "Creation",
+                                     description: description))
     }
     
     @discardableResult
     func recordChange(tag: String,
                              description: String) -> IntentionHistoryEntryEcho {
         
-        return recordChange(tag: tag, description: description, relatedIntentions: [])
+        recordChange(tag: tag, description: description, relatedIntentions: [])
     }
     
     @discardableResult
@@ -71,8 +71,8 @@ public extension IntentionHistory {
                              description: String,
                              relatedIntentions: [Intention]) -> IntentionHistoryEntryEcho {
         
-        return record(IntentionHistoryEntry(tag: tag,
-                                            description: description))
+        record(IntentionHistoryEntry(tag: tag,
+                                     description: description))
     }
     
     @discardableResult
@@ -80,8 +80,8 @@ public extension IntentionHistory {
                             tag: String,
                             description: String) -> IntentionHistoryEntryEcho {
         
-        return record(IntentionHistoryEntry(tag: tag,
-                                            description: description))
+        record(IntentionHistoryEntry(tag: tag,
+                                     description: description))
     }
     
     @discardableResult
@@ -89,8 +89,8 @@ public extension IntentionHistory {
                             tag: String,
                             description: String) -> IntentionHistoryEntryEcho {
         
-        return record(IntentionHistoryEntry(tag: tag,
-                                            description: description))
+        record(IntentionHistoryEntry(tag: tag,
+                                     description: description))
     }
 }
 

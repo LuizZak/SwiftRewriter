@@ -41,7 +41,7 @@ public class MemberBuilder<T: MemberGenerationIntention>: DeclarationBuilder<T> 
     }
     
     public func build() -> T {
-        return targetMember
+        targetMember
     }
 }
 
@@ -64,7 +64,7 @@ public extension MemberBuilder where T: InitGenerationIntention {
 extension MemberBuilder: _FunctionBuilder where T: FunctionIntention {
     public typealias FunctionType = T
     
-    public var target: FunctionType { get { return targetMember } set { targetMember = newValue } }
+    public var target: FunctionType { get { targetMember } set { targetMember = newValue } }
 }
 
 public extension MemberBuilder where T: MutableValueStorageIntention {

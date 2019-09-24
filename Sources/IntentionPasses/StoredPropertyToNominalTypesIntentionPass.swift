@@ -16,7 +16,7 @@ public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
     
     /// Textual tag this intention pass applies to history tracking entries.
     private var historyTag: String {
-        return "\(StoredPropertyToNominalTypesIntentionPass.self):\(operationsNumber)"
+        "\(StoredPropertyToNominalTypesIntentionPass.self):\(operationsNumber)"
     }
     
     private var context: IntentionPassContext!

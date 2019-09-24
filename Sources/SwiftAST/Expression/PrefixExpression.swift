@@ -5,15 +5,15 @@ public class PrefixExpression: Expression {
     }
     
     public override var subExpressions: [Expression] {
-        return [exp]
+        [exp]
     }
     
     public override var isLiteralExpression: Bool {
-        return exp.isLiteralExpression
+        exp.isLiteralExpression
     }
     
     public override var literalExpressionKind: LiteralExpressionKind? {
-        return exp.literalExpressionKind
+        exp.literalExpressionKind
     }
     
     public override var description: String {
@@ -47,12 +47,12 @@ public class PrefixExpression: Expression {
     
     @inlinable
     public override func copy() -> PrefixExpression {
-        return PrefixExpression(op: op, exp: exp.copy()).copyTypeAndMetadata(from: self)
+        PrefixExpression(op: op, exp: exp.copy()).copyTypeAndMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitPrefix(self)
+        visitor.visitPrefix(self)
     }
     
     public override func encode(to encoder: Encoder) throws {
@@ -89,6 +89,6 @@ public class PrefixExpression: Expression {
 extension Expression {
     @inlinable
     public var asPrefix: PrefixExpression? {
-        return cast()
+        cast()
     }
 }

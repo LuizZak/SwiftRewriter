@@ -154,7 +154,7 @@ extension CoreGraphicsExpressionPass {
     
     func createBasicTransformers() {
         func typing(as type: SwiftType) -> ArgumentRewritingStrategy {
-            return .transformed({ $0.typed(expected: type) }, .asIs)
+            .transformed({ $0.typed(expected: type) })
         }
         
         // UIEdgeInsetsMake(<top>, <left>, <bottom>, <right>)
@@ -423,19 +423,17 @@ extension CoreGraphicsExpressionPass {
 
         makeCGContextCall("CGContextAddArc", swiftName: "addArc",
             arguments: [.labeled("center", .mergingArguments(arg0: 0, arg1: 1, toCGPoint)),
-                        .labeled("radius", .asIs),
-                        .labeled("startAngle", .asIs),
-                        .labeled("endAngle", .asIs),
+                        .labeled("radius"),
+                        .labeled("startAngle"),
+                        .labeled("endAngle"),
                         .labeled("clockwise",
-                                 .transformed({ $0.binary(op: .equals, rhs: .constant(1)) },
-                                              .asIs
-                            ))]
+                                 .transformed({ $0.binary(op: .equals, rhs: .constant(1)) }))]
         )
 
         makeCGContextCall("CGContextAddArcToPoint", swiftName: "addArc",
             arguments: [.labeled("tangent1End", .mergingArguments(arg0: 0, arg1: 1, toCGPoint)),
                         .labeled("tangent2End", .mergingArguments(arg0: 2, arg1: 3, toCGPoint)),
-                        .labeled("radius", .asIs)]
+                        .labeled("radius")]
         )
 
         makeCGContextCall("CGContextAddPath", swiftName: "addPath",
@@ -654,7 +652,7 @@ extension CoreGraphicsExpressionPass {
         )
 
         makeCGContextCall("CGContextBeginPage", swiftName: "beginPage",
-            arguments: [.labeled("mediaBox", .asIs)]
+            arguments: [.labeled("mediaBox")]
         )
 
         makeCGContextCall("CGContextEndPage", swiftName: "endPage")

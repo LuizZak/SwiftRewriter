@@ -8,15 +8,15 @@ public class OpenGLESGlobalsProvider: GlobalsProvider {
     }
     
     public func knownTypeProvider() -> KnownTypeProvider {
-        return CollectionKnownTypeProvider(knownTypes: OpenGLESGlobalsProvider.provider.types)
+        CollectionKnownTypeProvider(knownTypes: OpenGLESGlobalsProvider.provider.types)
     }
     
     public func typealiasProvider() -> TypealiasProvider {
-        return CollectionTypealiasProvider(aliases: OpenGLESGlobalsProvider.provider.typealiases)
+        CollectionTypealiasProvider(aliases: OpenGLESGlobalsProvider.provider.typealiases)
     }
     
     public func definitionsSource() -> DefinitionsSource {
-        return OpenGLESGlobalsProvider.provider.definitions
+        OpenGLESGlobalsProvider.provider.definitions
     }
 }
 

@@ -100,28 +100,28 @@ public enum DirectedGraphVisitElement<E: DirectedGraphEdge, N: DirectedGraphNode
 public extension DirectedGraph {
     @inlinable
     func areEdgesEqual(_ edge1: Edge, _ edge2: Edge) -> Bool {
-        return areNodesEqual(startNode(for: edge1), startNode(for: edge2))
+        areNodesEqual(startNode(for: edge1), startNode(for: edge2))
             && areNodesEqual(endNode(for: edge1), endNode(for: edge2))
     }
     
     @inlinable
     func allEdges(for node: Node) -> [Edge] {
-        return edges(towards: node) + edges(from: node)
+        edges(towards: node) + edges(from: node)
     }
     
     @inlinable
     func nodesConnected(from node: Node) -> [Node] {
-        return edges(from: node).map(self.endNode(for:))
+        edges(from: node).map(self.endNode(for:))
     }
     
     @inlinable
     func nodesConnected(towards node: Node) -> [Node] {
-        return edges(towards: node).map(self.startNode(for:))
+        edges(towards: node).map(self.startNode(for:))
     }
     
     @inlinable
     func allNodesConnected(to node: Node) -> [Node] {
-        return nodesConnected(towards: node) + nodesConnected(from: node)
+        nodesConnected(towards: node) + nodesConnected(from: node)
     }
     
     /// Performs a depth-first visiting of this directed graph
@@ -231,7 +231,7 @@ public protocol DirectedGraphNode: Hashable {
 
 public extension DirectedGraphEdge where Self: AnyObject {
     static func == (lhs: Self, rhs: Self) -> Bool {
-        return lhs === rhs
+        lhs === rhs
     }
     
     func hash(into hasher: inout Hasher) {
@@ -241,7 +241,7 @@ public extension DirectedGraphEdge where Self: AnyObject {
 
 public extension DirectedGraphNode where Self: AnyObject {
     static func == (lhs: Self, rhs: Self) -> Bool {
-        return lhs === rhs
+        lhs === rhs
     }
     
     func hash(into hasher: inout Hasher) {

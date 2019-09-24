@@ -333,35 +333,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         let exp = Expression.identifier("value").sub(.constant("Not an integer!"))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "value", type: .nsArray)
-            .resolve()
-            .thenAssertExpression(resolvedAs: .errorType)
-    }
-    
-    func testSubscriptionInNSArray() {
-        let exp = Expression.identifier("value").sub(.constant(1))
-        
-        startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "value", type: .nsArray)
-            .resolve()
-            .thenAssertExpression(resolvedAs: .any)
-        
-        startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "value", type: .typeName("NSMutableArray"))
-            .resolve()
-            .thenAssertExpression(resolvedAs: .any)
-    }
-    
-    func testSubscriptionInNSArrayWithNonInteger() {
-        let exp = Expression.identifier("value").sub(.constant("Not an integer!"))
-        
-        startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "value", type: .nsArray)
-            .resolve()
-            .thenAssertExpression(resolvedAs: .errorType)
-        
-        startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "value", type: .typeName("NSMutableArray"))
+            .definingLocal(name: "value", type: .array(.string))
             .resolve()
             .thenAssertExpression(resolvedAs: .errorType)
     }
@@ -374,21 +346,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(resolvedAs: .optional(.string))
     }
-    
-    func testSubscriptionInNSDictionary() {
-        let exp = Expression.identifier("value").sub(.constant("abc"))
-        
-        startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "value", type: .nsDictionary)
-            .resolve()
-            .thenAssertExpression(resolvedAs: .optional(.any))
-        
-        startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "value", type: .typeName("NSMutableDictionary"))
-            .resolve()
-            .thenAssertExpression(resolvedAs: .optional(.any))
-    }
-    
+
     func testIdentifier() {
         let definition =
             CodeDefinition
@@ -508,36 +466,6 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .int)
     }
     
-    func testForLoopArrayTypeResolving_NSArray() {
-        // Iterating over an NSArray should produce `Any` values
-        
-        let exp = Expression.identifier("")
-        exp.resolvedType = .nsArray
-        
-        let stmt: ForStatement =
-            .for(.identifier("i"), exp, body: [])
-        
-        startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .usingCompoundedType(FoundationCompoundTypes.nsArray.create())
-            .usingCompoundedType(FoundationCompoundTypes.nsMutableArray.create())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .any)
-    }
-
-    func testForLoopArrayTypeResolving_NSMutableArray() {
-        // Iterating over an NSMutableArray should produce `Any` values
-        
-        let exp = Expression.identifier("")
-        exp.resolvedType = .typeName("NSMutableArray")
-        
-        let stmt: ForStatement =
-            .for(.identifier("i"), exp, body: [])
-        
-        startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .usingCompoundedType(FoundationCompoundTypes.nsArray.create())
-            .usingCompoundedType(FoundationCompoundTypes.nsMutableArray.create())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .any)
-    }
-    
     func testForLoopArrayTypeResolving_OpenRange() {
         // Iterating over an open range of integers should produce `Int` values
         
@@ -647,6 +575,23 @@ class ExpressionTypeResolverTests: XCTestCase {
             .definingType(Atype)
             .resolve()
             .thenAssertExpression(resolvedAs: .errorType)
+    }
+    
+    func testSubscriptLookup() {
+        // a[b]
+        let exp = Expression.identifier("a").sub(.identifier("b"))
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(named: "A") { builder in
+                return
+                    builder
+                        .subscription(indexType: .int, type: .int)
+                        .build()
+            }
+            .definingLocal(name: "b", type: .int)
+            .definingLocal(name: "a", type: .typeName("A"))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .int)
     }
     
     func testOptionalAccess() {
