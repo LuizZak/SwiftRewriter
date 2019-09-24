@@ -10,7 +10,7 @@ public class ObjcLexer: TokenizerLexer<FullToken<TokenType>> {
     }
     
     func startRange() -> RangeMarker {
-        return _RangeMarker(objcLexer: self)
+        _RangeMarker(objcLexer: self)
     }
     
     /// Current lexer's location as a `SourceLocation`.
@@ -47,7 +47,7 @@ public class ObjcLexer: TokenizerLexer<FullToken<TokenType>> {
         }
         
         func makeSubstring() -> Substring {
-            return objcLexer.lexer.inputString[rawRange()]
+            objcLexer.lexer.inputString[rawRange()]
         }
         
         func makeRange() -> SourceRange {
@@ -59,15 +59,15 @@ public class ObjcLexer: TokenizerLexer<FullToken<TokenType>> {
         }
         
         func makeLocation() -> SourceLocation {
-            return location
+            location
         }
         
         private func rawRange() -> Range<Lexer.Index> {
-            return index..<_RangeMarker.lexerIndex(in: objcLexer)
+            index..<_RangeMarker.lexerIndex(in: objcLexer)
         }
         
         private static func lexerIndex(in lexer: ObjcLexer) -> Lexer.Index {
-            return lexer.lexer.inputIndex
+            lexer.lexer.inputIndex
         }
     }
 }
@@ -81,7 +81,7 @@ public protocol RangeMarker {
 
 public extension RangeMarker {
     func makeString() -> String {
-        return String(makeSubstring())
+        String(makeSubstring())
     }
 }
 

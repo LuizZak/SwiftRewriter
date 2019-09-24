@@ -3,7 +3,7 @@ public struct SourceLocation: Comparable {
     public static let invalid = SourceLocation(line: 0, column: 0, utf8Offset: 0)
     
     public var isValid: Bool {
-        return line != 0 || column != 0 || utf8Offset != 0
+        line != 0 || column != 0 || utf8Offset != 0
     }
     
     public let line: Int
@@ -17,6 +17,6 @@ public struct SourceLocation: Comparable {
     }
     
     public static func <(lhs: SourceLocation, rhs: SourceLocation) -> Bool {
-        return lhs.utf8Offset < rhs.utf8Offset
+        lhs.utf8Offset < rhs.utf8Offset
     }
 }

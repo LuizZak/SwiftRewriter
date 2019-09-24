@@ -3,33 +3,33 @@ import ObjcParserAntlr
 /// A syntax node for an Objective-C class interface (`@interface`) declaration.
 public class ObjcClassInterface: ASTNode, InitializableNode {
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
 public extension ObjcClassInterface {
     var properties: [PropertyDefinition] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     var superclass: SuperclassName? {
-        return firstChild()
+        firstChild()
     }
     
     var protocolList: ProtocolReferenceList? {
-        return firstChild()
+        firstChild()
     }
     
     var ivarsList: IVarsList? {
-        return firstChild()
+        firstChild()
     }
     
     var methods: [MethodDefinition] {
-        return childrenMatching()
+        childrenMatching()
     }
 }
 
@@ -41,34 +41,34 @@ public class SuperclassName: Identifier {
 
 public class IVarsList: ASTNode, InitializableNode {
     public var ivarDeclarations: [IVarDeclaration] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
 public class IVarDeclaration: ASTNode, InitializableNode {
     public var type: TypeNameNode? {
-        return firstChild()
+        firstChild()
     }
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
 public class ProtocolReferenceList: ASTNode, InitializableNode {
     public var protocols: [ProtocolName] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 

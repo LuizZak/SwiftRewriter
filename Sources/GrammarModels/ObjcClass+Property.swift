@@ -1,16 +1,16 @@
 public class PropertyDefinition: ASTNode, InitializableNode {
     /// Type identifier
     public var type: TypeNameNode? {
-        return firstChild()
+        firstChild()
     }
     
     public var attributesList: PropertyAttributesList? {
-        return firstChild()
+        firstChild()
     }
     
     /// Identifier for this property
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     // For use in protocol methods only
@@ -20,17 +20,17 @@ public class PropertyDefinition: ASTNode, InitializableNode {
     public var hasIbInspectableSpecifier: Bool = false
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
 public class PropertyAttributesList: ASTNode, InitializableNode {
     public var attributes: [PropertyAttributeNode] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     public var keywordAttributes: [String] {
-        return attributes.compactMap { mod in
+        attributes.compactMap { mod in
             switch mod.attribute {
             case .keyword(let kw):
                 return kw
@@ -41,7 +41,7 @@ public class PropertyAttributesList: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -87,7 +87,7 @@ public class PropertyAttributeNode: ASTNode {
                 length: SourceLength = .zero) {
         
         self.attribute = modifier
-        super.init(_isInNonnullContext: isInNonnullContext,
+        super.init(isInNonnullContext: isInNonnullContext,
                    location: location,
                    length: length)
     }

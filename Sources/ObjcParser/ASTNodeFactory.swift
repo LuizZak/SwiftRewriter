@@ -14,7 +14,7 @@ class ASTNodeFactory {
     }
     
     func isInNonnullContext(_ context: ParserRuleContext) -> Bool {
-        return nonnullContextQuerier.isInNonnullContext(context)
+        nonnullContextQuerier.isInNonnullContext(context)
     }
     
     func makeIdentifier(from context: Parser.IdentifierContext) -> Identifier {
@@ -60,7 +60,7 @@ class ASTNodeFactory {
     }
     
     func makePointer(from context: ObjectiveCParser.PointerContext) -> PointerNode {
-        let node = PointerNode(_isInNonnullContext: isInNonnullContext(context))
+        let node = PointerNode(isInNonnullContext: isInNonnullContext(context))
         updateSourceLocation(for: node, with: context)
         if let pointer = context.pointer() {
             node.addChild(makePointer(from: pointer))
@@ -69,7 +69,7 @@ class ASTNodeFactory {
     }
     
     func makeTypeDeclarator(from context: ObjectiveCParser.DeclaratorContext) -> TypeDeclaratorNode {
-        let node = TypeDeclaratorNode(_isInNonnullContext: isInNonnullContext(context))
+        let node = TypeDeclaratorNode(isInNonnullContext: isInNonnullContext(context))
         updateSourceLocation(for: node, with: context)
         if let identifierNode = context.directDeclarator()?.identifier().map(makeIdentifier) {
             node.addChild(identifierNode)
@@ -89,7 +89,7 @@ class ASTNodeFactory {
     }
     
     func makeMethodBody(from rule: Parser.MethodDefinitionContext) -> MethodBody {
-        let methodBody = MethodBody(_isInNonnullContext: isInNonnullContext(rule))
+        let methodBody = MethodBody(isInNonnullContext: isInNonnullContext(rule))
         updateSourceLocation(for: methodBody, with: rule)
         methodBody.statements = rule.compoundStatement()
         
@@ -100,7 +100,7 @@ class ASTNodeFactory {
         
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
         
-        let body = MethodBody(_isInNonnullContext: nonnull)
+        let body = MethodBody(isInNonnullContext: nonnull)
         body.statements = rule
         updateSourceLocation(for: body, with: rule)
         
@@ -110,14 +110,14 @@ class ASTNodeFactory {
     func makeEnumCase(from rule: Parser.EnumeratorContext, identifier: Parser.IdentifierContext) -> ObjcEnumCase {
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
         
-        let enumCase = ObjcEnumCase(_isInNonnullContext: nonnull)
+        let enumCase = ObjcEnumCase(isInNonnullContext: nonnull)
         updateSourceLocation(for: enumCase, with: rule)
         
         let identifierNode = makeIdentifier(from: identifier)
         enumCase.addChild(identifierNode)
         
         if let expression = rule.expression() {
-            let expressionNode = ExpressionNode(_isInNonnullContext: nonnull)
+            let expressionNode = ExpressionNode(isInNonnullContext: nonnull)
             expressionNode.expression = expression
             updateSourceLocation(for: expressionNode, with: expression)
             enumCase.addChild(expressionNode)

@@ -6,6 +6,8 @@ public enum FoundationCompoundTypes {
     public static let nsCalendar = CalendarCompoundType.self
     public static let nsArray = NSArrayCompoundType.self
     public static let nsMutableArray = NSMutableArrayCompoundType.self
+    public static let nsDictionary = NSDictionaryCompoundType.self
+    public static let nsMutableDictionary = NSMutableDictionaryCompoundType.self
     public static let nsDateFormatter = NSDateFormatterCompoundType.self
     public static let nsDate = NSDateCompoundType.self
     public static let nsLocale = NSLocaleCompoundType.self
@@ -17,7 +19,7 @@ public enum CalendarCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "Calendar")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {
@@ -43,7 +45,7 @@ public enum NSArrayCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "NSArray")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {
@@ -59,6 +61,7 @@ public enum NSArrayCompoundType {
                 var description: String { get }
                 var sortedArrayHint: Data { get }
                 
+                subscript(index: Int) -> Any { get set }
                 
                 @_swiftrewriter(mapFrom: objectAtIndex(_:))
                 func object(at index: Int) -> Any
@@ -145,7 +148,7 @@ public enum NSMutableArrayCompoundType {
     private static var singleton: CompoundedMappingType = createType()
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func createType() -> CompoundedMappingType {
@@ -233,11 +236,94 @@ public enum NSMutableArrayCompoundType {
     }
 }
 
+public enum NSDictionaryCompoundType {
+    private static var singleton = makeType(from: typeString(), typeName: "NSDictionary")
+    
+    public static func create() -> CompoundedMappingType {
+        return singleton
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class NSDictionary: NSObject, NSCopying, NSMutableCopying, NSSecureCoding, NSFastEnumeration {
+                open var count: Int { get }
+                open var allKeys: [Any] { get }
+                open var allValues: [Any] { get }
+                open var description: String { get }
+                open var descriptionInStringsFileFormat: String { get }
+                open subscript(key: NSCopying) -> Any? { get }
+                open subscript(key: String) -> Any? { get }
+
+                public init()
+
+                open func allKeys(for anObject: Any) -> [Any]
+                open func object(forKey aKey: Any) -> Any?
+                open func keyEnumerator() -> NSEnumerator
+                open func description(withLocale locale: Any?) -> String
+                open func description(withLocale locale: Any?, indent level: Int) -> String
+                open func isEqual(to otherDictionary: [AnyHashable : Any]) -> Bool
+                open func objectEnumerator() -> NSEnumerator
+                open func objects(forKeys keys: [Any], notFoundMarker marker: Any) -> [Any]
+                
+                @available(OSX 10.13, *)
+                open func write(to url: URL) throws
+                open func keysSortedByValue(using comparator: Selector) -> [Any]
+                
+                @available(OSX 10.6, *)
+                open func enumerateKeysAndObjects(_ block: (Any, Any, UnsafeMutablePointer<ObjCBool>) -> Void)
+                
+                @available(OSX 10.6, *)
+                open func enumerateKeysAndObjects(options opts: NSEnumerationOptions = [], using block: (Any, Any, UnsafeMutablePointer<ObjCBool>) -> Void)
+                
+                @available(OSX 10.6, *)
+                open func keysSortedByValue(comparator cmptr: (Any, Any) -> ComparisonResult) -> [Any]
+                
+                @available(OSX 10.6, *)
+                open func keysSortedByValue(options opts: NSSortOptions = [], usingComparator cmptr: (Any, Any) -> ComparisonResult) -> [Any]
+                
+                @available(OSX 10.6, *)
+                open func keysOfEntries(passingTest predicate: (Any, Any, UnsafeMutablePointer<ObjCBool>) -> Bool) -> Set<AnyHashable>
+                
+                @available(OSX 10.6, *)
+                open func keysOfEntries(options opts: NSEnumerationOptions = [], passingTest predicate: (Any, Any, UnsafeMutablePointer<ObjCBool>) -> Bool) -> Set<AnyHashable>
+            }
+            """
+        
+        return type
+    }
+}
+
+public enum NSMutableDictionaryCompoundType {
+    private static var singleton = makeType(from: typeString(), typeName: "NSMutableDictionary")
+    
+    public static func create() -> CompoundedMappingType {
+        return singleton
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class NSMutableDictionary: NSDictionary {
+                public init(capacity numItems: Int)
+                open subscript(key: Any) -> Any?
+                
+                open func removeObject(forKey aKey: Any)
+                open func setObject(_ anObject: Any, forKey aKey: NSCopying)
+                open func addEntries(from otherDictionary: [AnyHashable : Any])
+                open func removeAllObjects()
+                open func removeObjects(forKeys keyArray: [Any])
+                open func setDictionary(_ otherDictionary: [AnyHashable : Any])
+            }
+            """
+        
+        return type
+    }
+}
+
 public enum NSDateFormatterCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "DateFormatter")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {
@@ -263,7 +349,7 @@ public enum NSDateCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "Date")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {
@@ -312,7 +398,7 @@ public enum NSLocaleCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "Locale")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {
@@ -333,7 +419,7 @@ public enum NSStringCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "NSString")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {
@@ -350,7 +436,7 @@ public enum NSMutableStringCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "NSMutableString")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {

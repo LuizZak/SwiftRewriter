@@ -1,6 +1,6 @@
 public struct UnknownASTContext: CustomStringConvertible {
     public var description: String {
-        return context
+        context
     }
     
     public var context: String

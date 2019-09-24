@@ -1,20 +1,24 @@
 import MiniLexer
 import GrammarModels
+import Utils
 
 /// Container for diagnostic messages during parsing
 public class Diagnostics {
-    private(set) public var diagnostics: [DiagnosticMessage] = []
+    @ConcurrentValue private var _diagnostics: [DiagnosticMessage] = []
+    public var diagnostics: [DiagnosticMessage] {
+        return _diagnostics;
+    }
     
     public var errors: [DiagnosticMessage] {
-        return diagnostics.filter { if case .error = $0 { return true }; return false }
+        diagnostics.filter { if case .error = $0 { return true }; return false }
     }
     
     public var warnings: [DiagnosticMessage] {
-        return diagnostics.filter { if case .warning = $0 { return true }; return false }
+        diagnostics.filter { if case .warning = $0 { return true }; return false }
     }
     
     public var notes: [DiagnosticMessage] {
-        return diagnostics.filter { if case .note = $0 { return true }; return false }
+        diagnostics.filter { if case .note = $0 { return true }; return false }
     }
     
     public init() {
@@ -23,7 +27,7 @@ public class Diagnostics {
     
     public func copy() -> Diagnostics {
         let new = Diagnostics()
-        new.diagnostics = diagnostics
+        new._diagnostics = diagnostics
         return new
     }
     
@@ -51,7 +55,7 @@ public class Diagnostics {
     }
     
     public func merge(with other: Diagnostics) {
-        diagnostics.append(contentsOf: other.diagnostics)
+        _diagnostics.append(contentsOf: other.diagnostics)
     }
     
     public func error(_ message: String, origin: String? = nil, location: SourceLocation) {
@@ -59,25 +63,25 @@ public class Diagnostics {
             DiagnosticMessage.error(
                 ErrorDiagnostic(message: message, origin: origin, location: location))
         
-        diagnostics.append(diag)
+        _diagnostics.append(diag)
     }
     
     public func warning(_ message: String, origin: String? = nil, location: SourceLocation) {
         let diag =
             DiagnosticMessage.warning(message: message, origin: origin, location: location)
         
-        diagnostics.append(diag)
+        _diagnostics.append(diag)
     }
     
     public func note(_ message: String, origin: String? = nil, location: SourceLocation) {
         let diag =
             DiagnosticMessage.note(message: message, origin: origin, location: location)
         
-        diagnostics.append(diag)
+        _diagnostics.append(diag)
     }
     
     public func errorDiagnostics() -> [ErrorDiagnostic] {
-        return diagnostics.compactMap {
+        diagnostics.compactMap {
             switch $0 {
             case .error(let error):
                 return error
@@ -88,7 +92,7 @@ public class Diagnostics {
     }
     
     internal func removeAll() {
-        diagnostics.removeAll()
+        _diagnostics.removeAll()
     }
 }
 

@@ -11,7 +11,7 @@ open class SyntaxNode {
     }
     
     open var children: [SyntaxNode] {
-        return []
+        []
     }
     
     public init() {

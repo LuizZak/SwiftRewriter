@@ -456,7 +456,7 @@ public final class FunctionSignatureParser {
         }
         
         var tokenString: String {
-            return rawValue
+            rawValue
         }
         
         static func tokenType(at lexer: Lexer) -> FunctionSignatureParser.Token? {

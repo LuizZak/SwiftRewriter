@@ -25,6 +25,6 @@ class Stopwatch {
     }
     
     static func start() -> Stopwatch {
-        return Stopwatch()
+        Stopwatch()
     }
 }

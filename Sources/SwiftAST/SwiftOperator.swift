@@ -105,6 +105,6 @@ public enum SwiftOperatorCategory: Equatable {
 
 extension SwiftOperator: CustomStringConvertible {
     public var description: String {
-        return rawValue
+        rawValue
     }
 }

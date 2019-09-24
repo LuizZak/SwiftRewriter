@@ -249,11 +249,11 @@ class KnownTypePropertiesDefinitionsSource: DefinitionsSource {
     }
     
     func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
-        return []
+        []
     }
     
     func allDefinitions() -> [CodeDefinition] {
-        return []
+        []
     }
     
 }

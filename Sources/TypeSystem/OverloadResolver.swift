@@ -1,5 +1,6 @@
 import SwiftAST
 import KnownType
+import Utils
 
 /// Implements basic function call overload selection.
 public class OverloadResolver {
@@ -41,7 +42,7 @@ public class OverloadResolver {
     func findBestOverload(inSignatures signatures: [FunctionSignature],
                           argumentTypes: [SwiftType?]) -> Int? {
         
-        return findBestOverload(inSignatures: signatures,
+        findBestOverload(inSignatures: signatures,
                                 arguments: argumentTypes.asOverloadResolverArguments)
     }
     
@@ -163,7 +164,7 @@ public class OverloadResolver {
     }
     
     private func stripIntegerLiterals(from arguments: [Argument]) -> [Argument] {
-        return arguments.map { (arg: Argument) -> Argument in
+        arguments.map { (arg: Argument) -> Argument in
             arg.literalKind == .integer || arg.literalKind == .float
                 ? Argument(type: nil, isLiteral: false, literalKind: nil)
                 : arg
@@ -190,7 +191,7 @@ public class OverloadResolver {
     
     public struct Argument: Hashable {
         public var isMissingType: Bool {
-            return type == nil || type == .errorType
+            type == nil || type == .errorType
         }
         
         public var type: SwiftType?
@@ -213,43 +214,37 @@ public class OverloadResolver {
 }
 
 class OverloadResolverState {
-    private let cache = ConcurrentValue<[CacheEntry: Int?]>(value: [:])
+    @ConcurrentValue private var cache: [CacheEntry: Int?] = [:]
     
     public func makeCache() {
-        cache.setAsCaching(value: [:])
+        _cache.setAsCaching(value: [:])
     }
     
     public func tearDownCache() {
-        cache.tearDownCaching(resetToValue: [:])
+        _cache.tearDownCaching(resetToValue: [:])
     }
     
     func cachedEntry(forSignatures signatures: [FunctionSignature],
                      arguments: [OverloadResolver.Argument]) -> Int?? {
         
-        if !cache.usingCache {
+        if !_cache.usingCache {
             return nil
         }
         
-        return cache.readingValue { cache in
-            let entry = CacheEntry(signatures: signatures, arguments: arguments)
-            
-            return cache[entry]
-        }
+        let entry = CacheEntry(signatures: signatures, arguments: arguments)
+        return cache[entry]
     }
     
     func addCache(forSignatures signatures: [FunctionSignature],
                   arguments: [OverloadResolver.Argument],
                   resolutionIndex: Int?) {
         
-        if !cache.usingCache {
+        if !_cache.usingCache {
             return
         }
         
-        cache.modifyingValue { cache in
-            let entry = CacheEntry(signatures: signatures, arguments: arguments)
-            
-            cache[entry] = resolutionIndex
-        }
+        let entry = CacheEntry(signatures: signatures, arguments: arguments)
+        _cache.wrappedValue[entry] = resolutionIndex
     }
     
     struct CacheEntry: Hashable {
@@ -260,7 +255,7 @@ class OverloadResolverState {
 
 public extension Sequence where Element == FunctionArgument {
     var asOverloadResolverArguments: [OverloadResolver.Argument] {
-        return map {
+        map {
             OverloadResolver.Argument(type: $0.expression.resolvedType,
                                       isLiteral: $0.expression.isLiteralExpression,
                                       literalKind: $0.expression.literalExpressionKind)
@@ -270,7 +265,7 @@ public extension Sequence where Element == FunctionArgument {
 
 public extension Sequence where Element == SwiftType? {
     var asOverloadResolverArguments: [OverloadResolver.Argument] {
-        return map {
+        map {
             OverloadResolver.Argument(type: $0, isLiteral: false, literalKind: nil)
         }
     }

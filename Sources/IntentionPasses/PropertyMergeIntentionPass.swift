@@ -14,7 +14,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
     
     /// Textual tag this intention pass applies to history tracking entries.
     private var historyTag: String {
-        return "\(PropertyMergeIntentionPass.self):\(operationsNumber)"
+        "\(PropertyMergeIntentionPass.self):\(operationsNumber)"
     }
     
     public init() {

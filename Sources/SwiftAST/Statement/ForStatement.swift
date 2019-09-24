@@ -28,7 +28,7 @@ public class ForStatement: Statement {
     }
     
     public override var children: [SyntaxNode] {
-        return _childrenNodes
+        _childrenNodes
     }
     
     public init(pattern: Pattern, exp: Expression, body: CompoundStatement) {
@@ -59,9 +59,8 @@ public class ForStatement: Statement {
     
     @inlinable
     public override func copy() -> ForStatement {
-        return
-            ForStatement(pattern: pattern.copy(), exp: exp.copy(), body: body.copy())
-                .copyMetadata(from: self)
+        ForStatement(pattern: pattern.copy(), exp: exp.copy(), body: body.copy())
+            .copyMetadata(from: self)
     }
     
     private func reloadChildrenNodes() {
@@ -76,7 +75,7 @@ public class ForStatement: Statement {
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        return visitor.visitFor(self)
+        visitor.visitFor(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
@@ -107,6 +106,6 @@ public class ForStatement: Statement {
 public extension Statement {
     @inlinable
     var asFor: ForStatement? {
-        return cast()
+        cast()
     }
 }

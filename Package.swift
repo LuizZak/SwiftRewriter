@@ -25,7 +25,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-package-manager.git", .exact("0.4.0")),
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.28"),
         .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.0")),
-        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50000.0"))
+        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50100.0"))
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define
@@ -43,7 +43,7 @@ let package = Package(
             dependencies: ["Utils"]),
         .target(
             name: "SwiftAST",
-            dependencies: ["MiniLexer", "Utils"]),
+            dependencies: ["MiniLexer", "Utils", "WriterTargetOutput"]),
         .target(
             name: "ObjcParserAntlr",
             dependencies: ["Antlr4"]),

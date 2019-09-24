@@ -174,7 +174,7 @@ class DefaultTypeMapperTests: XCTestCase {
     }
     
     func testMapSimpleTypes() {
-        expect(.id(protocols: []),
+        expect(.id(),
                toConvertTo: "AnyObject")
         
         expect(.instancetype,
@@ -192,7 +192,7 @@ class DefaultTypeMapperTests: XCTestCase {
                withExplicitNullability: .nullable,
                toConvertTo: "(UITableViewDelegate & UITableViewDataSource)?")
         
-        expect(.specified(specifiers: ["__weak"], .id(protocols: [])),
+        expect(.specified(specifiers: ["__weak"], .id()),
                withExplicitNullability: nil,
                toConvertTo: "AnyObject?")
     }
@@ -277,8 +277,6 @@ class DefaultTypeMapperTests: XCTestCase {
         
         expect(.pointer(.generic("NSDictionary", parameters: [.pointer(.struct("NSString"))])),
                toConvertTo: "NSDictionary<String>")
-        expect(.pointer(.struct("NSDictionary")),
-               toConvertTo: "NSDictionary")
     }
     
     /// NSMutableArray is kept alone since its pass-by-reference semantics are
@@ -299,9 +297,6 @@ class DefaultTypeMapperTests: XCTestCase {
     /// ...ditto for NSMutableDictionary
     func testNSMutableDictionary() {
         expect(.pointer(.generic("NSMutableDictionary", parameters: [.pointer(.struct("NSString")), .pointer(.struct("NSObject"))])),
-               toConvertTo: "NSMutableDictionary")
-        
-        expect(.pointer(.struct("NSMutableDictionary")),
                toConvertTo: "NSMutableDictionary")
     }
     

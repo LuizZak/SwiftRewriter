@@ -146,9 +146,9 @@ extension Pattern: CustomStringConvertible {
 /// Allows referencing a location within a pattern for an identifier, an
 /// expression or a tuple-pattern.
 ///
-/// - `self`: Returns the root pattern itself
-/// - tuple: Returns the tuple within the pattern, at a given index, with a given
-/// nested subpattern.
+/// - `self`: The root pattern itself
+/// - tuple: The tuple within the pattern, at a given index, with a given nested
+/// subpattern.
 public enum PatternLocation: Hashable {
     case `self`
     indirect case tuple(index: Int, pattern: PatternLocation)

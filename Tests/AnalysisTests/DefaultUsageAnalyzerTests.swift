@@ -33,7 +33,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     }
             }
         let intentions = builder.build(typeChecked: true)
-        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
+        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem(), numThreads: 8)
         let method = intentions.fileIntentions()[0].typeIntentions[1].methods[0]
         
         let usages = sut.findUsagesOf(method: method)
@@ -75,7 +75,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     }
             }
         let intentions = builder.build(typeChecked: true)
-        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
+        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem(), numThreads: 8)
         let method = intentions.fileIntentions()[0].typeIntentions[1].methods[0]
         
         let usages = sut.findUsagesOf(method: method)
@@ -110,7 +110,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     }
             }
         let intentions = builder.build(typeChecked: true)
-        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
+        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem(), numThreads: 8)
         let property = intentions.fileIntentions()[0].typeIntentions[1].properties[0]
         
         let usages = sut.findUsagesOf(property: property)
@@ -142,7 +142,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
             }
         
         let intentions = builder.build(typeChecked: true)
-        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
+        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem(), numThreads: 8)
         let property = intentions.fileIntentions()[0].enumIntentions[0].cases[0]
         
         let usages = sut.findUsagesOf(property: property)
@@ -181,7 +181,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
             }
         
         let intentions = builder.build(typeChecked: true)
-        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
+        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem(), numThreads: 8)
         let property = intentions.fileIntentions()[0].classIntentions[0].properties[0]
         
         let usages = sut.findUsagesOf(property: property)

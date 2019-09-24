@@ -3,7 +3,7 @@
 /// like `.pointerType(.structType("NSObject"))`
 public enum ObjcType: Equatable, Codable, CustomStringConvertible {
     /// Objective-c's `id` type, with optional protocol array specifiers
-    case id(protocols: [String])
+    case id(protocols: [String] = [])
     
     /// Special 'generic'-like specifier.
     /// Closely related to `id` type.

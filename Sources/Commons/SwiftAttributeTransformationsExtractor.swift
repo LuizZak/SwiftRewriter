@@ -3,9 +3,6 @@ import KnownType
 import Intentions
 import MiniLexer
 
-private typealias SwiftRewriterAttribute =
-    SwiftClassInterfaceParser.SwiftRewriterAttribute
-
 class SwiftAttributeTransformationsExtractor {
     
     let type: KnownType
@@ -15,7 +12,7 @@ class SwiftAttributeTransformationsExtractor {
     }
     
     func nonCanonicalNames() throws -> [String] {
-        return try aliases(in: type)
+        try aliases(in: type)
     }
     
     func transformations() throws -> [PostfixTransformation] {
@@ -173,7 +170,7 @@ class SwiftAttributeTransformationsExtractor {
                     toSwiftFunction: method.signature.name,
                     firstArgumentBecomesInstance: true,
                     arguments: method.signature.parameters.map { arg in
-                        arg.label.flatMap { .labeled($0, .asIs) } ?? .asIs
+                        arg.label.flatMap { .labeled($0) } ?? .asIs
                     }
                 )
                 
@@ -192,7 +189,7 @@ class SwiftAttributeTransformationsExtractor {
             return .method(transformer)
         }
         func makeTransformation(signature: FunctionSignature) -> PostfixTransformation {
-            return makeTransformation(identifier: signature.asIdentifier)
+            makeTransformation(identifier: signature.asIdentifier)
         }
         
         var transforms: [PostfixTransformation] = []

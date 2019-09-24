@@ -5,11 +5,11 @@ import SwiftAST
 import TestCommons
 
 class BaseSwiftSyntaxProducerTests: XCTestCase {
-    func assert<T: SyntaxNode>(_ node: T,
-                               producer: (SwiftSyntaxProducer) -> (T) -> Syntax,
-                               matches expected: String,
-                               file: String = #file,
-                               line: Int = #line) {
+    func assert<T: SwiftAST.SyntaxNode>(_ node: T,
+                                        producer: (SwiftSyntaxProducer) -> (T) -> Syntax,
+                                        matches expected: String,
+                                        file: String = #file,
+                                        line: Int = #line) {
         
         let syntax = producer(SwiftSyntaxProducer())(node)
         

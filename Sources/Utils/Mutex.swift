@@ -18,7 +18,7 @@ public final class Mutex {
     }
     
     public func tryLock() -> Bool {
-        return _lock.try()
+        _lock.try()
     }
     
     public func locking<T>(_ closure: () throws -> T) rethrows -> T {

@@ -1,24 +1,24 @@
 /// A syntax node for an Objective-C protocol (`@protocol`) declaration.
 public class ProtocolDeclaration: ASTNode, InitializableNode {
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
 public extension ProtocolDeclaration {
     var properties: [PropertyDefinition] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     var protocolList: ProtocolReferenceList? {
-        return firstChild()
+        firstChild()
     }
     
     var methods: [MethodDefinition] {
-        return childrenMatching()
+        childrenMatching()
     }
 }

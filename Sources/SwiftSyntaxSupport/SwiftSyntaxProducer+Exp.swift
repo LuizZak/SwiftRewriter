@@ -57,9 +57,11 @@ extension SwiftSyntaxProducer {
     
     func generateSizeOf(_ exp: SizeOfExpression) -> ExprSyntax {
         func _forType(_ type: SwiftType) -> ExprSyntax {
-            return MemberAccessExprSyntax { builder in
+            MemberAccessExprSyntax { builder in
                 let base = SpecializeExprSyntax { builder in
-                    let token = prepareStartToken(SyntaxFactory.makeIdentifier("MemoryLayout"))
+                    let token = prepareStartToken(
+                        SyntaxFactory.makeIdentifier("MemoryLayout")
+                    )
                     
                     builder.useExpression(
                         SyntaxFactory
@@ -70,7 +72,7 @@ extension SwiftSyntaxProducer {
                     builder.useGenericArgumentClause(GenericArgumentClauseSyntax { builder in
                         builder.useLeftAngleBracket(SyntaxFactory.makeLeftAngleToken())
                         builder.useRightAngleBracket(SyntaxFactory.makeRightAngleToken())
-                        builder.addGenericArgument(GenericArgumentSyntax { builder in
+                        builder.addArgument(GenericArgumentSyntax { builder in
                             builder.useArgumentType(SwiftTypeConverter.makeTypeSyntax(type))
                         })
                     })
@@ -101,26 +103,26 @@ extension SwiftSyntaxProducer {
     }
     
     func generateParens(_ exp: ParensExpression) -> ExprSyntax {
-        return TupleExprSyntax { builder in
+        TupleExprSyntax { builder in
             builder.useLeftParen(makeStartToken(SyntaxFactory.makeLeftParenToken))
             builder.useRightParen(SyntaxFactory.makeRightParenToken())
-            builder.addTupleElement(TupleElementSyntax { builder in
+            builder.addElement(TupleElementSyntax { builder in
                 builder.useExpression(generateExpression(exp.exp))
             })
         }
     }
     
     func generateIdentifier(_ exp: IdentifierExpression) -> IdentifierExprSyntax {
-        return IdentifierExprSyntax { builder in
+        IdentifierExprSyntax { builder in
             builder.useIdentifier(prepareStartToken(makeIdentifier(exp.identifier)))
         }
     }
     
     func generateCast(_ exp: CastExpression) -> SequenceExprSyntax {
-        return SequenceExprSyntax { builder in
-            builder.addExpression(generateExpression(exp.exp))
+        SequenceExprSyntax { builder in
+            builder.addElement(generateExpression(exp.exp))
             
-            builder.addExpression(AsExprSyntax { builder in
+            builder.addElement(AsExprSyntax { builder in
                 if exp.isOptionalCast {
                     builder.useAsTok(SyntaxFactory.makeAsKeyword().withLeadingSpace())
                     builder.useQuestionOrExclamationMark(SyntaxFactory.makePostfixQuestionMarkToken().withTrailingSpace())
@@ -134,7 +136,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateClosure(_ exp: BlockLiteralExpression) -> ClosureExprSyntax {
-        return ClosureExprSyntax { builder in
+        ClosureExprSyntax { builder in
             builder.useLeftBrace(makeStartToken(SyntaxFactory.makeLeftBraceToken))
             
             let hasParameters = !exp.parameters.isEmpty
@@ -163,7 +165,7 @@ extension SwiftSyntaxProducer {
                     }
                     
                     iterateWithComma(exp.parameters) { (arg, hasComma) in
-                        builder.addFunctionParameter(FunctionParameterSyntax { builder in
+                        builder.addParameter(FunctionParameterSyntax { builder in
                             builder.useFirstName(
                                 makeIdentifier(arg.name)
                                     .withExtraLeading(from: self)
@@ -199,7 +201,7 @@ extension SwiftSyntaxProducer {
             
             let statements = _generateStatements(exp.body.statements)
             for stmt in statements {
-                builder.addCodeBlockItem(stmt)
+                builder.addStatement(stmt)
             }
             
             deindent()
@@ -211,12 +213,12 @@ extension SwiftSyntaxProducer {
     }
     
     func generateArrayLiteral(_ exp: ArrayLiteralExpression) -> ArrayExprSyntax {
-        return ArrayExprSyntax { builder in
+        ArrayExprSyntax { builder in
             builder.useLeftSquare(makeStartToken(SyntaxFactory.makeLeftSquareBracketToken))
             builder.useRightSquare(SyntaxFactory.makeRightSquareBracketToken())
             
             iterateWithComma(exp.items) { (item, hasComma) in
-                builder.addArrayElement(ArrayElementSyntax { builder in
+                builder.addElement(ArrayElementSyntax { builder in
                     builder.useExpression(generateExpression(item))
                     
                     if hasComma {
@@ -228,7 +230,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateDictionaryLiteral(_ exp: DictionaryLiteralExpression) -> DictionaryExprSyntax {
-        return DictionaryExprSyntax { builder in
+        DictionaryExprSyntax { builder in
             builder.useLeftSquare(makeStartToken(SyntaxFactory.makeLeftSquareBracketToken))
             builder.useRightSquare(SyntaxFactory.makeRightSquareBracketToken())
             
@@ -257,42 +259,42 @@ extension SwiftSyntaxProducer {
     }
     
     func generateAssignment(_ exp: AssignmentExpression) -> SequenceExprSyntax {
-        return SequenceExprSyntax { builder in
-            builder.addExpression(generateExpression(exp.lhs))
+        SequenceExprSyntax { builder in
+            builder.addElement(generateExpression(exp.lhs))
             
             addExtraLeading(.spaces(1))
             
-            builder.addExpression(generateOperator(exp.op, mode: .assignment))
+            builder.addElement(generateOperator(exp.op, mode: .assignment))
             
             addExtraLeading(.spaces(1))
             
-            builder.addExpression(generateExpression(exp.rhs))
+            builder.addElement(generateExpression(exp.rhs))
         }
     }
     
     func generateUnary(_ exp: UnaryExpression) -> ExprSyntax {
-        return generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNeccessary(exp.exp) }))
+        generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNeccessary(exp.exp) }))
     }
     
     func generatePrefix(_ exp: PrefixExpression) -> ExprSyntax {
-        return generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNeccessary(exp.exp) }))
+        generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNeccessary(exp.exp) }))
     }
     
     func generateBinary(_ exp: BinaryExpression) -> SequenceExprSyntax {
-        return SequenceExprSyntax { builder in
-            builder.addExpression(generateExpression(exp.lhs))
+        SequenceExprSyntax { builder in
+            builder.addElement(generateExpression(exp.lhs))
             
             if exp.op.category != .range {
                 addExtraLeading(.spaces(1))
             }
             
-            builder.addExpression(generateOperator(exp.op, mode: .infix))
+            builder.addElement(generateOperator(exp.op, mode: .infix))
             
             if exp.op.category != .range {
                 addExtraLeading(.spaces(1))
             }
             
-            builder.addExpression(generateExpression(exp.rhs))
+            builder.addElement(generateExpression(exp.rhs))
         }
     }
     
@@ -331,7 +333,7 @@ extension SwiftSyntaxProducer {
         case let subs as SubscriptPostfix:
             return SubscriptExprSyntax { builder in
                 builder.useCalledExpression(subExp)
-                builder.addFunctionCallArgument(FunctionCallArgumentSyntax { builder in
+                builder.addArgument(FunctionCallArgumentSyntax { builder in
                     builder.useExpression(generateExpression(subs.expression))
                 })
                 builder.useLeftBracket(SyntaxFactory.makeLeftSquareBracketToken())
@@ -359,7 +361,7 @@ extension SwiftSyntaxProducer {
                 builder.useCalledExpression(subExp)
                 
                 iterateWithComma(arguments) { (arg, hasComma) in
-                    builder.addFunctionCallArgument(FunctionCallArgumentSyntax { builder in
+                    builder.addArgument(FunctionCallArgumentSyntax { builder in
                         if let label = arg.label {
                             builder.useLabel(makeIdentifier(label))
                             builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
@@ -396,7 +398,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateTernary(_ exp: TernaryExpression) -> ExprSyntax {
-        return TernaryExprSyntax { builder in
+        TernaryExprSyntax { builder in
             builder.useConditionExpression(generateExpression(exp.exp))
             builder.useQuestionMark(SyntaxFactory.makeInfixQuestionMarkToken().addingSurroundingSpaces())
             builder.useFirstChoice(generateExpression(exp.ifTrue))
@@ -440,7 +442,9 @@ extension SwiftSyntaxProducer {
             
         case .string(let string):
             return StringLiteralExprSyntax { builder in
-                builder.useStringLiteral(prepareStartToken(SyntaxFactory.makeStringLiteral("\"" + string + "\"")))
+                builder.useOpenQuote(prepareStartToken(SyntaxFactory.makeStringQuoteToken()))
+                builder.addSegment(SyntaxFactory.makeStringLiteral(string))
+                builder.useCloseQuote(SyntaxFactory.makeStringQuoteToken())
             }
             
         case .rawConstant(let constant):
@@ -491,7 +495,7 @@ extension SwiftSyntaxProducer {
             return TupleExprSyntax { builder in
                 builder.useLeftParen(makeStartToken(SyntaxFactory.makeLeftParenToken))
                 builder.useRightParen(SyntaxFactory.makeRightParenToken())
-                builder.addTupleElement(TupleElementSyntax { builder in
+                builder.addElement(TupleElementSyntax { builder in
                     builder.useExpression(generateExpression(exp))
                 })
             }

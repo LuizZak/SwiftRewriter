@@ -10,19 +10,19 @@ public class TernaryExpression: Expression {
     }
     
     public override var subExpressions: [Expression] {
-        return [exp, ifTrue, ifFalse]
+        [exp, ifTrue, ifFalse]
     }
     
     public override var isLiteralExpression: Bool {
-        return ifTrue.isLiteralExpression && ifFalse.isLiteralExpression
+        ifTrue.isLiteralExpression && ifFalse.isLiteralExpression
     }
     
     public override var description: String {
-        return exp.description + " ? " + ifTrue.description + " : " + ifFalse.description
+        exp.description + " ? " + ifTrue.description + " : " + ifFalse.description
     }
     
     public override var requiresParens: Bool {
-        return true
+        true
     }
     
     public init(exp: Expression, ifTrue: Expression, ifFalse: Expression) {
@@ -53,8 +53,7 @@ public class TernaryExpression: Expression {
     
     @inlinable
     public override func copy() -> TernaryExpression {
-        return
-            TernaryExpression(
+        TernaryExpression(
                 exp: exp.copy(),
                 ifTrue: ifTrue.copy(),
                 ifFalse: ifFalse.copy()
@@ -63,7 +62,7 @@ public class TernaryExpression: Expression {
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitTernary(self)
+        visitor.visitTernary(self)
     }
     
     public override func isEqual(to other: Expression) -> Bool {
@@ -104,6 +103,6 @@ public class TernaryExpression: Expression {
 public extension Expression {
     @inlinable
     var asTernary: TernaryExpression? {
-        return cast()
+        cast()
     }
 }

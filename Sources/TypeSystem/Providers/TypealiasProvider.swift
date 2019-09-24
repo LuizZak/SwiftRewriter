@@ -1,4 +1,5 @@
 import SwiftAST
+import Utils
 
 /// Provides typealias conversions from a string typename to a `SwiftType`
 /// structure.
@@ -11,8 +12,8 @@ public protocol TypealiasProvider {
 /// Gathers one or more typealias providers into a single `TypealiasProvider`
 /// interface.
 public class CompoundTypealiasProvider: TypealiasProvider {
-    private var aliasesCache = ConcurrentValue<[Int: SwiftType]>(value: [:])
-    private var negativeLookups = ConcurrentValue<Set<String>>(value: [])
+    @ConcurrentValue private var aliasesCache: [Int: SwiftType] = [:]
+    @ConcurrentValue private var negativeLookups: Set<String> = []
     
     public var providers: [TypealiasProvider]
     
@@ -21,32 +22,30 @@ public class CompoundTypealiasProvider: TypealiasProvider {
     }
     
     func makeCache() {
-        aliasesCache.setAsCaching(value: [:])
-        negativeLookups.setAsCaching(value: [])
+        _aliasesCache.setAsCaching(value: [:])
+        _negativeLookups.setAsCaching(value: [])
     }
     
     func tearDownCache() {
-        aliasesCache.tearDownCaching(resetToValue: [:])
-        negativeLookups.tearDownCaching(resetToValue: [])
+        _aliasesCache.tearDownCaching(resetToValue: [:])
+        _negativeLookups.tearDownCaching(resetToValue: [])
     }
     
     public func unalias(_ typeName: String) -> SwiftType? {
-        if aliasesCache.usingCache, let type = aliasesCache.readingValue({ $0[typeName.hashValue] }) {
+        if _aliasesCache.usingCache, let type = aliasesCache[typeName.hashValue] {
             return type
         }
         
         // Negative lookups
-        if negativeLookups.usingCache, negativeLookups.readingValue({ $0.contains(typeName) }) {
+        if _negativeLookups.usingCache, negativeLookups.contains(typeName) {
             return nil
         }
         
         for provider in providers {
             if let type = provider.unalias(typeName) {
                 
-                if aliasesCache.usingCache {
-                    aliasesCache.modifyingValue { value in
-                        value[typeName.hashValue] = type
-                    }
+                if _aliasesCache.usingCache {
+                    _aliasesCache.wrappedValue[typeName.hashValue] = type
                 }
                 
                 return type
@@ -54,10 +53,8 @@ public class CompoundTypealiasProvider: TypealiasProvider {
         }
         
         // Store negative lookups
-        if negativeLookups.usingCache {
-            negativeLookups.modifyingValue { value -> Void in
-                value.insert(typeName)
-            }
+        if _negativeLookups.usingCache {
+            _negativeLookups.wrappedValue.insert(typeName)
         }
         
         return nil
@@ -68,7 +65,7 @@ public class CompoundTypealiasProvider: TypealiasProvider {
         
         // Reset cache to allow types from this type alias provider to be
         // considered.
-        if aliasesCache.usingCache {
+        if _aliasesCache.usingCache {
             tearDownCache()
             makeCache()
         }
@@ -92,6 +89,6 @@ public class CollectionTypealiasProvider: TypealiasProvider {
     }
     
     public func unalias(_ typeName: String) -> SwiftType? {
-        return aliases[typeName]
+        aliases[typeName]
     }
 }

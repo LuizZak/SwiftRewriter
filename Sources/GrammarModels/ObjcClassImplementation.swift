@@ -2,28 +2,28 @@
 /// declaration.
 public class ObjcClassImplementation: ASTNode, InitializableNode {
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
 public extension ObjcClassImplementation {
     var superclass: SuperclassName? {
-        return firstChild()
+        firstChild()
     }
     
     var ivarsList: IVarsList? {
-        return firstChild()
+        firstChild()
     }
     
     var methods: [MethodDefinition] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     var propertyImplementations: [PropertyImplementation] {
-        return childrenMatching()
+        childrenMatching()
     }
 }

@@ -7,7 +7,7 @@ public final class ClassGenerationIntention: BaseClassIntention {
     public var superclassName: String?
     
     public override var isEmptyType: Bool {
-        return super.isEmptyType
+        super.isEmptyType
     }
     
     public override var supertype: KnownTypeReference? {

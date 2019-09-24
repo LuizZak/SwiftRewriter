@@ -22,12 +22,12 @@ public class CompoundedMappingTypesGlobalsProvider: GlobalsProvider {
     }
     
     public func typealiasProvider() -> TypealiasProvider {
-        return CollectionTypealiasProvider(aliases:
+        CollectionTypealiasProvider(aliases:
             CompoundedMappingTypesGlobalsProvider.provider.typealiases)
     }
     
     public func definitionsSource() -> DefinitionsSource {
-        return ArrayDefinitionsSource(definitions: [])
+        ArrayDefinitionsSource(definitions: [])
     }
 }
 

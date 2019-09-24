@@ -30,9 +30,8 @@ extension TypeFormatter {
     
     /// Generates a string representation of a given extension's typename
     public static func asString(extension ext: ClassExtensionGenerationIntention) -> String {
-        return
-            "extension \(ext.typeName)"
-                + (ext.categoryName.map { " (\($0))" } ?? "")
+        "extension \(ext.typeName)"
+            + (ext.categoryName.map { " (\($0))" } ?? "")
     }
     
 }

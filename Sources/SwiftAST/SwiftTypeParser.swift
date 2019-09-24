@@ -673,7 +673,7 @@ enum SwiftTypeToken: String, TokenProtocol {
     case eof = ""
     
     public var tokenString: String {
-        return rawValue
+        rawValue
     }
     
     public func length(in lexer: Lexer) -> Int {

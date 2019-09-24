@@ -269,10 +269,10 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
     
     // MARK: - while / do-while / for / for-in
     public override func visitIterationStatement(_ ctx: Parser.IterationStatementContext) -> Statement? {
-        return acceptFirst(from: ctx.whileStatement(),
-                           ctx.doStatement(),
-                           ctx.forStatement(),
-                           ctx.forInStatement())
+        acceptFirst(from: ctx.whileStatement(),
+                    ctx.doStatement(),
+                    ctx.forStatement(),
+                    ctx.forInStatement())
             ?? .unknown(UnknownASTContext(context: ctx.getText()))
     }
     
@@ -320,7 +320,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
     
     // MARK: - Helper methods
     func compoundStatementVisitor() -> CompoundStatementVisitor {
-        return CompoundStatementVisitor(expressionReader: expressionReader,
+        CompoundStatementVisitor(expressionReader: expressionReader,
                                         context: context)
     }
     

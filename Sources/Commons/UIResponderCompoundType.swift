@@ -4,7 +4,7 @@ public enum UIResponderCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "UIResponder")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {

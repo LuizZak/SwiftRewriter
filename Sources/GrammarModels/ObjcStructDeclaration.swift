@@ -1,15 +1,15 @@
 /// An Objective-C `struct` typedef declaration.
 public final class ObjcStructDeclaration: ASTNode, InitializableNode {
     public var fields: [ObjcStructField] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 

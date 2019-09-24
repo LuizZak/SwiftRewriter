@@ -3,7 +3,7 @@ import SwiftAST
 
 public class SwiftTypeConverter {
     public static func makeTypeSyntax(_ type: SwiftType) -> TypeSyntax {
-        return SwiftTypeConverter().makeTypeSyntax(type)
+        SwiftTypeConverter().makeTypeSyntax(type)
     }
     
     private var _blockStackLevel = 0
@@ -85,7 +85,7 @@ public class SwiftTypeConverter {
                     // Parameters
                     makeTupleTypeSyntax(parameters)
                         .elements
-                        .forEach { builder.addTupleTypeElement($0) }
+                        .forEach { builder.addArgument($0) }
                 }
                 
                 builder.useBaseType(functionType)
@@ -100,7 +100,7 @@ public class SwiftTypeConverter {
                                 leftParen: nil,
                                 argument: nil,
                                 rightParen: nil,
-                                tokenList: SyntaxFactory.makeBlankTokenList()
+                                tokenList: nil
                             )
                         )
                         
@@ -112,7 +112,7 @@ public class SwiftTypeConverter {
                                 leftParen: nil,
                                 argument: nil,
                                 rightParen: nil,
-                                tokenList: SyntaxFactory.makeBlankTokenList()
+                                tokenList: nil
                             )
                         )
                         
@@ -149,7 +149,7 @@ public class SwiftTypeConverter {
                 let count = composition.count
                 
                 for (i, type) in composition.enumerated() {
-                    builder.addCompositionTypeElement(CompositionTypeElementSyntax { builder in
+                    builder.addElement(CompositionTypeElementSyntax { builder in
                         
                         switch type {
                         case .nested(let nested):
@@ -187,12 +187,12 @@ public class SwiftTypeConverter {
     }
     
     func makeTupleTypeSyntax<C: Collection>(_ types: C) -> TupleTypeSyntax where C.Element == SwiftType {
-        return TupleTypeSyntax { builder in
+        TupleTypeSyntax { builder in
             builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
             builder.useRightParen(SyntaxFactory.makeRightParenToken())
             
             iterateWithComma(types) { (type, hasComma) in
-                builder.addTupleTypeElement(TupleTypeElementSyntax { builder in
+                builder.addElement(TupleTypeElementSyntax { builder in
                     builder.useType(makeTypeSyntax(type))
                     
                     if hasComma {
@@ -244,15 +244,13 @@ public class SwiftTypeConverter {
             
             let genericArgumentList =
                 SyntaxFactory
-                    .makeGenericArgumentList(types.enumerated().map {
-                        let (index, type) = $0
-                        
-                        return SyntaxFactory
-                            .makeGenericArgument(
-                                argumentType: type,
-                                trailingComma: index == types.count - 1 ? nil : SyntaxFactory.makeCommaToken().withTrailingSpace()
-                            )
-                    })
+                    .makeGenericArgumentList(
+                        mapWithComma(types) { (type, hasComma) -> GenericArgumentSyntax in
+                            SyntaxFactory
+                                .makeGenericArgument(
+                                    argumentType: type,
+                                    trailingComma: hasComma ? SyntaxFactory.makeCommaToken().withTrailingSpace() : nil)
+                        })
             
             let genericArgumentClause = SyntaxFactory
                 .makeGenericArgumentClause(

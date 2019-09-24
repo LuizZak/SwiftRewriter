@@ -341,7 +341,7 @@ public class IntentionCollectionTypeSystem: TypeSystem {
         }
         
         func canonicalName(for typeName: String) -> String? {
-            return nil
+            nil
         }
         
         func unalias(_ typeName: String) -> SwiftType? {
@@ -383,6 +383,7 @@ class CompoundKnownType: KnownType {
     var knownMethods: [KnownMethod]
     var knownProperties: [KnownProperty]
     var knownFields: [KnownProperty]
+    var knownSubscripts: [KnownSubscript]
     var knownProtocolConformances: [KnownProtocolConformance]
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
@@ -396,6 +397,7 @@ class CompoundKnownType: KnownType {
         knownMethods = []
         knownProperties = []
         knownFields = []
+        knownSubscripts = []
         knownProtocolConformances = []
         knownAttributes = []
         semantics = []
@@ -409,6 +411,7 @@ class CompoundKnownType: KnownType {
             knownMethods.append(contentsOf: type.knownMethods)
             knownProperties.append(contentsOf: type.knownProperties)
             knownFields.append(contentsOf: type.knownFields)
+            knownSubscripts.append(contentsOf: type.knownSubscripts)
             knownProtocolConformances.append(contentsOf: type.knownProtocolConformances)
             knownAttributes.append(contentsOf: type.knownAttributes)
             semantics.formUnion(type.semantics)

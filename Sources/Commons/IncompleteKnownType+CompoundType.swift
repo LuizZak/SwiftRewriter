@@ -21,7 +21,7 @@ extension IncompleteKnownType {
             throw IncompleteTypeError(description:
                 """
                 Found error while parsing \
-                @\(SwiftClassInterfaceParser.SwiftRewriterAttribute.name) \
+                @\(SwiftRewriterAttribute.name) \
                 attribute: \(error)
                 """
             )

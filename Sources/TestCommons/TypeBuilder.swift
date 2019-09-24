@@ -21,7 +21,7 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
                                type: SwiftType,
                                attributes: [PropertyAttribute] = []) -> TypeBuilder {
         
-        return createProperty(named: name, type: type, mode: .asField, attributes: attributes)
+        createProperty(named: name, type: type, mode: .asField, attributes: attributes)
     }
     
     @discardableResult
@@ -130,7 +130,7 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     }
     
     public func build() -> T {
-        return targetType
+        targetType
     }
 }
 

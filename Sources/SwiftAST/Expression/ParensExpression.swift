@@ -4,19 +4,19 @@ public class ParensExpression: Expression {
     }
     
     public override var subExpressions: [Expression] {
-        return [exp]
+        [exp]
     }
     
     public override var isLiteralExpression: Bool {
-        return exp.isLiteralExpression
+        exp.isLiteralExpression
     }
     
     public override var literalExpressionKind: LiteralExpressionKind? {
-        return exp.literalExpressionKind
+        exp.literalExpressionKind
     }
     
     public override var description: String {
-        return "(" + exp.description + ")"
+        "(" + exp.description + ")"
     }
     
     public init(exp: Expression) {
@@ -39,12 +39,12 @@ public class ParensExpression: Expression {
     
     @inlinable
     public override func copy() -> ParensExpression {
-        return ParensExpression(exp: exp.copy()).copyTypeAndMetadata(from: self)
+        ParensExpression(exp: exp.copy()).copyTypeAndMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitParens(self)
+        visitor.visitParens(self)
     }
     
     public override func isEqual(to other: Expression) -> Bool {
@@ -79,7 +79,7 @@ public class ParensExpression: Expression {
 public extension Expression {
     @inlinable
     var asParens: ParensExpression? {
-        return cast()
+        cast()
     }
     
     /// Returns the first non-`ParensExpression` child expression of this syntax

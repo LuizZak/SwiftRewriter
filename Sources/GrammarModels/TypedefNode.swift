@@ -1,50 +1,50 @@
 /// A type definition node
 public class TypedefNode: ASTNode, InitializableNode {
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     public var structDeclaration: ObjcStructDeclaration? {
-        return firstChild()
+        firstChild()
     }
     public var type: TypeNameNode? {
-        return firstChild()
+        firstChild()
     }
     public var blockParameters: BlockParametersNode? {
-        return firstChild()
+        firstChild()
     }
     public var typeDeclarators: [TypeDeclaratorNode] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
 /// Block parameters for a block typedef
 public class BlockParametersNode: ASTNode, InitializableNode {
     public var parameters: [TypeNameNode] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
 public class TypeDeclaratorNode: ASTNode {
     public var pointerNode: PointerNode? {
-        return firstChild()
+        firstChild()
     }
     
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
 }
 
 public class PointerNode: ASTNode {
     public var pointerNode: PointerNode? {
-        return firstChild()
+        firstChild()
     }
     
     public var asPointerList: [PointerNode] {

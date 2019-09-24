@@ -35,10 +35,11 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
     }
     
     public static func fromIntentionCollection(_ intentionCollection: IntentionCollection,
-                                               delegate: Delegate) -> FunctionBodyQueue {
+                                               delegate: Delegate,
+                                               numThreads: Int) -> FunctionBodyQueue {
         
         let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
-        queue.collect(from: intentionCollection)
+        queue.collect(from: intentionCollection, numThreads: numThreads)
         
         return queue
     }
@@ -74,8 +75,9 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         self.delegate = delegate
     }
     
-    private func collect(from intentions: IntentionCollection) {
+    private func collect(from intentions: IntentionCollection, numThreads: Int) {
         let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = numThreads
         
         for file in intentions.fileIntentions() {
             queue.addOperation {

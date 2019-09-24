@@ -1,53 +1,53 @@
 /// Represents a global function definition
 public class FunctionDefinition: ASTNode, InitializableNode {
     public var returnType: TypeNameNode? {
-        return firstChild()
+        firstChild()
     }
     
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     public var parameterList: ParameterList? {
-        return firstChild()
+        firstChild()
     }
     
     public var methodBody: MethodBody? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
 /// Represents the parameters list for a function definition
 public class ParameterList: ASTNode, InitializableNode {
     public var parameters: [FunctionParameter] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     public var variadicParameter: VariadicParameter? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
 /// Represents a parameter for a parameters list for a function definition
 public class FunctionParameter: ASTNode, InitializableNode {
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     public var type: TypeNameNode? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -55,6 +55,6 @@ public class FunctionParameter: ASTNode, InitializableNode {
 /// function parameter.
 public class VariadicParameter: ASTNode, InitializableNode {
     public required init(isInNonnullContext: Bool) {
-        super.init(_isInNonnullContext: isInNonnullContext)
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
