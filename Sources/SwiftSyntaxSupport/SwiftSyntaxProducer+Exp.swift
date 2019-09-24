@@ -442,8 +442,8 @@ extension SwiftSyntaxProducer {
             
         case .string(let string):
             return StringLiteralExprSyntax { builder in
-                builder.useOpenQuote(SyntaxFactory.makeStringQuoteToken())
-                builder.addSegment(prepareStartToken(SyntaxFactory.makeStringLiteral("\"" + string + "\"")))
+                builder.useOpenQuote(prepareStartToken(SyntaxFactory.makeStringQuoteToken()))
+                builder.addSegment(SyntaxFactory.makeStringLiteral(string))
                 builder.useCloseQuote(SyntaxFactory.makeStringQuoteToken())
             }
             
