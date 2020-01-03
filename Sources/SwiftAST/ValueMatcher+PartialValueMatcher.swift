@@ -5,7 +5,7 @@ public struct PartialValueMatcher<T, U> {
     
     public subscript<Z>(dynamicMember keyPath: KeyPath<U, Z>) -> PartialValueMatcher<T, Z> {
         PartialValueMatcher<T, Z>(keyPath: self.keyPath.appending(path: keyPath),
-                                         baseMatcher: baseMatcher)
+                                  baseMatcher: baseMatcher)
     }
 }
 

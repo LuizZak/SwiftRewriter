@@ -246,7 +246,7 @@ public extension ValueMatcher {
     /// - Returns: A new matcher with the specified matcher.
     @inlinable
     static func keyPath<U>(_ kp: KeyPath<T, U?>,
-                                  _ closure: (ValueMatcher<U>) -> ValueMatcher<U>) -> ValueMatcher {
+                           _ closure: (ValueMatcher<U>) -> ValueMatcher<U>) -> ValueMatcher {
         
         ValueMatcher().keyPath(kp, closure)
     }
