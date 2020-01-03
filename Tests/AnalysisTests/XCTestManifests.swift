@@ -79,6 +79,7 @@ extension ReachingDefinitionAnalysisTests {
         ("testIfElse", testIfElse),
         ("testIfLet", testIfLet),
         ("testVarDecl", testVarDecl),
+        ("testVarDeclReplace", testVarDeclReplace),
         ("testVarDeclWithNoInitialization", testVarDeclWithNoInitialization),
     ]
 }
