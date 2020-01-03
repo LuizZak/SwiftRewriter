@@ -65,7 +65,7 @@ class MyClass: NSObject {
 
 #### Requirements
 
-Xcode 10.2 & Swift 5.0
+Xcode 11.2 & Swift 5.1
 
 #### Usage
 
