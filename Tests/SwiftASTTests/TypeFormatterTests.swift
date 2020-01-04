@@ -1,6 +1,5 @@
 import XCTest
 import SwiftAST
-import SwiftRewriterLib
 
 class TypeFormatterTests: XCTestCase {
     func testAsStringFunctionSignature() {

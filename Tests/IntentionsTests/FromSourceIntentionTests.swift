@@ -1,5 +1,4 @@
 import XCTest
-import SwiftRewriterLib
 import TestCommons
 
 class FromSourceIntentionTests: XCTestCase {

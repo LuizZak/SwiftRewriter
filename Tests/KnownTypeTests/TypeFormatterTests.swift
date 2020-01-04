@@ -2,7 +2,6 @@ import XCTest
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
 
 class TypeFormatterTests: XCTestCase {
     func testAsStringMethodFromType() {

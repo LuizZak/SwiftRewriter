@@ -1,6 +1,5 @@
 import XCTest
 import GrammarModels
-import SwiftRewriterLib
 import SwiftAST
 
 class ExpressionTests: XCTestCase {

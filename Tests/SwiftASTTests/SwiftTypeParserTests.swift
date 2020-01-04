@@ -1,6 +1,5 @@
 import XCTest
 import SwiftAST
-import SwiftRewriterLib
 import TestCommons
 
 // TODO: Support parsing @convention, @escaping and @autoclosure block type attributes
