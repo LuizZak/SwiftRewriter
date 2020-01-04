@@ -61,13 +61,17 @@ public final class FunctionSignatureParser {
     ///
     /// ```
     /// function-signature
-    ///     : 'mutating'? identifier parameter-signature return-type?
-    ///     | 'mutating'? identifier parameter-signature 'throws' return-type?
-    ///     | 'mutating'? identifier parameter-signature 'rethrows' return-type?
+    ///     | 'mutating'? identifier parameter-signature throws-clause? return-type?
+    ///     ;
+    ///
+    /// throws-clause
+    ///     : 'throws'
+    ///     | 'rethrows'
     ///     ;
     ///
     /// return-type
     ///     : '->' swift-type
+    ///     ;
     /// ```
     ///
     /// Support for parsing Swift types is borrowed from `SwiftTypeParser`.
@@ -100,13 +104,17 @@ public final class FunctionSignatureParser {
     ///
     /// ```
     /// function-signature
-    ///     : 'mutating'? identifier parameter-signature return-type?
-    ///     | 'mutating'? identifier parameter-signature 'throws' return-type?
-    ///     | 'mutating'? identifier parameter-signature 'rethrows' return-type?
+    ///     | 'mutating'? identifier parameter-signature throws-clause? return-type?
+    ///     ;
+    ///
+    /// throws-clause
+    ///     : 'throws'
+    ///     | 'rethrows'
     ///     ;
     ///
     /// return-type
     ///     : '->' swift-type
+    ///     ;
     /// ```
     ///
     /// Support for parsing Swift types is borrowed from `SwiftTypeParser`.
