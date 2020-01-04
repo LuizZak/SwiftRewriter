@@ -172,7 +172,7 @@ extension SwiftSyntaxProducer {
         SourceFileSyntax { builder in
             
             // Imports come before any header #directive comments
-            iterating(file.knownImportDirectives) { module in
+            iterating(file.importDirectives) { module in
                 let syntax = generateImport(module)
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }

@@ -10,12 +10,14 @@ public protocol KnownFile {
     
     /// Gets a list of all globals defined within the file.
     var globals: [KnownGlobal] { get }
+    
+    /// Gets a list of all import compiler directives used within the file.
+    var importDirectives: [String] { get }
 }
 
 /// Represents the structure of an Objective-C file.
 public protocol KnownObjectiveCFile: KnownFile {
-    /// Gets a list of all import compiler directives used within the file.
-    var importDirectives: [String] { get }
+    
 }
 
 /// A protocol for denoting global-level declarations, such as functions and variables.

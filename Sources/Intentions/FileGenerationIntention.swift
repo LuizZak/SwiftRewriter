@@ -23,7 +23,7 @@ public final class FileGenerationIntention: Intention {
     
     /// Gets the (Swift) import directives should be printed at this file's top
     /// header section.
-    public var knownImportDirectives: [String] = []
+    public var importDirectives: [String] = []
 
     /// Gets the intention collection that contains this file generation intention
     public internal(set) var intentionCollection: IntentionCollection?
@@ -102,7 +102,7 @@ public final class FileGenerationIntention: Intention {
         
         preprocessorDirectives =
             try container.decode([String].self, forKey: .preprocessorDirectives)
-        knownImportDirectives =
+        importDirectives =
             try container.decode([String].self, forKey: .importDirectives)
         
         typeIntentions = try container.decodeIntentions(forKey: .typeIntentions)
@@ -133,7 +133,7 @@ public final class FileGenerationIntention: Intention {
         try container.encode(sourcePath, forKey: .sourcePath)
         try container.encode(targetPath, forKey: .targetPath)
         try container.encode(preprocessorDirectives, forKey: .preprocessorDirectives)
-        try container.encode(knownImportDirectives, forKey: .importDirectives)
+        try container.encode(importDirectives, forKey: .importDirectives)
         try container.encodeIntentions(typeIntentions, forKey: .typeIntentions)
         try container.encodeIntentions(typealiasIntentions, forKey: .typealiasIntentions)
         try container.encodeIntentions(globalFunctionIntentions,
@@ -241,15 +241,11 @@ extension FileGenerationIntention: KnownFile {
         (sourcePath as NSString).lastPathComponent
     }
     
-    public var knownTypes: [KnownType] {
-        typeIntentions
-    }
-
     public var types: [KnownType] {
         typeIntentions
     }
     
-    public var knownGlobals: [KnownGlobal] {
+    public var globals: [KnownGlobal] {
         globalVariableIntentions + globalFunctionIntentions
     }
 }

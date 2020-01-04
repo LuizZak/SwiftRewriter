@@ -106,8 +106,8 @@ let package = Package(
         .target(
             name: "TestCommons",
             dependencies: [
-                "SwiftAST", "SwiftSyntaxSupport", "Intentions", "KnownType",
-                "GrammarModels", "Utils", "TypeSystem"
+                "SwiftAST", "SwiftSyntaxSupport", "SwiftRewriterLib", "Intentions",
+                "KnownType", "GrammarModels", "Utils", "TypeSystem"
             ])
         
     ] + /* Tests */ [

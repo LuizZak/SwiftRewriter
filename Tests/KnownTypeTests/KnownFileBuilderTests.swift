@@ -9,7 +9,7 @@ class KnownFileBuilderTests: XCTestCase {
         
         XCTAssertEqual(sut.fileName, "FileName.h")
         XCTAssertEqual(file.fileName, "FileName.h")
-        XCTAssertEqual(file.knownTypes.count, 0)
+        XCTAssertEqual(file.types.count, 0)
     }
     
     func testClass() {
@@ -21,10 +21,10 @@ class KnownFileBuilderTests: XCTestCase {
         
         let file = sut.build()
         
-        XCTAssertEqual(file.knownTypes.count, 1)
-        XCTAssertEqual(file.knownTypes.first?.kind, .class)
-        XCTAssertEqual(file.knownTypes.first?.typeName, "AClass")
-        XCTAssertEqual(file.knownTypes.first?.knownConstructors.count, 1)
+        XCTAssertEqual(file.types.count, 1)
+        XCTAssertEqual(file.types.first?.kind, .class)
+        XCTAssertEqual(file.types.first?.typeName, "AClass")
+        XCTAssertEqual(file.types.first?.knownConstructors.count, 1)
     }
     
     func testStruct() {
@@ -36,10 +36,10 @@ class KnownFileBuilderTests: XCTestCase {
         
         let file = sut.build()
         
-        XCTAssertEqual(file.knownTypes.count, 1)
-        XCTAssertEqual(file.knownTypes.first?.kind, .struct)
-        XCTAssertEqual(file.knownTypes.first?.typeName, "AStruct")
-        XCTAssertEqual(file.knownTypes.first?.knownConstructors.count, 1)
+        XCTAssertEqual(file.types.count, 1)
+        XCTAssertEqual(file.types.first?.kind, .struct)
+        XCTAssertEqual(file.types.first?.typeName, "AStruct")
+        XCTAssertEqual(file.types.first?.knownConstructors.count, 1)
     }
     
     func testProtocol() {
@@ -51,10 +51,10 @@ class KnownFileBuilderTests: XCTestCase {
         
         let file = sut.build()
         
-        XCTAssertEqual(file.knownTypes.count, 1)
-        XCTAssertEqual(file.knownTypes.first?.kind, .protocol)
-        XCTAssertEqual(file.knownTypes.first?.typeName, "AProtocol")
-        XCTAssertEqual(file.knownTypes.first?.knownConstructors.count, 1)
+        XCTAssertEqual(file.types.count, 1)
+        XCTAssertEqual(file.types.first?.kind, .protocol)
+        XCTAssertEqual(file.types.first?.typeName, "AProtocol")
+        XCTAssertEqual(file.types.first?.knownConstructors.count, 1)
     }
     
     func testEnum() {
@@ -66,10 +66,10 @@ class KnownFileBuilderTests: XCTestCase {
         
         let file = sut.build()
         
-        XCTAssertEqual(file.knownTypes.count, 1)
-        XCTAssertEqual(file.knownTypes.first?.kind, .enum)
-        XCTAssertEqual(file.knownTypes.first?.typeName, "AnEnum")
-        XCTAssertEqual(file.knownTypes.first?.knownConstructors.count, 1)
+        XCTAssertEqual(file.types.count, 1)
+        XCTAssertEqual(file.types.first?.kind, .enum)
+        XCTAssertEqual(file.types.first?.typeName, "AnEnum")
+        XCTAssertEqual(file.types.first?.knownConstructors.count, 1)
     }
     
     func testAssignsKnownTypeFile() {
@@ -79,7 +79,7 @@ class KnownFileBuilderTests: XCTestCase {
         
         let file = sut.build()
         
-        XCTAssertNotNil(file.knownTypes[0].knownFile)
-        XCTAssertNotNil(file.knownTypes[0].knownFile?.fileName, "FileName.h")
+        XCTAssertNotNil(file.types[0].knownFile)
+        XCTAssertNotNil(file.types[0].knownFile?.fileName, "FileName.h")
     }
 }

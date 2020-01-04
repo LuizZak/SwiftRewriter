@@ -12,16 +12,19 @@ public struct KnownFileBuilder {
     }
     
     public init(fileName: String) {
-        self.file = BuildingKnownFile(fileName: fileName, types: [], globals: [], knownImportDirectives: [])
+        self.file = BuildingKnownFile(fileName: fileName,
+                                      buildingTypes: [],
+                                      buildingGlobals: [],
+                                      importDirectives: [])
     }
     
     // TODO: Not public until we solve the TODO within this init down bellow
     /*public*/ init(from existingFile: KnownFile) {
         let file =
             BuildingKnownFile(fileName: existingFile.fileName,
-                              types: [],
-                              globals: [],
-                              knownImportDirectives: existingFile.knownImportDirectives)
+                              buildingTypes: [],
+                              buildingGlobals: [],
+                              importDirectives: existingFile.importDirectives)
         
         self.file = file
         
@@ -57,7 +60,7 @@ public struct KnownFileBuilder {
         typeBuilder = builder(typeBuilder)
         
         var new = clone()
-        new.file.types.append(typeBuilder.type)
+        new.file.buildingTypes.append(typeBuilder.type)
         return new
     }
     
@@ -65,12 +68,12 @@ public struct KnownFileBuilder {
     public func build() -> KnownFile {
         let newFile
             = DummyFile(fileName: file.fileName,
-                        knownTypes: [],
-                        knownGlobals: [],
-                        knownImportDirectives: file.knownImportDirectives)
+                        types: [],
+                        globals: [],
+                        importDirectives: file.importDirectives)
         
-        newFile.knownTypes = assigningKeyPath(file.types, value: newFile, keyPath: \.knownFile)
-        newFile.knownGlobals = assigningKeyPath(file.globals, value: newFile, keyPath: \.knownFile)
+        newFile.types = assigningKeyPath(file.buildingTypes, value: newFile, keyPath: \.knownFile)
+        newFile.globals = assigningKeyPath(file.buildingGlobals, value: newFile, keyPath: \.knownFile)
         
         return newFile
     }
@@ -108,17 +111,18 @@ public struct KnownFileBuilder {
 
 struct BuildingKnownFile: Codable {
     var fileName: String
-    var types: [BuildingKnownType]
-    var globals: [BuildingKnownGlobalFunction]
-    var knownImportDirectives: [String]
+    var buildingTypes: [BuildingKnownType]
+    var buildingGlobals: [BuildingKnownGlobalFunction]
+    var importDirectives: [String]
 }
 
 extension BuildingKnownFile: KnownFile {
-    var knownTypes: [KnownType] {
-        types
+    var types: [KnownType] {
+        buildingTypes
     }
-    var knownGlobals: [KnownGlobal] {
-        return globals
+    
+    var globals: [KnownGlobal] {
+        buildingGlobals
     }
 }
 
@@ -136,18 +140,18 @@ extension BuildingKnownGlobalFunction: KnownGlobal {
 
 private class DummyFile: KnownFile {
     var fileName: String
-    var knownTypes: [KnownType]
-    var knownGlobals: [KnownGlobal]
-    var knownImportDirectives: [String]
+    var types: [KnownType]
+    var globals: [KnownGlobal]
+    var importDirectives: [String]
     
     init(fileName: String,
-         knownTypes: [KnownType],
-         knownGlobals: [KnownGlobal],
-         knownImportDirectives: [String]) {
+         types: [KnownType],
+         globals: [KnownGlobal],
+         importDirectives: [String]) {
         
         self.fileName = fileName
-        self.knownTypes = knownTypes
-        self.knownGlobals = knownGlobals
-        self.knownImportDirectives = knownImportDirectives
+        self.types = types
+        self.globals = globals
+        self.importDirectives = importDirectives
     }
 }
