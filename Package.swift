@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.1
 // The swift-tools-version declares the minimum version of Swift required to
 // build this package.
 
@@ -106,7 +106,7 @@ let package = Package(
         .target(
             name: "TestCommons",
             dependencies: [
-                "SwiftAST", "SwiftRewriterLib", "Intentions", "KnownType",
+                "SwiftAST", "SwiftSyntaxSupport", "Intentions", "KnownType",
                 "GrammarModels", "Utils", "TypeSystem"
             ])
         

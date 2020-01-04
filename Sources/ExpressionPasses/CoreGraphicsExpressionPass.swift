@@ -332,113 +332,113 @@ extension CoreGraphicsExpressionPass {
 
         makeCGContextCall("CGContextRestoreGState", swiftName: "restoreGState")
 
-        makeCGContextCall("CGContextScaleCTM", swiftName: "scale",
-            arguments: .addingLabels("x", "y")
-        )
+        makeCGContextCall("CGContextScaleCTM",
+                          swiftName: "scale",
+                          arguments: .addingLabels("x", "y"))
 
-        makeCGContextCall("CGContextTranslateCTM", swiftName: "translateBy",
-            arguments: .addingLabels("x", "y")
-        )
+        makeCGContextCall("CGContextTranslateCTM",
+                          swiftName: "translateBy",
+                          arguments: .addingLabels("x", "y"))
 
-        makeCGContextCall("CGContextRotateCTM", swiftName: "rotate",
-            arguments: .addingLabels("by")
-        )
+        makeCGContextCall("CGContextRotateCTM",
+                          swiftName: "rotate",
+                          arguments: .addingLabels("by"))
 
-        makeCGContextCall("CGContextConcatCTM", swiftName: "concatenate",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextConcatCTM",
+                          swiftName: "concatenate",
+                          arguments: [.asIs])
 
         makeCGContextCall("CGContextGetCTM", swiftName: "getCTM")
 
-        makeCGContextCall("CGContextSetLineWidth", swiftName: "setLineWidth",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetLineWidth",
+                          swiftName: "setLineWidth",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetLineCap", swiftName: "setLineCap",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetLineCap",
+                          swiftName: "setLineCap",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetLineJoin", swiftName: "setLineJoin",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetLineJoin",
+                          swiftName: "setLineJoin",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetMiterLimit", swiftName: "setMiterLimit",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetMiterLimit",
+                          swiftName: "setMiterLimit",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetLineDash", swiftName: "setLineDash",
-            arguments: .addingLabels("phase", nil)
-        )
+        makeCGContextCall("CGContextSetLineDash",
+                          swiftName: "setLineDash",
+                          arguments: .addingLabels("phase", nil))
 
-        makeCGContextCall("CGContextSetFlatness", swiftName: "setFlatness",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetFlatness",
+                          swiftName: "setFlatness",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetAlpha", swiftName: "setAlpha",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetAlpha",
+                          swiftName: "setAlpha",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetBlendMode", swiftName: "setBlendMode",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetBlendMode",
+                          swiftName: "setBlendMode",
+                          arguments: [.asIs])
 
         makeCGContextCall("CGContextBeginPath", swiftName: "beginPath")
 
-        makeCGContextCall("CGContextMoveToPoint", swiftName: "move",
-            arguments: [.labeled("to", .mergingArguments(arg0: 0, arg1: 1, toCGPoint))]
-        )
+        makeCGContextCall("CGContextMoveToPoint",
+                          swiftName: "move",
+                          arguments: [.labeled("to", .mergingArguments(arg0: 0, arg1: 1, toCGPoint))])
 
-        makeCGContextCall("CGContextAddLineToPoint", swiftName: "addLine",
-            arguments: [.labeled("to", .mergingArguments(arg0: 0, arg1: 1, toCGPoint))]
-        )
+        makeCGContextCall("CGContextAddLineToPoint",
+                          swiftName: "addLine",
+                          arguments: [.labeled("to", .mergingArguments(arg0: 0, arg1: 1, toCGPoint))])
 
-        makeCGContextCall("CGContextAddCurveToPoint", swiftName: "addCurve",
-            arguments: [.labeled("to", .mergingArguments(arg0: 4, arg1: 5, toCGPoint)),
-                        .labeled("control1", .mergingArguments(arg0: 0, arg1: 1, toCGPoint)),
-                        .labeled("control2", .mergingArguments(arg0: 2, arg1: 3, toCGPoint))]
-        )
+        makeCGContextCall("CGContextAddCurveToPoint",
+                          swiftName: "addCurve",
+                          arguments: [.labeled("to", .mergingArguments(arg0: 4, arg1: 5, toCGPoint)),
+                                      .labeled("control1", .mergingArguments(arg0: 0, arg1: 1, toCGPoint)),
+                                      .labeled("control2", .mergingArguments(arg0: 2, arg1: 3, toCGPoint))])
 
-        makeCGContextCall("CGContextAddQuadCurveToPoint", swiftName: "addQuadCurve",
-            arguments: [.labeled("to", .mergingArguments(arg0: 2, arg1: 3, toCGPoint)),
-                        .labeled("control", .mergingArguments(arg0: 0, arg1: 1, toCGPoint))]
-        )
+        makeCGContextCall("CGContextAddQuadCurveToPoint",
+                          swiftName: "addQuadCurve",
+                          arguments: [.labeled("to", .mergingArguments(arg0: 2, arg1: 3, toCGPoint)),
+                                      .labeled("control", .mergingArguments(arg0: 0, arg1: 1, toCGPoint))])
 
         makeCGContextCall("CGContextClosePath", swiftName: "closePath")
 
-        makeCGContextCall("CGContextAddRect", swiftName: "addRect",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextAddRect",
+                          swiftName: "addRect",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextAddRects", swiftName: "addRects",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextAddRects",
+                          swiftName: "addRects",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextAddLines", swiftName: "addLines",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextAddLines",
+                          swiftName: "addLines",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextAddEllipseInRect", swiftName: "addElipse",
-            arguments: [.labeled("in", .mergingArguments(arg0: 0, arg1: 1, toCGPoint))]
-        )
+        makeCGContextCall("CGContextAddEllipseInRect",
+                          swiftName: "addElipse",
+                          arguments: [.labeled("in", .mergingArguments(arg0: 0, arg1: 1, toCGPoint))])
 
-        makeCGContextCall("CGContextAddArc", swiftName: "addArc",
-            arguments: [.labeled("center", .mergingArguments(arg0: 0, arg1: 1, toCGPoint)),
-                        .labeled("radius"),
-                        .labeled("startAngle"),
-                        .labeled("endAngle"),
-                        .labeled("clockwise",
-                                 .transformed({ $0.binary(op: .equals, rhs: .constant(1)) }))]
-        )
+        makeCGContextCall("CGContextAddArc",
+                          swiftName: "addArc",
+                          arguments: [.labeled("center", .mergingArguments(arg0: 0, arg1: 1, toCGPoint)),
+                                      .labeled("radius"),
+                                      .labeled("startAngle"),
+                                      .labeled("endAngle"),
+                                      .labeled("clockwise",
+                                               .transformed({ $0.binary(op: .equals, rhs: .constant(1)) }))])
 
-        makeCGContextCall("CGContextAddArcToPoint", swiftName: "addArc",
-            arguments: [.labeled("tangent1End", .mergingArguments(arg0: 0, arg1: 1, toCGPoint)),
-                        .labeled("tangent2End", .mergingArguments(arg0: 2, arg1: 3, toCGPoint)),
-                        .labeled("radius")]
-        )
+        makeCGContextCall("CGContextAddArcToPoint",
+                          swiftName: "addArc",
+                          arguments: [.labeled("tangent1End", .mergingArguments(arg0: 0, arg1: 1, toCGPoint)),
+                                      .labeled("tangent2End", .mergingArguments(arg0: 2, arg1: 3, toCGPoint)),
+                                      .labeled("radius")])
 
-        makeCGContextCall("CGContextAddPath", swiftName: "addPath",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextAddPath",
+                          swiftName: "addPath",
+                          arguments: [.asIs])
 
         makeCGContextCall("CGContextReplacePathWithStrokedPath", swiftName: "replacePathWithStrokedPath")
 
@@ -450,13 +450,13 @@ extension CoreGraphicsExpressionPass {
 
         makeCGContextCall("CGContextCopyPath", swiftName: "copyPath")
 
-        makeCGContextCall("CGContextPathContainsPoint", swiftName: "pathContains",
-            arguments: .addingLabels(nil, "mode")
-        )
+        makeCGContextCall("CGContextPathContainsPoint",
+                          swiftName: "pathContains",
+                          arguments: .addingLabels(nil, "mode"))
 
-        makeCGContextCall("CGContextDrawPath", swiftName: "drawPath",
-            arguments: .addingLabels("using")
-        )
+        makeCGContextCall("CGContextDrawPath",
+                          swiftName: "drawPath",
+                          arguments: .addingLabels("using"))
 
         makeCGContextCall("CGContextFillPath", swiftName: "fillPath")
 
@@ -464,37 +464,37 @@ extension CoreGraphicsExpressionPass {
 
         makeCGContextCall("CGContextStrokePath", swiftName: "strokePath")
 
-        makeCGContextCall("CGContextFillRect", swiftName: "fill",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextFillRect",
+                          swiftName: "fill",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextFillRects", swiftName: "fillRects",
-            arguments: [.asIs] //"(const CGRect * rects, size_t count);"
-        )
+        makeCGContextCall("CGContextFillRects",
+                          swiftName: "fillRects",
+                          arguments: [.asIs]) //"(const CGRect * rects, size_t count);")
 
-        makeCGContextCall("CGContextStrokeRect", swiftName: "stroke",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextStrokeRect",
+                          swiftName: "stroke",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextStrokeRectWithWidth", swiftName: "stroke",
-            arguments: .addingLabels(nil, "width")
-        )
+        makeCGContextCall("CGContextStrokeRectWithWidth",
+                          swiftName: "stroke",
+                          arguments: .addingLabels(nil, "width"))
 
-        makeCGContextCall("CGContextClearRect", swiftName: "clear",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextClearRect",
+                          swiftName: "clear",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextFillEllipseInRect", swiftName: "fillEllipse",
-            arguments: .addingLabels("in")
-        )
+        makeCGContextCall("CGContextFillEllipseInRect",
+                          swiftName: "fillEllipse",
+                          arguments: .addingLabels("in"))
 
-        makeCGContextCall("CGContextStrokeEllipseInRect", swiftName: "strokeEllipse",
-            arguments: .addingLabels("in")
-        )
+        makeCGContextCall("CGContextStrokeEllipseInRect",
+                          swiftName: "strokeEllipse",
+                          arguments: .addingLabels("in"))
 
-        makeCGContextCall("CGContextStrokeLineSegments", swiftName: "strokeLineSegments",
-            arguments: .addingLabels("between")
-        )
+        makeCGContextCall("CGContextStrokeLineSegments",
+                          swiftName: "strokeLineSegments",
+                          arguments: .addingLabels("between"))
 
         makeCGContextCall("CGContextClip", swiftName: "clip")
 
@@ -502,158 +502,156 @@ extension CoreGraphicsExpressionPass {
 
         makeCGContextCall("CGContextResetClip", swiftName: "resetClip")
 
-        makeCGContextCall("CGContextClipToMask", swiftName: "clip",
-            arguments: .addingLabels("to", "mask")
-        )
+        makeCGContextCall("CGContextClipToMask",
+                          swiftName: "clip",
+                          arguments: .addingLabels("to", "mask"))
 
         makeCGContextCall("CGContextGetClipBoundingBox", swiftName: "getClipBoundingBox")
 
-        makeCGContextCall("CGContextClipToRect", swiftName: "clip",
-            arguments: .addingLabels("to")
-        )
+        makeCGContextCall("CGContextClipToRect",
+                          swiftName: "clip",
+                          arguments: .addingLabels("to"))
 
-        makeCGContextCall("CGContextClipToRects", swiftName: "clip",
-            arguments: .addingLabels("to")
-        )
+        makeCGContextCall("CGContextClipToRects",
+                          swiftName: "clip",
+                          arguments: .addingLabels("to"))
 
-        makeCGContextCall("CGContextSetFillColorWithColor", swiftName: "setFillColor",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetFillColorWithColor",
+                          swiftName: "setFillColor",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetStrokeColorWithColor", swiftName: "setStrokeColor",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetStrokeColorWithColor",
+                          swiftName: "setStrokeColor",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetFillColorSpace", swiftName: "setFillColorSpace",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetFillColorSpace",
+                          swiftName: "setFillColorSpace",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetStrokeColorSpace", swiftName: "setStrokeColorSpace",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetStrokeColorSpace",
+                          swiftName: "setStrokeColorSpace",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetFillColor", swiftName: "setFillColor",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetFillColor",
+                          swiftName: "setFillColor",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetStrokeColor", swiftName: "setStrokeColor",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetStrokeColor",
+                          swiftName: "setStrokeColor",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetFillPattern", swiftName: "setFillPattern",
-            arguments: .addingLabels(nil, "colorComponents")
-        )
+        makeCGContextCall("CGContextSetFillPattern",
+                          swiftName: "setFillPattern",
+                          arguments: .addingLabels(nil, "colorComponents"))
 
-        makeCGContextCall("CGContextSetStrokePattern", swiftName: "setStrokePattern",
-            arguments: .addingLabels(nil, "colorComponents")
-        )
+        makeCGContextCall("CGContextSetStrokePattern",
+                          swiftName: "setStrokePattern",
+                          arguments: .addingLabels(nil, "colorComponents"))
 
-        makeCGContextCall("CGContextSetPatternPhase", swiftName: "setPatternPhase",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetPatternPhase",
+                          swiftName: "setPatternPhase",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetGrayFillColor", swiftName: "setFillColor",
-            arguments: .addingLabels("gray", "alpha")
-        )
+        makeCGContextCall("CGContextSetGrayFillColor",
+                          swiftName: "setFillColor",
+                          arguments: .addingLabels("gray", "alpha"))
 
-        makeCGContextCall("CGContextSetGrayStrokeColor", swiftName: "setStrokeColor",
-            arguments: .addingLabels("gray", "alpha")
-        )
+        makeCGContextCall("CGContextSetGrayStrokeColor",
+                          swiftName: "setStrokeColor",
+                          arguments: .addingLabels("gray", "alpha"))
 
-        makeCGContextCall("CGContextSetRGBFillColor", swiftName: "setFillColor",
-            arguments: .addingLabels("red", "green", "blue", "alpha")
-        )
+        makeCGContextCall("CGContextSetRGBFillColor",
+                          swiftName: "setFillColor",
+                          arguments: .addingLabels("red", "green", "blue", "alpha"))
 
-        makeCGContextCall("CGContextSetRGBStrokeColor", swiftName: "setStrokeColor",
-            arguments: .addingLabels("red", "green", "blue", "alpha")
-        )
+        makeCGContextCall("CGContextSetRGBStrokeColor",
+                          swiftName: "setStrokeColor",
+                          arguments: .addingLabels("red", "green", "blue", "alpha"))
 
-        makeCGContextCall("CGContextSetCMYKFillColor", swiftName: "setFillColor",
-            arguments: .addingLabels("cyan", "magenta", "yellow", "black", "alpha")
-        )
+        makeCGContextCall("CGContextSetCMYKFillColor",
+                          swiftName: "setFillColor",
+                          arguments: .addingLabels("cyan", "magenta", "yellow", "black", "alpha"))
 
-        makeCGContextCall("CGContextSetCMYKStrokeColor", swiftName: "setStrokeColor",
-            arguments: .addingLabels("cyan", "magenta", "yellow", "black", "alpha")
-        )
+        makeCGContextCall("CGContextSetCMYKStrokeColor",
+                          swiftName: "setStrokeColor",
+                          arguments: .addingLabels("cyan", "magenta", "yellow", "black", "alpha"))
 
-        makeCGContextCall("CGContextSetRenderingIntent", swiftName: "setRenderingIntent",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetRenderingIntent",
+                          swiftName: "setRenderingIntent",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextDrawImage", swiftName: "draw",
-            arguments: [.fromArgIndex(1), .labeled("in", .fromArgIndex(0))]
-        )
+        makeCGContextCall("CGContextDrawImage",
+                          swiftName: "draw",
+                          arguments: [.fromArgIndex(1), .labeled("in", .fromArgIndex(0))])
 
-        makeCGContextCall("CGContextDrawTiledImage", swiftName: "draw",
-            arguments: [
-                .fromArgIndex(1),
-                .labeled("in", .fromArgIndex(0)),
-                .labeled("byTiling", .fixed { .constant(true) })
-            ]
-        )
+        makeCGContextCall("CGContextDrawTiledImage",
+                          swiftName: "draw",
+                          arguments: [.fromArgIndex(1),
+                                      .labeled("in", .fromArgIndex(0)),
+                                      .labeled("byTiling", .fixed { .constant(true) })])
 
         makeCGContextCall("CGContextGetInterpolationQuality", swiftName: "getInterpolationQuality")
 
-        makeCGContextCall("CGContextSetInterpolationQuality", swiftName: "setInterpolationQuality",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetInterpolationQuality",
+                          swiftName: "setInterpolationQuality",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetShadowWithColor", swiftName: "setShadow",
-            arguments: .addingLabels("offset", "blue", "color")
-        )
+        makeCGContextCall("CGContextSetShadowWithColor",
+                          swiftName: "setShadow",
+                          arguments: .addingLabels("offset", "blue", "color"))
 
-        makeCGContextCall("CGContextSetShadow", swiftName: "setShadow",
-            arguments: .addingLabels("offset", "blue")
-        )
+        makeCGContextCall("CGContextSetShadow",
+                          swiftName: "setShadow",
+                          arguments: .addingLabels("offset", "blue"))
 
-        makeCGContextCall("CGContextDrawLinearGradient", swiftName: "drawLinearGradient",
-            arguments: .addingLabels(nil,
-                                    "start",
-                                    "end",
-                                    "options")
-        )
+        makeCGContextCall("CGContextDrawLinearGradient",
+                          swiftName: "drawLinearGradient",
+                          arguments: .addingLabels(nil,
+                                                   "start",
+                                                   "end",
+                                                   "options"))
 
-        makeCGContextCall("CGContextDrawRadialGradient", swiftName: "drawRadialGradient",
-            arguments: .addingLabels(nil,
-                                     "startCenter",
-                                     "startRadius",
-                                     "endCenter",
-                                     "endRadius",
-                                     "options")
-        )
+        makeCGContextCall("CGContextDrawRadialGradient",
+                          swiftName: "drawRadialGradient",
+                          arguments: .addingLabels(nil,
+                                                   "startCenter",
+                                                   "startRadius",
+                                                   "endCenter",
+                                                   "endRadius",
+                                                   "options"))
 
-        makeCGContextCall("CGContextDrawShading", swiftName: "drawShading",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextDrawShading",
+                          swiftName: "drawShading",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetCharacterSpacing", swiftName: "setCharacterSpacing",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetCharacterSpacing",
+                          swiftName: "setCharacterSpacing",
+                          arguments: [.asIs])
         
-        makeCGContextCall("CGContextSetTextDrawingMode", swiftName: "setTextDrawingMode",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetTextDrawingMode",
+                          swiftName: "setTextDrawingMode",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetFont", swiftName: "setFont",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetFont",
+                          swiftName: "setFont",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetFontSize", swiftName: "setFontSize",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetFontSize",
+                          swiftName: "setFontSize",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextShowGlyphsAtPositions", swiftName: "showGlyphsAtPositions",
-            arguments: [.asIs, .asIs]
-            //arguments: "(const CGGlyph * glyphs, const CGPoint * Lpositions, size_t count);"
-        )
+        makeCGContextCall("CGContextShowGlyphsAtPositions",
+                          swiftName: "showGlyphsAtPositions",
+                          arguments: [.asIs, .asIs])
+                        //arguments: "(const CGGlyph * glyphs, const CGPoint * Lpositions, size_t count);"
 
-        makeCGContextCall("CGContextDrawPDFPage", swiftName: "drawPDFPage",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextDrawPDFPage",
+                          swiftName: "drawPDFPage",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextBeginPage", swiftName: "beginPage",
-            arguments: [.labeled("mediaBox")]
-        )
+        makeCGContextCall("CGContextBeginPage",
+                          swiftName: "beginPage",
+                          arguments: [.labeled("mediaBox")])
 
         makeCGContextCall("CGContextEndPage", swiftName: "endPage")
 
@@ -665,74 +663,74 @@ extension CoreGraphicsExpressionPass {
 
         makeCGContextCall("CGContextSynchronize", swiftName: "synchronize")
 
-        makeCGContextCall("CGContextSetShouldAntialias", swiftName: "setShouldAntialias",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetShouldAntialias",
+                          swiftName: "setShouldAntialias",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetAllowsAntialiasing", swiftName: "setAllowsAntialiasing",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetAllowsAntialiasing",
+                          swiftName: "setAllowsAntialiasing",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetShouldSmoothFonts", swiftName: "setShouldSmoothFonts",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetShouldSmoothFonts",
+                          swiftName: "setShouldSmoothFonts",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetAllowsFontSmoothing", swiftName: "setAllowsFontSmoothing",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetAllowsFontSmoothing",
+                          swiftName: "setAllowsFontSmoothing",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetShouldSubpixelPositionFonts", swiftName: "setShouldSubpixelPositionFonts",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetShouldSubpixelPositionFonts",
+                          swiftName: "setShouldSubpixelPositionFonts",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetAllowsFontSubpixelPositioning", swiftName: "setAllowsFontSubpixelPositioning",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetAllowsFontSubpixelPositioning",
+                          swiftName: "setAllowsFontSubpixelPositioning",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetShouldSubpixelQuantizeFonts", swiftName: "setShouldSubpixelQuantizeFonts",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetShouldSubpixelQuantizeFonts",
+                          swiftName: "setShouldSubpixelQuantizeFonts",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextSetAllowsFontSubpixelQuantization", swiftName: "setAllowsFontSubpixelQuantization",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextSetAllowsFontSubpixelQuantization",
+                          swiftName: "setAllowsFontSubpixelQuantization",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextBeginTransparencyLayer", swiftName: "beginTransparencyLayer",
-            arguments: .addingLabels("auxiliaryInfo")
-        )
+        makeCGContextCall("CGContextBeginTransparencyLayer",
+                          swiftName: "beginTransparencyLayer",
+                          arguments: .addingLabels("auxiliaryInfo"))
 
-        makeCGContextCall("CGContextBeginTransparencyLayerWithRect", swiftName: "beginTransparencyLayerWithRect",
-            arguments: .addingLabels("in", "auxiliaryInfo")
-        )
+        makeCGContextCall("CGContextBeginTransparencyLayerWithRect",
+                          swiftName: "beginTransparencyLayerWithRect",
+                          arguments: .addingLabels("in", "auxiliaryInfo"))
 
         makeCGContextCall("CGContextEndTransparencyLayer", swiftName: "endTransparencyLayer")
 
         makeCGContextCall("CGContextGetUserSpaceToDeviceSpaceTransform",
                           swiftName: "getUserSpaceToDeviceSpaceTransform")
 
-        makeCGContextCall("CGContextConvertPointToDeviceSpace", swiftName: "convertToDeviceSpace",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextConvertPointToDeviceSpace",
+                          swiftName: "convertToDeviceSpace",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextConvertPointToUserSpace", swiftName: "convertToUserSpace",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextConvertPointToUserSpace",
+                          swiftName: "convertToUserSpace",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextConvertSizeToDeviceSpace", swiftName: "convertToDeviceSpace",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextConvertSizeToDeviceSpace",
+                          swiftName: "convertToDeviceSpace",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextConvertSizeToUserSpace", swiftName: "convertToUserSpace",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextConvertSizeToUserSpace",
+                          swiftName: "convertToUserSpace",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextConvertRectToDeviceSpace", swiftName: "convertToDeviceSpace",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextConvertRectToDeviceSpace",
+                          swiftName: "convertToDeviceSpace",
+                          arguments: [.asIs])
 
-        makeCGContextCall("CGContextConvertRectToUserSpace", swiftName: "convertToUserSpace",
-            arguments: [.asIs]
-        )
+        makeCGContextCall("CGContextConvertRectToUserSpace",
+                          swiftName: "convertToUserSpace",
+                          arguments: [.asIs])
         
         // Properties
         

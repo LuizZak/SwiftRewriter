@@ -11,8 +11,8 @@ public protocol DiffTestCaseFailureReporter {
 public extension DiffTestCaseFailureReporter {
     
     func diffTest(expected input: String,
-                         file: String = #file,
-                         line: Int = #line) -> DiffingTest {
+                  file: String = #file,
+                  line: Int = #line) -> DiffingTest {
         
         let location = DiffLocation(file: file, line: line)
         let diffable = DiffableString(string: input, location: location)

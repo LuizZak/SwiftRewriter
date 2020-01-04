@@ -1,7 +1,6 @@
 import XCTest
 import SwiftAST
 import KnownType
-import SwiftRewriterLib
 
 class KnownTypeSerializerTests: XCTestCase {
     func testSerialization() throws {

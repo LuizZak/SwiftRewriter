@@ -24,9 +24,9 @@ public struct Path: CustomStringConvertible {
     
     public var lastPathComponent: String {
         fullPath
-                .split(separator: Path.pathSeparator)
-                .last
-                .map(String.init) ?? fullPath
+            .split(separator: Path.pathSeparator)
+            .last
+            .map(String.init) ?? fullPath
     }
     
     public var pathComponents: [String] {
