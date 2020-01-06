@@ -1,17 +1,21 @@
 import Foundation
 import ObjcParser
 
-class ParserPool {
+public class ParserPool {
     var cache: [URL: ObjcParser] = [:]
     let fileProvider: FileProvider
     let parserStatePool: ObjcParserStatePool
 
-    init(fileProvider: FileProvider, parserStatePool: ObjcParserStatePool) {
+    public init(fileProvider: FileProvider, parserStatePool: ObjcParserStatePool) {
         self.fileProvider = fileProvider
         self.parserStatePool = parserStatePool
     }
+    
+    public func storeParsedTree(file: URL, parser: ObjcParser) {
+        cache[file] = parser
+    }
 
-    func loadParsedTree(file: URL) throws -> ObjcParser {
+    public func loadParsedTree(file: URL) throws -> ObjcParser {
         if let parser = cache[file] {
             try parser.parse()
             return parser
@@ -30,7 +34,7 @@ class ParserPool {
         return parser
     }
 
-    enum Error: Swift.Error {
+    public enum Error: Swift.Error {
         case invalidFile
     }
 }

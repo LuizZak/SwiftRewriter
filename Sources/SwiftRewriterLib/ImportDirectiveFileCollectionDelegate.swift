@@ -5,7 +5,7 @@ public class ImportDirectiveFileCollectionDelegate {
     var parserPool: ParserPool
     let fileProvider: FileProvider
 
-    init(parserPool: ParserPool, fileProvider: FileProvider) {
+    public init(parserPool: ParserPool, fileProvider: FileProvider) {
         self.parserPool = parserPool
         self.fileProvider = fileProvider
     }
