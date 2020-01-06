@@ -25,12 +25,12 @@ public protocol SwiftRewriterService {
 public class SwiftRewriterServiceImpl: SwiftRewriterService {
     public static func fileDisk(settings: Settings) -> SwiftRewriterService {
         SwiftRewriterServiceImpl(output: FileDiskWriterOutput(),
-                                        settings: settings)
+                                 settings: settings)
     }
     
     public static func terminal(settings: Settings, colorize: Bool) -> SwiftRewriterService {
         SwiftRewriterServiceImpl(output: StdoutWriterOutput(colorize: colorize),
-                                        settings: settings)
+                                 settings: settings)
     }
     
     let output: WriterOutput
