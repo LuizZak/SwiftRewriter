@@ -9,7 +9,7 @@ public class ParserPool {
 
     public init(fileProvider: FileProvider,
                 parserStatePool: ObjcParserStatePool,
-                antlrSettings: AntlrSettings) {
+                antlrSettings: AntlrSettings = .default) {
         
         self.fileProvider = fileProvider
         self.parserStatePool = parserStatePool

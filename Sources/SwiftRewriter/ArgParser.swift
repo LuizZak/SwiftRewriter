@@ -23,10 +23,10 @@ class SwiftRewriterArgumentsParser {
     /// `--target stdout | filedisk`
     let targetArg: OptionArgument<Target>
     
-    /// `files <files...>`
+    /// `files <files...> [--follow-imports]`
     let filesParser: FilesParser
     
-    /// `path <path> [--exclude-pattern <pattern>] [--include-pattern <pattern>] [--skip-confirm] [--overwrite]`
+    /// `path <path> [--exclude-pattern <pattern>] [--include-pattern <pattern>] [--skip-confirm] [--overwrite] [--follow-imports]`
     let pathParser: PathParser
     
     init() {
@@ -36,7 +36,7 @@ class SwiftRewriterArgumentsParser {
                 [--colorize|-c] [--print-expression-types|-t] [--print-tracing-history|-p] \
                 [--emit-objc-compatibility|-o] [--verbose|-v] [--num-threads|-t <n>] [--force-ll|-ll] \
                 [--target|-w stdout | filedisk] \
-                [files <files...> \
+                [files <files...> [--follow-imports] \
                 | path <path> [--exclude-pattern|-e <pattern>] [--include-pattern|-i <pattern>] \
                 [--skip-confirm|-s] [--overwrite|-o]]
                 """,
@@ -142,10 +142,12 @@ class SwiftRewriterArgumentsParser {
     
     /// `files <files...>`
     class FilesParser {
-        /// `files <files...>`
+        /// `files <files...> [--follow-imports]`
         let filesParser: ArgumentParser
         /// `<files...>`
         let filesArg: PositionalArgument<[String]>
+        /// `--follow-imports`
+        let followImportsArg: OptionArgument<Bool>
         
         init(parentParser: ArgumentParser) {
             filesParser
@@ -153,6 +155,10 @@ class SwiftRewriterArgumentsParser {
                                    overview: "Converts one or more .h/.m file(s) to Swift.")
             filesArg
                 = filesParser.add(positional: "files", kind: [String].self, usage: "Objective-C file(s) to convert.")
+
+            followImportsArg
+                = filesParser.add(option: "--follow-imports", shortName: "-f", kind: Bool.self,
+                                  usage: "Follows #import declarations in files in order to parse other relevant files.")
         }
     }
     
@@ -172,6 +178,8 @@ class SwiftRewriterArgumentsParser {
         let skipConfirmArg: OptionArgument<Bool>
         /// `--overwrite` (for path mode only)
         let overwriteArg: OptionArgument<Bool>
+        /// `--follow-imports` (for path mode only)
+        let followImportsArg: OptionArgument<Bool>
         
         init(parentParser: ArgumentParser) {
             pathParser
@@ -210,6 +218,10 @@ class SwiftRewriterArgumentsParser {
             overwriteArg
                 = pathParser.add(option: "--overwrite", shortName: "-o", kind: Bool.self,
                                  usage: "Overwrites any .swift file with a matching output name on the target path.")
+
+            followImportsArg
+                = pathParser.add(option: "--follow-imports", shortName: "-f", kind: Bool.self,
+                                 usage: "Follows #import declarations in files in order to parse other relevant files.")
         }
     }
 }

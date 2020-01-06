@@ -124,10 +124,12 @@ public class FilesExplorerService {
 class SuggestConversionInterface {
     struct Options {
         static var `default` = Options(overwrite: false, skipConfirm: false,
-                                       excludePattern: nil, includePattern: nil)
+                                       followImports: false, excludePattern: nil,
+                                       includePattern: nil)
         
         var overwrite: Bool
         var skipConfirm: Bool
+        var followImports: Bool
         var excludePattern: String?
         var includePattern: String?
     }
@@ -158,12 +160,15 @@ class SuggestConversionInterface {
 
         let fileProvider = FileDiskProvider()
         let parserPool = ParserPool(fileProvider: fileProvider,
-                                    parserStatePool: ObjcParserStatePool(),
-                                    antlrSettings: .default)
+                                    parserStatePool: ObjcParserStatePool())
 
         let searchStep = FileCollectionStep(fileProvider: fileProvider)
-        let importFileDelegate = ImportDirectiveFileCollectionDelegate(parserPool: parserPool, fileProvider: fileProvider)
-        searchStep.delegate = importFileDelegate
+        let importFileDelegate
+            = ImportDirectiveFileCollectionDelegate(parserPool: parserPool,
+                                                    fileProvider: fileProvider)
+        if options.followImports {
+            searchStep.delegate = importFileDelegate
+        }
         do {
             try withExtendedLifetime(importFileDelegate) {
                 try searchStep.addFromDirectory(URL(fileURLWithPath: directoryPath),
