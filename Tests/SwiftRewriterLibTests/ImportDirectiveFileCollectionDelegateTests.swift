@@ -5,11 +5,15 @@ import TestCommons
 
 class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
     var fileDisk: VirtualFileDisk!
+    var parserPool: ParserPool!
     
     override func setUp() {
         super.setUp()
 
         fileDisk = VirtualFileDisk()
+        parserPool = ParserPool(fileProvider: fileDisk,
+                                parserStatePool: ObjcParserStatePool(),
+                                antlrSettings: .default)
     }
     
     func testReferencedFilesForFile() throws {
@@ -19,7 +23,6 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
             #import "a_file.h"
             """)
         try parser.parse()
-        let parserPool = ParserPool(fileProvider: fileDisk, parserStatePool: ObjcParserStatePool())
         parserPool.storeParsedTree(file: inputFile.url, parser: parser)
         let sut = ImportDirectiveFileCollectionDelegate(parserPool: parserPool, fileProvider: fileDisk)
         
@@ -38,7 +41,6 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
             #import "a_non_existing_file.h"
             """)
         try parser.parse()
-        let parserPool = ParserPool(fileProvider: fileDisk, parserStatePool: ObjcParserStatePool())
         parserPool.storeParsedTree(file: inputFile.url, parser: parser)
         let sut = ImportDirectiveFileCollectionDelegate(parserPool: parserPool, fileProvider: fileDisk)
         
@@ -55,7 +57,6 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
             #import <system_import.h>
             """)
         try parser.parse()
-        let parserPool = ParserPool(fileProvider: fileDisk, parserStatePool: ObjcParserStatePool())
         parserPool.storeParsedTree(file: inputFile.url, parser: parser)
         let sut = ImportDirectiveFileCollectionDelegate(parserPool: parserPool, fileProvider: fileDisk)
         

@@ -272,6 +272,7 @@ public final class SwiftRewriter {
         
         typeSystem.tearDownCache()
         
+        // Re-create cache with newly created typealiases available
         typeSystem.makeCache()
         defer {
             typeSystem.tearDownCache()

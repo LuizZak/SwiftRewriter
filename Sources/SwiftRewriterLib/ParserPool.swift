@@ -5,10 +5,15 @@ public class ParserPool {
     var cache: [URL: ObjcParser] = [:]
     let fileProvider: FileProvider
     let parserStatePool: ObjcParserStatePool
+    let antlrSettings: AntlrSettings
 
-    public init(fileProvider: FileProvider, parserStatePool: ObjcParserStatePool) {
+    public init(fileProvider: FileProvider,
+                parserStatePool: ObjcParserStatePool,
+                antlrSettings: AntlrSettings) {
+        
         self.fileProvider = fileProvider
         self.parserStatePool = parserStatePool
+        self.antlrSettings = antlrSettings
     }
     
     public func storeParsedTree(file: URL, parser: ObjcParser) {
@@ -29,6 +34,7 @@ public class ParserPool {
         let source = StringCodeSource(source: string, fileName: file.lastPathComponent)
         let state = parserStatePool.pull()
         let parser = ObjcParser(source: source, state: state)
+        parser.antlrSettings = antlrSettings
         try parser.parse()
         parserStatePool.repool(state)
         return parser
