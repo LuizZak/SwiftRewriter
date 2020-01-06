@@ -521,11 +521,19 @@ public class ObjcParser {
 
                 lexer.skipWhitespace()
 
-                // Extract "<[PATH]>" now, e.g. "<UIKit/UIKit.h>" -> "UIKit/UIKit.h"
-                try lexer.advance(expectingCurrent: "<")
-                let path = lexer.consume(until: { $0 == ">"})
+                if lexer.safeIsNextChar(equalTo: "<") {
+                    // Extract "<[PATH]>" now, e.g. "<UIKit/UIKit.h>" -> "UIKit/UIKit.h"
+                    try lexer.advance(expectingCurrent: "<")
+                    let path = lexer.consume(until: { $0 == ">"})
 
-                imports.append(ObjcImportDecl(path: String(path)))
+                    imports.append(ObjcImportDecl(path: String(path), isSystemImport: true))
+                } else {
+                    // Extract "[PATH]"
+                    try lexer.advance(expectingCurrent: "\"")
+                    let path = lexer.consume(until: { $0 == "\""})
+
+                    imports.append(ObjcImportDecl(path: String(path), isSystemImport: false))
+                }
             } catch {
                 // Ignore silently
             }
@@ -561,6 +569,10 @@ public class DiagnosticsErrorListener: BaseErrorListener {
 
 public struct ObjcImportDecl {
     public var path: String
+    /// If `true`, indicates `#import` is of `#import <system_header>` variant,
+    /// as opposed to `#import "local_file"` variant.
+    public var isSystemImport: Bool
+    
     public var pathComponents: [String] {
         (path as NSString).pathComponents
     }

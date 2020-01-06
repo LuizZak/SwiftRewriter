@@ -16,7 +16,11 @@ extension ImportDirectiveFileCollectionDelegate: FileCollectionStepDelegate {
                                    referencedFilesForFile file: InputFile) throws -> [URL] {
 
         let parserTree = try parserPool.loadParsedTree(file: file.url)
-        let fileReferences = parserTree.importDirectives.map { $0.path }.filter { $0.hasSuffix(".h") }
+        let fileReferences =
+            parserTree.importDirectives
+                .filter { !$0.isSystemImport }
+                .map { $0.path }
+                .filter { $0.hasSuffix(".h") }
 
         let basePath = file.url.deletingLastPathComponent()
 
