@@ -10,6 +10,13 @@ public class FileCollectionStep {
     }
 
     public func addFile(fromUrl url: URL, isPrimary: Bool) throws {
+        // Promote non-primary files into primaries
+        if let index = files.firstIndex(where: { $0.url == url }) {
+            files[index].isPrimary = files[index].isPrimary || isPrimary
+            
+            return
+        }
+        
         if fileProvider.fileExists(atPath: url.path) {
             let file = InputFile(url: url, isPrimary: isPrimary)
             try addFile(file)
@@ -17,6 +24,13 @@ public class FileCollectionStep {
     }
 
     public func addFile(_ file: InputFile) throws {
+        // Promote non-primary files into primaries
+        if let index = files.firstIndex(where: { $0.url == file.url }) {
+            files[index].isPrimary = files[index].isPrimary || file.isPrimary
+            
+            return
+        }
+        
         files.append(file)
         try resolveReferences(in: file)
     }

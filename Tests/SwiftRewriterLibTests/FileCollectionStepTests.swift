@@ -13,14 +13,47 @@ class FileCollectionStepTests: XCTestCase {
         sut = FileCollectionStep(fileProvider: fileDisk)
     }
 
-    func testAddFileFromURL() throws {
+    func testAddFileFromUrl() throws {
         try fileDisk.createFile(atPath: "/directory/file.h")
 
         try sut.addFile(fromUrl: URL(string: "/directory/file.h")!, isPrimary: true)
         try sut.addFile(fromUrl: URL(string: "/directory/file.m")!, isPrimary: true)
 
-        XCTAssertEqual(sut.files.map { $0.url.path },
-                       ["/directory/file.h"])
+        XCTAssertEqual(sut.files.map { $0.url.path }, ["/directory/file.h"])
+    }
+    
+    func testAddFileFromUrlIgnoresDuplicates() throws {
+        try fileDisk.createFile(atPath: "/directory/file.h")
+        
+        try sut.addFile(fromUrl: URL(string: "/directory/file.h")!, isPrimary: true)
+        try sut.addFile(fromUrl: URL(string: "/directory/file.h")!, isPrimary: true)
+        
+        XCTAssertEqual(sut.files.map { $0.url.path }, ["/directory/file.h"])
+    }
+    
+    func testAddFileFromUrlPromotesNonPrimariesToPrimaries() throws {
+        try fileDisk.createFile(atPath: "/directory/file.h")
+        
+        try sut.addFile(fromUrl: URL(string: "/directory/file.h")!, isPrimary: false)
+        try sut.addFile(fromUrl: URL(string: "/directory/file.h")!, isPrimary: true)
+        
+        XCTAssertEqual(sut.files.map { $0.url.path }, ["/directory/file.h"])
+        XCTAssert(sut.files[0].isPrimary)
+    }
+    
+    func testAddFileIgnoresDuplicates() throws {
+        try sut.addFile(InputFile(url: URL(string: "/directory/file.h")!, isPrimary: true))
+        try sut.addFile(InputFile(url: URL(string: "/directory/file.h")!, isPrimary: true))
+        
+        XCTAssertEqual(sut.files.map { $0.url.path }, ["/directory/file.h"])
+    }
+    
+    func testAddFilePromotesNonPrimariesToPrimaries() throws {
+        try sut.addFile(InputFile(url: URL(string: "/directory/file.h")!, isPrimary: false))
+        try sut.addFile(InputFile(url: URL(string: "/directory/file.h")!, isPrimary: true))
+        
+        XCTAssertEqual(sut.files.map { $0.url.path }, ["/directory/file.h"])
+        XCTAssert(sut.files[0].isPrimary)
     }
 
     func testAddFromDirectoryRecursive() throws {
