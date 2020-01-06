@@ -36,11 +36,26 @@ class SwiftRewriterCommand {
     func filesMode(_ result: ArgumentParser.Result) throws {
         let rewriter = makeRewriterService(result)
         
-        guard let files = result.get(args.filesParser.filesArg) else {
+        guard let fileUrls = result.get(args.filesParser.filesArg) else {
             throw ArgumentParserError.expectedValue(option: "<files...>")
         }
+
+        let fileProvider = FileDiskProvider()
+        let fileCollectionStep = FileCollectionStep(fileProvider: fileProvider)
+        let parserPool = ParserPool(fileProvider: fileProvider,
+                                    parserStatePool: ObjcParserStatePool(),
+                                    antlrSettings: .default)
+        let delegate = ImportDirectiveFileCollectionDelegate(parserPool: parserPool,
+                                                             fileProvider: fileProvider)
+
+        try withExtendedLifetime(delegate) {
+            for fileUrl in fileUrls {
+                try fileCollectionStep.addFile(fromUrl: URL(fileURLWithPath: fileUrl),
+                                               isPrimary: true)
+            }
+        }
         
-        try rewriter.rewrite(files: files.map { URL(fileURLWithPath: $0) })
+        try rewriter.rewrite(files: fileCollectionStep.files)
     }
     
     // MARK: - Path mode

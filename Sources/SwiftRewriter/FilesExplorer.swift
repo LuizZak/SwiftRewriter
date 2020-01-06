@@ -157,12 +157,20 @@ class SuggestConversionInterface {
         var overwriteCount = 0
 
         let fileProvider = FileDiskProvider()
+        let parserPool = ParserPool(fileProvider: fileProvider,
+                                    parserStatePool: ObjcParserStatePool(),
+                                    antlrSettings: .default)
+
         let searchStep = FileCollectionStep(fileProvider: fileProvider)
+        let importFileDelegate = ImportDirectiveFileCollectionDelegate(parserPool: parserPool, fileProvider: fileProvider)
+        searchStep.delegate = importFileDelegate
         do {
-            try searchStep.addFromDirectory(URL(fileURLWithPath: directoryPath),
-                                            recursive: true,
-                                            includePattern: options.includePattern,
-                                            excludePattern: options.excludePattern)
+            try withExtendedLifetime(importFileDelegate) {
+                try searchStep.addFromDirectory(URL(fileURLWithPath: directoryPath),
+                                                recursive: true,
+                                                includePattern: options.includePattern,
+                                                excludePattern: options.excludePattern)
+            }
         } catch {
             console.printLine("Error finding files: \(error).")
             if !options.skipConfirm {
@@ -173,7 +181,9 @@ class SuggestConversionInterface {
         }
         
         let objcFiles: [URL] = searchStep
-            .files.map { $0.url }
+            .files
+            .filter { $0.isPrimary }
+            .map { $0.url }
             // Check a matching .swift file doesn't already exist for the paths
             // (if `overwrite` is not on)
             .filter { (url: URL) -> Bool in
