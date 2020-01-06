@@ -54,7 +54,7 @@ public final class SwiftWriter {
         
         let mutex = Mutex()
         
-        for file in fileIntents {
+        for file in fileIntents where shouldOutputFile(file) {
             if unique.contains(file.targetPath) {
                 print("""
                     Found duplicated file intent to save to path \(file.targetPath).
@@ -98,6 +98,10 @@ public final class SwiftWriter {
                                    origin: error.0,
                                    location: .invalid)
         }
+    }
+    
+    func shouldOutputFile(_ file: FileGenerationIntention) -> Bool {
+        return file.isPrimary
     }
 }
 

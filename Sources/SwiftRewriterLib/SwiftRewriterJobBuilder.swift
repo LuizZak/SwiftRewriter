@@ -45,8 +45,10 @@ public class SwiftRewriterJobInputFiles {
         self.inputs.append(contentsOf: inputs)
     }
     
-    public func add(filePath: String, source: String) {
-        add(SwiftRewriterJobInputSource(filePath: filePath, source: source))
+    public func add(filePath: String, source: String, isPrimary: Bool = true) {
+        add(SwiftRewriterJobInputSource(filePath: filePath,
+                                        source: source,
+                                        isPrimary: isPrimary))
     }
     
     public func addInputs(from inputsProvider: InputSourcesProvider) {
@@ -61,6 +63,7 @@ public class SwiftRewriterJobInputFiles {
 struct SwiftRewriterJobInputSource: InputSource {
     var filePath: String
     var source: String
+    var isPrimary: Bool
     
     func sourceName() -> String {
         filePath

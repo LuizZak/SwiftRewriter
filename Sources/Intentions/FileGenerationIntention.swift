@@ -24,7 +24,12 @@ public final class FileGenerationIntention: Intention {
     /// Gets the (Swift) import directives should be printed at this file's top
     /// header section.
     public var importDirectives: [String] = []
-
+    
+    /// Whether this is a primary source file input. Secondary source inputs do
+    /// not contribute to output files, but may be useful while processing and
+    /// merging inputs of primary files.
+    public var isPrimary: Bool = true
+    
     /// Gets the intention collection that contains this file generation intention
     public internal(set) var intentionCollection: IntentionCollection?
     
@@ -109,6 +114,7 @@ public final class FileGenerationIntention: Intention {
         typealiasIntentions = try container.decodeIntentions(forKey: .typealiasIntentions)
         globalFunctionIntentions = try container.decodeIntentions(forKey: .globalFunctionIntentions)
         globalVariableIntentions = try container.decodeIntentions(forKey: .globalVariableIntentions)
+        isPrimary = try container.decode(Bool.self, forKey: .isPrimary)
         
         try super.init(from: container.superDecoder())
         
@@ -134,6 +140,7 @@ public final class FileGenerationIntention: Intention {
         try container.encode(targetPath, forKey: .targetPath)
         try container.encode(preprocessorDirectives, forKey: .preprocessorDirectives)
         try container.encode(importDirectives, forKey: .importDirectives)
+        try container.encode(isPrimary, forKey: .isPrimary)
         try container.encodeIntentions(typeIntentions, forKey: .typeIntentions)
         try container.encodeIntentions(typealiasIntentions, forKey: .typealiasIntentions)
         try container.encodeIntentions(globalFunctionIntentions,
@@ -229,6 +236,7 @@ public final class FileGenerationIntention: Intention {
         case targetPath
         case preprocessorDirectives
         case importDirectives
+        case isPrimary
         case typeIntentions
         case typealiasIntentions
         case globalFunctionIntentions

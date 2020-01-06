@@ -16,16 +16,18 @@ public class FileInputProvider: InputSourcesProvider {
     
     public func sources() -> [InputSource] {
         files.map {
-            FileInputSource(file: $0)
+            FileInputSource(file: $0, isPrimary: true)
         }
     }
 }
 
 public class FileInputSource: InputSource {
     var file: String
+    public var isPrimary: Bool
     
-    public init(file: String) {
+    public init(file: String, isPrimary: Bool) {
         self.file = file
+        self.isPrimary = isPrimary
     }
     
     public func sourceName() -> String {

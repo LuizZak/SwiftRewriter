@@ -75,7 +75,7 @@ public final class ASTRewriterPassApplier {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = numThreads
         
-        for file in intentions.fileIntentions() {
+        for file in intentions.fileIntentions() where shouldApply(on: file) {
             for passType in self.passes {
                 self.internalApply(on: file,
                                    intentions: intentions,
@@ -85,6 +85,10 @@ public final class ASTRewriterPassApplier {
         }
         
         queue.waitUntilAllOperationsAreFinished()
+    }
+    
+    private func shouldApply(on file: FileGenerationIntention) -> Bool {
+        return file.isPrimary
     }
     
     private func internalApply(on file: FileGenerationIntention,

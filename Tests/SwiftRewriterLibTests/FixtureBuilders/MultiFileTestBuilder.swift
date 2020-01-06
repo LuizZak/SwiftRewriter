@@ -24,8 +24,8 @@ class MultiFileTestBuilder {
         builder.globalsProvidersSource = DefaultGlobalsProvidersSource()
     }
     
-    func file(name: String, _ contents: String) -> MultiFileTestBuilder {
-        builder.inputs.add(filePath: name, source: contents)
+    func file(name: String, _ contents: String, isPrimary: Bool = true) -> MultiFileTestBuilder {
+        builder.inputs.add(filePath: name, source: contents, isPrimary: isPrimary)
         files.append((name, contents))
         return self
     }
@@ -251,19 +251,6 @@ struct ExpectedFile {
     var source: String
     var _file: String
     var _line: Int
-}
-
-struct TestInputSource: InputSource {
-    var name: String
-    var source: String
-    
-    func sourceName() -> String {
-        return name
-    }
-    
-    func loadSource() throws -> CodeSource {
-        return StringCodeSource(source: source, fileName: name)
-    }
 }
 
 class TestMultiInputProvider: InputSourcesProvider {

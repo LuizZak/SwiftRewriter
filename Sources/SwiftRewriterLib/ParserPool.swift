@@ -4,9 +4,11 @@ import ObjcParser
 class ParserPool {
     var cache: [URL: ObjcParser] = [:]
     let fileProvider: FileProvider
+    let parserStatePool: ObjcParserStatePool
 
-    init(fileProvider: FileProvider) {
+    init(fileProvider: FileProvider, parserStatePool: ObjcParserStatePool) {
         self.fileProvider = fileProvider
+        self.parserStatePool = parserStatePool
     }
 
     func loadParsedTree(file: URL) throws -> ObjcParser {
@@ -21,8 +23,10 @@ class ParserPool {
         }
 
         let source = StringCodeSource(source: string, fileName: file.lastPathComponent)
-        let parser = ObjcParser(source: source)
+        let state = parserStatePool.pull()
+        let parser = ObjcParser(source: source, state: state)
         try parser.parse()
+        parserStatePool.repool(state)
         return parser
     }
 

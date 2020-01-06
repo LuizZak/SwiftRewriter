@@ -70,6 +70,20 @@ public class FileCollectionStep {
     }
 }
 
+public extension FileCollectionStep {
+    func makeInputSourcesProvider() -> InputSourcesProvider {
+        return InternalSourcesProvider(files: files)
+    }
+    
+    private struct InternalSourcesProvider: InputSourcesProvider {
+        let files: [InputFile]
+        
+        func sources() -> [InputSource] {
+            return files
+        }
+    }
+}
+
 public protocol FileProvider {
     func enumerator(atPath path: String) -> [String]?
     func fileExists(atPath path: String) -> Bool

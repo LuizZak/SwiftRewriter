@@ -162,7 +162,6 @@ public final class SwiftRewriter {
             print("Parsing function bodies...")
         }
         
-        
         // Register globals first
         for provider in globalsProvidersSource.globalsProviders {
             typeSystem.addTypealiasProvider(provider.typealiasProvider())
@@ -521,6 +520,7 @@ public final class SwiftRewriter {
         let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), targetPath: path)
         fileIntent.preprocessorDirectives = parser.preprocessorDirectives
         fileIntent.index = index
+        fileIntent.isPrimary = source.isPrimary
         ctx.pushContext(fileIntent)
         
         let intentionCollector = IntentionCollector(delegate: collectorDelegate, context: ctx)

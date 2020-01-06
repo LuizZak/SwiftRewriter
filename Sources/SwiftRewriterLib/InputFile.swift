@@ -1,4 +1,5 @@
 import Foundation
+import ObjcParser
 
 public struct InputFile: Equatable {
     public var url: URL
@@ -11,5 +12,17 @@ public struct InputFile: Equatable {
     public init(url: URL, isPrimary: Bool) {
         self.url = url
         self.isPrimary = isPrimary
+    }
+}
+
+extension InputFile: InputSource {
+    public func sourceName() -> String {
+        url.path
+    }
+    
+    public func loadSource() throws -> CodeSource {
+        let source = try String(contentsOf: url)
+        
+        return StringCodeSource(source: source, fileName: url.path)
     }
 }

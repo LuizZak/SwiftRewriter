@@ -274,6 +274,12 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
+    public func isPrimary(_ isPrimary: Bool) -> FileIntentionBuilder {
+        intention.isPrimary = isPrimary
+        return self
+    }
+    
+    @discardableResult
     public func addImportDirective(moduleName: String) -> FileIntentionBuilder {
         intention.importDirectives.append(moduleName)
         
