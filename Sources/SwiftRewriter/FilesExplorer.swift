@@ -191,7 +191,7 @@ class SuggestConversionInterface {
                 }
 
                 return false
-        }
+            }
 
         if objcFiles.isEmpty {
             console.printLine("No files where found to process.")

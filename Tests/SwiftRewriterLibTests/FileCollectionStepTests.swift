@@ -47,18 +47,18 @@ class FileCollectionStepTests: XCTestCase {
     }
     
     func testAddFileIgnoresDuplicates() throws {
-        try sut.addFile(InputFile(url: URL(string: "/directory/file.h")!, isPrimary: true))
-        try sut.addFile(InputFile(url: URL(string: "/directory/file.h")!, isPrimary: true))
+        try sut.addFile(DiskInputFile(url: URL(string: "/directory/file.h")!, isPrimary: true))
+        try sut.addFile(DiskInputFile(url: URL(string: "/directory/file.h")!, isPrimary: true))
         
         XCTAssertEqual(sut.files.map { $0.url.path }, ["/directory/file.h"])
     }
     
     func testAddFilePromotesNonPrimariesToPrimaries() throws {
         // Test both orders of 'isPrimary' flag: false -> true, true -> false
-        try sut.addFile(InputFile(url: URL(string: "/directory/file1.h")!, isPrimary: false))
-        try sut.addFile(InputFile(url: URL(string: "/directory/file1.h")!, isPrimary: true))
-        try sut.addFile(InputFile(url: URL(string: "/directory/file2.h")!, isPrimary: true))
-        try sut.addFile(InputFile(url: URL(string: "/directory/file2.h")!, isPrimary: false))
+        try sut.addFile(DiskInputFile(url: URL(string: "/directory/file1.h")!, isPrimary: false))
+        try sut.addFile(DiskInputFile(url: URL(string: "/directory/file1.h")!, isPrimary: true))
+        try sut.addFile(DiskInputFile(url: URL(string: "/directory/file2.h")!, isPrimary: true))
+        try sut.addFile(DiskInputFile(url: URL(string: "/directory/file2.h")!, isPrimary: false))
         
         XCTAssertEqual(sut.files.map { $0.url.path }, ["/directory/file1.h", "/directory/file2.h"])
         XCTAssert(sut.files[0].isPrimary)
@@ -83,7 +83,7 @@ class FileCollectionStepTests: XCTestCase {
     }
 
     func testDelegateFileCollectionStepReferencedFilesForFile() throws {
-        let file = InputFile(url: URL(string: "/file.h")!, isPrimary: false)
+        let file = DiskInputFile(url: URL(string: "/file.h")!, isPrimary: false)
         let mockDelegate = MockFileCollectionStepDelegate()
         sut.delegate = mockDelegate
 
@@ -97,8 +97,8 @@ class FileCollectionStepTests: XCTestCase {
 
     func testDelegateFileCollectionStepReferencedFilesForFile_CollectsFiles() throws {
         try fileDisk.createFile(atPath: "/import.h")
-        let file = InputFile(url: URL(string: "/file.h")!, isPrimary: true)
-        let expected = InputFile(url: URL(string: "/import.h")!, isPrimary: false)
+        let file = DiskInputFile(url: URL(string: "/file.h")!, isPrimary: true)
+        let expected = DiskInputFile(url: URL(string: "/import.h")!, isPrimary: false)
         let mockDelegate = MockFileCollectionStepDelegate()
         mockDelegate.fileReferences = [URL(string: "/import.h")!]
         sut.delegate = mockDelegate
@@ -110,10 +110,10 @@ class FileCollectionStepTests: XCTestCase {
 }
 
 private class MockFileCollectionStepDelegate: FileCollectionStepDelegate {
-    var fileCollectionStepReferencedFilesForFile: [(fileCollectionStep: FileCollectionStep, file: InputFile)] = []
+    var fileCollectionStepReferencedFilesForFile: [(fileCollectionStep: FileCollectionStep, file: DiskInputFile)] = []
     var fileReferences: [URL] = []
     func fileCollectionStep(_ fileCollectionStep: FileCollectionStep,
-                            referencedFilesForFile file: InputFile) throws -> [URL] {
+                            referencedFilesForFile file: DiskInputFile) throws -> [URL] {
         fileCollectionStepReferencedFilesForFile.append((fileCollectionStep, file))
         return fileReferences
     }

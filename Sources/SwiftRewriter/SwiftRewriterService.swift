@@ -17,6 +17,9 @@ public struct Settings {
 public protocol SwiftRewriterService {
     /// Performs a rewrite of the given files
     func rewrite(files: [URL]) throws
+
+    /// Performs a rewrite of the given files
+    func rewrite(files: [DiskInputFile]) throws
 }
 
 public class SwiftRewriterServiceImpl: SwiftRewriterService {
@@ -39,7 +42,12 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
     }
     
     public func rewrite(files: [URL]) throws {
-        let input = FileInputProvider(files: files)
+        let inputFiles = files.map { DiskInputFile(url: $0, isPrimary: true) }
+        try rewrite(files: inputFiles)
+    }
+
+    public func rewrite(files: [DiskInputFile]) throws {
+        let input = ArrayInputSourcesProvider(files: files)
         
         let jobBuilder = SwiftRewriterJobBuilder()
         

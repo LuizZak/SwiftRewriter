@@ -18,7 +18,7 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
     
     func testReferencedFilesForFile() throws {
         try fileDisk.createFile(atPath: "/a_file.h")
-        let inputFile = InputFile(url: URL(string: "/input.h")!, isPrimary: true)
+        let inputFile = DiskInputFile(url: URL(string: "/input.h")!, isPrimary: true)
         let parser = ObjcParser(string: """
             #import "a_file.h"
             """)
@@ -35,7 +35,7 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
     
     func testReferencedFilesForFileIgnoresNonExistingFiles() throws {
         try fileDisk.createFile(atPath: "/a_file.h")
-        let inputFile = InputFile(url: URL(string: "/input.h")!, isPrimary: true)
+        let inputFile = DiskInputFile(url: URL(string: "/input.h")!, isPrimary: true)
         let parser = ObjcParser(string: """
             #import "a_file.h"
             #import "a_non_existing_file.h"
@@ -52,7 +52,7 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
     }
     
     func testReferencedFilesForFileIgnoresSystemImports() throws {
-        let inputFile = InputFile(url: URL(string: "/input.h")!, isPrimary: true)
+        let inputFile = DiskInputFile(url: URL(string: "/input.h")!, isPrimary: true)
         let parser = ObjcParser(string: """
             #import <system_import.h>
             """)

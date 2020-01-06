@@ -13,7 +13,7 @@ public class ImportDirectiveFileCollectionDelegate {
 
 extension ImportDirectiveFileCollectionDelegate: FileCollectionStepDelegate {
     public func fileCollectionStep(_ fileCollectionStep: FileCollectionStep,
-                                   referencedFilesForFile file: InputFile) throws -> [URL] {
+                                   referencedFilesForFile file: DiskInputFile) throws -> [URL] {
 
         let parserTree = try parserPool.loadParsedTree(file: file.url)
         let fileReferences =

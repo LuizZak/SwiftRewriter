@@ -1,7 +1,7 @@
 import Foundation
 import ObjcParser
 
-public struct InputFile: Equatable {
+public struct DiskInputFile: Equatable {
     public var url: URL
 
     /// Whether this file is a primary file for conversion.
@@ -15,7 +15,7 @@ public struct InputFile: Equatable {
     }
 }
 
-extension InputFile: InputSource {
+extension DiskInputFile: InputSource {
     public func sourceName() -> String {
         url.path
     }

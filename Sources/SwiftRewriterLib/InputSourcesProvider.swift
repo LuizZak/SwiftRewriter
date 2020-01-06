@@ -6,6 +6,19 @@ public protocol InputSourcesProvider {
     func sources() -> [InputSource]
 }
 
+/// An array-backed input sources provider
+public struct ArrayInputSourcesProvider: InputSourcesProvider {
+    public var files: [InputSource]
+
+    public init(files: [InputSource] = []) {
+        self.files = files
+    }
+
+    public func sources() -> [InputSource] {
+        files
+    }
+}
+
 /// Represents an input source for Obj-c file
 public protocol InputSource {
     /// Whether this is a primary input source.

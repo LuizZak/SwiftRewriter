@@ -2,7 +2,7 @@ import Foundation
 
 public class FileCollectionStep {
     var fileProvider: FileProvider
-    public private(set) var files: [InputFile] = []
+    public private(set) var files: [DiskInputFile] = []
     public weak var delegate: FileCollectionStepDelegate?
 
     public init(fileProvider: FileProvider = FileDiskProvider()) {
@@ -18,12 +18,12 @@ public class FileCollectionStep {
         }
         
         if fileProvider.fileExists(atPath: url.path) {
-            let file = InputFile(url: url, isPrimary: isPrimary)
+            let file = DiskInputFile(url: url, isPrimary: isPrimary)
             try addFile(file)
         }
     }
 
-    public func addFile(_ file: InputFile) throws {
+    public func addFile(_ file: DiskInputFile) throws {
         // Promote non-primary files into primaries
         if let index = files.firstIndex(where: { $0.url == file.url }) {
             files[index].isPrimary = files[index].isPrimary || file.isPrimary
@@ -60,7 +60,7 @@ public class FileCollectionStep {
                 }
 
         for fileUrl in objcFileUrls {
-            let file = InputFile(url: fileUrl, isPrimary: true)
+            let file = DiskInputFile(url: fileUrl, isPrimary: true)
             try addFile(file)
         }
     }
@@ -69,7 +69,7 @@ public class FileCollectionStep {
         return files.contains { $0.url == url }
     }
 
-    private func resolveReferences(in file: InputFile) throws {
+    private func resolveReferences(in file: DiskInputFile) throws {
         guard let delegate = delegate else {
             return
         }
@@ -90,7 +90,7 @@ public extension FileCollectionStep {
     }
     
     private struct InternalSourcesProvider: InputSourcesProvider {
-        let files: [InputFile]
+        let files: [DiskInputFile]
         
         func sources() -> [InputSource] {
             return files
