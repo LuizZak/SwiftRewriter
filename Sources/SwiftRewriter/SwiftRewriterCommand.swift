@@ -39,7 +39,7 @@ class SwiftRewriterCommand {
         guard let fileUrls = result.get(args.filesParser.filesArg) else {
             throw ArgumentParserError.expectedValue(option: "<files...>")
         }
-        let followImports = result.get(args.filesParser.followImportsArg) ?? false
+        let followImports = result.get(args.followImportsArg) ?? false
 
         let fileProvider = FileDiskProvider()
         let fileCollectionStep = FileCollectionStep(fileProvider: fileProvider)
@@ -71,7 +71,7 @@ class SwiftRewriterCommand {
         let skipConfirm = result.get(args.pathParser.skipConfirmArg) ?? false
         let excludePattern = result.get(args.pathParser.excludePatternArg)
         let includePattern = result.get(args.pathParser.includePatternArg)
-        let followImports = result.get(args.pathParser.followImportsArg) ?? false
+        let followImports = result.get(args.followImportsArg) ?? false
         let overwrite = result.get(args.pathParser.overwriteArg) ?? false
         
         let console = Console()
