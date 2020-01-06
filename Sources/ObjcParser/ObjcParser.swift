@@ -195,11 +195,11 @@ public class ObjcParser {
         var root: T
         
         if antlrSettings.forceUseLLPrediction {
-            parser._interp.setPredictionMode(.LL)
+            parser.getInterpreter().setPredictionMode(.LL)
             
             root = try operation(parser)
         } else {
-            parser._interp.setPredictionMode(.SLL)
+            parser.getInterpreter().setPredictionMode(.SLL)
             
             root = try operation(parser)
             
@@ -207,7 +207,7 @@ public class ObjcParser {
                 diag.removeAll()
                 
                 try parser.reset()
-                parser._interp.setPredictionMode(.LL)
+                parser.getInterpreter().setPredictionMode(.LL)
                 
                 root = try operation(parser)
             }
