@@ -38,7 +38,7 @@ class FileOutputImpl: FileOutput {
 }
 
 class FileOutputTarget: RewriterOutputTarget {
-    private var identDepth: Int = 0
+    private var indentDepth: Int = 0
     private var settings: RewriterOutputSettings
     var fileHandle: FileHandle
     var buffer: String = ""
@@ -67,13 +67,13 @@ class FileOutputTarget: RewriterOutputTarget {
     }
     
     public func output(line: String, style: TextStyle) {
-        outputIdentation()
+        outputIndentation()
         writeBufferFile(line)
         outputLineFeed()
     }
     
-    public func outputIdentation() {
-        writeBufferFile(identString())
+    public func outputIndentation() {
+        writeBufferFile(indentString())
     }
     
     public func outputLineFeed() {
@@ -84,24 +84,24 @@ class FileOutputTarget: RewriterOutputTarget {
         writeBufferFile(content)
     }
     
-    public func increaseIdentation() {
-        identDepth += 1
+    public func increaseIndentation() {
+        indentDepth += 1
     }
     
-    public func decreaseIdentation() {
-        identDepth -= 1
+    public func decreaseIndentation() {
+        indentDepth -= 1
     }
     
     public func onAfterOutput() {
         
     }
     
-    private func identString() -> String {
+    private func indentString() -> String {
         switch settings.tabStyle {
         case .spaces(let sp):
-            return String(repeating: " ", count: sp * identDepth)
+            return String(repeating: " ", count: sp * indentDepth)
         case .tabs:
-            return String(repeating: "\t", count: identDepth)
+            return String(repeating: "\t", count: indentDepth)
         }
     }
 }

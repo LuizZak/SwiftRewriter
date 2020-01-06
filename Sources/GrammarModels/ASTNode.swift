@@ -152,9 +152,9 @@ open class ASTNode {
 public extension ASTNode {
     func printNode(_ printer: (String) -> Void) {
         withoutActuallyEscaping(printer) { printer in
-            var ident = 0
+            var indent = 0
             func _printIndented(_ str: String) {
-                printer(String(repeating: " ", count: ident) + str)
+                printer(String(repeating: " ", count: indent) + str)
             }
             
             func _print(_ node: ASTNode) {
@@ -166,11 +166,11 @@ public extension ASTNode {
                 
                 _printIndented(nodeTitle)
                 
-                ident += 2
+                indent += 2
                 for child in node.children {
                     _print(child)
                 }
-                ident -= 2
+                indent -= 2
             }
             
             // --
