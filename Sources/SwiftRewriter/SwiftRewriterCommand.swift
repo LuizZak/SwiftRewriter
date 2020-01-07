@@ -40,6 +40,7 @@ class SwiftRewriterCommand {
             throw ArgumentParserError.expectedValue(option: "<files...>")
         }
         let followImports = result.get(args.followImportsArg) ?? false
+        let verbose = result.get(args.verboseArg) ?? false
 
         let fileProvider = FileDiskProvider()
         let fileCollectionStep = FileCollectionStep(fileProvider: fileProvider)
@@ -49,6 +50,9 @@ class SwiftRewriterCommand {
                                                              fileProvider: fileProvider)
         if followImports {
             fileCollectionStep.delegate = delegate
+        }
+        if verbose {
+            fileCollectionStep.listener = StdoutFileCollectionStepListener()
         }
         try withExtendedLifetime(delegate) {
             for fileUrl in fileUrls {
@@ -71,8 +75,9 @@ class SwiftRewriterCommand {
         let skipConfirm = result.get(args.pathParser.skipConfirmArg) ?? false
         let excludePattern = result.get(args.pathParser.excludePatternArg)
         let includePattern = result.get(args.pathParser.includePatternArg)
-        let followImports = result.get(args.followImportsArg) ?? false
         let overwrite = result.get(args.pathParser.overwriteArg) ?? false
+        let followImports = result.get(args.followImportsArg) ?? false
+        let verbose = result.get(args.verboseArg) ?? false
         
         let console = Console()
         let menu = Menu(rewriterService: rewriter, console: console)
@@ -82,7 +87,8 @@ class SwiftRewriterCommand {
                     skipConfirm: skipConfirm,
                     followImports: followImports,
                     excludePattern: excludePattern,
-                    includePattern: includePattern)
+                    includePattern: includePattern,
+                    verbose: verbose)
         
         let interface = SuggestConversionInterface(rewriterService: rewriter)
         interface.searchAndShowConfirm(in: menu,

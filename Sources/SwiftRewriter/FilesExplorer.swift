@@ -125,13 +125,14 @@ class SuggestConversionInterface {
     struct Options {
         static var `default` = Options(overwrite: false, skipConfirm: false,
                                        followImports: false, excludePattern: nil,
-                                       includePattern: nil)
+                                       includePattern: nil, verbose: false)
         
         var overwrite: Bool
         var skipConfirm: Bool
         var followImports: Bool
         var excludePattern: String?
         var includePattern: String?
+        var verbose: Bool
     }
     
     var rewriterService: SwiftRewriterService
@@ -162,19 +163,22 @@ class SuggestConversionInterface {
         let parserPool = ParserPool(fileProvider: fileProvider,
                                     parserStatePool: ObjcParserStatePool())
 
-        let searchStep = FileCollectionStep(fileProvider: fileProvider)
+        let fileCollectionStep = FileCollectionStep(fileProvider: fileProvider)
         let importFileDelegate
             = ImportDirectiveFileCollectionDelegate(parserPool: parserPool,
                                                     fileProvider: fileProvider)
         if options.followImports {
-            searchStep.delegate = importFileDelegate
+            fileCollectionStep.delegate = importFileDelegate
+        }
+        if options.verbose {
+            fileCollectionStep.listener = StdoutFileCollectionStepListener()
         }
         do {
             try withExtendedLifetime(importFileDelegate) {
-                try searchStep.addFromDirectory(URL(fileURLWithPath: directoryPath),
-                                                recursive: true,
-                                                includePattern: options.includePattern,
-                                                excludePattern: options.excludePattern)
+                try fileCollectionStep.addFromDirectory(URL(fileURLWithPath: directoryPath),
+                                                        recursive: true,
+                                                        includePattern: options.includePattern,
+                                                        excludePattern: options.excludePattern)
             }
         } catch {
             console.printLine("Error finding files: \(error).")
@@ -185,7 +189,7 @@ class SuggestConversionInterface {
             return
         }
         
-        let objcFiles: [URL] = searchStep
+        let objcFiles: [URL] = fileCollectionStep
             .files
             .filter { $0.isPrimary }
             .map { $0.url }

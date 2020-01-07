@@ -4,7 +4,7 @@ import ObjcParser
 public class ImportDirectiveFileCollectionDelegate {
     var parserPool: ParserPool
     let fileProvider: FileProvider
-
+    
     public init(parserPool: ParserPool, fileProvider: FileProvider) {
         self.parserPool = parserPool
         self.fileProvider = fileProvider

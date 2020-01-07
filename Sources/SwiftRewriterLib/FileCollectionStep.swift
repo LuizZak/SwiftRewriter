@@ -4,6 +4,7 @@ public class FileCollectionStep {
     var fileProvider: FileProvider
     public private(set) var files: [DiskInputFile] = []
     public weak var delegate: FileCollectionStepDelegate?
+    public var listener: FileCollectionStepListener?
 
     public init(fileProvider: FileProvider = FileDiskProvider()) {
         self.fileProvider = fileProvider
@@ -86,6 +87,9 @@ public class FileCollectionStep {
 
         for url in references {
             if !hasFile(url) {
+                listener?.fileCollectionStep(self, didAddReferencedFile: url,
+                                             forInputFile: file)
+                
                 try addFile(fromUrl: url, isPrimary: false)
             }
         }
@@ -141,4 +145,11 @@ public class FileDiskProvider: FileProvider {
     public enum Error: Swift.Error {
         case invalidFileData
     }
+}
+
+// TODO: Maybe merge with FileCollectionStepDelegate?
+public protocol FileCollectionStepListener {
+    func fileCollectionStep(_ collectionStep: FileCollectionStep,
+                            didAddReferencedFile referencedUrl: URL,
+                            forInputFile inputFile: DiskInputFile)
 }
