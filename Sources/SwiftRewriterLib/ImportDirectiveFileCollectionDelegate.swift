@@ -2,11 +2,11 @@ import Foundation
 import ObjcParser
 
 public class ImportDirectiveFileCollectionDelegate {
-    var parserPool: ParserPool
+    var parserCache: ParserCache
     let fileProvider: FileProvider
     
-    public init(parserPool: ParserPool, fileProvider: FileProvider) {
-        self.parserPool = parserPool
+    public init(parserCache: ParserCache, fileProvider: FileProvider) {
+        self.parserCache = parserCache
         self.fileProvider = fileProvider
     }
 }
@@ -15,7 +15,7 @@ extension ImportDirectiveFileCollectionDelegate: FileCollectionStepDelegate {
     public func fileCollectionStep(_ fileCollectionStep: FileCollectionStep,
                                    referencedFilesForFile file: DiskInputFile) throws -> [URL] {
 
-        let parserTree = try parserPool.loadParsedTree(file: file.url)
+        let parserTree = try parserCache.loadParsedTree(file: file.url)
         let fileReferences =
             parserTree.importDirectives
                 .filter { !$0.isSystemImport }

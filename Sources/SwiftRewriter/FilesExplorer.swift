@@ -160,12 +160,9 @@ class SuggestConversionInterface {
         var overwriteCount = 0
 
         let fileProvider = FileDiskProvider()
-        let parserPool = ParserPool(fileProvider: fileProvider,
-                                    parserStatePool: ObjcParserStatePool())
-
         let fileCollectionStep = FileCollectionStep(fileProvider: fileProvider)
         let importFileDelegate
-            = ImportDirectiveFileCollectionDelegate(parserPool: parserPool,
+            = ImportDirectiveFileCollectionDelegate(parserCache: rewriterService.parserCache,
                                                     fileProvider: fileProvider)
         if options.followImports {
             fileCollectionStep.delegate = importFileDelegate

@@ -44,9 +44,7 @@ class SwiftRewriterCommand {
 
         let fileProvider = FileDiskProvider()
         let fileCollectionStep = FileCollectionStep(fileProvider: fileProvider)
-        let parserPool = ParserPool(fileProvider: fileProvider,
-                                    parserStatePool: ObjcParserStatePool())
-        let delegate = ImportDirectiveFileCollectionDelegate(parserPool: parserPool,
+        let delegate = ImportDirectiveFileCollectionDelegate(parserCache: rewriter.parserCache,
                                                              fileProvider: fileProvider)
         if followImports {
             fileCollectionStep.delegate = delegate

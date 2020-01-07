@@ -47,6 +47,9 @@ public final class SwiftRewriter {
     /// To keep token sources alive long enough.
     private var parsers: [ObjcParser] = []
     
+    /// An optional instance of a parser cache with pre-parsed input files.
+    public var parserCache: ParserCache?
+    
     /// A diagnostics instance that collects all diagnostic errors during input
     /// source processing.
     public let diagnostics: Diagnostics
@@ -500,11 +503,17 @@ public final class SwiftRewriter {
         
         let src = try source.loadSource()
         
-        let processedSrc = applyPreprocessors(source: src)
-        
-        let parser = ObjcParser(string: processedSrc, fileName: src.filePath, state: state)
-        parser.antlrSettings = makeAntlrSettings()
-        try parser.parse()
+        // Hit parser cache, if available
+        let parser: ObjcParser
+        if let parserCache = parserCache {
+            parser = try parserCache.loadParsedTree(file: URL(string: src.filePath)!)
+        } else {
+            let processedSrc = applyPreprocessors(source: src)
+            
+            parser = ObjcParser(string: processedSrc, fileName: src.filePath, state: state)
+            parser.antlrSettings = makeAntlrSettings()
+            try parser.parse()
+        }
         
         let typeMapper = DefaultTypeMapper(typeSystem: TypeSystem.defaultTypeSystem)
         let typeParser = TypeParsing(state: state, antlrSettings: parser.antlrSettings)

@@ -1,18 +1,23 @@
 import Foundation
 import ObjcParser
+import SourcePreprocessors
 
-public class ParserPool {
+/// A
+public class ParserCache {
     var cache: [URL: ObjcParser] = [:]
     let fileProvider: FileProvider
     let parserStatePool: ObjcParserStatePool
+    let sourcePreprocessors: [SourcePreprocessor]
     let antlrSettings: AntlrSettings
 
     public init(fileProvider: FileProvider,
                 parserStatePool: ObjcParserStatePool,
+                sourcePreprocessors: [SourcePreprocessor] = [],
                 antlrSettings: AntlrSettings = .default) {
         
         self.fileProvider = fileProvider
         self.parserStatePool = parserStatePool
+        self.sourcePreprocessors = sourcePreprocessors
         self.antlrSettings = antlrSettings
     }
     
@@ -32,12 +37,27 @@ public class ParserPool {
         }
 
         let source = StringCodeSource(source: string, fileName: file.lastPathComponent)
+        
+        let processedSource = applyPreprocessors(source: source, preprocessors: sourcePreprocessors)
+        
         let state = parserStatePool.pull()
-        let parser = ObjcParser(source: source, state: state)
+        let parser = ObjcParser(string: processedSource,
+                                fileName: source.filePath,
+                                state: state)
         parser.antlrSettings = antlrSettings
         try parser.parse()
         parserStatePool.repool(state)
         return parser
+    }
+    
+    private func applyPreprocessors(source: CodeSource, preprocessors: [SourcePreprocessor]) -> String {
+        let src = source.fetchSource()
+        
+        let context = _PreprocessingContext(filePath: source.filePath)
+        
+        return preprocessors.reduce(src) {
+            $1.preprocess(source: $0, context: context)
+        }
     }
 
     public enum Error: Swift.Error {

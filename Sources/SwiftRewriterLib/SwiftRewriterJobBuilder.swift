@@ -13,6 +13,7 @@ public class SwiftRewriterJobBuilder {
     public var preprocessors: [SourcePreprocessor] = []
     public var settings: SwiftRewriter.Settings = .default
     public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
+    public var parserCache: ParserCache? = nil
     
     public init() {
         
@@ -29,7 +30,8 @@ public class SwiftRewriterJobBuilder {
                                 globalsProvidersSource: globalsProvidersSource,
                                 preprocessors: preprocessors,
                                 settings: settings,
-                                swiftSyntaxOptions: swiftSyntaxOptions)
+                                swiftSyntaxOptions: swiftSyntaxOptions,
+                                parserCache: parserCache)
     }
 }
 

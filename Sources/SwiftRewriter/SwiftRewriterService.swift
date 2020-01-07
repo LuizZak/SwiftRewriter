@@ -4,6 +4,7 @@ import ExpressionPasses
 import SourcePreprocessors
 import IntentionPasses
 import GlobalsProviders
+import ObjcParser
 
 public struct Settings {
     /// Settings for the AST writer
@@ -15,6 +16,9 @@ public struct Settings {
 
 /// Protocol for enabling Swift rewriting service from CLI
 public protocol SwiftRewriterService {
+    /// Gets the input parser cache to be used during rewriting
+    var parserCache: ParserCache { get }
+    
     /// Performs a rewrite of the given files
     func rewrite(files: [URL]) throws
 
@@ -35,8 +39,19 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
     
     let output: WriterOutput
     let settings: Settings
+    let preprocessors: [SourcePreprocessor] = [QuickSpecPreprocessor()]
+    let parserStatePool: ObjcParserStatePool
+    
+    public var parserCache: ParserCache
     
     public init(output: WriterOutput, settings: Settings) {
+        let antlrSettings = AntlrSettings(forceUseLLPrediction: settings.rewriter.forceUseLLPrediction)
+        
+        parserStatePool = ObjcParserStatePool()
+        parserCache = ParserCache(fileProvider: FileDiskProvider(),
+                                  parserStatePool: parserStatePool,
+                                  sourcePreprocessors: preprocessors,
+                                  antlrSettings: antlrSettings)
         self.output = output
         self.settings = settings
     }
@@ -57,7 +72,8 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
         jobBuilder.globalsProvidersSource = DefaultGlobalsProvidersSource()
         jobBuilder.settings = settings.rewriter
         jobBuilder.swiftSyntaxOptions = settings.astWriter
-        jobBuilder.preprocessors = [QuickSpecPreprocessor()]
+        jobBuilder.preprocessors = preprocessors
+        jobBuilder.parserCache = parserCache
         
         let job = jobBuilder.createJob()
         
