@@ -17,9 +17,12 @@ class FileCollectionStepTests: XCTestCase {
         try fileDisk.createFile(atPath: "/directory/file.h")
 
         try sut.addFile(fromUrl: URL(string: "/directory/file.h")!, isPrimary: true)
-        try sut.addFile(fromUrl: URL(string: "/directory/file.m")!, isPrimary: true)
 
         XCTAssertEqual(sut.files.map { $0.url.path }, ["/directory/file.h"])
+    }
+    
+    func testAddFileFromUrlThrowsErrorOnInvalidFile() throws {
+        XCTAssertThrowsError(try sut.addFile(fromUrl: URL(string: "/directory/file.m")!, isPrimary: true))
     }
     
     func testAddFileFromUrlIgnoresDuplicates() throws {
@@ -75,7 +78,7 @@ class FileCollectionStepTests: XCTestCase {
 
         try sut.addFromDirectory(URL(string: "/directory")!, recursive: true)
 
-        XCTAssertEqual(sut.files.map { $0.url.path },
+        XCTAssertEqual(Set(sut.files.map { $0.url.path }),
                        ["/directory/file.h",
                         "/directory/file.m",
                         "/directory/subPath/file.h",
