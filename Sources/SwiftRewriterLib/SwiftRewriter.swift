@@ -109,8 +109,9 @@ public final class SwiftRewriter {
         
         try autoreleasepool {
             try loadInputSources()
-            parseStatements()
+            let autotypeDecls = parseStatements()
             evaluateTypes()
+            resolveAutotypeDeclarations(autotypeDecls)
             performIntentionPasses()
             outputDefinitions()
         }
@@ -157,11 +158,10 @@ public final class SwiftRewriter {
     }
     
     /// Parses all statements now, with proper type information available.
-    private func parseStatements() {
+    private func parseStatements() -> [LazyAutotypeVarDeclResolve] {
         if settings.verbose {
             print("Parsing function bodies...")
         }
-        
         
         // Register globals first
         for provider in globalsProvidersSource.globalsProviders {
@@ -173,15 +173,19 @@ public final class SwiftRewriter {
         defer {
             typeSystem.tearDownCache()
         }
+
+        let autotypeDeclarations = ConcurrentValue<[LazyAutotypeVarDeclResolve]>(wrappedValue: [])
         
         let antlrSettings = makeAntlrSettings()
-        
+
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
         for item in lazyParse {
             queue.addOperation {
                 autoreleasepool {
+                    let delegate = InnerStatementASTReaderDelegate(parseItem: item)
+
                     let typeMapper = DefaultTypeMapper(typeSystem: self.typeSystem)
                     let state = SwiftRewriter._parserStatePool.pull()
                     let typeParser = TypeParsing(state: state, antlrSettings: antlrSettings)
@@ -192,6 +196,7 @@ public final class SwiftRewriter {
                     let reader = SwiftASTReader(typeMapper: typeMapper,
                                                 typeParser: typeParser,
                                                 typeSystem: self.typeSystem)
+                    reader.delegate = delegate
                     
                     switch item {
                     case .enumCase(let enCase):
@@ -217,11 +222,17 @@ public final class SwiftRewriter {
                         
                         v.expression = reader.parseExpression(expression: expression)
                     }
+
+                    autotypeDeclarations.modifyingValue {
+                        $0.append(contentsOf: delegate.autotypeDeclarations)
+                    }
                 }
             }
         }
         
         queue.waitUntilAllOperationsAreFinished()
+
+        return autotypeDeclarations.wrappedValue
     }
     
     /// Evaluate all type signatures, now with the knowledge of all types present
@@ -342,6 +353,29 @@ public final class SwiftRewriter {
         }
         
         queue.waitUntilAllOperationsAreFinished()
+    }
+
+    private func resolveAutotypeDeclarations(_ declarations: [LazyAutotypeVarDeclResolve]) {
+        let globals = CompoundDefinitionsSource()
+
+        // Register globals first
+        for provider in globalsProvidersSource.globalsProviders {
+            globals.addSource(provider.definitionsSource())
+        }
+
+        let typeResolverInvoker =
+            DefaultTypeResolverInvoker(globals: globals, typeSystem: typeSystem,
+                                       numThreads: settings.numThreads)
+
+        // Make a pre-type resolve before applying passes
+        typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection, force: true)
+
+        for declaration in declarations {
+            let stmt = declaration.statement
+            if let type = stmt.decl[declaration.index].initialization?.resolvedType {
+                stmt.decl[declaration.index].type = type
+            }
+        }
     }
     
     private func performIntentionPasses() {
@@ -707,6 +741,25 @@ fileprivate extension SwiftRewriter {
             typeParser
         }
     }
+
+    private class InnerStatementASTReaderDelegate: SwiftStatementASTReaderDelegate {
+        var parseItem: LazyParseItem
+        var autotypeDeclarations: [LazyAutotypeVarDeclResolve] = []
+
+        init(parseItem: LazyParseItem) {
+            self.parseItem = parseItem
+        }
+
+        func swiftStatementASTReader(reportAutoTypeDeclaration varDecl: VariableDeclarationsStatement,
+                                     declarationAtIndex index: Int) {
+
+            autotypeDeclarations.append(
+                LazyAutotypeVarDeclResolve(parseItem: parseItem,
+                                           statement: varDecl,
+                                           index: index)
+            )
+        }
+    }
 }
 
 private enum LazyParseItem {
@@ -724,6 +777,14 @@ private enum LazyTypeResolveItem {
     case enumDecl(EnumGenerationIntention)
     case extensionDecl(ClassExtensionGenerationIntention)
     case `typealias`(TypealiasIntention)
+}
+
+/// Stored '__auto_type' variable declaration that needs to be resolved after
+/// statement parsing
+private struct LazyAutotypeVarDeclResolve {
+    var parseItem: LazyParseItem
+    var statement: VariableDeclarationsStatement
+    var index: Int
 }
 
 internal func _typeNullability(inType type: ObjcType) -> TypeNullability? {

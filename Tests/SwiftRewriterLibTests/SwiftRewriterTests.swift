@@ -565,7 +565,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     // TODO: Fix this test
-    func _testRewriteCFunctionWithCFunctionParameter() {
+    func xtestRewriteCFunctionWithCFunctionParameter() {
         assertObjcParse(
             objc: """
             typedef int (*cmpfn234_2)(void (*)(), void *);
@@ -2677,5 +2677,44 @@ class SwiftRewriterTests: XCTestCase {
                 }
             }
             """)
+    }
+
+    func testRewriteAutotypeDeclaration() {
+        assertObjcParse(
+            objc: """
+            void f() {
+                __auto_type value = 1;
+            }
+            """,
+            swift: """
+            func f() {
+                // decl type: Int
+                // init type: Int
+                let value = 1
+            }
+            """,
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
+    }
+
+    // TODO: Make this test pass
+    func xtestRewriteAutotypeDeclarationDependent() {
+        assertObjcParse(
+            objc: """
+            void f() {
+                __auto_type value = 1;
+                __auto_type valueDep = value;
+            }
+            """,
+            swift: """
+            func f() {
+                // decl type: Int
+                // init type: Int
+                let value = 1
+                // decl type: Int
+                // init type: Int
+                let valueDep = value
+            }
+            """,
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
 }

@@ -323,11 +323,12 @@ extension SwiftStatementASTReaderTests {
                 typeMapper: typeMapper,
                 typeParser: typeParser,
                 context: SwiftASTReaderContext(typeSystem: typeSystem,
-                                               typeContext: nil))
+                                               typeContext: nil),
+                delegate: delegate)
         
         let sut = SwiftStatementASTReader(expressionReader: expReader,
-                                          context: expReader.context)
-        sut.delegate = delegate
+                                          context: expReader.context,
+                                          delegate: delegate)
         
         do {
             let parser = try SwiftStatementASTReaderTests._state.makeMainParser(input: objcStmt).parser

@@ -14,11 +14,15 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
     
     var expressionReader: SwiftExprASTReader
     var context: SwiftASTReaderContext
-    weak var delegate: SwiftStatementASTReaderDelegate?
+    public weak var delegate: SwiftStatementASTReaderDelegate?
     
-    public init(expressionReader: SwiftExprASTReader, context: SwiftASTReaderContext) {
+    public init(expressionReader: SwiftExprASTReader,
+                context: SwiftASTReaderContext,
+                delegate: SwiftStatementASTReaderDelegate?) {
+
         self.expressionReader = expressionReader
         self.context = context
+        self.delegate = delegate
     }
     
     public override func visitDeclaration(_ ctx: Parser.DeclarationContext) -> Statement? {
@@ -328,7 +332,8 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
     // MARK: - Helper methods
     func compoundStatementVisitor() -> CompoundStatementVisitor {
         CompoundStatementVisitor(expressionReader: expressionReader,
-                                        context: context)
+                                 context: context,
+                                 delegate: delegate)
     }
     
     private func acceptFirst(from rules: ParserRuleContext?...) -> Statement? {
@@ -345,10 +350,15 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
     class CompoundStatementVisitor: ObjectiveCParserBaseVisitor<CompoundStatement> {
         var expressionReader: SwiftExprASTReader
         var context: SwiftASTReaderContext
+        weak var delegate: SwiftStatementASTReaderDelegate?
         
-        init(expressionReader: SwiftExprASTReader, context: SwiftASTReaderContext) {
+        init(expressionReader: SwiftExprASTReader,
+             context: SwiftASTReaderContext,
+             delegate: SwiftStatementASTReaderDelegate?) {
+
             self.expressionReader = expressionReader
             self.context = context
+            self.delegate = delegate
         }
         
         override func visitStatement(_ ctx: Parser.StatementContext) -> CompoundStatement? {
@@ -358,7 +368,8 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             
             let reader =
                 SwiftStatementASTReader(expressionReader: expressionReader,
-                                        context: context)
+                                        context: context,
+                                        delegate: delegate)
             
             reader.expressionReader = expressionReader
             
@@ -375,7 +386,8 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             
             let reader =
                 SwiftStatementASTReader(expressionReader: expressionReader,
-                                        context: context)
+                                        context: context,
+                                        delegate: delegate)
             
             reader.expressionReader = expressionReader
             
