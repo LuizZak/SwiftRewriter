@@ -21,6 +21,8 @@ public class FileCollectionStep {
         if fileProvider.fileExists(atPath: url.path) {
             let file = DiskInputFile(url: url, isPrimary: isPrimary)
             try addFile(file)
+        } else {
+            throw Error.fileDoesNotExist(path: url.path)
         }
     }
 
@@ -86,11 +88,22 @@ public class FileCollectionStep {
         let references = try delegate.fileCollectionStep(self, referencedFilesForFile: file)
 
         for url in references {
-            if !hasFile(url) {
+            if !hasFile(url) && fileProvider.fileExists(atPath: url.path) {
                 listener?.fileCollectionStep(self, didAddReferencedFile: url,
                                              forInputFile: file)
                 
                 try addFile(fromUrl: url, isPrimary: false)
+            }
+        }
+    }
+    
+    public enum Error: Swift.Error, CustomStringConvertible {
+        case fileDoesNotExist(path: String)
+        
+        public var description: String {
+            switch self {
+            case .fileDoesNotExist(let path):
+                return "File does not exist at path '\(path)'"
             }
         }
     }
