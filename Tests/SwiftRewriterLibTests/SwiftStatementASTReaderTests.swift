@@ -10,6 +10,13 @@ import WriterTargetOutput
 
 class SwiftStatementASTReaderTests: XCTestCase {
     var tokens: CommonTokenStream!
+    private var delegate: TestSwiftStatementASTReaderDelegate?
+
+    override func setUp() {
+        super.setUp()
+
+        delegate = nil
+    }
     
     func testIfStatement() {
         assert(objcStmt: "if(abc) { }",
@@ -281,6 +288,22 @@ class SwiftStatementASTReaderTests: XCTestCase {
                                              type: .swiftBlock(returnType: .void, parameters: []),
                                              initialization: nil))
     }
+
+    func testReportAutotypeDeclaration() {
+        delegate = TestSwiftStatementASTReaderDelegate()
+
+        assert(objcStmt: "__auto_type value;",
+               parseBlock: { try $0.declaration() },
+               readsAs: .variableDeclaration(identifier: "value",
+                                             type: .typeName("__auto_type"),
+                                             initialization: nil))
+
+        XCTAssertEqual(delegate?.reportAutoTypeDeclaration,
+                       .variableDeclaration(identifier: "value",
+                                            type: .typeName("__auto_type"),
+                                            initialization: nil))
+        XCTAssertEqual(delegate?.declarationAtIndex, 0)
+    }
 }
 
 extension SwiftStatementASTReaderTests {
@@ -304,6 +327,7 @@ extension SwiftStatementASTReaderTests {
         
         let sut = SwiftStatementASTReader(expressionReader: expReader,
                                           context: expReader.context)
+        sut.delegate = delegate
         
         do {
             let parser = try SwiftStatementASTReaderTests._state.makeMainParser(input: objcStmt).parser
@@ -354,4 +378,16 @@ extension SwiftStatementASTReaderTests {
     }
     
     private static var _state = ObjcParserState()
+}
+
+private class TestSwiftStatementASTReaderDelegate: SwiftStatementASTReaderDelegate {
+
+    var reportAutoTypeDeclaration: VariableDeclarationsStatement?
+    var declarationAtIndex: Int?
+
+    func swiftStatementASTReader(reportAutoTypeDeclaration varDecl: VariableDeclarationsStatement,
+                                 declarationAtIndex index: Int) {
+        self.reportAutoTypeDeclaration = varDecl
+        self.declarationAtIndex = index
+    }
 }

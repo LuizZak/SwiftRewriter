@@ -4,11 +4,17 @@ import ObjcParser
 import Antlr4
 import SwiftAST
 
+public protocol SwiftStatementASTReaderDelegate: class {
+    func swiftStatementASTReader(reportAutoTypeDeclaration varDecl: VariableDeclarationsStatement,
+                                 declarationAtIndex index: Int)
+}
+
 public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     public typealias Parser = ObjectiveCParser
     
     var expressionReader: SwiftExprASTReader
     var context: SwiftASTReaderContext
+    weak var delegate: SwiftStatementASTReaderDelegate?
     
     public init(expressionReader: SwiftExprASTReader, context: SwiftASTReaderContext) {
         self.expressionReader = expressionReader
@@ -49,7 +55,8 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
     public override func visitVarDeclaration(_ ctx: Parser.VarDeclarationContext) -> Statement? {
         let extractor =
             VarDeclarationExtractor(expressionReader: expressionReader,
-                                    context: context)
+                                    context: context,
+                                    delegate: delegate)
         
         return ctx.accept(extractor)
     }
@@ -406,10 +413,15 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
     fileprivate class VarDeclarationExtractor: ObjectiveCParserBaseVisitor<Statement> {
         var expressionReader: SwiftExprASTReader
         var context: SwiftASTReaderContext
+        weak var delegate: SwiftStatementASTReaderDelegate?
         
-        init(expressionReader: SwiftExprASTReader, context: SwiftASTReaderContext) {
+        init(expressionReader: SwiftExprASTReader,
+             context: SwiftASTReaderContext,
+             delegate: SwiftStatementASTReaderDelegate?) {
+
             self.expressionReader = expressionReader
             self.context = context
+            self.delegate = delegate
         }
         
         override func visitForLoopInitializer(_ ctx: Parser.ForLoopInitializerContext) -> Statement? {
@@ -446,16 +458,15 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
                                                  isConstant: isConstant,
                                                  initialization: expr)
                 declarations.append(declaration)
-                
-                let storage =
-                    ValueStorage(type: swiftType,
-                                 ownership: ownership,
-                                 isConstant: isConstant)
-                
-                context.define(localNamed: identifier, storage: storage)
+
+                context.define(localNamed: identifier, storage: declaration.storage)
             }
-            
-            return .variableDeclarations(declarations)
+
+            let varDeclStmt = Statement.variableDeclarations(declarations)
+
+            reportAutotypeDeclarations(in: varDeclStmt)
+
+            return varDeclStmt
         }
         
         override func visitVarDeclaration(_ ctx: Parser.VarDeclarationContext) -> Statement? {
@@ -500,16 +511,26 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
                                                  isConstant: isConstant,
                                                  initialization: expr)
                 declarations.append(declaration)
-                
-                let storage =
-                    ValueStorage(type: swiftType,
-                                 ownership: ownership,
-                                 isConstant: isConstant)
-                
-                context.define(localNamed: identifier, storage: storage)
+
+                context.define(localNamed: identifier, storage: declaration.storage)
             }
+
+            let varDeclStmt = Statement.variableDeclarations(declarations)
+
+            reportAutotypeDeclarations(in: varDeclStmt)
             
-            return .variableDeclarations(declarations)
+            return varDeclStmt
+        }
+
+        private func reportAutotypeDeclarations(in declarationStatement: VariableDeclarationsStatement) {
+            if let delegate = delegate {
+                for (i, decl) in declarationStatement.decl.enumerated() {
+                    if decl.type == .typeName("__auto_type") {
+                        delegate.swiftStatementASTReader(reportAutoTypeDeclaration: declarationStatement,
+                                                         declarationAtIndex: i)
+                    }
+                }
+            }
         }
     }
 }
@@ -538,7 +559,8 @@ private class ForStatementGenerator {
         let varDeclExtractor =
             SwiftStatementASTReader
                 .VarDeclarationExtractor(expressionReader: reader.expressionReader,
-                                         context: context)
+                                         context: context,
+                                         delegate: reader.delegate)
         
         let initExpr =
             ctx.forLoopInitializer()?
