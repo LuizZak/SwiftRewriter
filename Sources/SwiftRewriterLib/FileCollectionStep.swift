@@ -50,7 +50,15 @@ public class FileCollectionStep {
                 fileMatchesFilter(path: path,
                                   includePattern: includePattern,
                                   excludePattern: excludePattern)
-            }.map(URL.init(fileURLWithPath:))
+            }
+            // Sort files, for convenience of better conveying progress to user
+            .sorted { (s1: String, s2: String) -> Bool in
+                let name1 = (s1 as NSString).lastPathComponent
+                let name2 = (s2 as NSString).lastPathComponent
+                
+                return name1.compare(name2, options: .numeric) == .orderedAscending
+            }
+            .map(URL.init(fileURLWithPath:))
 
         let objcFileUrls: [URL] =
                 // Filter down to .h/.m files
@@ -112,7 +120,10 @@ public class FileDiskProvider: FileProvider {
     }
 
     public func enumerator(atPath path: String) -> [String]? {
-        return fileManager.enumerator(atPath: path)?.compactMap { $0 as? String }
+        return fileManager
+            .enumerator(atPath: path)?
+            .compactMap { $0 as? String }
+            .map { URL(string: path)!.appendingPathComponent($0).path }
     }
 
     public func fileExists(atPath path: String) -> Bool {
