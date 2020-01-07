@@ -506,7 +506,7 @@ public final class SwiftRewriter {
         // Hit parser cache, if available
         let parser: ObjcParser
         if let parserCache = parserCache {
-            parser = try parserCache.loadParsedTree(file: URL(string: src.filePath)!)
+            parser = try parserCache.loadParsedTree(file: URL(fileURLWithPath: src.filePath))
         } else {
             let processedSrc = applyPreprocessors(source: src)
             

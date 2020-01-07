@@ -2,7 +2,7 @@ import Foundation
 import ObjcParser
 import SourcePreprocessors
 
-/// A
+/// A parser cache that stores pre-parsed trees based on input file URLs
 public class ParserCache {
     var cache: [URL: ObjcParser] = [:]
     let fileProvider: FileProvider
@@ -21,7 +21,7 @@ public class ParserCache {
         self.antlrSettings = antlrSettings
     }
     
-    public func storeParsedTree(file: URL, parser: ObjcParser) {
+    public func replaceCachedParsedTree(file: URL, parser: ObjcParser) {
         cache[file] = parser
     }
 
@@ -47,6 +47,7 @@ public class ParserCache {
         parser.antlrSettings = antlrSettings
         try parser.parse()
         parserStatePool.repool(state)
+        cache[file] = parser
         return parser
     }
     

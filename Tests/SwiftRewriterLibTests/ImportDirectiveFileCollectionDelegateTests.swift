@@ -23,7 +23,7 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
             #import "a_file.h"
             """)
         try parser.parse()
-        parserCache.storeParsedTree(file: inputFile.url, parser: parser)
+        parserCache.replaceCachedParsedTree(file: inputFile.url, parser: parser)
         let sut = ImportDirectiveFileCollectionDelegate(parserCache: parserCache,
                                                         fileProvider: fileDisk)
         
@@ -42,7 +42,7 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
             #import "a_non_existing_file.h"
             """)
         try parser.parse()
-        parserCache.storeParsedTree(file: inputFile.url, parser: parser)
+        parserCache.replaceCachedParsedTree(file: inputFile.url, parser: parser)
         let sut = ImportDirectiveFileCollectionDelegate(parserCache: parserCache,
                                                         fileProvider: fileDisk)
         
@@ -59,7 +59,7 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
             #import <system_import.h>
             """)
         try parser.parse()
-        parserCache.storeParsedTree(file: inputFile.url, parser: parser)
+        parserCache.replaceCachedParsedTree(file: inputFile.url, parser: parser)
         let sut = ImportDirectiveFileCollectionDelegate(parserCache: parserCache,
                                                         fileProvider: fileDisk)
         
