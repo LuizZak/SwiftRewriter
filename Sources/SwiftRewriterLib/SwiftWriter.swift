@@ -402,7 +402,11 @@ internal func evaluateOwnershipPrefix(inType type: ObjcType,
     
     var ownership: Ownership = .strong
     if !type.isPointer {
-        return .strong
+        if case .specified(_, .struct("__auto_type")) = type {
+            // skip return
+        } else {
+            return .strong
+        }
     }
     
     switch type {

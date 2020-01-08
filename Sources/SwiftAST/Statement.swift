@@ -145,10 +145,10 @@ public extension Statement {
     }
     
     static func variableDeclaration(identifier: String,
-                                           type: SwiftType,
-                                           ownership: Ownership = .strong,
-                                           isConstant: Bool = false,
-                                           initialization: Expression?) -> Statement {
+                                    type: SwiftType,
+                                    ownership: Ownership = .strong,
+                                    isConstant: Bool = false,
+                                    initialization: Expression?) -> Statement {
         
         .variableDeclarations([
             StatementVariableDeclaration(identifier: identifier,
