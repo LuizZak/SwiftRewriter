@@ -402,7 +402,14 @@ internal func evaluateOwnershipPrefix(inType type: ObjcType,
     
     var ownership: Ownership = .strong
     if !type.isPointer {
-        return .strong
+        // We don't have enough information at statement parsing time to conclude
+        // that an __auto_type declaration does not resolve in fact to a pointer.
+        // Keep ownership modifiers for now
+        if case .specified(_, .struct("__auto_type")) = type {
+            // skip return
+        } else {
+            return .strong
+        }
     }
     
     switch type {

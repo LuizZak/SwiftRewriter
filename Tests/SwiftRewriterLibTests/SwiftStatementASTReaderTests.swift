@@ -304,6 +304,26 @@ class SwiftStatementASTReaderTests: XCTestCase {
                                             initialization: nil))
         XCTAssertEqual(delegate?.declarationAtIndex, 0)
     }
+    
+    func testWeakNonPointerDefinition() {
+        // Tests that non pointer definitions drop the __weak qualifier during
+        // parsing
+        assert(objcStmt: "__weak NSInteger value = 1;",
+               parseBlock: { try $0.declaration() },
+               readsAs: .variableDeclaration(identifier: "value",
+                                             type: .int,
+                                             ownership: .strong,
+                                             initialization: .constant(1)))
+    }
+    
+    func testAutotypeWeakDefinition() {
+        assert(objcStmt: "__weak __auto_type value = nil;",
+               parseBlock: { try $0.declaration() },
+               readsAs: .variableDeclaration(identifier: "value",
+                                             type: .typeName("__auto_type"),
+                                             ownership: .weak,
+                                             initialization: .constant(.nil)))
+    }
 }
 
 extension SwiftStatementASTReaderTests {
