@@ -441,6 +441,7 @@ extension SwiftStatementASTReaderTests {
     // to regenerate.
     static let __allTests__SwiftStatementASTReaderTests = [
         ("testAutomaticSwitchFallthrough", testAutomaticSwitchFallthrough),
+        ("testAutotypeWeakDefinition", testAutotypeWeakDefinition),
         ("testBlockDeclaration", testBlockDeclaration),
         ("testDeclaration", testDeclaration),
         ("testDoWhile", testDoWhile),
@@ -451,6 +452,7 @@ extension SwiftStatementASTReaderTests {
         ("testIfStatement", testIfStatement),
         ("testLabeledStatement", testLabeledStatement),
         ("testSwitch", testSwitch),
+        ("testWeakNonPointerDefinition", testWeakNonPointerDefinition),
         ("testWhile", testWhile),
     ]
 }
