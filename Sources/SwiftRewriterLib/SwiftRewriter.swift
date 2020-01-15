@@ -111,7 +111,7 @@ public final class SwiftRewriter {
             try loadInputSources()
             parseStatements()
             evaluateTypes()
-            performIntentionPasses()
+            performIntentionAndSyntaxPasses()
             outputDefinitions()
         }
     }
@@ -161,7 +161,6 @@ public final class SwiftRewriter {
         if settings.verbose {
             print("Parsing function bodies...")
         }
-        
         
         // Register globals first
         for provider in globalsProvidersSource.globalsProviders {
@@ -344,11 +343,7 @@ public final class SwiftRewriter {
         queue.waitUntilAllOperationsAreFinished()
     }
     
-    private func performIntentionPasses() {
-        let syntaxPasses =
-            [MandatorySyntaxNodePass.self]
-                + astRewriterPassSources.syntaxNodePasses
-        
+    private func performIntentionAndSyntaxPasses() {
         let globals = CompoundDefinitionsSource()
         
         if settings.verbose {
@@ -407,11 +402,18 @@ public final class SwiftRewriter {
             .resolveAllExpressionTypes(in: intentionCollection,
                                        force: true)
         
+        let syntaxPasses =
+            [MandatorySyntaxNodePass.self]
+                + astRewriterPassSources.syntaxNodePasses
+        
         let applier =
             ASTRewriterPassApplier(passes: syntaxPasses,
                                    typeSystem: typeSystem,
                                    globals: globals,
                                    numThreds: settings.numThreads)
+        
+        let progressDelegate = ASTRewriterDelegate()
+        applier.progressDelegate = progressDelegate
         
         if !settings.diagnoseFiles.isEmpty {
             let mutex = Mutex()
@@ -424,7 +426,9 @@ public final class SwiftRewriter {
         
         typeSystem.makeCache()
         
-        applier.apply(on: intentionCollection)
+        withExtendedLifetime(progressDelegate) {
+            applier.apply(on: intentionCollection)
+        }
         
         typeSystem.tearDownCache()
     }
@@ -627,6 +631,36 @@ public final class SwiftRewriter {
         public enum StageDiagnosticFlag {
             /// Prints result of Objective-C grammar parsing stage
             case parsedAST
+        }
+    }
+}
+
+// MARK: - ASTRewriterPassApplierProgressDelegate
+private extension SwiftRewriter {
+    class ASTRewriterDelegate: ASTRewriterPassApplierProgressDelegate {
+        private var didPrintLine = false
+        
+        func astWriterPassApplier(_ passApplier: ASTRewriterPassApplier,
+                                  applyingPassType passType: ASTRewriterPass.Type,
+                                  toFile file: FileGenerationIntention) {
+            
+            // Clear previous line and re-print, instead of bogging down the
+            // terminal with loads of prints
+            if didPrintLine {
+                // Move up command
+                print("\u{001B}[1A", terminator: "")
+                // Clear line command
+                print("\u{001B}[2K", terminator: "")
+            }
+            
+            let totalPadLength = passApplier.progress.total.description.count
+            let progressString = String(format: "[%0\(totalPadLength)d/%d]",
+                                        passApplier.progress.current,
+                                        passApplier.progress.total)
+            
+            print("\(progressString): \((file.targetPath as NSString).lastPathComponent)")
+            
+            didPrintLine = true
         }
     }
 }
