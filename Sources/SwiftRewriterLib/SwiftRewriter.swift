@@ -377,9 +377,24 @@ public final class SwiftRewriter {
                 + [MandatoryIntentionPass(phase: .afterOtherIntentions)]
         
         // Execute passes
-        for pass in intentionPasses {
+        for (i, pass) in intentionPasses.enumerated() {
             autoreleasepool {
                 requiresResolve = false
+                
+                if settings.verbose {
+                    // Clear previous line and re-print, instead of bogging down
+                    // the terminal with loads of prints
+                    if i > 0 {
+                        _terminalClearLine()
+                    }
+                    
+                    let totalPadLength = intentionPasses.count.description.count
+                    let progressString = String(format: "[%0\(totalPadLength)d/%d]",
+                                                i + 1,
+                                                intentionPasses.count)
+                    
+                    print("\(progressString): \(type(of: pass))")
+                }
                 
                 pass.apply(on: intentionCollection, context: context)
                 
@@ -413,7 +428,9 @@ public final class SwiftRewriter {
                                    numThreds: settings.numThreads)
         
         let progressDelegate = ASTRewriterDelegate()
-        applier.progressDelegate = progressDelegate
+        if settings.verbose {
+            applier.progressDelegate = progressDelegate
+        }
         
         if !settings.diagnoseFiles.isEmpty {
             let mutex = Mutex()
@@ -647,10 +664,7 @@ private extension SwiftRewriter {
             // Clear previous line and re-print, instead of bogging down the
             // terminal with loads of prints
             if didPrintLine {
-                // Move up command
-                print("\u{001B}[1A", terminator: "")
-                // Clear line command
-                print("\u{001B}[2K", terminator: "")
+                _terminalClearLine()
             }
             
             let totalPadLength = passApplier.progress.total.description.count
@@ -784,4 +798,11 @@ internal func _typeNullability(inType type: ObjcType) -> TypeNullability? {
 
 internal struct _PreprocessingContext: PreprocessingContext {
     var filePath: String
+}
+
+private func _terminalClearLine() {
+    // Move up command
+    print("\u{001B}[1A", terminator: "")
+    // Clear line command
+    print("\u{001B}[2K", terminator: "")
 }
