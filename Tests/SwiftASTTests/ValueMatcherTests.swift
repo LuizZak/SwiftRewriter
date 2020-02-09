@@ -144,7 +144,7 @@ class ValueMatcherTests: XCTestCase {
     }
     
     func testMatchRuleExtract() {
-        let extractor = ValueMatcherExtractor(initialValue: "")
+        let extractor = ValueMatcherExtractor("")
         
         XCTAssert(MatchRule<String>.extract(.any, extractor).evaluate("abc"))
         XCTAssertFalse(MatchRule<String>.extract(.none, extractor).evaluate("def"))
@@ -166,7 +166,7 @@ class ValueMatcherTests: XCTestCase {
     }
     
     func testMatchRuleExtractOperator() {
-        let result = ValueMatcherExtractor(initialValue: "")
+        let result = ValueMatcherExtractor("")
         
         let rule = MatchRule<String>.any ->> result
         
@@ -194,7 +194,7 @@ class ValueMatcherTests: XCTestCase {
     }
     
     func testMatchRuleExtractOptionalToNonOptionalOperator() {
-        let output = ValueMatcherExtractor(initialValue: TestEquatable())
+        let output = ValueMatcherExtractor(TestEquatable())
         
         let rule = MatchRule<TestEquatable?>.any ->> output
         
@@ -220,7 +220,7 @@ class ValueMatcherTests: XCTestCase {
     }
     
     func testBindMatch() {
-        let output = ValueMatcherExtractor(initialValue: 0)
+        let output = ValueMatcherExtractor(0)
         
         let rule =
             ValueMatcher<Int>()
