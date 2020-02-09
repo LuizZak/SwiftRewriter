@@ -360,12 +360,12 @@ extension ValueMatcher where T: Equatable {
     }
     
     @inlinable
-    public func bind(to target: UnsafeMutablePointer<T>) -> ValueMatcher {
+    public func bind(to target: ValueMatcherExtractor<T>) -> ValueMatcher {
         self.match(.extract(.any, target))
     }
     
     @inlinable
-    public func bind(to target: UnsafeMutablePointer<T?>) -> ValueMatcher {
+    public func bind(to target: ValueMatcherExtractor<T?>) -> ValueMatcher {
         self.match(.extractOptional(.any, target))
     }
     
@@ -386,12 +386,12 @@ extension ValueMatcher where T: Equatable {
     }
     
     @inlinable
-    public static func ->> (lhs: ValueMatcher, rhs: UnsafeMutablePointer<T>) -> ValueMatcher {
+    public static func ->> (lhs: ValueMatcher, rhs: ValueMatcherExtractor<T>) -> ValueMatcher {
         lhs.match(.any ->> rhs)
     }
     
     @inlinable
-    public static func ->> (lhs: ValueMatcher, rhs: UnsafeMutablePointer<T?>) -> ValueMatcher {
+    public static func ->> (lhs: ValueMatcher, rhs: ValueMatcherExtractor<T?>) -> ValueMatcher {
         lhs.match(.any ->> rhs)
     }
 }
@@ -442,8 +442,8 @@ public enum MatchRule<U: Equatable> {
     case anyOf([MatchRule])
     indirect case negated(MatchRule)
     case closure((U) -> Bool)
-    indirect case extract(MatchRule, UnsafeMutablePointer<U>)
-    indirect case extractOptional(MatchRule, UnsafeMutablePointer<U?>)
+    indirect case extract(MatchRule, ValueMatcherExtractor<U>)
+    indirect case extractOptional(MatchRule, ValueMatcherExtractor<U?>)
     
     public static func differentThan(_ value: U) -> MatchRule {
         .negated(.equals(value))
@@ -500,31 +500,31 @@ public enum MatchRule<U: Equatable> {
         case .closure(let closure):
             return closure(value)
             
-        case let .extract(rule, pointer):
+        case let .extract(rule, extractor):
             guard rule.evaluate(value) else {
                 return false
             }
             
-            pointer.pointee = value
+            extractor.extract(value)
             
             return true
             
-        case let .extractOptional(rule, pointer):
+        case let .extractOptional(rule, extractor):
             guard rule.evaluate(value) else {
                 return false
             }
             
-            pointer.pointee = value
+            extractor.extract(value)
             
             return true
         }
     }
     
-    public static func ->> (lhs: MatchRule, rhs: UnsafeMutablePointer<U>) -> MatchRule {
+    public static func ->> (lhs: MatchRule, rhs: ValueMatcherExtractor<U>) -> MatchRule {
         .extract(lhs, rhs)
     }
     
-    public static func ->> (lhs: MatchRule, rhs: UnsafeMutablePointer<U?>) -> MatchRule {
+    public static func ->> (lhs: MatchRule, rhs: ValueMatcherExtractor<U?>) -> MatchRule {
         .extractOptional(lhs, rhs)
     }
     
@@ -553,15 +553,13 @@ public enum MatchRule<U: Equatable> {
             return .anyOf([lhs, rhs])
         }
     }
-    
 }
 
 extension MatchRule {
-    
-    public static func ->> <Z>(lhs: MatchRule, rhs: UnsafeMutablePointer<Z>) -> MatchRule where U == Z? {
+    public static func ->> <Z>(lhs: MatchRule, rhs: ValueMatcherExtractor<Z>) -> MatchRule where U == Z? {
         .closure { v in
             if let value = v, lhs.evaluate(v) {
-                rhs.pointee = value
+                rhs.extract(value)
                 
                 return true
             }
@@ -569,7 +567,6 @@ extension MatchRule {
             return false
         }
     }
-    
 }
 
 extension MatchRule: ExpressibleByIntegerLiteral where U == Int {
@@ -605,3 +602,19 @@ extension MatchRule: ExpressibleByStringLiteral where U == String {
 }
 
 infix operator ->>: AssignmentPrecedence
+
+public class ValueMatcherExtractor<T> {
+    public var value: T
+    
+    public init(_ initialValue: T) {
+        self.value = initialValue
+    }
+    
+    public init<U>() where T == U? {
+        value = nil
+    }
+    
+    public func extract(_ value: T) {
+        self.value = value
+    }
+}
