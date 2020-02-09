@@ -172,7 +172,7 @@ class MandatoryIntentionPass: IntentionPass {
         // Check supertypes for overrides
         if let supertype = context.typeSystem.supertype(of: type) {
             for method in type.methods {
-                let parameterTypes = method.parameters.map { $0.type }
+                let parameterTypes = method.parameters.map(\.type)
                 
                 let superMethod
                     = context.typeSystem.method(withObjcSelector: method.selector,

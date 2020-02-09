@@ -11,7 +11,7 @@ public class FileInputProvider: InputSourcesProvider {
     }
     
     public init(files: [URL]) {
-        self.files = files.map { $0.absoluteURL.relativePath }
+        self.files = files.map(\.absoluteURL.relativePath)
     }
     
     public func sources() -> [InputSource] {

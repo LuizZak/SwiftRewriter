@@ -457,7 +457,7 @@ extension SwiftSyntaxProducer {
             inheritances.append(supertype)
         }
         inheritances.append(contentsOf:
-            type.knownProtocolConformances.map { $0.protocolName }
+            type.knownProtocolConformances.map(\.protocolName)
         )
         
         // TODO: This should be done in an intention pass before handing over the

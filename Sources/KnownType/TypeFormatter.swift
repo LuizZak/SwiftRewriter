@@ -341,6 +341,6 @@ public extension TypeFormatter {
     }
     
     static func stringify(_ semantics: [Semantic]) -> String {
-        semantics.map { $0.name }.joined(separator: ", ")
+        semantics.map(\.name).joined(separator: ", ")
     }
 }

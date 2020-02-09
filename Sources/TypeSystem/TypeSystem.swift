@@ -729,7 +729,7 @@ public class TypeSystem {
     public func constructor(withArgumentLabels labels: [String?], in type: KnownType) -> KnownConstructor? {
         if let constructor =
             type.knownConstructors
-                .first(where: { $0.parameters.map { $0.label }.elementsEqual(labels) }) {
+                .first(where: { $0.parameters.map(\.label).elementsEqual(labels) }) {
             return constructor
         }
         
@@ -915,7 +915,7 @@ public class TypeSystem {
             }
             
         case .protocolComposition(let types):
-            result = composeTypeWithKnownTypes(types.map { $0.description })
+            result = composeTypeWithKnownTypes(types.map(\.description))
             
         // Other Swift types are not supported, at the moment.
         default:

@@ -136,7 +136,7 @@ public final class SwiftClassInterfaceParser {
             .named(name)
             .settingIsExtension(isExtension)
             .protocolConformances(protocolNames: supertypes)
-            .settingAttributes(attributes.map { $0.asKnownAttribute })
+            .settingAttributes(attributes.map(\.asKnownAttribute))
     }
     
     /// ```
@@ -192,7 +192,7 @@ public final class SwiftClassInterfaceParser {
         let attributes: [Attribute] =
             (try? parseAttributes(from: tokenizer)) ?? []
         
-        let knownAttributes = attributes.map { $0.asKnownAttribute }
+        let knownAttributes = attributes.map(\.asKnownAttribute)
         
         let modifiers: [DeclarationModifier] =
             (try? parseDeclarationModifiers(from: tokenizer)) ?? []

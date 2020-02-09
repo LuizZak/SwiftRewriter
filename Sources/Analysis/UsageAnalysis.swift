@@ -200,7 +200,7 @@ public class IntentionCollectionUsageAnalyzer: BaseUsageAnalyzer {
                 intentions, delegate: EmptyFunctionBodyQueueDelegate(),
                 numThreads: numThreads)
         
-        return queue.items.map { $0.body }
+        return queue.items.map(\.body)
     }
 }
 

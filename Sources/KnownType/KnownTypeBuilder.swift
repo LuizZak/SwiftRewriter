@@ -568,7 +568,7 @@ extension KnownTypeBuilder {
     
     /// Returns the currently recorded protocol conformances for the final type
     public var protocolConformances: [String] {
-        type.protocols.map { $0.protocolName }
+        type.protocols.map(\.protocolName)
     }
 }
 

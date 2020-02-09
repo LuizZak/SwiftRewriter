@@ -200,7 +200,7 @@ public extension Sequence where Element == ArgumentRewritingStrategy {
     }
     
     func argumentLabels() -> [String?] {
-        map { $0.label }
+        map(\.label)
     }
     
     static func addingLabels(_ labels: String?...) -> [Element] {

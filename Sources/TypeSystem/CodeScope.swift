@@ -137,7 +137,7 @@ public struct ArrayDefinitionsSource: DefinitionsSource {
                         return nil
                     }
                 }.groupBy({ $0.0 })
-                .mapValues { $0.map { $0.1 } }
+                .mapValues { $0.map(\.1) }
     }
     
     public func firstDefinition(named name: String) -> CodeDefinition? {
@@ -219,7 +219,7 @@ public final class DefaultCodeScope: CodeScope {
                         return nil
                     }
                 }.groupBy({ $0.0 })
-                .mapValues { $0.map { $0.1 } }
+                .mapValues { $0.map(\.1) }
     }
     
     public func firstDefinition(named name: String) -> CodeDefinition? {

@@ -1023,7 +1023,7 @@ class TypeSystemTests: XCTestCase {
         sut.addType(protP)
         sut.addType(protZ)
         
-        XCTAssertEqual(Set(sut.allConformances(of: typeB).map { $0.protocolName }),
+        XCTAssertEqual(Set(sut.allConformances(of: typeB).map(\.protocolName)),
                        ["P", "Q", "Z", "W"])
     }
     
@@ -1047,7 +1047,7 @@ class TypeSystemTests: XCTestCase {
         sut.addType(protA)
         sut.addType(protB)
         
-        XCTAssertEqual(Set(sut.allConformances(of: protA).map { $0.protocolName }),
+        XCTAssertEqual(Set(sut.allConformances(of: protA).map(\.protocolName)),
                        ["B"])
     }
     
