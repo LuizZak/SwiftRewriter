@@ -690,7 +690,7 @@ public final class SwiftClassInterfaceParser {
     /// ```
     private static func parseSwiftOperator(from tokenizer: Tokenizer) throws -> SwiftOperator {
         
-        let op = try tokenizer.advance(matching: { $0.tokenType.isOperator })
+        let op = try tokenizer.advance(matching: \.tokenType.isOperator)
         
         switch op.tokenType {
         case .operator(let o):

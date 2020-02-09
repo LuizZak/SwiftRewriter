@@ -143,7 +143,7 @@ public struct KnownTypeBuilder {
     /// Adds a parameter-less constructor to this type
     public func constructor(isFailable: Bool = false,
                             annotations: [String] = []) -> KnownTypeBuilder {
-        assert(!type.knownConstructors.contains { $0.parameters.isEmpty },
+        assert(!type.knownConstructors.contains(where: \.parameters.isEmpty),
                "An empty constructor is already provided")
         
         return constructor(withParameters: [],

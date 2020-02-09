@@ -157,7 +157,7 @@ class MandatoryIntentionPass: IntentionPass {
         
         // Init method override (always an override in case of plain `init`)
         if let initMethod
-            = type.constructors.first(where: { $0.parameters.isEmpty })
+            = type.constructors.first(where: \.parameters.isEmpty)
                 ?? type.methods.first(where: { $0.name == "init" && $0.parameters.isEmpty }) {
             
             if let initMethod = initMethod as? OverridableMemberGenerationIntention {

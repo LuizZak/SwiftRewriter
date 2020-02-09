@@ -192,7 +192,7 @@ public extension Sequence where Element == ArgumentRewritingStrategy {
         var requiredArgs = reduce(0) { $0 + $1.argumentConsumeCount }
         
         // Verify max arg count inferred from indexes of arguments
-        if let max = compactMap({ $0.maxArgumentReferenced }).max(), max > requiredArgs {
+        if let max = compactMap(\.maxArgumentReferenced).max(), max > requiredArgs {
             requiredArgs = max
         }
         

@@ -114,8 +114,8 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
             // Protocols which feature optional members must be emitted with @objc
             // to maintain compatibility; same for method/properties
             if let _protocol = intention as? ProtocolGenerationIntention {
-                if _protocol.methods.any({ $0.optional })
-                    || _protocol.properties.any({ $0.optional }) {
+                if _protocol.methods.any(\.optional)
+                    || _protocol.properties.any(\.optional) {
                     return true
                 }
             }
@@ -464,8 +464,8 @@ extension SwiftSyntaxProducer {
         // types to this swift syntax producer
         var emitObjcAttribute = false
         if let prot = type as? ProtocolGenerationIntention {
-            if prot.methods.contains(where: { $0.optional })
-                || prot.properties.contains(where: { $0.optional }) {
+            if prot.methods.contains(where: \.optional)
+                || prot.properties.contains(where: \.optional) {
             
                 emitObjcAttribute = true
             }

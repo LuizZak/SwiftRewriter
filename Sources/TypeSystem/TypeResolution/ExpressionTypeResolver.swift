@@ -840,7 +840,7 @@ private class MemberInvocationResolver {
             )
             
             if let expectedType = postfix.expectedType, let args = postfix.op.asFunctionCall?.arguments {
-                let argTypes = args.compactMap { $0.expression.resolvedType }
+                let argTypes = args.compactMap(\.expression.resolvedType)
                 
                 if args.count == argTypes.count {
                     postfix.exp.expectedType =
@@ -934,7 +934,7 @@ private class MemberInvocationResolver {
             
             let definitions =
                 typeResolver.searchFunctionDefinitions(matching: identifier, target)
-            let signatures = definitions.compactMap { $0.asFunctionSignature }
+            let signatures = definitions.compactMap(\.asFunctionSignature)
             
             functionCall = functionCall.replacingArguments(
                 functionCall.subExpressions.map(typeResolver.visitExpression)

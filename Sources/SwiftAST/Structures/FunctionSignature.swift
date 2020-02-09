@@ -104,7 +104,7 @@ public struct FunctionSignature: Hashable {
     /// foo(bar:baz:_:)
     /// ```
     public func possibleSelectorSignatures() -> Set<SelectorSignature> {
-        if !parameters.contains(where: { $0.hasDefaultValue }) {
+        if !parameters.contains(where: \.hasDefaultValue) {
             return [asSelector]
         }
         

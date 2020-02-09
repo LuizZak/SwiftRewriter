@@ -650,7 +650,7 @@ public class DefaultTypeMapper: TypeMapper {
             return false
         }
         
-        return types.contains { $0.isPointer }
+        return types.contains(where: \.isPointer)
     }
     
     private static let _scalarMappings: [String: SwiftType] = [

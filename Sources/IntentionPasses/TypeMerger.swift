@@ -36,9 +36,9 @@ class TypeMerger {
         let allExtensions = sourceExtensions + targetExtensions
         let allStructs = sourceStructs + targetStructs
         
-        let allClassesByName = Dictionary(grouping: allClasses, by: { $0.typeName })
-        let allExtensionsByName = Dictionary(grouping: allExtensions, by: { $0.typeName })
-        let allStructsByName = Dictionary(grouping: allStructs, by: { $0.typeName })
+        let allClassesByName = Dictionary(grouping: allClasses, by: \.typeName)
+        let allExtensionsByName = Dictionary(grouping: allExtensions, by: \.typeName)
+        let allStructsByName = Dictionary(grouping: allStructs, by: \.typeName)
         
         for (_, classes) in allClassesByName {
             guard let target = classes.first(where: { !$0.isInterfaceSource }) else {
@@ -102,9 +102,9 @@ class TypeMerger {
         let extensions = file.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
         let structs = file.structIntentions
         
-        let classesByName = Dictionary(grouping: classes, by: { $0.typeName })
-        let extensionsByName = Dictionary(grouping: extensions, by: { $0.typeName })
-        let structsByName = Dictionary(grouping: structs, by: { $0.typeName })
+        let classesByName = Dictionary(grouping: classes, by: \.typeName)
+        let extensionsByName = Dictionary(grouping: extensions, by: \.typeName)
+        let structsByName = Dictionary(grouping: structs, by: \.typeName)
         
         for (_, classes) in classesByName {
             guard let target = classes.first(where: { !$0.isInterfaceSource }) else {

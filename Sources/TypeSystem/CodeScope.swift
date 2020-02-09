@@ -124,7 +124,7 @@ public struct ArrayDefinitionsSource: DefinitionsSource {
     public init(definitions: [CodeDefinition] = []) {
         self.definitions = definitions
         self.definitionsByName = definitions
-            .groupBy { $0.name }
+            .groupBy(\.name)
             .mapValues { $0[0] }
         
         self.functionDefinitions =
@@ -136,7 +136,7 @@ public struct ArrayDefinitionsSource: DefinitionsSource {
                     case .variable:
                         return nil
                     }
-                }.groupBy({ $0.0 })
+                }.groupBy(\.0)
                 .mapValues { $0.map(\.1) }
     }
     
@@ -206,7 +206,7 @@ public final class DefaultCodeScope: CodeScope {
     public init(definitions: [CodeDefinition] = []) {
         self.definitions = definitions
         self.definitionsByName = definitions
-            .groupBy { $0.name }
+            .groupBy(\.name)
             .mapValues { $0[0] }
         
         self.functionDefinitions =
@@ -218,7 +218,7 @@ public final class DefaultCodeScope: CodeScope {
                     case .variable:
                         return nil
                     }
-                }.groupBy({ $0.0 })
+                }.groupBy(\.0)
                 .mapValues { $0.map(\.1) }
     }
     

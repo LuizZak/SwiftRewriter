@@ -1014,7 +1014,7 @@ public class TypeSystem {
                     TypeDefinitions
                         .classesList
                         .classes
-                        .groupBy({ $0.typeName })
+                        .groupBy(\.typeName)
                         .mapValues { $0[0] }
                 )
         }

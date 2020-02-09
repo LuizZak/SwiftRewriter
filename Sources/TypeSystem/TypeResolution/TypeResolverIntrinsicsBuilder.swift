@@ -328,8 +328,8 @@ public struct IntentionCollectionGlobals {
     public let varMap: [String: [GlobalVariableGenerationIntention]]
     
     public init(intentions: IntentionCollection) {
-        funcMap = Dictionary(grouping: intentions.globalFunctions(), by: { $0.name })
-        funcIdentMap = Dictionary(grouping: intentions.globalFunctions(), by: { $0.signature.asIdentifier })
-        varMap = Dictionary(grouping: intentions.globalVariables(), by: { $0.name })
+        funcMap = Dictionary(grouping: intentions.globalFunctions(), by: \.name)
+        funcIdentMap = Dictionary(grouping: intentions.globalFunctions(), by: \.signature.asIdentifier)
+        varMap = Dictionary(grouping: intentions.globalVariables(), by: \.name)
     }
 }
