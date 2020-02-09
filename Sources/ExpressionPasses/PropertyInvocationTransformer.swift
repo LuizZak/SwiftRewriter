@@ -26,7 +26,7 @@ public class PropertyInvocationTransformer: PostfixInvocationTransformer {
         guard member.name == oldName else {
             return false
         }
-        guard baseExpressionMatcher.matches(postfix.exp) else {
+        guard baseExpressionMatcher(matches: postfix.exp) else {
             return false
         }
         

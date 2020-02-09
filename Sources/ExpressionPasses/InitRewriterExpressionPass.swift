@@ -165,12 +165,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
     }
     
     private func superInitExpressionFrom(exp: ExpressionsStatement) -> Expression? {
-        
-        let matcher =
-            ValueMatcher<ExpressionsStatement>()
-                .keyPath(\.expressions, hasCount(1))
-        
-        if matcher.matches(exp), let superInit = superOrSelfInitExpressionFrom(exp: exp.expressions[0]) {
+        if exp.expressions.count == 1, let superInit = superOrSelfInitExpressionFrom(exp: exp.expressions[0]) {
             return superInit
         }
         
@@ -187,7 +182,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
         
         var _functionCall: FunctionCallPostfix?
         
-        let invertedMatchSuperInit =
+        let invertedMatchSuperInitMatcher =
             ValueMatcher<PostfixExpression>()
                 .inverted { inverted in
                     inverted
@@ -200,7 +195,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
                         })
                 }.anyExpression()
         
-        guard exp.matches(invertedMatchSuperInit), let functionCall = _functionCall else {
+        guard invertedMatchSuperInitMatcher(matches: exp), let functionCall = _functionCall else {
             return nil
         }
         

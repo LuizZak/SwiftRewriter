@@ -21,6 +21,12 @@ public struct ValueMatcher<T>: ValueMatcherProtocol {
     
     /// Returns `true` if this matcher matches on the given value.
     @inlinable
+    public func callAsFunction(matches value: T) -> Bool {
+        return matches(value)
+    }
+    
+    /// Returns `true` if this matcher matches on the given value.
+    @inlinable
     public func matches(_ value: T) -> Bool {
         for matcher in matchers {
             if !matcher.matches(value) {
@@ -180,7 +186,7 @@ public extension ValueMatcher {
                 return false
             }
             
-            return valueMatcher.matches(value)
+            return valueMatcher(matches: value)
         }
         
         let anyMatcher = AnyASTMatcherRule(closureMatcher)
@@ -278,7 +284,7 @@ extension ValueMatcher {
         
         @usableFromInline
         func matches(_ value: T) -> Bool {
-            matcher.matches(value[keyPath: keyPath])
+            matcher(matches: value[keyPath: keyPath])
         }
     }
     
@@ -505,7 +511,7 @@ public enum MatchRule<U: Equatable> {
                 return false
             }
             
-            extractor.extract(value)
+            extractor(value)
             
             return true
             
@@ -514,7 +520,7 @@ public enum MatchRule<U: Equatable> {
                 return false
             }
             
-            extractor.extract(value)
+            extractor(value)
             
             return true
         }
@@ -559,7 +565,7 @@ extension MatchRule {
     public static func ->> <Z>(lhs: MatchRule, rhs: ValueMatcherExtractor<Z>) -> MatchRule where U == Z? {
         .closure { v in
             if let value = v, lhs.evaluate(v) {
-                rhs.extract(value)
+                rhs(value)
                 
                 return true
             }
@@ -615,6 +621,10 @@ public class ValueMatcherExtractor<T> {
     }
     
     public func extract(_ value: T) {
+        self.value = value
+    }
+    
+    public func callAsFunction(_ value: T) {
         self.value = value
     }
 }

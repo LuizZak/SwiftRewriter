@@ -27,7 +27,7 @@ public extension Matchable {
     }
     
     func matches(_ matcher: ValueMatcher<Self>) -> Bool {
-        matcher.matches(self)
+        matcher(matches: self)
     }
     
 }
@@ -45,7 +45,7 @@ public extension ValueMatcher where T: Statement {
     func anyStatement() -> ValueMatcher<Statement> {
         ValueMatcher<Statement>().match { (value) -> Bool in
             if let value = value as? T {
-                return self.matches(value)
+                return self(matches: value)
             }
             
             return false
