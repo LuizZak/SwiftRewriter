@@ -157,7 +157,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 	}
 	@discardableResult
 	open func objectiveCDocument() throws -> ObjectiveCDocumentContext {
-		var _localctx: ObjectiveCDocumentContext = ObjectiveCDocumentContext(_ctx, getState())
+        let _localctx: ObjectiveCDocumentContext = ObjectiveCDocumentContext(_ctx, getState())
 		try enterRule(_localctx, 0, ObjectiveCPreprocessorParser.RULE_objectiveCDocument)
 		var _la: Int = 0
 		defer {
@@ -230,7 +230,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 	}
 	@discardableResult
 	open func text() throws -> TextContext {
-		var _localctx: TextContext = TextContext(_ctx, getState())
+        let _localctx: TextContext = TextContext(_ctx, getState())
 		try enterRule(_localctx, 2, ObjectiveCPreprocessorParser.RULE_text)
 		var _la: Int = 0
 		defer {
@@ -312,7 +312,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 	}
 	@discardableResult
 	open func code() throws -> CodeContext {
-		var _localctx: CodeContext = CodeContext(_ctx, getState())
+        let _localctx: CodeContext = CodeContext(_ctx, getState())
 		try enterRule(_localctx, 4, ObjectiveCPreprocessorParser.RULE_code)
 		defer {
 	    		try! exitRule()
@@ -789,7 +789,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 	}
 	@discardableResult
 	open func directive_text() throws -> Directive_textContext {
-		var _localctx: Directive_textContext = Directive_textContext(_ctx, getState())
+        let _localctx: Directive_textContext = Directive_textContext(_ctx, getState())
 		try enterRule(_localctx, 8, ObjectiveCPreprocessorParser.RULE_directive_text)
 		var _la: Int = 0
 		defer {
@@ -1052,10 +1052,9 @@ open class ObjectiveCPreprocessorParser: Parser {
 	@discardableResult
 	private func preprocessor_expression(_ _p: Int) throws -> Preprocessor_expressionContext   {
 		let _parentctx: ParserRuleContext? = _ctx
-		var _parentState: Int = getState()
+        let _parentState: Int = getState()
 		var _localctx: Preprocessor_expressionContext = Preprocessor_expressionContext(_ctx, _parentState)
-		var  _prevctx: Preprocessor_expressionContext = _localctx
-		var _startState: Int = 10
+        let _startState: Int = 10
 		try enterRecursionRule(_localctx, 10, ObjectiveCPreprocessorParser.RULE_preprocessor_expression, _p)
 		var _la: Int = 0
 		defer {
@@ -1070,7 +1069,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .TRUE:
 				_localctx = PreprocessorConstantContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 
 				setState(65)
 				try match(ObjectiveCPreprocessorParser.Tokens.TRUE.rawValue)

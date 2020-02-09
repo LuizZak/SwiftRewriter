@@ -234,7 +234,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
     
     private func superOrSelfInitExpressionFrom(exp: Expression) -> Expression? {
         
-        var superInit = ValueMatcherExtractor<Expression?>()
+        let superInit = ValueMatcherExtractor<Expression?>()
         
         let invertedMatchSuperInit =
             ValueMatcher<PostfixExpression>()
