@@ -160,7 +160,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
             
             // Writing to a reference type at any point invalidates mutations
             // to the original value.
-            let types = chain.compactMap({ $0.resolvedType })
+            let types = chain.compactMap(\.resolvedType)
             if types.contains(where: { !typeSystem.isScalarType($0) }) {
                 return true
             }

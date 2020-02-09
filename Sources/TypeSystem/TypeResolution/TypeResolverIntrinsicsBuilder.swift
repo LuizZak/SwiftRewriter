@@ -303,7 +303,7 @@ class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
     
     func allDefinitions() -> [CodeDefinition] {
         let variables: [CodeDefinition] =
-            globals.varMap.flatMap { $0.value }
+            globals.varMap.flatMap(\.value)
                 .filter { global in
                     global.isVisible(for: symbol)
                 }.map { global in
@@ -311,7 +311,7 @@ class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
                 }
         
         let functions: [CodeDefinition] =
-            globals.funcMap.flatMap { $0.value }
+            globals.funcMap.flatMap(\.value)
                 .filter { global in
                     global.isVisible(for: symbol)
                 }.map { global in

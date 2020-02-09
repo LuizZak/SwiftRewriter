@@ -110,7 +110,7 @@ public struct FunctionSignature: Hashable {
         
         let defaultArgIndices =
             parameters.enumerated()
-                .filter { $0.element.hasDefaultValue }
+                .filter(\.element.hasDefaultValue)
                 .map(\.offset)
         
         if defaultArgIndices.count == 0 {

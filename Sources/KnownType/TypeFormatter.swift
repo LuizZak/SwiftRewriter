@@ -143,8 +143,8 @@ public extension TypeFormatter {
                 _onFirstDeclaration = false
             }
             
-            let staticFields = type.knownFields.filter { $0.isStatic }
-            let staticProperties = type.knownProperties.filter { $0.isStatic }
+            let staticFields = type.knownFields.filter(\.isStatic)
+            let staticProperties = type.knownProperties.filter(\.isStatic)
             let instanceFields = type.knownFields.filter { !$0.isStatic }
             let instanceProperties = type.knownProperties.filter { !$0.isStatic }
             

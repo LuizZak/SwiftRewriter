@@ -45,7 +45,7 @@ class TypeMerger {
                 continue
             }
             
-            let remaining = classes.filter { $0.isInterfaceSource }
+            let remaining = classes.filter(\.isInterfaceSource)
             
             mergeAllTypeDefinitions(in: remaining, on: target)
             
@@ -62,7 +62,7 @@ class TypeMerger {
                     continue
                 }
                 
-                let remaining = cat.filter { $0.isInterfaceSource }
+                let remaining = cat.filter(\.isInterfaceSource)
                 
                 mergeAllTypeDefinitions(in: remaining, on: target)
                 
@@ -111,7 +111,7 @@ class TypeMerger {
                 continue
             }
             
-            let remaining = classes.filter { $0.isInterfaceSource }
+            let remaining = classes.filter(\.isInterfaceSource)
             
             mergeAllTypeDefinitions(in: remaining, on: target)
             
@@ -128,7 +128,7 @@ class TypeMerger {
                     continue
                 }
                 
-                let remaining = cat.filter { $0.isInterfaceSource }
+                let remaining = cat.filter(\.isInterfaceSource)
                 
                 mergeAllTypeDefinitions(in: remaining, on: target)
                 
