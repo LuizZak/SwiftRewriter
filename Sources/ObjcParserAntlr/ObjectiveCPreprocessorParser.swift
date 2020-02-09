@@ -1078,7 +1078,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .FALSE:
 				_localctx = PreprocessorConstantContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(66)
 				try match(ObjectiveCPreprocessorParser.Tokens.FALSE.rawValue)
 
@@ -1087,7 +1086,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .DECIMAL_LITERAL:
 				_localctx = PreprocessorConstantContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(67)
 				try match(ObjectiveCPreprocessorParser.Tokens.DECIMAL_LITERAL.rawValue)
 
@@ -1096,7 +1094,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .DIRECTIVE_STRING:
 				_localctx = PreprocessorConstantContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(68)
 				try match(ObjectiveCPreprocessorParser.Tokens.DIRECTIVE_STRING.rawValue)
 
@@ -1105,7 +1102,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .CONDITIONAL_SYMBOL:
 				_localctx = PreprocessorConditionalSymbolContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(69)
 				try match(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue)
 				setState(74)
@@ -1128,7 +1124,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .LPAREN:
 				_localctx = PreprocessorParenthesisContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(76)
 				try match(ObjectiveCPreprocessorParser.Tokens.LPAREN.rawValue)
 				setState(77)
@@ -1141,7 +1136,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .BANG:
 				_localctx = PreprocessorNotContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(80)
 				try match(ObjectiveCPreprocessorParser.Tokens.BANG.rawValue)
 				setState(81)
@@ -1152,7 +1146,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .DEFINED:
 				_localctx = PreprocessorDefinedContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(82)
 				try match(ObjectiveCPreprocessorParser.Tokens.DEFINED.rawValue)
 				setState(87)
@@ -1190,7 +1183,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 					if _parseListeners != nil {
 					   try triggerExitRuleEvent()
 					}
-					_prevctx = _localctx
 					setState(103)
 					try _errHandler.sync(self)
 					switch(try getInterpreter().adaptivePredict(_input,9, _ctx)) {
