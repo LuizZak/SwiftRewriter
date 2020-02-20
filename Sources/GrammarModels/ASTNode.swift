@@ -21,14 +21,14 @@ open class ASTNode {
     private(set) public var children: [ASTNode] = []
     
     /// Parent node for this node
-    public weak var parent: ASTNode?
+    private(set) public weak var parent: ASTNode?
     
     /// Whether this node exists in the original source code or was synthesized
     /// (for syntax error correction etc.)
     public var existsInSource: Bool
     
     /// Indicates whether this node was completely contained within the range of
-    /// a NS_ASSUME_NONNULL_BEGIN/NS_ASSUME_NONNULL_END region.
+    /// a `NS_ASSUME_NONNULL_BEGIN`/`NS_ASSUME_NONNULL_END` region.
     public var isInNonnullContext: Bool = false
     
     /// Instantiates a bare ASTNode with a given range.
