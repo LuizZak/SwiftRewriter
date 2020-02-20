@@ -86,7 +86,7 @@ $ swift run -c=release SwiftRewriter path /path/to/project/
 Usage:
 
 ```
-USAGE: SwiftRewriter [--colorize|-c] [--print-expression-types|-t] [--print-tracing-history|-h] [--emit-objc-compatibility|-o] [--verbose|-v] [--num-threads|-t <n>] [--force-ll|-ll] [--target|-w stdout | filedisk] [files <files...> | path <path> [--exclude-pattern|-e <pattern>] [--include-pattern|-i <pattern>] [--skip-confirm|-s] [--overwrite|-o]]
+USAGE: SwiftRewriter [--colorize|-c] [--print-expression-types|-t] [--print-tracing-history|-p] [--emit-objc-compatibility|-o] [--verbose|-v] [--num-threads|-t <n>] [--force-ll|-ll] [--target|-w stdout | filedisk] [--follow-imports] [files <files...> | path <path> [--exclude-pattern|-e <pattern>] [--include-pattern|-i <pattern>] [--skip-confirm|-s] [--overwrite|-o]]
 
 OPTIONS:
   --colorize, -c          Pass this parameter as true to enable terminal colorization during output.
@@ -98,6 +98,7 @@ to the standard output for diagnosing rewriting issues.
 
 This forces Swift to create Objective-C-compatible subclassing structures
 which may increase compatibility with previous Obj-C code.
+  --follow-imports, -f    Follows #import declarations in files in order to parse other relevant files.
   --force-ll, -ll         Forces ANTLR parsing to use LL prediction context, instead of making an attempt at SLL first. May be more performant in some circumstances depending on complexity of original source code.
   --num-threads, -t       Specifies the number of threads to use when performing parsing, as well as intention and expression passes. If not specified, thread allocation is defined by the system depending on usage conditions.
   --print-expression-types, -e
