@@ -1,2 +1,1 @@
-let command = SwiftRewriterCommand()
-command.run()
+SwiftRewriterCommand.main()
