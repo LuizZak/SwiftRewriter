@@ -572,7 +572,7 @@ extension KnownTypeBuilder {
     }
 }
 
-private class DummyType: KnownType {
+private final class DummyType: KnownType {
     var origin: String
     var typeName: String
     var kind: KnownTypeKind = .class
