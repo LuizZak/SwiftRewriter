@@ -4,6 +4,7 @@ import Console
 
 struct SwiftRewriterCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
+        commandName: "SwiftRewriter",
         discussion: """
         Converts a set of files, or, if not provided, starts an interactive \
         menu to navigate the file system and choose files to convert.
