@@ -175,7 +175,7 @@ extension SwiftSyntaxProducer {
             iterating(file.importDirectives) { module in
                 let syntax = generateImport(module)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
                 
                 builder.addStatement(codeBlock)
             }
@@ -192,7 +192,7 @@ extension SwiftSyntaxProducer {
             iterating(file.typealiasIntentions) { intention in
                 let syntax = generateTypealias(intention)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
                 
                 builder.addStatement(codeBlock)
             }
@@ -200,7 +200,7 @@ extension SwiftSyntaxProducer {
             iterating(file.enumIntentions) { intention in
                 let syntax = generateEnum(intention)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
                 
                 builder.addStatement(codeBlock)
             }
@@ -208,7 +208,7 @@ extension SwiftSyntaxProducer {
             iterating(file.structIntentions) { _struct in
                 let syntax = generateStruct(_struct)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
                 
                 builder.addStatement(codeBlock)
             }
@@ -216,7 +216,7 @@ extension SwiftSyntaxProducer {
             iterating(file.globalVariableIntentions) { variable in
                 let syntax = varDeclGenerator.generateGlobalVariable(variable)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
                 
                 builder.addStatement(codeBlock)
             }
@@ -224,7 +224,7 @@ extension SwiftSyntaxProducer {
             iterating(file.globalFunctionIntentions) { function in
                 let syntax = generateFunction(function, alwaysEmitBody: true)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
                 
                 builder.addStatement(codeBlock)
             }
@@ -232,7 +232,7 @@ extension SwiftSyntaxProducer {
             iterating(file.protocolIntentions) { _protocol in
                 let syntax = generateProtocol(_protocol)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
                 
                 builder.addStatement(codeBlock)
             }
@@ -240,7 +240,7 @@ extension SwiftSyntaxProducer {
             iterating(file.classIntentions) { _class in
                 let syntax = generateClass(_class)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
                 
                 builder.addStatement(codeBlock)
             }
@@ -248,7 +248,7 @@ extension SwiftSyntaxProducer {
             iterating(file.extensionIntentions) { _class in
                 let syntax = generateExtension(_class)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
                 
                 builder.addStatement(codeBlock)
             }
@@ -261,6 +261,7 @@ extension SwiftSyntaxProducer {
                         .makeToken(TokenKind.identifier(""),
                                    presence: .present)
                         .withExtraLeading(consuming: &extraLeading)
+                        .asSyntax
                     )
                 }
                 
@@ -323,7 +324,7 @@ extension SwiftSyntaxProducer {
             let attributes = self.attributes(for: intention, inline: false)
             
             for attribute in attributes {
-                builder.addAttribute(attribute())
+                builder.addAttribute(attribute().asSyntax)
             }
             
             builder.useEnumKeyword(makeStartToken(SyntaxFactory.makeEnumKeyword).withTrailingSpace())
@@ -384,7 +385,7 @@ extension SwiftSyntaxProducer {
             addExtraLeading(.newlines(1) + indentation())
             
             for attribute in attributes(for: intention, inline: false) {
-                builder.addAttribute(attribute())
+                builder.addAttribute(attribute().asSyntax)
             }
             for modifier in modifiers(for: intention) {
                 builder.addModifier(modifier(self))
@@ -423,7 +424,7 @@ extension SwiftSyntaxProducer {
             addExtraLeading(indentation())
             
             for attribute in attributes(for: intention, inline: false) {
-                builder.addAttribute(attribute())
+                builder.addAttribute(attribute().asSyntax)
             }
             
             builder.useClassKeyword(
@@ -503,7 +504,7 @@ extension SwiftSyntaxProducer {
                         .makeSimpleTypeIdentifier(
                             name: identifier,
                             genericArgumentClause: nil
-                        )
+                        ).asTypeSyntax
                     )
                 }
                 
@@ -523,7 +524,7 @@ extension SwiftSyntaxProducer {
             
             let attributes = self.attributes(for: intention, inline: false)
             for attribute in attributes {
-                builder.addAttribute(attribute())
+                builder.addAttribute(attribute().asSyntax)
             }
             builder.useStructKeyword(
                 makeStartToken(SyntaxFactory.makeStructKeyword)
@@ -560,7 +561,7 @@ extension SwiftSyntaxProducer {
             
             let attributes = self.attributes(for: intention, inline: false)
             for attribute in attributes {
-                builder.addAttribute(attribute())
+                builder.addAttribute(attribute().asSyntax)
             }
             
             builder.useProtocolKeyword(
@@ -618,7 +619,7 @@ extension SwiftSyntaxProducer {
                 
                 builder.addMember(
                     SyntaxFactory.makeMemberDeclListItem(
-                        decl: generateEnumCase(prop),
+                        decl: generateEnumCase(prop).asDeclSyntax,
                         semicolon: nil
                     )
                 )
@@ -643,7 +644,7 @@ extension SwiftSyntaxProducer {
                         decl: generateInitializer(
                             _init,
                             alwaysEmitBody: !(intention is ProtocolGenerationIntention)
-                        ),
+                        ).asDeclSyntax,
                         semicolon: nil
                     )
                 )
@@ -661,7 +662,7 @@ extension SwiftSyntaxProducer {
                 
                 builder.addMember(
                     SyntaxFactory.makeMemberDeclListItem(
-                        decl: generateDeinitializer(_deinit),
+                        decl: generateDeinitializer(_deinit).asDeclSyntax,
                         semicolon: nil
                     )
                 )
@@ -676,7 +677,7 @@ extension SwiftSyntaxProducer {
                         decl: generateFunction(
                             method,
                             alwaysEmitBody: !(intention is ProtocolGenerationIntention)
-                        ),
+                        ).asDeclSyntax,
                         semicolon: nil
                     )
                 )
@@ -689,12 +690,12 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     
     func generateInitializer(_ intention: InitGenerationIntention,
-                             alwaysEmitBody: Bool) -> DeclSyntax {
+                             alwaysEmitBody: Bool) -> InitializerDeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
         
         return InitializerDeclSyntax { builder in
             for attribute in attributes(for: intention, inline: false) {
-                builder.addAttribute(attribute())
+                builder.addAttribute(attribute().asSyntax)
             }
             for modifier in modifiers(for: intention) {
                 builder.addModifier(modifier(self))
@@ -734,7 +735,7 @@ extension SwiftSyntaxProducer {
         
         return FunctionDeclSyntax { builder in
             for attribute in attributes(for: intention, inline: false) {
-                builder.addAttribute(attribute())
+                builder.addAttribute(attribute().asSyntax)
             }
             for modifier in modifiers(for: intention) {
                 builder.addModifier(modifier(self))
@@ -818,7 +819,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateAttributeListSyntax<S: Sequence>(_ attributes: S) -> AttributeListSyntax where S.Element == KnownAttribute {
-        SyntaxFactory.makeAttributeList(attributes.map(generateAttributeSyntax))
+        SyntaxFactory.makeAttributeList(attributes.lazy.map(generateAttributeSyntax).map { $0.asSyntax })
     }
     
     func generateAttributeSyntax(_ attribute: KnownAttribute) -> AttributeSyntax {

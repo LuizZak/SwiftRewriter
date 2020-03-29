@@ -14,7 +14,7 @@ public class SwiftTypeConverter {
     
     func makeWrappedInParensIfRequired(_ type: SwiftType) -> TypeSyntax {
         if type.requiresSurroundingParens {
-            return makeTupleTypeSyntax([type])
+            return TypeSyntax(makeTupleTypeSyntax([type]))
         }
         
         return makeTypeSyntax(type)
@@ -23,14 +23,14 @@ public class SwiftTypeConverter {
     func makeTypeSyntax(_ type: SwiftType) -> TypeSyntax {
         switch type {
         case .nominal(let nominal):
-            return makeNominalTypeSyntax(nominal)
+            return makeNominalTypeSyntax(nominal).asTypeSyntax
             
         case .implicitUnwrappedOptional(let type):
             return SyntaxFactory
                 .makeImplicitlyUnwrappedOptionalType(
                     wrappedType: makeWrappedInParensIfRequired(type),
                     exclamationMark: SyntaxFactory.makeExclamationMarkToken()
-                )
+                ).asTypeSyntax
             
         case .nullabilityUnspecified(let type):
             let type = makeWrappedInParensIfRequired(type)
@@ -40,13 +40,13 @@ public class SwiftTypeConverter {
                     .makeOptionalType(
                         wrappedType: type,
                         questionMark: SyntaxFactory.makePostfixQuestionMarkToken()
-                    )
+                    ).asTypeSyntax
             } else {
                 return SyntaxFactory
                     .makeImplicitlyUnwrappedOptionalType(
                         wrappedType: type,
                         exclamationMark: SyntaxFactory.makeExclamationMarkToken()
-                    )
+                    ).asTypeSyntax
             }
             
         case .optional(let type):
@@ -54,7 +54,7 @@ public class SwiftTypeConverter {
                 .makeOptionalType(
                     wrappedType: makeWrappedInParensIfRequired(type),
                     questionMark: SyntaxFactory.makePostfixQuestionMarkToken()
-                )
+                ).asTypeSyntax
             
         case .metatype(let type):
             return SyntaxFactory
@@ -62,10 +62,10 @@ public class SwiftTypeConverter {
                     baseType: makeTypeSyntax(type),
                     period: SyntaxFactory.makePeriodToken(),
                     typeOrProtocol: SyntaxFactory.makeTypeToken()
-                )
+                ).asTypeSyntax
             
         case .nested(let nested):
-            return makeNestedTypeSyntax(nested)
+            return makeNestedTypeSyntax(nested).asTypeSyntax
             
         case let .block(returnType, parameters, attributes):
             _blockStackLevel += 1
@@ -86,14 +86,15 @@ public class SwiftTypeConverter {
                     makeTupleTypeSyntax(parameters)
                         .elements
                         .forEach { builder.addArgument($0) }
-                }
+                }.asTypeSyntax
                 
                 builder.useBaseType(functionType)
                 
                 for attribute in attributes {
+                    let attrSyntax: AttributeSyntax
                     switch attribute {
                     case .autoclosure:
-                        builder.addAttribute(SyntaxFactory
+                        attrSyntax = SyntaxFactory
                             .makeAttribute(
                                 atSignToken: SyntaxFactory.makeAtSignToken(),
                                 attributeName: makeIdentifier("autoclosure"),
@@ -102,10 +103,9 @@ public class SwiftTypeConverter {
                                 rightParen: nil,
                                 tokenList: nil
                             )
-                        )
                         
                     case .escaping:
-                        builder.addAttribute(SyntaxFactory
+                        attrSyntax = SyntaxFactory
                             .makeAttribute(
                                 atSignToken: SyntaxFactory.makeAtSignToken(),
                                 attributeName: makeIdentifier("escaping"),
@@ -114,10 +114,9 @@ public class SwiftTypeConverter {
                                 rightParen: nil,
                                 tokenList: nil
                             )
-                        )
                         
                     case .convention(let convention):
-                        builder.addAttribute(SyntaxFactory
+                        attrSyntax = SyntaxFactory
                             .makeAttribute(
                                 atSignToken: SyntaxFactory.makeAtSignToken(),
                                 attributeName: makeIdentifier("convention"),
@@ -130,15 +129,16 @@ public class SwiftTypeConverter {
                                     SyntaxFactory.makeRightParenToken().withTrailingSpace()
                                 ])
                             )
-                        )
                     }
+                    
+                    builder.addAttribute(Syntax(attrSyntax))
                 }
-            }
+            }.asTypeSyntax
             
         case .tuple(let tuple):
             switch tuple {
             case .types(let types):
-                return makeTupleTypeSyntax(types)
+                return makeTupleTypeSyntax(types).asTypeSyntax
                 
             case .empty:
                 return SyntaxFactory.makeTypeIdentifier("Void")
@@ -153,10 +153,10 @@ public class SwiftTypeConverter {
                         
                         switch type {
                         case .nested(let nested):
-                            builder.useType(makeNestedTypeSyntax(nested))
+                            builder.useType(makeNestedTypeSyntax(nested).asTypeSyntax)
                             
                         case .nominal(let nominal):
-                            builder.useType(makeNominalTypeSyntax(nominal))
+                            builder.useType(makeNominalTypeSyntax(nominal).asTypeSyntax)
                         }
                         
                         if i != count - 1 {
@@ -164,7 +164,7 @@ public class SwiftTypeConverter {
                         }
                     })
                 }
-            }
+            }.asTypeSyntax
             
         case .array(let inner):
             return ArrayTypeSyntax { builder in
@@ -172,7 +172,7 @@ public class SwiftTypeConverter {
                 builder.useRightSquareBracket(SyntaxFactory.makeRightSquareBracketToken())
                 
                 builder.useElementType(makeTypeSyntax(inner))
-            }
+            }.asTypeSyntax
             
         case let .dictionary(key, value):
             return DictionaryTypeSyntax { builder in
@@ -182,7 +182,7 @@ public class SwiftTypeConverter {
                 
                 builder.useKeyType(makeTypeSyntax(key))
                 builder.useValueType(makeTypeSyntax(value))
-            }
+            }.asTypeSyntax
         }
     }
     
@@ -210,7 +210,7 @@ public class SwiftTypeConverter {
             
             return SyntaxFactory
                 .makeMemberTypeIdentifier(
-                    baseType: previous,
+                    baseType: previous.asTypeSyntax,
                     period: SyntaxFactory.makePeriodToken(),
                     name: typeSyntax.name,
                     genericArgumentClause: typeSyntax.genericArgumentClause
@@ -221,7 +221,7 @@ public class SwiftTypeConverter {
         
         let initial = SyntaxFactory
             .makeMemberTypeIdentifier(
-                baseType: makeNominalTypeSyntax(nestedType.first),
+                baseType: makeNominalTypeSyntax(nestedType.first).asTypeSyntax,
                 period: SyntaxFactory.makePeriodToken(),
                 name: typeSyntax.name,
                 genericArgumentClause: typeSyntax.genericArgumentClause
