@@ -575,7 +575,7 @@ extension KnownTypeBuilder {
     }
 }
 
-private class DummyType: KnownType {
+private final class DummyType: KnownType {
     var origin: String
     var typeName: String
     var knownFile: KnownFile? = nil
@@ -696,16 +696,28 @@ extension BuildingKnownType: KnownType {
     }
 }
 
-struct BuildingKnownConstructor: KnownConstructor, Codable {
+final class BuildingKnownConstructor: KnownConstructor, Codable {
     var parameters: [ParameterSignature]
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
     var isFailable: Bool
     var isConvenience: Bool
     var annotations: [String]
+    
+    init(parameters: [ParameterSignature], knownAttributes: [KnownAttribute],
+         semantics: Set<Semantic>, isFailable: Bool, isConvenience: Bool,
+         annotations: [String]) {
+        
+        self.parameters = parameters
+        self.knownAttributes = knownAttributes
+        self.semantics = semantics
+        self.isFailable = isFailable
+        self.isConvenience = isConvenience
+        self.annotations = annotations
+    }
 }
 
-struct BuildingKnownMethod: KnownMethod, Codable {
+final class BuildingKnownMethod: KnownMethod, Codable {
     var ownerType: KnownTypeReference?
     var body: KnownMethodBody?
     var signature: FunctionSignature
@@ -713,6 +725,19 @@ struct BuildingKnownMethod: KnownMethod, Codable {
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
     var annotations: [String]
+    
+    init(ownerType: KnownTypeReference?, body: KnownMethodBody?,
+         signature: FunctionSignature, optional: Bool, knownAttributes: [KnownAttribute],
+         semantics: Set<Semantic>, annotations: [String]) {
+        
+        self.ownerType = ownerType
+        self.body = body
+        self.signature = signature
+        self.optional = optional
+        self.knownAttributes = knownAttributes
+        self.semantics = semantics
+        self.annotations = annotations
+    }
     
     enum CodingKeys: String, CodingKey {
         case ownerType
@@ -724,7 +749,7 @@ struct BuildingKnownMethod: KnownMethod, Codable {
     }
 }
 
-struct BuildingKnownProperty: KnownProperty, Codable {
+final class BuildingKnownProperty: KnownProperty, Codable {
     var ownerType: KnownTypeReference?
     var name: String
     var storage: ValueStorage
@@ -736,9 +761,27 @@ struct BuildingKnownProperty: KnownProperty, Codable {
     var isEnumCase: Bool
     var semantics: Set<Semantic>
     var annotations: [String]
+    
+    init(ownerType: KnownTypeReference?, name: String, storage: ValueStorage,
+         attributes: [PropertyAttribute], isStatic: Bool, optional: Bool,
+         accessor: KnownPropertyAccessor, knownAttributes: [KnownAttribute],
+         isEnumCase: Bool, semantics: Set<Semantic>, annotations: [String]) {
+        
+        self.ownerType = ownerType
+        self.name = name
+        self.storage = storage
+        self.attributes = attributes
+        self.isStatic = isStatic
+        self.optional = optional
+        self.accessor = accessor
+        self.knownAttributes = knownAttributes
+        self.isEnumCase = isEnumCase
+        self.semantics = semantics
+        self.annotations = annotations
+    }
 }
 
-struct BuildingKnownSubscript: KnownSubscript, Codable {
+final class BuildingKnownSubscript: KnownSubscript, Codable {
     var isStatic: Bool
     var ownerType: KnownTypeReference?
     var subscriptType: SwiftType
@@ -747,6 +790,20 @@ struct BuildingKnownSubscript: KnownSubscript, Codable {
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
     var annotations: [String]
+    
+    init(isStatic: Bool, ownerType: KnownTypeReference?, subscriptType: SwiftType,
+         type: SwiftType, isConstant: Bool, knownAttributes: [KnownAttribute],
+         semantics: Set<Semantic>, annotations: [String]) {
+        
+        self.isStatic = isStatic
+        self.ownerType = ownerType
+        self.subscriptType = subscriptType
+        self.type = type
+        self.isConstant = isConstant
+        self.knownAttributes = knownAttributes
+        self.semantics = semantics
+        self.annotations = annotations
+    }
 }
 
 struct BuildingKnownProtocolConformance: KnownProtocolConformance, Codable {

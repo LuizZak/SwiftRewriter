@@ -1,8 +1,8 @@
 #if os(Linux)
 import Glibc
+#elseif os(macOS)
+import Darwin
 #endif
-
-import Dispatch
 
 @propertyWrapper
 public final class ConcurrentValue<T> {
