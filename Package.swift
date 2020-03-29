@@ -23,7 +23,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/LuizZak/MiniLexer.git", .exact("0.9.5")),
         .package(url: "https://github.com/apple/swift-package-manager.git", .exact("0.4.0")),
-        .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.28"),
+        .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.29"),
         .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.0")),
         .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50100.0"))
     ],
