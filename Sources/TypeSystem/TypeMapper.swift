@@ -240,7 +240,7 @@ public class DefaultTypeMapper: TypeMapper {
                 attributes.sorted { $0.description < $1.description }
             
             let attributeString =
-                sortedAttributes.map { $0.description }.joined(separator: " ")
+                sortedAttributes.map(\.description).joined(separator: " ")
             
             let paramsString =
                 parameters.map {
@@ -650,7 +650,7 @@ public class DefaultTypeMapper: TypeMapper {
             return false
         }
         
-        return types.contains { $0.isPointer }
+        return types.contains(where: \.isPointer)
     }
     
     private static let _scalarMappings: [String: SwiftType] = [

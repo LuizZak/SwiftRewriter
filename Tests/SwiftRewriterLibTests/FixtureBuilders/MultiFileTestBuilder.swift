@@ -50,7 +50,7 @@ class MultiFileTestBuilder {
         let output = TestWriterOutput()
         
         let results = job.execute(output: output)
-        let errors = results.diagnostics.errors.map { $0.description }.joined(separator: "\n")
+        let errors = results.diagnostics.errors.map(\.description).joined(separator: "\n")
         
         if !expectsErrors && !results.diagnostics.errors.isEmpty {
             test.recordFailure(
@@ -85,7 +85,7 @@ class MultiFileTestBuilder {
         let results = job.execute(output: output)
         
         if !expectsErrors && !results.diagnostics.errors.isEmpty {
-            let errors = results.diagnostics.errors.map { $0.description }.joined(separator: "\n")
+            let errors = results.diagnostics.errors.map(\.description).joined(separator: "\n")
             
             test.recordFailure(
                 withDescription: """
@@ -97,7 +97,7 @@ class MultiFileTestBuilder {
             // Compute output
             let buffer = output.outputs
                 .sorted { $0.path < $1.path }
-                .map { $0.buffer }
+                .map(\.buffer)
                 .joined(separator: "\n")
             
             if buffer != expectedSwift {

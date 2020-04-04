@@ -120,7 +120,7 @@ public class CollectionKnownTypeProvider: KnownTypeProvider {
     public init(knownTypes: [KnownType] = []) {
         self.knownTypes = knownTypes
         
-        knownTypesByName = knownTypes.groupBy({ $0.typeName })
+        knownTypesByName = knownTypes.groupBy(\.typeName)
     }
     
     public func removeAllTypes() {

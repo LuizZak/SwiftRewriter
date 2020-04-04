@@ -21,7 +21,7 @@ public struct FunctionIdentifier: Hashable, Equatable, CustomStringConvertible {
 
 public extension FunctionCallPostfix {
     func identifierWith(methodName: String) -> FunctionIdentifier {
-        let arguments = self.arguments.map { $0.label }
+        let arguments = self.arguments.map(\.label)
         
         return FunctionIdentifier(name: methodName, parameterNames: arguments)
     }

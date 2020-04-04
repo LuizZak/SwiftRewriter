@@ -69,7 +69,7 @@ private class MockWriterOutput: WriterOutput {
     func resultString() -> String {
         return files
             .sorted { $0.filepath < $1.filepath }
-            .map { $0.buffer }
+            .map(\.buffer)
             .joined(separator: "\n")
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
