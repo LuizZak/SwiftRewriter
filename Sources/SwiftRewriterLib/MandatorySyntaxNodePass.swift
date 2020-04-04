@@ -20,11 +20,11 @@ class MandatorySyntaxNodePass: ASTRewriterPass {
         }
         
         // [Type new]
-        var typeName: String = ""
-        if exp.matches(ident(.any ->> &typeName).call("new")) {
-            var result: Expression = Expression.identifier(typeName)
+        let typeName = ValueMatcherExtractor("")
+        if exp.matches(ident(.any ->> typeName).call("new")) {
+            var result: Expression = Expression.identifier(typeName.value)
                 
-            if typeName == "self" {
+            if typeName.value == "self" {
                 result = result.dot("init").call()
             } else {
                 result = result.call()
@@ -36,12 +36,12 @@ class MandatorySyntaxNodePass: ASTRewriterPass {
         }
         
         // Type.new
-        if exp.matches(ident(.any ->> &typeName).dot("new")) {
+        if exp.matches(ident(.any ->> typeName).dot("new")) {
             let result: Expression
-            if typeName == "self" {
-                result = Expression.identifier(typeName).dot("init").call()
+            if typeName.value == "self" {
+                result = Expression.identifier(typeName.value).dot("init").call()
             } else {
-                result = Expression.identifier(typeName).call()
+                result = Expression.identifier(typeName.value).call()
             }
             
             result.resolvedType = exp.resolvedType

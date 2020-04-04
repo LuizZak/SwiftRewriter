@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/LuizZak/antlr4-swift.git",
         "state": {
           "branch": null,
-          "revision": "065310a79abea55f737b55786045e0b0272e6d85",
-          "version": "4.0.28"
+          "revision": "7828076064effeb80085ee50052a5d2c1c16cb44",
+          "version": "4.0.29"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/LuizZak/MiniLexer.git",
         "state": {
           "branch": null,
-          "revision": "4da97d6f92d79402cd3cf35d6438ec723554ae7c",
-          "version": "0.9.5"
+          "revision": "71cc272f4613d1e45e1eacab33fa2f77c6311007",
+          "version": "0.10.0"
         }
       },
       {
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/apple/swift-syntax.git",
         "state": {
           "branch": null,
-          "revision": "3e3eb191fcdbecc6031522660c4ed6ce25282c25",
-          "version": "0.50100.0"
+          "revision": "0688b9cfc4c3dd234e4f55f1f056b2affc849873",
+          "version": "0.50200.0"
         }
       }
     ]

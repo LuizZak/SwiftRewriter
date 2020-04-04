@@ -25,37 +25,37 @@ public class IntentionCollection: Codable {
     
     /// Gets all global variable intentions across all files
     public func globalVariables() -> [GlobalVariableGenerationIntention] {
-        _intentions.flatMap { $0.globalVariableIntentions }
+        _intentions.flatMap(\.globalVariableIntentions)
     }
     
     /// Gets all global functions intentions across all files
     public func globalFunctions() -> [GlobalFunctionGenerationIntention] {
-        _intentions.flatMap { $0.globalFunctionIntentions }
+        _intentions.flatMap(\.globalFunctionIntentions)
     }
     
     /// Performs a full search of all types intended to be created on all files.
     public func typeIntentions() -> [TypeGenerationIntention] {
-        _intentions.flatMap { $0.typeIntentions }
+        _intentions.flatMap(\.typeIntentions)
     }
     
     /// Gets all nominal class generation intentions across all files
     public func classIntentions() -> [ClassGenerationIntention] {
-        _intentions.flatMap { $0.classIntentions }
+        _intentions.flatMap(\.classIntentions)
     }
     
     /// Gets all extension intentions across all files
     public func extensionIntentions() -> [ClassExtensionGenerationIntention] {
-        _intentions.flatMap { $0.extensionIntentions }
+        _intentions.flatMap(\.extensionIntentions)
     }
     
     /// Gets all protocols intended to be created on all files.
     public func protocolIntentions() -> [ProtocolGenerationIntention] {
-        _intentions.flatMap { $0.protocolIntentions }
+        _intentions.flatMap(\.protocolIntentions)
     }
     
     /// Performs a full search of all typealias intended to be created on all files.
     public func typealiasIntentions() -> [TypealiasIntention] {
-        _intentions.flatMap { $0.typealiasIntentions }
+        _intentions.flatMap(\.typealiasIntentions)
     }
     
     public func intentionFor(fileNamed name: String) -> FileGenerationIntention? {

@@ -102,7 +102,7 @@ public extension ValueMatcher where T: Expression {
             .keyPath(\.op.asFunctionCall?.arguments) { args -> ValueMatcher<[FunctionArgument]> in
                 args.match(closure: { args -> Bool in
                     for (matcher, arg) in zip(matchers, args) {
-                        if !matcher.matches(arg) {
+                        if !matcher(matches: arg) {
                             return false
                         }
                     }
@@ -234,7 +234,7 @@ public extension ValueMatcher where T: Expression {
     func anyExpression() -> ValueMatcher<Expression> {
         ValueMatcher<Expression>().match { (value) -> Bool in
             if let value = value as? T {
-                return self.matches(value)
+                return self(matches: value)
             }
             
             return false
@@ -303,7 +303,7 @@ public extension ValueMatcher where T: Expression {
             let sequence = SyntaxNodeSequence(node: exp, inspectBlocks: false)
             
             for e in sequence.compactMap({ $0 as? T }) {
-                if matcher.matches(e) {
+                if matcher(matches: e) {
                     return true
                 }
             }
@@ -359,7 +359,7 @@ public struct ExpressionMatchable {
     
     @inlinable
     public static func == (lhs: ExpressionMatchable, rhs: ValueMatcher<Expression>) -> Bool {
-        lhs.exp.matches(rhs)
+        rhs(matches: lhs.exp)
     }
 }
 
