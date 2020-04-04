@@ -42,7 +42,7 @@ public struct FunctionSignature: Hashable {
     /// Returns a `SwiftType.block`-equivalent type for this function signature
     public var swiftClosureType: SwiftType {
         .swiftBlock(returnType: returnType,
-                           parameters: parameters.map { $0.type })
+                           parameters: parameters.map(\.type))
     }
     
     public var droppingNullability: FunctionSignature {
@@ -63,8 +63,8 @@ public struct FunctionSignature: Hashable {
                 isStatic: Bool = false,
                 isMutating: Bool = false) {
         
-        _asIdentifier = FunctionIdentifier(name: name, parameterNames: parameters.map { $0.label })
-        _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map { $0.label })
+        _asIdentifier = FunctionIdentifier(name: name, parameterNames: parameters.map(\.label))
+        _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map(\.label))
         self.isStatic = isStatic
         self.name = name
         self.returnType = returnType
@@ -73,8 +73,8 @@ public struct FunctionSignature: Hashable {
     }
     
     private mutating func _recreateAliases() {
-        _asIdentifier = FunctionIdentifier(name: name, parameterNames: parameters.map { $0.label })
-        _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map { $0.label })
+        _asIdentifier = FunctionIdentifier(name: name, parameterNames: parameters.map(\.label))
+        _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map(\.label))
     }
     
     /// Returns a set of possible selector signature variations for this function
@@ -104,14 +104,14 @@ public struct FunctionSignature: Hashable {
     /// foo(bar:baz:_:)
     /// ```
     public func possibleSelectorSignatures() -> Set<SelectorSignature> {
-        if !parameters.contains(where: { $0.hasDefaultValue }) {
+        if !parameters.contains(where: \.hasDefaultValue) {
             return [asSelector]
         }
         
         let defaultArgIndices =
             parameters.enumerated()
-                .filter { $0.element.hasDefaultValue }
-                .map { $0.offset }
+                .filter(\.element.hasDefaultValue)
+                .map(\.offset)
         
         if defaultArgIndices.count == 0 {
             return [asSelector]
@@ -222,7 +222,7 @@ extension FunctionSignature: Codable {
 public extension Sequence where Element == ParameterSignature {
     
     func argumentLabels() -> [String?] {
-        map { $0.label }
+        map(\.label)
     }
 }
 

@@ -628,14 +628,14 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Parameter list
-        let parameterListNode = context.pushContext(nodeType: ParameterList.self)
+        context.pushContext(nodeType: ParameterList.self)
         defer {
             context.popContext()
         }
         
         if let params = ctx.parameterList(), let paramDecl = params.parameterDeclarationList() {
             for param in paramDecl.parameterDeclaration() {
-                let node = context.pushContext(nodeType: FunctionParameter.self)
+                context.pushContext(nodeType: FunctionParameter.self)
                 defer {
                     context.popContext()
                 }

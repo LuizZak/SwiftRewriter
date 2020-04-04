@@ -118,7 +118,7 @@ public extension Collection where Element == Path {
 public extension Sequence where Element == String {
     /// Returns a list of paths for each string in this sequence
     var asPaths: [Path] {
-        map { $0.path }
+        map(\.path)
     }
 }
 

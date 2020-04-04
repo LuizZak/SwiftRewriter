@@ -155,7 +155,7 @@ extension SwiftSyntaxProducer {
                         self.addExtraLeading(self.indentation())
                     }
                     
-                    return SyntaxFactory.makeCodeBlockItem(item: self.generateExpression(exp), semicolon: nil, errorTokens: nil)
+                    return self.generateExpression(exp).inCodeBlock()
                 }
             }
     }
@@ -169,7 +169,9 @@ extension SwiftSyntaxProducer {
             .generateVariableDeclarations(stmt)
             .map { decl in
                 return {
-                    SyntaxFactory.makeCodeBlockItem(item: decl(), semicolon: nil, errorTokens: nil)
+                    SyntaxFactory.makeCodeBlockItem(item: decl().asSyntax,
+                                                    semicolon: nil,
+                                                    errorTokens: nil)
                 }
             }
     }
@@ -228,11 +230,11 @@ extension SwiftSyntaxProducer {
                             builder.useEqual(SyntaxFactory.makeEqualToken().withTrailingSpace().withLeadingSpace())
                             builder.useValue(generateExpression(stmt.exp))
                         })
-                    })
+                    }.asSyntax)
                 })
             } else {
                 builder.addCondition(ConditionElementSyntax { builder in
-                    builder.useCondition(generateExpression(stmt.exp))
+                    builder.useCondition(generateExpression(stmt.exp).asSyntax)
                 })
             }
             
@@ -242,9 +244,9 @@ extension SwiftSyntaxProducer {
                 builder.useElseKeyword(makeStartToken(SyntaxFactory.makeElseKeyword).addingLeadingSpace())
                 if _else.statements.count == 1, let elseIfStmt = _else.statements[0] as? IfStatement {
                     addExtraLeading(.spaces(1))
-                    builder.useElseBody(generateIfStmt(elseIfStmt))
+                    builder.useElseBody(generateIfStmt(elseIfStmt).asSyntax)
                 } else {
-                    builder.useElseBody(generateCompound(_else))
+                    builder.useElseBody(generateCompound(_else).asSyntax)
                 }
             }
         }
@@ -262,8 +264,8 @@ extension SwiftSyntaxProducer {
             for _case in stmt.cases {
                 addExtraLeading(.newlines(1) + indentation())
                 
-                let label = generateSwitchCaseLabel(_case)
-                syntaxes.append(generateSwitchCase(label, statements: _case.statements))
+                let label = generateSwitchCaseLabel(_case).asSyntax
+                syntaxes.append(generateSwitchCase(label, statements: _case.statements).asSyntax)
             }
             
             if let _default = stmt.defaultCase {
@@ -272,11 +274,11 @@ extension SwiftSyntaxProducer {
                 let label = SwitchDefaultLabelSyntax { builder in
                     builder.useDefaultKeyword(makeStartToken(SyntaxFactory.makeDefaultKeyword))
                     builder.useColon(SyntaxFactory.makeColonToken())
-                }
-                syntaxes.append(generateSwitchCase(label, statements: _default))
+                }.asSyntax
+                syntaxes.append(generateSwitchCase(label, statements: _default).asSyntax)
             }
             
-            builder.addCase(SyntaxFactory.makeSwitchCaseList(syntaxes))
+            builder.addCase(SyntaxFactory.makeSwitchCaseList(syntaxes).asSyntax)
         }
     }
     
@@ -319,7 +321,7 @@ extension SwiftSyntaxProducer {
             builder.useWhileKeyword(makeStartToken(SyntaxFactory.makeWhileKeyword).withTrailingSpace())
             
             builder.addCondition(ConditionElementSyntax { builder in
-                builder.useCondition(generateExpression(stmt.exp))
+                builder.useCondition(generateExpression(stmt.exp).asSyntax)
             })
             
             builder.useBody(generateCompound(stmt.body))
@@ -373,15 +375,16 @@ extension SwiftSyntaxProducer {
         return SyntaxFactory
             .makeBlankIdentifierExpr()
             .withIdentifier(makeIdentifier("").withLeadingTrivia(trivia))
+            .asExprSyntax
     }
     
     func generatePattern(_ pattern: Pattern) -> PatternSyntax {
         switch pattern {
         case .identifier(let ident):
-            return IdentifierPatternSyntax { $0.useIdentifier(makeIdentifier(ident)) }
+            return IdentifierPatternSyntax { $0.useIdentifier(makeIdentifier(ident)) }.asPatternSyntax
             
         case .expression(let exp):
-            return ExpressionPatternSyntax { $0.useExpression(generateExpression(exp)) }
+            return ExpressionPatternSyntax { $0.useExpression(generateExpression(exp)) }.asPatternSyntax
             
         case .tuple(let items):
             return TuplePatternSyntax { builder in
@@ -401,19 +404,19 @@ extension SwiftSyntaxProducer {
                         }
                     )
                 }
-            }
+            }.asPatternSyntax
         }
     }
 }
 
-private extension ExprSyntax {
+private extension ExprSyntaxProtocol {
     func inCodeBlock() -> CodeBlockItemSyntax {
-        CodeBlockItemSyntax { $0.useItem(self) }
+        CodeBlockItemSyntax { $0.useItem(self.asSyntax) }
     }
 }
 
-private extension StmtSyntax {
+private extension StmtSyntaxProtocol {
     func inCodeBlock() -> CodeBlockItemSyntax {
-        CodeBlockItemSyntax { $0.useItem(self) }
+        CodeBlockItemSyntax { $0.useItem(self.asSyntax) }
     }
 }

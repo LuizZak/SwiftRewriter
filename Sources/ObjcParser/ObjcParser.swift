@@ -328,7 +328,7 @@ public class ObjcParser {
         var type: ObjcType
         
         var specifiers: [String] = []
-        while lexer.tokenType(matches: { $0.isTypeQualifier }) {
+        while lexer.tokenType(matches: \.isTypeQualifier) {
             let spec = lexer.nextToken().value
             specifiers.append(String(spec))
         }
@@ -341,18 +341,18 @@ public class ObjcParser {
                 let types =
                     _parseCommaSeparatedList(
                         braces: .operator(.lessThan), .operator(.greaterThan),
-                        itemParser: { try lexer.advance(matching: { $0.tokenType.isIdentifier }) })
+                        itemParser: { try lexer.advance(matching: \.tokenType.isIdentifier) })
                 
                 type = .id(protocols: types.map { String($0.value) })
             } else {
                 type = .id()
             }
-        } else if lexer.tokenType(matches: { $0.isIdentifier }) {
-            var typeName: String = String(try lexer.advance(matching: { $0.tokenType.isIdentifier }).value)
+        } else if lexer.tokenType(matches: \.isIdentifier) {
+            var typeName: String = String(try lexer.advance(matching: \.tokenType.isIdentifier).value)
             
             // 'long long' support
             if typeName == "long" && lexer.tokenType(is: .identifier("long")) {
-                typeName = String(try typeName + " " + lexer.advance(matching: { $0.tokenType.isIdentifier }).value)
+                typeName = String(try typeName + " " + lexer.advance(matching: \.tokenType.isIdentifier).value)
             }
             
             // 'signed', 'unsigned' support
@@ -387,7 +387,7 @@ public class ObjcParser {
         
         // Type qualifier
         var qualifiers: [String] = []
-        while lexer.tokenType(matches: { $0.isTypeQualifier }) {
+        while lexer.tokenType(matches: \.isTypeQualifier) {
             let qual = lexer.nextToken().value
             qualifiers.append(String(qual))
         }

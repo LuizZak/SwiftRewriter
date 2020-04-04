@@ -28,7 +28,7 @@ class VariableDeclSyntaxGenerator {
         
         let decl = makeDeclaration(intention)
         
-        return generate(decl)
+        return generate(decl).asDeclSyntax
     }
     
     func generateVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> [() -> VariableDeclSyntax] {
@@ -45,7 +45,7 @@ class VariableDeclSyntaxGenerator {
     func generate(_ variableDecl: VariableDeclaration) -> VariableDeclSyntax {
         VariableDeclSyntax { builder in
             for attribute in variableDecl.attributes {
-                builder.addAttribute(attribute())
+                builder.addAttribute(attribute().asSyntax)
             }
             for modifier in variableDecl.modifiers {
                 builder.addModifier(modifier(producer))
@@ -80,7 +80,7 @@ class VariableDeclSyntaxGenerator {
         PatternBindingSyntax { builder in
             builder.usePattern(IdentifierPatternSyntax { builder in
                 builder.useIdentifier(makeIdentifier(binding.name))
-            })
+            }.asPatternSyntax)
             
             if let bindingType = binding.type {
                 builder.useTypeAnnotation(TypeAnnotationSyntax { builder in
@@ -141,7 +141,7 @@ class VariableDeclSyntaxGenerator {
                             )
                         })
                     }
-                }
+                }.asSyntax
             }
         }
         
@@ -159,12 +159,15 @@ class VariableDeclSyntaxGenerator {
                     producer.deindent()
                     
                     let stmtList = SyntaxFactory.makeCodeBlockItemList(blocks)
+                    let codeBlock = SyntaxFactory.makeCodeBlockItem(item: stmtList.asSyntax,
+                                                                    semicolon: nil,
+                                                                    errorTokens: nil)
                     
-                    builder.addStatement(SyntaxFactory.makeCodeBlockItem(item: stmtList, semicolon: nil, errorTokens: nil))
+                    builder.addStatement(codeBlock)
                     
                     producer.addExtraLeading(.newlines(1) + producer.indentation())
                     builder.useRightBrace(producer.makeStartToken(SyntaxFactory.makeRightBraceToken))
-                }
+                }.asSyntax
             }
             
         case let .property(get, set):
@@ -217,7 +220,7 @@ class VariableDeclSyntaxGenerator {
                     
                     producer.addExtraLeading(.newlines(1) + producer.indentation())
                     builder.useRightBrace(producer.makeStartToken(SyntaxFactory.makeRightBraceToken))
-                }
+                }.asSyntax
             }
         }
     }

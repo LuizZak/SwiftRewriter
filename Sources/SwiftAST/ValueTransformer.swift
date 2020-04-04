@@ -81,6 +81,12 @@ public struct ValueTransformer<T, U> {
         self.line = line
     }
     
+    /// Transforms a given value
+    @inlinable
+    public func callAsFunction(transform value: T) -> U? {
+        return transform(value: value)
+    }
+    
     @inlinable
     public func transform(value: T) -> U? {
         transformResult(value: value).value
@@ -145,7 +151,7 @@ public struct ValueTransformer<T, U> {
                          _ predicate: @escaping (U) -> Bool) -> ValueTransformer<T, U> {
         
         ValueTransformer<T, U>(file: file, line: line) { value in
-            guard let value = self.transform(value: value) else {
+            guard let value = self(transform: value) else {
                 return nil
             }
             
@@ -181,7 +187,7 @@ public struct ValueTransformer<T, U> {
                          matcher: ValueMatcher<U>) -> ValueTransformer<T, U> {
         
         ValueTransformer<T, U>(line: line, file: file, previous: self) { value in
-            if matcher.matches(value) {
+            if matcher(matches: value) {
                 return .success(value: value)
             } else {
                 return .failure(message: "Failed to pass matcher at \(file):\(line)")

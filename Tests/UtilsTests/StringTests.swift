@@ -115,7 +115,7 @@ class StringTests: XCTestCase {
     }
     
     func testCommentSectionRangesInEmptyString() {
-        let ranges = "".commentSectionRanges()
+        let ranges = "".cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 0)
     }
     
@@ -129,7 +129,7 @@ class StringTests: XCTestCase {
         Not a comment again.
         """
         
-        let ranges = input.commentSectionRanges()
+        let ranges = input.cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 2)
         XCTAssertEqual(ranges[0], input.range(of: "// A comment!\n"))
         XCTAssertEqual(ranges[1], input.range(of: """
@@ -142,7 +142,7 @@ class StringTests: XCTestCase {
     func testCommentSectionRangesEntireString() {
         let input = "// A comment!"
         
-        let ranges = input.commentSectionRanges()
+        let ranges = input.cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
     }
@@ -150,7 +150,7 @@ class StringTests: XCTestCase {
     func testCommentSectionRangesEntireStringMultiLine() {
         let input = "/* A comment! \n*/"
         
-        let ranges = input.commentSectionRanges()
+        let ranges = input.cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
     }
@@ -158,7 +158,7 @@ class StringTests: XCTestCase {
     func testCommentSectionRangesOpenMultiLineComment() {
         let input = "/* A comment! \n"
         
-        let ranges = input.commentSectionRanges()
+        let ranges = input.cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
     }
@@ -166,14 +166,14 @@ class StringTests: XCTestCase {
     func testCommentSectionRangesIgnoresCommentsInStringLiterals() {
         let input = "\"A comment in a string: // etc.\""
         
-        let ranges = input.commentSectionRanges()
+        let ranges = input.cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 0)
     }
     
     func testCommentSectionRangesIgnoresStringLiteralsWithinSingleLineComments() {
         let input = "/* A comment! \"A string\" \n"
         
-        let ranges = input.commentSectionRanges()
+        let ranges = input.cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
     }
@@ -184,7 +184,7 @@ class StringTests: XCTestCase {
             */ "A string /* */"
             """
         
-        let ranges = input.commentSectionRanges()
+        let ranges = input.cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.range(of: """
             /* A comment! "An unterminated string literal

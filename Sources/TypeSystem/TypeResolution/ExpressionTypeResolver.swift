@@ -584,7 +584,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         } else {
             exp.resolvedType =
                 .block(returnType: exp.returnType,
-                       parameters: exp.parameters.map { $0.type },
+                       parameters: exp.parameters.map(\.type),
                        attributes: [])
         }
         
@@ -840,7 +840,7 @@ private class MemberInvocationResolver {
             )
             
             if let expectedType = postfix.expectedType, let args = postfix.op.asFunctionCall?.arguments {
-                let argTypes = args.compactMap { $0.expression.resolvedType }
+                let argTypes = args.compactMap(\.expression.resolvedType)
                 
                 if args.count == argTypes.count {
                     postfix.exp.expectedType =
@@ -868,7 +868,7 @@ private class MemberInvocationResolver {
             functionCall.returnType = metatype
             functionCall.callableSignature =
                 .block(returnType: metatype,
-                       parameters: ctor.parameters.map { $0.type },
+                       parameters: ctor.parameters.map(\.type),
                        attributes: [])
             
             matchParameterTypes(parameters: ctor.parameters, callArguments: functionCall.arguments)
@@ -885,7 +885,7 @@ private class MemberInvocationResolver {
             functionCall.returnType = metatype
             functionCall.callableSignature =
                 .block(returnType: metatype,
-                       parameters: ctor.parameters.map { $0.type },
+                       parameters: ctor.parameters.map(\.type),
                        attributes: [])
             
             matchParameterTypes(parameters: ctor.parameters, callArguments: functionCall.arguments)
@@ -930,11 +930,11 @@ private class MemberInvocationResolver {
             
             let identifier =
                 FunctionIdentifier(name: target.identifier,
-                                   parameterNames: arguments.map { $0.label })
+                                   parameterNames: arguments.map(\.label))
             
             let definitions =
                 typeResolver.searchFunctionDefinitions(matching: identifier, target)
-            let signatures = definitions.compactMap { $0.asFunctionSignature }
+            let signatures = definitions.compactMap(\.asFunctionSignature)
             
             functionCall = functionCall.replacingArguments(
                 functionCall.subExpressions.map(typeResolver.visitExpression)
@@ -961,7 +961,7 @@ private class MemberInvocationResolver {
     }
     
     func matchParameterTypes(parameters: [ParameterSignature], callArguments: [FunctionArgument]) {
-        matchParameterTypes(types: parameters.map { $0.type }, callArguments: callArguments)
+        matchParameterTypes(types: parameters.map(\.type), callArguments: callArguments)
     }
     
     func matchParameterTypes(types: [SwiftType], callArguments: [FunctionArgument]) {
@@ -989,7 +989,7 @@ private class MemberInvocationResolver {
     }
     
     func labels(in arguments: [FunctionArgument]) -> [String?] {
-        arguments.map { $0.label }
+        arguments.map(\.label)
     }
     
     func findBestMatch(_ functions: [FunctionSignature],
@@ -1016,8 +1016,8 @@ private class MemberInvocationResolver {
         
         let selector
             = SelectorSignature(isStatic: isStatic,
-                                keywords: [memberName] + arguments.map { $0.label })
-        let types = arguments.map { $0.expression.resolvedType }
+                                keywords: [memberName] + arguments.map(\.label))
+        let types = arguments.map(\.expression.resolvedType)
         
         return typeSystem.method(withObjcSelector: selector,
                                  invocationTypeHints: types,
