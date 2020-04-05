@@ -376,7 +376,7 @@ class ObjcParserTests: XCTestCase {
         XCTAssertEqual(implementation?.properties[0].hasIbInspectableSpecifier, true)
     }
     
-    func testParseError() {
+    func testParseNestedBlocks() {
         _=parserTest("""
             @interface ViewController (Private)
             
