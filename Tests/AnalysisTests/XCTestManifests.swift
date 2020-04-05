@@ -42,6 +42,7 @@ extension ControlFlowGraphCreationTests {
         ("testSwitchStatementFallthrough", testSwitchStatementFallthrough),
         ("testSwitchStatementFallthroughWithDefer", testSwitchStatementFallthroughWithDefer),
         ("testSwitchStatementFallthroughWithDeferInterwindedWithReturn", testSwitchStatementFallthroughWithDeferInterwindedWithReturn),
+        ("testSwitchStatementWithDefaultCase", testSwitchStatementWithDefaultCase),
         ("testVariableDeclaration", testVariableDeclaration),
         ("testWhileLoop", testWhileLoop),
         ("testWhileLoopWithBreak", testWhileLoopWithBreak),

@@ -45,11 +45,11 @@ func showSearchPathUi(in menu: MenuController) -> String? {
 }
 
 /// Helper for presenting selection of file names on a list
-private func presentFileSelection(in menu: MenuController, list: [Path], prompt: String) -> [Path] {
+private func presentFileSelection(in menu: MenuController, list: [String], prompt: String) -> [String] {
     let prompt = prompt + """
     Type ':all' to select all files.
     """
-    var items: [Path] = []
+    var items: [String] = []
 
     let config = 
         Pages.PageDisplayConfiguration(commandPrompt: prompt) { input in
@@ -245,7 +245,7 @@ class SuggestConversionInterface {
             
             let duration = stopwatch.stop()
             
-            console.printLine("Finishing converting \(objcFiles.count) files in \(String(format: "%.2lf", duration))s.")
+            console.printLine("Finished converting \(objcFiles.count) files in \(String(format: "%.2lf", duration))s.")
             _=console.readLineWith(prompt: "Press [Enter] to continue.")
         } catch {
             console.printLine("Error converting files: \(error)")
@@ -319,7 +319,7 @@ private class FileFinderInterface {
                         : "Showing all files found"
                 
                 let indexes = presentFileSelection(
-                    in: menu, list: matches.asPaths,
+                    in: menu, list: matches,
                     prompt: "\(matchesString), select one to convert")
                 
                 guard !indexes.isEmpty else {
@@ -328,7 +328,7 @@ private class FileFinderInterface {
                 
                 do {
                     let fileUrls = indexes.map {
-                        URL(fileURLWithPath: (path as NSString).appendingPathComponent($0.fullPath))
+                        URL(fileURLWithPath: (path as NSString).appendingPathComponent($0))
                     }
                     try rewriterService.rewrite(files: fileUrls)
                     _=console.readLineWith(prompt: "\nPress [Enter] to convert another file")
@@ -416,7 +416,7 @@ private class FilesExplorer: PagesCommandHandler {
         else if let index = Int(input) {
             guard index > 0 && index <= fileList.count else {
                 return .loop(
-                    "Invalid index \(index): Only have \(fileList.count) files to select!"
+                    "Invalid index \(index): There are only \(fileList.count) files to select from!"
                     .terminalColorize(.red))
             }
             
@@ -554,5 +554,13 @@ public class FileListConsoleProvider: ConsoleDataProvider {
         }
         
         return [url.lastPathComponent]
+    }
+}
+
+extension Collection where Element == String {
+    func indexOfFilename(matching string: String, options: String.CompareOptions = .literal) -> Index? {
+        firstIndex {
+            ($0 as NSString).lastPathComponent.compare(string, options: options) == .orderedSame
+        }
     }
 }

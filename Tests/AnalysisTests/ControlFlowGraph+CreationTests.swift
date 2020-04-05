@@ -439,8 +439,52 @@ class ControlFlowGraphCreationTests: XCTestCase {
                         statements: [
                             .expression(.identifier("c"))
                         ]
+                    )
+                ],
+                default: nil
+            )
+        ]
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="SwitchStatement"]
+                n3 [label="b"]
+                n4 [label="c"]
+                n5 [label="exit"]
+                n1 -> n2
+                n2 -> n3
+                n2 -> n4
+                n3 -> n5
+                n4 -> n5
+            }
+            """)
+        XCTAssertEqual(graph.nodes.count, 5)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+    }
+    
+    func testSwitchStatementWithDefaultCase() {
+        let stmt: CompoundStatement = [
+            Statement.switch(
+                .identifier("a"),
+                cases: [
+                    SwitchCase(
+                        patterns: [],
+                        statements: [
+                            .expression(.identifier("b"))
+                        ]
                     ),
-                    SwitchCase(patterns: [], statements: [])
+                    SwitchCase(
+                        patterns: [],
+                        statements: [
+                            .expression(.identifier("c"))
+                        ]
+                    )
                 ],
                 default: [
                     .expression(.identifier("d"))
@@ -464,7 +508,6 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n2 -> n3
                 n2 -> n4
                 n2 -> n5
-                n2 -> n6
                 n3 -> n6
                 n4 -> n6
                 n5 -> n6
@@ -472,7 +515,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
             """)
         XCTAssertEqual(graph.nodes.count, 6)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 4)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 3)
     }
     
     func testEmptySwitchStatement() {
@@ -480,15 +523,9 @@ class ControlFlowGraphCreationTests: XCTestCase {
             Statement.switch(
                 .identifier("a"),
                 cases: [
-                    SwitchCase(
-                        patterns: [],
-                        statements: []
-                    ),
-                    SwitchCase(
-                        patterns: [],
-                        statements: []
-                    ),
-                    SwitchCase(patterns: [], statements: [])
+                    SwitchCase(patterns: [.identifier("b")], statements: []),
+                    SwitchCase(patterns: [.identifier("c")], statements: []),
+                    SwitchCase(patterns: [.identifier("d")], statements: [])
                 ],
                 default: []
             )
@@ -518,16 +555,13 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 .identifier("a"),
                 cases: [
                     SwitchCase(
-                        patterns: [],
+                        patterns: [.identifier("b")],
                         statements: [
                             .fallthrough
                         ]
                     ),
-                    SwitchCase(
-                        patterns: [],
-                        statements: []
-                    ),
-                    SwitchCase(patterns: [], statements: [])
+                    SwitchCase(patterns: [.identifier("c")], statements: []),
+                    SwitchCase(patterns: [.identifier("d")], statements: [])
                 ],
                 default: []
             )
@@ -571,8 +605,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                         statements: [
                             .expression(.identifier("c"))
                         ]
-                    ),
-                    SwitchCase(patterns: [], statements: [])
+                    )
                 ],
                 default: [
                     .expression(.identifier("d"))
@@ -598,7 +631,6 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n3 -> n4
                 n3 -> n5
                 n3 -> n6
-                n3 -> n7
                 n4 -> n2
                 n5 -> n7
                 n6 -> n7
@@ -606,7 +638,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
             """)
         XCTAssertEqual(graph.nodes.count, 7)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 3)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
     }
     
     func testSwitchStatementBreakDefer() {
