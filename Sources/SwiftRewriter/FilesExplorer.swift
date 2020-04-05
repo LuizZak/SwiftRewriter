@@ -44,11 +44,11 @@ func showSearchPathUi(in menu: MenuController) -> String? {
 }
 
 /// Helper for presenting selection of file names on a list
-private func presentFileSelection(in menu: MenuController, list: [Path], prompt: String) -> [Path] {
+private func presentFileSelection(in menu: MenuController, list: [String], prompt: String) -> [String] {
     let prompt = prompt + """
     Type ':all' to select all files.
     """
-    var items: [Path] = []
+    var items: [String] = []
 
     let config = 
         Pages.PageDisplayConfiguration(commandPrompt: prompt) { input in
@@ -294,7 +294,7 @@ private class FileFinderInterface {
                         : "Showing all files found"
                 
                 let indexes = presentFileSelection(
-                    in: menu, list: matches.asPaths,
+                    in: menu, list: matches,
                     prompt: "\(matchesString), select one to convert")
                 
                 guard !indexes.isEmpty else {
@@ -303,7 +303,7 @@ private class FileFinderInterface {
                 
                 do {
                     let fileUrls = indexes.map {
-                        URL(fileURLWithPath: (path as NSString).appendingPathComponent($0.fullPath))
+                        URL(fileURLWithPath: (path as NSString).appendingPathComponent($0))
                     }
                     try rewriterService.rewrite(files: fileUrls)
                     _=console.readLineWith(prompt: "\nPress [Enter] to convert another file")
@@ -529,5 +529,13 @@ public class FileListConsoleProvider: ConsoleDataProvider {
         }
         
         return [url.lastPathComponent]
+    }
+}
+
+extension Collection where Element == String {
+    func indexOfFilename(matching string: String, options: String.CompareOptions = .literal) -> Index? {
+        firstIndex {
+            ($0 as NSString).lastPathComponent.compare(string, options: options) == .orderedSame
+        }
     }
 }
