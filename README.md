@@ -129,11 +129,10 @@ Defaults to 'filedisk' if not provided.
     stdout
         Prints the conversion results to the terminal's standard output;
     
-                            filedisk
-                                Saves output of conversion to the filedisk as .swift files on the same folder as the input files. 
-  --follow-imports, -f    Follows #import declarations in files in order to parse other relevant files.
+                              filedisk
+                                  Saves output of conversion to the filedisk as .swift files on the same folder as the input files. 
+  -f, --follow-imports    Follows #import declarations in files in order to parse other relevant files. 
   -h, --help              Show help information.
-
 ```
 
 The program should output the contents of the files you pass into the standard output.
