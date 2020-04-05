@@ -51,7 +51,7 @@ public final class ASTRewriterPassApplier {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = numThreads
         
-        let files = intentions.fileIntentions()
+        let files = intentions.fileIntentions().filter(shouldApply(on:))
         
         // Calculate total expected work
         progress.total = files.count * passes.count
@@ -71,6 +71,10 @@ public final class ASTRewriterPassApplier {
         }
         
         queue.waitUntilAllOperationsAreFinished()
+    }
+    
+    private func shouldApply(on file: FileGenerationIntention) -> Bool {
+        return file.isPrimary
     }
     
     private func internalApply(on file: FileGenerationIntention,

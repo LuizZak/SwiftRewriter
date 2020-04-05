@@ -475,6 +475,20 @@ class ObjcParserTests: XCTestCase {
             }
             """)
     }
+
+    func testParseImportDirectives() throws {
+        let sut = ObjcParser(string: """
+            #define aDefine
+            #import <dir/file.h>
+            #import "file.h"
+            """)
+
+        try sut.parse()
+
+        XCTAssertEqual(sut.importDirectives.map { $0.path }, ["dir/file.h", "file.h"])
+        XCTAssert(sut.importDirectives[0].isSystemImport)
+        XCTAssertFalse(sut.importDirectives[1].isSystemImport)
+    }
 }
 
 extension ObjcParserTests {

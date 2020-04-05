@@ -41,7 +41,7 @@ class SwiftRewriter_IntentionPassTests: XCTestCase {
         }
         @end
         """
-        let testInput = TestSingleInputProvider(code: code)
+        let testInput = TestSingleInputProvider(code: code, isPrimary: true)
         let testOutput = TestSingleFileWriterOutput()
         
         let pass = Pass()

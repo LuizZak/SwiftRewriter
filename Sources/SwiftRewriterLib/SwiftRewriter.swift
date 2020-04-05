@@ -41,11 +41,11 @@ public final class SwiftRewriter {
     /// gathered.
     private var lazyResolve: [LazyTypeResolveItem] = []
     
-    /// Full path of files from followed includes, when `followIncludes` is on.
-    private var includesFollowed: [String] = []
-    
     /// To keep token sources alive long enough.
     private var parsers: [ObjcParser] = []
+    
+    /// An optional instance of a parser cache with pre-parsed input files.
+    public var parserCache: ParserCache?
     
     /// A diagnostics instance that collects all diagnostic errors during input
     /// source processing.
@@ -65,10 +65,6 @@ public final class SwiftRewriter {
     
     /// Provider for global variables
     public var globalsProvidersSource: GlobalsProvidersSource
-    
-    /// If true, `#include "file.h"` directives are resolved and the new unique
-    /// files found during importing are included into the transpilation step.
-    public var followIncludes: Bool = false
     
     /// Describes settings for the current `SwiftRewriter` invocation
     public var settings: Settings
@@ -284,6 +280,7 @@ public final class SwiftRewriter {
         
         typeSystem.tearDownCache()
         
+        // Re-create cache with newly created typealiases available
         typeSystem.makeCache()
         defer {
             typeSystem.tearDownCache()
@@ -523,36 +520,6 @@ public final class SwiftRewriter {
         }
     }
     
-    private func resolveIncludes(in directives: [String], basePath: String, foundFileCallback: (_ path: String) -> Void) {
-        if !followIncludes {
-            return
-        }
-        
-        var includeFiles: [String] = []
-        
-        for line in directives {
-            guard line.starts(with: "#include \"") else {
-                continue
-            }
-            
-            let split = line.split(separator: "\"", maxSplits: 2, omittingEmptySubsequences: true)
-            
-            if split.count > 1 {
-                includeFiles.append(String(split[1]))
-            }
-        }
-        
-        for file in includeFiles {
-            let fullPath = (basePath as NSString).appendingPathComponent(file)
-            
-            guard !includesFollowed.contains(fullPath) else {
-                continue
-            }
-            
-            foundFileCallback(fullPath)
-        }
-    }
-    
     private func loadObjcSource(from source: InputSource, index: Int, mutex: Mutex) throws {
         let state = parserStatePool.pull()
         defer { parserStatePool.repool(state) }
@@ -568,11 +535,17 @@ public final class SwiftRewriter {
         
         let src = try source.loadSource()
         
-        let processedSrc = applyPreprocessors(source: src)
-        
-        let parser = ObjcParser(string: processedSrc, fileName: src.filePath, state: state)
-        parser.antlrSettings = makeAntlrSettings()
-        try parser.parse()
+        // Hit parser cache, if available
+        let parser: ObjcParser
+        if let parserCache = parserCache {
+            parser = try parserCache.loadParsedTree(file: URL(fileURLWithPath: src.filePath))
+        } else {
+            let processedSrc = applyPreprocessors(source: src)
+            
+            parser = ObjcParser(string: processedSrc, fileName: src.filePath, state: state)
+            parser.antlrSettings = makeAntlrSettings()
+            try parser.parse()
+        }
         
         let typeMapper = DefaultTypeMapper(typeSystem: TypeSystem.defaultTypeSystem)
         let typeParser = TypeParsing(state: state, antlrSettings: parser.antlrSettings)
@@ -589,6 +562,7 @@ public final class SwiftRewriter {
         let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), targetPath: path)
         fileIntent.preprocessorDirectives = parser.preprocessorDirectives
         fileIntent.index = index
+        fileIntent.isPrimary = source.isPrimary
         ctx.pushContext(fileIntent)
         
         let intentionCollector = IntentionCollector(delegate: collectorDelegate, context: ctx)
@@ -602,15 +576,6 @@ public final class SwiftRewriter {
             lazyResolve.append(contentsOf: collectorDelegate.lazyResolve)
             diagnostics.merge(with: parser.diagnostics)
             intentionCollection.addIntention(fileIntent)
-            
-            resolveIncludes(
-                in: fileIntent.preprocessorDirectives,
-                basePath: (src.filePath as NSString).deletingLastPathComponent,
-                foundFileCallback: { filePath in
-                    // TODO: Do meaningful work here to open the files and parse their
-                    // declarations
-                }
-            )
         }
     }
     
@@ -647,11 +612,7 @@ public final class SwiftRewriter {
     /// Settings for a `SwiftRewriter` instance
     public struct Settings {
         /// Gets the default settings for a `SwiftRewriter` invocation
-        public static var `default` = Settings(numThreads: 8,
-                                               verbose: false,
-                                               diagnoseFiles: [],
-                                               forceUseLLPrediction: false,
-                                               stageDiagnostics: [])
+        public static var `default` = Settings()
         
         /// The number of concurrent threads to use when applying intention/syntax
         /// node passes and other multi-threadable operations.
@@ -678,7 +639,7 @@ public final class SwiftRewriter {
         
         /// Enables printing outputs of stages for diagnostic purposes.
         public var stageDiagnostics: [StageDiagnosticFlag]
-        
+
         public init(numThreads: Int = 8,
                     verbose: Bool = false,
                     diagnoseFiles: [String] = [],

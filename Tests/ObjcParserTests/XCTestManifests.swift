@@ -56,6 +56,7 @@ extension ObjcParserTests {
         ("testParseIBInspectableProperty", testParseIBInspectableProperty),
         ("testParseIBOutletProperty", testParseIBOutletProperty),
         ("testParseIfWithExpressionList", testParseIfWithExpressionList),
+        ("testParseImportDirectives", testParseImportDirectives),
         ("testParseKeywordsInSelectors", testParseKeywordsInSelectors),
         ("testParseNestedBlocks", testParseNestedBlocks),
         ("testParseNestedGenericTypes", testParseNestedGenericTypes),

@@ -33,11 +33,7 @@ public struct StringCodeSource: CodeSource {
     }
     
     public func isEqual(to other: Source) -> Bool {
-        guard let strSource = other as? StringCodeSource else {
-            return false
-        }
-        
-        return source == strSource.source
+        filePath == other.filePath
     }
     
     public func lineNumber(at index: String.Index) -> Int {

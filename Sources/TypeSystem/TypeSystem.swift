@@ -1703,6 +1703,7 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
         let supertype: KnownTypeReference? = nil
         let typeName: String
         let kind: KnownTypeKind = .protocol
+        var knownFile: KnownFile? = nil
         let knownTraits: [String : TraitType] = [:]
         let knownConstructors: [KnownConstructor] = []
         let knownMethods: [KnownMethod] = []
@@ -1785,6 +1786,7 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         let supertype: KnownTypeReference?
         let typeName: String
         let kind: KnownTypeKind = .protocol
+        var knownFile: KnownFile? = nil
         let knownTraits: [String : TraitType] = [:]
         let knownConstructors: [KnownConstructor] = []
         let knownMethods: [KnownMethod] = []

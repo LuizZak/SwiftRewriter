@@ -30,7 +30,7 @@ class SingleFileTestBuilder {
                          line: Int = #line) {
         
         let output = TestSingleFileWriterOutput()
-        let input = TestSingleInputProvider(code: objc)
+        let input = TestSingleInputProvider(code: objc, isPrimary: true)
         
         let sut = SwiftRewriter(input: input, output: output)
         sut.writerOptions = options
@@ -91,9 +91,11 @@ class SingleFileTestBuilder {
 
 class TestSingleInputProvider: InputSourcesProvider, InputSource {
     var code: String
+    var isPrimary: Bool
     
-    init(code: String) {
+    init(code: String, isPrimary: Bool) {
         self.code = code
+        self.isPrimary = isPrimary
     }
     
     func sources() -> [InputSource] {

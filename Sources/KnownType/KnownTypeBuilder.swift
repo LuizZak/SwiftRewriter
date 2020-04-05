@@ -6,7 +6,7 @@ import SwiftAST
 public struct KnownTypeBuilder {
     public typealias ParameterTuple = (label: String, type: SwiftType)
     
-    private var type: BuildingKnownType
+    var type: BuildingKnownType
     public var useSwiftSignatureMatching: Bool = false
     
     public var typeName: String {
@@ -459,8 +459,10 @@ public struct KnownTypeBuilder {
     }
     
     public func enumRawValue(type rawValueType: SwiftType) -> KnownTypeBuilder {
+        precondition(type.kind == .enum,
+                     "cannot add enum raw value to non-enum type kind \(type.kind)")
+        
         var new = clone()
-        precondition(type.kind == .enum)
         
         new.type.setKnownTrait(KnownTypeTraits.enumRawValue,
                                value: .swiftType(rawValueType))
@@ -472,9 +474,10 @@ public struct KnownTypeBuilder {
                          rawValue: Expression? = nil,
                          semantics: Set<Semantic> = []) -> KnownTypeBuilder {
         
-        var new = clone()
+        precondition(type.kind == .enum,
+                     "cannot add enum case to non-enum type kind \(type.kind)")
         
-        precondition(type.kind == .enum)
+        var new = clone()
         
         let storage =
             ValueStorage(type: .typeName(type.typeName), ownership: .strong,
@@ -575,6 +578,7 @@ extension KnownTypeBuilder {
 private final class DummyType: KnownType {
     var origin: String
     var typeName: String
+    var knownFile: KnownFile? = nil
     var kind: KnownTypeKind = .class
     var isExtension: Bool = false
     var knownTraits: [String: TraitType] = [:]
@@ -616,9 +620,10 @@ private final class DummyType: KnownType {
     }
 }
 
-private struct BuildingKnownType: Codable {
+struct BuildingKnownType: Codable {
     var origin: String
     var typeName: String
+    var knownFile: KnownFile?
     var kind: KnownTypeKind = .class
     var isExtension: Bool = false
     var traits: [String: TraitType] = [:]
@@ -636,6 +641,22 @@ private struct BuildingKnownType: Codable {
         self.origin = "Synthesized type"
         self.typeName = typeName
         self.supertype = supertype
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case origin
+        case typeName
+        case kind
+        case isExtension
+        case traits
+        case constructors
+        case methods
+        case properties
+        case fields
+        case protocols
+        case attributes
+        case supertype
+        case semantics
     }
 }
 
@@ -675,7 +696,7 @@ extension BuildingKnownType: KnownType {
     }
 }
 
-private final class BuildingKnownConstructor: KnownConstructor, Codable {
+final class BuildingKnownConstructor: KnownConstructor, Codable {
     var parameters: [ParameterSignature]
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
@@ -696,7 +717,7 @@ private final class BuildingKnownConstructor: KnownConstructor, Codable {
     }
 }
 
-private final class BuildingKnownMethod: KnownMethod, Codable {
+final class BuildingKnownMethod: KnownMethod, Codable {
     var ownerType: KnownTypeReference?
     var body: KnownMethodBody?
     var signature: FunctionSignature
@@ -728,7 +749,7 @@ private final class BuildingKnownMethod: KnownMethod, Codable {
     }
 }
 
-private final class BuildingKnownProperty: KnownProperty, Codable {
+final class BuildingKnownProperty: KnownProperty, Codable {
     var ownerType: KnownTypeReference?
     var name: String
     var storage: ValueStorage
@@ -760,7 +781,7 @@ private final class BuildingKnownProperty: KnownProperty, Codable {
     }
 }
 
-private final class BuildingKnownSubscript: KnownSubscript, Codable {
+final class BuildingKnownSubscript: KnownSubscript, Codable {
     var isStatic: Bool
     var ownerType: KnownTypeReference?
     var subscriptType: SwiftType
@@ -785,6 +806,6 @@ private final class BuildingKnownSubscript: KnownSubscript, Codable {
     }
 }
 
-private struct BuildingKnownProtocolConformance: KnownProtocolConformance, Codable {
+struct BuildingKnownProtocolConformance: KnownProtocolConformance, Codable {
     var protocolName: String
 }

@@ -33,7 +33,7 @@ public extension TypeFormatter {
             printAttributes: if !attr.isEmpty {
                 if sameLine {
                     if attrInLine.count < attrInLineLimit {
-                        o.outputIdentation()
+                        o.outputIndentation()
                         o.outputInlineWithSpace(attrInLine, style: .keyword)
                         
                         return true
@@ -77,7 +77,7 @@ public extension TypeFormatter {
         o.outputLineFeed()
         
         // Type body
-        o.idented {
+        o.indented {
             let outputField: (KnownProperty) -> Void = { field in
                 let didPrintSameLine = outputAttributesAndAnnotations(field.knownAttributes,
                                                                       field.annotations,
@@ -89,7 +89,7 @@ public extension TypeFormatter {
                                     includeVarKeyword: true)
                 
                 if !didPrintSameLine {
-                    o.outputIdentation()
+                    o.outputIndentation()
                 }
                 
                 o.outputInline(line)
@@ -115,7 +115,7 @@ public extension TypeFormatter {
                 }
                 
                 if !didPrintSameLine {
-                    o.outputIdentation()
+                    o.outputIndentation()
                 }
                 
                 o.outputInline(line)
@@ -134,7 +134,7 @@ public extension TypeFormatter {
                                     includeAccessors: subscriptDecl.isConstant)
                 
                 if !didPrintSameLine {
-                    o.outputIdentation()
+                    o.outputIndentation()
                 }
                 
                 o.outputInline(line)
@@ -184,7 +184,7 @@ public extension TypeFormatter {
             }
         }
         
-        o.outputIdentation()
+        o.outputIndentation()
         o.outputInline("}")
         
         return o.buffer

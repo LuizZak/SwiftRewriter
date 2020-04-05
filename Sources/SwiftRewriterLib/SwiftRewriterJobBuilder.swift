@@ -13,6 +13,7 @@ public class SwiftRewriterJobBuilder {
     public var preprocessors: [SourcePreprocessor] = []
     public var settings: SwiftRewriter.Settings = .default
     public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
+    public var parserCache: ParserCache? = nil
     
     public init() {
         
@@ -29,7 +30,8 @@ public class SwiftRewriterJobBuilder {
                                 globalsProvidersSource: globalsProvidersSource,
                                 preprocessors: preprocessors,
                                 settings: settings,
-                                swiftSyntaxOptions: swiftSyntaxOptions)
+                                swiftSyntaxOptions: swiftSyntaxOptions,
+                                parserCache: parserCache)
     }
 }
 
@@ -45,8 +47,10 @@ public class SwiftRewriterJobInputFiles {
         self.inputs.append(contentsOf: inputs)
     }
     
-    public func add(filePath: String, source: String) {
-        add(SwiftRewriterJobInputSource(filePath: filePath, source: source))
+    public func add(filePath: String, source: String, isPrimary: Bool = true) {
+        add(SwiftRewriterJobInputSource(filePath: filePath,
+                                        source: source,
+                                        isPrimary: isPrimary))
     }
     
     public func addInputs(from inputsProvider: InputSourcesProvider) {
@@ -61,6 +65,7 @@ public class SwiftRewriterJobInputFiles {
 struct SwiftRewriterJobInputSource: InputSource {
     var filePath: String
     var source: String
+    var isPrimary: Bool
     
     func sourceName() -> String {
         filePath

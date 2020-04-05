@@ -33,7 +33,8 @@ class SwiftRewriterJobTests: XCTestCase {
                              globalsProvidersSource: MockGlobalsProvidersSource(),
                              preprocessors: [MockSourcePreprocessor()],
                              settings: .default,
-                             swiftSyntaxOptions: .default)
+                             swiftSyntaxOptions: .default,
+                             parserCache: nil)
         let output = MockWriterOutput()
         
         let result = job.execute(output: output)
@@ -108,7 +109,8 @@ private class MockInputSourcesProvider: InputSourcesProvider {
             @interface BaseClass : NSObject
             @end
             """,
-            path: "Input.m")
+            path: "Input.m",
+            isPrimary: true)
     ]
     
     func sources() -> [InputSource] {
@@ -119,6 +121,7 @@ private class MockInputSourcesProvider: InputSourcesProvider {
 private struct MockInputSource: InputSource {
     var source: String
     var path: String
+    var isPrimary: Bool
     
     func loadSource() throws -> CodeSource {
         return StringCodeSource(source: source, fileName: path)

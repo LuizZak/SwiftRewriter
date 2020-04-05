@@ -1,6 +1,7 @@
 import ArgumentParser
 import Foundation
 import Console
+import SwiftRewriterLib
 
 struct SwiftRewriterCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
@@ -83,6 +84,12 @@ extension SwiftRewriterCommand {
                     Saves output of conversion to the filedisk as .swift files on the same folder as the input files.
             """)
         var target: Target?
+
+        @Flag(name: .shortAndLong,
+              help: """
+              Follows #import declarations in files in order to parse other relevant files.
+              """)
+        var followImports: Bool
     }
 }
 
@@ -100,7 +107,24 @@ extension SwiftRewriterCommand {
         func run() throws {
             let rewriter = makeRewriterService(options)
             
-            try rewriter.rewrite(files: files.map { URL(fileURLWithPath: $0) })
+            let fileProvider = FileDiskProvider()
+            let fileCollectionStep = FileCollectionStep(fileProvider: fileProvider)
+            let delegate = ImportDirectiveFileCollectionDelegate(parserCache: rewriter.parserCache,
+                                                                 fileProvider: fileProvider)
+            if options.followImports {
+                fileCollectionStep.delegate = delegate
+            }
+            if options.verbose {
+                fileCollectionStep.listener = StdoutFileCollectionStepListener()
+            }
+            try withExtendedLifetime(delegate) {
+                for fileUrl in files {
+                    try fileCollectionStep.addFile(fromUrl: URL(fileURLWithPath: fileUrl),
+                                                   isPrimary: true)
+                }
+            }
+            
+            try rewriter.rewrite(files: fileCollectionStep.files)
         }
     }
 }
@@ -150,8 +174,10 @@ extension SwiftRewriterCommand {
             let options: SuggestConversionInterface.Options
                 = .init(overwrite: overwrite,
                         skipConfirm: skipConfirm,
+                        followImports: self.options.followImports,
                         excludePattern: excludePattern,
-                        includePattern: includePattern)
+                        includePattern: includePattern,
+                        verbose: self.options.verbose)
             
             let interface = SuggestConversionInterface(rewriterService: rewriter)
             interface.searchAndShowConfirm(in: menu,

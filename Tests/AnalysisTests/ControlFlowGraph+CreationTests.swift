@@ -1816,7 +1816,7 @@ private extension ControlFlowGraphCreationTests {
     func graphviz(graph: ControlFlowGraph) -> String {
         let buffer = StringRewriterOutput(settings: .defaults)
         buffer.output(line: "digraph flow {")
-        buffer.idented {
+        buffer.indented {
             var nodeIds: [ObjectIdentifier: String] = [:]
             
             var nodeDefinitions: [NodeDefinition] = []
@@ -1909,7 +1909,7 @@ private extension ControlFlowGraphCreationTests {
                     let target = edge.end
                     
                     let targetId = nodeIds[ObjectIdentifier(target)]!
-                    buffer.outputIdentation()
+                    buffer.outputIndentation()
                     buffer.outputInline("\(nodeId) -> \(targetId)")
                     if edge.isBackEdge {
                         buffer.outputInline(" [color=\"#aa3333\",penwidth=0.5]")
