@@ -34,7 +34,7 @@ public final class MethodInvocationTransformer: PostfixInvocationTransformer {
             return false
         }
         
-        guard baseExpressionMatcher.matches(memberNameAccess.exp) else {
+        guard baseExpressionMatcher(matches: memberNameAccess.exp) else {
             return false
         }
         

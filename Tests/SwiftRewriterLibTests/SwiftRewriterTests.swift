@@ -2696,8 +2696,7 @@ class SwiftRewriterTests: XCTestCase {
             options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
 
-    // TODO: Make this test pass
-    func xtestRewriteAutotypeDeclarationDependent() {
+    func testRewriteAutotypeDeclarationDependent() {
         assertObjcParse(
             objc: """
             void f() {
@@ -2713,6 +2712,29 @@ class SwiftRewriterTests: XCTestCase {
                 // decl type: Int
                 // init type: Int
                 let valueDep = value
+            }
+            """,
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
+    }
+    
+    func testRewriteWeakAutotypeDeclaration() {
+        assertObjcParse(
+            objc: """
+            @interface A
+            @end
+            @implementation A
+            - (void)foo {
+                __weak __auto_type weakSelf = self;
+            }
+            @end
+            """,
+            swift: """
+            class A {
+                func foo() {
+                    // decl type: A?
+                    // init type: A
+                    weak var weakSelf = self
+                }
             }
             """,
             options: SwiftSyntaxOptions(outputExpressionTypes: true))

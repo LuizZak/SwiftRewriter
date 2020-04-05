@@ -102,7 +102,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
         
         // Check `initWith<...>` prefix
         let splitOnWith = signature.name.components(separatedBy: "With")
-        if splitOnWith.count != 2 || splitOnWith.contains(where: { $0.isEmpty }) {
+        if splitOnWith.count != 2 || splitOnWith.contains(where: \.isEmpty) {
             return false
         }
         if !splitOnWith[0].hasPrefix("init") {
@@ -129,7 +129,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
         let signature = method.signature
         
         let splitOnWith = signature.name.components(separatedBy: "With")
-        if splitOnWith.count != 2 || splitOnWith.contains(where: { $0.isEmpty }) {
+        if splitOnWith.count != 2 || splitOnWith.contains(where: \.isEmpty) {
             return false
         }
         

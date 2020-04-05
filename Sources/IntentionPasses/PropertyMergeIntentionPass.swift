@@ -102,7 +102,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                                         property.type,
                                         ignoreNullability: true)
                     }
-                    .filter { $0.parameters.isEmpty }
+                    .filter(\.parameters.isEmpty)
             
             // Setters: All methods named `func set[Name](_ name: Type)` where
             // `[Name]` is the same as the property's name with the first letter

@@ -35,25 +35,25 @@ public class ASTSimplifier: ASTRewriterPass {
     
     /// Simplify check before invoking nullable closure
     public override func visitIf(_ stmt: IfStatement) -> Statement {
-        var nullCheckM: IdentifierExpression?
-        var postfix: PostfixExpression?
+        let nullCheckM = ValueMatcherExtractor<IdentifierExpression?>()
+        let postfix = ValueMatcherExtractor<PostfixExpression?>()
         
         let matcher =
             ValueMatcher<IfStatement>()
                 .match(if: !hasElse())
                 .keyPath(\.nullCheckMember?.asIdentifier,
-                            .differentThan(nil) ->> &nullCheckM)
+                            .differentThan(nil) ->> nullCheckM)
                 .keyPath(\.body.statements, hasCount(1))
                 .keyPath(\.body.statements[0].asExpressions,
                          ValueMatcher<ExpressionsStatement>()
                             .keyPath(\.expressions, hasCount(1))
                             .keyPath(\.expressions[0].asPostfix,
                                      ValueMatcher<PostfixExpression>()
-                                        .keyPath(\.exp, lazyEquals(nullCheckM))
-                                        ->> &postfix
+                                        .keyPath(\.exp, lazyEquals(nullCheckM.value))
+                                        ->> postfix
                             ))
         
-        if matcher.matches(stmt), let postfix = postfix?.copy() {
+        if matcher.matches(stmt), let postfix = postfix.value?.copy() {
             postfix.op.optionalAccessKind = .safeUnwrap
             
             let statement = Statement.expression(postfix)

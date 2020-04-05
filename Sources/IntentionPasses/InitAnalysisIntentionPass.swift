@@ -114,7 +114,7 @@ public class InitAnalysisIntentionPass: IntentionPass {
                             .anyExpression()
                 ).anyExpression()
         
-        if negatedSelfIsSelfOrSuperInit.matches(ifStatement.exp) {
+        if negatedSelfIsSelfOrSuperInit(matches: ifStatement.exp) {
             return false
         }
         
@@ -151,7 +151,7 @@ public class InitAnalysisIntentionPass: IntentionPass {
                     )
                 )
         
-        if matchSelfOrSuper.matches(exp), let selfOrSuper = selfOrSuper?.asIdentifier?.identifier {
+        if matchSelfOrSuper(matches: exp), let selfOrSuper = selfOrSuper?.asIdentifier?.identifier {
             return selfOrSuper
         }
         

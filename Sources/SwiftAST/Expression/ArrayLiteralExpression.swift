@@ -11,7 +11,7 @@ public class ArrayLiteralExpression: Expression {
     }
     
     public override var description: String {
-        "[\(items.map { $0.description }.joined(separator: ", "))]"
+        "[\(items.map(\.description).joined(separator: ", "))]"
     }
     
     public init(items: [Expression]) {

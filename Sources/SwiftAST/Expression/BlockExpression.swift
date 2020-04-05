@@ -9,7 +9,7 @@ public class BlockLiteralExpression: Expression {
         var buff = "{ "
         
         buff += "("
-        buff += parameters.map { $0.description }.joined(separator: ", ")
+        buff += parameters.map(\.description).joined(separator: ", ")
         buff += ") -> "
         buff += returnType.description
         buff += " in "

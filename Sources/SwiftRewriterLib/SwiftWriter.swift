@@ -166,6 +166,7 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
         
         return shouldEmitTypeSignature(forInitVal: initialValue,
                                        varType: storage.type,
+                                       ownership: storage.ownership,
                                        isConstant: storage.isConstant)
     }
     
@@ -193,9 +194,10 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
         
     }
     
-    private func shouldEmitTypeSignature(forInitVal exp: Expression,
-                                         varType: SwiftType,
-                                         isConstant: Bool) -> Bool {
+    func shouldEmitTypeSignature(forInitVal exp: Expression,
+                                 varType: SwiftType,
+                                 ownership: Ownership,
+                                 isConstant: Bool) -> Bool {
         
         if exp.isErrorTyped {
             return true
@@ -239,7 +241,12 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
             }
             
             if type.isOptional != varType.isOptional {
-                return true
+                let isSame = type.deepUnwrapped == varType.deepUnwrapped
+                let isWeak = ownership == .weak
+                
+                if !isSame || !isWeak {
+                    return true
+                }
             }
             
             return !typeSystem.typesMatch(type, varType, ignoreNullability: true)

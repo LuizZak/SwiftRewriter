@@ -173,7 +173,7 @@ public enum ObjcType: Equatable, Codable, CustomStringConvertible {
             return s
             
         case let .generic(cl, parameters):
-            let typeNames = parameters.map { $0.description }.joined(separator: ", ")
+            let typeNames = parameters.map(\.description).joined(separator: ", ")
             
             if !typeNames.isEmpty {
                 return "\(cl)<\(typeNames)>"
@@ -199,10 +199,10 @@ public enum ObjcType: Equatable, Codable, CustomStringConvertible {
             return "\(specifiers.joined(separator: " ")) \(type.description)"
             
         case let .blockType(name, returnType, parameters):
-            return "\(returnType)(^\(name ?? ""))(\(parameters.map { $0.description }.joined(separator: ", ")))"
+            return "\(returnType)(^\(name ?? ""))(\(parameters.map(\.description).joined(separator: ", ")))"
             
         case let .functionPointer(name, returnType, parameters):
-            return "\(returnType)(*\(name ?? ""))(\(parameters.map { $0.description }.joined(separator: ", ")))"
+            return "\(returnType)(*\(name ?? ""))(\(parameters.map(\.description).joined(separator: ", ")))"
             
         case let .fixedArray(type, length):
             return "\(type)[\(length)]"

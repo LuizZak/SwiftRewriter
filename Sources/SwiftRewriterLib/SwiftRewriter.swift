@@ -112,7 +112,7 @@ public final class SwiftRewriter {
             let autotypeDecls = parseStatements()
             evaluateTypes()
             resolveAutotypeDeclarations(autotypeDecls)
-            performIntentionPasses()
+            performIntentionAndSyntaxPasses()
             outputDefinitions()
         }
     }
@@ -372,17 +372,25 @@ public final class SwiftRewriter {
 
         for declaration in declarations {
             let stmt = declaration.statement
-            if let type = stmt.decl[declaration.index].initialization?.resolvedType {
-                stmt.decl[declaration.index].type = type
+            let decl = stmt.decl[declaration.index]
+            
+            // If this declaration's initializer depends on another auto type,
+            // resolve expression types so the actual type can be propagated
+            if decl.initialization?.resolvedType == SwiftType.typeName("__auto_type") {
+                typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection, force: true)
+            }
+            
+            if let type = decl.initialization?.resolvedType {
+                if decl.ownership == .weak && typeSystem.isClassInstanceType(type) {
+                    stmt.decl[declaration.index].type = .optional(type)
+                } else {
+                    stmt.decl[declaration.index].type = type
+                }
             }
         }
     }
     
-    private func performIntentionPasses() {
-        let syntaxPasses =
-            [MandatorySyntaxNodePass.self]
-                + astRewriterPassSources.syntaxNodePasses
-        
+    private func performIntentionAndSyntaxPasses() {
         let globals = CompoundDefinitionsSource()
         
         if settings.verbose {
@@ -416,9 +424,24 @@ public final class SwiftRewriter {
                 + [MandatoryIntentionPass(phase: .afterOtherIntentions)]
         
         // Execute passes
-        for pass in intentionPasses {
+        for (i, pass) in intentionPasses.enumerated() {
             autoreleasepool {
                 requiresResolve = false
+                
+                if settings.verbose {
+                    // Clear previous line and re-print, instead of bogging down
+                    // the terminal with loads of prints
+                    if i > 0 {
+                        _terminalClearLine()
+                    }
+                    
+                    let totalPadLength = intentionPasses.count.description.count
+                    let progressString = String(format: "[%0\(totalPadLength)d/%d]",
+                                                i + 1,
+                                                intentionPasses.count)
+                    
+                    print("\(progressString): \(type(of: pass))")
+                }
                 
                 pass.apply(on: intentionCollection, context: context)
                 
@@ -441,11 +464,20 @@ public final class SwiftRewriter {
             .resolveAllExpressionTypes(in: intentionCollection,
                                        force: true)
         
+        let syntaxPasses =
+            [MandatorySyntaxNodePass.self]
+                + astRewriterPassSources.syntaxNodePasses
+        
         let applier =
             ASTRewriterPassApplier(passes: syntaxPasses,
                                    typeSystem: typeSystem,
                                    globals: globals,
                                    numThreds: settings.numThreads)
+        
+        let progressDelegate = ASTRewriterDelegate()
+        if settings.verbose {
+            applier.progressDelegate = progressDelegate
+        }
         
         if !settings.diagnoseFiles.isEmpty {
             let mutex = Mutex()
@@ -458,7 +490,9 @@ public final class SwiftRewriter {
         
         typeSystem.makeCache()
         
-        applier.apply(on: intentionCollection)
+        withExtendedLifetime(progressDelegate) {
+            applier.apply(on: intentionCollection)
+        }
         
         typeSystem.tearDownCache()
     }
@@ -665,6 +699,33 @@ public final class SwiftRewriter {
     }
 }
 
+// MARK: - ASTRewriterPassApplierProgressDelegate
+private extension SwiftRewriter {
+    class ASTRewriterDelegate: ASTRewriterPassApplierProgressDelegate {
+        private var didPrintLine = false
+        
+        func astWriterPassApplier(_ passApplier: ASTRewriterPassApplier,
+                                  applyingPassType passType: ASTRewriterPass.Type,
+                                  toFile file: FileGenerationIntention) {
+            
+            // Clear previous line and re-print, instead of bogging down the
+            // terminal with loads of prints
+            if didPrintLine {
+                _terminalClearLine()
+            }
+            
+            let totalPadLength = passApplier.progress.total.description.count
+            let progressString = String(format: "[%0\(totalPadLength)d/%d]",
+                                        passApplier.progress.current,
+                                        passApplier.progress.total)
+            
+            print("\(progressString): \((file.targetPath as NSString).lastPathComponent)")
+            
+            didPrintLine = true
+        }
+    }
+}
+
 // MARK: - IntentionCollectorDelegate
 fileprivate extension SwiftRewriter {
     class CollectorDelegate: IntentionCollectorDelegate {
@@ -811,4 +872,11 @@ internal func _typeNullability(inType type: ObjcType) -> TypeNullability? {
 
 internal struct _PreprocessingContext: PreprocessingContext {
     var filePath: String
+}
+
+private func _terminalClearLine() {
+    // Move up command
+    print("\u{001B}[1A", terminator: "")
+    // Clear line command
+    print("\u{001B}[2K", terminator: "")
 }

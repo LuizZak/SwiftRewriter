@@ -16,7 +16,7 @@ public class OverloadResolver {
     func findBestOverload(in methods: [KnownMethod],
                           argumentTypes: [SwiftType?]) -> KnownMethod? {
         
-        let signatures = methods.map { $0.signature }
+        let signatures = methods.map(\.signature)
         if let index = findBestOverload(inSignatures: signatures,
                                         arguments: argumentTypes.asOverloadResolverArguments) {
             return methods[index]
@@ -29,7 +29,7 @@ public class OverloadResolver {
     func findBestOverload(in methods: [KnownMethod],
                           arguments: [Argument]) -> KnownMethod? {
         
-        let signatures = methods.map { $0.signature }
+        let signatures = methods.map(\.signature)
         if let index = findBestOverload(inSignatures: signatures,
                                         arguments: arguments) {
             return methods[index]
@@ -63,7 +63,7 @@ public class OverloadResolver {
         // All argument types are nil, or no signature matches the available type
         // count: no best candidate can be decided.
         if !signatureCandidates.contains(where: { $0.argumentCount == arguments.count })
-            || (!arguments.isEmpty && arguments.allSatisfy({ $0.isMissingType })) {
+            || (!arguments.isEmpty && arguments.allSatisfy(\.isMissingType)) {
             
             state.addCache(forSignatures: signatures,
                            arguments: arguments,

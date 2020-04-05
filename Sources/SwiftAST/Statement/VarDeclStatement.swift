@@ -11,7 +11,7 @@ public class VariableDeclarationsStatement: Statement {
     }
     
     public override var children: [SyntaxNode] {
-        decl.compactMap { $0.initialization }
+        decl.compactMap(\.initialization)
     }
     
     public init(decl: [StatementVariableDeclaration]) {
