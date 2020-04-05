@@ -11,74 +11,6 @@ class ObjcParserTests: XCTestCase {
         _=ObjcParser(string: "abc")
     }
     
-    func testParserMaintainsOriginalRuleContext() {
-        let source = """
-            #import "abc.h"
-            NS_ASSUME_NONNULL_BEGIN
-
-            typedef NS_ENUM(NSInteger, MyEnum) {
-                MyEnumValue1 = 0,
-                MyEnumValue1
-            };
-
-            typedef struct {
-                int a;
-                int b;
-            } A;
-
-            typedef void(^f)();
-            typedef int (*f2) (void *);
-
-            void aFunc(int a, int b, ...);
-
-            void anotherFunc(int a, int b, ...) {
-                stmt();
-            }
-            
-            @protocol P
-            @property BOOL p;
-            - (void)m;
-            @end
-            
-            @interface MyClass : Superclass <Prot1, Prot2>
-            {
-                NSInteger myInt;
-            }
-            @property (nonatomic, getter=isValue) BOOL value;
-            - (void)myMethod:(NSString*)param1;
-            @end
-            
-            @interface MyClass (MyCategory)
-            + (void)classMethod:(NSArray<NSObject*>*)anyArray;
-            @end
-
-            @implementation MyClass
-            @synthesize a, b = c;
-            
-            - (void)myMethod:(NSString*)param1 {
-                for(int i = 0; i < 10; i++) {
-                    NSLog(@"%@", i);
-                }
-            }
-            + (void)classMethod:(NSArray<NSObject*>*)anyArray {
-            }
-            @end
-            """
-        
-        let node = parserTest(source)
-        
-        let visitor = AnyASTVisitor(visit: { node in
-            if node is InvalidNode {
-                return
-            }
-            
-            //XCTAssertNotNil(node.sourceRuleContext, "\(node)")
-        })
-        
-        let traverser = ASTTraverser(node: node, visitor: visitor)
-        traverser.traverse()
-    }
-    
     func testParseComments() {
         let source = """
             // Test comment
@@ -376,7 +308,7 @@ class ObjcParserTests: XCTestCase {
         XCTAssertEqual(implementation?.properties[0].hasIbInspectableSpecifier, true)
     }
     
-    func testParseError() {
+    func testParseNestedBlocks() {
         _=parserTest("""
             @interface ViewController (Private)
             

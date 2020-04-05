@@ -126,17 +126,10 @@ extension TokenType: TokenProtocol {
         let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         // Lex operators first
-        var op: Operator?
-        
         for knownOp in operators {
             if lexer.advanceIf(equals: knownOp.string) {
-                op = knownOp.op
-                break
+                return .operator(knownOp.op)
             }
-        }
-        
-        if let op = op {
-            return .operator(op)
         }
         
         return nil
@@ -159,9 +152,8 @@ extension TokenType: TokenProtocol {
         
         do {
             var isAt = false
-            if try lexer.peek() == "@" {
+            if lexer.advanceIf(equals: "@") {
                 isAt = true
-                try lexer.advance()
                 
                 if lexer.isEof() {
                     return nil
