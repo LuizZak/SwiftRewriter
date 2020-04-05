@@ -79,6 +79,27 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
         ); assertDidNotNotifyChange()
     }
     
+    func testDontPromoteWeakVariables() {
+        let statement = Statement
+            .compound([
+                .variableDeclaration(identifier: "a",
+                                     type: SwiftType.optional("A"),
+                                     ownership: .weak,
+                                     initialization: Expression.identifier("_a").typed("A"))
+                ])
+        functionBodyContext = FunctionBodyIntention(body: statement)
+        
+        assertTransform(
+            statement: statement,
+            into: .compound([
+                .variableDeclaration(identifier: "a",
+                                     type: SwiftType.optional("A"),
+                                     ownership: .weak,
+                                     initialization: Expression.identifier("_a").typed("A"))
+                ])
+        ); assertDidNotNotifyChange()
+    }
+    
     func testDontPromoteErrorTypedInitializedVariables() {
         let statement = Statement
             .compound([

@@ -105,8 +105,9 @@ public final class SwiftRewriter {
         
         try autoreleasepool {
             try loadInputSources()
-            parseStatements()
+            let autotypeDecls = parseStatements()
             evaluateTypes()
+            resolveAutotypeDeclarations(autotypeDecls)
             performIntentionAndSyntaxPasses()
             outputDefinitions()
         }
@@ -153,7 +154,7 @@ public final class SwiftRewriter {
     }
     
     /// Parses all statements now, with proper type information available.
-    private func parseStatements() {
+    private func parseStatements() -> [LazyAutotypeVarDeclResolve] {
         if settings.verbose {
             print("Parsing function bodies...")
         }
@@ -168,15 +169,19 @@ public final class SwiftRewriter {
         defer {
             typeSystem.tearDownCache()
         }
+
+        let autotypeDeclarations = ConcurrentValue<[LazyAutotypeVarDeclResolve]>(wrappedValue: [])
         
         let antlrSettings = makeAntlrSettings()
-        
+
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
         for item in lazyParse {
             queue.addOperation {
                 autoreleasepool {
+                    let delegate = InnerStatementASTReaderDelegate(parseItem: item)
+
                     let typeMapper = DefaultTypeMapper(typeSystem: self.typeSystem)
                     let state = SwiftRewriter._parserStatePool.pull()
                     let typeParser = TypeParsing(state: state, antlrSettings: antlrSettings)
@@ -187,6 +192,7 @@ public final class SwiftRewriter {
                     let reader = SwiftASTReader(typeMapper: typeMapper,
                                                 typeParser: typeParser,
                                                 typeSystem: self.typeSystem)
+                    reader.delegate = delegate
                     
                     switch item {
                     case .enumCase(let enCase):
@@ -212,11 +218,17 @@ public final class SwiftRewriter {
                         
                         v.expression = reader.parseExpression(expression: expression)
                     }
+
+                    autotypeDeclarations.modifyingValue {
+                        $0.append(contentsOf: delegate.autotypeDeclarations)
+                    }
                 }
             }
         }
         
         queue.waitUntilAllOperationsAreFinished()
+
+        return autotypeDeclarations.wrappedValue
     }
     
     /// Evaluate all type signatures, now with the knowledge of all types present
@@ -338,6 +350,41 @@ public final class SwiftRewriter {
         }
         
         queue.waitUntilAllOperationsAreFinished()
+    }
+
+    private func resolveAutotypeDeclarations(_ declarations: [LazyAutotypeVarDeclResolve]) {
+        let globals = CompoundDefinitionsSource()
+
+        // Register globals first
+        for provider in globalsProvidersSource.globalsProviders {
+            globals.addSource(provider.definitionsSource())
+        }
+
+        let typeResolverInvoker =
+            DefaultTypeResolverInvoker(globals: globals, typeSystem: typeSystem,
+                                       numThreads: settings.numThreads)
+
+        // Make a pre-type resolve before applying passes
+        typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection, force: true)
+
+        for declaration in declarations {
+            let stmt = declaration.statement
+            let decl = stmt.decl[declaration.index]
+            
+            // If this declaration's initializer depends on another auto type,
+            // resolve expression types so the actual type can be propagated
+            if decl.initialization?.resolvedType == SwiftType.typeName("__auto_type") {
+                typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection, force: true)
+            }
+            
+            if let type = decl.initialization?.resolvedType {
+                if decl.ownership == .weak && typeSystem.isClassInstanceType(type) {
+                    stmt.decl[declaration.index].type = .optional(type)
+                } else {
+                    stmt.decl[declaration.index].type = type
+                }
+            }
+        }
     }
     
     private func performIntentionAndSyntaxPasses() {
@@ -716,6 +763,25 @@ fileprivate extension SwiftRewriter {
             typeParser
         }
     }
+
+    private class InnerStatementASTReaderDelegate: SwiftStatementASTReaderDelegate {
+        var parseItem: LazyParseItem
+        var autotypeDeclarations: [LazyAutotypeVarDeclResolve] = []
+
+        init(parseItem: LazyParseItem) {
+            self.parseItem = parseItem
+        }
+
+        func swiftStatementASTReader(reportAutoTypeDeclaration varDecl: VariableDeclarationsStatement,
+                                     declarationAtIndex index: Int) {
+
+            autotypeDeclarations.append(
+                LazyAutotypeVarDeclResolve(parseItem: parseItem,
+                                           statement: varDecl,
+                                           index: index)
+            )
+        }
+    }
 }
 
 private enum LazyParseItem {
@@ -733,6 +799,14 @@ private enum LazyTypeResolveItem {
     case enumDecl(EnumGenerationIntention)
     case extensionDecl(ClassExtensionGenerationIntention)
     case `typealias`(TypealiasIntention)
+}
+
+/// Stored '__auto_type' variable declaration that needs to be resolved after
+/// statement parsing
+private struct LazyAutotypeVarDeclResolve {
+    var parseItem: LazyParseItem
+    var statement: VariableDeclarationsStatement
+    var index: Int
 }
 
 internal func _typeNullability(inType type: ObjcType) -> TypeNullability? {

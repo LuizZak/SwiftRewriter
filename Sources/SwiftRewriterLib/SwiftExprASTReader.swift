@@ -11,11 +11,15 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     public var typeMapper: TypeMapper
     public var typeParser: TypeParsing
     public var context: SwiftASTReaderContext
+    public var delegate: SwiftStatementASTReaderDelegate?
     
-    public init(typeMapper: TypeMapper, typeParser: TypeParsing, context: SwiftASTReaderContext) {
+    public init(typeMapper: TypeMapper, typeParser: TypeParsing, context: SwiftASTReaderContext,
+                delegate: SwiftStatementASTReaderDelegate?) {
+
         self.typeMapper = typeMapper
         self.typeParser = typeParser
         self.context = context
+        self.delegate = delegate
     }
     
     public override func visitExpression(_ ctx: ObjectiveCParser.ExpressionContext) -> Expression? {
@@ -468,7 +472,8 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     private func compoundStatementVisitor() -> SwiftStatementASTReader.CompoundStatementVisitor {
         SwiftStatementASTReader
                 .CompoundStatementVisitor(expressionReader: self,
-                                          context: context)
+                                          context: context,
+                                          delegate: delegate)
     }
     
     private class FunctionArgumentVisitor: ObjectiveCParserBaseVisitor<FunctionArgument> {
