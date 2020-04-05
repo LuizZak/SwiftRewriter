@@ -26,7 +26,12 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIn
         functionBody == nil
     }
     
-    public var functionBody: FunctionBodyIntention?
+    public var functionBody: FunctionBodyIntention? {
+        didSet {
+            oldValue?.parent = nil
+            functionBody?.parent = self
+        }
+    }
     
     public var knownAttributes: [KnownAttribute] = []
     

@@ -167,11 +167,24 @@ extension SwiftSyntaxProducer {
         
         return varDeclGenerator
             .generateVariableDeclarations(stmt)
-            .map { decl in
+            .enumerated()
+            .map { (i, decl) in
                 return {
-                    SyntaxFactory.makeCodeBlockItem(item: decl().asSyntax,
-                                                    semicolon: nil,
-                                                    errorTokens: nil)
+                    if self.settings.outputExpressionTypes {
+                        self.addExtraLeading(Trivia.lineComment("// decl type: \(stmt.decl[i].type)"))
+                        self.addExtraLeading(.newlines(1))
+                        self.addExtraLeading(self.indentation())
+
+                        if let exp = stmt.decl[i].initialization {
+                            self.addExtraLeading(Trivia.lineComment("// init type: \(exp.resolvedType ?? "<nil>")"))
+                            self.addExtraLeading(.newlines(1))
+                            self.addExtraLeading(self.indentation())
+                        }
+                    }
+
+                    return SyntaxFactory.makeCodeBlockItem(item: decl().asSyntax,
+                                                           semicolon: nil,
+                                                           errorTokens: nil)
                 }
             }
     }
