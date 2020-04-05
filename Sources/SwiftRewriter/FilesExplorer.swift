@@ -220,7 +220,7 @@ class SuggestConversionInterface {
             
             let duration = stopwatch.stop()
             
-            console.printLine("Finishing converting \(objcFiles.count) files in \(String(format: "%.2lf", duration))s.")
+            console.printLine("Finished converting \(objcFiles.count) files in \(String(format: "%.2lf", duration))s.")
             _=console.readLineWith(prompt: "Press [Enter] to continue.")
         } catch {
             console.printLine("Error converting files: \(error)")
@@ -391,7 +391,7 @@ private class FilesExplorer: PagesCommandHandler {
         else if let index = Int(input) {
             guard index > 0 && index <= fileList.count else {
                 return .loop(
-                    "Invalid index \(index): Only have \(fileList.count) files to select!"
+                    "Invalid index \(index): There are only \(fileList.count) files to select from!"
                     .terminalColorize(.red))
             }
             
