@@ -43,7 +43,7 @@ public class SwiftTypeParser {
     ///     ;
     ///
     /// block
-    ///     : '(' block-argument-list '...'? ')' '->' swift-type ;
+    ///     : arg-attribute-list? '(' block-argument-list '...'? ')' '->' swift-type ;
     ///
     /// array
     ///     : '[' type ']' ;
@@ -90,7 +90,8 @@ public class SwiftTypeParser {
     ///     ;
     ///
     /// arg-attribute
-    ///     : '@' identifier
+    ///     : block-type-attribute
+    ///     | '@' identifier
     ///     | '@' identifier '(' ..* ')'
     ///     ;
     ///
@@ -150,7 +151,7 @@ public class SwiftTypeParser {
             }
         } else if lexer.tokenType(is: .openBrace) {
             type = try parseArrayOrDictionary(lexer)
-        } else if lexer.tokenType(is: .openParens) {
+        } else if lexer.tokenType(is: .openParens) || lexer.tokenType(is: .at) {
             type = try parseTupleOrBlock(lexer)
         } else {
             throw unexpectedTokenError(lexer: lexer)
@@ -172,9 +173,7 @@ public class SwiftTypeParser {
     /// ```
     private static func parseNominalType(_ lexer: Tokenizer) throws -> NominalSwiftType {
         
-        guard let identifier = lexer.consumeToken(ifTypeIs: .identifier) else {
-            throw unexpectedTokenError(lexer: lexer)
-        }
+        let identifier = try lexer.advance(overTokenType: .identifier)
         
         // Attempt a generic type parse
         let type =
@@ -326,14 +325,9 @@ public class SwiftTypeParser {
         
         repeat {
             types.append(try parseType(lexer))
-            
-            if lexer.consumeToken(ifTypeIs: .comma) != nil {
-                continue
-            }
-            
-            try lexer.advance(overTokenType: .closeBracket)
-            break
-        } while !lexer.isEof
+        } while !lexer.isEof && lexer.consumeToken(ifTypeIs: .comma) != nil
+        
+        try lexer.advance(overTokenType: .closeBracket)
         
         return .generic(typeName, parameters: .fromCollection(types))
     }
@@ -380,7 +374,7 @@ public class SwiftTypeParser {
     ///     ;
     ///
     /// block
-    ///     : '(' block-argument-list '...'? ')' '->' swift-type ;
+    ///     : arg-attribute-list? '(' block-argument-list '...'? ')' '->' swift-type ;
     ///
     /// block-argument-list
     ///     : block-argument (',' block-argument)* ;
@@ -398,12 +392,23 @@ public class SwiftTypeParser {
     ///     ;
     ///
     /// arg-attribute
-    ///     : '@' identifier
+    ///     : block-type-attribute
+    ///     | '@' identifier
     ///     | '@' identifier '(' ..* ')'
     ///     ;
     /// ```
     private static func parseTupleOrBlock(_ lexer: Tokenizer) throws -> SwiftType {
+        var attributes: [BlockTypeAttribute] = []
+        
         func verifyAndSkipAnnotations() throws {
+            if let attr = verifyBlockTypeAttribute(lexer: lexer) {
+                attributes.append(attr)
+                
+                // Check for another attribute
+                try verifyAndSkipAnnotations()
+                return
+            }
+            
             guard lexer.consumeToken(ifTypeIs: .at) != nil else {
                 return
             }
@@ -424,12 +429,19 @@ public class SwiftTypeParser {
             try verifyAndSkipAnnotations()
         }
         
+        func flushAnnotations() -> [BlockTypeAttribute] {
+            defer { attributes.removeAll() }
+            return attributes
+        }
+        
         var returnType: SwiftType
         var parameters: [SwiftType] = []
+        var expectsBlock = false
+        
+        try verifyAndSkipAnnotations()
+        let funcAttributes = flushAnnotations()
         
         try lexer.advance(overTokenType: .openParens)
-        
-        var expectsBlock = false
         
         while !lexer.tokenType(is: .closeParens) {
             // Inout label
@@ -442,7 +454,6 @@ public class SwiftTypeParser {
             // Attributes
             if lexer.tokenType(is: .at) {
                 expectsType = true
-                try verifyAndSkipAnnotations()
             }
             
             // If we see an 'inout', skip identifiers and force a parameter type
@@ -466,11 +477,6 @@ public class SwiftTypeParser {
                     lexer.consumeToken(ifTypeIs: .identifier)
                     lexer.consumeToken(ifTypeIs: .identifier)
                     lexer.consumeToken(ifTypeIs: .colon)
-                }
-                
-                // Attributes
-                if lexer.tokenType(is: .at) {
-                    try verifyAndSkipAnnotations()
                 }
             }
             
@@ -506,7 +512,7 @@ public class SwiftTypeParser {
         if lexer.consumeToken(ifTypeIs: .functionArrow) != nil {
             returnType = try parseType(lexer)
             
-            return .block(returnType: returnType, parameters: parameters, attributes: [])
+            return .block(returnType: returnType, parameters: parameters, attributes: Set(funcAttributes))
         } else if expectsBlock {
             throw expectedBlockType(lexer: lexer)
         }
@@ -555,6 +561,93 @@ public class SwiftTypeParser {
         }
         
         return .tuple(TupleSwiftType.types(.fromCollection(parameters)))
+    }
+    
+    /// Attempts to parse a block type attribute from the given lexer.
+    /// If lexing fails, the lexer is backtracked and nil is returned.
+    ///
+    /// ```
+    /// block-type-attribute
+    ///     : autoclosure-attribute
+    ///     | escaping-attribute
+    ///     | convention-attribute
+    ///     ;
+    ///
+    /// autoclosure-attribute
+    ///     : '@' 'autoclosure'
+    ///     ;
+    ///
+    /// escaping-attribute
+    ///     : '@' 'escaping'
+    ///     ;
+    ///
+    /// convention-attribute
+    ///     : '@' 'convention' '(' convention-type ')'
+    ///
+    /// convention-type
+    ///     : 'c'
+    ///     | 'block'
+    ///     | 'swift'
+    ///     ;
+    /// ```
+    private static func verifyBlockTypeAttribute(lexer: Tokenizer) -> BlockTypeAttribute? {
+        let backtracker = lexer.backtracker()
+        
+        do {
+            try lexer.advance(overTokenType: .at)
+            
+            switch try lexer.advance(overTokenType: .identifier).value {
+            case "autoclosure":
+                let attribute = BlockTypeAttribute.autoclosure
+                // Check for a '(' immediately after the attribute name
+                if lexer.lexer.safeIsNextChar(equalTo: "(") {
+                    backtracker.backtrack()
+                    return nil
+                }
+                
+                return attribute
+            case "escaping":
+                let attribute = BlockTypeAttribute.escaping
+                
+                // Check for a '(' immediately after the attribute name
+                if lexer.lexer.safeIsNextChar(equalTo: "(") {
+                    backtracker.backtrack()
+                    return nil
+                }
+                
+                return attribute
+            case "convention":
+                try lexer.advance(overTokenType: .openParens)
+                
+                let ident = try lexer.advance(overTokenType: .identifier).value
+                
+                try lexer.advance(overTokenType: .closeParens)
+                
+                switch ident {
+                case "c":
+                    return .convention(.c)
+                    
+                case "block":
+                    return .convention(.block)
+                    
+                case "swift":
+                    // Althouugh 'swift' is a valid block convention, by default
+                    // all blocks are swift convention unless otherwise stated,
+                    // so simply return as no convention block and parsing will
+                    // default to a swift block
+                    backtracker.backtrack()
+                default:
+                    backtracker.backtrack()
+                }
+                
+            default:
+                backtracker.backtrack()
+            }
+        } catch {
+            backtracker.backtrack()
+        }
+        
+        return nil
     }
     
     private static func verifyTrailing(after type: SwiftType, lexer: Tokenizer) throws -> SwiftType {
@@ -756,6 +849,20 @@ enum SwiftTypeToken: String, TokenProtocol {
             return nil
         } catch {
             return nil
+        }
+    }
+}
+
+private extension SwiftType {
+    func withAttributes(_ attributes: [BlockTypeAttribute]) -> SwiftType {
+        switch self {
+        case let .block(returnType, parameters, attr):
+            return .block(returnType: returnType,
+                          parameters: parameters,
+                          attributes: attr.union(attributes))
+            
+        default:
+            return self
         }
     }
 }

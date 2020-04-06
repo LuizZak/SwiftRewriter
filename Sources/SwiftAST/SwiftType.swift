@@ -299,7 +299,9 @@ public extension SwiftType {
         .nominal(.generic(name, parameters: parameters))
     }
     
-    static func swiftBlock(returnType: SwiftType, parameters: [SwiftType]) -> SwiftType {
+    static func swiftBlock(returnType: SwiftType,
+                           parameters: [SwiftType] = []) -> SwiftType {
+        
         .block(returnType: returnType, parameters: parameters, attributes: [])
     }
     
@@ -727,15 +729,11 @@ extension TwoOrMore: Collection {
 }
 
 // MARK: Equatable conditional conformance
-extension OneOrMore: Equatable where T: Equatable {
-}
-extension OneOrMore: Hashable where T: Hashable {
-}
+extension OneOrMore: Equatable where T: Equatable { }
+extension OneOrMore: Hashable where T: Hashable { }
 
-extension TwoOrMore: Equatable where T: Equatable {
-}
-extension TwoOrMore: Hashable where T: Hashable {
-}
+extension TwoOrMore: Equatable where T: Equatable { }
+extension TwoOrMore: Hashable where T: Hashable { }
 
 // MARK: Array initialization
 extension OneOrMore: ExpressibleByArrayLiteral {
