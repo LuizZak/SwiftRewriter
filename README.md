@@ -1,6 +1,9 @@
 # SwiftRewriter
 
-[![Build Status](https://dev.azure.com/luiz-fs/SwiftRewriter/_apis/build/status/LuizZak.SwiftRewriter?branchName=master)](https://dev.azure.com/luiz-fs/SwiftRewriter/_build/latest?definitionId=3&branchName=master)
+| Platform | Build Status |
+|----------|--------|
+| macOS    | [![Build Status](https://dev.azure.com/luiz-fs/SwiftRewriter/_apis/build/status/LuizZak.SwiftRewriter?branchName=master&jobName=macOS)](https://dev.azure.com/luiz-fs/SwiftRewriter/_build/latest?definitionId=3&branchName=master) |
+| Linux    | [![Build Status](https://dev.azure.com/luiz-fs/SwiftRewriter/_apis/build/status/LuizZak.SwiftRewriter?branchName=master&jobName=Linux)](https://dev.azure.com/luiz-fs/SwiftRewriter/_build/latest?definitionId=3&branchName=master) |
 
 A program that aims to aid in automatization of conversion of Objective-C code into equivalent Swift code.
 
