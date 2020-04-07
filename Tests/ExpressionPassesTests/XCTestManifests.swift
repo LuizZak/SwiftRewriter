@@ -316,6 +316,7 @@ extension VariableNullabilityPromotionExpressionPassTests {
         ("testDontPromoteErrorTypedInitializedVariables", testDontPromoteErrorTypedInitializedVariables),
         ("testDontPromoteNilInitializedVariables", testDontPromoteNilInitializedVariables),
         ("testDontPromoteUninitializedConstants", testDontPromoteUninitializedConstants),
+        ("testDontPromoteWeakVariables", testDontPromoteWeakVariables),
         ("testNonNilPromotion", testNonNilPromotion),
     ]
 }

@@ -157,6 +157,7 @@ extension SwiftTypeParserTests {
         ("testParseBlockArgumentWithInOut", testParseBlockArgumentWithInOut),
         ("testParseBlockType", testParseBlockType),
         ("testParseBlockTypeTakingBlockType", testParseBlockTypeTakingBlockType),
+        ("testParseBlockTypeWithAttributes", testParseBlockTypeWithAttributes),
         ("testParseBlockTypeWithMultipleParameterAnnotations", testParseBlockTypeWithMultipleParameterAnnotations),
         ("testParseBlockTypeWithParameterAnnotationAfterInout", testParseBlockTypeWithParameterAnnotationAfterInout),
         ("testParseBlockTypeWithParameterAnnotationAfterParameterLabel", testParseBlockTypeWithParameterAnnotationAfterParameterLabel),
