@@ -70,7 +70,7 @@ class TypeSystemTests: XCTestCase {
                                  ignoreNullability: false))
     }
     
-    func testExpandBlockTypeAliases() {
+    func testTypesMatchExpandBlockTypeAliases() {
         sut.addTypealias(
             aliasName: "A",
             originalType: .swiftBlock(returnType: .void, parameters: []))
@@ -80,7 +80,7 @@ class TypeSystemTests: XCTestCase {
                                  ignoreNullability: false))
     }
     
-    func testExpandBlockTypeAliasesDeep() {
+    func testTypesMatchExpandBlockTypeAliasesDeep() {
         sut.addTypealias(aliasName: "A",
                          originalType: .swiftBlock(returnType: "B", parameters: []))
         
@@ -123,6 +123,55 @@ class TypeSystemTests: XCTestCase {
         XCTAssertEqual(sut.defaultValue(for: .tuple(.types([.int, .int]))),
                        .tuple([.constant(0), .constant(0)]))
     }
+    
+    func testDefaultValueForTupleWithNonRepresentableDefaultValue() {
+        XCTAssertNil(sut.defaultValue(for: .tuple(.types([.int, .typeName("UnknownType")]))))
+    }
+    
+    func testDefaultValueOfUnknownType() {
+        XCTAssertNil(sut.defaultValue(for: .typeName("UnknownType")))
+    }
+    
+    func testDefaultValueForClassTypeIsAlwaysNil() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .class)
+                .constructor()
+                .build()
+        sut.addType(str)
+        
+        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
+    }
+    
+    func testDefaultValueForProtocolTypeIsAlwaysNil() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .protocol)
+                .constructor()
+                .build()
+        sut.addType(str)
+        
+        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
+    }
+    
+    func testDefaultValueForStructWithNoEmptyConstructorEvaluatesToNil() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .build()
+        sut.addType(str)
+        
+        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
+    }
+    
+    func testDefaultValueForStructWithEmptyConstructor() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .constructor()
+                .build()
+        sut.addType(str)
+        
+        XCTAssertEqual(sut.defaultValue(for: .typeName("A")), Expression.identifier("A").call())
+    }
+    
+    // MARK: -
     
     func testResolveTypeAliasesInOptionalArrayOfInts() {
         XCTAssertEqual(sut.resolveAlias(in: .optional(.array(.int))),
@@ -470,45 +519,6 @@ class TypeSystemTests: XCTestCase {
                                    static: false,
                                    includeOptional: false,
                                    in: cls))
-    }
-    
-    func testDefaultValueForClassTypeIsAlwaysNil() {
-        let str =
-            KnownTypeBuilder(typeName: "A", kind: .class)
-                .constructor()
-                .build()
-        sut.addType(str)
-        
-        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
-    }
-    
-    func testDefaultValueForProtocolTypeIsAlwaysNil() {
-        let str =
-            KnownTypeBuilder(typeName: "A", kind: .protocol)
-                .constructor()
-                .build()
-        sut.addType(str)
-        
-        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
-    }
-    
-    func testDefaultValueForStructWithNoEmptyConstructorEvaluatesToNil() {
-        let str =
-            KnownTypeBuilder(typeName: "A", kind: .struct)
-                .build()
-        sut.addType(str)
-        
-        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
-    }
-    
-    func testDefaultValueForStructWithEmptyConstructor() {
-        let str =
-            KnownTypeBuilder(typeName: "A", kind: .struct)
-                .constructor()
-                .build()
-        sut.addType(str)
-        
-        XCTAssertEqual(sut.defaultValue(for: .typeName("A")), Expression.identifier("A").call())
     }
     
     func testAddTypeAlias() {
