@@ -521,7 +521,10 @@ public class TypeSystem {
             return nil
             
         case .tuple(.empty):
-            return .tuple([])
+            let exp = Expression.tuple([])
+            exp.resolvedType = type
+            
+            return exp
             
         case .tuple(.types(let types)):
             var defValues: [Expression] = []
@@ -534,7 +537,10 @@ public class TypeSystem {
                 defValues.append(defValue)
             }
             
-            return .tuple(defValues)
+            let exp = Expression.tuple(defValues)
+            exp.resolvedType = type
+            
+            return exp
             
         default:
             return nil

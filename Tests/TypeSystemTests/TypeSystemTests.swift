@@ -96,32 +96,45 @@ class TypeSystemTests: XCTestCase {
     
     func testDefaultValueForNumerics() {
         XCTAssertEqual(sut.defaultValue(for: .int), .constant(0))
+        XCTAssertEqual(sut.defaultValue(for: .int)?.resolvedType, .int)
         XCTAssertEqual(sut.defaultValue(for: .uint), .constant(0))
+        XCTAssertEqual(sut.defaultValue(for: .uint)?.resolvedType, .uint)
         XCTAssertEqual(sut.defaultValue(for: .float), .constant(0.0))
+        XCTAssertEqual(sut.defaultValue(for: .float)?.resolvedType, .float)
         XCTAssertEqual(sut.defaultValue(for: .double), .constant(0.0))
+        XCTAssertEqual(sut.defaultValue(for: .double)?.resolvedType, .double)
     }
     
     func testDefaultValueForBool() {
         XCTAssertEqual(sut.defaultValue(for: .bool), .constant(false))
+        XCTAssertEqual(sut.defaultValue(for: .bool)?.resolvedType, .bool)
     }
     
     func testDefaultValueForOptionals() {
         XCTAssertEqual(sut.defaultValue(for: .optional(.int)), .constant(.nil))
+        XCTAssertEqual(sut.defaultValue(for: .optional(.int))?.resolvedType, .optional(.int))
         XCTAssertEqual(sut.defaultValue(for: .optional(.string)), .constant(.nil))
+        XCTAssertEqual(sut.defaultValue(for: .optional(.string))?.resolvedType, .optional(.string))
         XCTAssertEqual(sut.defaultValue(for: .optional(.double)), .constant(.nil))
+        XCTAssertEqual(sut.defaultValue(for: .optional(.double))?.resolvedType, .optional(.double))
     }
     
     func testDefaultValueForOptionalOfArrayOfIntegers() {
         XCTAssertEqual(sut.defaultValue(for: .optional(.array(.int))), .constant(.nil))
+        XCTAssertEqual(sut.defaultValue(for: .optional(.array(.int)))?.resolvedType, .optional(.array(.int)))
     }
     
     func testDefaultValueForVoid() {
         XCTAssertEqual(sut.defaultValue(for: .void), .tuple([]))
+        XCTAssertEqual(sut.defaultValue(for: .void)?.resolvedType, .void)
     }
     
     func testDefaultValueForTuple() {
         XCTAssertEqual(sut.defaultValue(for: .tuple(.types([.int, .int]))),
                        .tuple([.constant(0), .constant(0)]))
+        
+        XCTAssertEqual(sut.defaultValue(for: .tuple(.types([.int, .int])))?.resolvedType,
+                       .tuple(.types([.int, .int])))
     }
     
     func testDefaultValueForTupleWithNonRepresentableDefaultValue() {
@@ -168,7 +181,10 @@ class TypeSystemTests: XCTestCase {
                 .build()
         sut.addType(str)
         
-        XCTAssertEqual(sut.defaultValue(for: .typeName("A")), Expression.identifier("A").call())
+        let result = sut.defaultValue(for: .typeName("A"))
+        
+        XCTAssertEqual(result, Expression.identifier("A").call())
+        XCTAssertEqual(result?.resolvedType, .typeName("A"))
     }
     
     // MARK: -
