@@ -55,7 +55,7 @@ public class TypeParsing {
             }
             
             if let type = parseObjcType(typeName) {
-                types.append(type)
+                types.append(handleFixedArray(type, declarator: declarator))
             }
         }
         
@@ -92,7 +92,7 @@ public class TypeParsing {
             return nil
         }
         
-        return type
+        return handleFixedArray(type, declarator: declarator)
     }
     
     public func parseObjcType(in specQual: Parser.SpecifierQualifierListContext) -> ObjcType? {
@@ -124,7 +124,7 @@ public class TypeParsing {
             return blockType
         }
         
-        return type
+        return handleFixedArray(type, declarator: declarator)
     }
     
     public func parseObjcType(in declarationSpecifiers: Parser.DeclarationSpecifiersContext) -> ObjcType? {
@@ -157,7 +157,7 @@ public class TypeParsing {
             return blockType
         }
         
-        return type
+        return handleFixedArray(type, declarator: declarator)
     }
     
     private func manageBlock(baseType: ObjcType,
@@ -375,6 +375,26 @@ public class TypeParsing {
                              parameters: parameters)
         
         return functionPointerType
+    }
+    
+    private func handleFixedArray(_ type: ObjcType, declarator: Parser.DeclaratorContext) -> ObjcType {
+        guard let directDeclarator = declarator.directDeclarator() else {
+            return type
+        }
+        
+        var type = type
+        
+        for suffix in directDeclarator.declaratorSuffix().reversed() {
+            guard let constantExpression = suffix.constantExpression() else {
+                continue
+            }
+            
+            if let int = Int(constantExpression.getText()) {
+                type = .fixedArray(type, length: int)
+            }
+        }
+        
+        return type
     }
 }
 

@@ -1086,11 +1086,11 @@ private class GenericParseTreeContextMapper {
     }
     
     private func match(ruleType: ParserRuleContext.Type) -> Pair? {
-        if exceptions.contains(where: { ObjectIdentifier($0) == ObjectIdentifier(ruleType) }) {
+        if exceptions.contains(where: { $0 == ruleType }) {
             return nil
         }
         
-        return pairs.first { ObjectIdentifier($0.ruleType) == ObjectIdentifier(ruleType) }
+        return pairs.first { $0.ruleType == ruleType }
     }
     
     private enum Pair {

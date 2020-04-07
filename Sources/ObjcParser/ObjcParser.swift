@@ -360,11 +360,11 @@ public class ObjcParser {
                 type = .id()
             }
         } else if lexer.tokenType(matches: \.isIdentifier) {
-            var typeName: String = String(try lexer.advance(matching: \.tokenType.isIdentifier).value)
+            var typeName = String(try lexer.advance(matching: \.tokenType.isIdentifier).value)
             
             // 'long long' support
             if typeName == "long" && lexer.tokenType(is: .identifier("long")) {
-                typeName = String(try typeName + " " + lexer.advance(matching: \.tokenType.isIdentifier).value)
+                typeName = try String(typeName + " " + lexer.advance(matching: \.tokenType.isIdentifier).value)
             }
             
             // 'signed', 'unsigned' support

@@ -2739,4 +2739,64 @@ class SwiftRewriterTests: XCTestCase {
             """,
             options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
+    
+    func testRewriteFixedArray() {
+        assertObjcParse(
+            objc: """
+            typedef struct {
+                int a[3];
+            } A;
+            """,
+            swift: """
+            struct A {
+                var a: (CInt, CInt, CInt)
+
+                init() {
+                }
+                init(a: (CInt, CInt, CInt)) {
+                    self.a = a
+                }
+            }
+            """)
+    }
+    
+    func testRewriteEmptyFixedArray() {
+        assertObjcParse(
+            objc: """
+            typedef struct {
+                int a[0];
+            } A;
+            """,
+            swift: """
+            struct A {
+                var a: Void
+
+                init() {
+                }
+                init(a: Void) {
+                    self.a = a
+                }
+            }
+            """)
+    }
+    
+    func testRewriteFixedArrayOfFixedArray() {
+        assertObjcParse(
+            objc: """
+            typedef struct {
+                int a[3][2];
+            } A;
+            """,
+            swift: """
+            struct A {
+                var a: ((CInt, CInt), (CInt, CInt), (CInt, CInt))
+
+                init() {
+                }
+                init(a: ((CInt, CInt), (CInt, CInt), (CInt, CInt))) {
+                    self.a = a
+                }
+            }
+            """)
+    }
 }
