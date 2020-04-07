@@ -152,6 +152,9 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                 // [Creation] Synthesizing parameterless constructor for struct
                 init() {
                     parent = nil
+                    kids = (nil, nil, nil, nil)
+                    counts = (0, 0, 0, 0)
+                    elems = (nil, nil, nil)
                 }
                 // [Creation] Synthesizing parameterized constructor for struct
                 init(parent: UnsafeMutablePointer<node234>!, kids: (UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!), counts: (CInt, CInt, CInt, CInt), elems: (UnsafeMutableRawPointer!, UnsafeMutableRawPointer!, UnsafeMutableRawPointer!)) {

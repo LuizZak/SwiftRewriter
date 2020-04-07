@@ -94,6 +94,12 @@ public protocol ExpressionVisitor {
     /// - Returns: Result of visiting this ternary expression node
     func visitTernary(_ exp: TernaryExpression) -> ExprResult
     
+    /// Visits a tuple node
+    ///
+    /// - Parameter exp: A tuple expression to visit
+    /// - Returns: Result of visiting this tuple node
+    func visitTuple(_ exp: TupleExpression) -> ExprResult
+    
     /// Visits an unknown expression node
     ///
     /// - Parameter exp: An unknown expression to visit

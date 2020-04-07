@@ -115,6 +115,15 @@ class TypeSystemTests: XCTestCase {
         XCTAssertEqual(sut.defaultValue(for: .optional(.array(.int))), .constant(.nil))
     }
     
+    func testDefaultValueForVoid() {
+        XCTAssertEqual(sut.defaultValue(for: .void), .tuple([]))
+    }
+    
+    func testDefaultValueForTuple() {
+        XCTAssertEqual(sut.defaultValue(for: .tuple(.types([.int, .int]))),
+                       .tuple([.constant(0), .constant(0)]))
+    }
+    
     func testResolveTypeAliasesInOptionalArrayOfInts() {
         XCTAssertEqual(sut.resolveAlias(in: .optional(.array(.int))),
                        .optional(.array(.int)))

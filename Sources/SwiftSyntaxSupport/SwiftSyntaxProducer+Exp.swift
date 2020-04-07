@@ -44,6 +44,9 @@ extension SwiftSyntaxProducer {
         case let exp as TernaryExpression:
             return generateTernary(exp)
             
+        case let exp as TupleExpression:
+            return generateTuple(exp)
+            
         case let exp as BlockLiteralExpression:
             return generateClosure(exp).asExprSyntax
             
@@ -405,6 +408,23 @@ extension SwiftSyntaxProducer {
             builder.useFirstChoice(generateExpression(exp.ifTrue))
             builder.useColonMark(SyntaxFactory.makeColonToken().addingSurroundingSpaces())
             builder.useSecondChoice(generateExpression(exp.ifFalse))
+        }.asExprSyntax
+    }
+    
+    func generateTuple(_ exp: TupleExpression) -> ExprSyntax {
+        TupleExprSyntax { builder in
+            builder.useLeftParen(makeStartToken(SyntaxFactory.makeLeftParenToken))
+            builder.useRightParen(SyntaxFactory.makeRightParenToken())
+            
+            iterateWithComma(exp.elements) { (item, hasComma) in
+                builder.addElement(TupleExprElementSyntax { builder in
+                    builder.useExpression(generateExpression(item))
+                    
+                    if hasComma {
+                        builder.useTrailingComma(SyntaxFactory.makeCommaToken().withTrailingSpace())
+                    }
+                })
+            }
         }.asExprSyntax
     }
     

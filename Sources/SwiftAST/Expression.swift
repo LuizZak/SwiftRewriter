@@ -230,6 +230,10 @@ public extension Expression {
         BlockLiteralExpression(parameters: parameters, returnType: returnType, body: body)
     }
     
+    static func tuple(_ elements: [Expression]) -> TupleExpression {
+        TupleExpression(elements: elements)
+    }
+    
     static func unknown(_ exp: UnknownASTContext) -> UnknownExpression {
         UnknownExpression(context: exp)
     }

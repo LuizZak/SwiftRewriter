@@ -474,7 +474,15 @@ public class TypeSystem {
     }
     
     /// Returns an expression representing the default value for a given Swift type.
-    /// Returns nil, in case no default values are known
+    ///
+    /// Default values are the equivalent to a zeroed-out representation of the
+    /// value's contents in memory, so:
+    ///
+    /// - It is zero for numerical values;
+    /// - It is nil for optional values.
+    ///
+    /// Returns nil, in case no default values are known or type is not representable
+    /// by a default value (i.e. a reference type).
     public func defaultValue(for type: SwiftType) -> Expression? {
         if isNumeric(type) {
             let exp: Expression = isInteger(type) ? .constant(0) : .constant(0.0)
@@ -511,6 +519,23 @@ public class TypeSystem {
             }
             
             return nil
+            
+        case .tuple(.empty):
+            return .tuple([])
+            
+        case .tuple(.types(let types)):
+            var defValues: [Expression] = []
+            
+            for type in types {
+                guard let defValue = defaultValue(for: type) else {
+                    return nil
+                }
+                
+                defValues.append(defValue)
+            }
+            
+            return .tuple(defValues)
+            
         default:
             return nil
         }

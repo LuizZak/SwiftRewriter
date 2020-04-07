@@ -2752,6 +2752,7 @@ class SwiftRewriterTests: XCTestCase {
                 var a: (CInt, CInt, CInt)
 
                 init() {
+                    a = (0, 0, 0)
                 }
                 init(a: (CInt, CInt, CInt)) {
                     self.a = a
@@ -2772,6 +2773,7 @@ class SwiftRewriterTests: XCTestCase {
                 var a: Void
 
                 init() {
+                    a = ()
                 }
                 init(a: Void) {
                     self.a = a
@@ -2792,6 +2794,7 @@ class SwiftRewriterTests: XCTestCase {
                 var a: ((CInt, CInt), (CInt, CInt), (CInt, CInt))
 
                 init() {
+                    a = ((0, 0), (0, 0), (0, 0))
                 }
                 init(a: ((CInt, CInt), (CInt, CInt), (CInt, CInt))) {
                     self.a = a
