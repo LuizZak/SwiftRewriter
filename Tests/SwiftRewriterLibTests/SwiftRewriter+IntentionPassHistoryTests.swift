@@ -125,7 +125,7 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                 var root: UnsafeMutablePointer<node234>!
                 // [Creation] A.c line 26 column 5
                 var cmp: cmpfn234!
-            
+
                 // [Creation] Synthesizing parameterless constructor for struct
                 init() {
                     root = nil
@@ -143,21 +143,18 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                 // [Creation] A.c line 29 column 5
                 var parent: UnsafeMutablePointer<node234>!
                 // [Creation] A.c line 30 column 5
-                var kids: UnsafeMutablePointer<node234>!
+                var kids: (UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!)
                 // [Creation] A.c line 31 column 5
-                var counts: CInt
+                var counts: (CInt, CInt, CInt, CInt)
                 // [Creation] A.c line 32 column 5
-                var elems: UnsafeMutableRawPointer!
-            
+                var elems: (UnsafeMutableRawPointer!, UnsafeMutableRawPointer!, UnsafeMutableRawPointer!)
+
                 // [Creation] Synthesizing parameterless constructor for struct
                 init() {
                     parent = nil
-                    kids = nil
-                    counts = 0
-                    elems = nil
                 }
                 // [Creation] Synthesizing parameterized constructor for struct
-                init(parent: UnsafeMutablePointer<node234>!, kids: UnsafeMutablePointer<node234>!, counts: CInt, elems: UnsafeMutableRawPointer!) {
+                init(parent: UnsafeMutablePointer<node234>!, kids: (UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!), counts: (CInt, CInt, CInt, CInt), elems: (UnsafeMutableRawPointer!, UnsafeMutableRawPointer!, UnsafeMutableRawPointer!)) {
                     self.parent = parent
                     self.kids = kids
                     self.counts = counts
