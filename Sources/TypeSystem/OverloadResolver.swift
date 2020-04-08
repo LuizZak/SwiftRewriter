@@ -163,14 +163,6 @@ public class OverloadResolver {
         return result
     }
     
-    private func stripIntegerLiterals(from arguments: [Argument]) -> [Argument] {
-        arguments.map { (arg: Argument) -> Argument in
-            arg.literalKind == .integer || arg.literalKind == .float
-                ? Argument(type: nil, isLiteral: false, literalKind: nil)
-                : arg
-        }
-    }
-    
     private func produceCandidates(from signatures: [FunctionSignature]) -> [OverloadCandidate] {
         var overloads: [OverloadCandidate] = []
         
