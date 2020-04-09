@@ -777,7 +777,9 @@ private class MemberInvocationResolver {
                 exp.resolvedType = .optional(value)
 
             default:
-                exp.resolvedType = typeSystem.subscription(indexType: subType, in: expType)?.type
+                exp.resolvedType = typeSystem.subscription(indexType: subType,
+                                                           static: expType.isMetatype,
+                                                           in: expType)?.type
             }
             
             sub.returnType = exp.resolvedType

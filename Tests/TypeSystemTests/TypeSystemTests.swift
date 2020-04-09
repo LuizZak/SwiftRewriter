@@ -1116,9 +1116,9 @@ class TypeSystemTests: XCTestCase {
             .build()
         sut.addType(type)
         
-        XCTAssertNotNil(sut.subscription(indexType: .int, in: type))
-        XCTAssertNotNil(sut.subscription(indexType: .string, in: type))
-        XCTAssertNil(sut.subscription(indexType: .double, in: type))
+        XCTAssertNotNil(sut.subscription(indexType: .int, static: false, in: type))
+        XCTAssertNotNil(sut.subscription(indexType: .string, static: false, in: type))
+        XCTAssertNil(sut.subscription(indexType: .double, static: false, in: type))
     }
     
     func testSubscriptLookupSwiftType() {
@@ -1128,9 +1128,21 @@ class TypeSystemTests: XCTestCase {
             .build()
         sut.addType(type)
         
-        XCTAssertNotNil(sut.subscription(indexType: .int, in: .typeName("A")))
-        XCTAssertNotNil(sut.subscription(indexType: .string, in: .typeName("A")))
-        XCTAssertNil(sut.subscription(indexType: .double, in: .typeName("A")))
+        XCTAssertNotNil(sut.subscription(indexType: .int, static: false, in: .typeName("A")))
+        XCTAssertNotNil(sut.subscription(indexType: .string, static: false, in: .typeName("A")))
+        XCTAssertNil(sut.subscription(indexType: .double, static: false, in: .typeName("A")))
+    }
+    
+    func testStaticSubscriptLookup() {
+        let type = KnownTypeBuilder(typeName: "A")
+            .subscription(indexType: .int, type: .int, isStatic: false)
+            .subscription(indexType: .string, type: .string, isStatic: true)
+            .build()
+        
+        XCTAssertNotNil(sut.subscription(indexType: .int, static: false, in: type))
+        XCTAssertNil(sut.subscription(indexType: .int, static: true, in: type))
+        XCTAssertNil(sut.subscription(indexType: .string, static: false, in: type))
+        XCTAssertNotNil(sut.subscription(indexType: .string, static: true, in: type))
     }
 }
 
