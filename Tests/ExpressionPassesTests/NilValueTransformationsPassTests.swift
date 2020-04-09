@@ -309,4 +309,18 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                 ])
         )
     }
+    
+    func testAssignmentIntoOptionalValue() {
+        // a.b = c
+        let exp = Expression.identifier("a").dot("b").assignment(op: .equals, rhs: .identifier("c"))
+        let expected = Expression.identifier("a").optional().dot("b").assignment(op: .equals, rhs: .identifier("c"))
+        exp.lhs.subExpressions[0].resolvedType = .optional(.typeName("A"))
+        
+        assertTransform(
+            // { a.b = c }
+            statement: .expression(exp),
+            // { a?.b = c }
+            into: .expression(expected)
+        ); assertNotifiedChange()
+    }
 }
