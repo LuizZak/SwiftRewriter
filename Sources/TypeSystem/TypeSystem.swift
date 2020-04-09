@@ -913,10 +913,10 @@ public class TypeSystem {
     }
     
     /// Gets a subscription for a given index type on a given type
-    public func subscription(indexType: SwiftType, in type: KnownType) -> KnownSubscript? {
+    public func subscription(indexType: SwiftType, static isStatic: Bool, in type: KnownType) -> KnownSubscript? {
         let lookup = makeTypeMemberLookup()
         
-        return lookup.subscription(indexType: indexType, in: type)
+        return lookup.subscription(indexType: indexType, static: isStatic, in: type)
     }
     
     /// Returns a known type for a given SwiftType, if present.
@@ -1028,10 +1028,10 @@ public class TypeSystem {
     }
     
     /// Gets a subscription for a given index type on a given type
-    public func subscription(indexType: SwiftType, in type: SwiftType) -> KnownSubscript? {
+    public func subscription(indexType: SwiftType, static isStatic: Bool, in type: SwiftType) -> KnownSubscript? {
         let lookup = makeTypeMemberLookup()
         
-        return lookup.subscription(indexType: indexType, in: type)
+        return lookup.subscription(indexType: indexType, static: isStatic, in: type)
     }
     
     private func makeTypeMemberLookup() -> TypeMemberLookup {
@@ -1401,13 +1401,15 @@ private class TypeMemberLookup {
         }
     }
     
-    public func subscription(indexType: SwiftType, in type: KnownType) -> KnownSubscript? {
-        if let sub = type.knownSubscripts.first(where: { typeSystem.isType(indexType, assignableTo: $0.subscriptType) }) {
+    public func subscription(indexType: SwiftType, static isStatic: Bool, in type: KnownType) -> KnownSubscript? {
+        if let sub =
+            type.knownSubscripts
+                .first(where: { typeSystem.isType(indexType, assignableTo: $0.subscriptType) && $0.isStatic == isStatic }) {
             return sub
         }
         
         return typeSystem.supertype(of: type).flatMap {
-            subscription(indexType: indexType, in: $0)
+            subscription(indexType: indexType, static: isStatic, in: $0)
         }
     }
     
@@ -1525,12 +1527,12 @@ private class TypeMemberLookup {
         return result
     }
     
-    public func subscription(indexType: SwiftType, in type: SwiftType) -> KnownSubscript? {
+    public func subscription(indexType: SwiftType, static isStatic: Bool, in type: SwiftType) -> KnownSubscript? {
         guard let knownType = typeSystem.findType(for: type) else {
             return nil
         }
         
-        return subscription(indexType: indexType, in: knownType)
+        return subscription(indexType: indexType, static: isStatic, in: knownType)
     }
 }
 

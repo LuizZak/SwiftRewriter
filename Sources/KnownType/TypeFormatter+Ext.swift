@@ -281,8 +281,7 @@ public extension TypeFormatter {
         
         var result = ""
         
-        // TODO: Support static subscript declarations
-        // result += decl.isStatic ? "static " : ""
+        result += decl.isStatic ? "static " : ""
         
         if typeName {
             result += type.typeName + "."
