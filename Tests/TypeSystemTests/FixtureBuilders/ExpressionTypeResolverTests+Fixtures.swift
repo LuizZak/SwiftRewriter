@@ -242,7 +242,6 @@ extension ExpressionTypeResolverTests {
                 applied = true
             }
             
-            
             guard let exp = statement[keyPath: keyPath] else {
                 testCase.recordFailure(withDescription: """
                     Could not locale expression at keypath \(keyPath)

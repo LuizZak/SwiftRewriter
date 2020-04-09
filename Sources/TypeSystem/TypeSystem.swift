@@ -479,7 +479,10 @@ public class TypeSystem {
     /// value's contents in memory, so:
     ///
     /// - It is zero for numerical values;
-    /// - It is nil for optional values.
+    /// - It is nil for optional values;
+    /// - For tuples containing types that have default values, the result is a
+    ///   tuple containing said default values - if any type within the tuple
+    ///   has no default value, nil is returned for the whole tuple.
     ///
     /// Returns nil, in case no default values are known or type is not representable
     /// by a default value (i.e. a reference type).
