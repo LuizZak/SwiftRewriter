@@ -2802,4 +2802,29 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testRewriteAccessIntoOptionalWeakType() {
+        assertObjcParse(
+            objc: """
+            @interface A
+            @property NSInteger a;
+            @end
+            @implementation A
+            - (void)test {
+                __weak __auto_type weakSelf = self;
+                weakSelf.a = 10;
+            }
+            @end
+            """,
+            swift: """
+            class A {
+                var a: Int = 0
+            
+                func test() {
+                    weak var weakSelf = self
+                    weakSelf?.a = 10
+                }
+            }
+            """)
+    }
 }

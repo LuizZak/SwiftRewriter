@@ -130,17 +130,20 @@ public extension CodeDefinition {
     /// Creates a code definition for a local identifier
     static func forLocalIdentifier(_ identifier: String,
                                    type: SwiftType,
+                                   ownership: Ownership = .strong,
                                    isConstant: Bool,
                                    location: LocalCodeDefinition.DefinitionLocation) -> LocalCodeDefinition {
         
         if isConstant {
             return LocalCodeDefinition(constantNamed: identifier,
                                        type: type,
+                                       ownership: ownership,
                                        location: location)
         }
         
         return LocalCodeDefinition(variableNamed: identifier,
                                    type: type,
+                                   ownership: ownership,
                                    location: location)
     }
     
@@ -150,6 +153,7 @@ public extension CodeDefinition {
                 .forLocalIdentifier(
                     decl.identifier,
                     type: decl.type,
+                    ownership: decl.ownership,
                     isConstant: decl.isConstant,
                     location: .variableDeclaration(stmt, index: i)
                 )
@@ -258,22 +262,24 @@ public class LocalCodeDefinition: CodeDefinition {
     
     fileprivate convenience init(variableNamed name: String,
                                  type: SwiftType,
+                                 ownership: Ownership = .strong,
                                  location: DefinitionLocation) {
         
         self.init(variableNamed: name,
                   storage: ValueStorage(type: type,
-                                        ownership: .strong,
+                                        ownership: ownership,
                                         isConstant: false),
                   location: location)
     }
     
     fileprivate convenience init(constantNamed name: String,
                                  type: SwiftType,
+                                 ownership: Ownership = .strong,
                                  location: DefinitionLocation) {
         
         self.init(variableNamed: name,
                   storage: ValueStorage(type: type,
-                                        ownership: .strong,
+                                        ownership: ownership,
                                         isConstant: true),
                   location: location)
     }

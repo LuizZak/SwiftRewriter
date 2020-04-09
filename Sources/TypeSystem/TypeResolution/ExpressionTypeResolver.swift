@@ -112,7 +112,11 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         for (i, decl) in stmt.decl.enumerated() {
             var type = decl.type
             
-            if !typeSystem.isScalarType(decl.type), let initValueType = decl.initialization?.resolvedType {
+            // TODO: This optionality promotion should probably be reserved to
+            // expression passes only.
+            if !typeSystem.isScalarType(decl.type) && decl.ownership != .weak,
+                let initValueType = decl.initialization?.resolvedType {
+                
                 type = type.withSameOptionalityAs(initValueType)
                 
                 // Promote implicitly unwrapped optionals to full optionals
@@ -127,6 +131,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
                 CodeDefinition
                     .forLocalIdentifier(decl.identifier,
                                         type: type,
+                                        ownership: decl.ownership,
                                         isConstant: decl.isConstant,
                                         location: .variableDeclaration(stmt, index: i))
             
