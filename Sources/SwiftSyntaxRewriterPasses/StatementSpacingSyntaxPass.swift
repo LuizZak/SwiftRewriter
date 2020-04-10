@@ -141,15 +141,18 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
 
 // Returns only the indentation of a given token's leading trivia
 private func indentation(for token: TokenSyntax) -> Trivia {
-    var spaces = 0
+    var leading: Trivia = .zero
     for trivia in token.leadingTrivia {
         switch trivia {
-        case .spaces(let sp):
-            spaces += sp
+        case .spaces, .tabs:
+            leading = leading.appending(trivia)
+        // Reset on newlines
+        case .newlines:
+            leading = .zero
         default:
             continue
         }
     }
     
-    return Trivia.spaces(spaces)
+    return leading
 }
