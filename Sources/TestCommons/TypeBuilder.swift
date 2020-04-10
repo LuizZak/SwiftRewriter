@@ -19,16 +19,16 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     @discardableResult
     public func createProperty(named name: String,
                                type: SwiftType,
-                               attributes: [ObjcPropertyAttribute] = []) -> TypeBuilder {
+                               objcAttributes: [ObjcPropertyAttribute] = []) -> TypeBuilder {
         
-        createProperty(named: name, type: type, mode: .asField, attributes: attributes)
+        createProperty(named: name, type: type, mode: .asField, objcAttributes: objcAttributes)
     }
     
     @discardableResult
     public func createProperty(named name: String,
                                type: SwiftType,
                                mode: PropertyGenerationIntention.Mode = .asField,
-                               attributes: [ObjcPropertyAttribute] = [],
+                               objcAttributes: [ObjcPropertyAttribute] = [],
                                builder: (MemberBuilder<PropertyGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
         
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
@@ -38,11 +38,11 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
         if targetType is ProtocolGenerationIntention {
             prop = ProtocolPropertyGenerationIntention(name: name,
                                                        storage: storage,
-                                                       attributes: attributes)
+                                                       objcAttributes: objcAttributes)
         } else {
             prop = PropertyGenerationIntention(name: name,
                                                storage: storage,
-                                               attributes: attributes)
+                                               objcAttributes: objcAttributes)
         }
         
         prop.mode = mode

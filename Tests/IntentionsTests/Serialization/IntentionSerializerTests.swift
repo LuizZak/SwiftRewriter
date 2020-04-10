@@ -17,13 +17,12 @@ class IntentionSerializerTests: XCTestCase {
                             .createInstanceVariable(named: "a", type: .int)
                             .createProperty(named: "b",
                                             type: .float,
-                                            attributes: [
+                                            objcAttributes: [
                                                 .getterName("getterName"),
                                                 .readonly,
                                                 .attribute("attribute1"),
                                                 .setterName("attribute1")
-                                            ]
-                            )
+                                            ])
                             .createMethod("method(_ a: Int, b: Float)") { method in
                                 method
                                     .addHistory(tag: "Test", description: "A test history")
