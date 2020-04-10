@@ -210,15 +210,15 @@ private class MockSwiftSyntaxRewriterPassProvider: SwiftSyntaxRewriterPassProvid
     
     private class RewriterPass: SyntaxRewriter, SwiftSyntaxRewriterPass {
         func rewrite(_ file: SourceFileSyntax) -> SourceFileSyntax {
-            return self.visit(file) as! SourceFileSyntax
+            return SourceFileSyntax(self.visit(file))!
         }
         
         override func visit(_ node: IdentifierExprSyntax) -> ExprSyntax {
             if node.identifier.text == "hello" {
-                return node.withIdentifier(node.identifier.withKind(.identifier("Hello")))
+                return ExprSyntax(node.withIdentifier(node.identifier.withKind(.identifier("Hello"))))
             }
             
-            return node
+            return ExprSyntax(node)
         }
     }
 }

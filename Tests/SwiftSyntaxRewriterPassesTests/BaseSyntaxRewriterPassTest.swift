@@ -28,7 +28,7 @@ class BaseSyntaxRewriterPassTest: XCTestCase {
             try! FileManager.default.removeItem(at: url)
         }
         
-        return try SyntaxTreeParser.parse(url)
+        return try SyntaxParser.parse(url)
     }
     
     func createTemporaryFile(_ contents: String) throws -> URL {

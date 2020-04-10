@@ -10,8 +10,7 @@ public class StatementSpacingSyntaxPass: SwiftSyntaxRewriterPass {
     
     public func rewrite(_ file: SourceFileSyntax) -> SourceFileSyntax {
         let rewriter = InnerSyntaxRewriter()
-        
-        return (rewriter.visit(file) as? SourceFileSyntax) ?? file
+        return SourceFileSyntax(rewriter.visit(file)) ?? file
     }
 }
 
@@ -26,22 +25,25 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
         // sure expressions are always separated by at least one empty line from
         // other statement kinds
         for range in ranges {
+            let rangeStart = statements.index(statements.startIndex, offsetBy: range.lowerBound)
+            let rangeEnd = statements.index(statements.startIndex, offsetBy: range.upperBound)
+                
             statements = statements.replacing(
                 childAt: range.lowerBound,
-                with: SetEmptyLineLeadingTrivia().visit(statements[range.lowerBound]) as! CodeBlockItemSyntax
+                with: CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(statements[rangeStart]))!
             )
             
             if statements.count > range.upperBound {
                 statements = statements.replacing(
                     childAt: range.upperBound,
-                    with: SetEmptyLineLeadingTrivia().visit(statements[range.upperBound]) as! CodeBlockItemSyntax
+                    with: CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(statements[rangeEnd]))!
                 )
             }
         }
         
-        return ranges.reduce(node) { (node, range) in
+        return Syntax(ranges.reduce(node) { node, range in
             node.withStatements(analyzeRange(range, in: statements))
-        }
+        })
     }
     
     func analyzeRange(_ range: Range<Int>, in stmts: CodeBlockItemListSyntax) -> CodeBlockItemListSyntax {
@@ -50,8 +52,9 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
         }
         
         var stmts = stmts
-        
-        let expressions = stmts[range]
+        let rangeStart = stmts.index(stmts.startIndex, offsetBy: range.lowerBound)
+        let rangeEnd = stmts.index(stmts.startIndex, offsetBy: range.upperBound)
+        let expressions = stmts[rangeStart..<rangeEnd]
         
         // Indexed distances between string of expression at [x] and [x + 1]
         let distance: [Int] =
@@ -61,9 +64,11 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
                 .map { (arg) -> Int in
                     let (i, exp) = arg
                     
+                    let newIndex = expressions.index(expressions.startIndex, offsetBy: i + 1)
+                    
                     return Levenshtein.distanceBetween(
                         exp.description,
-                        and: expressions[expressions.startIndex + i + 1].description
+                        and: expressions[newIndex].description
                     )
                 }
         
@@ -75,11 +80,14 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
             // last and next expressions, add an empty line between the current
             // and next expressions
             if abs(fromLast - toNext) > 2 {
-                let next = expressions[expressions.startIndex + i + 1]
+                let newIndex = expressions.index(expressions.startIndex, offsetBy: i + 1)
+                
+                let next = expressions[newIndex]
+                let childIndex = stmts.distance(from: stmts.startIndex, to: newIndex)
                 
                 stmts = stmts.replacing(
-                    childAt: expressions.startIndex + i + 1,
-                    with: SetEmptyLineLeadingTrivia().visit(next) as! CodeBlockItemSyntax
+                    childAt: childIndex,
+                    with: CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(next))!
                 )
             }
         }
@@ -100,7 +108,7 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
         var ranges: [Range<Int>] = []
         
         for (i, stmt) in statements.enumerated() {
-            if stmt.item is ExprSyntax {
+            if stmt.item.is(ExprSyntax.self) {
                 currentRangeStart = currentRangeStart ?? i
             } else if let current = currentRangeStart {
                 ranges.append(current..<i)
@@ -123,15 +131,25 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
         override func visit(_ token: TokenSyntax) -> Syntax {
             if isFirstVisit {
                 isFirstVisit = false
-                return token.withLeadingTrivia(.newlines(2) + indentation(for: token))
+                return Syntax(token.withLeadingTrivia(.newlines(2) + indentation(for: token)))
             }
             
-            return token
+            return Syntax(token)
         }
     }
 }
 
 // Returns only the indentation of a given token's leading trivia
 private func indentation(for token: TokenSyntax) -> Trivia {
-    return Trivia.spaces(token.leadingTrivia.sourceLength.columnsAtLastLine)
+    var spaces = 0
+    for trivia in token.leadingTrivia {
+        switch trivia {
+        case .spaces(let sp):
+            spaces += sp
+        default:
+            continue
+        }
+    }
+    
+    return Trivia.spaces(spaces)
 }
