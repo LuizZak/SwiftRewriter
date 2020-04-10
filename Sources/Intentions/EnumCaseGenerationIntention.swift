@@ -21,7 +21,11 @@ public class EnumCaseGenerationIntention: PropertyGenerationIntention {
         
         let storage = ValueStorage(type: .any, ownership: .strong, isConstant: true)
         
-        super.init(name: name, storage: storage, attributes: [], accessLevel: accessLevel, source: source)
+        super.init(name: name,
+                   storage: storage,
+                   objcAttributes: [],
+                   accessLevel: accessLevel,
+                   source: source)
     }
     
     public required init(from decoder: Decoder) throws {

@@ -29,13 +29,13 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
     /// This is not analogous to `storage.isConstant`, and references only the
     /// Objective-C property.
     public var isReadOnly: Bool {
-        attributes.contains { $0.rawString == "readonly" }
+        objcAttributes.contains { $0.rawString == "readonly" }
     }
     
     /// Returns `true` if the original Objective-C property is marked with a
     /// "class" attribute.
     public var isClassProperty: Bool {
-        attributes.contains { $0.rawString == "class" }
+        objcAttributes.contains { $0.rawString == "class" }
     }
     
     /// If this property features a synthesized getter, returns the body intention
@@ -88,13 +88,13 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
             mode.setParent(self)
         }
     }
-    public var attributes: [PropertyAttribute]
+    public var objcAttributes: [ObjcPropertyAttribute]
     
     public var initialValue: Expression?
     
     public convenience init(name: String,
                             type: SwiftType,
-                            attributes: [PropertyAttribute],
+                            objcAttributes: [ObjcPropertyAttribute],
                             accessLevel: AccessLevel = .internal,
                             source: ASTNode? = nil) {
         
@@ -106,20 +106,20 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         
         self.init(name: name,
                   storage: storage,
-                  attributes: attributes,
+                  objcAttributes: objcAttributes,
                   accessLevel: accessLevel,
                   source: source)
     }
     
     public init(name: String,
                 storage: ValueStorage,
-                attributes: [PropertyAttribute],
+                objcAttributes: [ObjcPropertyAttribute],
                 accessLevel: AccessLevel = .internal,
                 source: ASTNode? = nil) {
         
         self.name = name
         self.storage = storage
-        self.attributes = attributes
+        self.objcAttributes = objcAttributes
         
         super.init(accessLevel: accessLevel, source: source)
     }
@@ -135,7 +135,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         name = try container.decode(String.self, forKey: .name)
         storage = try container.decode(ValueStorage.self, forKey: .storage)
         mode = try container.decode(Mode.self, forKey: .mode)
-        attributes = try container.decode([PropertyAttribute].self,
+        objcAttributes = try container.decode([ObjcPropertyAttribute].self,
                                           forKey: .attributes)
         initialValue = try container.decodeIfPresent(Expression.self,
                                                      forKey: .initialValue)
@@ -152,7 +152,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         try container.encode(name, forKey: .name)
         try container.encode(storage, forKey: .storage)
         try container.encode(mode, forKey: .mode)
-        try container.encode(attributes, forKey: .attributes)
+        try container.encode(objcAttributes, forKey: .attributes)
         try container.encode(initialValue, forKey: .initialValue)
         
         try super.encode(to: container.superEncoder())

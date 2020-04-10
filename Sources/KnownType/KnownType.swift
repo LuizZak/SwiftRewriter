@@ -159,7 +159,7 @@ public protocol KnownProperty: KnownMember {
     var storage: ValueStorage { get }
     
     /// Property's attributes
-    var attributes: [PropertyAttribute] { get }
+    var objcAttributes: [ObjcPropertyAttribute] { get }
     
     /// True if this method is an optional protocol conformance property
     var optional: Bool { get }

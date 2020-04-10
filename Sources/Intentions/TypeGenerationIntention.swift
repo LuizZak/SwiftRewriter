@@ -147,7 +147,7 @@ public class TypeGenerationIntention: FromSourceIntention {
         let intention =
             PropertyGenerationIntention(name: knownProperty.name,
                                         storage: knownProperty.storage,
-                                        attributes: knownProperty.attributes)
+                                        objcAttributes: knownProperty.objcAttributes)
         
         addProperty(intention)
         

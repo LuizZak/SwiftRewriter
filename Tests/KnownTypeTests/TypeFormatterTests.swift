@@ -32,6 +32,18 @@ class TypeFormatterTests: XCTestCase {
         )
     }
     
+    func testAsStringStaticPropertyFromType() {
+        let type =
+            KnownTypeBuilder(typeName: "A")
+                .property(named: "a", type: .int, isStatic: true)
+                .build()
+        
+        XCTAssertEqual(
+            "static A.a: Int",
+            TypeFormatter.asString(property: type.knownProperties[0], ofType: type)
+        )
+    }
+    
     func testAsStringPropertyFromTypeWithTypeNameAndVarKeywordAndAccessors() {
         let storage = ValueStorage(type: .int, ownership: .weak, isConstant: true)
         let type =
@@ -89,7 +101,7 @@ class TypeFormatterTests: XCTestCase {
             TypeFormatter.asString(field: field, ofType: type)
         )
     }
-    
+
     func testAsStringSubscript() {
         let type =
             KnownTypeBuilder(typeName: "A")
@@ -98,6 +110,18 @@ class TypeFormatterTests: XCTestCase {
         
         XCTAssertEqual(
             "A.subscript(index: Int) -> String",
+            TypeFormatter.asString(subscript: type.knownSubscripts[0], ofType: type)
+        )
+    }
+    
+    func testAsStringStaticSubscript() {
+        let type =
+            KnownTypeBuilder(typeName: "A")
+                .subscription(indexType: .int, type: .string, isStatic: true)
+                .build()
+        
+        XCTAssertEqual(
+            "static A.subscript(index: Int) -> String",
             TypeFormatter.asString(subscript: type.knownSubscripts[0], ofType: type)
         )
     }

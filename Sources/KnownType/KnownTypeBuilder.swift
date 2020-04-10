@@ -323,7 +323,7 @@ public struct KnownTypeBuilder {
                          isStatic: Bool = false,
                          optional: Bool = false,
                          accessor: KnownPropertyAccessor = .getterAndSetter,
-                         propertyAttributes: [PropertyAttribute] = [],
+                         propertyAttributes: [ObjcPropertyAttribute] = [],
                          attributes: [KnownAttribute] = [],
                          isEnumCase: Bool = false,
                          semantics: Set<Semantic> = [],
@@ -753,7 +753,7 @@ final class BuildingKnownProperty: KnownProperty, Codable {
     var ownerType: KnownTypeReference?
     var name: String
     var storage: ValueStorage
-    var attributes: [PropertyAttribute]
+    var objcAttributes: [ObjcPropertyAttribute]
     var isStatic: Bool
     var optional: Bool
     var accessor: KnownPropertyAccessor
@@ -763,14 +763,14 @@ final class BuildingKnownProperty: KnownProperty, Codable {
     var annotations: [String]
     
     init(ownerType: KnownTypeReference?, name: String, storage: ValueStorage,
-         attributes: [PropertyAttribute], isStatic: Bool, optional: Bool,
+         attributes: [ObjcPropertyAttribute], isStatic: Bool, optional: Bool,
          accessor: KnownPropertyAccessor, knownAttributes: [KnownAttribute],
          isEnumCase: Bool, semantics: Set<Semantic>, annotations: [String]) {
         
         self.ownerType = ownerType
         self.name = name
         self.storage = storage
-        self.attributes = attributes
+        self.objcAttributes = attributes
         self.isStatic = isStatic
         self.optional = optional
         self.accessor = accessor

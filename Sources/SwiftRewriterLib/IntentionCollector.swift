@@ -401,14 +401,14 @@ public class IntentionCollector {
         
         let attributes =
             node.attributesList?
-                .attributes.map { attr -> PropertyAttribute in
+                .attributes.map { attr -> ObjcPropertyAttribute in
                     switch attr.attribute {
                     case .getter(let getter):
-                        return PropertyAttribute.getterName(getter)
+                        return ObjcPropertyAttribute.getterName(getter)
                     case .setter(let setter):
-                        return PropertyAttribute.setterName(setter)
+                        return ObjcPropertyAttribute.setterName(setter)
                     case .keyword(let keyword):
-                        return PropertyAttribute.attribute(keyword)
+                        return ObjcPropertyAttribute.attribute(keyword)
                     }
                 } ?? []
         
@@ -420,7 +420,7 @@ public class IntentionCollector {
             let prop =
                 ProtocolPropertyGenerationIntention(name: node.identifier?.name ?? "",
                                                     storage: storage,
-                                                    attributes: attributes,
+                                                    objcAttributes: attributes,
                                                     source: node)
             prop.isOptional = node.isOptionalProperty
             prop.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
@@ -434,7 +434,7 @@ public class IntentionCollector {
             let prop =
                 PropertyGenerationIntention(name: node.identifier?.name ?? "",
                                             storage: storage,
-                                            attributes: attributes,
+                                            objcAttributes: attributes,
                                             source: node)
             prop.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
             prop.knownAttributes = knownAttributes

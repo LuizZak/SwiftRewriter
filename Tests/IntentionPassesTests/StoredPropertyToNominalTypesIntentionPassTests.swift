@@ -64,7 +64,7 @@ class StoredPropertyToNominalTypesIntentionPassTests: XCTestCase {
                     file.createClass(withName: "A")
                     file.createExtension(forClassNamed: "A") { builder in
                         builder.createProperty(named: "a", type: .int, mode: mode,
-                                               attributes: [PropertyAttribute.attribute("readonly")])
+                                               attributes: [ObjcPropertyAttribute.attribute("readonly")])
                     }
                 }.build()
         let cls = intentions.classIntentions()[0]

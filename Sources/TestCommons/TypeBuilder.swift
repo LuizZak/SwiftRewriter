@@ -19,7 +19,7 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     @discardableResult
     public func createProperty(named name: String,
                                type: SwiftType,
-                               attributes: [PropertyAttribute] = []) -> TypeBuilder {
+                               attributes: [ObjcPropertyAttribute] = []) -> TypeBuilder {
         
         createProperty(named: name, type: type, mode: .asField, attributes: attributes)
     }
@@ -28,7 +28,7 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     public func createProperty(named name: String,
                                type: SwiftType,
                                mode: PropertyGenerationIntention.Mode = .asField,
-                               attributes: [PropertyAttribute] = [],
+                               attributes: [ObjcPropertyAttribute] = [],
                                builder: (MemberBuilder<PropertyGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
         
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
