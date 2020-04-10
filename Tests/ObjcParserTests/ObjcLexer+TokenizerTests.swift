@@ -3,10 +3,6 @@ import GrammarModels
 @testable import ObjcParser
 
 class ObjcLexer_TokenizerTests: XCTestCase {
-    override func setUp() {
-        super.setUp()
-    }
-    
     func testTokenizeIdentifiers() {
         expect("AnIdentifier", toTokenizeAs: .identifier("AnIdentifier"))
         expect("_AnIdentifier_", toTokenizeAs: .identifier("_AnIdentifier_"))
