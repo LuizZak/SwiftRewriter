@@ -147,14 +147,14 @@ public class ReachingDefinitionAnalyzer {
                 )
             
         case let stmt as ExpressionsStatement:
-            var killed: Set<Definition> = []
+            var generated: Set<Definition> = []
             
             for exp in stmt.expressions {
                 let usages =
                     LocalUsageAnalyzer(typeSystem: typeSystem)
                         .findAllUsages(in: exp, functionBody: functionBody)
                 
-                let localsKilled =
+                let localsGenerated =
                     usages.filter { usage in
                         !usage.isReadOnlyUsage
                     }.compactMap { usage in
@@ -163,10 +163,10 @@ public class ReachingDefinitionAnalyzer {
                         Definition(definitionSite: exp, definition: $0)
                     }
                 
-                killed.formUnion(localsKilled)
+                generated.formUnion(localsGenerated)
             }
             
-            return killed
+            return generated
             
         case let stmt as IfStatement:
             guard let pattern = stmt.pattern else {

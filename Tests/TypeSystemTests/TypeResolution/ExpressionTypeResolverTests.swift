@@ -463,7 +463,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .for(.identifier("i"), exp, body: [])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .int)
+            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .int, isConstant: true)
     }
     
     func testForLoopArrayTypeResolving_OpenRange() {
@@ -476,7 +476,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .for(.identifier("i"), exp, body: [])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .int)
+            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .int, isConstant: true)
     }
     
     func testForLoopArrayTypeResolving_ClosedRange() {
@@ -489,7 +489,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .for(.identifier("i"), exp, body: [])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .int)
+            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .int, isConstant: true)
     }
     
     func testForLoopArrayTypeResolving_NonArray() {
@@ -502,7 +502,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .for(.identifier("i"), exp, body: [])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .errorType)
+            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .errorType, isConstant: true)
     }
     
     func testMemberLookup() {
@@ -590,6 +590,22 @@ class ExpressionTypeResolverTests: XCTestCase {
             }
             .definingLocal(name: "b", type: .int)
             .definingLocal(name: "a", type: .typeName("A"))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .int)
+    }
+    
+    func testStaticSubscriptLookup() {
+        // A[b]
+        let exp = Expression.identifier("A").sub(.identifier("b"))
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(named: "A") { builder in
+                return
+                    builder
+                        .subscription(indexType: .int, type: .int, isStatic: true)
+                        .build()
+            }
+            .definingLocal(name: "b", type: .int)
             .resolve()
             .thenAssertExpression(resolvedAs: .int)
     }
@@ -756,6 +772,18 @@ class ExpressionTypeResolverTests: XCTestCase {
                           sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .implicitUnwrappedOptional(.int))
             .thenAssertDefined(localNamed: "a", type: .int)
+    }
+    
+    func testVariableDeclarationDoesNotTransmitOptionalForWeakDeclarations() {
+        _=startScopedTest(with:
+            Statement.variableDeclaration(identifier: "a",
+                                          type: .optional("A"),
+                                          ownership: .weak,
+                                          initialization: Expression.identifier("value")),
+                          sut: ExpressionTypeResolver())
+            .definingType(KnownTypeBuilder(typeName: "A").build())
+            .definingLocal(name: "value", type: "A")
+            .thenAssertDefined(localNamed: "a", type: .optional("A"), ownership: .weak)
     }
     
     /// Tests that on an assignment expression, the right-hand-side of the expression

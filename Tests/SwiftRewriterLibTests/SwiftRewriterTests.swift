@@ -565,7 +565,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     // TODO: Fix this test
-    func _testRewriteCFunctionWithCFunctionParameter() {
+    func xtestRewriteCFunctionWithCFunctionParameter() {
         assertObjcParse(
             objc: """
             typedef int (*cmpfn234_2)(void (*)(), void *);
@@ -2674,6 +2674,155 @@ class SwiftRewriterTests: XCTestCase {
                     @throwerror;
                     */
                 } else {
+                }
+            }
+            """)
+    }
+
+    func testRewriteAutotypeDeclaration() {
+        assertObjcParse(
+            objc: """
+            void f() {
+                __auto_type value = 1;
+            }
+            """,
+            swift: """
+            func f() {
+                // decl type: Int
+                // init type: Int
+                let value = 1
+            }
+            """,
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
+    }
+
+    func testRewriteAutotypeDeclarationDependent() {
+        assertObjcParse(
+            objc: """
+            void f() {
+                __auto_type value = 1;
+                __auto_type valueDep = value;
+            }
+            """,
+            swift: """
+            func f() {
+                // decl type: Int
+                // init type: Int
+                let value = 1
+                // decl type: Int
+                // init type: Int
+                let valueDep = value
+            }
+            """,
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
+    }
+    
+    func testRewriteWeakAutotypeDeclaration() {
+        assertObjcParse(
+            objc: """
+            @interface A
+            @end
+            @implementation A
+            - (void)foo {
+                __weak __auto_type weakSelf = self;
+            }
+            @end
+            """,
+            swift: """
+            class A {
+                func foo() {
+                    // decl type: A?
+                    // init type: A
+                    weak var weakSelf = self
+                }
+            }
+            """,
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
+    }
+    
+    func testRewriteFixedArray() {
+        assertObjcParse(
+            objc: """
+            typedef struct {
+                int a[3];
+            } A;
+            """,
+            swift: """
+            struct A {
+                var a: (CInt, CInt, CInt)
+
+                init() {
+                    a = (0, 0, 0)
+                }
+                init(a: (CInt, CInt, CInt)) {
+                    self.a = a
+                }
+            }
+            """)
+    }
+    
+    func testRewriteEmptyFixedArray() {
+        assertObjcParse(
+            objc: """
+            typedef struct {
+                int a[0];
+            } A;
+            """,
+            swift: """
+            struct A {
+                var a: Void
+
+                init() {
+                    a = ()
+                }
+                init(a: Void) {
+                    self.a = a
+                }
+            }
+            """)
+    }
+    
+    func testRewriteFixedArrayOfFixedArray() {
+        assertObjcParse(
+            objc: """
+            typedef struct {
+                int a[3][2];
+            } A;
+            """,
+            swift: """
+            struct A {
+                var a: ((CInt, CInt), (CInt, CInt), (CInt, CInt))
+
+                init() {
+                    a = ((0, 0), (0, 0), (0, 0))
+                }
+                init(a: ((CInt, CInt), (CInt, CInt), (CInt, CInt))) {
+                    self.a = a
+                }
+            }
+            """)
+    }
+    
+    func testRewriteAccessIntoOptionalWeakType() {
+        assertObjcParse(
+            objc: """
+            @interface A
+            @property NSInteger a;
+            @end
+            @implementation A
+            - (void)test {
+                __weak __auto_type weakSelf = self;
+                weakSelf.a = 10;
+            }
+            @end
+            """,
+            swift: """
+            class A {
+                var a: Int = 0
+            
+                func test() {
+                    weak var weakSelf = self
+                    weakSelf?.a = 10
                 }
             }
             """)

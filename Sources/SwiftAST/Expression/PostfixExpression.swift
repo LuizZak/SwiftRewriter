@@ -247,7 +247,7 @@ public final class MemberPostfix: Postfix {
     public let name: String
     
     public override var description: String {
-        super.description + "." + name
+        "\(super.description).\(name)"
     }
     
     public init(name: String) {
@@ -317,7 +317,7 @@ public final class SubscriptPostfix: Postfix {
     public let expression: Expression
     
     public override var description: String {
-        super.description + "[" + expression.description + "]"
+        "\(super.description)[\(expression.description)]"
     }
     
     public override var subExpressions: [Expression] {
@@ -402,7 +402,7 @@ public final class FunctionCallPostfix: Postfix {
     public let arguments: [FunctionArgument]
     
     public override var description: String {
-        super.description + "(" + arguments.map { $0.description }.joined(separator: ", ") + ")"
+        "\(super.description)(\(arguments.map(\.description).joined(separator: ", ")))"
     }
     
     public override var subExpressions: [Expression] {
@@ -411,7 +411,7 @@ public final class FunctionCallPostfix: Postfix {
     
     /// Gets the list of keywords for the arguments passed to this function call.
     public var argumentKeywords: [String?] {
-        arguments.map { $0.label }
+        arguments.map(\.label)
     }
     
     /// A .block callable signature for this function call postfix.
@@ -419,7 +419,7 @@ public final class FunctionCallPostfix: Postfix {
     
     public init(arguments: [FunctionArgument]) {
         self.arguments = arguments
-        self._subExpressions = arguments.map { $0.expression }
+        self._subExpressions = arguments.map(\.expression)
         
         super.init()
     }

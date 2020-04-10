@@ -1,7 +1,7 @@
-/// Specifies an attribute for a property
-public enum PropertyAttribute: Hashable, Codable {
+/// Specifies an Objective-C attribute for a property
+public enum ObjcPropertyAttribute: Hashable, Codable {
     /// Standard `readonly` property attribute
-    public static var readonly: PropertyAttribute = .attribute("readonly")
+    public static var readonly: ObjcPropertyAttribute = .attribute("readonly")
     
     case attribute(String)
     case setterName(String)

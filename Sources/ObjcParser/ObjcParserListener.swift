@@ -628,14 +628,14 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Parameter list
-        let parameterListNode = context.pushContext(nodeType: ParameterList.self)
+        context.pushContext(nodeType: ParameterList.self)
         defer {
             context.popContext()
         }
         
         if let params = ctx.parameterList(), let paramDecl = params.parameterDeclarationList() {
             for param in paramDecl.parameterDeclaration() {
-                let node = context.pushContext(nodeType: FunctionParameter.self)
+                context.pushContext(nodeType: FunctionParameter.self)
                 defer {
                     context.popContext()
                 }
@@ -1086,11 +1086,11 @@ private class GenericParseTreeContextMapper {
     }
     
     private func match(ruleType: ParserRuleContext.Type) -> Pair? {
-        if exceptions.contains(where: { ObjectIdentifier($0) == ObjectIdentifier(ruleType) }) {
+        if exceptions.contains(where: { $0 == ruleType }) {
             return nil
         }
         
-        return pairs.first { ObjectIdentifier($0.ruleType) == ObjectIdentifier(ruleType) }
+        return pairs.first { $0.ruleType == ruleType }
     }
     
     private enum Pair {

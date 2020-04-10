@@ -54,7 +54,7 @@ public final class SwiftWriter {
         
         let mutex = Mutex()
         
-        for file in fileIntents {
+        for file in fileIntents where shouldOutputFile(file) {
             if unique.contains(file.targetPath) {
                 print("""
                     Found duplicated file intent to save to path \(file.targetPath).
@@ -98,6 +98,10 @@ public final class SwiftWriter {
                                    origin: error.0,
                                    location: .invalid)
         }
+    }
+    
+    func shouldOutputFile(_ file: FileGenerationIntention) -> Bool {
+        return file.isPrimary
     }
 }
 
@@ -167,6 +171,7 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
         
         return shouldEmitTypeSignature(forInitVal: initialValue,
                                        varType: storage.type,
+                                       ownership: storage.ownership,
                                        isConstant: storage.isConstant)
     }
     
@@ -194,9 +199,10 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
         
     }
     
-    private func shouldEmitTypeSignature(forInitVal exp: Expression,
-                                         varType: SwiftType,
-                                         isConstant: Bool) -> Bool {
+    func shouldEmitTypeSignature(forInitVal exp: Expression,
+                                 varType: SwiftType,
+                                 ownership: Ownership,
+                                 isConstant: Bool) -> Bool {
         
         if exp.isErrorTyped {
             return true
@@ -240,7 +246,12 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
             }
             
             if type.isOptional != varType.isOptional {
-                return true
+                let isSame = type.deepUnwrapped == varType.deepUnwrapped
+                let isWeak = ownership == .weak
+                
+                if !isSame || !isWeak {
+                    return true
+                }
             }
             
             return !typeSystem.typesMatch(type, varType, ignoreNullability: true)
@@ -403,7 +414,14 @@ internal func evaluateOwnershipPrefix(inType type: ObjcType,
     
     var ownership: Ownership = .strong
     if !type.isPointer {
-        return .strong
+        // We don't have enough information at statement parsing time to conclude
+        // that an __auto_type declaration does not resolve in fact to a pointer.
+        // Keep ownership modifiers for now
+        if case .specified(_, .struct("__auto_type")) = type {
+            // skip return
+        } else {
+            return .strong
+        }
     }
     
     switch type {

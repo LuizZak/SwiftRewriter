@@ -13,7 +13,7 @@ struct ValueTransformerWrapper: PostfixInvocationTransformer {
     }
     
     public func attemptApply(on postfix: PostfixExpression) -> Expression? {
-        valueTransformer.transform(value: postfix)
+        valueTransformer(transform: postfix)
     }
 }
 

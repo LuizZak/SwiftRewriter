@@ -16,6 +16,7 @@ public class SwiftRewriterJob {
     public var preprocessors: [SourcePreprocessor]
     public var settings: SwiftRewriter.Settings = .default
     public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
+    public var parserCache: ParserCache? = nil
     
     public init(input: InputSourcesProvider,
                 intentionPassesSource: IntentionPassSource?,
@@ -24,7 +25,8 @@ public class SwiftRewriterJob {
                 syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider?,
                 preprocessors: [SourcePreprocessor],
                 settings: SwiftRewriter.Settings,
-                swiftSyntaxOptions: SwiftSyntaxOptions) {
+                swiftSyntaxOptions: SwiftSyntaxOptions,
+                parserCache: ParserCache?) {
         
         self.intentionPassesSource = intentionPassesSource
         self.astRewriterPassSources = astRewriterPassSources
@@ -34,6 +36,7 @@ public class SwiftRewriterJob {
         self.settings = settings
         self.input = input
         self.swiftSyntaxOptions = swiftSyntaxOptions
+        self.parserCache = parserCache
     }
     
     /// Executes a transpilation job, returning the result of the operation.
@@ -70,6 +73,7 @@ public class SwiftRewriterJob {
         
         rewriter.writerOptions = swiftSyntaxOptions
         rewriter.preprocessors = preprocessors
+        rewriter.parserCache = parserCache
         
         return rewriter
     }

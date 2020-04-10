@@ -1,4 +1,5 @@
-/// Provides a facility to analyze a postfix expression in left-to-right fashion.
+/// Acts as a facilitator when analyzing a postfix expression in a left-to-right
+/// fashion.
 public final class PostfixChainInverter {
     private var expression: PostfixExpression
     

@@ -33,7 +33,7 @@ public extension TypeFormatter {
             printAttributes: if !attr.isEmpty {
                 if sameLine {
                     if attrInLine.count < attrInLineLimit {
-                        o.outputIdentation()
+                        o.outputIndentation()
                         o.outputInlineWithSpace(attrInLine, style: .keyword)
                         
                         return true
@@ -77,7 +77,7 @@ public extension TypeFormatter {
         o.outputLineFeed()
         
         // Type body
-        o.idented {
+        o.indented {
             let outputField: (KnownProperty) -> Void = { field in
                 let didPrintSameLine = outputAttributesAndAnnotations(field.knownAttributes,
                                                                       field.annotations,
@@ -89,7 +89,7 @@ public extension TypeFormatter {
                                     includeVarKeyword: true)
                 
                 if !didPrintSameLine {
-                    o.outputIdentation()
+                    o.outputIndentation()
                 }
                 
                 o.outputInline(line)
@@ -115,7 +115,7 @@ public extension TypeFormatter {
                 }
                 
                 if !didPrintSameLine {
-                    o.outputIdentation()
+                    o.outputIndentation()
                 }
                 
                 o.outputInline(line)
@@ -134,7 +134,7 @@ public extension TypeFormatter {
                                     includeAccessors: subscriptDecl.isConstant)
                 
                 if !didPrintSameLine {
-                    o.outputIdentation()
+                    o.outputIndentation()
                 }
                 
                 o.outputInline(line)
@@ -143,8 +143,8 @@ public extension TypeFormatter {
                 _onFirstDeclaration = false
             }
             
-            let staticFields = type.knownFields.filter { $0.isStatic }
-            let staticProperties = type.knownProperties.filter { $0.isStatic }
+            let staticFields = type.knownFields.filter(\.isStatic)
+            let staticProperties = type.knownProperties.filter(\.isStatic)
             let instanceFields = type.knownFields.filter { !$0.isStatic }
             let instanceProperties = type.knownProperties.filter { !$0.isStatic }
             
@@ -184,7 +184,7 @@ public extension TypeFormatter {
             }
         }
         
-        o.outputIdentation()
+        o.outputIndentation()
         o.outputInline("}")
         
         return o.buffer
@@ -281,8 +281,7 @@ public extension TypeFormatter {
         
         var result = ""
         
-        // TODO: Support static subscript declarations
-        // result += decl.isStatic ? "static " : ""
+        result += decl.isStatic ? "static " : ""
         
         if typeName {
             result += type.typeName + "."
@@ -341,6 +340,6 @@ public extension TypeFormatter {
     }
     
     static func stringify(_ semantics: [Semantic]) -> String {
-        semantics.map { $0.name }.joined(separator: ", ")
+        semantics.map(\.name).joined(separator: ", ")
     }
 }

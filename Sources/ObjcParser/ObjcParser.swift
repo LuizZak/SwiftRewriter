@@ -1,3 +1,4 @@
+import Foundation
 import MiniLexer
 import GrammarModels
 import class Antlr4.BaseErrorListener
@@ -67,6 +68,8 @@ public class ObjcParser {
     /// A state used to instance single threaded parsers.
     /// The default parser state, in case the user did not provide one on init.
     private static var _singleThreadState: ObjcParserState = ObjcParserState()
+
+    var parsed: Bool = false
     
     // MARK: ANTLR parser
     var mainParser: AntlrParser<ObjectiveCLexer, ObjectiveCParser>?
@@ -95,6 +98,7 @@ public class ObjcParser {
     
     /// Preprocessor directives found on this file
     public var preprocessorDirectives: [String] = []
+    public var importDirectives: [ObjcImportDecl] = []
     
     public var antlrSettings: AntlrSettings = .default
     
@@ -153,6 +157,10 @@ public class ObjcParser {
     
     /// Parses the entire source string
     public func parse() throws {
+        if parsed {
+            return
+        }
+
         // Clear previous state
         preprocessorDirectives = []
         
@@ -169,6 +177,10 @@ public class ObjcParser {
         let visitor = AnyASTVisitor(visit: { $0.originalSource = self.source })
         let traverser = ASTTraverser(node: rootNode, visitor: visitor)
         traverser.traverse()
+
+        importDirectives = ObjcParser.parseObjcImports(in: preprocessorDirectives)
+
+        parsed = true
     }
     
     private func tryParse<T: ParserRuleContext, P: Parser>(from parser: P, _ operation: (P) throws -> T) throws -> T {
@@ -183,11 +195,11 @@ public class ObjcParser {
         var root: T
         
         if antlrSettings.forceUseLLPrediction {
-            parser._interp.setPredictionMode(.LL)
+            parser.getInterpreter().setPredictionMode(.LL)
             
             root = try operation(parser)
         } else {
-            parser._interp.setPredictionMode(.SLL)
+            parser.getInterpreter().setPredictionMode(.SLL)
             
             root = try operation(parser)
             
@@ -195,7 +207,7 @@ public class ObjcParser {
                 diag.removeAll()
                 
                 try parser.reset()
-                parser._interp.setPredictionMode(.LL)
+                parser.getInterpreter().setPredictionMode(.LL)
                 
                 root = try operation(parser)
             }
@@ -328,7 +340,7 @@ public class ObjcParser {
         var type: ObjcType
         
         var specifiers: [String] = []
-        while lexer.tokenType(matches: { $0.isTypeQualifier }) {
+        while lexer.tokenType(matches: \.isTypeQualifier) {
             let spec = lexer.nextToken().value
             specifiers.append(String(spec))
         }
@@ -341,18 +353,18 @@ public class ObjcParser {
                 let types =
                     _parseCommaSeparatedList(
                         braces: .operator(.lessThan), .operator(.greaterThan),
-                        itemParser: { try lexer.advance(matching: { $0.tokenType.isIdentifier }) })
+                        itemParser: { try lexer.advance(matching: \.tokenType.isIdentifier) })
                 
                 type = .id(protocols: types.map { String($0.value) })
             } else {
                 type = .id()
             }
-        } else if lexer.tokenType(matches: { $0.isIdentifier }) {
-            var typeName: String = String(try lexer.advance(matching: { $0.tokenType.isIdentifier }).value)
+        } else if lexer.tokenType(matches: \.isIdentifier) {
+            var typeName = String(try lexer.advance(matching: \.tokenType.isIdentifier).value)
             
             // 'long long' support
             if typeName == "long" && lexer.tokenType(is: .identifier("long")) {
-                typeName = String(try typeName + " " + lexer.advance(matching: { $0.tokenType.isIdentifier }).value)
+                typeName = try String(typeName + " " + lexer.advance(matching: \.tokenType.isIdentifier).value)
             }
             
             // 'signed', 'unsigned' support
@@ -387,7 +399,7 @@ public class ObjcParser {
         
         // Type qualifier
         var qualifiers: [String] = []
-        while lexer.tokenType(matches: { $0.isTypeQualifier }) {
+        while lexer.tokenType(matches: \.isTypeQualifier) {
             let qual = lexer.nextToken().value
             qualifiers.append(String(qual))
         }
@@ -494,6 +506,41 @@ public class ObjcParser {
         
         return items
     }
+
+    private static func parseObjcImports(in directives: [String]) -> [ObjcImportDecl] {
+        var imports: [ObjcImportDecl] = []
+
+        for directive in directives {
+            do {
+                let lexer = MiniLexer.Lexer(input: directive)
+
+                // "#import <[PATH]>"
+                try lexer.advance(expectingCurrent: "#"); lexer.skipWhitespace()
+
+                guard lexer.advanceIf(equals: "import") else { continue }
+
+                lexer.skipWhitespace()
+
+                if lexer.safeIsNextChar(equalTo: "<") {
+                    // Extract "<[PATH]>" now, e.g. "<UIKit/UIKit.h>" -> "UIKit/UIKit.h"
+                    try lexer.advance(expectingCurrent: "<")
+                    let path = lexer.consume(until: { $0 == ">"})
+
+                    imports.append(ObjcImportDecl(path: String(path), isSystemImport: true))
+                } else {
+                    // Extract "[PATH]"
+                    try lexer.advance(expectingCurrent: "\"")
+                    let path = lexer.consume(until: { $0 == "\""})
+
+                    imports.append(ObjcImportDecl(path: String(path), isSystemImport: false))
+                }
+            } catch {
+                // Ignore silently
+            }
+        }
+
+        return imports
+    }
 }
 
 public class DiagnosticsErrorListener: BaseErrorListener {
@@ -517,5 +564,22 @@ public class DiagnosticsErrorListener: BaseErrorListener {
             msg,
             origin: source.filePath,
             location: SourceLocation(line: line, column: charPositionInLine, utf8Offset: 0))
+    }
+}
+
+public struct ObjcImportDecl {
+    public var path: String
+    /// If `true`, indicates `#import` is of `#import <system_header>` variant,
+    /// as opposed to `#import "local_file"` variant.
+    public var isSystemImport: Bool
+    
+    public var pathComponents: [String] {
+        (path as NSString).pathComponents
+    }
+
+    /// Returns `true` if any of the path components of this import decl's
+    /// path match a given path component fully.
+    public func matchesPathComponent<S: StringProtocol>(_ path: S) -> Bool {
+        pathComponents.contains(where: { $0 == path })
     }
 }

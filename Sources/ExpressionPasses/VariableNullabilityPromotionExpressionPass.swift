@@ -37,6 +37,9 @@ public class VariableNullabilityPromotionExpressionPass: ASTRewriterPass {
             if decl.initialization == nil && decl.isConstant {
                 continue
             }
+            if decl.ownership == .weak {
+                continue
+            }
             if decl.initialization?.isErrorTyped == true {
                 continue
             }

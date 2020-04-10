@@ -21,14 +21,14 @@ open class ASTNode {
     private(set) public var children: [ASTNode] = []
     
     /// Parent node for this node
-    public weak var parent: ASTNode?
+    private(set) public weak var parent: ASTNode?
     
     /// Whether this node exists in the original source code or was synthesized
     /// (for syntax error correction etc.)
     public var existsInSource: Bool
     
     /// Indicates whether this node was completely contained within the range of
-    /// a NS_ASSUME_NONNULL_BEGIN/NS_ASSUME_NONNULL_END region.
+    /// a `NS_ASSUME_NONNULL_BEGIN`/`NS_ASSUME_NONNULL_END` region.
     public var isInNonnullContext: Bool = false
     
     /// Instantiates a bare ASTNode with a given range.
@@ -152,9 +152,9 @@ open class ASTNode {
 public extension ASTNode {
     func printNode(_ printer: (String) -> Void) {
         withoutActuallyEscaping(printer) { printer in
-            var ident = 0
+            var indent = 0
             func _printIndented(_ str: String) {
-                printer(String(repeating: " ", count: ident) + str)
+                printer(String(repeating: " ", count: indent) + str)
             }
             
             func _print(_ node: ASTNode) {
@@ -166,11 +166,11 @@ public extension ASTNode {
                 
                 _printIndented(nodeTitle)
                 
-                ident += 2
+                indent += 2
                 for child in node.children {
                     _print(child)
                 }
-                ident -= 2
+                indent -= 2
             }
             
             // --

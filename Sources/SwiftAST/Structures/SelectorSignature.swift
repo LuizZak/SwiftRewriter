@@ -15,7 +15,7 @@ public extension FunctionCallPostfix {
     /// a given method name.
     func selectorWith(methodName: String) -> SelectorSignature {
         let selectors: [String?]
-            = [methodName] + arguments.map { $0.label }
+            = [methodName] + arguments.map(\.label)
         
         return SelectorSignature(isStatic: false, keywords: selectors)
     }

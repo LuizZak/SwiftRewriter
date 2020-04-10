@@ -61,7 +61,7 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             implementations
                 .groupBy {
                     strippingPathExtension($0.sourcePath)
-                }.compactMapValues { $0.first }
+                }.compactMapValues(\.first)
         
         // Move all enum/protocol/global variables from header to implementation
         // files, when available

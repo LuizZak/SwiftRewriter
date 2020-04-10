@@ -62,7 +62,7 @@ extension ControlFlowGraph {
     
     func removeEdges<S: Sequence>(_ edgesToRemove: S) where S.Element == ControlFlowGraphEdge {
         edges = edges.filter { e in
-            !edgesToRemove.contains { $0 === e }
+            !edgesToRemove.contains(e)
         }
     }
 }
@@ -326,8 +326,6 @@ private extension ControlFlowGraph {
         if let def = stmt.defaultCase {
             let defResult = _connections(for: def)
             result = result.addingBranch(towards: defResult)
-        } else {
-            result = result.addingExitNode(node)
         }
         
         return result

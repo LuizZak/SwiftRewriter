@@ -139,7 +139,7 @@ class SwiftAttributeTransformationsExtractor {
             case .mapFromIdentifier(let identifier):
                 if identifier.name == "init" {
                     transforms.append(
-                        .initializer(old: identifier.parameterNames,
+                        .initializer(old: identifier.argumentLabels,
                                      new: ctor.parameters.argumentLabels()))
                 } else {
                     _mapStaticMethod(identifier)
@@ -163,7 +163,7 @@ class SwiftAttributeTransformationsExtractor {
         func makeTransformation(identifier: FunctionIdentifier) -> PostfixTransformation {
             
             // Free function to method conversion
-            if identifier.parameterNames.first == "self" {
+            if identifier.argumentLabels.first == "self" {
                 
                 let transformer = FunctionInvocationTransformer(
                     objcFunctionName: identifier.name,
@@ -209,7 +209,7 @@ class SwiftAttributeTransformationsExtractor {
                 let ident =
                     FunctionIdentifier(
                         name: ident,
-                        parameterNames: method.signature.asIdentifier.parameterNames)
+                        parameterNames: method.signature.asIdentifier.argumentLabels)
                 
                 let transformer =
                     MethodInvocationTransformerMatcher(
@@ -279,7 +279,7 @@ class SwiftAttributeTransformationsExtractor {
         var setter: String?
         
         func analyze(_ identifier: FunctionIdentifier) {
-            let params = identifier.parameterNames
+            let params = identifier.argumentLabels
             
             if params.isEmpty {
                 getter = identifier.name

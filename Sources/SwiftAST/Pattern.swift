@@ -139,7 +139,7 @@ extension Pattern: CustomStringConvertible {
     public var description: String {
         switch self.simplified {
         case .tuple(let tups):
-            return "(" + tups.map({ $0.description }).joined(separator: ", ") + ")"
+            return "(" + tups.map(\.description).joined(separator: ", ") + ")"
         case .expression(let exp):
             return exp.description
         case .identifier(let ident):

@@ -19,7 +19,7 @@ public class DictionaryLiteralExpression: Expression {
             return "[:]"
         }
         
-        return "[" + pairs.map { $0.description }.joined(separator: ", ") + "]"
+        return "[" + pairs.map(\.description).joined(separator: ", ") + "]"
     }
     
     public init(pairs: [ExpressionDictionaryPair]) {

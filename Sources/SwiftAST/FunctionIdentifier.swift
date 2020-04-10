@@ -4,24 +4,24 @@ public struct FunctionIdentifier: Hashable, Equatable, CustomStringConvertible {
     /// Base name of function
     public var name: String
     
-    /// Names of each parameter of the function call.
-    /// Nil parameter names indicate no parameter name at that position.
-    public var parameterNames: [String?]
+    /// Names of each argument of the function call.
+    /// Nil argument labels indicate no argument label at that position.
+    public var argumentLabels: [String?]
     
     public var description: String {
-        let parameters = parameterNames.map { ($0 ?? "_") + ":" }
+        let parameters = argumentLabels.map { ($0 ?? "_") + ":" }
         return "\(name)(\(parameters.joined()))"
     }
     
     public init(name: String, parameterNames: [String?]) {
         self.name = name
-        self.parameterNames = parameterNames
+        self.argumentLabels = parameterNames
     }
 }
 
 public extension FunctionCallPostfix {
     func identifierWith(methodName: String) -> FunctionIdentifier {
-        let arguments = self.arguments.map { $0.label }
+        let arguments = self.arguments.map(\.label)
         
         return FunctionIdentifier(name: methodName, parameterNames: arguments)
     }

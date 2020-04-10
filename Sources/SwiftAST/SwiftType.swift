@@ -299,7 +299,9 @@ public extension SwiftType {
         .nominal(.generic(name, parameters: parameters))
     }
     
-    static func swiftBlock(returnType: SwiftType, parameters: [SwiftType]) -> SwiftType {
+    static func swiftBlock(returnType: SwiftType,
+                           parameters: [SwiftType] = []) -> SwiftType {
+        
         .block(returnType: returnType, parameters: parameters, attributes: [])
     }
     
@@ -354,7 +356,7 @@ extension NominalSwiftType: CustomStringConvertible {
             return name
             
         case let .generic(name, params):
-            return name + "<" + params.map { $0.description }.joined(separator: ", ") + ">"
+            return name + "<" + params.map(\.description).joined(separator: ", ") + ">"
         }
     }
     
@@ -372,7 +374,7 @@ extension ProtocolCompositionComponent: CustomStringConvertible {
     public var description: String {
         switch self {
         case .nested(let items):
-            return items.map { $0.description }.joined(separator: ".")
+            return items.map(\.description).joined(separator: ".")
         case .nominal(let nominal):
             return nominal.description
         }
@@ -394,12 +396,12 @@ extension SwiftType: CustomStringConvertible {
                 attributes.sorted { $0.description < $1.description }
             
             let attributeString =
-                sortedAttributes.map { $0.description }.joined(separator: " ")
+                sortedAttributes.map(\.description).joined(separator: " ")
             
             return
                 (attributeString.isEmpty ? "" : attributeString + " ")
                     + "("
-                    + parameters.map { $0.description }.joined(separator: ", ")
+                    + parameters.map(\.description).joined(separator: ", ")
                     + ") -> "
                     + returnType.description
             
@@ -413,7 +415,7 @@ extension SwiftType: CustomStringConvertible {
             return type.descriptionWithParens + "!"
             
         case let .protocolComposition(types):
-            return types.map { $0.description }.joined(separator: " & ")
+            return types.map(\.description).joined(separator: " & ")
             
         case let .metatype(innerType):
             return innerType.descriptionWithParens + ".Type"
@@ -422,10 +424,10 @@ extension SwiftType: CustomStringConvertible {
             return "Void"
             
         case let .tuple(.types(inner)):
-            return "(" + inner.map { $0.description }.joined(separator: ", ") + ")"
+            return "(" + inner.map(\.description).joined(separator: ", ") + ")"
             
         case .nested(let items):
-            return items.map { $0.description }.joined(separator: ".")
+            return items.map(\.description).joined(separator: ".")
             
         case .array(let type):
             return "[\(type)]"
@@ -727,15 +729,11 @@ extension TwoOrMore: Collection {
 }
 
 // MARK: Equatable conditional conformance
-extension OneOrMore: Equatable where T: Equatable {
-}
-extension OneOrMore: Hashable where T: Hashable {
-}
+extension OneOrMore: Equatable where T: Equatable { }
+extension OneOrMore: Hashable where T: Hashable { }
 
-extension TwoOrMore: Equatable where T: Equatable {
-}
-extension TwoOrMore: Hashable where T: Hashable {
-}
+extension TwoOrMore: Equatable where T: Equatable { }
+extension TwoOrMore: Hashable where T: Hashable { }
 
 // MARK: Array initialization
 extension OneOrMore: ExpressibleByArrayLiteral {

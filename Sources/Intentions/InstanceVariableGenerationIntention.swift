@@ -55,7 +55,7 @@ public final class InstanceVariableGenerationIntention: MemberGenerationIntentio
 }
 
 extension InstanceVariableGenerationIntention: KnownProperty {
-    public var attributes: [PropertyAttribute] {
+    public var objcAttributes: [ObjcPropertyAttribute] {
         []
     }
     

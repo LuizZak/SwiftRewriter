@@ -21,23 +21,19 @@ extension ValueMatcherConvertible where Target == Self, Self: Equatable {
 }
 
 public extension Matchable {
-    
     static func matcher() -> ValueMatcher<Self> {
         ValueMatcher()
     }
     
     func matches(_ matcher: ValueMatcher<Self>) -> Bool {
-        matcher.matches(self)
+        matcher(matches: self)
     }
-    
 }
 
 public extension Statement {
-    
     static func matcher<T: Statement>(_ matcher: SyntaxMatcher<T>) -> SyntaxMatcher<T> {
         matcher
     }
-    
 }
 
 public extension ValueMatcher where T: Statement {
@@ -45,7 +41,7 @@ public extension ValueMatcher where T: Statement {
     func anyStatement() -> ValueMatcher<Statement> {
         ValueMatcher<Statement>().match { (value) -> Bool in
             if let value = value as? T {
-                return self.matches(value)
+                return self(matches: value)
             }
             
             return false

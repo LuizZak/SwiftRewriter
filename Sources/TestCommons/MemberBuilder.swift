@@ -146,11 +146,11 @@ public extension MemberBuilder where T: PropertyGenerationIntention {
     @discardableResult
     func setIsStatic(_ isStatic: Bool) -> MemberBuilder {
         if isStatic {
-            if !targetMember.attributes.contains(.attribute("class")) {
-                targetMember.attributes.append(.attribute("class"))
+            if !targetMember.objcAttributes.contains(.attribute("class")) {
+                targetMember.objcAttributes.append(.attribute("class"))
             }
         } else {
-            targetMember.attributes.removeAll(where: { $0 == .attribute("class") })
+            targetMember.objcAttributes.removeAll(where: { $0 == .attribute("class") })
         }
         
         return self
@@ -165,7 +165,7 @@ public typealias InitializerBuilder = MemberBuilder<InitGenerationIntention>
 
 public extension MemberBuilder where T == PropertyGenerationIntention {
     convenience init(name: String, type: SwiftType) {
-        let prop = PropertyGenerationIntention(name: name, type: type, attributes: [])
+        let prop = PropertyGenerationIntention(name: name, type: type, objcAttributes: [])
         
         self.init(targetMember: prop)
     }
@@ -173,7 +173,7 @@ public extension MemberBuilder where T == PropertyGenerationIntention {
 
 public extension PropertyGenerationIntention {
     convenience init(name: String, type: SwiftType, builder: (PropertyBuilder) -> Void) {
-        self.init(name: name, type: type, attributes: [])
+        self.init(name: name, type: type, objcAttributes: [])
         
         builder(PropertyBuilder(targetMember: self))
     }

@@ -30,6 +30,21 @@ class ReachingDefinitionAnalysisTests: XCTestCase {
         XCTAssert(definitions.first?.definitionSite === body.statements[0])
     }
     
+    func testVarDeclReplace() {
+        let body: CompoundStatement = [
+            .variableDeclaration(identifier: "a", type: .int, initialization: .constant(0)),
+            .expression(Expression.assignment(lhs: .identifier("a"), op: .assign, rhs: .constant(1))),
+            .expression(Expression.identifier("a"))
+        ]
+        setupTest(with: body)
+        
+        let definitions = sut.reachingDefinitions(for: controlFlowGraph.graphNode(for: body.statements[2])!)
+        
+        XCTAssertEqual(definitions.count, 1)
+        XCTAssertEqual(definitions.first?.definition.name, "a")
+        XCTAssert(definitions.first?.definitionSite === body.statements[1].asExpressions?.expressions[0])
+    }
+    
     func testVarDeclWithNoInitialization() {
         let body: CompoundStatement = [
             .variableDeclaration(identifier: "a", type: .int, initialization: nil),
@@ -68,7 +83,7 @@ class ReachingDefinitionAnalysisTests: XCTestCase {
         XCTAssertEqual(definitions.count, 2)
         XCTAssertEqual(definitions.first?.definition.name, "a")
         XCTAssert(definitions.contains { $0.definitionSite === body.statements[0].asVariableDeclaration })
-        XCTAssert(definitions.contains { $0.definitionSite === body.statements[1].asIf!.body.statements[0].asExpressions?.expressions[0] })
+        XCTAssert(definitions.contains { $0.definitionSite === body.statements[1].asIf?.body.statements[0].asExpressions?.expressions[0] })
     }
     
     func testIfElse() {
@@ -103,8 +118,8 @@ class ReachingDefinitionAnalysisTests: XCTestCase {
         
         XCTAssertEqual(definitions.count, 2)
         XCTAssertEqual(definitions.first?.definition.name, "a")
-        XCTAssert(definitions.contains { $0.definitionSite === body.statements[1].asIf!.body.statements[0].asExpressions?.expressions[0] })
-        XCTAssert(definitions.contains { $0.definitionSite === body.statements[1].asIf!.elseBody!.statements[0].asExpressions?.expressions[0] })
+        XCTAssert(definitions.contains { $0.definitionSite === body.statements[1].asIf?.body.statements[0].asExpressions?.expressions[0] })
+        XCTAssert(definitions.contains { $0.definitionSite === body.statements[1].asIf?.elseBody?.statements[0].asExpressions?.expressions[0] })
     }
     
     func testIfLet() {

@@ -57,6 +57,7 @@ extension SwiftSyntaxProducerTests {
         ("testGenerateMultipleImportDirectives", testGenerateMultipleImportDirectives),
         ("testGeneratePreprocessorDirectivesInEmptyFile", testGeneratePreprocessorDirectivesInEmptyFile),
         ("testGeneratePreprocessorDirectivesInPopulatedFile", testGeneratePreprocessorDirectivesInPopulatedFile),
+        ("testGenerateVariableDeclarationTypes", testGenerateVariableDeclarationTypes),
         ("testWriteClassAttributes", testWriteClassAttributes),
         ("testWriteConvenienceInit", testWriteConvenienceInit),
         ("testWriteEnumAttributes", testWriteEnumAttributes),
@@ -111,6 +112,8 @@ extension SwiftSyntaxProducer_ExpTests {
         ("testSizeOfType", testSizeOfType),
         ("testSizeOfValue", testSizeOfValue),
         ("testTernary", testTernary),
+        ("testTuple", testTuple),
+        ("testTupleNestedInExpression", testTupleNestedInExpression),
         ("testUnary", testUnary),
     ]
 }

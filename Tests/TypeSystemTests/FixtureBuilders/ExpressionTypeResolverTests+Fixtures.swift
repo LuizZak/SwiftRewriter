@@ -2,7 +2,6 @@ import XCTest
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
 import TypeSystem
 import TestCommons
 import Commons
@@ -136,9 +135,11 @@ extension ExpressionTypeResolverTests {
         @discardableResult
         func thenAssertDefined(localNamed name: String,
                                type: SwiftType,
+                               ownership: Ownership = .strong,
+                               isConstant: Bool = false,
                                file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
             let storage =
-                ValueStorage(type: type, ownership: .strong, isConstant: false)
+                ValueStorage(type: type, ownership: ownership, isConstant: isConstant)
             
             return
                 thenAssertDefined(localNamed: name,
@@ -151,11 +152,12 @@ extension ExpressionTypeResolverTests {
         @discardableResult
         func thenAssertDefined(in scope: CodeScopeNode,
                                localNamed name: String,
-                               isConstant: Bool,
                                type: SwiftType,
+                               ownership: Ownership = .strong,
+                               isConstant: Bool = false,
                                file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
             let storage =
-                ValueStorage(type: type, ownership: .strong, isConstant: isConstant)
+                ValueStorage(type: type, ownership: ownership, isConstant: isConstant)
                 
             return
                 thenAssertDefined(in: scope,
@@ -239,7 +241,6 @@ extension ExpressionTypeResolverTests {
                 _=statement.accept(sut)
                 applied = true
             }
-            
             
             guard let exp = statement[keyPath: keyPath] else {
                 testCase.recordFailure(withDescription: """

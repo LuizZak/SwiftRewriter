@@ -80,7 +80,7 @@ public class PromoteProtocolPropertyConformanceIntentionPass: IntentionPass {
                 let property =
                     PropertyGenerationIntention(name: prop.name,
                                                 type: prop.memberType,
-                                                attributes: prop.attributes)
+                                                objcAttributes: prop.objcAttributes)
                 property
                     .history
                     .recordCreation(description: """

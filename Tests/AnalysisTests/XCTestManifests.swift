@@ -42,6 +42,7 @@ extension ControlFlowGraphCreationTests {
         ("testSwitchStatementFallthrough", testSwitchStatementFallthrough),
         ("testSwitchStatementFallthroughWithDefer", testSwitchStatementFallthroughWithDefer),
         ("testSwitchStatementFallthroughWithDeferInterwindedWithReturn", testSwitchStatementFallthroughWithDeferInterwindedWithReturn),
+        ("testSwitchStatementWithDefaultCase", testSwitchStatementWithDefaultCase),
         ("testVariableDeclaration", testVariableDeclaration),
         ("testWhileLoop", testWhileLoop),
         ("testWhileLoopWithBreak", testWhileLoopWithBreak),
@@ -79,6 +80,7 @@ extension ReachingDefinitionAnalysisTests {
         ("testIfElse", testIfElse),
         ("testIfLet", testIfLet),
         ("testVarDecl", testVarDecl),
+        ("testVarDeclReplace", testVarDeclReplace),
         ("testVarDeclWithNoInitialization", testVarDeclWithNoInitialization),
     ]
 }

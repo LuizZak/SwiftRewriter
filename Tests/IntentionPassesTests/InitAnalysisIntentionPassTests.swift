@@ -164,7 +164,7 @@ private extension InitAnalysisIntentionPassTests {
             return descs.joined(separator: ", ")
         }
         
-        static let none = InitFlags(rawValue: 0)
+        static let none = InitFlags([])
         static let failable = InitFlags(rawValue: 1)
         static let convenience = InitFlags(rawValue: 2)
     }

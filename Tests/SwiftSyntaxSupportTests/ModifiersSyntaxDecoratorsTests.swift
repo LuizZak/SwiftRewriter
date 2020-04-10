@@ -253,10 +253,10 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         let prot = ProtocolGenerationIntention(typeName: "Prot")
         
         withExtendedLifetime(prot) {
-            let optionalProp = ProtocolPropertyGenerationIntention(name: "name", type: .int, attributes: [])
+            let optionalProp = ProtocolPropertyGenerationIntention(name: "name", type: .int, objcAttributes: [])
             optionalProp.isOptional = true
             optionalProp.type = prot
-            let nonOptionalProp = ProtocolPropertyGenerationIntention(name: "name", type: .int, attributes: [])
+            let nonOptionalProp = ProtocolPropertyGenerationIntention(name: "name", type: .int, objcAttributes: [])
             nonOptionalProp.isOptional = false
             nonOptionalProp.type = prot
             let optionalMethod = ProtocolMethodGenerationIntention(name: "name", builder: { _ in })

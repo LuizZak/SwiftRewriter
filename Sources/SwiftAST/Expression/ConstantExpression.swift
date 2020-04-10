@@ -108,7 +108,7 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral,
 public extension Expression {
     @inlinable
     var asConstant: ConstantExpression? {
-        self as? ConstantExpression
+        cast()
     }
 }
 

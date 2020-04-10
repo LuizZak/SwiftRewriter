@@ -7,19 +7,21 @@ public protocol KnownFile {
     
     /// Gets a list of known types defined within this file.
     var types: [KnownType] { get }
+    
+    /// Gets a list of all globals defined within the file.
+    var globals: [KnownGlobal] { get }
+    
+    /// Gets a list of all import compiler directives used within the file.
+    var importDirectives: [String] { get }
 }
 
 /// Represents the structure of an Objective-C file.
 public protocol KnownObjectiveCFile: KnownFile {
-    /// Gets a list of all import compiler directives used within the file.
-    var importDirectives: [String] { get }
     
-    /// Gets a list of all globals defined within the file.
-    var globals: [KnownGlobal] { get }
 }
 
-/// A protocol for denoting global-level declartions, such as functions and variables.
-public protocol KnownGlobal: SemanticalObject {
+/// A protocol for denoting global-level declarations, such as functions and variables.
+public protocol KnownGlobal: KnownDeclaration, SemanticalObject {
     
 }
 

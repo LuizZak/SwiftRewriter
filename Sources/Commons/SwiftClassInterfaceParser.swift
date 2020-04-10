@@ -136,7 +136,7 @@ public final class SwiftClassInterfaceParser {
             .named(name)
             .settingIsExtension(isExtension)
             .protocolConformances(protocolNames: supertypes)
-            .settingAttributes(attributes.map { $0.asKnownAttribute })
+            .settingAttributes(attributes.map(\.asKnownAttribute))
     }
     
     /// ```
@@ -192,7 +192,7 @@ public final class SwiftClassInterfaceParser {
         let attributes: [Attribute] =
             (try? parseAttributes(from: tokenizer)) ?? []
         
-        let knownAttributes = attributes.map { $0.asKnownAttribute }
+        let knownAttributes = attributes.map(\.asKnownAttribute)
         
         let modifiers: [DeclarationModifier] =
             (try? parseDeclarationModifiers(from: tokenizer)) ?? []
@@ -254,6 +254,7 @@ public final class SwiftClassInterfaceParser {
             typeBuilder =
                 typeBuilder.subscription(indexType: subscriptDecl.subscriptType,
                                          type: subscriptDecl.type,
+                                         isStatic: modifiers.contains(.static),
                                          isConstant: subscriptDecl.isConstant,
                                          attributes: knownAttributes)
             
@@ -690,7 +691,7 @@ public final class SwiftClassInterfaceParser {
     /// ```
     private static func parseSwiftOperator(from tokenizer: Tokenizer) throws -> SwiftOperator {
         
-        let op = try tokenizer.advance(matching: { $0.tokenType.isOperator })
+        let op = try tokenizer.advance(matching: \.tokenType.isOperator)
         
         switch op.tokenType {
         case .operator(let o):

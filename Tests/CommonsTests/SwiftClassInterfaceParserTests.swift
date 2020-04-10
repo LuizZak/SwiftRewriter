@@ -214,6 +214,21 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownSubscripts[0].subscriptType, .int)
         XCTAssertEqual(type.knownSubscripts[0].type, .string)
         XCTAssertFalse(type.knownSubscripts[0].isConstant)
+        XCTAssertFalse(type.knownSubscripts[0].isStatic)
+    }
+    
+    func testParseStaticSubscription() throws {
+        let type = try parseType("""
+            class MyClass {
+                static subscript(index: Int) -> String
+            }
+            """)
+
+        XCTAssertEqual(type.knownSubscripts.count, 1)
+        XCTAssertEqual(type.knownSubscripts[0].subscriptType, .int)
+        XCTAssertEqual(type.knownSubscripts[0].type, .string)
+        XCTAssertFalse(type.knownSubscripts[0].isConstant)
+        XCTAssert(type.knownSubscripts[0].isStatic)
     }
 
     func testParseSubscriptionWithGetterSetter() throws {

@@ -6,7 +6,7 @@ import Utils
 public class Diagnostics {
     @ConcurrentValue private var _diagnostics: [DiagnosticMessage] = []
     public var diagnostics: [DiagnosticMessage] {
-        return _diagnostics;
+        return _diagnostics
     }
     
     public var errors: [DiagnosticMessage] {

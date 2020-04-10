@@ -85,7 +85,7 @@ public extension Expression {
     /// Returns the first non-`ParensExpression` child expression of this syntax
     /// node.
     ///
-    /// If `self` is not an instance of `ParensExpression`, self is returned
+    /// If this is not an instance of `ParensExpression`, `self` is returned
     /// instead.
     var unwrappingParens: Expression {
         if let parens = self as? ParensExpression {

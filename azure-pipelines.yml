@@ -9,14 +9,14 @@ trigger:
 jobs:
 - job: macOS
   pool:
-    vmImage: 'macOS-10.14'
+    vmImage: 'macOS-10.15'
   steps:
-  - bash: 'sudo xcode-select -s /Applications/Xcode_11.app/Contents/Developer'
+  - bash: 'sudo xcode-select -s /Applications/Xcode_11.4.app/Contents/Developer'
   - bash: 'swift test'
 
 - job: Linux
   container:
-    image: swift:5.1-bionic
+    image: swift:5.2-bionic
   pool:
     vmImage: ubuntu-16.04
   steps:

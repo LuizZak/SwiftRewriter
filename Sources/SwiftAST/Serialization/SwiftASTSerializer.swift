@@ -160,6 +160,9 @@ public final class SwiftASTSerializer {
             case is UnaryExpression:
                 kind = .unary
                 
+            case is TupleExpression:
+                kind = .tuple
+                
             case is UnknownExpression:
                 kind = .unknown
                 
@@ -220,6 +223,9 @@ public final class SwiftASTSerializer {
             case .unary:
                 expression = try container.decode(UnaryExpression.self, forKey: .expression)
                 
+            case .tuple:
+                expression = try container.decode(TupleExpression.self, forKey: .expression)
+                
             case .unknown:
                 expression = try container.decode(UnknownExpression.self, forKey: .expression)
             }
@@ -258,6 +264,7 @@ public final class SwiftASTSerializer {
         case sizeOf
         case ternary
         case unary
+        case tuple
         case unknown
     }
     

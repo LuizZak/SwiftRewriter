@@ -474,7 +474,18 @@ public class TypeSystem {
     }
     
     /// Returns an expression representing the default value for a given Swift type.
-    /// Returns nil, in case no default values are known
+    ///
+    /// Default values are the equivalent to a zeroed-out representation of the
+    /// value's contents in memory, so:
+    ///
+    /// - It is zero for numerical values;
+    /// - It is nil for optional values;
+    /// - For tuples containing types that have default values, the result is a
+    ///   tuple containing said default values - if any type within the tuple
+    ///   has no default value, nil is returned for the whole tuple.
+    ///
+    /// Returns nil, in case no default values are known or type is not representable
+    /// by a default value (i.e. a reference type).
     public func defaultValue(for type: SwiftType) -> Expression? {
         if isNumeric(type) {
             let exp: Expression = isInteger(type) ? .constant(0) : .constant(0.0)
@@ -511,6 +522,29 @@ public class TypeSystem {
             }
             
             return nil
+            
+        case .tuple(.empty):
+            let exp = Expression.tuple([])
+            exp.resolvedType = type
+            
+            return exp
+            
+        case .tuple(.types(let types)):
+            var defValues: [Expression] = []
+            
+            for type in types {
+                guard let defValue = defaultValue(for: type) else {
+                    return nil
+                }
+                
+                defValues.append(defValue)
+            }
+            
+            let exp = Expression.tuple(defValues)
+            exp.resolvedType = type
+            
+            return exp
+            
         default:
             return nil
         }
@@ -729,7 +763,7 @@ public class TypeSystem {
     public func constructor(withArgumentLabels labels: [String?], in type: KnownType) -> KnownConstructor? {
         if let constructor =
             type.knownConstructors
-                .first(where: { $0.parameters.map { $0.label }.elementsEqual(labels) }) {
+                .first(where: { $0.parameters.map(\.label).elementsEqual(labels) }) {
             return constructor
         }
         
@@ -882,10 +916,10 @@ public class TypeSystem {
     }
     
     /// Gets a subscription for a given index type on a given type
-    public func subscription(indexType: SwiftType, in type: KnownType) -> KnownSubscript? {
+    public func subscription(indexType: SwiftType, static isStatic: Bool, in type: KnownType) -> KnownSubscript? {
         let lookup = makeTypeMemberLookup()
         
-        return lookup.subscription(indexType: indexType, in: type)
+        return lookup.subscription(indexType: indexType, static: isStatic, in: type)
     }
     
     /// Returns a known type for a given SwiftType, if present.
@@ -915,7 +949,7 @@ public class TypeSystem {
             }
             
         case .protocolComposition(let types):
-            result = composeTypeWithKnownTypes(types.map { $0.description })
+            result = composeTypeWithKnownTypes(types.map(\.description))
             
         // Other Swift types are not supported, at the moment.
         default:
@@ -997,10 +1031,10 @@ public class TypeSystem {
     }
     
     /// Gets a subscription for a given index type on a given type
-    public func subscription(indexType: SwiftType, in type: SwiftType) -> KnownSubscript? {
+    public func subscription(indexType: SwiftType, static isStatic: Bool, in type: SwiftType) -> KnownSubscript? {
         let lookup = makeTypeMemberLookup()
         
-        return lookup.subscription(indexType: indexType, in: type)
+        return lookup.subscription(indexType: indexType, static: isStatic, in: type)
     }
     
     private func makeTypeMemberLookup() -> TypeMemberLookup {
@@ -1014,7 +1048,7 @@ public class TypeSystem {
                     TypeDefinitions
                         .classesList
                         .classes
-                        .groupBy({ $0.typeName })
+                        .groupBy(\.typeName)
                         .mapValues { $0[0] }
                 )
         }
@@ -1370,13 +1404,15 @@ private class TypeMemberLookup {
         }
     }
     
-    public func subscription(indexType: SwiftType, in type: KnownType) -> KnownSubscript? {
-        if let sub = type.knownSubscripts.first(where: { typeSystem.isType(indexType, assignableTo: $0.subscriptType) }) {
+    public func subscription(indexType: SwiftType, static isStatic: Bool, in type: KnownType) -> KnownSubscript? {
+        if let sub =
+            type.knownSubscripts
+                .first(where: { typeSystem.isType(indexType, assignableTo: $0.subscriptType) && $0.isStatic == isStatic }) {
             return sub
         }
         
         return typeSystem.supertype(of: type).flatMap {
-            subscription(indexType: indexType, in: $0)
+            subscription(indexType: indexType, static: isStatic, in: $0)
         }
     }
     
@@ -1494,12 +1530,12 @@ private class TypeMemberLookup {
         return result
     }
     
-    public func subscription(indexType: SwiftType, in type: SwiftType) -> KnownSubscript? {
+    public func subscription(indexType: SwiftType, static isStatic: Bool, in type: SwiftType) -> KnownSubscript? {
         guard let knownType = typeSystem.findType(for: type) else {
             return nil
         }
         
-        return subscription(indexType: indexType, in: knownType)
+        return subscription(indexType: indexType, static: isStatic, in: knownType)
     }
 }
 
@@ -1703,6 +1739,7 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
         let supertype: KnownTypeReference? = nil
         let typeName: String
         let kind: KnownTypeKind = .protocol
+        var knownFile: KnownFile? = nil
         let knownTraits: [String : TraitType] = [:]
         let knownConstructors: [KnownConstructor] = []
         let knownMethods: [KnownMethod] = []
@@ -1785,6 +1822,7 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         let supertype: KnownTypeReference?
         let typeName: String
         let kind: KnownTypeKind = .protocol
+        var knownFile: KnownFile? = nil
         let knownTraits: [String : TraitType] = [:]
         let knownConstructors: [KnownConstructor] = []
         let knownMethods: [KnownMethod] = []

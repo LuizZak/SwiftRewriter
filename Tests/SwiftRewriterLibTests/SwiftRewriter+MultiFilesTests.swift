@@ -679,6 +679,75 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             // End of file A.swift
             """)
     }
+    
+    func testIgnoresNonPrimaryFileInputs() {
+        assertThat()
+            .file(name: "A.h", """
+            @interface A
+            @end
+            """, isPrimary: true)
+            .file(name: "B.h", """
+            @interface B
+            @end
+            """, isPrimary: false)
+            .translatesToSwift("""
+            class A {
+            }
+            // End of file A.swift
+            """)
+    }
+    
+    func testNonPrimaryFilesContributeToPrimaryFileAnalysis() {
+        // Test that non-primary files are actually contributing to analysis on
+        // primary files by checking that 'B' is detected as a class and is not
+        // turning into an UnsafeMutablePointer<B>! type
+        assertThat()
+            .file(name: "A.h", """
+            @interface A
+            @property B *b;
+            @end
+            """, isPrimary: true)
+            .file(name: "B.h", """
+            @interface B
+            @end
+            """, isPrimary: false)
+            .translatesToSwift("""
+            class A {
+                var b: B!
+            }
+            // End of file A.swift
+            """)
+    }
+    
+    func testNonPrimaryFilesMerge() {
+        // Tests that non-primary files are still susceptible to merging into
+        // primary files
+        assertThat()
+            .file(name: "objc.h",
+            """
+            @interface MyClass
+            @property (nonnull) NSString *property;
+            - (nonnull id)myMethod:(nonnull NSString*)parameter;
+            @end
+            """, isPrimary: false)
+            .file(name: "objc.m",
+            """
+            @implementation MyClass
+            - (id)myMethod:(NSString*)parameter {
+            }
+            @end
+            """)
+            .translatesToSwift(
+            """
+            class MyClass {
+                var property: String
+            
+                func myMethod(_ parameter: String) -> AnyObject {
+                }
+            }
+            // End of file objc.swift
+            """)
+    }
 }
 
 extension SwiftRewriter_MultiFilesTests {

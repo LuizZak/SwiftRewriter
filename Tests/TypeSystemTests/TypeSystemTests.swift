@@ -70,7 +70,7 @@ class TypeSystemTests: XCTestCase {
                                  ignoreNullability: false))
     }
     
-    func testExpandBlockTypeAliases() {
+    func testTypesMatchExpandBlockTypeAliases() {
         sut.addTypealias(
             aliasName: "A",
             originalType: .swiftBlock(returnType: .void, parameters: []))
@@ -80,7 +80,7 @@ class TypeSystemTests: XCTestCase {
                                  ignoreNullability: false))
     }
     
-    func testExpandBlockTypeAliasesDeep() {
+    func testTypesMatchExpandBlockTypeAliasesDeep() {
         sut.addTypealias(aliasName: "A",
                          originalType: .swiftBlock(returnType: "B", parameters: []))
         
@@ -96,24 +96,98 @@ class TypeSystemTests: XCTestCase {
     
     func testDefaultValueForNumerics() {
         XCTAssertEqual(sut.defaultValue(for: .int), .constant(0))
+        XCTAssertEqual(sut.defaultValue(for: .int)?.resolvedType, .int)
         XCTAssertEqual(sut.defaultValue(for: .uint), .constant(0))
+        XCTAssertEqual(sut.defaultValue(for: .uint)?.resolvedType, .uint)
         XCTAssertEqual(sut.defaultValue(for: .float), .constant(0.0))
+        XCTAssertEqual(sut.defaultValue(for: .float)?.resolvedType, .float)
         XCTAssertEqual(sut.defaultValue(for: .double), .constant(0.0))
+        XCTAssertEqual(sut.defaultValue(for: .double)?.resolvedType, .double)
     }
     
     func testDefaultValueForBool() {
         XCTAssertEqual(sut.defaultValue(for: .bool), .constant(false))
+        XCTAssertEqual(sut.defaultValue(for: .bool)?.resolvedType, .bool)
     }
     
     func testDefaultValueForOptionals() {
         XCTAssertEqual(sut.defaultValue(for: .optional(.int)), .constant(.nil))
+        XCTAssertEqual(sut.defaultValue(for: .optional(.int))?.resolvedType, .optional(.int))
         XCTAssertEqual(sut.defaultValue(for: .optional(.string)), .constant(.nil))
+        XCTAssertEqual(sut.defaultValue(for: .optional(.string))?.resolvedType, .optional(.string))
         XCTAssertEqual(sut.defaultValue(for: .optional(.double)), .constant(.nil))
+        XCTAssertEqual(sut.defaultValue(for: .optional(.double))?.resolvedType, .optional(.double))
     }
     
     func testDefaultValueForOptionalOfArrayOfIntegers() {
         XCTAssertEqual(sut.defaultValue(for: .optional(.array(.int))), .constant(.nil))
+        XCTAssertEqual(sut.defaultValue(for: .optional(.array(.int)))?.resolvedType, .optional(.array(.int)))
     }
+    
+    func testDefaultValueForVoid() {
+        XCTAssertEqual(sut.defaultValue(for: .void), .tuple([]))
+        XCTAssertEqual(sut.defaultValue(for: .void)?.resolvedType, .void)
+    }
+    
+    func testDefaultValueForTuple() {
+        XCTAssertEqual(sut.defaultValue(for: .tuple(.types([.int, .int]))),
+                       .tuple([.constant(0), .constant(0)]))
+        
+        XCTAssertEqual(sut.defaultValue(for: .tuple(.types([.int, .int])))?.resolvedType,
+                       .tuple(.types([.int, .int])))
+    }
+    
+    func testDefaultValueForTupleWithNonRepresentableDefaultValue() {
+        XCTAssertNil(sut.defaultValue(for: .tuple(.types([.int, .typeName("UnknownType")]))))
+    }
+    
+    func testDefaultValueOfUnknownType() {
+        XCTAssertNil(sut.defaultValue(for: .typeName("UnknownType")))
+    }
+    
+    func testDefaultValueForClassTypeIsAlwaysNil() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .class)
+                .constructor()
+                .build()
+        sut.addType(str)
+        
+        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
+    }
+    
+    func testDefaultValueForProtocolTypeIsAlwaysNil() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .protocol)
+                .constructor()
+                .build()
+        sut.addType(str)
+        
+        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
+    }
+    
+    func testDefaultValueForStructWithNoEmptyConstructorEvaluatesToNil() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .build()
+        sut.addType(str)
+        
+        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
+    }
+    
+    func testDefaultValueForStructWithEmptyConstructor() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .constructor()
+                .build()
+        sut.addType(str)
+        
+        let result = sut.defaultValue(for: .typeName("A"))
+        
+        XCTAssertEqual(result, Expression.identifier("A").call())
+        XCTAssertEqual(result?.resolvedType, .typeName("A"))
+    }
+    
+    // MARK: -
     
     func testResolveTypeAliasesInOptionalArrayOfInts() {
         XCTAssertEqual(sut.resolveAlias(in: .optional(.array(.int))),
@@ -461,45 +535,6 @@ class TypeSystemTests: XCTestCase {
                                    static: false,
                                    includeOptional: false,
                                    in: cls))
-    }
-    
-    func testDefaultValueForClassTypeIsAlwaysNil() {
-        let str =
-            KnownTypeBuilder(typeName: "A", kind: .class)
-                .constructor()
-                .build()
-        sut.addType(str)
-        
-        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
-    }
-    
-    func testDefaultValueForProtocolTypeIsAlwaysNil() {
-        let str =
-            KnownTypeBuilder(typeName: "A", kind: .protocol)
-                .constructor()
-                .build()
-        sut.addType(str)
-        
-        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
-    }
-    
-    func testDefaultValueForStructWithNoEmptyConstructorEvaluatesToNil() {
-        let str =
-            KnownTypeBuilder(typeName: "A", kind: .struct)
-                .build()
-        sut.addType(str)
-        
-        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
-    }
-    
-    func testDefaultValueForStructWithEmptyConstructor() {
-        let str =
-            KnownTypeBuilder(typeName: "A", kind: .struct)
-                .constructor()
-                .build()
-        sut.addType(str)
-        
-        XCTAssertEqual(sut.defaultValue(for: .typeName("A")), Expression.identifier("A").call())
     }
     
     func testAddTypeAlias() {
@@ -1023,7 +1058,7 @@ class TypeSystemTests: XCTestCase {
         sut.addType(protP)
         sut.addType(protZ)
         
-        XCTAssertEqual(Set(sut.allConformances(of: typeB).map { $0.protocolName }),
+        XCTAssertEqual(Set(sut.allConformances(of: typeB).map(\.protocolName)),
                        ["P", "Q", "Z", "W"])
     }
     
@@ -1047,7 +1082,7 @@ class TypeSystemTests: XCTestCase {
         sut.addType(protA)
         sut.addType(protB)
         
-        XCTAssertEqual(Set(sut.allConformances(of: protA).map { $0.protocolName }),
+        XCTAssertEqual(Set(sut.allConformances(of: protA).map(\.protocolName)),
                        ["B"])
     }
     
@@ -1081,9 +1116,9 @@ class TypeSystemTests: XCTestCase {
             .build()
         sut.addType(type)
         
-        XCTAssertNotNil(sut.subscription(indexType: .int, in: type))
-        XCTAssertNotNil(sut.subscription(indexType: .string, in: type))
-        XCTAssertNil(sut.subscription(indexType: .double, in: type))
+        XCTAssertNotNil(sut.subscription(indexType: .int, static: false, in: type))
+        XCTAssertNotNil(sut.subscription(indexType: .string, static: false, in: type))
+        XCTAssertNil(sut.subscription(indexType: .double, static: false, in: type))
     }
     
     func testSubscriptLookupSwiftType() {
@@ -1093,9 +1128,21 @@ class TypeSystemTests: XCTestCase {
             .build()
         sut.addType(type)
         
-        XCTAssertNotNil(sut.subscription(indexType: .int, in: .typeName("A")))
-        XCTAssertNotNil(sut.subscription(indexType: .string, in: .typeName("A")))
-        XCTAssertNil(sut.subscription(indexType: .double, in: .typeName("A")))
+        XCTAssertNotNil(sut.subscription(indexType: .int, static: false, in: .typeName("A")))
+        XCTAssertNotNil(sut.subscription(indexType: .string, static: false, in: .typeName("A")))
+        XCTAssertNil(sut.subscription(indexType: .double, static: false, in: .typeName("A")))
+    }
+    
+    func testStaticSubscriptLookup() {
+        let type = KnownTypeBuilder(typeName: "A")
+            .subscription(indexType: .int, type: .int, isStatic: false)
+            .subscription(indexType: .string, type: .string, isStatic: true)
+            .build()
+        
+        XCTAssertNotNil(sut.subscription(indexType: .int, static: false, in: type))
+        XCTAssertNil(sut.subscription(indexType: .int, static: true, in: type))
+        XCTAssertNil(sut.subscription(indexType: .string, static: false, in: type))
+        XCTAssertNotNil(sut.subscription(indexType: .string, static: true, in: type))
     }
 }
 

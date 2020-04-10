@@ -2,10 +2,14 @@ import ObjcParser
 import Utils
 
 /// A class to aid in managing pooling of ObjcParserState instances
-final class ObjcParserStatePool {
+public final class ObjcParserStatePool {
     let mutex = Mutex()
     
     private var pool: [ObjcParserState] = []
+    
+    public init() {
+        
+    }
     
     /// Pulls a new instance of an `ObjcParserState` to parse with.
     ///

@@ -1,6 +1,7 @@
 import Foundation
 import Console
 import Utils
+import SwiftRewriterLib
 
 func showSearchPathUi(in menu: MenuController) -> String? {
     let console = menu.console
@@ -44,11 +45,11 @@ func showSearchPathUi(in menu: MenuController) -> String? {
 }
 
 /// Helper for presenting selection of file names on a list
-private func presentFileSelection(in menu: MenuController, list: [Path], prompt: String) -> [Path] {
+private func presentFileSelection(in menu: MenuController, list: [String], prompt: String) -> [String] {
     let prompt = prompt + """
     Type ':all' to select all files.
     """
-    var items: [Path] = []
+    var items: [String] = []
 
     let config = 
         Pages.PageDisplayConfiguration(commandPrompt: prompt) { input in
@@ -123,12 +124,15 @@ public class FilesExplorerService {
 class SuggestConversionInterface {
     struct Options {
         static var `default` = Options(overwrite: false, skipConfirm: false,
-                                       excludePattern: nil, includePattern: nil)
+                                       followImports: false, excludePattern: nil,
+                                       includePattern: nil, verbose: false)
         
         var overwrite: Bool
         var skipConfirm: Bool
+        var followImports: Bool
         var excludePattern: String?
         var includePattern: String?
+        var verbose: Bool
     }
     
     var rewriterService: SwiftRewriterService
@@ -150,40 +154,61 @@ class SuggestConversionInterface {
                               options: Options = .default) {
         
         let console = menu.console
-        let fileManager = FileManager.default
         
         console.printLine("Inspecting path \(directoryPath)...")
         
         var overwriteCount = 0
+
+        let fileProvider = FileDiskProvider()
+        let fileCollectionStep = FileCollectionStep(fileProvider: fileProvider)
+        let importFileDelegate
+            = ImportDirectiveFileCollectionDelegate(parserCache: rewriterService.parserCache,
+                                                    fileProvider: fileProvider)
+        if options.followImports {
+            fileCollectionStep.delegate = importFileDelegate
+        }
+        if options.verbose {
+            fileCollectionStep.listener = StdoutFileCollectionStepListener()
+        }
+        do {
+            try withExtendedLifetime(importFileDelegate) {
+                try fileCollectionStep.addFromDirectory(URL(fileURLWithPath: directoryPath),
+                                                        recursive: true,
+                                                        includePattern: options.includePattern,
+                                                        excludePattern: options.excludePattern)
+            }
+        } catch {
+            console.printLine("Error finding files: \(error).")
+            if !options.skipConfirm {
+                _=console.readLineWith(prompt: "Press [Enter] to continue.")
+            }
+
+            return
+        }
         
-        let objcFiles: [URL] =
-            filesAt(path: directoryPath,
-                    includePattern: options.includePattern,
-                    excludePattern: options.excludePattern)
-                // Filter down to .h/.m files
-                .filter { (path: URL) -> Bool in
-                    ((path.path as NSString).pathExtension == "m"
-                        || (path.path as NSString).pathExtension == "h")
+        let objcFiles: [URL] = fileCollectionStep
+            .files
+            .filter { $0.isPrimary }
+            .map { $0.url }
+            // Check a matching .swift file doesn't already exist for the paths
+            // (if `overwrite` is not on)
+            .filter { (url: URL) -> Bool in
+                let swiftFile =
+                    ((url.path as NSString)
+                        .deletingPathExtension as NSString)
+                        .appendingPathExtension("swift")!
+
+                if !fileProvider.fileExists(atPath: swiftFile) {
+                    return true
                 }
-                // Check a matching .swift file doesn't already exist for the paths
-                // (if `overwrite` is not on)
-                .filter { (url: URL) -> Bool in
-                    let swiftFile =
-                        ((url.path as NSString)
-                            .deletingPathExtension as NSString)
-                            .appendingPathExtension("swift")!
-                    
-                    if !fileManager.fileExists(atPath: swiftFile) {
-                        return true
-                    }
-                    if options.overwrite {
-                        overwriteCount += 1
-                        return true
-                    }
-                    
-                    return false
+                if options.overwrite {
+                    overwriteCount += 1
+                    return true
                 }
-        
+
+                return false
+            }
+
         if objcFiles.isEmpty {
             console.printLine("No files where found to process.")
             if !options.skipConfirm {
@@ -220,7 +245,7 @@ class SuggestConversionInterface {
             
             let duration = stopwatch.stop()
             
-            console.printLine("Finishing converting \(objcFiles.count) files in \(String(format: "%.2lf", duration))s.")
+            console.printLine("Finished converting \(objcFiles.count) files in \(String(format: "%.2lf", duration))s.")
             _=console.readLineWith(prompt: "Press [Enter] to continue.")
         } catch {
             console.printLine("Error converting files: \(error)")
@@ -294,7 +319,7 @@ private class FileFinderInterface {
                         : "Showing all files found"
                 
                 let indexes = presentFileSelection(
-                    in: menu, list: matches.asPaths,
+                    in: menu, list: matches,
                     prompt: "\(matchesString), select one to convert")
                 
                 guard !indexes.isEmpty else {
@@ -303,7 +328,7 @@ private class FileFinderInterface {
                 
                 do {
                     let fileUrls = indexes.map {
-                        URL(fileURLWithPath: (path as NSString).appendingPathComponent($0.fullPath))
+                        URL(fileURLWithPath: (path as NSString).appendingPathComponent($0))
                     }
                     try rewriterService.rewrite(files: fileUrls)
                     _=console.readLineWith(prompt: "\nPress [Enter] to convert another file")
@@ -391,7 +416,7 @@ private class FilesExplorer: PagesCommandHandler {
         else if let index = Int(input) {
             guard index > 0 && index <= fileList.count else {
                 return .loop(
-                    "Invalid index \(index): Only have \(fileList.count) files to select!"
+                    "Invalid index \(index): There are only \(fileList.count) files to select from!"
                     .terminalColorize(.red))
             }
             
@@ -529,5 +554,13 @@ public class FileListConsoleProvider: ConsoleDataProvider {
         }
         
         return [url.lastPathComponent]
+    }
+}
+
+extension Collection where Element == String {
+    func indexOfFilename(matching string: String, options: String.CompareOptions = .literal) -> Index? {
+        firstIndex {
+            ($0 as NSString).lastPathComponent.compare(string, options: options) == .orderedSame
+        }
     }
 }

@@ -292,6 +292,20 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
             matches: "true ? foo : bar")
     }
     
+    func testTuple() {
+        assert(
+            Expression.tuple([.constant(1), .constant(2)]),
+            producer: SwiftSyntaxProducer.generateTuple,
+            matches: "(1, 2)")
+    }
+    
+    func testTupleNestedInExpression() {
+        assert(
+            Expression.arrayLiteral([.tuple([.constant(1), .constant(2)])]),
+            producer: SwiftSyntaxProducer.generateArrayLiteral,
+            matches: "[(1, 2)]")
+    }
+    
     func testClosure() {
         assert(
             Expression.block(body: []),

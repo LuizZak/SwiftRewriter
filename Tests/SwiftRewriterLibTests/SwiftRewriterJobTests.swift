@@ -38,7 +38,8 @@ class SwiftRewriterJobTests: XCTestCase {
                              syntaxRewriterPassSource: MockSwiftSyntaxRewriterPassProvider(),
                              preprocessors: [MockSourcePreprocessor()],
                              settings: .default,
-                             swiftSyntaxOptions: .default)
+                             swiftSyntaxOptions: .default,
+                             parserCache: nil)
         let output = MockWriterOutput()
         
         let result = job.execute(output: output)
@@ -67,7 +68,7 @@ private class MockWriterOutput: WriterOutput {
     func resultString() -> String {
         return files
             .sorted { $0.filepath < $1.filepath }
-            .map { $0.buffer }
+            .map(\.buffer)
             .joined(separator: "\n")
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -107,7 +108,8 @@ private class MockInputSourcesProvider: InputSourcesProvider {
             @interface BaseClass : NSObject
             @end
             """,
-            path: "Input.m")
+            path: "Input.m",
+            isPrimary: true)
     ]
     
     func sources() -> [InputSource] {
@@ -118,6 +120,7 @@ private class MockInputSourcesProvider: InputSourcesProvider {
 private struct MockInputSource: InputSource {
     var source: String
     var path: String
+    var isPrimary: Bool
     
     func loadSource() throws -> CodeSource {
         return StringCodeSource(source: source, fileName: path)

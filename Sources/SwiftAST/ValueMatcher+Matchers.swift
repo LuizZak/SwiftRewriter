@@ -2,7 +2,7 @@
 
 @inlinable
 public func not<T>(_ rule: ValueMatcher<T>) -> ValueMatcher<T> {
-    ValueMatcher().match(closure: { !rule.matches($0) })
+    ValueMatcher().match(closure: { !rule(matches: $0) })
 }
 
 @inlinable
@@ -64,7 +64,7 @@ public extension ValueMatcher where T: Collection {
                 return false
             }
             
-            return matcher.matches(value[index])
+            return matcher(matches: value[index])
         }
     }
     

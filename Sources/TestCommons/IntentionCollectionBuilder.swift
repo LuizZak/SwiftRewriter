@@ -3,7 +3,6 @@ import SwiftAST
 import KnownType
 import Intentions
 import TypeSystem
-import SwiftRewriterLib
 
 /// An empty initializer used as default argument of initializer closure parameters
 /// for `IntentionCollectionBuilder` and related classes.
@@ -271,6 +270,12 @@ public class FileIntentionBuilder {
     @discardableResult
     public func endNonnullContext() -> FileIntentionBuilder {
         inNonnullContext = false
+        return self
+    }
+    
+    @discardableResult
+    public func isPrimary(_ isPrimary: Bool) -> FileIntentionBuilder {
+        intention.isPrimary = isPrimary
         return self
     }
     

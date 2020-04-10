@@ -43,7 +43,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
         let mutex = Mutex()
         
         // First roundtrip: Collect all known conformances
-        for clsName in Set(classes.map { $0.typeName }) {
+        for clsName in Set(classes.map(\.typeName)) {
             queue.addOperation {
                 guard let type = context.typeSystem.knownTypeWithName(clsName) else {
                     return

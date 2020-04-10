@@ -6,12 +6,7 @@ import Intentions
 /// of a function.
 public class CodeDefinition {
     public var name: String {
-        get {
-            kind.name
-        }
-        set {
-            kind.name = newValue
-        }
+        kind.name
     }
     
     public var kind: Kind
@@ -76,16 +71,6 @@ public class CodeDefinition {
                     return signature.name
                 }
             }
-            set {
-                switch self {
-                case .variable(_, let storage):
-                    self = .variable(name: newValue, storage: storage)
-                    
-                case .function(var signature):
-                    signature.name = newValue
-                    self = .function(signature: signature)
-                }
-            }
         }
     }
 }
@@ -122,8 +107,8 @@ public extension CodeDefinition {
     /// Used for creating self intrinsics for member bodies.
     static func forSelf(type: SwiftType, isStatic: Bool) -> CodeDefinition {
         LocalCodeDefinition(constantNamed: "self",
-                                   type: isStatic ? .metatype(for: type) : type,
-                                   location: isStatic ? .staticSelf : .instanceSelf)
+                            type: isStatic ? .metatype(for: type) : type,
+                            location: isStatic ? .staticSelf : .instanceSelf)
     }
     
     /// Creates a code definition that matches the instance or static type of
@@ -131,31 +116,34 @@ public extension CodeDefinition {
     /// Used for creating self intrinsics for member bodies.
     static func forSuper(type: SwiftType, isStatic: Bool) -> CodeDefinition {
         LocalCodeDefinition(constantNamed: "super",
-                                   type: isStatic ? .metatype(for: type) : type,
-                                   location: isStatic ? .staticSelf : .instanceSelf)
+                            type: isStatic ? .metatype(for: type) : type,
+                            location: isStatic ? .staticSelf : .instanceSelf)
     }
     
     /// Creates a code definition for the setter of a setter method body.
     static func forSetterValue(named name: String, type: SwiftType) -> CodeDefinition {
         LocalCodeDefinition(constantNamed: name,
-                                   type: type,
-                                   location: .setterValue)
+                            type: type,
+                            location: .setterValue)
     }
     
     /// Creates a code definition for a local identifier
     static func forLocalIdentifier(_ identifier: String,
                                    type: SwiftType,
+                                   ownership: Ownership = .strong,
                                    isConstant: Bool,
                                    location: LocalCodeDefinition.DefinitionLocation) -> LocalCodeDefinition {
         
         if isConstant {
             return LocalCodeDefinition(constantNamed: identifier,
                                        type: type,
+                                       ownership: ownership,
                                        location: location)
         }
         
         return LocalCodeDefinition(variableNamed: identifier,
                                    type: type,
+                                   ownership: ownership,
                                    location: location)
     }
     
@@ -165,6 +153,7 @@ public extension CodeDefinition {
                 .forLocalIdentifier(
                     decl.identifier,
                     type: decl.type,
+                    ownership: decl.ownership,
                     isConstant: decl.isConstant,
                     location: .variableDeclaration(stmt, index: i)
                 )
@@ -197,7 +186,7 @@ public extension CodeDefinition {
     
     static func forType(named name: String) -> TypeCodeDefinition {
         TypeCodeDefinition(constantNamed: name,
-                                  type: .metatype(for: .typeName(name)))
+                           type: .metatype(for: .typeName(name)))
     }
 }
 
@@ -273,22 +262,24 @@ public class LocalCodeDefinition: CodeDefinition {
     
     fileprivate convenience init(variableNamed name: String,
                                  type: SwiftType,
+                                 ownership: Ownership = .strong,
                                  location: DefinitionLocation) {
         
         self.init(variableNamed: name,
                   storage: ValueStorage(type: type,
-                                        ownership: .strong,
+                                        ownership: ownership,
                                         isConstant: false),
                   location: location)
     }
     
     fileprivate convenience init(constantNamed name: String,
                                  type: SwiftType,
+                                 ownership: Ownership = .strong,
                                  location: DefinitionLocation) {
         
         self.init(variableNamed: name,
                   storage: ValueStorage(type: type,
-                                        ownership: .strong,
+                                        ownership: ownership,
                                         isConstant: true),
                   location: location)
     }
@@ -350,7 +341,7 @@ public class LocalCodeDefinition: CodeDefinition {
 
 extension LocalCodeDefinition: Equatable {
     public static func == (lhs: LocalCodeDefinition, rhs: LocalCodeDefinition) -> Bool {
-        lhs === rhs || lhs.location == rhs.location
+        lhs === rhs || (lhs.kind == rhs.kind && lhs.location == rhs.location)
     }
 }
 extension LocalCodeDefinition: Hashable {
