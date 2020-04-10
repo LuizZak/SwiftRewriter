@@ -155,6 +155,9 @@ extension Pattern: CustomStringConvertible {
 /// - tuple: The tuple within the pattern, at a given index, with a given nested
 /// subpattern.
 public enum PatternLocation: Hashable {
+    /// The root pattern itself
     case `self`
+    /// The tuple within the pattern, at a given index, with a given nested
+    /// subpattern.
     indirect case tuple(index: Int, pattern: PatternLocation)
 }
