@@ -478,8 +478,6 @@ extension SwiftType: Codable {
 }
 
 // MARK: - Building structures
-public typealias ZeroOrMore<T> = [T]
-
 public struct OneOrMore<T> {
     public var first: T
     var remaining: [T]

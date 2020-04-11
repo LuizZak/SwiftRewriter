@@ -46,6 +46,8 @@ extension TypeFormatterTests {
         ("testAsStringPropertyFromTypeWithArrayType", testAsStringPropertyFromTypeWithArrayType),
         ("testAsStringPropertyFromTypeWithOptionalArrayType", testAsStringPropertyFromTypeWithOptionalArrayType),
         ("testAsStringPropertyFromTypeWithTypeNameAndVarKeywordAndAccessors", testAsStringPropertyFromTypeWithTypeNameAndVarKeywordAndAccessors),
+        ("testAsStringStaticPropertyFromType", testAsStringStaticPropertyFromType),
+        ("testAsStringStaticSubscript", testAsStringStaticSubscript),
         ("testAsStringSubscript", testAsStringSubscript),
         ("testLongAttributeProperty", testLongAttributeProperty),
     ]
