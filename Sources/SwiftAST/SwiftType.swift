@@ -566,7 +566,7 @@ extension OneOrMore: Sequence {
     
     public struct Iterator: IteratorProtocol {
         private var current: OneOrMore
-        private var index: Index = .first
+        private var index: Index = 0
         
         init(current: OneOrMore) {
             self.current = current
@@ -574,35 +574,10 @@ extension OneOrMore: Sequence {
         
         public mutating func next() -> T? {
             defer {
-                index = index.next
+                index += 1
             }
             
             return index < current.endIndex ? current[index] : nil
-        }
-    }
-    
-    public enum Index: Comparable {
-        case first
-        case tail(Int)
-        
-        public var next: Index {
-            switch self {
-            case .first:
-                return .tail(0)
-            case .tail(let index):
-                return .tail(index + 1)
-            }
-        }
-        
-        public static func < (lhs: Index, rhs: Index) -> Bool {
-            switch (lhs, rhs) {
-            case (.first, .tail):
-                return true
-            case let (.tail(l), .tail(r)):
-                return l < r
-            default:
-                return false
-            }
         }
     }
 }
@@ -614,7 +589,7 @@ extension TwoOrMore: Sequence {
     
     public struct Iterator: IteratorProtocol {
         private var current: TwoOrMore
-        private var index: Index = .first
+        private var index: Index = 0
         
         init(current: TwoOrMore) {
             self.current = current
@@ -622,61 +597,21 @@ extension TwoOrMore: Sequence {
         
         public mutating func next() -> T? {
             defer {
-                index = index.next
+                index += 1
             }
             
             return index < current.endIndex ? current[index] : nil
-        }
-    }
-    
-    public enum Index: Comparable {
-        case first
-        case second
-        case tail(Int)
-        
-        public var next: Index {
-            switch self {
-            case .first:
-                return .second
-            case .second:
-                return .tail(0)
-            case .tail(let index):
-                return .tail(index + 1)
-            }
-        }
-        
-        public static func < (lhs: Index, rhs: Index) -> Bool {
-            switch (lhs, rhs) {
-            case (.first, .second),
-                 (.first, .tail):
-                return true
-            case (.second, .tail):
-                return true
-            case let (.tail(l), .tail(r)) where l < r:
-                return true
-            default:
-                return false
-            }
         }
     }
 }
 
 // MARK: Collection conformance
 extension OneOrMore: Collection {
-    public var startIndex: OneOrMore<T>.Index {
-        .first
+    public var startIndex: Int {
+        return 0
     }
-    public var endIndex: OneOrMore<T>.Index {
-        .tail(remaining.count)
-    }
-    
-    public subscript(index: Index) -> T {
-        switch index {
-        case .first:
-            return first
-        case .tail(let index):
-            return remaining[index]
-        }
+    public var endIndex: Int {
+        remaining.count + 1
     }
     
     public subscript(index: Int) -> T {
@@ -688,28 +623,17 @@ extension OneOrMore: Collection {
         }
     }
     
-    public func index(after i: OneOrMore<T>.Index) -> OneOrMore<T>.Index {
-        i.next
+    public func index(after i: Int) -> Int {
+        return i + 1
     }
 }
 
 extension TwoOrMore: Collection {
-    public var startIndex: TwoOrMore<T>.Index {
-        .first
+    public var startIndex: Int {
+        return 0
     }
-    public var endIndex: TwoOrMore<T>.Index {
-        .tail(remaining.count)
-    }
-    
-    public subscript(index: Index) -> T {
-        switch index {
-        case .first:
-            return first
-        case .second:
-            return second
-        case .tail(let index):
-            return remaining[index]
-        }
+    public var endIndex: Int {
+        return remaining.count + 2
     }
     
     public subscript(index: Int) -> T {
@@ -723,8 +647,8 @@ extension TwoOrMore: Collection {
         }
     }
     
-    public func index(after i: TwoOrMore<T>.Index) -> TwoOrMore<T>.Index {
-        i.next
+    public func index(after i: Int) -> Int {
+        i + 1
     }
 }
 
