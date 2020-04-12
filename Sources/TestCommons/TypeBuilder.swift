@@ -38,11 +38,13 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
         if targetType is ProtocolGenerationIntention {
             prop = ProtocolPropertyGenerationIntention(name: name,
                                                        storage: storage,
-                                                       objcAttributes: objcAttributes)
+                                                       objcAttributes: objcAttributes,
+                                                       ownerTypeName: targetType.typeName)
         } else {
             prop = PropertyGenerationIntention(name: name,
                                                storage: storage,
-                                               objcAttributes: objcAttributes)
+                                               objcAttributes: objcAttributes,
+                                               ownerTypeName: targetType.typeName)
         }
         
         prop.mode = mode
@@ -60,7 +62,7 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     public func createConstructor(withParameters parameters: [ParameterSignature] = [],
                                   builder: (MemberBuilder<InitGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
         
-        let ctor = InitGenerationIntention(parameters: parameters)
+        let ctor = InitGenerationIntention(parameters: parameters, ownerTypeName: targetType.typeName)
         let mbuilder = MemberBuilder(targetMember: ctor)
         
         builder(mbuilder)
@@ -112,9 +114,9 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
         let method: MethodGenerationIntention
         
         if targetType is ProtocolGenerationIntention {
-            method = ProtocolMethodGenerationIntention(signature: signature)
+            method = ProtocolMethodGenerationIntention(signature: signature, ownerTypeName: targetType.typeName)
         } else {
-            method = MethodGenerationIntention(signature: signature)
+            method = MethodGenerationIntention(signature: signature, ownerTypeName: targetType.typeName)
         }
         
         if !(targetType is ProtocolGenerationIntention) {
@@ -152,7 +154,7 @@ public extension TypeBuilder where T: InstanceVariableContainerIntention {
     func createInstanceVariable(named name: String, type: SwiftType) -> TypeBuilder {
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         
-        let ivar = InstanceVariableGenerationIntention(name: name, storage: storage)
+        let ivar = InstanceVariableGenerationIntention(name: name, storage: storage, ownerTypeName: targetType.typeName)
         targetType.addInstanceVariable(ivar)
         
         return self

@@ -164,32 +164,35 @@ public typealias MethodBuilder = MemberBuilder<MethodGenerationIntention>
 public typealias InitializerBuilder = MemberBuilder<InitGenerationIntention>
 
 public extension MemberBuilder where T == PropertyGenerationIntention {
-    convenience init(name: String, type: SwiftType) {
-        let prop = PropertyGenerationIntention(name: name, type: type, objcAttributes: [])
+    convenience init(name: String, type: SwiftType, ownerTypeName: String) {
+        let prop = PropertyGenerationIntention(name: name,
+                                               type: type,
+                                               objcAttributes: [],
+                                               ownerTypeName: ownerTypeName)
         
         self.init(targetMember: prop)
     }
 }
 
 public extension PropertyGenerationIntention {
-    convenience init(name: String, type: SwiftType, builder: (PropertyBuilder) -> Void) {
-        self.init(name: name, type: type, objcAttributes: [])
+    convenience init(name: String, type: SwiftType, ownerTypeName: String, builder: (PropertyBuilder) -> Void) {
+        self.init(name: name, type: type, objcAttributes: [], ownerTypeName: ownerTypeName)
         
         builder(PropertyBuilder(targetMember: self))
     }
 }
 
 public extension MethodGenerationIntention {
-    convenience init(name: String, builder: (MethodBuilder) -> Void) {
-        self.init(signature: FunctionSignature(name: name))
+    convenience init(name: String, ownerTypeName: String, builder: (MethodBuilder) -> Void) {
+        self.init(signature: FunctionSignature(name: name), ownerTypeName: ownerTypeName)
         
         builder(MethodBuilder(targetMember: self))
     }
 }
 
 public extension InitGenerationIntention {
-    convenience init(builder: (InitializerBuilder) -> Void) {
-        self.init(parameters: [])
+    convenience init(ownerTypeName: String, builder: (InitializerBuilder) -> Void) {
+        self.init(parameters: [], ownerTypeName: ownerTypeName)
         
         builder(InitializerBuilder(targetMember: self))
     }

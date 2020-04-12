@@ -49,7 +49,7 @@ class PostfixTransformationTests: XCTestCase {
         let transformer =
             FunctionInvocationTransformer(
                 fromObjcFunctionName: "oldFunction",
-                destinationMember: .propertySetter("property", argumentTransformer: .asIs)
+                destinationMember: .propertySetter("property")
             )
         let sut = PostfixTransformation.function(transformer)
         
