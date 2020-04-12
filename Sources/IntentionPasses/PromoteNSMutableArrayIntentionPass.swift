@@ -209,7 +209,7 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
     
     /// Returns `true` iff `member` represents a member access of a method or property
     /// of native NSMutableArray/NSArrays.
-    private func isMemberAccessOfNSMutableArrayOrArrayDefinition(_ member: MemberPostfix) -> Bool {
+    private func isMemberAccessOfNSMutableArrayOrNSArrayDefinition(_ member: MemberPostfix) -> Bool {
         guard let memberType = member.memberDefinition?.ownerType else {
             return false
         }
