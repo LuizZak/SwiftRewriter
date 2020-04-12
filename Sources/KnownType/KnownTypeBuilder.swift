@@ -418,11 +418,32 @@ public struct KnownTypeBuilder {
                              semantics: Set<Semantic> = [],
                              annotations: [String] = []) -> KnownTypeBuilder {
         
+        let parameters = [
+            ParameterSignature(name: "index", type: indexType)
+        ]
+        
+        return subscription(parameters: parameters,
+                            type: type,
+                            isStatic: isStatic,
+                            isConstant: isConstant,
+                            attributes: attributes,
+                            semantics: semantics,
+                            annotations: annotations)
+    }
+    
+    public func subscription(parameters: [ParameterSignature],
+                             type: SwiftType,
+                             isStatic: Bool = false,
+                             isConstant: Bool = false,
+                             attributes: [KnownAttribute] = [],
+                             semantics: Set<Semantic> = [],
+                             annotations: [String] = []) -> KnownTypeBuilder {
+        
         var new = clone()
         
         let sub = BuildingKnownSubscript(isStatic: isStatic,
                                          ownerType: self.type.asKnownTypeReference,
-                                         subscriptType: indexType,
+                                         parameters: parameters,
                                          type: type,
                                          isConstant: isConstant,
                                          knownAttributes: attributes,
@@ -784,20 +805,20 @@ final class BuildingKnownProperty: KnownProperty, Codable {
 final class BuildingKnownSubscript: KnownSubscript, Codable {
     var isStatic: Bool
     var ownerType: KnownTypeReference?
-    var subscriptType: SwiftType
+    var parameters: [ParameterSignature]
     var type: SwiftType
     var isConstant: Bool
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
     var annotations: [String]
     
-    init(isStatic: Bool, ownerType: KnownTypeReference?, subscriptType: SwiftType,
+    init(isStatic: Bool, ownerType: KnownTypeReference?, parameters: [ParameterSignature],
          type: SwiftType, isConstant: Bool, knownAttributes: [KnownAttribute],
          semantics: Set<Semantic>, annotations: [String]) {
         
         self.isStatic = isStatic
         self.ownerType = ownerType
-        self.subscriptType = subscriptType
+        self.parameters = parameters
         self.type = type
         self.isConstant = isConstant
         self.knownAttributes = knownAttributes

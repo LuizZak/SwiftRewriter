@@ -287,7 +287,9 @@ public extension TypeFormatter {
             result += type.typeName + "."
         }
         
-        result += "subscript(index: " + stringify(decl.subscriptType) + ") -> " + stringify(decl.type)
+        
+        
+        result += "subscript\(asString(parameters: decl.parameters)) -> " + stringify(decl.type)
         
         if includeAccessors {
             result += " { "

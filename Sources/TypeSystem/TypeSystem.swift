@@ -65,7 +65,7 @@ public class TypeSystem {
     /// Gets the overload resolver instance for this type system
     public func overloadResolver() -> OverloadResolver {
         OverloadResolver(typeSystem: self,
-                                state: overloadResolverState)
+                         state: overloadResolverState)
     }
     
     public func addTypealiasProvider(_ provider: TypealiasProvider) {
@@ -916,10 +916,17 @@ public class TypeSystem {
     }
     
     /// Gets a subscription for a given index type on a given type
-    public func subscription(indexType: SwiftType, static isStatic: Bool, in type: KnownType) -> KnownSubscript? {
+    public func subscription(withParameterLabels labels: [String?],
+                             invocationTypeHints: [SwiftType?]?,
+                             static isStatic: Bool,
+                             in type: KnownType) -> KnownSubscript? {
+        
         let lookup = makeTypeMemberLookup()
         
-        return lookup.subscription(indexType: indexType, static: isStatic, in: type)
+        return lookup.subscription(withParameterLabels: labels,
+                                   invocationTypeHints: invocationTypeHints,
+                                   static: isStatic,
+                                   in: type)
     }
     
     /// Returns a known type for a given SwiftType, if present.
@@ -1031,10 +1038,17 @@ public class TypeSystem {
     }
     
     /// Gets a subscription for a given index type on a given type
-    public func subscription(indexType: SwiftType, static isStatic: Bool, in type: SwiftType) -> KnownSubscript? {
+    public func subscription(withParameterLabels labels: [String?],
+                             invocationTypeHints: [SwiftType?]?,
+                             static isStatic: Bool,
+                             in type: SwiftType) -> KnownSubscript? {
+        
         let lookup = makeTypeMemberLookup()
         
-        return lookup.subscription(indexType: indexType, static: isStatic, in: type)
+        return lookup.subscription(withParameterLabels: labels,
+                                   invocationTypeHints: invocationTypeHints,
+                                   static: isStatic,
+                                   in: type)
     }
     
     private func makeTypeMemberLookup() -> TypeMemberLookup {
@@ -1189,354 +1203,6 @@ func typeNameIn(swiftType: SwiftType) -> String? {
 
 func typeNameIn(nominalType: NominalSwiftType) -> String {
     nominalType.typeNameValue
-}
-
-private class TypeMemberLookup {
-    private let typeSystem: TypeSystem
-    private let memberSearchCache: MemberSearchCache
-    private var visitedTypes: Set<String> = []
-    
-    init(typeSystem: TypeSystem, memberSearchCache: MemberSearchCache) {
-        self.typeSystem = typeSystem
-        self.memberSearchCache = memberSearchCache
-    }
-    
-    func method(withObjcSelector selector: SelectorSignature,
-                invocationTypeHints: [SwiftType?]?,
-                static isStatic: Bool,
-                includeOptional: Bool,
-                in type: KnownType) -> KnownMethod? {
-        
-        visitedTypes.insert(type.typeName)
-        
-        if memberSearchCache.usingCache,
-            let result =
-            memberSearchCache.lookupMethod(withObjcSelector: selector,
-                                           invocationTypeHints: invocationTypeHints,
-                                           static: isStatic,
-                                           includeOptional: includeOptional,
-                                           in: type.typeName) {
-            
-            return result
-        }
-        
-        let result = _method(withObjcSelector: selector,
-                             invocationTypeHints: invocationTypeHints,
-                             static: isStatic,
-                             includeOptional: includeOptional,
-                             in: type)
-        
-        if memberSearchCache.usingCache {
-            memberSearchCache.storeMethod(withObjcSelector: selector,
-                                          invocationTypeHints: invocationTypeHints,
-                                          static: isStatic,
-                                          includeOptional: includeOptional,
-                                          in: type.typeName,
-                                          method: result)
-        }
-        
-        return result
-    }
-    
-    private func _method(withObjcSelector selector: SelectorSignature,
-                         invocationTypeHints: [SwiftType?]?,
-                         static isStatic: Bool,
-                         includeOptional: Bool,
-                         in type: KnownType) -> KnownMethod? {
-        
-        let methods =
-            type.knownMethods
-                .filter {
-                    $0.isStatic == isStatic
-                        && (includeOptional || !$0.optional)
-                        && $0.signature.possibleSelectorSignatures().contains(selector)
-                }
-        
-        if !methods.isEmpty {
-            if methods.count == 1 || invocationTypeHints == nil {
-                return methods[0]
-            }
-            
-            // Attempt overload resolution based on argument type information
-            if let invocationTypeHints = invocationTypeHints,
-                selector.keywords.count - 1 == invocationTypeHints.count {
-                
-                if let method =
-                    typeSystem.overloadResolver()
-                        .findBestOverload(in: methods,
-                                          argumentTypes: invocationTypeHints)
-                        ?? methods.first {
-                    
-                    return method
-                }
-            }
-        }
-        
-        // Search on supertypes
-        let onSupertype =
-            typeSystem.supertype(of: type)
-                .flatMap {
-                    method(withObjcSelector: selector,
-                           invocationTypeHints: invocationTypeHints,
-                           static: isStatic,
-                           includeOptional: includeOptional,
-                           in: $0)
-                }
-        
-        if let result = onSupertype {
-            return result
-        }
-        
-        // Search on protocol conformances
-        for conformance in type.knownProtocolConformances {
-            if visitedTypes.contains(conformance.protocolName) {
-                continue
-            }
-            
-            guard let prot = typeSystem.knownTypeWithName(conformance.protocolName) else {
-                continue
-            }
-            
-            if let method = method(withObjcSelector: selector,
-                                   invocationTypeHints: invocationTypeHints,
-                                   static: isStatic,
-                                   includeOptional: includeOptional,
-                                   in: prot) {
-                
-                return method
-            }
-        }
-        
-        return nil
-    }
-    
-    func property(named name: String,
-                  static isStatic: Bool,
-                  includeOptional: Bool,
-                  in type: KnownType) -> KnownProperty? {
-        
-        visitedTypes.insert(type.typeName)
-        
-        if memberSearchCache.usingCache,
-            let result =
-            memberSearchCache.lookupProperty(named: name,
-                                             static: isStatic,
-                                             includeOptional: includeOptional,
-                                             in: type.typeName) {
-            
-            return result
-        }
-        
-        let result = _property(named: name,
-                               static: isStatic,
-                               includeOptional: includeOptional,
-                               in: type)
-        
-        if memberSearchCache.usingCache {
-            memberSearchCache.storeProperty(named: name,
-                                            static: isStatic,
-                                            includeOptional: includeOptional,
-                                            in: type.typeName,
-                                            property: result)
-        }
-        
-        return result
-    }
-    
-    private func _property(named name: String,
-                           static isStatic: Bool,
-                           includeOptional: Bool,
-                           in type: KnownType) -> KnownProperty? {
-        
-        visitedTypes.insert(type.typeName)
-        
-        if let property = type.knownProperties.first(where: {
-            $0.name == name
-                && $0.isStatic == isStatic
-                && (includeOptional || !$0.optional)
-        }) {
-            return property
-        }
-        
-        // Search on supertypes
-        return typeSystem.supertype(of: type).flatMap {
-            property(named: name,
-                     static: isStatic,
-                     includeOptional: includeOptional,
-                     in: $0)
-        }
-    }
-    
-    func field(named name: String, static isStatic: Bool, in type: KnownType) -> KnownProperty? {
-        visitedTypes.insert(type.typeName)
-        
-        if memberSearchCache.usingCache,
-            let result =
-            memberSearchCache.lookupField(named: name,
-                                          static: isStatic,
-                                          in: type.typeName) {
-            
-            return result
-        }
-        
-        let result = _field(named: name, static: isStatic, in: type)
-        
-        if memberSearchCache.usingCache {
-            memberSearchCache.storeField(named: name,
-                                         static: isStatic,
-                                         in: type.typeName,
-                                         field: result)
-        }
-        
-        return result
-    }
-    
-    func _field(named name: String, static isStatic: Bool, in type: KnownType) -> KnownProperty? {
-        if let field =
-            type.knownFields
-                .first(where: { $0.name == name && $0.isStatic == isStatic }) {
-            return field
-        }
-        
-        // Search on supertypes
-        return typeSystem.supertype(of: type).flatMap {
-            field(named: name, static: isStatic, in: $0)
-        }
-    }
-    
-    public func subscription(indexType: SwiftType, static isStatic: Bool, in type: KnownType) -> KnownSubscript? {
-        if let sub =
-            type.knownSubscripts
-                .first(where: { typeSystem.isType(indexType, assignableTo: $0.subscriptType) && $0.isStatic == isStatic }) {
-            return sub
-        }
-        
-        return typeSystem.supertype(of: type).flatMap {
-            subscription(indexType: indexType, static: isStatic, in: $0)
-        }
-    }
-    
-    func method(withObjcSelector selector: SelectorSignature,
-                invocationTypeHints: [SwiftType?]?,
-                static isStatic: Bool,
-                includeOptional: Bool,
-                in type: SwiftType) -> KnownMethod? {
-        
-        let typeName =
-            memberSearchCache.usingCache
-                ? typeNameIn(swiftType: type)
-                : nil
-        
-        if memberSearchCache.usingCache, let typeName = typeName {
-            if let result =
-                memberSearchCache.lookupMethod(withObjcSelector: selector,
-                                               invocationTypeHints: invocationTypeHints,
-                                               static: isStatic,
-                                               includeOptional: includeOptional,
-                                               in: typeName) {
-                
-                return result
-            }
-        }
-        
-        guard let knownType = typeSystem.findType(for: type) else {
-            return nil
-        }
-        let result = method(withObjcSelector: selector,
-                            invocationTypeHints: invocationTypeHints,
-                            static: isStatic,
-                            includeOptional: includeOptional,
-                            in: knownType)
-        
-        if memberSearchCache.usingCache, let typeName = typeName {
-            memberSearchCache.storeMethod(withObjcSelector: selector,
-                                          invocationTypeHints: invocationTypeHints,
-                                          static: isStatic,
-                                          includeOptional: includeOptional,
-                                          in: typeName,
-                                          method: result)
-        }
-        
-        return result
-    }
-    
-    /// Gets a property with a given name on a given known type, also specifying
-    /// whether to include optional methods (from optional protocol methods that
-    /// where not implemented by a concrete class).
-    public func property(named name: String,
-                         static isStatic: Bool,
-                         includeOptional: Bool,
-                         in type: SwiftType) -> KnownProperty? {
-        
-        let typeName =
-            memberSearchCache.usingCache
-                ? typeNameIn(swiftType: type)
-                : nil
-        
-        if memberSearchCache.usingCache, let typeName = typeName {
-            if let result =
-                memberSearchCache.lookupProperty(named: name,
-                                                 static: isStatic,
-                                                 includeOptional: includeOptional,
-                                                 in: typeName) {
-                
-                return result
-            }
-        }
-        
-        guard let knownType = typeSystem.findType(for: type) else {
-            return nil
-        }
-        let result = property(named: name,
-                              static: isStatic,
-                              includeOptional: includeOptional,
-                              in: knownType)
-        
-        if memberSearchCache.usingCache, let typeName = typeName {
-            memberSearchCache.storeProperty(named: name,
-                                            static: isStatic,
-                                            includeOptional: includeOptional,
-                                            in: typeName,
-                                            property: result)
-        }
-        
-        return result
-    }
-    
-    /// Gets an instance field with a given name on a given known type.
-    public func field(named name: String, static isStatic: Bool, in type: SwiftType) -> KnownProperty? {
-        
-        let typeName =
-            memberSearchCache.usingCache
-                ? typeNameIn(swiftType: type)
-                : nil
-        
-        if memberSearchCache.usingCache, let typeName = typeName {
-            if let result = memberSearchCache.lookupField(named: name, static: isStatic, in: typeName) {
-                return result
-            }
-        }
-        
-        guard let knownType = typeSystem.findType(for: type) else {
-            return nil
-        }
-        
-        let result = field(named: name, static: isStatic, in: knownType)
-        
-        if memberSearchCache.usingCache, let typeName = typeName {
-            memberSearchCache.storeField(named: name, static: isStatic, in: typeName, field: result)
-        }
-        
-        return result
-    }
-    
-    public func subscription(indexType: SwiftType, static isStatic: Bool, in type: SwiftType) -> KnownSubscript? {
-        guard let knownType = typeSystem.findType(for: type) else {
-            return nil
-        }
-        
-        return subscription(indexType: indexType, static: isStatic, in: knownType)
-    }
 }
 
 private class TypealiasExpander {
@@ -1854,6 +1520,7 @@ internal final class MemberSearchCache {
     @ConcurrentValue private var methodsCache: [MethodSearchEntry: KnownMethod?] = [:]
     @ConcurrentValue private var propertiesCache: [PropertySearchEntry: KnownProperty?] = [:]
     @ConcurrentValue private var fieldsCache: [FieldSearchEntry: KnownProperty?] = [:]
+    @ConcurrentValue private var subscriptsCache: [SubscriptSearchEntry: KnownSubscript?] = [:]
 
     var usingCache: Bool = false
 
@@ -1862,6 +1529,7 @@ internal final class MemberSearchCache {
         _methodsCache.setAsCaching(value: [:])
         _propertiesCache.setAsCaching(value: [:])
         _fieldsCache.setAsCaching(value: [:])
+        _subscriptsCache.setAsCaching(value: [:])
     }
 
     func tearDownCache() {
@@ -1869,6 +1537,7 @@ internal final class MemberSearchCache {
         _methodsCache.tearDownCaching(resetToValue: [:])
         _propertiesCache.tearDownCaching(resetToValue: [:])
         _fieldsCache.tearDownCaching(resetToValue: [:])
+        _subscriptsCache.tearDownCaching(resetToValue: [:])
     }
 
     func storeMethod(withObjcSelector selector: SelectorSignature,
@@ -1912,6 +1581,20 @@ internal final class MemberSearchCache {
         
         _fieldsCache.wrappedValue[entry] = field
     }
+    
+    func storeSubscript(withParameterLabels labels: [String?],
+                        invocationTypeHints: [SwiftType?]?,
+                        static isStatic: Bool,
+                        in typeName: String,
+                        `subscript` sub: KnownSubscript?) {
+        
+        let entry = SubscriptSearchEntry(labels: labels,
+                                         invocationTypeHints: invocationTypeHints,
+                                         isStatic: isStatic,
+                                         typeName: typeName)
+        
+        _subscriptsCache.wrappedValue[entry] = sub
+    }
 
     func lookupMethod(withObjcSelector selector: SelectorSignature,
                       invocationTypeHints: [SwiftType?]?,
@@ -1951,6 +1634,19 @@ internal final class MemberSearchCache {
         
         return fieldsCache[entry]
     }
+    
+    func lookupSubscription(withParameterLabels labels: [String?],
+                            invocationTypeHints: [SwiftType?]?,
+                            static isStatic: Bool,
+                            in typeName: String) -> KnownSubscript?? {
+        
+        let entry = SubscriptSearchEntry(labels: labels,
+                                         invocationTypeHints: invocationTypeHints,
+                                         isStatic: isStatic,
+                                         typeName: typeName)
+        
+        return subscriptsCache[entry]
+    }
 
     struct MethodSearchEntry: Hashable {
         var selector: SelectorSignature
@@ -1969,6 +1665,13 @@ internal final class MemberSearchCache {
 
     struct FieldSearchEntry: Hashable {
         var name: String
+        var isStatic: Bool
+        var typeName: String
+    }
+    
+    struct SubscriptSearchEntry: Hashable {
+        var labels: [String?]
+        var invocationTypeHints: [SwiftType?]?
         var isStatic: Bool
         var typeName: String
     }

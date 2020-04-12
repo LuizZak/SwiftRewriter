@@ -1116,9 +1116,18 @@ class TypeSystemTests: XCTestCase {
             .build()
         sut.addType(type)
         
-        XCTAssertNotNil(sut.subscription(indexType: .int, static: false, in: type))
-        XCTAssertNotNil(sut.subscription(indexType: .string, static: false, in: type))
-        XCTAssertNil(sut.subscription(indexType: .double, static: false, in: type))
+        XCTAssertNotNil(sut.subscription(withParameterLabels: [nil],
+                                         invocationTypeHints: [.int],
+                                         static: false,
+                                         in: type))
+        XCTAssertNotNil(sut.subscription(withParameterLabels: [nil],
+                                         invocationTypeHints: [.string],
+                                         static: false,
+                                         in: type))
+        XCTAssertNotNil(sut.subscription(withParameterLabels: [nil],
+                                         invocationTypeHints: [.double],
+                                         static: false,
+                                         in: type))
     }
     
     func testSubscriptLookupSwiftType() {
@@ -1128,9 +1137,18 @@ class TypeSystemTests: XCTestCase {
             .build()
         sut.addType(type)
         
-        XCTAssertNotNil(sut.subscription(indexType: .int, static: false, in: .typeName("A")))
-        XCTAssertNotNil(sut.subscription(indexType: .string, static: false, in: .typeName("A")))
-        XCTAssertNil(sut.subscription(indexType: .double, static: false, in: .typeName("A")))
+        XCTAssertNotNil(sut.subscription(withParameterLabels: [nil],
+                                         invocationTypeHints: [.int],
+                                         static: false,
+                                         in: .typeName("A")))
+        XCTAssertNotNil(sut.subscription(withParameterLabels: [nil],
+                                         invocationTypeHints: [.string],
+                                         static: false,
+                                         in: .typeName("A")))
+        XCTAssertNotNil(sut.subscription(withParameterLabels: [nil],
+                                         invocationTypeHints: [.double],
+                                         static: false,
+                                         in: .typeName("A")))
     }
     
     func testStaticSubscriptLookup() {
@@ -1139,10 +1157,26 @@ class TypeSystemTests: XCTestCase {
             .subscription(indexType: .string, type: .string, isStatic: true)
             .build()
         
-        XCTAssertNotNil(sut.subscription(indexType: .int, static: false, in: type))
-        XCTAssertNil(sut.subscription(indexType: .int, static: true, in: type))
-        XCTAssertNil(sut.subscription(indexType: .string, static: false, in: type))
-        XCTAssertNotNil(sut.subscription(indexType: .string, static: true, in: type))
+        XCTAssertEqual(sut.subscription(withParameterLabels: [nil],
+                                        invocationTypeHints: [.int],
+                                        static: false,
+                                        in: type)?.type,
+                       .int)
+        XCTAssertEqual(sut.subscription(withParameterLabels: [nil],
+                                        invocationTypeHints: [.int],
+                                        static: true,
+                                        in: type)?.type,
+                       .string)
+        XCTAssertEqual(sut.subscription(withParameterLabels: [nil],
+                                        invocationTypeHints: [.string],
+                                        static: false,
+                                        in: type)?.type,
+                       .int)
+        XCTAssertEqual(sut.subscription(withParameterLabels: [nil],
+                                        invocationTypeHints: [.string],
+                                        static: true,
+                                        in: type)?.type,
+                       .string)
     }
 }
 
