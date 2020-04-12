@@ -1112,6 +1112,11 @@ class SwiftRewriter_TypingTests: XCTestCase {
             
             @interface UIView (Category)
             @end
+            @implementation UIView (Category)
+            - (void)method {
+                (self.window);
+            }
+            @end
             """,
             swift: """
             class A: UIView {
@@ -1123,6 +1128,10 @@ class SwiftRewriter_TypingTests: XCTestCase {
 
             // MARK: - Category
             extension UIView {
+                func method() {
+                    // type: UIWindow?
+                    self.window
+                }
             }
             """,
             options: SwiftSyntaxOptions(outputExpressionTypes: true))
