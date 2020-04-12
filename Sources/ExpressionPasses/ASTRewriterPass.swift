@@ -95,7 +95,7 @@ open class ASTRewriterPass: SyntaxNodeRewriter {
         
         if let sub = exp.subscription {
             exp.exp = visitExpression(exp.exp)
-            exp.op = sub.replacingExpression(visitBaseExpression(sub.expression))
+            exp.op = sub.replacingArguments(sub.subExpressions.map(visitBaseExpression))
             return exp
         }
         

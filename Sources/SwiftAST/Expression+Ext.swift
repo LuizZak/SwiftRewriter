@@ -16,6 +16,9 @@ public protocol ExpressionPostfixBuildable {
     
     /// Creates a subscript access postfix expression with this expression buildable
     func sub(_ exp: Expression, type: SwiftType?) -> PostfixExpression
+    
+    /// Creates a subscript access postfix expression with this expression buildable
+    func sub(_ arguments: [FunctionArgument], type: SwiftType?) -> PostfixExpression
 }
 
 extension ExpressionPostfixBuildable {
@@ -43,6 +46,10 @@ extension ExpressionPostfixBuildable {
     
     public func sub(_ exp: Expression) -> PostfixExpression {
         sub(exp, type: nil)
+    }
+    
+    public func sub(_ arguments: [FunctionArgument]) -> PostfixExpression {
+        sub(arguments, type: nil)
     }
 }
 
@@ -81,6 +88,13 @@ public extension ExpressionPostfixBuildable {
     /// Creates a subscript access postfix expression with this expression
     func sub(_ exp: Expression, type: SwiftType?) -> PostfixExpression {
         let op = Postfix.subscript(exp)
+        op.returnType = type
+        
+        return .postfix(expressionToBuild, op)
+    }
+    
+    func sub(_ arguments: [FunctionArgument], type: SwiftType?) -> PostfixExpression {
+        let op = Postfix.subscript(arguments: arguments)
         op.returnType = type
         
         return .postfix(expressionToBuild, op)
@@ -180,6 +194,14 @@ public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
     
     public func sub(_ exp: Expression, type: SwiftType?) -> PostfixExpression {
         let op = Postfix.subscript(exp)
+        op.returnType = type
+        op.optionalAccessKind = isForceUnwrap ? .forceUnwrap : .safeUnwrap
+        
+        return .postfix(expressionToBuild, op)
+    }
+    
+    public func sub(_ arguments: [FunctionArgument], type: SwiftType?) -> PostfixExpression {
+        let op = Postfix.subscript(arguments: arguments)
         op.returnType = type
         op.optionalAccessKind = isForceUnwrap ? .forceUnwrap : .safeUnwrap
         

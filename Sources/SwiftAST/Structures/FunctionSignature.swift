@@ -220,9 +220,12 @@ extension FunctionSignature: Codable {
 }
 
 public extension Sequence where Element == ParameterSignature {
-    
     func argumentLabels() -> [String?] {
         map(\.label)
+    }
+    
+    func subscriptArgumentLabels() -> [String?] {
+        map { $0.label == $0.name ? nil : $0.label }
     }
 }
 

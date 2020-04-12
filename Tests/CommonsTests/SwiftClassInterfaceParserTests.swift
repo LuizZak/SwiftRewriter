@@ -202,7 +202,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownConstructors.count, 1)
         XCTAssert(type.knownConstructors[0].isFailable)
     }
-
+    
     func testParseSubscription() throws {
         let type = try parseType("""
             class MyClass {
@@ -211,7 +211,28 @@ class SwiftClassInterfaceParserTests: XCTestCase {
             """)
 
         XCTAssertEqual(type.knownSubscripts.count, 1)
-        XCTAssertEqual(type.knownSubscripts[0].subscriptType, .int)
+        XCTAssertEqual(type.knownSubscripts[0].parameters.count, 1)
+        // TODO: Argument labels for subscriptions should support more states to
+        // better represent the possible label states (none, '_', and labeled), which
+        // normal function arguments cannot represent.
+        XCTAssertEqual(type.knownSubscripts[0].parameters[0].label, "index")
+        XCTAssertEqual(type.knownSubscripts[0].parameters[0].name, "index")
+        XCTAssertEqual(type.knownSubscripts[0].parameters[0].type, .int)
+        XCTAssertFalse(type.knownSubscripts[0].parameters[0].hasDefaultValue)
+        XCTAssertEqual(type.knownSubscripts[0].type, .string)
+        XCTAssertFalse(type.knownSubscripts[0].isConstant)
+        XCTAssertFalse(type.knownSubscripts[0].isStatic)
+    }
+    
+    func testParseSubscriptionWithZeroArguments() throws {
+        let type = try parseType("""
+            class MyClass {
+                subscript() -> String
+            }
+            """)
+
+        XCTAssertEqual(type.knownSubscripts.count, 1)
+        XCTAssertTrue(type.knownSubscripts[0].parameters.isEmpty)
         XCTAssertEqual(type.knownSubscripts[0].type, .string)
         XCTAssertFalse(type.knownSubscripts[0].isConstant)
         XCTAssertFalse(type.knownSubscripts[0].isStatic)
@@ -225,7 +246,10 @@ class SwiftClassInterfaceParserTests: XCTestCase {
             """)
 
         XCTAssertEqual(type.knownSubscripts.count, 1)
-        XCTAssertEqual(type.knownSubscripts[0].subscriptType, .int)
+        XCTAssertEqual(type.knownSubscripts[0].parameters[0].label, "index")
+        XCTAssertEqual(type.knownSubscripts[0].parameters[0].name, "index")
+        XCTAssertEqual(type.knownSubscripts[0].parameters[0].type, .int)
+        XCTAssertFalse(type.knownSubscripts[0].parameters[0].hasDefaultValue)
         XCTAssertEqual(type.knownSubscripts[0].type, .string)
         XCTAssertFalse(type.knownSubscripts[0].isConstant)
         XCTAssert(type.knownSubscripts[0].isStatic)
@@ -239,7 +263,10 @@ class SwiftClassInterfaceParserTests: XCTestCase {
             """)
 
         XCTAssertEqual(type.knownSubscripts.count, 1)
-        XCTAssertEqual(type.knownSubscripts[0].subscriptType, .int)
+        XCTAssertEqual(type.knownSubscripts[0].parameters[0].label, "index")
+        XCTAssertEqual(type.knownSubscripts[0].parameters[0].name, "index")
+        XCTAssertEqual(type.knownSubscripts[0].parameters[0].type, .int)
+        XCTAssertFalse(type.knownSubscripts[0].parameters[0].hasDefaultValue)
         XCTAssertEqual(type.knownSubscripts[0].type, .string)
         XCTAssert(type.knownSubscripts[0].isConstant)
     }
@@ -361,6 +388,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
             class MyClass: UIView, UITableViewDelegate {
                 var count: Int { get }
                 var data: [String]
+                subscript(index: Int, other: String) -> Bool
                 
                 init()
                 init(coder aDecoder: NSCoding)
@@ -375,6 +403,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
             class MyClass: UIView, UITableViewDelegate {
                 var count: Int { get }
                 var data: [String]
+                subscript(index: Int, other: String) -> Bool
                 
                 init()
                 init(coder aDecoder: NSCoding)

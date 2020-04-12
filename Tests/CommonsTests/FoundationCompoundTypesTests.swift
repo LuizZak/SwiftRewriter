@@ -186,8 +186,8 @@ class FoundationCompoundTypesTests: XCTestCase {
                 var allValues: [Any] { get }
                 var description: String { get }
                 var descriptionInStringsFileFormat: String { get }
-                subscript(index: NSCopying) -> Any? { get }
-                subscript(index: String) -> Any? { get }
+                subscript(key: NSCopying) -> Any? { get }
+                subscript(key: String) -> Any? { get }
                 
                 init()
                 func allKeys(for anObject: Any) -> [Any]
@@ -232,7 +232,7 @@ class FoundationCompoundTypesTests: XCTestCase {
         
         assertSignature(type: type, matches: """
             class NSMutableDictionary: NSDictionary {
-                subscript(index: Any) -> Any?
+                subscript(key: Any) -> Any?
                 
                 init(capacity numItems: Int)
                 func removeObject(forKey aKey: Any)

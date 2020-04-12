@@ -61,8 +61,7 @@ public extension ValueMatcher where T: Expression {
     }
 
     @inlinable
-    func subscribe<E>(_ matcher: E) -> SyntaxMatcher<PostfixExpression>
-        where E: ValueMatcherConvertible, E.Target == Expression {
+    func subscribe(arguments matchers: [ValueMatcher<FunctionArgument>]) -> SyntaxMatcher<PostfixExpression> {
             
         SyntaxMatcher<PostfixExpression>()
             .match(.closure { postfix -> Bool in
@@ -72,7 +71,18 @@ public extension ValueMatcher where T: Expression {
                 
                 return self.matches(exp)
             })
-            .keyPath(\.op.asSubscription?.expression, matcher.asMatcher())
+            .keyPath(\.op.asSubscription?.arguments.count, equals: matchers.count)
+            .keyPath(\.op.asSubscription?.arguments) { args -> ValueMatcher<[FunctionArgument]> in
+                args.match(closure: { args -> Bool in
+                    for (matcher, arg) in zip(matchers, args) {
+                        if !matcher(matches: arg) {
+                            return false
+                        }
+                    }
+                    
+                    return true
+                })
+            }
     }
 
     @inlinable
