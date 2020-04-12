@@ -3,9 +3,6 @@ import KnownType
 import Intentions
 import MiniLexer
 
-private typealias SwiftRewriterAttribute =
-    SwiftClassInterfaceParser.SwiftRewriterAttribute
-
 public class SwiftAttributeTransformationsExtractor {
     
     let type: KnownType
@@ -181,7 +178,7 @@ public class SwiftAttributeTransformationsExtractor {
         func makeTransformation(identifier: FunctionIdentifier) -> MethodInvocationRewriter? {
             
             // Free function to method conversions don't have a method alias
-            if identifier.parameterNames.first == "self" {
+            if identifier.argumentLabels.first == "self" {
                 return nil
             }
             
@@ -214,11 +211,11 @@ public class SwiftAttributeTransformationsExtractor {
             case .mapFromIdentifier(let ident):
                 // We don't support aliasing global functions that where mapped
                 // into methods
-                if ident.parameterNames.first != "self" {
+                if ident.argumentLabels.first != "self" {
                     let signature =
                         FunctionSignature(
                             name: ident.name,
-                            parameters: ident.parameterNames.map { ParameterSignature(label: $0, name: "_", type: .errorType, hasDefaultValue: false) },
+                            parameters: ident.argumentLabels.map { ParameterSignature(label: $0, name: "_", type: .errorType, hasDefaultValue: false) },
                             returnType: method.signature.returnType,
                             isStatic: method.signature.isStatic,
                             isMutating: method.signature.isMutating)

@@ -5,8 +5,8 @@ public final class MethodInvocationTransformer: PostfixInvocationTransformer {
     let baseExpressionMatcher: ValueMatcher<Expression>
     let invocationMatcher: MethodInvocationTransformerMatcher
     
-    init(baseExpressionMatcher: ValueMatcher<Expression>,
-         invocationMatcher: MethodInvocationTransformerMatcher) {
+    public init(baseExpressionMatcher: ValueMatcher<Expression>,
+                invocationMatcher: MethodInvocationTransformerMatcher) {
         
         self.baseExpressionMatcher = baseExpressionMatcher
         self.invocationMatcher = invocationMatcher

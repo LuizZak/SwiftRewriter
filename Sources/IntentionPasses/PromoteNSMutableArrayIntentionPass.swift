@@ -2,7 +2,7 @@ import SwiftAST
 import Commons
 import Intentions
 import KnownType
-import SwiftRewriterLib
+import Analysis
 
 /// Intention pass that analyzes all usages of `NSMutableArray` to promote usages
 /// that can safely be converted to `Array<T>`.
@@ -70,7 +70,8 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
     private func applyAnalysis(to entry: AnalysisEntry) {
         let usageAnalyzer =
             IntentionCollectionUsageAnalyzer(intentions: intentions,
-                                             typeSystem: context.typeSystem)
+                                             typeSystem: context.typeSystem,
+                                             numThreads: context.numThreads)
         
         let property: KnownProperty
         

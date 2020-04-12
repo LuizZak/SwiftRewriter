@@ -303,10 +303,10 @@ public extension SwiftType {
         .block(returnType: returnType, parameters: parameters, attributes: [])
     }
     
-    public static func array(_ element: SwiftType) -> SwiftType {
+    static func array(_ element: SwiftType) -> SwiftType {
         return .generic("Array", parameters: [element])
     }
-    public static func dictionary(key: SwiftType, value: SwiftType) -> SwiftType {
+    static func dictionary(key: SwiftType, value: SwiftType) -> SwiftType {
         return .generic("Dictionary", parameters: [key, value])
     }
     

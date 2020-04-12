@@ -743,10 +743,12 @@ final class BuildingKnownConstructor: KnownConstructor, Codable {
     var isConvenience: Bool
     var annotations: [String]
     
-    init(parameters: [ParameterSignature], knownAttributes: [KnownAttribute],
+    init(ownerType: KnownTypeReference,
+         parameters: [ParameterSignature], knownAttributes: [KnownAttribute],
          semantics: Set<Semantic>, isFailable: Bool, isConvenience: Bool,
          annotations: [String]) {
         
+        self.ownerType = ownerType
         self.parameters = parameters
         self.knownAttributes = knownAttributes
         self.semantics = semantics
@@ -765,7 +767,7 @@ final class BuildingKnownMethod: KnownMethod, Codable {
     var semantics: Set<Semantic>
     var annotations: [String]
     
-    init(ownerType: KnownTypeReference?, body: KnownMethodBody?,
+    init(ownerType: KnownTypeReference, body: KnownMethodBody?,
          signature: FunctionSignature, optional: Bool, knownAttributes: [KnownAttribute],
          semantics: Set<Semantic>, annotations: [String]) {
         
@@ -801,7 +803,7 @@ final class BuildingKnownProperty: KnownProperty, Codable {
     var semantics: Set<Semantic>
     var annotations: [String]
     
-    init(ownerType: KnownTypeReference?, name: String, storage: ValueStorage,
+    init(ownerType: KnownTypeReference, name: String, storage: ValueStorage,
          attributes: [ObjcPropertyAttribute], isStatic: Bool, optional: Bool,
          accessor: KnownPropertyAccessor, knownAttributes: [KnownAttribute],
          isEnumCase: Bool, semantics: Set<Semantic>, annotations: [String]) {
@@ -821,8 +823,8 @@ final class BuildingKnownProperty: KnownProperty, Codable {
 }
 
 final class BuildingKnownSubscript: KnownSubscript, Codable {
+    var ownerType: KnownTypeReference
     var isStatic: Bool
-    var ownerType: KnownTypeReference?
     var parameters: [ParameterSignature]
     var type: SwiftType
     var isConstant: Bool
@@ -830,7 +832,7 @@ final class BuildingKnownSubscript: KnownSubscript, Codable {
     var semantics: Set<Semantic>
     var annotations: [String]
     
-    init(isStatic: Bool, ownerType: KnownTypeReference?, parameters: [ParameterSignature],
+    init(isStatic: Bool, ownerType: KnownTypeReference, parameters: [ParameterSignature],
          type: SwiftType, isConstant: Bool, knownAttributes: [KnownAttribute],
          semantics: Set<Semantic>, annotations: [String]) {
         

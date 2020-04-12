@@ -42,6 +42,9 @@ let package = Package(
             name: "WriterTargetOutput",
             dependencies: ["Utils"]),
         .target(
+            name: "SourcePreprocessors",
+            dependencies: ["Utils", "MiniLexer"]),
+        .target(
             name: "SwiftAST",
             dependencies: ["MiniLexer", "Utils", "WriterTargetOutput"]),
         .target(
@@ -69,14 +72,14 @@ let package = Package(
         .target(
             name: "TypeSystem",
             dependencies: ["SwiftAST", "ObjcParser", "TypeDefinitions", "Utils",
-                           "Intentions", "KnownType", "GrammarModels"]),
+                           "Intentions", "KnownType", "GrammarModels", "SwiftSyntaxSupport"]),
         .target(
             name: "Commons",
             dependencies: ["SwiftAST", "Utils", "TypeSystem", "KnownType"]),
         .target(
             name: "IntentionPasses",
             dependencies: ["SwiftAST", "Commons", "Utils", "MiniLexer",
-                           "Intentions"]),
+                           "Intentions", "Analysis"]),
         .target(
             name: "GlobalsProviders",
             dependencies: ["SwiftAST", "Commons", "TypeSystem"]),
@@ -88,9 +91,6 @@ let package = Package(
             name: "ExpressionPasses",
             dependencies: ["SwiftAST", "Commons", "Utils", "Analysis", 
                            "Intentions", "TypeSystem", "MiniLexer"]),
-        .target(
-            name: "SourcePreprocessors",
-            dependencies: ["Utils", "MiniLexer"]),
         .target(
             name: "SwiftRewriterLib",
             dependencies: ["GrammarModels", "SwiftAST", "ObjcParser", "Analysis",

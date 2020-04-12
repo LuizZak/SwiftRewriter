@@ -30,7 +30,7 @@ public class SwiftTypeConverter {
                 builder.useRightSquareBracket(SyntaxFactory.makeRightSquareBracketToken())
                 
                 builder.useElementType(makeTypeSyntax(inner[0]))
-            }
+            }.asTypeSyntax
             
         case let .nominal(.generic("Dictionary", elements)) where elements.count == 2:
             let key = elements[0]
@@ -43,8 +43,7 @@ public class SwiftTypeConverter {
                 
                 builder.useKeyType(makeTypeSyntax(key))
                 builder.useValueType(makeTypeSyntax(value))
-            }
-            
+            }.asTypeSyntax
             
         case .nominal(let nominal):
             return makeNominalTypeSyntax(nominal).asTypeSyntax

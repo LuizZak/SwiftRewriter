@@ -194,6 +194,7 @@ public final class SwiftClassInterfaceParser {
             case varDecl
             case function
             case initializer
+            case `subscript`
         }
         
         let attributes: [Attribute] =
@@ -221,6 +222,9 @@ public final class SwiftClassInterfaceParser {
                 
             case ._init:
                 declType = .initializer
+            
+            case .subscript:
+                declType = .subscript
                 
             default:
                 throw tokenizer.lexer.syntaxError(
@@ -290,11 +294,6 @@ public final class SwiftClassInterfaceParser {
                                          isStatic: modifiers.contains(.static),
                                          isConstant: subscriptDecl.isConstant,
                                          attributes: knownAttributes)
-            
-        default:
-            throw tokenizer.lexer.syntaxError(
-                "Expected variable, function or initializer declaration"
-            )
         }
     }
     

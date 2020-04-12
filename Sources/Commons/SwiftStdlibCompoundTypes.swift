@@ -1,6 +1,5 @@
 import SwiftAST
 import KnownType
-import SwiftRewriterLib
 
 public enum SwiftStdlibCompoundTypes {
     public static let array = ArrayOfTCompoundType.self

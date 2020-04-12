@@ -771,7 +771,7 @@ private class MemberInvocationResolver {
                     return exp.makeErrorTyped()
                 }
                 
-                exp.resolvedType = .optional(value)
+                exp.resolvedType = .optional(.any)
 
             default:
                 

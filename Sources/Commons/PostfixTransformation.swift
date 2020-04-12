@@ -155,9 +155,7 @@ func propertyFromFreeFunctions(_ getterName: String,
         transformers.append(
             FunctionInvocationTransformer(
                 objcFunctionName: setterName,
-                toSwiftPropertySetter: property,
-                argumentTransformer: .asIs
-            )
+                toSwiftPropertySetter: property)
         )
     }
     
