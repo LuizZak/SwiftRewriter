@@ -728,8 +728,6 @@ private class MemberInvocationResolver {
         
         switch op {
         case let sub as SubscriptPostfix:
-            let sub = sub.replacingExpression(typeResolver.visitExpression(sub.expression))
-            
             exp.exp = typeResolver.visitExpression(exp.exp)
             exp.op = sub
             
@@ -741,19 +739,26 @@ private class MemberInvocationResolver {
             guard let expType = exp.exp.resolvedType else {
                 return exp
             }
-            guard let subType = sub.expression.resolvedType else {
-                return exp
+            
+            func resolveArgTypes() {
+                exp.op = sub.replacingArguments(
+                    sub.subExpressions.map(typeResolver.visitExpression)
+                )
             }
+            
+            let subTypes = sub.arguments.map(\.expression.resolvedType)
             // Propagate error type
-            if sub.expression.isErrorTyped {
+            if sub.arguments.any(\.expression.isErrorTyped) {
                 return exp.makeErrorTyped()
             }
 
             // Array<T> / Dictionary<T> resolving
             switch typeResolver.expandAliases(in: expType) {
             case .nominal(.generic("Array", let params)) where Array(params).count == 1:
+                resolveArgTypes()
+                
                 // Can only subscript arrays with integers!
-                if subType != .int {
+                if exp.op.subExpressions[0].resolvedType != .int {
                     return exp.makeErrorTyped()
                 }
                 
@@ -763,14 +768,18 @@ private class MemberInvocationResolver {
                 exp.resolvedType = .optional(Array(params)[1])
                 
             case .array(let element):
-                if subType != .int {
+                resolveArgTypes()
+                
+                if exp.op.subExpressions[0].resolvedType != .int {
                     return exp.makeErrorTyped()
                 }
                 
                 exp.resolvedType = element
                 
             case let .dictionary(key, value):
-                if subType != key {
+                resolveArgTypes()
+                
+                if exp.op.subExpressions[0].resolvedType != key {
                     return exp.makeErrorTyped()
                 }
                 
@@ -781,14 +790,21 @@ private class MemberInvocationResolver {
                 let subscriptDecl =
                     typeSystem
                         .subscription(withParameterLabels: [nil],
-                                      invocationTypeHints: [subType],
+                                      invocationTypeHints: subTypes,
                                       static: expType.isMetatype,
                                       in: expType)
                 
-                exp.resolvedType = subscriptDecl?.type
+                if let subscriptDecl = subscriptDecl {
+                    exp.resolvedType = subscriptDecl.type
+                    matchParameterTypes(parameters: subscriptDecl.parameters, callArguments: sub.arguments)
+                    
+                    resolveArgTypes()
+                } else {
+                    exp.makeErrorTyped()
+                }
             }
             
-            sub.returnType = exp.resolvedType
+            exp.op.returnType = exp.resolvedType
             
         case let fc as FunctionCallPostfix:
             return handleFunctionCall(postfix: exp, functionCall: fc)

@@ -32,7 +32,7 @@ public final class PostfixChainInverter {
                     result.append(.member(op.name, original: op, pop))
                     
                 case let op as SubscriptPostfix:
-                    result.append(.subscript(op.expression, original: op, pop))
+                    result.append(.subscript(op.arguments, original: op, pop))
                     
                 case let op as FunctionCallPostfix:
                     result.append(.call(op.arguments, original: op, pop))
@@ -53,7 +53,7 @@ public final class PostfixChainInverter {
     public enum Postfix: Equatable {
         case root(Expression)
         case member(String, original: MemberPostfix, PostfixExpression)
-        case `subscript`(Expression, original: SubscriptPostfix, PostfixExpression)
+        case `subscript`([FunctionArgument], original: SubscriptPostfix, PostfixExpression)
         case call([FunctionArgument], original: FunctionCallPostfix, PostfixExpression)
         
         public var postfix: SwiftAST.Postfix? {
