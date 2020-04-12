@@ -388,6 +388,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
             class MyClass: UIView, UITableViewDelegate {
                 var count: Int { get }
                 var data: [String]
+                subscript(index: Int, other: String) -> Bool
                 
                 init()
                 init(coder aDecoder: NSCoding)
@@ -402,6 +403,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
             class MyClass: UIView, UITableViewDelegate {
                 var count: Int { get }
                 var data: [String]
+                subscript(index: Int, other: String) -> Bool
                 
                 init()
                 init(coder aDecoder: NSCoding)
