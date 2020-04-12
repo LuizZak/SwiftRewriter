@@ -59,6 +59,36 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                     StatementVariableDeclaration(identifier: "bar",
                                                  type: .float,
                                                  initialization: .constant(0.0))
+                ])
+        ]
+        let syntax = SwiftSyntaxProducer().generateCompound(stmt)
+        
+        assert(syntax,
+               matches: """
+                 {
+                    var foo: Int, bar: Float = 0.0
+                }
+                """)
+    }
+    
+    // If we have a single variable declaration statement with variables that
+    // alternate between 'let' and 'var', make sure we split these declarations
+    // across multiple statements, since var-decl statements cannot have both 'let'
+    // and 'var' declarations in the same line
+    func testSplitMixedConstantVariableDeclarationsInCompound() {
+        let stmt: CompoundStatement = [
+            Statement
+                .variableDeclarations([
+                    StatementVariableDeclaration(identifier: "foo", type: .int),
+                    StatementVariableDeclaration(identifier: "bar",
+                                                 type: .float,
+                                                 initialization: .constant(0.0)),
+                    StatementVariableDeclaration(identifier: "baz",
+                                                 type: .int,
+                                                 isConstant: true),
+                    StatementVariableDeclaration(identifier: "zaz",
+                                                 type: .string,
+                                                 isConstant: true)
                     ])
         ]
         let syntax = SwiftSyntaxProducer().generateCompound(stmt)
@@ -67,6 +97,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                matches: """
                  {
                     var foo: Int, bar: Float = 0.0
+                    let baz: Int, zaz: String
                 }
                 """)
     }

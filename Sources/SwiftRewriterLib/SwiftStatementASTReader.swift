@@ -807,3 +807,63 @@ private func expressions(in expression: Expression, inspectBlocks: Bool) -> AnyS
     
     return AnySequence(sequence.lazy.compactMap { $0 as? Expression })
 }
+
+internal func _isConstant(fromType type: ObjcType) -> Bool {
+    switch type {
+    case .qualified(_, let qualifiers),
+         .specified(_, .qualified(_, let qualifiers)):
+        if qualifiers.contains("const") {
+            return true
+        }
+    case .specified(let specifiers, _):
+        if specifiers.contains("const") {
+            return true
+        }
+    default:
+        break
+    }
+    
+    return false
+}
+
+internal func evaluateOwnershipPrefix(inType type: ObjcType,
+                                      property: PropertyDefinition? = nil) -> Ownership {
+    
+    var ownership: Ownership = .strong
+    if !type.isPointer {
+        // We don't have enough information at statement parsing time to conclude
+        // that an __auto_type declaration does not resolve in fact to a pointer.
+        // Keep ownership modifiers for now
+        if case .specified(_, .struct("__auto_type")) = type {
+            // skip return
+        } else {
+            return .strong
+        }
+    }
+    
+    switch type {
+    case .specified(let specifiers, _):
+        if specifiers.last == "__weak" {
+            ownership = .weak
+        } else if specifiers.last == "__unsafe_unretained" {
+            ownership = .unownedUnsafe
+        }
+    default:
+        break
+    }
+    
+    // Search in property
+    if let property = property {
+        if let modifiers = property.attributesList?.keywordAttributes {
+            if modifiers.contains("weak") {
+                ownership = .weak
+            } else if modifiers.contains("unsafe_unretained") {
+                ownership = .unownedUnsafe
+            } else if modifiers.contains("assign") {
+                ownership = .unownedUnsafe
+            }
+        }
+    }
+    
+    return ownership
+}

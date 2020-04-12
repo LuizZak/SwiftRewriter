@@ -1,4 +1,5 @@
 import ObjcParser
+import SwiftSyntaxSupport
 import IntentionPasses
 import ExpressionPasses
 import SourcePreprocessors
@@ -10,6 +11,7 @@ public class SwiftRewriterJobBuilder {
     public var intentionPassesSource: IntentionPassSource?
     public var astRewriterPassSources: ASTRewriterPassSource?
     public var globalsProvidersSource: GlobalsProvidersSource?
+    public var syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider?
     public var preprocessors: [SourcePreprocessor] = []
     public var settings: SwiftRewriter.Settings = .default
     public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
@@ -28,6 +30,7 @@ public class SwiftRewriterJobBuilder {
                                 intentionPassesSource: intentionPassesSource,
                                 astRewriterPassSources: astRewriterPassSources,
                                 globalsProvidersSource: globalsProvidersSource,
+                                syntaxRewriterPassSource: syntaxRewriterPassSource,
                                 preprocessors: preprocessors,
                                 settings: settings,
                                 swiftSyntaxOptions: swiftSyntaxOptions,

@@ -64,6 +64,9 @@ let package = Package(
             name: "SwiftSyntaxSupport",
             dependencies: ["SwiftSyntax", "KnownType", "Intentions", "SwiftAST"]),
         .target(
+            name: "SwiftSyntaxRewriterPasses",
+            dependencies: ["SwiftSyntax", "SwiftSyntaxSupport", "Utils"]),
+        .target(
             name: "TypeSystem",
             dependencies: ["SwiftAST", "ObjcParser", "TypeDefinitions", "Utils",
                            "Intentions", "KnownType", "GrammarModels"]),
@@ -94,7 +97,8 @@ let package = Package(
                            "TypeDefinitions", "Utils", "Intentions", "TypeSystem",
                            "IntentionPasses", "KnownType", "WriterTargetOutput",
                            "SwiftSyntaxSupport", "GlobalsProviders",
-                           "ExpressionPasses", "SourcePreprocessors"]),
+                           "ExpressionPasses", "SourcePreprocessors",
+                           "SwiftSyntaxRewriterPasses"]),
         .target(
             name: "SwiftRewriter",
             dependencies: [
@@ -143,12 +147,16 @@ let package = Package(
                            "Intentions", "GrammarModels", "KnownType", "TestCommons",
                            "GlobalsProviders"]),
         .testTarget(
+            name: "SwiftSyntaxRewriterPassesTests",
+            dependencies: ["SwiftSyntaxRewriterPasses", "SwiftSyntax", "SwiftSyntaxSupport",
+                           "TestCommons"]),
+        .testTarget(
             name: "SwiftRewriterLibTests",
             dependencies: ["SwiftRewriterLib",
                            "SwiftAST", "GrammarModels", "ObjcParser", "ExpressionPasses",
                            "IntentionPasses", "TestCommons", "GlobalsProviders",
                            "Intentions", "TypeSystem", "WriterTargetOutput",
-                           "SwiftSyntaxSupport"]),
+                           "SwiftSyntaxSupport", "SwiftSyntaxRewriterPasses"]),
         .testTarget(
             name: "CommonsTests",
             dependencies: ["Commons",

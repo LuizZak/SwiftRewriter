@@ -252,7 +252,7 @@ public final class SwiftClassInterfaceParser {
             let subscriptDecl = try parseSubscriptDeclaration(from: tokenizer)
 
             typeBuilder =
-                typeBuilder.subscription(indexType: subscriptDecl.subscriptType,
+                typeBuilder.subscription(parameters: subscriptDecl.parameters,
                                          type: subscriptDecl.type,
                                          isStatic: modifiers.contains(.static),
                                          isConstant: subscriptDecl.isConstant,
@@ -399,12 +399,7 @@ public final class SwiftClassInterfaceParser {
     private static func parseSubscriptDeclaration(from tokenizer: Tokenizer) throws -> SubscriptDeclaration {
         try tokenizer.advance(overTokenType: .subscript)
 
-        try tokenizer.advance(overTokenType: .openParens)
-        // TODO: Consume subscription parameters as an array of ParameterSignatures
-        _=try identifier(from: tokenizer)
-        try tokenizer.advance(overTokenType: .colon)
-        let indexType = try SwiftTypeParser.parse(from: tokenizer.lexer)
-        try tokenizer.advance(overTokenType: .closeParens)
+        let parameters = try FunctionSignatureParser.parseParameters(from: tokenizer.lexer)
 
         try tokenizer.advance(overTokenType: .functionArrow)
         let returnType = try SwiftTypeParser.parse(from: tokenizer.lexer)
@@ -422,7 +417,7 @@ public final class SwiftClassInterfaceParser {
             isConstant = false
         }
 
-        return SubscriptDeclaration(subscriptType: indexType, type: returnType, isConstant: isConstant)
+        return SubscriptDeclaration(parameters: parameters, type: returnType, isConstant: isConstant)
     }
     
     /// ```
@@ -831,7 +826,7 @@ public final class SwiftClassInterfaceParser {
     }
 
     private struct SubscriptDeclaration {
-        var subscriptType: SwiftType
+        var parameters: [ParameterSignature]
         var type: SwiftType
         var isConstant: Bool
     }

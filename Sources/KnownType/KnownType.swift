@@ -173,8 +173,9 @@ public protocol KnownProperty: KnownMember {
 
 /// A known type subscript
 public protocol KnownSubscript: KnownMember {
-    /// Gets the type for the indexing value of this subscription.
-    var subscriptType: SwiftType { get }
+    /// Gets the type for the indexing values of this subscription as an array of
+    /// parameters.
+    var parameters: [ParameterSignature] { get }
 
     /// Gets the resulting type when this subscript is indexed into.
     var type: SwiftType { get }

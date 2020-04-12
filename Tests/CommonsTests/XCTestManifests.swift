@@ -73,6 +73,7 @@ extension SwiftClassInterfaceParserTests {
         ("testParseProperty", testParseProperty),
         ("testParseProtocolConformances", testParseProtocolConformances),
         ("testParseStaticMembers", testParseStaticMembers),
+        ("testParseStaticSubscription", testParseStaticSubscription),
         ("testParseSubscription", testParseSubscription),
         ("testParseSubscriptionWithGetterSetter", testParseSubscriptionWithGetterSetter),
         ("testParseSupertypes", testParseSupertypes),

@@ -43,7 +43,27 @@ public class OverloadResolver {
                           argumentTypes: [SwiftType?]) -> Int? {
         
         findBestOverload(inSignatures: signatures,
-                                arguments: argumentTypes.asOverloadResolverArguments)
+                         arguments: argumentTypes.asOverloadResolverArguments)
+    }
+    
+    /// Returns a matching resolution on a given array of subscript declarations.
+    public func findBestOverload(inSubscripts subscripts: [KnownSubscript],
+                                 arguments: [Argument]) -> KnownSubscript? {
+        
+        let asFunctionSignatures = subscripts.map {
+            FunctionSignature(name: "subscript",
+                              parameters: $0.parameters,
+                              returnType: $0.type,
+                              isStatic: $0.isStatic,
+                              isMutating: false)
+        }
+        
+        if let index = findBestOverload(inSignatures: asFunctionSignatures,
+                                        arguments: arguments) {
+            return subscripts[index]
+        }
+        
+        return nil
     }
     
     /// Returns a matching resolution by index on a given array of signatures.

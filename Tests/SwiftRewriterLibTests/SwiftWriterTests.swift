@@ -17,12 +17,14 @@ class SwiftSyntaxWriterTests: XCTestCase {
         
         output = TestWriterOutput()
         typeSystem = TypeSystem()
+        let provider = ArraySwiftSyntaxRewriterPassProvider(passes: [])
+        let passApplier = SwiftSyntaxRewriterPassApplier(provider: provider)
         sut = SwiftSyntaxWriter(intentions: IntentionCollection(),
                                 options: SwiftSyntaxOptions(),
                                 diagnostics: Diagnostics(),
                                 output: output,
-                                typeMapper: DefaultTypeMapper(typeSystem: typeSystem),
-                                typeSystem: typeSystem)
+                                typeSystem: typeSystem,
+                                syntaxRewriterApplier: passApplier)
     }
     
     func testShouldEmitTypeSignatureForOptionalInitializedVar() {

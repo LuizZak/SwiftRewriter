@@ -337,9 +337,22 @@ extension SwiftSyntaxProducer {
         case let subs as SubscriptPostfix:
             return SubscriptExprSyntax { builder in
                 builder.useCalledExpression(subExp)
-                builder.addArgument(TupleExprElementSyntax { builder in
-                    builder.useExpression(generateExpression(subs.expression))
-                })
+                iterateWithComma(subs.arguments) { (arg, hasComma) in
+                    builder.addArgument(TupleExprElementSyntax { builder in
+                        if let label = arg.label {
+                            builder.useLabel(makeIdentifier(label))
+                            builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
+                        }
+                        
+                        let argExpSyntax = generateExpression(arg.expression)
+                        
+                        builder.useExpression(argExpSyntax)
+                        
+                        if hasComma {
+                            builder.useTrailingComma(SyntaxFactory.makeCommaToken().withTrailingSpace())
+                        }
+                    })
+                }
                 builder.useLeftBracket(SyntaxFactory.makeLeftSquareBracketToken())
                 builder.useRightBracket(SyntaxFactory.makeRightSquareBracketToken())
             }.asExprSyntax

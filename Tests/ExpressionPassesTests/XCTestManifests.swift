@@ -244,6 +244,7 @@ extension NilValueTransformationsPassTests {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__NilValueTransformationsPassTests = [
+        ("testAssignmentIntoOptionalValue", testAssignmentIntoOptionalValue),
         ("testConditionalMemberAccess", testConditionalMemberAccess),
         ("testConditionalMemberAccessNested", testConditionalMemberAccessNested),
         ("testIgnoreImplicitlyUnwrappedMemberAccess", testIgnoreImplicitlyUnwrappedMemberAccess),

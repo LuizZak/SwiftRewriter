@@ -82,7 +82,7 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
             fc.arguments.forEach { visitExpression($0.expression) }
             
         case let sub as SubscriptPostfix:
-            visitExpression(sub.expression)
+            sub.arguments.forEach { visitExpression($0.expression) }
             
         default:
             break

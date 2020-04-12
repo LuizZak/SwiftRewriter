@@ -4,6 +4,7 @@ import ExpressionPasses
 import SourcePreprocessors
 import IntentionPasses
 import GlobalsProviders
+import SwiftSyntaxRewriterPasses
 import ObjcParser
 
 public struct Settings {
@@ -70,6 +71,7 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
         jobBuilder.intentionPassesSource = DefaultIntentionPasses()
         jobBuilder.astRewriterPassSources = DefaultExpressionPasses()
         jobBuilder.globalsProvidersSource = DefaultGlobalsProvidersSource()
+        jobBuilder.syntaxRewriterPassSource = DefaultSyntaxPassProvider()
         jobBuilder.settings = settings.rewriter
         jobBuilder.swiftSyntaxOptions = settings.astWriter
         jobBuilder.preprocessors = preprocessors

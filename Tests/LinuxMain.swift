@@ -12,6 +12,7 @@ import ObjcParserTests
 import SourcePreprocessorsTests
 import SwiftASTTests
 import SwiftRewriterLibTests
+import SwiftSyntaxRewriterPassesTests
 import SwiftSyntaxSupportTests
 import TestCommonsTests
 import TypeSystemTests
@@ -30,6 +31,7 @@ tests += ObjcParserTests.__allTests()
 tests += SourcePreprocessorsTests.__allTests()
 tests += SwiftASTTests.__allTests()
 tests += SwiftRewriterLibTests.__allTests()
+tests += SwiftSyntaxRewriterPassesTests.__allTests()
 tests += SwiftSyntaxSupportTests.__allTests()
 tests += TestCommonsTests.__allTests()
 tests += TypeSystemTests.__allTests()

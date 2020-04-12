@@ -85,7 +85,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
             exp.op = fc.replacingArguments(fc.arguments.map { visitExpression($0.expression) })
             
         case let sub as SubscriptPostfix:
-            exp.op = sub.replacingExpression(visitExpression(sub.expression))
+            exp.op = sub.replacingArguments(sub.arguments.map { visitExpression($0.expression) })
             
         default:
             break

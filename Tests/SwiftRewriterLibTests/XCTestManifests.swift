@@ -203,6 +203,7 @@ extension SwiftRewriterTests {
         ("testPostfixAfterCastUsesOptionalPostfix", testPostfixAfterCastUsesOptionalPostfix),
         ("testPropagateNullabilityOfBlockArgumentsInTypealiasedBlock", testPropagateNullabilityOfBlockArgumentsInTypealiasedBlock),
         ("testReadOnlyPropertyWithBackingFieldWithSameNameGetsCollapedAsPrivateSetProperty", testReadOnlyPropertyWithBackingFieldWithSameNameGetsCollapedAsPrivateSetProperty),
+        ("testRewriteAccessIntoOptionalWeakType", testRewriteAccessIntoOptionalWeakType),
         ("testRewriteAliasedTypedefStruct", testRewriteAliasedTypedefStruct),
         ("testRewriteAliasedTypedefStructWithPointers", testRewriteAliasedTypedefStructWithPointers),
         ("testRewriteAutotypeDeclaration", testRewriteAutotypeDeclaration),

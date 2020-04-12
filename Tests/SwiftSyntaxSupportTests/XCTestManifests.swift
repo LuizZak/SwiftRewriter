@@ -141,6 +141,7 @@ extension SwiftSyntaxProducer_StmtTests {
         ("testRepeatWhileStatement", testRepeatWhileStatement),
         ("testReturnStatement", testReturnStatement),
         ("testReturnStatementWithExpression", testReturnStatementWithExpression),
+        ("testSplitMixedConstantVariableDeclarationsInCompound", testSplitMixedConstantVariableDeclarationsInCompound),
         ("testSwitchStatementEmpty", testSwitchStatementEmpty),
         ("testSwitchStatementFull", testSwitchStatementFull),
         ("testSwitchStatementOneCase", testSwitchStatementOneCase),
