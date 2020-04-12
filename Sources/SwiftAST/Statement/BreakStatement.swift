@@ -1,6 +1,6 @@
 public class BreakStatement: Statement {
     public override var isUnconditionalJump: Bool {
-        return true
+        true
     }
     
     public let targetLabel: String?
@@ -25,16 +25,21 @@ public class BreakStatement: Statement {
     
     @inlinable
     public override func copy() -> BreakStatement {
-        return BreakStatement(targetLabel: targetLabel).copyMetadata(from: self)
+        BreakStatement(targetLabel: targetLabel).copyMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        return visitor.visitBreak(self)
+        visitor.visitBreak(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
-        return other is BreakStatement
+        switch other {
+        case let rhs as BreakStatement:
+            return targetLabel == rhs.targetLabel
+        default:
+            return false
+        }
     }
     
     public override func encode(to encoder: Encoder) throws {
@@ -51,7 +56,7 @@ public class BreakStatement: Statement {
 }
 public extension Statement {
     @inlinable
-    public var asBreak: BreakStatement? {
-        return cast()
+    var asBreak: BreakStatement? {
+        cast()
     }
 }

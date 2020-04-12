@@ -1,8 +1,9 @@
-import GrammarModels
+import Antlr4
 import ObjcParserAntlr
 import ObjcParser
-import Antlr4
+import GrammarModels
 import SwiftAST
+import TypeSystem
 
 /// A visitor that reads simple Objective-C expressions and emits as Expression
 /// enum cases.
@@ -10,11 +11,15 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     public var typeMapper: TypeMapper
     public var typeParser: TypeParsing
     public var context: SwiftASTReaderContext
+    public var delegate: SwiftStatementASTReaderDelegate?
     
-    public init(typeMapper: TypeMapper, typeParser: TypeParsing, context: SwiftASTReaderContext) {
+    public init(typeMapper: TypeMapper, typeParser: TypeParsing, context: SwiftASTReaderContext,
+                delegate: SwiftStatementASTReaderDelegate?) {
+
         self.typeMapper = typeMapper
         self.typeParser = typeParser
         self.context = context
+        self.delegate = delegate
     }
     
     public override func visitExpression(_ ctx: ObjectiveCParser.ExpressionContext) -> Expression? {
@@ -126,7 +131,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             return unary.accept(self)
         }
         if let typeName = ctx.typeName(),
-            let type = typeParser.parseObjcType(fromTypeName: typeName),
+            let type = typeParser.parseObjcType(from: typeName),
             let exp = ctx.castExpression()?.accept(self) {
             
             let swiftType = typeMapper.swiftType(forObjcType: type, context: .alwaysNonnull)
@@ -153,7 +158,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         // sizeof(<expr>) / sizeof(<type>)
         if ctx.SIZEOF() != nil {
             if let typeSpecifier = ctx.typeSpecifier(),
-                let type = typeParser.parseObjcType(fromTypeSpecifier: typeSpecifier) {
+                let type = typeParser.parseObjcType(from: typeSpecifier) {
                 
                 let swiftType = typeMapper.swiftType(forObjcType: type)
                 
@@ -280,7 +285,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitArgumentExpression(_ ctx: ObjectiveCParser.ArgumentExpressionContext) -> Expression? {
-        return acceptFirst(from: ctx.expression)
+        acceptFirst(from: ctx.expression)
     }
     
     public override func visitPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) -> Expression? {
@@ -333,7 +338,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitBoxExpression(_ ctx: ObjectiveCParser.BoxExpressionContext) -> Expression? {
-        return acceptFirst(from: ctx.expression, ctx.constant, ctx.identifier)
+        acceptFirst(from: ctx.expression, ctx.constant, ctx.identifier)
     }
     
     public override func visitStringLiteral(_ ctx: ObjectiveCParser.StringLiteralContext) -> Expression? {
@@ -348,12 +353,12 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     
     public override func visitBlockExpression(_ ctx: ObjectiveCParser.BlockExpressionContext) -> Expression? {
         let returnType = ctx.typeSpecifier().flatMap { typeSpecifier -> ObjcType? in
-            return typeParser.parseObjcType(fromTypeSpecifier: typeSpecifier)
+            return typeParser.parseObjcType(from: typeSpecifier)
         } ?? .void
         
         let parameters: [BlockParameter]
         if let blockParameters = ctx.blockParameters() {
-            let types = typeParser.parseObjcTypes(fromBlockParameters: blockParameters)
+            let types = typeParser.parseObjcTypes(from: blockParameters)
             let args = blockParameters.typeVariableDeclaratorOrName()
             
             parameters =
@@ -447,11 +452,11 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitSelectorName(_ ctx: ObjectiveCParser.SelectorNameContext) -> Expression? {
-        return .constant(.string(ctx.getText()))
+        .constant(.string(ctx.getText()))
     }
     
     public override func visitIdentifier(_ ctx: ObjectiveCParser.IdentifierContext) -> Expression? {
-        return .identifier(ctx.getText())
+        .identifier(ctx.getText())
     }
     
     private func acceptFirst(from rules: () -> ParserRuleContext?...) -> Expression? {
@@ -465,10 +470,10 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     private func compoundStatementVisitor() -> SwiftStatementASTReader.CompoundStatementVisitor {
-        return
-            SwiftStatementASTReader
+        SwiftStatementASTReader
                 .CompoundStatementVisitor(expressionReader: self,
-                                          context: context)
+                                          context: context,
+                                          delegate: delegate)
     }
     
     private class FunctionArgumentVisitor: ObjectiveCParserBaseVisitor<FunctionArgument> {
@@ -493,5 +498,5 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
 }
 
 private func swiftOperator(from string: String) -> SwiftOperator? {
-    return SwiftOperator(rawValue: string)
+    SwiftOperator(rawValue: string)
 }

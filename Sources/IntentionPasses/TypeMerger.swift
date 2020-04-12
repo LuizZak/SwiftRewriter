@@ -1,14 +1,14 @@
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
+import TypeSystem
 
 class TypeMerger {
     let typeSystem: TypeSystem
     let invocatorTag: String
     
     var historyTag: String {
-        return "TypeMerge:\(invocatorTag)"
+        "TypeMerge:\(invocatorTag)"
     }
     
     init(typeSystem: TypeSystem, invocatorTag: String) {
@@ -36,16 +36,16 @@ class TypeMerger {
         let allExtensions = sourceExtensions + targetExtensions
         let allStructs = sourceStructs + targetStructs
         
-        let allClassesByName = Dictionary(grouping: allClasses, by: { $0.typeName })
-        let allExtensionsByName = Dictionary(grouping: allExtensions, by: { $0.typeName })
-        let allStructsByName = Dictionary(grouping: allStructs, by: { $0.typeName })
+        let allClassesByName = Dictionary(grouping: allClasses, by: \.typeName)
+        let allExtensionsByName = Dictionary(grouping: allExtensions, by: \.typeName)
+        let allStructsByName = Dictionary(grouping: allStructs, by: \.typeName)
         
         for (_, classes) in allClassesByName {
             guard let target = classes.first(where: { !$0.isInterfaceSource }) else {
                 continue
             }
             
-            let remaining = classes.filter { $0.isInterfaceSource }
+            let remaining = classes.filter(\.isInterfaceSource)
             
             mergeAllTypeDefinitions(in: remaining, on: target)
             
@@ -62,7 +62,7 @@ class TypeMerger {
                     continue
                 }
                 
-                let remaining = cat.filter { $0.isInterfaceSource }
+                let remaining = cat.filter(\.isInterfaceSource)
                 
                 mergeAllTypeDefinitions(in: remaining, on: target)
                 
@@ -102,16 +102,16 @@ class TypeMerger {
         let extensions = file.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
         let structs = file.structIntentions
         
-        let classesByName = Dictionary(grouping: classes, by: { $0.typeName })
-        let extensionsByName = Dictionary(grouping: extensions, by: { $0.typeName })
-        let structsByName = Dictionary(grouping: structs, by: { $0.typeName })
+        let classesByName = Dictionary(grouping: classes, by: \.typeName)
+        let extensionsByName = Dictionary(grouping: extensions, by: \.typeName)
+        let structsByName = Dictionary(grouping: structs, by: \.typeName)
         
         for (_, classes) in classesByName {
             guard let target = classes.first(where: { !$0.isInterfaceSource }) else {
                 continue
             }
             
-            let remaining = classes.filter { $0.isInterfaceSource }
+            let remaining = classes.filter(\.isInterfaceSource)
             
             mergeAllTypeDefinitions(in: remaining, on: target)
             
@@ -128,7 +128,7 @@ class TypeMerger {
                     continue
                 }
                 
-                let remaining = cat.filter { $0.isInterfaceSource }
+                let remaining = cat.filter(\.isInterfaceSource)
                 
                 mergeAllTypeDefinitions(in: remaining, on: target)
                 

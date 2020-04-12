@@ -4,7 +4,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
     ///
     /// Returns true for `.break`, `.continue` and `.return` statements.
     public var isUnconditionalJump: Bool {
-        return false
+        false
     }
     
     /// This statement label's (parsed from C's goto labels), if any.
@@ -41,11 +41,11 @@ public class Statement: SyntaxNode, Codable, Equatable {
     /// statement
     @inlinable
     public func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        return visitor.visitStatement(self)
+        visitor.visitStatement(self)
     }
     
     public func isEqual(to other: Statement) -> Bool {
-        return false
+        false
     }
     
     public static func == (lhs: Statement, rhs: Statement) -> Bool {
@@ -67,7 +67,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
     
     @usableFromInline
     final func cast<T: Statement>() -> T? {
-        return self as? T
+        self as? T
     }
     
     private enum CodingKeys: String, CodingKey {
@@ -76,81 +76,81 @@ public class Statement: SyntaxNode, Codable, Equatable {
 }
 
 public extension Statement {
-    public static func compound(_ cpd: [Statement]) -> CompoundStatement {
-        return CompoundStatement(statements: cpd)
+    static func compound(_ cpd: [Statement]) -> CompoundStatement {
+        CompoundStatement(statements: cpd)
     }
-    public static func `if`(_ exp: Expression,
+    static func `if`(_ exp: Expression,
                             body: CompoundStatement,
                             else elseBody: CompoundStatement?) -> IfStatement {
         
-        return IfStatement(exp: exp, body: body, elseBody: elseBody, pattern: nil)
+        IfStatement(exp: exp, body: body, elseBody: elseBody, pattern: nil)
     }
-    public static func ifLet(_ pattern: Pattern,
+    static func ifLet(_ pattern: Pattern,
                              _ exp: Expression,
                              body: CompoundStatement,
                              else elseBody: CompoundStatement?) -> IfStatement {
         
-        return IfStatement(exp: exp, body: body, elseBody: elseBody, pattern: pattern)
+        IfStatement(exp: exp, body: body, elseBody: elseBody, pattern: pattern)
     }
-    public static func `while`(_ exp: Expression, body: CompoundStatement) -> WhileStatement {
-        return WhileStatement(exp: exp, body: body)
+    static func `while`(_ exp: Expression, body: CompoundStatement) -> WhileStatement {
+        WhileStatement(exp: exp, body: body)
     }
-    public static func doWhile(_ exp: Expression, body: CompoundStatement) -> DoWhileStatement {
-        return DoWhileStatement(exp: exp, body: body)
+    static func doWhile(_ exp: Expression, body: CompoundStatement) -> DoWhileStatement {
+        DoWhileStatement(exp: exp, body: body)
     }
-    public static func `for`(_ pattern: Pattern, _ exp: Expression, body: CompoundStatement) -> ForStatement {
-        return ForStatement(pattern: pattern, exp: exp, body: body)
+    static func `for`(_ pattern: Pattern, _ exp: Expression, body: CompoundStatement) -> ForStatement {
+        ForStatement(pattern: pattern, exp: exp, body: body)
     }
-    public static func `switch`(_ exp: Expression,
+    static func `switch`(_ exp: Expression,
                                 cases: [SwitchCase],
                                 default defaultCase: [Statement]?) -> SwitchStatement {
         
-        return SwitchStatement(exp: exp, cases: cases, defaultCase: defaultCase)
+        SwitchStatement(exp: exp, cases: cases, defaultCase: defaultCase)
     }
-    public static func `do`(_ stmt: CompoundStatement) -> DoStatement {
-        return DoStatement(body: stmt)
+    static func `do`(_ stmt: CompoundStatement) -> DoStatement {
+        DoStatement(body: stmt)
     }
-    public static func `defer`(_ stmt: CompoundStatement) -> DeferStatement {
-        return DeferStatement(body: stmt)
+    static func `defer`(_ stmt: CompoundStatement) -> DeferStatement {
+        DeferStatement(body: stmt)
     }
-    public static func `return`(_ exp: Expression?) -> ReturnStatement {
-        return ReturnStatement(exp: exp)
+    static func `return`(_ exp: Expression?) -> ReturnStatement {
+        ReturnStatement(exp: exp)
     }
-    public static func `break`() -> BreakStatement {
-        return BreakStatement()
+    static func `break`() -> BreakStatement {
+        BreakStatement()
     }
-    public static func `break`(targetLabel: String?) -> BreakStatement {
-        return BreakStatement(targetLabel: targetLabel)
+    static func `break`(targetLabel: String?) -> BreakStatement {
+        BreakStatement(targetLabel: targetLabel)
     }
-    public static var `fallthrough`: FallthroughStatement {
-        return FallthroughStatement()
+    static var `fallthrough`: FallthroughStatement {
+        FallthroughStatement()
     }
-    public static func `continue`() -> ContinueStatement {
-        return ContinueStatement()
+    static func `continue`() -> ContinueStatement {
+        ContinueStatement()
     }
-    public static func `continue`(targetLabel: String?) -> ContinueStatement {
-        return ContinueStatement(targetLabel: targetLabel)
+    static func `continue`(targetLabel: String?) -> ContinueStatement {
+        ContinueStatement(targetLabel: targetLabel)
     }
-    public static func expressions(_ exp: [Expression]) -> ExpressionsStatement {
-        return ExpressionsStatement(expressions: exp)
+    static func expressions(_ exp: [Expression]) -> ExpressionsStatement {
+        ExpressionsStatement(expressions: exp)
     }
-    public static func variableDeclarations(_ decl: [StatementVariableDeclaration]) -> VariableDeclarationsStatement {
-        return VariableDeclarationsStatement(decl: decl)
+    static func variableDeclarations(_ decl: [StatementVariableDeclaration]) -> VariableDeclarationsStatement {
+        VariableDeclarationsStatement(decl: decl)
     }
-    public static func unknown(_ context: UnknownASTContext) -> UnknownStatement {
-        return UnknownStatement(context: context)
+    static func unknown(_ context: UnknownASTContext) -> UnknownStatement {
+        UnknownStatement(context: context)
     }
-    public static func expression(_ expr: Expression) -> Statement {
-        return .expressions([expr])
+    static func expression(_ expr: Expression) -> Statement {
+        .expressions([expr])
     }
     
-    public static func variableDeclaration(identifier: String,
-                                           type: SwiftType,
-                                           ownership: Ownership = .strong,
-                                           isConstant: Bool = false,
-                                           initialization: Expression?) -> Statement {
+    static func variableDeclaration(identifier: String,
+                                    type: SwiftType,
+                                    ownership: Ownership = .strong,
+                                    isConstant: Bool = false,
+                                    initialization: Expression?) -> Statement {
         
-        return .variableDeclarations([
+        .variableDeclarations([
             StatementVariableDeclaration(identifier: identifier,
                                          type: type,
                                          ownership: ownership,
@@ -163,14 +163,14 @@ public extension Statement {
 public extension Statement {
     
     @inlinable
-    public func copyMetadata(from other: Statement) -> Self {
+    func copyMetadata(from other: Statement) -> Self {
         self.label = other.label
         
         return self
     }
     
     /// Labels this statement with a given label, and returns this instance.
-    public func labeled(_ label: String?) -> Self {
+    func labeled(_ label: String?) -> Self {
         self.label = label
         
         return self

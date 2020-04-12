@@ -1,7 +1,6 @@
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
 
 // TODO: Move task of converting `init` methods to a separate intention pass.
 
@@ -21,7 +20,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
     
     /// Textual tag this intention pass applies to history tracking entries.
     private var historyTag: String {
-        return "\(SwiftifyMethodSignaturesIntentionPass.self):\(operationsNumber)"
+        "\(SwiftifyMethodSignaturesIntentionPass.self):\(operationsNumber)"
     }
     
     public init() {
@@ -104,7 +103,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
         
         // Check `initWith<...>` prefix
         let splitOnWith = signature.name.components(separatedBy: "With")
-        if splitOnWith.count != 2 || splitOnWith.contains(where: { $0.isEmpty }) {
+        if splitOnWith.count != 2 || splitOnWith.contains(where: \.isEmpty) {
             return false
         }
         if !splitOnWith[0].hasPrefix("init") {
@@ -131,7 +130,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
         let signature = method.signature
         
         let splitOnWith = signature.name.components(separatedBy: "With")
-        if splitOnWith.count != 2 || splitOnWith.contains(where: { $0.isEmpty }) {
+        if splitOnWith.count != 2 || splitOnWith.contains(where: \.isEmpty) {
             return false
         }
         

@@ -4,6 +4,7 @@ import SwiftAST
 import KnownType
 import Intentions
 import SwiftRewriterLib
+import TypeSystem
 
 class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {

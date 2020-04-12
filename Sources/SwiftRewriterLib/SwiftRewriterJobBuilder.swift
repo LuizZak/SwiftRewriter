@@ -1,4 +1,9 @@
 import ObjcParser
+import SwiftSyntaxSupport
+import IntentionPasses
+import ExpressionPasses
+import SourcePreprocessors
+import GlobalsProviders
 
 /// Facility for creating `SwiftRewriterJob`s.
 public class SwiftRewriterJobBuilder {
@@ -6,9 +11,11 @@ public class SwiftRewriterJobBuilder {
     public var intentionPassesSource: IntentionPassSource?
     public var astRewriterPassSources: ASTRewriterPassSource?
     public var globalsProvidersSource: GlobalsProvidersSource?
+    public var syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider?
     public var preprocessors: [SourcePreprocessor] = []
     public var settings: SwiftRewriter.Settings = .default
     public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
+    public var parserCache: ParserCache? = nil
     
     public init() {
         
@@ -23,9 +30,11 @@ public class SwiftRewriterJobBuilder {
                                 intentionPassesSource: intentionPassesSource,
                                 astRewriterPassSources: astRewriterPassSources,
                                 globalsProvidersSource: globalsProvidersSource,
+                                syntaxRewriterPassSource: syntaxRewriterPassSource,
                                 preprocessors: preprocessors,
                                 settings: settings,
-                                swiftSyntaxOptions: swiftSyntaxOptions)
+                                swiftSyntaxOptions: swiftSyntaxOptions,
+                                parserCache: parserCache)
     }
 }
 
@@ -41,8 +50,10 @@ public class SwiftRewriterJobInputFiles {
         self.inputs.append(contentsOf: inputs)
     }
     
-    public func add(filePath: String, source: String) {
-        add(SwiftRewriterJobInputSource(filePath: filePath, source: source))
+    public func add(filePath: String, source: String, isPrimary: Bool = true) {
+        add(SwiftRewriterJobInputSource(filePath: filePath,
+                                        source: source,
+                                        isPrimary: isPrimary))
     }
     
     public func addInputs(from inputsProvider: InputSourcesProvider) {
@@ -50,20 +61,21 @@ public class SwiftRewriterJobInputFiles {
     }
     
     func createSourcesProvider() -> InputSourcesProvider {
-        return SwiftRewriterJobInputProvider(inputs: inputs)
+        SwiftRewriterJobInputProvider(inputs: inputs)
     }
 }
 
 struct SwiftRewriterJobInputSource: InputSource {
     var filePath: String
     var source: String
+    var isPrimary: Bool
     
     func sourceName() -> String {
-        return filePath
+        filePath
     }
     
     func loadSource() throws -> CodeSource {
-        return StringCodeSource(source: source, fileName: filePath)
+        StringCodeSource(source: source, fileName: filePath)
     }
 }
 
@@ -75,6 +87,6 @@ class SwiftRewriterJobInputProvider: InputSourcesProvider {
     }
     
     func sources() -> [InputSource] {
-        return inputs
+        inputs
     }
 }

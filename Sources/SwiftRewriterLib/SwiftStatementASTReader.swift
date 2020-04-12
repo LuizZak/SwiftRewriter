@@ -4,15 +4,25 @@ import ObjcParser
 import Antlr4
 import SwiftAST
 
+public protocol SwiftStatementASTReaderDelegate: class {
+    func swiftStatementASTReader(reportAutoTypeDeclaration varDecl: VariableDeclarationsStatement,
+                                 declarationAtIndex index: Int)
+}
+
 public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     public typealias Parser = ObjectiveCParser
     
     var expressionReader: SwiftExprASTReader
     var context: SwiftASTReaderContext
+    public weak var delegate: SwiftStatementASTReaderDelegate?
     
-    public init(expressionReader: SwiftExprASTReader, context: SwiftASTReaderContext) {
+    public init(expressionReader: SwiftExprASTReader,
+                context: SwiftASTReaderContext,
+                delegate: SwiftStatementASTReaderDelegate?) {
+
         self.expressionReader = expressionReader
         self.context = context
+        self.delegate = delegate
     }
     
     public override func visitDeclaration(_ ctx: Parser.DeclarationContext) -> Statement? {
@@ -49,7 +59,8 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
     public override func visitVarDeclaration(_ ctx: Parser.VarDeclarationContext) -> Statement? {
         let extractor =
             VarDeclarationExtractor(expressionReader: expressionReader,
-                                    context: context)
+                                    context: context,
+                                    delegate: delegate)
         
         return ctx.accept(extractor)
     }
@@ -269,10 +280,10 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
     
     // MARK: - while / do-while / for / for-in
     public override func visitIterationStatement(_ ctx: Parser.IterationStatementContext) -> Statement? {
-        return acceptFirst(from: ctx.whileStatement(),
-                           ctx.doStatement(),
-                           ctx.forStatement(),
-                           ctx.forInStatement())
+        acceptFirst(from: ctx.whileStatement(),
+                    ctx.doStatement(),
+                    ctx.forStatement(),
+                    ctx.forInStatement())
             ?? .unknown(UnknownASTContext(context: ctx.getText()))
     }
     
@@ -320,8 +331,9 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
     
     // MARK: - Helper methods
     func compoundStatementVisitor() -> CompoundStatementVisitor {
-        return CompoundStatementVisitor(expressionReader: expressionReader,
-                                        context: context)
+        CompoundStatementVisitor(expressionReader: expressionReader,
+                                 context: context,
+                                 delegate: delegate)
     }
     
     private func acceptFirst(from rules: ParserRuleContext?...) -> Statement? {
@@ -338,10 +350,15 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
     class CompoundStatementVisitor: ObjectiveCParserBaseVisitor<CompoundStatement> {
         var expressionReader: SwiftExprASTReader
         var context: SwiftASTReaderContext
+        weak var delegate: SwiftStatementASTReaderDelegate?
         
-        init(expressionReader: SwiftExprASTReader, context: SwiftASTReaderContext) {
+        init(expressionReader: SwiftExprASTReader,
+             context: SwiftASTReaderContext,
+             delegate: SwiftStatementASTReaderDelegate?) {
+
             self.expressionReader = expressionReader
             self.context = context
+            self.delegate = delegate
         }
         
         override func visitStatement(_ ctx: Parser.StatementContext) -> CompoundStatement? {
@@ -351,7 +368,8 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             
             let reader =
                 SwiftStatementASTReader(expressionReader: expressionReader,
-                                        context: context)
+                                        context: context,
+                                        delegate: delegate)
             
             reader.expressionReader = expressionReader
             
@@ -368,7 +386,8 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             
             let reader =
                 SwiftStatementASTReader(expressionReader: expressionReader,
-                                        context: context)
+                                        context: context,
+                                        delegate: delegate)
             
             reader.expressionReader = expressionReader
             
@@ -406,10 +425,15 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
     fileprivate class VarDeclarationExtractor: ObjectiveCParserBaseVisitor<Statement> {
         var expressionReader: SwiftExprASTReader
         var context: SwiftASTReaderContext
+        weak var delegate: SwiftStatementASTReaderDelegate?
         
-        init(expressionReader: SwiftExprASTReader, context: SwiftASTReaderContext) {
+        init(expressionReader: SwiftExprASTReader,
+             context: SwiftASTReaderContext,
+             delegate: SwiftStatementASTReaderDelegate?) {
+
             self.expressionReader = expressionReader
             self.context = context
+            self.delegate = delegate
         }
         
         override func visitForLoopInitializer(_ ctx: Parser.ForLoopInitializerContext) -> Statement? {
@@ -446,16 +470,15 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
                                                  isConstant: isConstant,
                                                  initialization: expr)
                 declarations.append(declaration)
-                
-                let storage =
-                    ValueStorage(type: swiftType,
-                                 ownership: ownership,
-                                 isConstant: isConstant)
-                
-                context.define(localNamed: identifier, storage: storage)
+
+                context.define(localNamed: identifier, storage: declaration.storage)
             }
-            
-            return .variableDeclarations(declarations)
+
+            let varDeclStmt = Statement.variableDeclarations(declarations)
+
+            reportAutotypeDeclarations(in: varDeclStmt)
+
+            return varDeclStmt
         }
         
         override func visitVarDeclaration(_ ctx: Parser.VarDeclarationContext) -> Statement? {
@@ -481,7 +504,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
                 guard let type =
                     expressionReader
                         .typeParser
-                        .parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,
+                        .parseObjcType(in: declarationSpecifiers,
                                        declarator: declarator) else {
                     continue
                 }
@@ -500,16 +523,26 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
                                                  isConstant: isConstant,
                                                  initialization: expr)
                 declarations.append(declaration)
-                
-                let storage =
-                    ValueStorage(type: swiftType,
-                                 ownership: ownership,
-                                 isConstant: isConstant)
-                
-                context.define(localNamed: identifier, storage: storage)
+
+                context.define(localNamed: identifier, storage: declaration.storage)
             }
+
+            let varDeclStmt = Statement.variableDeclarations(declarations)
+
+            reportAutotypeDeclarations(in: varDeclStmt)
             
-            return .variableDeclarations(declarations)
+            return varDeclStmt
+        }
+
+        private func reportAutotypeDeclarations(in declarationStatement: VariableDeclarationsStatement) {
+            if let delegate = delegate {
+                for (i, decl) in declarationStatement.decl.enumerated() {
+                    if decl.type == .typeName("__auto_type") {
+                        delegate.swiftStatementASTReader(reportAutoTypeDeclaration: declarationStatement,
+                                                         declarationAtIndex: i)
+                    }
+                }
+            }
         }
     }
 }
@@ -538,7 +571,8 @@ private class ForStatementGenerator {
         let varDeclExtractor =
             SwiftStatementASTReader
                 .VarDeclarationExtractor(expressionReader: reader.expressionReader,
-                                         context: context)
+                                         context: context,
+                                         delegate: reader.delegate)
         
         let initExpr =
             ctx.forLoopInitializer()?
@@ -772,4 +806,64 @@ private func expressions(in expression: Expression, inspectBlocks: Bool) -> AnyS
                            inspectBlocks: inspectBlocks)
     
     return AnySequence(sequence.lazy.compactMap { $0 as? Expression })
+}
+
+internal func _isConstant(fromType type: ObjcType) -> Bool {
+    switch type {
+    case .qualified(_, let qualifiers),
+         .specified(_, .qualified(_, let qualifiers)):
+        if qualifiers.contains("const") {
+            return true
+        }
+    case .specified(let specifiers, _):
+        if specifiers.contains("const") {
+            return true
+        }
+    default:
+        break
+    }
+    
+    return false
+}
+
+internal func evaluateOwnershipPrefix(inType type: ObjcType,
+                                      property: PropertyDefinition? = nil) -> Ownership {
+    
+    var ownership: Ownership = .strong
+    if !type.isPointer {
+        // We don't have enough information at statement parsing time to conclude
+        // that an __auto_type declaration does not resolve in fact to a pointer.
+        // Keep ownership modifiers for now
+        if case .specified(_, .struct("__auto_type")) = type {
+            // skip return
+        } else {
+            return .strong
+        }
+    }
+    
+    switch type {
+    case .specified(let specifiers, _):
+        if specifiers.last == "__weak" {
+            ownership = .weak
+        } else if specifiers.last == "__unsafe_unretained" {
+            ownership = .unownedUnsafe
+        }
+    default:
+        break
+    }
+    
+    // Search in property
+    if let property = property {
+        if let modifiers = property.attributesList?.keywordAttributes {
+            if modifiers.contains("weak") {
+                ownership = .weak
+            } else if modifiers.contains("unsafe_unretained") {
+                ownership = .unownedUnsafe
+            } else if modifiers.contains("assign") {
+                ownership = .unownedUnsafe
+            }
+        }
+    }
+    
+    return ownership
 }

@@ -1,6 +1,5 @@
 import SwiftAST
 import KnownType
-import SwiftRewriterLib
 
 /// Corrects invocations of properties of types which are expressed as method
 /// invocations. This is a common construct in Objective-C.
@@ -13,7 +12,7 @@ public class PropertyAsMethodAccessCorrectingExpressionPass: BaseExpressionPass 
             if result.didWork {
                 notifyChange()
                 
-                return super.visitExpression(result.exp)
+                return visitExpression(result.exp)
             }
         }
         

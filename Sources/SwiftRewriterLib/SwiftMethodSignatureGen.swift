@@ -1,5 +1,6 @@
 import GrammarModels
 import SwiftAST
+import TypeSystem
 
 /// A helper class that can be used to generate a proper swift method signature
 /// from an Objective-C method signature.
@@ -106,7 +107,7 @@ public class SwiftMethodSignatureGen {
             var label = kw.selector?.name
             let identifier = kw.identifier?.name ?? "_\(i)"
             var nullability: TypeNullability? = nil
-            let type = kw.type?.type?.type ?? ObjcType.id(protocols: [])
+            let type = kw.type?.type?.type ?? ObjcType.id()
             
             // The first label name is always empty.
             // This matches the original Objective-C behavior of using the first

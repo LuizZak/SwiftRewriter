@@ -1,4 +1,3 @@
-import SwiftRewriterLib
 import SwiftAST
 
 /// Specifies rewriting strategies to apply to a function invocation argument.
@@ -18,15 +17,15 @@ public enum ArgumentRewritingStrategy {
     case fixed(() -> Expression)
     
     /// Transforms an argument using a given transformation method
-    indirect case transformed((Expression) -> Expression, ArgumentRewritingStrategy)
+    indirect case transformed((Expression) -> Expression, ArgumentRewritingStrategy = .asIs)
     
     /// Creates a rule that omits the argument in case it matches a given
     /// expression.
-    indirect case omitIf(matches: ValueMatcher<Expression>, ArgumentRewritingStrategy)
+    indirect case omitIf(matches: ValueMatcher<Expression>, ArgumentRewritingStrategy = .asIs)
     
     /// Allows adding a label to the result of an argument strategy for the
     /// current parameter.
-    indirect case labeled(String, ArgumentRewritingStrategy)
+    indirect case labeled(String, ArgumentRewritingStrategy = .asIs)
     
     /// In case this argument strategy is a labeled argument rewrite, returns
     /// the new label, otherwise, returns `nil`.
@@ -189,23 +188,23 @@ public enum ArgumentRewritingStrategy {
 
 public extension Sequence where Element == ArgumentRewritingStrategy {
     
-    public func requiredArgumentCount() -> Int {
+    func requiredArgumentCount() -> Int {
         var requiredArgs = reduce(0) { $0 + $1.argumentConsumeCount }
         
         // Verify max arg count inferred from indexes of arguments
-        if let max = compactMap({ $0.maxArgumentReferenced }).max(), max > requiredArgs {
+        if let max = compactMap(\.maxArgumentReferenced).max(), max > requiredArgs {
             requiredArgs = max
         }
         
         return requiredArgs
     }
     
-    public func argumentLabels() -> [String?] {
-        return map { $0.label }
+    func argumentLabels() -> [String?] {
+        map(\.label)
     }
     
-    public static func addingLabels(_ labels: String?...) -> [Element] {
-        return labels.map { $0.map { .labeled($0, .asIs) } ?? .asIs }
+    static func addingLabels(_ labels: String?...) -> [Element] {
+        labels.map { $0.map { .labeled($0) } ?? .asIs }
     }
 }
 
@@ -215,7 +214,7 @@ public extension Collection where Element == ArgumentRewritingStrategy, Index ==
     /// rewriting strategies.
     ///
     /// - precondition: `arguments.count >= self.requiredArgumentCount()`
-    public func rewrite(arguments: [FunctionArgument]) -> [FunctionArgument] {
+    func rewrite(arguments: [FunctionArgument]) -> [FunctionArgument] {
         precondition(arguments.count >= self.requiredArgumentCount())
         
         var result: [FunctionArgument] = []
@@ -241,7 +240,7 @@ public extension Collection where Element == ArgumentRewritingStrategy, Index ==
     /// rewriting strategies.
     ///
     /// - precondition: `parameters.count >= self.requiredArgumentCount()`
-    public func rewrite(parameters: [ParameterSignature]) -> [ParameterSignature] {
+    func rewrite(parameters: [ParameterSignature]) -> [ParameterSignature] {
         precondition(parameters.count >= self.requiredArgumentCount())
         
         var result: [ParameterSignature] = []
@@ -267,9 +266,9 @@ public extension Collection where Element == ArgumentRewritingStrategy, Index ==
 
 public extension ValueTransformer where U == [FunctionArgument] {
     
-    public func rewritingArguments(_ transformers: [ArgumentRewritingStrategy],
-                                   file: String = #file,
-                                   line: Int = #line) -> ValueTransformer {
+    func rewritingArguments(_ transformers: [ArgumentRewritingStrategy],
+                            file: String = #file,
+                            line: Int = #line) -> ValueTransformer {
         
         let required = transformers.requiredArgumentCount()
         

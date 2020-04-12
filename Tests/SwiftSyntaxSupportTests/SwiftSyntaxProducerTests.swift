@@ -25,7 +25,7 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                     builder.setBody([
                         Statement.expression(Expression.identifier("foo").typed("Bar")),
                         Statement.expression(Expression.identifier("baz").typed(.errorType))
-                        ])
+                    ])
                 }
             }
         let sut = SwiftSyntaxProducer(settings: .init(outputExpressionTypes: true))
@@ -38,6 +38,35 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                 foo
                 // type: <<error type>>
                 baz
+            }
+            """)
+    }
+
+    func testGenerateVariableDeclarationTypes() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createGlobalFunction(withName: "foo") { builder in
+                    builder.setBody([
+                        Statement.variableDeclaration(identifier: "foo",
+                                                      type: .int,
+                                                      initialization: Expression.constant(0).typed(.double)),
+                        Statement.variableDeclaration(identifier: "bar",
+                                                      type: .int,
+                                                      initialization: nil)
+                    ])
+                }
+            }
+        let sut = SwiftSyntaxProducer(settings: .init(outputExpressionTypes: true))
+
+        let result = sut.generateFile(file)
+
+        assert(result, matches: """
+            func foo() {
+                // decl type: Int
+                // init type: Double
+                var foo: Int = 0
+                // decl type: Int
+                var bar: Int
             }
             """)
     }

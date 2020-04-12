@@ -15,6 +15,10 @@ public class Identifier: ASTNode {
     /// String identifier
     public var name: String
     
+    public override var shortDescription: String {
+        name
+    }
+    
     public init(name: String,
                 isInNonnullContext: Bool,
                 location: SourceLocation = .invalid,
@@ -26,15 +30,15 @@ public class Identifier: ASTNode {
                    location: location,
                    length: length)
     }
-    
-    override public func shortDescription() -> String {
-        return name
-    }
 }
 
 /// A node that represents a special keyword-type token
 public class KeywordNode: ASTNode {
     public var keyword: Keyword
+    
+    public override var shortDescription: String {
+        keyword.rawValue
+    }
     
     public init(keyword: Keyword,
                 isInNonnullContext: Bool,
@@ -46,9 +50,5 @@ public class KeywordNode: ASTNode {
         super.init(isInNonnullContext: isInNonnullContext,
                    location: location,
                    length: length)
-    }
-    
-    override public func shortDescription() -> String {
-        return keyword.rawValue
     }
 }

@@ -1,15 +1,15 @@
 /// A global variable declaration.
 public class VariableDeclaration: ASTNode, InitializableNode {
     public var type: TypeNameNode? {
-        return firstChild()
+        firstChild()
     }
     
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     public var initialExpression: InitialExpression? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -20,7 +20,7 @@ public class VariableDeclaration: ASTNode, InitializableNode {
 /// Represents the initial expression for a global variable definition.
 public class InitialExpression: ASTNode, InitializableNode {
     public var constantExpression: ConstantExpressionNode? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -32,7 +32,7 @@ public class InitialExpression: ASTNode, InitializableNode {
 /// parsed from a source file.
 public class ConstantExpressionNode: ASTNode, InitializableNode {
     public var expression: ExpressionNode? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {

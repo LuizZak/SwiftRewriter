@@ -1,7 +1,6 @@
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
 import MiniLexer
 
 private typealias SwiftRewriterAttribute =
@@ -16,7 +15,7 @@ public class SwiftAttributeTransformationsExtractor {
     }
     
     public func nonCanonicalNames() throws -> [String] {
-        return try aliases(in: type)
+        try aliases(in: type)
     }
     
     /// Returns an array of aliased `KnownMethod`s that correspond to all methods
@@ -158,7 +157,7 @@ public class SwiftAttributeTransformationsExtractor {
             case .mapFromIdentifier(let identifier):
                 if identifier.name == "init" {
                     transforms.append(
-                        .initializer(old: identifier.parameterNames,
+                        .initializer(old: identifier.argumentLabels,
                                      new: ctor.parameters.argumentLabels()))
                 } else {
                     _mapStaticMethod(identifier)
@@ -241,14 +240,14 @@ public class SwiftAttributeTransformationsExtractor {
         func makeTransformation(identifier: FunctionIdentifier) -> PostfixTransformation {
             
             // Free function to method conversion
-            if identifier.parameterNames.first == "self" {
+            if identifier.argumentLabels.first == "self" {
                 
                 let transformer = FunctionInvocationTransformer(
                     objcFunctionName: identifier.name,
                     toSwiftFunction: method.signature.name,
                     firstArgumentBecomesInstance: true,
                     arguments: method.signature.parameters.map { arg in
-                        arg.label.flatMap { .labeled($0, .asIs) } ?? .asIs
+                        arg.label.flatMap { .labeled($0) } ?? .asIs
                     }
                 )
                 
@@ -267,7 +266,7 @@ public class SwiftAttributeTransformationsExtractor {
             return .method(transformer)
         }
         func makeTransformation(signature: FunctionSignature) -> PostfixTransformation {
-            return makeTransformation(identifier: signature.asIdentifier)
+            makeTransformation(identifier: signature.asIdentifier)
         }
         
         var transforms: [PostfixTransformation] = []
@@ -287,7 +286,7 @@ public class SwiftAttributeTransformationsExtractor {
                 let ident =
                     FunctionIdentifier(
                         name: ident,
-                        parameterNames: method.signature.asIdentifier.parameterNames)
+                        parameterNames: method.signature.asIdentifier.argumentLabels)
                 
                 let transformer =
                     MethodInvocationTransformerMatcher(
@@ -357,7 +356,7 @@ public class SwiftAttributeTransformationsExtractor {
         var setter: String?
         
         func analyze(_ identifier: FunctionIdentifier) {
-            let params = identifier.parameterNames
+            let params = identifier.argumentLabels
             
             if params.isEmpty {
                 getter = identifier.name

@@ -61,9 +61,12 @@ public final class FunctionSignatureParser {
     ///
     /// ```
     /// function-signature
-    ///     : declaration-modifiers? identifier parameter-signature return-type?
-    ///     | declaration-modifiers? identifier parameter-signature 'throws' return-type?
-    ///     | declaration-modifiers? identifier parameter-signature 'rethrows' return-type?
+    ///     : declaration-modifiers? identifier parameter-signature throws-clause? return-type?
+    ///     ;
+    ///
+    /// throws-clause
+    ///     : 'throws'
+    ///     | 'rethrows'
     ///     ;
     ///
     /// return-type
@@ -108,9 +111,12 @@ public final class FunctionSignatureParser {
     ///
     /// ```
     /// function-signature
-    ///     : declaration-modifiers? identifier parameter-signature return-type?
-    ///     | declaration-modifiers? identifier parameter-signature 'throws' return-type?
-    ///     | declaration-modifiers? identifier parameter-signature 'rethrows' return-type?
+    ///     : declaration-modifiers? identifier parameter-signature throws-clause? return-type?
+    ///     ;
+    ///
+    /// throws-clause
+    ///     : 'throws'
+    ///     | 'rethrows'
     ///     ;
     ///
     /// return-type
@@ -472,7 +478,7 @@ public final class FunctionSignatureParser {
         }
         
         var tokenString: String {
-            return rawValue
+            rawValue
         }
         
         static func tokenType(at lexer: Lexer) -> FunctionSignatureParser.Token? {

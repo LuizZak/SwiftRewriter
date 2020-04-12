@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/LuizZak/antlr4-swift.git",
         "state": {
           "branch": null,
-          "revision": "c8737a781a83c16c1325072611f780c62092c9fb",
-          "version": "4.0.24"
+          "revision": "7828076064effeb80085ee50052a5d2c1c16cb44",
+          "version": "4.0.29"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/LuizZak/console.git",
         "state": {
           "branch": null,
-          "revision": "a3adc9d4fbcc3f2c6add286140e02cfa66100a8e",
-          "version": "0.4.3"
+          "revision": "a7c1af26ffdb6fd2dbb1bffe714b5950ce738f70",
+          "version": "0.8.0"
         }
       },
       {
@@ -24,17 +24,17 @@
         "repositoryURL": "https://github.com/LuizZak/MiniLexer.git",
         "state": {
           "branch": null,
-          "revision": "068f7a65ee3c5bbc7664f45ff7c601f9082f9a71",
-          "version": "0.7.2"
+          "revision": "71cc272f4613d1e45e1eacab33fa2f77c6311007",
+          "version": "0.10.0"
         }
       },
       {
-        "package": "SwiftPM",
-        "repositoryURL": "https://github.com/apple/swift-package-manager.git",
+        "package": "swift-argument-parser",
+        "repositoryURL": "https://github.com/apple/swift-argument-parser.git",
         "state": {
           "branch": null,
-          "revision": "235aacc514cb81a6881364b0fedcb3dd083228f3",
-          "version": "0.3.0"
+          "revision": "8d31a0905c346a45c87773ad50862b5b3df8dff6",
+          "version": "0.0.4"
         }
       },
       {
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/apple/swift-syntax.git",
         "state": {
           "branch": null,
-          "revision": "f20c0bcbfb4b07e107c9851350217cb2217f0cb4",
-          "version": "0.40200.0"
+          "revision": "0688b9cfc4c3dd234e4f55f1f056b2affc849873",
+          "version": "0.50200.0"
         }
       }
     ]

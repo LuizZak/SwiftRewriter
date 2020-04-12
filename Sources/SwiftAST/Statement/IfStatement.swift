@@ -16,7 +16,7 @@ public class IfStatement: Statement {
     public var pattern: Pattern?
     
     public var isIfLet: Bool {
-        return pattern != nil
+        pattern != nil
     }
     
     public override var children: [SyntaxNode] {
@@ -72,7 +72,7 @@ public class IfStatement: Statement {
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        return visitor.visitIf(self)
+        visitor.visitIf(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
@@ -104,7 +104,7 @@ public class IfStatement: Statement {
 }
 public extension Statement {
     @inlinable
-    public var asIf: IfStatement? {
-        return cast()
+    var asIf: IfStatement? {
+        cast()
     }
 }

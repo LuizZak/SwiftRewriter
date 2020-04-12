@@ -1,5 +1,4 @@
 import SwiftAST
-import SwiftRewriterLib
 
 public enum CoreGraphicsCompoundTypes {
     public static let cgPoint = CGPointCompoundType.self
@@ -11,7 +10,7 @@ public enum CGPointCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "CGPoint")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     private static func typeString() -> String {
@@ -36,7 +35,7 @@ public enum CGSizeCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "CGSize")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     private static func typeString() -> String {
@@ -61,7 +60,7 @@ public enum CGRectCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "CGRect")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     private static func typeString() -> String {

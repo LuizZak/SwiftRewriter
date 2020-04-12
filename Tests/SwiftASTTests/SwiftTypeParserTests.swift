@@ -1,9 +1,6 @@
 import XCTest
 import SwiftAST
-import SwiftRewriterLib
 import TestCommons
-
-// TODO: Support parsing @convention, @escaping and @autoclosure block type attributes
 
 class SwiftTypeParserTests: XCTestCase {
     func testParseIdentifierType() throws {
@@ -82,48 +79,127 @@ class SwiftTypeParserTests: XCTestCase {
     
     func testParseOptionalBlock() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(() -> ())?"),
-                           SwiftType.optional(.swiftBlock(returnType: .void, parameters: [])))
+                           SwiftType.optional(.swiftBlock(returnType: .void)))
+    }
+    
+    func testParseBlockTypeWithAttributes() throws {
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "@convention(c) () -> ()"),
+            SwiftType.block(returnType: .void,
+                            parameters: [],
+                            attributes: [.convention(.c)]))
+        
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "@convention(block) () -> ()"),
+            SwiftType.block(returnType: .void,
+                            parameters: [],
+                            attributes: [.convention(.block)]))
+        
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "@convention(swift) () -> ()"),
+            SwiftType.swiftBlock(returnType: .void,
+                                 parameters: []))
+        
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "@autoclosure () -> ()"),
+            SwiftType.block(returnType: .void,
+                            parameters: [],
+                            attributes: [.autoclosure]))
+        
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "@escaping () -> ()"),
+            SwiftType.block(returnType: .void,
+                            parameters: [],
+                            attributes: [.escaping]))
     }
     
     func testParseBlockTypeWithParameterAnnotation() throws {
-        try XCTAssertEqual(SwiftTypeParser.parse(from: "(@escaping () -> ()) -> ()"),
-                           SwiftType.swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [])]))
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "(@escaping () -> ()) -> ()"),
+            SwiftType.swiftBlock(returnType: .void,
+                                 parameters: [.block(returnType: .void,
+                                                     parameters: [],
+                                                     attributes: [.escaping])]))
+        
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "(@convention(c) () -> ()) -> ()"),
+            SwiftType.swiftBlock(returnType: .void,
+                                 parameters: [.block(returnType: .void,
+                                                     parameters: [],
+                                                     attributes: [.convention(.c)])]))
+        
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "(@autoclosure () -> ()) -> ()"),
+            SwiftType.swiftBlock(returnType: .void,
+                                 parameters: [.block(returnType: .void,
+                                                     parameters: [],
+                                                     attributes: [.autoclosure])]))
+        
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "(@escaping () -> (), @autoclosure () -> Void) -> ()"),
+            SwiftType.swiftBlock(returnType: .void,
+                                 parameters: [.block(returnType: .void,
+                                                     parameters: [],
+                                                     attributes: [.escaping]),
+                                              .block(returnType: .void,
+                                                     parameters: [],
+                                                     attributes: [.autoclosure])]))
     }
     
     func testParseBlockTypeWithParameterAnnotationAfterParameterName() throws {
-        try XCTAssertEqual(SwiftTypeParser.parse(from: "(name: @escaping (Int) -> ()) -> ()"),
-                           SwiftType.swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [.int])]))
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "(name: @escaping (Int) -> ()) -> ()"),
+            SwiftType.swiftBlock(returnType: .void,
+                                 parameters: [.block(returnType: .void,
+                                                     parameters: [.int],
+                                                     attributes: [.escaping])]))
     }
     
     func testParseBlockTypeWithParameterAnnotationAfterParameterLabel() throws {
-        try XCTAssertEqual(SwiftTypeParser.parse(from: "(_ label: @escaping (Int) -> ()) -> ()"),
-                           SwiftType.swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [.int])]))
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "(_ label: @escaping (Int) -> ()) -> ()"),
+            SwiftType.swiftBlock(returnType: .void,
+                                 parameters: [.block(returnType: .void,
+                                                     parameters: [.int],
+                                                     attributes: [.escaping])]))
     }
     
     func testParseBlockTypeWithParameterAnnotationAfterInout() throws {
-        try XCTAssertEqual(SwiftTypeParser.parse(from: "(inout @escaping (Int) -> ()) -> ()"),
-                           SwiftType.swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [.int])]))
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "(inout @escaping (Int) -> ()) -> ()"),
+            SwiftType.swiftBlock(returnType: .void,
+                                 parameters: [.block(returnType: .void,
+                                                     parameters: [.int],
+                                                     attributes: [.escaping])]))
     }
     
     func testParseBlockTypeWithParameterAnnotationWithParenthesis() throws {
-        try XCTAssertEqual(SwiftTypeParser.parse(from: "(@escaping(abc) (Int) -> ()) -> ()"),
-                           SwiftType.swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [.int])]))
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "(@escaping(abc) (Int) -> ()) -> ()"),
+            SwiftType.swiftBlock(returnType: .void,
+                                 parameters: [.swiftBlock(returnType: .void, parameters: [.int])]))
     }
     
     func testParseBlockTypeWithMultipleParameterAnnotations() throws {
-        try XCTAssertEqual(SwiftTypeParser.parse(from: "(@autoclosure @escaping (Int) -> ()) -> ()"),
-                           SwiftType.swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [.int])]))
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "(@autoclosure @escaping (Int) -> ()) -> ()"),
+            SwiftType.swiftBlock(returnType: .void,
+                                 parameters: [.block(returnType: .void,
+                                                     parameters: [.int],
+                                                     attributes: [.autoclosure, .escaping])]))
     }
     
     /// Variadic parameters are converted into array-types.
     func testParseBlockTypeWithVariadicParameterEllipsis() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(Int...) -> ()"),
-                           SwiftType.swiftBlock(returnType: .void, parameters: [.array(.int)]))
+                           SwiftType.swiftBlock(returnType: .void,
+                                                parameters: [.array(.int)]))
     }
     
     func testParseBlockTypeTakingBlockType() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(() -> ()) -> ()"),
-                           SwiftType.swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [])]))
+                           SwiftType.swiftBlock(returnType: .void,
+                                                parameters: [.swiftBlock(returnType: .void, parameters: [])]))
     }
     
     func testParseArray() throws {

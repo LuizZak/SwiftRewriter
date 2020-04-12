@@ -23,7 +23,7 @@ class ValueTransformerTests: XCTestCase {
                 .labeled("size", .constant(11))
             ])
         
-        let result = transformer.transform(value: exp)
+        let result = transformer(transform: exp)
         
         XCTAssertEqual(
             result,
@@ -48,7 +48,7 @@ class ValueTransformerTests: XCTestCase {
         
         // Incorrect type (validate closure)
         XCTAssertNil(
-            transformer.transform(value:
+            transformer(transform:
                 Expression
                     .identifier("UIFont")
                     .typed("SomeOtherType")
@@ -106,9 +106,9 @@ class ValueTransformerTests: XCTestCase {
             ValueTransformer<Int, String>(keyPath: \.description)
                 .validate { $0 != "2" }
         
-        XCTAssertEqual(transformer.transform(value: 0), "0")
-        XCTAssertEqual(transformer.transform(value: 1), "1")
-        XCTAssertNil(transformer.transform(value: 2))
+        XCTAssertEqual(transformer(transform: 0), "0")
+        XCTAssertEqual(transformer(transform: 1), "1")
+        XCTAssertNil(transformer(transform: 2))
     }
     
     func testDebugTransform() {
@@ -309,7 +309,7 @@ class ValueTransformerTests: XCTestCase {
                     return .failure(message: message)
                 }
         
-        _=sut.transform(value: 1)
+        _=sut(transform: 1)
         
         XCTAssertFalse(wasInvoked)
     }

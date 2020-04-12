@@ -9,7 +9,7 @@ public class BlockLiteralExpression: Expression {
         var buff = "{ "
         
         buff += "("
-        buff += parameters.map { $0.description }.joined(separator: ", ")
+        buff += parameters.map(\.description).joined(separator: ", ")
         buff += ") -> "
         buff += returnType.description
         buff += " in "
@@ -22,7 +22,7 @@ public class BlockLiteralExpression: Expression {
     }
     
     public override var requiresParens: Bool {
-        return true
+        true
     }
     
     public init(parameters: [BlockParameter], returnType: SwiftType, body: CompoundStatement) {
@@ -49,14 +49,14 @@ public class BlockLiteralExpression: Expression {
     
     @inlinable
     public override func copy() -> BlockLiteralExpression {
-        return BlockLiteralExpression(parameters: parameters,
+        BlockLiteralExpression(parameters: parameters,
                                       returnType: returnType,
                                       body: body.copy()).copyTypeAndMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitBlock(self)
+        visitor.visitBlock(self)
     }
     
     public override func isEqual(to other: Expression) -> Bool {
@@ -96,8 +96,8 @@ public class BlockLiteralExpression: Expression {
 }
 public extension Expression {
     @inlinable
-    public var asBlock: BlockLiteralExpression? {
-        return cast()
+    var asBlock: BlockLiteralExpression? {
+        cast()
     }
 }
 
@@ -113,6 +113,6 @@ public struct BlockParameter: Codable, Equatable {
 
 extension BlockParameter: CustomStringConvertible {
     public var description: String {
-        return "\(self.name): \(type)"
+        "\(self.name): \(type)"
     }
 }

@@ -1,4 +1,3 @@
-
 public class BinaryExpression: Expression {
     public var lhs: Expression {
         didSet { oldValue.parent = nil; lhs.parent = self; }
@@ -9,15 +8,15 @@ public class BinaryExpression: Expression {
     }
     
     public override var subExpressions: [Expression] {
-        return [lhs, rhs]
+        [lhs, rhs]
     }
     
     public override var isLiteralExpression: Bool {
-        return lhs.isLiteralExpression && rhs.isLiteralExpression
+        lhs.isLiteralExpression && rhs.isLiteralExpression
     }
     
     public override var requiresParens: Bool {
-        return true
+        true
     }
     
     public override var description: String {
@@ -56,8 +55,7 @@ public class BinaryExpression: Expression {
     
     @inlinable
     public override func copy() -> BinaryExpression {
-        return
-            BinaryExpression(
+        BinaryExpression(
                 lhs: lhs.copy(),
                 op: op,
                 rhs: rhs.copy()
@@ -66,7 +64,7 @@ public class BinaryExpression: Expression {
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitBinary(self)
+        visitor.visitBinary(self)
     }
     
     public override func isEqual(to other: Expression) -> Bool {
@@ -105,6 +103,6 @@ public class BinaryExpression: Expression {
 extension Expression {
     @inlinable
     public var asBinary: BinaryExpression? {
-        return cast()
+        cast()
     }
 }

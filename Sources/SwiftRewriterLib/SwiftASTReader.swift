@@ -1,4 +1,5 @@
 import SwiftAST
+import TypeSystem
 import GrammarModels
 import ObjcParserAntlr
 import ObjcParser
@@ -9,6 +10,8 @@ public class SwiftASTReader {
     let typeMapper: TypeMapper
     let typeParser: TypeParsing
     let typeSystem: TypeSystem?
+
+    weak var delegate: SwiftStatementASTReaderDelegate?
     
     public init(typeMapper: TypeMapper,
                 typeParser: TypeParsing,
@@ -29,12 +32,14 @@ public class SwiftASTReader {
         let expressionReader =
             SwiftExprASTReader(typeMapper: typeMapper,
                                typeParser: typeParser,
-                               context: context)
+                               context: context,
+                               delegate: delegate)
         
         let parser =
             SwiftStatementASTReader
                 .CompoundStatementVisitor(expressionReader: expressionReader,
-                                          context: context)
+                                          context: context,
+                                          delegate: delegate)
         
         guard let result = compoundStatement.accept(parser) else {
             return [.unknown(UnknownASTContext(context: compoundStatement))]
@@ -49,7 +54,8 @@ public class SwiftASTReader {
         let parser =
             SwiftExprASTReader(typeMapper: typeMapper,
                                typeParser: typeParser,
-                               context: context)
+                               context: context,
+                               delegate: delegate)
         
         guard let result = expression.accept(parser) else {
             return .unknown(UnknownASTContext(context: expression))

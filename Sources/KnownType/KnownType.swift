@@ -1,13 +1,12 @@
-import Foundation
 import SwiftAST
 
 /// Describes a known type with known properties and methods and their signatures.
-public protocol KnownType: KnownTypeReferenceConvertible, AttributeTaggeableObject, SemanticalObject {
+public protocol KnownType: KnownTypeReferenceConvertible, KnownDeclaration, AttributeTaggeableObject, SemanticalObject {
     /// A string that specifies the origin of this known type.
     /// This should be implemented by conformers by returning an as precise as
     /// possible set of informations that can help pinpoint the origin of this
     /// type, such as a file name/line number, if the type originated from a file,
-    /// etc.
+    /// or was synthesized, etc.
     var origin: String { get }
     
     /// Returns `true` if this known type represents an extension for another
@@ -37,6 +36,9 @@ public protocol KnownType: KnownTypeReferenceConvertible, AttributeTaggeableObje
     
     /// Gets an array of all known instance variable fields for this type
     var knownFields: [KnownProperty] { get }
+
+    /// Gets an array of all known subscriptable members for this type
+    var knownSubscripts: [KnownSubscript] { get }
     
     /// Gets an array of all known protocol conformances for this type
     var knownProtocolConformances: [KnownProtocolConformance] { get }
@@ -75,7 +77,7 @@ public enum KnownTypeReference: KnownTypeReferenceConvertible {
     }
     
     public var asKnownTypeReference: KnownTypeReference {
-        return self
+        self
     }
 }
 
@@ -85,14 +87,14 @@ public protocol KnownTypeReferenceConvertible {
 
 extension String: KnownTypeReferenceConvertible {
     public var asKnownTypeReference: KnownTypeReference {
-        return .typeName(self)
+        .typeName(self)
     }
 }
 
 /// Default implementations
 public extension KnownType {
-    public var asKnownTypeReference: KnownTypeReference {
-        return .knownType(self)
+    var asKnownTypeReference: KnownTypeReference {
+        .knownType(self)
     }
 }
 
@@ -157,7 +159,7 @@ public protocol KnownProperty: KnownMember {
     var storage: ValueStorage { get }
     
     /// Property's attributes
-    var attributes: [PropertyAttribute] { get }
+    var objcAttributes: [ObjcPropertyAttribute] { get }
     
     /// True if this method is an optional protocol conformance property
     var optional: Bool { get }
@@ -167,6 +169,19 @@ public protocol KnownProperty: KnownMember {
     
     /// `true` if this property actually represents an enumeration case.
     var isEnumCase: Bool { get }
+}
+
+/// A known type subscript
+public protocol KnownSubscript: KnownMember {
+    /// Gets the type for the indexing values of this subscription as an array of
+    /// parameters.
+    var parameters: [ParameterSignature] { get }
+
+    /// Gets the resulting type when this subscript is indexed into.
+    var type: SwiftType { get }
+
+    /// Gets whether this subscription is getter-only
+    var isConstant: Bool { get }
 }
 
 /// Describes the getter/setter states of a property
@@ -182,20 +197,26 @@ public protocol KnownProtocolConformance {
 }
 
 public extension KnownMethod {
-    public var isStatic: Bool {
-        return signature.isStatic
+    var isStatic: Bool {
+        signature.isStatic
     }
 }
 
 public extension KnownProperty {
-    public var memberType: SwiftType {
-        return storage.type
+    var memberType: SwiftType {
+        storage.type
     }
 }
 
 public extension KnownMethod {
-    public var memberType: SwiftType {
-        return signature.swiftClosureType
+    var memberType: SwiftType {
+        signature.swiftClosureType
+    }
+}
+
+public extension KnownSubscript {
+    var memberType: SwiftType {
+        type
     }
 }
 
@@ -204,8 +225,8 @@ public enum KnownTypeTraits {
 }
 
 public extension KnownType {
-    public func knownTrait(_ traitName: String) -> TraitType? {
-        return knownTraits[traitName]
+    func knownTrait(_ traitName: String) -> TraitType? {
+        knownTraits[traitName]
     }
 }
 
@@ -294,5 +315,12 @@ public struct KnownAttribute: Codable {
     public init(name: String, parameters: String? = nil) {
         self.name = name
         self.parameters = parameters
+    }
+}
+
+public extension SwiftRewriterAttribute {
+    var asKnownAttribute: KnownAttribute {
+        KnownAttribute(name: SwiftRewriterAttribute.name,
+                       parameters: content.asString)
     }
 }

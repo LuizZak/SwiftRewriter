@@ -1,12 +1,15 @@
-import SwiftRewriterLib
 import SwiftAST
 
 /// Method-to-method call transformation should allow:
 ///
 /// 1. Renaming method member name
+/// ```
 ///     \<exp>.method()
-///         to
+/// ```
+/// to
+/// ```
 ///     \<exp>.otherMethod()
+/// ```
 ///
 /// 2. Add or remove arguments in arbitrary position
 ///     2.1 Add a new argument to an arbitrary position
@@ -39,7 +42,7 @@ public class MethodInvocationRewriter {
     public let requiredArgumentCount: Int
     
     var argumentRewritingStrategies: [ArgumentRewritingStrategy]? {
-        return argumentRewriting?.map { $0.0 }
+        argumentRewriting?.map(\.0)
     }
     
     public init(renaming: String?,
@@ -49,11 +52,11 @@ public class MethodInvocationRewriter {
         self.renaming = renaming
         self.argumentRewriting = argumentRewriting
         self.returnType = returnType
-        self.requiredArgumentCount = argumentRewriting?.map { $0.0 }.requiredArgumentCount() ?? 0
+        self.requiredArgumentCount = argumentRewriting?.map(\.0).requiredArgumentCount() ?? 0
     }
     
     public func rewriteName(_ name: String) -> String {
-        return renaming ?? name
+        renaming ?? name
     }
     
     public func rewriteIdentifier(_ identifier: FunctionIdentifier,
@@ -65,7 +68,7 @@ public class MethodInvocationRewriter {
             parameterNames =
                 argStrategies
                     .rewrite(arguments: arguments)
-                    .map { $0.label }
+                    .map(\.label)
         }
         
         let identifier =
@@ -86,7 +89,7 @@ public class MethodInvocationRewriter {
     }
     
     public func replaceReturnType(_ returnType: SwiftType) -> SwiftType {
-        return self.returnType ?? returnType
+        self.returnType ?? returnType
     }
     
     /// - precondition: If `argumentRewriting != nil`, `arguments.count >= requiredArgumentCount`
@@ -104,7 +107,7 @@ public class MethodInvocationRewriter {
             return parameters
         }
         
-        var params = argRewriters.map { $0.0 }.rewrite(parameters: parameters)
+        var params = argRewriters.map(\.0).rewrite(parameters: parameters)
         
         for (i, (_, type)) in argRewriters.enumerated() {
             params[i].type = type ?? params[i].type
@@ -117,7 +120,7 @@ public class MethodInvocationRewriter {
     public func rewriteFunctionCall(_ functionCall: FunctionCallPostfix) -> FunctionCallPostfix {
         let newArgs = rewriteFunctionArguments(functionCall.arguments)
         
-        if let types = argumentRewriting?.map({ $0.1 }) {
+        if let types = argumentRewriting?.map(\.1) {
             for (i, type) in types.enumerated() {
                 newArgs[i].expression.expectedType = type
             }
@@ -192,9 +195,9 @@ public class MethodInvocationRewriterBuilder {
     }
     
     public func build() -> MethodInvocationRewriter {
-        return MethodInvocationRewriter(renaming: _renaming,
-                                        argumentRewriting: _argumentRewriting,
-                                        returnType: _returnType)
+        MethodInvocationRewriter(renaming: _renaming,
+                                 argumentRewriting: _argumentRewriting,
+                                 returnType: _returnType)
     }
 }
 

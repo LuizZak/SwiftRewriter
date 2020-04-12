@@ -13,9 +13,9 @@ public extension FunctionCallPostfix {
     
     /// Generates an Objective-C selector from this function call united with
     /// a given method name.
-    public func selectorWith(methodName: String) -> SelectorSignature {
+    func selectorWith(methodName: String) -> SelectorSignature {
         let selectors: [String?]
-            = [methodName] + arguments.map { $0.label }
+            = [methodName] + arguments.map(\.label)
         
         return SelectorSignature(isStatic: false, keywords: selectors)
     }

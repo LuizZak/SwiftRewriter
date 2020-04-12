@@ -14,7 +14,7 @@ public class PropertyImplementation: ASTNode, InitializableNode {
     }
     
     public var list: PropertySynthesizeList? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -34,7 +34,7 @@ public enum PropertyImplementationKind {
 /// List of synthesizes in a @synthesize property implementation.
 public class PropertySynthesizeList: ASTNode, InitializableNode {
     public var synthesizations: [PropertySynthesizeItem] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -45,10 +45,10 @@ public class PropertySynthesizeList: ASTNode, InitializableNode {
 /// Single item of a @synthesize property implementation list.
 public class PropertySynthesizeItem: ASTNode, InitializableNode {
     public var propertyName: Identifier? {
-        return firstChild()
+        firstChild()
     }
     public var instanceVarName: Identifier? {
-        return child(atIndex: 1)
+        child(atIndex: 1)
     }
     public var isDynamic: Bool = false
     

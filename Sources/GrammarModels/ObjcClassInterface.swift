@@ -3,7 +3,7 @@ import ObjcParserAntlr
 /// A syntax node for an Objective-C class interface (`@interface`) declaration.
 public class ObjcClassInterface: ASTNode, InitializableNode {
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -12,24 +12,24 @@ public class ObjcClassInterface: ASTNode, InitializableNode {
 }
 
 public extension ObjcClassInterface {
-    public var properties: [PropertyDefinition] {
-        return childrenMatching()
+    var properties: [PropertyDefinition] {
+        childrenMatching()
     }
     
-    public var superclass: SuperclassName? {
-        return firstChild()
+    var superclass: SuperclassName? {
+        firstChild()
     }
     
-    public var protocolList: ProtocolReferenceList? {
-        return firstChild()
+    var protocolList: ProtocolReferenceList? {
+        firstChild()
     }
     
-    public var ivarsList: IVarsList? {
-        return firstChild()
+    var ivarsList: IVarsList? {
+        firstChild()
     }
     
-    public var methods: [MethodDefinition] {
-        return childrenMatching()
+    var methods: [MethodDefinition] {
+        childrenMatching()
     }
 }
 
@@ -41,7 +41,7 @@ public class SuperclassName: Identifier {
 
 public class IVarsList: ASTNode, InitializableNode {
     public var ivarDeclarations: [IVarDeclaration] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -51,10 +51,10 @@ public class IVarsList: ASTNode, InitializableNode {
 
 public class IVarDeclaration: ASTNode, InitializableNode {
     public var type: TypeNameNode? {
-        return firstChild()
+        firstChild()
     }
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -64,7 +64,7 @@ public class IVarDeclaration: ASTNode, InitializableNode {
 
 public class ProtocolReferenceList: ASTNode, InitializableNode {
     public var protocols: [ProtocolName] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     public required init(isInNonnullContext: Bool) {

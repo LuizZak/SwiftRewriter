@@ -2,7 +2,7 @@
 /// declaration.
 public class ObjcClassImplementation: ASTNode, InitializableNode {
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -11,19 +11,19 @@ public class ObjcClassImplementation: ASTNode, InitializableNode {
 }
 
 public extension ObjcClassImplementation {
-    public var superclass: SuperclassName? {
-        return firstChild()
+    var superclass: SuperclassName? {
+        firstChild()
     }
     
-    public var ivarsList: IVarsList? {
-        return firstChild()
+    var ivarsList: IVarsList? {
+        firstChild()
     }
     
-    public var methods: [MethodDefinition] {
-        return childrenMatching()
+    var methods: [MethodDefinition] {
+        childrenMatching()
     }
     
-    public var propertyImplementations: [PropertyImplementation] {
-        return childrenMatching()
+    var propertyImplementations: [PropertyImplementation] {
+        childrenMatching()
     }
 }

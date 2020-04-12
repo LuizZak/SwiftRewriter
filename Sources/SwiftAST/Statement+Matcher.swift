@@ -10,42 +10,38 @@ public protocol ValueMatcherConvertible {
 
 extension ValueMatcher: ValueMatcherConvertible {
     public func asMatcher() -> ValueMatcher<T> {
-        return self
+        self
     }
 }
 
 extension ValueMatcherConvertible where Target == Self, Self: Equatable {
     public func asMatcher() -> ValueMatcher<Self> {
-        return ValueMatcher<Self>().match { $0 == self }
+        ValueMatcher<Self>().match { $0 == self }
     }
 }
 
 public extension Matchable {
-    
-    public static func matcher() -> ValueMatcher<Self> {
-        return ValueMatcher()
+    static func matcher() -> ValueMatcher<Self> {
+        ValueMatcher()
     }
     
-    public func matches(_ matcher: ValueMatcher<Self>) -> Bool {
-        return matcher.matches(self)
+    func matches(_ matcher: ValueMatcher<Self>) -> Bool {
+        matcher(matches: self)
     }
-    
 }
 
 public extension Statement {
-    
-    public static func matcher<T: Statement>(_ matcher: SyntaxMatcher<T>) -> SyntaxMatcher<T> {
-        return matcher
+    static func matcher<T: Statement>(_ matcher: SyntaxMatcher<T>) -> SyntaxMatcher<T> {
+        matcher
     }
-    
 }
 
 public extension ValueMatcher where T: Statement {
     @inlinable
-    public func anyStatement() -> ValueMatcher<Statement> {
-        return ValueMatcher<Statement>().match { (value) -> Bool in
+    func anyStatement() -> ValueMatcher<Statement> {
+        ValueMatcher<Statement>().match { (value) -> Bool in
             if let value = value as? T {
-                return self.matches(value)
+                return self(matches: value)
             }
             
             return false
@@ -56,7 +52,7 @@ public extension ValueMatcher where T: Statement {
 
 @inlinable
 public func hasElse() -> SyntaxMatcher<IfStatement> {
-    return SyntaxMatcher().keyPath(\.elseBody, !isNil())
+    SyntaxMatcher().keyPath(\.elseBody, !isNil())
 }
 
 extension Statement: Matchable {

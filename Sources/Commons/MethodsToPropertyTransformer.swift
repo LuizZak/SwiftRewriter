@@ -41,7 +41,7 @@ public final class MethodsToPropertyTransformer: PostfixInvocationTransformer {
                 return false
             }
             
-            guard baseExpressionMatcher.matches(memberNameAccess.exp) else {
+            guard baseExpressionMatcher(matches: memberNameAccess.exp) else {
                 return false
             }
             
@@ -51,7 +51,7 @@ public final class MethodsToPropertyTransformer: PostfixInvocationTransformer {
                 return false
             }
             
-            guard baseExpressionMatcher.matches(memberNameAccess.exp) else {
+            guard baseExpressionMatcher(matches: memberNameAccess.exp) else {
                 return false
             }
             

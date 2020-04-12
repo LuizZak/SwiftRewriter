@@ -1,5 +1,5 @@
 import SwiftAST
-import SwiftRewriterLib
+import TypeSystem
 
 extension IncompleteKnownType {
     
@@ -23,7 +23,7 @@ extension IncompleteKnownType {
             throw IncompleteTypeError(description:
                 """
                 Found error while parsing \
-                @\(SwiftClassInterfaceParser.SwiftRewriterAttribute.name) \
+                @\(SwiftRewriterAttribute.name) \
                 attribute: \(error)
                 """
             )

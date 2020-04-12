@@ -5,11 +5,11 @@ public class EnumCaseGenerationIntention: PropertyGenerationIntention {
     public var expression: Expression?
     
     public override var isStatic: Bool {
-        return true // Enum cases are always static
+        true // Enum cases are always static
     }
     
     public override var isEnumCase: Bool {
-        return true
+        true
     }
     
     public init(name: String,
@@ -22,8 +22,11 @@ public class EnumCaseGenerationIntention: PropertyGenerationIntention {
         
         let storage = ValueStorage(type: .any, ownership: .strong, isConstant: true)
         
-        super.init(name: name, storage: storage, attributes: [],
-                   ownerTypeName: ownerTypeName, accessLevel: accessLevel,
+        super.init(name: name,
+                   storage: storage,
+                   objcAttributes: [],
+                   ownerTypeName: ownerTypeName,
+                   accessLevel: accessLevel,
                    source: source)
     }
     

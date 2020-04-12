@@ -1,7 +1,6 @@
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
 
 public class PropertyMergeIntentionPass: IntentionPass {
     /// A number representing the unique index of an operation to aid in history
@@ -15,7 +14,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
     
     /// Textual tag this intention pass applies to history tracking entries.
     private var historyTag: String {
-        return "\(PropertyMergeIntentionPass.self):\(operationsNumber)"
+        "\(PropertyMergeIntentionPass.self):\(operationsNumber)"
     }
     
     public init() {
@@ -103,7 +102,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                                         property.type,
                                         ignoreNullability: true)
                     }
-                    .filter { $0.parameters.isEmpty }
+                    .filter(\.parameters.isEmpty)
             
             // Setters: All methods named `func set[Name](_ name: Type)` where
             // `[Name]` is the same as the property's name with the first letter
@@ -113,12 +112,12 @@ public class PropertyMergeIntentionPass: IntentionPass {
                     .lazy
                     .filter { $0.returnType == .void }
                     .filter { $0.isStatic == property.isStatic }
-                    .filter { $0.parameters.count == 1 }
                     .filter {
-                        self.context.typeSystem
-                            .typesMatch($0.parameters[0].type,
-                                        property.type,
-                                        ignoreNullability: true)
+                        $0.parameters.count == 1 &&
+                            self.context.typeSystem
+                                .typesMatch($0.parameters[0].type,
+                                            property.type,
+                                            ignoreNullability: true)
                     }
                     .filter { $0.name == expectedName }
             

@@ -5,7 +5,7 @@ import KnownType
 /// An intention to create an instance variable (Objective-C's 'ivar').
 public final class InstanceVariableGenerationIntention: MemberGenerationIntention, MutableValueStorageIntention {
     public var typedSource: IVarDeclaration? {
-        return source as? IVarDeclaration
+        source as? IVarDeclaration
     }
     
     public var name: String
@@ -14,7 +14,7 @@ public final class InstanceVariableGenerationIntention: MemberGenerationIntentio
     public var initialValue: Expression?
     
     public override var memberType: SwiftType {
-        return type
+        type
     }
     
     public init(name: String,
@@ -56,19 +56,19 @@ public final class InstanceVariableGenerationIntention: MemberGenerationIntentio
 }
 
 extension InstanceVariableGenerationIntention: KnownProperty {
-    public var attributes: [PropertyAttribute] {
-        return []
+    public var objcAttributes: [ObjcPropertyAttribute] {
+        []
     }
     
     public var accessor: KnownPropertyAccessor {
-        return .getterAndSetter
+        .getterAndSetter
     }
     
     public var optional: Bool {
-        return false
+        false
     }
     
     public var isEnumCase: Bool {
-        return false
+        false
     }
 }

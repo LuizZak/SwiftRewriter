@@ -1,6 +1,5 @@
 import SwiftAST
 import Intentions
-import SwiftRewriterLib
 
 public class ClassVisitingIntentionPass: IntentionPass {
     internal var context: IntentionPassContext!

@@ -1,9 +1,19 @@
 import XCTest
 import SwiftAST
 import Intentions
+import TestCommons
+import IntentionPasses
+import ExpressionPasses
+import SourcePreprocessors
+import GlobalsProviders
 import SwiftRewriterLib
+import TypeSystem
 import WriterTargetOutput
+import SwiftSyntaxSupport
+import SwiftSyntaxRewriterPasses
+import SwiftSyntax
 import ObjcParser
+import Utils
 
 class SwiftRewriterJobTests: XCTestCase {
     func testTranspile() {
@@ -15,7 +25,7 @@ class SwiftRewriterJobTests: XCTestCase {
             // End of file Input.swift
             class Class {
                 func method() {
-                    hello.world()
+                    Hello.world()
                 }
             }
             // End of file Source.swift
@@ -25,35 +35,32 @@ class SwiftRewriterJobTests: XCTestCase {
                              intentionPassesSource: MockIntentionPassSource(),
                              astRewriterPassSources: MockExpressionPassesSource(),
                              globalsProvidersSource: MockGlobalsProvidersSource(),
+                             syntaxRewriterPassSource: MockSwiftSyntaxRewriterPassProvider(),
                              preprocessors: [MockSourcePreprocessor()],
                              settings: .default,
-                             swiftSyntaxOptions: .default)
+                             swiftSyntaxOptions: .default,
+                             parserCache: nil)
         let output = MockWriterOutput()
         
         let result = job.execute(output: output)
         
         let buffer = output.resultString()
+        
         XCTAssert(result.succeeded)
-        XCTAssertEqual(
-            buffer,
-            expectedSwift,
-            """
-            
-            Diff:
-            
-            \(expectedSwift.makeDifferenceMarkString(against: buffer))
-            """)
+        diffTest(expected: expectedSwift, highlightLineInEditor: false)
+            .diff(buffer)
     }
 }
 
 private class MockWriterOutput: WriterOutput {
     var files: [MockOutput] = []
+    let mutex = Mutex()
     
     func createFile(path: String) throws -> FileOutput {
         let output = MockOutput(filepath: path)
-        objc_sync_enter(self)
-        files.append(output)
-        objc_sync_exit(self)
+        mutex.locking {
+            files.append(output)
+        }
         
         return output
     }
@@ -61,7 +68,7 @@ private class MockWriterOutput: WriterOutput {
     func resultString() -> String {
         return files
             .sorted { $0.filepath < $1.filepath }
-            .map { $0.buffer }
+            .map(\.buffer)
             .joined(separator: "\n")
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -101,7 +108,8 @@ private class MockInputSourcesProvider: InputSourcesProvider {
             @interface BaseClass : NSObject
             @end
             """,
-            path: "Input.m")
+            path: "Input.m",
+            isPrimary: true)
     ]
     
     func sources() -> [InputSource] {
@@ -112,6 +120,7 @@ private class MockInputSourcesProvider: InputSourcesProvider {
 private struct MockInputSource: InputSource {
     var source: String
     var path: String
+    var isPrimary: Bool
     
     func loadSource() throws -> CodeSource {
         return StringCodeSource(source: source, fileName: path)
@@ -192,4 +201,24 @@ private class MockGlobalsProviders: GlobalsProvider {
         return CollectionTypealiasProvider(aliases: [:])
     }
     
+}
+
+private class MockSwiftSyntaxRewriterPassProvider: SwiftSyntaxRewriterPassProvider {
+    var passes: [SwiftSyntaxRewriterPass] = [
+        RewriterPass()
+    ]
+    
+    private class RewriterPass: SyntaxRewriter, SwiftSyntaxRewriterPass {
+        func rewrite(_ file: SourceFileSyntax) -> SourceFileSyntax {
+            return SourceFileSyntax(self.visit(file))!
+        }
+        
+        override func visit(_ node: IdentifierExprSyntax) -> ExprSyntax {
+            if node.identifier.text == "hello" {
+                return ExprSyntax(node.withIdentifier(node.identifier.withKind(.identifier("Hello"))))
+            }
+            
+            return ExprSyntax(node)
+        }
+    }
 }

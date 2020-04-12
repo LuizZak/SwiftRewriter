@@ -190,7 +190,9 @@ extension StringDiffTestingTests {
         let location = DiffLocation(file: file, line: line)
         let diffable = DiffableString(string: input, location: location)
         
-        return DiffingTest(expected: diffable, testCase: testReporter)
+        return DiffingTest(expected: diffable,
+                           testCase: testReporter,
+                           highlightLineInEditor: true)
     }
 }
 

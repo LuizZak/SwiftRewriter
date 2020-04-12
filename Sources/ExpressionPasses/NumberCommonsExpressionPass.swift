@@ -1,12 +1,12 @@
 import SwiftAST
-import SwiftRewriterLib
+import TypeSystem
 
 /// Fixes casting of numeric types to use associated intializers instead of performing
 /// `as?` casts, and does other conversions such as usage of `floorf`/`ceilf`/etc.
 /// functions on general floating-point types.
 public class NumberCommonsExpressionPass: ASTRewriterPass {
     public override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
-        return super.visitVariableDeclarations(stmt)
+        super.visitVariableDeclarations(stmt)
     }
     
     public override func visitExpression(_ exp: Expression) -> Expression {

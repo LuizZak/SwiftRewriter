@@ -2,7 +2,6 @@ import Foundation
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
 import Utils
 
 // TODO: This could be generalized into merging signatures from types such that
@@ -41,8 +40,10 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = context.numThreads
         
+        let mutex = Mutex()
+        
         // First roundtrip: Collect all known conformances
-        for clsName in Set(classes.map { $0.typeName }) {
+        for clsName in Set(classes.map(\.typeName)) {
             queue.addOperation {
                 guard let type = context.typeSystem.knownTypeWithName(clsName) else {
                     return
@@ -50,7 +51,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
                 
                 let conformances = context.typeSystem.allConformances(of: type)
                 
-                synchronized(self) {
+                mutex.locking {
                     classProtocols[type.typeName] = conformances
                 }
             }

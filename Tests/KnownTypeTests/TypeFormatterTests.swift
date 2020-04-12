@@ -2,7 +2,6 @@ import XCTest
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
 
 class TypeFormatterTests: XCTestCase {
     func testAsStringMethodFromType() {
@@ -29,6 +28,18 @@ class TypeFormatterTests: XCTestCase {
         
         XCTAssertEqual(
             "A.a: Int",
+            TypeFormatter.asString(property: type.knownProperties[0], ofType: type)
+        )
+    }
+    
+    func testAsStringStaticPropertyFromType() {
+        let type =
+            KnownTypeBuilder(typeName: "A")
+                .property(named: "a", type: .int, isStatic: true)
+                .build()
+        
+        XCTAssertEqual(
+            "static A.a: Int",
             TypeFormatter.asString(property: type.knownProperties[0], ofType: type)
         )
     }
@@ -89,6 +100,30 @@ class TypeFormatterTests: XCTestCase {
         XCTAssertEqual(
             "A.a: Int",
             TypeFormatter.asString(field: field, ofType: type)
+        )
+    }
+
+    func testAsStringSubscript() {
+        let type =
+            KnownTypeBuilder(typeName: "A")
+                .subscription(indexType: .int, type: .string)
+                .build()
+        
+        XCTAssertEqual(
+            "A.subscript(index: Int) -> String",
+            TypeFormatter.asString(subscript: type.knownSubscripts[0], ofType: type)
+        )
+    }
+    
+    func testAsStringStaticSubscript() {
+        let type =
+            KnownTypeBuilder(typeName: "A")
+                .subscription(indexType: .int, type: .string, isStatic: true)
+                .build()
+        
+        XCTAssertEqual(
+            "static A.subscript(index: Int) -> String",
+            TypeFormatter.asString(subscript: type.knownSubscripts[0], ofType: type)
         )
     }
     
@@ -172,6 +207,11 @@ class TypeFormatterTests: XCTestCase {
                       accessor: .getter,
                       attributes: [KnownAttribute(name: "attr", parameters: nil)],
                       annotations: ["Annotation"])
+            .subscription(indexType: .int,
+                          type: .string,
+                          isConstant: true,
+                          attributes: [KnownAttribute(name: "attr", parameters: nil)],
+                          annotations: ["Annotation"])
             .protocolConformance(protocolName: "Protocol")
             .method(withSignature: FunctionSignature(
                 name: "methodA",
@@ -198,6 +238,9 @@ class TypeFormatterTests: XCTestCase {
                 
                 // Annotation
                 @attr var readOnlyProp: A { get }
+                
+                // Annotation
+                @attr subscript(index: Int) -> String { get }
                 
                 init()
                 

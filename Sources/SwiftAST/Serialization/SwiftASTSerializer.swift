@@ -160,6 +160,9 @@ public final class SwiftASTSerializer {
             case is UnaryExpression:
                 kind = .unary
                 
+            case is TupleExpression:
+                kind = .tuple
+                
             case is UnknownExpression:
                 kind = .unknown
                 
@@ -220,6 +223,9 @@ public final class SwiftASTSerializer {
             case .unary:
                 expression = try container.decode(UnaryExpression.self, forKey: .expression)
                 
+            case .tuple:
+                expression = try container.decode(TupleExpression.self, forKey: .expression)
+                
             case .unknown:
                 expression = try container.decode(UnknownExpression.self, forKey: .expression)
             }
@@ -258,6 +264,7 @@ public final class SwiftASTSerializer {
         case sizeOf
         case ternary
         case unary
+        case tuple
         case unknown
     }
     
@@ -289,7 +296,7 @@ public final class SwiftASTSerializer {
 
 public extension SwiftASTSerializer {
     
-    public static func encode(statement: Statement,
+    static func encode(statement: Statement,
                               encoder: JSONEncoder,
                               options: SerializationOptions = []) throws -> Data {
         
@@ -300,12 +307,12 @@ public extension SwiftASTSerializer {
         return try encoder.encode(container)
     }
     
-    public static func decodeStatement(decoder: JSONDecoder, data: Data) throws -> Statement {
+    static func decodeStatement(decoder: JSONDecoder, data: Data) throws -> Statement {
         let container = try decoder.decode(SwiftASTSerializer.StatementContainer.self, from: data)
         return container.statement
     }
     
-    public static func encode(expression: Expression,
+    static func encode(expression: Expression,
                               encoder: JSONEncoder,
                               options: SerializationOptions = []) throws -> Data {
         
@@ -316,7 +323,7 @@ public extension SwiftASTSerializer {
         return try encoder.encode(container)
     }
     
-    public static func decodeExpression(decoder: JSONDecoder, data: Data) throws -> Expression {
+    static func decodeExpression(decoder: JSONDecoder, data: Data) throws -> Expression {
         let container = try decoder.decode(SwiftASTSerializer.ExpressionContainer.self, from: data)
         return container.expression
     }

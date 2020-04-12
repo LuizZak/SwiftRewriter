@@ -1,9 +1,19 @@
+#if canImport(ObjectiveC)
+import ObjectiveC
+#endif
+
 import Foundation
+import Dispatch
 import GrammarModels
 import ObjcParser
 import SwiftAST
+import TypeSystem
 import WriterTargetOutput
 import Intentions
+import IntentionPasses
+import ExpressionPasses
+import SourcePreprocessors
+import GlobalsProviders
 import SwiftSyntaxSupport
 import Utils
 
@@ -21,7 +31,7 @@ public final class SwiftRewriter {
     private var typeSystem: IntentionCollectionTypeSystem
     
     /// For pooling and reusing Antlr parser states to aid in performance
-    private var parserStatePool: ObjcParserStatePool { return SwiftRewriter._parserStatePool }
+    private var parserStatePool: ObjcParserStatePool { SwiftRewriter._parserStatePool }
     
     /// Items to type-parse after parsing is complete, and all types have been
     /// gathered.
@@ -31,11 +41,11 @@ public final class SwiftRewriter {
     /// gathered.
     private var lazyResolve: [LazyTypeResolveItem] = []
     
-    /// Full path of files from followed includes, when `followIncludes` is on.
-    private var includesFollowed: [String] = []
-    
     /// To keep token sources alive long enough.
     private var parsers: [ObjcParser] = []
+    
+    /// An optional instance of a parser cache with pre-parsed input files.
+    public var parserCache: ParserCache?
     
     /// A diagnostics instance that collects all diagnostic errors during input
     /// source processing.
@@ -56,9 +66,8 @@ public final class SwiftRewriter {
     /// Provider for global variables
     public var globalsProvidersSource: GlobalsProvidersSource
     
-    /// If true, `#include "file.h"` directives are resolved and the new unique
-    /// files found during importing are included into the transpilation step.
-    public var followIncludes: Bool = false
+    /// Provider for swift-syntax rewriters
+    public var syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider
     
     /// Describes settings for the current `SwiftRewriter` invocation
     public var settings: Settings
@@ -71,6 +80,7 @@ public final class SwiftRewriter {
                 intentionPassesSource: IntentionPassSource? = nil,
                 astRewriterPassSources: ASTRewriterPassSource? = nil,
                 globalsProvidersSource: GlobalsProvidersSource? = nil,
+                syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider? = nil,
                 settings: Settings = .default) {
         
         self.diagnostics = Diagnostics()
@@ -83,6 +93,8 @@ public final class SwiftRewriter {
             astRewriterPassSources ?? ArrayASTRewriterPassSource(syntaxNodePasses: [])
         self.globalsProvidersSource =
             globalsProvidersSource ?? ArrayGlobalProvidersSource(globalsProviders: [])
+        self.syntaxRewriterPassSource =
+            syntaxRewriterPassSource ?? ArraySwiftSyntaxRewriterPassProvider(passes: [])
         
         typeSystem = IntentionCollectionTypeSystem(intentions: intentionCollection)
         
@@ -99,9 +111,10 @@ public final class SwiftRewriter {
         
         try autoreleasepool {
             try loadInputSources()
-            parseStatements()
+            let autotypeDecls = parseStatements()
             evaluateTypes()
-            performIntentionPasses()
+            resolveAutotypeDeclarations(autotypeDecls)
+            performIntentionAndSyntaxPasses()
             outputDefinitions()
         }
     }
@@ -113,27 +126,24 @@ public final class SwiftRewriter {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
-        var outError: Error?
-        let outErrorBarrier
-            = DispatchQueue(label: "br.com.swiftrewriter", qos: .default,
-                            attributes: .concurrent, autoreleaseFrequency: .inherit,
-                            target: nil)
+        let outError: ConcurrentValue<Error?> = ConcurrentValue(wrappedValue: nil)
+        let mutex = Mutex()
         
         for (i, src) in sources.enumerated() {
             queue.addOperation {
-                if outErrorBarrier.sync(execute: { outError }) != nil {
+                if outError.wrappedValue != nil {
                     return
                 }
                 
                 do {
                     try autoreleasepool {
-                        try self.loadObjcSource(from: src, index: i)
+                        try self.loadObjcSource(from: src, index: i, mutex: mutex)
                     }
                 } catch {
-                    outErrorBarrier.sync(flags: .barrier) {
-                        if outError != nil { return }
+                    outError.modifyingValue {
+                        if $0 != nil { return }
                         
-                        outError = error
+                        $0 = error
                     }
                 }
             }
@@ -141,7 +151,7 @@ public final class SwiftRewriter {
         
         queue.waitUntilAllOperationsAreFinished()
         
-        if let error = outError {
+        if let error = outError.wrappedValue {
             throw error
         }
         
@@ -150,24 +160,34 @@ public final class SwiftRewriter {
     }
     
     /// Parses all statements now, with proper type information available.
-    private func parseStatements() {
+    private func parseStatements() -> [LazyAutotypeVarDeclResolve] {
         if settings.verbose {
             print("Parsing function bodies...")
+        }
+        
+        // Register globals first
+        for provider in globalsProvidersSource.globalsProviders {
+            typeSystem.addTypealiasProvider(provider.typealiasProvider())
+            typeSystem.addKnownTypeProvider(provider.knownTypeProvider())
         }
         
         typeSystem.makeCache()
         defer {
             typeSystem.tearDownCache()
         }
+
+        let autotypeDeclarations = ConcurrentValue<[LazyAutotypeVarDeclResolve]>(wrappedValue: [])
         
         let antlrSettings = makeAntlrSettings()
-        
+
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
         for item in lazyParse {
             queue.addOperation {
                 autoreleasepool {
+                    let delegate = InnerStatementASTReaderDelegate(parseItem: item)
+
                     let typeMapper = DefaultTypeMapper(typeSystem: self.typeSystem)
                     let state = SwiftRewriter._parserStatePool.pull()
                     let typeParser = TypeParsing(state: state, antlrSettings: antlrSettings)
@@ -178,6 +198,7 @@ public final class SwiftRewriter {
                     let reader = SwiftASTReader(typeMapper: typeMapper,
                                                 typeParser: typeParser,
                                                 typeSystem: self.typeSystem)
+                    reader.delegate = delegate
                     
                     switch item {
                     case .enumCase(let enCase):
@@ -203,11 +224,17 @@ public final class SwiftRewriter {
                         
                         v.expression = reader.parseExpression(expression: expression)
                     }
+
+                    autotypeDeclarations.modifyingValue {
+                        $0.append(contentsOf: delegate.autotypeDeclarations)
+                    }
                 }
             }
         }
         
         queue.waitUntilAllOperationsAreFinished()
+
+        return autotypeDeclarations.wrappedValue
     }
     
     /// Evaluate all type signatures, now with the knowledge of all types present
@@ -259,6 +286,7 @@ public final class SwiftRewriter {
         
         typeSystem.tearDownCache()
         
+        // Re-create cache with newly created typealiases available
         typeSystem.makeCache()
         defer {
             typeSystem.tearDownCache()
@@ -329,12 +357,43 @@ public final class SwiftRewriter {
         
         queue.waitUntilAllOperationsAreFinished()
     }
+
+    private func resolveAutotypeDeclarations(_ declarations: [LazyAutotypeVarDeclResolve]) {
+        let globals = CompoundDefinitionsSource()
+
+        // Register globals first
+        for provider in globalsProvidersSource.globalsProviders {
+            globals.addSource(provider.definitionsSource())
+        }
+
+        let typeResolverInvoker =
+            DefaultTypeResolverInvoker(globals: globals, typeSystem: typeSystem,
+                                       numThreads: settings.numThreads)
+
+        // Make a pre-type resolve before applying passes
+        typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection, force: true)
+
+        for declaration in declarations {
+            let stmt = declaration.statement
+            let decl = stmt.decl[declaration.index]
+            
+            // If this declaration's initializer depends on another auto type,
+            // resolve expression types so the actual type can be propagated
+            if decl.initialization?.resolvedType == SwiftType.typeName("__auto_type") {
+                typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection, force: true)
+            }
+            
+            if let type = decl.initialization?.resolvedType {
+                if decl.ownership == .weak && typeSystem.isClassInstanceType(type) {
+                    stmt.decl[declaration.index].type = .optional(type)
+                } else {
+                    stmt.decl[declaration.index].type = type
+                }
+            }
+        }
+    }
     
-    private func performIntentionPasses() {
-        let syntaxPasses =
-            [MandatorySyntaxNodePass.self]
-                + astRewriterPassSources.syntaxNodePasses
-        
+    private func performIntentionAndSyntaxPasses() {
         let globals = CompoundDefinitionsSource()
         
         if settings.verbose {
@@ -344,9 +403,6 @@ public final class SwiftRewriter {
         // Register globals first
         for provider in globalsProvidersSource.globalsProviders {
             globals.addSource(provider.definitionsSource())
-            
-            typeSystem.addTypealiasProvider(provider.typealiasProvider())
-            typeSystem.addKnownTypeProvider(provider.knownTypeProvider())
         }
         
         let typeResolverInvoker =
@@ -371,9 +427,24 @@ public final class SwiftRewriter {
                 + [MandatoryIntentionPass(phase: .afterOtherIntentions)]
         
         // Execute passes
-        for pass in intentionPasses {
+        for (i, pass) in intentionPasses.enumerated() {
             autoreleasepool {
                 requiresResolve = false
+                
+                if settings.verbose {
+                    // Clear previous line and re-print, instead of bogging down
+                    // the terminal with loads of prints
+                    if i > 0 {
+                        _terminalClearLine()
+                    }
+                    
+                    let totalPadLength = intentionPasses.count.description.count
+                    let progressString = String(format: "[%0\(totalPadLength)d/%d]",
+                                                i + 1,
+                                                intentionPasses.count)
+                    
+                    print("\(progressString): \(type(of: pass))")
+                }
                 
                 pass.apply(on: intentionCollection, context: context)
                 
@@ -396,15 +467,25 @@ public final class SwiftRewriter {
             .resolveAllExpressionTypes(in: intentionCollection,
                                        force: true)
         
+        let syntaxPasses =
+            [MandatorySyntaxNodePass.self]
+                + astRewriterPassSources.syntaxNodePasses
+        
         let applier =
             ASTRewriterPassApplier(passes: syntaxPasses,
                                    typeSystem: typeSystem,
                                    globals: globals,
                                    numThreds: settings.numThreads)
         
+        let progressDelegate = ASTRewriterDelegate()
+        if settings.verbose {
+            applier.progressDelegate = progressDelegate
+        }
+        
         if !settings.diagnoseFiles.isEmpty {
+            let mutex = Mutex()
             applier.afterFile = { file, passName in
-                synchronized(self) {
+                mutex.locking {
                     self.printDiagnosedFile(targetPath: file, step: "After applying \(passName) pass")
                 }
             }
@@ -412,23 +493,28 @@ public final class SwiftRewriter {
         
         typeSystem.makeCache()
         
-        applier.apply(on: intentionCollection)
+        withExtendedLifetime(progressDelegate) {
+            applier.apply(on: intentionCollection)
+        }
         
         typeSystem.tearDownCache()
     }
     
     private func outputDefinitions() {
         if settings.verbose {
-            print("Saving files...")
+            print("Applying Swift syntax passes and saving files...")
         }
+        
+        let syntaxApplier =
+            SwiftSyntaxRewriterPassApplier(provider: syntaxRewriterPassSource)
         
         let writer = SwiftWriter(intentions: intentionCollection,
                                  options: writerOptions,
                                  numThreads: settings.numThreads,
                                  diagnostics: diagnostics,
                                  output: outputTarget,
-                                 typeMapper: typeMapper,
-                                 typeSystem: typeSystem)
+                                 typeSystem: typeSystem,
+                                 syntaxRewriterApplier: syntaxApplier)
         
         writer.execute()
     }
@@ -443,38 +529,7 @@ public final class SwiftRewriter {
         }
     }
     
-    private func resolveIncludes(in directives: [String], basePath: String) {
-        if !followIncludes {
-            return
-        }
-        
-        var includeFiles: [String] = []
-        
-        for line in directives {
-            guard line.starts(with: "#include \"") else {
-                continue
-            }
-            
-            let split = line.split(separator: "\"", maxSplits: 2, omittingEmptySubsequences: true)
-            
-            if split.count > 1 {
-                includeFiles.append(String(split[1]))
-            }
-        }
-        
-        for file in includeFiles {
-            let fullPath = (basePath as NSString).appendingPathComponent(file)
-            
-            guard !includesFollowed.contains(fullPath) else {
-                continue
-            }
-            
-            // TODO: Do meaningful work here to open the files and parse their
-            // declarations
-        }
-    }
-    
-    private func loadObjcSource(from source: InputSource, index: Int) throws {
+    private func loadObjcSource(from source: InputSource, index: Int, mutex: Mutex) throws {
         let state = parserStatePool.pull()
         defer { parserStatePool.repool(state) }
         
@@ -489,11 +544,17 @@ public final class SwiftRewriter {
         
         let src = try source.loadSource()
         
-        let processedSrc = applyPreprocessors(source: src)
-        
-        let parser = ObjcParser(string: processedSrc, fileName: src.filePath, state: state)
-        parser.antlrSettings = makeAntlrSettings()
-        try parser.parse()
+        // Hit parser cache, if available
+        let parser: ObjcParser
+        if let parserCache = parserCache {
+            parser = try parserCache.loadParsedTree(file: URL(fileURLWithPath: src.filePath))
+        } else {
+            let processedSrc = applyPreprocessors(source: src)
+            
+            parser = ObjcParser(string: processedSrc, fileName: src.filePath, state: state)
+            parser.antlrSettings = makeAntlrSettings()
+            try parser.parse()
+        }
         
         let typeMapper = DefaultTypeMapper(typeSystem: TypeSystem.defaultTypeSystem)
         let typeParser = TypeParsing(state: state, antlrSettings: parser.antlrSettings)
@@ -502,9 +563,7 @@ public final class SwiftRewriter {
             CollectorDelegate(typeMapper: typeMapper, typeParser: typeParser)
         
         if settings.stageDiagnostics.contains(.parsedAST) {
-            // TODO: Would be interesting if we could simply print ASTNodes
-            // directly, or not rely on ObjcParser to do that for us, at least.
-            parser.printParsedNodes()
+            parser.rootNode.printNode({ print($0) })
         }
         
         let ctx = IntentionBuildingContext()
@@ -512,6 +571,7 @@ public final class SwiftRewriter {
         let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), targetPath: path)
         fileIntent.preprocessorDirectives = parser.preprocessorDirectives
         fileIntent.index = index
+        fileIntent.isPrimary = source.isPrimary
         ctx.pushContext(fileIntent)
         
         let intentionCollector = IntentionCollector(delegate: collectorDelegate, context: ctx)
@@ -519,15 +579,12 @@ public final class SwiftRewriter {
         
         ctx.popContext() // FileGenerationIntention
         
-        synchronized(self) {
+        mutex.locking {
             parsers.append(parser)
             lazyParse.append(contentsOf: collectorDelegate.lazyParse)
             lazyResolve.append(contentsOf: collectorDelegate.lazyResolve)
             diagnostics.merge(with: parser.diagnostics)
             intentionCollection.addIntention(fileIntent)
-            
-            resolveIncludes(in: fileIntent.preprocessorDirectives,
-                            basePath: (src.filePath as NSString).deletingLastPathComponent)
         }
     }
     
@@ -558,17 +615,13 @@ public final class SwiftRewriter {
     }
     
     private func makeAntlrSettings() -> AntlrSettings {
-        return AntlrSettings(forceUseLLPrediction: settings.forceUseLLPrediction)
+        AntlrSettings(forceUseLLPrediction: settings.forceUseLLPrediction)
     }
     
     /// Settings for a `SwiftRewriter` instance
     public struct Settings {
         /// Gets the default settings for a `SwiftRewriter` invocation
-        public static var `default` = Settings(numThreads: 8,
-                                               verbose: false,
-                                               diagnoseFiles: [],
-                                               forceUseLLPrediction: false,
-                                               stageDiagnostics: [])
+        public static var `default` = Settings()
         
         /// The number of concurrent threads to use when applying intention/syntax
         /// node passes and other multi-threadable operations.
@@ -595,7 +648,7 @@ public final class SwiftRewriter {
         
         /// Enables printing outputs of stages for diagnostic purposes.
         public var stageDiagnostics: [StageDiagnosticFlag]
-        
+
         public init(numThreads: Int = 8,
                     verbose: Bool = false,
                     diagnoseFiles: [String] = [],
@@ -616,9 +669,36 @@ public final class SwiftRewriter {
     }
 }
 
+// MARK: - ASTRewriterPassApplierProgressDelegate
+private extension SwiftRewriter {
+    class ASTRewriterDelegate: ASTRewriterPassApplierProgressDelegate {
+        private var didPrintLine = false
+        
+        func astWriterPassApplier(_ passApplier: ASTRewriterPassApplier,
+                                  applyingPassType passType: ASTRewriterPass.Type,
+                                  toFile file: FileGenerationIntention) {
+            
+            // Clear previous line and re-print, instead of bogging down the
+            // terminal with loads of prints
+            if didPrintLine {
+                _terminalClearLine()
+            }
+            
+            let totalPadLength = passApplier.progress.total.description.count
+            let progressString = String(format: "[%0\(totalPadLength)d/%d]",
+                                        passApplier.progress.current,
+                                        passApplier.progress.total)
+            
+            print("\(progressString): \((file.targetPath as NSString).lastPathComponent)")
+            
+            didPrintLine = true
+        }
+    }
+}
+
 // MARK: - IntentionCollectorDelegate
 fileprivate extension SwiftRewriter {
-    fileprivate class CollectorDelegate: IntentionCollectorDelegate {
+    class CollectorDelegate: IntentionCollectorDelegate {
         var typeMapper: TypeMapper
         var typeParser: TypeParsing
         
@@ -631,7 +711,7 @@ fileprivate extension SwiftRewriter {
         }
         
         func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
-            return node.isInNonnullContext
+            node.isInNonnullContext
         }
         
         func reportForLazyResolving(intention: Intention) {
@@ -685,11 +765,30 @@ fileprivate extension SwiftRewriter {
         }
         
         func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
-            return typeMapper
+            typeMapper
         }
         
         func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing {
-            return typeParser
+            typeParser
+        }
+    }
+
+    private class InnerStatementASTReaderDelegate: SwiftStatementASTReaderDelegate {
+        var parseItem: LazyParseItem
+        var autotypeDeclarations: [LazyAutotypeVarDeclResolve] = []
+
+        init(parseItem: LazyParseItem) {
+            self.parseItem = parseItem
+        }
+
+        func swiftStatementASTReader(reportAutoTypeDeclaration varDecl: VariableDeclarationsStatement,
+                                     declarationAtIndex index: Int) {
+
+            autotypeDeclarations.append(
+                LazyAutotypeVarDeclResolve(parseItem: parseItem,
+                                           statement: varDecl,
+                                           index: index)
+            )
         }
     }
 }
@@ -709,6 +808,14 @@ private enum LazyTypeResolveItem {
     case enumDecl(EnumGenerationIntention)
     case extensionDecl(ClassExtensionGenerationIntention)
     case `typealias`(TypealiasIntention)
+}
+
+/// Stored '__auto_type' variable declaration that needs to be resolved after
+/// statement parsing
+private struct LazyAutotypeVarDeclResolve {
+    var parseItem: LazyParseItem
+    var statement: VariableDeclarationsStatement
+    var index: Int
 }
 
 internal func _typeNullability(inType type: ObjcType) -> TypeNullability? {
@@ -731,4 +838,15 @@ internal func _typeNullability(inType type: ObjcType) -> TypeNullability? {
     default:
         return nil
     }
+}
+
+internal struct _PreprocessingContext: PreprocessingContext {
+    var filePath: String
+}
+
+private func _terminalClearLine() {
+    // Move up command
+    print("\u{001B}[1A", terminator: "")
+    // Clear line command
+    print("\u{001B}[2K", terminator: "")
 }

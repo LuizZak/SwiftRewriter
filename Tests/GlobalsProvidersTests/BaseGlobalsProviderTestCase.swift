@@ -1,7 +1,8 @@
 import XCTest
 import SwiftAST
 import KnownType
-import SwiftRewriterLib
+import GlobalsProviders
+import TypeSystem
 
 let cInt = SwiftType.typeName("CInt")
 let cFloat = SwiftType.typeName("CFloat")

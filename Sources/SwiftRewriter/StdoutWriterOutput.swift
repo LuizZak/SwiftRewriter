@@ -12,7 +12,7 @@ public class StdoutWriterOutput: WriterOutput {
     }
     
     public func createFile(path: String) -> FileOutput {
-        return StdFileOutput(path: path, colorize: colorize)
+        StdFileOutput(path: path, colorize: colorize)
     }
     
     private class StdFileOutput: FileOutput {
@@ -67,7 +67,7 @@ public final class TerminalStringRewriterOutput: RewriterOutputTarget {
     public func output(line: String, style: TextStyle) {
         ignoreCallChange = true
         
-        outputIdentation()
+        outputIndentation()
         buffer += colorize(line, forStyle: style)
         outputLineFeed()
         
@@ -76,7 +76,7 @@ public final class TerminalStringRewriterOutput: RewriterOutputTarget {
         callChangeCallback()
     }
     
-    public func outputIdentation() {
+    public func outputIndentation() {
         buffer += identString()
         callChangeCallback()
     }
@@ -91,11 +91,11 @@ public final class TerminalStringRewriterOutput: RewriterOutputTarget {
         callChangeCallback()
     }
     
-    public func increaseIdentation() {
+    public func increaseIndentation() {
         identDepth += 1
     }
     
-    public func decreaseIdentation() {
+    public func decreaseIndentation() {
         identDepth -= 1
     }
     

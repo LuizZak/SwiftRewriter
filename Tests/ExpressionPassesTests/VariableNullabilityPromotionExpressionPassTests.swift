@@ -3,6 +3,7 @@ import ExpressionPasses
 import SwiftAST
 import Intentions
 import SwiftRewriterLib
+import TypeSystem
 import TestCommons
 
 class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
@@ -74,6 +75,27 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                 .variableDeclaration(identifier: "a",
                                      type: SwiftType.nullabilityUnspecified("A"),
                                      initialization: .constant(.nil))
+                ])
+        ); assertDidNotNotifyChange()
+    }
+    
+    func testDontPromoteWeakVariables() {
+        let statement = Statement
+            .compound([
+                .variableDeclaration(identifier: "a",
+                                     type: SwiftType.optional("A"),
+                                     ownership: .weak,
+                                     initialization: Expression.identifier("_a").typed("A"))
+                ])
+        functionBodyContext = FunctionBodyIntention(body: statement)
+        
+        assertTransform(
+            statement: statement,
+            into: .compound([
+                .variableDeclaration(identifier: "a",
+                                     type: SwiftType.optional("A"),
+                                     ownership: .weak,
+                                     initialization: Expression.identifier("_a").typed("A"))
                 ])
         ); assertDidNotNotifyChange()
     }

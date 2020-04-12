@@ -6,9 +6,9 @@ public enum AccessLevel: String, Codable {
     case `public`
     case `open`
     
-    /// Returns `true` if this access level value is of higher visibility than
-    /// the one provided.
-    public func isMoreVisible(than other: AccessLevel) -> Bool {
+    /// Returns `true` if this access level value is of higher accessibility/visibility
+    /// than the one provided.
+    public func isMoreAccessible(than other: AccessLevel) -> Bool {
         switch (self, other) {
             
         // Equal access levels: neither is more visible than the other.
@@ -33,6 +33,8 @@ public enum AccessLevel: String, Codable {
         case (.open, .private),
              (.open, .fileprivate),
              (.open, .internal),
+             // TODO: Should open be more 'visible' than public? It is technically more
+             // permissive, but not more visible than public.
              (.open, .public):
             return true
             

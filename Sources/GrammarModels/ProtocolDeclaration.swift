@@ -1,7 +1,7 @@
 /// A syntax node for an Objective-C protocol (`@protocol`) declaration.
 public class ProtocolDeclaration: ASTNode, InitializableNode {
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -10,15 +10,15 @@ public class ProtocolDeclaration: ASTNode, InitializableNode {
 }
 
 public extension ProtocolDeclaration {
-    public var properties: [PropertyDefinition] {
-        return childrenMatching()
+    var properties: [PropertyDefinition] {
+        childrenMatching()
     }
     
-    public var protocolList: ProtocolReferenceList? {
-        return firstChild()
+    var protocolList: ProtocolReferenceList? {
+        firstChild()
     }
     
-    public var methods: [MethodDefinition] {
-        return childrenMatching()
+    var methods: [MethodDefinition] {
+        childrenMatching()
     }
 }

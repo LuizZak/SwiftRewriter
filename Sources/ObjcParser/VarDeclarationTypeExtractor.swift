@@ -9,41 +9,41 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
     public var declaratorIndex: Int = 0
     
     public static func extract(from typeDeclaratorOrName: Parser.TypeVariableDeclaratorOrNameContext) -> TypeName? {
-        return _extract(from: typeDeclaratorOrName)
+        _extract(from: typeDeclaratorOrName)
     }
     public static func extract(from typeSpecifier: Parser.TypeSpecifierContext) -> TypeName? {
-        return _extract(from: typeSpecifier)
+        _extract(from: typeSpecifier)
     }
     public static func extract(from typeName: Parser.TypeNameContext) -> TypeName? {
-        return _extract(from: typeName)
+        _extract(from: typeName)
     }
     public static func extract(from rule: Parser.TypeVariableDeclaratorContext) -> TypeName? {
-        return _extract(from: rule)
+        _extract(from: rule)
     }
     public static func extract(from rule: Parser.SpecifierQualifierListContext) -> TypeName? {
-        return _extract(from: rule)
+        _extract(from: rule)
     }
     public static func extract(from rule: Parser.DeclarationSpecifiersContext) -> TypeName? {
-        return _extract(from: rule)
+        _extract(from: rule)
     }
     public static func extract(from rule: Parser.VarDeclarationContext, atIndex index: Int = 0) -> TypeName? {
-        return _extract(from: rule, atIndex: index)
+        _extract(from: rule, atIndex: index)
     }
     public static func extract(from rule: Parser.ForLoopInitializerContext, atIndex index: Int = 0) -> TypeName? {
-        return _extract(from: rule, atIndex: index)
+        _extract(from: rule, atIndex: index)
     }
     
     public static func extractAll(from rule: Parser.VarDeclarationContext) -> [TypeName] {
-        return _extractAll(from: rule)
+        _extractAll(from: rule)
     }
     public static func extractAll(from rule: Parser.ForLoopInitializerContext) -> [TypeName] {
-        return _extractAll(from: rule)
+        _extractAll(from: rule)
     }
     public static func extractAll(from rule: Parser.BlockParametersContext) -> [TypeName] {
-        return _extractAll(from: rule)
+        _extractAll(from: rule)
     }
     public static func extractAll(from rule: Parser.FieldDeclarationContext) -> [TypeName] {
-        return _extractAll(from: rule)
+        _extractAll(from: rule)
     }
     
     private static func _extract(from rule: ParserRuleContext, atIndex index: Int = 0) -> TypeName? {
@@ -304,9 +304,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
                 type += blockNullability.getText()
             }
             
-            type += ")"
-            
-            type += "(" + parameterTypes.joined(separator: ", ") + ")"
+            type += ")(\(parameterTypes.joined(separator: ", ")))"
             
             return type
         }

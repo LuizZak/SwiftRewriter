@@ -1,4 +1,9 @@
 import ObjcParser
+import SwiftSyntaxSupport
+import IntentionPasses
+import ExpressionPasses
+import SourcePreprocessors
+import GlobalsProviders
 
 /// Represents a transpilation job, with all required information to start a
 /// transpile job.
@@ -7,25 +12,31 @@ public class SwiftRewriterJob {
     public var intentionPassesSource: IntentionPassSource?
     public var astRewriterPassSources: ASTRewriterPassSource?
     public var globalsProvidersSource: GlobalsProvidersSource?
+    public var syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider?
     public var preprocessors: [SourcePreprocessor]
     public var settings: SwiftRewriter.Settings = .default
     public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
+    public var parserCache: ParserCache? = nil
     
     public init(input: InputSourcesProvider,
                 intentionPassesSource: IntentionPassSource?,
                 astRewriterPassSources: ASTRewriterPassSource?,
                 globalsProvidersSource: GlobalsProvidersSource?,
+                syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider?,
                 preprocessors: [SourcePreprocessor],
                 settings: SwiftRewriter.Settings,
-                swiftSyntaxOptions: SwiftSyntaxOptions) {
+                swiftSyntaxOptions: SwiftSyntaxOptions,
+                parserCache: ParserCache?) {
         
         self.intentionPassesSource = intentionPassesSource
         self.astRewriterPassSources = astRewriterPassSources
         self.globalsProvidersSource = globalsProvidersSource
+        self.syntaxRewriterPassSource = syntaxRewriterPassSource
         self.preprocessors = preprocessors
         self.settings = settings
         self.input = input
         self.swiftSyntaxOptions = swiftSyntaxOptions
+        self.parserCache = parserCache
     }
     
     /// Executes a transpilation job, returning the result of the operation.
@@ -57,10 +68,12 @@ public class SwiftRewriterJob {
                                      intentionPassesSource: intentionPassesSource,
                                      astRewriterPassSources: astRewriterPassSources,
                                      globalsProvidersSource: globalsProvidersSource,
+                                     syntaxRewriterPassSource: syntaxRewriterPassSource,
                                      settings: settings)
         
         rewriter.writerOptions = swiftSyntaxOptions
         rewriter.preprocessors = preprocessors
+        rewriter.parserCache = parserCache
         
         return rewriter
     }

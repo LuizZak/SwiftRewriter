@@ -1,5 +1,3 @@
-import Foundation
-
 /// Represents a centralization point where all source code generation intentions
 /// are placed and queried for.
 public class IntentionCollection: Codable {
@@ -22,46 +20,46 @@ public class IntentionCollection: Codable {
     }
     
     public func fileIntentions() -> [FileGenerationIntention] {
-        return _intentions
+        _intentions
     }
     
     /// Gets all global variable intentions across all files
     public func globalVariables() -> [GlobalVariableGenerationIntention] {
-        return _intentions.flatMap { $0.globalVariableIntentions }
+        _intentions.flatMap(\.globalVariableIntentions)
     }
     
     /// Gets all global functions intentions across all files
     public func globalFunctions() -> [GlobalFunctionGenerationIntention] {
-        return _intentions.flatMap { $0.globalFunctionIntentions }
+        _intentions.flatMap(\.globalFunctionIntentions)
     }
     
     /// Performs a full search of all types intended to be created on all files.
     public func typeIntentions() -> [TypeGenerationIntention] {
-        return _intentions.flatMap { $0.typeIntentions }
+        _intentions.flatMap(\.typeIntentions)
     }
     
     /// Gets all nominal class generation intentions across all files
     public func classIntentions() -> [ClassGenerationIntention] {
-        return _intentions.flatMap { $0.classIntentions }
+        _intentions.flatMap(\.classIntentions)
     }
     
     /// Gets all extension intentions across all files
     public func extensionIntentions() -> [ClassExtensionGenerationIntention] {
-        return _intentions.flatMap { $0.extensionIntentions }
+        _intentions.flatMap(\.extensionIntentions)
     }
     
     /// Gets all protocols intended to be created on all files.
     public func protocolIntentions() -> [ProtocolGenerationIntention] {
-        return _intentions.flatMap { $0.protocolIntentions }
+        _intentions.flatMap(\.protocolIntentions)
     }
     
     /// Performs a full search of all typealias intended to be created on all files.
     public func typealiasIntentions() -> [TypealiasIntention] {
-        return _intentions.flatMap { $0.typealiasIntentions }
+        _intentions.flatMap(\.typealiasIntentions)
     }
     
     public func intentionFor(fileNamed name: String) -> FileGenerationIntention? {
-        return fileIntentions().first { $0.targetPath == name }
+        fileIntentions().first { $0.targetPath == name }
     }
     
     public func addIntention(_ intention: FileGenerationIntention) {

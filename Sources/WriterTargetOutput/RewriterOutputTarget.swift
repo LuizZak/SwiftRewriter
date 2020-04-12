@@ -1,4 +1,4 @@
-import Foundation
+import Utils
 
 /// Defines settings for a rewriter output target to follow when writing code
 public struct RewriterOutputSettings {
@@ -24,7 +24,7 @@ public protocol RewriterOutputTarget: class {
     func outputRaw(_ text: String)
     
     /// Outputs the given string with a `.plain` text style and outputs a line
-    /// feed at the end, with padding for identation at the begginning.
+    /// feed at the end, with padding for indentation at the begginning.
     func output(line: String)
     
     /// Outputs a given string inline with a `.plain` text style without adding
@@ -32,7 +32,7 @@ public protocol RewriterOutputTarget: class {
     func outputInline(_ content: String)
     
     /// Outputs the given string and outputs a line feed at the end, with padding
-    /// for identation at the begginning.
+    /// for indentation at the begginning.
     func output(line: String, style: TextStyle)
     
     /// Outputs a given string inline without adding a line feed at the end.
@@ -46,18 +46,18 @@ public protocol RewriterOutputTarget: class {
     /// Outputs a line feed character at the current position
     func outputLineFeed()
     
-    /// Outputs the current identation spacing at the current location.
-    func outputIdentation()
+    /// Outputs the current indentation spacing at the current location.
+    func outputIndentation()
     
-    /// Increases the identation of output lines from this output target
-    func increaseIdentation()
+    /// Increases the indentation of output lines from this output target
+    func increaseIndentation()
     
-    /// Decreases the identation of output lines from this output target
-    func decreaseIdentation()
+    /// Decreases the indentation of output lines from this output target
+    func decreaseIndentation()
     
-    /// Performs a series of operations while idented, decreasing the identation
+    /// Performs a series of operations while indented, decreasing the indentation
     /// automatically after.
-    func idented(perform block: () -> Void)
+    func indented(perform block: () -> Void)
     
     /// Called after the entire output operation is finished on this rewriter.
     /// Used to allow post-printing operations to be performed, like string trimming
@@ -93,16 +93,16 @@ public extension RewriterOutputTarget {
         outputInline(" ")
     }
     
-    func idented(perform block: () -> Void) {
-        increaseIdentation()
+    func indented(perform block: () -> Void) {
+        increaseIndentation()
         block()
-        decreaseIdentation()
+        decreaseIndentation()
     }
 }
 
 /// Outputs to a string buffer
 public final class StringRewriterOutput: RewriterOutputTarget {
-    private var identDepth: Int = 0
+    private var indentDepth: Int = 0
     private var settings: RewriterOutputSettings
     private var ignoreCallChange = false
     private(set) public var buffer: String = ""
@@ -123,7 +123,7 @@ public final class StringRewriterOutput: RewriterOutputTarget {
     public func output(line: String, style: TextStyle) {
         ignoreCallChange = true
         
-        outputIdentation()
+        outputIndentation()
         buffer += line
         outputLineFeed()
         
@@ -132,8 +132,8 @@ public final class StringRewriterOutput: RewriterOutputTarget {
         callChangeCallback()
     }
     
-    public func outputIdentation() {
-        buffer += identString()
+    public func outputIndentation() {
+        buffer += indentString()
         callChangeCallback()
     }
     
@@ -147,16 +147,16 @@ public final class StringRewriterOutput: RewriterOutputTarget {
         callChangeCallback()
     }
     
-    public func increaseIdentation() {
-        identDepth += 1
+    public func increaseIndentation() {
+        indentDepth += 1
     }
     
-    public func decreaseIdentation() {
-        identDepth -= 1
+    public func decreaseIndentation() {
+        indentDepth -= 1
     }
     
     public func onAfterOutput() {
-        buffer = buffer.trimmingCharacters(in: .whitespacesAndNewlines)
+        buffer = buffer.trimmingWhitespaces()
         
         callChangeCallback()
     }
@@ -169,12 +169,12 @@ public final class StringRewriterOutput: RewriterOutputTarget {
         onChangeBuffer?(buffer)
     }
     
-    private func identString() -> String {
+    private func indentString() -> String {
         switch settings.tabStyle {
         case .spaces(let sp):
-            return String(repeating: " ", count: sp * identDepth)
+            return String(repeating: " ", count: sp * indentDepth)
         case .tabs:
-            return String(repeating: "\t", count: identDepth)
+            return String(repeating: "\t", count: indentDepth)
         }
     }
 }

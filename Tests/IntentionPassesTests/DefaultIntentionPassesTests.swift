@@ -4,6 +4,7 @@ import Intentions
 import SwiftRewriterLib
 import Commons
 import GlobalsProviders
+import TypeSystem
 
 class DefaultIntentionPassesTests: XCTestCase {
     func testDefaultIntentionPasses() {

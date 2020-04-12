@@ -1,6 +1,5 @@
 import SwiftAST
 import Intentions
-import SwiftRewriterLib
 
 /// Analyzes non-overriden methods that have implicitly unwrapped optional returns,
 /// detecting non-null return signature by looking into all return statements

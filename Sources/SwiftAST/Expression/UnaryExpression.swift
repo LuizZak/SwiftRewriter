@@ -5,15 +5,15 @@ public class UnaryExpression: Expression {
     }
     
     public override var subExpressions: [Expression] {
-        return [exp]
+        [exp]
     }
     
     public override var isLiteralExpression: Bool {
-        return exp.isLiteralExpression
+        exp.isLiteralExpression
     }
     
     public override var literalExpressionKind: LiteralExpressionKind? {
-        return exp.literalExpressionKind
+        exp.literalExpressionKind
     }
     
     public override var description: String {
@@ -47,12 +47,12 @@ public class UnaryExpression: Expression {
     
     @inlinable
     public override func copy() -> UnaryExpression {
-        return UnaryExpression(op: op, exp: exp.copy()).copyTypeAndMetadata(from: self)
+        UnaryExpression(op: op, exp: exp.copy()).copyTypeAndMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitUnary(self)
+        visitor.visitUnary(self)
     }
     
     public override func isEqual(to other: Expression) -> Bool {
@@ -89,6 +89,6 @@ public class UnaryExpression: Expression {
 extension Expression {
     @inlinable
     public var asUnary: UnaryExpression? {
-        return cast()
+        cast()
     }
 }

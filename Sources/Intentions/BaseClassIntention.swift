@@ -9,7 +9,7 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
     public var isInterfaceSource: Bool = false
     
     public override var isEmptyType: Bool {
-        return super.isEmptyType && instanceVariables.isEmpty && synthesizations.isEmpty
+        super.isEmptyType && instanceVariables.isEmpty && synthesizations.isEmpty
     }
     
     private(set) public var instanceVariables: [InstanceVariableGenerationIntention] = []
@@ -17,7 +17,7 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
     private(set) public var synthesizations: [PropertySynthesizationIntention] = []
     
     public override var knownFields: [KnownProperty] {
-        return instanceVariables
+        instanceVariables
     }
     
     public override init(typeName: String,
@@ -60,7 +60,7 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
     }
     
     public func removeInstanceVariable(named name: String) {
-        guard let index = instanceVariables.index(where: { $0.name == name }) else {
+        guard let index = instanceVariables.firstIndex(where: { $0.name == name }) else {
             return
         }
         
@@ -79,7 +79,7 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
     }
     
     public func removeSynthesization(_ intention: PropertySynthesizationIntention) {
-        guard let index = synthesizations.index(where: { $0 === intention }) else {
+        guard let index = synthesizations.firstIndex(where: { $0 === intention }) else {
             return
         }
         

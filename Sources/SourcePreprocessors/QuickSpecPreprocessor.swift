@@ -1,5 +1,3 @@
-import Foundation
-import SwiftRewriterLib
 import Utils
 import MiniLexer
 
@@ -34,16 +32,16 @@ public class QuickSpecPreprocessor: SourcePreprocessor {
         // Extract comment sections which will be useful to detect regions where
         // QuickSpecBegin/QuickSpecEnd are actually comments and are not to be
         // modified.
-        var commentSections = source.commentSectionRanges()
+        var commentSections = source.cStyleCommentSectionRanges()
         var processed = source {
             didSet {
-                commentSections = processed.commentSectionRanges()
+                commentSections = processed.cStyleCommentSectionRanges()
             }
         }
         
         /// Returns true if the given range is contained within comment sections
         func overlapsComments(_ range: Range<String.Index>) -> Bool {
-            return commentSections.contains { $0.overlaps(range) }
+            commentSections.contains { $0.overlaps(range) }
         }
         
         repeat {

@@ -3,11 +3,11 @@
 public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
     /// An empty compound statement.
     public static var empty: CompoundStatement {
-        return CompoundStatement()
+        CompoundStatement()
     }
     
     public var isEmpty: Bool {
-        return statements.isEmpty
+        statements.isEmpty
     }
     
     public var statements: [Statement] = [] {
@@ -18,7 +18,7 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
     }
     
     public override var children: [SyntaxNode] {
-        return statements
+        statements
     }
     
     public init(statements: [Statement]) {
@@ -49,12 +49,12 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
     
     @inlinable
     public override func copy() -> CompoundStatement {
-        return CompoundStatement(statements: statements.map { $0.copy() }).copyMetadata(from: self)
+        CompoundStatement(statements: statements.map { $0.copy() }).copyMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        return visitor.visitCompound(self)
+        visitor.visitCompound(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
@@ -81,13 +81,13 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
 
 extension CompoundStatement: Sequence {
     public func makeIterator() -> IndexingIterator<[Statement]> {
-        return statements.makeIterator()
+        statements.makeIterator()
     }
 }
 
 public extension Statement {
     @inlinable
-    public var asCompound: CompoundStatement? {
-        return cast()
+    var asCompound: CompoundStatement? {
+        cast()
     }
 }

@@ -1,6 +1,7 @@
 import Foundation
 import Console
 import Utils
+import SwiftRewriterLib
 
 func showSearchPathUi(in menu: MenuController) -> String? {
     let console = menu.console
@@ -44,11 +45,11 @@ func showSearchPathUi(in menu: MenuController) -> String? {
 }
 
 /// Helper for presenting selection of file names on a list
-private func presentFileSelection(in menu: MenuController, list: [Path], prompt: String) -> [Path] {
+private func presentFileSelection(in menu: MenuController, list: [String], prompt: String) -> [String] {
     let prompt = prompt + """
     Type ':all' to select all files.
     """
-    var items: [Path] = []
+    var items: [String] = []
 
     let config = 
         Pages.PageDisplayConfiguration(commandPrompt: prompt) { input in
@@ -123,12 +124,15 @@ public class FilesExplorerService {
 class SuggestConversionInterface {
     struct Options {
         static var `default` = Options(overwrite: false, skipConfirm: false,
-                                       excludePattern: nil, includePattern: nil)
+                                       followImports: false, excludePattern: nil,
+                                       includePattern: nil, verbose: false)
         
         var overwrite: Bool
         var skipConfirm: Bool
+        var followImports: Bool
         var excludePattern: String?
         var includePattern: String?
+        var verbose: Bool
     }
     
     var rewriterService: SwiftRewriterService
@@ -145,43 +149,66 @@ class SuggestConversionInterface {
         searchAndShowConfirm(in: menu, path: path)
     }
     
-    func searchAndShowConfirm(in menu: MenuController, path directoryPath: String,
+    func searchAndShowConfirm(in menu: MenuController,
+                              path directoryPath: String,
                               options: Options = .default) {
+        
         let console = menu.console
-        let fileManager = FileManager.default
         
         console.printLine("Inspecting path \(directoryPath)...")
         
         var overwriteCount = 0
+
+        let fileProvider = FileDiskProvider()
+        let fileCollectionStep = FileCollectionStep(fileProvider: fileProvider)
+        let importFileDelegate
+            = ImportDirectiveFileCollectionDelegate(parserCache: rewriterService.parserCache,
+                                                    fileProvider: fileProvider)
+        if options.followImports {
+            fileCollectionStep.delegate = importFileDelegate
+        }
+        if options.verbose {
+            fileCollectionStep.listener = StdoutFileCollectionStepListener()
+        }
+        do {
+            try withExtendedLifetime(importFileDelegate) {
+                try fileCollectionStep.addFromDirectory(URL(fileURLWithPath: directoryPath),
+                                                        recursive: true,
+                                                        includePattern: options.includePattern,
+                                                        excludePattern: options.excludePattern)
+            }
+        } catch {
+            console.printLine("Error finding files: \(error).")
+            if !options.skipConfirm {
+                _=console.readLineWith(prompt: "Press [Enter] to continue.")
+            }
+
+            return
+        }
         
-        let objcFiles: [URL] =
-            filesAt(path: directoryPath,
-                    includePattern: options.includePattern,
-                    excludePattern: options.excludePattern)
-                // Filter down to .h/.m files
-                .filter { (path: URL) -> Bool in
-                    ((path.path as NSString).pathExtension == "m"
-                        || (path.path as NSString).pathExtension == "h")
+        let objcFiles: [URL] = fileCollectionStep
+            .files
+            .filter { $0.isPrimary }
+            .map { $0.url }
+            // Check a matching .swift file doesn't already exist for the paths
+            // (if `overwrite` is not on)
+            .filter { (url: URL) -> Bool in
+                let swiftFile =
+                    ((url.path as NSString)
+                        .deletingPathExtension as NSString)
+                        .appendingPathExtension("swift")!
+
+                if !fileProvider.fileExists(atPath: swiftFile) {
+                    return true
                 }
-                // Check a matching .swift file doesn't already exist for the paths
-                // (if `overwrite` is not on)
-                .filter { (url: URL) -> Bool in
-                    let swiftFile =
-                        ((url.path as NSString)
-                            .deletingPathExtension as NSString)
-                            .appendingPathExtension("swift")!
-                    
-                    if !fileManager.fileExists(atPath: swiftFile) {
-                        return true
-                    }
-                    if options.overwrite {
-                        overwriteCount += 1
-                        return true
-                    }
-                    
-                    return false
+                if options.overwrite {
+                    overwriteCount += 1
+                    return true
                 }
-        
+
+                return false
+            }
+
         if objcFiles.isEmpty {
             console.printLine("No files where found to process.")
             if !options.skipConfirm {
@@ -218,41 +245,12 @@ class SuggestConversionInterface {
             
             let duration = stopwatch.stop()
             
-            console.printLine("Finishing converting \(objcFiles.count) files in \(String(format: "%.2lf", duration))s.")
+            console.printLine("Finished converting \(objcFiles.count) files in \(String(format: "%.2lf", duration))s.")
             _=console.readLineWith(prompt: "Press [Enter] to continue.")
         } catch {
             console.printLine("Error converting files: \(error)")
             _=console.readLineWith(prompt: "Press [Enter] to continue.")
         }
-    }
-}
-
-private class Stopwatch {
-    var start: timespec = timespec()
-    
-    private init() {
-        if #available(OSX 10.12, *) {
-            clock_gettime(CLOCK_MONOTONIC_RAW, &start)
-        } else {
-            fatalError()
-        }
-    }
-    
-    static func start() -> Stopwatch {
-        return Stopwatch()
-    }
-    
-    func stop() -> TimeInterval {
-        var end: timespec = timespec()
-        if #available(OSX 10.12, *) {
-            clock_gettime(CLOCK_MONOTONIC_RAW, &end)
-        } else {
-            fatalError()
-        }
-        
-        let delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000
-        
-        return TimeInterval(delta_us) / 1_000_000
     }
 }
 
@@ -274,6 +272,7 @@ private class FileFinderInterface {
     func exploreFilesUi(path: String, menu: MenuController) {
         let console = menu.console
         let fileManager = FileManager.default
+        let maxFilesShown = 300
 
         repeat {
             console.clearScreen()
@@ -300,7 +299,8 @@ private class FileFinderInterface {
                 (($0 as NSString).pathExtension == "m" || ($0 as NSString).pathExtension == "h") &&
                 ($0 as NSString).lastPathComponent.localizedCaseInsensitiveContains(fileName)
             }
-            var matches = Array(matchesSource.prefix(300))
+            
+            var matches = Array(matchesSource.prefix(maxFilesShown))
             matches.sort { s1, s2 in
                 s1.compare(s2, options: .numeric) == .orderedAscending
             }
@@ -313,10 +313,13 @@ private class FileFinderInterface {
 
             repeat {
                 // Present selection to user
-                let matchesString = matches.count == 50 ? "Showing the first 50 matches" : "Showing all files found"
+                let matchesString =
+                    matches.count == maxFilesShown
+                        ? "Showing first \(maxFilesShown) matches"
+                        : "Showing all files found"
                 
                 let indexes = presentFileSelection(
-                    in: menu, list: matches.asPaths,
+                    in: menu, list: matches,
                     prompt: "\(matchesString), select one to convert")
                 
                 guard !indexes.isEmpty else {
@@ -325,7 +328,7 @@ private class FileFinderInterface {
                 
                 do {
                     let fileUrls = indexes.map {
-                        URL(fileURLWithPath: (path as NSString).appendingPathComponent($0.fullPath))
+                        URL(fileURLWithPath: (path as NSString).appendingPathComponent($0))
                     }
                     try rewriterService.rewrite(files: fileUrls)
                     _=console.readLineWith(prompt: "\nPress [Enter] to convert another file")
@@ -346,7 +349,7 @@ private class FilesExplorer: PagesCommandHandler {
     var canHandleEmptyInput: Bool = false
     
     var commandPrompt: String? {
-        return "Select a file above or input '0' to quit"
+        "Select a file above or input '0' to quit"
     }
     
     private var fileList: FileListConsoleProvider?
@@ -362,7 +365,7 @@ private class FilesExplorer: PagesCommandHandler {
     }
     
     func executeCommand(_ input: String) throws -> Pages.PagesCommandResult {
-        return self.navigateOption(input)
+        self.navigateOption(input)
     }
 
     public func getFileListProvider() throws -> FileListConsoleProvider {
@@ -391,7 +394,7 @@ private class FilesExplorer: PagesCommandHandler {
         if #available(OSX 10.11, *) {
             newPathAttempt = URL(fileURLWithPath: input, relativeTo: path)
         } else {
-            newPathAttempt = nil
+            newPathAttempt = URL(string: input, relativeTo: path)
         }
         
         if verifyFilesNamed(input, from: path) {
@@ -413,7 +416,7 @@ private class FilesExplorer: PagesCommandHandler {
         else if let index = Int(input) {
             guard index > 0 && index <= fileList.count else {
                 return .loop(
-                    "Invalid index \(index): Only have \(fileList.count) files to select!"
+                    "Invalid index \(index): There are only \(fileList.count) files to select from!"
                     .terminalColorize(.red))
             }
             
@@ -424,7 +427,7 @@ private class FilesExplorer: PagesCommandHandler {
         
         do {
             path = newPath
-            let newList = try self.getFileListProvider()
+            let newList = try getFileListProvider()
             
             return .modifyList(keepPageIndex: true) { _ in
                 newList
@@ -439,8 +442,8 @@ private class FilesExplorer: PagesCommandHandler {
         
         var isDirectory = ObjCBool(false)
         
-        // Check if we're not pointing at a directory the user might want to navigate
-        // to
+        // Check if we're not pointing at a directory the user might want to
+        // navigate to
         if FileManager.default.fileExists(atPath: newPath.relativePath,
                                           isDirectory: &isDirectory)
             && isDirectory.boolValue {
@@ -449,7 +452,8 @@ private class FilesExplorer: PagesCommandHandler {
         
         // Raw .h/.m file
         if file.hasSuffix(".h") || file.hasSuffix(".m") {
-            let exists = FileManager.default.fileExists(atPath: newPath.relativePath, isDirectory: &isDirectory)
+            let exists = FileManager.default.fileExists(atPath: newPath.relativePath,
+                                                        isDirectory: &isDirectory)
             guard exists && !isDirectory.boolValue else {
                 return false
             }
@@ -481,12 +485,11 @@ private class FilesExplorer: PagesCommandHandler {
             
             // Search for .h/.m pairs with a similar name
             let filesInDir =
-                try
-                    FileManager.default
-                        .contentsOfDirectory(at: newPath.deletingLastPathComponent(),
-                                             includingPropertiesForKeys: nil,
-                                             options: [.skipsHiddenFiles,
-                                                       .skipsSubdirectoryDescendants])
+                try FileManager.default
+                    .contentsOfDirectory(at: newPath.deletingLastPathComponent(),
+                                         includingPropertiesForKeys: nil,
+                                         options: [.skipsHiddenFiles,
+                                                   .skipsSubdirectoryDescendants])
             
             // Match all files in directory
             let matches =
@@ -525,11 +528,11 @@ public class FileListConsoleProvider: ConsoleDataProvider {
     let fileList: [URL]
     
     public var header: String {
-        return path.relativePath
+        path.relativePath
     }
     
     public var count: Int {
-        return fileList.count
+        fileList.count
     }
     
     public init(path: URL, fileList: [URL]) {
@@ -541,7 +544,7 @@ public class FileListConsoleProvider: ConsoleDataProvider {
         let url = fileList[row]
         let fullPath = url.standardizedFileURL.relativePath
         
-        var isDirectory: ObjCBool = ObjCBool(false)
+        var isDirectory = ObjCBool(false)
         guard FileManager.default.fileExists(atPath: fullPath, isDirectory: &isDirectory) else {
             return [""]
         }
@@ -551,5 +554,13 @@ public class FileListConsoleProvider: ConsoleDataProvider {
         }
         
         return [url.lastPathComponent]
+    }
+}
+
+extension Collection where Element == String {
+    func indexOfFilename(matching string: String, options: String.CompareOptions = .literal) -> Index? {
+        firstIndex {
+            ($0 as NSString).lastPathComponent.compare(string, options: options) == .orderedSame
+        }
     }
 }

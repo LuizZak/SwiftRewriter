@@ -1,5 +1,5 @@
-import SwiftAST
 import Intentions
+import SwiftAST
 
 /// Delegate for controlling some aspects of SwiftSyntax AST generation
 public protocol SwiftSyntaxProducerDelegate: class {

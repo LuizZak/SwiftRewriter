@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Helper global extensions to String with common functionality.
 public extension StringProtocol {
     /// Returns `true` if `self` starts with an uppercase character.
-    public var startsUppercased: Bool {
+    var startsUppercased: Bool {
         guard let first = unicodeScalars.first else {
             return false
         }
@@ -12,7 +12,7 @@ public extension StringProtocol {
     }
     
     /// Returns a copy of `self` with the first letter lowercased.
-    public var lowercasedFirstLetter: String {
+    var lowercasedFirstLetter: String {
         if isEmpty {
             return String(self)
         }
@@ -21,7 +21,7 @@ public extension StringProtocol {
     }
     
     /// Returns a copy of `self` with the first letter uppercased.
-    public var uppercasedFirstLetter: String {
+    var uppercasedFirstLetter: String {
         if isEmpty {
             return String(self)
         }
@@ -33,7 +33,7 @@ public extension StringProtocol {
 public extension String {
     /// Produces a diff-like string with a marking on the first character
     /// that differs between `self` and a target string.
-    public func makeDifferenceMarkString(against string: String) -> String {
+    func makeDifferenceMarkString(against string: String) -> String {
         guard let (line, column) = firstDifferingLineColumn(against: string) else {
             return self + "\n ~ Strings are equal."
         }
@@ -51,7 +51,7 @@ public extension String {
         return insertingStringLine(marker, after: line)
     }
     
-    public func firstDifferingLineColumn(against string: String) -> (line: Int, column: Int)? {
+    func firstDifferingLineColumn(against string: String) -> (line: Int, column: Int)? {
         if self == string {
             return nil
         }
@@ -104,7 +104,7 @@ public extension String {
     
     /// Returns the ranges for all individual lines of text separated by a line-break
     /// character `\n` within this string.
-    public func lineRanges() -> [Range<Index>] {
+    func lineRanges() -> [Range<Index>] {
         var lines: [Range<Index>] = []
         var currentLineStart = startIndex
         
@@ -123,7 +123,7 @@ public extension String {
     }
     
     /// Gets the line number for the given index in this string
-    public func lineNumber(at index: Index) -> Int {
+    func lineNumber(at index: Index) -> Int {
         let line =
             self[..<index].reduce(0) {
                 $0 + ($1 == "\n" ? 1 : 0)
@@ -135,7 +135,7 @@ public extension String {
     /// Gets the column offset number for the given index in this string.
     /// The column offset counts how many characters there are to the left to
     /// either the nearest newline or the beginning of the string.
-    public func columnOffset(at index: Index) -> Int {
+    func columnOffset(at index: Index) -> Int {
         // Figure out start of line at the given index
         let lineStart =
             zip(self[..<index], indices)
@@ -150,9 +150,9 @@ public extension String {
 }
 
 public extension String {
-    /// Returns a range of sections of this string that represent single and
-    /// multi-lined comments.
-    func commentSectionRanges() -> [Range<Index>] {
+    /// Returns a range of sections of this string that represent C-based single
+    /// and multi-lined comments.
+    func cStyleCommentSectionRanges() -> [Range<Index>] {
         if self.count < 2 {
             return []
         }
@@ -221,7 +221,7 @@ public extension String {
             }
         }
         
-        // Finish any open commentary ranges
+        // Finish any open comment ranges
         switch state {
         case .normal, .stringLiteral:
             break
@@ -232,4 +232,43 @@ public extension String {
         
         return ranges
     }
+}
+
+public extension String {
+    func trimmingWhitespaces() -> String {
+        return trimWhitespace(self)
+    }
+}
+
+public func trimWhitespace(_ string: String) -> String {
+    if string.isEmpty {
+        return string
+    }
+    
+    var leading: String.Index = string.startIndex
+    var trailing: String.Index = string.index(before: string.endIndex)
+    
+    let whitespace: Set<Character> = [" ", "\t", "\n", "\r"]
+    
+    while leading != string.endIndex {
+        if whitespace.contains(string[leading]) {
+            string.formIndex(after: &leading)
+        } else {
+            break
+        }
+    }
+    
+    if leading == string.endIndex {
+        return ""
+    }
+    
+    while trailing != string.startIndex {
+        if whitespace.contains(string[trailing]) {
+            string.formIndex(before: &trailing)
+        } else {
+            break
+        }
+    }
+    
+    return String(string[leading...trailing])
 }

@@ -15,16 +15,16 @@ public class UnknownStatement: Statement {
     
     @inlinable
     public override func copy() -> UnknownStatement {
-        return UnknownStatement(context: context).copyMetadata(from: self)
+        UnknownStatement(context: context).copyMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        return visitor.visitUnknown(self)
+        visitor.visitUnknown(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
-        return other is UnknownStatement
+        other is UnknownStatement
     }
     
     public override func encode(to encoder: Encoder) throws {
@@ -35,7 +35,7 @@ public class UnknownStatement: Statement {
 }
 public extension Statement {
     @inlinable
-    public var asUnknown: UnknownStatement? {
-        return cast()
+    var asUnknown: UnknownStatement? {
+        cast()
     }
 }

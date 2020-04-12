@@ -30,19 +30,19 @@ public struct FunctionSignature: Hashable {
     }
     
     public var asIdentifier: FunctionIdentifier {
-        return _asIdentifier
+        _asIdentifier
     }
     
     /// The cannonical selector signature for this function signature.
     public var asSelector: SelectorSignature {
-        return _asSelector
+        _asSelector
     }
     
     // TODO: Support suplying type attributes for function signatures
     /// Returns a `SwiftType.block`-equivalent type for this function signature
     public var swiftClosureType: SwiftType {
-        return .swiftBlock(returnType: returnType,
-                           parameters: parameters.map { $0.type })
+        .swiftBlock(returnType: returnType,
+                           parameters: parameters.map(\.type))
     }
     
     public var droppingNullability: FunctionSignature {
@@ -63,8 +63,8 @@ public struct FunctionSignature: Hashable {
                 isStatic: Bool = false,
                 isMutating: Bool = false) {
         
-        _asIdentifier = FunctionIdentifier(name: name, parameterNames: parameters.map { $0.label })
-        _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map { $0.label })
+        _asIdentifier = FunctionIdentifier(name: name, parameterNames: parameters.map(\.label))
+        _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map(\.label))
         self.isStatic = isStatic
         self.name = name
         self.returnType = returnType
@@ -73,8 +73,8 @@ public struct FunctionSignature: Hashable {
     }
     
     private mutating func _recreateAliases() {
-        _asIdentifier = FunctionIdentifier(name: name, parameterNames: parameters.map { $0.label })
-        _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map { $0.label })
+        _asIdentifier = FunctionIdentifier(name: name, parameterNames: parameters.map(\.label))
+        _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map(\.label))
     }
     
     /// Returns a set of possible selector signature variations for this function
@@ -104,14 +104,14 @@ public struct FunctionSignature: Hashable {
     /// foo(bar:baz:_:)
     /// ```
     public func possibleSelectorSignatures() -> Set<SelectorSignature> {
-        if !parameters.contains(where: { $0.hasDefaultValue }) {
+        if !parameters.contains(where: \.hasDefaultValue) {
             return [asSelector]
         }
         
         let defaultArgIndices =
             parameters.enumerated()
-                .filter { $0.element.hasDefaultValue }
-                .map { $0.offset }
+                .filter(\.element.hasDefaultValue)
+                .map(\.offset)
         
         if defaultArgIndices.count == 0 {
             return [asSelector]
@@ -183,7 +183,7 @@ public struct FunctionSignature: Hashable {
     /// Returns `true` iff `self` and `other` match using Objective-C signature
     /// matching rules.
     public func matchesAsSelector(_ other: FunctionSignature) -> Bool {
-        return asSelector == other.asSelector
+        asSelector == other.asSelector
     }
     
     /// Returns `true` iff `self` and `other` match using C signature matching
@@ -192,7 +192,7 @@ public struct FunctionSignature: Hashable {
     /// In C, function signatures match if they have the same name, and the same
     /// number of parameters.
     public func matchesAsCFunction(_ other: FunctionSignature) -> Bool {
-        return name == other.name && parameters.count == other.parameters.count
+        name == other.name && parameters.count == other.parameters.count
     }
 }
 
@@ -220,21 +220,24 @@ extension FunctionSignature: Codable {
 }
 
 public extension Sequence where Element == ParameterSignature {
+    func argumentLabels() -> [String?] {
+        map(\.label)
+    }
     
-    public func argumentLabels() -> [String?] {
-        return map { $0.label }
+    func subscriptArgumentLabels() -> [String?] {
+        map { $0.label == $0.name ? nil : $0.label }
     }
 }
 
 public extension FunctionSignature {
-    public init(isStatic: Bool = false, signatureString: String) throws {
+    init(isStatic: Bool = false, signatureString: String) throws {
         self = try FunctionSignatureParser.parseSignature(from: signatureString)
         self.isStatic = isStatic
     }
 }
 
 public extension Array where Element == ParameterSignature {
-    public init(parsingParameters parametersString: String) throws {
+    init(parsingParameters parametersString: String) throws {
         self = try FunctionSignatureParser.parseParameters(from: parametersString)
     }
 }

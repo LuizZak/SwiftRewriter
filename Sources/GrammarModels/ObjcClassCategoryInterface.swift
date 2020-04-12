@@ -1,10 +1,10 @@
 /// A class category that extends a class with additional properties/methods/ivars/protocols.
 public class ObjcClassCategoryInterface: ASTNode, InitializableNode {
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     public var categoryName: Identifier? {
-        return child(ofType: Identifier.self, atIndex: 1)
+        child(ofType: Identifier.self, atIndex: 1)
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -13,20 +13,20 @@ public class ObjcClassCategoryInterface: ASTNode, InitializableNode {
 }
 
 public extension ObjcClassCategoryInterface {
-    public var properties: [PropertyDefinition] {
-        return childrenMatching()
+    var properties: [PropertyDefinition] {
+        childrenMatching()
     }
     
-    public var protocolList: ProtocolReferenceList? {
-        return firstChild()
+    var protocolList: ProtocolReferenceList? {
+        firstChild()
     }
     
-    public var ivarsList: IVarsList? {
-        return firstChild()
+    var ivarsList: IVarsList? {
+        firstChild()
     }
     
-    public var methods: [MethodDefinition] {
-        return childrenMatching()
+    var methods: [MethodDefinition] {
+        childrenMatching()
     }
 }
 
@@ -34,10 +34,10 @@ public extension ObjcClassCategoryInterface {
 /// declaration for a category.
 public class ObjcClassCategoryImplementation: ASTNode, InitializableNode {
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     public var categoryName: Identifier? {
-        return child(ofType: Identifier.self, atIndex: 1)
+        child(ofType: Identifier.self, atIndex: 1)
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -46,11 +46,11 @@ public class ObjcClassCategoryImplementation: ASTNode, InitializableNode {
 }
 
 public extension ObjcClassCategoryImplementation {
-    public var ivarsList: IVarsList? {
-        return firstChild()
+    var ivarsList: IVarsList? {
+        firstChild()
     }
     
-    public var methods: [MethodDefinition] {
-        return childrenMatching()
+    var methods: [MethodDefinition] {
+        childrenMatching()
     }
 }

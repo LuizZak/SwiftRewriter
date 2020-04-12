@@ -1,7 +1,6 @@
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
 
 /// Searches for matching property protocol conformance implementations in types
 /// and promotes them into getter or getter/setter property pairs.
@@ -11,7 +10,7 @@ public class PromoteProtocolPropertyConformanceIntentionPass: IntentionPass {
     
     /// Textual tag this intention pass applies to history tracking entries.
     private var historyTag: String {
-        return "\(PromoteProtocolPropertyConformanceIntentionPass.self)"
+        "\(PromoteProtocolPropertyConformanceIntentionPass.self)"
     }
     
     public init() {
@@ -81,7 +80,7 @@ public class PromoteProtocolPropertyConformanceIntentionPass: IntentionPass {
                 let property =
                     PropertyGenerationIntention(name: prop.name,
                                                 type: prop.memberType,
-                                                attributes: prop.attributes,
+                                                objcAttributes: prop.objcAttributes,
                                                 ownerTypeName: type.typeName)
                 property
                     .history

@@ -33,7 +33,7 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral,
     }
     
     public override var description: String {
-        return constant.description
+        constant.description
     }
     
     public init(constant: Constant) {
@@ -68,12 +68,12 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral,
     
     @inlinable
     public override func copy() -> ConstantExpression {
-        return ConstantExpression(constant: constant).copyTypeAndMetadata(from: self)
+        ConstantExpression(constant: constant).copyTypeAndMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitConstant(self)
+        visitor.visitConstant(self)
     }
     
     public override func isEqual(to other: Expression) -> Bool {
@@ -107,8 +107,8 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral,
 }
 public extension Expression {
     @inlinable
-    public var asConstant: ConstantExpression? {
-        return self as? ConstantExpression
+    var asConstant: ConstantExpression? {
+        cast()
     }
 }
 
@@ -200,15 +200,15 @@ public enum Constant: Codable, Equatable {
     }
     
     public static func binary(_ value: Int) -> Constant {
-        return .int(value, .binary)
+        .int(value, .binary)
     }
     
     public static func octal(_ value: Int) -> Constant {
-        return .int(value, .octal)
+        .int(value, .octal)
     }
     
     public static func hexadecimal(_ value: Int) -> Constant {
-        return .int(value, .hexadecimal)
+        .int(value, .hexadecimal)
     }
     
     public enum IntegerType: String, Codable {

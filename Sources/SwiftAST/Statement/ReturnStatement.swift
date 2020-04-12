@@ -1,6 +1,6 @@
 public class ReturnStatement: Statement {
     public override var isUnconditionalJump: Bool {
-        return true
+        true
     }
     
     public var exp: Expression? {
@@ -38,12 +38,12 @@ public class ReturnStatement: Statement {
     
     @inlinable
     public override func copy() -> ReturnStatement {
-        return ReturnStatement(exp: exp?.copy()).copyMetadata(from: self)
+        ReturnStatement(exp: exp?.copy()).copyMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        return visitor.visitReturn(self)
+        visitor.visitReturn(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
@@ -69,7 +69,7 @@ public class ReturnStatement: Statement {
 }
 public extension Statement {
     @inlinable
-    public var asReturn: ReturnStatement? {
-        return cast()
+    var asReturn: ReturnStatement? {
+        cast()
     }
 }

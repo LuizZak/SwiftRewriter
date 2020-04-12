@@ -1,6 +1,6 @@
 public extension UnkeyedDecodingContainer {
     
-    public mutating func decodeStatement<S: Statement>(_ type: S.Type = S.self) throws -> S {
+    mutating func decodeStatement<S: Statement>(_ type: S.Type = S.self) throws -> S {
         let container = try self.decode(SwiftASTSerializer.StatementContainer.self)
         
         if let s = container.statement as? S {
@@ -10,7 +10,7 @@ public extension UnkeyedDecodingContainer {
         throw SwiftASTSerializer.Error.unexpectedStatementType(Swift.type(of: container.statement))
     }
     
-    public mutating func decodeStatementIfPresent<S: Statement>(_ type: S.Type = S.self) throws -> S? {
+    mutating func decodeStatementIfPresent<S: Statement>(_ type: S.Type = S.self) throws -> S? {
         guard let container = try self.decodeIfPresent(SwiftASTSerializer.StatementContainer.self) else {
             return nil
         }
@@ -25,7 +25,7 @@ public extension UnkeyedDecodingContainer {
 
 public extension UnkeyedDecodingContainer {
     
-    public mutating func decodeExpression<E: Expression>(_ type: E.Type = E.self) throws -> E {
+    mutating func decodeExpression<E: Expression>(_ type: E.Type = E.self) throws -> E {
         let container = try self.decode(SwiftASTSerializer.ExpressionContainer.self)
         
         if let s = container.expression as? E {
@@ -35,7 +35,7 @@ public extension UnkeyedDecodingContainer {
         throw SwiftASTSerializer.Error.unexpectedExpressionType(Swift.type(of: container.expression))
     }
     
-    public mutating func decodeExpressionIfPresent<S: Expression>(_ type: S.Type = S.self) throws -> S? {
+    mutating func decodeExpressionIfPresent<S: Expression>(_ type: S.Type = S.self) throws -> S? {
         guard let container = try self.decodeIfPresent(SwiftASTSerializer.ExpressionContainer.self) else {
             return nil
         }

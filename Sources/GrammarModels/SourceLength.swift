@@ -37,7 +37,7 @@ public struct SourceLength {
 }
 
 extension SourceLocation {
-    /// Determine the AbsolutePosition by advancing the `lhs` by the given source
+    /// Determine the `SourceLocation` by advancing the `lhs` by the given source
     /// length.
     public static func +(lhs: SourceLocation, rhs: SourceLength) -> SourceLocation {
         let utf8Offset = lhs.utf8Offset + rhs.utf8Length

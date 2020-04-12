@@ -1,4 +1,3 @@
-import SwiftRewriterLib
 import SwiftAST
 
 public class ASTCorrectorExpressionPass: ASTRewriterPass {
@@ -51,28 +50,28 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
     public override func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
         // TODO: Deal with multiple expressions on a single line, maybe.
         
-        var pf: PostfixExpression?
-        var functionCall = FunctionCallPostfix(arguments: [])
+        let pf = ValueMatcherExtractor<PostfixExpression?>()
+        let functionCall = ValueMatcherExtractor(FunctionCallPostfix(arguments: []))
         let matcher =
             ExpressionsStatement.matcher()
                 .keyPath(\.expressions, hasCount(1))
                 .keyPath(\.expressions[0].asPostfix) { postfix in
                     postfix
-                        .bind(to: &pf)
-                        .keyPath(\.functionCall, !isNil() ->> &functionCall)
+                        .bind(to: pf)
+                        .keyPath(\.functionCall, !isNil() ->> functionCall)
                         .keyPath(\.functionCall?.arguments, hasCount(1))
                 }
         
-        guard matcher.matches(stmt), let postfix = pf else {
+        guard matcher.matches(stmt), let postfix = pf.value else {
             return super.visitExpressions(stmt)
         }
         
         // Apply potential if-let patterns to simple 1-parameter function calls
-        guard case .block(_, let params, _)? = functionCall.callableSignature else {
+        guard case .block(_, let params, _)? = functionCall.value.callableSignature else {
             return super.visitExpressions(stmt)
         }
         
-        let argument = functionCall.arguments[0].expression
+        let argument = functionCall.value.arguments[0].expression
         
         // Check the receiving argument is non-optional, but the argument's type
         // in the expression is an optional (but not an implicitly unwrapped, since
@@ -93,7 +92,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         // if let <name> = <arg0> {
         //   func(<name>)
         // }
-        let newOp = functionCall.replacingArguments([
+        let newOp = functionCall.value.replacingArguments([
             Expression.identifier(name).typed(resolvedType.deepUnwrapped)
         ])
         let newPostfix = postfix.copy()
@@ -109,7 +108,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         
         notifyChange()
         
-        return super.visitStatement(stmt)
+        return visitStatement(stmt)
     }
     
     public override func visitExpression(_ exp: Expression) -> Expression {
@@ -160,11 +159,11 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
     }
     
     public override func visitIf(_ stmt: IfStatement) -> Statement {
-        return super.visitIf(stmt)
+        super.visitIf(stmt)
     }
     
     public override func visitWhile(_ stmt: WhileStatement) -> Statement {
-        return super.visitWhile(stmt)
+        super.visitWhile(stmt)
     }
     
     public override func visitUnary(_ exp: UnaryExpression) -> Expression {

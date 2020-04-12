@@ -17,10 +17,13 @@ public enum Pattern: Codable, Equatable {
         switch discriminator {
         case "identifier":
             try self = .identifier(container.decode(String.self, forKey: .payload))
+            
         case "expression":
             try self = .expression(container.decodeExpression(forKey: .payload))
+            
         case "tuple":
             try self = .tuple(container.decode([Pattern].self, forKey: .payload))
+            
         default:
             throw DecodingError.dataCorruptedError(
                 forKey: CodingKeys.discriminator,
@@ -36,17 +39,19 @@ public enum Pattern: Codable, Equatable {
         case .identifier(let ident):
             try container.encode("identifier", forKey: .discriminator)
             try container.encode(ident, forKey: .payload)
+            
         case .expression(let exp):
             try container.encode("expression", forKey: .discriminator)
             try container.encodeExpression(exp, forKey: .payload)
+            
         case .tuple(let pattern):
             try container.encode("tuple", forKey: .discriminator)
             try container.encode(pattern, forKey: .payload)
         }
     }
     
-    /// Simplifies patterns that feature 1-item tuples (i.e. `(<item>)`) by unwrapping
-    /// the inner patterns.
+    /// Simplifies patterns that feature 1-item tuples (i.e. `(<item>)`) by
+    /// unwrapping the inner patterns.
     public var simplified: Pattern {
         switch self {
         case .tuple(let pt) where pt.count == 1:
@@ -134,7 +139,7 @@ extension Pattern: CustomStringConvertible {
     public var description: String {
         switch self.simplified {
         case .tuple(let tups):
-            return "(" + tups.map({ $0.description }).joined(separator: ", ") + ")"
+            return "(" + tups.map(\.description).joined(separator: ", ") + ")"
         case .expression(let exp):
             return exp.description
         case .identifier(let ident):
@@ -146,10 +151,13 @@ extension Pattern: CustomStringConvertible {
 /// Allows referencing a location within a pattern for an identifier, an
 /// expression or a tuple-pattern.
 ///
-/// - `self`: Returns the root pattern itself
-/// - tuple: Returns the tuple within the pattern, at a given index, with a given
-/// nested subpattern.
+/// - `self`: The root pattern itself
+/// - tuple: The tuple within the pattern, at a given index, with a given nested
+/// subpattern.
 public enum PatternLocation: Hashable {
+    /// The root pattern itself
     case `self`
+    /// The tuple within the pattern, at a given index, with a given nested
+    /// subpattern.
     indirect case tuple(index: Int, pattern: PatternLocation)
 }

@@ -16,38 +16,45 @@ public protocol ExpressionPostfixBuildable {
     
     /// Creates a subscript access postfix expression with this expression buildable
     func sub(_ exp: Expression, type: SwiftType?) -> PostfixExpression
+    
+    /// Creates a subscript access postfix expression with this expression buildable
+    func sub(_ arguments: [FunctionArgument], type: SwiftType?) -> PostfixExpression
 }
 
 extension ExpressionPostfixBuildable {
     public func call() -> PostfixExpression {
-        return call([] as [FunctionArgument], type: nil, callableSignature: nil)
+        call([] as [FunctionArgument], type: nil, callableSignature: nil)
     }
     
     public func call(_ arguments: [FunctionArgument]) -> PostfixExpression {
-        return call(arguments, type: nil, callableSignature: nil)
+        call(arguments, type: nil, callableSignature: nil)
     }
     
     public func call(_ unlabeledArguments: [Expression]) -> PostfixExpression {
-        return call(unlabeledArguments, type: nil, callableSignature: nil)
+        call(unlabeledArguments, type: nil, callableSignature: nil)
     }
     
     public func call(_ unlabeledArguments: [Expression],
                      callableSignature: SwiftType?) -> PostfixExpression {
         
-        return call(unlabeledArguments, type: nil, callableSignature: callableSignature)
+        call(unlabeledArguments, type: nil, callableSignature: callableSignature)
     }
     
     public func dot(_ member: String) -> PostfixExpression {
-        return dot(member, type: nil)
+        dot(member, type: nil)
     }
     
     public func sub(_ exp: Expression) -> PostfixExpression {
-        return sub(exp, type: nil)
+        sub(exp, type: nil)
+    }
+    
+    public func sub(_ arguments: [FunctionArgument]) -> PostfixExpression {
+        sub(arguments, type: nil)
     }
 }
 
 public extension ExpressionPostfixBuildable {
-    public func call(_ arguments: [FunctionArgument],
+    func call(_ arguments: [FunctionArgument],
                      type: SwiftType?,
                      callableSignature: SwiftType?) -> PostfixExpression {
         
@@ -59,7 +66,7 @@ public extension ExpressionPostfixBuildable {
     
     /// Returns a postfix call with this expression as a function, and a series
     /// of unlabeled arguments as input.
-    public func call(_ unlabeledArguments: [Expression],
+    func call(_ unlabeledArguments: [Expression],
                      type: SwiftType?,
                      callableSignature: SwiftType?) -> PostfixExpression {
         
@@ -71,7 +78,7 @@ public extension ExpressionPostfixBuildable {
     }
     
     /// Creates a member access postfix expression with this expression
-    public func dot(_ member: String, type: SwiftType?) -> PostfixExpression {
+    func dot(_ member: String, type: SwiftType?) -> PostfixExpression {
         let op = Postfix.member(member)
         op.returnType = type
         
@@ -79,8 +86,15 @@ public extension ExpressionPostfixBuildable {
     }
     
     /// Creates a subscript access postfix expression with this expression
-    public func sub(_ exp: Expression, type: SwiftType?) -> PostfixExpression {
+    func sub(_ exp: Expression, type: SwiftType?) -> PostfixExpression {
         let op = Postfix.subscript(exp)
+        op.returnType = type
+        
+        return .postfix(expressionToBuild, op)
+    }
+    
+    func sub(_ arguments: [FunctionArgument], type: SwiftType?) -> PostfixExpression {
+        let op = Postfix.subscript(arguments: arguments)
         op.returnType = type
         
         return .postfix(expressionToBuild, op)
@@ -88,20 +102,20 @@ public extension ExpressionPostfixBuildable {
 }
 
 extension Expression: ExpressionPostfixBuildable {
-    public var expressionToBuild: Expression { return self }
+    public var expressionToBuild: Expression { self }
 }
 
 extension Expression {
     /// Creates a BinaryExpression between this expression and a right-hand-side
     /// expression.
     public func binary(op: SwiftOperator, rhs: Expression) -> BinaryExpression {
-        return .binary(lhs: self, op: op, rhs: rhs)
+        .binary(lhs: self, op: op, rhs: rhs)
     }
     
     /// Creates a BinaryExpression between this expression and a right-hand-side
     /// expression.
     public func assignment(op: SwiftOperator, rhs: Expression) -> AssignmentExpression {
-        return .assignment(lhs: self, op: op, rhs: rhs)
+        .assignment(lhs: self, op: op, rhs: rhs)
     }
     
     /// Creates a type-cast expression with this expression
@@ -113,12 +127,12 @@ extension Expression {
     
     /// Begins an optional postfix creation from this expression.
     public func optional() -> OptionalAccessPostfixBuilder {
-        return OptionalAccessPostfixBuilder(exp: self, isForceUnwrap: false)
+        OptionalAccessPostfixBuilder(exp: self, isForceUnwrap: false)
     }
     
     /// Begins a force-unwrap optional postfix creation from this expression.
     public func forceUnwrap() -> OptionalAccessPostfixBuilder {
-        return OptionalAccessPostfixBuilder(exp: self, isForceUnwrap: true)
+        OptionalAccessPostfixBuilder(exp: self, isForceUnwrap: true)
     }
 }
 
@@ -140,10 +154,10 @@ public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
     public var exp: Expression
     public var isForceUnwrap: Bool
     
-    public var expressionToBuild: Expression { return exp }
+    public var expressionToBuild: Expression { exp }
     
     public func copy() -> OptionalAccessPostfixBuilder {
-        return OptionalAccessPostfixBuilder(exp: exp.copy(), isForceUnwrap: isForceUnwrap)
+        OptionalAccessPostfixBuilder(exp: exp.copy(), isForceUnwrap: isForceUnwrap)
     }
     
     public func call(_ arguments: [FunctionArgument],
@@ -180,6 +194,14 @@ public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
     
     public func sub(_ exp: Expression, type: SwiftType?) -> PostfixExpression {
         let op = Postfix.subscript(exp)
+        op.returnType = type
+        op.optionalAccessKind = isForceUnwrap ? .forceUnwrap : .safeUnwrap
+        
+        return .postfix(expressionToBuild, op)
+    }
+    
+    public func sub(_ arguments: [FunctionArgument], type: SwiftType?) -> PostfixExpression {
+        let op = Postfix.subscript(arguments: arguments)
         op.returnType = type
         op.optionalAccessKind = isForceUnwrap ? .forceUnwrap : .safeUnwrap
         

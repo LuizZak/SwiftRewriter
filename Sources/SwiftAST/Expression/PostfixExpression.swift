@@ -21,7 +21,7 @@ public class PostfixExpression: Expression {
     }
     
     public override var subExpressions: [Expression] {
-        return _subExpressions
+        _subExpressions
     }
     
     public override var description: String {
@@ -66,7 +66,7 @@ public class PostfixExpression: Expression {
     /// sequential postfix expressions. Also returns `true` if this expression
     /// is by itself and not contained in a postfix chain.
     public var isTopPostfixExpression: Bool {
-        return !(parent is PostfixExpression)
+        !(parent is PostfixExpression)
     }
     
     public init(exp: Expression, op: Postfix) {
@@ -110,12 +110,12 @@ public class PostfixExpression: Expression {
     }
     
     public override func copy() -> PostfixExpression {
-        return PostfixExpression(exp: exp.copy(), op: op.copy()).copyTypeAndMetadata(from: self)
+        PostfixExpression(exp: exp.copy(), op: op.copy()).copyTypeAndMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitPostfix(self)
+        visitor.visitPostfix(self)
     }
     
     public override func isEqual(to other: Expression) -> Bool {
@@ -174,7 +174,7 @@ public class PostfixExpression: Expression {
 extension Expression {
     @inlinable
     public var asPostfix: PostfixExpression? {
-        return cast()
+        cast()
     }
 }
 
@@ -201,7 +201,7 @@ public class Postfix: ExpressionComponent, Codable, Equatable, CustomStringConve
     }
     
     public var subExpressions: [Expression] {
-        return []
+        []
     }
     
     /// Resulting type for this postfix access
@@ -225,7 +225,7 @@ public class Postfix: ExpressionComponent, Codable, Equatable, CustomStringConve
     }
     
     public func isEqual(to other: Postfix) -> Bool {
-        return false
+        false
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -233,7 +233,7 @@ public class Postfix: ExpressionComponent, Codable, Equatable, CustomStringConve
     }
     
     public static func == (lhs: Postfix, rhs: Postfix) -> Bool {
-        return lhs.isEqual(to: rhs)
+        lhs.isEqual(to: rhs)
     }
     
     /// Describes the optional access type for a postfix operator
@@ -252,7 +252,7 @@ public final class MemberPostfix: Postfix {
     public let name: String
     
     public override var description: String {
-        return super.description + "." + name
+        "\(super.description).\(name)"
     }
     
     public init(name: String) {
@@ -268,7 +268,7 @@ public final class MemberPostfix: Postfix {
     }
     
     public override func copy() -> MemberPostfix {
-        return MemberPostfix(name: name).copyTypeAndMetadata(from: self)
+        MemberPostfix(name: name).copyTypeAndMetadata(from: self)
     }
     
     public func withIdentifier(_ identifier: String) -> MemberPostfix {
@@ -306,58 +306,87 @@ public final class MemberPostfix: Postfix {
     }
 }
 public extension Postfix {
-    public static func member(_ name: String) -> MemberPostfix {
-        return MemberPostfix(name: name)
+    static func member(_ name: String) -> MemberPostfix {
+        MemberPostfix(name: name)
     }
     
     @inlinable
-    public var asMember: MemberPostfix? {
-        return self as? MemberPostfix
+    var asMember: MemberPostfix? {
+        self as? MemberPostfix
     }
 }
 // Helper casting getter extensions to postfix expression
 public extension PostfixExpression {
     @inlinable
     var member: MemberPostfix? {
-        return op as? MemberPostfix
+        op as? MemberPostfix
     }
 }
 
 public final class SubscriptPostfix: Postfix {
-    public let expression: Expression
+    private let _subExpressions: [Expression]
+    public let arguments: [FunctionArgument]
     
     public override var description: String {
-        return super.description + "[" + expression.description + "]"
+        "\(super.description)[\(arguments.map(\.description).joined(separator: ", "))]"
     }
     
     public override var subExpressions: [Expression] {
-        return [expression]
+        _subExpressions
     }
     
-    public init(expression: Expression) {
-        self.expression = expression
+    /// Gets the list of keywords for the arguments passed to this function call.
+    public var argumentKeywords: [String?] {
+        arguments.map(\.label)
+    }
+    
+    public init(arguments: [FunctionArgument]) {
+        self.arguments = arguments
+        self._subExpressions = arguments.map(\.expression)
         
         super.init()
+    }
+    
+    public convenience init(expression: Expression) {
+        self.init(arguments: [
+            FunctionArgument(label: nil, expression: expression)
+        ])
     }
     
     public required convenience init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(expression: container.decodeExpression(forKey: .expression))
+        try self.init(arguments: container.decode([FunctionArgument].self, forKey: .arguments))
     }
     
     public override func copy() -> SubscriptPostfix {
-        return
-            SubscriptPostfix(expression: expression.copy())
-                .copyTypeAndMetadata(from: self)
+        SubscriptPostfix(arguments: arguments.map { $0.copy() })
+            .copyTypeAndMetadata(from: self)
     }
     
-    public func replacingExpression(_ exp: Expression) -> SubscriptPostfix {
-        let sub = Postfix.subscript(exp)
-        sub.optionalAccessKind = optionalAccessKind
-        sub.returnType = returnType
+    /// Returns a new subscript call postfix with the arguments replaced to a
+    /// given arguments array, while keeping argument labels and resolved type
+    /// information.
+    ///
+    /// The number of arguments passed must match the number of arguments present
+    /// in this subscript call postfix.
+    ///
+    /// - precondition: `expressions.count == self.arguments.count`
+    public func replacingArguments(_ expressions: [Expression]) -> SubscriptPostfix {
+        precondition(expressions.count == arguments.count)
         
-        return sub
+        let newArgs: [FunctionArgument] =
+            zip(arguments, expressions).map { tuple in
+                let (arg, exp) = tuple
+                
+                return FunctionArgument(label: arg.label, expression: exp)
+            }
+        
+        let new =
+            SubscriptPostfix(arguments: newArgs)
+                .copyTypeAndMetadata(from: self)
+        
+        return new
     }
     
     public override func isEqual(to other: Postfix) -> Bool {
@@ -372,7 +401,7 @@ public final class SubscriptPostfix: Postfix {
     public override func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
-        try container.encodeExpression(expression, forKey: .expression)
+        try container.encode(arguments, forKey: .arguments)
         
         try super.encode(to: container.superEncoder())
     }
@@ -382,28 +411,33 @@ public final class SubscriptPostfix: Postfix {
             return true
         }
         
-        return lhs.optionalAccessKind == rhs.optionalAccessKind && lhs.expression == rhs.expression
+        return lhs.optionalAccessKind == rhs.optionalAccessKind
+            && lhs.arguments == rhs.arguments
     }
     
     private enum CodingKeys: String, CodingKey {
-        case expression
+        case arguments
     }
 }
 public extension Postfix {
-    public static func `subscript`(_ exp: Expression) -> SubscriptPostfix {
-        return SubscriptPostfix(expression: exp)
+    static func `subscript`(_ exp: Expression) -> SubscriptPostfix {
+        SubscriptPostfix(expression: exp)
+    }
+    
+    static func `subscript`(arguments: [FunctionArgument]) -> SubscriptPostfix {
+        SubscriptPostfix(arguments: arguments)
     }
     
     @inlinable
-    public var asSubscription: SubscriptPostfix? {
-        return self as? SubscriptPostfix
+    var asSubscription: SubscriptPostfix? {
+        self as? SubscriptPostfix
     }
 }
 // Helper casting getter extensions to postfix expression
 public extension PostfixExpression {
     @inlinable
     var subscription: SubscriptPostfix? {
-        return op as? SubscriptPostfix
+        op as? SubscriptPostfix
     }
 }
 
@@ -413,16 +447,16 @@ public final class FunctionCallPostfix: Postfix {
     public let arguments: [FunctionArgument]
     
     public override var description: String {
-        return super.description + "(" + arguments.map { $0.description }.joined(separator: ", ") + ")"
+        "\(super.description)(\(arguments.map(\.description).joined(separator: ", ")))"
     }
     
     public override var subExpressions: [Expression] {
-        return _subExpressions
+        _subExpressions
     }
     
     /// Gets the list of keywords for the arguments passed to this function call.
     public var argumentKeywords: [String?] {
-        return arguments.map { $0.label }
+        arguments.map(\.label)
     }
     
     /// A .block callable signature for this function call postfix.
@@ -430,7 +464,7 @@ public final class FunctionCallPostfix: Postfix {
     
     public init(arguments: [FunctionArgument]) {
         self.arguments = arguments
-        self._subExpressions = arguments.map { $0.expression }
+        self._subExpressions = arguments.map(\.expression)
         
         super.init()
     }
@@ -505,20 +539,20 @@ public final class FunctionCallPostfix: Postfix {
     }
 }
 public extension Postfix {
-    public static func functionCall(arguments: [FunctionArgument] = []) -> FunctionCallPostfix {
-        return FunctionCallPostfix(arguments: arguments)
+    static func functionCall(arguments: [FunctionArgument] = []) -> FunctionCallPostfix {
+        FunctionCallPostfix(arguments: arguments)
     }
     
     @inlinable
-    public var asFunctionCall: FunctionCallPostfix? {
-        return self as? FunctionCallPostfix
+    var asFunctionCall: FunctionCallPostfix? {
+        self as? FunctionCallPostfix
     }
 }
 // Helper casting getter extensions to postfix expression
 public extension PostfixExpression {
     @inlinable
     var functionCall: FunctionCallPostfix? {
-        return op as? FunctionCallPostfix
+        op as? FunctionCallPostfix
     }
 }
 
@@ -528,7 +562,7 @@ public struct FunctionArgument: Codable, Equatable {
     public var expression: Expression
     
     public var isLabeled: Bool {
-        return label != nil
+        label != nil
     }
     
     public init(label: String?, expression: Expression) {
@@ -545,15 +579,15 @@ public struct FunctionArgument: Codable, Equatable {
     
     @inlinable
     public func copy() -> FunctionArgument {
-        return FunctionArgument(label: label, expression: expression.copy())
+        FunctionArgument(label: label, expression: expression.copy())
     }
     
     public static func unlabeled(_ exp: Expression) -> FunctionArgument {
-        return FunctionArgument(label: nil, expression: exp)
+        FunctionArgument(label: nil, expression: exp)
     }
     
     public static func labeled(_ label: String, _ exp: Expression) -> FunctionArgument {
-        return FunctionArgument(label: label, expression: exp)
+        FunctionArgument(label: label, expression: exp)
     }
     
     public func encode(to encoder: Encoder) throws {

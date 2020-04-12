@@ -15,11 +15,11 @@ public struct IntentionHistoryEntryEcho {
     
     @discardableResult
     public func echoRecord(to history: IntentionHistory) -> IntentionHistoryEntryEcho {
-        return history.record(entry)
+        history.record(entry)
     }
     
     @discardableResult
     public func echoRecord(to intention: Intention) -> IntentionHistoryEntryEcho {
-        return intention.history.record(entry)
+        intention.history.record(entry)
     }
 }

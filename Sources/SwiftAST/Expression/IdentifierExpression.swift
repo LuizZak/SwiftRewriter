@@ -2,7 +2,7 @@ public class IdentifierExpression: Expression, ExpressibleByStringLiteral {
     public var identifier: String
     
     public override var description: String {
-        return identifier
+        identifier
     }
     
     public required init(stringLiteral value: String) {
@@ -27,12 +27,12 @@ public class IdentifierExpression: Expression, ExpressibleByStringLiteral {
     
     @inlinable
     public override func copy() -> IdentifierExpression {
-        return IdentifierExpression(identifier: identifier).copyTypeAndMetadata(from: self)
+        IdentifierExpression(identifier: identifier).copyTypeAndMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitIdentifier(self)
+        visitor.visitIdentifier(self)
     }
     
     @inlinable
@@ -67,7 +67,7 @@ public class IdentifierExpression: Expression, ExpressibleByStringLiteral {
 }
 public extension Expression {
     @inlinable
-    public var asIdentifier: IdentifierExpression? {
-        return cast()
+    var asIdentifier: IdentifierExpression? {
+        cast()
     }
 }

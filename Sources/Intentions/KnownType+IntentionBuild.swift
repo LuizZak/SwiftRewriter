@@ -44,12 +44,12 @@ extension KnownTypeBuilder {
             if type.kind == .protocol {
                 intent = ProtocolPropertyGenerationIntention(name: prop.name,
                                                              type: prop.storage.type,
-                                                             attributes: prop.attributes,
+                                                             objcAttributes: prop.objcAttributes,
                                                              ownerTypeName: typeName)
             } else {
                 intent = PropertyGenerationIntention(name: prop.name,
                                                      type: prop.storage.type,
-                                                     attributes: prop.attributes,
+                                                     objcAttributes: prop.objcAttributes,
                                                      ownerTypeName: typeName)
             }
             
@@ -61,7 +61,7 @@ extension KnownTypeBuilder {
                 intent.mode = .asField
             }
             
-            intent.attributes = prop.attributes
+            intent.objcAttributes = prop.objcAttributes
             intent.knownAttributes = prop.knownAttributes
             
             typeIntention.addProperty(intent)

@@ -144,58 +144,59 @@ class ValueMatcherTests: XCTestCase {
     }
     
     func testMatchRuleExtract() {
-        var result: String = ""
+        let extractor = ValueMatcherExtractor("")
         
-        XCTAssert(MatchRule<String>.extract(.any, &result).evaluate("abc"))
-        XCTAssertFalse(MatchRule<String>.extract(.none, &result).evaluate("def"))
+        XCTAssert(MatchRule<String>.extract(.any, extractor).evaluate("abc"))
+        XCTAssertFalse(MatchRule<String>.extract(.none, extractor).evaluate("def"))
         
-        XCTAssertEqual(result, "abc")
+        XCTAssertEqual(extractor.value, "abc")
     }
     
     func testMatchRuleExtractOptional() {
         let instance1 = TestEquatable()
         let instance2 = TestEquatable()
-        var output: TestEquatable?
         
-        XCTAssert(MatchRule<TestEquatable>.extractOptional(.any, &output).evaluate(instance1))
-        XCTAssertFalse(MatchRule<TestEquatable>.extractOptional(.none, &output).evaluate(instance2))
+        let extractor = ValueMatcherExtractor<TestEquatable?>()
         
-        XCTAssert(output === instance1)
-        XCTAssert(output !== instance2)
+        XCTAssert(MatchRule<TestEquatable>.extractOptional(.any, extractor).evaluate(instance1))
+        XCTAssertFalse(MatchRule<TestEquatable>.extractOptional(.none, extractor).evaluate(instance2))
+        
+        XCTAssert(extractor.value === instance1)
+        XCTAssert(extractor.value !== instance2)
     }
     
     func testMatchRuleExtractOperator() {
-        var result: String = ""
+        let result = ValueMatcherExtractor("")
         
-        let rule = MatchRule<String>.any ->> &result
+        let rule = MatchRule<String>.any ->> result
         
         switch rule {
-        case .extract(.any, &result):
-            // Success!
-            break
+        case .extract(.any, let extractor):
+            extractor.extract("abc")
+            XCTAssertEqual(result.value, "abc")
         default:
             XCTFail("Expected ->> to produce `.extract` rule, but produced \(rule) instead.")
         }
     }
     
     func testMatchRuleExtractOptionalOperator() {
-        var output: TestEquatable?
+        let output = ValueMatcherExtractor<String?>()
         
-        let rule = MatchRule<TestEquatable>.any ->> &output
+        let rule = MatchRule<String>.any ->> output
         
         switch rule {
-        case .extractOptional(.any, _):
-            // Success!
-            break
+        case .extractOptional(.any, let extractor):
+            extractor.extract("abc")
+            XCTAssertEqual(output.value, "abc")
         default:
             XCTFail("Expected ->> to produce `.extractOptional` rule, but produced \(rule) instead.")
         }
     }
     
     func testMatchRuleExtractOptionalToNonOptionalOperator() {
-        var output = TestEquatable()
+        let output = ValueMatcherExtractor(TestEquatable())
         
-        let rule = MatchRule<TestEquatable?>.any ->> &output
+        let rule = MatchRule<TestEquatable?>.any ->> output
         
         switch rule {
         case .closure:
@@ -219,14 +220,24 @@ class ValueMatcherTests: XCTestCase {
     }
     
     func testBindMatch() {
-        var output: Int = 0
+        let output = ValueMatcherExtractor(0)
         
         let rule =
             ValueMatcher<Int>()
-                .bind(to: &output)
+                .bind(to: output)
         
         XCTAssert(rule.matches(123))
-        XCTAssertEqual(output, 123)
+        XCTAssertEqual(output.value, 123)
+    }
+    
+    func testCreateMatcherWithKeypath() {
+        let rule =
+            ValueMatcher<TestNode>()
+                .stringField
+                .count == 3
+        
+        XCTAssert(rule.matches(TestNode(intField: 123, stringField: "123")))
+        XCTAssertFalse(rule.matches(TestNode(intField: 123, stringField: "")))
     }
 }
 

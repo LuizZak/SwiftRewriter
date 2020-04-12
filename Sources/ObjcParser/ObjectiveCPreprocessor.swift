@@ -21,7 +21,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import Foundation
 import Antlr4
 import ObjcParserAntlr
 
@@ -81,7 +80,7 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserBaseVisitor<String> {
     }
     
     public override func visitPreprocessorImport(_ context: Parser.PreprocessorImportContext) -> String? {
-        return isCompiledText().description
+        isCompiledText().description
     }
     
     public override func visitPreprocessorConditional(_ context: Parser.PreprocessorConditionalContext) -> String? {
@@ -123,17 +122,17 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserBaseVisitor<String> {
     }
     
     public override func visitPreprocessorPragma(_ context: Parser.PreprocessorPragmaContext) -> String? {
-        return isCompiledText().description
+        isCompiledText().description
     }
     
     public override func visitPreprocessorError(_ context: Parser.PreprocessorErrorContext) -> String? {
-        return isCompiledText().description
+        isCompiledText().description
     }
     
     public override func visitPreprocessorWarning(
         _ ctx: ObjectiveCPreprocessorParser.PreprocessorWarningContext) -> String? {
         
-        return isCompiledText().description
+        isCompiledText().description
     }
     
     public override func visitPreprocessorDefine(_ context: Parser.PreprocessorDefineContext) -> String? {
@@ -175,7 +174,7 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserBaseVisitor<String> {
     }
     
     public override func visitPreprocessorParenthesis(_ context: Parser.PreprocessorParenthesisContext) -> String? {
-        return context.preprocessor_expression()?.accept(self)
+        context.preprocessor_expression()?.accept(self)
     }
     
     public override func visitPreprocessorNot(_ context: Parser.PreprocessorNotContext) -> String? {
@@ -236,7 +235,7 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserBaseVisitor<String> {
     }
     
     private func isCompiledText() -> Bool {
-        return !_conditions.contains(false)
+        !_conditions.contains(false)
     }
     
     private func _sourceText(for context: ParserRuleContext) -> String? {

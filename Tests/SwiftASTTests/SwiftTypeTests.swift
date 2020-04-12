@@ -231,25 +231,17 @@ class SwiftTypeTests: XCTestCase {
     func testOneOrMoreInitializing() {
         let sut = OneOrMore.fromCollection([1, 2, 3])
         
-        XCTAssertEqual(sut, OneOrMore.list(1, .list(2, .tail(3))))
+        XCTAssertEqual(sut, OneOrMore(first: 1, remaining: [2, 3]))
     }
     
     func testTwoOrMoreInitializing() {
         let sut = TwoOrMore.fromCollection([1, 2, 3])
         
-        XCTAssertEqual(sut, TwoOrMore.list(1, .tail(2, 3)))
-    }
-    
-    func testIterateZeroOrMore() {
-        let sut: ZeroOrMore<Int> = [1, 2, 3]
-        
-        let result = Array(sut)
-        
-        XCTAssertEqual(result, [1, 2, 3])
+        XCTAssertEqual(sut, TwoOrMore(first: 1, second: 2, remaining: [3]))
     }
     
     func testIterateOneOrMoreOneItem() {
-        let sut: OneOrMore<Int> = .tail(1)
+        let sut: OneOrMore<Int> = .one(1)
         
         let result = Array(sut)
         

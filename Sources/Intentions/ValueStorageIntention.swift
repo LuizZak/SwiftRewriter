@@ -8,16 +8,16 @@ public protocol ValueStorageIntention: IntentionProtocol {
 }
 
 public extension ValueStorageIntention {
-    public var type: SwiftType {
-        return storage.type
+    var type: SwiftType {
+        storage.type
     }
     
-    public var ownership: Ownership {
-        return storage.ownership
+    var ownership: Ownership {
+        storage.ownership
     }
     
-    public var isConstant: Bool {
-        return storage.isConstant
+    var isConstant: Bool {
+        storage.isConstant
     }
 }
 

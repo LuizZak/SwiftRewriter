@@ -1,5 +1,4 @@
 import SwiftAST
-import SwiftRewriterLib
 
 /// Applies transformations to expressions that perform operations on optional
 /// values.

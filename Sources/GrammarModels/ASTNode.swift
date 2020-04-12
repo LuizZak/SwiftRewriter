@@ -1,4 +1,3 @@
-import Foundation
 import Antlr4
 import ObjcParserAntlr
 
@@ -12,24 +11,24 @@ open class ASTNode {
     /// Original source for this node.
     public var originalSource: Source?
     
+    /// Overriden by subclasses to provide custom short descriptions to be used
+    /// when printing AST nodes for diagnostics
+    public var shortDescription: String {
+        ""
+    }
+    
     /// Children nodes associated with this node
     private(set) public var children: [ASTNode] = []
     
     /// Parent node for this node
-    public weak var parent: ASTNode?
+    private(set) public weak var parent: ASTNode?
     
     /// Whether this node exists in the original source code or was synthesized
     /// (for syntax error correction etc.)
     public var existsInSource: Bool
     
-    /// Trivia leading up to this node
-    //public var leadingTrivia: Trivia?
-    
-    /// Trivia leading after this node
-    //public var trailingTrivia: Trivia?
-    
     /// Indicates whether this node was completely contained within the range of
-    /// a NS_ASSUME_NONNULL_BEGIN/NS_ASSUME_NONNULL_END region.
+    /// a `NS_ASSUME_NONNULL_BEGIN`/`NS_ASSUME_NONNULL_END` region.
     public var isInNonnullContext: Bool = false
     
     /// Instantiates a bare ASTNode with a given range.
@@ -90,7 +89,7 @@ open class ASTNode {
         }
         
         node.parent = nil
-        if let index = children.index(where: { $0 === node }) {
+        if let index = children.firstIndex(where: { $0 === node }) {
             children.remove(at: index)
         }
     }
@@ -108,7 +107,7 @@ open class ASTNode {
     
     /// Gets children of this node of a given type
     public func childrenMatching<T: ASTNode>(type: T.Type = T.self) -> [T] {
-        return children.compactMap { $0 as? T }
+        children.compactMap { $0 as? T }
     }
     
     /// Gets the first child of this `ASTNode` that passes a given predicate.
@@ -128,7 +127,7 @@ open class ASTNode {
     
     /// Gets the first child of this `ASTNode` that is derived from a given type.
     public func firstChild<T: ASTNode>(ofType type: T.Type = T.self) -> T? {
-        return firstChild { _ in true }
+        firstChild { _ in true }
     }
     
     /// Updates the source range by making it the union of all of this node's
@@ -145,31 +144,51 @@ open class ASTNode {
         self.location = startNode.location
         self.length =
             SourceLength(newlines: endNode.location.line - startNode.location.line,
-                          columnsAtLastLine: endNode.location.column,
-                          utf8Length: endNode.location.utf8Offset - startNode.location.utf8Offset)
+                         columnsAtLastLine: endNode.location.column,
+                         utf8Length: endNode.location.utf8Offset - startNode.location.utf8Offset)
     }
-    
-    /// Overriden by subclasses to provide custom short descriptions to be used
-    /// when printing AST nodes for diagnostics
-    public func shortDescription() -> String {
-        return ""
+}
+
+public extension ASTNode {
+    func printNode(_ printer: (String) -> Void) {
+        withoutActuallyEscaping(printer) { printer in
+            var indent = 0
+            func _printIndented(_ str: String) {
+                printer(String(repeating: " ", count: indent) + str)
+            }
+            
+            func _print(_ node: ASTNode) {
+                var nodeTitle = "\(type(of: node))"
+                let description = node.shortDescription
+                if !description.isEmpty {
+                    nodeTitle += " (\(description))"
+                }
+                
+                _printIndented(nodeTitle)
+                
+                indent += 2
+                for child in node.children {
+                    _print(child)
+                }
+                indent -= 2
+            }
+            
+            // --
+            
+            printer("Begin print ASTNodes --")
+            _print(self)
+            printer("-- End print ASTNodes")
+        }
     }
 }
 
 /// Describes a node with a default parametered `init` which is a known
 /// base node requirement initializer.
-public protocol InitializableNode {
+public protocol InitializableNode: ASTNode {
     init(isInNonnullContext: Bool)
 }
 
 /// A bare node used to specify invalid contexts
 public class InvalidNode: ASTNode {
     
-}
-
-/// Trivia encompasses spacing characters and comments between nodes
-public enum Trivia {
-    indirect case singleLineComment(String, leadingSpace: String)
-    indirect case multiLineComments(String, leadingSpace: String)
-    case spacing(String)
 }

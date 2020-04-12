@@ -80,6 +80,9 @@ class SwiftASTSerializerTests: XCTestCase {
                         ]),
                     Statement.break()
                 ]
+            ),
+            Statement.expression(
+                Expression.tuple([.constant(0), .constant(1)])
             )
         ]
         

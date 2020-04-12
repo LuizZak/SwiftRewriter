@@ -1,7 +1,6 @@
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
 
 /// An intention to move all instance variables/properties from extensions into
 /// the nominal types.
@@ -17,7 +16,7 @@ public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
     
     /// Textual tag this intention pass applies to history tracking entries.
     private var historyTag: String {
-        return "\(StoredPropertyToNominalTypesIntentionPass.self):\(operationsNumber)"
+        "\(StoredPropertyToNominalTypesIntentionPass.self):\(operationsNumber)"
     }
     
     private var context: IntentionPassContext!

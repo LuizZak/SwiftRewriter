@@ -6,7 +6,9 @@ import SwiftAST
 import Intentions
 import WriterTargetOutput
 import SwiftSyntaxSupport
+import ExpressionPasses
 @testable import SwiftRewriterLib
+import TypeSystem
 import SwiftAST
 
 class ExpressionPassTestCase: XCTestCase {
@@ -183,7 +185,8 @@ class ExpressionPassTestCase: XCTestCase {
         let reader = SwiftExprASTReader(typeMapper: typeMapper,
                                         typeParser: TypeParsing(state: ExpressionPassTestCase._state),
                                         context: SwiftASTReaderContext(typeSystem: typeSystem,
-                                                                       typeContext: nil))
+                                                                       typeContext: nil),
+                                        delegate: nil)
         
         return expression.accept(reader)!
     }
@@ -214,10 +217,12 @@ class ExpressionPassTestCase: XCTestCase {
                 typeMapper: typeMapper,
                 typeParser: typeParser,
                 context: SwiftASTReaderContext(typeSystem: typeSystem,
-                                               typeContext: nil))
+                                               typeContext: nil),
+                delegate: nil)
         
         let reader = SwiftStatementASTReader(expressionReader: expReader,
-                                             context: expReader.context)
+                                             context: expReader.context,
+                                             delegate: nil)
         
         return stmt.accept(reader)!
     }

@@ -39,11 +39,11 @@ let operators: [(string: String, op: Operator)] = [
 
 extension TokenType: TokenProtocol {
     public static var eofToken: TokenType {
-        return .eof
+        .eof
     }
     
     public var tokenString: String {
-        return self.description
+        self.description
     }
     
     public func length(in lexer: Lexer) -> Int {
@@ -107,7 +107,7 @@ extension TokenType: TokenProtocol {
     }
     
     private static func readIdentifierToken(lexer: Lexer) -> TokenType? {
-        let bt = lexer.backtracker(); defer { bt.backtrack() }
+        let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         do {
             let ident = try lexer.lexIdentifier()
@@ -123,27 +123,20 @@ extension TokenType: TokenProtocol {
     }
     
     private static func attemptReadOperator(lexer: Lexer) -> TokenType? {
-        let bt = lexer.backtracker(); defer { bt.backtrack() }
+        let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         // Lex operators first
-        var op: Operator?
-        
         for knownOp in operators {
             if lexer.advanceIf(equals: knownOp.string) {
-                op = knownOp.op
-                break
+                return .operator(knownOp.op)
             }
-        }
-        
-        if let op = op {
-            return .operator(op)
         }
         
         return nil
     }
     
     private static func attemptReadQualifierToken(lexer: Lexer) -> TokenType? {
-        let bt = lexer.backtracker(); defer { bt.backtrack() }
+        let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         do {
             let qualifier = try lexer.lexTypeQualifier()
@@ -155,13 +148,12 @@ extension TokenType: TokenProtocol {
     }
     
     private static func attemptReadKeywordToken(lexer: Lexer) -> TokenType? {
-        let bt = lexer.backtracker(); defer { bt.backtrack() }
+        let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         do {
             var isAt = false
-            if try lexer.peek() == "@" {
+            if lexer.advanceIf(equals: "@") {
                 isAt = true
-                try lexer.advance()
                 
                 if lexer.isEof() {
                     return nil
@@ -181,7 +173,7 @@ extension TokenType: TokenProtocol {
     }
     
     private static func attemptReadSpecialChar(lexer: Lexer) -> TokenType? {
-        let bt = lexer.backtracker(); defer { bt.backtrack() }
+        let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         do {
             let type: TokenType

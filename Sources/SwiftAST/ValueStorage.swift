@@ -13,6 +13,6 @@ public struct ValueStorage: Hashable, Codable {
     }
     
     public static func constant(ofType type: SwiftType) -> ValueStorage {
-        return ValueStorage(type: type, ownership: .strong, isConstant: true)
+        ValueStorage(type: type, ownership: .strong, isConstant: true)
     }
 }

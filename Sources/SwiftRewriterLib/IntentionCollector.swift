@@ -3,6 +3,7 @@ import ObjcParser
 import SwiftAST
 import KnownType
 import Intentions
+import TypeSystem
 
 public protocol IntentionCollectorDelegate: class {
     func isNodeInNonnullContext(_ node: ASTNode) -> Bool
@@ -31,14 +32,14 @@ public class IntentionBuildingContext {
     /// Searches from top-to-bottom, so the last context `T` that was pushed is
     /// returned first.
     public func findContext<T: Intention>(ofType type: T.Type = T.self) -> T? {
-        return contexts.reversed().first { $0 is T } as? T
+        contexts.reversed().first { $0 is T } as? T
     }
     
     /// Returns the topmost context on the contexts stack casted to a specific type.
     ///
     /// If the topmost context is not T, nil is returned instead.
     public func currentContext<T: Intention>(as type: T.Type = T.self) -> T? {
-        return contexts.last as? T
+        contexts.last as? T
     }
     
     public func popContext() {
@@ -400,14 +401,14 @@ public class IntentionCollector {
         
         let attributes =
             node.attributesList?
-                .attributes.map { attr -> PropertyAttribute in
+                .attributes.map { attr -> ObjcPropertyAttribute in
                     switch attr.attribute {
                     case .getter(let getter):
-                        return PropertyAttribute.getterName(getter)
+                        return ObjcPropertyAttribute.getterName(getter)
                     case .setter(let setter):
-                        return PropertyAttribute.setterName(setter)
+                        return ObjcPropertyAttribute.setterName(setter)
                     case .keyword(let keyword):
-                        return PropertyAttribute.attribute(keyword)
+                        return ObjcPropertyAttribute.attribute(keyword)
                     }
                 } ?? []
         
@@ -419,7 +420,7 @@ public class IntentionCollector {
             let prop =
                 ProtocolPropertyGenerationIntention(name: node.identifier?.name ?? "",
                                                     storage: storage,
-                                                    attributes: attributes,
+                                                    objcAttributes: attributes,
                                                     ownerTypeName: ctx.typeName,
                                                     source: node)
             prop.isOptional = node.isOptionalProperty
@@ -434,7 +435,7 @@ public class IntentionCollector {
             let prop =
                 PropertyGenerationIntention(name: node.identifier?.name ?? "",
                                             storage: storage,
-                                            attributes: attributes,
+                                            objcAttributes: attributes,
                                             ownerTypeName: ctx.typeName,
                                             source: node)
             prop.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
@@ -656,10 +657,11 @@ public class IntentionCollector {
         
         if let body = node.methodBody {
             let methodBodyIntention = FunctionBodyIntention(body: [], source: body)
-            recordSourceHistory(intention: methodBodyIntention, node: body)
-            
-            delegate?.reportForLazyParsing(intention: methodBodyIntention)
             globalFunc.functionBody = methodBodyIntention
+
+            recordSourceHistory(intention: methodBodyIntention, node: body)
+
+            delegate?.reportForLazyParsing(intention: methodBodyIntention)
         }
         
         delegate?.reportForLazyResolving(intention: globalFunc)

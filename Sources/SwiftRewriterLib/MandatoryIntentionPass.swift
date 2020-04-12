@@ -1,6 +1,8 @@
 import Foundation
 import SwiftAST
 import Intentions
+import IntentionPasses
+import Utils
 
 // TODO: Detect indirect super-type calling (i.e. `[aVarWithSuperAssociatedWithinIt method]`)
 // on override detection code
@@ -155,7 +157,7 @@ class MandatoryIntentionPass: IntentionPass {
         
         // Init method override (always an override in case of plain `init`)
         if let initMethod
-            = type.constructors.first(where: { $0.parameters.isEmpty })
+            = type.constructors.first(where: \.parameters.isEmpty)
                 ?? type.methods.first(where: { $0.name == "init" && $0.parameters.isEmpty }) {
             
             if let initMethod = initMethod as? OverridableMemberGenerationIntention {
@@ -170,7 +172,7 @@ class MandatoryIntentionPass: IntentionPass {
         // Check supertypes for overrides
         if let supertype = context.typeSystem.supertype(of: type) {
             for method in type.methods {
-                let parameterTypes = method.parameters.map { $0.type }
+                let parameterTypes = method.parameters.map(\.type)
                 
                 let superMethod
                     = context.typeSystem.method(withObjcSelector: method.selector,

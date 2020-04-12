@@ -1,4 +1,3 @@
-import SwiftRewriterLib
 import Utils
 import SwiftAST
 import Commons
@@ -20,35 +19,35 @@ public class UIKitExpressionPass: BaseExpressionPass {
                              swiftEnumName: "UIControlEvents") {
             notifyChange()
             
-            return super.visitExpression(exp)
+            return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UIGestureRecognizerState",
                              swiftEnumName: "UIGestureRecognizerState") {
             notifyChange()
             
-            return super.visitExpression(exp)
+            return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UITableViewCellSeparatorStyle",
                              swiftEnumName: "UITableViewCellSeparatorStyle") {
             notifyChange()
             
-            return super.visitExpression(exp)
+            return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UITableViewCellSelectionStyle",
                              swiftEnumName: "UITableViewCellSelectionStyle") {
             notifyChange()
             
-            return super.visitExpression(exp)
+            return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UIViewAnimationOption",
                              swiftEnumName: "UIViewAnimationOptions") {
             notifyChange()
             
-            return super.visitExpression(exp)
+            return visitExpression(exp)
         }
         
         return super.visitIdentifier(exp)
@@ -58,12 +57,12 @@ public class UIKitExpressionPass: BaseExpressionPass {
         if let exp = convertAddTargetForControlEvents(exp) {
             notifyChange()
             
-            return super.visitExpression(exp)
+            return visitExpression(exp)
         }
         if let exp = convertBooleanGetters(exp) {
             notifyChange()
             
-            return super.visitExpression(exp)
+            return visitExpression(exp)
         }
         
         return super.visitPostfix(exp)
@@ -207,17 +206,17 @@ extension UIKitExpressionPass {
         makeInit(
             typeName: "UIColor", method: "colorWithRed", convertInto: .identifier("UIColor"),
             andCallWithArguments: [
-                .labeled("red", .asIs),
-                .labeled("green", .asIs),
-                .labeled("blue", .asIs),
-                .labeled("alpha", .asIs)
+                .labeled("red"),
+                .labeled("green"),
+                .labeled("blue"),
+                .labeled("alpha")
             ]
         )
         makeInit(
             typeName: "UIColor", method: "colorWithWhite", convertInto: .identifier("UIColor"),
             andCallWithArguments: [
-                .labeled("white", .asIs),
-                .labeled("alpha", .asIs)
+                .labeled("white"),
+                .labeled("alpha")
             ]
         )
     }
@@ -227,7 +226,7 @@ extension UIKitExpressionPass {
         makeInit(
             typeName: "UIFont", method: "systemFontOfSize",
             convertInto: Expression.identifier("UIFont").dot("systemFont"),
-            andCallWithArguments: [.labeled("ofSize", .asIs)],
+            andCallWithArguments: [.labeled("ofSize")],
             andTypeAs: .typeName("UIFont")
         )
         
@@ -235,7 +234,7 @@ extension UIKitExpressionPass {
         makeInit(
             typeName: "UIFont", method: "boldSystemFontOfSize",
             convertInto: Expression.identifier("UIFont").dot("boldSystemFont"),
-            andCallWithArguments: [.labeled("ofSize", .asIs)],
+            andCallWithArguments: [.labeled("ofSize")],
             andTypeAs: .typeName("UIFont")
         )
         
@@ -243,7 +242,7 @@ extension UIKitExpressionPass {
         makeInit(
             typeName: "UIFont", method: "italicSystemFontOfFont",
             convertInto: Expression.identifier("UIFont").dot("italicSystemFont"),
-            andCallWithArguments: [.labeled("ofSize", .asIs)],
+            andCallWithArguments: [.labeled("ofSize")],
             andTypeAs: .typeName("UIFont")
         )
         
@@ -251,7 +250,7 @@ extension UIKitExpressionPass {
         makeInit(
             typeName: "UIFont", method: "systemFontOfFont",
             convertInto: Expression.identifier("UIFont").dot("systemFont"),
-            andCallWithArguments: [.labeled("ofSize", .asIs), .labeled("weight", .asIs)],
+            andCallWithArguments: [.labeled("ofSize"), .labeled("weight")],
             andTypeAs: .typeName("UIFont")
         )
         
@@ -259,7 +258,7 @@ extension UIKitExpressionPass {
         makeInit(
             typeName: "UIFont", method: "monospacedDigitSystemFontOfSize",
             convertInto: Expression.identifier("UIFont").dot("monospacedDigitSystemFont"),
-            andCallWithArguments: [.labeled("ofSize", .asIs), .labeled("weight", .asIs)],
+            andCallWithArguments: [.labeled("ofSize"), .labeled("weight")],
             andTypeAs: .typeName("UIFont")
         )
     }

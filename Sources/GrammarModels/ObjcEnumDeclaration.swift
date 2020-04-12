@@ -3,15 +3,15 @@ public class ObjcEnumDeclaration: ASTNode, InitializableNode {
     public var isOptionSet: Bool = false
     
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     
     public var type: TypeNameNode? {
-        return firstChild()
+        firstChild()
     }
     
     public var cases: [ObjcEnumCase] {
-        return childrenMatching()
+        childrenMatching()
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -21,9 +21,9 @@ public class ObjcEnumDeclaration: ASTNode, InitializableNode {
 
 public class ObjcEnumCase: ASTNode {
     public var identifier: Identifier? {
-        return firstChild()
+        firstChild()
     }
     public var expression: ExpressionNode? {
-        return firstChild()
+        firstChild()
     }
 }

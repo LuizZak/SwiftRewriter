@@ -1,11 +1,12 @@
 import XCTest
+import SourcePreprocessors
 import SwiftRewriterLib
 
 class SwiftRewriter_SourcePreprocessor: XCTestCase {
     func testPreprocessorIsInvokedBeforeParsing() throws {
         let input = TestSingleInputProvider(code: """
         an invalid parsing file
-        """)
+        """, isPrimary: true)
         let output = TestSingleFileWriterOutput()
         let preprocessor =
             TestSourcePreprocessor(

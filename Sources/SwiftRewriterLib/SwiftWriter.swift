@@ -5,6 +5,7 @@ import ObjcParserAntlr
 import SwiftAST
 import KnownType
 import Intentions
+import TypeSystem
 import WriterTargetOutput
 import SwiftSyntaxSupport
 import Utils
@@ -14,27 +15,27 @@ import Utils
 public final class SwiftWriter {
     var intentions: IntentionCollection
     var output: WriterOutput
-    let typeMapper: TypeMapper
     var diagnostics: Diagnostics
     var options: SwiftSyntaxOptions
     let numThreads: Int
     let typeSystem: TypeSystem
+    let syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier
     
     public init(intentions: IntentionCollection,
                 options: SwiftSyntaxOptions,
                 numThreads: Int,
                 diagnostics: Diagnostics,
                 output: WriterOutput,
-                typeMapper: TypeMapper,
-                typeSystem: TypeSystem) {
+                typeSystem: TypeSystem,
+                syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier) {
         
         self.intentions = intentions
         self.options = options
         self.numThreads = numThreads
         self.diagnostics = diagnostics
         self.output = output
-        self.typeMapper = typeMapper
         self.typeSystem = typeSystem
+        self.syntaxRewriterApplier = syntaxRewriterApplier
     }
     
     public func execute() {
@@ -51,8 +52,10 @@ public final class SwiftWriter {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = numThreads
         
-        for file in fileIntents {
-            if unique.contains(file.targetPath) {
+        let mutex = Mutex()
+        
+        for file in fileIntents where shouldOutputFile(file) {
+            if !unique.insert(file.targetPath).inserted {
                 print("""
                     Found duplicated file intent to save to path \(file.targetPath).
                     This usually means an original .h/.m source pairs could not be \
@@ -60,7 +63,6 @@ public final class SwiftWriter {
                     """)
                 continue
             }
-            unique.insert(file.targetPath)
             
             let writer
                 = SwiftSyntaxWriter(
@@ -68,19 +70,19 @@ public final class SwiftWriter {
                     options: options,
                     diagnostics: Diagnostics(),
                     output: output,
-                    typeMapper: typeMapper,
-                    typeSystem: typeSystem)
+                    typeSystem: typeSystem,
+                    syntaxRewriterApplier: syntaxRewriterApplier)
             
             queue.addOperation {
                 autoreleasepool {
                     do {
                         try writer.outputFile(file)
                         
-                        synchronized(self) {
+                        mutex.locking {
                             self.diagnostics.merge(with: writer.diagnostics)
                         }
                     } catch {
-                        synchronized(self) {
+                        mutex.locking {
                             errors.append((file.targetPath, error))
                         }
                     }
@@ -91,34 +93,38 @@ public final class SwiftWriter {
         queue.waitUntilAllOperationsAreFinished()
         
         for error in errors {
-            self.diagnostics.error("Error while saving file \(error.0): \(error.1)",
-                                   origin: error.0,
-                                   location: .invalid)
+            diagnostics.error("Error while saving file \(error.0): \(error.1)",
+                              origin: error.0,
+                              location: .invalid)
         }
+    }
+    
+    func shouldOutputFile(_ file: FileGenerationIntention) -> Bool {
+        return file.isPrimary
     }
 }
 
 class SwiftSyntaxWriter {
     var intentions: IntentionCollection
     var output: WriterOutput
-    let typeMapper: TypeMapper
     var diagnostics: Diagnostics
     var options: SwiftSyntaxOptions
     let typeSystem: TypeSystem
+    let syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier
     
     init(intentions: IntentionCollection,
          options: SwiftSyntaxOptions,
          diagnostics: Diagnostics,
          output: WriterOutput,
-         typeMapper: TypeMapper,
-         typeSystem: TypeSystem) {
+         typeSystem: TypeSystem,
+         syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier) {
         
         self.intentions = intentions
         self.options = options
         self.diagnostics = diagnostics
         self.output = output
-        self.typeMapper = typeMapper
         self.typeSystem = typeSystem
+        self.syntaxRewriterApplier = syntaxRewriterApplier
     }
     
     func outputFile(_ fileIntent: FileGenerationIntention) throws {
@@ -137,7 +143,8 @@ class SwiftSyntaxWriter {
         
         let producer = SwiftSyntaxProducer(settings: settings, delegate: self)
         
-        let fileSyntax = producer.generateFile(fileIntent)
+        var fileSyntax = producer.generateFile(fileIntent)
+        fileSyntax = syntaxRewriterApplier.apply(to: fileSyntax)
         
         out.outputRaw(fileSyntax.description)
         
@@ -163,6 +170,7 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
         
         return shouldEmitTypeSignature(forInitVal: initialValue,
                                        varType: storage.type,
+                                       ownership: storage.ownership,
                                        isConstant: storage.isConstant)
     }
     
@@ -190,9 +198,10 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
         
     }
     
-    private func shouldEmitTypeSignature(forInitVal exp: Expression,
-                                         varType: SwiftType,
-                                         isConstant: Bool) -> Bool {
+    func shouldEmitTypeSignature(forInitVal exp: Expression,
+                                 varType: SwiftType,
+                                 ownership: Ownership,
+                                 isConstant: Bool) -> Bool {
         
         if exp.isErrorTyped {
             return true
@@ -236,7 +245,12 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
             }
             
             if type.isOptional != varType.isOptional {
-                return true
+                let isSame = type.deepUnwrapped == varType.deepUnwrapped
+                let isWeak = ownership == .weak
+                
+                if !isSame || !isWeak {
+                    return true
+                }
             }
             
             return !typeSystem.typesMatch(type, varType, ignoreNullability: true)
@@ -364,67 +378,4 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
         case `nil`
         case other
     }
-}
-
-internal func _isConstant(fromType type: ObjcType) -> Bool {
-    switch type {
-    case .qualified(_, let qualifiers),
-         .specified(_, .qualified(_, let qualifiers)):
-        if qualifiers.contains("const") {
-            return true
-        }
-    case .specified(let specifiers, _):
-        if specifiers.contains("const") {
-            return true
-        }
-    default:
-        break
-    }
-    
-    return false
-}
-
-internal func _accessModifierFor(accessLevel: AccessLevel, omitInternal: Bool = true) -> String {
-    // In Swift, omitting the access level specifier infers 'internal', so we
-    // allow the user to decide whether to omit the keyword here
-    if omitInternal && accessLevel == .internal {
-        return ""
-    }
-    
-    return accessLevel.rawValue
-}
-
-internal func evaluateOwnershipPrefix(inType type: ObjcType,
-                                      property: PropertyDefinition? = nil) -> Ownership {
-    
-    var ownership: Ownership = .strong
-    if !type.isPointer {
-        return .strong
-    }
-    
-    switch type {
-    case .specified(let specifiers, _):
-        if specifiers.last == "__weak" {
-            ownership = .weak
-        } else if specifiers.last == "__unsafe_unretained" {
-            ownership = .unownedUnsafe
-        }
-    default:
-        break
-    }
-    
-    // Search in property
-    if let property = property {
-        if let modifiers = property.attributesList?.keywordAttributes {
-            if modifiers.contains("weak") {
-                ownership = .weak
-            } else if modifiers.contains("unsafe_unretained") {
-                ownership = .unownedUnsafe
-            } else if modifiers.contains("assign") {
-                ownership = .unownedUnsafe
-            }
-        }
-    }
-    
-    return ownership
 }

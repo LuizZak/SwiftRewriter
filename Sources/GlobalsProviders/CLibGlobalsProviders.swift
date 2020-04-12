@@ -1,6 +1,5 @@
-import Foundation
 import SwiftAST
-import SwiftRewriterLib
+import TypeSystem
 
 private let cInt = SwiftType.typeName("CInt")
 private let cFloat = SwiftType.typeName("CFloat")
@@ -14,15 +13,15 @@ public class CLibGlobalsProviders: GlobalsProvider {
     }
     
     public func knownTypeProvider() -> KnownTypeProvider {
-        return CollectionKnownTypeProvider(knownTypes: CLibGlobalsProviders.provider.types)
+        CollectionKnownTypeProvider(knownTypes: CLibGlobalsProviders.provider.types)
     }
     
     public func typealiasProvider() -> TypealiasProvider {
-        return CollectionTypealiasProvider(aliases: CLibGlobalsProviders.provider.typealiases)
+        CollectionTypealiasProvider(aliases: CLibGlobalsProviders.provider.typealiases)
     }
     
     public func definitionsSource() -> DefinitionsSource {
-        return CLibGlobalsProviders.provider.definitions
+        CLibGlobalsProviders.provider.definitions
     }
 }
 

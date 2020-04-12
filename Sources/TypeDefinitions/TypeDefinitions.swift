@@ -18,11 +18,11 @@ let protocols: ProtocolsList = {
 /// `ios-framework-protocols.json` files.
 public enum TypeDefinitions {
     public static var classesList: ClassesList {
-        return classes
+        classes
     }
     
     public static var protocolsList: ProtocolsList {
-        return protocols
+        protocols
     }
 }
 

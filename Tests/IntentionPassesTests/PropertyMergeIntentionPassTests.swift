@@ -142,7 +142,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     builder
                         .createInstanceVariable(named: "innerA", type: .int)
                         .createProperty(named: "a", type: .int,
-                                        attributes: [.attribute("readonly")])
+                                        objcAttributes: [.attribute("readonly")])
                         .createMethod(named: "a", returnType: .int) { method in
                             method.setBody([
                                 .return(.identifier("innerA"))
@@ -291,7 +291,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     builder
                         .createProperty(named: "a",
                                         type: .int,
-                                        attributes: [.attribute("readonly")])
+                                        objcAttributes: [.attribute("readonly")])
                         .createVoidMethod(named: "b") { method in
                             method.setBody([
                                 .expression(
@@ -346,7 +346,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     builder
                         .createProperty(named: "a",
                                         type: .int,
-                                        attributes: [.attribute("readonly")])
+                                        objcAttributes: [.attribute("readonly")])
                         .createVoidMethod(named: "b") { method in
                             method.setBody([
                                 .variableDeclarations([
@@ -460,7 +460,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             IntentionCollectionBuilder()
                 .createFileWithClass(named: "A") { builder in
                     builder
-                        .createProperty(named: "a", type: .int, attributes: [.attribute("class")])
+                        .createProperty(named: "a", type: .int, objcAttributes: [.attribute("class")])
                         .createMethod(named: "a", returnType: .int)
                         .createMethod(named: "setA", parameters: [
                             ParameterSignature(label: nil, name: "a", type: .int)
@@ -749,7 +749,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
                 .createFileWithClass(named: "A") { type in
-                    type.createProperty(named: "a", type: .int, attributes: [.readonly])
+                    type.createProperty(named: "a", type: .int, objcAttributes: [.readonly])
                         .createSynthesize(propertyName: "a", variableName: "a")
                         .createMethod(named: "method") { method in
                             method.setBody([
@@ -893,7 +893,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 .createFile(named: "A.m") { file in
                     file.createExtension(forClassNamed: "A", categoryName: "Ext") { ext in
                         ext.setAsCategoryImplementation(categoryName: "Ext")
-                            .createProperty(named: "a", type: .int, attributes: [.readonly])
+                            .createProperty(named: "a", type: .int, objcAttributes: [.readonly])
                             .createMethod(named: "a", returnType: .int) { method in
                                 method.setBody([.return(.constant(0))])
                             }
@@ -918,7 +918,7 @@ private extension TypeBuilder {
     @discardableResult
     func ext_makeReadonlyPropertyWithGetter(named name: String, type: SwiftType = .int) -> TypeBuilder<T> {
         return
-            self.createProperty(named: "a", type: .int, attributes: [.attribute("readonly")])
+            self.createProperty(named: "a", type: .int, objcAttributes: [.attribute("readonly")])
                 .createMethod(named: "a", returnType: .int)
     }
     

@@ -1,9 +1,8 @@
-import Foundation
 import GrammarModels
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
+import TypeSystem
 
 /// An empty initializer used as default argument of initializer closure parameters
 /// for `IntentionCollectionBuilder` and related classes.
@@ -275,6 +274,12 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
+    public func isPrimary(_ isPrimary: Bool) -> FileIntentionBuilder {
+        intention.isPrimary = isPrimary
+        return self
+    }
+    
+    @discardableResult
     public func addImportDirective(moduleName: String) -> FileIntentionBuilder {
         intention.importDirectives.append(moduleName)
         
@@ -298,7 +303,7 @@ public class FileIntentionBuilder {
     }
     
     public func build() -> FileGenerationIntention {
-        return intention
+        intention
     }
 }
 
@@ -381,7 +386,7 @@ public class FunctionSignatureBuilder {
     }
     
     func build() -> FunctionSignature {
-        return signature
+        signature
     }
 }
 
@@ -393,7 +398,7 @@ public class FunctionBuilder<T: FunctionIntention>: _FunctionBuilder {
     }
     
     public func build() -> T {
-        return target
+        target
     }
 }
 
@@ -780,7 +785,7 @@ public class EnumTypeBuilder {
     }
     
     public func build() -> EnumGenerationIntention {
-        return targetEnum
+        targetEnum
     }
 }
 

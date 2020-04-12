@@ -1,4 +1,3 @@
-import Foundation
 import GrammarModels
 import SwiftAST
 import KnownType
@@ -9,7 +8,7 @@ public final class ClassExtensionGenerationIntention: BaseClassIntention {
     public var categoryName: String?
     
     public override var isExtension: Bool {
-        return true
+        true
     }
     
     public override init(typeName: String,

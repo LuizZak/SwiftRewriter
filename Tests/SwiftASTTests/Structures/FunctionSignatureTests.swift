@@ -1,6 +1,5 @@
 import XCTest
 import SwiftAST
-import SwiftRewriterLib
 
 class FunctionSignatureTests: XCTestCase {
     func testPossibleSelectorSignatures() throws {

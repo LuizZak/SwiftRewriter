@@ -1,6 +1,5 @@
 import XCTest
 import SwiftAST
-import SwiftRewriterLib
 
 class Intention_FileTests: XCTestCase {
     func testFunctionSignatureAsSelector() {

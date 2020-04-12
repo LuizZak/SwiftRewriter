@@ -1,4 +1,5 @@
 import Foundation
+import SwiftRewriterLib
 
 /// Finds all files in a given directory recursively, optionaly specifying include
 /// and exclude patterns to fine-grain the results.
@@ -11,8 +12,6 @@ import Foundation
 /// matching the pattern. Takes priority over `includePattern`.
 /// - Returns: The full file URL for each file found satisfying the patterns specified.
 func filesAt(path directoryPath: String, includePattern: String? = nil, excludePattern: String? = nil) -> [URL] {
-    let fnflags = FNM_CASEFOLD
-    
     let fileManager = FileManager.default
     guard var objcFiles = fileManager.enumerator(atPath: directoryPath)?.compactMap({ $0 as? String }) else {
         return []
@@ -21,13 +20,9 @@ func filesAt(path directoryPath: String, includePattern: String? = nil, excludeP
     // Inclusions
     if let includePattern = includePattern {
         objcFiles = objcFiles.filter { path in
-            fnmatch(includePattern, path, fnflags) == 0
-        }
-    }
-    // Exclusions
-    if let excludePattern = excludePattern {
-        objcFiles = objcFiles.filter { path in
-            fnmatch(excludePattern, path, fnflags) != 0
+            fileMatchesFilter(path: path,
+                              includePattern: includePattern,
+                              excludePattern: excludePattern)
         }
     }
     

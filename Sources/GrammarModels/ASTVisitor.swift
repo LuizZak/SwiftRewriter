@@ -11,8 +11,8 @@ public protocol ASTVisitor {
 
 public extension ASTVisitor {
     // Default implementation of merge simply returns the right-hand side
-    public func merge(_ r1: Result, r2: Result) -> Result {
-        return r2
+    func merge(_ r1: Result, r2: Result) -> Result {
+        r2
     }
 }
 
@@ -58,7 +58,7 @@ public class ASTTraverser<Visitor> where Visitor: ASTVisitor {
 }
 
 public extension ASTTraverser where Visitor.Result == Void {
-    public convenience init(node: ASTNode, visitor: Visitor) {
+    convenience init(node: ASTNode, visitor: Visitor) {
         self.init(node: node, initialValue: (), visitor: visitor)
     }
 }
@@ -85,7 +85,7 @@ public class AnyASTVisitor<T>: ASTVisitor {
     }
     
     public func visit(_ node: ASTNode) -> T {
-        return visitClosure(node)
+        visitClosure(node)
     }
     
     public func onExit(_ node: ASTNode) {
@@ -94,7 +94,7 @@ public class AnyASTVisitor<T>: ASTVisitor {
 }
 
 public extension AnyASTVisitor where T == Void {
-    public convenience init() {
+    convenience init() {
         self.init(onEnter: { _ in }, visit: { _ in }, onExit: { _ in })
     }
 }

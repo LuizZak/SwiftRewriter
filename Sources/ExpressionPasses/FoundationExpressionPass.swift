@@ -1,7 +1,7 @@
-import SwiftRewriterLib
 import Utils
 import SwiftAST
 import Commons
+import TypeSystem
 
 /// Applies passes to simplify known Foundation methods
 public class FoundationExpressionPass: BaseExpressionPass {
@@ -17,32 +17,32 @@ public class FoundationExpressionPass: BaseExpressionPass {
         if let new = convertIsEqualToString(exp, op: .equals) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         if let new = convertStringWithFormat(exp) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         if let new = convertAddObjectsFromArray(exp) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         if let new = convertClassCall(exp) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         if let new = convertDataStructureInit(exp) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         if let new = convertRespondsToSelector(exp) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         
         return super.visitPostfix(exp)
@@ -58,7 +58,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
             if let new = convertIsEqualToString(postfix, op: .unequals) {
                 notifyChange()
                 
-                return super.visitExpression(new)
+                return visitExpression(new)
             }
         }
         
@@ -69,7 +69,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
         if let new = convertNSPrefixedTypeName(exp) {
             notifyChange()
             
-            return super.visitExpression(new)
+            return visitExpression(new)
         }
         
         return super.visitIdentifier(exp)
@@ -326,7 +326,7 @@ extension FoundationExpressionPass {
         makeInit(typeName: "NSLocale",
                  method: "localeWithLocaleIdentifier",
                  convertInto: Expression.identifier("Locale"),
-                 andCallWithArguments: [.labeled("identifier", .asIs)],
+                 andCallWithArguments: [.labeled("identifier")],
                  andTypeAs: .typeName("Locale"))
         
         makeInit(typeName: "NSLocale",

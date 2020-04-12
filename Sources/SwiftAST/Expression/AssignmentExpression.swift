@@ -8,11 +8,11 @@ public class AssignmentExpression: Expression {
     }
     
     public override var subExpressions: [Expression] {
-        return [lhs, rhs]
+        [lhs, rhs]
     }
     
     public override var requiresParens: Bool {
-        return true
+        true
     }
     
     public override var description: String {
@@ -51,8 +51,7 @@ public class AssignmentExpression: Expression {
     
     @inlinable
     public override func copy() -> AssignmentExpression {
-        return
-            AssignmentExpression(
+        AssignmentExpression(
                 lhs: lhs.copy(),
                 op: op,
                 rhs: rhs.copy()
@@ -61,7 +60,7 @@ public class AssignmentExpression: Expression {
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitAssignment(self)
+        visitor.visitAssignment(self)
     }
     
     public override func isEqual(to other: Expression) -> Bool {
@@ -99,7 +98,7 @@ public class AssignmentExpression: Expression {
 }
 public extension Expression {
     @inlinable
-    public var asAssignment: AssignmentExpression? {
-        return cast()
+    var asAssignment: AssignmentExpression? {
+        cast()
     }
 }

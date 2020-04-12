@@ -3,6 +3,7 @@ import Antlr4
 import ObjcParser
 import ObjcParserAntlr
 import SwiftRewriterLib
+import TypeSystem
 import SwiftAST
 
 class SwiftExprASTReaderTests: XCTestCase {
@@ -255,7 +256,8 @@ extension SwiftExprASTReaderTests {
                 typeMapper: typeMapper,
                 typeParser: typeParser,
                 context: SwiftASTReaderContext(typeSystem: typeSystem,
-                                               typeContext: nil))
+                                               typeContext: nil),
+                delegate: nil)
         
         do {
             let state = try SwiftExprASTReaderTests._state.makeMainParser(input: objcExpr)

@@ -114,3 +114,9 @@ public class FromSourceIntention: Intention, NonNullScopedIntention {
         case inNonnullContext
     }
 }
+
+extension FromSourceIntention: KnownDeclaration {
+    public var knownFile: KnownFile? {
+        return file
+    }
+}

@@ -157,7 +157,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 	}
 	@discardableResult
 	open func objectiveCDocument() throws -> ObjectiveCDocumentContext {
-		var _localctx: ObjectiveCDocumentContext = ObjectiveCDocumentContext(_ctx, getState())
+        let _localctx: ObjectiveCDocumentContext = ObjectiveCDocumentContext(_ctx, getState())
 		try enterRule(_localctx, 0, ObjectiveCPreprocessorParser.RULE_objectiveCDocument)
 		var _la: Int = 0
 		defer {
@@ -230,7 +230,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 	}
 	@discardableResult
 	open func text() throws -> TextContext {
-		var _localctx: TextContext = TextContext(_ctx, getState())
+        let _localctx: TextContext = TextContext(_ctx, getState())
 		try enterRule(_localctx, 2, ObjectiveCPreprocessorParser.RULE_text)
 		var _la: Int = 0
 		defer {
@@ -312,7 +312,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 	}
 	@discardableResult
 	open func code() throws -> CodeContext {
-		var _localctx: CodeContext = CodeContext(_ctx, getState())
+        let _localctx: CodeContext = CodeContext(_ctx, getState())
 		try enterRule(_localctx, 4, ObjectiveCPreprocessorParser.RULE_code)
 		defer {
 	    		try! exitRule()
@@ -351,8 +351,10 @@ open class ObjectiveCPreprocessorParser: Parser {
 	open class DirectiveContext:ParserRuleContext {
 		open override func getRuleIndex() -> Int { return ObjectiveCPreprocessorParser.RULE_directive }
 	 
-		public  func copyFrom(_ ctx: DirectiveContext) {
-			super.copyFrom(ctx)
+		public func copyFrom(_ ctx: DirectiveContext) {
+            // FIXME: https://bugs.swift.org/browse/SR-10260
+            // Change back to super.copyFrom(ctx) once that bug is fixed
+			copyFrom(ctx as ParserRuleContext)
 		}
 	}
 	public  final class PreprocessorDefContext: DirectiveContext {
@@ -787,7 +789,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 	}
 	@discardableResult
 	open func directive_text() throws -> Directive_textContext {
-		var _localctx: Directive_textContext = Directive_textContext(_ctx, getState())
+        let _localctx: Directive_textContext = Directive_textContext(_ctx, getState())
 		try enterRule(_localctx, 8, ObjectiveCPreprocessorParser.RULE_directive_text)
 		var _la: Int = 0
 		defer {
@@ -825,8 +827,10 @@ open class ObjectiveCPreprocessorParser: Parser {
 	open class Preprocessor_expressionContext:ParserRuleContext {
 		open override func getRuleIndex() -> Int { return ObjectiveCPreprocessorParser.RULE_preprocessor_expression }
 	 
-		public  func copyFrom(_ ctx: Preprocessor_expressionContext) {
-			super.copyFrom(ctx)
+		public func copyFrom(_ ctx: Preprocessor_expressionContext) {
+            // FIXME: https://bugs.swift.org/browse/SR-10260
+            // Change back to super.copyFrom(ctx) once that bug is fixed
+			copyFrom(ctx as ParserRuleContext)
 		}
 	}
 	public  final class PreprocessorParenthesisContext: Preprocessor_expressionContext {
@@ -1048,10 +1052,9 @@ open class ObjectiveCPreprocessorParser: Parser {
 	@discardableResult
 	private func preprocessor_expression(_ _p: Int) throws -> Preprocessor_expressionContext   {
 		let _parentctx: ParserRuleContext? = _ctx
-		var _parentState: Int = getState()
+        let _parentState: Int = getState()
 		var _localctx: Preprocessor_expressionContext = Preprocessor_expressionContext(_ctx, _parentState)
-		var  _prevctx: Preprocessor_expressionContext = _localctx
-		var _startState: Int = 10
+        let _startState: Int = 10
 		try enterRecursionRule(_localctx, 10, ObjectiveCPreprocessorParser.RULE_preprocessor_expression, _p)
 		var _la: Int = 0
 		defer {
@@ -1066,7 +1069,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .TRUE:
 				_localctx = PreprocessorConstantContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 
 				setState(65)
 				try match(ObjectiveCPreprocessorParser.Tokens.TRUE.rawValue)
@@ -1076,7 +1078,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .FALSE:
 				_localctx = PreprocessorConstantContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(66)
 				try match(ObjectiveCPreprocessorParser.Tokens.FALSE.rawValue)
 
@@ -1085,7 +1086,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .DECIMAL_LITERAL:
 				_localctx = PreprocessorConstantContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(67)
 				try match(ObjectiveCPreprocessorParser.Tokens.DECIMAL_LITERAL.rawValue)
 
@@ -1094,7 +1094,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .DIRECTIVE_STRING:
 				_localctx = PreprocessorConstantContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(68)
 				try match(ObjectiveCPreprocessorParser.Tokens.DIRECTIVE_STRING.rawValue)
 
@@ -1103,7 +1102,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .CONDITIONAL_SYMBOL:
 				_localctx = PreprocessorConditionalSymbolContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(69)
 				try match(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue)
 				setState(74)
@@ -1126,7 +1124,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .LPAREN:
 				_localctx = PreprocessorParenthesisContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(76)
 				try match(ObjectiveCPreprocessorParser.Tokens.LPAREN.rawValue)
 				setState(77)
@@ -1139,7 +1136,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .BANG:
 				_localctx = PreprocessorNotContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(80)
 				try match(ObjectiveCPreprocessorParser.Tokens.BANG.rawValue)
 				setState(81)
@@ -1150,7 +1146,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .DEFINED:
 				_localctx = PreprocessorDefinedContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(82)
 				try match(ObjectiveCPreprocessorParser.Tokens.DEFINED.rawValue)
 				setState(87)
@@ -1188,7 +1183,6 @@ open class ObjectiveCPreprocessorParser: Parser {
 					if _parseListeners != nil {
 					   try triggerExitRuleEvent()
 					}
-					_prevctx = _localctx
 					setState(103)
 					try _errHandler.sync(self)
 					switch(try getInterpreter().adaptivePredict(_input,9, _ctx)) {

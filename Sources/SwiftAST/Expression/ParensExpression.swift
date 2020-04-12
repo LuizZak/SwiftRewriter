@@ -4,19 +4,19 @@ public class ParensExpression: Expression {
     }
     
     public override var subExpressions: [Expression] {
-        return [exp]
+        [exp]
     }
     
     public override var isLiteralExpression: Bool {
-        return exp.isLiteralExpression
+        exp.isLiteralExpression
     }
     
     public override var literalExpressionKind: LiteralExpressionKind? {
-        return exp.literalExpressionKind
+        exp.literalExpressionKind
     }
     
     public override var description: String {
-        return "(" + exp.description + ")"
+        "(" + exp.description + ")"
     }
     
     public init(exp: Expression) {
@@ -39,12 +39,12 @@ public class ParensExpression: Expression {
     
     @inlinable
     public override func copy() -> ParensExpression {
-        return ParensExpression(exp: exp.copy()).copyTypeAndMetadata(from: self)
+        ParensExpression(exp: exp.copy()).copyTypeAndMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitParens(self)
+        visitor.visitParens(self)
     }
     
     public override func isEqual(to other: Expression) -> Bool {
@@ -78,16 +78,16 @@ public class ParensExpression: Expression {
 }
 public extension Expression {
     @inlinable
-    public var asParens: ParensExpression? {
-        return cast()
+    var asParens: ParensExpression? {
+        cast()
     }
     
     /// Returns the first non-`ParensExpression` child expression of this syntax
     /// node.
     ///
-    /// If `self` is not an instance of `ParensExpression`, self is returned
+    /// If this is not an instance of `ParensExpression`, `self` is returned
     /// instead.
-    public var unwrappingParens: Expression {
+    var unwrappingParens: Expression {
         if let parens = self as? ParensExpression {
             return parens.exp.unwrappingParens
         }

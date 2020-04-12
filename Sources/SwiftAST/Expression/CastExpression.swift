@@ -6,15 +6,15 @@ public class CastExpression: Expression {
     public var isOptionalCast: Bool
     
     public override var subExpressions: [Expression] {
-        return [exp]
+        [exp]
     }
     
     public override var description: String {
-        return "\(exp) \(isOptionalCast ? "as?" : "as") \(type)"
+        "\(exp) \(isOptionalCast ? "as?" : "as") \(type)"
     }
     
     public override var requiresParens: Bool {
-        return true
+        true
     }
     
     public init(exp: Expression, type: SwiftType, isOptionalCast: Bool = true) {
@@ -41,12 +41,12 @@ public class CastExpression: Expression {
     
     @inlinable
     public override func copy() -> CastExpression {
-        return CastExpression(exp: exp.copy(), type: type).copyTypeAndMetadata(from: self)
+        CastExpression(exp: exp.copy(), type: type).copyTypeAndMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitCast(self)
+        visitor.visitCast(self)
     }
     
     public override func isEqual(to other: Expression) -> Bool {
@@ -86,8 +86,8 @@ public class CastExpression: Expression {
 }
 public extension Expression {
     @inlinable
-    public var asCast: CastExpression? {
-        return cast()
+    var asCast: CastExpression? {
+        cast()
     }
 }
 

@@ -82,7 +82,7 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
             fc.arguments.forEach { visitExpression($0.expression) }
             
         case let sub as SubscriptPostfix:
-            visitExpression(sub.expression)
+            sub.arguments.forEach { visitExpression($0.expression) }
             
         default:
             break
@@ -160,6 +160,16 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
         visitExpression(exp.exp)
         visitExpression(exp.ifTrue)
         visitExpression(exp.ifFalse)
+    }
+    
+    /// Visits a tuple node
+    ///
+    /// - Parameter exp: A tuple expression to visit
+    /// - Returns: Result of visiting this tuple node
+    public func visitTuple(_ exp: TupleExpression) {
+        listener(exp)
+        
+        exp.elements.forEach(visitExpression)
     }
     
     /// Visits an unknown expression node

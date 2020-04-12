@@ -1,6 +1,9 @@
 # SwiftRewriter
 
-[![Build Status](https://travis-ci.org/LuizZak/SwiftRewriter.svg?branch=master)](https://travis-ci.org/LuizZak/SwiftRewriter)
+| Platform | Build Status |
+|----------|--------|
+| macOS    | [![Build Status](https://dev.azure.com/luiz-fs/SwiftRewriter/_apis/build/status/LuizZak.SwiftRewriter?branchName=master&jobName=macOS)](https://dev.azure.com/luiz-fs/SwiftRewriter/_build/latest?definitionId=3&branchName=master) |
+| Linux    | [![Build Status](https://dev.azure.com/luiz-fs/SwiftRewriter/_apis/build/status/LuizZak.SwiftRewriter?branchName=master&jobName=Linux)](https://dev.azure.com/luiz-fs/SwiftRewriter/_build/latest?definitionId=3&branchName=master) |
 
 A program that aims to aid in automatization of conversion of Objective-C code into equivalent Swift code.
 
@@ -65,14 +68,14 @@ class MyClass: NSObject {
 
 #### Requirements
 
-Xcode 10.1 & Swift 4.2
+Xcode 11.4 & Swift 5.2
 
 #### Usage
 
 - From the working directory execute as follows:
 
 ```bash
-$ swift run -c=release SwiftRewriter --colorize --target stdout files /path/to/MyClass.h /path/to/MyClass.m
+$ swift run -c=release SwiftRewriter files --colorize --target stdout /path/to/MyClass.h /path/to/MyClass.m
 ```
 
 - To convert a directory containing Objective-C files (recursively), saving resulting .swift files to disk, execute as follows:
@@ -81,43 +84,58 @@ $ swift run -c=release SwiftRewriter --colorize --target stdout files /path/to/M
 $ swift run -c=release SwiftRewriter path /path/to/project/
 ```
 
-- Run `swift run SwiftRewriter --help` to print the full reference of command line arguments SwiftRewriter accepts. Reference also available bellow:
+- Run `swift run SwiftRewriter --help` to print the full reference of command line arguments SwiftRewriter accepts. Reference also available bellow (for `path` subcommand):
 
 Usage:
 
 ```
-USAGE: SwiftRewriter [--colorize|-c] [--print-expression-types|-t] [--print-tracing-history|-h] [--emit-objc-compatibility|-o] [--verbose|-v] [--num-threads|-t <n>] [--force-ll|-ll] [--target|-w stdout | filedisk] [files <files...> | path <path> [--exclude-pattern|-e <pattern>] [--include-pattern|-i <pattern>] [--skip-confirm|-s] [--overwrite|-o]]
+OVERVIEW: 
+
+Examines a path and collects all .h/.m files to convert, before presenting a prompt to confirm conversion of files.
+
+USAGE: SwiftRewriter path <options>
+
+ARGUMENTS:
+  <path>                  Path to the project to inspect 
 
 OPTIONS:
-  --colorize, -c          Pass this parameter as true to enable terminal colorization during output.
-  --diagnose-file, -d     Provides a target file path to diagnose during rewriting.
-After each intention pass and after expression passes, the file is written
-to the standard output for diagnosing rewriting issues.
-  --emit-objc-compatibility, -o
+  -e, --exclude-pattern <exclude-pattern>
+                          Provides a file pattern for excluding matches from the initial Objective-C files search. Pattern is applied to the full path. 
+  -i, --include-pattern <include-pattern>
+                          Provides a pattern for including matches from the initial Objective-C files search. Pattern is applied to the full path. --exclude-pattern takes priority over --include-pattern
+                          matches. 
+  -s, --skip-confirm      Skips asking for confirmation prior to parsing. 
+  -o, --overwrite         Overwrites any .swift file with a matching output name on the target path. 
+  -c, --colorize          Pass this parameter as true to enable terminal colorization during output. 
+  -e, --print-expression-types
+                          Prints the type of each top-level resolved expression statement found in function bodies. 
+  -p, --print-tracing-history
+                          Prints extra information before each declaration and member about the inner logical decisions of intention passes as they change the structure of declarations. 
+  -v, --verbose           Prints progress information to the console while performing a transpiling job. 
+  -t, --num-threads <num-threads>
+                          Specifies the number of threads to use when performing parsing, as well as intention and expression passes. If not specified, thread allocation is defined by the system
+                          depending on usage conditions. 
+  --force-ll              Forces ANTLR parsing to use LL prediction context, instead of making an attempt at SLL first. May be more performant in some circumstances depending on complexity of original
+                          source code. 
+  --emit-objc-compatibility
                           Emits '@objc' attributes on definitions, and emits NSObject subclass and NSObjectProtocol conformance on protocols.
 
-This forces Swift to create Objective-C-compatible subclassing structures
-which may increase compatibility with previous Obj-C code.
-  --force-ll, -ll         Forces ANTLR parsing to use LL prediction context, instead of making an attempt at SLL first. May be more performant in some circumstances depending on complexity of original source code.
-  --num-threads, -t       Specifies the number of threads to use when performing parsing, as well as intention and expression passes. If not specified, thread allocation is defined by the system depending on usage conditions.
-  --print-expression-types, -e
-                          Prints the type of each top-level resolved expression statement found in function bodies.
-  --print-tracing-history, -p
-                          Prints extra information before each declaration and member about the inner logical decisions of intention passes as they change the structure of declarations.
-  --target, -w            Specifies the output target for the conversion.
+                          This forces Swift to create Objective-C-compatible subclassing structures
+                          which may increase compatibility with previous Obj-C code. 
+  --diagnose-file <diagnose-file>
+                          Provides a target file path to diagnose during rewriting.
+After each intention pass and after expression passes, the file is written
+                          to the standard output for diagnosing rewriting issues. 
+  -w, --target <target>   Specifies the output target for the conversion.
 Defaults to 'filedisk' if not provided.
 
     stdout
         Prints the conversion results to the terminal's standard output;
     
-    filedisk
-        Saves output of conversion to the filedisk as .swift files on the same folder as the input files.
-  --verbose, -v           Prints progress information to the console while performing a transpiling job.
-  --help                  Display available options
-
-SUBCOMMANDS:
-  files                   Converts one or more .h/.m file(s) to Swift.
-  path                    Examines a path and collects all .h/.m files to convert, before presenting a prompt to confirm conversion of files.
+                              filedisk
+                                  Saves output of conversion to the filedisk as .swift files on the same folder as the input files. 
+  -f, --follow-imports    Follows #import declarations in files in order to parse other relevant files. 
+  -h, --help              Show help information.
 ```
 
 The program should output the contents of the files you pass into the standard output.
@@ -138,6 +156,6 @@ Some other libraries and resources that are also concerned with automating the p
 
 - [Yahoo's Objc2Swift](https://github.com/yahoojapan/objc2swift) makes language transformations, but it has shortcomings as far as making large transpilations go: Its grammar implementation lacks modern Objective-C features (such as generic types), and it makes no semantic transformations, doing AST conversions only. Main inspiration for writing this tool, I just thought augmenting it with a more modern Objective-C syntax and some semantical awareness would be nifty.
 
-- [Objc2Swift.js](http://okaxaki.github.io/objc2swift/index.html) is a more fully-fledged, nifty converter that is semantically-aware and attempts to produce working code while respecting semantics, but it does not currently support emitting Swift 3 and 4-compatible code.
+- [Objc2Swift.js](http://okaxaki.github.io/objc2swift/index.html) is a more fully-fledged, nifty converter that is semantically-aware and attempts to produce working code while respecting semantics, but it does not currently support emitting Swift 3, 4 and 5-compatible code.
 
 - [Swiftify](https://objectivec2swift.com/) is a comercial product which does many high and low-level transformations, producing code that appears to be (I haven't tested it much, tbh) nearly fully-functioning Swift code.

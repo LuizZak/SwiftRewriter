@@ -1,6 +1,6 @@
 import SwiftAST
 import KnownType
-import SwiftRewriterLib
+import TypeSystem
 import Commons
 
 public class BaseGlobalsProvider: GlobalsProvider {
@@ -17,15 +17,15 @@ public class BaseGlobalsProvider: GlobalsProvider {
     }
     
     public func definitionsSource() -> DefinitionsSource {
-        return ArrayDefinitionsSource(definitions: globals)
+        ArrayDefinitionsSource(definitions: globals)
     }
     
     public func typealiasProvider() -> TypealiasProvider {
-        return CollectionTypealiasProvider(aliases: typealiases)
+        CollectionTypealiasProvider(aliases: typealiases)
     }
     
     public func knownTypeProvider() -> KnownTypeProvider {
-        return CollectionKnownTypeProvider(knownTypes: types)
+        CollectionKnownTypeProvider(knownTypes: types)
     }
     
     func createDefinitions() {
@@ -77,11 +77,11 @@ public class BaseGlobalsProvider: GlobalsProvider {
     }
     
     func constant(name: String, type: SwiftType) -> CodeDefinition {
-        return .forGlobalVariable(name: name, isConstant: true, type: type)
+        .forGlobalVariable(name: name, isConstant: true, type: type)
     }
     
     func variable(name: String, type: SwiftType) -> CodeDefinition {
-        return .forGlobalVariable(name: name, isConstant: false, type: type)
+        .forGlobalVariable(name: name, isConstant: false, type: type)
     }
     
     func function(name: String, paramsSignature: String, returnType: SwiftType = .void) -> CodeDefinition {

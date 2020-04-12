@@ -2,7 +2,7 @@ public class UnknownExpression: Expression {
     public var context: UnknownASTContext
     
     public override var description: String {
-        return context.description
+        context.description
     }
     
     public init(context: UnknownASTContext) {
@@ -23,16 +23,16 @@ public class UnknownExpression: Expression {
     
     @inlinable
     public override func copy() -> UnknownExpression {
-        return UnknownExpression(context: context).copyTypeAndMetadata(from: self)
+        UnknownExpression(context: context).copyTypeAndMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitUnknown(self)
+        visitor.visitUnknown(self)
     }
     
     public override func isEqual(to other: Expression) -> Bool {
-        return other is UnknownExpression
+        other is UnknownExpression
     }
     
     public override func encode(to encoder: Encoder) throws {
@@ -44,7 +44,7 @@ public class UnknownExpression: Expression {
     }
     
     public static func == (lhs: UnknownExpression, rhs: UnknownExpression) -> Bool {
-        return true
+        true
     }
     
     private enum CodingKeys: String, CodingKey {
@@ -53,7 +53,7 @@ public class UnknownExpression: Expression {
 }
 public extension Expression {
     @inlinable
-    public var asUnknown: UnknownExpression? {
-        return cast()
+    var asUnknown: UnknownExpression? {
+        cast()
     }
 }

@@ -7,7 +7,7 @@ public class DoStatement: Statement {
     }
     
     public override var children: [SyntaxNode] {
-        return [body]
+        [body]
     }
     
     public init(body: CompoundStatement) {
@@ -30,12 +30,12 @@ public class DoStatement: Statement {
     
     @inlinable
     public override func copy() -> DoStatement {
-        return DoStatement(body: body.copy()).copyMetadata(from: self)
+        DoStatement(body: body.copy()).copyMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        return visitor.visitDo(self)
+        visitor.visitDo(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
@@ -61,7 +61,7 @@ public class DoStatement: Statement {
 }
 public extension Statement {
     @inlinable
-    public var asDoStatement: DoStatement? {
-        return cast()
+    var asDoStatement: DoStatement? {
+        cast()
     }
 }

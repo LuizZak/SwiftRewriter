@@ -475,6 +475,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 private var callback: (() -> Void)?
             
                 func f1() {
+                    // decl type: (() -> Void)!
+                    // init type: (() -> Void)?
                     let _callback = self.callback
                     // type: Void?
                     _callback?()
@@ -505,6 +507,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 private var callback: (() -> Void)?
             
                 func f1() {
+                    // decl type: (() -> Void)!
+                    // init type: (() -> Void)?
                     let _callback = self.callback
                     // type: Void?
                     _callback?()
@@ -716,9 +720,17 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             class MyClass {
                 func method() {
+                    // decl type: String!
+                    // init type: String?
                     let local1 = self.optional()
+                    // decl type: String
+                    // init type: String
                     let local2 = self.nonOptional()
+                    // decl type: String!
+                    // init type: String!
                     let local3 = self.unspecifiedOptional()
+                    // decl type: String
+                    // init type: String
                     let local4 = "Literal"
                     // type: String?
                     local1
@@ -772,8 +784,14 @@ class SwiftRewriter_TypingTests: XCTestCase {
             }
             class MyClass {
                 func method() {
+                    // decl type: A!
+                    // init type: B?
                     let local1 = self.optional()
+                    // decl type: A
+                    // init type: B
                     let local2 = self.nonOptional()
+                    // decl type: A!
+                    // init type: B!
                     let local3 = self.unspecifiedOptional()
                     // type: A?
                     local1
@@ -864,6 +882,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 func method() {
                     // type: Callback
                     self.callback = { () -> Void in
+                        // decl type: Int
                         let local: Int
                         // type: Int
                         local
@@ -914,6 +933,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 var callback: Callback
             
                 func method() {
+                    // decl type: Int
                     let local: Int
                     // type: Callback
                     self.callback = { () -> Void in
@@ -956,6 +976,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             class A {
                 func f1() {
+                    // decl type: A!
+                    // init type: A!
                     let a = self.other()
                     // type: A?
                     a
@@ -983,6 +1005,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             class A {
                 func f1() {
+                    // decl type: A
+                    // init type: A
                     let a = self.other()
                     // type: A
                     a
@@ -1180,7 +1204,11 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             swift: """
             func test() {
+                // decl type: NSMutableArray
+                // init type: NSMutableArray
                 let array = NSMutableArray()
+                // decl type: NSObject
+                // init type: NSMutableArray
                 let object = array
                 // type: Void
                 array.add(object)
@@ -1215,6 +1243,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             swift: """
             func test() {
+                // decl type: CGFloat
+                // init type: Int
                 let f: CGFloat = 0
                 // type: CGFloat
                 floor(f)
@@ -1264,6 +1294,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             swift: """
             func test() {
+                // decl type: Protocol!
                 let prot: Protocol!
                 // type: Bool?
                 prot.method?()
@@ -1297,8 +1328,14 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             swift: """
             func test() {
+                // decl type: CGFloat
+                // init type: Int
                 let cgFloat: CGFloat = 0
+                // decl type: CInt
+                // init type: CInt
                 let cInt: CInt = 0
+                // decl type: Int
+                // init type: Int
                 let nsInteger = 0
                 // type: CGFloat
                 max(0, cgFloat)

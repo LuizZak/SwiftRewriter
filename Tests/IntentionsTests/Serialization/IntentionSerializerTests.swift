@@ -2,7 +2,6 @@ import XCTest
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
 import TestCommons
 
 class IntentionSerializerTests: XCTestCase {
@@ -16,7 +15,14 @@ class IntentionSerializerTests: XCTestCase {
                         type.createConformance(protocolName: "Protocol")
                             .createConstructor()
                             .createInstanceVariable(named: "a", type: .int)
-                            .createProperty(named: "b", type: .float)
+                            .createProperty(named: "b",
+                                            type: .float,
+                                            objcAttributes: [
+                                                .getterName("getterName"),
+                                                .readonly,
+                                                .attribute("attribute1"),
+                                                .setterName("attribute1")
+                                            ])
                             .createMethod("method(_ a: Int, b: Float)") { method in
                                 method
                                     .addHistory(tag: "Test", description: "A test history")

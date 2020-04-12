@@ -1,11 +1,10 @@
 import SwiftAST
-import SwiftRewriterLib
 
 public enum UIColorCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "UIColor")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        singleton
     }
     
     static func typeString() -> String {

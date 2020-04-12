@@ -1,6 +1,5 @@
 import SwiftAST
 import Intentions
-import SwiftRewriterLib
 
 // TODO: Also support failable init detection by inspecting `nullable` in the
 // return type of intializers in Objective-C.
@@ -11,7 +10,7 @@ public class InitAnalysisIntentionPass: IntentionPass {
     private let tag = "\(InitAnalysisIntentionPass.self)"
     
     // Matches 'self.init'/'super.init' expressions, with or without parameters.
-    let invertedMatchSelfOrSuperInit =
+    let matchSelfOrSuperInit =
         ValueMatcher<PostfixExpression>()
             .inverted { inverted in
                 inverted
@@ -111,11 +110,11 @@ public class InitAnalysisIntentionPass: IntentionPass {
                          ValueMatcher<AssignmentExpression>()
                             .keyPath(\.lhs, ident("self" || "super").anyExpression())
                             .keyPath(\.op, equals: .assign)
-                            .keyPath(\.rhs, invertedMatchSelfOrSuperInit)
+                            .keyPath(\.rhs, matchSelfOrSuperInit)
                             .anyExpression()
                 ).anyExpression()
         
-        if negatedSelfIsSelfOrSuperInit.matches(ifStatement.exp) {
+        if negatedSelfIsSelfOrSuperInit(matches: ifStatement.exp) {
             return false
         }
         
@@ -152,7 +151,7 @@ public class InitAnalysisIntentionPass: IntentionPass {
                     )
                 )
         
-        if matchSelfOrSuper.matches(exp), let selfOrSuper = selfOrSuper?.asIdentifier?.identifier {
+        if matchSelfOrSuper(matches: exp), let selfOrSuper = selfOrSuper?.asIdentifier?.identifier {
             return selfOrSuper
         }
         
