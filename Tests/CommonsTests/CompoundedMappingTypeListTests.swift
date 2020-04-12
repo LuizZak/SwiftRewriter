@@ -11,6 +11,8 @@ class CompoundedMappingTypeListTests: XCTestCase {
         XCTAssertEqual(iterator.next()?.typeName, "Calendar")
         XCTAssertEqual(iterator.next()?.typeName, "NSArray")
         XCTAssertEqual(iterator.next()?.typeName, "NSMutableArray")
+        XCTAssertEqual(iterator.next()?.typeName, "NSDictionary")
+        XCTAssertEqual(iterator.next()?.typeName, "NSMutableDictionary")
         XCTAssertEqual(iterator.next()?.typeName, "DateFormatter")
         XCTAssertEqual(iterator.next()?.typeName, "Date")
         XCTAssertEqual(iterator.next()?.typeName, "Locale")

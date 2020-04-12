@@ -1204,11 +1204,11 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             swift: """
             func test() {
-                // decl type: NSMutableArray
+                // decl type: NSMutableArray<NSObject>
                 // init type: NSMutableArray
                 let array = NSMutableArray()
                 // decl type: NSObject
-                // init type: NSMutableArray
+                // init type: NSMutableArray<NSObject>
                 let object = array
                 // type: Void
                 array.add(object)

@@ -174,16 +174,18 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
                 }
             }
             
-            guard let memberType = member.memberDefinition?.ownerType else {
+            guard let memberIntention = member.memberDefinition as? MemberGenerationIntention else {
+                continue
+            }
+            guard let memberType = memberIntention.type else {
                 return false
             }
             
-            let memberTypeName = memberType.asTypeName
-            guard let type = context.typeSystem.knownTypeWithName(memberTypeName) else {
+            guard let type = context.typeSystem.knownTypeWithName(memberType.typeName) else {
                 return false
             }
             
-            if type.isExtension && (type.typeName == "NSMutableArray" || type.typeName == "NSArray") {
+            if memberType.isExtension && (type.typeName == "NSMutableArray" || type.typeName == "NSArray") {
                 return false
             }
         }
