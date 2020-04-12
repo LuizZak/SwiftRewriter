@@ -87,8 +87,7 @@ let package = Package(
         .target(
             name: "ExpressionPasses",
             dependencies: ["SwiftAST", "Commons", "Utils", "Analysis", 
-                           "Intentions", "TypeSystem", "MiniLexer", 
-                           "TestCommons"]),
+                           "Intentions", "TypeSystem", "MiniLexer"]),
         .target(
             name: "SourcePreprocessors",
             dependencies: ["Utils", "MiniLexer"]),
