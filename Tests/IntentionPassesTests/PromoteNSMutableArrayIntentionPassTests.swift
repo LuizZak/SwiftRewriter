@@ -232,7 +232,7 @@ class PromoteNSMutableArrayIntentionPassTests: XCTestCase {
                 }.build(typeChecked: true)
         let sut = PromoteNSMutableArrayIntentionPass()
         
-        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        sut.apply(on: intentions, context: makeContext(intentions: intentions, resolveTypes: true))
         
         let type = intentions.classIntentions()[0]
         XCTAssertEqual(type.properties[0].type, nsMutableArrayType("A"))
@@ -248,6 +248,9 @@ class PromoteNSMutableArrayIntentionPassTests: XCTestCase {
                 }
                 .createFile(named: "NSArray+Ext") { builder in
                     builder.createProtocol(withName: "Prot")
+                    builder.createExtension(forClassNamed: "NSArray", categoryName: "Ext") { ext in
+                        ext.createConformance(protocolName: "Prot")
+                    }
                 }
                 .createFileWithClass(named: "A") { builder in
                     builder.createProperty(
@@ -268,7 +271,7 @@ class PromoteNSMutableArrayIntentionPassTests: XCTestCase {
                 }.build(typeChecked: true)
         let sut = PromoteNSMutableArrayIntentionPass()
         
-        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        sut.apply(on: intentions, context: makeContext(intentions: intentions, resolveTypes: true))
         
         let type = intentions.classIntentions()[0]
         XCTAssertEqual(type.properties[0].type, nsMutableArrayType("A"))

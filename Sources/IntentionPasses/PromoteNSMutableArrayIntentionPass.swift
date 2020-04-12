@@ -149,44 +149,58 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
             guard let op = postfixChainItem.postfix else {
                 continue
             }
-            guard let member = op.asMember else {
-                continue
-            }
-            
-            // Check if we have an aliased NSArray/NSMutableArray method created
-            // by a method annotated with `@_swiftrewriter` here
-            if i < inverted.count - 1 && member.memberDefinition == nil {
-                guard let identifier = postfixChainItem.formFunctionIdentifier(withNext: inverted[i + 1]) else {
+            if let member = op.asMember {
+                // Check if we have an aliased NSArray/NSMutableArray method created
+                // by a method annotated with `@_swiftrewriter` here
+                if i < inverted.count - 1 && member.memberDefinition == nil {
+                    guard let identifier = postfixChainItem.formFunctionIdentifier(withNext: inverted[i + 1]) else {
+                        continue
+                    }
+                    
+                    // TODO: Maybe we shouldn't really be looking at types directly
+                    // from compound types, but through a first-class support for
+                    // alised members in `TypeSystem`?
+                    let nsArray = FoundationCompoundTypes.nsArray.create()
+                    let nsMutArray = FoundationCompoundTypes.nsMutableArray.create()
+                    
+                    if nsArray.aliasedMethods.containsMethod(withIdentifier: identifier) {
+                        return true
+                    }
+                    if nsMutArray.aliasedMethods.containsMethod(withIdentifier: identifier) {
+                        return true
+                    }
+                }
+                
+                guard let memberIntention = member.memberDefinition as? MemberGenerationIntention else {
                     continue
                 }
-                
-                // TODO: Maybe we shouldn't really be looking at types directly
-                // from compound types, but through a first-class support for
-                // alised members in `TypeSystem`?
-                let nsArray = FoundationCompoundTypes.nsArray.create()
-                let nsMutArray = FoundationCompoundTypes.nsMutableArray.create()
-                
-                if nsArray.aliasedMethods.containsMethod(withIdentifier: identifier) {
-                    return true
+                guard let memberType = memberIntention.type else {
+                    return false
                 }
-                if nsMutArray.aliasedMethods.containsMethod(withIdentifier: identifier) {
-                    return true
+                
+                guard let type = context.typeSystem.knownTypeWithName(memberType.typeName) else {
+                    return false
                 }
-            }
-            
-            guard let memberIntention = member.memberDefinition as? MemberGenerationIntention else {
-                continue
-            }
-            guard let memberType = memberIntention.type else {
-                return false
-            }
-            
-            guard let type = context.typeSystem.knownTypeWithName(memberType.typeName) else {
-                return false
-            }
-            
-            if memberType.isExtension && (type.typeName == "NSMutableArray" || type.typeName == "NSArray") {
-                return false
+                
+                if memberType.isExtension && (type.typeName == "NSMutableArray" || type.typeName == "NSArray") {
+                    return false
+                }
+            } else if let fc = op.asFunctionCall, i > 0, let prevMember = inverted[i - 1].postfix?.asMember {
+                let ident = fc.selectorWith(methodName: prevMember.name)
+                
+                // Search for protocol method generation intentions - those indicate
+                // that a method comes from an extension of NSMutableArray or
+                // NSArray directly and thus the reference cannot be converted
+                // to Array<T>
+                let method = context.typeSystem.method(withObjcSelector: ident,
+                                                       invocationTypeHints: [],
+                                                       static: false,
+                                                       includeOptional: true,
+                                                       in: .typeName("NSMutableArray"))
+                
+                if method is ProtocolMethodGenerationIntention {
+                    return false
+                }
             }
         }
         
