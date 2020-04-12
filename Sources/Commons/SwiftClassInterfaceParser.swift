@@ -252,7 +252,7 @@ public final class SwiftClassInterfaceParser {
             let subscriptDecl = try parseSubscriptDeclaration(from: tokenizer)
 
             typeBuilder =
-                typeBuilder.subscription(indexType: subscriptDecl.parameters[0].type,
+                typeBuilder.subscription(parameters: subscriptDecl.parameters,
                                          type: subscriptDecl.type,
                                          isStatic: modifiers.contains(.static),
                                          isConstant: subscriptDecl.isConstant,

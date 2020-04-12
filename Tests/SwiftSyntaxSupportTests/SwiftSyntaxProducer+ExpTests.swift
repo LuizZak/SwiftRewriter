@@ -145,6 +145,23 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
             matches: "foo[1]")
     }
     
+    func testPostfixSubscriptEmptyArguments() {
+        assert(
+            Expression.identifier("foo").sub([]),
+            producer: SwiftSyntaxProducer.generatePostfix,
+            matches: "foo[]")
+    }
+    
+    func testPostfixSubscriptMultipleArguments() {
+        assert(
+            Expression.identifier("foo").sub([
+                FunctionArgument(label: "label", expression: .constant(1)),
+                FunctionArgument(label: nil, expression: .constant(2))
+            ]),
+            producer: SwiftSyntaxProducer.generatePostfix,
+            matches: "foo[label: 1, 2]")
+    }
+    
     func testPostfixOptionalSubscript() {
         assert(
             Expression.identifier("foo").optional().sub(.constant(1)),
