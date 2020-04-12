@@ -172,7 +172,7 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
                 }
                 
                 guard let memberIntention = member.memberDefinition as? MemberGenerationIntention else {
-                    continue
+                    return false
                 }
                 guard let memberType = memberIntention.type else {
                     return false

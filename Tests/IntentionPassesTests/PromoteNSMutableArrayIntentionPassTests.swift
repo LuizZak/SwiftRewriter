@@ -276,6 +276,34 @@ class PromoteNSMutableArrayIntentionPassTests: XCTestCase {
         let type = intentions.classIntentions()[0]
         XCTAssertEqual(type.properties[0].type, nsMutableArrayType("A"))
     }
+    
+    func testDontPromotePropertyIfUsingUnknownMemberDeclaration() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { builder in
+                    builder.createProperty(
+                        named: "a",
+                        type: nsMutableArrayType("A")
+                    )
+                    builder.createVoidMethod(named: "test") { builder in
+                        builder.setBody([
+                            .expression(
+                                Expression
+                                    .identifier("self")
+                                    .dot("a")
+                                    .dot("unknownMember")
+                                    .call()
+                            )
+                            ])
+                    }
+                }.build(typeChecked: true)
+        let sut = PromoteNSMutableArrayIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions, resolveTypes: true))
+        
+        let type = intentions.classIntentions()[0]
+        XCTAssertEqual(type.properties[0].type, nsMutableArrayType("A"))
+    }
 }
 
 private func nsArrayType(_ element: SwiftType) -> SwiftType {
