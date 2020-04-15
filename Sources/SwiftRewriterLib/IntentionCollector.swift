@@ -728,11 +728,7 @@ public class IntentionCollector {
                 }
                 
                 if var objcType = objcType {
-                    if isOpaqueStruct {
-                        if !objcType.isPointer {
-                            continue
-                        }
-                        
+                    if isOpaqueStruct && objcType.isPointer {
                         // TODO: Support pointer-to-opaque pointers
                         objcType = ObjcType.struct("OpaquePointer")
                     }
