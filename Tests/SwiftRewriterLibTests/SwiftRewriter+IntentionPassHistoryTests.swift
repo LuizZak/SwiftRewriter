@@ -119,7 +119,6 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
             typealias copyfn234 = @convention(c) (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer?
 
             // [Creation] A.c line 24 column 1
-            // [Creation] A.h line 5 column 9
             struct tree234_Tag {
                 // [Creation] A.c line 25 column 5
                 var root: UnsafeMutablePointer<node234>!
@@ -138,7 +137,6 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                 }
             }
             // [Creation] A.c line 28 column 1
-            // [Creation] A.c line 22 column 9
             struct node234_Tag {
                 // [Creation] A.c line 29 column 5
                 var parent: UnsafeMutablePointer<node234>!
