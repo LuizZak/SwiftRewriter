@@ -16,7 +16,9 @@ class FileOutputImpl: FileOutput {
         let url = URL(fileURLWithPath: path)
         
         if !FileManager.default.fileExists(atPath: path) {
-            FileManager.default.createFile(atPath: path, contents: nil)
+            if !FileManager.default.createFile(atPath: path, contents: nil) {
+                throw Error.cannotCreateFile(path: path)
+            }
         }
         
         // Open output stream
@@ -34,6 +36,10 @@ class FileOutputImpl: FileOutput {
     
     func outputTarget() -> RewriterOutputTarget {
         file
+    }
+    
+    enum Error: Swift.Error {
+        case cannotCreateFile(path: String)
     }
 }
 
