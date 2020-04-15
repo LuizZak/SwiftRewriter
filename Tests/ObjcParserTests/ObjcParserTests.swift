@@ -278,7 +278,7 @@ class ObjcParserTests: XCTestCase {
         
         let defNode: TypedefNode? = node.firstChild()
         let structNode: ObjcStructDeclaration? = defNode?.firstChild()
-        let fields = structNode?.childrenMatching(type: ObjcStructField.self)
+        let fields = structNode?.body?.fields
         
         XCTAssertNotNil(structNode)
         XCTAssertNotNil(fields?[0])

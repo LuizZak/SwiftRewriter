@@ -849,27 +849,34 @@ private class StructListener: ObjectiveCParserBaseListener {
             str.addChild(identifier)
         }
         
-        for fieldDeclaration in ctx.fieldDeclaration() {
-            let names
-                = VarDeclarationIdentifierNameExtractor
-                    .extractAll(from: fieldDeclaration)
+        // Declaration body
+        if ctx.LBRACE() != nil {
+            let body = ObjcStructDeclarationBody(isInNonnullContext: inNonnull)
             
-            let types
-                = typeParser.parseObjcTypes(in: fieldDeclaration)
+            str.addChild(body)
             
-            for (type, identifier) in zip(types, names) {
-                let field = ObjcStructField(isInNonnullContext: inNonnull)
+            for fieldDeclaration in ctx.fieldDeclaration() {
+                let names
+                    = VarDeclarationIdentifierNameExtractor
+                        .extractAll(from: fieldDeclaration)
                 
-                let identifierNode = nodeFactory.makeIdentifier(from: identifier)
+                let types
+                    = typeParser.parseObjcTypes(in: fieldDeclaration)
                 
-                let typeNode = TypeNameNode(type: type, isInNonnullContext: inNonnull)
-                nodeFactory.updateSourceLocation(for: typeNode, with: fieldDeclaration)
-                
-                field.addChild(identifierNode)
-                field.addChild(typeNode)
-                nodeFactory.updateSourceLocation(for: field, with: fieldDeclaration)
-                
-                str.addChild(field)
+                for (type, identifier) in zip(types, names) {
+                    let field = ObjcStructField(isInNonnullContext: inNonnull)
+                    
+                    let identifierNode = nodeFactory.makeIdentifier(from: identifier)
+                    
+                    let typeNode = TypeNameNode(type: type, isInNonnullContext: inNonnull)
+                    nodeFactory.updateSourceLocation(for: typeNode, with: fieldDeclaration)
+                    
+                    field.addChild(identifierNode)
+                    field.addChild(typeNode)
+                    nodeFactory.updateSourceLocation(for: field, with: fieldDeclaration)
+                    
+                    body.addChild(field)
+                }
             }
         }
         

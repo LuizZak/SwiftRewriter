@@ -701,8 +701,14 @@ public class IntentionCollector {
         }
         
         var shouldRecord = true
+        var isOpaqueStruct = false
         
         if let delegate = delegate {
+            if node.body == nil {
+                isOpaqueStruct  = true
+                shouldRecord = false
+            }
+            
             let typeParser = delegate.typeParser(for: self)
             
             let effectiveDeclarators =
@@ -721,7 +727,16 @@ public class IntentionCollector {
                     objcType = .struct(structIntent.typeName)
                 }
                 
-                if let objcType = objcType {
+                if var objcType = objcType {
+                    if isOpaqueStruct {
+                        if !objcType.isPointer {
+                            continue
+                        }
+                        
+                        // TODO: Support pointer-to-opaque pointers
+                        objcType = ObjcType.struct("OpaquePointer")
+                    }
+                    
                     let inNonnull = delegate.isNodeInNonnullContext(declarator)
                     
                     let alias = TypealiasIntention(originalObjcType: objcType,

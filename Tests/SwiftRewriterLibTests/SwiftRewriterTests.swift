@@ -1220,6 +1220,27 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteOpaqueTypealias2() {
+        assertObjcParse(
+            objc: """
+            typedef struct _b *b;
+            """,
+            swift: """
+            typealias b = OpaquePointer
+            """)
+    }
+    
+    // TODO: Support pointer to opaque pointers
+    func xtestRewritePointerToOpaqueTypealias() {
+        assertObjcParse(
+            objc: """
+            typedef struct _b **b;
+            """,
+            swift: """
+            typealias b = UnsafeMutablePointer<OpaquePointer>
+            """)
+    }
+    
     func testRewriteFuncDeclaration() {
         assertObjcParse(
             objc: """

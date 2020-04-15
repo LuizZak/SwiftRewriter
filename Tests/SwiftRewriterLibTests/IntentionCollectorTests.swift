@@ -93,6 +93,37 @@ class IntentionCollectorTests: XCTestCase {
         
         XCTAssert(file.classIntentions[0].properties[0].knownAttributes.contains { $0.name == "IBInspectable" })
     }
+    
+    func testCollectStructDeclaration() throws {
+        let parser = ObjcParser(string: """
+            typedef struct {
+                int a;
+            } A;
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.structIntentions.count, 1)
+        XCTAssertEqual(file.structIntentions.first?.typeName, "A")
+    }
+    
+    func testCollectOpaqueStruct() throws {
+        let parser = ObjcParser(string: """
+            typedef struct _A *A;
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssert(file.structIntentions.isEmpty)
+        XCTAssertEqual(file.typealiasIntentions.count, 1)
+        XCTAssertEqual(file.typealiasIntentions.first?.name, "A")
+        XCTAssertEqual(file.typealiasIntentions.first?.fromType, .void)
+        XCTAssertEqual(file.typealiasIntentions.first?.originalObjcType, .struct("OpaquePointer"))
+    }
 }
 
 private class TestCollectorDelegate: IntentionCollectorDelegate {
