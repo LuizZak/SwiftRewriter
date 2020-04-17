@@ -69,6 +69,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::ObjcParserTests",
@@ -83,6 +84,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::SwiftASTTests",
