@@ -1,0 +1,143 @@
+{
+  "configurations" : [
+    {
+      "id" : "8175EDB2-7311-486C-8507-E97B46536954",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::AnalysisTests",
+        "name" : "AnalysisTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::CommonsTests",
+        "name" : "CommonsTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::ExpressionPassesTests",
+        "name" : "ExpressionPassesTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::GlobalsProvidersTests",
+        "name" : "GlobalsProvidersTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::GrammarModelsTests",
+        "name" : "GrammarModelsTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::IntentionPassesTests",
+        "name" : "IntentionPassesTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::IntentionsTests",
+        "name" : "IntentionsTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::KnownTypeTests",
+        "name" : "KnownTypeTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::ObjcParserTests",
+        "name" : "ObjcParserTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::SourcePreprocessorsTests",
+        "name" : "SourcePreprocessorsTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::SwiftASTTests",
+        "name" : "SwiftASTTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::SwiftRewriterLibTests",
+        "name" : "SwiftRewriterLibTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::SwiftSyntaxRewriterPassesTests",
+        "name" : "SwiftSyntaxRewriterPassesTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::SwiftSyntaxSupportTests",
+        "name" : "SwiftSyntaxSupportTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::TestCommonsTests",
+        "name" : "TestCommonsTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::TypeSystemTests",
+        "name" : "TypeSystemTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::UtilsTests",
+        "name" : "UtilsTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::WriterTargetOutputTests",
+        "name" : "WriterTargetOutputTests"
+      }
+    }
+  ],
+  "version" : 1
+}

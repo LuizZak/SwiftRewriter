@@ -1,0 +1,39 @@
+{
+  "configurations" : [
+    {
+      "id" : "1271023B-B334-43BC-8C5D-9801E02DB232",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "skippedTests" : [
+        "ASTRewriterPassTests",
+        "FileCollectionStepTests",
+        "ImportDirectiveFileCollectionDelegateTests",
+        "IntentionCollectorTests",
+        "PropertyMergeIntentionPassTests",
+        "SwiftASTReaderContextTests",
+        "SwiftExprASTReaderTests",
+        "SwiftMethodSignatureGenTests",
+        "SwiftOperatorTests",
+        "SwiftRewriterJobTests",
+        "SwiftStatementASTReaderTests",
+        "SwiftSyntaxWriterTests"
+      ],
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::SwiftRewriterLibTests",
+        "name" : "SwiftRewriterLibTests"
+      }
+    }
+  ],
+  "version" : 1
+}
