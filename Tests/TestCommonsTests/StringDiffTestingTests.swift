@@ -53,7 +53,7 @@ class StringDiffTestingTests: XCTestCase {
         XCTAssertEqual(
             testReporter.messages[1],
             """
-            test.swift:6: Difference starts here: Actual line reads 'df'
+            test.swift:3: Difference starts here: Actual line reads 'df'
             """
         )
     }
@@ -125,7 +125,7 @@ class StringDiffTestingTests: XCTestCase {
         XCTAssertEqual(
             testReporter.messages[1],
             """
-            test.swift:8: Difference starts here: Expected matching line 'ghi'
+            test.swift:4: Difference starts here: Expected matching line 'ghi'
             """
         )
     }
@@ -176,7 +176,7 @@ class StringDiffTestingTests: XCTestCase {
         XCTAssertEqual(
             testReporter.messages[1],
             """
-            test.swift:6: Difference starts here: Extraneous content after this line
+            test.swift:3: Difference starts here: Extraneous content after this line
             """
         )
     }

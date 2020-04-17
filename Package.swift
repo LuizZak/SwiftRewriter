@@ -119,6 +119,9 @@ let package = Package(
             name: "UtilsTests",
             dependencies: ["Utils"]),
         .testTarget(
+            name: "WriterTargetOutputTests",
+            dependencies: ["WriterTargetOutput", "TestCommons"]),
+        .testTarget(
             name: "ObjcParserTests",
             dependencies: ["GrammarModels", "ObjcParser"]),
         .testTarget(

@@ -115,7 +115,7 @@ public class DiffingTest {
                 Difference starts here: Actual line reads '\(resLineContent)'
                 """,
                 inFile: file,
-                atLine: line + diffStartLine,
+                atLine: expectedDiff.location.line + diffStartLine,
                 expected: true
             )
         } else if resLineRanges.count < expectedLineRanges.count {
@@ -126,7 +126,7 @@ public class DiffingTest {
                 Difference starts here: Expected matching line '\(resultLineContent)'
                 """,
                 inFile: file,
-                atLine: line + diffStartLine + 1,
+                atLine: expectedDiff.location.line + diffStartLine + 1,
                 expected: true
             )
         } else {
@@ -135,7 +135,7 @@ public class DiffingTest {
                 Difference starts here: Extraneous content after this line
                 """,
                 inFile: file,
-                atLine: line + expectedLineRanges.count,
+                atLine: expectedDiff.location.line + expectedLineRanges.count,
                 expected: true
             )
         }
