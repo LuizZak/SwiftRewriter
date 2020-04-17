@@ -90,6 +90,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::SwiftRewriterLibTests",

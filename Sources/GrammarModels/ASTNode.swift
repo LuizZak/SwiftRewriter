@@ -47,11 +47,11 @@ open class ASTNode {
     /// Adds a new node as a child of this node
     /// - precondition: `node` has no previous parent node (`node.parent == nil`).
     public func addChild(_ node: ASTNode) {
-        guard node.parent == nil else {
-            if node.parent === self {
-                fatalError("Node is already a child of \(self)")
+        if let parent = node.parent {
+            if parent === self {
+                fatalError("Node is already a child of this node")
             } else {
-                fatalError("Node already has a parent \(node.parent!)")
+                fatalError("Node already has a parent \(parent)")
             }
         }
         
@@ -62,11 +62,11 @@ open class ASTNode {
     /// Inserts a node as a child of this node.
     /// - precondition: `node` has no previous parent node (`node.parent == nil`).
     public func insertChild(_ node: ASTNode, at index: Int) {
-        guard node.parent == nil else {
-            if node.parent === self {
-                fatalError("Node is already a child of \(self)")
+        if let parent = node.parent {
+            if parent === self {
+                fatalError("Node is already a child of this node")
             } else {
-                fatalError("Node already has a parent \(node.parent!)")
+                fatalError("Node already has a parent \(parent)")
             }
         }
         
@@ -94,7 +94,10 @@ open class ASTNode {
         }
     }
     
-    /// Gets a child of a given type at a given index
+    /// Gets a child of a given type at a given index.
+    ///
+    /// - note: The index represents the nth child from the list of children typed
+    /// `T` in this node, not the nth child overall.
     public func child<T: ASTNode>(ofType type: T.Type = T.self, atIndex index: Int) -> T? {
         let ch = childrenMatching(type: type)
         
