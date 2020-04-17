@@ -14,7 +14,8 @@ public struct KnownFileBuilder {
     public init(fileName: String) {
         self.file = BuildingKnownFile(fileName: fileName,
                                       buildingTypes: [],
-                                      buildingGlobals: [],
+                                      buildingGlobalFunctions: [],
+                                      buildingGlobalVariables: [],
                                       importDirectives: [])
     }
     
@@ -23,7 +24,8 @@ public struct KnownFileBuilder {
         let file =
             BuildingKnownFile(fileName: existingFile.fileName,
                               buildingTypes: [],
-                              buildingGlobals: [],
+                              buildingGlobalFunctions: [],
+                              buildingGlobalVariables: [],
                               importDirectives: existingFile.importDirectives)
         
         self.file = file
@@ -55,6 +57,40 @@ public struct KnownFileBuilder {
         return type(name: name, kind: .protocol, builder)
     }
     
+    public func globalFunction(signature: FunctionSignature,
+                               semantics: Set<Semantic> = []) -> KnownFileBuilder {
+        
+        let newFunc = BuildingKnownGlobalFunction(signature: signature,
+                                                  semantics: semantics,
+                                                  knownFile: nil)
+        
+        var new = clone()
+        new.file.buildingGlobalFunctions.append(newFunc)
+        return new
+    }
+    
+    public func globalVar(name: String,
+                          type: SwiftType,
+                          semantics: Set<Semantic> = []) -> KnownFileBuilder {
+        
+        let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
+        return globalVar(name: name, storage: storage, semantics: semantics)
+    }
+    
+    public func globalVar(name: String,
+                          storage: ValueStorage,
+                          semantics: Set<Semantic> = []) -> KnownFileBuilder {
+        
+        let newVar = BuildingKnownGlobalVariable(name: name,
+                                                 storage: storage,
+                                                 knownFile: nil,
+                                                 semantics: semantics)
+        
+        var new = clone()
+        new.file.buildingGlobalVariables.append(newVar)
+        return new
+    }
+    
     func type(name: String, kind: KnownTypeKind, _ builder: TypeBuildCallback = { $0 }) -> KnownFileBuilder {
         var typeBuilder = KnownTypeBuilder(typeName: name, kind: kind)
         typeBuilder = builder(typeBuilder)
@@ -72,8 +108,11 @@ public struct KnownFileBuilder {
                         globals: [],
                         importDirectives: file.importDirectives)
         
+        let globalFuncs = assigningKeyPath(file.buildingGlobalFunctions, value: newFile, keyPath: \.knownFile)
+        let globalVars = assigningKeyPath(file.buildingGlobalVariables, value: newFile, keyPath: \.knownFile)
+        
         newFile.types = assigningKeyPath(file.buildingTypes, value: newFile, keyPath: \.knownFile)
-        newFile.globals = assigningKeyPath(file.buildingGlobals, value: newFile, keyPath: \.knownFile)
+        newFile.globals = globalFuncs + globalVars
         
         return newFile
     }
@@ -112,7 +151,8 @@ public struct KnownFileBuilder {
 struct BuildingKnownFile: Codable {
     var fileName: String
     var buildingTypes: [BuildingKnownType]
-    var buildingGlobals: [BuildingKnownGlobalFunction]
+    var buildingGlobalFunctions: [BuildingKnownGlobalFunction]
+    var buildingGlobalVariables: [BuildingKnownGlobalVariable]
     var importDirectives: [String]
 }
 
@@ -122,20 +162,44 @@ extension BuildingKnownFile: KnownFile {
     }
     
     var globals: [KnownGlobal] {
-        buildingGlobals
+        buildingGlobalFunctions + buildingGlobalVariables
     }
 }
 
 struct BuildingKnownGlobalFunction: Codable {
+    var signature: FunctionSignature
     var semantics: Set<Semantic>
     var knownFile: KnownFile?
     
+    var identifier: FunctionIdentifier {
+        return signature.asIdentifier
+    }
+    
     enum CodingKeys: String, CodingKey {
+        case semantics
+        case signature
+    }
+}
+
+extension BuildingKnownGlobalFunction: KnownGlobalFunction {
+    
+}
+
+struct BuildingKnownGlobalVariable: Codable {
+    var name: String
+    var storage: ValueStorage
+    var knownFile: KnownFile?
+    var semantics: Set<Semantic>
+    
+    enum CodingKeys: String, CodingKey {
+        case name
+        case storage
         case semantics
     }
 }
 
-extension BuildingKnownGlobalFunction: KnownGlobal {
+extension BuildingKnownGlobalVariable: KnownGlobalVariable {
+    
 }
 
 private class DummyFile: KnownFile {

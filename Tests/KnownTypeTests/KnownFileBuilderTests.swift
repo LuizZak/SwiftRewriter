@@ -72,14 +72,48 @@ class KnownFileBuilderTests: XCTestCase {
         XCTAssertEqual(file.types.first?.knownConstructors.count, 1)
     }
     
+    func testGlobalFunction() {
+        let signature = FunctionSignature(name: "function")
+        let semantics = Set<Semantic>([.init(name: "semantic")])
+        
+        let sut =
+            KnownFileBuilder(fileName: "FileName.swift")
+                .globalFunction(signature: signature, semantics: semantics)
+        
+        let file = sut.build()
+        XCTAssertEqual(file.globals.count, 1)
+        XCTAssert(file.globals.first is KnownGlobalFunction)
+        XCTAssertEqual(file.globals.first?.semantics, semantics)
+        XCTAssertEqual((file.globals.first as? KnownGlobalFunction)?.signature, signature)
+    }
+    
+    func testGlobalVar() {
+        let storage = ValueStorage(type: .int, ownership: .weak, isConstant: true)
+        let semantics = Set<Semantic>([.init(name: "semantic")])
+        
+        let sut =
+            KnownFileBuilder(fileName: "FileName.swift")
+                .globalVar(name: "v", storage: storage, semantics: semantics)
+        
+        let file = sut.build()
+        XCTAssertEqual(file.globals.count, 1)
+        XCTAssert(file.globals.first is KnownGlobalVariable)
+        XCTAssertEqual(file.globals.first?.semantics, semantics)
+        XCTAssertEqual((file.globals.first as? KnownGlobalVariable)?.storage, storage)
+    }
+    
     func testAssignsKnownTypeFile() {
         let sut =
             KnownFileBuilder(fileName: "FileName.h")
                 .class(name: "AClass")
+                .globalFunction(signature: FunctionSignature(name: "f"))
+                .globalVar(name: "v", storage: ValueStorage(type: .int, ownership: .strong, isConstant: false))
         
         let file = sut.build()
         
         XCTAssertNotNil(file.types[0].knownFile)
         XCTAssertNotNil(file.types[0].knownFile?.fileName, "FileName.h")
+        XCTAssertNotNil(file.globals[0].knownFile)
+        XCTAssertNotNil(file.globals[1].knownFile)
     }
 }
