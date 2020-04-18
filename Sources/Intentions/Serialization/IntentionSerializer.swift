@@ -70,6 +70,9 @@ public final class IntentionSerializer {
             case is PropertySynthesizationIntention:
                 kind = .propertySynthesize
                 
+            case is SubscriptGenerationIntention:
+                kind = .subscript
+                
             default:
                 throw Error.unknownIntentionType(type(of: intention))
             }
@@ -143,6 +146,9 @@ public final class IntentionSerializer {
                 
             case .propertySynthesize:
                 intention = try container.decode(PropertySynthesizationIntention.self, forKey: .intention)
+                
+            case .subscript:
+                intention = try container.decode(SubscriptGenerationIntention.self, forKey: .intention)
             }
         }
         
@@ -180,6 +186,7 @@ public final class IntentionSerializer {
         case protocolInheritance
         case `typealias`
         case functionBody
+        case `subscript`
     }
     
     public enum Error: Swift.Error {

@@ -16,6 +16,7 @@ public class TypeGenerationIntention: FromSourceIntention {
     private(set) public var properties: [PropertyGenerationIntention] = []
     private(set) public var methods: [MethodGenerationIntention] = []
     private(set) public var constructors: [InitGenerationIntention] = []
+    private(set) public var subscripts: [SubscriptGenerationIntention] = []
     
     public var isExtension: Bool {
         false
@@ -70,6 +71,7 @@ public class TypeGenerationIntention: FromSourceIntention {
         properties = try container.decodeIntentions(forKey: .properties)
         methods = try container.decodeIntentions(forKey: .methods)
         constructors = try container.decodeIntentions(forKey: .constructors)
+        subscripts = try container.decodeIntentions(forKey: .subscripts)
         knownTraits = try container.decode([String: TraitType].self, forKey: .knownTraits)
         semantics = try container.decode(Set<Semantic>.self, forKey: .semantics)
         
@@ -90,6 +92,10 @@ public class TypeGenerationIntention: FromSourceIntention {
             intention.type = self
             intention.parent = self
         }
+        for intention in subscripts {
+            intention.type = self
+            intention.parent = self
+        }
     }
     
     public override func encode(to encoder: Encoder) throws {
@@ -101,6 +107,7 @@ public class TypeGenerationIntention: FromSourceIntention {
         try container.encodeIntentions(properties, forKey: .properties)
         try container.encodeIntentions(methods, forKey: .methods)
         try container.encodeIntentions(constructors, forKey: .constructors)
+        try container.encodeIntentions(subscripts, forKey: .subscripts)
         try container.encode(knownTraits, forKey: .knownTraits)
         try container.encode(semantics, forKey: .semantics)
         
@@ -207,6 +214,13 @@ public class TypeGenerationIntention: FromSourceIntention {
         }
     }
     
+    public func addSubscript(_ intention: SubscriptGenerationIntention) {
+        subscripts.append(intention)
+        
+        intention.type = self
+        intention.parent = self
+    }
+    
     public func addConstructor(_ intention: InitGenerationIntention) {
         self.constructors.append(intention)
         
@@ -253,6 +267,7 @@ public class TypeGenerationIntention: FromSourceIntention {
         case properties
         case methods
         case constructors
+        case subscripts
         case knownTraits
         case semantics
     }
@@ -272,6 +287,6 @@ extension TypeGenerationIntention: KnownType {
         protocols
     }
     public var knownSubscripts: [KnownSubscript] {
-        []
+        subscripts
     }
 }

@@ -594,6 +594,70 @@ extension SwiftSyntaxProducerTests {
     }
 }
 
+// MARK: - Subscript Generation
+extension SwiftSyntaxProducerTests {
+    func testGenerateSubscript() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A") { type in
+                    type.createSubscript(
+                        parameters: [ParameterSignature(name: "index", type: .int)],
+                        returnType: .int)
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(result, matches: """
+            class A {
+                subscript(index: Int) -> Int {
+                }
+            }
+            """)
+    }
+    
+    func testGenerateSubscriptGetterAndSetter() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A") { type in
+                    type.createSubscript(
+                        parameters: [ParameterSignature(name: "index", type: .int)],
+                        returnType: .int) { sub in
+                            let setter: CompoundStatement = [
+                                .expression(Expression
+                                    .identifier("print")
+                                    .call([.identifier("newValue")])
+                                )
+                            ]
+                            
+                            sub.setAsGetterSetter(
+                                getter: [.return(.constant(0))],
+                                setter: .init(valueIdentifier: "newValue",
+                                              body: setter)
+                            )
+                    }
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(result, matches: """
+            class A {
+                subscript(index: Int) -> Int {
+                    get {
+                        return 0
+                    }
+                    set {
+                        print(newValue)
+                    }
+                }
+            }
+            """)
+    }
+}
+
 // MARK: - Typealias Generation
 extension SwiftSyntaxProducerTests {
     func testGenerateFileWithTypealias() {

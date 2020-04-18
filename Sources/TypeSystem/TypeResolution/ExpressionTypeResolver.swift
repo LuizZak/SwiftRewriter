@@ -795,7 +795,7 @@ private class MemberInvocationResolver {
                                       in: expType)
                 
                 if let subscriptDecl = subscriptDecl {
-                    exp.resolvedType = subscriptDecl.type
+                    exp.resolvedType = subscriptDecl.returnType
                     matchParameterTypes(parameters: subscriptDecl.parameters, callArguments: sub.arguments)
                     
                     resolveArgTypes()

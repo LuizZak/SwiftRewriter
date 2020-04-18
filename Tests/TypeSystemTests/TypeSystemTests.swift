@@ -1160,22 +1160,22 @@ class TypeSystemTests: XCTestCase {
         XCTAssertEqual(sut.subscription(withParameterLabels: [nil],
                                         invocationTypeHints: [.int],
                                         static: false,
-                                        in: type)?.type,
+                                        in: type)?.returnType,
                        .int)
         XCTAssertEqual(sut.subscription(withParameterLabels: [nil],
                                         invocationTypeHints: [.int],
                                         static: true,
-                                        in: type)?.type,
+                                        in: type)?.returnType,
                        .string)
         XCTAssertEqual(sut.subscription(withParameterLabels: [nil],
                                         invocationTypeHints: [.string],
                                         static: false,
-                                        in: type)?.type,
+                                        in: type)?.returnType,
                        .int)
         XCTAssertEqual(sut.subscription(withParameterLabels: [nil],
                                         invocationTypeHints: [.string],
                                         static: true,
-                                        in: type)?.type,
+                                        in: type)?.returnType,
                        .string)
     }
 }

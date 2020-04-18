@@ -29,7 +29,7 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
                                type: SwiftType,
                                mode: PropertyGenerationIntention.Mode = .asField,
                                objcAttributes: [ObjcPropertyAttribute] = [],
-                               builder: (MemberBuilder<PropertyGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
+                               builder: (PropertyBuilder) -> Void = emptyInit) -> TypeBuilder {
         
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         
@@ -58,7 +58,7 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     
     @discardableResult
     public func createConstructor(withParameters parameters: [ParameterSignature] = [],
-                                  builder: (MemberBuilder<InitGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
+                                  builder: (InitializerBuilder) -> Void = emptyInit) -> TypeBuilder {
         
         let ctor = InitGenerationIntention(parameters: parameters)
         let mbuilder = MemberBuilder(targetMember: ctor)
@@ -72,7 +72,7 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     
     @discardableResult
     public func createVoidMethod(
-        named name: String, builder: (MemberBuilder<MethodGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
+        named name: String, builder: (MethodBuilder) -> Void = emptyInit) -> TypeBuilder {
         
         let signature = FunctionSignature(name: name, parameters: [])
         
@@ -84,7 +84,7 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
                              returnType: SwiftType = .void,
                              parameters: [ParameterSignature] = [],
                              isStatic: Bool = false,
-                             builder: (MemberBuilder<MethodGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
+                             builder: (MethodBuilder) -> Void = emptyInit) -> TypeBuilder {
         
         let signature = FunctionSignature(name: name,
                                           parameters: parameters,
@@ -97,7 +97,7 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     @discardableResult
     public func createMethod(_ signatureString: String,
                              isStatic: Bool = false,
-                             builder: (MemberBuilder<MethodGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
+                             builder: (MethodBuilder) -> Void = emptyInit) -> TypeBuilder {
         
         var signature = try! FunctionSignatureParser.parseSignature(from: signatureString)
         signature.isStatic = isStatic
@@ -107,7 +107,7 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     
     @discardableResult
     public func createMethod(_ signature: FunctionSignature,
-                             builder: (MemberBuilder<MethodGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
+                             builder: (MethodBuilder) -> Void = emptyInit) -> TypeBuilder {
         
         let method: MethodGenerationIntention
         
@@ -125,6 +125,27 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
         builder(mbuilder)
         
         targetType.addMethod(mbuilder.build())
+        
+        return self
+    }
+    
+    @discardableResult
+    public func createSubscript(parameters: [ParameterSignature],
+                                returnType: SwiftType,
+                                isConstant: Bool = false,
+                                builder: (SubscriptBuilder) -> Void = emptyInit) -> TypeBuilder {
+        
+        let sub = SubscriptGenerationIntention(parameters: parameters,
+                                               returnType: returnType,
+                                               isConstant: isConstant,
+                                               mode: .getter(FunctionBodyIntention(body: [])),
+                                               accessLevel: .internal,
+                                               source: nil)
+        
+        let sbuilder = SubscriptBuilder(targetMember: sub)
+        builder(sbuilder)
+        
+        targetType.addSubscript(sub)
         
         return self
     }

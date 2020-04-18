@@ -19,8 +19,7 @@ class SwiftSyntaxWriterTests: XCTestCase {
         typeSystem = TypeSystem()
         let provider = ArraySwiftSyntaxRewriterPassProvider(passes: [])
         let passApplier = SwiftSyntaxRewriterPassApplier(provider: provider)
-        sut = SwiftSyntaxWriter(intentions: IntentionCollection(),
-                                options: SwiftSyntaxOptions(),
+        sut = SwiftSyntaxWriter(options: SwiftSyntaxOptions(),
                                 diagnostics: Diagnostics(),
                                 output: output,
                                 typeSystem: typeSystem,

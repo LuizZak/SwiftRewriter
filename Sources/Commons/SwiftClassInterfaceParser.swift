@@ -253,7 +253,7 @@ public final class SwiftClassInterfaceParser {
 
             typeBuilder =
                 typeBuilder.subscription(parameters: subscriptDecl.parameters,
-                                         type: subscriptDecl.type,
+                                         returnType: subscriptDecl.type,
                                          isStatic: modifiers.contains(.static),
                                          isConstant: subscriptDecl.isConstant,
                                          attributes: knownAttributes)

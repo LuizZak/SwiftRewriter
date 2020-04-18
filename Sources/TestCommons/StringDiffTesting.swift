@@ -100,7 +100,7 @@ public class DiffingTest {
         }
         
         // Report inline in Xcode now
-        guard let (diffStartLine, _) = res.firstDifferingLineColumn(against: expectedDiff.string) else {
+        guard let (diffStartLine, diffStartColumn) = res.firstDifferingLineColumn(against: expectedDiff.string) else {
             return
         }
         
@@ -119,16 +119,39 @@ public class DiffingTest {
                 expected: true
             )
         } else if resLineRanges.count < expectedLineRanges.count {
-            let resultLineContent = expectedDiff.string[expectedLineRanges[diffStartLine]]
+            let isAtLastColumn: Bool = {
+                guard let last = expectedLineRanges.last else {
+                    return false
+                }
+                
+                let dist = expectedDiff.string.distance(from: last.lowerBound, to: last.upperBound)
+                
+                return diffStartColumn == dist + 1
+            }()
             
-            testCase.recordFailure(
-                withDescription: """
-                Difference starts here: Expected matching line '\(resultLineContent)'
-                """,
-                inFile: file,
-                atLine: expectedDiff.location.line + diffStartLine + 1,
-                expected: true
-            )
+            if diffStartLine == expectedLineRanges.count - 1 && isAtLastColumn {
+                let resultLineContent = expectedDiff.string[expectedLineRanges[diffStartLine]]
+                
+                testCase.recordFailure(
+                    withDescription: """
+                    Difference starts here: Expected matching line '\(resultLineContent)'
+                    """,
+                    inFile: file,
+                    atLine: expectedDiff.location.line + diffStartLine + 1,
+                    expected: true
+                )
+            } else {
+                let resLineContent = res[resLineRanges[diffStartLine - 1]]
+                
+                testCase.recordFailure(
+                    withDescription: """
+                    Difference starts here: Actual line reads '\(resLineContent)'
+                    """,
+                    inFile: file,
+                    atLine: expectedDiff.location.line + diffStartLine,
+                    expected: true
+                )
+            }
         } else {
             testCase.recordFailure(
                 withDescription: """

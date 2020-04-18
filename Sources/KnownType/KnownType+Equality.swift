@@ -72,7 +72,7 @@ func areEquivalent(_ prop1: KnownProperty, _ prop2: KnownProperty) -> Bool {
 /// sesmantics.
 func areEquivalent(_ sub1: KnownSubscript, _ sub2: KnownSubscript) -> Bool {
     return sub1.parameters == sub2.parameters
-        && sub1.type == sub2.type
+        && sub1.returnType == sub2.returnType
         && sub1.annotations == sub2.annotations
         && sub1.knownAttributes == sub2.knownAttributes
         && sub1.semantics == sub2.semantics

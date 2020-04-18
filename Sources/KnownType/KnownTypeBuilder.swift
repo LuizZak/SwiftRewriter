@@ -61,7 +61,7 @@ public struct KnownTypeBuilder {
         }
         for sub in existingType.knownSubscripts {
             self = self.subscription(parameters: sub.parameters,
-                                     type: sub.type,
+                                     returnType: sub.returnType,
                                      isStatic: sub.isStatic,
                                      isConstant: sub.isConstant,
                                      attributes: sub.knownAttributes,
@@ -432,7 +432,7 @@ public struct KnownTypeBuilder {
         ]
         
         return subscription(parameters: parameters,
-                            type: type,
+                            returnType: type,
                             isStatic: isStatic,
                             isConstant: isConstant,
                             attributes: attributes,
@@ -441,7 +441,7 @@ public struct KnownTypeBuilder {
     }
     
     public func subscription(parameters: [ParameterSignature],
-                             type: SwiftType,
+                             returnType: SwiftType,
                              isStatic: Bool = false,
                              isConstant: Bool = false,
                              attributes: [KnownAttribute] = [],
@@ -453,7 +453,7 @@ public struct KnownTypeBuilder {
         let sub = BuildingKnownSubscript(isStatic: isStatic,
                                          ownerType: self.type.asKnownTypeReference,
                                          parameters: parameters,
-                                         type: type,
+                                         returnType: returnType,
                                          isConstant: isConstant,
                                          knownAttributes: attributes,
                                          semantics: semantics,
@@ -816,20 +816,20 @@ final class BuildingKnownSubscript: KnownSubscript, Codable {
     var isStatic: Bool
     var ownerType: KnownTypeReference?
     var parameters: [ParameterSignature]
-    var type: SwiftType
+    var returnType: SwiftType
     var isConstant: Bool
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
     var annotations: [String]
     
     init(isStatic: Bool, ownerType: KnownTypeReference?, parameters: [ParameterSignature],
-         type: SwiftType, isConstant: Bool, knownAttributes: [KnownAttribute],
+         returnType: SwiftType, isConstant: Bool, knownAttributes: [KnownAttribute],
          semantics: Set<Semantic>, annotations: [String]) {
         
         self.isStatic = isStatic
         self.ownerType = ownerType
         self.parameters = parameters
-        self.type = type
+        self.returnType = returnType
         self.isConstant = isConstant
         self.knownAttributes = knownAttributes
         self.semantics = semantics

@@ -178,7 +178,7 @@ public protocol KnownSubscript: KnownMember {
     var parameters: [ParameterSignature] { get }
 
     /// Gets the resulting type when this subscript is indexed into.
-    var type: SwiftType { get }
+    var returnType: SwiftType { get }
 
     /// Gets whether this subscription is getter-only
     var isConstant: Bool { get }
@@ -216,7 +216,7 @@ public extension KnownMethod {
 
 public extension KnownSubscript {
     var memberType: SwiftType {
-        type
+        returnType
     }
 }
 
