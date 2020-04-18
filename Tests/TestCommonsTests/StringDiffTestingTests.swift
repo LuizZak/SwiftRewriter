@@ -80,6 +80,47 @@ class StringDiffTestingTests: XCTestCase {
         XCTAssertEqual(testReporter.messages.count, 0)
     }
     
+    func testDiffWhitespaceString() {
+           #sourceLocation(file: "test.swift", line: 1)
+           diffTest(expected: """
+                
+                """).diff("test")
+           #sourceLocation()
+           
+           XCTAssertEqual(
+               testReporter.messages[0],
+               """
+               test.swift:3: Strings don't match:
+
+               Expected (between ---):
+
+               ---
+
+               ---
+
+               Actual result (between ---):
+
+               ---
+               test
+               ---
+
+               Diff (between ---):
+
+               ---
+               test
+                ~ Difference at start of string.
+               ---
+               """
+           )
+           
+           XCTAssertEqual(
+               testReporter.messages[1],
+               """
+               test.swift:1: Difference starts here: Actual line reads 'test'
+               """
+           )
+       }
+    
     func testDiffLargerExpectedString() {
         #sourceLocation(file: "test.swift", line: 1)
         diffTest(expected: """

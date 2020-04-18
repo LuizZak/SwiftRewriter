@@ -2848,4 +2848,48 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testConvertSubscriptDeclaration() {
+        assertObjcParse(objc: """
+            @interface A
+            @end
+            @implementation A
+            - (NSObject*)objectAtIndexSubscript:(NSUInteger)index {
+                return self;
+            }
+            @end
+            """, swift: """
+            class A {
+                subscript(index: UInt) -> NSObject! {
+                    return self
+                }
+            }
+            """)
+    }
+    
+    func testConvertSubscriptDeclarationGetterAndSetter() {
+        assertObjcParse(objc: """
+            @interface A
+            @end
+            @implementation A
+            - (NSObject*)objectAtIndexSubscript:(NSUInteger)index {
+                return self;
+            }
+            - (void)setObject:(NSObject*)object atIndexedSubscript:(NSUInteger)index {
+                (object);
+            }
+            @end
+            """, swift: """
+            class A {
+                subscript(index: UInt) -> NSObject! {
+                    get {
+                        return self
+                    }
+                    set(object) {
+                        (object)
+                    }
+                }
+            }
+            """)
+    }
 }
