@@ -10,6 +10,10 @@ extension KnownFileBuilderTests {
         ("testClass", testClass),
         ("testEnum", testEnum),
         ("testEphemeral", testEphemeral),
+        ("testGlobalFunction", testGlobalFunction),
+        ("testGlobalVar", testGlobalVar),
+        ("testImportDirective", testImportDirective),
+        ("testInitCopying", testInitCopying),
         ("testProtocol", testProtocol),
         ("testStruct", testStruct),
     ]

@@ -107,6 +107,8 @@ extension SwiftSyntaxProducer_ExpTests {
         ("testPostfixOptionalMember", testPostfixOptionalMember),
         ("testPostfixOptionalSubscript", testPostfixOptionalSubscript),
         ("testPostfixSubscript", testPostfixSubscript),
+        ("testPostfixSubscriptEmptyArguments", testPostfixSubscriptEmptyArguments),
+        ("testPostfixSubscriptMultipleArguments", testPostfixSubscriptMultipleArguments),
         ("testPrefix", testPrefix),
         ("testSequentialBinaryExpression", testSequentialBinaryExpression),
         ("testSizeOfType", testSizeOfType),

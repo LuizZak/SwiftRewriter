@@ -48,8 +48,10 @@ extension IntentionCollectorTests {
     static let __allTests__IntentionCollectorTests = [
         ("testCollectFunctionDefinition", testCollectFunctionDefinition),
         ("testCollectFunctionDefinitionBody", testCollectFunctionDefinitionBody),
+        ("testCollectOpaqueStruct", testCollectOpaqueStruct),
         ("testCollectPropertyIBInspectableAttribute", testCollectPropertyIBInspectableAttribute),
         ("testCollectPropertyIBOutletAttribute", testCollectPropertyIBOutletAttribute),
+        ("testCollectStructDeclaration", testCollectStructDeclaration),
     ]
 }
 
@@ -253,6 +255,7 @@ extension SwiftRewriterTests {
         ("testRewriteMethodSignatures", testRewriteMethodSignatures),
         ("testRewriteNSArray", testRewriteNSArray),
         ("testRewriteOpaqueTypealias", testRewriteOpaqueTypealias),
+        ("testRewriteOpaqueTypealias2", testRewriteOpaqueTypealias2),
         ("testRewriteProtocol", testRewriteProtocol),
         ("testRewriteProtocolConformance", testRewriteProtocolConformance),
         ("testRewriteProtocolOptionalRequiredSections", testRewriteProtocolOptionalRequiredSections),

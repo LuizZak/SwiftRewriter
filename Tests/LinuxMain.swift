@@ -17,6 +17,7 @@ import SwiftSyntaxSupportTests
 import TestCommonsTests
 import TypeSystemTests
 import UtilsTests
+import WriterTargetOutputTests
 
 var tests = [XCTestCaseEntry]()
 tests += AnalysisTests.__allTests()
@@ -36,5 +37,6 @@ tests += SwiftSyntaxSupportTests.__allTests()
 tests += TestCommonsTests.__allTests()
 tests += TypeSystemTests.__allTests()
 tests += UtilsTests.__allTests()
+tests += WriterTargetOutputTests.__allTests()
 
 XCTMain(tests)
