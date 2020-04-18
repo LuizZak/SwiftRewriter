@@ -61,15 +61,15 @@ public extension IntentionHistory {
     
     @discardableResult
     func recordChange(tag: String,
-                             description: String) -> IntentionHistoryEntryEcho {
+                      description: String) -> IntentionHistoryEntryEcho {
         
         recordChange(tag: tag, description: description, relatedIntentions: [])
     }
     
     @discardableResult
     func recordChange(tag: String,
-                             description: String,
-                             relatedIntentions: [Intention]) -> IntentionHistoryEntryEcho {
+                      description: String,
+                      relatedIntentions: [Intention]) -> IntentionHistoryEntryEcho {
         
         record(IntentionHistoryEntry(tag: tag,
                                      description: description))
@@ -77,8 +77,8 @@ public extension IntentionHistory {
     
     @discardableResult
     func recordMerge(with intentions: [Intention],
-                            tag: String,
-                            description: String) -> IntentionHistoryEntryEcho {
+                     tag: String,
+                     description: String) -> IntentionHistoryEntryEcho {
         
         record(IntentionHistoryEntry(tag: tag,
                                      description: description))
@@ -86,8 +86,8 @@ public extension IntentionHistory {
     
     @discardableResult
     func recordSplit(from intention: Intention,
-                            tag: String,
-                            description: String) -> IntentionHistoryEntryEcho {
+                     tag: String,
+                     description: String) -> IntentionHistoryEntryEcho {
         
         record(IntentionHistoryEntry(tag: tag,
                                      description: description))

@@ -36,6 +36,10 @@ public class ClassVisitingIntentionPass: IntentionPass {
         for method in type.methods {
             applyOnMethod(method)
         }
+        
+        for sub in type.subscripts {
+            applyOnSubscript(sub)
+        }
     }
     
     func applyOnInstanceVar(_ ivar: InstanceVariableGenerationIntention) {
@@ -47,6 +51,10 @@ public class ClassVisitingIntentionPass: IntentionPass {
     }
     
     func applyOnProperty(_ property: PropertyGenerationIntention) {
+        
+    }
+    
+    func applyOnSubscript(_ sub: SubscriptGenerationIntention) {
         
     }
 }

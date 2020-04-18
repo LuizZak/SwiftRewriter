@@ -13,6 +13,7 @@ class DefaultIntentionPassesTests: XCTestCase {
         var intentsIterator = intents.makeIterator()
         
         XCTAssert(intentsIterator.next() is FileTypeMergingIntentionPass)
+        XCTAssert(intentsIterator.next() is SubscriptDeclarationPass)
         XCTAssert(intentsIterator.next() is PromoteProtocolPropertyConformanceIntentionPass)
         XCTAssert(intentsIterator.next() is ProtocolNullabilityPropagationToConformersIntentionPass)
         XCTAssert(intentsIterator.next() is PropertyMergeIntentionPass)

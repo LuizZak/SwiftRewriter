@@ -61,6 +61,23 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
         case getter(FunctionBodyIntention)
         case getterAndSetter(get: FunctionBodyIntention, set: PropertyGenerationIntention.Setter)
         
+        public var getter: FunctionBodyIntention {
+            switch self {
+            case .getter(let f), .getterAndSetter(let f, _):
+                return f
+            }
+        }
+        
+        public var setter: PropertyGenerationIntention.Setter? {
+            switch self {
+            case .getterAndSetter(_, let setter):
+                return setter
+                
+            default:
+                return nil
+            }
+        }
+        
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             

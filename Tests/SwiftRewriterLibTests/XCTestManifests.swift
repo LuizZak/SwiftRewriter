@@ -174,6 +174,8 @@ extension SwiftRewriterTests {
         ("testCollapsePropertySynthesisWhenPropertyAndBackingFieldMatchTypesAndName", testCollapsePropertySynthesisWhenPropertyAndBackingFieldMatchTypesAndName),
         ("testConvertAssignProperty", testConvertAssignProperty),
         ("testConvertImplementationAndCallSiteUsingKnownTypeInformation", testConvertImplementationAndCallSiteUsingKnownTypeInformation),
+        ("testConvertSubscriptDeclaration", testConvertSubscriptDeclaration),
+        ("testConvertSubscriptDeclarationGetterAndSetter", testConvertSubscriptDeclarationGetterAndSetter),
         ("testCorrectsDateIsEqualIntoBinaryExpression", testCorrectsDateIsEqualIntoBinaryExpression),
         ("testCorrectsNullabilityOfMethodParameters", testCorrectsNullabilityOfMethodParameters),
         ("testCorrectsNullableArgumentInFoundationTypeFunctionCall", testCorrectsNullableArgumentInFoundationTypeFunctionCall),
