@@ -299,7 +299,7 @@ public protocol AttributeTaggeableObject {
 }
 
 /// Describes an attribute for a `KnownType` or one of its members.
-public struct KnownAttribute: Codable {
+public struct KnownAttribute: Codable, Equatable {
     public var name: String
     public var parameters: String?
     

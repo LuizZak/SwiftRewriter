@@ -1,6 +1,7 @@
 import XCTest
 import SwiftAST
-import KnownType
+
+@testable import KnownType
 
 class KnownFileBuilderTests: XCTestCase {
     func testEphemeral() {
@@ -9,7 +10,18 @@ class KnownFileBuilderTests: XCTestCase {
         
         XCTAssertEqual(sut.fileName, "FileName.h")
         XCTAssertEqual(file.fileName, "FileName.h")
-        XCTAssertEqual(file.types.count, 0)
+        XCTAssert(file.types.isEmpty)
+        XCTAssert(file.globals.isEmpty)
+        XCTAssert(file.importDirectives.isEmpty)
+    }
+    
+    func testImportDirective() {
+        let sut =
+            KnownFileBuilder(fileName: "FileName.swift")
+                .importDirective("ModuleA")
+        
+        let file = sut.build()
+        XCTAssertEqual(file.importDirectives, ["ModuleA"])
     }
     
     func testClass() {
@@ -20,7 +32,6 @@ class KnownFileBuilderTests: XCTestCase {
                 }
         
         let file = sut.build()
-        
         XCTAssertEqual(file.types.count, 1)
         XCTAssertEqual(file.types.first?.kind, .class)
         XCTAssertEqual(file.types.first?.typeName, "AClass")
@@ -35,7 +46,6 @@ class KnownFileBuilderTests: XCTestCase {
                 }
         
         let file = sut.build()
-        
         XCTAssertEqual(file.types.count, 1)
         XCTAssertEqual(file.types.first?.kind, .struct)
         XCTAssertEqual(file.types.first?.typeName, "AStruct")
@@ -50,7 +60,6 @@ class KnownFileBuilderTests: XCTestCase {
                 }
         
         let file = sut.build()
-        
         XCTAssertEqual(file.types.count, 1)
         XCTAssertEqual(file.types.first?.kind, .protocol)
         XCTAssertEqual(file.types.first?.typeName, "AProtocol")
@@ -65,7 +74,6 @@ class KnownFileBuilderTests: XCTestCase {
                 }
         
         let file = sut.build()
-        
         XCTAssertEqual(file.types.count, 1)
         XCTAssertEqual(file.types.first?.kind, .enum)
         XCTAssertEqual(file.types.first?.typeName, "AnEnum")
@@ -115,5 +123,19 @@ class KnownFileBuilderTests: XCTestCase {
         XCTAssertNotNil(file.types[0].knownFile?.fileName, "FileName.h")
         XCTAssertNotNil(file.globals[0].knownFile)
         XCTAssertNotNil(file.globals[1].knownFile)
+    }
+    
+    func testInitCopying() {
+        let fileA =
+            KnownFileBuilder(fileName: "FileName.h")
+                .importDirective("ModuleA")
+                .class(name: "AClass")
+                .globalFunction(signature: FunctionSignature(name: "f"))
+                .globalVar(name: "v", storage: ValueStorage(type: .int, ownership: .strong, isConstant: false))
+                .build()
+        
+        let sut = KnownFileBuilder(from: fileA)
+        
+        XCTAssert(areEquivalent(fileA, sut.build()))
     }
 }

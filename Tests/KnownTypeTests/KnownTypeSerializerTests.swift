@@ -15,6 +15,7 @@ class KnownTypeSerializerTests: XCTestCase {
                         returning: .array(.int),
                         isStatic: true, optional: false)
                 .property(named: "prop", type: .optional(.typeName("A")))
+                .subscription(indexType: .int, type: .string)
                 .field(named: "field", type: .string)
                 .protocolConformance(protocolName: "P")
                 .build()

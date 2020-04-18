@@ -59,6 +59,15 @@ public struct KnownTypeBuilder {
         for prot in existingType.knownProtocolConformances {
             self = self.protocolConformance(protocolName: prot.protocolName)
         }
+        for sub in existingType.knownSubscripts {
+            self = self.subscription(parameters: sub.parameters,
+                                     type: sub.type,
+                                     isStatic: sub.isStatic,
+                                     isConstant: sub.isConstant,
+                                     attributes: sub.knownAttributes,
+                                     semantics: sub.semantics,
+                                     annotations: sub.annotations)
+        }
         self.type.traits = existingType.knownTraits
     }
     
@@ -674,6 +683,7 @@ struct BuildingKnownType: Codable {
         case methods
         case properties
         case fields
+        case subscripts
         case protocols
         case attributes
         case supertype

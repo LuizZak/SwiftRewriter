@@ -21,16 +21,29 @@ public struct KnownFileBuilder {
     
     // TODO: Not public until we solve the TODO within this init down bellow
     /*public*/ init(from existingFile: KnownFile) {
-        let file =
+        var file =
             BuildingKnownFile(fileName: existingFile.fileName,
                               buildingTypes: [],
                               buildingGlobalFunctions: [],
                               buildingGlobalVariables: [],
                               importDirectives: existingFile.importDirectives)
         
+        for type in existingFile.types {
+            let typeBuilder = KnownTypeBuilder(from: type)
+            
+            file.buildingTypes.append(typeBuilder.type)
+        }
+        
         self.file = file
         
-        // TODO: Copy over globals from new file
+        for global in existingFile.globals {
+            if let f = global as? KnownGlobalFunction {
+                self = self.globalFunction(signature: f.signature, semantics: f.semantics)
+            }
+            if let v = global as? KnownGlobalVariable {
+                self = self.globalVar(name: v.name, storage: v.storage, semantics: v.semantics)
+            }
+        }
     }
     
     private init(file: BuildingKnownFile) {
@@ -39,6 +52,12 @@ public struct KnownFileBuilder {
     
     func clone() -> KnownFileBuilder {
         return KnownFileBuilder(file: file)
+    }
+    
+    public func importDirective(_ moduleName: String) -> KnownFileBuilder {
+        var new = clone()
+        new.file.importDirectives.append(moduleName)
+        return new
     }
     
     public func `class`(name: String, _ builder: TypeBuildCallback = { $0 }) -> KnownFileBuilder {
