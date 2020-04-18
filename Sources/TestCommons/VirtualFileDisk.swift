@@ -65,16 +65,18 @@ public class VirtualFileDisk {
     }
 
     public func filesInDirectory(atPath path: String, recursive: Bool) throws -> [String] {
+        if !recursive {
+            return try directory(atPath: path).files.map { $0.fullPath }
+        }
+        
         var files: [String] = []
         var stack: [String] = [path]
 
         while let nextPath = stack.popLast() {
             let dir = try directory(atPath: nextPath)
+            
             files.append(contentsOf: dir.files.map { $0.fullPath })
-
-            if recursive {
-                stack.append(contentsOf: dir.directories.map { $0.fullPath })
-            }
+            stack.append(contentsOf: dir.directories.map { $0.fullPath })
         }
 
         return files
