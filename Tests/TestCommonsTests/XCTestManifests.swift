@@ -12,6 +12,7 @@ extension StringDiffTestingTests {
         ("testDiffLargerExpectedStringWithMismatchInMiddle", testDiffLargerExpectedStringWithMismatchInMiddle),
         ("testDiffLargerResultString", testDiffLargerResultString),
         ("testDiffSimpleString", testDiffSimpleString),
+        ("testDiffWhitespaceString", testDiffWhitespaceString),
     ]
 }
 

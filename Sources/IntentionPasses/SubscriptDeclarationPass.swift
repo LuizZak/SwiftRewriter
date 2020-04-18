@@ -120,13 +120,6 @@ public class SubscriptDeclarationPass: ClassVisitingIntentionPass {
     func getterSetterMatch(_ getter: MethodGenerationIntention,
                            _ setter: MethodGenerationIntention) -> Bool {
         
-        guard getter.parameters.count == 1 else {
-            return false
-        }
-        guard setter.parameters.count == 2 else {
-            return false
-        }
-        
         let objectsMatch = context.typeSystem.typesMatch(getter.returnType,
                                                          setter.parameters[0].type,
                                                          ignoreNullability: true)
