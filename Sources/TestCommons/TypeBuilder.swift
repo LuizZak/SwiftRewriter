@@ -130,14 +130,24 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     }
     
     @discardableResult
+    public func createSubscript(_ parameters: String,
+                                returnType: SwiftType,
+                                builder: (SubscriptBuilder) -> Void = emptyInit) -> TypeBuilder {
+        
+        let params = try! FunctionSignatureParser.parseParameters(from: parameters)
+        
+        return createSubscript(parameters: params,
+                               returnType: returnType,
+                               builder: builder)
+    }
+    
+    @discardableResult
     public func createSubscript(parameters: [ParameterSignature],
                                 returnType: SwiftType,
-                                isConstant: Bool = false,
                                 builder: (SubscriptBuilder) -> Void = emptyInit) -> TypeBuilder {
         
         let sub = SubscriptGenerationIntention(parameters: parameters,
                                                returnType: returnType,
-                                               isConstant: isConstant,
                                                mode: .getter(FunctionBodyIntention(body: [])),
                                                accessLevel: .internal,
                                                source: nil)

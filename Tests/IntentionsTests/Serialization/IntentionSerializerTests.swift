@@ -23,6 +23,38 @@ class IntentionSerializerTests: XCTestCase {
                                                 .attribute("attribute1"),
                                                 .setterName("attribute1")
                                             ])
+                            .createProperty(named: "c", type: .int) { prop in
+                                prop.setAsComputedProperty(body: [
+                                    .return(.constant(0))
+                                ])
+                            }
+                            .createProperty(named: "d", type: .int) { prop in
+                                let setterBody: CompoundStatement = [
+                                    .expression(Expression
+                                        .identifier("print")
+                                        .call([.identifier("newValue")])
+                                    )
+                                ]
+                                
+                                prop.setAsGetterSetter(
+                                    getter: [.return(.constant(0))],
+                                    setter: .init(valueIdentifier: "newValue",
+                                                  body: setterBody))
+                            }
+                            .createSubscript("(index: Int)", returnType: .int)
+                            .createSubscript("(index: String)", returnType: .string) { sub in
+                                let setterBody: CompoundStatement = [
+                                    .expression(Expression
+                                        .identifier("print")
+                                        .call([.identifier("newValue")])
+                                    )
+                                ]
+                                
+                                sub.setAsGetterSetter(
+                                    getter: [.return(.constant(0))],
+                                    setter: .init(valueIdentifier: "newValue",
+                                                  body: setterBody))
+                            }
                             .createMethod("method(_ a: Int, b: Float)") { method in
                                 method
                                     .addHistory(tag: "Test", description: "A test history")

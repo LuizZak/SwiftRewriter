@@ -6,7 +6,15 @@ import KnownType
 public final class SubscriptGenerationIntention: MemberGenerationIntention {
     public var parameters: [ParameterSignature]
     public var returnType: SwiftType
-    public var isConstant: Bool
+    public var isConstant: Bool {
+        switch mode {
+        case .getter:
+            return true
+            
+        case .getterAndSetter:
+            return false
+        }
+    }
     public var mode: Mode {
         didSet {
             oldValue.setParent(nil)
@@ -16,14 +24,12 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
     
     public init(parameters: [ParameterSignature],
                 returnType: SwiftType,
-                isConstant: Bool,
                 mode: Mode,
                 accessLevel: AccessLevel = .internal,
                 source: ASTNode? = nil) {
         
         self.parameters = parameters
         self.returnType = returnType
-        self.isConstant = isConstant
         self.mode = mode
         
         super.init(accessLevel: accessLevel, source: source)
@@ -36,7 +42,6 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
         
         parameters = try container.decode([ParameterSignature].self, forKey: .parameters)
         returnType = try container.decode(SwiftType.self, forKey: .returnType)
-        isConstant = try container.decode(Bool.self, forKey: .isConstant)
         mode = try container.decode(Mode.self, forKey: .mode)
         
         try super.init(from: container.superDecoder())
@@ -47,7 +52,6 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
         
         try container.encode(parameters, forKey: .parameters)
         try container.encode(returnType, forKey: .returnType)
-        try container.encode(isConstant, forKey: .isConstant)
         try container.encode(mode, forKey: .mode)
         
         try super.encode(to: container.superEncoder())
@@ -90,11 +94,11 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
             switch self {
             case .getter(let body):
                 try container.encode(0, forKey: .discriminator)
-                try container.encode(body, forKey: .payload0)
+                try container.encodeIntention(body, forKey: .payload0)
                 
             case let .getterAndSetter(get, set):
                 try container.encode(1, forKey: .discriminator)
-                try container.encode(get, forKey: .payload0)
+                try container.encodeIntention(get, forKey: .payload0)
                 try container.encode(set, forKey: .payload1)
             }
         }
@@ -119,7 +123,6 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
     private enum CodingKeys: String, CodingKey {
         case parameters
         case returnType
-        case isConstant
         case mode
     }
 }

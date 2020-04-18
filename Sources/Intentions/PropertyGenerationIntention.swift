@@ -201,11 +201,11 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
                 
             case .computed(let body):
                 try container.encode(1, forKey: .discriminator)
-                try container.encode(body, forKey: .payload0)
+                try container.encodeIntention(body, forKey: .payload0)
                 
             case let .property(get, set):
                 try container.encode(2, forKey: .discriminator)
-                try container.encode(get, forKey: .payload0)
+                try container.encodeIntention(get, forKey: .payload0)
                 try container.encode(set, forKey: .payload1)
             }
         }
