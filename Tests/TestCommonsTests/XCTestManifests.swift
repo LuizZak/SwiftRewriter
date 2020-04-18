@@ -9,6 +9,7 @@ extension StringDiffTestingTests {
         ("testDiffEmptyStrings", testDiffEmptyStrings),
         ("testDiffEqualStrings", testDiffEqualStrings),
         ("testDiffLargerExpectedString", testDiffLargerExpectedString),
+        ("testDiffLargerExpectedStringWithMismatchInMiddle", testDiffLargerExpectedStringWithMismatchInMiddle),
         ("testDiffLargerResultString", testDiffLargerResultString),
         ("testDiffSimpleString", testDiffSimpleString),
     ]

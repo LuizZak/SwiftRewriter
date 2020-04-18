@@ -636,6 +636,17 @@ extension SwiftSyntaxProducer {
                 )
             }
             
+            iterating(intention.subscripts) { sub in
+                addExtraLeading(indentation())
+                
+                builder.addMember(
+                    SyntaxFactory.makeMemberDeclListItem(
+                        decl: varDeclGenerator.generateSubscript(sub),
+                        semicolon: nil
+                    )
+                )
+            }
+            
             iterating(intention.constructors) { _init in
                 addExtraLeading(indentation())
                 
@@ -707,7 +718,7 @@ extension SwiftSyntaxProducer {
                 builder.useOptionalMark(SyntaxFactory.makeInfixQuestionMarkToken())
             }
             
-            builder.useParameters(generateParameterList(intention.parameters))
+            builder.useParameters(generateParameterClause(intention.parameters))
             
             if let body = intention.functionBody {
                 builder.useBody(generateFunctionBody(body))
@@ -731,6 +742,7 @@ extension SwiftSyntaxProducer {
     
     func generateFunction(_ intention: SignatureFunctionIntention,
                           alwaysEmitBody: Bool) -> FunctionDeclSyntax {
+        
         addHistoryTrackingLeadingIfEnabled(intention)
         
         return FunctionDeclSyntax { builder in
@@ -755,7 +767,7 @@ extension SwiftSyntaxProducer {
     
     func generateSignature(_ signature: FunctionSignature) -> FunctionSignatureSyntax {
         FunctionSignatureSyntax { builder in
-            builder.useInput(generateParameterList(signature.parameters))
+            builder.useInput(generateParameterClause(signature.parameters))
             
             if signature.returnType != .void {
                 builder.useOutput(generateReturn(signature.returnType))
@@ -770,7 +782,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateParameterList(_ parameters: [ParameterSignature]) -> ParameterClauseSyntax {
+    func generateParameterClause(_ parameters: [ParameterSignature]) -> ParameterClauseSyntax {
         ParameterClauseSyntax { builder in
             builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
             builder.useRightParen(SyntaxFactory.makeRightParenToken())

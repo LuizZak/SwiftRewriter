@@ -19,6 +19,27 @@ class VariableDeclSyntaxGenerator {
         generateVariableDecl(intention)
     }
     
+    func generateSubscript(_ intention: SubscriptGenerationIntention) -> DeclSyntax {
+        producer.addHistoryTrackingLeadingIfEnabled(intention)
+        
+        return SubscriptDeclSyntax { builder in
+            for attribute in producer.attributes(for: intention, inline: false) {
+                builder.addAttribute(attribute().asSyntax)
+            }
+            for modifier in producer.modifiers(for: intention) {
+                builder.addModifier(modifier(producer))
+            }
+            
+            builder.useSubscriptKeyword(producer.makeStartToken(SyntaxFactory.makeSubscriptKeyword))
+            builder.useIndices(producer.generateParameterClause(intention.parameters))
+            builder.useResult(producer.generateReturn(intention.returnType))
+            
+            if let accessors = VariableDeclSyntaxGenerator.makeAccessorBlockCreator(intention, producer) {
+                builder.useAccessor(accessors())
+            }
+        }.asDeclSyntax
+    }
+    
     func generateGlobalVariable(_ intention: GlobalVariableGenerationIntention) -> DeclSyntax {
         generateVariableDecl(intention)
     }
@@ -111,6 +132,7 @@ class VariableDeclSyntaxGenerator {
     
     private static func makeAccessorBlockCreator(_ property: PropertyGenerationIntention,
                                                  _ producer: SwiftSyntaxProducer) -> (() -> Syntax)? {
+        
         // Emit { get } and { get set } accessor blocks for protocols
         if let property = property as? ProtocolPropertyGenerationIntention {
             return {
@@ -150,78 +172,104 @@ class VariableDeclSyntaxGenerator {
             return nil
             
         case .computed(let body):
-            return {
-                return CodeBlockSyntax { builder in
-                    builder.useLeftBrace(producer.makeStartToken(SyntaxFactory.makeLeftBraceToken).withLeadingSpace())
-                    
-                    producer.indent()
-                    let blocks = producer._generateStatements(body.body.statements)
-                    producer.deindent()
-                    
-                    let stmtList = SyntaxFactory.makeCodeBlockItemList(blocks)
-                    let codeBlock = SyntaxFactory.makeCodeBlockItem(item: stmtList.asSyntax,
-                                                                    semicolon: nil,
-                                                                    errorTokens: nil)
-                    
-                    builder.addStatement(codeBlock)
-                    
-                    producer.addExtraLeading(.newlines(1) + producer.indentation())
-                    builder.useRightBrace(producer.makeStartToken(SyntaxFactory.makeRightBraceToken))
-                }.asSyntax
-            }
+            return generateGetterAccessor(body, producer)
             
         case let .property(get, set):
-            return {
-                return AccessorBlockSyntax { builder in
-                    builder.useLeftBrace(producer.makeStartToken(SyntaxFactory.makeLeftBraceToken).withLeadingSpace())
-                    
-                    producer.indent()
-                    
-                    producer.addExtraLeading(.newlines(1) + producer.indentation())
-                    
-                    let getter = AccessorDeclSyntax { builder in
-                        builder.useAccessorKind(
-                            producer.prepareStartToken(
-                                SyntaxFactory
-                                    .makeToken(.contextualKeyword("get"),
-                                               presence: .present)
-                            )
+            return generateGetterSetterAccessor(get, set, producer)
+        }
+    }
+    
+    private static func makeAccessorBlockCreator(_ subcript: SubscriptGenerationIntention,
+                                                 _ producer: SwiftSyntaxProducer) -> (() -> Syntax)? {
+        
+        switch subcript.mode {
+        case .getter(let body):
+            return generateGetterAccessor(body, producer)
+            
+        case let .getterAndSetter(get, set):
+            return generateGetterSetterAccessor(get, set, producer)
+        }
+    }
+    
+    private static func generateGetterAccessor(_ getter: FunctionBodyIntention,
+                                               _ producer: SwiftSyntaxProducer) -> () -> Syntax {
+        
+        return {
+            return CodeBlockSyntax { builder in
+                builder.useLeftBrace(producer.makeStartToken(SyntaxFactory.makeLeftBraceToken).withLeadingSpace())
+                
+                producer.indent()
+                let blocks = producer._generateStatements(getter.body.statements)
+                producer.deindent()
+                
+                let stmtList = SyntaxFactory.makeCodeBlockItemList(blocks)
+                let codeBlock = SyntaxFactory.makeCodeBlockItem(item: stmtList.asSyntax,
+                                                                semicolon: nil,
+                                                                errorTokens: nil)
+                
+                builder.addStatement(codeBlock)
+                
+                producer.addExtraLeading(.newlines(1) + producer.indentation())
+                builder.useRightBrace(producer.makeStartToken(SyntaxFactory.makeRightBraceToken))
+            }.asSyntax
+        }
+    }
+    
+    private static func generateGetterSetterAccessor(
+        _ get: FunctionBodyIntention,
+        _ set: PropertyGenerationIntention.Setter,
+        _ producer: SwiftSyntaxProducer) -> () -> Syntax {
+        
+        return {
+            return AccessorBlockSyntax { builder in
+                builder.useLeftBrace(producer.makeStartToken(SyntaxFactory.makeLeftBraceToken).withLeadingSpace())
+                
+                producer.indent()
+                
+                producer.addExtraLeading(.newlines(1) + producer.indentation())
+                
+                let getter = AccessorDeclSyntax { builder in
+                    builder.useAccessorKind(
+                        producer.prepareStartToken(
+                            SyntaxFactory
+                                .makeToken(.contextualKeyword("get"),
+                                           presence: .present)
                         )
-                        
-                        builder.useBody(producer.generateFunctionBody(get))
+                    )
+                    
+                    builder.useBody(producer.generateFunctionBody(get))
+                }
+                
+                producer.addExtraLeading(.newlines(1) + producer.indentation())
+                
+                let setter = AccessorDeclSyntax { builder in
+                    builder.useAccessorKind(
+                        producer.prepareStartToken(
+                            SyntaxFactory
+                                .makeToken(.contextualKeyword("set"),
+                                           presence: .present)
+                        )
+                    )
+                    
+                    if set.valueIdentifier != "newValue" {
+                        builder.useParameter(AccessorParameterSyntax { builder in
+                            builder.useLeftParen(producer.makeStartToken(SyntaxFactory.makeLeftParenToken))
+                            builder.useName(makeIdentifier(set.valueIdentifier))
+                            builder.useRightParen(SyntaxFactory.makeRightParenToken())
+                        })
                     }
                     
-                    producer.addExtraLeading(.newlines(1) + producer.indentation())
-                    
-                    let setter = AccessorDeclSyntax { builder in
-                        builder.useAccessorKind(
-                            producer.prepareStartToken(
-                                SyntaxFactory
-                                    .makeToken(.contextualKeyword("set"),
-                                               presence: .present)
-                            )
-                        )
-                        
-                        if set.valueIdentifier != "newValue" {
-                            builder.useParameter(AccessorParameterSyntax { builder in
-                                builder.useLeftParen(producer.makeStartToken(SyntaxFactory.makeLeftParenToken))
-                                builder.useName(makeIdentifier(set.valueIdentifier))
-                                builder.useRightParen(SyntaxFactory.makeRightParenToken())
-                            })
-                        }
-                        
-                        builder.useBody(producer.generateFunctionBody(set.body))
-                    }
-                    
-                    producer.deindent()
-                    
-                    builder.addAccessor(getter)
-                    builder.addAccessor(setter)
-                    
-                    producer.addExtraLeading(.newlines(1) + producer.indentation())
-                    builder.useRightBrace(producer.makeStartToken(SyntaxFactory.makeRightBraceToken))
-                }.asSyntax
-            }
+                    builder.useBody(producer.generateFunctionBody(set.body))
+                }
+                
+                producer.deindent()
+                
+                builder.addAccessor(getter)
+                builder.addAccessor(setter)
+                
+                producer.addExtraLeading(.newlines(1) + producer.indentation())
+                builder.useRightBrace(producer.makeStartToken(SyntaxFactory.makeRightBraceToken))
+            }.asSyntax
         }
     }
 }

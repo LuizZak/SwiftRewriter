@@ -66,7 +66,6 @@ public final class SwiftWriter {
             
             let writer
                 = SwiftSyntaxWriter(
-                    intentions: intentions,
                     options: options,
                     diagnostics: Diagnostics(),
                     output: output,
@@ -105,21 +104,18 @@ public final class SwiftWriter {
 }
 
 class SwiftSyntaxWriter {
-    var intentions: IntentionCollection
     var output: WriterOutput
     var diagnostics: Diagnostics
     var options: SwiftSyntaxOptions
     let typeSystem: TypeSystem
     let syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier
     
-    init(intentions: IntentionCollection,
-         options: SwiftSyntaxOptions,
+    init(options: SwiftSyntaxOptions,
          diagnostics: Diagnostics,
          output: WriterOutput,
          typeSystem: TypeSystem,
          syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier) {
         
-        self.intentions = intentions
         self.options = options
         self.diagnostics = diagnostics
         self.output = output

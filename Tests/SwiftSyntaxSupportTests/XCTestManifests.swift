@@ -57,6 +57,8 @@ extension SwiftSyntaxProducerTests {
         ("testGenerateMultipleImportDirectives", testGenerateMultipleImportDirectives),
         ("testGeneratePreprocessorDirectivesInEmptyFile", testGeneratePreprocessorDirectivesInEmptyFile),
         ("testGeneratePreprocessorDirectivesInPopulatedFile", testGeneratePreprocessorDirectivesInPopulatedFile),
+        ("testGenerateSubscript", testGenerateSubscript),
+        ("testGenerateSubscriptGetterAndSetter", testGenerateSubscriptGetterAndSetter),
         ("testGenerateVariableDeclarationTypes", testGenerateVariableDeclarationTypes),
         ("testWriteClassAttributes", testWriteClassAttributes),
         ("testWriteConvenienceInit", testWriteConvenienceInit),

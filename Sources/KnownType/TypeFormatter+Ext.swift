@@ -289,7 +289,7 @@ public extension TypeFormatter {
         
         
         
-        result += "subscript\(asString(parameters: decl.parameters)) -> " + stringify(decl.type)
+        result += "subscript\(asString(parameters: decl.parameters)) -> " + stringify(decl.returnType)
         
         if includeAccessors {
             result += " { "

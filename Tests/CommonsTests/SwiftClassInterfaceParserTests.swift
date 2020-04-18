@@ -219,7 +219,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownSubscripts[0].parameters[0].name, "index")
         XCTAssertEqual(type.knownSubscripts[0].parameters[0].type, .int)
         XCTAssertFalse(type.knownSubscripts[0].parameters[0].hasDefaultValue)
-        XCTAssertEqual(type.knownSubscripts[0].type, .string)
+        XCTAssertEqual(type.knownSubscripts[0].returnType, .string)
         XCTAssertFalse(type.knownSubscripts[0].isConstant)
         XCTAssertFalse(type.knownSubscripts[0].isStatic)
     }
@@ -233,7 +233,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
 
         XCTAssertEqual(type.knownSubscripts.count, 1)
         XCTAssertTrue(type.knownSubscripts[0].parameters.isEmpty)
-        XCTAssertEqual(type.knownSubscripts[0].type, .string)
+        XCTAssertEqual(type.knownSubscripts[0].returnType, .string)
         XCTAssertFalse(type.knownSubscripts[0].isConstant)
         XCTAssertFalse(type.knownSubscripts[0].isStatic)
     }
@@ -250,7 +250,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownSubscripts[0].parameters[0].name, "index")
         XCTAssertEqual(type.knownSubscripts[0].parameters[0].type, .int)
         XCTAssertFalse(type.knownSubscripts[0].parameters[0].hasDefaultValue)
-        XCTAssertEqual(type.knownSubscripts[0].type, .string)
+        XCTAssertEqual(type.knownSubscripts[0].returnType, .string)
         XCTAssertFalse(type.knownSubscripts[0].isConstant)
         XCTAssert(type.knownSubscripts[0].isStatic)
     }
@@ -267,7 +267,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownSubscripts[0].parameters[0].name, "index")
         XCTAssertEqual(type.knownSubscripts[0].parameters[0].type, .int)
         XCTAssertFalse(type.knownSubscripts[0].parameters[0].hasDefaultValue)
-        XCTAssertEqual(type.knownSubscripts[0].type, .string)
+        XCTAssertEqual(type.knownSubscripts[0].returnType, .string)
         XCTAssert(type.knownSubscripts[0].isConstant)
     }
     

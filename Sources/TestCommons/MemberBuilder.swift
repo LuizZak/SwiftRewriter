@@ -157,11 +157,31 @@ public extension MemberBuilder where T: PropertyGenerationIntention {
     }
 }
 
+public extension MemberBuilder where T: SubscriptGenerationIntention {
+    @discardableResult
+    func setAsGetterOnly(body: CompoundStatement) -> MemberBuilder {
+        targetMember.mode = .getter(FunctionBodyIntention(body: body))
+        
+        return self
+    }
+    
+    @discardableResult
+    func setAsGetterSetter(getter: CompoundStatement,
+                           setter: PropertyGenerationIntention.Setter) -> MemberBuilder {
+        
+        targetMember.mode = .getterAndSetter(get: FunctionBodyIntention(body: getter),
+                                             set: setter)
+        
+        return self
+    }
+}
+
 // MARK: - Typealiases
 public typealias PropertyBuilder = MemberBuilder<PropertyGenerationIntention>
 public typealias InstanceVarBuilder = MemberBuilder<InstanceVariableGenerationIntention>
 public typealias MethodBuilder = MemberBuilder<MethodGenerationIntention>
 public typealias InitializerBuilder = MemberBuilder<InitGenerationIntention>
+public typealias SubscriptBuilder = MemberBuilder<SubscriptGenerationIntention>
 
 public extension MemberBuilder where T == PropertyGenerationIntention {
     convenience init(name: String, type: SwiftType) {

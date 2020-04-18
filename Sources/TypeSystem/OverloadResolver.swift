@@ -53,7 +53,7 @@ public class OverloadResolver {
         let asFunctionSignatures = subscripts.map {
             FunctionSignature(name: "subscript",
                               parameters: $0.parameters,
-                              returnType: $0.type,
+                              returnType: $0.returnType,
                               isStatic: $0.isStatic,
                               isMutating: false)
         }

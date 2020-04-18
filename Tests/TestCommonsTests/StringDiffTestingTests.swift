@@ -130,6 +130,56 @@ class StringDiffTestingTests: XCTestCase {
         )
     }
     
+    func testDiffLargerExpectedStringWithMismatchInMiddle() {
+        #sourceLocation(file: "test.swift", line: 1)
+        diffTest(expected: """
+                abc
+                def
+                ghi
+                """).diff("""
+                abc
+                xyz
+                """)
+        #sourceLocation()
+        
+        XCTAssertEqual(
+            testReporter.messages[0],
+            """
+            test.swift:5: Strings don't match:
+
+            Expected (between ---):
+
+            ---
+            abc
+            def
+            ghi
+            ---
+
+            Actual result (between ---):
+
+            ---
+            abc
+            xyz
+            ---
+
+            Diff (between ---):
+
+            ---
+            abc
+            xyz
+            ^ Difference starts here
+            ---
+            """
+        )
+        
+        XCTAssertEqual(
+            testReporter.messages[1],
+            """
+            test.swift:3: Difference starts here: Actual line reads 'xyz'
+            """
+        )
+    }
+    
     func testDiffLargerResultString() {
         #sourceLocation(file: "test.swift", line: 1)
         diffTest(expected: """
