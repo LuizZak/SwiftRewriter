@@ -473,6 +473,7 @@ extension SwiftRewriter_TypingTests {
         ("testTypeLookupInFoundationType", testTypeLookupInFoundationType),
         ("testTypeLookupIntoComposedProtocols", testTypeLookupIntoComposedProtocols),
         ("testTypingInGlobalFunction", testTypingInGlobalFunction),
+        ("testTypingSubscript", testTypingSubscript),
         ("testVariableDeclarationCascadesTypeOfInitialExpression", testVariableDeclarationCascadesTypeOfInitialExpression),
         ("testVisibilityOfGlobalElements", testVisibilityOfGlobalElements),
     ]

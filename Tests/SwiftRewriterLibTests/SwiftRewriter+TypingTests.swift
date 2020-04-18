@@ -1360,4 +1360,33 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
+    
+    func testTypingSubscript() {
+        assertObjcParse(
+            objc: """
+            @interface A
+            @end
+            @implementation A
+            - (NSObject*)objectAtIndexSubscript:(NSUInteger)index {
+                return self;
+            }
+            - (void)test {
+                (self[0]);
+            }
+            @end
+            """,
+            swift: """
+            class A {
+                subscript(index: UInt) -> NSObject! {
+                    return self
+                }
+
+                func test() {
+                    // type: NSObject!
+                    self[0]
+                }
+            }
+            """,
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
+    }
 }
