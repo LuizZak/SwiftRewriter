@@ -8,29 +8,52 @@ class CommentQuerier {
         self.allComments = allComments
     }
     
+    func popClosestCommentBefore(node: ParserRuleContext) -> ObjcComment? {
+        guard let start = node.getStart() else {
+            return nil
+        }
+        
+        let location = start.sourceLocation()
+        
+        for (i, comment) in allComments.enumerated().reversed() {
+            if comment.location < location {
+                allComments.remove(at: i)
+                return comment
+            }
+        }
+        
+        return nil
+    }
+    
+    public func popClosestCommentsBefore(node: ParserRuleContext) -> [ObjcComment] {
+        var comments: [ObjcComment] = []
+        while let comment = popClosestCommentBefore(node: node) {
+            comments.append(comment)
+        }
+        
+        return comments.reversed()
+    }
+    
     func comments(overlapping node: ParserRuleContext) -> [ObjcComment] {
         guard let startToken = node.getStart(), let stopToken = node.getStop() else {
             return []
         }
         
-        let startLine = startToken.getLine()
-        let startCol = startToken.getCharPositionInLine() + 1
-        let startIndex = startToken.getStartIndex()
-        
-        let endLine = stopToken.getLine()
-        let endCol = stopToken.getCharPositionInLine() + 1
-        let endIndex = stopToken.getStartIndex()
-        
-        let start = SourceLocation(line: startLine,
-                                   column: startCol,
-                                   utf8Offset: startIndex)
-        
-        let end = SourceLocation(line: endLine,
-                                 column: endCol,
-                                 utf8Offset: endIndex)
+        let start = startToken.sourceLocation()
+        let end = stopToken.sourceLocation()
         
         return allComments.filter {
             $0.location >= start && $0.location <= end
         }
+    }
+}
+
+private extension Token {
+    func sourceLocation() -> SourceLocation {
+        let line = getLine()
+        let col = getCharPositionInLine() + 1
+        let char = getStartIndex()
+        
+        return SourceLocation(line: line, column: col, utf8Offset: char)
     }
 }

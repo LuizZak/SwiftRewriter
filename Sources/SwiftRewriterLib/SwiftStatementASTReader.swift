@@ -94,12 +94,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
         
         // TODO: Perhaps we should only associate comments that come one line
         // before the statement?
-        var comments: [String] = []
-        while let comment = context.popClosestCommentBefore(node: ctx) {
-            comments.append(comment.string.trimmingWhitespaces())
-        }
-        
-        stmt.comments = comments.reversed()
+        stmt.comments = context.popClosestCommentsBefore(node: ctx).map { $0.string.trimmingWhitespaces() }
         stmt.trailingComment = context.popClosestCommentAtTrailingLine(node: ctx)?.string.trimmingWhitespaces()
         
         return stmt

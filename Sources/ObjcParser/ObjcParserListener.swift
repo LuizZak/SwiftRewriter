@@ -39,6 +39,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         mapper = GenericParseTreeContextMapper(
             source: source,
             nonnullContextQuerier: nonnullContextQuerier,
+            commentQuerier: commentQuerier,
             nodeFactory: nodeFactory)
         
         super.init()
@@ -60,27 +61,33 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         )
         mapper.addRuleMap(
             rule: O.ClassInterfaceContext.self,
-            nodeType: ObjcClassInterface.self
+            nodeType: ObjcClassInterface.self,
+            collectComments: true
         )
         mapper.addRuleMap(
             rule: O.ClassImplementationContext.self,
-            nodeType: ObjcClassImplementation.self
+            nodeType: ObjcClassImplementation.self,
+            collectComments: true
         )
         mapper.addRuleMap(
             rule: O.CategoryInterfaceContext.self,
-            nodeType: ObjcClassCategoryInterface.self
+            nodeType: ObjcClassCategoryInterface.self,
+            collectComments: true
         )
         mapper.addRuleMap(
             rule: O.CategoryImplementationContext.self,
-            nodeType: ObjcClassCategoryImplementation.self
+            nodeType: ObjcClassCategoryImplementation.self,
+            collectComments: true
         )
         mapper.addRuleMap(
             rule: O.MethodDeclarationContext.self,
-            nodeType: MethodDefinition.self
+            nodeType: MethodDefinition.self,
+            collectComments: true
         )
         mapper.addRuleMap(
             rule: O.MethodDefinitionContext.self,
-            nodeType: MethodDefinition.self
+            nodeType: MethodDefinition.self,
+            collectComments: true
         )
         mapper.addRuleMap(
             rule: O.KeywordDeclaratorContext.self,
@@ -100,7 +107,8 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         )
         mapper.addRuleMap(
             rule: O.TypedefDeclarationContext.self,
-            nodeType: TypedefNode.self
+            nodeType: TypedefNode.self,
+            collectComments: true
         )
         mapper.addRuleMap(
             rule: O.BlockParametersContext.self,
@@ -108,19 +116,23 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         )
         mapper.addRuleMap(
             rule: O.ProtocolDeclarationContext.self,
-            nodeType: ProtocolDeclaration.self
+            nodeType: ObjcProtocolDeclaration.self,
+            collectComments: true
         )
         mapper.addRuleMap(
             rule: O.EnumDeclarationContext.self,
-            nodeType: ObjcEnumDeclaration.self
+            nodeType: ObjcEnumDeclaration.self,
+            collectComments: true
         )
         mapper.addRuleMap(
             rule: O.FunctionDeclarationContext.self,
-            nodeType: FunctionDefinition.self
+            nodeType: FunctionDefinition.self,
+            collectComments: true
         )
         mapper.addRuleMap(
             rule: O.FunctionDefinitionContext.self,
-            nodeType: FunctionDefinition.self
+            nodeType: FunctionDefinition.self,
+            collectComments: true
         )
         mapper.addRuleMap(
             rule: O.PropertyImplementationContext.self,
@@ -151,6 +163,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         let globalVariableListener =
             GlobalVariableListener(typeParser: typeParser,
                                    nonnullContextQuerier: nonnullContextQuerier,
+                                   commentQuerier: commentQuerier,
                                    nodeFactory: nodeFactory)
         
         let walker = ParseTreeWalker()
@@ -325,7 +338,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     // MARK: - Protocol Declaration
     override func enterProtocolDeclaration(_ ctx: ObjectiveCParser.ProtocolDeclarationContext) {
-        guard context.currentContextNode(as: ProtocolDeclaration.self) != nil else {
+        guard context.currentContextNode(as: ObjcProtocolDeclaration.self) != nil else {
             return
         }
         
@@ -360,6 +373,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         let listener = PropertyListener(isInNonnullContext: isInNonnullContext(ctx),
                                         typeParser: typeParser,
                                         nonnullContextQuerier: nonnullContextQuerier,
+                                        commentQuerier: commentQuerier,
                                         inOptionalContext: inOptionalContext,
                                         updateSourceLocation: nodeFactory.updateSourceLocation)
         
@@ -685,14 +699,17 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
     var declarations: [ASTNode] = []
     var typeParser: TypeParsing
     var nonnullContextQuerier: NonnullContextQuerier
+    var commentQuerier: CommentQuerier
     var nodeFactory: ASTNodeFactory
     
     init(typeParser: TypeParsing,
          nonnullContextQuerier: NonnullContextQuerier,
+         commentQuerier: CommentQuerier,
          nodeFactory: ASTNodeFactory) {
         
         self.typeParser = typeParser
         self.nonnullContextQuerier = nonnullContextQuerier
+        self.commentQuerier = commentQuerier
         self.nodeFactory = nodeFactory
     }
     
@@ -701,6 +718,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
         let topLevelDeclarations = ctx.topLevelDeclaration()
         let visitor = GlobalVariableVisitor(typeParser: typeParser,
                                             nonnullContextQuerier: nonnullContextQuerier,
+                                            commentQuerier: commentQuerier,
                                             nodeFactory: nodeFactory)
         
         for topLevelDeclaration in topLevelDeclarations {
@@ -723,6 +741,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
         let visitor =
             GlobalVariableVisitor(typeParser: typeParser,
                                   nonnullContextQuerier: nonnullContextQuerier,
+                                  commentQuerier: commentQuerier,
                                   nodeFactory: nodeFactory)
         
         if let vars = ctx.accept(visitor) {
@@ -733,14 +752,17 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
     private class GlobalVariableVisitor: ObjectiveCParserBaseVisitor<[ASTNode]> {
         var typeParser: TypeParsing
         var nonnullContextQuerier: NonnullContextQuerier
+        var commentQuerier: CommentQuerier
         var nodeFactory: ASTNodeFactory
         
         init(typeParser: TypeParsing,
              nonnullContextQuerier: NonnullContextQuerier,
+             commentQuerier: CommentQuerier,
              nodeFactory: ASTNodeFactory) {
             
             self.typeParser = typeParser
             self.nonnullContextQuerier = nonnullContextQuerier
+            self.commentQuerier = commentQuerier
             self.nodeFactory = nodeFactory
         }
         
@@ -771,6 +793,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                 let inNonnull = nonnullContextQuerier.isInNonnullContext(initDeclarator)
                 
                 let varDecl = VariableDeclaration(isInNonnullContext: inNonnull)
+                varDecl.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
                 
                 let identifierNode = nodeFactory.makeIdentifier(from: identifier)
                 let typeNameNode = TypeNameNode(type: type, isInNonnullContext: inNonnull)
@@ -892,18 +915,21 @@ private class PropertyListener: ObjectiveCParserBaseListener {
     var property: PropertyDefinition
     var typeParser: TypeParsing
     var nonnullContextQuerier: NonnullContextQuerier
+    var commentQuerier: CommentQuerier
     var inOptionalContext: Bool
     var updateSourceLocation: (ASTNode, ParserRuleContext) -> Void
     
     init(isInNonnullContext: Bool,
          typeParser: TypeParsing,
          nonnullContextQuerier: NonnullContextQuerier,
+         commentQuerier: CommentQuerier,
          inOptionalContext: Bool,
          updateSourceLocation: @escaping (ASTNode, ParserRuleContext) -> Void) {
         
         self.property = PropertyDefinition(isInNonnullContext: isInNonnullContext)
         self.typeParser = typeParser
         self.nonnullContextQuerier = nonnullContextQuerier
+        self.commentQuerier = commentQuerier
         self.inOptionalContext = inOptionalContext
         self.updateSourceLocation = updateSourceLocation
     }
@@ -915,6 +941,7 @@ private class PropertyListener: ObjectiveCParserBaseListener {
                         isInNonnullContext: nonnullContextQuerier.isInNonnullContext(ctx))
         updateSourceLocation(node, ctx)
         property.addChild(node)
+        property.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
         
         if ctx.ibOutletQualifier() != nil {
             property.hasIbOutletSpecifier = true
@@ -1031,18 +1058,24 @@ private class GenericParseTreeContextMapper {
     private var source: Source
     
     private var nonnullContextQuerier: NonnullContextQuerier
+    private var commentQuerier: CommentQuerier
     private var nodeFactory: ASTNodeFactory
     
-    init(source: Source, nonnullContextQuerier: NonnullContextQuerier, nodeFactory: ASTNodeFactory) {
+    init(source: Source,
+         nonnullContextQuerier: NonnullContextQuerier,
+         commentQuerier: CommentQuerier,
+         nodeFactory: ASTNodeFactory) {
+        
         self.source = source
         self.nonnullContextQuerier = nonnullContextQuerier
+        self.commentQuerier = commentQuerier
         self.nodeFactory = nodeFactory
     }
     
-    func addRuleMap<T: ParserRuleContext, U: InitializableNode>(rule: T.Type, nodeType: U.Type) {
+    func addRuleMap<T: ParserRuleContext, U: InitializableNode>(rule: T.Type, nodeType: U.Type, collectComments: Bool = false) {
         assert(match(ruleType: rule) == nil, "Duplicated mapping rule for parser rule context \(rule)")
         
-        pairs.append(.type(rule: rule, nodeType: nodeType))
+        pairs.append(.type(rule: rule, nodeType: nodeType, collectComments: collectComments))
     }
     
     func addRuleMap<T: ParserRuleContext, U: InitializableNode>(rule: T.Type, node: U) {
@@ -1066,12 +1099,16 @@ private class GenericParseTreeContextMapper {
         }
         
         switch nodeType {
-        case .type(_, let nodeType):
+        case let .type(_, nodeType, collectComments):
             let node =
                 nodeType.init(isInNonnullContext:
                     nonnullContextQuerier.isInNonnullContext(rule))
             
             nodeFactory.updateSourceLocation(for: node, with: rule)
+            
+            if collectComments {
+                node.precedingComments = commentQuerier.popClosestCommentsBefore(node: rule)
+            }
             
             context.pushContext(node: node)
             
@@ -1088,7 +1125,7 @@ private class GenericParseTreeContextMapper {
         
         if let popped = context.popContext() {
             switch pair {
-            case .type(_, let nodeType):
+            case .type(_, let nodeType, _):
                 assert(type(of: popped) == nodeType)
             case .instance(_, let node):
                 assert(popped === node)
@@ -1105,12 +1142,12 @@ private class GenericParseTreeContextMapper {
     }
     
     private enum Pair {
-        case type(rule: ParserRuleContext.Type, nodeType: InitializableNode.Type)
+        case type(rule: ParserRuleContext.Type, nodeType: InitializableNode.Type, collectComments: Bool)
         case instance(rule: ParserRuleContext.Type, node: InitializableNode)
         
         var ruleType: ParserRuleContext.Type {
             switch self {
-            case .type(let rule, _):
+            case .type(let rule, _, _):
                 return rule
             case .instance(let rule, _):
                 return rule

@@ -76,6 +76,15 @@ public final class SwiftASTReaderContext {
         return nil
     }
     
+    public func popClosestCommentsBefore(node: ParserRuleContext) -> [ObjcComment] {
+        var comments: [ObjcComment] = []
+        while let comment = popClosestCommentBefore(node: node) {
+            comments.append(comment)
+        }
+        
+        return comments.reversed()
+    }
+    
     public func popClosestCommentAtTrailingLine(node: ParserRuleContext) -> ObjcComment? {
         guard let stop = node.getStop() else {
             return nil

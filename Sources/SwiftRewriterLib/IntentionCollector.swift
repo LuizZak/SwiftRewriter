@@ -82,7 +82,7 @@ public class IntentionCollector {
                 self.enterObjcClassCategoryImplementationNode(n)
             case let n as ObjcStructDeclaration:
                 self.enterStructDeclarationNode(n)
-            case let n as ProtocolDeclaration:
+            case let n as ObjcProtocolDeclaration:
                 self.enterProtocolDeclarationNode(n)
             case let n as IVarsList:
                 self.enterObjcClassIVarsListNode(n)
@@ -154,7 +154,7 @@ public class IntentionCollector {
                 self.exitObjcClassCategoryImplementationNode(n)
             case let n as ObjcStructDeclaration:
                 self.exitStructDeclarationNode(n)
-            case let n as ProtocolDeclaration:
+            case let n as ObjcProtocolDeclaration:
                 self.exitProtocolDeclarationNode(n)
             case let n as ObjcEnumDeclaration:
                 self.exitObjcEnumDeclarationNode(n)
@@ -356,7 +356,7 @@ public class IntentionCollector {
     }
     
     // MARK: - ProtocolDeclaration
-    private func enterProtocolDeclarationNode(_ node: ProtocolDeclaration) {
+    private func enterProtocolDeclarationNode(_ node: ObjcProtocolDeclaration) {
         guard let name = node.identifier?.name else {
             return
         }
@@ -371,7 +371,7 @@ public class IntentionCollector {
         context.pushContext(intent)
     }
     
-    private func exitProtocolDeclarationNode(_ node: ProtocolDeclaration) {
+    private func exitProtocolDeclarationNode(_ node: ObjcProtocolDeclaration) {
         if node.identifier?.name != nil {
             context.popContext() // ProtocolGenerationIntention
         }
