@@ -202,7 +202,7 @@ public final class SwiftRewriter {
                     
                     switch item {
                     case .enumCase(let enCase):
-                        guard let expression = (enCase.source as? ObjcEnumCase)?.expression?.expression else {
+                        guard let expression = enCase.typedSource?.expression?.expression else {
                             return
                         }
                         

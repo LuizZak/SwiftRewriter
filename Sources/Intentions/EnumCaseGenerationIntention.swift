@@ -2,6 +2,10 @@ import GrammarModels
 import SwiftAST
 
 public class EnumCaseGenerationIntention: PropertyGenerationIntention {
+    public var typedSource: ObjcEnumCase? {
+        return source as? ObjcEnumCase
+    }
+    
     public var expression: Expression?
     
     public override var isStatic: Bool {

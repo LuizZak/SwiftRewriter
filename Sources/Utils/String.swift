@@ -38,10 +38,6 @@ public extension String {
             return self + "\n ~ Strings are equal."
         }
         
-        if self == string {
-            return self + "\n ~ Strings are equal."
-        }
-        
         if line == 0 && column == 0 {
             return self + "\n ~ Difference at start of string."
         }

@@ -143,6 +143,16 @@ class SyntaxNodeIteratorTests: XCTestCase {
         )
     }
     
+    func testTuple() {
+        assertExpression(.tuple([.identifier("a"), .identifier("b")]),
+                         iteratesAs: [
+                            Expression.tuple([.identifier("a"), .identifier("b")]),
+                            Expression.identifier("a"),
+                            Expression.identifier("b")
+            ]
+        )
+    }
+    
     func testBlockTraversalFalse() {
         assertExpression(makeBlock(), iteratesAs: [makeBlock()])
     }
