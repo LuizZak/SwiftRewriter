@@ -22,6 +22,10 @@ class ASTNodeFactory {
         nonnullContextQuerier.isInNonnullContext(context)
     }
     
+    func comments(preceeding context: ParserRuleContext) -> [ObjcComment] {
+        commentQuerier.popClosestCommentsBefore(node: context)
+    }
+    
     func comments(overlapping context: ParserRuleContext) -> [ObjcComment] {
         commentQuerier.comments(overlapping: context)
     }
@@ -122,6 +126,7 @@ class ASTNodeFactory {
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
         
         let enumCase = ObjcEnumCase(isInNonnullContext: nonnull)
+        enumCase.precedingComments = comments(preceeding: rule)
         updateSourceLocation(for: enumCase, with: rule)
         
         let identifierNode = makeIdentifier(from: identifier)

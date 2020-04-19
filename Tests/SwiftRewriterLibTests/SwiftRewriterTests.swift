@@ -2959,26 +2959,26 @@ class SwiftRewriterTests: XCTestCase {
     
     func testDeclarationCommentTransposing() {
         assertObjcParse(objc: """
-        // A comment
-        @interface A
-        // Method declaration comment
-        - (void)test;
-        @end
-        // Another comment
-        @implementation A
-        // Method definition comment
-        - (void)test {
-        }
-        @end
-        """, swift: """
-        // A comment
-        // Another comment
-        class A {
+            // A comment
+            @interface A
             // Method declaration comment
+            - (void)test;
+            @end
+            // Another comment
+            @implementation A
             // Method definition comment
-            func test() {
+            - (void)test {
             }
-        }
-        """)
+            @end
+            """, swift: """
+            // A comment
+            // Another comment
+            class A {
+                // Method declaration comment
+                // Method definition comment
+                func test() {
+                }
+            }
+            """)
     }
 }

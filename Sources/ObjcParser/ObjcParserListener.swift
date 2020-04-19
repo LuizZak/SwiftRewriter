@@ -327,6 +327,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 nodeFactory.updateSourceLocation(for: typeNode, with: fieldDeclarator)
                 
                 let ivar = IVarDeclaration(isInNonnullContext: nonnull)
+                ivar.precedingComments = commentQuerier.popClosestCommentsBefore(node: decl)
                 ivar.addChild(typeNode)
                 ivar.addChild(ident)
                 ivar.updateSourceRange()

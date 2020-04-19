@@ -124,6 +124,109 @@ class IntentionCollectorTests: XCTestCase {
         XCTAssertEqual(file.typealiasIntentions.first?.fromType, .void)
         XCTAssertEqual(file.typealiasIntentions.first?.originalObjcType, .struct("OpaquePointer"))
     }
+    
+    func testCollectClassInterfaceComments() throws {
+        testCommentCollection("""
+            // A comment
+            // Another comment
+            @interface A
+            @end
+            """, \FileGenerationIntention.classIntentions[0])
+    }
+    
+    func testCollectClassImplementationComments() throws {
+        testCommentCollection("""
+            // A comment
+            // Another comment
+            @implementation A
+            @end
+            """, \FileGenerationIntention.classIntentions[0])
+    }
+    
+    func testCollectMethodComments() throws {
+        testCommentCollection("""
+            @interface A
+            // A comment
+            // Another comment
+            - (void)test;
+            @end
+            """, \FileGenerationIntention.classIntentions[0].methods[0])
+    }
+    
+    func testCollectPropertyComments() throws {
+        testCommentCollection("""
+            @interface A
+            // A comment
+            // Another comment
+            @property NSInteger i;
+            @end
+            """, \FileGenerationIntention.classIntentions[0].properties[0])
+    }
+    
+    func testCollectIVarComments() throws {
+        testCommentCollection("""
+            @interface A
+            {
+                // A comment
+                // Another comment
+                NSInteger i;
+            }
+            @end
+            """, \FileGenerationIntention.classIntentions[0].instanceVariables[0])
+    }
+    
+    func testCollectEnumComments() throws {
+        testCommentCollection("""
+            // A comment
+            // Another comment
+            typedef NS_ENUM(NSInteger, MyEnum) {
+                MyEnumCase1 = 0,
+                MyEnumCase2
+            };
+            """, \FileGenerationIntention.enumIntentions[0])
+    }
+    
+    func testCollectEnumCaseComments() throws {
+        testCommentCollection("""
+            typedef NS_ENUM(NSInteger, MyEnum) {
+                // A comment
+                // Another comment
+                MyEnumCase1 = 0,
+                MyEnumCase2
+            };
+            """, \FileGenerationIntention.enumIntentions[0].cases[0])
+    }
+    
+    func testCollectStructComments() throws {
+        testCommentCollection("""
+            // A comment
+            // Another comment
+            typedef struct {
+                int a;
+            } A;
+            """, \FileGenerationIntention.structIntentions[0])
+    }
+    
+    private func testCommentCollection<T: FromSourceIntention>(
+        _ code: String,
+        _ keyPath: KeyPath<FileGenerationIntention, T>,
+        line: UInt = #line) {
+        
+        do {
+            let parser = ObjcParser(string: code)
+            try parser.parse()
+            let rootNode = parser.rootNode
+            
+            sut.collectIntentions(rootNode)
+            
+            XCTAssertEqual(file[keyPath: keyPath].precedingComments, [
+                "// A comment",
+                "// Another comment"
+            ], line: line)
+        } catch {
+            XCTFail("Failed to parse Objective-C source: \(error)", line: line)
+        }
+    }
 }
 
 private class TestCollectorDelegate: IntentionCollectorDelegate {

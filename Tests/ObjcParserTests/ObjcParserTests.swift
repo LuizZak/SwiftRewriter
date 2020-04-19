@@ -660,6 +660,44 @@ class ObjcParserTests: XCTestCase {
             @end
             """, \GlobalContextNode.classImplementations[0].methods[0])
     }
+    
+    func testCollectCommentsPrecedingEnumDeclaration() {
+        testParseCommentsRaw(
+            """
+            // Preceding comment
+            // Another preceding comment
+            typedef NS_ENUM(NSInteger, MyEnum) {
+                MyEnumCase
+            };
+            // Trailing comment
+            """, \GlobalContextNode.enumDeclarations[0])
+    }
+    
+    func testCollectCommentsPrecedingEnumCase() {
+        testParseCommentsRaw(
+            """
+            typedef NS_ENUM(NSInteger, MyEnum) {
+                // Preceding comment
+                // Another preceding comment
+                MyEnumCase
+                // Trailing comment
+            };
+            """, \GlobalContextNode.enumDeclarations[0].cases[0])
+    }
+    
+    func testCollectCommentsPrecedingInstanceVariable() {
+        testParseCommentsRaw(
+            """
+            @interface A
+            {
+                // Preceding comment
+                // Another preceding comment
+                NSInteger i;
+                // Trailing comment
+            }
+            @end
+            """, \GlobalContextNode.classInterfaces[0].ivarsList!.ivarDeclarations[0])
+    }
 }
 
 extension ObjcParserTests {

@@ -24,6 +24,9 @@ public final class GlobalContextNode: ASTNode, InitializableNode {
     public var typedefNodes: [TypedefNode] {
         childrenMatching()
     }
+    public var enumDeclarations: [ObjcEnumDeclaration] {
+        childrenMatching()
+    }
     
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)
