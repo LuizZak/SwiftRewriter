@@ -10,6 +10,10 @@ public class Statement: SyntaxNode, Codable, Equatable {
     /// This statement label's (parsed from C's goto labels), if any.
     public var label: String?
     
+    /// A list of comments, including leading // or /*, which are printed before
+    /// the statement.
+    public var comments: [String] = []
+    
     override public init() {
         super.init()
     }
@@ -24,6 +28,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         self.label = try container.decodeIfPresent(String.self, forKey: .label)
+        self.comments = try container.decode([String].self, forKey: .comments)
         
         super.init()
     }
@@ -52,7 +57,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
         if lhs === rhs {
             return true
         }
-        if lhs.label != rhs.label {
+        if lhs.label != rhs.label || lhs.comments != rhs.comments {
             return false
         }
         
@@ -63,6 +68,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
         try container.encodeIfPresent(label, forKey: .label)
+        try container.encode(comments, forKey: .comments)
     }
     
     @usableFromInline
@@ -72,6 +78,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
     
     private enum CodingKeys: String, CodingKey {
         case label
+        case comments
     }
 }
 
@@ -165,6 +172,7 @@ public extension Statement {
     @inlinable
     func copyMetadata(from other: Statement) -> Self {
         self.label = other.label
+        self.comments = other.comments
         
         return self
     }
@@ -172,6 +180,13 @@ public extension Statement {
     /// Labels this statement with a given label, and returns this instance.
     func labeled(_ label: String?) -> Self {
         self.label = label
+        
+        return self
+    }
+    
+    /// Replaces the current list of leading comments and returns this instance.
+    func withComments(_ comments: [String]) -> Self {
+        self.comments = comments
         
         return self
     }

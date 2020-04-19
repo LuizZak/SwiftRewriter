@@ -89,6 +89,24 @@ extension SwiftSyntaxProducer {
     }
     
     func generateStatementBlockItems(_ stmt: Statement) -> [() -> CodeBlockItemSyntax] {
+        for comment in stmt.comments {
+            // TODO: Perhaps Statement.comments should be an enum describing these
+            // cases, instead of relegating this detection to here?
+            if comment.hasPrefix("//") {
+                addExtraLeading(.lineComment(comment))
+            } else if comment.hasPrefix("///") {
+                addExtraLeading(.docLineComment(comment))
+            } else if comment.hasPrefix("/*") {
+                addExtraLeading(.blockComment(comment))
+            } else if comment.hasPrefix("/**") {
+                addExtraLeading(.docBlockComment(comment))
+            } else {
+                addExtraLeading(.lineComment(comment))
+            }
+            
+            addExtraLeading(.newlines(1) + indentation())
+        }
+        
         if let label = stmt.label, !isLabeledStatementType(stmt) {
             addExtraLeading(.lineComment("// \(label):"))
             addExtraLeading(.newlines(1) + indentation())

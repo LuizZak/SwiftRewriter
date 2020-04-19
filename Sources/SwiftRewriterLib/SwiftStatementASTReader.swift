@@ -83,14 +83,25 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
         context.pushDefinitionContext()
         defer { context.popDefinitionContext() }
         
-        return acceptFirst(from: ctx.selectionStatement(),
-                           ctx.iterationStatement(),
-                           ctx.expressions(),
-                           ctx.jumpStatement(),
-                           ctx.synchronizedStatement(),
-                           ctx.autoreleaseStatement(),
-                           ctx.labeledStatement())
+        let stmt = acceptFirst(from: ctx.selectionStatement(),
+                               ctx.iterationStatement(),
+                               ctx.expressions(),
+                               ctx.jumpStatement(),
+                               ctx.synchronizedStatement(),
+                               ctx.autoreleaseStatement(),
+                               ctx.labeledStatement())
             ?? .unknown(UnknownASTContext(context: ctx.getText()))
+        
+        // TODO: Perhaps we should only associate comments that come one line
+        // before the statement?
+        var comments: [String] = []
+        while let comment = context.popClosestCommentBefore(node: ctx) {
+            comments.append(comment.string.trimmingWhitespaces())
+        }
+        
+        stmt.comments = comments.reversed()
+        
+        return stmt
     }
     
     public override func visitExpressions(_ ctx: Parser.ExpressionsContext) -> Statement? {

@@ -80,11 +80,5 @@ public class ImportDirectiveIntentionPass: IntentionPass {
         var pathComponents: [String] {
             (path as NSString).pathComponents
         }
-        
-        /// Returns `true` if any of the path components of this import decl's
-        /// path match a given path component fully.
-        func matchesPathComponent<S: StringProtocol>(_ path: S) -> Bool {
-            pathComponents.contains(where: { $0 == path })
-        }
     }
 }

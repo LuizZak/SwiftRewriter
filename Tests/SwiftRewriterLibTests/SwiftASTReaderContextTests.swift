@@ -14,7 +14,9 @@ class SwiftASTReaderContextTests: XCTestCase {
         
         typeSystem = TypeSystem()
         typeContext = KnownTypeBuilder(typeName: "TestType").build()
-        sut = SwiftASTReaderContext(typeSystem: typeSystem, typeContext: typeContext)
+        sut = SwiftASTReaderContext(typeSystem: typeSystem,
+                                    typeContext: typeContext,
+                                    comments: [])
     }
 
     func testTypePropertyOrFieldNamedWithProperty() {
@@ -22,7 +24,9 @@ class SwiftASTReaderContextTests: XCTestCase {
             KnownTypeBuilder(typeName: "TestType")
                 .property(named: "test", type: .int)
                 .build()
-        sut = SwiftASTReaderContext(typeSystem: typeSystem, typeContext: typeContext)
+        sut = SwiftASTReaderContext(typeSystem: typeSystem,
+                                    typeContext: typeContext,
+                                    comments: [])
         
         let prop = sut.typePropertyOrFieldNamed("test")
         
@@ -34,7 +38,9 @@ class SwiftASTReaderContextTests: XCTestCase {
             KnownTypeBuilder(typeName: "TestType")
                 .field(named: "test", type: .int)
                 .build()
-        sut = SwiftASTReaderContext(typeSystem: typeSystem, typeContext: typeContext)
+        sut = SwiftASTReaderContext(typeSystem: typeSystem,
+                                    typeContext: typeContext,
+                                    comments: [])
         
         let field = sut.typePropertyOrFieldNamed("test")
         

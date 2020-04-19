@@ -1,15 +1,19 @@
 import SwiftAST
 import TypeSystem
 import KnownType
+import GrammarModels
+import Antlr4
 
 public final class SwiftASTReaderContext {
     private var localsStack: [[Local]] = [[]]
     private var typeSystem: TypeSystem?
     private var typeContext: KnownType?
+    private var comments: [ObjcComment]
     
-    public init(typeSystem: TypeSystem?, typeContext: KnownType?) {
+    public init(typeSystem: TypeSystem?, typeContext: KnownType?, comments: [ObjcComment]) {
         self.typeSystem = typeSystem
         self.typeContext = typeContext
+        self.comments = comments
     }
     
     public func define(localNamed name: String, storage: ValueStorage) {
@@ -53,6 +57,27 @@ public final class SwiftASTReaderContext {
     
     public func popDefinitionContext() {
         localsStack.removeLast()
+    }
+    
+    public func popClosestCommentBefore(node: ParserRuleContext) -> ObjcComment? {
+        guard let start = node.getStart() else {
+            return nil
+        }
+        
+        let line = start.getLine()
+        let col = start.getCharPositionInLine() + 1
+        let char = start.getStartIndex()
+        
+        let location = SourceLocation(line: line, column: col, utf8Offset: char)
+        
+        for (i, comment) in comments.enumerated().reversed() {
+            if comment.location < location {
+                comments.remove(at: i)
+                return comment
+            }
+        }
+        
+        return nil
     }
     
     public struct Local {

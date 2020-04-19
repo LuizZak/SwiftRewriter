@@ -23,11 +23,13 @@ public class SwiftASTReader {
     }
     
     public func parseStatements(compoundStatement: ObjectiveCParser.CompoundStatementContext,
+                                comments: [ObjcComment] = [],
                                 typeContext: KnownType? = nil) -> CompoundStatement {
         
         let context =
             SwiftASTReaderContext(typeSystem: typeSystem,
-                                  typeContext: typeContext)
+                                  typeContext: typeContext,
+                                  comments: comments)
         
         let expressionReader =
             SwiftExprASTReader(typeMapper: typeMapper,
@@ -48,8 +50,12 @@ public class SwiftASTReader {
         return result
     }
     
-    public func parseExpression(expression: ObjectiveCParser.ExpressionContext) -> Expression {
-        let context = SwiftASTReaderContext(typeSystem: typeSystem, typeContext: nil)
+    public func parseExpression(expression: ObjectiveCParser.ExpressionContext,
+                                comments: [ObjcComment] = []) -> Expression {
+        
+        let context = SwiftASTReaderContext(typeSystem: typeSystem,
+                                            typeContext: nil,
+                                            comments: comments)
         
         let parser =
             SwiftExprASTReader(typeMapper: typeMapper,

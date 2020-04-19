@@ -3,10 +3,12 @@ import Antlr4
 import ObjcParser
 import ObjcParserAntlr
 import SwiftSyntaxSupport
-@testable import SwiftRewriterLib
 import TypeSystem
 import SwiftAST
 import WriterTargetOutput
+import GrammarModels
+
+@testable import SwiftRewriterLib
 
 class SwiftStatementASTReaderTests: XCTestCase {
     var tokens: CommonTokenStream!
@@ -324,11 +326,46 @@ class SwiftStatementASTReaderTests: XCTestCase {
                                              ownership: .weak,
                                              initialization: .constant(.nil)))
     }
+    
+    func testReadWithComments() {
+        let comment = ObjcComment(string: "// A Comment",
+                                  range: "// A Comment".cStyleCommentSectionRanges()[0],
+                                  location: SourceLocation(line: 1, column: 1, utf8Offset: 0),
+                                  length: SourceLength(newlines: 0, columnsAtLastLine: 12, utf8Length: "// A Comment".utf8.count))
+        let expected = Statement.expression(Expression.identifier("test").call())
+        expected.comments.append("// A Comment")
+        
+        assert(objcStmt: "\ntest();",
+               comments: [comment],
+               parseBlock: { try $0.statement() },
+               readsAs: expected)
+    }
+    
+    func testReadWithCommentsMultiple() throws {
+        let string = """
+            // A Comment
+            // Another Comment
+            test();
+            // This should not be included
+            """
+        let objcParser = ObjcParser(string: string)
+        try objcParser.parse()
+        let comments = Array(objcParser.comments[0...1])
+        let expected = Statement.expression(Expression.identifier("test").call())
+        expected.comments.append("// A Comment")
+        expected.comments.append("// Another Comment")
+        
+        assert(objcStmt: string,
+               comments: comments,
+               parseBlock: { try $0.statement() },
+               readsAs: expected)
+    }
 }
 
 extension SwiftStatementASTReaderTests {
     @discardableResult
     func assert(objcStmt: String,
+                comments: [ObjcComment] = [],
                 parseBlock: (ObjectiveCParser) throws -> (ParserRuleContext) = { try $0.statement() },
                 readsAs expected: Statement,
                 file: String = #file,
@@ -343,7 +380,8 @@ extension SwiftStatementASTReaderTests {
                 typeMapper: typeMapper,
                 typeParser: typeParser,
                 context: SwiftASTReaderContext(typeSystem: typeSystem,
-                                               typeContext: nil),
+                                               typeContext: nil,
+                                               comments: comments),
                 delegate: delegate)
         
         let sut = SwiftStatementASTReader(expressionReader: expReader,
