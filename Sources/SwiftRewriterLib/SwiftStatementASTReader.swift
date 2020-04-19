@@ -80,6 +80,8 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             return compound
         }
         
+        let comments = context.popClosestCommentsBefore(node: ctx).map { $0.string.trimmingWhitespaces() }
+        
         context.pushDefinitionContext()
         defer { context.popDefinitionContext() }
         
@@ -94,7 +96,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
         
         // TODO: Perhaps we should only associate comments that come one line
         // before the statement?
-        stmt.comments = context.popClosestCommentsBefore(node: ctx).map { $0.string.trimmingWhitespaces() }
+        stmt.comments = comments
         stmt.trailingComment = context.popClosestCommentAtTrailingLine(node: ctx)?.string.trimmingWhitespaces()
         
         return stmt
@@ -535,6 +537,11 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             }
 
             let varDeclStmt = Statement.variableDeclarations(declarations)
+            
+            // TODO: Perhaps we should only associate comments that come one line
+            // before the statement?
+            varDeclStmt.comments = context.popClosestCommentsBefore(node: ctx).map { $0.string.trimmingWhitespaces() }
+            varDeclStmt.trailingComment = context.popClosestCommentAtTrailingLine(node: ctx)?.string.trimmingWhitespaces()
 
             reportAutotypeDeclarations(in: varDeclStmt)
             

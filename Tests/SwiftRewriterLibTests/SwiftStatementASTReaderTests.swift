@@ -361,6 +361,67 @@ class SwiftStatementASTReaderTests: XCTestCase {
                readsAs: expected)
     }
     
+    func testReadCommentInDeclaration() throws {
+        let string = """
+            {
+                // A Comment
+                // Another Comment
+                NSInteger value;
+                // This should not be included
+            }
+            """
+        let objcParser = ObjcParser(string: string)
+        try objcParser.parse()
+        let comments = objcParser.comments
+        let expected = Statement.variableDeclaration(identifier: "value", type: .int, initialization: nil)
+        expected.comments.append("// A Comment")
+        expected.comments.append("// Another Comment")
+        
+        assert(objcStmt: string,
+               comments: comments,
+               parseBlock: { try $0.statement() },
+               readsAs: CompoundStatement(statements: [expected]))
+    }
+    
+    func testReadWithCommentsComplex() throws {
+        let string = """
+            {
+                // Define value
+                NSInteger def;
+                // Fetch value
+                def = stmt();
+                // Check value
+                if (def) {
+                    // Return
+                    return def;
+                }
+            }
+            """
+        let objcParser = ObjcParser(string: string)
+        try objcParser.parse()
+        let comments = objcParser.comments
+        let expected: CompoundStatement = [
+            Statement
+                .variableDeclaration(identifier: "def", type: .int, initialization: nil)
+                .withComments(["// Define value"]),
+            Statement
+                .expression(Expression.identifier("def").assignment(op: .assign, rhs: Expression.identifier("stmt").call()))
+                .withComments(["// Fetch value"]),
+            Statement
+                .if(.identifier("def"), body: [
+                    Statement
+                        .return(.identifier("def"))
+                        .withComments(["// Return"])
+                ], else: nil)
+                .withComments(["// Check value"])
+        ]
+        
+        assert(objcStmt: string,
+               comments: comments,
+               parseBlock: { try $0.statement() },
+               readsAs: expected)
+    }
+    
     func testReadWithCommentsTrailing() throws {
         let string = """
             test(); // A trailing comment
