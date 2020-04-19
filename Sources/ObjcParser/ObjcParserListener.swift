@@ -7,6 +7,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     let rootNode: GlobalContextNode
     let typeParser: TypeParsing
     private var nonnullContextQuerier: NonnullContextQuerier
+    private var commentQuerier: CommentQuerier
     private let mapper: GenericParseTreeContextMapper
     private let sourceString: String
     private let source: Source
@@ -20,14 +21,17 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
          source: Source,
          state: ObjcParserState,
          antlrSettings: AntlrSettings,
-         nonnullContextQuerier: NonnullContextQuerier) {
+         nonnullContextQuerier: NonnullContextQuerier,
+         commentQuerier: CommentQuerier) {
         
         self.sourceString = sourceString
         self.source = source
         self.nonnullContextQuerier = nonnullContextQuerier
+        self.commentQuerier = commentQuerier
         self.nodeFactory =
             ASTNodeFactory(source: source,
-                           nonnullContextQuerier: nonnullContextQuerier)
+                           nonnullContextQuerier: nonnullContextQuerier,
+                           commentQuerier: commentQuerier)
         
         typeParser = TypeParsing(state: state, antlrSettings: antlrSettings)
         context = NodeCreationContext()

@@ -7,6 +7,9 @@ public final class ExpressionNode: ASTNode {
 public final class MethodBody: ASTNode {
     public var statements: ObjectiveCParser.CompoundStatementContext?
     
+    /// List of comments found within the range of this method body
+    public var comments: [ObjcComment] = []
+    
     public override var shortDescription: String {
         statements?.getText() ?? ""
     }

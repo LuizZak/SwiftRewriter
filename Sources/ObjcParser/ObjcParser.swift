@@ -169,14 +169,20 @@ public class ObjcParser {
         preprocessorDirectives = []
         
         let input = try parsePreprocessor()
+        
+        parseComments(input: input)
+        
         try parseNSAssumeNonnullChannel(input: input)
         
         let nonnullContextQuerier =
             NonnullContextQuerier(nonnullMacroRegionsTokenRange: nonnullMacroRegionsTokenRange)
         
-        try parseMainChannel(input: input, nonnullContextQuerier: nonnullContextQuerier)
+        let commentQuerier =
+            CommentQuerier(allComments: comments)
         
-        parseComments(input: input)
+        try parseMainChannel(input: input,
+                             nonnullContextQuerier: nonnullContextQuerier,
+                             commentQuerier: commentQuerier)
         
         // Go around the tree setting the source for the nodes and detecting
         // nodes within assume non-null ranges
@@ -185,7 +191,6 @@ public class ObjcParser {
         traverser.traverse()
 
         importDirectives = ObjcParser.parseObjcImports(in: preprocessorDirectives)
-
         
         parsed = true
     }
@@ -255,7 +260,8 @@ public class ObjcParser {
     }
     
     private func parseMainChannel(input: String,
-                                  nonnullContextQuerier: NonnullContextQuerier) throws {
+                                  nonnullContextQuerier: NonnullContextQuerier,
+                                  commentQuerier: CommentQuerier) throws {
         
         // Make a pass with ANTLR before traversing the parse tree and collecting
         // known constructs
@@ -273,7 +279,8 @@ public class ObjcParser {
                                source: source,
                                state: state,
                                antlrSettings: antlrSettings,
-                               nonnullContextQuerier: nonnullContextQuerier)
+                               nonnullContextQuerier: nonnullContextQuerier,
+                               commentQuerier: commentQuerier)
         
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)
@@ -628,11 +635,4 @@ public struct ObjcImportDecl {
     public func matchesPathComponent<S: StringProtocol>(_ path: S) -> Bool {
         pathComponents.contains(where: { $0 == path })
     }
-}
-
-public struct ObjcComment {
-    public var string: String
-    public var range: Range<String.Index>
-    public var location: SourceLocation
-    public var length: SourceLength
 }

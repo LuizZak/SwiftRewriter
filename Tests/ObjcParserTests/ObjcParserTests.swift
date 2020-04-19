@@ -527,7 +527,6 @@ class ObjcParserTests: XCTestCase {
             void /* A comment */ func() {
             }
             """
-        
         let sut = ObjcParser(string: string)
         
         try sut.parse()
@@ -540,6 +539,25 @@ class ObjcParserTests: XCTestCase {
         XCTAssertEqual(sut.comments[0].location.column, 6)
         XCTAssertEqual(sut.comments[0].length.newlines, 0)
         XCTAssertEqual(sut.comments[0].length.columnsAtLastLine, 15)
+    }
+    
+    func testCollectCommentsInMethodBody() throws {
+        let string = """
+            void func() {
+                // A Comment
+                if (true) {
+                }
+                /* Another comment */
+            }
+            """
+        let sut = ObjcParser(string: string)
+        
+        try sut.parse()
+        
+        let global = sut.rootNode
+        let f = global.childrenMatching(type: FunctionDefinition.self)[0]
+        let body = f.methodBody!
+        XCTAssertEqual(body.comments.count, 2)
     }
 }
 
