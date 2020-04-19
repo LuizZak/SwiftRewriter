@@ -96,6 +96,10 @@ public class ObjcParser {
     /// rewriter can leverage this information to infer nonnull contexts.
     public var nonnullMacroRegionsTokenRange: [(start: Int, end: Int)] = []
     
+    /// Contains information about all C-style comments found while parsing the
+    /// input file.
+    public var comments: [ObjcComment] = []
+    
     /// Preprocessor directives found on this file
     public var preprocessorDirectives: [String] = []
     public var importDirectives: [ObjcImportDecl] = []
@@ -172,6 +176,8 @@ public class ObjcParser {
         
         try parseMainChannel(input: input, nonnullContextQuerier: nonnullContextQuerier)
         
+        parseComments(input: input)
+        
         // Go around the tree setting the source for the nodes and detecting
         // nodes within assume non-null ranges
         let visitor = AnyASTVisitor(visit: { $0.originalSource = self.source })
@@ -180,6 +186,7 @@ public class ObjcParser {
 
         importDirectives = ObjcParser.parseObjcImports(in: preprocessorDirectives)
 
+        
         parsed = true
     }
     
@@ -330,6 +337,45 @@ public class ObjcParser {
             default:
                 break
             }
+        }
+    }
+    
+    private func parseComments(input: String) {
+        comments.removeAll()
+        
+        let ranges = input.cStyleCommentSectionRanges()
+        
+        for range in ranges {
+            let lineStart = input.lineNumber(at: range.lowerBound)
+            let colStart = input.columnOffset(at: range.lowerBound)
+            
+            let lineEnd = input.lineNumber(at: range.upperBound)
+            let colEnd = input.columnOffset(at: range.upperBound)
+            
+            let utf8Offset = input.utf8.distance(from: input.startIndex, to: range.lowerBound)
+            let utf8Length = input.utf8.distance(from: range.lowerBound, to: range.upperBound)
+            
+            let location = SourceLocation(line: lineStart,
+                                          column: colStart,
+                                          utf8Offset: utf8Offset)
+            
+            let length: SourceLength
+            if lineStart == lineEnd {
+                length = SourceLength(newlines: 0,
+                                      columnsAtLastLine: colEnd - colStart,
+                                      utf8Length: utf8Length)
+            } else {
+                length = SourceLength(newlines: lineEnd - lineStart,
+                                      columnsAtLastLine: colEnd - 1,
+                                      utf8Length: utf8Length)
+            }
+            
+            let comment = ObjcComment(string: String(input[range]),
+                                      range: range,
+                                      location: location,
+                                      length: length)
+            
+            comments.append(comment)
         }
     }
     
@@ -582,4 +628,11 @@ public struct ObjcImportDecl {
     public func matchesPathComponent<S: StringProtocol>(_ path: S) -> Bool {
         pathComponents.contains(where: { $0 == path })
     }
+}
+
+public struct ObjcComment {
+    public var string: String
+    public var range: Range<String.Index>
+    public var location: SourceLocation
+    public var length: SourceLength
 }

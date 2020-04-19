@@ -17,7 +17,7 @@ public struct SourceLength {
     /// Combine the length of two source length. Note that the addition is *not*
     /// commutative (3 columns + 1 line = 1 line but 1 line + 3 columns = 1 line
     /// and 3 columns)
-    public static func +(lhs: SourceLength, rhs: SourceLength) -> SourceLength {
+    public static func + (lhs: SourceLength, rhs: SourceLength) -> SourceLength {
         let utf8Length = lhs.utf8Length + rhs.utf8Length
         let newlines = lhs.newlines + rhs.newlines
         let columnsAtLastLine: Int
@@ -31,7 +31,7 @@ public struct SourceLength {
                             utf8Length: utf8Length)
     }
     
-    public static func +=(lhs: inout SourceLength, rhs: SourceLength) {
+    public static func += (lhs: inout SourceLength, rhs: SourceLength) {
         lhs = lhs + rhs
     }
 }
@@ -39,7 +39,7 @@ public struct SourceLength {
 extension SourceLocation {
     /// Determine the `SourceLocation` by advancing the `lhs` by the given source
     /// length.
-    public static func +(lhs: SourceLocation, rhs: SourceLength) -> SourceLocation {
+    public static func + (lhs: SourceLocation, rhs: SourceLength) -> SourceLocation {
         let utf8Offset = lhs.utf8Offset + rhs.utf8Length
         let line = lhs.line + rhs.newlines
         let column: Int
@@ -51,7 +51,7 @@ extension SourceLocation {
         return SourceLocation(line: line, column: column, utf8Offset: utf8Offset)
     }
     
-    public static func +=(lhs: inout SourceLocation, rhs: SourceLength) {
+    public static func += (lhs: inout SourceLocation, rhs: SourceLength) {
         lhs = lhs + rhs
     }
 }

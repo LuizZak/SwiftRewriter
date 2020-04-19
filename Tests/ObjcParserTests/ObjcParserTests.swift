@@ -489,6 +489,58 @@ class ObjcParserTests: XCTestCase {
         XCTAssert(sut.importDirectives[0].isSystemImport)
         XCTAssertFalse(sut.importDirectives[1].isSystemImport)
     }
+    
+    func testCommentRanges() throws {
+        let string = """
+            // A comment
+            #import "file.h"
+            /*
+                Another comment
+            */
+            """
+        
+        let sut = ObjcParser(string: string)
+        
+        try sut.parse()
+        
+        XCTAssertEqual(sut.comments.count, 2)
+        // Single line
+        XCTAssertEqual(sut.comments[0].string, "// A comment\n")
+        XCTAssertEqual(sut.comments[0].range.lowerBound, "".startIndex)
+        XCTAssertEqual(sut.comments[0].range.upperBound, "// A comment\n".endIndex)
+        XCTAssertEqual(sut.comments[0].location.line, 1)
+        XCTAssertEqual(sut.comments[0].location.column, 1)
+        XCTAssertEqual(sut.comments[0].length.newlines, 1)
+        XCTAssertEqual(sut.comments[0].length.columnsAtLastLine, 0)
+        // Multi-line
+        XCTAssertEqual(sut.comments[1].string, "/*\n    Another comment\n*/")
+        XCTAssertEqual(sut.comments[1].range.lowerBound, string.range(of: "/*")?.lowerBound)
+        XCTAssertEqual(sut.comments[1].range.upperBound, string.range(of: "*/")?.upperBound)
+        XCTAssertEqual(sut.comments[1].location.line, 3)
+        XCTAssertEqual(sut.comments[1].location.column, 1)
+        XCTAssertEqual(sut.comments[1].length.newlines, 2)
+        XCTAssertEqual(sut.comments[1].length.columnsAtLastLine, 2)
+    }
+    
+    func testCommentRangeInlinedMultiLineComment() throws {
+        let string = """
+            void /* A comment */ func() {
+            }
+            """
+        
+        let sut = ObjcParser(string: string)
+        
+        try sut.parse()
+        
+        XCTAssertEqual(sut.comments.count, 1)
+        XCTAssertEqual(sut.comments[0].string, "/* A comment */")
+        XCTAssertEqual(sut.comments[0].range.lowerBound, string.range(of: "/*")?.lowerBound)
+        XCTAssertEqual(sut.comments[0].range.upperBound, string.range(of: "*/")?.upperBound)
+        XCTAssertEqual(sut.comments[0].location.line, 1)
+        XCTAssertEqual(sut.comments[0].location.column, 6)
+        XCTAssertEqual(sut.comments[0].length.newlines, 0)
+        XCTAssertEqual(sut.comments[0].length.columnsAtLastLine, 15)
+    }
 }
 
 extension ObjcParserTests {
