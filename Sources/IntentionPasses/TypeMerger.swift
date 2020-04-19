@@ -295,11 +295,12 @@ class TypeMerger {
     func mergeMethodSignatures(from first: KnownType,
                                into second: TypeGenerationIntention,
                                createIfUnexistent: Bool = true,
-                               skipCreatingOptionalMethods: Bool = true) {
+                               skipCreatingOptionalMethods: Bool = true,
+                               copyComments: Bool = true) {
         
         for method in first.knownMethods {
             if let existing = second.method(matchingSelector: method.signature.asSelector) {
-                mergeMethods(method, into: existing)
+                mergeMethods(method, into: existing, copyComments: copyComments)
             } else if createIfUnexistent {
                 if skipCreatingOptionalMethods && method.optional {
                     continue
@@ -315,7 +316,7 @@ class TypeMerger {
                         \(TypeFormatter.asString(method: method, ofType: first))
                         """)
                 
-                if let intention = method as? FromSourceIntention {
+                if copyComments, let intention = method as? FromSourceIntention {
                     prependComments(from: intention, into: generated)
                 }
                 
@@ -356,11 +357,12 @@ class TypeMerger {
     /// contains the proper nullability annotations, and for @protocol conformance
     /// nullability pairing.
     func mergeMethods(_ source: KnownMethod,
-                      into target: MethodGenerationIntention) {
+                      into target: MethodGenerationIntention,
+                      copyComments: Bool = true) {
         
         let originalSignature = target.signature
         
-        if let sourceAsIntention = source as? FromSourceIntention {
+        if copyComments, let sourceAsIntention = source as? FromSourceIntention {
             prependComments(from: sourceAsIntention, into: target)
         }
         

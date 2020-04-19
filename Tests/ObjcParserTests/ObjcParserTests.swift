@@ -698,6 +698,29 @@ class ObjcParserTests: XCTestCase {
             @end
             """, \GlobalContextNode.classInterfaces[0].ivarsList!.ivarDeclarations[0])
     }
+    
+    func testCommentCollectionIgnoresMethodImplementationComments() throws {
+        let sut = ObjcParser(string: """
+            @implementation A
+            - (void)test {
+                // Preceding comment
+                // Another preceding comment
+                NSInteger i;
+                // Trailing comment
+            }
+            - (void)anotherMethod {
+            }
+            @end
+            """)
+
+        try sut.parse()
+
+        let global = sut.rootNode
+        let decl1 = global.classImplementations[0].methods[0]
+        let decl2 = global.classImplementations[0].methods[1]
+        XCTAssertEqual(decl1.body?.comments.count, 3)
+        XCTAssert(decl2.precedingComments.isEmpty)
+    }
 }
 
 extension ObjcParserTests {

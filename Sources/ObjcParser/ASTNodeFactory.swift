@@ -27,7 +27,7 @@ class ASTNodeFactory {
     }
     
     func comments(overlapping context: ParserRuleContext) -> [ObjcComment] {
-        commentQuerier.comments(overlapping: context)
+        commentQuerier.popCommentsOverlapping(node: context)
     }
     
     func makeIdentifier(from context: Parser.IdentifierContext) -> Identifier {

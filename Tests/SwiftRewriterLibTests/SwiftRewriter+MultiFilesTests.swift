@@ -279,7 +279,8 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             {
                 B* ivarB;
             }
-            @property (nonnull) B *b; // Should translate to 'B', and not 'UnsafeMutablePointer<B>!'
+            // Should translate to 'B', and not 'UnsafeMutablePointer<B>!'
+            @property (nonnull) B *b;
             - (B*)takesB:(B*)b;
             - (instancetype)initWithB:(B*)b;
             @end
@@ -298,6 +299,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             
             class A {
                 private var ivarB: B!
+                // Should translate to 'B', and not 'UnsafeMutablePointer<B>!'
                 var b: B
             
                 init(b: B!) {
@@ -672,6 +674,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
 
             // MARK: - QuickDateExtensions
             extension String: DateConvertible {
+                // This should not be duplicated on the final emitted type!
                 var asDate: Date? {
                     return Date()
                 }

@@ -34,7 +34,7 @@ class CommentQuerier {
         return comments.reversed()
     }
     
-    func comments(overlapping node: ParserRuleContext) -> [ObjcComment] {
+    func popCommentsOverlapping(node: ParserRuleContext) -> [ObjcComment] {
         guard let startToken = node.getStart(), let stopToken = node.getStop() else {
             return []
         }
@@ -42,9 +42,15 @@ class CommentQuerier {
         let start = startToken.sourceLocation()
         let end = stopToken.sourceLocation()
         
-        return allComments.filter {
+        let test: (ObjcComment) -> Bool = {
             $0.location >= start && $0.location <= end
         }
+        
+        defer {
+            allComments.removeAll(where: test)
+        }
+        
+        return allComments.filter(test)
     }
 }
 

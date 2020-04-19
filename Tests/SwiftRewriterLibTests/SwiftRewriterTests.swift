@@ -379,8 +379,6 @@ class SwiftRewriterTests: XCTestCase {
 
             @interface MyClass () <MyDelegate>
             {
-                /// Coments that are meant to be ignored.
-                /// None of these should affect parsing
                 NSInteger anIVar;
             }
             - (void)methodFromCategory;
@@ -814,9 +812,11 @@ class SwiftRewriterTests: XCTestCase {
             objc: """
             @protocol MyProtocol
             @optional
-            - (void)myMethod;  // Result should not contain this optional method...
-            - (void)myMethod2; // ...but should contain this one, which is implemented
-                               // by the conforming class.
+            // Result should not contain this optional method...
+            - (void)myMethod;
+            // ...but should contain this one, which is implemented
+            // by the conforming class.
+            - (void)myMethod2;
             @end
             @interface A : NSObject <MyProtocol>
             - (void)myMethod2;
@@ -825,8 +825,11 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             protocol MyProtocol: NSObjectProtocol {
+                // Result should not contain this optional method...
                 @objc
                 optional func myMethod()
+                // ...but should contain this one, which is implemented
+                // by the conforming class.
                 @objc
                 optional func myMethod2()
             }
@@ -2955,7 +2958,7 @@ class SwiftRewriterTests: XCTestCase {
                }
            }
            """)
-   }
+    }
     
     func testDeclarationCommentTransposing() {
         assertObjcParse(objc: """
@@ -2977,6 +2980,56 @@ class SwiftRewriterTests: XCTestCase {
                 // Method declaration comment
                 // Method definition comment
                 func test() {
+                }
+            }
+            """)
+    }
+    
+    func testDeclarationCommentIgnoresMethodBodyComments() {
+        assertObjcParse(objc: """
+            @implementation A
+            // Method definition comment
+            - (void)test {
+                // Method body comment
+                stmt();
+            }
+            // Another comment
+            - (void)test2 {
+            }
+            @end
+            """, swift: """
+            class A {
+                // Method definition comment
+                func test() {
+                    // Method body comment
+                    stmt()
+                }
+                // Another comment
+                func test2() {
+                }
+            }
+            """)
+    }
+    
+    func testDontMergeCommentsFromProtocolToClass() {
+        assertObjcParse(objc: """
+            @protocol MyProtocol
+            // Comment
+            - (void)myMethod2;
+            @end
+            @interface A : NSObject <MyProtocol>
+            // Method comment
+            - (void)myMethod2;
+            @end
+            """, swift: """
+            protocol MyProtocol {
+                // Comment
+                func myMethod2()
+            }
+
+            class A: NSObject, MyProtocol {
+                // Method comment
+                func myMethod2() {
                 }
             }
             """)

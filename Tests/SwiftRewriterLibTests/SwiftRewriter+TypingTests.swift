@@ -86,6 +86,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     // type: NSObject.Type
                     super
                 }
+                // Here just to check the transpiler correctly switches between metatype
+                // and instance type while iterating over methods to output
                 func instanceMethod() {
                     // type: MyClass
                     self
@@ -142,7 +144,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
     func testSelfSuperInitInClassMethod() {
         assertObjcParse(
             objc: """
-            @interface MyClass: NSObject // To inherit [self init] constructor
+            // To inherit [self init] constructor
+            @interface MyClass: NSObject
             @end
             
             @implementation MyClass
@@ -153,6 +156,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
+            // To inherit [self init] constructor
             class MyClass: NSObject {
                 static func method() {
                     // type: MyClass
