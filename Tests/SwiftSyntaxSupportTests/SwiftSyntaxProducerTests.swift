@@ -111,6 +111,55 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
             }
             """)
     }
+    
+    func testGenerateIntentionHistoryAndComments() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A") { builder in
+                    builder.addHistory(tag: "Tag", description: "History 1")
+                    builder.addHistory(tag: "Tag", description: "History 2")
+                    builder.addComment("// A comment")
+                    
+                    builder.createProperty(named: "prop", type: .int) { builder in
+                        builder.addHistory(tag: "Tag", description: "History 3")
+                        builder.addComment("// A comment")
+                    }
+                    builder.createConstructor(withParameters: []) { builder in
+                        builder.setBody([])
+                        builder.addHistory(tag: "Tag", description: "History 4")
+                        builder.addComment("// A comment")
+                    }
+                    builder.createMethod(named: "method") { builder in
+                        builder.addHistory(tag: "Tag", description: "History 5")
+                        builder.addComment("// A comment")
+                    }
+                }
+            }
+        let sut = SwiftSyntaxProducer(settings: .init(printIntentionHistory: true))
+        
+        let result = sut.generateFile(file)
+        
+        assert(result, matches: """
+            // [Tag] History 1
+            // [Tag] History 2
+            // A comment
+            class A {
+                // [Tag] History 3
+                // A comment
+                var prop: Int
+
+                // [Tag] History 4
+                // A comment
+                init() {
+                }
+
+                // [Tag] History 5
+                // A comment
+                func method() {
+                }
+            }
+            """)
+    }
 }
 
 // MARK: - Attribute writing
@@ -398,8 +447,26 @@ extension SwiftSyntaxProducerTests {
     }
 }
 
-// MARK: - Function body generation
+// MARK: - Function generation
 extension SwiftSyntaxProducerTests {
+    func testGenerateFileWithEmptyFunction() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createGlobalFunction(withName: "a") { builder in
+                    builder.addComment("// A comment")
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(result, matches: """
+            // A comment
+            func a() {
+            }
+            """)
+    }
+    
     func testGenerateFileWithFunctionBody() {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
@@ -441,6 +508,7 @@ extension SwiftSyntaxProducerTests {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
                 builder.createGlobalFunction(withName: "a") { builder in
+                    builder.addComment("// A comment")
                     builder.setBody([])
                     builder.createSignature(name: "a") { builder in
                         builder.addParameter(name: "test", type: .int)
@@ -452,6 +520,7 @@ extension SwiftSyntaxProducerTests {
         let result = sut.generateFile(file)
         
         assert(result, matches: """
+            // A comment
             func a(test: Int) {
             }
             """)
@@ -493,11 +562,13 @@ extension SwiftSyntaxProducerTests {
                                              type: .optional(.anyObject),
                                              ownership: .unownedUnsafe)
             }
+        file.globalVariableIntentions[0].precedingComments = ["// A comment"]
         let sut = SwiftSyntaxProducer()
         
         let result = sut.generateFile(file)
         
         assert(result, matches: """
+            // A comment
             weak var foo: AnyObject?
             unowned(safe) var bar: AnyObject?
             unowned(unsafe) var baz: AnyObject?
@@ -605,12 +676,14 @@ extension SwiftSyntaxProducerTests {
                         returnType: .int)
                 }
             }
+        file.typeIntentions[0].subscripts[0].precedingComments = ["// A comment"]
         let sut = SwiftSyntaxProducer()
         
         let result = sut.generateFile(file)
         
         assert(result, matches: """
             class A {
+                // A comment
                 subscript(index: Int) -> Int {
                 }
             }
@@ -667,11 +740,13 @@ extension SwiftSyntaxProducerTests {
                                         swiftType: .int,
                                         type: .void)
             }
+        file.typealiasIntentions[0].precedingComments = ["// A comment"]
         let sut = SwiftSyntaxProducer()
         
         let result = sut.generateFile(file)
         
         assert(result, matches: """
+            // A comment
             typealias Alias = Int
             """)
     }
@@ -682,7 +757,9 @@ extension SwiftSyntaxProducerTests {
     func testGenerateFileWithExtension() {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
-                builder.createExtension(forClassNamed: "A")
+                builder.createExtension(forClassNamed: "A") { ext in
+                    ext.addComment("// A comment")
+                }
                 builder.createExtension(forClassNamed: "B", categoryName: "BExtension")
             }
         let sut = SwiftSyntaxProducer()
@@ -691,6 +768,7 @@ extension SwiftSyntaxProducerTests {
         
         assert(result, matches: """
             // MARK: -
+            // A comment
             extension A {
             }
             // MARK: - BExtension
@@ -705,13 +783,16 @@ extension SwiftSyntaxProducerTests {
     func testGenerateFileWithEmptyEnum() {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
-                builder.createEnum(withName: "A", rawValue: .int)
+                builder.createEnum(withName: "A", rawValue: .int) { e in
+                    e.addComment("// A comment")
+                }
             }
         let sut = SwiftSyntaxProducer()
         
         let result = sut.generateFile(file)
         
         assert(result, matches: """
+            // A comment
             enum A: Int {
             }
             """)
@@ -743,13 +824,16 @@ extension SwiftSyntaxProducerTests {
     func testGenerateFileWithEmptyClass() {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
-                builder.createClass(withName: "A")
+                builder.createClass(withName: "A") { type in
+                    type.addComment("// A comment")
+                }
             }
         let sut = SwiftSyntaxProducer()
         
         let result = sut.generateFile(file)
         
         assert(result, matches: """
+            // A comment
             class A {
             }
             """)
@@ -910,13 +994,16 @@ extension SwiftSyntaxProducerTests {
     func testGenerateFileWithStruct() {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
-                builder.createStruct(withName: "A")
+                builder.createStruct(withName: "A") { str in
+                    str.addComment("// A comment")
+                }
             }
         let sut = SwiftSyntaxProducer()
         
         let result = sut.generateFile(file)
         
         assert(result, matches: """
+            // A comment
             struct A {
             }
             """)
@@ -928,13 +1015,16 @@ extension SwiftSyntaxProducerTests {
     func testGenerateFileWithProtocol() {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
-                builder.createProtocol(withName: "A")
+                builder.createProtocol(withName: "A") { prot in
+                    prot.addComment("// A comment")
+                }
             }
         let sut = SwiftSyntaxProducer()
         
         let result = sut.generateFile(file)
         
         assert(result, matches: """
+            // A comment
             protocol A {
             }
             """)

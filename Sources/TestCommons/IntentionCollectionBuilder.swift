@@ -362,6 +362,20 @@ public class FunctionBuilder<T: FunctionIntention>: _FunctionBuilder {
     }
 }
 
+extension FunctionBuilder where T: FromSourceIntention {
+    @discardableResult
+    public func addComment(_ comment: String) -> FunctionBuilder {
+        target.precedingComments.append(comment)
+        return self
+    }
+    
+    @discardableResult
+    public func addComments(_ comments: [String]) -> FunctionBuilder {
+        target.precedingComments.append(contentsOf: comments)
+        return self
+    }
+}
+
 public class EnumTypeBuilder {
     var targetEnum: EnumGenerationIntention
     
@@ -375,6 +389,18 @@ public class EnumTypeBuilder {
         
         targetEnum.addCase(caseIntention)
         
+        return self
+    }
+    
+    @discardableResult
+    public func addComment(_ comment: String) -> EnumTypeBuilder {
+        targetEnum.precedingComments.append(comment)
+        return self
+    }
+    
+    @discardableResult
+    public func addComments(_ comments: [String]) -> EnumTypeBuilder {
+        targetEnum.precedingComments.append(contentsOf: comments)
         return self
     }
     

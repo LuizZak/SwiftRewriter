@@ -148,6 +148,13 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
         return false
     }
     
+    func addCommentsIfAvailable(_ intention: FromSourceIntention) {
+        for comment in intention.precedingComments {
+            addExtraLeading(.lineComment(comment))
+            addExtraLeading(.newlines(1) + indentation())
+        }
+    }
+    
     func addHistoryTrackingLeadingIfEnabled(_ intention: IntentionProtocol) {
         if !settings.printIntentionHistory {
             return
@@ -301,6 +308,7 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     func generateTypealias(_ intention: TypealiasIntention) -> TypealiasDeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
+        addCommentsIfAvailable(intention)
         
         return TypealiasDeclSyntax { builder in
             builder.useTypealiasKeyword(makeStartToken(SyntaxFactory.makeTypealiasKeyword).withTrailingSpace())
@@ -317,6 +325,7 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     func generateEnum(_ intention: EnumGenerationIntention) -> EnumDeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
+        addCommentsIfAvailable(intention)
         
         return EnumDeclSyntax { builder in
             addExtraLeading(indentation())
@@ -350,7 +359,9 @@ extension SwiftSyntaxProducer {
     }
     
     func generateEnumCase(_ _case: EnumCaseGenerationIntention) -> EnumCaseDeclSyntax {
-        EnumCaseDeclSyntax { builder in
+        addCommentsIfAvailable(_case)
+        
+        return EnumCaseDeclSyntax { builder in
             builder.useCaseKeyword(makeStartToken(SyntaxFactory.makeCaseKeyword).withTrailingSpace())
             
             builder.addElement(EnumCaseElementSyntax { builder in
@@ -371,19 +382,20 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     
     func generateExtension(_ intention: ClassExtensionGenerationIntention) -> ExtensionDeclSyntax {
+        addExtraLeading(indentation())
+        
+        if let categoryName = intention.categoryName, !categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            addExtraLeading(.lineComment("// MARK: - \(categoryName)"))
+        } else {
+            addExtraLeading(.lineComment("// MARK: -"))
+        }
+        
+        addExtraLeading(.newlines(1) + indentation())
+        
         addHistoryTrackingLeadingIfEnabled(intention)
+        addCommentsIfAvailable(intention)
         
         return ExtensionDeclSyntax { builder in
-            addExtraLeading(indentation())
-            
-            if let categoryName = intention.categoryName, !categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                addExtraLeading(.lineComment("// MARK: - \(categoryName)"))
-            } else {
-                addExtraLeading(.lineComment("// MARK: -"))
-            }
-            
-            addExtraLeading(.newlines(1) + indentation())
-            
             for attribute in attributes(for: intention, inline: false) {
                 builder.addAttribute(attribute().asSyntax)
             }
@@ -419,6 +431,7 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     func generateClass(_ intention: ClassGenerationIntention) -> ClassDeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
+        addCommentsIfAvailable(intention)
         
         return ClassDeclSyntax { builder in
             addExtraLeading(indentation())
@@ -518,6 +531,7 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     func generateStruct(_ intention: StructGenerationIntention) -> StructDeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
+        addCommentsIfAvailable(intention)
         
         return StructDeclSyntax { builder in
             addExtraLeading(indentation())
@@ -555,6 +569,7 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     func generateProtocol(_ intention: ProtocolGenerationIntention) -> ProtocolDeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
+        addCommentsIfAvailable(intention)
         
         return ProtocolDeclSyntax.init { builder in
             addExtraLeading(indentation())
@@ -702,7 +717,9 @@ extension SwiftSyntaxProducer {
     
     func generateInitializer(_ intention: InitGenerationIntention,
                              alwaysEmitBody: Bool) -> InitializerDeclSyntax {
+        
         addHistoryTrackingLeadingIfEnabled(intention)
+        addCommentsIfAvailable(intention)
         
         return InitializerDeclSyntax { builder in
             for attribute in attributes(for: intention, inline: false) {
@@ -744,6 +761,10 @@ extension SwiftSyntaxProducer {
                           alwaysEmitBody: Bool) -> FunctionDeclSyntax {
         
         addHistoryTrackingLeadingIfEnabled(intention)
+        
+        if let fromSource = intention as? FromSourceIntention {
+            addCommentsIfAvailable(fromSource)
+        }
         
         return FunctionDeclSyntax { builder in
             for attribute in attributes(for: intention, inline: false) {
