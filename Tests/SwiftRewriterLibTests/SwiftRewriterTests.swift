@@ -2934,26 +2934,51 @@ class SwiftRewriterTests: XCTestCase {
     
     // TODO: Fix multi-lined comments to adjust indentation
     func testBlockCommentTransposing() {
-           assertObjcParse(objc: """
-               @interface A
-               @end
-               @implementation A
-               - (void)test {
+       assertObjcParse(objc: """
+           @interface A
+           @end
+           @implementation A
+           - (void)test {
+               /*
+                   Block comment
+               */
+               test2();
+           }
+           @end
+           """, swift: """
+           class A {
+               func test() {
                    /*
-                       Block comment
-                   */
-                   test2();
+                   Block comment
+               */
+                   test2()
                }
-               @end
-               """, swift: """
-               class A {
-                   func test() {
-                       /*
-                       Block comment
-                   */
-                       test2()
-                   }
-               }
-               """)
-       }
+           }
+           """)
+   }
+    
+    func testDeclarationCommentTransposing() {
+        assertObjcParse(objc: """
+        // A comment
+        @interface A
+        // Method declaration comment
+        - (void)test;
+        @end
+        // Another comment
+        @implementation A
+        // Method definition comment
+        - (void)test {
+        }
+        @end
+        """, swift: """
+        // A comment
+        // Another comment
+        class A {
+            // Method declaration comment
+            // Method definition comment
+            func test() {
+            }
+        }
+        """)
+    }
 }
