@@ -956,6 +956,7 @@ class SwiftRewriterTests: XCTestCase {
             class MyClass {
                 func method() {
                     let aValue: NSObject!
+
                     (aValue as? String)?[123]
                 }
             }
@@ -978,6 +979,7 @@ class SwiftRewriterTests: XCTestCase {
             class MyClass {
                 func method() {
                     let aValue: NSObject!
+
                     (aValue as? String)?.someMethod()
                     (aValue as? String)?.property
                     (aValue as? String)?[123]
@@ -1073,7 +1075,9 @@ class SwiftRewriterTests: XCTestCase {
                 init() {
                     position = vector_float3()
                     color = packed_float4()
+
                     offset = 0
+
                     booly = false
                 }
                 init(position: vector_float3, color: packed_float4, offset: CInt, booly: Bool) {
@@ -1384,6 +1388,7 @@ class SwiftRewriterTests: XCTestCase {
                     }
 
                     let path = CGMutablePath()
+
                     path.move(to: CGPoint(x: 0, y: top))
                     path.addLine(to: CGPoint(x: 0, y: bottom))
                     shapeLayer.strokeColor = self.dateLabel.textColor.CGColor
@@ -1756,6 +1761,7 @@ class SwiftRewriterTests: XCTestCase {
                 }
                 func method() {
                     let b: B?
+
                     self.takesA(b?.a() ?? A())
                 }
             }
@@ -1792,6 +1798,7 @@ class SwiftRewriterTests: XCTestCase {
             
                 func method() {
                     let a: A!
+
                     self.b?.c = 0
                     a.b?.c = 0
                     self.takesExpression(a.b?.c ?? 0)
@@ -2316,6 +2323,7 @@ class SwiftRewriterTests: XCTestCase {
             class A {
                 func method() {
                     let dict = [:]
+
                     NSLog(dict["abc"]?["def"].value)
                 }
             }
@@ -2506,6 +2514,7 @@ class SwiftRewriterTests: XCTestCase {
                 Date() == Date()
 
                 let date: Date?
+
                 date == Date()
             }
             """
@@ -2631,6 +2640,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             func test() {
                 let obj = Date()
+
                 objc.isKindOfClass(Date.self)
             }
             """)
@@ -2843,6 +2853,7 @@ class SwiftRewriterTests: XCTestCase {
             
                 func test() {
                     weak var weakSelf = self
+
                     weakSelf?.a = 10
                 }
             }

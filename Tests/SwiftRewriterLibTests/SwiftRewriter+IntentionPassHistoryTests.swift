@@ -151,6 +151,7 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                 init() {
                     parent = nil
                     kids = (nil, nil, nil, nil)
+
                     counts = (0, 0, 0, 0)
                     elems = (nil, nil, nil)
                 }

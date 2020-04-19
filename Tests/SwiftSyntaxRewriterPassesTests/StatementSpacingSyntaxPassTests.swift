@@ -61,4 +61,39 @@ class StatementSpacingSyntaxPassTests: BaseSyntaxRewriterPassTest {
             """
         )
     }
+    
+    func testDontApplySpacingToFirstExpressionInMethod() {
+        assertRewrite(
+            input: """
+            func f() {
+                stmt()
+            }
+            """,
+            expected: """
+            func f() {
+                stmt()
+            }
+            """
+        )
+    }
+    
+    func testKeepExistingLeadingTrivia() {
+        assertRewrite(
+            input: """
+            func f() {
+                let a: Int = 0
+                // A comment
+                stmt()
+            }
+            """,
+            expected: """
+            func f() {
+                let a: Int = 0
+
+                // A comment
+                stmt()
+            }
+            """
+        )
+    }
 }

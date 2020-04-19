@@ -5,6 +5,7 @@ import ExpressionPasses
 import IntentionPasses
 import GlobalsProviders
 import WriterTargetOutput
+import SwiftSyntaxRewriterPasses
 
 class SingleFileTestBuilder {
     var test: XCTestCase
@@ -38,6 +39,7 @@ class SingleFileTestBuilder {
         sut.astRewriterPassSources = DefaultExpressionPasses()
         sut.intentionPassesSource = DefaultIntentionPasses()
         sut.globalsProvidersSource = DefaultGlobalsProvidersSource()
+        sut.syntaxRewriterPassSource = DefaultSyntaxPassProvider()
         
         do {
             try sut.rewrite()

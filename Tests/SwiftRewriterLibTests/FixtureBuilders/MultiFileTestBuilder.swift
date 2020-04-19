@@ -6,6 +6,7 @@ import IntentionPasses
 import GlobalsProviders
 import Utils
 import WriterTargetOutput
+import SwiftSyntaxRewriterPasses
 
 class MultiFileTestBuilder {
     typealias File = (path: String, source: String)
@@ -22,6 +23,7 @@ class MultiFileTestBuilder {
         builder.astRewriterPassSources = DefaultExpressionPasses()
         builder.intentionPassesSource = DefaultIntentionPasses()
         builder.globalsProvidersSource = DefaultGlobalsProvidersSource()
+        builder.syntaxRewriterPassSource = DefaultSyntaxPassProvider()
     }
     
     func file(name: String, _ contents: String, isPrimary: Bool = true) -> MultiFileTestBuilder {
