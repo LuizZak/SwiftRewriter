@@ -1136,11 +1136,11 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass {
                 func myMethod() {
-                    // label:
+                    label:
                     if true {
                     }
 
-                    // label2:
+                    label2:
                     if true {
                     }
                 }
@@ -1165,7 +1165,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass {
                 func myMethod() {
-                    // label:
+                    label:
                     if true {
                     }
 

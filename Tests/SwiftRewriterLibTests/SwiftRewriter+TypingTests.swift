@@ -844,6 +844,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                         // type: Int
                         arg
                     }
+                    // Test the intrinsic doesn't leak to outer scopes
                     // type: <<error type>>
                     arg
                 }
