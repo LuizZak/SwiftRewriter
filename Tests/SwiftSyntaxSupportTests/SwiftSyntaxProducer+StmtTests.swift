@@ -445,4 +445,85 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             */
             """)
     }
+    
+    func testLabeledExpressionStatement() {
+        let stmt = Statement.expression(.identifier("value")).labeled("label")
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+            // label:
+                value
+            """)
+    }
+    
+    func testLabeledIfStatement() {
+        let stmt = Statement.if(.constant(true), body: [], else: nil).labeled("label")
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+            label:
+                if true {
+                }
+            """)
+    }
+    
+    func testLabeledWhileStatement() {
+        let stmt = Statement.while(.constant(true), body: []).labeled("label")
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+            label:
+                while true {
+                }
+            """)
+    }
+    
+    func testLabeledRepeatWhileStatement() {
+        let stmt = Statement.doWhile(.constant(true), body: []).labeled("label")
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+            label:
+                repeat {
+                } while true
+            """)
+    }
+    
+    func testLabeledSwitchStatement() {
+        let stmt = Statement
+            .switch(
+                .identifier("value"),
+                cases: [
+                ],
+                default: nil).labeled("label")
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+            label:
+                switch value {
+                }
+            """)
+    }
+    
+    func testLabeledForInStatement() {
+        let stmt = Statement.for(.identifier("v"), .identifier("value"), body: []).labeled("label")
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+            label:
+                for v in value {
+                }
+            """)
+    }
+    
+    func testLabeledDoStatement() {
+        let stmt = Statement.do([]).labeled("label")
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+            label:
+                do {
+                }
+            """)
+    }
 }

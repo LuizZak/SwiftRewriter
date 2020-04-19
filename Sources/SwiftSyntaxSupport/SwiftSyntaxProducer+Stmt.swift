@@ -89,9 +89,9 @@ extension SwiftSyntaxProducer {
     }
     
     func generateStatementBlockItems(_ stmt: Statement) -> [() -> CodeBlockItemSyntax] {
-        if let label = stmt.label {
-            addExtraLeading(.newlines(1) + indentation())
+        if let label = stmt.label, !isLabeledStatementType(stmt) {
             addExtraLeading(.lineComment("// \(label):"))
+            addExtraLeading(.newlines(1) + indentation())
         }
         
         switch stmt {
@@ -142,6 +142,18 @@ extension SwiftSyntaxProducer {
             
         default:
             return [{ SyntaxFactory.makeBlankExpressionStmt().inCodeBlock() }]
+        }
+    }
+    
+    // TODO: This should be a property inside the Statement class
+    private func isLabeledStatementType(_ stmt: Statement) -> Bool {
+        switch stmt {
+        case is IfStatement, is SwitchStatement, is DoStatement, is ForStatement,
+             is WhileStatement, is DoWhileStatement:
+            return true
+            
+        default:
+            return false
         }
     }
     
@@ -230,6 +242,12 @@ extension SwiftSyntaxProducer {
     
     func generateIfStmt(_ stmt: IfStatement) -> IfStmtSyntax {
         IfStmtSyntax { builder in
+            if let label = stmt.label {
+                builder.useLabelName(prepareStartToken(SyntaxFactory.makeIdentifier(label)))
+                builder.useLabelColon(SyntaxFactory.makeColonToken())
+                addExtraLeading(.newlines(1) + indentation())
+            }
+            
             builder.useIfKeyword(makeStartToken(SyntaxFactory.makeIfKeyword).withTrailingSpace())
             
             if let pattern = stmt.pattern {
@@ -267,6 +285,12 @@ extension SwiftSyntaxProducer {
     
     func generateSwitchStmt(_ stmt: SwitchStatement) -> SwitchStmtSyntax {
         SwitchStmtSyntax { builder in
+            if let label = stmt.label {
+                builder.useLabelName(prepareStartToken(SyntaxFactory.makeIdentifier(label)))
+                builder.useLabelColon(SyntaxFactory.makeColonToken())
+                addExtraLeading(.newlines(1) + indentation())
+            }
+            
             builder.useSwitchKeyword(makeStartToken(SyntaxFactory.makeSwitchKeyword).withTrailingSpace())
             builder.useLeftBrace(SyntaxFactory.makeLeftBraceToken().withLeadingSpace())
             builder.useRightBrace(SyntaxFactory.makeRightBraceToken().withLeadingTrivia(.newlines(1) + indentation()))
@@ -331,6 +355,12 @@ extension SwiftSyntaxProducer {
     
     func generateWhileStmt(_ stmt: WhileStatement) -> WhileStmtSyntax {
         WhileStmtSyntax { builder in
+            if let label = stmt.label {
+                builder.useLabelName(prepareStartToken(SyntaxFactory.makeIdentifier(label)))
+                builder.useLabelColon(SyntaxFactory.makeColonToken())
+                addExtraLeading(.newlines(1) + indentation())
+            }
+            
             builder.useWhileKeyword(makeStartToken(SyntaxFactory.makeWhileKeyword).withTrailingSpace())
             
             builder.addCondition(ConditionElementSyntax { builder in
@@ -343,6 +373,12 @@ extension SwiftSyntaxProducer {
     
     func generateDoWhileStmt(_ stmt: DoWhileStatement) -> RepeatWhileStmtSyntax {
         RepeatWhileStmtSyntax { builder in
+            if let label = stmt.label {
+                builder.useLabelName(prepareStartToken(SyntaxFactory.makeIdentifier(label)))
+                builder.useLabelColon(SyntaxFactory.makeColonToken())
+                addExtraLeading(.newlines(1) + indentation())
+            }
+            
             builder.useRepeatKeyword(makeStartToken(SyntaxFactory.makeRepeatKeyword))
             builder.useWhileKeyword(SyntaxFactory.makeWhileKeyword().addingSurroundingSpaces())
             
@@ -353,6 +389,12 @@ extension SwiftSyntaxProducer {
     
     func generateForIn(_ stmt: ForStatement) -> ForInStmtSyntax {
         ForInStmtSyntax { builder in
+            if let label = stmt.label {
+                builder.useLabelName(prepareStartToken(SyntaxFactory.makeIdentifier(label)))
+                builder.useLabelColon(SyntaxFactory.makeColonToken())
+                addExtraLeading(.newlines(1) + indentation())
+            }
+            
             builder.useForKeyword(makeStartToken(SyntaxFactory.makeForKeyword).withTrailingSpace())
             builder.useInKeyword(SyntaxFactory.makeInKeyword().addingSurroundingSpaces())
             builder.useBody(generateCompound(stmt.body))
@@ -363,6 +405,12 @@ extension SwiftSyntaxProducer {
     
     func generateDo(_ stmt: DoStatement) -> DoStmtSyntax {
         DoStmtSyntax { builder in
+            if let label = stmt.label {
+                builder.useLabelName(prepareStartToken(SyntaxFactory.makeIdentifier(label)))
+                builder.useLabelColon(SyntaxFactory.makeColonToken())
+                addExtraLeading(.newlines(1) + indentation())
+            }
+            
             builder.useDoKeyword(makeStartToken(SyntaxFactory.makeDoKeyword))
             builder.useBody(generateCompound(stmt.body))
         }
