@@ -2892,4 +2892,32 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testCommentTransposing() {
+        assertObjcParse(objc: """
+            @interface A
+            @end
+            @implementation A
+            - (NSObject*)getObject {
+                // A comment
+                test();
+                
+                // Double line
+                // Comment
+                return nil;
+            }
+            @end
+            """, swift: """
+            class A {
+                func getObject() -> NSObject! {
+                    // A comment
+                    test()
+
+                    // Double line
+                    // Comment
+                    return nil
+                }
+            }
+            """)
+    }
 }

@@ -528,46 +528,58 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
     }
     
     func testComment() {
-        let stmt = Statement
-            .expression(.identifier("value"))
-            .withComments(["// A Comment", "// Another Comment"])
+        let stmt: CompoundStatement = [
+            Statement
+                .expression(.identifier("value"))
+                .withComments(["// A Comment", "// Another Comment"])
+        ]
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
         
         assert(syntaxes, matches: """
-            // A Comment
+             {
+                // A Comment
                 // Another Comment
                 value
+            }
             """)
     }
     
     func testCommentAndLabel() {
-        let stmt = Statement
-            .expression(.identifier("value"))
-            .withComments(["// A Comment", "// Another Comment"])
-            .labeled("label")
+        let stmt: CompoundStatement = [
+            Statement
+                .expression(.identifier("value"))
+                .withComments(["// A Comment", "// Another Comment"])
+                .labeled("label")
+        ]
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
         
         assert(syntaxes, matches: """
-            // A Comment
+             {
+                // A Comment
                 // Another Comment
                 // label:
                 value
+            }
             """)
     }
     
     func testCommentAndLabelInLabelableStatement() {
-        let stmt = Statement
-            .if(.identifier("value"), body: [], else: nil)
-            .withComments(["// A Comment", "// Another Comment"])
-            .labeled("label")
+        let stmt: CompoundStatement = [
+            Statement
+                .if(.identifier("value"), body: [], else: nil)
+                .withComments(["// A Comment", "// Another Comment"])
+                .labeled("label")
+        ]
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
         
         assert(syntaxes, matches: """
-            // A Comment
+             {
+                // A Comment
                 // Another Comment
                 label:
                 if value {
                 }
+            }
             """)
     }
 }
