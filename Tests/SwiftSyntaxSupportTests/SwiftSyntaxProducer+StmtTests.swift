@@ -582,4 +582,54 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             }
             """)
     }
+    
+    func testTrailingComment() {
+        let stmt: CompoundStatement = [
+            Statement
+                .variableDeclaration(identifier: "value", type: .int, initialization: nil)
+                .withTrailingComment("// A trailing comment")
+        ]
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+             {
+                var value: Int // A trailing comment
+            }
+            """)
+    }
+    
+    func testTrailingCommentInStatement() {
+        let stmt: CompoundStatement = [
+            Statement
+                .if(.identifier("value"), body: [], else: nil)
+                .withTrailingComment("// A trailing comment")
+        ]
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+             {
+                if value {
+                } // A trailing comment
+            }
+            """)
+    }
+    
+    func testTrailingCommentInSplitExpressionsStatement() {
+        let stmt: CompoundStatement = [
+            Statement
+                .expressions([
+                    Expression.identifier("stmt1").call(),
+                    Expression.identifier("stmt2").call(),
+                ])
+                .withTrailingComment("// A trailing comment")
+        ]
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+             {
+                stmt1()
+                stmt2() // A trailing comment
+            }
+            """)
+    }
 }

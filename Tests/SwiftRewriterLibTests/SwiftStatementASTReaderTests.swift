@@ -360,6 +360,39 @@ class SwiftStatementASTReaderTests: XCTestCase {
                parseBlock: { try $0.statement() },
                readsAs: expected)
     }
+    
+    func testReadWithCommentsTrailing() throws {
+        let string = """
+            test(); // A trailing comment
+            """
+        let objcParser = ObjcParser(string: string)
+        try objcParser.parse()
+        let comments = objcParser.comments
+        let expected = Statement.expression(Expression.identifier("test").call())
+        expected.trailingComment = "// A trailing comment"
+        
+        assert(objcStmt: string,
+               comments: comments,
+               parseBlock: { try $0.statement() },
+               readsAs: expected)
+    }
+    
+    func testReadWithCommentsTrailingStatement() throws {
+        let string = """
+            if (true) {
+            } // A trailing comment
+            """
+        let objcParser = ObjcParser(string: string)
+        try objcParser.parse()
+        let comments = objcParser.comments
+        let expected = Statement.if(.constant(true), body: [], else: nil)
+        expected.trailingComment = "// A trailing comment"
+        
+        assert(objcStmt: string,
+               comments: comments,
+               parseBlock: { try $0.statement() },
+               readsAs: expected)
+    }
 }
 
 extension SwiftStatementASTReaderTests {

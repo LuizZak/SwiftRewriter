@@ -14,6 +14,10 @@ public class Statement: SyntaxNode, Codable, Equatable {
     /// the statement.
     public var comments: [String] = []
     
+    /// A comment that trails the statement (i.e. it's placed after the statement,
+    /// before the newline feed)
+    public var trailingComment: String?
+    
     override public init() {
         super.init()
     }
@@ -29,6 +33,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
         
         self.label = try container.decodeIfPresent(String.self, forKey: .label)
         self.comments = try container.decode([String].self, forKey: .comments)
+        self.trailingComment = try container.decodeIfPresent(String.self, forKey: .trailingComment)
         
         super.init()
     }
@@ -57,7 +62,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
         if lhs === rhs {
             return true
         }
-        if lhs.label != rhs.label || lhs.comments != rhs.comments {
+        if lhs.label != rhs.label || lhs.comments != rhs.comments || lhs.trailingComment != rhs.trailingComment {
             return false
         }
         
@@ -69,6 +74,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
         
         try container.encodeIfPresent(label, forKey: .label)
         try container.encode(comments, forKey: .comments)
+        try container.encodeIfPresent(trailingComment, forKey: .trailingComment)
     }
     
     @usableFromInline
@@ -79,6 +85,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
     private enum CodingKeys: String, CodingKey {
         case label
         case comments
+        case trailingComment
     }
 }
 
@@ -87,15 +94,15 @@ public extension Statement {
         CompoundStatement(statements: cpd)
     }
     static func `if`(_ exp: Expression,
-                            body: CompoundStatement,
-                            else elseBody: CompoundStatement?) -> IfStatement {
+                     body: CompoundStatement,
+                     else elseBody: CompoundStatement?) -> IfStatement {
         
         IfStatement(exp: exp, body: body, elseBody: elseBody, pattern: nil)
     }
     static func ifLet(_ pattern: Pattern,
-                             _ exp: Expression,
-                             body: CompoundStatement,
-                             else elseBody: CompoundStatement?) -> IfStatement {
+                      _ exp: Expression,
+                      body: CompoundStatement,
+                      else elseBody: CompoundStatement?) -> IfStatement {
         
         IfStatement(exp: exp, body: body, elseBody: elseBody, pattern: pattern)
     }
@@ -109,8 +116,8 @@ public extension Statement {
         ForStatement(pattern: pattern, exp: exp, body: body)
     }
     static func `switch`(_ exp: Expression,
-                                cases: [SwitchCase],
-                                default defaultCase: [Statement]?) -> SwitchStatement {
+                         cases: [SwitchCase],
+                         default defaultCase: [Statement]?) -> SwitchStatement {
         
         SwitchStatement(exp: exp, cases: cases, defaultCase: defaultCase)
     }
@@ -173,11 +180,12 @@ public extension Statement {
     func copyMetadata(from other: Statement) -> Self {
         self.label = other.label
         self.comments = other.comments
+        self.trailingComment = other.trailingComment
         
         return self
     }
     
-    /// Labels this statement with a given label, and returns this instance.
+    /// Labels this statement with a given label and returns this instance.
     func labeled(_ label: String?) -> Self {
         self.label = label
         
@@ -187,6 +195,14 @@ public extension Statement {
     /// Replaces the current list of leading comments and returns this instance.
     func withComments(_ comments: [String]) -> Self {
         self.comments = comments
+        
+        return self
+    }
+    
+    /// Replaces the trailing comment from this statement with a new value and
+    /// returns this instance.
+    func withTrailingComment(_ comment: String?) -> Self {
+        self.trailingComment = comment
         
         return self
     }

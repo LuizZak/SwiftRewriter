@@ -900,7 +900,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
         assertObjcParse(
             objc: """
             typedef void(^_Nonnull Callback)();
-            NSString *takesBlock(void(^block)());
+            NSString *takesBlockGlobal(void(^block)());
             
             @interface MyClass
             @property (nonnull) Callback callback;
@@ -915,7 +915,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 [self takesBlock:^() {
                     (local);
                 }];
-                takesBlock(^{
+                takesBlockGlobal(^{
                     (local);
                 });
                 (local);
@@ -927,7 +927,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             typealias Callback = () -> Void
 
-            func takesBlock(_ block: (() -> Void)!) -> String! {
+            func takesBlockGlobal(_ block: (() -> Void)!) -> String! {
             }
 
             class MyClass {
@@ -947,7 +947,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                         local
                     }
                     // type: String!
-                    takesBlock { () -> Void in
+                    takesBlockGlobal { () -> Void in
                         // type: Int
                         local
                     }
@@ -1356,7 +1356,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 // type: Int
                 max(0, 0)
                 // type: CGFloat
-                max(0.0, 0)
+                max(0.0, 0) // FIXME: Result is currently 'CGFloat', but should be 'Double'
             }
             """,
             options: SwiftSyntaxOptions(outputExpressionTypes: true))

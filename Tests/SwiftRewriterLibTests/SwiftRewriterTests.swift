@@ -1628,7 +1628,7 @@ class SwiftRewriterTests: XCTestCase {
                     super.b(a)
                 }
                 func c(_ a: Int) {
-                    super.c()
+                    super.c() // Make sure we don't create unnecessary overrides
                 }
             }
             """)

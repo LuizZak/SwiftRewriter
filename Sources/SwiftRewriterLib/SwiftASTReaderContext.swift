@@ -64,11 +64,7 @@ public final class SwiftASTReaderContext {
             return nil
         }
         
-        let line = start.getLine()
-        let col = start.getCharPositionInLine() + 1
-        let char = start.getStartIndex()
-        
-        let location = SourceLocation(line: line, column: col, utf8Offset: char)
+        let location = start.sourceLocation()
         
         for (i, comment) in comments.enumerated().reversed() {
             if comment.location < location {
@@ -80,8 +76,35 @@ public final class SwiftASTReaderContext {
         return nil
     }
     
+    public func popClosestCommentAtTrailingLine(node: ParserRuleContext) -> ObjcComment? {
+        guard let stop = node.getStop() else {
+            return nil
+        }
+        
+        let location = stop.sourceLocation()
+        
+        for (i, comment) in comments.enumerated() {
+            if comment.location.line == location.line && comment.location.column > location.column {
+                comments.remove(at: i)
+                return comment
+            }
+        }
+        
+        return nil
+    }
+    
     public struct Local {
         public var name: String
         public var storage: ValueStorage
+    }
+}
+
+private extension Token {
+    func sourceLocation() -> SourceLocation {
+        let line = getLine()
+        let col = getCharPositionInLine() + 1
+        let char = getStartIndex()
+        
+        return SourceLocation(line: line, column: col, utf8Offset: char)
     }
 }

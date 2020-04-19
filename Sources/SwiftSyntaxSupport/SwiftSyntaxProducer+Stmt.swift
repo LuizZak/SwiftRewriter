@@ -3,6 +3,9 @@ import Intentions
 import SwiftAST
 
 extension SwiftSyntaxProducer {
+    // TODO: Consider reducing code duplication within `generateStatement` and
+    // `_generateStatements`
+    
     /// Generates a code block for the given statement.
     /// This code block might have zero, one or more sub-statements, depending on
     /// the properties of the given statement, e.g. expression statements which
@@ -119,55 +122,77 @@ extension SwiftSyntaxProducer {
             }
         }
         
+        let genList: [() -> CodeBlockItemSyntax]
+        
         switch stmt {
         case let stmt as ReturnStatement:
-            return [{ self.generateReturn(stmt).inCodeBlock() }]
+            genList = [{ self.generateReturn(stmt).inCodeBlock() }]
             
         case let stmt as ContinueStatement:
-            return [{ self.generateContinue(stmt).inCodeBlock() }]
+            genList = [{ self.generateContinue(stmt).inCodeBlock() }]
             
         case let stmt as BreakStatement:
-            return [{ self.generateBreak(stmt).inCodeBlock() }]
+            genList = [{ self.generateBreak(stmt).inCodeBlock() }]
             
         case let stmt as FallthroughStatement:
-            return [{ self.generateFallthrough(stmt).inCodeBlock() }]
+            genList = [{ self.generateFallthrough(stmt).inCodeBlock() }]
             
         case let stmt as ExpressionsStatement:
-            return generateExpressions(stmt)
+            genList = generateExpressions(stmt)
             
         case let stmt as VariableDeclarationsStatement:
-            return generateVariableDeclarations(stmt)
+            genList = generateVariableDeclarations(stmt)
             
         case let stmt as IfStatement:
-            return [{ self.generateIfStmt(stmt).inCodeBlock() }]
+            genList = [{ self.generateIfStmt(stmt).inCodeBlock() }]
             
         case let stmt as SwitchStatement:
-            return [{ self.generateSwitchStmt(stmt).inCodeBlock() }]
+            genList = [{ self.generateSwitchStmt(stmt).inCodeBlock() }]
             
         case let stmt as WhileStatement:
-            return [{ self.generateWhileStmt(stmt).inCodeBlock() }]
+            genList = [{ self.generateWhileStmt(stmt).inCodeBlock() }]
             
         case let stmt as DoStatement:
-            return [{ self.generateDo(stmt).inCodeBlock() }]
+            genList = [{ self.generateDo(stmt).inCodeBlock() }]
             
         case let stmt as DoWhileStatement:
-            return [{ self.generateDoWhileStmt(stmt).inCodeBlock() }]
+            genList = [{ self.generateDoWhileStmt(stmt).inCodeBlock() }]
             
         case let stmt as ForStatement:
-            return [{ self.generateForIn(stmt).inCodeBlock() }]
+            genList = [{ self.generateForIn(stmt).inCodeBlock() }]
             
         case let stmt as DeferStatement:
-            return [{ self.generateDefer(stmt).inCodeBlock() }]
+            genList = [{ self.generateDefer(stmt).inCodeBlock() }]
             
         case let stmt as CompoundStatement:
-            return stmt.statements.flatMap(generateStatementBlockItems)
+            genList = stmt.statements.flatMap(generateStatementBlockItems)
             
         case let stmt as UnknownStatement:
-            return [{ self.generateUnknown(stmt).inCodeBlock() }]
+            genList = [{ self.generateUnknown(stmt).inCodeBlock() }]
             
         default:
-            return [{ SyntaxFactory.makeBlankExpressionStmt().inCodeBlock() }]
+            genList = [{ SyntaxFactory.makeBlankExpressionStmt().inCodeBlock() }]
         }
+        
+        return applyingTrailingComment(comment: stmt.trailingComment,
+                                       toList: genList)
+    }
+    
+    private func applyingTrailingComment(
+        comment: String?,
+        toList list: [() -> CodeBlockItemSyntax]) -> [() -> CodeBlockItemSyntax] {
+        
+        guard let comment = comment, let last = list.last else {
+            return list
+        }
+        
+        var list = list
+        
+        list[list.count - 1] = {
+            return last().withTrailingTrivia(.spaces(1) + .lineComment(comment))
+        }
+        
+        return list
     }
     
     // TODO: This should be a property inside the Statement class

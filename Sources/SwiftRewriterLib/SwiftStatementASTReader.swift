@@ -100,6 +100,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
         }
         
         stmt.comments = comments.reversed()
+        stmt.trailingComment = context.popClosestCommentAtTrailingLine(node: ctx)?.string.trimmingWhitespaces()
         
         return stmt
     }
