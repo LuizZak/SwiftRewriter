@@ -40,6 +40,7 @@ public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
     
     public func mergeStoredProperties(from extensions: [ClassExtensionGenerationIntention],
                                       into nominalClass: ClassGenerationIntention) {
+        
         for ext in extensions {
             // IVar
             moveInstanceVariables(from: ext, into: nominalClass)
@@ -50,6 +51,7 @@ public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
     
     func moveInstanceVariables(from first: ClassExtensionGenerationIntention,
                                into second: BaseClassIntention) {
+        
         for ivar in first.instanceVariables {
             if !second.hasInstanceVariable(named: ivar.name) {
                 second.addInstanceVariable(ivar)
@@ -81,8 +83,8 @@ public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
     
     func moveStoredProperties(from first: ClassExtensionGenerationIntention,
                               into second: BaseClassIntention) {
+        
         for prop in first.properties where prop.requiresField {
-            
             first.removeProperty(prop)
             
             if !second.hasProperty(named: prop.name) {
