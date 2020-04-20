@@ -2864,7 +2864,8 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testConvertSubscriptDeclaration() {
-        assertObjcParse(objc: """
+        assertObjcParse(
+            objc: """
             @interface A
             @end
             @implementation A
@@ -2872,7 +2873,8 @@ class SwiftRewriterTests: XCTestCase {
                 return self;
             }
             @end
-            """, swift: """
+            """,
+            swift: """
             class A {
                 subscript(index: UInt) -> NSObject! {
                     return self
@@ -2882,7 +2884,8 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testConvertSubscriptDeclarationGetterAndSetter() {
-        assertObjcParse(objc: """
+        assertObjcParse(
+            objc: """
             @interface A
             @end
             @implementation A
@@ -2893,7 +2896,8 @@ class SwiftRewriterTests: XCTestCase {
                 (object);
             }
             @end
-            """, swift: """
+            """,
+            swift: """
             class A {
                 subscript(index: UInt) -> NSObject! {
                     get {
@@ -2908,7 +2912,8 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testCommentTransposing() {
-        assertObjcParse(objc: """
+        assertObjcParse(
+            objc: """
             @interface A
             @end
             @implementation A
@@ -2921,7 +2926,8 @@ class SwiftRewriterTests: XCTestCase {
                 return nil;
             }
             @end
-            """, swift: """
+            """,
+            swift: """
             class A {
                 func getObject() -> NSObject! {
                     // A comment
@@ -2937,31 +2943,34 @@ class SwiftRewriterTests: XCTestCase {
     
     // TODO: Fix multi-lined comments to adjust indentation
     func testBlockCommentTransposing() {
-       assertObjcParse(objc: """
-           @interface A
-           @end
-           @implementation A
-           - (void)test {
-               /*
-                   Block comment
-               */
-               test2();
-           }
-           @end
-           """, swift: """
-           class A {
-               func test() {
-                   /*
-                   Block comment
-               */
-                   test2()
-               }
-           }
-           """)
+        assertObjcParse(
+            objc: """
+            @interface A
+            @end
+            @implementation A
+            - (void)test {
+                /*
+                    Block comment
+                */
+                test2();
+            }
+            @end
+            """,
+            swift: """
+            class A {
+                func test() {
+                    /*
+                    Block comment
+                */
+                    test2()
+                }
+            }
+            """)
     }
     
     func testDeclarationCommentTransposing() {
-        assertObjcParse(objc: """
+        assertObjcParse(
+            objc: """
             // A comment
             @interface A
             // Method declaration comment
@@ -2973,7 +2982,8 @@ class SwiftRewriterTests: XCTestCase {
             - (void)test {
             }
             @end
-            """, swift: """
+            """,
+            swift: """
             // A comment
             // Another comment
             class A {
@@ -2986,7 +2996,8 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testDeclarationCommentIgnoresMethodBodyComments() {
-        assertObjcParse(objc: """
+        assertObjcParse(
+            objc: """
             @implementation A
             // Method definition comment
             - (void)test {
@@ -2997,7 +3008,8 @@ class SwiftRewriterTests: XCTestCase {
             - (void)test2 {
             }
             @end
-            """, swift: """
+            """,
+            swift: """
             class A {
                 // Method definition comment
                 func test() {
@@ -3012,7 +3024,8 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testDontMergeCommentsFromProtocolToClass() {
-        assertObjcParse(objc: """
+        assertObjcParse(
+            objc: """
             @protocol MyProtocol
             // Comment
             - (void)myMethod2;
@@ -3021,7 +3034,8 @@ class SwiftRewriterTests: XCTestCase {
             // Method comment
             - (void)myMethod2;
             @end
-            """, swift: """
+            """,
+            swift: """
             protocol MyProtocol {
                 // Comment
                 func myMethod2()
@@ -3031,6 +3045,20 @@ class SwiftRewriterTests: XCTestCase {
                 // Method comment
                 func myMethod2() {
                 }
+            }
+            """)
+    }
+    
+    func testBlockPropertyDeclaration() {
+        assertObjcParse(
+            objc: """
+            @interface A
+            @property void (^show)(UIView *view, UIViewController *controller);
+            @end
+            """,
+            swift: """
+            class A {
+                var show: ((UIView?, UIViewController?) -> Void)!
             }
             """)
     }
