@@ -76,6 +76,7 @@ extension SwiftRewriterCommand {
                 help: """
             Specifies the output target for the conversion.
             Defaults to 'filedisk' if not provided.
+            Ihnored when converting from the standard input.
 
                 stdout
                     Prints the conversion results to the terminal's standard output;
@@ -88,6 +89,7 @@ extension SwiftRewriterCommand {
         @Flag(name: .shortAndLong,
               help: """
               Follows #import declarations in files in order to parse other relevant files.
+              Ignored when converting from standard input.
               """)
         var followImports: Bool
     }
