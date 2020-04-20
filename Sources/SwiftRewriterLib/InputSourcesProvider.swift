@@ -8,14 +8,14 @@ public protocol InputSourcesProvider {
 
 /// An array-backed input sources provider
 public struct ArrayInputSourcesProvider: InputSourcesProvider {
-    public var files: [InputSource]
+    public var inputs: [InputSource]
 
-    public init(files: [InputSource] = []) {
-        self.files = files
+    public init(inputs: [InputSource] = []) {
+        self.inputs = inputs
     }
 
     public func sources() -> [InputSource] {
-        files
+        inputs
     }
 }
 

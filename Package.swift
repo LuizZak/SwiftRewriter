@@ -193,7 +193,10 @@ let package = Package(
         .testTarget(
             name: "TestCommonsTests",
             dependencies: ["TestCommons",
-                           "Utils", "TypeSystem"])
+                           "Utils", "TypeSystem"]),
+        .testTarget(
+            name: "SwiftRewriterTests",
+            dependencies: ["SwiftRewriter"])
     ],
     swiftLanguageVersions: [.v5]
 )

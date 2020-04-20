@@ -25,36 +25,31 @@ public class ParserCache {
         cache[file] = parser
     }
 
-    public func loadParsedTree(file: URL) throws -> ObjcParser {
-        if let parser = cache[file] {
+    public func loadParsedTree(input: InputSource) throws -> ObjcParser {
+        let url = URL(fileURLWithPath: input.sourceName())
+        
+        if let parser = cache[url] {
             try parser.parse()
             return parser
         }
 
-        let data = try fileProvider.contentsOfFile(atPath: file.path)
-        guard let string = String(bytes: data, encoding: .utf8) else {
-            throw Error.invalidFile
-        }
-
-        let source = StringCodeSource(source: string, fileName: file.lastPathComponent)
-        
-        let processedSource = applyPreprocessors(source: source, preprocessors: sourcePreprocessors)
+        let processedSource = try applyPreprocessors(input: input, preprocessors: sourcePreprocessors)
         
         let state = parserStatePool.pull()
         let parser = ObjcParser(string: processedSource,
-                                fileName: source.filePath,
+                                fileName: url.path,
                                 state: state)
         parser.antlrSettings = antlrSettings
         try parser.parse()
         parserStatePool.repool(state)
-        cache[file] = parser
+        cache[url] = parser
         return parser
     }
     
-    private func applyPreprocessors(source: CodeSource, preprocessors: [SourcePreprocessor]) -> String {
-        let src = source.fetchSource()
+    private func applyPreprocessors(input: InputSource, preprocessors: [SourcePreprocessor]) throws -> String {
+        let src = try input.loadSource().fetchSource()
         
-        let context = _PreprocessingContext(filePath: source.filePath)
+        let context = _PreprocessingContext(filePath: input.sourceName())
         
         return preprocessors.reduce(src) {
             $1.preprocess(source: $0, context: context)

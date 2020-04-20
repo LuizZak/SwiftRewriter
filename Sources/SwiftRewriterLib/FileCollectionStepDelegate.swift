@@ -2,5 +2,5 @@ import Foundation
 
 public protocol FileCollectionStepDelegate: class {
     func fileCollectionStep(_ fileCollectionStep: FileCollectionStep,
-                            referencedFilesForFile file: DiskInputFile) throws -> [URL]
+                            referencedFilesForFile file: InputSource) throws -> [URL]
 }

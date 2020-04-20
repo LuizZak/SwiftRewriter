@@ -95,7 +95,7 @@ class FileCollectionStepTests: XCTestCase {
         let invocations = mockDelegate.fileCollectionStepReferencedFilesForFile
         XCTAssertEqual(invocations.count, 1)
         XCTAssert(invocations[0].fileCollectionStep === sut)
-        XCTAssertEqual(invocations[0].file, file)
+        XCTAssertEqual(invocations[0].file as? DiskInputFile, file)
     }
 
     func testDelegateFileCollectionStepReferencedFilesForFile_CollectsFiles() throws {
@@ -113,10 +113,10 @@ class FileCollectionStepTests: XCTestCase {
 }
 
 private class MockFileCollectionStepDelegate: FileCollectionStepDelegate {
-    var fileCollectionStepReferencedFilesForFile: [(fileCollectionStep: FileCollectionStep, file: DiskInputFile)] = []
+    var fileCollectionStepReferencedFilesForFile: [(fileCollectionStep: FileCollectionStep, file: InputSource)] = []
     var fileReferences: [URL] = []
     func fileCollectionStep(_ fileCollectionStep: FileCollectionStep,
-                            referencedFilesForFile file: DiskInputFile) throws -> [URL] {
+                            referencedFilesForFile file: InputSource) throws -> [URL] {
         fileCollectionStepReferencedFilesForFile.append((fileCollectionStep, file))
         return fileReferences
     }

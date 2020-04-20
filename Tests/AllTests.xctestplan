@@ -140,6 +140,13 @@
         "identifier" : "SwiftRewriter::WriterTargetOutputTests",
         "name" : "WriterTargetOutputTests"
       }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::SwiftRewriterTests",
+        "name" : "SwiftRewriterTests"
+      }
     }
   ],
   "version" : 1

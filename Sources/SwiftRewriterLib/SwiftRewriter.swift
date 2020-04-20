@@ -546,13 +546,14 @@ public final class SwiftRewriter {
         
         path = (path as NSString).deletingPathExtension + ".swift"
         
-        let src = try source.loadSource()
-        
         // Hit parser cache, if available
         let parser: ObjcParser
         if let parserCache = parserCache {
-            parser = try parserCache.loadParsedTree(file: URL(fileURLWithPath: src.filePath))
+            parser = try parserCache.loadParsedTree(input: source)
         } else {
+            // TODO: Reduce duplication with ParserCache.applyPreprocessors
+            let src = try source.loadSource()
+            
             let processedSrc = applyPreprocessors(source: src)
             
             parser = ObjcParser(string: processedSrc, fileName: src.filePath, state: state)

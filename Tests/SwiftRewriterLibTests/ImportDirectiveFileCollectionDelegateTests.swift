@@ -18,12 +18,13 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
     
     func testReferencedFilesForFile() throws {
         try fileDisk.createFile(atPath: "/a_file.h")
-        let inputFile = DiskInputFile(url: URL(string: "/input.h")!, isPrimary: true)
+        let url = URL(fileURLWithPath: "/input.h")
+        let inputFile = SingleInputProvider(code: "", isPrimary: true, fileName: url.path)
         let parser = ObjcParser(string: """
             #import "a_file.h"
             """)
         try parser.parse()
-        parserCache.replaceCachedParsedTree(file: inputFile.url, parser: parser)
+        parserCache.replaceCachedParsedTree(file: url, parser: parser)
         let sut = ImportDirectiveFileCollectionDelegate(parserCache: parserCache,
                                                         fileProvider: fileDisk)
         
@@ -36,13 +37,14 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
     
     func testReferencedFilesForFileIgnoresNonExistingFiles() throws {
         try fileDisk.createFile(atPath: "/a_file.h")
-        let inputFile = DiskInputFile(url: URL(string: "/input.h")!, isPrimary: true)
+        let url = URL(fileURLWithPath: "/input.h")
+        let inputFile = SingleInputProvider(code: "", isPrimary: true, fileName: url.path)
         let parser = ObjcParser(string: """
             #import "a_file.h"
             #import "a_non_existing_file.h"
             """)
         try parser.parse()
-        parserCache.replaceCachedParsedTree(file: inputFile.url, parser: parser)
+        parserCache.replaceCachedParsedTree(file: url, parser: parser)
         let sut = ImportDirectiveFileCollectionDelegate(parserCache: parserCache,
                                                         fileProvider: fileDisk)
         
@@ -54,12 +56,13 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
     }
     
     func testReferencedFilesForFileIgnoresSystemImports() throws {
-        let inputFile = DiskInputFile(url: URL(string: "/input.h")!, isPrimary: true)
+        let url = URL(fileURLWithPath: "/input.h")
+        let inputFile = SingleInputProvider(code: "", isPrimary: true, fileName: url.path)
         let parser = ObjcParser(string: """
             #import <system_import.h>
             """)
         try parser.parse()
-        parserCache.replaceCachedParsedTree(file: inputFile.url, parser: parser)
+        parserCache.replaceCachedParsedTree(file: url, parser: parser)
         let sut = ImportDirectiveFileCollectionDelegate(parserCache: parserCache,
                                                         fileProvider: fileDisk)
         

@@ -13,16 +13,16 @@ public class ImportDirectiveFileCollectionDelegate {
 
 extension ImportDirectiveFileCollectionDelegate: FileCollectionStepDelegate {
     public func fileCollectionStep(_ fileCollectionStep: FileCollectionStep,
-                                   referencedFilesForFile file: DiskInputFile) throws -> [URL] {
+                                   referencedFilesForFile file: InputSource) throws -> [URL] {
 
-        let parserTree = try parserCache.loadParsedTree(file: file.url)
+        let parserTree = try parserCache.loadParsedTree(input: file)
         let fileReferences =
             parserTree.importDirectives
                 .filter { !$0.isSystemImport }
                 .map { $0.path }
                 .filter { $0.hasSuffix(".h") }
 
-        let basePath = file.url.deletingLastPathComponent()
+        let basePath = URL(fileURLWithPath: file.sourceName()).deletingLastPathComponent()
 
         var urls: [URL] = []
 

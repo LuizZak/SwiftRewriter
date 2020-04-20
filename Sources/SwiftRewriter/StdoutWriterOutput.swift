@@ -6,28 +6,34 @@ import Console
 public class StdoutWriterOutput: WriterOutput {
     var buffer: String = ""
     var colorize: Bool
+    var signalEndOfFiles: Bool = true
     
     init(colorize: Bool = true) {
         self.colorize = colorize
     }
     
     public func createFile(path: String) -> FileOutput {
-        StdFileOutput(path: path, colorize: colorize)
+        StdFileOutput(path: path, colorize: colorize, signalEndOfFiles: signalEndOfFiles)
     }
     
     private class StdFileOutput: FileOutput {
         var buffer: String = ""
         var colorize: Bool
         var path: String
+        var signalEndOfFiles: Bool
         
-        init(path: String, colorize: Bool = true) {
+        init(path: String, colorize: Bool = true, signalEndOfFiles: Bool) {
             self.colorize = colorize
             self.path = path
+            self.signalEndOfFiles = signalEndOfFiles
         }
         
         func close() {
-            print(buffer)
-            print("// End of file \((path as NSString).lastPathComponent)")
+            print(buffer, terminator: signalEndOfFiles ? "\n" : "")
+            
+            if signalEndOfFiles {
+                print("// End of file \((path as NSString).lastPathComponent)")
+            }
         }
         
         func outputTarget() -> RewriterOutputTarget {

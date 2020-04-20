@@ -198,11 +198,33 @@ extension SwiftRewriterCommand {
             
             let output = StdoutWriterOutput(colorize: colorize)
             let service = SwiftRewriterServiceImpl(output: output, settings: settings)
-            let console = Console()
-            let menu = Menu(rewriterService: service, console: console)
             
-            menu.main()
+            // Detect terminal
+            if isatty(fileno(stdin)) != 0 {
+                let console = Console()
+                let menu = Menu(rewriterService: service, console: console)
+                
+                menu.main()
+            } else {
+                // If not invoked by a terminal, produce an output based in the
+                // standard input
+                
+                output.signalEndOfFiles = false
+                
+                let inputData = FileHandle.standardInput.availableData
+                guard let inputString = String(data: inputData, encoding: .utf8) else {
+                    throw SwiftRewriterError(description: "Expected UTF-8 in standard input pipe mode")
+                }
+
+                let input = SingleInputProvider(code: inputString, isPrimary: true)
+
+                try service.rewrite(inputs: [input])
+            }
         }
+    }
+    
+    struct SwiftRewriterError: Error {
+        var description: String
     }
 }
 
