@@ -968,14 +968,22 @@ private class PropertyListener: ObjectiveCParserBaseListener {
             property.addChild(node)
         }
         
-        if let fieldDeclaration = ctx.fieldDeclaration() {
-            let inNonnull = nonnullContextQuerier.isInNonnullContext(fieldDeclaration)
-            
-            if let type = typeParser.parseObjcType(in: fieldDeclaration) {
-                let typeNode = TypeNameNode(type: type, isInNonnullContext: inNonnull)
-                updateSourceLocation(typeNode, fieldDeclaration)
-                property.addChild(typeNode)
-            }
+        guard let fieldDeclaration = ctx.fieldDeclaration() else {
+            return
+        }
+        guard let specQualifier = fieldDeclaration.specifierQualifierList() else {
+            return
+        }
+        guard let declarator = fieldDeclaration.fieldDeclaratorList()?.fieldDeclarator().first?.declarator() else {
+            return
+        }
+        
+        let inNonnull = nonnullContextQuerier.isInNonnullContext(fieldDeclaration)
+        
+        if let type = typeParser.parseObjcType(in: specQualifier, declarator: declarator) {
+            let typeNode = TypeNameNode(type: type, isInNonnullContext: inNonnull)
+            updateSourceLocation(typeNode, fieldDeclaration)
+            property.addChild(typeNode)
         }
     }
     

@@ -3058,7 +3058,7 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class A {
-                var show: (UIView, UIViewController) -> Void
+                var show: ((UIView?, UIViewController?) -> Void)!
             }
             """)
     }

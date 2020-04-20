@@ -68,31 +68,11 @@ public class TypeParsing {
         guard let specQualifier = decl.specifierQualifierList() else {
             return nil
         }
-        guard let baseTypeString = specQualifier.typeSpecifier(0)?.getText() else {
-            return nil
-        }
         guard let declarator = decl.fieldDeclaratorList()?.fieldDeclarator(0)?.declarator() else {
             return nil
         }
         
-        let pointer = declarator.pointer()?.accept(VarDeclarationTypeExtractor())
-        
-        var typeName = "\(baseTypeString) \(pointer ?? "")"
-        
-        if !specQualifier.arcBehaviourSpecifier().isEmpty {
-            let arcSpecifiers =
-                specQualifier.arcBehaviourSpecifier().map {
-                    $0.getText()
-                }
-            
-            typeName = "\(arcSpecifiers.joined(separator: " ")) \(typeName)"
-        }
-        
-        guard let type = parseObjcType(typeName) else {
-            return nil
-        }
-        
-        return handleFixedArray(type, declarator: declarator)
+        return parseObjcType(in: specQualifier, declarator: declarator)
     }
     
     public func parseObjcType(in specQual: Parser.SpecifierQualifierListContext) -> ObjcType? {
@@ -105,6 +85,7 @@ public class TypeParsing {
     
     public func parseObjcType(in specifierQualifierList: Parser.SpecifierQualifierListContext,
                               declarator: Parser.DeclaratorContext) -> ObjcType? {
+        
         guard let specifiersString = VarDeclarationTypeExtractor.extract(from: specifierQualifierList) else {
             return nil
         }
