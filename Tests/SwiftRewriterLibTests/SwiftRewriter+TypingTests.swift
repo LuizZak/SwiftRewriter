@@ -433,7 +433,6 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testPropertyResolutionLooksThroughNullability() {
-        // FIXME: Maybe it's desirable to infer as `Int!` instead?
         assertObjcParse(
             objc: """
             @interface A : NSObject

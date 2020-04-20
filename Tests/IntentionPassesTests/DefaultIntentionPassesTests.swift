@@ -24,6 +24,7 @@ class DefaultIntentionPassesTests: XCTestCase {
         XCTAssert(intentsIterator.next() is UIKitCorrectorIntentionPass)
         XCTAssert(intentsIterator.next() is ProtocolNullabilityPropagationToConformersIntentionPass)
         XCTAssert(intentsIterator.next() is DetectNonnullReturnsIntentionPass)
+        XCTAssert(intentsIterator.next() is RemoveEmptyExtensionsIntentionPass)
         XCTAssertNil(intentsIterator.next())
     }
 }

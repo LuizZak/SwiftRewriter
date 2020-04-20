@@ -62,11 +62,6 @@ final class SwiftRewriterTests: XCTestCase {
     }
     
     @available(OSX 10.13, *)
-    func runProcess(_ process: Process) throws -> ProcessResult {
-        try runProcess(process, stdinData: nil)
-    }
-    
-    @available(OSX 10.13, *)
     func runProcess(_ process: Process, stdin: String?) throws -> ProcessResult {
         try runProcess(process, stdinData: stdin?.data(using: .utf8))
     }

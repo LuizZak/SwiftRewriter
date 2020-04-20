@@ -1437,19 +1437,28 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testAppliesTypenameConversionToCategories() {
+        // Make sure we have members on each extension so that the resulting
+        // empty extensions are not removed
         assertObjcParse(
             objc: """
             @interface NSString (Extension)
+            - (void)test;
             @end
             @implementation NSDate (Extension)
+            - (void)test {
+            }
             @end
             """,
             swift: """
             // MARK: - Extension
             extension String {
+                func test() {
+                }
             }
             // MARK: - Extension
             extension Date {
+                func test() {
+                }
             }
             """)
     }
@@ -2214,10 +2223,6 @@ class SwiftRewriterTests: XCTestCase {
                         self._b = a
                     }
                 }
-            }
-
-            // MARK: - category
-            extension A {
             }
             """)
     }
@@ -3059,6 +3064,26 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             class A {
                 var show: ((UIView?, UIViewController?) -> Void)!
+            }
+            """)
+    }
+    
+    func testOmitEmptyExtensions() {
+        assertObjcParse(
+            objc: """
+            @interface A
+            @end
+            @interface A ()
+            // Create a property on an extension to force the property to be moved
+            // and thus de-populate this interface
+            @property NSInteger a;
+            @end
+            """,
+            swift: """
+            class A {
+                // Create a property on an extension to force the property to be moved
+                // and thus de-populate this interface
+                var a: Int = 0
             }
             """)
     }

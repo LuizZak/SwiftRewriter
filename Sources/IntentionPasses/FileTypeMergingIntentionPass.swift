@@ -46,6 +46,7 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             }
         }
         
+        // TODO: Leave this to RemoveEmptyExtensionsIntentionPass
         // Remove empty extension/categories from files
         intentionCollection.extensionIntentions().forEach { ext in
             if ext.isEmptyType && (ext.categoryName == nil || ext.categoryName?.isEmpty == true) {
