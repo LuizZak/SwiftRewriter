@@ -46,14 +46,6 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             }
         }
         
-        // TODO: Leave this to RemoveEmptyExtensionsIntentionPass
-        // Remove empty extension/categories from files
-        intentionCollection.extensionIntentions().forEach { ext in
-            if ext.isEmptyType && (ext.categoryName == nil || ext.categoryName?.isEmpty == true) {
-                ext.file?.removeTypes { $0 === ext }
-            }
-        }
-        
         func strippingPathExtension(_ path: String) -> String {
             (path as NSString).deletingPathExtension
         }
