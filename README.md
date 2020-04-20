@@ -15,11 +15,15 @@ Given the following files:
 
 MyClass.h:
 ```objc
+/// A simple class to store names
 @interface MyClass : NSObject
+/// First name
 @property (nonnull) NSString *name;
+/// Last name
 @property (nonnull) NSString *surname;
 
 - (nonnull instancetype)initWithName:(nonnull NSString*)name surname:(nonnull NSString*)surname;
+/// Prints the full name to the standard output
 - (void)printMyName;
 @end
 ```
@@ -50,8 +54,11 @@ $ swift run SwiftRewriter --colorize --target stdout files MyClass.h MyClass.m
 will produce the following Swift file in the standard output:
 
 ```swift
+/// A simple class to store names
 class MyClass: NSObject {
+    /// First name
     var name: String
+    /// Last name
     var surname: String
 
     init(name: String, surname: String) {
@@ -60,6 +67,7 @@ class MyClass: NSObject {
         super.init()
     }
 
+    /// Prints the full name to the standard output
     func printMyName() {
         NSLog("%@ %@", self.name, self.surname)
     }
