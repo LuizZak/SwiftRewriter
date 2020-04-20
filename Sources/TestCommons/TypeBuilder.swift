@@ -17,6 +17,18 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     }
     
     @discardableResult
+    public func addComment(_ comment: String) -> TypeBuilder {
+        targetType.precedingComments.append(comment)
+        return self
+    }
+    
+    @discardableResult
+    public func addComments(_ comments: [String]) -> TypeBuilder {
+        targetType.precedingComments.append(contentsOf: comments)
+        return self
+    }
+    
+    @discardableResult
     public func createProperty(named name: String,
                                type: SwiftType,
                                objcAttributes: [ObjcPropertyAttribute] = []) -> TypeBuilder {

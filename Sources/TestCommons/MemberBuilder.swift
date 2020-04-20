@@ -40,6 +40,18 @@ public class MemberBuilder<T: MemberGenerationIntention>: DeclarationBuilder<T> 
         return self
     }
     
+    @discardableResult
+    public func addComment(_ comment: String) -> MemberBuilder {
+        targetMember.precedingComments.append(comment)
+        return self
+    }
+    
+    @discardableResult
+    public func addComments(_ comments: [String]) -> MemberBuilder {
+        targetMember.precedingComments.append(contentsOf: comments)
+        return self
+    }
+    
     public func build() -> T {
         targetMember
     }

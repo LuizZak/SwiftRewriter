@@ -7,14 +7,27 @@ class ASTNodeFactory {
     
     let source: Source
     let nonnullContextQuerier: NonnullContextQuerier
+    let commentQuerier: CommentQuerier
     
-    init(source: Source, nonnullContextQuerier: NonnullContextQuerier) {
+    init(source: Source,
+         nonnullContextQuerier: NonnullContextQuerier,
+         commentQuerier: CommentQuerier) {
+        
         self.source = source
         self.nonnullContextQuerier = nonnullContextQuerier
+        self.commentQuerier = commentQuerier
     }
     
     func isInNonnullContext(_ context: ParserRuleContext) -> Bool {
         nonnullContextQuerier.isInNonnullContext(context)
+    }
+    
+    func comments(preceeding context: ParserRuleContext) -> [ObjcComment] {
+        commentQuerier.popClosestCommentsBefore(node: context)
+    }
+    
+    func comments(overlapping context: ParserRuleContext) -> [ObjcComment] {
+        commentQuerier.popCommentsOverlapping(node: context)
     }
     
     func makeIdentifier(from context: Parser.IdentifierContext) -> Identifier {
@@ -92,6 +105,7 @@ class ASTNodeFactory {
         let methodBody = MethodBody(isInNonnullContext: isInNonnullContext(rule))
         updateSourceLocation(for: methodBody, with: rule)
         methodBody.statements = rule.compoundStatement()
+        methodBody.comments = comments(overlapping: rule)
         
         return methodBody
     }
@@ -103,6 +117,7 @@ class ASTNodeFactory {
         let body = MethodBody(isInNonnullContext: nonnull)
         body.statements = rule
         updateSourceLocation(for: body, with: rule)
+        body.comments = comments(overlapping: rule)
         
         return body
     }
@@ -111,6 +126,7 @@ class ASTNodeFactory {
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
         
         let enumCase = ObjcEnumCase(isInNonnullContext: nonnull)
+        enumCase.precedingComments = comments(preceeding: rule)
         updateSourceLocation(for: enumCase, with: rule)
         
         let identifierNode = makeIdentifier(from: identifier)

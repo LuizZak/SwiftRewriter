@@ -445,4 +445,191 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             */
             """)
     }
+    
+    func testLabeledExpressionStatement() {
+        let stmt = Statement.expression(.identifier("value")).labeled("label")
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+            // label:
+                value
+            """)
+    }
+    
+    func testLabeledIfStatement() {
+        let stmt = Statement.if(.constant(true), body: [], else: nil).labeled("label")
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+            label:
+                if true {
+                }
+            """)
+    }
+    
+    func testLabeledWhileStatement() {
+        let stmt = Statement.while(.constant(true), body: []).labeled("label")
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+            label:
+                while true {
+                }
+            """)
+    }
+    
+    func testLabeledRepeatWhileStatement() {
+        let stmt = Statement.doWhile(.constant(true), body: []).labeled("label")
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+            label:
+                repeat {
+                } while true
+            """)
+    }
+    
+    func testLabeledSwitchStatement() {
+        let stmt = Statement
+            .switch(
+                .identifier("value"),
+                cases: [
+                ],
+                default: nil).labeled("label")
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+            label:
+                switch value {
+                }
+            """)
+    }
+    
+    func testLabeledForInStatement() {
+        let stmt = Statement.for(.identifier("v"), .identifier("value"), body: []).labeled("label")
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+            label:
+                for v in value {
+                }
+            """)
+    }
+    
+    func testLabeledDoStatement() {
+        let stmt = Statement.do([]).labeled("label")
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+            label:
+                do {
+                }
+            """)
+    }
+    
+    func testComment() {
+        let stmt: CompoundStatement = [
+            Statement
+                .expression(.identifier("value"))
+                .withComments(["// A Comment", "// Another Comment"])
+        ]
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+             {
+                // A Comment
+                // Another Comment
+                value
+            }
+            """)
+    }
+    
+    func testCommentAndLabel() {
+        let stmt: CompoundStatement = [
+            Statement
+                .expression(.identifier("value"))
+                .withComments(["// A Comment", "// Another Comment"])
+                .labeled("label")
+        ]
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+             {
+                // A Comment
+                // Another Comment
+                // label:
+                value
+            }
+            """)
+    }
+    
+    func testCommentAndLabelInLabelableStatement() {
+        let stmt: CompoundStatement = [
+            Statement
+                .if(.identifier("value"), body: [], else: nil)
+                .withComments(["// A Comment", "// Another Comment"])
+                .labeled("label")
+        ]
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+             {
+                // A Comment
+                // Another Comment
+                label:
+                if value {
+                }
+            }
+            """)
+    }
+    
+    func testTrailingComment() {
+        let stmt: CompoundStatement = [
+            Statement
+                .variableDeclaration(identifier: "value", type: .int, initialization: nil)
+                .withTrailingComment("// A trailing comment")
+        ]
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+             {
+                var value: Int // A trailing comment
+            }
+            """)
+    }
+    
+    func testTrailingCommentInStatement() {
+        let stmt: CompoundStatement = [
+            Statement
+                .if(.identifier("value"), body: [], else: nil)
+                .withTrailingComment("// A trailing comment")
+        ]
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+             {
+                if value {
+                } // A trailing comment
+            }
+            """)
+    }
+    
+    func testTrailingCommentInSplitExpressionsStatement() {
+        let stmt: CompoundStatement = [
+            Statement
+                .expressions([
+                    Expression.identifier("stmt1").call(),
+                    Expression.identifier("stmt2").call(),
+                ])
+                .withTrailingComment("// A trailing comment")
+        ]
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes, matches: """
+             {
+                stmt1()
+                stmt2() // A trailing comment
+            }
+            """)
+    }
 }

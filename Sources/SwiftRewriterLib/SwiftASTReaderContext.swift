@@ -1,15 +1,19 @@
 import SwiftAST
 import TypeSystem
 import KnownType
+import GrammarModels
+import Antlr4
 
 public final class SwiftASTReaderContext {
     private var localsStack: [[Local]] = [[]]
     private var typeSystem: TypeSystem?
     private var typeContext: KnownType?
+    private var comments: [ObjcComment]
     
-    public init(typeSystem: TypeSystem?, typeContext: KnownType?) {
+    public init(typeSystem: TypeSystem?, typeContext: KnownType?, comments: [ObjcComment]) {
         self.typeSystem = typeSystem
         self.typeContext = typeContext
+        self.comments = comments
     }
     
     public func define(localNamed name: String, storage: ValueStorage) {
@@ -55,8 +59,61 @@ public final class SwiftASTReaderContext {
         localsStack.removeLast()
     }
     
+    public func popClosestCommentBefore(node: ParserRuleContext) -> ObjcComment? {
+        guard let start = node.getStart() else {
+            return nil
+        }
+        
+        let location = start.sourceLocation()
+        
+        for (i, comment) in comments.enumerated().reversed() {
+            if comment.location < location {
+                comments.remove(at: i)
+                return comment
+            }
+        }
+        
+        return nil
+    }
+    
+    public func popClosestCommentsBefore(node: ParserRuleContext) -> [ObjcComment] {
+        var comments: [ObjcComment] = []
+        while let comment = popClosestCommentBefore(node: node) {
+            comments.append(comment)
+        }
+        
+        return comments.reversed()
+    }
+    
+    public func popClosestCommentAtTrailingLine(node: ParserRuleContext) -> ObjcComment? {
+        guard let stop = node.getStop() else {
+            return nil
+        }
+        
+        let location = stop.sourceLocation()
+        
+        for (i, comment) in comments.enumerated() {
+            if comment.location.line == location.line && comment.location.column > location.column {
+                comments.remove(at: i)
+                return comment
+            }
+        }
+        
+        return nil
+    }
+    
     public struct Local {
         public var name: String
         public var storage: ValueStorage
+    }
+}
+
+private extension Token {
+    func sourceLocation() -> SourceLocation {
+        let line = getLine()
+        let col = getCharPositionInLine() + 1
+        let char = getStartIndex()
+        
+        return SourceLocation(line: line, column: col, utf8Offset: char)
     }
 }

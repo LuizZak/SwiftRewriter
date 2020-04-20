@@ -96,6 +96,10 @@ public class ObjcParser {
     /// rewriter can leverage this information to infer nonnull contexts.
     public var nonnullMacroRegionsTokenRange: [(start: Int, end: Int)] = []
     
+    /// Contains information about all C-style comments found while parsing the
+    /// input file.
+    public var comments: [ObjcComment] = []
+    
     /// Preprocessor directives found on this file
     public var preprocessorDirectives: [String] = []
     public var importDirectives: [ObjcImportDecl] = []
@@ -165,12 +169,20 @@ public class ObjcParser {
         preprocessorDirectives = []
         
         let input = try parsePreprocessor()
+        
+        parseComments(input: input)
+        
         try parseNSAssumeNonnullChannel(input: input)
         
         let nonnullContextQuerier =
             NonnullContextQuerier(nonnullMacroRegionsTokenRange: nonnullMacroRegionsTokenRange)
         
-        try parseMainChannel(input: input, nonnullContextQuerier: nonnullContextQuerier)
+        let commentQuerier =
+            CommentQuerier(allComments: comments)
+        
+        try parseMainChannel(input: input,
+                             nonnullContextQuerier: nonnullContextQuerier,
+                             commentQuerier: commentQuerier)
         
         // Go around the tree setting the source for the nodes and detecting
         // nodes within assume non-null ranges
@@ -179,7 +191,7 @@ public class ObjcParser {
         traverser.traverse()
 
         importDirectives = ObjcParser.parseObjcImports(in: preprocessorDirectives)
-
+        
         parsed = true
     }
     
@@ -248,7 +260,8 @@ public class ObjcParser {
     }
     
     private func parseMainChannel(input: String,
-                                  nonnullContextQuerier: NonnullContextQuerier) throws {
+                                  nonnullContextQuerier: NonnullContextQuerier,
+                                  commentQuerier: CommentQuerier) throws {
         
         // Make a pass with ANTLR before traversing the parse tree and collecting
         // known constructs
@@ -266,7 +279,8 @@ public class ObjcParser {
                                source: source,
                                state: state,
                                antlrSettings: antlrSettings,
-                               nonnullContextQuerier: nonnullContextQuerier)
+                               nonnullContextQuerier: nonnullContextQuerier,
+                               commentQuerier: commentQuerier)
         
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)
@@ -330,6 +344,45 @@ public class ObjcParser {
             default:
                 break
             }
+        }
+    }
+    
+    private func parseComments(input: String) {
+        comments.removeAll()
+        
+        let ranges = input.cStyleCommentSectionRanges()
+        
+        for range in ranges {
+            let lineStart = input.lineNumber(at: range.lowerBound)
+            let colStart = input.columnOffset(at: range.lowerBound)
+            
+            let lineEnd = input.lineNumber(at: range.upperBound)
+            let colEnd = input.columnOffset(at: range.upperBound)
+            
+            let utf8Offset = input.utf8.distance(from: input.startIndex, to: range.lowerBound)
+            let utf8Length = input.utf8.distance(from: range.lowerBound, to: range.upperBound)
+            
+            let location = SourceLocation(line: lineStart,
+                                          column: colStart,
+                                          utf8Offset: utf8Offset)
+            
+            let length: SourceLength
+            if lineStart == lineEnd {
+                length = SourceLength(newlines: 0,
+                                      columnsAtLastLine: colEnd - colStart,
+                                      utf8Length: utf8Length)
+            } else {
+                length = SourceLength(newlines: lineEnd - lineStart,
+                                      columnsAtLastLine: colEnd - 1,
+                                      utf8Length: utf8Length)
+            }
+            
+            let comment = ObjcComment(string: String(input[range]),
+                                      range: range,
+                                      location: location,
+                                      length: length)
+            
+            comments.append(comment)
         }
     }
     
@@ -414,9 +467,7 @@ public class ObjcParser {
         return type
     }
     
-    func parseTokenNode(_ tokenType: TokenType,
-                        onMissing message: String? = nil) throws {
-        
+    func parseTokenNode(_ tokenType: TokenType) throws {
         try lexer.advance(overTokenType: tokenType)
     }
     
@@ -575,11 +626,5 @@ public struct ObjcImportDecl {
     
     public var pathComponents: [String] {
         (path as NSString).pathComponents
-    }
-
-    /// Returns `true` if any of the path components of this import decl's
-    /// path match a given path component fully.
-    public func matchesPathComponent<S: StringProtocol>(_ path: S) -> Bool {
-        pathComponents.contains(where: { $0 == path })
     }
 }

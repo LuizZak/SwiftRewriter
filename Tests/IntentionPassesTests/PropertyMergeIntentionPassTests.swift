@@ -910,6 +910,79 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         XCTAssertEqual(type.properties.count, 1)
         XCTAssertEqual(type.properties[0].getter?.body, [.return(.constant(0))])
     }
+    
+    func testMergeKeepsComments() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { builder in
+                    builder
+                        .createProperty(named: "a", type: .int, objcAttributes: [.attribute("readonly")]) { prop in
+                            prop.addComment("// Property comment")
+                        }
+                        .createMethod(named: "a", returnType: .int) { m in
+                            m.addComment("// Getter comment")
+                        }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.properties[0].precedingComments, [
+            "// Property comment",
+            "// Getter comment"
+        ])
+    }
+    
+    func testMergeKeepsCommentsGetterAndSetter() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { builder in
+                    builder
+                        .createProperty(named: "a", type: .int, objcAttributes: [.attribute("readonly")]) { prop in
+                            prop.addComment("// Property comment")
+                        }
+                        .createMethod(named: "a", returnType: .int) { m in
+                            m.addComment("// Getter comment")
+                        }
+                        .createMethod("setA(_ a: Int)") { m in
+                            m.addComment("// Setter comment")
+                        }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.properties[0].precedingComments, [
+            "// Property comment",
+            "// Getter comment",
+            "// Setter comment"
+        ])
+    }
+    
+    func testMergeKeepsCommentsSetterOnly() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { builder in
+                    builder
+                        .createProperty(named: "a", type: .int, objcAttributes: [.attribute("readonly")]) { prop in
+                            prop.addComment("// Property comment")
+                        }
+                        .createMethod("setA(_ a: Int)") { m in
+                            m.addComment("// Setter comment")
+                        }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.properties[0].precedingComments, [
+            "// Property comment",
+            "// Setter comment"
+        ])
+    }
 }
 
 // MARK: - Private test setup shortcuts
@@ -918,8 +991,8 @@ private extension TypeBuilder {
     @discardableResult
     func ext_makeReadonlyPropertyWithGetter(named name: String, type: SwiftType = .int) -> TypeBuilder<T> {
         return
-            self.createProperty(named: "a", type: .int, objcAttributes: [.attribute("readonly")])
-                .createMethod(named: "a", returnType: .int)
+            self.createProperty(named: name, type: .int, objcAttributes: [.attribute("readonly")])
+                .createMethod(named: name, returnType: .int)
     }
     
     @discardableResult

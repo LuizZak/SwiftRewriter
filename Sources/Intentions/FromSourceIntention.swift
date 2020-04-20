@@ -7,6 +7,9 @@ import KnownType
 public class FromSourceIntention: Intention, NonNullScopedIntention {
     public var accessLevel: AccessLevel
     
+    /// A list of comments that precedes this intention in source code
+    public var precedingComments: [String] = []
+    
     /// Gets the file intention this intention is associated with, if available.
     public var file: FileGenerationIntention? {
         var parent: Intention? = self
@@ -40,6 +43,7 @@ public class FromSourceIntention: Intention, NonNullScopedIntention {
         
         self.accessLevel = try container.decode(AccessLevel.self, forKey: .accessLevel)
         self.inNonnullContext = try container.decode(Bool.self, forKey: .inNonnullContext)
+        self.precedingComments = try container.decode([String].self, forKey: .precedingComments)
         
         try super.init(from: container.superDecoder())
     }
@@ -49,6 +53,7 @@ public class FromSourceIntention: Intention, NonNullScopedIntention {
         
         try container.encode(accessLevel, forKey: .accessLevel)
         try container.encode(inNonnullContext, forKey: .inNonnullContext)
+        try container.encode(precedingComments, forKey: .precedingComments)
         
         try super.encode(to: container.superEncoder())
     }
@@ -112,6 +117,7 @@ public class FromSourceIntention: Intention, NonNullScopedIntention {
     private enum CodingKeys: String, CodingKey {
         case accessLevel
         case inNonnullContext
+        case precedingComments
     }
 }
 

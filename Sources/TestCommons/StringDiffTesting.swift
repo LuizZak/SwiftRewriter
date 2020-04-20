@@ -141,7 +141,7 @@ public class DiffingTest {
                     expected: true
                 )
             } else {
-                let resLineContent = res[resLineRanges[diffStartLine - 1]]
+                let resLineContent = res[resLineRanges[max(0, diffStartLine - 1)]]
                 
                 testCase.recordFailure(
                     withDescription: """

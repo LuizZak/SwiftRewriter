@@ -80,17 +80,26 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             return compound
         }
         
+        let comments = context.popClosestCommentsBefore(node: ctx).map { $0.string.trimmingWhitespaces() }
+        
         context.pushDefinitionContext()
         defer { context.popDefinitionContext() }
         
-        return acceptFirst(from: ctx.selectionStatement(),
-                           ctx.iterationStatement(),
-                           ctx.expressions(),
-                           ctx.jumpStatement(),
-                           ctx.synchronizedStatement(),
-                           ctx.autoreleaseStatement(),
-                           ctx.labeledStatement())
+        let stmt = acceptFirst(from: ctx.selectionStatement(),
+                               ctx.iterationStatement(),
+                               ctx.expressions(),
+                               ctx.jumpStatement(),
+                               ctx.synchronizedStatement(),
+                               ctx.autoreleaseStatement(),
+                               ctx.labeledStatement())
             ?? .unknown(UnknownASTContext(context: ctx.getText()))
+        
+        // TODO: Perhaps we should only associate comments that come one line
+        // before the statement?
+        stmt.comments = comments
+        stmt.trailingComment = context.popClosestCommentAtTrailingLine(node: ctx)?.string.trimmingWhitespaces()
+        
+        return stmt
     }
     
     public override func visitExpressions(_ ctx: Parser.ExpressionsContext) -> Statement? {
@@ -528,6 +537,11 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             }
 
             let varDeclStmt = Statement.variableDeclarations(declarations)
+            
+            // TODO: Perhaps we should only associate comments that come one line
+            // before the statement?
+            varDeclStmt.comments = context.popClosestCommentsBefore(node: ctx).map { $0.string.trimmingWhitespaces() }
+            varDeclStmt.trailingComment = context.popClosestCommentAtTrailingLine(node: ctx)?.string.trimmingWhitespaces()
 
             reportAutotypeDeclarations(in: varDeclStmt)
             

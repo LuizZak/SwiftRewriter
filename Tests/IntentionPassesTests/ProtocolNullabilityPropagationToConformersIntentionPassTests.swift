@@ -117,4 +117,30 @@ class ProtocolNullabilityPropagationToConformersIntentionPassTests: XCTestCase {
         XCTAssertEqual(extDef.methods[0].returnType, .string)
         XCTAssertEqual(extDef.methods[1].returnType, .optional(.string))
     }
+    
+    func testDoNotMergeProtocolToClassMethodComments() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createProtocol(withName: "Prot") { prot in
+                        prot.createMethod("test()") { m in
+                            m.addComment("// Comment")
+                        }
+                    }.createClass(withName: "A") { type in
+                        type.createConformance(protocolName: "Prot")
+                        type.createMethod("test()") { m in
+                            m.addComment("// Method comment")
+                        }
+                    }
+            }.build()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let file = intentions.fileIntentions()[0]
+        let cls = file.classIntentions[0]
+        let method = cls.methods[0]
+        XCTAssertEqual(method.precedingComments, [
+            "// Method comment"
+        ])
+    }
 }

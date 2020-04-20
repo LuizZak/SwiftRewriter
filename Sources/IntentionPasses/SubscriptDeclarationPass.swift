@@ -85,6 +85,7 @@ public class SubscriptDeclarationPass: ClassVisitingIntentionPass {
         
         sub.history.mergeHistories(method.history)
         sub.history.recordCreation(description: "Creating subscript declaration from objectAtIndexSubscript(_:) method")
+        sub.precedingComments = method.precedingComments
         
         return sub
     }
@@ -113,6 +114,7 @@ public class SubscriptDeclarationPass: ClassVisitingIntentionPass {
         sub.history.recordMerge(with: [getter, setter],
                                 tag: "Creation",
                                 description: "Creating subscript declaration from objectAtIndexSubscript(_:) and setObject(_:atIndexedSubscript:) pair")
+        sub.precedingComments = getter.precedingComments + setter.precedingComments
         
         return sub
     }

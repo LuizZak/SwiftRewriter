@@ -93,12 +93,12 @@ let package = Package(
             dependencies: ["Utils", "MiniLexer"]),
         .target(
             name: "SwiftRewriterLib",
-            dependencies: ["GrammarModels", "SwiftAST", "ObjcParser", "Analysis",
-                           "TypeDefinitions", "Utils", "Intentions", "TypeSystem",
-                           "IntentionPasses", "KnownType", "WriterTargetOutput",
-                           "SwiftSyntaxSupport", "GlobalsProviders",
-                           "ExpressionPasses", "SourcePreprocessors",
-                           "SwiftSyntaxRewriterPasses"]),
+            dependencies: ["Antlr4", "GrammarModels", "SwiftAST", "ObjcParser",
+                           "Analysis", "TypeDefinitions", "Utils", "Intentions",
+                           "TypeSystem", "IntentionPasses", "KnownType",
+                           "WriterTargetOutput", "SwiftSyntaxSupport",
+                           "GlobalsProviders", "ExpressionPasses",
+                           "SourcePreprocessors", "SwiftSyntaxRewriterPasses"]),
         .target(
             name: "SwiftRewriter",
             dependencies: [

@@ -31,6 +31,9 @@ open class ASTNode {
     /// a `NS_ASSUME_NONNULL_BEGIN`/`NS_ASSUME_NONNULL_END` region.
     public var isInNonnullContext: Bool = false
     
+    /// Array of comments that precede this declaration
+    public var precedingComments: [ObjcComment] = []
+    
     /// Instantiates a bare ASTNode with a given range.
     /// Defaults to an invalid range
     public init(isInNonnullContext: Bool,

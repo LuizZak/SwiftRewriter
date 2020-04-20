@@ -182,10 +182,13 @@ class ExpressionPassTestCase: XCTestCase {
         
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
         
+        let context = SwiftASTReaderContext(typeSystem: typeSystem,
+                                            typeContext: nil,
+                                            comments: [])
+        
         let reader = SwiftExprASTReader(typeMapper: typeMapper,
                                         typeParser: TypeParsing(state: ExpressionPassTestCase._state),
-                                        context: SwiftASTReaderContext(typeSystem: typeSystem,
-                                                                       typeContext: nil),
+                                        context: context,
                                         delegate: nil)
         
         return expression.accept(reader)!
@@ -217,7 +220,8 @@ class ExpressionPassTestCase: XCTestCase {
                 typeMapper: typeMapper,
                 typeParser: typeParser,
                 context: SwiftASTReaderContext(typeSystem: typeSystem,
-                                               typeContext: nil),
+                                               typeContext: nil,
+                                               comments: []),
                 delegate: nil)
         
         let reader = SwiftStatementASTReader(expressionReader: expReader,

@@ -2,6 +2,7 @@ import SwiftAST
 import KnownType
 import Intentions
 
+/// Merges properties with getter/setters in types
 public class PropertyMergeIntentionPass: IntentionPass {
     /// A number representing the unique index of an operation to aid in history
     /// checking by tag.
@@ -348,6 +349,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
             }
             
             propertySet.property.mode = .property(get: finalGetter, set: finalSetter)
+            propertySet.property.precedingComments.append(contentsOf: getter.precedingComments)
+            propertySet.property.precedingComments.append(contentsOf: setter.precedingComments)
             
             // Remove the original method intentions
             getterOwner.removeMethod(getter)
@@ -393,6 +396,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             let getterBody = getter.functionBody ?? FunctionBodyIntention(body: [])
             
             propertySet.property.mode = .computed(getterBody)
+            propertySet.property.precedingComments.append(contentsOf: getter.precedingComments)
             
             // Remove the original method intention
             getterOwner.removeMethod(getter)
@@ -441,6 +445,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 FunctionBodyIntention(body: [.return(.identifier(backingFieldName))])
             
             propertySet.property.mode = .property(get: getterIntention, set: newSetter)
+            propertySet.property.precedingComments.append(contentsOf: setter.precedingComments)
             
             // Existing backing field
             if classIntention.hasInstanceVariable(named: backingFieldName) {

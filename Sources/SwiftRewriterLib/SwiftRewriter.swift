@@ -209,12 +209,16 @@ public final class SwiftRewriter {
                         enCase.expression = reader.parseExpression(expression: expression)
                         
                     case let .functionBody(funcBody, method):
-                        guard let body = funcBody.typedSource?.statements else {
+                        guard let methodBody = funcBody.typedSource else {
+                            return
+                        }
+                        guard let body = methodBody.statements else {
                             return
                         }
                         
                         funcBody.body =
                             reader.parseStatements(compoundStatement: body,
+                                                   comments: methodBody.comments,
                                                    typeContext: method?.type)
                         
                     case .globalVar(let v):

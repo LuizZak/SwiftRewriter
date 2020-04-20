@@ -86,6 +86,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     // type: NSObject.Type
                     super
                 }
+                // Here just to check the transpiler correctly switches between metatype
+                // and instance type while iterating over methods to output
                 func instanceMethod() {
                     // type: MyClass
                     self
@@ -142,7 +144,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
     func testSelfSuperInitInClassMethod() {
         assertObjcParse(
             objc: """
-            @interface MyClass: NSObject // To inherit [self init] constructor
+            // To inherit [self init] constructor
+            @interface MyClass: NSObject
             @end
             
             @implementation MyClass
@@ -153,6 +156,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
+            // To inherit [self init] constructor
             class MyClass: NSObject {
                 static func method() {
                     // type: MyClass
@@ -478,6 +482,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     // decl type: (() -> Void)!
                     // init type: (() -> Void)?
                     let _callback = self.callback
+
                     // type: Void?
                     _callback?()
                 }
@@ -510,6 +515,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     // decl type: (() -> Void)!
                     // init type: (() -> Void)?
                     let _callback = self.callback
+
                     // type: Void?
                     _callback?()
                 }
@@ -732,6 +738,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     // decl type: String
                     // init type: String
                     let local4 = "Literal"
+
                     // type: String?
                     local1
                     // type: String
@@ -793,6 +800,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     // decl type: A!
                     // init type: B!
                     let local3 = self.unspecifiedOptional()
+
                     // type: A?
                     local1
                     // type: A
@@ -844,6 +852,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                         // type: Int
                         arg
                     }
+                    // Test the intrinsic doesn't leak to outer scopes
                     // type: <<error type>>
                     arg
                 }
@@ -899,7 +908,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
         assertObjcParse(
             objc: """
             typedef void(^_Nonnull Callback)();
-            NSString *takesBlock(void(^block)());
+            NSString *takesBlockGlobal(void(^block)());
             
             @interface MyClass
             @property (nonnull) Callback callback;
@@ -914,7 +923,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 [self takesBlock:^() {
                     (local);
                 }];
-                takesBlock(^{
+                takesBlockGlobal(^{
                     (local);
                 });
                 (local);
@@ -926,7 +935,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             typealias Callback = () -> Void
 
-            func takesBlock(_ block: (() -> Void)!) -> String! {
+            func takesBlockGlobal(_ block: (() -> Void)!) -> String! {
             }
 
             class MyClass {
@@ -935,6 +944,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 func method() {
                     // decl type: Int
                     let local: Int
+
                     // type: Callback
                     self.callback = { () -> Void in
                         // type: Int
@@ -946,10 +956,11 @@ class SwiftRewriter_TypingTests: XCTestCase {
                         local
                     }
                     // type: String!
-                    takesBlock { () -> Void in
+                    takesBlockGlobal { () -> Void in
                         // type: Int
                         local
                     }
+
                     // type: Int
                     local
                 }
@@ -979,6 +990,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     // decl type: A!
                     // init type: A!
                     let a = self.other()
+
                     // type: A?
                     a
                 }
@@ -1008,6 +1020,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     // decl type: A
                     // init type: A
                     let a = self.other()
+
                     // type: A
                     a
                 }
@@ -1188,12 +1201,16 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     self.convert(CGRect.zero, to: nil)
                     // type: CGPoint
                     self.convert(CGPoint.zero, to: nil)
+
                     // type: CGRect
                     self.convert(a?.frame ?? CGRect(), to: nil)
+
                     // type: CGPoint
                     self.convert(a?.center ?? CGPoint(), to: nil)
+
                     // type: CGRect
                     self.convert(a?.frame ?? CGRect(), to: a)
+
                     // type: CGPoint
                     self.convert(a?.center ?? CGPoint(), to: a)
                 }
@@ -1208,6 +1225,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             void test() {
                 NSMutableArray *array = [NSMutableArray array];
                 NSObject *object = array;
+
                 [array addObject:object];
             }
             """,
@@ -1219,6 +1237,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 // decl type: NSObject
                 // init type: NSMutableArray
                 let object = array
+
                 // type: Void
                 array.add(object)
             }
@@ -1255,6 +1274,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 // decl type: CGFloat
                 // init type: Int
                 let f: CGFloat = 0
+
                 // type: CGFloat
                 floor(f)
             }
@@ -1305,6 +1325,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             func test() {
                 // decl type: Protocol!
                 let prot: Protocol!
+
                 // type: Bool?
                 prot.method?()
             
@@ -1346,16 +1367,19 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 // decl type: Int
                 // init type: Int
                 let nsInteger = 0
+
                 // type: CGFloat
                 max(0, cgFloat)
                 // type: CInt
                 max(0, cInt)
+
                 // type: Int
                 max(0, nsInteger)
                 // type: Int
                 max(0, 0)
+
                 // type: CGFloat
-                max(0.0, 0)
+                max(0.0, 0) // FIXME: Result is currently 'CGFloat', but should be 'Double'
             }
             """,
             options: SwiftSyntaxOptions(outputExpressionTypes: true))

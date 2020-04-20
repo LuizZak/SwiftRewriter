@@ -73,7 +73,8 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
                 for prot in protocols where conformances.contains(where: { $0.protocolName == prot.typeName }) {
                     typeMerger.mergeMethodSignatures(from: prot,
                                                      into: cls,
-                                                     createIfUnexistent: false)
+                                                     createIfUnexistent: false,
+                                                     copyComments: false)
                 }
             }
         }

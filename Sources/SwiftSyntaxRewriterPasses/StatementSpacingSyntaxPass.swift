@@ -27,11 +27,13 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
         for range in ranges {
             let rangeStart = statements.index(statements.startIndex, offsetBy: range.lowerBound)
             let rangeEnd = statements.index(statements.startIndex, offsetBy: range.upperBound)
-                
-            statements = statements.replacing(
-                childAt: range.lowerBound,
-                with: CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(statements[rangeStart]))!
-            )
+            
+            if range.lowerBound > 0 {
+                statements = statements.replacing(
+                    childAt: range.lowerBound,
+                    with: CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(statements[rangeStart]))!
+                )
+            }
             
             if statements.count > range.upperBound {
                 statements = statements.replacing(
@@ -131,7 +133,7 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
         override func visit(_ token: TokenSyntax) -> Syntax {
             if isFirstVisit {
                 isFirstVisit = false
-                return Syntax(token.withLeadingTrivia(.newlines(2) + indentation(for: token)))
+                return Syntax(token.withLeadingTrivia(.newlines(2) + indentation(for: token) + removingLeadingWhitespace(token.leadingTrivia)))
             }
             
             return Syntax(token)
@@ -155,4 +157,18 @@ private func indentation(for token: TokenSyntax) -> Trivia {
     }
     
     return leading
+}
+
+private func removingLeadingWhitespace(_ trivia: Trivia) -> Trivia {
+    let newTrivia = trivia.drop { piece in
+        switch piece {
+        case .spaces, .tabs, .newlines, .carriageReturns, .carriageReturnLineFeeds,
+             .formfeeds, .verticalTabs:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    return Trivia(pieces: Array(newTrivia))
 }

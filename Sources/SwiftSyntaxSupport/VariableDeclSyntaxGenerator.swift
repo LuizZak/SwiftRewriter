@@ -21,6 +21,7 @@ class VariableDeclSyntaxGenerator {
     
     func generateSubscript(_ intention: SubscriptGenerationIntention) -> DeclSyntax {
         producer.addHistoryTrackingLeadingIfEnabled(intention)
+        producer.addCommentsIfAvailable(intention)
         
         return SubscriptDeclSyntax { builder in
             for attribute in producer.attributes(for: intention, inline: false) {
@@ -46,6 +47,10 @@ class VariableDeclSyntaxGenerator {
     
     func generateVariableDecl(_ intention: ValueStorageIntention) -> DeclSyntax {
         producer.addHistoryTrackingLeadingIfEnabled(intention)
+        
+        if let fromSource = intention as? FromSourceIntention {
+            producer.addCommentsIfAvailable(fromSource)
+        }
         
         let decl = makeDeclaration(intention)
         

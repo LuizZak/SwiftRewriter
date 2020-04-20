@@ -82,7 +82,7 @@ public class IntentionCollector {
                 self.enterObjcClassCategoryImplementationNode(n)
             case let n as ObjcStructDeclaration:
                 self.enterStructDeclarationNode(n)
-            case let n as ProtocolDeclaration:
+            case let n as ObjcProtocolDeclaration:
                 self.enterProtocolDeclarationNode(n)
             case let n as IVarsList:
                 self.enterObjcClassIVarsListNode(n)
@@ -154,7 +154,7 @@ public class IntentionCollector {
                 self.exitObjcClassCategoryImplementationNode(n)
             case let n as ObjcStructDeclaration:
                 self.exitStructDeclarationNode(n)
-            case let n as ProtocolDeclaration:
+            case let n as ObjcProtocolDeclaration:
                 self.exitProtocolDeclarationNode(n)
             case let n as ObjcEnumDeclaration:
                 self.exitObjcEnumDeclarationNode(n)
@@ -273,6 +273,8 @@ public class IntentionCollector {
         
         let intent = ClassGenerationIntention(typeName: name, source: node)
         intent.isInterfaceSource = true
+        
+        mapComments(node, intent)
         recordSourceHistory(intention: intent, node: node)
         
         context
@@ -298,6 +300,8 @@ public class IntentionCollector {
         intent.isInterfaceSource = true
         delegate?.reportForLazyResolving(intention: intent)
         intent.categoryName = node.categoryName?.name
+        
+        mapComments(node, intent)
         recordSourceHistory(intention: intent, node: node)
         
         context
@@ -320,6 +324,8 @@ public class IntentionCollector {
         }
         
         let intent = ClassGenerationIntention(typeName: name, source: node)
+        
+        mapComments(node, intent)
         recordSourceHistory(intention: intent, node: node)
         
         context
@@ -342,6 +348,8 @@ public class IntentionCollector {
         let intent = ClassExtensionGenerationIntention(typeName: name, source: node)
         delegate?.reportForLazyResolving(intention: intent)
         intent.categoryName = node.categoryName?.name
+        
+        mapComments(node, intent)
         recordSourceHistory(intention: intent, node: node)
         
         context
@@ -356,12 +364,14 @@ public class IntentionCollector {
     }
     
     // MARK: - ProtocolDeclaration
-    private func enterProtocolDeclarationNode(_ node: ProtocolDeclaration) {
+    private func enterProtocolDeclarationNode(_ node: ObjcProtocolDeclaration) {
         guard let name = node.identifier?.name else {
             return
         }
         
         let intent = ProtocolGenerationIntention(typeName: name, source: node)
+        
+        mapComments(node, intent)
         recordSourceHistory(intention: intent, node: node)
         
         context
@@ -371,7 +381,7 @@ public class IntentionCollector {
         context.pushContext(intent)
     }
     
-    private func exitProtocolDeclarationNode(_ node: ProtocolDeclaration) {
+    private func exitProtocolDeclarationNode(_ node: ObjcProtocolDeclaration) {
         if node.identifier?.name != nil {
             context.popContext() // ProtocolGenerationIntention
         }
@@ -425,6 +435,8 @@ public class IntentionCollector {
             prop.isOptional = node.isOptionalProperty
             prop.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
             prop.knownAttributes = knownAttributes
+            
+            mapComments(node, prop)
             recordSourceHistory(intention: prop, node: node)
             
             ctx.addProperty(prop)
@@ -438,6 +450,8 @@ public class IntentionCollector {
                                             source: node)
             prop.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
             prop.knownAttributes = knownAttributes
+            
+            mapComments(node, prop)
             recordSourceHistory(intention: prop, node: node)
             
             ctx.addProperty(prop)
@@ -467,6 +481,7 @@ public class IntentionCollector {
                 propertyName: propertyName.name, ivarName: ivarName, isExplicit: true,
                 type: node.isDynamic ? .dynamic : .synthesize)
         
+        mapComments(node, intent)
         recordSourceHistory(intention: intent, node: node)
         
         ctx.addSynthesization(intent)
@@ -500,6 +515,7 @@ public class IntentionCollector {
         
         method.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
         
+        mapComments(node, method)
         recordSourceHistory(intention: method, node: node)
         
         if let body = node.body {
@@ -565,7 +581,10 @@ public class IntentionCollector {
                                                 storage: storage,
                                                 accessLevel: access,
                                                 source: node)
+        
         ivar.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
+        
+        mapComments(node, ivar)
         recordSourceHistory(intention: ivar, node: node)
         
         classCtx.addInstanceVariable(ivar)
@@ -584,6 +603,8 @@ public class IntentionCollector {
                                     rawValueType: .anyObject,
                                     source: node)
         enumIntention.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
+        
+        mapComments(node, enumIntention)
         recordSourceHistory(intention: enumIntention, node: node)
         
         context
@@ -606,6 +627,8 @@ public class IntentionCollector {
         let enumCase =
             EnumCaseGenerationIntention(name: identifier, expression: nil,
                                         accessLevel: .internal, source: node)
+        
+        mapComments(node, enumCase)
         recordSourceHistory(intention: enumCase, node: node)
         
         delegate?.reportForLazyParsing(intention: enumCase)
@@ -637,6 +660,8 @@ public class IntentionCollector {
         let signature = gen.generateDefinitionSignature(from: node)
         
         let globalFunc = GlobalFunctionGenerationIntention(signature: signature, source: node)
+        
+        mapComments(node, globalFunc)
         recordSourceHistory(intention: globalFunc, node: node)
         
         context
@@ -684,7 +709,13 @@ public class IntentionCollector {
         let fileIntent = context.findContext(ofType: FileGenerationIntention.self)
         
         let structIntent = StructGenerationIntention(typeName: identifier.name, source: node)
+        
+        mapComments(node, structIntent)
         recordSourceHistory(intention: structIntent, node: node)
+        
+        if let parentNode = node.parent as? TypedefNode {
+            mapComments(parentNode, structIntent)
+        }
         
         context.pushContext(structIntent)
         
@@ -739,6 +770,7 @@ public class IntentionCollector {
                                                    fromType: .void,
                                                    named: identifier.name)
                     recordSourceHistory(intention: alias, node: identifier)
+                    
                     alias.inNonnullContext = inNonnull
                     
                     fileIntent?.addTypealias(alias)
@@ -790,7 +822,10 @@ public class IntentionCollector {
             name: identifier.name,
             storage: storage,
             source: node)
+        
+        mapComments(node, ivar)
         recordSourceHistory(intention: ivar, node: node)
+        
         ctx.addInstanceVariable(ivar)
         
         delegate?.reportForLazyResolving(intention: ivar)
@@ -809,6 +844,18 @@ extension IntentionCollector {
     
     private func recordSourceHistory(intention: FromSourceIntention, node: ASTNode) {
         intention.history.recordSourceHistory(node: node)
+    }
+    
+}
+
+extension IntentionCollector {
+    
+    private func mapComments(_ node: ASTNode, _ intention: FromSourceIntention) {
+        intention.precedingComments.append(contentsOf: convertComments(node.precedingComments))
+    }
+    
+    private func convertComments(_ comments: [ObjcComment]) -> [String] {
+        return comments.map { $0.string.trimmingWhitespaces() }
     }
     
 }

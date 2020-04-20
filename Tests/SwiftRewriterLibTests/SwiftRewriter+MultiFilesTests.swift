@@ -9,11 +9,15 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
         assertThat()
             .file(name: "MyClass.h",
             """
+            /// A simple class to store names
             @interface MyClass : NSObject
+            /// First name
             @property (nonnull) NSString *name;
+            /// Last name
             @property (nonnull) NSString *surname;
 
             - (nonnull instancetype)initWithName:(nonnull NSString*)name surname:(nonnull NSString*)surname;
+            /// Prints the full name to the standard output
             - (void)printMyName;
             @end
             """)
@@ -34,8 +38,11 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             @end
             """)
             .translatesToSwift("""
+            /// A simple class to store names
             class MyClass: NSObject {
+                /// First name
                 var name: String
+                /// Last name
                 var surname: String
             
                 init(name: String, surname: String) {
@@ -44,6 +51,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                     super.init()
                 }
             
+                /// Prints the full name to the standard output
                 func printMyName() {
                     NSLog("%@ %@", self.name, self.surname)
                 }
@@ -279,7 +287,8 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             {
                 B* ivarB;
             }
-            @property (nonnull) B *b; // Should translate to 'B', and not 'UnsafeMutablePointer<B>!'
+            // Should translate to 'B', and not 'UnsafeMutablePointer<B>!'
+            @property (nonnull) B *b;
             - (B*)takesB:(B*)b;
             - (instancetype)initWithB:(B*)b;
             @end
@@ -298,6 +307,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             
             class A {
                 private var ivarB: B!
+                // Should translate to 'B', and not 'UnsafeMutablePointer<B>!'
                 var b: B
             
                 init(b: B!) {
@@ -672,6 +682,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
 
             // MARK: - QuickDateExtensions
             extension String: DateConvertible {
+                // This should not be duplicated on the final emitted type!
                 var asDate: Date? {
                     return Date()
                 }

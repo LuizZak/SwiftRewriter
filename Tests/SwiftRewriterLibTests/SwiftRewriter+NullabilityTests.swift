@@ -35,6 +35,7 @@ class SwiftRewriterNullabilityTests: XCTestCase {
                 var nonNil = A()
                 let constantNonNil = A()
                 var lateNilAssignment: A! = A()
+
                 nonNil = A()
                 lateNilAssignment = nil
             }

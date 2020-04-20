@@ -13,18 +13,25 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                 .createFile(named: "A.h") { file in
                     file.createClass(withName: "A") { builder in
                         builder
-                            .createVoidMethod(named: "fromHeader")
+                            .addComment("// Header comment")
+                            .createVoidMethod(named: "fromHeader") { method in
+                                method.addComment("// Header comment")
+                            }
                             .setAsInterfaceSource()
                     }
                 }.createFile(named: "A.m") { file in
                     file.createClass(withName: "A") { builder in
-                        builder.createVoidMethod(named: "fromImplementation") { method in
-                            method.setBody([
-                                .expression(
-                                    Expression.identifier("stmt").call()
-                                )
-                            ])
-                        }
+                        builder
+                            .addComment("// Implementation comment")
+                            .createVoidMethod(named: "fromImplementation") { method in
+                                method
+                                    .addComment("// Implementation comment")
+                                    .setBody([
+                                        .expression(
+                                            Expression.identifier("stmt").call()
+                                        )
+                                    ])
+                            }
                     }
                 }.build()
         let sut = FileTypeMergingIntentionPass()
@@ -35,7 +42,17 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         XCTAssertEqual(files.count, 1)
         XCTAssertEqual(files[0].sourcePath, "A.m")
         XCTAssertEqual(files[0].classIntentions.count, 1)
+        XCTAssertEqual(files[0].classIntentions[0].precedingComments, [
+            "// Header comment",
+            "// Implementation comment"
+        ])
         XCTAssertEqual(files[0].classIntentions[0].typeName, "A")
+        XCTAssertEqual(files[0].classIntentions[0].methods[0].precedingComments, [
+            "// Implementation comment"
+        ])
+        XCTAssertEqual(files[0].classIntentions[0].methods[1].precedingComments, [
+            "// Header comment"
+        ])
     }
     
     func testMergingTypesSortsMethodsFromImplementationAboveMethodsFromInterface() {
@@ -302,6 +319,8 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                                                         .call()
                                                 )])
                 }.build()
+        intentions.fileIntentions()[0].globalFunctionIntentions[0].precedingComments = ["// Header comments"]
+        intentions.fileIntentions()[1].globalFunctionIntentions[0].precedingComments = ["// Implementation comments"]
         let sut = FileTypeMergingIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
@@ -317,6 +336,10 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                        )
         XCTAssertEqual(files[0].globalFunctionIntentions.first?.functionBody?.body,
                        [.expression(Expression.identifier("a").call())])
+        XCTAssertEqual(files[0].globalFunctionIntentions.first?.precedingComments, [
+            "// Header comments",
+            "// Implementation comments"
+        ])
     }
     
     func testDontMergeSimilarButNotActuallyMatchingGlobalFunctions() {
@@ -387,14 +410,18 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                     file.createClass(withName: "A") { builder in
                         builder
                             .createVoidMethod(named: "a") { method in
-                                method.signature.isStatic = true
+                                method
+                                    .addComment("// Header comment")
+                                    .signature.isStatic = true
                             }
                             .setAsInterfaceSource()
                     }
                 }.createFile(named: "A.m") { file in
                     file.createClass(withName: "A") { builder in
                         builder.createVoidMethod(named: "a") { method in
-                            method.signature.isStatic = true
+                            method
+                                .addComment("// Implementation comment")
+                                .signature.isStatic = true
                         }
                     }
                 }.build()
@@ -404,6 +431,10 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         let files = intentions.fileIntentions()
         let methods = files[0].classIntentions[0].methods
+        XCTAssertEqual(methods[0].precedingComments, [
+            "// Header comment",
+            "// Implementation comment"
+        ])
         XCTAssertEqual(methods.count, 1)
     }
     

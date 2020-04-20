@@ -256,7 +256,8 @@ extension SwiftExprASTReaderTests {
                 typeMapper: typeMapper,
                 typeParser: typeParser,
                 context: SwiftASTReaderContext(typeSystem: typeSystem,
-                                               typeContext: nil),
+                                               typeContext: nil,
+                                               comments: []),
                 delegate: nil)
         
         do {

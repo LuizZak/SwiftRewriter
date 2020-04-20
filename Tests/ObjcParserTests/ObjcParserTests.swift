@@ -247,7 +247,7 @@ class ObjcParserTests: XCTestCase {
             @end
             """)
         
-        let prot: ProtocolDeclaration? = node.firstChild()
+        let prot: ObjcProtocolDeclaration? = node.firstChild()
         XCTAssertNotNil(prot?.protocolList)
         XCTAssertEqual(prot?.protocolList?.protocols.first?.name, "B")
     }
@@ -489,9 +489,277 @@ class ObjcParserTests: XCTestCase {
         XCTAssert(sut.importDirectives[0].isSystemImport)
         XCTAssertFalse(sut.importDirectives[1].isSystemImport)
     }
+    
+    func testCommentRanges() throws {
+        let string = """
+            // A comment
+            #import "file.h"
+            /*
+                Another comment
+            */
+            """
+        
+        let sut = ObjcParser(string: string)
+        
+        try sut.parse()
+        
+        XCTAssertEqual(sut.comments.count, 2)
+        // Single line
+        XCTAssertEqual(sut.comments[0].string, "// A comment\n")
+        XCTAssertEqual(sut.comments[0].range.lowerBound, "".startIndex)
+        XCTAssertEqual(sut.comments[0].range.upperBound, "// A comment\n".endIndex)
+        XCTAssertEqual(sut.comments[0].location.line, 1)
+        XCTAssertEqual(sut.comments[0].location.column, 1)
+        XCTAssertEqual(sut.comments[0].length.newlines, 1)
+        XCTAssertEqual(sut.comments[0].length.columnsAtLastLine, 0)
+        // Multi-line
+        XCTAssertEqual(sut.comments[1].string, "/*\n    Another comment\n*/")
+        XCTAssertEqual(sut.comments[1].range.lowerBound, string.range(of: "/*")?.lowerBound)
+        XCTAssertEqual(sut.comments[1].range.upperBound, string.range(of: "*/")?.upperBound)
+        XCTAssertEqual(sut.comments[1].location.line, 3)
+        XCTAssertEqual(sut.comments[1].location.column, 1)
+        XCTAssertEqual(sut.comments[1].length.newlines, 2)
+        XCTAssertEqual(sut.comments[1].length.columnsAtLastLine, 2)
+    }
+    
+    func testCommentRangeInlinedMultiLineComment() throws {
+        let string = """
+            void /* A comment */ func() {
+            }
+            """
+        let sut = ObjcParser(string: string)
+        
+        try sut.parse()
+        
+        XCTAssertEqual(sut.comments.count, 1)
+        XCTAssertEqual(sut.comments[0].string, "/* A comment */")
+        XCTAssertEqual(sut.comments[0].range.lowerBound, string.range(of: "/*")?.lowerBound)
+        XCTAssertEqual(sut.comments[0].range.upperBound, string.range(of: "*/")?.upperBound)
+        XCTAssertEqual(sut.comments[0].location.line, 1)
+        XCTAssertEqual(sut.comments[0].location.column, 6)
+        XCTAssertEqual(sut.comments[0].length.newlines, 0)
+        XCTAssertEqual(sut.comments[0].length.columnsAtLastLine, 15)
+    }
+    
+    func testCollectCommentsInMethodBody() throws {
+        let string = """
+            void func() {
+                // A Comment
+                if (true) {
+                }
+                /* Another comment */
+            }
+            """
+        let sut = ObjcParser(string: string)
+        
+        try sut.parse()
+        
+        let global = sut.rootNode
+        let f = global.functionDefinitions[0]
+        let body = f.methodBody!
+        XCTAssertEqual(body.comments.count, 2)
+    }
+    
+    func testCollectCommentsPrecedingFunction() {
+        testParseComments(
+            """
+            void func() {
+            }
+            """, \.functionDefinitions[0])
+    }
+    
+    func testCollectCommentsPrecedingClassInterface() {
+        testParseComments(
+            """
+            @interface A
+            @end
+            """, \.classInterfaces[0])
+    }
+    
+    func testCollectCommentsPrecedingClassImplementations() {
+        testParseComments(
+            """
+            @implementation A
+            @end
+            """, \.classImplementations[0])
+    }
+    
+    func testCollectCommentsPrecedingCategoryInterface() {
+           testParseComments(
+               """
+               @interface A ()
+               @end
+               """, \.categoryInterfaces[0])
+       }
+       
+       func testCollectCommentsPrecedingCategoryImplementation() {
+           testParseComments(
+               """
+               @implementation A ()
+               @end
+               """, \.categoryImplementations[0])
+       }
+    
+    func testCollectCommentsPrecedingProtocolDeclaration() {
+        testParseComments(
+            """
+            @protocol A
+            @end
+            """, \.protocolDeclarations[0])
+    }
+    
+    func testCollectCommentsPrecedingGlobalVariable() {
+        testParseComments(
+            """
+            int global;
+            """, \.variableDeclarations[0])
+    }
+    
+    func testCollectCommentsPrecedingTypedefNode() {
+        testParseComments(
+            """
+            typedef struct {
+                int a;
+            } A;
+            """, \.typedefNodes[0])
+    }
+    
+    func testCollectCommentsPrecedingMethodDefinition() {
+        testParseCommentsRaw(
+            """
+            @interface A
+            // Preceding comment
+            // Another preceding comment
+            - (void)method;
+            // Trailing comment
+            @end
+            """, \GlobalContextNode.classInterfaces[0].methods[0])
+    }
+    
+    func testCollectCommentsPrecedingPropertyDefinition() {
+        testParseCommentsRaw(
+            """
+            @interface A
+            // Preceding comment
+            // Another preceding comment
+            @property NSInteger a;
+            // Trailing comment
+            @end
+            """, \GlobalContextNode.classInterfaces[0].properties[0])
+    }
+    
+    func testCollectCommentsPrecedingMethodDeclaration() {
+        testParseCommentsRaw(
+            """
+            @implementation A
+            // Preceding comment
+            // Another preceding comment
+            - (void)method {
+            }
+            // Trailing comment
+            @end
+            """, \GlobalContextNode.classImplementations[0].methods[0])
+    }
+    
+    func testCollectCommentsPrecedingEnumDeclaration() {
+        testParseCommentsRaw(
+            """
+            // Preceding comment
+            // Another preceding comment
+            typedef NS_ENUM(NSInteger, MyEnum) {
+                MyEnumCase
+            };
+            // Trailing comment
+            """, \GlobalContextNode.enumDeclarations[0])
+    }
+    
+    func testCollectCommentsPrecedingEnumCase() {
+        testParseCommentsRaw(
+            """
+            typedef NS_ENUM(NSInteger, MyEnum) {
+                // Preceding comment
+                // Another preceding comment
+                MyEnumCase
+                // Trailing comment
+            };
+            """, \GlobalContextNode.enumDeclarations[0].cases[0])
+    }
+    
+    func testCollectCommentsPrecedingInstanceVariable() {
+        testParseCommentsRaw(
+            """
+            @interface A
+            {
+                // Preceding comment
+                // Another preceding comment
+                NSInteger i;
+                // Trailing comment
+            }
+            @end
+            """, \GlobalContextNode.classInterfaces[0].ivarsList!.ivarDeclarations[0])
+    }
+    
+    func testCommentCollectionIgnoresMethodImplementationComments() throws {
+        let sut = ObjcParser(string: """
+            @implementation A
+            - (void)test {
+                // Preceding comment
+                // Another preceding comment
+                NSInteger i;
+                // Trailing comment
+            }
+            - (void)anotherMethod {
+            }
+            @end
+            """)
+
+        try sut.parse()
+
+        let global = sut.rootNode
+        let decl1 = global.classImplementations[0].methods[0]
+        let decl2 = global.classImplementations[0].methods[1]
+        XCTAssertEqual(decl1.body?.comments.count, 3)
+        XCTAssert(decl2.precedingComments.isEmpty)
+    }
 }
 
 extension ObjcParserTests {
+    
+    private func testParseComments<T: ASTNode>(
+        _ source: String,
+        _ keyPath: KeyPath<GlobalContextNode, T>,
+        line: UInt = #line) {
+        
+        let string = """
+            // Preceding comment
+            // Another preceding comment
+            \(source)
+            // Trailing comment
+            """
+        
+        testParseCommentsRaw(string, keyPath, line: line)
+    }
+    
+    private func testParseCommentsRaw<T: ASTNode>(
+        _ source: String,
+        _ keyPath: KeyPath<GlobalContextNode, T>,
+        line: UInt = #line) {
+        
+        do {
+            let sut = ObjcParser(string: source)
+
+            try sut.parse()
+
+            let global = sut.rootNode
+            let decl = global[keyPath: keyPath]
+            var comments = decl.precedingComments.makeIterator()
+            XCTAssertEqual(comments.next()?.string, "// Preceding comment\n", line: line)
+            XCTAssertEqual(comments.next()?.string, "// Another preceding comment\n", line: line)
+            XCTAssertNil(comments.next())
+        } catch {
+            XCTFail("Error while parsing test code: \(error)", line: line)
+        }
+    }
     
     private func parserTest(_ source: String, file: String = #file, line: Int = #line) -> GlobalContextNode {
         let sut = ObjcParser(string: source)

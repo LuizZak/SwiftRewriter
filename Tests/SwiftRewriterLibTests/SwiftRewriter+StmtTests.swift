@@ -284,7 +284,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
         // Should emit types for upcasts
         assertSingleStatement(
             objc: "NSObject *x = self; x = self;",
-            swift: "var x: NSObject = self\n        x = self"
+            swift: "var x: NSObject = self\n\n        x = self"
         )
         // For literals, no need to emit type signature as the expression won't
         // change values, so there's no later potential re-assignments of other
@@ -963,6 +963,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass {
                 func myMethod() {
                     let count = 5
+
                     i = 0
 
                     while i < count {
@@ -1047,6 +1048,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass {
                 func myMethod() {
                     let _lockTarget = self
+
                     objc_sync_enter(_lockTarget)
 
                     defer {
@@ -1136,11 +1138,11 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass {
                 func myMethod() {
-                    // label:
+                    label:
                     if true {
                     }
 
-                    // label2:
+                    label2:
                     if true {
                     }
                 }
@@ -1165,7 +1167,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass {
                 func myMethod() {
-                    // label:
+                    label:
                     if true {
                     }
 

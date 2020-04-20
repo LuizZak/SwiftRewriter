@@ -379,8 +379,6 @@ class SwiftRewriterTests: XCTestCase {
 
             @interface MyClass () <MyDelegate>
             {
-                /// Coments that are meant to be ignored.
-                /// None of these should affect parsing
                 NSInteger anIVar;
             }
             - (void)methodFromCategory;
@@ -814,9 +812,11 @@ class SwiftRewriterTests: XCTestCase {
             objc: """
             @protocol MyProtocol
             @optional
-            - (void)myMethod;  // Result should not contain this optional method...
-            - (void)myMethod2; // ...but should contain this one, which is implemented
-                               // by the conforming class.
+            // Result should not contain this optional method...
+            - (void)myMethod;
+            // ...but should contain this one, which is implemented
+            // by the conforming class.
+            - (void)myMethod2;
             @end
             @interface A : NSObject <MyProtocol>
             - (void)myMethod2;
@@ -825,8 +825,11 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             protocol MyProtocol: NSObjectProtocol {
+                // Result should not contain this optional method...
                 @objc
                 optional func myMethod()
+                // ...but should contain this one, which is implemented
+                // by the conforming class.
                 @objc
                 optional func myMethod2()
             }
@@ -956,6 +959,7 @@ class SwiftRewriterTests: XCTestCase {
             class MyClass {
                 func method() {
                     let aValue: NSObject!
+
                     (aValue as? String)?[123]
                 }
             }
@@ -978,6 +982,7 @@ class SwiftRewriterTests: XCTestCase {
             class MyClass {
                 func method() {
                     let aValue: NSObject!
+
                     (aValue as? String)?.someMethod()
                     (aValue as? String)?.property
                     (aValue as? String)?[123]
@@ -1073,7 +1078,9 @@ class SwiftRewriterTests: XCTestCase {
                 init() {
                     position = vector_float3()
                     color = packed_float4()
+
                     offset = 0
+
                     booly = false
                 }
                 init(position: vector_float3, color: packed_float4, offset: CInt, booly: Bool) {
@@ -1384,6 +1391,7 @@ class SwiftRewriterTests: XCTestCase {
                     }
 
                     let path = CGMutablePath()
+
                     path.move(to: CGPoint(x: 0, y: top))
                     path.addLine(to: CGPoint(x: 0, y: bottom))
                     shapeLayer.strokeColor = self.dateLabel.textColor.CGColor
@@ -1628,7 +1636,7 @@ class SwiftRewriterTests: XCTestCase {
                     super.b(a)
                 }
                 func c(_ a: Int) {
-                    super.c()
+                    super.c() // Make sure we don't create unnecessary overrides
                 }
             }
             """)
@@ -1756,6 +1764,7 @@ class SwiftRewriterTests: XCTestCase {
                 }
                 func method() {
                     let b: B?
+
                     self.takesA(b?.a() ?? A())
                 }
             }
@@ -1792,6 +1801,7 @@ class SwiftRewriterTests: XCTestCase {
             
                 func method() {
                     let a: A!
+
                     self.b?.c = 0
                     a.b?.c = 0
                     self.takesExpression(a.b?.c ?? 0)
@@ -2316,6 +2326,7 @@ class SwiftRewriterTests: XCTestCase {
             class A {
                 func method() {
                     let dict = [:]
+
                     NSLog(dict["abc"]?["def"].value)
                 }
             }
@@ -2506,6 +2517,7 @@ class SwiftRewriterTests: XCTestCase {
                 Date() == Date()
 
                 let date: Date?
+
                 date == Date()
             }
             """
@@ -2631,6 +2643,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             func test() {
                 let obj = Date()
+
                 objc.isKindOfClass(Date.self)
             }
             """)
@@ -2843,6 +2856,7 @@ class SwiftRewriterTests: XCTestCase {
             
                 func test() {
                     weak var weakSelf = self
+
                     weakSelf?.a = 10
                 }
             }
@@ -2888,6 +2902,134 @@ class SwiftRewriterTests: XCTestCase {
                     set(object) {
                         (object)
                     }
+                }
+            }
+            """)
+    }
+    
+    func testCommentTransposing() {
+        assertObjcParse(objc: """
+            @interface A
+            @end
+            @implementation A
+            - (NSObject*)getObject {
+                // A comment
+                test();
+
+                // Double line
+                // Comment
+                return nil;
+            }
+            @end
+            """, swift: """
+            class A {
+                func getObject() -> NSObject! {
+                    // A comment
+                    test()
+
+                    // Double line
+                    // Comment
+                    return nil
+                }
+            }
+            """)
+    }
+    
+    // TODO: Fix multi-lined comments to adjust indentation
+    func testBlockCommentTransposing() {
+       assertObjcParse(objc: """
+           @interface A
+           @end
+           @implementation A
+           - (void)test {
+               /*
+                   Block comment
+               */
+               test2();
+           }
+           @end
+           """, swift: """
+           class A {
+               func test() {
+                   /*
+                   Block comment
+               */
+                   test2()
+               }
+           }
+           """)
+    }
+    
+    func testDeclarationCommentTransposing() {
+        assertObjcParse(objc: """
+            // A comment
+            @interface A
+            // Method declaration comment
+            - (void)test;
+            @end
+            // Another comment
+            @implementation A
+            // Method definition comment
+            - (void)test {
+            }
+            @end
+            """, swift: """
+            // A comment
+            // Another comment
+            class A {
+                // Method declaration comment
+                // Method definition comment
+                func test() {
+                }
+            }
+            """)
+    }
+    
+    func testDeclarationCommentIgnoresMethodBodyComments() {
+        assertObjcParse(objc: """
+            @implementation A
+            // Method definition comment
+            - (void)test {
+                // Method body comment
+                stmt();
+            }
+            // Another comment
+            - (void)test2 {
+            }
+            @end
+            """, swift: """
+            class A {
+                // Method definition comment
+                func test() {
+                    // Method body comment
+                    stmt()
+                }
+                // Another comment
+                func test2() {
+                }
+            }
+            """)
+    }
+    
+    func testDontMergeCommentsFromProtocolToClass() {
+        assertObjcParse(objc: """
+            @protocol MyProtocol
+            // Comment
+            - (void)myMethod2;
+            @end
+            @interface A : NSObject <MyProtocol>
+            // Method comment
+            - (void)myMethod2;
+            @end
+            """, swift: """
+            protocol MyProtocol {
+                // Comment
+                func myMethod2()
+            }
+
+            class A: NSObject, MyProtocol {
+                // Method comment
+                func myMethod2() {
                 }
             }
             """)

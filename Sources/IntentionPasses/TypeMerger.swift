@@ -205,8 +205,10 @@ class TypeMerger {
 
     /// Merges a source KnownType into a second, such that property/method signatures
     /// are flattened to properly nullability-annotated methods.
-    func mergeTypes(from first: KnownType,
+    func mergeTypes(from first: TypeGenerationIntention,
                     into second: TypeGenerationIntention) {
+        
+        prependComments(from: first, into: second)
         
         // Protocols
         for prot in first.knownProtocolConformances {
@@ -264,15 +266,15 @@ class TypeMerger {
     }
 
     /// Merges properties from a starting type into a target type.
-    func mergePropertySignatures(from first: KnownType, into second: TypeGenerationIntention) {
+    func mergePropertySignatures(from first: TypeGenerationIntention, into second: TypeGenerationIntention) {
         // Properties
-        for prop in first.knownProperties {
+        for prop in first.properties {
             if !second.hasProperty(named: prop.name) {
                 let generated = second.generateProperty(from: prop)
                 
-                if let historic = prop as? Historic {
-                    generated.history.mergeHistories(historic.history)
-                }
+                prependComments(from: prop, into: generated)
+                
+                generated.history.mergeHistories(prop.history)
             }
         }
     }
@@ -289,31 +291,36 @@ class TypeMerger {
     ///
     /// Bodies from the methods are not copied over.
     /// - SeeAlso:
-    /// `mergeMethods(_ method1:KnownMethod, into method2: MethodGenerationIntention)`
+    /// `mergeMethods(_:KnownMethod,into:MethodGenerationIntention)`
     func mergeMethodSignatures(from first: KnownType,
                                into second: TypeGenerationIntention,
                                createIfUnexistent: Bool = true,
-                               skipCreatingOptionalMethods: Bool = true) {
+                               skipCreatingOptionalMethods: Bool = true,
+                               copyComments: Bool = true) {
         
-        for knownMethod in first.knownMethods {
-            if let existing = second.method(matchingSelector: knownMethod.signature.asSelector) {
-                mergeMethods(knownMethod, into: existing)
+        for method in first.knownMethods {
+            if let existing = second.method(matchingSelector: method.signature.asSelector) {
+                mergeMethods(method, into: existing, copyComments: copyComments)
             } else if createIfUnexistent {
-                if skipCreatingOptionalMethods && knownMethod.optional {
+                if skipCreatingOptionalMethods && method.optional {
                     continue
                 }
                 
-                let generated = second.generateMethod(from: knownMethod)
+                let generated = second.generateMethod(from: method)
                 
                 second.history
                     .recordChange(
                         tag: historyTag,
                         description: """
                         Creating definition for newly found method \
-                        \(TypeFormatter.asString(method: knownMethod, ofType: first))
+                        \(TypeFormatter.asString(method: method, ofType: first))
                         """)
                 
-                if let historic = knownMethod as? Historic {
+                if copyComments, let intention = method as? FromSourceIntention {
+                    prependComments(from: intention, into: generated)
+                }
+                
+                if let historic = method as? Historic {
                     generated.history.mergeHistories(historic.history)
                 }
             }
@@ -350,8 +357,14 @@ class TypeMerger {
     /// contains the proper nullability annotations, and for @protocol conformance
     /// nullability pairing.
     func mergeMethods(_ source: KnownMethod,
-                      into target: MethodGenerationIntention) {
+                      into target: MethodGenerationIntention,
+                      copyComments: Bool = true) {
+        
         let originalSignature = target.signature
+        
+        if copyComments, let sourceAsIntention = source as? FromSourceIntention {
+            prependComments(from: sourceAsIntention, into: target)
+        }
         
         target.signature = mergeSignatures(source.signature, target.signature)
         
@@ -387,6 +400,8 @@ class TypeMerger {
                        into target: GlobalFunctionGenerationIntention) {
         
         let originalSignature = target.signature
+        
+        prependComments(from: source, into: target)
         
         target.signature = mergeSignatures(source.signature, target.signature)
         
@@ -486,5 +501,16 @@ class TypeMerger {
         if type2 == type1Unaliased {
             type2 = type1
         }
+    }
+    
+    func prependComments(from intention1: FromSourceIntention, into intention2: FromSourceIntention) {
+        // Pre-pend comments
+        let result = intention1.precedingComments + intention2.precedingComments
+        
+        intention2.precedingComments = result
+    }
+    
+    func appendComments(from intention1: FromSourceIntention, into intention2: FromSourceIntention) {
+        intention2.precedingComments.append(contentsOf: intention1.precedingComments)
     }
 }

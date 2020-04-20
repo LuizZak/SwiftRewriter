@@ -233,4 +233,51 @@ class SubscriptDeclarationPassTests: XCTestCase {
         ])
         XCTAssertNil(type.subscripts.first?.mode.setter)
     }
+    
+    func testConvertSubscriptGetterKeepsComments() {
+        let intentions = IntentionCollectionBuilder()
+            .createFileWithClass(named: "A") { type in
+                type.createMethod("objectAtIndexSubscript(_ index: UInt) -> NSObject") { method in
+                    method
+                        .addComment("// A comment")
+                        .setAccessLevel(.private)
+                        .setBody([
+                            .return(.identifier("value"))
+                        ])
+                }
+            }.build()
+        let sut = SubscriptDeclarationPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let type = intentions.classIntentions()[0]
+        XCTAssertEqual(type.subscripts[0].precedingComments, [
+            "// A comment"
+        ])
+    }
+    
+    func testConvertSubscriptGetterSetterKeepsComments() {
+        let intentions = IntentionCollectionBuilder()
+            .createFileWithClass(named: "A") { type in
+                type.createMethod("objectAtIndexSubscript(_ index: UInt) -> NSObject") { method in
+                    method
+                        .addComment("// Getter comment")
+                        .setAccessLevel(.private)
+                        .setBody([
+                            .return(.identifier("value"))
+                        ])
+                }.createMethod("setObject(_ object: NSObject, atIndexedSubscript index: UInt)") { method in
+                    method.addComment("// Setter comment")
+                }
+            }.build()
+        let sut = SubscriptDeclarationPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let type = intentions.classIntentions()[0]
+        XCTAssertEqual(type.subscripts[0].precedingComments, [
+            "// Getter comment",
+            "// Setter comment"
+        ])
+    }
 }

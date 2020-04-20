@@ -271,6 +271,56 @@ class StringDiffTestingTests: XCTestCase {
             """
         )
     }
+    
+    func testDiffLargerExpectedStringWithChangeAtFirstLine() {
+        #sourceLocation(file: "test.swift", line: 1)
+        diffTest(expected: """
+                label:
+                if true {
+                }
+                """).diff("""
+                if true {
+                    }
+                """)
+        #sourceLocation()
+        
+        XCTAssertEqual(
+            testReporter.messages[0],
+            """
+            test.swift:5: Strings don't match:
+
+            Expected (between ---):
+
+            ---
+            label:
+            if true {
+            }
+            ---
+
+            Actual result (between ---):
+
+            ---
+            if true {
+                }
+            ---
+
+            Diff (between ---):
+
+            ---
+            if true {
+                }
+             ~ Difference at start of string.
+            ---
+            """
+        )
+        
+        XCTAssertEqual(
+            testReporter.messages[1],
+            """
+            test.swift:1: Difference starts here: Actual line reads 'if true {'
+            """
+        )
+    }
 }
 
 extension StringDiffTestingTests {
