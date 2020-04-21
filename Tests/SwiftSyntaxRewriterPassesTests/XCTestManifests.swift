@@ -16,6 +16,8 @@ extension StatementSpacingSyntaxPassTests {
     // to regenerate.
     static let __allTests__StatementSpacingSyntaxPassTests = [
         ("testAddSpacingBetweenExpressionAndStatements", testAddSpacingBetweenExpressionAndStatements),
+        ("testDontApplySpacingToFirstExpressionInMethod", testDontApplySpacingToFirstExpressionInMethod),
+        ("testKeepExistingLeadingTrivia", testKeepExistingLeadingTrivia),
         ("testRewrite", testRewrite),
     ]
 }

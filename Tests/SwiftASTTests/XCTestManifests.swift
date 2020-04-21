@@ -320,6 +320,7 @@ extension SyntaxNodeIteratorTests {
         ("testSwitchNotInspectingBlocks", testSwitchNotInspectingBlocks),
         ("testTernary", testTernary),
         ("testTernaryExpression", testTernaryExpression),
+        ("testTuple", testTuple),
         ("testUnary", testUnary),
         ("testUnaryExpression", testUnaryExpression),
         ("testVariableDeclarationsInspectingBlocks", testVariableDeclarationsInspectingBlocks),
