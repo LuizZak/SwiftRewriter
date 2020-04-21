@@ -2,14 +2,14 @@ import GrammarModels
 
 /// An intention represents the intent of the code transpiler to generate a
 /// file/class/struct/property/etc. with Swift code.
-public protocol IntentionProtocol: class {
+public protocol IntentionProtocol: class, Historic {
     /// Gets the history tracker for this intention
     var history: IntentionHistory { get }
 }
 
 /// An intention represents the intent of the code transpiler to generate a
 /// file/class/struct/property/etc. with Swift code.
-public class Intention: IntentionProtocol, Historic, Codable {
+public class Intention: IntentionProtocol, Codable {
     private var _history = IntentionHistoryTracker()
     
     /// Original source location of the node that generated this intention

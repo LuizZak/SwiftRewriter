@@ -76,8 +76,8 @@ public class FromSourceIntention: Intention, NonNullScopedIntention {
         // Type-level visibility
         case .private:
             switch (self, intention) {
-                // Private file-level member is visible to all other declarations
-            // on the same file
+            // Private file-level member is visible to all other declarations on
+            // the same file
             case (is FileLevelIntention, _):
                 return self.file?.targetPath == intention.file?.targetPath
                 

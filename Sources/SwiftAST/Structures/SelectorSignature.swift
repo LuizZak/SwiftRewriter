@@ -1,4 +1,4 @@
-/// Represents an Objective-C selector signature.
+/// Represents an Objective-C selector signature, e.g. `[functionWithA:b::]`.
 public struct SelectorSignature: Hashable, Codable {
     public var isStatic: Bool
     public var keywords: [String?]
