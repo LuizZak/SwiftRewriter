@@ -33,6 +33,11 @@ public class TupleExpression: Expression {
     }
     
     @inlinable
+    public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
+        visitor.visitTuple(self)
+    }
+    
+    @inlinable
     public override func copy() -> Expression {
         TupleExpression(elements: elements.map { $0.copy() }).copyTypeAndMetadata(from: self)
     }
