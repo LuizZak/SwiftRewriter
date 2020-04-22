@@ -85,7 +85,7 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cu
         resolvedType == .errorType
     }
     
-    override public init() {
+    override internal init() {
         super.init()
     }
     

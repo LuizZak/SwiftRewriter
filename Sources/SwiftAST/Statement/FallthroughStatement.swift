@@ -3,7 +3,6 @@ public class FallthroughStatement: Statement {
         true
     }
     
-    @inlinable
     public override func copy() -> FallthroughStatement {
         FallthroughStatement().copyMetadata(from: self)
     }

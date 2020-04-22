@@ -18,7 +18,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
     /// before the newline feed)
     public var trailingComment: String?
     
-    override public init() {
+    override internal init() {
         super.init()
     }
     

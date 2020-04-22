@@ -1,7 +1,6 @@
 import Foundation
 
 public final class SwiftASTSerializer {
-    
     internal struct StatementContainer: Codable {
         var kind: StatementKind
         var statement: Statement
@@ -64,7 +63,7 @@ public final class SwiftASTSerializer {
         }
         
         init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: StatementContainerKeys.self)
+            let container = try decoder.container(keyedBy: CodingKeys.self)
             
             kind = try container.decode(StatementKind.self, forKey: .kind)
             
@@ -102,11 +101,16 @@ public final class SwiftASTSerializer {
             }
         }
         
-        public func encode(to encoder: Encoder) throws {
-            var container = encoder.container(keyedBy: StatementContainerKeys.self)
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
             
             try container.encode(kind, forKey: .kind)
             try container.encode(statement, forKey: .statement)
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case kind
+            case statement
         }
     }
     
@@ -175,7 +179,7 @@ public final class SwiftASTSerializer {
         }
         
         init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: ExpressionContainerKeys.self)
+            let container = try decoder.container(keyedBy: CodingKeys.self)
             
             kind = try container.decode(ExpressionKind.self, forKey: .kind)
             
@@ -231,22 +235,17 @@ public final class SwiftASTSerializer {
             }
         }
         
-        public func encode(to encoder: Encoder) throws {
-            var container = encoder.container(keyedBy: ExpressionContainerKeys.self)
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
             
             try container.encode(kind, forKey: .kind)
             try container.encode(expression, forKey: .expression)
         }
-    }
-    
-    internal enum StatementContainerKeys: String, CodingKey {
-        case kind
-        case statement
-    }
-    
-    internal enum ExpressionContainerKeys: String, CodingKey {
-        case kind
-        case expression
+        
+        private enum CodingKeys: String, CodingKey {
+            case kind
+            case expression
+        }
     }
     
     internal enum ExpressionKind: String, Codable {
@@ -297,8 +296,8 @@ public final class SwiftASTSerializer {
 public extension SwiftASTSerializer {
     
     static func encode(statement: Statement,
-                              encoder: JSONEncoder,
-                              options: SerializationOptions = []) throws -> Data {
+                       encoder: JSONEncoder,
+                       options: SerializationOptions = []) throws -> Data {
         
         let container = try SwiftASTSerializer.StatementContainer(statement: statement)
         
@@ -313,8 +312,8 @@ public extension SwiftASTSerializer {
     }
     
     static func encode(expression: Expression,
-                              encoder: JSONEncoder,
-                              options: SerializationOptions = []) throws -> Data {
+                       encoder: JSONEncoder,
+                       options: SerializationOptions = []) throws -> Data {
         
         let container = try SwiftASTSerializer.ExpressionContainer(expression: expression)
         
