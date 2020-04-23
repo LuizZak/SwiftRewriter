@@ -214,9 +214,7 @@ extension SwiftRewriterCommand {
                 output.signalEndOfFiles = false
                 
                 let inputData = FileHandle.standardInput.availableData
-                guard let inputString = String(data: inputData, encoding: .utf8) else {
-                    throw SwiftRewriterError(description: "Expected UTF-8 in standard input pipe mode")
-                }
+                let inputString = String(decoding: inputData, as: UTF8.self)
 
                 let input = SingleInputProvider(code: inputString, isPrimary: true)
 

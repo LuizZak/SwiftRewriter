@@ -110,7 +110,7 @@ extension SwiftSyntaxProducer {
             }
         }
         
-        if let label = stmt.label, !isLabeledStatementType(stmt) {
+        if let label = stmt.label, !isLabelableStatementType(stmt) {
             if !stmt.comments.isEmpty {
                 addExtraLeading(.newlines(1) + indentation())
             }
@@ -196,7 +196,7 @@ extension SwiftSyntaxProducer {
     }
     
     // TODO: This should be a property inside the Statement class
-    private func isLabeledStatementType(_ stmt: Statement) -> Bool {
+    private func isLabelableStatementType(_ stmt: Statement) -> Bool {
         switch stmt {
         case is IfStatement, is SwitchStatement, is DoStatement, is ForStatement,
              is WhileStatement, is DoWhileStatement:

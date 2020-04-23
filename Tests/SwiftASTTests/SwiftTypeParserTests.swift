@@ -392,7 +392,7 @@ class SwiftTypeParserTests: XCTestCase {
         func encoded(_ type: SwiftType) -> String {
             let coder = JSONEncoder()
             let data = try! coder.encode(type)
-            return String(data: data, encoding: .utf8)!
+            return String(decoding: data, as: UTF8.self)
         }
         
         for i in 0..<100 {

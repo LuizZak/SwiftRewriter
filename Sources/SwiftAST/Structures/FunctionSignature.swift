@@ -45,6 +45,8 @@ public struct FunctionSignature: Hashable {
                            parameters: parameters.map(\.type))
     }
     
+    /// Returns a new function signature where parameters and return type have
+    /// their nullability stripped off.
     public var droppingNullability: FunctionSignature {
         let parameters = self.parameters.map {
             ParameterSignature(label: $0.label, name: $0.name, type: $0.type.deepUnwrapped)

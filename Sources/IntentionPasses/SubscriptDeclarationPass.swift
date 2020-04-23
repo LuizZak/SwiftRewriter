@@ -58,23 +58,24 @@ public class SubscriptDeclarationPass: ClassVisitingIntentionPass {
     func apply(_ match: Match, in type: TypeGenerationIntention) {
         switch match {
         case .getter(let method):
-            type.removeMethod(method)
             let sub = toGetter(method)
-            
             type.addSubscript(sub)
+            
+            type.removeMethod(method)
             
         case let .getterSetter(getter, setter):
+            let sub = toGetterSetter(getter, setter)
+            type.addSubscript(sub)
+            
             type.removeMethod(getter)
             type.removeMethod(setter)
-            let sub = toGetterSetter(getter, setter)
-            
-            type.addSubscript(sub)
         }
     }
     
     func toGetter(_ method: MethodGenerationIntention) -> SubscriptGenerationIntention {
         let parameters = [
-            ParameterSignature(name: method.parameters[0].name, type: method.parameters[0].type)
+            ParameterSignature(name: method.parameters[0].name,
+                               type: method.parameters[0].type)
         ]
         let sub = SubscriptGenerationIntention(
             parameters: parameters,

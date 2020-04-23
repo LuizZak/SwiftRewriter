@@ -84,13 +84,13 @@ final class SwiftRewriterTests: XCTestCase {
         process.waitUntilExit()
         
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = String(data: data, encoding: .utf8)
+        let output = String(decoding: data, as: UTF8.self)
         
         let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
-        let errorOutput = String(data: errorData, encoding: .utf8)
+        let errorOutput = String(decoding: errorData, as: UTF8.self)
         
-        return ProcessResult(standardOutput: output ?? "",
-                             standardError: errorOutput ?? "",
+        return ProcessResult(standardOutput: output,
+                             standardError: errorOutput,
                              terminationStatus: process.terminationStatus)
     }
     
