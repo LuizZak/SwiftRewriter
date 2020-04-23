@@ -168,6 +168,14 @@ class SwiftTypeTests: XCTestCase {
         )
     }
     
+    func testOptionalityDepth() {
+        XCTAssertEqual(SwiftType.int.optionalityDepth, 0)
+        XCTAssertEqual(SwiftType.optional(.int).optionalityDepth, 1)
+        XCTAssertEqual(SwiftType.implicitUnwrappedOptional(.int).optionalityDepth, 1)
+        XCTAssertEqual(SwiftType.nullabilityUnspecified(.int).optionalityDepth, 1)
+        XCTAssertEqual(SwiftType.optional(.optional(.int)).optionalityDepth, 2)
+    }
+    
     func testEncode() throws {
         let type = SwiftType.swiftBlock(returnType: .void, parameters: [.array(.string)])
         

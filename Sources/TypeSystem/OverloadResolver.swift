@@ -128,10 +128,10 @@ public class OverloadResolver {
         
         // Do a lookup ignoring type nullability to attempt to find best-matching
         // candidates, now
-        var candidates = signatureCandidates
+        var remainingCandidates = signatureCandidates
         
         for (argIndex, argument) in arguments.enumerated() {
-            guard candidates.count > 1, let argumentType = argument.type, !argument.isMissingType else {
+            guard remainingCandidates.count > 1, let argumentType = argument.type, !argument.isMissingType else {
                 continue
             }
             
@@ -140,9 +140,18 @@ public class OverloadResolver {
             repeat {
                 doWork = false
                 
-                for (i, signature) in candidates.enumerated() {
+                for (i, signature) in remainingCandidates.enumerated() {
                     let parameterType =
                         signature.signature.parameters[argIndex].type
+                    
+                    let isAssignableAsIs =
+                        typeSystem.isType(argumentType,
+                                          assignableTo: parameterType)
+                    
+                    if isAssignableAsIs {
+                        remainingCandidates[i].rank += OverloadRankStatics.typeAssignableRankBonus
+                        continue
+                    }
                     
                     let isAssignable =
                         typeSystem.isType(argumentType.deepUnwrapped,
@@ -157,8 +166,12 @@ public class OverloadResolver {
                     // for float-to-integer casts)
                     if argument.isLiteral {
                         switch argument.literalKind {
-                        case .integer? where typeSystem.isNumeric(parameterType.deepUnwrapped),
-                             .float? where typeSystem.isFloat(parameterType.deepUnwrapped):
+                        case .integer where typeSystem.isInteger(parameterType.deepUnwrapped):
+                            remainingCandidates[i].rank += OverloadRankStatics.numericTypeMatchRankBonus
+                            continue
+                            
+                        case .integer where typeSystem.isNumeric(parameterType.deepUnwrapped),
+                             .float where typeSystem.isFloat(parameterType.deepUnwrapped):
                             continue
                             
                         default:
@@ -166,15 +179,17 @@ public class OverloadResolver {
                         }
                     }
                     
-                    candidates.remove(at: i)
+                    remainingCandidates.remove(at: i)
                     doWork = true
                     break
                 }
-            } while doWork && candidates.count > 1
+            } while doWork && remainingCandidates.count > 1
         }
         
+        remainingCandidates.sort(by: { $0.rank > $1.rank })
+        
         // Return first candidate found
-        let result = candidates.first?.inputIndex
+        let result = remainingCandidates.first?.inputIndex
         
         state.addCache(forSignatures: signatures,
                        arguments: arguments,
@@ -189,7 +204,8 @@ public class OverloadResolver {
         for (i, signature) in signatures.enumerated() {
             for selector in signature.possibleSelectorSignatures() {
                 let candidate =
-                    OverloadCandidate(selector: selector,
+                    OverloadCandidate(rank: 0,
+                                      selector: selector,
                                       signature: signature,
                                       inputIndex: i,
                                       argumentCount: selector.keywords.count - 1)
@@ -218,10 +234,16 @@ public class OverloadResolver {
     }
     
     private struct OverloadCandidate {
+        var rank: Int = 0
         var selector: SelectorSignature
         var signature: FunctionSignature
         var inputIndex: Int
         var argumentCount: Int
+    }
+    
+    private enum OverloadRankStatics {
+        static let typeAssignableRankBonus = 1
+        static let numericTypeMatchRankBonus = 1
     }
 }
 

@@ -407,7 +407,11 @@ public class TypeSystem {
             return true
         }
         
-        switch (unaliasedType, unaliasedBaseType) {
+        if unaliasedType.optionalityDepth > unaliasedBaseType.optionalityDepth {
+            return false
+        }
+        
+        switch (unaliasedType.deepUnwrapped, unaliasedBaseType.deepUnwrapped) {
         case (.nominal(let nominalType), .nominal(let nominalBaseType)):
             let typeName = typeNameIn(nominalType: nominalType)
             let baseTypeName = typeNameIn(nominalType: nominalBaseType)

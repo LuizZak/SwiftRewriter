@@ -232,6 +232,12 @@ public extension SwiftType {
         .nullabilityUnspecified(self)
     }
     
+    /// Returns a greater than zero number that indicates how many layers of
+    /// optional types this type contains until the first non-optional type.
+    var optionalityDepth: Int {
+        return isOptional ? 1 + unwrapped.optionalityDepth : 0
+    }
+    
     /// Returns this type, wrapped in the same optionality depth as another given
     /// type.
     ///

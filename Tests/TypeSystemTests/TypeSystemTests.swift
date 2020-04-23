@@ -673,6 +673,19 @@ class TypeSystemTests: XCTestCase {
         XCTAssertFalse(sut.isType("Q", assignableTo: "Z"))
     }
     
+    func testIsTypeAssignableToLooksThroughOptionalityWhenCheckingSubtyping() {
+        let a = KnownTypeBuilder(typeName: "A").build()
+        let b = KnownTypeBuilder(typeName: "B").settingSupertype("A").build()
+        sut.addType(a)
+        sut.addType(b)
+        
+        XCTAssert(sut.isType(.optional("B"), assignableTo: .optional("A")))
+        XCTAssert(sut.isType("B", assignableTo: .optional("A")))
+        // Optionality depth from the left side must be less than or equal to
+        // optionality depth from the right side
+        XCTAssertFalse(sut.isType(.optional("B"), assignableTo: "A"))
+    }
+    
     func testTypeCategoryPrimitives() {
         XCTAssertEqual(sut.category(forType: "Bool"), .boolean)
         XCTAssertEqual(sut.category(forType: "ObjCBool"), .boolean)

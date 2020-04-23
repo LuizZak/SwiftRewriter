@@ -1352,7 +1352,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 max(0, cInt);
                 max(0, nsInteger);
                 max(0, 0);
-                max(0.0, 0); // FIXME: Result is currently 'CGFloat', but should be 'Double'
+                max(0.0, 0);
             }
             """,
             swift: """
@@ -1376,9 +1376,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 max(0, nsInteger)
                 // type: Int
                 max(0, 0)
-
-                // type: CGFloat
-                max(0.0, 0) // FIXME: Result is currently 'CGFloat', but should be 'Double'
+                // type: Double
+                max(0.0, 0)
             }
             """,
             options: SwiftSyntaxOptions(outputExpressionTypes: true))

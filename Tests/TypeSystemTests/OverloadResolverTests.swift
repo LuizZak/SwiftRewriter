@@ -335,9 +335,7 @@ class OverloadResolverTests: XCTestCase {
         XCTAssertEqual(index, 1)
     }
     
-    // FIXME: Overload resolution should be able to favor some more compatible
-    // overloads over others
-    func xtestResolveLiteralsFavorsNaturalLiteralType() throws {
+    func testResolveLiteralsFavorsNaturalLiteralType() throws {
         let arguments: [OverloadResolver.Argument] = [
             OverloadResolver.Argument(type: .int, isLiteral: true, literalKind: .integer),
         ]
@@ -351,9 +349,7 @@ class OverloadResolverTests: XCTestCase {
         XCTAssertEqual(index, 1)
     }
     
-    // FIXME: Making this pass would not be vital, but would also be nice for
-    // completeness sake.
-    func xtestMatchFavoringSameOptionalityWithPolymorphism() throws {
+    func testMatchFavoringSameOptionalityWithPolymorphism() throws {
         typeSystem.addType(KnownTypeBuilder(typeName: "A").build())
         typeSystem.addType(
             KnownTypeBuilder(typeName: "B")
