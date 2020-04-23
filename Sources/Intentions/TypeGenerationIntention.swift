@@ -236,12 +236,6 @@ public class TypeGenerationIntention: FromSourceIntention {
         protocols.contains(where: { $0.protocolName == name })
     }
     
-    public func method(withSignature signature: FunctionSignature) -> MethodGenerationIntention? {
-        methods.first {
-            signature.droppingNullability == $0.signature.droppingNullability
-        }
-    }
-    
     /// Finds a method on this class that matches a given Objective-C selector
     /// signature.
     ///
