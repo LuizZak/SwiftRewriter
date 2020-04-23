@@ -16,7 +16,7 @@ public struct SourceLocation: Comparable {
         self.utf8Offset = utf8Offset
     }
     
-    public static func <(lhs: SourceLocation, rhs: SourceLocation) -> Bool {
+    public static func < (lhs: SourceLocation, rhs: SourceLocation) -> Bool {
         lhs.utf8Offset < rhs.utf8Offset
     }
 }
