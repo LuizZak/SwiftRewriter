@@ -1,7 +1,7 @@
 import SwiftSyntax
 
 public class BaseSwiftSyntaxProducer {
-    var indentationMode: TriviaPiece = .spaces(4)
+    var spacesInIndentation: Int = 4
     var indentationLevel: Int = 0
     
     var extraLeading: Trivia?
@@ -11,7 +11,7 @@ public class BaseSwiftSyntaxProducer {
             .makeDefaultDecoratorApplier()
     
     func indentation() -> Trivia {
-        Trivia(pieces: Array(repeating: indentationMode, count: indentationLevel))
+        return indentationLevel == 0 ? .zero : Trivia.spaces(indentationLevel * spacesInIndentation)
     }
     
     func indentationString() -> String {
