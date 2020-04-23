@@ -276,6 +276,7 @@ extension SwiftTypeTests {
         ("testIterateOneOrMoreOneItem", testIterateOneOrMoreOneItem),
         ("testIterateTwoOrMore", testIterateTwoOrMore),
         ("testOneOrMoreInitializing", testOneOrMoreInitializing),
+        ("testOptionalityDepth", testOptionalityDepth),
         ("testTwoOrMoreInitializing", testTwoOrMoreInitializing),
         ("testWithSameOptionalityAs", testWithSameOptionalityAs),
     ]

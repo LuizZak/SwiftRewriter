@@ -146,6 +146,7 @@ extension OverloadResolverTests {
     // to regenerate.
     static let __allTests__OverloadResolverTests = [
         ("testMatchFavoringSameOptionality", testMatchFavoringSameOptionality),
+        ("testMatchFavoringSameOptionalityWithPolymorphism", testMatchFavoringSameOptionalityWithPolymorphism),
         ("testMatchLooksThroughOptionalArgumentTypes", testMatchLooksThroughOptionalArgumentTypes),
         ("testMatchLooksThroughOptionalParameterTypes", testMatchLooksThroughOptionalParameterTypes),
         ("testOverloadResolver", testOverloadResolver),
@@ -157,6 +158,7 @@ extension OverloadResolverTests {
         ("testPolymorphicResolving", testPolymorphicResolving),
         ("testPolymorphicResolvingFavorsExactMatching", testPolymorphicResolvingFavorsExactMatching),
         ("testPolymorphicResolvingLooksThroughOptionalArgumentTypes", testPolymorphicResolvingLooksThroughOptionalArgumentTypes),
+        ("testResolveLiteralsFavorsNaturalLiteralType", testResolveLiteralsFavorsNaturalLiteralType),
         ("testResolveLiteralsUsingTypeCompatibility", testResolveLiteralsUsingTypeCompatibility),
         ("testResolveLiteralsUsingTypeCompatibilityLookingThroughArgumentNullability", testResolveLiteralsUsingTypeCompatibilityLookingThroughArgumentNullability),
         ("testResolveLiteralsUsingTypeCompatibilityLookingThroughParameterNullability", testResolveLiteralsUsingTypeCompatibilityLookingThroughParameterNullability),
@@ -210,6 +212,7 @@ extension TypeSystemTests {
         ("testIsTypeAssignableToChecksProtocolConformance", testIsTypeAssignableToChecksProtocolConformance),
         ("testIsTypeAssignableToChecksProtocolConformanceChain", testIsTypeAssignableToChecksProtocolConformanceChain),
         ("testIsTypeAssignableToChecksSubclassTyping", testIsTypeAssignableToChecksSubclassTyping),
+        ("testIsTypeAssignableToLooksThroughOptionalityWhenCheckingSubtyping", testIsTypeAssignableToLooksThroughOptionalityWhenCheckingSubtyping),
         ("testIsTypeConformingToProtocol", testIsTypeConformingToProtocol),
         ("testIsTypeConformingToProtocol_SwiftType", testIsTypeConformingToProtocol_SwiftType),
         ("testIsTypeConformingToProtocolIndirectProtocolLookup", testIsTypeConformingToProtocolIndirectProtocolLookup),
