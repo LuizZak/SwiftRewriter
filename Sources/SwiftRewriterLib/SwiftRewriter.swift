@@ -521,7 +521,9 @@ public final class SwiftRewriter {
                                  typeSystem: typeSystem,
                                  syntaxRewriterApplier: syntaxApplier)
         
-        writer.progressListener = progressListener
+        if settings.verbose {
+            writer.progressListener = progressListener
+        }
         
         withExtendedLifetime(progressListener) {
             writer.execute()
