@@ -63,8 +63,9 @@ public final class SwiftWriter {
         queue.maxConcurrentOperationCount = numThreads
         
         let mutex = Mutex()
+        let filesToEmit = fileIntents.filter(shouldOutputFile(_:))
         
-        for file in fileIntents where shouldOutputFile(file) {
+        for file in filesToEmit {
             if !unique.insert(file.targetPath).inserted {
                 print("""
                     Found duplicated file intent to save to path \(file.targetPath).
@@ -92,7 +93,7 @@ public final class SwiftWriter {
                                 listener.swiftWriterReportProgress(
                                     self,
                                     filesEmitted: fe,
-                                    totalFiles: fileIntents.count,
+                                    totalFiles: filesToEmit.count,
                                     latestFile: file)
                             }
                         }
