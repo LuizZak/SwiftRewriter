@@ -10,9 +10,17 @@ import WriterTargetOutput
 import SwiftSyntaxSupport
 import Utils
 
+public protocol SwiftWriterProgressListener: class {
+    func swiftWriterReportProgress(_ writer: SwiftWriter,
+                                   filesEmitted: Int,
+                                   totalFiles: Int,
+                                   latestFile: FileGenerationIntention)
+}
+
 /// Gets as inputs a series of intentions and outputs actual files and script
 /// contents.
 public final class SwiftWriter {
+    weak var progressListener: SwiftWriterProgressListener?
     var intentions: IntentionCollection
     var output: WriterOutput
     var diagnostics: Diagnostics
@@ -48,7 +56,9 @@ public final class SwiftWriter {
         let fileIntents = intentions.fileIntentions()
         
         var errors: [(String, Error)] = []
+        let filesEmitted = ConcurrentValue<Int>(wrappedValue: 0)
         
+        let listenerQueue = DispatchQueue(label: "com.swiftrewriter.swiftwriter.listener")
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = numThreads
         
@@ -75,6 +85,18 @@ public final class SwiftWriter {
             queue.addOperation {
                 autoreleasepool {
                     do {
+                        if let listener = self.progressListener {
+                            let fe: Int = filesEmitted.modifyingValue({ $0 += 1; return $0 })
+                            
+                            listenerQueue.async {
+                                listener.swiftWriterReportProgress(
+                                    self,
+                                    filesEmitted: fe,
+                                    totalFiles: fileIntents.count,
+                                    latestFile: file)
+                            }
+                        }
+                        
                         try writer.outputFile(file)
                         
                         mutex.locking {

@@ -509,6 +509,7 @@ public final class SwiftRewriter {
             print("Applying Swift syntax passes and saving files...")
         }
         
+        let progressListener = InnerSwiftWriterDelegate()
         let syntaxApplier =
             SwiftSyntaxRewriterPassApplier(provider: syntaxRewriterPassSource)
         
@@ -520,7 +521,11 @@ public final class SwiftRewriter {
                                  typeSystem: typeSystem,
                                  syntaxRewriterApplier: syntaxApplier)
         
-        writer.execute()
+        writer.progressListener = progressListener
+        
+        withExtendedLifetime(progressListener) {
+            writer.execute()
+        }
     }
     
     private func applyPreprocessors(source: CodeSource) -> String {
@@ -695,6 +700,34 @@ private extension SwiftRewriter {
                                         passApplier.progress.total)
             
             print("\(progressString): \((file.targetPath as NSString).lastPathComponent)")
+            
+            didPrintLine = true
+        }
+    }
+}
+
+// MARK: - SwiftWriterDelegate
+private extension SwiftRewriter {
+    class InnerSwiftWriterDelegate: SwiftWriterProgressListener {
+        private var didPrintLine = false
+        
+        func swiftWriterReportProgress(_ writer: SwiftWriter,
+                                       filesEmitted: Int,
+                                       totalFiles: Int,
+                                       latestFile: FileGenerationIntention) {
+            
+            // Clear previous line and re-print, instead of bogging down the
+            // terminal with loads of prints
+            if didPrintLine {
+                _terminalClearLine()
+            }
+            
+            let totalPadLength = totalFiles.description.count
+            let progressString = String(format: "[%0\(totalPadLength)d/%d]",
+                                        filesEmitted,
+                                        totalFiles)
+            
+            print("\(progressString): \((latestFile.targetPath as NSString).lastPathComponent)")
             
             didPrintLine = true
         }
