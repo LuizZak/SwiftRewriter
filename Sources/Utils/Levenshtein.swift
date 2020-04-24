@@ -39,8 +39,8 @@ public class Levenshtein {
     }
     
     @inlinable
-    static func minimum(_ numbers: Int...) -> Int {
-        return numbers.reduce(numbers[0]) { $0 < $1 ? $0 : $1 }
+    static func minimum(_ n1: Int, _ n2: Int, _ n3: Int) -> Int {
+        return min(n1, min(n2, n3))
     }
     
     @usableFromInline
