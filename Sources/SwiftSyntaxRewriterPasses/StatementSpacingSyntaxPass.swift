@@ -1,8 +1,11 @@
 import SwiftSyntax
 import SwiftSyntaxSupport
 import Utils
+import MiniLexer
 
-/// Syntax pass which spaces lines of statements based on their similarity
+/// Syntax pass which spaces lines of statements based on their similarity by
+/// comparing if the leading identifier on the expression line (ignoring 'self.')
+/// matches the identifier from the previous line.
 public class StatementSpacingSyntaxPass: SwiftSyntaxRewriterPass {
     public init() {
         
@@ -15,11 +18,21 @@ public class StatementSpacingSyntaxPass: SwiftSyntaxRewriterPass {
 }
 
 private class InnerSyntaxRewriter: SyntaxRewriter {
-    override func visit(_ node: CodeBlockSyntax) -> Syntax {
-        var statements = node.statements
+    override func visit(_ node: CodeBlockItemListSyntax) -> Syntax {
+        var statements = super.visit(node).as(CodeBlockItemListSyntax.self)!
         
-        // Get long-running sequences of expressions to separate
-        let ranges = rangeOfExpressionStatements(in: node.statements)
+        let ranges = rangeOfExpressionStatements(in: node)
+        statements = separateExpressions(in: statements, ranges: ranges)
+        
+        return Syntax(ranges.reduce(statements) { stmts, range in
+            analyzeRange(range, in: stmts)
+        })
+    }
+    
+    func separateExpressions(in statements: CodeBlockItemListSyntax,
+                             ranges: [Range<Int>]) -> CodeBlockItemListSyntax {
+        
+        var statements = statements
         
         // Add leading line breaks between expression sequence boundaries, making
         // sure expressions are always separated by at least one empty line from
@@ -43,9 +56,7 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
             }
         }
         
-        return Syntax(ranges.reduce(node) { node, range in
-            node.withStatements(analyzeRange(range, in: statements))
-        })
+        return statements
     }
     
     func analyzeRange(_ range: Range<Int>, in stmts: CodeBlockItemListSyntax) -> CodeBlockItemListSyntax {
@@ -58,43 +69,55 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
         let rangeEnd = stmts.index(stmts.startIndex, offsetBy: range.upperBound)
         let expressions = stmts[rangeStart..<rangeEnd]
         
-        // Indexed distances between string of expression at [x] and [x + 1]
-        let distance: [Int] =
-            expressions
-                .enumerated()
-                .dropLast()
-                .map { (arg) -> Int in
-                    let (i, exp) = arg
-                    
-                    let newIndex = expressions.index(expressions.startIndex, offsetBy: i + 1)
-                    
-                    return Levenshtein.distanceBetween(
-                        exp.description,
-                        and: expressions[newIndex].description
-                    )
-                }
-        
-        for i in 1..<(expressions.count - 1) {
-            let fromLast = distance[i - 1]
-            let toNext = distance[i]
+        func addLineSpace(_ block: CodeBlockItemSyntax, _ index: CodeBlockItemListSyntax.Index) {
+            let childIndex = stmts.distance(from: stmts.startIndex, to: index)
             
-            // If we have too sharp of an increase of the distance between the
-            // last and next expressions, add an empty line between the current
-            // and next expressions
-            if abs(fromLast - toNext) > 2 {
-                let newIndex = expressions.index(expressions.startIndex, offsetBy: i + 1)
-                
-                let next = expressions[newIndex]
-                let childIndex = stmts.distance(from: stmts.startIndex, to: newIndex)
-                
-                stmts = stmts.replacing(
-                    childAt: childIndex,
-                    with: CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(next))!
-                )
+            stmts = stmts.replacing(
+                childAt: childIndex,
+                with: CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(block))!
+            )
+        }
+        
+        var currentIdent: String? = identInStmt(stmts[rangeStart])
+        
+        for i in 1..<expressions.count {
+            let index = expressions.index(expressions.startIndex, offsetBy: i)
+            let curr = expressions[index]
+            
+            let nextIdent = identInStmt(curr)
+            
+            if currentIdent != nextIdent {
+                currentIdent = nextIdent
+                addLineSpace(curr, index)
             }
         }
         
         return stmts
+    }
+    
+    func identInStmt(_ stmt: CodeBlockItemSyntax) -> String? {
+        let desc = stmt.withoutTrivia().description
+        
+        let lexer = Lexer(input: desc)
+        lexer.skipWhitespace()
+        guard lexer.safeNextCharPasses(with: { Lexer.isLetter($0) || $0 == "_" }) else {
+            return nil
+        }
+        
+        var str = lexer.consumeString { lex in
+            lex.advance(while: { Lexer.isAlphanumeric($0) || $0 == "_" })
+        }
+        
+        // Attempt to consume property after 'self'
+        if str == "self" {
+            if lexer.advanceIf(equals: ".") {
+                str = lexer.consumeString { lex in
+                    lex.advance(while: { Lexer.isAlphanumeric($0) || $0 == "_" })
+                }
+            }
+        }
+        
+        return str.isEmpty ? nil : String(str)
     }
     
     /// Returns a list of indexes which represent running sequences of expression

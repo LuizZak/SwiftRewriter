@@ -740,10 +740,13 @@ class SwiftRewriter_TypingTests: XCTestCase {
 
                     // type: String?
                     local1
+
                     // type: String
                     local2
+
                     // type: String?
                     local3
+
                     // type: String
                     local4
                 }
@@ -949,11 +952,13 @@ class SwiftRewriter_TypingTests: XCTestCase {
                         // type: Int
                         local
                     }
+
                     // type: Void
                     self.takesBlock { () -> Void in
                         // type: Int
                         local
                     }
+
                     // type: String!
                     takesBlockGlobal { () -> Void in
                         // type: Int
@@ -1200,16 +1205,12 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     self.convert(CGRect.zero, to: nil)
                     // type: CGPoint
                     self.convert(CGPoint.zero, to: nil)
-
                     // type: CGRect
                     self.convert(a?.frame ?? CGRect(), to: nil)
-
                     // type: CGPoint
                     self.convert(a?.center ?? CGPoint(), to: nil)
-
                     // type: CGRect
                     self.convert(a?.frame ?? CGRect(), to: a)
-
                     // type: CGPoint
                     self.convert(a?.center ?? CGPoint(), to: a)
                 }
@@ -1371,7 +1372,6 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 max(0, cgFloat)
                 // type: CInt
                 max(0, cInt)
-
                 // type: Int
                 max(0, nsInteger)
                 // type: Int

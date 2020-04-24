@@ -65,7 +65,7 @@ let package = Package(
             dependencies: ["SwiftSyntax", "KnownType", "Intentions", "SwiftAST"]),
         .target(
             name: "SwiftSyntaxRewriterPasses",
-            dependencies: ["SwiftSyntax", "SwiftSyntaxSupport", "Utils"]),
+            dependencies: ["SwiftSyntax", "SwiftSyntaxSupport", "Utils", "MiniLexer"]),
         .target(
             name: "TypeSystem",
             dependencies: ["SwiftAST", "ObjcParser", "TypeDefinitions", "Utils",

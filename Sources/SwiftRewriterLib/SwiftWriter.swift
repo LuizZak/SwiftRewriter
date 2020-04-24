@@ -55,7 +55,7 @@ public final class SwiftWriter {
         var unique = Set<String>()
         let fileIntents = intentions.fileIntentions()
         
-        var errors: [(String, Error)] = []
+        let errors = ConcurrentValue<[(String, Error)]>(wrappedValue: [])
         let filesEmitted = ConcurrentValue<Int>(wrappedValue: 0)
         
         let listenerQueue = DispatchQueue(label: "com.swiftrewriter.swiftwriter.listener")
@@ -67,11 +67,14 @@ public final class SwiftWriter {
         
         for file in filesToEmit {
             if !unique.insert(file.targetPath).inserted {
-                print("""
-                    Found duplicated file intent to save to path \(file.targetPath).
-                    This usually means an original .h/.m source pairs could not be \
-                    properly reduced to a single .swift file.
-                    """)
+                mutex.locking {
+                    diagnostics.warning("""
+                        Found duplicated file intent to save to path \(file.targetPath).
+                        This usually means an original .h/.m source pairs could not be \
+                        properly reduced to a single .swift file.
+                        """,
+                        location: .invalid)
+                }
                 continue
             }
             
@@ -104,9 +107,7 @@ public final class SwiftWriter {
                             self.diagnostics.merge(with: writer.diagnostics)
                         }
                     } catch {
-                        mutex.locking {
-                            errors.append((file.targetPath, error))
-                        }
+                        errors.wrappedValue.append((file.targetPath, error))
                     }
                 }
             }
@@ -114,7 +115,7 @@ public final class SwiftWriter {
         
         queue.waitUntilAllOperationsAreFinished()
         
-        for error in errors {
+        for error in errors.wrappedValue {
             diagnostics.error("Error while saving file \(error.0): \(error.1)",
                               origin: error.0,
                               location: .invalid)

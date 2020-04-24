@@ -1058,14 +1058,20 @@ class SwiftRewriterTests: XCTestCase {
             
                 init() {
                     x = 0.0
+
                     y = 0.0
+
                     z = 0.0
+
                     w = 0.0
                 }
                 init(x: CFloat, y: CFloat, z: CFloat, w: CFloat) {
                     self.x = x
+
                     self.y = y
+
                     self.z = z
+
                     self.w = w
                 }
             }
@@ -1077,6 +1083,7 @@ class SwiftRewriterTests: XCTestCase {
             
                 init() {
                     position = vector_float3()
+
                     color = packed_float4()
 
                     offset = 0
@@ -1085,8 +1092,11 @@ class SwiftRewriterTests: XCTestCase {
                 }
                 init(position: vector_float3, color: packed_float4, offset: CInt, booly: Bool) {
                     self.position = position
+
                     self.color = color
+
                     self.offset = offset
+
                     self.booly = booly
                 }
             }
@@ -1140,14 +1150,20 @@ class SwiftRewriterTests: XCTestCase {
 
                 init() {
                     x = 0.0
+
                     y = 0.0
+
                     z = 0.0
+
                     w = 0.0
                 }
                 init(x: CFloat, y: CFloat, z: CFloat, w: CFloat) {
                     self.x = x
+
                     self.y = y
+
                     self.z = z
+
                     self.w = w
                 }
             }
