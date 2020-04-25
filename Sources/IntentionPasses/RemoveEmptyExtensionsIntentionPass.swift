@@ -11,10 +11,8 @@ public class RemoveEmptyExtensionsIntentionPass: IntentionPass {
                       context: IntentionPassContext) {
         
         for file in intentionCollection.fileIntentions() {
-            for ext in file.extensionIntentions {
-                if ext.isEmptyType {
-                    file.removeClassTypes(where: { $0 === ext })
-                }
+            for ext in file.extensionIntentions where ext.isEmptyType {
+                file.removeClassTypes(where: { $0 === ext })
             }
         }
     }

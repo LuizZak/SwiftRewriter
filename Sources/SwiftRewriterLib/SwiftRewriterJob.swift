@@ -16,7 +16,7 @@ public class SwiftRewriterJob {
     public var preprocessors: [SourcePreprocessor]
     public var settings: SwiftRewriter.Settings = .default
     public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
-    public var parserCache: ParserCache? = nil
+    public var parserCache: ParserCache?
     
     public init(input: InputSourcesProvider,
                 intentionPassesSource: IntentionPassSource?,
@@ -50,7 +50,7 @@ public class SwiftRewriterJob {
         do {
             try swiftRewriter.rewrite()
             
-            if swiftRewriter.diagnostics.errors.count != 0 {
+            if !swiftRewriter.diagnostics.errors.isEmpty {
                 jobResult.diagnostics.merge(with: swiftRewriter.diagnostics)
             } else {
                 jobResult.succeeded = true

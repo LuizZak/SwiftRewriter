@@ -66,11 +66,9 @@ public final class SwiftASTReaderContext {
         
         let location = start.sourceLocation()
         
-        for (i, comment) in comments.enumerated().reversed() {
-            if comment.location < location {
-                comments.remove(at: i)
-                return comment
-            }
+        for (i, comment) in comments.enumerated().reversed() where comment.location < location {
+            comments.remove(at: i)
+            return comment
         }
         
         return nil

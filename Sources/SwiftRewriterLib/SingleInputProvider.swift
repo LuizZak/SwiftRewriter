@@ -25,4 +25,3 @@ public class SingleInputProvider: InputSourcesProvider, InputSource {
         return StringCodeSource(source: code, fileName: sourceName())
     }
 }
-

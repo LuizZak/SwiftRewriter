@@ -9,6 +9,7 @@ disabled_rules:
   - nesting
   - cyclomatic_complexity
   - function_body_length
+  - shorthand_operator
 opt_in_rules:
   - empty_count
 excluded:

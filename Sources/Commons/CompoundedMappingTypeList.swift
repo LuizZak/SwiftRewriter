@@ -19,7 +19,7 @@ public enum CompoundedMappingTypeList {
             UIColorCompoundType.create(),
             UIGestureRecognizerCompoundType.create(),
             UILabelCompoundType.create(),
-            UIViewControllerCompoundType.create(),
+            UIViewControllerCompoundType.create()
         ]
     }
 }

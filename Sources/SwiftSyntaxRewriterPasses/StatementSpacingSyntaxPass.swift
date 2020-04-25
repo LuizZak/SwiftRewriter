@@ -156,7 +156,11 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
         override func visit(_ token: TokenSyntax) -> Syntax {
             if isFirstVisit {
                 isFirstVisit = false
-                return Syntax(token.withLeadingTrivia(.newlines(2) + indentation(for: token) + removingLeadingWhitespace(token.leadingTrivia)))
+                let trivia = .newlines(2)
+                    + indentation(for: token)
+                    + removingLeadingWhitespace(token.leadingTrivia)
+                
+                return Syntax(token.withLeadingTrivia(trivia))
             }
             
             return Syntax(token)

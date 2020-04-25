@@ -253,4 +253,3 @@ public extension TypeBuilder where T: ClassGenerationIntention {
         return self
     }
 }
-

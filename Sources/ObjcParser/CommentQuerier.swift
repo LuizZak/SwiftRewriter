@@ -15,11 +15,9 @@ class CommentQuerier {
         
         let location = start.sourceLocation()
         
-        for (i, comment) in allComments.enumerated().reversed() {
-            if comment.location < location {
-                allComments.remove(at: i)
-                return comment
-            }
+        for (i, comment) in allComments.enumerated().reversed() where comment.location < location {
+            allComments.remove(at: i)
+            return comment
         }
         
         return nil

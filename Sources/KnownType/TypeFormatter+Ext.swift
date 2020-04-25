@@ -30,7 +30,7 @@ public extension TypeFormatter {
                 o.output(line: "// \(annotation)", style: .comment)
             }
             
-            printAttributes: if !attr.isEmpty {
+            if !attr.isEmpty {
                 if sameLine {
                     if attrInLine.count < attrInLineLimit {
                         o.outputIndentation()
@@ -286,8 +286,6 @@ public extension TypeFormatter {
         if typeName {
             result += type.typeName + "."
         }
-        
-        
         
         result += "subscript\(asString(parameters: decl.parameters)) -> " + stringify(decl.returnType)
         

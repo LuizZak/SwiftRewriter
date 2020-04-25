@@ -314,7 +314,6 @@ public class FunctionSignatureBuilder {
         self.signature = signature
     }
     
-    
     @discardableResult
     public func addParameter(name: String, type: SwiftType) -> FunctionSignatureBuilder {
         signature.parameters.append(

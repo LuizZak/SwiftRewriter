@@ -140,7 +140,7 @@ public extension MemberBuilder where T: PropertyGenerationIntention {
     
     @discardableResult
     func setAsGetterSetter(getter: CompoundStatement,
-                                  setter: PropertyGenerationIntention.Setter) -> MemberBuilder {
+                           setter: PropertyGenerationIntention.Setter) -> MemberBuilder {
         
         targetMember.mode = .property(get: FunctionBodyIntention(body: getter),
                                       set: setter)

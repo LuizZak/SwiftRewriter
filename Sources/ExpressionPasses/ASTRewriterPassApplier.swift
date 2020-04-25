@@ -25,7 +25,7 @@ public final class ASTRewriterPassApplier {
     
     /// A progress delegate which will be notified of ongoing progress made while
     /// AST passes are applied
-    public var progressDelegate: ASTRewriterPassApplierProgressDelegate?
+    public weak var progressDelegate: ASTRewriterPassApplierProgressDelegate?
     
     /// Progress information for the passes being applied
     private(set) public var progress: (current: Int, total: Int) = (0, 0)

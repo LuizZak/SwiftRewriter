@@ -608,7 +608,7 @@ extension KnownTypeBuilder {
 private final class DummyType: KnownType {
     var origin: String
     var typeName: String
-    var knownFile: KnownFile? = nil
+    var knownFile: KnownFile?
     var kind: KnownTypeKind = .class
     var isExtension: Bool = false
     var knownTraits: [String: TraitType] = [:]

@@ -62,14 +62,12 @@ public class CodeDefinition {
         case function(signature: FunctionSignature)
         
         public var name: String {
-            get {
-                switch self {
-                case .variable(let name, _):
-                    return name
-                    
-                case .function(let signature):
-                    return signature.name
-                }
+            switch self {
+            case .variable(let name, _):
+                return name
+                
+            case .function(let signature):
+                return signature.name
             }
         }
     }

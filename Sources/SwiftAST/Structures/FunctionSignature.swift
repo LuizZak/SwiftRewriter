@@ -115,7 +115,7 @@ public struct FunctionSignature: Hashable {
                 .filter(\.element.hasDefaultValue)
                 .map(\.offset)
         
-        if defaultArgIndices.count == 0 {
+        if defaultArgIndices.isEmpty {
             return [asSelector]
         }
         

@@ -204,8 +204,9 @@ public class SwiftTypeConverter {
     }
 
     func makeNestedTypeSyntax(_ nestedType: NestedSwiftType) -> MemberTypeIdentifierSyntax {
+        typealias Produce = (MemberTypeIdentifierSyntax, NominalSwiftType) -> MemberTypeIdentifierSyntax
         
-        let produce: (MemberTypeIdentifierSyntax, NominalSwiftType) -> MemberTypeIdentifierSyntax = { (previous, type) in
+        let produce: Produce = { (previous, type) in
             let typeSyntax = self.makeNominalTypeSyntax(type)
             
             return SyntaxFactory

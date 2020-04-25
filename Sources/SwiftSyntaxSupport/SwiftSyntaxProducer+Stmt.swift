@@ -47,7 +47,10 @@ extension SwiftSyntaxProducer {
             indent()
             defer {
                 deindent()
-                builder.useRightBrace(SyntaxFactory.makeRightBraceToken().onNewline().addingLeadingTrivia(indentation()))
+                builder.useRightBrace(SyntaxFactory
+                    .makeRightBraceToken()
+                    .onNewline()
+                    .addingLeadingTrivia(indentation()))
                 extraLeading = nil
             }
             

@@ -106,7 +106,7 @@ public class SwiftMethodSignatureGen {
         for (i, kw) in keywords.enumerated() {
             var label = kw.selector?.name
             let identifier = kw.identifier?.name ?? "_\(i)"
-            var nullability: TypeNullability? = nil
+            var nullability: TypeNullability?
             let type = kw.type?.type?.type ?? ObjcType.id()
             
             // The first label name is always empty.

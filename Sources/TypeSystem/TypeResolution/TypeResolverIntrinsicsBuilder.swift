@@ -225,19 +225,15 @@ class KnownTypePropertiesDefinitionsSource: DefinitionsSource {
         
         var definition: CodeDefinition?
         
-        for prop in type.knownProperties where prop.isStatic == staticMembers {
-            if prop.name == name {
-                definition = CodeDefinition.forKnownMember(prop)
-                break
-            }
+        for prop in type.knownProperties where prop.isStatic == staticMembers && prop.name == name {
+            definition = CodeDefinition.forKnownMember(prop)
+            break
         }
         
         if definition == nil {
-            for field in type.knownFields where field.isStatic == staticMembers {
-                if field.name == name {
-                    definition = CodeDefinition.forKnownMember(field)
-                    break
-                }
+            for field in type.knownFields where field.isStatic == staticMembers && field.name == name {
+                definition = CodeDefinition.forKnownMember(field)
+                break
             }
         }
         

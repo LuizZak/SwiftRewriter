@@ -119,7 +119,7 @@ public final class SwiftClassInterfaceParser {
             supertypes.append(supertype)
             
             // (',' type-name)*
-            _=tokenizer.lexer.performGreedyRounds { (lexer, _) in
+            _=tokenizer.lexer.performGreedyRounds { (_, _) in
                 guard tokenizer.consumeToken(ifTypeIs: .comma) != nil else {
                     return false
                 }
@@ -443,7 +443,7 @@ public final class SwiftClassInterfaceParser {
     private static func parseDeclarationModifiers(from tokenizer: Tokenizer) throws -> [DeclarationModifier] {
         var modifiers: [DeclarationModifier] = []
         
-        try tokenizer.lexer.expect(atLeast: 1) { (lexer) -> Bool in
+        try tokenizer.lexer.expect(atLeast: 1) { _ in
             modifiers.append(try parseDeclarationModifier(from: tokenizer))
             
             return true

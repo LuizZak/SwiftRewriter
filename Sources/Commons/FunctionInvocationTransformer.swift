@@ -73,7 +73,7 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
         case .propertyGetter:
             requiredArgumentCount = 1
             
-        case .propertySetter(_):
+        case .propertySetter:
             requiredArgumentCount = 2
         }
     }

@@ -97,7 +97,7 @@ public class VirtualFileDisk {
     }
 }
 
-fileprivate protocol DirectoryEntry: class {
+private protocol DirectoryEntry: class {
     var parent: DirectoryEntry? { get }
     var name: String { get }
     var fullPath: String { get }
@@ -112,7 +112,7 @@ extension DirectoryEntry {
     }
 }
 
-fileprivate class File: DirectoryEntry {
+private class File: DirectoryEntry {
     weak var parent: DirectoryEntry?
     var name: String
     var data: Data
@@ -123,7 +123,7 @@ fileprivate class File: DirectoryEntry {
     }
 }
 
-fileprivate class Directory: DirectoryEntry {
+private class Directory: DirectoryEntry {
     weak var parent: DirectoryEntry?
 
     var name: String

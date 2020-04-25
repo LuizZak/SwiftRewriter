@@ -1081,7 +1081,11 @@ private class GenericParseTreeContextMapper {
         self.nodeFactory = nodeFactory
     }
     
-    func addRuleMap<T: ParserRuleContext, U: InitializableNode>(rule: T.Type, nodeType: U.Type, collectComments: Bool = false) {
+    func addRuleMap<T: ParserRuleContext, U: InitializableNode>(
+        rule: T.Type,
+        nodeType: U.Type,
+        collectComments: Bool = false) {
+        
         assert(match(ruleType: rule) == nil, "Duplicated mapping rule for parser rule context \(rule)")
         
         pairs.append(.type(rule: rule, nodeType: nodeType, collectComments: collectComments))

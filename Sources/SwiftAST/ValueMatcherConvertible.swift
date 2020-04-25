@@ -15,4 +15,3 @@ extension ValueMatcherConvertible where Target == Self, Self: Equatable {
         ValueMatcher<Self>().match { $0 == self }
     }
 }
-

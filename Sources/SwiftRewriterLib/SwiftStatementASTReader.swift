@@ -540,8 +540,13 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             
             // TODO: Perhaps we should only associate comments that come one line
             // before the statement?
-            varDeclStmt.comments = context.popClosestCommentsBefore(node: ctx).map { $0.string.trimmingWhitespaces() }
-            varDeclStmt.trailingComment = context.popClosestCommentAtTrailingLine(node: ctx)?.string.trimmingWhitespaces()
+            varDeclStmt.comments = context
+                .popClosestCommentsBefore(node: ctx)
+                .map { $0.string.trimmingWhitespaces() }
+            
+            varDeclStmt.trailingComment = context
+                .popClosestCommentAtTrailingLine(node: ctx)?
+                .string.trimmingWhitespaces()
 
             reportAutotypeDeclarations(in: varDeclStmt)
             
@@ -549,13 +554,15 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
         }
 
         private func reportAutotypeDeclarations(in declarationStatement: VariableDeclarationsStatement) {
-            if let delegate = delegate {
-                for (i, decl) in declarationStatement.decl.enumerated() {
-                    if decl.type == .typeName("__auto_type") {
-                        delegate.swiftStatementASTReader(reportAutoTypeDeclaration: declarationStatement,
-                                                         declarationAtIndex: i)
-                    }
-                }
+            guard let delegate = delegate else {
+                return
+            }
+            
+            for (i, decl) in declarationStatement.decl.enumerated()
+                where decl.type == .typeName("__auto_type") {
+                    
+                delegate.swiftStatementASTReader(reportAutoTypeDeclaration: declarationStatement,
+                                                 declarationAtIndex: i)
             }
         }
     }

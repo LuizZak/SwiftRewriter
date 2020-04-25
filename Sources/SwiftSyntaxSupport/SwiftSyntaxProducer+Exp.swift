@@ -129,7 +129,9 @@ extension SwiftSyntaxProducer {
             builder.addElement(AsExprSyntax { builder in
                 if exp.isOptionalCast {
                     builder.useAsTok(SyntaxFactory.makeAsKeyword().withLeadingSpace())
-                    builder.useQuestionOrExclamationMark(SyntaxFactory.makePostfixQuestionMarkToken().withTrailingSpace())
+                    builder.useQuestionOrExclamationMark(SyntaxFactory
+                        .makePostfixQuestionMarkToken()
+                        .withTrailingSpace())
                 } else {
                     builder.useAsTok(SyntaxFactory.makeAsKeyword().addingSurroundingSpaces())
                 }
@@ -518,7 +520,8 @@ extension SwiftSyntaxProducer {
         case .infix:
             producer = { op in
                 return BinaryOperatorExprSyntax { builder in
-                    builder.useOperatorToken(self.prepareStartToken(SyntaxFactory.makeSpacedBinaryOperator(op.rawValue)))
+                    let token = self.prepareStartToken(SyntaxFactory.makeSpacedBinaryOperator(op.rawValue))
+                    builder.useOperatorToken(token)
                 }.asExprSyntax
             }
         case .postfix(let exp):

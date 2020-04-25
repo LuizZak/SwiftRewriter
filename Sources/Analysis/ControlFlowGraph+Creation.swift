@@ -604,7 +604,9 @@ private extension ControlFlowGraph {
             return result.satisfyingExits()
         }
         
-        func connectingContinues(label targetLabel: String? = nil, to node: ControlFlowGraphNode) -> _NodeCreationResult {
+        func connectingContinues(label targetLabel: String? = nil,
+                                 to node: ControlFlowGraphNode) -> _NodeCreationResult {
+            
             var newResult = self
             
             let operations = continueNodes

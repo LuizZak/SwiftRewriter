@@ -130,11 +130,9 @@ public struct StatementVariableDeclaration: Codable, Equatable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        
         try self.identifier = container.decode(String.self, forKey: .identifier)
         try self.storage = container.decode(ValueStorage.self, forKey: .storage)
         try self.initialization = container.decodeExpressionIfPresent(forKey: .initialization)
-        
     }
     
     public func copy() -> StatementVariableDeclaration {

@@ -1409,15 +1409,15 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
         let supertype: KnownTypeReference? = nil
         let typeName: String
         let kind: KnownTypeKind = .protocol
-        var knownFile: KnownFile? = nil
+        var knownFile: KnownFile?
         let knownTraits: [String : TraitType] = [:]
         let knownConstructors: [KnownConstructor] = []
         let knownMethods: [KnownMethod] = []
         let knownProperties: [KnownProperty] = []
         let knownFields: [KnownProperty] = []
         let knownSubscripts: [KnownSubscript] = []
-        let knownAttributes: [KnownAttribute] = []
         let knownProtocolConformances: [KnownProtocolConformance]
+        let knownAttributes: [KnownAttribute] = []
         let semantics: Set<Semantic> = []
         
         init(protocolType: ProtocolType) {
@@ -1492,7 +1492,7 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         let supertype: KnownTypeReference?
         let typeName: String
         let kind: KnownTypeKind = .protocol
-        var knownFile: KnownFile? = nil
+        var knownFile: KnownFile?
         let knownTraits: [String : TraitType] = [:]
         let knownConstructors: [KnownConstructor] = []
         let knownMethods: [KnownMethod] = []

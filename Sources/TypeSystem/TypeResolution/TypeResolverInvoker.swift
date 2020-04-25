@@ -109,7 +109,9 @@ public class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
         self.intentionGlobals = intentionGlobals
     }
     
-    public func makeContext(forFunction function: GlobalFunctionGenerationIntention) -> TypeResolvingQueueDelegate.Context {
+    public func makeContext(forFunction function: GlobalFunctionGenerationIntention)
+        -> TypeResolvingQueueDelegate.Context {
+        
         let resolver = ExpressionTypeResolver(
             typeSystem: typeSystem, contextFunctionReturnType: function.signature.returnType)
         

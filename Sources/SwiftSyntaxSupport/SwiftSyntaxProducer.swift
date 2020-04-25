@@ -177,7 +177,7 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
     }
     
     private func isDeallocMethod(_ intention: MethodGenerationIntention) -> Bool {
-        intention.name == "dealloc" && intention.parameters.count == 0
+        intention.name == "dealloc" && intention.parameters.isEmpty
     }
 }
 
@@ -394,7 +394,9 @@ extension SwiftSyntaxProducer {
     func generateExtension(_ intention: ClassExtensionGenerationIntention) -> ExtensionDeclSyntax {
         addExtraLeading(indentation())
         
-        if let categoryName = intention.categoryName, !categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        if let categoryName = intention.categoryName,
+            !categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            
             addExtraLeading(.lineComment("// MARK: - \(categoryName)"))
         } else {
             addExtraLeading(.lineComment("// MARK: -"))
@@ -861,7 +863,9 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateAttributeListSyntax<S: Sequence>(_ attributes: S) -> AttributeListSyntax where S.Element == KnownAttribute {
+    func generateAttributeListSyntax<S: Sequence>(_ attributes: S) -> AttributeListSyntax
+        where S.Element == KnownAttribute {
+
         SyntaxFactory.makeAttributeList(attributes.lazy.map(generateAttributeSyntax).map { $0.asSyntax })
     }
     
