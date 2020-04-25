@@ -1410,6 +1410,7 @@ class SwiftRewriterTests: XCTestCase {
 
                     path.move(to: CGPoint(x: 0, y: top))
                     path.addLine(to: CGPoint(x: 0, y: bottom))
+
                     shapeLayer.strokeColor = self.dateLabel.textColor.CGColor
                     shapeLayer.lineWidth = 1
                     shapeLayer.lineCap = kCALineCapSquare

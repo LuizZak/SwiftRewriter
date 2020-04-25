@@ -1018,6 +1018,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 func myMethod() {
                     do {
                         let _lockTarget = self
+
                         objc_sync_enter(_lockTarget)
 
                         defer {

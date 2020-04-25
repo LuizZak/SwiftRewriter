@@ -895,6 +895,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     self.callback = { () -> Void in
                         // decl type: Int
                         let local: Int
+
                         // type: Int
                         local
                     }
