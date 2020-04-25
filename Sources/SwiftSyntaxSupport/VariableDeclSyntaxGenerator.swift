@@ -329,7 +329,7 @@ private extension VariableDeclSyntaxGenerator {
                          storage: ValueStorage,
                          attributes: [() -> AttributeSyntax],
                          intention: IntentionProtocol?,
-                         modifiers: ModifiersDecoratorResult,
+                         modifiers: [ModifiersDecoratorResult],
                          accessors: (() -> Syntax)? = nil,
                          initialization: Expression? = nil) -> VariableDeclaration {
         

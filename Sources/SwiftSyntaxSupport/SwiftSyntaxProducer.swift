@@ -66,11 +66,11 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
         }
     }
     
-    func modifiers(for intention: IntentionProtocol) -> ModifiersDecoratorResult {
+    func modifiers(for intention: IntentionProtocol) -> [ModifiersDecoratorResult] {
         modifiersDecorations.modifiers(for: intention)
     }
     
-    func modifiers(for decl: StatementVariableDeclaration) -> ModifiersDecoratorResult {
+    func modifiers(for decl: StatementVariableDeclaration) -> [ModifiersDecoratorResult] {
         modifiersDecorations.modifiers(for: decl)
     }
     

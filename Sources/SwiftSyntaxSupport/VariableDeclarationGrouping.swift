@@ -5,7 +5,7 @@ import SwiftAST
 struct VariableDeclaration {
     var constant: Bool
     var attributes: [() -> AttributeSyntax]
-    var modifiers: ModifiersDecoratorResult
+    var modifiers: [ModifiersDecoratorResult]
     var kind: VariableDeclarationKind
 }
 

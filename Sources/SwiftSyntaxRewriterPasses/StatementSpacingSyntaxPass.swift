@@ -13,7 +13,7 @@ public class StatementSpacingSyntaxPass: SwiftSyntaxRewriterPass {
     
     public func rewrite(_ file: SourceFileSyntax) -> SourceFileSyntax {
         let rewriter = InnerSyntaxRewriter()
-        return SourceFileSyntax(rewriter.visit(file)) ?? file
+        return rewriter.visit(file).as(SourceFileSyntax.self) ?? file
     }
 }
 
