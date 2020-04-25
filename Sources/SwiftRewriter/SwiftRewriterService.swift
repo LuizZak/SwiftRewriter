@@ -9,7 +9,7 @@ import ObjcParser
 
 public struct Settings {
     /// Settings for the AST writer
-    public var astWriter = SwiftSyntaxOptions()
+    public var astWriter: SwiftSyntaxOptions = .default
     
     /// General settings for `SwiftRewriter` instances
     public var rewriter: SwiftRewriter.Settings = .default

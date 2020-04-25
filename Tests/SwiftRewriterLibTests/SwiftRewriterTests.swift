@@ -804,7 +804,7 @@ class SwiftRewriterTests: XCTestCase {
                 func myMethod()
             }
             """,
-            options: SwiftSyntaxOptions(emitObjcCompatibility: true))
+            options: SwiftSyntaxOptions.default.with(\.emitObjcCompatibility, true))
     }
     
     func testRewriteProtocolConformance() {
@@ -1620,7 +1620,7 @@ class SwiftRewriterTests: XCTestCase {
                 }
             }
             """,
-            options: SwiftSyntaxOptions(emitObjcCompatibility: true))
+            options: SwiftSyntaxOptions.default.with(\.emitObjcCompatibility, true))
     }
     
     /// Tests calls that override a super call by detection of a `super` call on
@@ -2749,7 +2749,7 @@ class SwiftRewriterTests: XCTestCase {
                 let value = 1
             }
             """,
-            options: SwiftSyntaxOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions.default.with(\.outputExpressionTypes, true))
     }
 
     func testRewriteAutotypeDeclarationDependent() {
@@ -2770,7 +2770,7 @@ class SwiftRewriterTests: XCTestCase {
                 let valueDep = value
             }
             """,
-            options: SwiftSyntaxOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions.default.with(\.outputExpressionTypes, true))
     }
     
     func testRewriteWeakAutotypeDeclaration() {
@@ -2793,7 +2793,7 @@ class SwiftRewriterTests: XCTestCase {
                 }
             }
             """,
-            options: SwiftSyntaxOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions.default.with(\.outputExpressionTypes, true))
     }
     
     func testRewriteFixedArray() {

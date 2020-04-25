@@ -633,7 +633,11 @@ public final class SwiftRewriter {
     /// Settings for a `SwiftRewriter` instance
     public struct Settings {
         /// Gets the default settings for a `SwiftRewriter` invocation
-        public static var `default` = Settings()
+        public static var `default` = Settings(numThreads: 8,
+                                               verbose: false,
+                                               diagnoseFiles: [],
+                                               forceUseLLPrediction: false,
+                                               stageDiagnostics: [])
         
         /// The number of concurrent threads to use when applying intention/syntax
         /// node passes and other multi-threadable operations.
@@ -661,11 +665,11 @@ public final class SwiftRewriter {
         /// Enables printing outputs of stages for diagnostic purposes.
         public var stageDiagnostics: [StageDiagnosticFlag]
 
-        public init(numThreads: Int = 8,
-                    verbose: Bool = false,
-                    diagnoseFiles: [String] = [],
-                    forceUseLLPrediction: Bool = false,
-                    stageDiagnostics: [StageDiagnosticFlag] = []) {
+        public init(numThreads: Int,
+                    verbose: Bool,
+                    diagnoseFiles: [String],
+                    forceUseLLPrediction: Bool,
+                    stageDiagnostics: [StageDiagnosticFlag]) {
             
             self.numThreads = numThreads
             self.verbose = verbose

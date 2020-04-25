@@ -28,7 +28,9 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                     ])
                 }
             }
-        let sut = SwiftSyntaxProducer(settings: .init(outputExpressionTypes: true))
+        var settings = SwiftSyntaxProducer.Settings.default
+        settings.outputExpressionTypes = true
+        let sut = SwiftSyntaxProducer(settings: settings)
         
         let result = sut.generateFile(file)
         
@@ -56,7 +58,9 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                     ])
                 }
             }
-        let sut = SwiftSyntaxProducer(settings: .init(outputExpressionTypes: true))
+        var settings = SwiftSyntaxProducer.Settings.default
+        settings.outputExpressionTypes = true
+        let sut = SwiftSyntaxProducer(settings: settings)
 
         let result = sut.generateFile(file)
 
@@ -90,7 +94,9 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                     }
                 }
             }
-        let sut = SwiftSyntaxProducer(settings: .init(printIntentionHistory: true))
+        var settings = SwiftSyntaxProducer.Settings.default
+        settings.printIntentionHistory = true
+        let sut = SwiftSyntaxProducer(settings: settings)
         
         let result = sut.generateFile(file)
         
@@ -135,7 +141,9 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                     }
                 }
             }
-        let sut = SwiftSyntaxProducer(settings: .init(printIntentionHistory: true))
+        var settings = SwiftSyntaxProducer.Settings.default
+        settings.printIntentionHistory = true
+        let sut = SwiftSyntaxProducer(settings: settings)
         
         let result = sut.generateFile(file)
         
@@ -155,6 +163,42 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
 
                 // [Tag] History 5
                 // A comment
+                func method() {
+                }
+            }
+            """)
+    }
+    
+    func testEmitObjcCompatibility() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createProtocol(withName: "A")
+                builder.createClass(withName: "B") { builder in
+                    builder.createProperty(named: "prop", type: .int)
+                    builder.createConstructor(withParameters: [])
+                    builder.createMethod(named: "method")
+                }
+            }
+        var settings = SwiftSyntaxProducer.Settings.default
+        settings.emitObjcCompatibility = true
+        let sut = SwiftSyntaxProducer(settings: settings)
+        
+        let result = sut.generateFile(file)
+        
+        assert(result, matches: """
+            @objc
+            protocol A: NSObjectProtocol {
+            }
+
+            @objc
+            class B {
+                @objc var prop: Int
+
+                @objc
+                init() {
+                }
+
+                @objc
                 func method() {
                 }
             }

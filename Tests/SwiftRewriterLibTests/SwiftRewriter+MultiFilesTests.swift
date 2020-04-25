@@ -377,7 +377,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 }
             }
             // End of file A.swift
-            """, options: SwiftSyntaxOptions(outputExpressionTypes: true))
+            """, options: SwiftSyntaxOptions.default.with(\.outputExpressionTypes, true))
     }
     
     func testPreserversAssumesNonnullContextAfterMovingDeclarationsFromHeaderToImplementation() {
@@ -520,7 +520,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             }
             // End of file B.swift
             """,
-            options: SwiftSyntaxOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions.default.with(\.outputExpressionTypes, true))
     }
     
     func testProtocolConformanceHandling() {

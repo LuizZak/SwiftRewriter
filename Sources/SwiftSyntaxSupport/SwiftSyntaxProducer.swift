@@ -37,7 +37,9 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
     
     public struct Settings {
         /// Default settings instance
-        public static let `default` = Settings()
+        public static let `default` = Settings(outputExpressionTypes: false,
+                                               printIntentionHistory: false,
+                                               emitObjcCompatibility: false)
         
         /// If `true`, when outputting expression statements, print the resulting
         /// type of the expression before the expression statement as a comment
@@ -56,13 +58,21 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
         /// compiled and executed.
         public var emitObjcCompatibility: Bool
         
-        public init(outputExpressionTypes: Bool = false,
-                    printIntentionHistory: Bool = false,
-                    emitObjcCompatibility: Bool = false) {
+        public init(outputExpressionTypes: Bool,
+                    printIntentionHistory: Bool,
+                    emitObjcCompatibility: Bool) {
             
             self.outputExpressionTypes = outputExpressionTypes
             self.printIntentionHistory = printIntentionHistory
             self.emitObjcCompatibility = emitObjcCompatibility
+        }
+        
+        /// To ease modifications of single parameters from default settings
+        /// without having to create a temporary variable first
+        public func with<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: T) -> Self {
+            var copy = self
+            copy[keyPath: keyPath] = value
+            return copy
         }
     }
     

@@ -45,7 +45,7 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                 }
             }
             """,
-            options: SwiftSyntaxOptions(printIntentionHistory: true))
+            options: SwiftSyntaxOptions.default.with(\.printIntentionHistory, true))
     }
     
     func testCFilesHistoryTracking() {
@@ -170,7 +170,7 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
             }
             // End of file A.swift
             """)
-            .transpile(options: SwiftSyntaxOptions(printIntentionHistory: true))
+            .transpile(options: SwiftSyntaxOptions.default.with(\.printIntentionHistory, true))
             .assertExpectedSwiftFiles()
     }
 }
