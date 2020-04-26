@@ -68,7 +68,7 @@ public class PromoteProtocolPropertyConformanceIntentionPass: IntentionPass {
                 continue
             }
             
-            let ident = FunctionIdentifier(name: prop.name, parameterNames: [])
+            let ident = FunctionIdentifier(name: prop.name, argumentLabels: [])
             let methods = type.methods(matching: ident)
             guard methods.count == 1 else {
                 continue

@@ -875,13 +875,13 @@ public class TypeSystem {
         return protocols
     }
     
-    /// Searches for a method with a given Objective-C equivalent selector, also
+    /// Searches for a method with a given Swift function identifier, also
     /// specifying whether to include optional methods (from optional protocol
     /// methods that where not implemented by a concrete class).
     ///
     /// An optional list of types which correlate to the type of each argument
     /// passed to the function can be provided to allow overload detection.
-    public func method(withObjcSelector selector: SelectorSignature,
+    public func method(withIdentifier identifier: FunctionIdentifier,
                        invocationTypeHints: [SwiftType?]?,
                        static isStatic: Bool,
                        includeOptional: Bool,
@@ -889,7 +889,7 @@ public class TypeSystem {
         
         let lookup = makeTypeMemberLookup()
         
-        return lookup.method(withObjcSelector: selector,
+        return lookup.method(withIdentifier: identifier,
                              invocationTypeHints: invocationTypeHints,
                              static: isStatic,
                              includeOptional: includeOptional,
@@ -997,13 +997,13 @@ public class TypeSystem {
         return conformance(toProtocolName: name, in: knownType)
     }
     
-    /// Searches for a method with a given Objective-C equivalent selector, also
+    /// Searches for a method with a given Swift function identifier, also
     /// specifying whether to include optional methods (from optional protocol
     /// methods that where not implemented by a concrete class).
     ///
     /// An optional list of types which correlate to the type of each argument
     /// passed to the function can be provided to allow overload detection.
-    public func method(withObjcSelector selector: SelectorSignature,
+    public func method(withIdentifier identifier: FunctionIdentifier,
                        invocationTypeHints: [SwiftType?]?,
                        static isStatic: Bool,
                        includeOptional: Bool,
@@ -1011,7 +1011,7 @@ public class TypeSystem {
         
         let lookup = makeTypeMemberLookup()
         
-        return lookup.method(withObjcSelector: selector,
+        return lookup.method(withIdentifier: identifier,
                              invocationTypeHints: invocationTypeHints,
                              static: isStatic,
                              includeOptional: includeOptional,
@@ -1544,14 +1544,14 @@ internal final class MemberSearchCache {
         _subscriptsCache.tearDownCaching(resetToValue: [:])
     }
 
-    func storeMethod(withObjcSelector selector: SelectorSignature,
+    func storeMethod(withIdentifier identifier: FunctionIdentifier,
                      invocationTypeHints: [SwiftType?]?,
                      static isStatic: Bool,
                      includeOptional: Bool,
                      in typeName: String,
                      method: KnownMethod?) {
         
-        let entry = MethodSearchEntry(selector: selector,
+        let entry = MethodSearchEntry(identifier: identifier,
                                       invocationTypeHints: invocationTypeHints,
                                       isStatic: isStatic,
                                       includeOptional: includeOptional,
@@ -1600,13 +1600,13 @@ internal final class MemberSearchCache {
         _subscriptsCache.wrappedValue[entry] = sub
     }
 
-    func lookupMethod(withObjcSelector selector: SelectorSignature,
+    func lookupMethod(withIdentifier identifier: FunctionIdentifier,
                       invocationTypeHints: [SwiftType?]?,
                       static isStatic: Bool,
                       includeOptional: Bool,
                       in typeName: String) -> KnownMethod?? {
         
-        let entry = MethodSearchEntry(selector: selector,
+        let entry = MethodSearchEntry(identifier: identifier,
                                       invocationTypeHints: invocationTypeHints,
                                       isStatic: isStatic,
                                       includeOptional: includeOptional,
@@ -1653,7 +1653,7 @@ internal final class MemberSearchCache {
     }
 
     struct MethodSearchEntry: Hashable {
-        var selector: SelectorSignature
+        var identifier: FunctionIdentifier
         var invocationTypeHints: [SwiftType?]?
         var isStatic: Bool
         var includeOptional: Bool

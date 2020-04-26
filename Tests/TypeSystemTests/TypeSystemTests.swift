@@ -357,17 +357,15 @@ class TypeSystemTests: XCTestCase {
         
         // NSObjectProtocol methods
         XCTAssertNotNil(
-            sut.method(withObjcSelector: SelectorSignature(isStatic: false,
-                                                           keywords: ["responds", "to"]),
+            sut.method(withIdentifier: FunctionIdentifier(name: "responds", argumentLabels: ["to"]),
                        invocationTypeHints: nil,
                        static: false,
                        includeOptional: true,
                        in: type)
         )
         XCTAssertNotNil(
-            sut.method(withObjcSelector:
-                SelectorSignature(isStatic: false,
-                                  keywords: ["isEqual", nil]),
+            sut.method(withIdentifier:
+                FunctionIdentifier(name: "isEqual", argumentLabels: [nil]),
                        invocationTypeHints: nil,
                        static: false,
                        includeOptional: true,
@@ -512,25 +510,25 @@ class TypeSystemTests: XCTestCase {
         sut.addType(prot)
         sut.addType(cls)
         
-        XCTAssertNotNil(sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["nonOptional"]),
+        XCTAssertNotNil(sut.method(withIdentifier: FunctionIdentifier(name: "nonOptional", argumentLabels: []),
                                    invocationTypeHints: nil,
                                    static: false,
                                    includeOptional: false,
                                    in: cls))
         
-        XCTAssertNil(sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["optional"]),
+        XCTAssertNil(sut.method(withIdentifier: FunctionIdentifier(name: "optional", argumentLabels: []),
                                 invocationTypeHints: nil,
                                 static: false,
                                 includeOptional: false,
                                 in: cls))
         
-        XCTAssertNotNil(sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["optional"]),
+        XCTAssertNotNil(sut.method(withIdentifier: FunctionIdentifier(name: "optional", argumentLabels: []),
                                    invocationTypeHints: nil,
                                    static: false,
                                    includeOptional: true,
                                    in: cls))
         
-        XCTAssertNotNil(sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["optionalImplemented"]),
+        XCTAssertNotNil(sut.method(withIdentifier: FunctionIdentifier(name: "optionalImplemented", argumentLabels: []),
                                    invocationTypeHints: nil,
                                    static: false,
                                    includeOptional: false,
@@ -795,7 +793,7 @@ class TypeSystemTests: XCTestCase {
         
         XCTAssert(type.knownMethods.contains(where: { $0.signature.name == "fromExtension" }))
         XCTAssertNotNil(
-            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["fromExtension"]),
+            sut.method(withIdentifier: FunctionIdentifier(name: "fromExtension", argumentLabels: []),
                        invocationTypeHints: nil,
                        static: false,
                        includeOptional: false,
@@ -835,7 +833,7 @@ class TypeSystemTests: XCTestCase {
         
         // No type hinting: Return first method found
         XCTAssertEqual(
-            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["method", "value"]),
+            sut.method(withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
                        invocationTypeHints: nil,
                        static: false,
                        includeOptional: false,
@@ -846,7 +844,7 @@ class TypeSystemTests: XCTestCase {
         
         // With type hinting
         XCTAssertEqual(
-            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["method", "value"]),
+            sut.method(withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
                        invocationTypeHints: [.int],
                        static: false,
                        includeOptional: false,
@@ -855,7 +853,7 @@ class TypeSystemTests: XCTestCase {
             SwiftType.int
         )
         XCTAssertEqual(
-            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["method", "value"]),
+            sut.method(withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
                        invocationTypeHints: [.string],
                        static: false,
                        includeOptional: false,
@@ -876,7 +874,7 @@ class TypeSystemTests: XCTestCase {
         
         // No type hinting: Return first method found
         XCTAssertEqual(
-            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["method", "value"]),
+            sut.method(withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
                        invocationTypeHints: nil,
                        static: false,
                        includeOptional: false,
@@ -887,7 +885,7 @@ class TypeSystemTests: XCTestCase {
         
         // With type hinting
         XCTAssertEqual(
-            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["method", "value"]),
+            sut.method(withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
                        invocationTypeHints: [.optional(.int)],
                        static: false,
                        includeOptional: false,
@@ -896,7 +894,7 @@ class TypeSystemTests: XCTestCase {
             SwiftType.int
         )
         XCTAssertEqual(
-            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["method", "value"]),
+            sut.method(withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
                        invocationTypeHints: [.optional(.string)],
                        static: false,
                        includeOptional: false,
@@ -915,7 +913,7 @@ class TypeSystemTests: XCTestCase {
         sut.addType(type)
         
         XCTAssertNotNil(
-            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["method", "value"]),
+            sut.method(withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
                        invocationTypeHints: [.int],
                        static: false,
                        includeOptional: false,
@@ -1008,13 +1006,13 @@ class TypeSystemTests: XCTestCase {
         sut.addType(prot)
         
         let notFound =
-            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: []),
+            sut.method(withIdentifier: FunctionIdentifier(name: "nonexisting", argumentLabels: []),
                        invocationTypeHints: nil,
                        static: false,
                        includeOptional: false,
                        in: prot)
         let found =
-            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["test"]),
+            sut.method(withIdentifier: FunctionIdentifier(name: "test", argumentLabels: []),
                        invocationTypeHints: nil,
                        static: false,
                        includeOptional: false,
@@ -1036,13 +1034,13 @@ class TypeSystemTests: XCTestCase {
         sut.addType(protB)
         
         let notFound =
-            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: []),
+            sut.method(withIdentifier: FunctionIdentifier(name: "nonexisting", argumentLabels: []),
                        invocationTypeHints: nil,
                        static: false,
                        includeOptional: false,
                        in: protA)
         let found =
-            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["test"]),
+            sut.method(withIdentifier: FunctionIdentifier(name: "test", argumentLabels: []),
                        invocationTypeHints: nil,
                        static: false,
                        includeOptional: false,

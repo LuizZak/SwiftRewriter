@@ -209,7 +209,7 @@ class SwiftAttributeTransformationsExtractor {
                 let ident =
                     FunctionIdentifier(
                         name: ident,
-                        parameterNames: method.signature.asIdentifier.argumentLabels)
+                        argumentLabels: method.signature.asIdentifier.argumentLabels)
                 
                 let transformer =
                     MethodInvocationTransformerMatcher(

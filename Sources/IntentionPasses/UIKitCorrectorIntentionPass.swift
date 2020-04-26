@@ -171,7 +171,7 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
                                fromKeywords k1: [String?], to k2: [String?]) {
         
         let identifier =
-            FunctionIdentifier(name: k1[0] ?? "__", parameterNames: Array(k1.dropFirst()))
+            FunctionIdentifier(name: k1[0] ?? "__", argumentLabels: Array(k1.dropFirst()))
         
         let transformerBuilder = MethodInvocationRewriterBuilder()
         

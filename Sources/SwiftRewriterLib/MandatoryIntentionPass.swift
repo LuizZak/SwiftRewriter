@@ -175,7 +175,7 @@ class MandatoryIntentionPass: IntentionPass {
                 let parameterTypes = method.parameters.map(\.type)
                 
                 let superMethod
-                    = context.typeSystem.method(withObjcSelector: method.selector,
+                    = context.typeSystem.method(withIdentifier: method.signature.asIdentifier,
                                                 invocationTypeHints: parameterTypes,
                                                 static: method.isStatic,
                                                 includeOptional: false,

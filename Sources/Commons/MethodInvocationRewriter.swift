@@ -73,7 +73,7 @@ public class MethodInvocationRewriter {
         
         let identifier =
             FunctionIdentifier(name: rewriteName(identifier.name),
-                               parameterNames: parameterNames)
+                               argumentLabels: parameterNames)
         
         return identifier
     }

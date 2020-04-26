@@ -11,7 +11,7 @@ class TypeMemberLookup {
         self.memberSearchCache = memberSearchCache
     }
     
-    func method(withObjcSelector selector: SelectorSignature,
+    func method(withIdentifier identifier: FunctionIdentifier,
                 invocationTypeHints: [SwiftType?]?,
                 static isStatic: Bool,
                 includeOptional: Bool,
@@ -21,7 +21,7 @@ class TypeMemberLookup {
         
         if memberSearchCache.usingCache,
             let result =
-            memberSearchCache.lookupMethod(withObjcSelector: selector,
+            memberSearchCache.lookupMethod(withIdentifier: identifier,
                                            invocationTypeHints: invocationTypeHints,
                                            static: isStatic,
                                            includeOptional: includeOptional,
@@ -30,14 +30,14 @@ class TypeMemberLookup {
             return result
         }
         
-        let result = _method(withObjcSelector: selector,
+        let result = _method(withIdentifier: identifier,
                              invocationTypeHints: invocationTypeHints,
                              static: isStatic,
                              includeOptional: includeOptional,
                              in: type)
         
         if memberSearchCache.usingCache {
-            memberSearchCache.storeMethod(withObjcSelector: selector,
+            memberSearchCache.storeMethod(withIdentifier: identifier,
                                           invocationTypeHints: invocationTypeHints,
                                           static: isStatic,
                                           includeOptional: includeOptional,
@@ -48,7 +48,7 @@ class TypeMemberLookup {
         return result
     }
     
-    private func _method(withObjcSelector selector: SelectorSignature,
+    private func _method(withIdentifier identifier: FunctionIdentifier,
                          invocationTypeHints: [SwiftType?]?,
                          static isStatic: Bool,
                          includeOptional: Bool,
@@ -59,7 +59,7 @@ class TypeMemberLookup {
                 .filter {
                     $0.isStatic == isStatic
                         && (includeOptional || !$0.optional)
-                        && $0.signature.possibleSelectorSignatures().contains(selector)
+                        && $0.signature.possibleIdentifierSignatures().contains(identifier)
                 }
         
         if !methods.isEmpty {
@@ -69,7 +69,7 @@ class TypeMemberLookup {
             
             // Attempt overload resolution based on argument type information
             if let invocationTypeHints = invocationTypeHints,
-                selector.keywords.count - 1 == invocationTypeHints.count {
+                identifier.argumentLabels.count == invocationTypeHints.count {
                 
                 if let method =
                     typeSystem.overloadResolver()
@@ -86,7 +86,7 @@ class TypeMemberLookup {
         let onSupertype =
             typeSystem.supertype(of: type)
                 .flatMap {
-                    method(withObjcSelector: selector,
+                    method(withIdentifier: identifier,
                            invocationTypeHints: invocationTypeHints,
                            static: isStatic,
                            includeOptional: includeOptional,
@@ -107,7 +107,7 @@ class TypeMemberLookup {
                 continue
             }
             
-            if let method = method(withObjcSelector: selector,
+            if let method = method(withIdentifier: identifier,
                                    invocationTypeHints: invocationTypeHints,
                                    static: isStatic,
                                    includeOptional: includeOptional,
@@ -315,7 +315,7 @@ class TypeMemberLookup {
         return nil
     }
     
-    func method(withObjcSelector selector: SelectorSignature,
+    func method(withIdentifier identifier: FunctionIdentifier,
                 invocationTypeHints: [SwiftType?]?,
                 static isStatic: Bool,
                 includeOptional: Bool,
@@ -328,7 +328,7 @@ class TypeMemberLookup {
         
         if memberSearchCache.usingCache, let typeName = typeName {
             if let result =
-                memberSearchCache.lookupMethod(withObjcSelector: selector,
+                memberSearchCache.lookupMethod(withIdentifier: identifier,
                                                invocationTypeHints: invocationTypeHints,
                                                static: isStatic,
                                                includeOptional: includeOptional,
@@ -341,14 +341,14 @@ class TypeMemberLookup {
         guard let knownType = typeSystem.findType(for: type) else {
             return nil
         }
-        let result = method(withObjcSelector: selector,
+        let result = method(withIdentifier: identifier,
                             invocationTypeHints: invocationTypeHints,
                             static: isStatic,
                             includeOptional: includeOptional,
                             in: knownType)
         
         if memberSearchCache.usingCache, let typeName = typeName {
-            memberSearchCache.storeMethod(withObjcSelector: selector,
+            memberSearchCache.storeMethod(withIdentifier: identifier,
                                           invocationTypeHints: invocationTypeHints,
                                           static: isStatic,
                                           includeOptional: includeOptional,

@@ -959,7 +959,7 @@ private class MemberInvocationResolver {
             
             let identifier =
                 FunctionIdentifier(name: target.identifier,
-                                   parameterNames: arguments.map(\.label))
+                                   argumentLabels: arguments.map(\.label))
             
             let definitions =
                 typeResolver.searchFunctionDefinitions(matching: identifier, target)
@@ -1043,12 +1043,11 @@ private class MemberInvocationResolver {
                 arguments: [FunctionArgument],
                 in type: SwiftType) -> KnownMethod? {
         
-        let selector
-            = SelectorSignature(isStatic: isStatic,
-                                keywords: [memberName] + arguments.map(\.label))
+        let identifier = FunctionIdentifier(name: memberName, argumentLabels: arguments.map(\.label))
+        
         let types = arguments.map(\.expression.resolvedType)
         
-        return typeSystem.method(withObjcSelector: selector,
+        return typeSystem.method(withIdentifier: identifier,
                                  invocationTypeHints: types,
                                  static: isStatic,
                                  includeOptional: true,

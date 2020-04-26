@@ -11,10 +11,10 @@ public class SubscriptDeclarationPass: ClassVisitingIntentionPass {
     override func applyOnType(_ type: TypeGenerationIntention) {
         let getterSign
             = FunctionIdentifier(name: "objectAtIndexSubscript",
-                                 parameterNames: [nil])
+                                 argumentLabels: [nil])
         let setterSign
             = FunctionIdentifier(name: "setObject",
-                                 parameterNames: [nil, "atIndexedSubscript"])
+                                 argumentLabels: [nil, "atIndexedSubscript"])
         
         let getters = type.methods(matching: getterSign)
         let setters = type.methods(matching: setterSign)

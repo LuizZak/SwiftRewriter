@@ -1,13 +1,9 @@
 /// Signature for a function intention
 public struct FunctionSignature: Hashable {
-    private var _asIdentifier: FunctionIdentifier = FunctionIdentifier(name: "", parameterNames: [])
+    private var _asIdentifier: FunctionIdentifier = FunctionIdentifier(name: "", argumentLabels: [])
     private var _asSelector: SelectorSignature = SelectorSignature(isStatic: false, keywords: [])
     
-    public var isMutating: Bool {
-        didSet {
-            _recreateAliases()
-        }
-    }
+    public var isMutating: Bool
     public var isStatic: Bool {
         didSet {
             _recreateAliases()
@@ -18,11 +14,7 @@ public struct FunctionSignature: Hashable {
             _recreateAliases()
         }
     }
-    public var returnType: SwiftType {
-        didSet {
-            _recreateAliases()
-        }
-    }
+    public var returnType: SwiftType
     public var parameters: [ParameterSignature] {
         didSet {
             _recreateAliases()
@@ -42,7 +34,7 @@ public struct FunctionSignature: Hashable {
     /// Returns a `SwiftType.block`-equivalent type for this function signature
     public var swiftClosureType: SwiftType {
         .swiftBlock(returnType: returnType,
-                           parameters: parameters.map(\.type))
+                    parameters: parameters.map(\.type))
     }
     
     /// Returns a new function signature where parameters and return type have
@@ -65,7 +57,7 @@ public struct FunctionSignature: Hashable {
                 isStatic: Bool = false,
                 isMutating: Bool = false) {
         
-        _asIdentifier = FunctionIdentifier(name: name, parameterNames: parameters.map(\.label))
+        _asIdentifier = FunctionIdentifier(name: name, argumentLabels: parameters.map(\.label))
         _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map(\.label))
         self.isStatic = isStatic
         self.name = name
@@ -75,7 +67,7 @@ public struct FunctionSignature: Hashable {
     }
     
     private mutating func _recreateAliases() {
-        _asIdentifier = FunctionIdentifier(name: name, parameterNames: parameters.map(\.label))
+        _asIdentifier = FunctionIdentifier(name: name, argumentLabels: parameters.map(\.label))
         _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map(\.label))
     }
     
@@ -146,6 +138,69 @@ public struct FunctionSignature: Hashable {
             }
             
             set.insert(SelectorSignature(isStatic: isStatic, keywords: keywords))
+        }
+        
+        return set
+    }
+    
+    /// Returns a set of possible function identifier signature variations for
+    /// this function signature when permutating over default argument type variations.
+    ///
+    /// e.g.: Given the following signature:
+    ///
+    /// ```
+    /// foo(bar: Int, baz: Int = default, _ zaz: Int = default)
+    /// ```
+    ///
+    /// permutated identifier signature set returned by this method would be:
+    ///
+    /// ```
+    /// foo(bar:)
+    /// foo(bar:baz:)
+    /// foo(bar:_:)
+    /// foo(bar:baz:_:)
+    /// ```
+    public func possibleIdentifierSignatures() -> Set<FunctionIdentifier> {
+        if !parameters.contains(where: \.hasDefaultValue) {
+            return [asIdentifier]
+        }
+        
+        let defaultArgIndices =
+            parameters.enumerated()
+                .filter(\.element.hasDefaultValue)
+                .map(\.offset)
+        
+        if defaultArgIndices.isEmpty {
+            return [asIdentifier]
+        }
+        
+        // Use a simple counter which increments sequentially, and use the bit
+        // representation of the counter to produce the permutations.
+        // Each bit represents the nth parameter with a default value, with 1
+        // being _with_ the parameter, and 0 being _without_ it.
+        let combinations = 1 << defaultArgIndices.count
+        
+        var set: Set<FunctionIdentifier> = []
+        
+        for i in 0..<combinations {
+            var paramLabels: [String?] = []
+            var nextDefaultArgIndex = 0
+            
+            for param in parameters {
+                if !param.hasDefaultValue {
+                    paramLabels.append(param.label)
+                    continue
+                }
+                
+                // Check if bit is set
+                if (i >> nextDefaultArgIndex) & 1 == 1 {
+                    paramLabels.append(param.label)
+                }
+                
+                nextDefaultArgIndex += 1
+            }
+            
+            set.insert(FunctionIdentifier(name: name, argumentLabels: paramLabels))
         }
         
         return set

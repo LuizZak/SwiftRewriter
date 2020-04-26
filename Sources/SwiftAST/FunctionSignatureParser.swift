@@ -49,7 +49,7 @@ public final class FunctionSignatureParser {
         
         try tokenizer.advance(overTokenType: .closeParens)
         
-        return FunctionIdentifier(name: identifier, parameterNames: params)
+        return FunctionIdentifier(name: identifier, argumentLabels: params)
     }
     
     /// Parses a function signature from a given input string.
