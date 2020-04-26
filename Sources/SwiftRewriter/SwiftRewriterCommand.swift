@@ -208,7 +208,7 @@ extension SwiftRewriterCommand {
                 
                 menu.main()
             } else {
-                // If not invoked by a terminal, produce an output based in the
+                // If not invoked by a terminal, produce an output based on the
                 // standard input
                 
                 output.signalEndOfFiles = false
