@@ -1,10 +1,11 @@
 import Foundation
 import ObjcParser
 import SourcePreprocessors
+import Utils
 
 /// A parser cache that stores pre-parsed trees based on input file URLs
 public class ParserCache {
-    var cache: [URL: ObjcParser] = [:]
+    @ConcurrentValue var cache: [URL: ObjcParser] = [:]
     let fileProvider: FileProvider
     let parserStatePool: ObjcParserStatePool
     let sourcePreprocessors: [SourcePreprocessor]
