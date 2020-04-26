@@ -16,7 +16,7 @@ public struct DiskInputFile: Equatable {
 }
 
 extension DiskInputFile: InputSource {
-    public func sourceName() -> String {
+    public func sourcePath() -> String {
         url.path
     }
     

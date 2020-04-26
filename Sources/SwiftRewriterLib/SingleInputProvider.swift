@@ -17,11 +17,11 @@ public class SingleInputProvider: InputSourcesProvider, InputSource {
         return [self]
     }
     
-    public func sourceName() -> String {
+    public func sourcePath() -> String {
         return fileName
     }
     
     public func loadSource() throws -> CodeSource {
-        return StringCodeSource(source: code, fileName: sourceName())
+        return StringCodeSource(source: code, fileName: sourcePath())
     }
 }

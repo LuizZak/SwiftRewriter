@@ -27,7 +27,7 @@ public class ParserCache {
     }
 
     public func loadParsedTree(input: InputSource) throws -> ObjcParser {
-        let url = URL(fileURLWithPath: input.sourceName())
+        let url = URL(fileURLWithPath: input.sourcePath())
         
         if let parser = cache[url] {
             try parser.parse()
@@ -50,7 +50,7 @@ public class ParserCache {
     private func applyPreprocessors(input: InputSource, preprocessors: [SourcePreprocessor]) throws -> String {
         let src = try input.loadSource().fetchSource()
         
-        let context = _PreprocessingContext(filePath: input.sourceName())
+        let context = _PreprocessingContext(filePath: input.sourcePath())
         
         return preprocessors.reduce(src) {
             $1.preprocess(source: $0, context: context)

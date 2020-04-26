@@ -70,7 +70,7 @@ struct SwiftRewriterJobInputSource: InputSource {
     var source: String
     var isPrimary: Bool
     
-    func sourceName() -> String {
+    func sourcePath() -> String {
         filePath
     }
     

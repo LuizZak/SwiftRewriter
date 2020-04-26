@@ -104,12 +104,12 @@ class TestSingleInputProvider: InputSourcesProvider, InputSource {
         return [self]
     }
     
-    func sourceName() -> String {
+    func sourcePath() -> String {
         return "\(type(of: self)).m"
     }
     
     func loadSource() throws -> CodeSource {
-        return StringCodeSource(source: code, fileName: sourceName())
+        return StringCodeSource(source: code, fileName: sourcePath())
     }
 }
 

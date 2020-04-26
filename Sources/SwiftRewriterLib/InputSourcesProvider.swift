@@ -27,8 +27,8 @@ public protocol InputSource {
     /// following `#import` declarations.
     var isPrimary: Bool { get }
     
-    /// Requests a unique name for this source name.
-    func sourceName() -> String
+    /// Requests the path name for this input source.
+    func sourcePath() -> String
     
     /// Asks the receiver to return its target's contents.
     func loadSource() throws -> CodeSource

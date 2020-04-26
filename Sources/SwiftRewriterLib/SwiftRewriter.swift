@@ -545,7 +545,7 @@ public final class SwiftRewriter {
         defer { parserStatePool.repool(state) }
         
         // Generate intention for this source
-        var path = source.sourceName()
+        var path = source.sourcePath()
         
         if settings.verbose {
             print("Parsing \((path as NSString).lastPathComponent)...")
@@ -580,7 +580,7 @@ public final class SwiftRewriter {
         
         let ctx = IntentionBuildingContext()
         
-        let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), targetPath: path)
+        let fileIntent = FileGenerationIntention(sourcePath: source.sourcePath(), targetPath: path)
         fileIntent.preprocessorDirectives = parser.preprocessorDirectives
         fileIntent.index = index
         fileIntent.isPrimary = source.isPrimary

@@ -22,7 +22,7 @@ extension ImportDirectiveFileCollectionDelegate: FileCollectionStepDelegate {
                 .map { $0.path }
                 .filter { $0.hasSuffix(".h") }
 
-        let basePath = URL(fileURLWithPath: file.sourceName()).deletingLastPathComponent()
+        let basePath = URL(fileURLWithPath: file.sourcePath()).deletingLastPathComponent()
 
         var urls: [URL] = []
 

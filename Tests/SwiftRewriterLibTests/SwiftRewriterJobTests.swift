@@ -126,7 +126,7 @@ private struct MockInputSource: InputSource {
         return StringCodeSource(source: source, fileName: path)
     }
     
-    func sourceName() -> String {
+    func sourcePath() -> String {
         return path
     }
 }
