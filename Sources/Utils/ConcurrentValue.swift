@@ -70,17 +70,17 @@ public final class ConcurrentValue<T> {
 
     @inlinable
     public func setAsCaching(value: T) {
-        pthread_rwlock_wrlock(&lock)
-        _value = value
-        usingCache = true
-        pthread_rwlock_unlock(&lock)
+        modifyingValue {
+            $0 = value
+            usingCache = true
+        }
     }
 
     @inlinable
     public func tearDownCaching(resetToValue value: T) {
-        pthread_rwlock_wrlock(&lock)
-        _value = value
-        usingCache = false
-        pthread_rwlock_unlock(&lock)
+        modifyingValue {
+            $0 = value
+            usingCache = false
+        }
     }
 }
