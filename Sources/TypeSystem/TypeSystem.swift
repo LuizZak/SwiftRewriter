@@ -1220,17 +1220,53 @@ private class TypealiasExpander {
     }
     
     func expand(in type: SwiftType) -> SwiftType {
-        return type.map { type -> SwiftType in
-            switch type {
-            case .nominal(let nominal):
-                return .nominal(expand(inNominal: nominal))
-            case .nested(let nested):
-                return .nested(.fromCollection(nested.map(expand(inNominal:))))
-            case .protocolComposition(let composition):
-                return .protocolComposition(.fromCollection(composition.map(expand(inComposition:))))
-            default:
-                return type
+        switch type {
+        case let .block(returnType, parameters, attributes):
+            return .block(returnType: expand(in: returnType),
+                          parameters: parameters.map(expand),
+                          attributes: attributes)
+            
+        case .nominal(.typeName(let name)):
+            if let type = source.unalias(name) {
+                return pushingAlias(name) {
+                    return expand(in: type)
+                }
             }
+            
+            return type
+            
+        case .nominal(let nominal):
+            return .nominal(expand(inNominal: nominal))
+            
+        case .optional(let type):
+            return .optional(expand(in: type))
+            
+        case .implicitUnwrappedOptional(let type):
+            return .implicitUnwrappedOptional(expand(in: type))
+            
+        case .nullabilityUnspecified(let type):
+            return .nullabilityUnspecified(expand(in: type))
+            
+        case .nested(let nested):
+            return .nested(.fromCollection(nested.map(expand(inNominal:))))
+            
+        case .metatype(let type):
+            return .metatype(for: expand(in: type))
+            
+        case .tuple(.empty):
+            return type
+            
+        case .tuple(.types(let values)):
+            return .tuple(.types(.fromCollection(values.map(expand))))
+            
+        case .protocolComposition(let composition):
+            return .protocolComposition(.fromCollection(composition.map(expand(inComposition:))))
+            
+        case .array(let inner):
+            return .array(expand(in: inner))
+            
+        case let .dictionary(key, value):
+            return .dictionary(key: expand(in: key), value: expand(in: value))
         }
     }
     

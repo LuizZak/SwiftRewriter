@@ -267,33 +267,6 @@ public extension SwiftType {
         }
     }
     
-    /// Maps this type, applying a given transforming closure to any nested types
-    /// and finally the root type this type represents.
-    func map(_ transform: (SwiftType) -> SwiftType) -> SwiftType {
-        switch self {
-        case .array(let inner):
-            return .array(inner.map(transform))
-        case let .dictionary(key, value):
-            return .dictionary(key: key.map(transform), value: value.map(transform))
-        case .implicitUnwrappedOptional(let inner):
-            return .implicitUnwrappedOptional(inner.map(transform))
-        case .optional(let inner):
-            return .optional(inner.map(transform))
-        case .nullabilityUnspecified(let inner):
-            return .nullabilityUnspecified(inner.map(transform))
-        case .metatype(let inner):
-            return .metatype(for: inner.map(transform))
-        case .tuple(.types(let types)):
-            return .tuple(TupleSwiftType.types(.fromCollection(types.map { $0.map(transform) })))
-        case let .block(returnType, parameters, attributes):
-            return .block(returnType: returnType.map(transform),
-                          parameters: parameters.map { $0.map(transform) },
-                          attributes: attributes)
-        default:
-            return transform(self)
-        }
-    }
-    
     static let void = SwiftType.tuple(.empty)
     static let int = SwiftType.typeName("Int")
     static let uint = SwiftType.typeName("UInt")
@@ -338,14 +311,14 @@ public extension SwiftType {
         .block(returnType: returnType, parameters: parameters, attributes: [])
     }
     
-    /// Returns a type that is the same as the input, but with any .optional,
-    /// .implicitUnwrappedOptional, or .nullabilityUnspecified types unwrapped
-    /// to non optional, including block parameters.
+    /// Returns a type that is the same as the input, but with any .optional or
+    /// .implicitUnwrappedOptional types unwrapped to non optional, inclusing
+    /// block parameters.
     ///
     /// - Parameters:
     ///   - type: The input type
-    ///   - removeImplicitsOnly: Whether to only remove nullability unspecified
-    ///   optionals, keeping other optional kinds in place.
+    ///   - removeImplicitsOnly: Whether to only remove implicit unwrapped optionals,
+    /// keeping optionals in place.
     /// - Returns: The deeply unwrapped version of the input type.
     static func asNonnullDeep(_ type: SwiftType,
                               removeUnspecifiedsOnly: Bool = false) -> SwiftType {

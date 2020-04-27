@@ -77,7 +77,7 @@ class TypeMerger {
                 continue
             }
             
-            targetVar.storage.type = mergeTypeSignatures(gvar.type, targetVar.storage.type)
+            mergeTypeSignatures(gvar.type, &targetVar.storage.type)
         }
         
         // Merge struct definitions
@@ -439,26 +439,24 @@ class TypeMerger {
         
         var result = sign2
         
-        result.returnType = mergeTypeSignatures(sign1.returnType, result.returnType)
+        mergeTypeSignatures(sign1.returnType, &result.returnType)
         
         for (i, p1) in sign1.parameters.enumerated() {
             if i >= result.parameters.count {
                 break
             }
             
-            result.parameters[i].type = mergeTypeSignatures(p1.type, result.parameters[i].type)
+            mergeTypeSignatures(p1.type, &result.parameters[i].type)
         }
         
         return result
     }
 
     func mergeTypeSignatures(_ type1: SwiftType,
-                             _ type2: SwiftType) -> SwiftType {
+                             _ type2: inout SwiftType) {
         
         let type1Unaliased = typeSystem.resolveAlias(in: type1)
         var type2Unaliased = typeSystem.resolveAlias(in: type2)
-        
-        var outType: SwiftType = type2
         
         // Merge block types
         // TODO: Figure out what to do when two block types have different type
@@ -466,30 +464,25 @@ class TypeMerger {
         switch (type1Unaliased.deepUnwrapped, type2Unaliased.deepUnwrapped) {
         case (let .block(t1Ret, t1Params, t1Attributes), var .block(ret, params, attributes))
             where t1Params.count == params.count:
-            ret = mergeTypeSignatures(t1Ret, ret)
+            mergeTypeSignatures(t1Ret, &ret)
             
             for (i, p1) in t1Params.enumerated() {
-                params[i] = mergeTypeSignatures(p1, params[i])
+                mergeTypeSignatures(p1, &params[i])
             }
             
             attributes.formUnion(t1Attributes)
             
-            outType = SwiftType
+            type2 = SwiftType
                 .block(returnType: ret,
                        parameters: params,
                        attributes: attributes)
                 .withSameOptionalityAs(type2)
-            
-            type2Unaliased = SwiftType
-                .block(returnType: typeSystem.resolveAlias(in: ret),
-                       parameters: params.map(typeSystem.resolveAlias),
-                       attributes: attributes)
-                .withSameOptionalityAs(type2)
+            type2Unaliased = typeSystem.resolveAlias(in: type2)
         default:
             break
         }
         
-        if !type1.isNullabilityUnspecified && outType.isNullabilityUnspecified {
+        if !type1.isNullabilityUnspecified && type2.isNullabilityUnspecified {
             let type1NonnullDeep =
                 SwiftType.asNonnullDeep(type1Unaliased.deepUnwrapped,
                                         removeUnspecifiedsOnly: true)
@@ -499,17 +492,15 @@ class TypeMerger {
                                         removeUnspecifiedsOnly: true)
             
             if type1NonnullDeep == type2NonnullDeep {
-                outType = type2NonnullDeep.withSameOptionalityAs(type1)
+                type2 = type2NonnullDeep.withSameOptionalityAs(type1)
             }
         }
         
         // Do a final check: If the resulting type2 is the same as an unaliased
         // type1 signature, favor using the typealias in the final type signature.
-        if outType == type1Unaliased {
-            outType = type1
+        if type2 == type1Unaliased {
+            type2 = type1
         }
-        
-        return outType
     }
     
     func prependComments(from intention1: FromSourceIntention, into intention2: FromSourceIntention) {
