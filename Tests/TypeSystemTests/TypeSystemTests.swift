@@ -105,6 +105,16 @@ class TypeSystemTests: XCTestCase {
         XCTAssertEqual(sut.defaultValue(for: .double)?.resolvedType, .double)
     }
     
+    func testDefaultValueForNumericTypealiases() {
+        sut.addTypealias(aliasName: "MyInt", originalType: .int)
+        sut.addTypealias(aliasName: "MyFloat", originalType: .float)
+        
+        XCTAssertEqual(sut.defaultValue(for: "MyInt"), .constant(0))
+        XCTAssertEqual(sut.defaultValue(for: "MyInt")?.resolvedType, "MyInt")
+        XCTAssertEqual(sut.defaultValue(for: "MyFloat"), .constant(0.0))
+        XCTAssertEqual(sut.defaultValue(for: "MyFloat")?.resolvedType, "MyFloat")
+    }
+    
     func testDefaultValueForBool() {
         XCTAssertEqual(sut.defaultValue(for: .bool), .constant(false))
         XCTAssertEqual(sut.defaultValue(for: .bool)?.resolvedType, .bool)
@@ -366,6 +376,18 @@ class TypeSystemTests: XCTestCase {
         
         XCTAssert(sut.isInteger("Alias"))
         XCTAssertFalse(sut.isInteger("NonIntegerAlias"))
+    }
+    
+    func testIsNumericTypealiased() {
+        sut.addTypealias(aliasName: "Alias", originalType: .float)
+        
+        XCTAssert(sut.isNumeric("Alias"))
+    }
+    
+    func testIsFloatTypealiased() {
+        sut.addTypealias(aliasName: "Alias", originalType: .float)
+        
+        XCTAssert(sut.isFloat("Alias"))
     }
     
     func testIsTypeSubtypeOf() {

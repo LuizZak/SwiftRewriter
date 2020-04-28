@@ -635,17 +635,11 @@ public class TypeSystem {
         if isInteger(type) {
             return true
         }
-        
-        switch type {
-        case .float, .double, .cgFloat:
+        if isFloat(type) {
             return true
-        case .typeName("Float80"):
-            return true
-        case .typeName("CFloat"), .typeName("CDouble"):
-            return true
-        default:
-            return false
         }
+        
+        return false
     }
     
     private func bitwidth(intType: SwiftType) -> Int {
