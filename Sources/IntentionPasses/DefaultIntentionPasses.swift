@@ -1,7 +1,7 @@
 public struct DefaultIntentionPasses: IntentionPassSource {
     public var intentionPasses: [IntentionPass] = [
         FileTypeMergingIntentionPass(),
-        SubscriptDeclarationPass(),
+        SubscriptDeclarationIntentionPass(),
         PromoteProtocolPropertyConformanceIntentionPass(),
         ProtocolNullabilityPropagationToConformersIntentionPass(),
         PropertyMergeIntentionPass(),

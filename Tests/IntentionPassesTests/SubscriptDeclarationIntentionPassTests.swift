@@ -5,7 +5,7 @@ import Intentions
 import SwiftRewriterLib
 import TestCommons
 
-class SubscriptDeclarationPassTests: XCTestCase {
+class SubscriptDeclarationIntentionPassTests: XCTestCase {
     func testConvertSubscriptGetter() {
         let intentions = IntentionCollectionBuilder()
             .createFileWithClass(named: "A") { type in
@@ -17,7 +17,7 @@ class SubscriptDeclarationPassTests: XCTestCase {
                         ])
                 }
             }.build()
-        let sut = SubscriptDeclarationPass()
+        let sut = SubscriptDeclarationIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
@@ -40,7 +40,7 @@ class SubscriptDeclarationPassTests: XCTestCase {
                         .addHistory(tag: "Test", description: "Method description")
                 }
             }.build()
-        let sut = SubscriptDeclarationPass()
+        let sut = SubscriptDeclarationIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
@@ -66,7 +66,7 @@ class SubscriptDeclarationPassTests: XCTestCase {
                         method.setBody([.expression(.identifier("object"))])
                     }
             }.build()
-        let sut = SubscriptDeclarationPass()
+        let sut = SubscriptDeclarationIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
@@ -101,7 +101,7 @@ class SubscriptDeclarationPassTests: XCTestCase {
                             .addHistory(tag: "Test", description: "Setter history")
                     }
             }.build()
-        let sut = SubscriptDeclarationPass()
+        let sut = SubscriptDeclarationIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
@@ -121,7 +121,7 @@ class SubscriptDeclarationPassTests: XCTestCase {
                     method.setBody([.expression(.identifier("object"))])
                 }
             }.build()
-        let sut = SubscriptDeclarationPass()
+        let sut = SubscriptDeclarationIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
@@ -135,7 +135,7 @@ class SubscriptDeclarationPassTests: XCTestCase {
             .createFileWithClass(named: "A") { type in
                 type.createMethod("objectAtIndexSubscript(_ index: UInt) -> Void")
             }.build()
-        let sut = SubscriptDeclarationPass()
+        let sut = SubscriptDeclarationIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
@@ -158,7 +158,7 @@ class SubscriptDeclarationPassTests: XCTestCase {
                         method.setBody([.expression(.identifier("object"))])
                     }
             }.build()
-        let sut = SubscriptDeclarationPass()
+        let sut = SubscriptDeclarationIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
@@ -188,7 +188,7 @@ class SubscriptDeclarationPassTests: XCTestCase {
                         method.setBody([.expression(.identifier("object"))])
                     }
             }.build()
-        let sut = SubscriptDeclarationPass()
+        let sut = SubscriptDeclarationIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
@@ -218,7 +218,7 @@ class SubscriptDeclarationPassTests: XCTestCase {
                         method.setBody([.expression(.identifier("object"))])
                     }
             }.build()
-        let sut = SubscriptDeclarationPass()
+        let sut = SubscriptDeclarationIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
@@ -246,7 +246,7 @@ class SubscriptDeclarationPassTests: XCTestCase {
                         ])
                 }
             }.build()
-        let sut = SubscriptDeclarationPass()
+        let sut = SubscriptDeclarationIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
@@ -270,7 +270,7 @@ class SubscriptDeclarationPassTests: XCTestCase {
                     method.addComment("// Setter comment")
                 }
             }.build()
-        let sut = SubscriptDeclarationPass()
+        let sut = SubscriptDeclarationIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
