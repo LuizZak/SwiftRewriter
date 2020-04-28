@@ -1527,7 +1527,7 @@ class SwiftRewriterTests: XCTestCase {
                 private var _e: CDouble = 0.0
                 private var _e: CGFloat = 0.0
                 private var _f: String!
-                private var _g: E
+                private var _g: E = E.E_1
                 private var _h: String
                 private let _i: String! = nil
                 var a: Bool = false
@@ -1537,7 +1537,7 @@ class SwiftRewriterTests: XCTestCase {
                 var e: CDouble = 0.0
                 var e: CGFloat = 0.0
                 var f: String!
-                var g: E
+                var g: E = E.E_1
                 var h: String
             }
             """)

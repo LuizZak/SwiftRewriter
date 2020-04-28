@@ -80,6 +80,10 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         type
     }
     
+    public var expression: Expression? {
+        initialValue
+    }
+    
     public var name: String
     public var storage: ValueStorage
     public var mode: Mode = .asField {

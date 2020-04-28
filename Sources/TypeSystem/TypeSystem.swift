@@ -524,6 +524,40 @@ public class TypeSystem {
                 
                 return exp
             }
+            // Enums have their default value bound to the case that corresponds
+            // to 0
+            if knownType.kind == .enum {
+                let cases = knownType.knownProperties.filter { $0.isEnumCase }
+                
+                guard !cases.isEmpty else {
+                    return nil
+                }
+                guard let rawValueType = knownType.knownTrait(KnownTypeTraits.enumRawValue)?.asSwiftType else {
+                    return nil
+                }
+                guard isInteger(rawValueType) else {
+                    return nil
+                }
+                
+                var increment = 0
+                for cs in cases {
+                    defer { increment += 1 }
+                    
+                    var isZero = false
+                    if cs.expression == nil && increment == 0 {
+                        isZero = true
+                    } else if let integer =  cs.expression?.asConstant?.constant.integerValue {
+                        increment = integer
+                        isZero = integer == 0
+                    }
+                    
+                    if isZero {
+                        return Expression
+                            .identifier(name).typed(.metatype(for: .typeName(name)))
+                            .dot(cs.name).typed(.typeName(name))
+                    }
+                }
+            }
             
             return nil
             

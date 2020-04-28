@@ -120,6 +120,13 @@ public struct KnownTypeBuilder {
         return new
     }
     
+    /// Adds a trait to the type
+    public func addingTrait(_ traitName: String, value: TraitType) -> KnownTypeBuilder {
+        var new = clone()
+        new.type.traits[traitName] = value
+        return new
+    }
+    
     /// Sets the supertype of the type being constructed on this known type builder
     public func settingSupertype(_ supertype: KnownTypeReferenceConvertible?) -> KnownTypeBuilder {
         var new = clone()
@@ -336,7 +343,8 @@ public struct KnownTypeBuilder {
                          attributes: [KnownAttribute] = [],
                          isEnumCase: Bool = false,
                          semantics: Set<Semantic> = [],
-                         annotations: [String] = []) -> KnownTypeBuilder {
+                         annotations: [String] = [],
+                         expression: Expression? = nil) -> KnownTypeBuilder {
         
         var new = clone()
         
@@ -358,7 +366,8 @@ public struct KnownTypeBuilder {
                                   knownAttributes: attributes,
                                   isEnumCase: isEnumCase,
                                   semantics: semantics,
-                                  annotations: annotations)
+                                  annotations: annotations,
+                                  expression: expression)
         
         new.type.properties.append(property)
         
@@ -412,7 +421,8 @@ public struct KnownTypeBuilder {
                                   knownAttributes: attributes,
                                   isEnumCase: false,
                                   semantics: semantics,
-                                  annotations: annotations)
+                                  annotations: annotations,
+                                  expression: nil)
         
         new.type.fields.append(property)
         
@@ -524,7 +534,8 @@ public struct KnownTypeBuilder {
                                   knownAttributes: [],
                                   isEnumCase: true,
                                   semantics: semantics,
-                                  annotations: [])
+                                  annotations: [],
+                                  expression: rawValue)
         
         new.type.properties.append(cs)
         
@@ -792,11 +803,13 @@ final class BuildingKnownProperty: KnownProperty, Codable {
     var isEnumCase: Bool
     var semantics: Set<Semantic>
     var annotations: [String]
+    var expression: Expression?
     
     init(ownerType: KnownTypeReference?, name: String, storage: ValueStorage,
          attributes: [ObjcPropertyAttribute], isStatic: Bool, optional: Bool,
          accessor: KnownPropertyAccessor, knownAttributes: [KnownAttribute],
-         isEnumCase: Bool, semantics: Set<Semantic>, annotations: [String]) {
+         isEnumCase: Bool, semantics: Set<Semantic>, annotations: [String],
+         expression: Expression?) {
         
         self.ownerType = ownerType
         self.name = name
@@ -809,6 +822,7 @@ final class BuildingKnownProperty: KnownProperty, Codable {
         self.isEnumCase = isEnumCase
         self.semantics = semantics
         self.annotations = annotations
+        self.expression = expression
     }
 }
 

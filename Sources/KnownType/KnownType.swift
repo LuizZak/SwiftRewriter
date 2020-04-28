@@ -169,6 +169,9 @@ public protocol KnownProperty: KnownMember {
     
     /// `true` if this property actually represents an enumeration case.
     var isEnumCase: Bool { get }
+    
+    /// If present, specifies the value for this property.
+    var expression: Expression? { get }
 }
 
 /// A known type subscript
@@ -221,6 +224,7 @@ public extension KnownSubscript {
 }
 
 public enum KnownTypeTraits {
+    /// The trait that specified the raw value for an enum
     public static let enumRawValue = "enumRawValue"
 }
 

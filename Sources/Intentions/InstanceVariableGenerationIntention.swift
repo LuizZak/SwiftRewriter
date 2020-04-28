@@ -70,4 +70,8 @@ extension InstanceVariableGenerationIntention: KnownProperty {
     public var isEnumCase: Bool {
         false
     }
+    
+    public var expression: Expression? {
+        initialValue
+    }
 }

@@ -206,7 +206,7 @@ public final class SwiftRewriter {
                             return
                         }
                         
-                        enCase.expression = reader.parseExpression(expression: expression)
+                        enCase.initialValue = reader.parseExpression(expression: expression)
                         
                     case let .functionBody(funcBody, method):
                         guard let methodBody = funcBody.typedSource else {

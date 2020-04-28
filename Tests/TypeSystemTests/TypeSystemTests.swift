@@ -187,6 +187,61 @@ class TypeSystemTests: XCTestCase {
         XCTAssertEqual(result?.resolvedType, .typeName("A"))
     }
     
+    func testDefaultValueForEnum() {
+        let en = KnownTypeBuilder(typeName: "E", kind: .enum)
+            .addingTrait(KnownTypeTraits.enumRawValue, value: .swiftType(SwiftType.int))
+            .enumCase(named: "case1")
+            .build()
+        sut.addType(en)
+        
+        let result = sut.defaultValue(for: "E")
+        
+        XCTAssertEqual(result, Expression.identifier("E").dot("case1"))
+        XCTAssertEqual(result?.resolvedType, "E")
+    }
+    
+    func testDefaultValueForEnumWithNonIntegerType() {
+        let en1 = KnownTypeBuilder(typeName: "E1", kind: .enum)
+            .enumCase(named: "case1")
+            .build()
+        let en2 = KnownTypeBuilder(typeName: "E2", kind: .enum)
+            .addingTrait(KnownTypeTraits.enumRawValue, value: .swiftType(SwiftType.string))
+            .enumCase(named: "case1")
+            .build()
+        sut.addType(en1)
+        sut.addType(en2)
+        
+        XCTAssertNil(sut.defaultValue(for: "E1"))
+        XCTAssertNil(sut.defaultValue(for: "E2"))
+    }
+    
+    func testDefaultValueForEnumExplicitZero() {
+        let en = KnownTypeBuilder(typeName: "E", kind: .enum)
+            .addingTrait(KnownTypeTraits.enumRawValue, value: .swiftType(SwiftType.int))
+            .enumCase(named: "case1", rawValue: Expression.constant(0))
+            .build()
+        sut.addType(en)
+        
+        let result = sut.defaultValue(for: "E")
+        
+        XCTAssertEqual(result, Expression.identifier("E").dot("case1"))
+        XCTAssertEqual(result?.resolvedType, "E")
+    }
+    
+    func testDefaultValueForEnumIncrementedZero() {
+        let en = KnownTypeBuilder(typeName: "E", kind: .enum)
+            .addingTrait(KnownTypeTraits.enumRawValue, value: .swiftType(SwiftType.int))
+            .enumCase(named: "case1", rawValue: Expression.constant(-1))
+            .enumCase(named: "case2")
+            .build()
+        sut.addType(en)
+        
+        let result = sut.defaultValue(for: "E")
+        
+        XCTAssertEqual(result, Expression.identifier("E").dot("case2"))
+        XCTAssertEqual(result?.resolvedType, "E")
+    }
+    
     // MARK: -
     
     func testResolveTypeAliasesInOptionalArrayOfInts() {

@@ -12,7 +12,11 @@ public final class EnumGenerationIntention: TypeGenerationIntention {
         .enum
     }
     
-    public var rawValueType: SwiftType
+    public var rawValueType: SwiftType {
+        didSet {
+            knownTraits[KnownTypeTraits.enumRawValue] = .swiftType(rawValueType)
+        }
+    }
     
     public var cases: [EnumCaseGenerationIntention] {
         properties.compactMap { $0 as? EnumCaseGenerationIntention }
