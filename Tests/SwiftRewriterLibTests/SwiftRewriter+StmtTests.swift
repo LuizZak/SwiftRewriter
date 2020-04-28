@@ -151,11 +151,11 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testVarDeclaration() {
-        assertObjcParse(
+        assertRewrite(
             objc: "NSInteger myInt = 5;",
             swift: "var myInt: Int = 5"
         )
-        assertObjcParse(
+        assertRewrite(
             objc: "const NSInteger myInt = 5;",
             swift: "let myInt: Int = 5"
         )
@@ -166,7 +166,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testMultipleVarDeclarationInSameStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: "NSInteger a = 5, b, c = 6;",
             swift: """
                 var a: Int = 5
@@ -343,7 +343,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testEmitSizeOfForKnownTypes() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             typedef struct {
                 int field;
@@ -376,7 +376,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testSingleBlockArgument() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -400,7 +400,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testBlockLiteral() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -416,7 +416,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 }
             }
             """)
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -432,7 +432,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 }
             }
             """)
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -454,7 +454,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testVarDeclarationOmitsTypeOnLocalWithInitialValueMatchingLiteralType() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             NSInteger myInt;
             NSInteger myInt2 = 5;
@@ -501,7 +501,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testIfStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -529,7 +529,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testElseStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -555,7 +555,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testIfElseStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -585,7 +585,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testBracelessIfElseStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -614,7 +614,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testBracelessIfWithinIf() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -639,7 +639,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testIfStatementWithExpressions() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -665,7 +665,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testSwitchStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -696,7 +696,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testSwitchStatementWithFallthroughCases() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -729,7 +729,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testSwitchStatementAvoidFallthroghIfLastStatementIsUnconditionalJump() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -764,7 +764,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testSwitchStatementWithCompoundStatementCases() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -797,7 +797,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testWhileStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -825,7 +825,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testForStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -846,7 +846,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testForStatementWithNonLiteralCount() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -870,7 +870,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testForStatementWithNonConstantCount() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -894,7 +894,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testForStatementWithArrayCount() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -918,7 +918,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testForStatementWithNonConstantCountModifiedWithinLoop() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -949,7 +949,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testForStatementWithNonInitializerStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -978,7 +978,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testDoWhileStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -1001,7 +1001,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testSynchronizedStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -1035,7 +1035,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testSingleSynchronizedStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -1063,7 +1063,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testAutoreleasePoolStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -1085,7 +1085,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testForInStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -1123,7 +1123,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testLabeledStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -1152,7 +1152,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testLabeledStatementNested() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -1196,6 +1196,6 @@ private extension SwiftRewriter_StmtTests {
             }
             """
         
-        assertObjcParse(objc: objc, swift: swift, file: file, line: line)
+        assertRewrite(objc: objc, swift: swift, file: file, line: line)
     }
 }

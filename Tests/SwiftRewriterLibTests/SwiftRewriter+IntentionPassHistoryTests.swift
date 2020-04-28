@@ -4,7 +4,7 @@ import SwiftAST
 
 class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
     func testPrintIntentionHistory() throws {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)setValue:(BOOL)value {

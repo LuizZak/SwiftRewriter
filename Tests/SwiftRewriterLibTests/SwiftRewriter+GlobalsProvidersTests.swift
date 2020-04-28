@@ -3,7 +3,7 @@ import SwiftRewriterLib
 
 class SwiftRewriter_GlobalsProvidersTests: XCTestCase {
     func testSeesUIViewDefinition() throws {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A : UIView
             @end

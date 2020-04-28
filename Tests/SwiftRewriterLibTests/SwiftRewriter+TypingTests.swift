@@ -9,7 +9,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     /// Tests that the `self`/`super` identifier is properly assigned when resolving
     /// the final types of statements in a class
     func testSelfSuperTypeInInstanceMethodsPointsToSelfInstance() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface MyClass: NSObject
             @end
@@ -36,7 +36,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     /// Tests that the `self` identifier used in a method class context is properly
     /// assigned to the class' metatype
     func testSelfSuperTypeInClassMethodsPointsToMetatype() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface MyClass: NSObject
             @end
@@ -100,7 +100,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testSelfSuperTypeInPropertySynthesizedGetterAndSetterBody() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface MyClass : NSObject
             @property BOOL value;
@@ -142,7 +142,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testSelfSuperInitInClassMethod() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             // To inherit [self init] constructor
             @interface MyClass: NSObject
@@ -170,7 +170,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testSelfPropertyFetch() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface MyClass: NSObject
             @property NSInteger aValue;
@@ -196,7 +196,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testMessageSelf() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface MyClass: NSObject
             - (void)method1;
@@ -227,7 +227,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testMessageClassSelf() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface MyClass: NSObject
             + (void)method1;
@@ -258,7 +258,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testCustomInitClass() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A: NSObject
             @end
@@ -297,7 +297,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testIntrinsicsFromMethodParameter() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation A
             - (void)method:(NSInteger)value {
@@ -316,7 +316,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             options: SwiftSyntaxOptions.default.with(\.outputExpressionTypes, true))
     }
     func testIntrinsicsForSetterCustomNewValueName() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A: NSObject
             @property BOOL value;
@@ -348,7 +348,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testIntrinsicsForSetterWithDefaultNewValueName() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A: NSObject
             @property BOOL value;
@@ -380,7 +380,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testIntrinsicsExposeClassInstanceProperties() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A: NSObject
             {
@@ -413,7 +413,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testIntrinsicsExposeMethodParameters() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation A
             - (void)f1:(A*)value {
@@ -433,7 +433,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testPropertyResolutionLooksThroughNullability() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A : NSObject
             @property NSInteger prop;
@@ -459,7 +459,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testVariableDeclarationCascadesTypeOfInitialExpression() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A: NSObject
             {
@@ -491,7 +491,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testExpressionWithinBracelessIfStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A: NSObject
             {
@@ -524,7 +524,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testLookThroughProtocolConformances() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A: NSObject
             @property (nullable) NSObject *b;
@@ -551,7 +551,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     
     func testChainedOptionalAccessMethodCall() {
         // With a (nonnull B*)method;
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface B: NSObject
             - (nonnull B*)method;
@@ -585,7 +585,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     
     func testChainedOptionalAccessMethodCall2() {
         // With a (nullable B*)method;
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface B: NSObject
             - (nullable B*)method;
@@ -618,7 +618,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testChainCallRespondsToSelector() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @protocol B <NSObject>
             @end
@@ -656,7 +656,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testTypeLookupIntoComposedProtocols() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @protocol A <NSObject>
             @property BOOL a;
@@ -701,7 +701,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testLocalVariableDeclarationInitializedTransmitsNullabilityFromRightHandSide() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface MyClass
             - (nullable NSString*)optional;
@@ -762,7 +762,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testLocalVariableDeclarationInitializedTransmitsNullabilityFromRightHandSideWithSubclassing() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A
             @end
@@ -824,7 +824,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     /// Tests that when resolving types of block expressions we expose the parameters
     /// for the block as intrinsics as well
     func testBlockInvocationArgumentIntrinsics() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             typedef void(^_Nonnull Callback)(NSInteger);
             
@@ -866,7 +866,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     /// Test that local variables declared within blocks are scoped within
     /// blocks only.
     func testBlockInvocationRetainsDefinedLocalsWithinScope() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             typedef void(^_Nonnull Callback)();
             
@@ -908,7 +908,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testCapturingLocalsInBlocksFromOuterScopes() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             typedef void(^_Nonnull Callback)();
             NSString *takesBlockGlobal(void(^block)());
@@ -977,7 +977,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testAssignImplicitlyUnwrappedOptionalToLocalVariableEscalatesToOptional() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A
             - (A*)other;
@@ -1007,7 +1007,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testCreateNonOptionalLocalsWhenRHSInitializerIsNonOptional() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A
             - (nonnull A*)other;
@@ -1037,7 +1037,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testVisibilityOfGlobalElements() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             NSInteger global;
             void globalFunc();
@@ -1068,7 +1068,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testOutOfOrderTypeResolving() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation A (B)
             - (void)f1 {
@@ -1095,7 +1095,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testTypingInGlobalFunction() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             void global() {
                 [[A alloc] init];
@@ -1117,7 +1117,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testExtensionOfGlobalClass() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A : UIView
             @end
@@ -1156,7 +1156,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testForStatementIterator() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -1180,7 +1180,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testOverloadResolution() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A : UIView
             @property (nullable) UIView *a;
@@ -1221,7 +1221,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testTypeLookupInFoundationType() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             void test() {
                 NSMutableArray *array = [NSMutableArray array];
@@ -1247,7 +1247,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testCastTyping() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             void test() {
                 ((NSObject*)[[UIView alloc] init]).description;
@@ -1263,7 +1263,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testCLibOverloadResolution() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             void test() {
                 CGFloat f = 0;
@@ -1292,7 +1292,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
         // [<exp> colorWithAlphaComponent:] -> <exp>.withAlphaComponent()
         // These should be properly executed and the result be of the expected
         // UIColor type.
-        assertObjcParse(
+        assertRewrite(
             objc: """
             void test() {
                 [[UIColor lightGrayColor] colorWithAlphaComponent:0.2];
@@ -1308,7 +1308,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testOptionalProtocolInvocationOptionalAccess() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @protocol Protocol <NSObject>
             @optional
@@ -1344,7 +1344,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testBasicOverloadResolution() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             void test() {
                 CGFloat cgFloat = 0;
@@ -1385,7 +1385,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testTypingSubscript() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A
             @end

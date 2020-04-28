@@ -138,12 +138,12 @@ class TestSingleFileWriterOutput: WriterOutput, FileOutput {
 extension XCTestCase {
     
     @discardableResult
-    func assertObjcParse(objc: String, swift expectedSwift: String,
-                         options: SwiftSyntaxOptions = .default,
-                         rewriterSettings: SwiftRewriter.Settings = .default,
-                         expectsErrors: Bool = false,
-                         file: String = #file,
-                         line: Int = #line) -> SingleFileTestBuilder  {
+    func assertRewrite(objc: String, swift expectedSwift: String,
+                       options: SwiftSyntaxOptions = .default,
+                       rewriterSettings: SwiftRewriter.Settings = .default,
+                       expectsErrors: Bool = false,
+                       file: String = #file,
+                       line: Int = #line) -> SingleFileTestBuilder  {
         
         let test = SingleFileTestBuilder(test: self,
                                          objc: objc,

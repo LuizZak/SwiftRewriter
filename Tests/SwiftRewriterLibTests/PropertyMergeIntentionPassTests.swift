@@ -3,7 +3,7 @@ import SwiftRewriterLib
 
 class PropertyMergeIntentionPassTests: XCTestCase {
     func testPassWithGetterAndSetter() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface MyClass
             @property BOOL value;
@@ -33,7 +33,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
     }
     
     func testPassWithGetter() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface MyClass
             @property (readonly) BOOL value;
@@ -55,7 +55,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
     }
     
     func testPassWithGetterAndSetterWithSynthesizedField() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface MyClass
             {
@@ -89,7 +89,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
     }
     
     func testCollapsePropertiesAndMethods() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface MyClass
             @property (readonly) BOOL value;
@@ -110,7 +110,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
     }
     
     func testCollapsePropertiesAndMethodsWithTypeSignatureMatching() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             NS_ASSUME_NONNULL_BEGIN
             
@@ -144,7 +144,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
     }
     
     func testSetterOnly() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             NS_ASSUME_NONNULL_BEGIN
             

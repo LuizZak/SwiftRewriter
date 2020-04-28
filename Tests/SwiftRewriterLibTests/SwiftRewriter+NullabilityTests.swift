@@ -16,7 +16,7 @@ class SwiftRewriterNullabilityTests: XCTestCase {
         // as implicitly-unwrapped optional (in case no explicit nullability
         // annotations are defined)
         
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A
             - (instancetype)init;
@@ -48,7 +48,7 @@ class SwiftRewriterNullabilityTests: XCTestCase {
     }
     
     func testNilInitialValueWithSubsequentNonNilAssignment() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             @interface A
             - (instancetype)init;

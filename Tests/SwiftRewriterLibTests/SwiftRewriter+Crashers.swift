@@ -5,7 +5,7 @@ import GrammarModels
 
 class SwiftRewriterTests_Crashers: XCTestCase {
     func testCrashInSwitchCaseWithCompoundStatement() {
-        assertObjcParse(
+        assertRewrite(
             objc: """
             void test() {
                 switch (foo) {
