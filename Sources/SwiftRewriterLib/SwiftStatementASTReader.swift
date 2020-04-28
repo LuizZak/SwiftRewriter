@@ -94,8 +94,6 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
                                ctx.labeledStatement())
             ?? .unknown(UnknownASTContext(context: ctx.getText()))
         
-        // TODO: Perhaps we should only associate comments that come one line
-        // before the statement?
         stmt.comments = comments
         stmt.trailingComment = context.popClosestCommentAtTrailingLine(node: ctx)?.string.trimmingWhitespaces()
         
@@ -538,8 +536,6 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
 
             let varDeclStmt = Statement.variableDeclarations(declarations)
             
-            // TODO: Perhaps we should only associate comments that come one line
-            // before the statement?
             varDeclStmt.comments = context
                 .popClosestCommentsBefore(node: ctx)
                 .map { $0.string.trimmingWhitespaces() }

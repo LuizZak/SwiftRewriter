@@ -57,7 +57,7 @@ class DefaultTypeResolverInvokerTests: XCTestCase {
                     file.createClass(withName: "A") { type in
                         type.createProperty(named: "b", type: .typeName("B"))
                             .createMethod(named: "a") { method in
-                                method.createSignature(name: "b") { builder in
+                                method.createSignature { builder in
                                     builder.addParameter(name: "b", type: .optional(.typeName("B")))
                                 }
                                 method

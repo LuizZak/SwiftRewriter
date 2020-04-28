@@ -605,7 +605,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         return super.visitBlock(exp)
     }
     
-    // TODO: Handle if-let variable definition
     public override func visitIf(_ stmt: IfStatement) -> Statement {
         if let pattern = stmt.pattern {
             let result = super.visitIf(stmt)

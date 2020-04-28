@@ -10,6 +10,10 @@ public class DoStatement: Statement {
         [body]
     }
     
+    public override var isLabelableStatementType: Bool {
+        return true
+    }
+    
     public init(body: CompoundStatement) {
         self.body = body
         

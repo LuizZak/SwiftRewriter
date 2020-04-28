@@ -113,7 +113,7 @@ extension SwiftSyntaxProducer {
             }
         }
         
-        if let label = stmt.label, !isLabelableStatementType(stmt) {
+        if let label = stmt.label, !stmt.isLabelableStatementType {
             if !stmt.comments.isEmpty {
                 addExtraLeading(.newlines(1) + indentation())
             }
@@ -196,18 +196,6 @@ extension SwiftSyntaxProducer {
         }
         
         return list
-    }
-    
-    // TODO: This should be a property inside the Statement class
-    private func isLabelableStatementType(_ stmt: Statement) -> Bool {
-        switch stmt {
-        case is IfStatement, is SwitchStatement, is DoStatement, is ForStatement,
-             is WhileStatement, is DoWhileStatement:
-            return true
-            
-        default:
-            return false
-        }
     }
     
     func generateExpressions(_ stmt: ExpressionsStatement) -> [() -> CodeBlockItemSyntax] {

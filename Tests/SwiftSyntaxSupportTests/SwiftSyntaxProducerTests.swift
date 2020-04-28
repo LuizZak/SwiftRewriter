@@ -553,7 +553,7 @@ extension SwiftSyntaxProducerTests {
                 builder.createGlobalFunction(withName: "a") { builder in
                     builder.addComment("// A comment")
                     builder.setBody([])
-                    builder.createSignature(name: "a") { builder in
+                    builder.createSignature { builder in
                         builder.addParameter(name: "test", type: .int)
                     }
                 }
@@ -574,7 +574,7 @@ extension SwiftSyntaxProducerTests {
             .makeFileIntention(fileName: "Test.swift") { builder in
                 builder.createGlobalFunction(withName: "a") { builder in
                     builder.setBody([])
-                    builder.createSignature(name: "a") { builder in
+                    builder.createSignature { builder in
                         builder.setReturnType(.int)
                     }
                 }

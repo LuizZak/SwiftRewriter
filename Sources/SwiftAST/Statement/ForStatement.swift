@@ -31,6 +31,10 @@ public class ForStatement: Statement {
         _childrenNodes
     }
     
+    public override var isLabelableStatementType: Bool {
+        return true
+    }
+    
     public init(pattern: Pattern, exp: Expression, body: CompoundStatement) {
         self.pattern = pattern
         self.exp = exp

@@ -32,10 +32,7 @@ public enum AccessLevel: String, Codable {
             
         case (.open, .private),
              (.open, .fileprivate),
-             (.open, .internal),
-             // TODO: Should open be more 'visible' than public? It is technically more
-             // permissive, but not more visible than public.
-             (.open, .public):
+             (.open, .internal):
             return true
             
         default:

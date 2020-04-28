@@ -46,6 +46,10 @@ public class SwitchStatement: Statement {
         _childrenNodes
     }
     
+    public override var isLabelableStatementType: Bool {
+        return true
+    }
+    
     public init(exp: Expression, cases: [SwitchCase], defaultCase: [Statement]?) {
         self.exp = exp
         self.cases = cases

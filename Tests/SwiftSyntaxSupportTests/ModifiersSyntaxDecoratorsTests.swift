@@ -150,7 +150,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         
         assert(decorator: sut,
                element: .intention(makeProperty(.public)),
-               producesModifier: "public(set)")
+               producesModifier: nil)
         
         assert(decorator: sut,
                element: .intention(makeProperty(.internal)),

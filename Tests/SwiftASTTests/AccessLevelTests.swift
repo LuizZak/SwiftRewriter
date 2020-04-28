@@ -6,7 +6,7 @@ class AccessLevelTests: XCTestCase {
         XCTAssert(AccessLevel.open.isMoreAccessible(than: .private))
         XCTAssert(AccessLevel.open.isMoreAccessible(than: .fileprivate))
         XCTAssert(AccessLevel.open.isMoreAccessible(than: .internal))
-        XCTAssert(AccessLevel.open.isMoreAccessible(than: .public))
+        XCTAssertFalse(AccessLevel.open.isMoreAccessible(than: .public))
         XCTAssertFalse(AccessLevel.open.isMoreAccessible(than: .open))
 
         XCTAssert(AccessLevel.public.isMoreAccessible(than: .private))

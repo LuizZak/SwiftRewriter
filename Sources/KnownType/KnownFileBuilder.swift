@@ -19,8 +19,7 @@ public struct KnownFileBuilder {
                                       importDirectives: [])
     }
     
-    // TODO: Not public until we solve the TODO within this init down bellow
-    /*public*/ init(from existingFile: KnownFile) {
+    public init(from existingFile: KnownFile) {
         var file =
             BuildingKnownFile(fileName: existingFile.fileName,
                               buildingTypes: [],

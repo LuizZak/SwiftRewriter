@@ -7,6 +7,12 @@ public class Statement: SyntaxNode, Codable, Equatable {
         false
     }
     
+    /// Returns `true` if the type of the current statement instance supports
+    /// labels.
+    public var isLabelableStatementType: Bool {
+        return false
+    }
+    
     /// This statement label's (parsed from C's goto labels), if any.
     public var label: String?
     

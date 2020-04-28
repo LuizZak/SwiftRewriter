@@ -26,6 +26,10 @@ public class IfStatement: Statement {
         return [exp, body]
     }
     
+    public override var isLabelableStatementType: Bool {
+        return true
+    }
+    
     public init(exp: Expression, body: CompoundStatement, elseBody: CompoundStatement?, pattern: Pattern?) {
         self.exp = exp
         self.body = body

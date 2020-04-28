@@ -16,6 +16,10 @@ public class WhileStatement: Statement {
         [exp, body]
     }
     
+    public override var isLabelableStatementType: Bool {
+        return true
+    }
+    
     public init(exp: Expression, body: CompoundStatement) {
         self.exp = exp
         self.body = body
