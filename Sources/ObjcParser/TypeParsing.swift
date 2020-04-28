@@ -221,11 +221,14 @@ public class TypeParsing {
     }
     
     public func parseObjcType(from typeVariableDecl: Parser.TypeVariableDeclaratorContext) -> ObjcType? {
-        if let blockParameters = typeVariableDecl.declarator()?.directDeclarator()?.blockParameters() {
+        if let directDeclarator = typeVariableDecl.declarator()?.directDeclarator(),
+            let blockParameters = directDeclarator.blockParameters() {
+            
             guard let declarationSpecifiers = typeVariableDecl.declarationSpecifiers() else {
                 return nil
             }
             
+            let isFunctionPointer = directDeclarator.MUL() != nil
             let parameters = parseObjcTypes(from: blockParameters)
             
             guard let returnTypeName = VarDeclarationTypeExtractor.extract(from: declarationSpecifiers) else {
@@ -235,9 +238,17 @@ public class TypeParsing {
             
             let identifier = VarDeclarationIdentifierNameExtractor.extract(from: typeVariableDecl)
             
-            var type: ObjcType = .blockType(name: identifier?.getText(),
-                                            returnType: returnType,
-                                            parameters: parameters)
+            var type: ObjcType
+                
+            if isFunctionPointer {
+                type = .functionPointer(name: identifier?.getText(),
+                                        returnType: returnType,
+                                        parameters: parameters)
+            } else {
+                type = .blockType(name: identifier?.getText(),
+                                  returnType: returnType,
+                                  parameters: parameters)
+            }
             
             if let nullability = typeVariableDecl.declarator()?.directDeclarator()?.nullabilitySpecifier() {
                 type = .qualified(type, qualifiers: [nullability.getText()])

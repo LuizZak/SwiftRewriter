@@ -562,8 +562,7 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    // TODO: Fix this test
-    func xtestRewriteCFunctionWithCFunctionParameter() {
+    func testRewriteCFunctionWithCFunctionParameter() {
         assertObjcParse(
             objc: """
             typedef int (*cmpfn234_2)(void (*)(), void *);
