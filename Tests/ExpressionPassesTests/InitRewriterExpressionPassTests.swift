@@ -40,7 +40,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                                 .identifier("super").dot("init").call())
                 ),
                 
-                .if(.identifier("self"), body: [], else: nil),
+                .if(.identifier("self"), body: []),
                 
                 .return(.identifier("self"))
             ]),
@@ -77,7 +77,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                                 .identifier("self").dot("init").call())
                 ),
                 
-                .if(.identifier("self"), body: [], else: nil),
+                .if(.identifier("self"), body: []),
                 
                 .return(.identifier("self"))
             ]),
@@ -121,7 +121,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                             .identifier("self").dot("init")
                             .assignment(op: .assign, rhs: .identifier("property"))
                     )
-                ], else: nil),
+                ]),
                 
                 .return(.identifier("self"))
             ]),
@@ -168,8 +168,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                         ),
                         body: [
                             .return(.constant(.nil))
-                        ],
-                        else: nil),
+                        ]),
                     
                     .return(.identifier("self"))
                 ]),
@@ -213,8 +212,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                     ),
                     body: [
                         .return(.constant(.nil))
-                    ],
-                    else: nil),
+                    ]),
                 
                 .expression(
                     Expression

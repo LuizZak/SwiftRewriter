@@ -83,14 +83,11 @@ public extension ControlFlowGraph {
 
 private extension ControlFlowGraph {
     static func markBackEdges(in graph: ControlFlowGraph) {
-        var visited: Set<ControlFlowGraphNode> = []
         var queue: [(start: ControlFlowGraphNode, visited: [ControlFlowGraphNode])] = []
         
         queue.append((graph.entry, [graph.entry]))
         
         while let next = queue.popLast() {
-            visited.insert(next.start)
-        
             for nextEdge in graph.edges(from: next.start) {
                 let node = nextEdge.end
                 if next.visited.contains(node) {
@@ -155,9 +152,8 @@ private extension ControlFlowGraph {
         var previous = _NodeCreationResult(startNode: entry)
             .addingExitNode(entry)
         
-        previous =
-            _connections(for: statements, start: previous)
-                .returnToExits()
+        previous = _connections(for: statements, start: previous)
+            .returnToExits()
         
         previous.apply(to: graph, endNode: exit)
         
@@ -182,9 +178,8 @@ private extension ControlFlowGraph {
             
             let connections = _connections(for: statement)
             
-            previous =
-                previous
-                    .chainingExits(to: connections.appendingDefers(activeDefers))
+            previous = previous
+                .chainingExits(to: connections.appendingDefers(activeDefers))
         }
         
         return previous.appendingExitDefers(activeDefers)
@@ -199,12 +194,11 @@ private extension ControlFlowGraph {
         var result: _NodeCreationResult
         
         switch statement {
-        case is ExpressionsStatement,
-             is VariableDeclarationsStatement:
-            let node = ControlFlowGraphNode(node: statement)
+        case let statement as ExpressionsStatement:
+            result = _connections(forExpressions: statement)
             
-            result = _NodeCreationResult(startNode: node)
-                .addingExitNode(node)
+        case let statement as VariableDeclarationsStatement:
+            result = _connections(forDeclarations: statement)
             
         case let statement as BreakStatement:
             let node = ControlFlowGraphNode(node: statement)
@@ -268,6 +262,20 @@ private extension ControlFlowGraph {
         return result
     }
     
+    static func _connections(forExpressions statement: ExpressionsStatement) -> _NodeCreationResult {
+        let node = ControlFlowGraphNode(node: statement)
+        
+        return _NodeCreationResult(startNode: node)
+            .addingExitNode(node)
+    }
+    
+    static func _connections(forDeclarations statement: VariableDeclarationsStatement) -> _NodeCreationResult {
+        let node = ControlFlowGraphNode(node: statement)
+        
+        return _NodeCreationResult(startNode: node)
+            .addingExitNode(node)
+    }
+    
     static func _connections(forFallthrough stmt: FallthroughStatement) -> _NodeCreationResult {
         let node = ControlFlowGraphNode(node: stmt)
         
@@ -307,9 +315,8 @@ private extension ControlFlowGraph {
                     branch = branch.addingJumpInto(from: lastFallthrough)
                 }
                 
-                result =
-                    result
-                        .addingBranch(towards: branch.satisfyingFallthroughs().breakToExits())
+                result = result
+                    .addingBranch(towards: branch.satisfyingFallthroughs().breakToExits())
                 
                 lastFallthrough = branch.fallthroughNodes
             } else {
@@ -338,12 +345,12 @@ private extension ControlFlowGraph {
         let bodyConnections = _connections(for: stmt.body)
         
         if bodyConnections.isValid {
-            result =
-                result.addingBranch(towards: bodyConnections)
-                    .connectingExits(to: result.startNode)
-                    .breakToExits(targetLabel: stmt.label)
-                    .connectingContinues(label: stmt.label, to: result.startNode)
-                    .satisfyingContinues(label: stmt.label)
+            result = result
+                .addingBranch(towards: bodyConnections)
+                .connectingExits(to: result.startNode)
+                .breakToExits(targetLabel: stmt.label)
+                .connectingContinues(label: stmt.label, to: result.startNode)
+                .satisfyingContinues(label: stmt.label)
         } else {
             result = result
                 .addingExitNode(node)
@@ -368,12 +375,11 @@ private extension ControlFlowGraph {
                     .connectingContinues(label: stmt.label, to: bodyConnections.startNode)
                     .satisfyingContinues(label: stmt.label)
             
-            result =
-                result
-                    .addingExitNode(node)
-                    .connectingExits(to: bodyConnections.startNode)
-                    .addingExitNode(node)
-                    .breakToExits(targetLabel: stmt.label)
+            result = result
+                .addingExitNode(node)
+                .connectingExits(to: bodyConnections.startNode)
+                .addingExitNode(node)
+                .breakToExits(targetLabel: stmt.label)
         } else {
             result = result
                 .addingExitNode(node)

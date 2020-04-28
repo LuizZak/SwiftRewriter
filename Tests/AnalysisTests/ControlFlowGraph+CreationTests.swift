@@ -160,8 +160,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                     .expression(
                         Expression.identifier("print").call([.constant("Did work!")])
                     )
-                ],
-                else: nil)
+                ])
         ]
         
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
@@ -275,8 +274,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                                 .identifier("precidate"),
                                 body: [
                                     .continue(targetLabel: "outer")
-                                ],
-                                else: nil)
+                                ])
                         ]
                     )
                 ]
@@ -657,8 +655,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                                 .identifier("predicate"),
                                 body: [
                                     .break()
-                                ],
-                                else: nil),
+                                ]),
                             .expression(.identifier("d"))
                         ]
                     )
@@ -717,8 +714,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                                 .identifier("predicate"),
                                 body: [
                                     .fallthrough
-                                ],
-                                else: nil),
+                                ]),
                             .expression(.identifier("d")),
                             .defer([
                                 .expression(.identifier("e"))
@@ -793,15 +789,13 @@ class ControlFlowGraphCreationTests: XCTestCase {
                                 body: [
                                     .expression(.identifier("d")),
                                     .fallthrough
-                                ],
-                                else: nil),
+                                ]),
                             .expression(.identifier("e")),
                             Statement.if(
                                 .identifier("predicate"),
                                 body: [
                                     .return(nil)
-                                ],
-                                else: nil),
+                                ]),
                             .defer([
                                 .expression(.identifier("f"))
                             ])
@@ -1315,8 +1309,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                         Statement.expression(.identifier("c"))
                     ]),
                     Statement.expression(.identifier("d"))
-                ],
-                else: nil
+                ]
             ),
             Statement.expression(.identifier("e"))
         ]
@@ -1537,8 +1530,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                             .if(.identifier("precidate"),
                                 body: [
                                     .break(targetLabel: "outer")
-                                ],
-                                else: nil)
+                                ])
                         ]
                     )
                 ]
@@ -1596,8 +1588,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                             .if(.identifier("precidate"),
                                 body: [
                                     .continue(targetLabel: "outer")
-                                ],
-                                else: nil)
+                                ])
                         ]
                     )
                 ]
@@ -1647,8 +1638,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 .identifier("predicate"),
                 body: [
                     .return(.constant(0))
-                ],
-                else: nil
+                ]
             ),
             Statement.defer([
                 Statement.expression(.identifier("c"))

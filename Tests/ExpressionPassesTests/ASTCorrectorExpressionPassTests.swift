@@ -451,15 +451,14 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         exp.resolvedType = .optional(.bool)
         exp.expectedType = .bool
         
-        let stmt = Statement.if(exp, body: [], else: nil)
+        let stmt = Statement.if(exp, body: [])
         
         assertTransform(
             // if (a.b) { }
             statement: stmt,
             // if (a.b == true) { }
             into: Statement.if(expMaker().binary(op: .equals, rhs: .constant(true)),
-                               body: [],
-                               else: nil)
+                               body: [])
         ); assertNotifiedChange()
     }
     
@@ -472,15 +471,14 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         exp.exp.resolvedType = .optional(.bool)
         exp.expectedType = .bool
         
-        let stmt = Statement.if(exp, body: [], else: nil)
+        let stmt = Statement.if(exp, body: [])
         
         assertTransform(
             // if !a.b { }
             statement: stmt,
             // if (a.b != true) { }
             into: Statement.if(.parens(expMaker().binary(op: .unequals, rhs: .constant(true))),
-                               body: [],
-                               else: nil)
+                               body: [])
         ); assertNotifiedChange()
     }
     
@@ -493,15 +491,14 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         exp.resolvedType = .int
         exp.expectedType = .bool
         
-        let stmt = Statement.if(exp, body: [], else: nil)
+        let stmt = Statement.if(exp, body: [])
         
         assertTransform(
             // if (num) { }
             statement: stmt,
             // if (num != 0) { }
             into: Statement.if(expMaker().binary(op: .unequals, rhs: .constant(0)),
-                               body: [],
-                               else: nil)
+                               body: [])
         ); assertNotifiedChange()
     }
     
@@ -513,15 +510,14 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         exp.exp.resolvedType = .int
         exp.expectedType = .bool
         
-        let stmt = Statement.if(exp, body: [], else: nil)
+        let stmt = Statement.if(exp, body: [])
         
         assertTransform(
             // if !num { }
             statement: stmt,
             // if (num == 0) { }
             into: Statement.if(.parens(Expression.identifier("num").binary(op: .equals, rhs: .constant(0))),
-                               body: [],
-                               else: nil)
+                               body: [])
         ); assertNotifiedChange()
     }
     
@@ -533,15 +529,14 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         exp.resolvedType = .optional(.implicitUnwrappedOptional(.int))
         exp.expectedType = .bool
         
-        let stmt = Statement.if(exp, body: [], else: nil)
+        let stmt = Statement.if(exp, body: [])
         
         assertTransform(
             // if (num) { }
             statement: stmt,
             // if (num != 0) { }
             into: Statement.if(expMaker().binary(op: .unequals, rhs: .constant(0)),
-                               body: [],
-                               else: nil)
+                               body: [])
         ); assertNotifiedChange()
     }
     
@@ -554,15 +549,14 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         exp.resolvedType = .optional(.typeName("NSObject"))
         exp.expectedType = .bool
         
-        let stmt = Statement.if(exp, body: [], else: nil)
+        let stmt = Statement.if(exp, body: [])
         
         assertTransform(
             // if (obj) { }
             statement: stmt,
             // if (obj != nil) { }
             into: Statement.if(expMaker().binary(op: .unequals, rhs: .constant(.nil)),
-                               body: [],
-                               else: nil)
+                               body: [])
         ); assertNotifiedChange()
     }
     
@@ -576,15 +570,14 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         exp.expectedType = .bool
         exp.exp.expectedType = .bool
         
-        let stmt = Statement.if(exp, body: [], else: nil)
+        let stmt = Statement.if(exp, body: [])
         
         assertTransform(
             // if !obj { }
             statement: stmt,
             // if (obj == nil) { }
             into: Statement.if(.parens(expMaker().binary(op: .equals, rhs: .constant(.nil))),
-                               body: [],
-                               else: nil)
+                               body: [])
         ); assertNotifiedChange()
     }
     
@@ -595,15 +588,14 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         let exp = expMaker()
         exp.expectedType = .bool
         
-        let stmt = Statement.if(exp, body: [], else: nil)
+        let stmt = Statement.if(exp, body: [])
         
         assertTransform(
             // if (a.b) { }
             statement: stmt,
             // if (a.b == true) { }
             into: Statement.if(expMaker(),
-                               body: [],
-                               else: nil)
+                               body: [])
         ); assertDidNotNotifyChange()
     }
     
@@ -726,7 +718,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                 Pattern.identifier("b"), .identifier("b"),
                 body: [
                     .expression(Expression.identifier("a").call([Expression.identifier("b")]))
-                ], else: nil)
+                ])
         ); assertNotifiedChange()
     }
     
@@ -748,7 +740,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                 Pattern.identifier("c"), Expression.identifier("b").dot("c"),
                 body: [
                     .expression(Expression.identifier("a").call([Expression.identifier("c")]))
-                ], else: nil)
+                ])
         ); assertNotifiedChange()
     }
     
@@ -771,7 +763,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                 Pattern.identifier("c"), Expression.identifier("b").dot("c").call(),
                 body: [
                     .expression(Expression.identifier("a").call([Expression.identifier("c")]))
-                ], else: nil)
+                ])
         ); assertNotifiedChange()
     }
     
@@ -795,7 +787,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                 Pattern.identifier("value"), Expression.identifier("b").call(),
                 body: [
                     .expression(Expression.identifier("a").call([Expression.identifier("value")]))
-                ], else: nil)
+                ])
         ); assertNotifiedChange()
     }
     

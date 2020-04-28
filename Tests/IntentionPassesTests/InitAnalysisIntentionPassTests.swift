@@ -56,7 +56,7 @@ class InitAnalysisIntentionPassTests: XCTestCase {
             .if(Expression.identifier("self").binary(op: .equals, rhs: .constant(.nil)),
                 body: [
                     .return(.constant(.nil))
-                ], else: nil)
+                ])
         ])
     }
     
@@ -78,7 +78,7 @@ class InitAnalysisIntentionPassTests: XCTestCase {
                 ),
                 body: [
                     .return(.constant(.nil))
-                ], else: nil)
+                ])
             ])
     }
     
@@ -100,7 +100,7 @@ class InitAnalysisIntentionPassTests: XCTestCase {
                 ),
                 body: [
                     .return(.constant(.nil))
-                ], else: nil)
+                ])
             ])
     }
 }

@@ -853,7 +853,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     /// Tests expressions on `if` statements have expectedType set to boolean.
     func testIfStatementSetsExpectedTypeOfExpressionsToBoolean() {
         _=startScopedTest(with:
-            Statement.if(.constant(0), body: [], else: nil),
+            Statement.if(.constant(0), body: []),
                           sut: ExpressionTypeResolver())
             .thenAssertExpression(at: \Statement.asIf?.exp, expectsType: .bool)
     }
@@ -1170,7 +1170,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testBackPropagateBlockLiteralInIfStatement() {
         // Test that back-propagation from statement expressions work as well
         startScopedTest(
-            with: Statement.if(Expression.block(parameters: [.init(name: "p", type: .int)], return: .bool, body: []).call([.constant(0)]), body: [], else: nil),
+            with: Statement.if(Expression.block(parameters: [.init(name: "p", type: .int)], return: .bool, body: []).call([.constant(0)]), body: []),
             sut: ExpressionTypeResolver())
             .thenAssertExpression(
                 at: \Statement.asIf?.exp.asPostfix?.exp,

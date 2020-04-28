@@ -167,7 +167,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
     
     func testIfStatement() {
         assert(
-            Statement.if(.constant(true), body: [], else: nil),
+            Statement.if(.constant(true), body: []),
             producer: SwiftSyntaxProducer.generateIfStmt,
             matches: """
                 if true {
@@ -208,7 +208,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
     
     func testIfLetStatement() {
         assert(
-            Statement.ifLet(.identifier("value"), .identifier("exp"), body: [], else: nil),
+            Statement.ifLet(.identifier("value"), .identifier("exp"), body: []),
             producer: SwiftSyntaxProducer.generateIfStmt,
             matches: """
                 if let value = exp {
@@ -457,7 +457,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
     }
     
     func testLabeledIfStatement() {
-        let stmt = Statement.if(.constant(true), body: [], else: nil).labeled("label")
+        let stmt = Statement.if(.constant(true), body: []).labeled("label")
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
         
         assert(syntaxes, matches: """
@@ -566,7 +566,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
     func testCommentAndLabelInLabelableStatement() {
         let stmt: CompoundStatement = [
             Statement
-                .if(.identifier("value"), body: [], else: nil)
+                .if(.identifier("value"), body: [])
                 .withComments(["// A Comment", "// Another Comment"])
                 .labeled("label")
         ]
@@ -601,7 +601,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
     func testTrailingCommentInStatement() {
         let stmt: CompoundStatement = [
             Statement
-                .if(.identifier("value"), body: [], else: nil)
+                .if(.identifier("value"), body: [])
                 .withTrailingComment("// A trailing comment")
         ]
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)

@@ -70,8 +70,7 @@ class ReachingDefinitionAnalysisTests: XCTestCase {
                             .identifier("a")
                             .assignment(op: .assign, rhs: .constant(1))
                     )
-                ],
-                else: nil),
+                ]),
             Statement.expression(.identifier("a"))
         ]
         setupTest(with: body)

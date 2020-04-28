@@ -114,7 +114,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                 .if(Expression.identifier("value").dot("member").binary(op: .unequals, rhs: .constant(.nil)),
                     body: [
                         .expression(Expression.identifier("value").dot("member").call())
-                    ], else: nil)
+                    ])
         ); assertDidNotNotifyChange()
     }
     
@@ -189,9 +189,9 @@ class ASTSimplifierTests: ExpressionPassTestCase {
     func testSimplifyParenthesisInIfExpression() {
         assertTransform(
             // if (a) { }
-            statement: Statement.if(.parens(.constant(0)), body: [], else: nil),
+            statement: Statement.if(.parens(.constant(0)), body: []),
             // if a { }
-            into: Statement.if(.constant(0), body: [], else: nil)
+            into: Statement.if(.constant(0), body: [])
         ); assertNotifiedChange()
     }
     

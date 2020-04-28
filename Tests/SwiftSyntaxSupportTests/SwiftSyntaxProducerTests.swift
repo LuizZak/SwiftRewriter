@@ -523,8 +523,7 @@ extension SwiftSyntaxProducerTests {
                                     .identifier("print")
                                     .call([.constant("Hello,"),
                                            .constant("World!")]))
-                            ],
-                            else: nil
+                            ]
                         ),
                         .return(nil)
                     ])

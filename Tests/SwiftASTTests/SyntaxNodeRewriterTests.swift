@@ -13,8 +13,7 @@ class SyntaxNodeRewriterTests: XCTestCase {
                             Expression.identifier("a").optional().call(),
                             Expression.identifier("a").optional().sub(.identifier("b"))
                         ])
-                    ],
-                    else: nil),
+                    ]),
                 .while(Expression.identifier("a"),
                        body: [
                         .break()

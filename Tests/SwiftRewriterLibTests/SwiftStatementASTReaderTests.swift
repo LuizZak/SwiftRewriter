@@ -22,7 +22,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
     
     func testIfStatement() {
         assert(objcStmt: "if(abc) { }",
-               readsAs: .if(.identifier("abc"), body: .empty, else: nil)
+               readsAs: .if(.identifier("abc"), body: .empty)
         )
         
         assert(objcStmt: "if(abc) { } else { }",
@@ -32,7 +32,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         assert(objcStmt: "if(abc) { } else if(def) { }",
                readsAs: .if(.identifier("abc"),
                             body: .empty,
-                            else: CompoundStatement(statements: [.if(.identifier("def"), body: .empty, else: nil)]))
+                            else: CompoundStatement(statements: [.if(.identifier("def"), body: .empty)]))
         )
     }
     
@@ -263,7 +263,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
     
     func testLabeledStatement() {
         let stmt = assert(objcStmt: "label: if(true) { };",
-               readsAs: Statement.if(.constant(true), body: [], else: nil).labeled("label")
+               readsAs: Statement.if(.constant(true), body: []).labeled("label")
             )
         
         XCTAssertEqual(stmt?.label, "label")
@@ -412,7 +412,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
                     Statement
                         .return(.identifier("def"))
                         .withComments(["// Return"])
-                ], else: nil)
+                ])
                 .withComments(["// Check value"])
         ]
         
@@ -446,7 +446,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         let objcParser = ObjcParser(string: string)
         try objcParser.parse()
         let comments = objcParser.comments
-        let expected = Statement.if(.constant(true), body: [], else: nil)
+        let expected = Statement.if(.constant(true), body: [])
         expected.trailingComment = "// A trailing comment"
         
         assert(objcStmt: string,

@@ -103,8 +103,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
                 .identifier(name), argument.copy(),
                 body: [
                     .expression(newPostfix)
-                ],
-                else: nil)
+                ])
         
         notifyChange()
         
