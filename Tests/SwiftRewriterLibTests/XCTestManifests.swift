@@ -233,6 +233,7 @@ extension SwiftRewriterTests {
         ("testRewriteBlockTypeDefWithVoidParameterList", testRewriteBlockTypeDefWithVoidParameterList),
         ("testRewriteBlockWithinBlocksIvars", testRewriteBlockWithinBlocksIvars),
         ("testRewriteCFunctionPointerTypeDef", testRewriteCFunctionPointerTypeDef),
+        ("testRewriteCFunctionWithCFunctionParameter", testRewriteCFunctionWithCFunctionParameter),
         ("testRewriteChainedSubscriptAccess", testRewriteChainedSubscriptAccess),
         ("testRewriteClassProperties", testRewriteClassProperties),
         ("testRewriteClassProperty", testRewriteClassProperty),

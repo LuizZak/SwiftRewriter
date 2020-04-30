@@ -116,6 +116,7 @@ extension FunctionSignatureTests {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__FunctionSignatureTests = [
+        ("testPossibleIdentifierSignatures", testPossibleIdentifierSignatures),
         ("testPossibleSelectorSignatures", testPossibleSelectorSignatures),
     ]
 }
@@ -147,6 +148,7 @@ extension StatementTests {
     // to regenerate.
     static let __allTests__StatementTests = [
         ("testCreatingCompoundStatementWithLiteralProperlySetsParents", testCreatingCompoundStatementWithLiteralProperlySetsParents),
+        ("testIsLabelableStatementType", testIsLabelableStatementType),
     ]
 }
 

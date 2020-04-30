@@ -28,6 +28,7 @@ extension SwiftSyntaxProducerTests {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__SwiftSyntaxProducerTests = [
+        ("testEmitObjcCompatibility", testEmitObjcCompatibility),
         ("testGenerateEmptyFile", testGenerateEmptyFile),
         ("testGenerateExpressionTypes", testGenerateExpressionTypes),
         ("testGenerateFileWithClassWithComputedProperty", testGenerateFileWithClassWithComputedProperty),

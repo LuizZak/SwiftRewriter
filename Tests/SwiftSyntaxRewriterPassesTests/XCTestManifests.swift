@@ -18,7 +18,13 @@ extension StatementSpacingSyntaxPassTests {
         ("testAddSpacingBetweenExpressionAndStatements", testAddSpacingBetweenExpressionAndStatements),
         ("testDontApplySpacingToFirstExpressionInMethod", testDontApplySpacingToFirstExpressionInMethod),
         ("testKeepExistingLeadingTrivia", testKeepExistingLeadingTrivia),
+        ("testNestedStatement", testNestedStatement),
         ("testRewrite", testRewrite),
+        ("testRewriteDetectSelfPropertyAccesses", testRewriteDetectSelfPropertyAccesses),
+        ("testRewriterBlockStatementInClosure", testRewriterBlockStatementInClosure),
+        ("testRewriteRepeatedIdentifiers", testRewriteRepeatedIdentifiers),
+        ("testRewriteRepeatedIdentifiersIgnoresTrivia", testRewriteRepeatedIdentifiersIgnoresTrivia),
+        ("testRewriterInClosure", testRewriterInClosure),
     ]
 }
 
