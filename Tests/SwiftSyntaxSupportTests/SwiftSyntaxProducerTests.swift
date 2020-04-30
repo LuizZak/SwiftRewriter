@@ -460,13 +460,10 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        // TODO: Consider removing the extra line feed in case an empty file is
-        // generated.
         assert(result, matches: """
             // Preprocessor directives found in file:
             // #import <Abc.h>
             // #define MAX(a, b) ((a) > (b) ? (a) : (b))
-            
             """)
     }
     

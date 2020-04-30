@@ -197,7 +197,7 @@ extension SwiftSyntaxProducer {
                 builder.addStatement(codeBlock)
             }
             
-            var hasHeaderTrivia: Bool = false
+            var hasHeaderTrivia = false
             if let headerTrivia = generatePreprocessorDirectivesTrivia(file) {
                 hasHeaderTrivia = true
                 addExtraLeading(headerTrivia)
@@ -273,6 +273,8 @@ extension SwiftSyntaxProducer {
             // Noone consumed the leading trivia - emit a dummy token just so we
             // can have a file with preprocessor directives in place
             if !didModifyExtraLeading && hasHeaderTrivia {
+                extraLeading = extraLeading.map { Trivia(pieces: $0.dropLast()) }
+                
                 let item = CodeBlockItemSyntax { builder in
                     builder.useItem(SyntaxFactory
                         .makeToken(TokenKind.identifier(""),
