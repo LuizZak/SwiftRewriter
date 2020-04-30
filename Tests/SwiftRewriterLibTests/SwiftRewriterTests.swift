@@ -926,7 +926,6 @@ class SwiftRewriterTests: XCTestCase {
             // #if 0
             // #endif
             // #define MACRO 123
-
             """)
     }
     
@@ -942,7 +941,6 @@ class SwiftRewriterTests: XCTestCase {
             // Preprocessor directives found in file:
             // #if 0
             // #endif
-
             """)
     }
     
