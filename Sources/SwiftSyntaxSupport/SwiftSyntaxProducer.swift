@@ -10,7 +10,7 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
     // TODO: Come up with a better way to keep track of changes to leading
     // indentation.
     // This is currently used to emit an empty, dummy token with this trailing,
-    // in case a file with just import directive comments is encountered.
+    // in case a file with just compiler directive comments is encountered.
     var didModifyExtraLeading = false
     override var extraLeading: Trivia? {
         didSet {
