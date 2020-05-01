@@ -1,4 +1,4 @@
-// Generated from /Users/luizsilva/Desktop/grammars-v4-master/objc/two-step-processing/ObjectiveCPreprocessorParser.g4 by ANTLR 4.7
+// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/two-step-processing/ObjectiveCPreprocessorParser.g4 by ANTLR 4.8
 import Antlr4
 
 /**
@@ -15,7 +15,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitObjectiveCDocument(_ ctx: ObjectiveCPreprocessorParser.ObjectiveCDocumentContext) -> T{
+	open func visitObjectiveCDocument(_ ctx: ObjectiveCPreprocessorParser.ObjectiveCDocumentContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -25,7 +25,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitText(_ ctx: ObjectiveCPreprocessorParser.TextContext) -> T{
+	open func visitText(_ ctx: ObjectiveCPreprocessorParser.TextContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -35,7 +35,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitCode(_ ctx: ObjectiveCPreprocessorParser.CodeContext) -> T{
+	open func visitCode(_ ctx: ObjectiveCPreprocessorParser.CodeContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -46,7 +46,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitPreprocessorImport(_ ctx: ObjectiveCPreprocessorParser.PreprocessorImportContext) -> T{
+	open func visitPreprocessorImport(_ ctx: ObjectiveCPreprocessorParser.PreprocessorImportContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -57,7 +57,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitPreprocessorConditional(_ ctx: ObjectiveCPreprocessorParser.PreprocessorConditionalContext) -> T{
+	open func visitPreprocessorConditional(_ ctx: ObjectiveCPreprocessorParser.PreprocessorConditionalContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -68,7 +68,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitPreprocessorDef(_ ctx: ObjectiveCPreprocessorParser.PreprocessorDefContext) -> T{
+	open func visitPreprocessorDef(_ ctx: ObjectiveCPreprocessorParser.PreprocessorDefContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -79,7 +79,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitPreprocessorPragma(_ ctx: ObjectiveCPreprocessorParser.PreprocessorPragmaContext) -> T{
+	open func visitPreprocessorPragma(_ ctx: ObjectiveCPreprocessorParser.PreprocessorPragmaContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -90,7 +90,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitPreprocessorError(_ ctx: ObjectiveCPreprocessorParser.PreprocessorErrorContext) -> T{
+	open func visitPreprocessorError(_ ctx: ObjectiveCPreprocessorParser.PreprocessorErrorContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -101,7 +101,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitPreprocessorWarning(_ ctx: ObjectiveCPreprocessorParser.PreprocessorWarningContext) -> T{
+	open func visitPreprocessorWarning(_ ctx: ObjectiveCPreprocessorParser.PreprocessorWarningContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -112,7 +112,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitPreprocessorDefine(_ ctx: ObjectiveCPreprocessorParser.PreprocessorDefineContext) -> T{
+	open func visitPreprocessorDefine(_ ctx: ObjectiveCPreprocessorParser.PreprocessorDefineContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -122,7 +122,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitDirective_text(_ ctx: ObjectiveCPreprocessorParser.Directive_textContext) -> T{
+	open func visitDirective_text(_ ctx: ObjectiveCPreprocessorParser.Directive_textContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -133,7 +133,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitPreprocessorParenthesis(_ ctx: ObjectiveCPreprocessorParser.PreprocessorParenthesisContext) -> T{
+	open func visitPreprocessorParenthesis(_ ctx: ObjectiveCPreprocessorParser.PreprocessorParenthesisContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -144,7 +144,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitPreprocessorNot(_ ctx: ObjectiveCPreprocessorParser.PreprocessorNotContext) -> T{
+	open func visitPreprocessorNot(_ ctx: ObjectiveCPreprocessorParser.PreprocessorNotContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -155,7 +155,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitPreprocessorBinary(_ ctx: ObjectiveCPreprocessorParser.PreprocessorBinaryContext) -> T{
+	open func visitPreprocessorBinary(_ ctx: ObjectiveCPreprocessorParser.PreprocessorBinaryContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -166,7 +166,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitPreprocessorConstant(_ ctx: ObjectiveCPreprocessorParser.PreprocessorConstantContext) -> T{
+	open func visitPreprocessorConstant(_ ctx: ObjectiveCPreprocessorParser.PreprocessorConstantContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -177,7 +177,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitPreprocessorConditionalSymbol(_ ctx: ObjectiveCPreprocessorParser.PreprocessorConditionalSymbolContext) -> T{
+	open func visitPreprocessorConditionalSymbol(_ ctx: ObjectiveCPreprocessorParser.PreprocessorConditionalSymbolContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -188,7 +188,7 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitPreprocessorDefined(_ ctx: ObjectiveCPreprocessorParser.PreprocessorDefinedContext) -> T{
+	open func visitPreprocessorDefined(_ ctx: ObjectiveCPreprocessorParser.PreprocessorDefinedContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 

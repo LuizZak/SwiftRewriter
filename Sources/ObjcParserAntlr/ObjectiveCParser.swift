@@ -1,8 +1,9 @@
-// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/ObjectiveCParser.g4 by ANTLR 4.7
+// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/ObjectiveCParser.g4 by ANTLR 4.8
 import Antlr4
 
 open class ObjectiveCParser: Parser {
-    public class State {
+
+	public class State {
         public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
         
         internal var _decisionToDFA: [DFA<ParserATNConfig>]
@@ -31,7 +32,8 @@ open class ObjectiveCParser: Parser {
     
     public var state: State
 
-	public enum Tokens: Int {
+	public
+	enum Tokens: Int {
 		case EOF = -1, AUTO = 1, BREAK = 2, CASE = 3, CHAR = 4, CONST = 5, CONTINUE = 6, 
                  DEFAULT = 7, DO = 8, DOUBLE = 9, ELSE = 10, ENUM = 11, 
                  EXTERN = 12, FLOAT = 13, FOR = 14, GOTO = 15, IF = 16, 
@@ -91,78 +93,72 @@ open class ObjectiveCParser: Parser {
                  DIRECTIVE_SINGLE_COMMENT = 219, DIRECTIVE_BACKSLASH_NEWLINE = 220, 
                  DIRECTIVE_TEXT_NEWLINE = 221, DIRECTIVE_TEXT = 222
 	}
-	public static let RULE_translationUnit = 0, RULE_topLevelDeclaration = 1, 
-                   RULE_importDeclaration = 2, RULE_classInterface = 3, 
-                   RULE_classInterfaceName = 4, RULE_categoryInterface = 5, 
-                   RULE_classImplementation = 6, RULE_classImplementatioName = 7, 
-                   RULE_categoryImplementation = 8, RULE_className = 9, 
-                   RULE_superclassName = 10, RULE_genericSuperclassName = 11, 
-                   RULE_genericTypeSpecifier = 12, RULE_genericSuperclassSpecifier = 13, 
-                   RULE_superclassTypeSpecifierWithPrefixes = 14, RULE_protocolDeclaration = 15, 
-                   RULE_protocolDeclarationSection = 16, RULE_protocolDeclarationList = 17, 
-                   RULE_classDeclarationList = 18, RULE_protocolList = 19, 
-                   RULE_propertyDeclaration = 20, RULE_propertyAttributesList = 21, 
-                   RULE_propertyAttribute = 22, RULE_protocolName = 23, 
-                   RULE_instanceVariables = 24, RULE_visibilitySection = 25, 
-                   RULE_accessModifier = 26, RULE_interfaceDeclarationList = 27, 
-                   RULE_classMethodDeclaration = 28, RULE_instanceMethodDeclaration = 29, 
-                   RULE_methodDeclaration = 30, RULE_implementationDefinitionList = 31, 
-                   RULE_classMethodDefinition = 32, RULE_instanceMethodDefinition = 33, 
-                   RULE_methodDefinition = 34, RULE_methodSelector = 35, 
-                   RULE_keywordDeclarator = 36, RULE_selector = 37, RULE_methodType = 38, 
-                   RULE_propertyImplementation = 39, RULE_propertySynthesizeList = 40, 
-                   RULE_propertySynthesizeItem = 41, RULE_blockType = 42, 
-                   RULE_genericsSpecifier = 43, RULE_typeSpecifierWithPrefixes = 44, 
-                   RULE_dictionaryExpression = 45, RULE_dictionaryPair = 46, 
-                   RULE_arrayExpression = 47, RULE_boxExpression = 48, RULE_blockParameters = 49, 
-                   RULE_typeVariableDeclaratorOrName = 50, RULE_blockExpression = 51, 
-                   RULE_messageExpression = 52, RULE_receiver = 53, RULE_messageSelector = 54, 
-                   RULE_keywordArgument = 55, RULE_keywordArgumentType = 56, 
-                   RULE_selectorExpression = 57, RULE_selectorName = 58, 
-                   RULE_protocolExpression = 59, RULE_encodeExpression = 60, 
-                   RULE_typeVariableDeclarator = 61, RULE_throwStatement = 62, 
-                   RULE_tryBlock = 63, RULE_catchStatement = 64, RULE_synchronizedStatement = 65, 
-                   RULE_autoreleaseStatement = 66, RULE_functionDeclaration = 67, 
-                   RULE_functionDefinition = 68, RULE_functionSignature = 69, 
-                   RULE_attribute = 70, RULE_attributeName = 71, RULE_attributeParameters = 72, 
-                   RULE_attributeParameterList = 73, RULE_attributeParameter = 74, 
-                   RULE_attributeParameterAssignment = 75, RULE_declaration = 76, 
-                   RULE_functionPointer = 77, RULE_functionPointerParameterList = 78, 
-                   RULE_functionPointerParameterDeclarationList = 79, RULE_functionPointerParameterDeclaration = 80, 
-                   RULE_functionCallExpression = 81, RULE_enumDeclaration = 82, 
-                   RULE_varDeclaration = 83, RULE_typedefDeclaration = 84, 
-                   RULE_typeDeclaratorList = 85, RULE_declarationSpecifiers = 86, 
-                   RULE_attributeSpecifier = 87, RULE_initDeclaratorList = 88, 
-                   RULE_initDeclarator = 89, RULE_structOrUnionSpecifier = 90, 
-                   RULE_fieldDeclaration = 91, RULE_specifierQualifierList = 92, 
-                   RULE_ibOutletQualifier = 93, RULE_arcBehaviourSpecifier = 94, 
-                   RULE_nullabilitySpecifier = 95, RULE_storageClassSpecifier = 96, 
-                   RULE_typePrefix = 97, RULE_typeQualifier = 98, RULE_protocolQualifier = 99, 
-                   RULE_typeSpecifier = 100, RULE_scalarTypeSpecifier = 101, 
-                   RULE_typeofExpression = 102, RULE_fieldDeclaratorList = 103, 
-                   RULE_fieldDeclarator = 104, RULE_enumSpecifier = 105, 
-                   RULE_enumeratorList = 106, RULE_enumerator = 107, RULE_enumeratorIdentifier = 108, 
-                   RULE_directDeclarator = 109, RULE_declaratorSuffix = 110, 
-                   RULE_parameterList = 111, RULE_pointer = 112, RULE_macro = 113, 
-                   RULE_arrayInitializer = 114, RULE_structInitializer = 115, 
-                   RULE_structInitializerItem = 116, RULE_initializerList = 117, 
-                   RULE_typeName = 118, RULE_abstractDeclarator = 119, RULE_abstractDeclaratorSuffix = 120, 
-                   RULE_parameterDeclarationList = 121, RULE_parameterDeclaration = 122, 
-                   RULE_declarator = 123, RULE_statement = 124, RULE_labeledStatement = 125, 
-                   RULE_rangeExpression = 126, RULE_compoundStatement = 127, 
-                   RULE_selectionStatement = 128, RULE_switchStatement = 129, 
-                   RULE_switchBlock = 130, RULE_switchSection = 131, RULE_switchLabel = 132, 
-                   RULE_iterationStatement = 133, RULE_whileStatement = 134, 
-                   RULE_doStatement = 135, RULE_forStatement = 136, RULE_forLoopInitializer = 137, 
-                   RULE_forInStatement = 138, RULE_jumpStatement = 139, 
-                   RULE_expressions = 140, RULE_expression = 141, RULE_assignmentOperator = 142, 
-                   RULE_castExpression = 143, RULE_initializer = 144, RULE_constantExpression = 145, 
-                   RULE_unaryExpression = 146, RULE_unaryOperator = 147, 
-                   RULE_postfixExpression = 148, RULE_postfixExpr = 149, 
-                   RULE_argumentExpressionList = 150, RULE_argumentExpression = 151, 
-                   RULE_primaryExpression = 152, RULE_constant = 153, RULE_stringLiteral = 154, 
-                   RULE_identifier = 155
-	public static let ruleNames: [String] = [
+
+	public
+	static let RULE_translationUnit = 0, RULE_topLevelDeclaration = 1, RULE_importDeclaration = 2, 
+            RULE_classInterface = 3, RULE_classInterfaceName = 4, RULE_categoryInterface = 5, 
+            RULE_classImplementation = 6, RULE_classImplementatioName = 7, 
+            RULE_categoryImplementation = 8, RULE_className = 9, RULE_superclassName = 10, 
+            RULE_genericSuperclassName = 11, RULE_genericTypeSpecifier = 12, 
+            RULE_genericSuperclassSpecifier = 13, RULE_superclassTypeSpecifierWithPrefixes = 14, 
+            RULE_protocolDeclaration = 15, RULE_protocolDeclarationSection = 16, 
+            RULE_protocolDeclarationList = 17, RULE_classDeclarationList = 18, 
+            RULE_protocolList = 19, RULE_propertyDeclaration = 20, RULE_propertyAttributesList = 21, 
+            RULE_propertyAttribute = 22, RULE_protocolName = 23, RULE_instanceVariables = 24, 
+            RULE_visibilitySection = 25, RULE_accessModifier = 26, RULE_interfaceDeclarationList = 27, 
+            RULE_classMethodDeclaration = 28, RULE_instanceMethodDeclaration = 29, 
+            RULE_methodDeclaration = 30, RULE_implementationDefinitionList = 31, 
+            RULE_classMethodDefinition = 32, RULE_instanceMethodDefinition = 33, 
+            RULE_methodDefinition = 34, RULE_methodSelector = 35, RULE_keywordDeclarator = 36, 
+            RULE_selector = 37, RULE_methodType = 38, RULE_propertyImplementation = 39, 
+            RULE_propertySynthesizeList = 40, RULE_propertySynthesizeItem = 41, 
+            RULE_blockType = 42, RULE_genericsSpecifier = 43, RULE_typeSpecifierWithPrefixes = 44, 
+            RULE_dictionaryExpression = 45, RULE_dictionaryPair = 46, RULE_arrayExpression = 47, 
+            RULE_boxExpression = 48, RULE_blockParameters = 49, RULE_typeVariableDeclaratorOrName = 50, 
+            RULE_blockExpression = 51, RULE_messageExpression = 52, RULE_receiver = 53, 
+            RULE_messageSelector = 54, RULE_keywordArgument = 55, RULE_keywordArgumentType = 56, 
+            RULE_selectorExpression = 57, RULE_selectorName = 58, RULE_protocolExpression = 59, 
+            RULE_encodeExpression = 60, RULE_typeVariableDeclarator = 61, 
+            RULE_throwStatement = 62, RULE_tryBlock = 63, RULE_catchStatement = 64, 
+            RULE_synchronizedStatement = 65, RULE_autoreleaseStatement = 66, 
+            RULE_functionDeclaration = 67, RULE_functionDefinition = 68, 
+            RULE_functionSignature = 69, RULE_attribute = 70, RULE_attributeName = 71, 
+            RULE_attributeParameters = 72, RULE_attributeParameterList = 73, 
+            RULE_attributeParameter = 74, RULE_attributeParameterAssignment = 75, 
+            RULE_declaration = 76, RULE_functionPointer = 77, RULE_functionPointerParameterList = 78, 
+            RULE_functionPointerParameterDeclarationList = 79, RULE_functionPointerParameterDeclaration = 80, 
+            RULE_functionCallExpression = 81, RULE_enumDeclaration = 82, 
+            RULE_varDeclaration = 83, RULE_typedefDeclaration = 84, RULE_typeDeclaratorList = 85, 
+            RULE_declarationSpecifiers = 86, RULE_attributeSpecifier = 87, 
+            RULE_initDeclaratorList = 88, RULE_initDeclarator = 89, RULE_structOrUnionSpecifier = 90, 
+            RULE_fieldDeclaration = 91, RULE_specifierQualifierList = 92, 
+            RULE_ibOutletQualifier = 93, RULE_arcBehaviourSpecifier = 94, 
+            RULE_nullabilitySpecifier = 95, RULE_storageClassSpecifier = 96, 
+            RULE_typePrefix = 97, RULE_typeQualifier = 98, RULE_protocolQualifier = 99, 
+            RULE_typeSpecifier = 100, RULE_scalarTypeSpecifier = 101, RULE_typeofExpression = 102, 
+            RULE_fieldDeclaratorList = 103, RULE_fieldDeclarator = 104, 
+            RULE_enumSpecifier = 105, RULE_enumeratorList = 106, RULE_enumerator = 107, 
+            RULE_enumeratorIdentifier = 108, RULE_directDeclarator = 109, 
+            RULE_declaratorSuffix = 110, RULE_parameterList = 111, RULE_pointer = 112, 
+            RULE_macro = 113, RULE_arrayInitializer = 114, RULE_structInitializer = 115, 
+            RULE_structInitializerItem = 116, RULE_initializerList = 117, 
+            RULE_typeName = 118, RULE_abstractDeclarator = 119, RULE_abstractDeclaratorSuffix = 120, 
+            RULE_parameterDeclarationList = 121, RULE_parameterDeclaration = 122, 
+            RULE_declarator = 123, RULE_statement = 124, RULE_labeledStatement = 125, 
+            RULE_rangeExpression = 126, RULE_compoundStatement = 127, RULE_selectionStatement = 128, 
+            RULE_switchStatement = 129, RULE_switchBlock = 130, RULE_switchSection = 131, 
+            RULE_switchLabel = 132, RULE_iterationStatement = 133, RULE_whileStatement = 134, 
+            RULE_doStatement = 135, RULE_forStatement = 136, RULE_forLoopInitializer = 137, 
+            RULE_forInStatement = 138, RULE_jumpStatement = 139, RULE_expressions = 140, 
+            RULE_expression = 141, RULE_assignmentOperator = 142, RULE_castExpression = 143, 
+            RULE_initializer = 144, RULE_constantExpression = 145, RULE_unaryExpression = 146, 
+            RULE_unaryOperator = 147, RULE_postfixExpression = 148, RULE_postfixExpr = 149, 
+            RULE_argumentExpressionList = 150, RULE_argumentExpression = 151, 
+            RULE_primaryExpression = 152, RULE_constant = 153, RULE_stringLiteral = 154, 
+            RULE_identifier = 155
+
+	public
+	static let ruleNames: [String] = [
 		"translationUnit", "topLevelDeclaration", "importDeclaration", "classInterface", 
 		"classInterfaceName", "categoryInterface", "classImplementation", "classImplementatioName", 
 		"categoryImplementation", "className", "superclassName", "genericSuperclassName", 
@@ -275,53 +271,34 @@ open class ObjectiveCParser: Parser {
 		"DIRECTIVE_NEWLINE", "DIRECTIVE_MULTI_COMMENT", "DIRECTIVE_SINGLE_COMMENT", 
 		"DIRECTIVE_BACKSLASH_NEWLINE", "DIRECTIVE_TEXT_NEWLINE", "DIRECTIVE_TEXT"
 	]
-	public static let VOCABULARY: Vocabulary = Vocabulary(_LITERAL_NAMES, _SYMBOLIC_NAMES)
+	public
+	static let VOCABULARY = Vocabulary(_LITERAL_NAMES, _SYMBOLIC_NAMES)
 
-	/**
-	 * @deprecated Use {@link #VOCABULARY} instead.
-	 */
-	//@Deprecated
-	public let tokenNames: [String?]? = {
-	    let length = _SYMBOLIC_NAMES.count
-	    var tokenNames = [String?](repeating: nil, count: length)
-		for i in 0..<length {
-			var name = VOCABULARY.getLiteralName(i)
-			if name == nil {
-				name = VOCABULARY.getSymbolicName(i)
-			}
-			if name == nil {
-				name = "<INVALID>"
-			}
-			tokenNames[i] = name
-		}
-		return tokenNames
-	}()
+	override open
+	func getGrammarFileName() -> String { return "ObjectiveCParser.g4" }
 
-	open func getTokenNames() -> [String?]? {
-		return tokenNames
-	}
+	override open
+	func getRuleNames() -> [String] { return ObjectiveCParser.ruleNames }
 
-	override
-	open func getGrammarFileName() -> String { return "ObjectiveCParser.g4" }
+	override open
+	func getSerializedATN() -> String { return ObjectiveCParser._serializedATN }
 
-	override
-	open func getRuleNames() -> [String] { return ObjectiveCParser.ruleNames }
+	override open
+	func getATN() -> ATN { return _ATN }
 
-	override
-	open func getSerializedATN() -> String { return ObjectiveCParser._serializedATN }
 
-	override
-	open func getATN() -> ATN { return _ATN }
-
-	open override func getVocabulary() -> Vocabulary {
+	override open
+	func getVocabulary() -> Vocabulary {
 	    return ObjectiveCParser.VOCABULARY
 	}
-    
-    public override convenience init(_ input: TokenStream) throws {
+
+	override public convenience
+    init(_ input: TokenStream) throws {
         try self.init(input, State())
     }
     
-    public init(_ input: TokenStream, _ state: State) throws {
+    public
+    init(_ input: TokenStream, _ state: State) throws {
         self.state = state
         
         RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
@@ -333,42 +310,52 @@ open class ObjectiveCParser: Parser {
                                      atnConfigPool: state.atnConfigPool)
     }
 
-	open class TranslationUnitContext:ParserRuleContext {
-		open func EOF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.EOF.rawValue, 0) }
-		open func topLevelDeclaration() -> Array<TopLevelDeclarationContext> {
-			return getRuleContexts(TopLevelDeclarationContext.self)
+
+	public class TranslationUnitContext: ParserRuleContext {
+			open
+			func EOF() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.EOF.rawValue, 0)
+			}
+			open
+			func topLevelDeclaration() -> [TopLevelDeclarationContext] {
+				return getRuleContexts(TopLevelDeclarationContext.self)
+			}
+			open
+			func topLevelDeclaration(_ i: Int) -> TopLevelDeclarationContext? {
+				return getRuleContext(TopLevelDeclarationContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_translationUnit
 		}
-		open func topLevelDeclaration(_ i: Int) -> TopLevelDeclarationContext? {
-			return getRuleContext(TopLevelDeclarationContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_translationUnit }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterTranslationUnit(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterTranslationUnit(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitTranslationUnit(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitTranslationUnit(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitTranslationUnit(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTranslationUnit(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitTranslationUnit(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitTranslationUnit(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func translationUnit() throws -> TranslationUnitContext {
-		let _localctx: TranslationUnitContext = TranslationUnitContext(_ctx, getState())
+	 open func translationUnit() throws -> TranslationUnitContext {
+        let _localctx: TranslationUnitContext = TranslationUnitContext(_ctx, getState())
 		try enterRule(_localctx, 0, ObjectiveCParser.RULE_translationUnit)
 		var _la: Int = 0
 		defer {
@@ -411,67 +398,83 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class TopLevelDeclarationContext:ParserRuleContext {
-		open func importDeclaration() -> ImportDeclarationContext? {
-			return getRuleContext(ImportDeclarationContext.self,0)
+
+	public class TopLevelDeclarationContext: ParserRuleContext {
+			open
+			func importDeclaration() -> ImportDeclarationContext? {
+				return getRuleContext(ImportDeclarationContext.self, 0)
+			}
+			open
+			func functionDeclaration() -> FunctionDeclarationContext? {
+				return getRuleContext(FunctionDeclarationContext.self, 0)
+			}
+			open
+			func declaration() -> DeclarationContext? {
+				return getRuleContext(DeclarationContext.self, 0)
+			}
+			open
+			func classInterface() -> ClassInterfaceContext? {
+				return getRuleContext(ClassInterfaceContext.self, 0)
+			}
+			open
+			func classImplementation() -> ClassImplementationContext? {
+				return getRuleContext(ClassImplementationContext.self, 0)
+			}
+			open
+			func categoryInterface() -> CategoryInterfaceContext? {
+				return getRuleContext(CategoryInterfaceContext.self, 0)
+			}
+			open
+			func categoryImplementation() -> CategoryImplementationContext? {
+				return getRuleContext(CategoryImplementationContext.self, 0)
+			}
+			open
+			func protocolDeclaration() -> ProtocolDeclarationContext? {
+				return getRuleContext(ProtocolDeclarationContext.self, 0)
+			}
+			open
+			func protocolDeclarationList() -> ProtocolDeclarationListContext? {
+				return getRuleContext(ProtocolDeclarationListContext.self, 0)
+			}
+			open
+			func classDeclarationList() -> ClassDeclarationListContext? {
+				return getRuleContext(ClassDeclarationListContext.self, 0)
+			}
+			open
+			func functionDefinition() -> FunctionDefinitionContext? {
+				return getRuleContext(FunctionDefinitionContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_topLevelDeclaration
 		}
-		open func functionDeclaration() -> FunctionDeclarationContext? {
-			return getRuleContext(FunctionDeclarationContext.self,0)
-		}
-		open func declaration() -> DeclarationContext? {
-			return getRuleContext(DeclarationContext.self,0)
-		}
-		open func classInterface() -> ClassInterfaceContext? {
-			return getRuleContext(ClassInterfaceContext.self,0)
-		}
-		open func classImplementation() -> ClassImplementationContext? {
-			return getRuleContext(ClassImplementationContext.self,0)
-		}
-		open func categoryInterface() -> CategoryInterfaceContext? {
-			return getRuleContext(CategoryInterfaceContext.self,0)
-		}
-		open func categoryImplementation() -> CategoryImplementationContext? {
-			return getRuleContext(CategoryImplementationContext.self,0)
-		}
-		open func protocolDeclaration() -> ProtocolDeclarationContext? {
-			return getRuleContext(ProtocolDeclarationContext.self,0)
-		}
-		open func protocolDeclarationList() -> ProtocolDeclarationListContext? {
-			return getRuleContext(ProtocolDeclarationListContext.self,0)
-		}
-		open func classDeclarationList() -> ClassDeclarationListContext? {
-			return getRuleContext(ClassDeclarationListContext.self,0)
-		}
-		open func functionDefinition() -> FunctionDefinitionContext? {
-			return getRuleContext(FunctionDefinitionContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_topLevelDeclaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterTopLevelDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterTopLevelDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitTopLevelDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitTopLevelDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitTopLevelDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTopLevelDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitTopLevelDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitTopLevelDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func topLevelDeclaration() throws -> TopLevelDeclarationContext {
+	 open func topLevelDeclaration() throws -> TopLevelDeclarationContext {
 		let _localctx: TopLevelDeclarationContext = TopLevelDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 2, ObjectiveCParser.RULE_topLevelDeclaration)
 		defer {
@@ -558,40 +561,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ImportDeclarationContext:ParserRuleContext {
-		open func IMPORT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IMPORT.rawValue, 0) }
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class ImportDeclarationContext: ParserRuleContext {
+			open
+			func IMPORT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IMPORT.rawValue, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func SEMI() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_importDeclaration
 		}
-		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_importDeclaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterImportDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterImportDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitImportDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitImportDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitImportDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitImportDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitImportDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitImportDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func importDeclaration() throws -> ImportDeclarationContext {
-		let _localctx: ImportDeclarationContext = ImportDeclarationContext(_ctx, getState())
+	 open func importDeclaration() throws -> ImportDeclarationContext {
+        let _localctx: ImportDeclarationContext = ImportDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 4, ObjectiveCParser.RULE_importDeclaration)
 		defer {
 	    		try! exitRule()
@@ -614,47 +629,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ClassInterfaceContext:ParserRuleContext {
-		open func INTERFACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.INTERFACE.rawValue, 0) }
-		open func classInterfaceName() -> ClassInterfaceNameContext? {
-			return getRuleContext(ClassInterfaceNameContext.self,0)
+
+	public class ClassInterfaceContext: ParserRuleContext {
+			open
+			func INTERFACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.INTERFACE.rawValue, 0)
+			}
+			open
+			func classInterfaceName() -> ClassInterfaceNameContext? {
+				return getRuleContext(ClassInterfaceNameContext.self, 0)
+			}
+			open
+			func END() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.END.rawValue, 0)
+			}
+			open
+			func IB_DESIGNABLE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue, 0)
+			}
+			open
+			func instanceVariables() -> InstanceVariablesContext? {
+				return getRuleContext(InstanceVariablesContext.self, 0)
+			}
+			open
+			func interfaceDeclarationList() -> InterfaceDeclarationListContext? {
+				return getRuleContext(InterfaceDeclarationListContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_classInterface
 		}
-		open func END() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.END.rawValue, 0) }
-		open func IB_DESIGNABLE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue, 0) }
-		open func instanceVariables() -> InstanceVariablesContext? {
-			return getRuleContext(InstanceVariablesContext.self,0)
-		}
-		open func interfaceDeclarationList() -> InterfaceDeclarationListContext? {
-			return getRuleContext(InterfaceDeclarationListContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_classInterface }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterClassInterface(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterClassInterface(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitClassInterface(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitClassInterface(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitClassInterface(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitClassInterface(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitClassInterface(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitClassInterface(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func classInterface() throws -> ClassInterfaceContext {
-		let _localctx: ClassInterfaceContext = ClassInterfaceContext(_ctx, getState())
+	 open func classInterface() throws -> ClassInterfaceContext {
+        let _localctx: ClassInterfaceContext = ClassInterfaceContext(_ctx, getState())
 		try enterRule(_localctx, 6, ObjectiveCParser.RULE_classInterface)
 		var _la: Int = 0
 		defer {
@@ -725,50 +757,68 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ClassInterfaceNameContext:ParserRuleContext {
-		open func className() -> ClassNameContext? {
-			return getRuleContext(ClassNameContext.self,0)
+
+	public class ClassInterfaceNameContext: ParserRuleContext {
+			open
+			func className() -> ClassNameContext? {
+				return getRuleContext(ClassNameContext.self, 0)
+			}
+			open
+			func COLON() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0)
+			}
+			open
+			func superclassName() -> SuperclassNameContext? {
+				return getRuleContext(SuperclassNameContext.self, 0)
+			}
+			open
+			func LT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0)
+			}
+			open
+			func protocolList() -> ProtocolListContext? {
+				return getRuleContext(ProtocolListContext.self, 0)
+			}
+			open
+			func GT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0)
+			}
+			open
+			func genericSuperclassName() -> GenericSuperclassNameContext? {
+				return getRuleContext(GenericSuperclassNameContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_classInterfaceName
 		}
-		open func COLON() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0) }
-		open func superclassName() -> SuperclassNameContext? {
-			return getRuleContext(SuperclassNameContext.self,0)
-		}
-		open func LT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0) }
-		open func protocolList() -> ProtocolListContext? {
-			return getRuleContext(ProtocolListContext.self,0)
-		}
-		open func GT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0) }
-		open func genericSuperclassName() -> GenericSuperclassNameContext? {
-			return getRuleContext(GenericSuperclassNameContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_classInterfaceName }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterClassInterfaceName(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterClassInterfaceName(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitClassInterfaceName(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitClassInterfaceName(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitClassInterfaceName(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitClassInterfaceName(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitClassInterfaceName(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitClassInterfaceName(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func classInterfaceName() throws -> ClassInterfaceNameContext {
-		let _localctx: ClassInterfaceNameContext = ClassInterfaceNameContext(_ctx, getState())
+	 open func classInterfaceName() throws -> ClassInterfaceNameContext {
+        let _localctx: ClassInterfaceNameContext = ClassInterfaceNameContext(_ctx, getState())
 		try enterRule(_localctx, 8, ObjectiveCParser.RULE_classInterfaceName)
 		var _la: Int = 0
 		defer {
@@ -865,57 +915,85 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class CategoryInterfaceContext:ParserRuleContext {
-		public var categoryName: ClassNameContext!
-		open func INTERFACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.INTERFACE.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func END() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.END.rawValue, 0) }
-		open func className() -> ClassNameContext? {
-			return getRuleContext(ClassNameContext.self,0)
+
+	public class CategoryInterfaceContext: ParserRuleContext {
+		open var categoryName: ClassNameContext!
+			open
+			func INTERFACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.INTERFACE.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func END() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.END.rawValue, 0)
+			}
+			open
+			func className() -> ClassNameContext? {
+				return getRuleContext(ClassNameContext.self, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func LT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0)
+			}
+			open
+			func protocolList() -> ProtocolListContext? {
+				return getRuleContext(ProtocolListContext.self, 0)
+			}
+			open
+			func GT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0)
+			}
+			open
+			func instanceVariables() -> InstanceVariablesContext? {
+				return getRuleContext(InstanceVariablesContext.self, 0)
+			}
+			open
+			func interfaceDeclarationList() -> InterfaceDeclarationListContext? {
+				return getRuleContext(InterfaceDeclarationListContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_categoryInterface
 		}
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
-		}
-		open func LT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0) }
-		open func protocolList() -> ProtocolListContext? {
-			return getRuleContext(ProtocolListContext.self,0)
-		}
-		open func GT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0) }
-		open func instanceVariables() -> InstanceVariablesContext? {
-			return getRuleContext(InstanceVariablesContext.self,0)
-		}
-		open func interfaceDeclarationList() -> InterfaceDeclarationListContext? {
-			return getRuleContext(InterfaceDeclarationListContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_categoryInterface }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterCategoryInterface(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterCategoryInterface(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitCategoryInterface(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitCategoryInterface(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitCategoryInterface(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitCategoryInterface(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitCategoryInterface(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitCategoryInterface(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func categoryInterface() throws -> CategoryInterfaceContext {
-		let _localctx: CategoryInterfaceContext = CategoryInterfaceContext(_ctx, getState())
+	 open func categoryInterface() throws -> CategoryInterfaceContext {
+        let _localctx: CategoryInterfaceContext = CategoryInterfaceContext(_ctx, getState())
 		try enterRule(_localctx, 10, ObjectiveCParser.RULE_categoryInterface)
 		var _la: Int = 0
 		defer {
@@ -1018,46 +1096,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ClassImplementationContext:ParserRuleContext {
-		open func IMPLEMENTATION() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IMPLEMENTATION.rawValue, 0) }
-		open func classImplementatioName() -> ClassImplementatioNameContext? {
-			return getRuleContext(ClassImplementatioNameContext.self,0)
+
+	public class ClassImplementationContext: ParserRuleContext {
+			open
+			func IMPLEMENTATION() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IMPLEMENTATION.rawValue, 0)
+			}
+			open
+			func classImplementatioName() -> ClassImplementatioNameContext? {
+				return getRuleContext(ClassImplementatioNameContext.self, 0)
+			}
+			open
+			func END() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.END.rawValue, 0)
+			}
+			open
+			func instanceVariables() -> InstanceVariablesContext? {
+				return getRuleContext(InstanceVariablesContext.self, 0)
+			}
+			open
+			func implementationDefinitionList() -> ImplementationDefinitionListContext? {
+				return getRuleContext(ImplementationDefinitionListContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_classImplementation
 		}
-		open func END() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.END.rawValue, 0) }
-		open func instanceVariables() -> InstanceVariablesContext? {
-			return getRuleContext(InstanceVariablesContext.self,0)
-		}
-		open func implementationDefinitionList() -> ImplementationDefinitionListContext? {
-			return getRuleContext(ImplementationDefinitionListContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_classImplementation }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterClassImplementation(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterClassImplementation(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitClassImplementation(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitClassImplementation(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitClassImplementation(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitClassImplementation(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitClassImplementation(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitClassImplementation(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func classImplementation() throws -> ClassImplementationContext {
-		let _localctx: ClassImplementationContext = ClassImplementationContext(_ctx, getState())
+	 open func classImplementation() throws -> ClassImplementationContext {
+        let _localctx: ClassImplementationContext = ClassImplementationContext(_ctx, getState())
 		try enterRule(_localctx, 12, ObjectiveCParser.RULE_classImplementation)
 		var _la: Int = 0
 		defer {
@@ -1115,45 +1207,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ClassImplementatioNameContext:ParserRuleContext {
-		open func className() -> ClassNameContext? {
-			return getRuleContext(ClassNameContext.self,0)
+
+	public class ClassImplementatioNameContext: ParserRuleContext {
+			open
+			func className() -> ClassNameContext? {
+				return getRuleContext(ClassNameContext.self, 0)
+			}
+			open
+			func COLON() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0)
+			}
+			open
+			func superclassName() -> SuperclassNameContext? {
+				return getRuleContext(SuperclassNameContext.self, 0)
+			}
+			open
+			func genericSuperclassName() -> GenericSuperclassNameContext? {
+				return getRuleContext(GenericSuperclassNameContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_classImplementatioName
 		}
-		open func COLON() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0) }
-		open func superclassName() -> SuperclassNameContext? {
-			return getRuleContext(SuperclassNameContext.self,0)
-		}
-		open func genericSuperclassName() -> GenericSuperclassNameContext? {
-			return getRuleContext(GenericSuperclassNameContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_classImplementatioName }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterClassImplementatioName(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterClassImplementatioName(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitClassImplementatioName(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitClassImplementatioName(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitClassImplementatioName(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitClassImplementatioName(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitClassImplementatioName(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitClassImplementatioName(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func classImplementatioName() throws -> ClassImplementatioNameContext {
-		let _localctx: ClassImplementatioNameContext = ClassImplementatioNameContext(_ctx, getState())
+	 open func classImplementatioName() throws -> ClassImplementatioNameContext {
+        let _localctx: ClassImplementatioNameContext = ClassImplementatioNameContext(_ctx, getState())
 		try enterRule(_localctx, 14, ObjectiveCParser.RULE_classImplementatioName)
 		var _la: Int = 0
 		defer {
@@ -1216,49 +1319,69 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class CategoryImplementationContext:ParserRuleContext {
-		public var categoryName: ClassNameContext!
-		open func IMPLEMENTATION() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IMPLEMENTATION.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class CategoryImplementationContext: ParserRuleContext {
+		open var categoryName: ClassNameContext!
+			open
+			func IMPLEMENTATION() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IMPLEMENTATION.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func END() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.END.rawValue, 0)
+			}
+			open
+			func className() -> ClassNameContext? {
+				return getRuleContext(ClassNameContext.self, 0)
+			}
+			open
+			func implementationDefinitionList() -> ImplementationDefinitionListContext? {
+				return getRuleContext(ImplementationDefinitionListContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_categoryImplementation
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func END() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.END.rawValue, 0) }
-		open func className() -> ClassNameContext? {
-			return getRuleContext(ClassNameContext.self,0)
-		}
-		open func implementationDefinitionList() -> ImplementationDefinitionListContext? {
-			return getRuleContext(ImplementationDefinitionListContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_categoryImplementation }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterCategoryImplementation(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterCategoryImplementation(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitCategoryImplementation(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitCategoryImplementation(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitCategoryImplementation(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitCategoryImplementation(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitCategoryImplementation(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitCategoryImplementation(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func categoryImplementation() throws -> CategoryImplementationContext {
-		let _localctx: CategoryImplementationContext = CategoryImplementationContext(_ctx, getState())
+	 open func categoryImplementation() throws -> CategoryImplementationContext {
+        let _localctx: CategoryImplementationContext = CategoryImplementationContext(_ctx, getState())
 		try enterRule(_localctx, 16, ObjectiveCParser.RULE_categoryImplementation)
 		var _la: Int = 0
 		defer {
@@ -1313,46 +1436,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ClassNameContext:ParserRuleContext {
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class ClassNameContext: ParserRuleContext {
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func genericsSpecifier() -> GenericsSpecifierContext? {
+				return getRuleContext(GenericsSpecifierContext.self, 0)
+			}
+			open
+			func LT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0)
+			}
+			open
+			func protocolList() -> ProtocolListContext? {
+				return getRuleContext(ProtocolListContext.self, 0)
+			}
+			open
+			func GT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_className
 		}
-		open func genericsSpecifier() -> GenericsSpecifierContext? {
-			return getRuleContext(GenericsSpecifierContext.self,0)
-		}
-		open func LT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0) }
-		open func protocolList() -> ProtocolListContext? {
-			return getRuleContext(ProtocolListContext.self,0)
-		}
-		open func GT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_className }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterClassName(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterClassName(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitClassName(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitClassName(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitClassName(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitClassName(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitClassName(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitClassName(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func className() throws -> ClassNameContext {
-		let _localctx: ClassNameContext = ClassNameContext(_ctx, getState())
+	 open func className() throws -> ClassNameContext {
+        let _localctx: ClassNameContext = ClassNameContext(_ctx, getState())
 		try enterRule(_localctx, 18, ObjectiveCParser.RULE_className)
 		defer {
 	    		try! exitRule()
@@ -1391,38 +1528,44 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class SuperclassNameContext:ParserRuleContext {
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class SuperclassNameContext: ParserRuleContext {
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_superclassName
 		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_superclassName }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterSuperclassName(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterSuperclassName(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitSuperclassName(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitSuperclassName(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitSuperclassName(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSuperclassName(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitSuperclassName(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitSuperclassName(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func superclassName() throws -> SuperclassNameContext {
-		let _localctx: SuperclassNameContext = SuperclassNameContext(_ctx, getState())
+	 open func superclassName() throws -> SuperclassNameContext {
+        let _localctx: SuperclassNameContext = SuperclassNameContext(_ctx, getState())
 		try enterRule(_localctx, 20, ObjectiveCParser.RULE_superclassName)
 		defer {
 	    		try! exitRule()
@@ -1441,41 +1584,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class GenericSuperclassNameContext:ParserRuleContext {
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class GenericSuperclassNameContext: ParserRuleContext {
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func genericSuperclassSpecifier() -> GenericSuperclassSpecifierContext? {
+				return getRuleContext(GenericSuperclassSpecifierContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_genericSuperclassName
 		}
-		open func genericSuperclassSpecifier() -> GenericSuperclassSpecifierContext? {
-			return getRuleContext(GenericSuperclassSpecifierContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_genericSuperclassName }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterGenericSuperclassName(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterGenericSuperclassName(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitGenericSuperclassName(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitGenericSuperclassName(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitGenericSuperclassName(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitGenericSuperclassName(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitGenericSuperclassName(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitGenericSuperclassName(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func genericSuperclassName() throws -> GenericSuperclassNameContext {
-		let _localctx: GenericSuperclassNameContext = GenericSuperclassNameContext(_ctx, getState())
+	 open func genericSuperclassName() throws -> GenericSuperclassNameContext {
+        let _localctx: GenericSuperclassNameContext = GenericSuperclassNameContext(_ctx, getState())
 		try enterRule(_localctx, 22, ObjectiveCParser.RULE_genericSuperclassName)
 		defer {
 	    		try! exitRule()
@@ -1496,46 +1646,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class GenericTypeSpecifierContext:ParserRuleContext {
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class GenericTypeSpecifierContext: ParserRuleContext {
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func genericsSpecifier() -> GenericsSpecifierContext? {
+				return getRuleContext(GenericsSpecifierContext.self, 0)
+			}
+			open
+			func LT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0)
+			}
+			open
+			func protocolList() -> ProtocolListContext? {
+				return getRuleContext(ProtocolListContext.self, 0)
+			}
+			open
+			func GT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_genericTypeSpecifier
 		}
-		open func genericsSpecifier() -> GenericsSpecifierContext? {
-			return getRuleContext(GenericsSpecifierContext.self,0)
-		}
-		open func LT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0) }
-		open func protocolList() -> ProtocolListContext? {
-			return getRuleContext(ProtocolListContext.self,0)
-		}
-		open func GT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_genericTypeSpecifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterGenericTypeSpecifier(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterGenericTypeSpecifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitGenericTypeSpecifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitGenericTypeSpecifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitGenericTypeSpecifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitGenericTypeSpecifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitGenericTypeSpecifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitGenericTypeSpecifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func genericTypeSpecifier() throws -> GenericTypeSpecifierContext {
-		let _localctx: GenericTypeSpecifierContext = GenericTypeSpecifierContext(_ctx, getState())
+	 open func genericTypeSpecifier() throws -> GenericTypeSpecifierContext {
+        let _localctx: GenericTypeSpecifierContext = GenericTypeSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 24, ObjectiveCParser.RULE_genericTypeSpecifier)
 		defer {
 	    		try! exitRule()
@@ -1574,47 +1738,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class GenericSuperclassSpecifierContext:ParserRuleContext {
-		open func LT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0) }
-		open func GT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0) }
-		open func superclassTypeSpecifierWithPrefixes() -> Array<SuperclassTypeSpecifierWithPrefixesContext> {
-			return getRuleContexts(SuperclassTypeSpecifierWithPrefixesContext.self)
+
+	public class GenericSuperclassSpecifierContext: ParserRuleContext {
+			open
+			func LT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0)
+			}
+			open
+			func GT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0)
+			}
+			open
+			func superclassTypeSpecifierWithPrefixes() -> [SuperclassTypeSpecifierWithPrefixesContext] {
+				return getRuleContexts(SuperclassTypeSpecifierWithPrefixesContext.self)
+			}
+			open
+			func superclassTypeSpecifierWithPrefixes(_ i: Int) -> SuperclassTypeSpecifierWithPrefixesContext? {
+				return getRuleContext(SuperclassTypeSpecifierWithPrefixesContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_genericSuperclassSpecifier
 		}
-		open func superclassTypeSpecifierWithPrefixes(_ i: Int) -> SuperclassTypeSpecifierWithPrefixesContext? {
-			return getRuleContext(SuperclassTypeSpecifierWithPrefixesContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_genericSuperclassSpecifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterGenericSuperclassSpecifier(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterGenericSuperclassSpecifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitGenericSuperclassSpecifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitGenericSuperclassSpecifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitGenericSuperclassSpecifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitGenericSuperclassSpecifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitGenericSuperclassSpecifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitGenericSuperclassSpecifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func genericSuperclassSpecifier() throws -> GenericSuperclassSpecifierContext {
-		let _localctx: GenericSuperclassSpecifierContext = GenericSuperclassSpecifierContext(_ctx, getState())
+	 open func genericSuperclassSpecifier() throws -> GenericSuperclassSpecifierContext {
+        let _localctx: GenericSuperclassSpecifierContext = GenericSuperclassSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 26, ObjectiveCParser.RULE_genericSuperclassSpecifier)
 		var _la: Int = 0
 		defer {
@@ -1674,47 +1855,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class SuperclassTypeSpecifierWithPrefixesContext:ParserRuleContext {
-		open func typeSpecifier() -> TypeSpecifierContext? {
-			return getRuleContext(TypeSpecifierContext.self,0)
+
+	public class SuperclassTypeSpecifierWithPrefixesContext: ParserRuleContext {
+			open
+			func typeSpecifier() -> TypeSpecifierContext? {
+				return getRuleContext(TypeSpecifierContext.self, 0)
+			}
+			open
+			func typePrefix() -> [TypePrefixContext] {
+				return getRuleContexts(TypePrefixContext.self)
+			}
+			open
+			func typePrefix(_ i: Int) -> TypePrefixContext? {
+				return getRuleContext(TypePrefixContext.self, i)
+			}
+			open
+			func pointer() -> PointerContext? {
+				return getRuleContext(PointerContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_superclassTypeSpecifierWithPrefixes
 		}
-		open func typePrefix() -> Array<TypePrefixContext> {
-			return getRuleContexts(TypePrefixContext.self)
-		}
-		open func typePrefix(_ i: Int) -> TypePrefixContext? {
-			return getRuleContext(TypePrefixContext.self,i)
-		}
-		open func pointer() -> PointerContext? {
-			return getRuleContext(PointerContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_superclassTypeSpecifierWithPrefixes }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterSuperclassTypeSpecifierWithPrefixes(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterSuperclassTypeSpecifierWithPrefixes(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitSuperclassTypeSpecifierWithPrefixes(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitSuperclassTypeSpecifierWithPrefixes(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitSuperclassTypeSpecifierWithPrefixes(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSuperclassTypeSpecifierWithPrefixes(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitSuperclassTypeSpecifierWithPrefixes(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitSuperclassTypeSpecifierWithPrefixes(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func superclassTypeSpecifierWithPrefixes() throws -> SuperclassTypeSpecifierWithPrefixesContext {
-		let _localctx: SuperclassTypeSpecifierWithPrefixesContext = SuperclassTypeSpecifierWithPrefixesContext(_ctx, getState())
+	 open func superclassTypeSpecifierWithPrefixes() throws -> SuperclassTypeSpecifierWithPrefixesContext {
+        let _localctx: SuperclassTypeSpecifierWithPrefixesContext = SuperclassTypeSpecifierWithPrefixesContext(_ctx, getState())
 		try enterRule(_localctx, 28, ObjectiveCParser.RULE_superclassTypeSpecifierWithPrefixes)
 		var _la: Int = 0
 		defer {
@@ -1762,51 +1952,72 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ProtocolDeclarationContext:ParserRuleContext {
-		open func PROTOCOL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.PROTOCOL.rawValue, 0) }
-		open func protocolName() -> ProtocolNameContext? {
-			return getRuleContext(ProtocolNameContext.self,0)
+
+	public class ProtocolDeclarationContext: ParserRuleContext {
+			open
+			func PROTOCOL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.PROTOCOL.rawValue, 0)
+			}
+			open
+			func protocolName() -> ProtocolNameContext? {
+				return getRuleContext(ProtocolNameContext.self, 0)
+			}
+			open
+			func END() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.END.rawValue, 0)
+			}
+			open
+			func LT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0)
+			}
+			open
+			func protocolList() -> ProtocolListContext? {
+				return getRuleContext(ProtocolListContext.self, 0)
+			}
+			open
+			func GT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0)
+			}
+			open
+			func protocolDeclarationSection() -> [ProtocolDeclarationSectionContext] {
+				return getRuleContexts(ProtocolDeclarationSectionContext.self)
+			}
+			open
+			func protocolDeclarationSection(_ i: Int) -> ProtocolDeclarationSectionContext? {
+				return getRuleContext(ProtocolDeclarationSectionContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_protocolDeclaration
 		}
-		open func END() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.END.rawValue, 0) }
-		open func LT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0) }
-		open func protocolList() -> ProtocolListContext? {
-			return getRuleContext(ProtocolListContext.self,0)
-		}
-		open func GT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0) }
-		open func protocolDeclarationSection() -> Array<ProtocolDeclarationSectionContext> {
-			return getRuleContexts(ProtocolDeclarationSectionContext.self)
-		}
-		open func protocolDeclarationSection(_ i: Int) -> ProtocolDeclarationSectionContext? {
-			return getRuleContext(ProtocolDeclarationSectionContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_protocolDeclaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterProtocolDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterProtocolDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitProtocolDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitProtocolDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitProtocolDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitProtocolDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitProtocolDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitProtocolDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func protocolDeclaration() throws -> ProtocolDeclarationContext {
-		let _localctx: ProtocolDeclarationContext = ProtocolDeclarationContext(_ctx, getState())
+	 open func protocolDeclaration() throws -> ProtocolDeclarationContext {
+        let _localctx: ProtocolDeclarationContext = ProtocolDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 30, ObjectiveCParser.RULE_protocolDeclaration)
 		var _la: Int = 0
 		defer {
@@ -1871,44 +2082,57 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ProtocolDeclarationSectionContext:ParserRuleContext {
-		public var modifier: Token!
-		open func REQUIRED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.REQUIRED.rawValue, 0) }
-		open func OPTIONAL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.OPTIONAL.rawValue, 0) }
-		open func interfaceDeclarationList() -> Array<InterfaceDeclarationListContext> {
-			return getRuleContexts(InterfaceDeclarationListContext.self)
+
+	public class ProtocolDeclarationSectionContext: ParserRuleContext {
+		open var modifier: Token!
+			open
+			func REQUIRED() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.REQUIRED.rawValue, 0)
+			}
+			open
+			func OPTIONAL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.OPTIONAL.rawValue, 0)
+			}
+			open
+			func interfaceDeclarationList() -> [InterfaceDeclarationListContext] {
+				return getRuleContexts(InterfaceDeclarationListContext.self)
+			}
+			open
+			func interfaceDeclarationList(_ i: Int) -> InterfaceDeclarationListContext? {
+				return getRuleContext(InterfaceDeclarationListContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_protocolDeclarationSection
 		}
-		open func interfaceDeclarationList(_ i: Int) -> InterfaceDeclarationListContext? {
-			return getRuleContext(InterfaceDeclarationListContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_protocolDeclarationSection }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterProtocolDeclarationSection(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterProtocolDeclarationSection(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitProtocolDeclarationSection(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitProtocolDeclarationSection(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitProtocolDeclarationSection(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitProtocolDeclarationSection(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitProtocolDeclarationSection(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitProtocolDeclarationSection(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func protocolDeclarationSection() throws -> ProtocolDeclarationSectionContext {
-		let _localctx: ProtocolDeclarationSectionContext = ProtocolDeclarationSectionContext(_ctx, getState())
+	 open func protocolDeclarationSection() throws -> ProtocolDeclarationSectionContext {
+        let _localctx: ProtocolDeclarationSectionContext = ProtocolDeclarationSectionContext(_ctx, getState())
 		try enterRule(_localctx, 32, ObjectiveCParser.RULE_protocolDeclarationSection)
 		var _la: Int = 0
 		defer {
@@ -2062,40 +2286,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ProtocolDeclarationListContext:ParserRuleContext {
-		open func PROTOCOL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.PROTOCOL.rawValue, 0) }
-		open func protocolList() -> ProtocolListContext? {
-			return getRuleContext(ProtocolListContext.self,0)
+
+	public class ProtocolDeclarationListContext: ParserRuleContext {
+			open
+			func PROTOCOL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.PROTOCOL.rawValue, 0)
+			}
+			open
+			func protocolList() -> ProtocolListContext? {
+				return getRuleContext(ProtocolListContext.self, 0)
+			}
+			open
+			func SEMI() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_protocolDeclarationList
 		}
-		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_protocolDeclarationList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterProtocolDeclarationList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterProtocolDeclarationList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitProtocolDeclarationList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitProtocolDeclarationList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitProtocolDeclarationList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitProtocolDeclarationList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitProtocolDeclarationList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitProtocolDeclarationList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func protocolDeclarationList() throws -> ProtocolDeclarationListContext {
-		let _localctx: ProtocolDeclarationListContext = ProtocolDeclarationListContext(_ctx, getState())
+	 open func protocolDeclarationList() throws -> ProtocolDeclarationListContext {
+        let _localctx: ProtocolDeclarationListContext = ProtocolDeclarationListContext(_ctx, getState())
 		try enterRule(_localctx, 34, ObjectiveCParser.RULE_protocolDeclarationList)
 		defer {
 	    		try! exitRule()
@@ -2118,47 +2354,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ClassDeclarationListContext:ParserRuleContext {
-		open func CLASS() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.CLASS.rawValue, 0) }
-		open func className() -> Array<ClassNameContext> {
-			return getRuleContexts(ClassNameContext.self)
+
+	public class ClassDeclarationListContext: ParserRuleContext {
+			open
+			func CLASS() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.CLASS.rawValue, 0)
+			}
+			open
+			func className() -> [ClassNameContext] {
+				return getRuleContexts(ClassNameContext.self)
+			}
+			open
+			func className(_ i: Int) -> ClassNameContext? {
+				return getRuleContext(ClassNameContext.self, i)
+			}
+			open
+			func SEMI() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_classDeclarationList
 		}
-		open func className(_ i: Int) -> ClassNameContext? {
-			return getRuleContext(ClassNameContext.self,i)
-		}
-		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_classDeclarationList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterClassDeclarationList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterClassDeclarationList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitClassDeclarationList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitClassDeclarationList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitClassDeclarationList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitClassDeclarationList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitClassDeclarationList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitClassDeclarationList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func classDeclarationList() throws -> ClassDeclarationListContext {
-		let _localctx: ClassDeclarationListContext = ClassDeclarationListContext(_ctx, getState())
+	 open func classDeclarationList() throws -> ClassDeclarationListContext {
+        let _localctx: ClassDeclarationListContext = ClassDeclarationListContext(_ctx, getState())
 		try enterRule(_localctx, 36, ObjectiveCParser.RULE_classDeclarationList)
 		var _la: Int = 0
 		defer {
@@ -2200,45 +2453,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ProtocolListContext:ParserRuleContext {
-		open func protocolName() -> Array<ProtocolNameContext> {
-			return getRuleContexts(ProtocolNameContext.self)
+
+	public class ProtocolListContext: ParserRuleContext {
+			open
+			func protocolName() -> [ProtocolNameContext] {
+				return getRuleContexts(ProtocolNameContext.self)
+			}
+			open
+			func protocolName(_ i: Int) -> ProtocolNameContext? {
+				return getRuleContext(ProtocolNameContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_protocolList
 		}
-		open func protocolName(_ i: Int) -> ProtocolNameContext? {
-			return getRuleContext(ProtocolNameContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_protocolList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterProtocolList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterProtocolList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitProtocolList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitProtocolList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitProtocolList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitProtocolList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitProtocolList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitProtocolList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func protocolList() throws -> ProtocolListContext {
-		let _localctx: ProtocolListContext = ProtocolListContext(_ctx, getState())
+	 open func protocolList() throws -> ProtocolListContext {
+        let _localctx: ProtocolListContext = ProtocolListContext(_ctx, getState())
 		try enterRule(_localctx, 38, ObjectiveCParser.RULE_protocolList)
 		var _la: Int = 0
 		defer {
@@ -2276,48 +2540,68 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class PropertyDeclarationContext:ParserRuleContext {
-		open func PROPERTY() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.PROPERTY.rawValue, 0) }
-		open func fieldDeclaration() -> FieldDeclarationContext? {
-			return getRuleContext(FieldDeclarationContext.self,0)
+
+	public class PropertyDeclarationContext: ParserRuleContext {
+			open
+			func PROPERTY() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.PROPERTY.rawValue, 0)
+			}
+			open
+			func fieldDeclaration() -> FieldDeclarationContext? {
+				return getRuleContext(FieldDeclarationContext.self, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func propertyAttributesList() -> PropertyAttributesListContext? {
+				return getRuleContext(PropertyAttributesListContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func ibOutletQualifier() -> IbOutletQualifierContext? {
+				return getRuleContext(IbOutletQualifierContext.self, 0)
+			}
+			open
+			func IB_INSPECTABLE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_propertyDeclaration
 		}
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func propertyAttributesList() -> PropertyAttributesListContext? {
-			return getRuleContext(PropertyAttributesListContext.self,0)
-		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func ibOutletQualifier() -> IbOutletQualifierContext? {
-			return getRuleContext(IbOutletQualifierContext.self,0)
-		}
-		open func IB_INSPECTABLE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_propertyDeclaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterPropertyDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterPropertyDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitPropertyDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitPropertyDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitPropertyDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPropertyDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitPropertyDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitPropertyDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func propertyDeclaration() throws -> PropertyDeclarationContext {
-		let _localctx: PropertyDeclarationContext = PropertyDeclarationContext(_ctx, getState())
+	 open func propertyDeclaration() throws -> PropertyDeclarationContext {
+        let _localctx: PropertyDeclarationContext = PropertyDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 40, ObjectiveCParser.RULE_propertyDeclaration)
 		var _la: Int = 0
 		defer {
@@ -2376,45 +2660,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class PropertyAttributesListContext:ParserRuleContext {
-		open func propertyAttribute() -> Array<PropertyAttributeContext> {
-			return getRuleContexts(PropertyAttributeContext.self)
+
+	public class PropertyAttributesListContext: ParserRuleContext {
+			open
+			func propertyAttribute() -> [PropertyAttributeContext] {
+				return getRuleContexts(PropertyAttributeContext.self)
+			}
+			open
+			func propertyAttribute(_ i: Int) -> PropertyAttributeContext? {
+				return getRuleContext(PropertyAttributeContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_propertyAttributesList
 		}
-		open func propertyAttribute(_ i: Int) -> PropertyAttributeContext? {
-			return getRuleContext(PropertyAttributeContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_propertyAttributesList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterPropertyAttributesList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterPropertyAttributesList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitPropertyAttributesList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitPropertyAttributesList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitPropertyAttributesList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPropertyAttributesList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitPropertyAttributesList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitPropertyAttributesList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func propertyAttributesList() throws -> PropertyAttributesListContext {
-		let _localctx: PropertyAttributesListContext = PropertyAttributesListContext(_ctx, getState())
+	 open func propertyAttributesList() throws -> PropertyAttributesListContext {
+        let _localctx: PropertyAttributesListContext = PropertyAttributesListContext(_ctx, getState())
 		try enterRule(_localctx, 42, ObjectiveCParser.RULE_propertyAttributesList)
 		var _la: Int = 0
 		defer {
@@ -2452,55 +2747,104 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class PropertyAttributeContext:ParserRuleContext {
-		open func ATOMIC() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ATOMIC.rawValue, 0) }
-		open func NONATOMIC() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NONATOMIC.rawValue, 0) }
-		open func STRONG() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.STRONG.rawValue, 0) }
-		open func WEAK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.WEAK.rawValue, 0) }
-		open func RETAIN() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RETAIN.rawValue, 0) }
-		open func ASSIGN() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ASSIGN.rawValue, 0) }
-		open func UNSAFE_UNRETAINED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue, 0) }
-		open func COPY() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COPY.rawValue, 0) }
-		open func READONLY() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.READONLY.rawValue, 0) }
-		open func READWRITE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.READWRITE.rawValue, 0) }
-		open func GETTER() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.GETTER.rawValue, 0) }
-		open func ASSIGNMENT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue, 0) }
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class PropertyAttributeContext: ParserRuleContext {
+			open
+			func ATOMIC() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ATOMIC.rawValue, 0)
+			}
+			open
+			func NONATOMIC() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NONATOMIC.rawValue, 0)
+			}
+			open
+			func STRONG() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.STRONG.rawValue, 0)
+			}
+			open
+			func WEAK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.WEAK.rawValue, 0)
+			}
+			open
+			func RETAIN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RETAIN.rawValue, 0)
+			}
+			open
+			func ASSIGN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ASSIGN.rawValue, 0)
+			}
+			open
+			func UNSAFE_UNRETAINED() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue, 0)
+			}
+			open
+			func COPY() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COPY.rawValue, 0)
+			}
+			open
+			func READONLY() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.READONLY.rawValue, 0)
+			}
+			open
+			func READWRITE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.READWRITE.rawValue, 0)
+			}
+			open
+			func GETTER() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.GETTER.rawValue, 0)
+			}
+			open
+			func ASSIGNMENT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func SETTER() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SETTER.rawValue, 0)
+			}
+			open
+			func COLON() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0)
+			}
+			open
+			func nullabilitySpecifier() -> NullabilitySpecifierContext? {
+				return getRuleContext(NullabilitySpecifierContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_propertyAttribute
 		}
-		open func SETTER() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SETTER.rawValue, 0) }
-		open func COLON() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0) }
-		open func nullabilitySpecifier() -> NullabilitySpecifierContext? {
-			return getRuleContext(NullabilitySpecifierContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_propertyAttribute }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterPropertyAttribute(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterPropertyAttribute(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitPropertyAttribute(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitPropertyAttribute(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitPropertyAttribute(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPropertyAttribute(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitPropertyAttribute(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitPropertyAttribute(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func propertyAttribute() throws -> PropertyAttributeContext {
-		let _localctx: PropertyAttributeContext = PropertyAttributeContext(_ctx, getState())
+	 open func propertyAttribute() throws -> PropertyAttributeContext {
+        let _localctx: PropertyAttributeContext = PropertyAttributeContext(_ctx, getState())
 		try enterRule(_localctx, 44, ObjectiveCParser.RULE_propertyAttribute)
 		defer {
 	    		try! exitRule()
@@ -2614,45 +2958,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ProtocolNameContext:ParserRuleContext {
-		open func LT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0) }
-		open func protocolList() -> ProtocolListContext? {
-			return getRuleContext(ProtocolListContext.self,0)
+
+	public class ProtocolNameContext: ParserRuleContext {
+			open
+			func LT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0)
+			}
+			open
+			func protocolList() -> ProtocolListContext? {
+				return getRuleContext(ProtocolListContext.self, 0)
+			}
+			open
+			func GT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func COVARIANT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COVARIANT.rawValue, 0)
+			}
+			open
+			func CONTRAVARIANT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.CONTRAVARIANT.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_protocolName
 		}
-		open func GT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0) }
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
-		}
-		open func COVARIANT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COVARIANT.rawValue, 0) }
-		open func CONTRAVARIANT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.CONTRAVARIANT.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_protocolName }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterProtocolName(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterProtocolName(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitProtocolName(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitProtocolName(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitProtocolName(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitProtocolName(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitProtocolName(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitProtocolName(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func protocolName() throws -> ProtocolNameContext {
-		let _localctx: ProtocolNameContext = ProtocolNameContext(_ctx, getState())
+	 open func protocolName() throws -> ProtocolNameContext {
+        let _localctx: ProtocolNameContext = ProtocolNameContext(_ctx, getState())
 		try enterRule(_localctx, 46, ObjectiveCParser.RULE_protocolName)
 		var _la: Int = 0
 		defer {
@@ -2757,43 +3120,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class InstanceVariablesContext:ParserRuleContext {
-		open func LBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0) }
-		open func RBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0) }
-		open func visibilitySection() -> Array<VisibilitySectionContext> {
-			return getRuleContexts(VisibilitySectionContext.self)
+
+	public class InstanceVariablesContext: ParserRuleContext {
+			open
+			func LBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0)
+			}
+			open
+			func RBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0)
+			}
+			open
+			func visibilitySection() -> [VisibilitySectionContext] {
+				return getRuleContexts(VisibilitySectionContext.self)
+			}
+			open
+			func visibilitySection(_ i: Int) -> VisibilitySectionContext? {
+				return getRuleContext(VisibilitySectionContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_instanceVariables
 		}
-		open func visibilitySection(_ i: Int) -> VisibilitySectionContext? {
-			return getRuleContext(VisibilitySectionContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_instanceVariables }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterInstanceVariables(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterInstanceVariables(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitInstanceVariables(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitInstanceVariables(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitInstanceVariables(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInstanceVariables(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitInstanceVariables(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitInstanceVariables(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func instanceVariables() throws -> InstanceVariablesContext {
-		let _localctx: InstanceVariablesContext = InstanceVariablesContext(_ctx, getState())
+	 open func instanceVariables() throws -> InstanceVariablesContext {
+        let _localctx: InstanceVariablesContext = InstanceVariablesContext(_ctx, getState())
 		try enterRule(_localctx, 48, ObjectiveCParser.RULE_instanceVariables)
 		var _la: Int = 0
 		defer {
@@ -2838,44 +3214,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class VisibilitySectionContext:ParserRuleContext {
-		open func accessModifier() -> AccessModifierContext? {
-			return getRuleContext(AccessModifierContext.self,0)
+
+	public class VisibilitySectionContext: ParserRuleContext {
+			open
+			func accessModifier() -> AccessModifierContext? {
+				return getRuleContext(AccessModifierContext.self, 0)
+			}
+			open
+			func fieldDeclaration() -> [FieldDeclarationContext] {
+				return getRuleContexts(FieldDeclarationContext.self)
+			}
+			open
+			func fieldDeclaration(_ i: Int) -> FieldDeclarationContext? {
+				return getRuleContext(FieldDeclarationContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_visibilitySection
 		}
-		open func fieldDeclaration() -> Array<FieldDeclarationContext> {
-			return getRuleContexts(FieldDeclarationContext.self)
-		}
-		open func fieldDeclaration(_ i: Int) -> FieldDeclarationContext? {
-			return getRuleContext(FieldDeclarationContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_visibilitySection }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterVisibilitySection(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterVisibilitySection(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitVisibilitySection(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitVisibilitySection(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitVisibilitySection(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitVisibilitySection(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitVisibilitySection(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitVisibilitySection(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func visibilitySection() throws -> VisibilitySectionContext {
-		let _localctx: VisibilitySectionContext = VisibilitySectionContext(_ctx, getState())
+	 open func visibilitySection() throws -> VisibilitySectionContext {
+        let _localctx: VisibilitySectionContext = VisibilitySectionContext(_ctx, getState())
 		try enterRule(_localctx, 50, ObjectiveCParser.RULE_visibilitySection)
 		defer {
 	    		try! exitRule()
@@ -3014,39 +3398,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class AccessModifierContext:ParserRuleContext {
-		open func PRIVATE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.PRIVATE.rawValue, 0) }
-		open func PROTECTED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.PROTECTED.rawValue, 0) }
-		open func PACKAGE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.PACKAGE.rawValue, 0) }
-		open func PUBLIC() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.PUBLIC.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_accessModifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterAccessModifier(self)
+
+	public class AccessModifierContext: ParserRuleContext {
+			open
+			func PRIVATE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.PRIVATE.rawValue, 0)
+			}
+			open
+			func PROTECTED() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.PROTECTED.rawValue, 0)
+			}
+			open
+			func PACKAGE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.PACKAGE.rawValue, 0)
+			}
+			open
+			func PUBLIC() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.PUBLIC.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_accessModifier
+		}
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterAccessModifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitAccessModifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitAccessModifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitAccessModifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAccessModifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitAccessModifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitAccessModifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func accessModifier() throws -> AccessModifierContext {
-		let _localctx: AccessModifierContext = AccessModifierContext(_ctx, getState())
+	 open func accessModifier() throws -> AccessModifierContext {
+        let _localctx: AccessModifierContext = AccessModifierContext(_ctx, getState())
 		try enterRule(_localctx, 52, ObjectiveCParser.RULE_accessModifier)
 		var _la: Int = 0
 		defer {
@@ -3080,65 +3481,80 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class InterfaceDeclarationListContext:ParserRuleContext {
-		open func declaration() -> Array<DeclarationContext> {
-			return getRuleContexts(DeclarationContext.self)
+
+	public class InterfaceDeclarationListContext: ParserRuleContext {
+			open
+			func declaration() -> [DeclarationContext] {
+				return getRuleContexts(DeclarationContext.self)
+			}
+			open
+			func declaration(_ i: Int) -> DeclarationContext? {
+				return getRuleContext(DeclarationContext.self, i)
+			}
+			open
+			func classMethodDeclaration() -> [ClassMethodDeclarationContext] {
+				return getRuleContexts(ClassMethodDeclarationContext.self)
+			}
+			open
+			func classMethodDeclaration(_ i: Int) -> ClassMethodDeclarationContext? {
+				return getRuleContext(ClassMethodDeclarationContext.self, i)
+			}
+			open
+			func instanceMethodDeclaration() -> [InstanceMethodDeclarationContext] {
+				return getRuleContexts(InstanceMethodDeclarationContext.self)
+			}
+			open
+			func instanceMethodDeclaration(_ i: Int) -> InstanceMethodDeclarationContext? {
+				return getRuleContext(InstanceMethodDeclarationContext.self, i)
+			}
+			open
+			func propertyDeclaration() -> [PropertyDeclarationContext] {
+				return getRuleContexts(PropertyDeclarationContext.self)
+			}
+			open
+			func propertyDeclaration(_ i: Int) -> PropertyDeclarationContext? {
+				return getRuleContext(PropertyDeclarationContext.self, i)
+			}
+			open
+			func functionDeclaration() -> [FunctionDeclarationContext] {
+				return getRuleContexts(FunctionDeclarationContext.self)
+			}
+			open
+			func functionDeclaration(_ i: Int) -> FunctionDeclarationContext? {
+				return getRuleContext(FunctionDeclarationContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_interfaceDeclarationList
 		}
-		open func declaration(_ i: Int) -> DeclarationContext? {
-			return getRuleContext(DeclarationContext.self,i)
-		}
-		open func classMethodDeclaration() -> Array<ClassMethodDeclarationContext> {
-			return getRuleContexts(ClassMethodDeclarationContext.self)
-		}
-		open func classMethodDeclaration(_ i: Int) -> ClassMethodDeclarationContext? {
-			return getRuleContext(ClassMethodDeclarationContext.self,i)
-		}
-		open func instanceMethodDeclaration() -> Array<InstanceMethodDeclarationContext> {
-			return getRuleContexts(InstanceMethodDeclarationContext.self)
-		}
-		open func instanceMethodDeclaration(_ i: Int) -> InstanceMethodDeclarationContext? {
-			return getRuleContext(InstanceMethodDeclarationContext.self,i)
-		}
-		open func propertyDeclaration() -> Array<PropertyDeclarationContext> {
-			return getRuleContexts(PropertyDeclarationContext.self)
-		}
-		open func propertyDeclaration(_ i: Int) -> PropertyDeclarationContext? {
-			return getRuleContext(PropertyDeclarationContext.self,i)
-		}
-		open func functionDeclaration() -> Array<FunctionDeclarationContext> {
-			return getRuleContexts(FunctionDeclarationContext.self)
-		}
-		open func functionDeclaration(_ i: Int) -> FunctionDeclarationContext? {
-			return getRuleContext(FunctionDeclarationContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_interfaceDeclarationList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterInterfaceDeclarationList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterInterfaceDeclarationList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitInterfaceDeclarationList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitInterfaceDeclarationList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitInterfaceDeclarationList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInterfaceDeclarationList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitInterfaceDeclarationList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitInterfaceDeclarationList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func interfaceDeclarationList() throws -> InterfaceDeclarationListContext {
-		let _localctx: InterfaceDeclarationListContext = InterfaceDeclarationListContext(_ctx, getState())
+	 open func interfaceDeclarationList() throws -> InterfaceDeclarationListContext {
+        let _localctx: InterfaceDeclarationListContext = InterfaceDeclarationListContext(_ctx, getState())
 		try enterRule(_localctx, 54, ObjectiveCParser.RULE_interfaceDeclarationList)
 		defer {
 	    		try! exitRule()
@@ -3201,39 +3617,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ClassMethodDeclarationContext:ParserRuleContext {
-		open func ADD() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ADD.rawValue, 0) }
-		open func methodDeclaration() -> MethodDeclarationContext? {
-			return getRuleContext(MethodDeclarationContext.self,0)
+
+	public class ClassMethodDeclarationContext: ParserRuleContext {
+			open
+			func ADD() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ADD.rawValue, 0)
+			}
+			open
+			func methodDeclaration() -> MethodDeclarationContext? {
+				return getRuleContext(MethodDeclarationContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_classMethodDeclaration
 		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_classMethodDeclaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterClassMethodDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterClassMethodDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitClassMethodDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitClassMethodDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitClassMethodDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitClassMethodDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitClassMethodDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitClassMethodDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func classMethodDeclaration() throws -> ClassMethodDeclarationContext {
-		let _localctx: ClassMethodDeclarationContext = ClassMethodDeclarationContext(_ctx, getState())
+	 open func classMethodDeclaration() throws -> ClassMethodDeclarationContext {
+        let _localctx: ClassMethodDeclarationContext = ClassMethodDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 56, ObjectiveCParser.RULE_classMethodDeclaration)
 		defer {
 	    		try! exitRule()
@@ -3254,39 +3679,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class InstanceMethodDeclarationContext:ParserRuleContext {
-		open func SUB() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SUB.rawValue, 0) }
-		open func methodDeclaration() -> MethodDeclarationContext? {
-			return getRuleContext(MethodDeclarationContext.self,0)
+
+	public class InstanceMethodDeclarationContext: ParserRuleContext {
+			open
+			func SUB() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SUB.rawValue, 0)
+			}
+			open
+			func methodDeclaration() -> MethodDeclarationContext? {
+				return getRuleContext(MethodDeclarationContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_instanceMethodDeclaration
 		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_instanceMethodDeclaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterInstanceMethodDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterInstanceMethodDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitInstanceMethodDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitInstanceMethodDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitInstanceMethodDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInstanceMethodDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitInstanceMethodDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitInstanceMethodDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func instanceMethodDeclaration() throws -> InstanceMethodDeclarationContext {
-		let _localctx: InstanceMethodDeclarationContext = InstanceMethodDeclarationContext(_ctx, getState())
+	 open func instanceMethodDeclaration() throws -> InstanceMethodDeclarationContext {
+        let _localctx: InstanceMethodDeclarationContext = InstanceMethodDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 58, ObjectiveCParser.RULE_instanceMethodDeclaration)
 		defer {
 	    		try! exitRule()
@@ -3307,51 +3741,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class MethodDeclarationContext:ParserRuleContext {
-		open func methodSelector() -> MethodSelectorContext? {
-			return getRuleContext(MethodSelectorContext.self,0)
+
+	public class MethodDeclarationContext: ParserRuleContext {
+			open
+			func methodSelector() -> MethodSelectorContext? {
+				return getRuleContext(MethodSelectorContext.self, 0)
+			}
+			open
+			func SEMI() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
+			}
+			open
+			func methodType() -> MethodTypeContext? {
+				return getRuleContext(MethodTypeContext.self, 0)
+			}
+			open
+			func attributeSpecifier() -> [AttributeSpecifierContext] {
+				return getRuleContexts(AttributeSpecifierContext.self)
+			}
+			open
+			func attributeSpecifier(_ i: Int) -> AttributeSpecifierContext? {
+				return getRuleContext(AttributeSpecifierContext.self, i)
+			}
+			open
+			func macro() -> MacroContext? {
+				return getRuleContext(MacroContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_methodDeclaration
 		}
-		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
-		open func methodType() -> MethodTypeContext? {
-			return getRuleContext(MethodTypeContext.self,0)
-		}
-		open func attributeSpecifier() -> Array<AttributeSpecifierContext> {
-			return getRuleContexts(AttributeSpecifierContext.self)
-		}
-		open func attributeSpecifier(_ i: Int) -> AttributeSpecifierContext? {
-			return getRuleContext(AttributeSpecifierContext.self,i)
-		}
-		open func macro() -> MacroContext? {
-			return getRuleContext(MacroContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_methodDeclaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterMethodDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterMethodDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitMethodDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitMethodDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitMethodDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitMethodDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitMethodDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitMethodDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func methodDeclaration() throws -> MethodDeclarationContext {
-		let _localctx: MethodDeclarationContext = MethodDeclarationContext(_ctx, getState())
+	 open func methodDeclaration() throws -> MethodDeclarationContext {
+        let _localctx: MethodDeclarationContext = MethodDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 60, ObjectiveCParser.RULE_methodDeclaration)
 		var _la: Int = 0
 		defer {
@@ -3422,65 +3869,80 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ImplementationDefinitionListContext:ParserRuleContext {
-		open func functionDefinition() -> Array<FunctionDefinitionContext> {
-			return getRuleContexts(FunctionDefinitionContext.self)
+
+	public class ImplementationDefinitionListContext: ParserRuleContext {
+			open
+			func functionDefinition() -> [FunctionDefinitionContext] {
+				return getRuleContexts(FunctionDefinitionContext.self)
+			}
+			open
+			func functionDefinition(_ i: Int) -> FunctionDefinitionContext? {
+				return getRuleContext(FunctionDefinitionContext.self, i)
+			}
+			open
+			func declaration() -> [DeclarationContext] {
+				return getRuleContexts(DeclarationContext.self)
+			}
+			open
+			func declaration(_ i: Int) -> DeclarationContext? {
+				return getRuleContext(DeclarationContext.self, i)
+			}
+			open
+			func classMethodDefinition() -> [ClassMethodDefinitionContext] {
+				return getRuleContexts(ClassMethodDefinitionContext.self)
+			}
+			open
+			func classMethodDefinition(_ i: Int) -> ClassMethodDefinitionContext? {
+				return getRuleContext(ClassMethodDefinitionContext.self, i)
+			}
+			open
+			func instanceMethodDefinition() -> [InstanceMethodDefinitionContext] {
+				return getRuleContexts(InstanceMethodDefinitionContext.self)
+			}
+			open
+			func instanceMethodDefinition(_ i: Int) -> InstanceMethodDefinitionContext? {
+				return getRuleContext(InstanceMethodDefinitionContext.self, i)
+			}
+			open
+			func propertyImplementation() -> [PropertyImplementationContext] {
+				return getRuleContexts(PropertyImplementationContext.self)
+			}
+			open
+			func propertyImplementation(_ i: Int) -> PropertyImplementationContext? {
+				return getRuleContext(PropertyImplementationContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_implementationDefinitionList
 		}
-		open func functionDefinition(_ i: Int) -> FunctionDefinitionContext? {
-			return getRuleContext(FunctionDefinitionContext.self,i)
-		}
-		open func declaration() -> Array<DeclarationContext> {
-			return getRuleContexts(DeclarationContext.self)
-		}
-		open func declaration(_ i: Int) -> DeclarationContext? {
-			return getRuleContext(DeclarationContext.self,i)
-		}
-		open func classMethodDefinition() -> Array<ClassMethodDefinitionContext> {
-			return getRuleContexts(ClassMethodDefinitionContext.self)
-		}
-		open func classMethodDefinition(_ i: Int) -> ClassMethodDefinitionContext? {
-			return getRuleContext(ClassMethodDefinitionContext.self,i)
-		}
-		open func instanceMethodDefinition() -> Array<InstanceMethodDefinitionContext> {
-			return getRuleContexts(InstanceMethodDefinitionContext.self)
-		}
-		open func instanceMethodDefinition(_ i: Int) -> InstanceMethodDefinitionContext? {
-			return getRuleContext(InstanceMethodDefinitionContext.self,i)
-		}
-		open func propertyImplementation() -> Array<PropertyImplementationContext> {
-			return getRuleContexts(PropertyImplementationContext.self)
-		}
-		open func propertyImplementation(_ i: Int) -> PropertyImplementationContext? {
-			return getRuleContext(PropertyImplementationContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_implementationDefinitionList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterImplementationDefinitionList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterImplementationDefinitionList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitImplementationDefinitionList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitImplementationDefinitionList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitImplementationDefinitionList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitImplementationDefinitionList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitImplementationDefinitionList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitImplementationDefinitionList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func implementationDefinitionList() throws -> ImplementationDefinitionListContext {
-		let _localctx: ImplementationDefinitionListContext = ImplementationDefinitionListContext(_ctx, getState())
+	 open func implementationDefinitionList() throws -> ImplementationDefinitionListContext {
+        let _localctx: ImplementationDefinitionListContext = ImplementationDefinitionListContext(_ctx, getState())
 		try enterRule(_localctx, 62, ObjectiveCParser.RULE_implementationDefinitionList)
 		var _la: Int = 0
 		defer {
@@ -3549,39 +4011,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ClassMethodDefinitionContext:ParserRuleContext {
-		open func ADD() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ADD.rawValue, 0) }
-		open func methodDefinition() -> MethodDefinitionContext? {
-			return getRuleContext(MethodDefinitionContext.self,0)
+
+	public class ClassMethodDefinitionContext: ParserRuleContext {
+			open
+			func ADD() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ADD.rawValue, 0)
+			}
+			open
+			func methodDefinition() -> MethodDefinitionContext? {
+				return getRuleContext(MethodDefinitionContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_classMethodDefinition
 		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_classMethodDefinition }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterClassMethodDefinition(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterClassMethodDefinition(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitClassMethodDefinition(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitClassMethodDefinition(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitClassMethodDefinition(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitClassMethodDefinition(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitClassMethodDefinition(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitClassMethodDefinition(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func classMethodDefinition() throws -> ClassMethodDefinitionContext {
-		let _localctx: ClassMethodDefinitionContext = ClassMethodDefinitionContext(_ctx, getState())
+	 open func classMethodDefinition() throws -> ClassMethodDefinitionContext {
+        let _localctx: ClassMethodDefinitionContext = ClassMethodDefinitionContext(_ctx, getState())
 		try enterRule(_localctx, 64, ObjectiveCParser.RULE_classMethodDefinition)
 		defer {
 	    		try! exitRule()
@@ -3602,39 +4073,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class InstanceMethodDefinitionContext:ParserRuleContext {
-		open func SUB() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SUB.rawValue, 0) }
-		open func methodDefinition() -> MethodDefinitionContext? {
-			return getRuleContext(MethodDefinitionContext.self,0)
+
+	public class InstanceMethodDefinitionContext: ParserRuleContext {
+			open
+			func SUB() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SUB.rawValue, 0)
+			}
+			open
+			func methodDefinition() -> MethodDefinitionContext? {
+				return getRuleContext(MethodDefinitionContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_instanceMethodDefinition
 		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_instanceMethodDefinition }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterInstanceMethodDefinition(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterInstanceMethodDefinition(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitInstanceMethodDefinition(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitInstanceMethodDefinition(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitInstanceMethodDefinition(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInstanceMethodDefinition(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitInstanceMethodDefinition(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitInstanceMethodDefinition(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func instanceMethodDefinition() throws -> InstanceMethodDefinitionContext {
-		let _localctx: InstanceMethodDefinitionContext = InstanceMethodDefinitionContext(_ctx, getState())
+	 open func instanceMethodDefinition() throws -> InstanceMethodDefinitionContext {
+        let _localctx: InstanceMethodDefinitionContext = InstanceMethodDefinitionContext(_ctx, getState())
 		try enterRule(_localctx, 66, ObjectiveCParser.RULE_instanceMethodDefinition)
 		defer {
 	    		try! exitRule()
@@ -3655,54 +4135,68 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class MethodDefinitionContext:ParserRuleContext {
-		open func methodSelector() -> MethodSelectorContext? {
-			return getRuleContext(MethodSelectorContext.self,0)
+
+	public class MethodDefinitionContext: ParserRuleContext {
+			open
+			func methodSelector() -> MethodSelectorContext? {
+				return getRuleContext(MethodSelectorContext.self, 0)
+			}
+			open
+			func compoundStatement() -> CompoundStatementContext? {
+				return getRuleContext(CompoundStatementContext.self, 0)
+			}
+			open
+			func methodType() -> MethodTypeContext? {
+				return getRuleContext(MethodTypeContext.self, 0)
+			}
+			open
+			func initDeclaratorList() -> InitDeclaratorListContext? {
+				return getRuleContext(InitDeclaratorListContext.self, 0)
+			}
+			open
+			func SEMI() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.SEMI.rawValue)
+			}
+			open
+			func SEMI(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, i)
+			}
+			open
+			func attributeSpecifier() -> AttributeSpecifierContext? {
+				return getRuleContext(AttributeSpecifierContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_methodDefinition
 		}
-		open func compoundStatement() -> CompoundStatementContext? {
-			return getRuleContext(CompoundStatementContext.self,0)
-		}
-		open func methodType() -> MethodTypeContext? {
-			return getRuleContext(MethodTypeContext.self,0)
-		}
-		open func initDeclaratorList() -> InitDeclaratorListContext? {
-			return getRuleContext(InitDeclaratorListContext.self,0)
-		}
-		open func SEMI() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.SEMI.rawValue) }
-		open func SEMI(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, i)
-		}
-		open func attributeSpecifier() -> AttributeSpecifierContext? {
-			return getRuleContext(AttributeSpecifierContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_methodDefinition }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterMethodDefinition(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterMethodDefinition(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitMethodDefinition(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitMethodDefinition(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitMethodDefinition(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitMethodDefinition(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitMethodDefinition(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitMethodDefinition(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func methodDefinition() throws -> MethodDefinitionContext {
-		let _localctx: MethodDefinitionContext = MethodDefinitionContext(_ctx, getState())
+	 open func methodDefinition() throws -> MethodDefinitionContext {
+        let _localctx: MethodDefinitionContext = MethodDefinitionContext(_ctx, getState())
 		try enterRule(_localctx, 68, ObjectiveCParser.RULE_methodDefinition)
 		var _la: Int = 0
 		defer {
@@ -3796,46 +4290,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class MethodSelectorContext:ParserRuleContext {
-		open func selector() -> SelectorContext? {
-			return getRuleContext(SelectorContext.self,0)
+
+	public class MethodSelectorContext: ParserRuleContext {
+			open
+			func selector() -> SelectorContext? {
+				return getRuleContext(SelectorContext.self, 0)
+			}
+			open
+			func keywordDeclarator() -> [KeywordDeclaratorContext] {
+				return getRuleContexts(KeywordDeclaratorContext.self)
+			}
+			open
+			func keywordDeclarator(_ i: Int) -> KeywordDeclaratorContext? {
+				return getRuleContext(KeywordDeclaratorContext.self, i)
+			}
+			open
+			func COMMA() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, 0)
+			}
+			open
+			func ELIPSIS() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ELIPSIS.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_methodSelector
 		}
-		open func keywordDeclarator() -> Array<KeywordDeclaratorContext> {
-			return getRuleContexts(KeywordDeclaratorContext.self)
-		}
-		open func keywordDeclarator(_ i: Int) -> KeywordDeclaratorContext? {
-			return getRuleContext(KeywordDeclaratorContext.self,i)
-		}
-		open func COMMA() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, 0) }
-		open func ELIPSIS() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ELIPSIS.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_methodSelector }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterMethodSelector(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterMethodSelector(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitMethodSelector(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitMethodSelector(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitMethodSelector(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitMethodSelector(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitMethodSelector(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitMethodSelector(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func methodSelector() throws -> MethodSelectorContext {
-		let _localctx: MethodSelectorContext = MethodSelectorContext(_ctx, getState())
+	 open func methodSelector() throws -> MethodSelectorContext {
+        let _localctx: MethodSelectorContext = MethodSelectorContext(_ctx, getState())
 		try enterRule(_localctx, 70, ObjectiveCParser.RULE_methodSelector)
 		var _la: Int = 0
 		defer {
@@ -3900,51 +4408,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class KeywordDeclaratorContext:ParserRuleContext {
-		open func COLON() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0) }
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class KeywordDeclaratorContext: ParserRuleContext {
+			open
+			func COLON() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func selector() -> SelectorContext? {
+				return getRuleContext(SelectorContext.self, 0)
+			}
+			open
+			func methodType() -> [MethodTypeContext] {
+				return getRuleContexts(MethodTypeContext.self)
+			}
+			open
+			func methodType(_ i: Int) -> MethodTypeContext? {
+				return getRuleContext(MethodTypeContext.self, i)
+			}
+			open
+			func arcBehaviourSpecifier() -> ArcBehaviourSpecifierContext? {
+				return getRuleContext(ArcBehaviourSpecifierContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_keywordDeclarator
 		}
-		open func selector() -> SelectorContext? {
-			return getRuleContext(SelectorContext.self,0)
-		}
-		open func methodType() -> Array<MethodTypeContext> {
-			return getRuleContexts(MethodTypeContext.self)
-		}
-		open func methodType(_ i: Int) -> MethodTypeContext? {
-			return getRuleContext(MethodTypeContext.self,i)
-		}
-		open func arcBehaviourSpecifier() -> ArcBehaviourSpecifierContext? {
-			return getRuleContext(ArcBehaviourSpecifierContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_keywordDeclarator }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterKeywordDeclarator(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterKeywordDeclarator(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitKeywordDeclarator(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitKeywordDeclarator(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitKeywordDeclarator(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitKeywordDeclarator(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitKeywordDeclarator(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitKeywordDeclarator(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func keywordDeclarator() throws -> KeywordDeclaratorContext {
-		let _localctx: KeywordDeclaratorContext = KeywordDeclaratorContext(_ctx, getState())
+	 open func keywordDeclarator() throws -> KeywordDeclaratorContext {
+        let _localctx: KeywordDeclaratorContext = KeywordDeclaratorContext(_ctx, getState())
 		try enterRule(_localctx, 72, ObjectiveCParser.RULE_keywordDeclarator)
 		var _la: Int = 0
 		defer {
@@ -4012,43 +4533,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class SelectorContext:ParserRuleContext {
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class SelectorContext: ParserRuleContext {
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func RETURN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RETURN.rawValue, 0)
+			}
+			open
+			func SWITCH() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SWITCH.rawValue, 0)
+			}
+			open
+			func IF() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IF.rawValue, 0)
+			}
+			open
+			func ELSE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ELSE.rawValue, 0)
+			}
+			open
+			func DEFAULT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.DEFAULT.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_selector
 		}
-		open func RETURN() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RETURN.rawValue, 0) }
-		open func SWITCH() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SWITCH.rawValue, 0) }
-		open func IF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IF.rawValue, 0) }
-		open func ELSE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ELSE.rawValue, 0) }
-		open func DEFAULT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DEFAULT.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_selector }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterSelector(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterSelector(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitSelector(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitSelector(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitSelector(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSelector(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitSelector(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitSelector(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func selector() throws -> SelectorContext {
-		let _localctx: SelectorContext = SelectorContext(_ctx, getState())
+	 open func selector() throws -> SelectorContext {
+        let _localctx: SelectorContext = SelectorContext(_ctx, getState())
 		try enterRule(_localctx, 74, ObjectiveCParser.RULE_selector)
 		defer {
 	    		try! exitRule()
@@ -4156,40 +4698,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class MethodTypeContext:ParserRuleContext {
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func typeName() -> TypeNameContext? {
-			return getRuleContext(TypeNameContext.self,0)
+
+	public class MethodTypeContext: ParserRuleContext {
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func typeName() -> TypeNameContext? {
+				return getRuleContext(TypeNameContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_methodType
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_methodType }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterMethodType(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterMethodType(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitMethodType(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitMethodType(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitMethodType(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitMethodType(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitMethodType(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitMethodType(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func methodType() throws -> MethodTypeContext {
-		let _localctx: MethodTypeContext = MethodTypeContext(_ctx, getState())
+	 open func methodType() throws -> MethodTypeContext {
+        let _localctx: MethodTypeContext = MethodTypeContext(_ctx, getState())
 		try enterRule(_localctx, 76, ObjectiveCParser.RULE_methodType)
 		defer {
 	    		try! exitRule()
@@ -4212,41 +4766,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class PropertyImplementationContext:ParserRuleContext {
-		open func SYNTHESIZE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SYNTHESIZE.rawValue, 0) }
-		open func propertySynthesizeList() -> PropertySynthesizeListContext? {
-			return getRuleContext(PropertySynthesizeListContext.self,0)
+
+	public class PropertyImplementationContext: ParserRuleContext {
+			open
+			func SYNTHESIZE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SYNTHESIZE.rawValue, 0)
+			}
+			open
+			func propertySynthesizeList() -> PropertySynthesizeListContext? {
+				return getRuleContext(PropertySynthesizeListContext.self, 0)
+			}
+			open
+			func SEMI() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
+			}
+			open
+			func DYNAMIC() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.DYNAMIC.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_propertyImplementation
 		}
-		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
-		open func DYNAMIC() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DYNAMIC.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_propertyImplementation }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterPropertyImplementation(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterPropertyImplementation(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitPropertyImplementation(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitPropertyImplementation(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitPropertyImplementation(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPropertyImplementation(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitPropertyImplementation(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitPropertyImplementation(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func propertyImplementation() throws -> PropertyImplementationContext {
-		let _localctx: PropertyImplementationContext = PropertyImplementationContext(_ctx, getState())
+	 open func propertyImplementation() throws -> PropertyImplementationContext {
+        let _localctx: PropertyImplementationContext = PropertyImplementationContext(_ctx, getState())
 		try enterRule(_localctx, 78, ObjectiveCParser.RULE_propertyImplementation)
 		defer {
 	    		try! exitRule()
@@ -4288,45 +4857,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class PropertySynthesizeListContext:ParserRuleContext {
-		open func propertySynthesizeItem() -> Array<PropertySynthesizeItemContext> {
-			return getRuleContexts(PropertySynthesizeItemContext.self)
+
+	public class PropertySynthesizeListContext: ParserRuleContext {
+			open
+			func propertySynthesizeItem() -> [PropertySynthesizeItemContext] {
+				return getRuleContexts(PropertySynthesizeItemContext.self)
+			}
+			open
+			func propertySynthesizeItem(_ i: Int) -> PropertySynthesizeItemContext? {
+				return getRuleContext(PropertySynthesizeItemContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_propertySynthesizeList
 		}
-		open func propertySynthesizeItem(_ i: Int) -> PropertySynthesizeItemContext? {
-			return getRuleContext(PropertySynthesizeItemContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_propertySynthesizeList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterPropertySynthesizeList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterPropertySynthesizeList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitPropertySynthesizeList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitPropertySynthesizeList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitPropertySynthesizeList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPropertySynthesizeList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitPropertySynthesizeList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitPropertySynthesizeList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func propertySynthesizeList() throws -> PropertySynthesizeListContext {
-		let _localctx: PropertySynthesizeListContext = PropertySynthesizeListContext(_ctx, getState())
+	 open func propertySynthesizeList() throws -> PropertySynthesizeListContext {
+        let _localctx: PropertySynthesizeListContext = PropertySynthesizeListContext(_ctx, getState())
 		try enterRule(_localctx, 80, ObjectiveCParser.RULE_propertySynthesizeList)
 		var _la: Int = 0
 		defer {
@@ -4364,42 +4944,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class PropertySynthesizeItemContext:ParserRuleContext {
-		open func identifier() -> Array<IdentifierContext> {
-			return getRuleContexts(IdentifierContext.self)
+
+	public class PropertySynthesizeItemContext: ParserRuleContext {
+			open
+			func identifier() -> [IdentifierContext] {
+				return getRuleContexts(IdentifierContext.self)
+			}
+			open
+			func identifier(_ i: Int) -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, i)
+			}
+			open
+			func ASSIGNMENT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_propertySynthesizeItem
 		}
-		open func identifier(_ i: Int) -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,i)
-		}
-		open func ASSIGNMENT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_propertySynthesizeItem }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterPropertySynthesizeItem(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterPropertySynthesizeItem(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitPropertySynthesizeItem(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitPropertySynthesizeItem(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitPropertySynthesizeItem(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPropertySynthesizeItem(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitPropertySynthesizeItem(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitPropertySynthesizeItem(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func propertySynthesizeItem() throws -> PropertySynthesizeItemContext {
-		let _localctx: PropertySynthesizeItemContext = PropertySynthesizeItemContext(_ctx, getState())
+	 open func propertySynthesizeItem() throws -> PropertySynthesizeItemContext {
+        let _localctx: PropertySynthesizeItemContext = PropertySynthesizeItemContext(_ctx, getState())
 		try enterRule(_localctx, 82, ObjectiveCParser.RULE_propertySynthesizeItem)
 		var _la: Int = 0
 		defer {
@@ -4434,52 +5024,72 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class BlockTypeContext:ParserRuleContext {
-		open func typeSpecifier() -> Array<TypeSpecifierContext> {
-			return getRuleContexts(TypeSpecifierContext.self)
+
+	public class BlockTypeContext: ParserRuleContext {
+			open
+			func typeSpecifier() -> [TypeSpecifierContext] {
+				return getRuleContexts(TypeSpecifierContext.self)
+			}
+			open
+			func typeSpecifier(_ i: Int) -> TypeSpecifierContext? {
+				return getRuleContext(TypeSpecifierContext.self, i)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func BITXOR() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BITXOR.rawValue, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func nullabilitySpecifier() -> [NullabilitySpecifierContext] {
+				return getRuleContexts(NullabilitySpecifierContext.self)
+			}
+			open
+			func nullabilitySpecifier(_ i: Int) -> NullabilitySpecifierContext? {
+				return getRuleContext(NullabilitySpecifierContext.self, i)
+			}
+			open
+			func blockParameters() -> BlockParametersContext? {
+				return getRuleContext(BlockParametersContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_blockType
 		}
-		open func typeSpecifier(_ i: Int) -> TypeSpecifierContext? {
-			return getRuleContext(TypeSpecifierContext.self,i)
-		}
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func nullabilitySpecifier() -> Array<NullabilitySpecifierContext> {
-			return getRuleContexts(NullabilitySpecifierContext.self)
-		}
-		open func nullabilitySpecifier(_ i: Int) -> NullabilitySpecifierContext? {
-			return getRuleContext(NullabilitySpecifierContext.self,i)
-		}
-		open func blockParameters() -> BlockParametersContext? {
-			return getRuleContext(BlockParametersContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_blockType }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterBlockType(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterBlockType(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitBlockType(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitBlockType(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitBlockType(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitBlockType(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitBlockType(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitBlockType(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func blockType() throws -> BlockTypeContext {
-		let _localctx: BlockTypeContext = BlockTypeContext(_ctx, getState())
+	 open func blockType() throws -> BlockTypeContext {
+        let _localctx: BlockTypeContext = BlockTypeContext(_ctx, getState())
 		try enterRule(_localctx, 84, ObjectiveCParser.RULE_blockType)
 		var _la: Int = 0
 		defer {
@@ -4559,47 +5169,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class GenericsSpecifierContext:ParserRuleContext {
-		open func LT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0) }
-		open func GT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0) }
-		open func typeSpecifierWithPrefixes() -> Array<TypeSpecifierWithPrefixesContext> {
-			return getRuleContexts(TypeSpecifierWithPrefixesContext.self)
+
+	public class GenericsSpecifierContext: ParserRuleContext {
+			open
+			func LT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0)
+			}
+			open
+			func GT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0)
+			}
+			open
+			func typeSpecifierWithPrefixes() -> [TypeSpecifierWithPrefixesContext] {
+				return getRuleContexts(TypeSpecifierWithPrefixesContext.self)
+			}
+			open
+			func typeSpecifierWithPrefixes(_ i: Int) -> TypeSpecifierWithPrefixesContext? {
+				return getRuleContext(TypeSpecifierWithPrefixesContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_genericsSpecifier
 		}
-		open func typeSpecifierWithPrefixes(_ i: Int) -> TypeSpecifierWithPrefixesContext? {
-			return getRuleContext(TypeSpecifierWithPrefixesContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_genericsSpecifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterGenericsSpecifier(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterGenericsSpecifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitGenericsSpecifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitGenericsSpecifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitGenericsSpecifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitGenericsSpecifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitGenericsSpecifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitGenericsSpecifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func genericsSpecifier() throws -> GenericsSpecifierContext {
-		let _localctx: GenericsSpecifierContext = GenericsSpecifierContext(_ctx, getState())
+	 open func genericsSpecifier() throws -> GenericsSpecifierContext {
+        let _localctx: GenericsSpecifierContext = GenericsSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 86, ObjectiveCParser.RULE_genericsSpecifier)
 		var _la: Int = 0
 		defer {
@@ -4659,47 +5286,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class TypeSpecifierWithPrefixesContext:ParserRuleContext {
-		open func typeSpecifier() -> TypeSpecifierContext? {
-			return getRuleContext(TypeSpecifierContext.self,0)
+
+	public class TypeSpecifierWithPrefixesContext: ParserRuleContext {
+			open
+			func typeSpecifier() -> TypeSpecifierContext? {
+				return getRuleContext(TypeSpecifierContext.self, 0)
+			}
+			open
+			func typePrefix() -> [TypePrefixContext] {
+				return getRuleContexts(TypePrefixContext.self)
+			}
+			open
+			func typePrefix(_ i: Int) -> TypePrefixContext? {
+				return getRuleContext(TypePrefixContext.self, i)
+			}
+			open
+			func pointer() -> PointerContext? {
+				return getRuleContext(PointerContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_typeSpecifierWithPrefixes
 		}
-		open func typePrefix() -> Array<TypePrefixContext> {
-			return getRuleContexts(TypePrefixContext.self)
-		}
-		open func typePrefix(_ i: Int) -> TypePrefixContext? {
-			return getRuleContext(TypePrefixContext.self,i)
-		}
-		open func pointer() -> PointerContext? {
-			return getRuleContext(PointerContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_typeSpecifierWithPrefixes }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterTypeSpecifierWithPrefixes(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterTypeSpecifierWithPrefixes(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitTypeSpecifierWithPrefixes(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitTypeSpecifierWithPrefixes(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeSpecifierWithPrefixes(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeSpecifierWithPrefixes(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitTypeSpecifierWithPrefixes(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitTypeSpecifierWithPrefixes(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func typeSpecifierWithPrefixes() throws -> TypeSpecifierWithPrefixesContext {
-		let _localctx: TypeSpecifierWithPrefixesContext = TypeSpecifierWithPrefixesContext(_ctx, getState())
+	 open func typeSpecifierWithPrefixes() throws -> TypeSpecifierWithPrefixesContext {
+        let _localctx: TypeSpecifierWithPrefixesContext = TypeSpecifierWithPrefixesContext(_ctx, getState())
 		try enterRule(_localctx, 88, ObjectiveCParser.RULE_typeSpecifierWithPrefixes)
 		var _la: Int = 0
 		defer {
@@ -4747,48 +5383,68 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class DictionaryExpressionContext:ParserRuleContext {
-		open func AT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.AT.rawValue, 0) }
-		open func LBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0) }
-		open func RBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0) }
-		open func dictionaryPair() -> Array<DictionaryPairContext> {
-			return getRuleContexts(DictionaryPairContext.self)
+
+	public class DictionaryExpressionContext: ParserRuleContext {
+			open
+			func AT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.AT.rawValue, 0)
+			}
+			open
+			func LBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0)
+			}
+			open
+			func RBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0)
+			}
+			open
+			func dictionaryPair() -> [DictionaryPairContext] {
+				return getRuleContexts(DictionaryPairContext.self)
+			}
+			open
+			func dictionaryPair(_ i: Int) -> DictionaryPairContext? {
+				return getRuleContext(DictionaryPairContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_dictionaryExpression
 		}
-		open func dictionaryPair(_ i: Int) -> DictionaryPairContext? {
-			return getRuleContext(DictionaryPairContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_dictionaryExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterDictionaryExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterDictionaryExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitDictionaryExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitDictionaryExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitDictionaryExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDictionaryExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitDictionaryExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitDictionaryExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func dictionaryExpression() throws -> DictionaryExpressionContext {
-		let _localctx: DictionaryExpressionContext = DictionaryExpressionContext(_ctx, getState())
+	 open func dictionaryExpression() throws -> DictionaryExpressionContext {
+        let _localctx: DictionaryExpressionContext = DictionaryExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 90, ObjectiveCParser.RULE_dictionaryExpression)
 		var _la: Int = 0
 		defer {
@@ -4866,42 +5522,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class DictionaryPairContext:ParserRuleContext {
-		open func castExpression() -> CastExpressionContext? {
-			return getRuleContext(CastExpressionContext.self,0)
+
+	public class DictionaryPairContext: ParserRuleContext {
+			open
+			func castExpression() -> CastExpressionContext? {
+				return getRuleContext(CastExpressionContext.self, 0)
+			}
+			open
+			func COLON() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_dictionaryPair
 		}
-		open func COLON() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0) }
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_dictionaryPair }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterDictionaryPair(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterDictionaryPair(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitDictionaryPair(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitDictionaryPair(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitDictionaryPair(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDictionaryPair(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitDictionaryPair(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitDictionaryPair(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func dictionaryPair() throws -> DictionaryPairContext {
-		let _localctx: DictionaryPairContext = DictionaryPairContext(_ctx, getState())
+	 open func dictionaryPair() throws -> DictionaryPairContext {
+        let _localctx: DictionaryPairContext = DictionaryPairContext(_ctx, getState())
 		try enterRule(_localctx, 92, ObjectiveCParser.RULE_dictionaryPair)
 		defer {
 	    		try! exitRule()
@@ -4924,42 +5590,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ArrayExpressionContext:ParserRuleContext {
-		open func AT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.AT.rawValue, 0) }
-		open func LBRACK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, 0) }
-		open func RBRACK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RBRACK.rawValue, 0) }
-		open func expressions() -> ExpressionsContext? {
-			return getRuleContext(ExpressionsContext.self,0)
+
+	public class ArrayExpressionContext: ParserRuleContext {
+			open
+			func AT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.AT.rawValue, 0)
+			}
+			open
+			func LBRACK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, 0)
+			}
+			open
+			func RBRACK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACK.rawValue, 0)
+			}
+			open
+			func expressions() -> ExpressionsContext? {
+				return getRuleContext(ExpressionsContext.self, 0)
+			}
+			open
+			func COMMA() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_arrayExpression
 		}
-		open func COMMA() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_arrayExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterArrayExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterArrayExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitArrayExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitArrayExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitArrayExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitArrayExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitArrayExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitArrayExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func arrayExpression() throws -> ArrayExpressionContext {
-		let _localctx: ArrayExpressionContext = ArrayExpressionContext(_ctx, getState())
+	 open func arrayExpression() throws -> ArrayExpressionContext {
+        let _localctx: ArrayExpressionContext = ArrayExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 94, ObjectiveCParser.RULE_arrayExpression)
 		var _la: Int = 0
 		defer {
@@ -5020,47 +5704,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class BoxExpressionContext:ParserRuleContext {
-		open func AT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.AT.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
+
+	public class BoxExpressionContext: ParserRuleContext {
+			open
+			func AT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.AT.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func constant() -> ConstantContext? {
+				return getRuleContext(ConstantContext.self, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_boxExpression
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func constant() -> ConstantContext? {
-			return getRuleContext(ConstantContext.self,0)
-		}
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_boxExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterBoxExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterBoxExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitBoxExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitBoxExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitBoxExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitBoxExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitBoxExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitBoxExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func boxExpression() throws -> BoxExpressionContext {
-		let _localctx: BoxExpressionContext = BoxExpressionContext(_ctx, getState())
+	 open func boxExpression() throws -> BoxExpressionContext {
+        let _localctx: BoxExpressionContext = BoxExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 96, ObjectiveCParser.RULE_boxExpression)
 		defer {
 	    		try! exitRule()
@@ -5173,48 +5874,68 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class BlockParametersContext:ParserRuleContext {
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func typeVariableDeclaratorOrName() -> Array<TypeVariableDeclaratorOrNameContext> {
-			return getRuleContexts(TypeVariableDeclaratorOrNameContext.self)
+
+	public class BlockParametersContext: ParserRuleContext {
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func typeVariableDeclaratorOrName() -> [TypeVariableDeclaratorOrNameContext] {
+				return getRuleContexts(TypeVariableDeclaratorOrNameContext.self)
+			}
+			open
+			func typeVariableDeclaratorOrName(_ i: Int) -> TypeVariableDeclaratorOrNameContext? {
+				return getRuleContext(TypeVariableDeclaratorOrNameContext.self, i)
+			}
+			open
+			func VOID() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.VOID.rawValue, 0)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_blockParameters
 		}
-		open func typeVariableDeclaratorOrName(_ i: Int) -> TypeVariableDeclaratorOrNameContext? {
-			return getRuleContext(TypeVariableDeclaratorOrNameContext.self,i)
-		}
-		open func VOID() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.VOID.rawValue, 0) }
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_blockParameters }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterBlockParameters(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterBlockParameters(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitBlockParameters(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitBlockParameters(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitBlockParameters(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitBlockParameters(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitBlockParameters(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitBlockParameters(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func blockParameters() throws -> BlockParametersContext {
-		let _localctx: BlockParametersContext = BlockParametersContext(_ctx, getState())
+	 open func blockParameters() throws -> BlockParametersContext {
+        let _localctx: BlockParametersContext = BlockParametersContext(_ctx, getState())
 		try enterRule(_localctx, 98, ObjectiveCParser.RULE_blockParameters)
 		var _la: Int = 0
 		defer {
@@ -5287,41 +6008,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class TypeVariableDeclaratorOrNameContext:ParserRuleContext {
-		open func typeVariableDeclarator() -> TypeVariableDeclaratorContext? {
-			return getRuleContext(TypeVariableDeclaratorContext.self,0)
+
+	public class TypeVariableDeclaratorOrNameContext: ParserRuleContext {
+			open
+			func typeVariableDeclarator() -> TypeVariableDeclaratorContext? {
+				return getRuleContext(TypeVariableDeclaratorContext.self, 0)
+			}
+			open
+			func typeName() -> TypeNameContext? {
+				return getRuleContext(TypeNameContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_typeVariableDeclaratorOrName
 		}
-		open func typeName() -> TypeNameContext? {
-			return getRuleContext(TypeNameContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_typeVariableDeclaratorOrName }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterTypeVariableDeclaratorOrName(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterTypeVariableDeclaratorOrName(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitTypeVariableDeclaratorOrName(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitTypeVariableDeclaratorOrName(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeVariableDeclaratorOrName(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeVariableDeclaratorOrName(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitTypeVariableDeclaratorOrName(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitTypeVariableDeclaratorOrName(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func typeVariableDeclaratorOrName() throws -> TypeVariableDeclaratorOrNameContext {
-		let _localctx: TypeVariableDeclaratorOrNameContext = TypeVariableDeclaratorOrNameContext(_ctx, getState())
+	 open func typeVariableDeclaratorOrName() throws -> TypeVariableDeclaratorOrNameContext {
+        let _localctx: TypeVariableDeclaratorOrNameContext = TypeVariableDeclaratorOrNameContext(_ctx, getState())
 		try enterRule(_localctx, 100, ObjectiveCParser.RULE_typeVariableDeclaratorOrName)
 		defer {
 	    		try! exitRule()
@@ -5353,47 +6081,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class BlockExpressionContext:ParserRuleContext {
-		open func compoundStatement() -> CompoundStatementContext? {
-			return getRuleContext(CompoundStatementContext.self,0)
+
+	public class BlockExpressionContext: ParserRuleContext {
+			open
+			func BITXOR() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BITXOR.rawValue, 0)
+			}
+			open
+			func compoundStatement() -> CompoundStatementContext? {
+				return getRuleContext(CompoundStatementContext.self, 0)
+			}
+			open
+			func typeSpecifier() -> TypeSpecifierContext? {
+				return getRuleContext(TypeSpecifierContext.self, 0)
+			}
+			open
+			func nullabilitySpecifier() -> NullabilitySpecifierContext? {
+				return getRuleContext(NullabilitySpecifierContext.self, 0)
+			}
+			open
+			func blockParameters() -> BlockParametersContext? {
+				return getRuleContext(BlockParametersContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_blockExpression
 		}
-		open func typeSpecifier() -> TypeSpecifierContext? {
-			return getRuleContext(TypeSpecifierContext.self,0)
-		}
-		open func nullabilitySpecifier() -> NullabilitySpecifierContext? {
-			return getRuleContext(NullabilitySpecifierContext.self,0)
-		}
-		open func blockParameters() -> BlockParametersContext? {
-			return getRuleContext(BlockParametersContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_blockExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterBlockExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterBlockExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitBlockExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitBlockExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitBlockExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitBlockExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitBlockExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitBlockExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func blockExpression() throws -> BlockExpressionContext {
-		let _localctx: BlockExpressionContext = BlockExpressionContext(_ctx, getState())
+	 open func blockExpression() throws -> BlockExpressionContext {
+        let _localctx: BlockExpressionContext = BlockExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 102, ObjectiveCParser.RULE_blockExpression)
 		var _la: Int = 0
 		defer {
@@ -5454,43 +6195,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class MessageExpressionContext:ParserRuleContext {
-		open func LBRACK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, 0) }
-		open func receiver() -> ReceiverContext? {
-			return getRuleContext(ReceiverContext.self,0)
+
+	public class MessageExpressionContext: ParserRuleContext {
+			open
+			func LBRACK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, 0)
+			}
+			open
+			func receiver() -> ReceiverContext? {
+				return getRuleContext(ReceiverContext.self, 0)
+			}
+			open
+			func messageSelector() -> MessageSelectorContext? {
+				return getRuleContext(MessageSelectorContext.self, 0)
+			}
+			open
+			func RBRACK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACK.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_messageExpression
 		}
-		open func messageSelector() -> MessageSelectorContext? {
-			return getRuleContext(MessageSelectorContext.self,0)
-		}
-		open func RBRACK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RBRACK.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_messageExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterMessageExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterMessageExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitMessageExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitMessageExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitMessageExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitMessageExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitMessageExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitMessageExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func messageExpression() throws -> MessageExpressionContext {
-		let _localctx: MessageExpressionContext = MessageExpressionContext(_ctx, getState())
+	 open func messageExpression() throws -> MessageExpressionContext {
+        let _localctx: MessageExpressionContext = MessageExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 104, ObjectiveCParser.RULE_messageExpression)
 		defer {
 	    		try! exitRule()
@@ -5515,41 +6269,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ReceiverContext:ParserRuleContext {
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
+
+	public class ReceiverContext: ParserRuleContext {
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+			open
+			func genericTypeSpecifier() -> GenericTypeSpecifierContext? {
+				return getRuleContext(GenericTypeSpecifierContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_receiver
 		}
-		open func genericTypeSpecifier() -> GenericTypeSpecifierContext? {
-			return getRuleContext(GenericTypeSpecifierContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_receiver }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterReceiver(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterReceiver(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitReceiver(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitReceiver(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitReceiver(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitReceiver(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitReceiver(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitReceiver(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func receiver() throws -> ReceiverContext {
-		let _localctx: ReceiverContext = ReceiverContext(_ctx, getState())
+	 open func receiver() throws -> ReceiverContext {
+        let _localctx: ReceiverContext = ReceiverContext(_ctx, getState())
 		try enterRule(_localctx, 106, ObjectiveCParser.RULE_receiver)
 		defer {
 	    		try! exitRule()
@@ -5581,44 +6342,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class MessageSelectorContext:ParserRuleContext {
-		open func selector() -> SelectorContext? {
-			return getRuleContext(SelectorContext.self,0)
+
+	public class MessageSelectorContext: ParserRuleContext {
+			open
+			func selector() -> SelectorContext? {
+				return getRuleContext(SelectorContext.self, 0)
+			}
+			open
+			func keywordArgument() -> [KeywordArgumentContext] {
+				return getRuleContexts(KeywordArgumentContext.self)
+			}
+			open
+			func keywordArgument(_ i: Int) -> KeywordArgumentContext? {
+				return getRuleContext(KeywordArgumentContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_messageSelector
 		}
-		open func keywordArgument() -> Array<KeywordArgumentContext> {
-			return getRuleContexts(KeywordArgumentContext.self)
-		}
-		open func keywordArgument(_ i: Int) -> KeywordArgumentContext? {
-			return getRuleContext(KeywordArgumentContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_messageSelector }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterMessageSelector(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterMessageSelector(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitMessageSelector(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitMessageSelector(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitMessageSelector(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitMessageSelector(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitMessageSelector(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitMessageSelector(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func messageSelector() throws -> MessageSelectorContext {
-		let _localctx: MessageSelectorContext = MessageSelectorContext(_ctx, getState())
+	 open func messageSelector() throws -> MessageSelectorContext {
+        let _localctx: MessageSelectorContext = MessageSelectorContext(_ctx, getState())
 		try enterRule(_localctx, 108, ObjectiveCParser.RULE_messageSelector)
 		var _la: Int = 0
 		defer {
@@ -5672,49 +6441,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class KeywordArgumentContext:ParserRuleContext {
-		open func COLON() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0) }
-		open func keywordArgumentType() -> Array<KeywordArgumentTypeContext> {
-			return getRuleContexts(KeywordArgumentTypeContext.self)
+
+	public class KeywordArgumentContext: ParserRuleContext {
+			open
+			func COLON() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0)
+			}
+			open
+			func keywordArgumentType() -> [KeywordArgumentTypeContext] {
+				return getRuleContexts(KeywordArgumentTypeContext.self)
+			}
+			open
+			func keywordArgumentType(_ i: Int) -> KeywordArgumentTypeContext? {
+				return getRuleContext(KeywordArgumentTypeContext.self, i)
+			}
+			open
+			func selector() -> SelectorContext? {
+				return getRuleContext(SelectorContext.self, 0)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_keywordArgument
 		}
-		open func keywordArgumentType(_ i: Int) -> KeywordArgumentTypeContext? {
-			return getRuleContext(KeywordArgumentTypeContext.self,i)
-		}
-		open func selector() -> SelectorContext? {
-			return getRuleContext(SelectorContext.self,0)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_keywordArgument }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterKeywordArgument(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterKeywordArgument(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitKeywordArgument(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitKeywordArgument(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitKeywordArgument(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitKeywordArgument(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitKeywordArgument(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitKeywordArgument(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func keywordArgument() throws -> KeywordArgumentContext {
-		let _localctx: KeywordArgumentContext = KeywordArgumentContext(_ctx, getState())
+	 open func keywordArgument() throws -> KeywordArgumentContext {
+        let _localctx: KeywordArgumentContext = KeywordArgumentContext(_ctx, getState())
 		try enterRule(_localctx, 110, ObjectiveCParser.RULE_keywordArgument)
 		var _la: Int = 0
 		defer {
@@ -5774,46 +6558,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class KeywordArgumentTypeContext:ParserRuleContext {
-		open func expressions() -> ExpressionsContext? {
-			return getRuleContext(ExpressionsContext.self,0)
+
+	public class KeywordArgumentTypeContext: ParserRuleContext {
+			open
+			func expressions() -> ExpressionsContext? {
+				return getRuleContext(ExpressionsContext.self, 0)
+			}
+			open
+			func nullabilitySpecifier() -> NullabilitySpecifierContext? {
+				return getRuleContext(NullabilitySpecifierContext.self, 0)
+			}
+			open
+			func LBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0)
+			}
+			open
+			func initializerList() -> InitializerListContext? {
+				return getRuleContext(InitializerListContext.self, 0)
+			}
+			open
+			func RBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_keywordArgumentType
 		}
-		open func nullabilitySpecifier() -> NullabilitySpecifierContext? {
-			return getRuleContext(NullabilitySpecifierContext.self,0)
-		}
-		open func LBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0) }
-		open func initializerList() -> InitializerListContext? {
-			return getRuleContext(InitializerListContext.self,0)
-		}
-		open func RBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_keywordArgumentType }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterKeywordArgumentType(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterKeywordArgumentType(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitKeywordArgumentType(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitKeywordArgumentType(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitKeywordArgumentType(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitKeywordArgumentType(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitKeywordArgumentType(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitKeywordArgumentType(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func keywordArgumentType() throws -> KeywordArgumentTypeContext {
-		let _localctx: KeywordArgumentTypeContext = KeywordArgumentTypeContext(_ctx, getState())
+	 open func keywordArgumentType() throws -> KeywordArgumentTypeContext {
+        let _localctx: KeywordArgumentTypeContext = KeywordArgumentTypeContext(_ctx, getState())
 		try enterRule(_localctx, 112, ObjectiveCParser.RULE_keywordArgumentType)
 		var _la: Int = 0
 		defer {
@@ -5860,41 +6658,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class SelectorExpressionContext:ParserRuleContext {
-		open func SELECTOR() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SELECTOR.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func selectorName() -> SelectorNameContext? {
-			return getRuleContext(SelectorNameContext.self,0)
+
+	public class SelectorExpressionContext: ParserRuleContext {
+			open
+			func SELECTOR() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SELECTOR.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func selectorName() -> SelectorNameContext? {
+				return getRuleContext(SelectorNameContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_selectorExpression
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_selectorExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterSelectorExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterSelectorExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitSelectorExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitSelectorExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitSelectorExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSelectorExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitSelectorExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitSelectorExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func selectorExpression() throws -> SelectorExpressionContext {
-		let _localctx: SelectorExpressionContext = SelectorExpressionContext(_ctx, getState())
+	 open func selectorExpression() throws -> SelectorExpressionContext {
+        let _localctx: SelectorExpressionContext = SelectorExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 114, ObjectiveCParser.RULE_selectorExpression)
 		defer {
 	    		try! exitRule()
@@ -5919,45 +6732,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class SelectorNameContext:ParserRuleContext {
-		open func selector() -> Array<SelectorContext> {
-			return getRuleContexts(SelectorContext.self)
+
+	public class SelectorNameContext: ParserRuleContext {
+			open
+			func selector() -> [SelectorContext] {
+				return getRuleContexts(SelectorContext.self)
+			}
+			open
+			func selector(_ i: Int) -> SelectorContext? {
+				return getRuleContext(SelectorContext.self, i)
+			}
+			open
+			func COLON() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COLON.rawValue)
+			}
+			open
+			func COLON(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COLON.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_selectorName
 		}
-		open func selector(_ i: Int) -> SelectorContext? {
-			return getRuleContext(SelectorContext.self,i)
-		}
-		open func COLON() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COLON.rawValue) }
-		open func COLON(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COLON.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_selectorName }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterSelectorName(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterSelectorName(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitSelectorName(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitSelectorName(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitSelectorName(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSelectorName(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitSelectorName(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitSelectorName(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func selectorName() throws -> SelectorNameContext {
-		let _localctx: SelectorNameContext = SelectorNameContext(_ctx, getState())
+	 open func selectorName() throws -> SelectorNameContext {
+        let _localctx: SelectorNameContext = SelectorNameContext(_ctx, getState())
 		try enterRule(_localctx, 116, ObjectiveCParser.RULE_selectorName)
 		var _la: Int = 0
 		defer {
@@ -6031,41 +6855,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ProtocolExpressionContext:ParserRuleContext {
-		open func PROTOCOL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.PROTOCOL.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func protocolName() -> ProtocolNameContext? {
-			return getRuleContext(ProtocolNameContext.self,0)
+
+	public class ProtocolExpressionContext: ParserRuleContext {
+			open
+			func PROTOCOL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.PROTOCOL.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func protocolName() -> ProtocolNameContext? {
+				return getRuleContext(ProtocolNameContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_protocolExpression
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_protocolExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterProtocolExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterProtocolExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitProtocolExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitProtocolExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitProtocolExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitProtocolExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitProtocolExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitProtocolExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func protocolExpression() throws -> ProtocolExpressionContext {
-		let _localctx: ProtocolExpressionContext = ProtocolExpressionContext(_ctx, getState())
+	 open func protocolExpression() throws -> ProtocolExpressionContext {
+        let _localctx: ProtocolExpressionContext = ProtocolExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 118, ObjectiveCParser.RULE_protocolExpression)
 		defer {
 	    		try! exitRule()
@@ -6090,41 +6929,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class EncodeExpressionContext:ParserRuleContext {
-		open func ENCODE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ENCODE.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func typeName() -> TypeNameContext? {
-			return getRuleContext(TypeNameContext.self,0)
+
+	public class EncodeExpressionContext: ParserRuleContext {
+			open
+			func ENCODE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ENCODE.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func typeName() -> TypeNameContext? {
+				return getRuleContext(TypeNameContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_encodeExpression
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_encodeExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterEncodeExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterEncodeExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitEncodeExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitEncodeExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitEncodeExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitEncodeExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitEncodeExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitEncodeExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func encodeExpression() throws -> EncodeExpressionContext {
-		let _localctx: EncodeExpressionContext = EncodeExpressionContext(_ctx, getState())
+	 open func encodeExpression() throws -> EncodeExpressionContext {
+        let _localctx: EncodeExpressionContext = EncodeExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 120, ObjectiveCParser.RULE_encodeExpression)
 		defer {
 	    		try! exitRule()
@@ -6149,41 +7003,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class TypeVariableDeclaratorContext:ParserRuleContext {
-		open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
-			return getRuleContext(DeclarationSpecifiersContext.self,0)
+
+	public class TypeVariableDeclaratorContext: ParserRuleContext {
+			open
+			func declarationSpecifiers() -> DeclarationSpecifiersContext? {
+				return getRuleContext(DeclarationSpecifiersContext.self, 0)
+			}
+			open
+			func declarator() -> DeclaratorContext? {
+				return getRuleContext(DeclaratorContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_typeVariableDeclarator
 		}
-		open func declarator() -> DeclaratorContext? {
-			return getRuleContext(DeclaratorContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_typeVariableDeclarator }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterTypeVariableDeclarator(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterTypeVariableDeclarator(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitTypeVariableDeclarator(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitTypeVariableDeclarator(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeVariableDeclarator(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeVariableDeclarator(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitTypeVariableDeclarator(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitTypeVariableDeclarator(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func typeVariableDeclarator() throws -> TypeVariableDeclaratorContext {
-		let _localctx: TypeVariableDeclaratorContext = TypeVariableDeclaratorContext(_ctx, getState())
+	 open func typeVariableDeclarator() throws -> TypeVariableDeclaratorContext {
+        let _localctx: TypeVariableDeclaratorContext = TypeVariableDeclaratorContext(_ctx, getState())
 		try enterRule(_localctx, 122, ObjectiveCParser.RULE_typeVariableDeclarator)
 		defer {
 	    		try! exitRule()
@@ -6204,44 +7065,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ThrowStatementContext:ParserRuleContext {
-		open func THROW() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.THROW.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class ThrowStatementContext: ParserRuleContext {
+			open
+			func THROW() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.THROW.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_throwStatement
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_throwStatement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterThrowStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterThrowStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitThrowStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitThrowStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitThrowStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitThrowStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitThrowStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitThrowStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func throwStatement() throws -> ThrowStatementContext {
-		let _localctx: ThrowStatementContext = ThrowStatementContext(_ctx, getState())
+	 open func throwStatement() throws -> ThrowStatementContext {
+        let _localctx: ThrowStatementContext = ThrowStatementContext(_ctx, getState())
 		try enterRule(_localctx, 124, ObjectiveCParser.RULE_throwStatement)
 		defer {
 	    		try! exitRule()
@@ -6281,51 +7158,66 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class TryBlockContext:ParserRuleContext {
-		public var tryStatement: CompoundStatementContext!
-		public var finallyStatement: CompoundStatementContext!
-		open func TRY() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.TRY.rawValue, 0) }
-		open func compoundStatement() -> Array<CompoundStatementContext> {
-			return getRuleContexts(CompoundStatementContext.self)
+
+	public class TryBlockContext: ParserRuleContext {
+		open var tryStatement: CompoundStatementContext!
+		open var finallyStatement: CompoundStatementContext!
+			open
+			func TRY() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.TRY.rawValue, 0)
+			}
+			open
+			func compoundStatement() -> [CompoundStatementContext] {
+				return getRuleContexts(CompoundStatementContext.self)
+			}
+			open
+			func compoundStatement(_ i: Int) -> CompoundStatementContext? {
+				return getRuleContext(CompoundStatementContext.self, i)
+			}
+			open
+			func catchStatement() -> [CatchStatementContext] {
+				return getRuleContexts(CatchStatementContext.self)
+			}
+			open
+			func catchStatement(_ i: Int) -> CatchStatementContext? {
+				return getRuleContext(CatchStatementContext.self, i)
+			}
+			open
+			func FINALLY() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.FINALLY.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_tryBlock
 		}
-		open func compoundStatement(_ i: Int) -> CompoundStatementContext? {
-			return getRuleContext(CompoundStatementContext.self,i)
-		}
-		open func catchStatement() -> Array<CatchStatementContext> {
-			return getRuleContexts(CatchStatementContext.self)
-		}
-		open func catchStatement(_ i: Int) -> CatchStatementContext? {
-			return getRuleContext(CatchStatementContext.self,i)
-		}
-		open func FINALLY() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.FINALLY.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_tryBlock }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterTryBlock(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterTryBlock(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitTryBlock(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitTryBlock(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitTryBlock(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTryBlock(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitTryBlock(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitTryBlock(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func tryBlock() throws -> TryBlockContext {
-		let _localctx: TryBlockContext = TryBlockContext(_ctx, getState())
+	 open func tryBlock() throws -> TryBlockContext {
+        let _localctx: TryBlockContext = TryBlockContext(_ctx, getState())
 		try enterRule(_localctx, 126, ObjectiveCParser.RULE_tryBlock)
 		var _la: Int = 0
 		defer {
@@ -6386,44 +7278,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class CatchStatementContext:ParserRuleContext {
-		open func CATCH() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.CATCH.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func typeVariableDeclarator() -> TypeVariableDeclaratorContext? {
-			return getRuleContext(TypeVariableDeclaratorContext.self,0)
+
+	public class CatchStatementContext: ParserRuleContext {
+			open
+			func CATCH() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.CATCH.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func typeVariableDeclarator() -> TypeVariableDeclaratorContext? {
+				return getRuleContext(TypeVariableDeclaratorContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func compoundStatement() -> CompoundStatementContext? {
+				return getRuleContext(CompoundStatementContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_catchStatement
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func compoundStatement() -> CompoundStatementContext? {
-			return getRuleContext(CompoundStatementContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_catchStatement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterCatchStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterCatchStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitCatchStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitCatchStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitCatchStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitCatchStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitCatchStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitCatchStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func catchStatement() throws -> CatchStatementContext {
-		let _localctx: CatchStatementContext = CatchStatementContext(_ctx, getState())
+	 open func catchStatement() throws -> CatchStatementContext {
+        let _localctx: CatchStatementContext = CatchStatementContext(_ctx, getState())
 		try enterRule(_localctx, 128, ObjectiveCParser.RULE_catchStatement)
 		defer {
 	    		try! exitRule()
@@ -6450,44 +7358,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class SynchronizedStatementContext:ParserRuleContext {
-		open func SYNCHRONIZED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SYNCHRONIZED.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
+
+	public class SynchronizedStatementContext: ParserRuleContext {
+			open
+			func SYNCHRONIZED() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SYNCHRONIZED.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func compoundStatement() -> CompoundStatementContext? {
+				return getRuleContext(CompoundStatementContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_synchronizedStatement
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func compoundStatement() -> CompoundStatementContext? {
-			return getRuleContext(CompoundStatementContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_synchronizedStatement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterSynchronizedStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterSynchronizedStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitSynchronizedStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitSynchronizedStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitSynchronizedStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSynchronizedStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitSynchronizedStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitSynchronizedStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func synchronizedStatement() throws -> SynchronizedStatementContext {
-		let _localctx: SynchronizedStatementContext = SynchronizedStatementContext(_ctx, getState())
+	 open func synchronizedStatement() throws -> SynchronizedStatementContext {
+        let _localctx: SynchronizedStatementContext = SynchronizedStatementContext(_ctx, getState())
 		try enterRule(_localctx, 130, ObjectiveCParser.RULE_synchronizedStatement)
 		defer {
 	    		try! exitRule()
@@ -6514,39 +7438,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class AutoreleaseStatementContext:ParserRuleContext {
-		open func AUTORELEASEPOOL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.AUTORELEASEPOOL.rawValue, 0) }
-		open func compoundStatement() -> CompoundStatementContext? {
-			return getRuleContext(CompoundStatementContext.self,0)
+
+	public class AutoreleaseStatementContext: ParserRuleContext {
+			open
+			func AUTORELEASEPOOL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.AUTORELEASEPOOL.rawValue, 0)
+			}
+			open
+			func compoundStatement() -> CompoundStatementContext? {
+				return getRuleContext(CompoundStatementContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_autoreleaseStatement
 		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_autoreleaseStatement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterAutoreleaseStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterAutoreleaseStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitAutoreleaseStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitAutoreleaseStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitAutoreleaseStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAutoreleaseStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitAutoreleaseStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitAutoreleaseStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func autoreleaseStatement() throws -> AutoreleaseStatementContext {
-		let _localctx: AutoreleaseStatementContext = AutoreleaseStatementContext(_ctx, getState())
+	 open func autoreleaseStatement() throws -> AutoreleaseStatementContext {
+        let _localctx: AutoreleaseStatementContext = AutoreleaseStatementContext(_ctx, getState())
 		try enterRule(_localctx, 132, ObjectiveCParser.RULE_autoreleaseStatement)
 		defer {
 	    		try! exitRule()
@@ -6567,39 +7500,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class FunctionDeclarationContext:ParserRuleContext {
-		open func functionSignature() -> FunctionSignatureContext? {
-			return getRuleContext(FunctionSignatureContext.self,0)
+
+	public class FunctionDeclarationContext: ParserRuleContext {
+			open
+			func functionSignature() -> FunctionSignatureContext? {
+				return getRuleContext(FunctionSignatureContext.self, 0)
+			}
+			open
+			func SEMI() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_functionDeclaration
 		}
-		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_functionDeclaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterFunctionDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterFunctionDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitFunctionDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitFunctionDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitFunctionDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitFunctionDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func functionDeclaration() throws -> FunctionDeclarationContext {
-		let _localctx: FunctionDeclarationContext = FunctionDeclarationContext(_ctx, getState())
+	 open func functionDeclaration() throws -> FunctionDeclarationContext {
+        let _localctx: FunctionDeclarationContext = FunctionDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 134, ObjectiveCParser.RULE_functionDeclaration)
 		defer {
 	    		try! exitRule()
@@ -6620,41 +7562,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class FunctionDefinitionContext:ParserRuleContext {
-		open func functionSignature() -> FunctionSignatureContext? {
-			return getRuleContext(FunctionSignatureContext.self,0)
+
+	public class FunctionDefinitionContext: ParserRuleContext {
+			open
+			func functionSignature() -> FunctionSignatureContext? {
+				return getRuleContext(FunctionSignatureContext.self, 0)
+			}
+			open
+			func compoundStatement() -> CompoundStatementContext? {
+				return getRuleContext(CompoundStatementContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_functionDefinition
 		}
-		open func compoundStatement() -> CompoundStatementContext? {
-			return getRuleContext(CompoundStatementContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_functionDefinition }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterFunctionDefinition(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterFunctionDefinition(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitFunctionDefinition(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitFunctionDefinition(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionDefinition(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionDefinition(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitFunctionDefinition(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitFunctionDefinition(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func functionDefinition() throws -> FunctionDefinitionContext {
-		let _localctx: FunctionDefinitionContext = FunctionDefinitionContext(_ctx, getState())
+	 open func functionDefinition() throws -> FunctionDefinitionContext {
+        let _localctx: FunctionDefinitionContext = FunctionDefinitionContext(_ctx, getState())
 		try enterRule(_localctx, 136, ObjectiveCParser.RULE_functionDefinition)
 		defer {
 	    		try! exitRule()
@@ -6675,49 +7624,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class FunctionSignatureContext:ParserRuleContext {
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class FunctionSignatureContext: ParserRuleContext {
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func declarationSpecifiers() -> DeclarationSpecifiersContext? {
+				return getRuleContext(DeclarationSpecifiersContext.self, 0)
+			}
+			open
+			func attributeSpecifier() -> AttributeSpecifierContext? {
+				return getRuleContext(AttributeSpecifierContext.self, 0)
+			}
+			open
+			func parameterList() -> ParameterListContext? {
+				return getRuleContext(ParameterListContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_functionSignature
 		}
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
-			return getRuleContext(DeclarationSpecifiersContext.self,0)
-		}
-		open func attributeSpecifier() -> AttributeSpecifierContext? {
-			return getRuleContext(AttributeSpecifierContext.self,0)
-		}
-		open func parameterList() -> ParameterListContext? {
-			return getRuleContext(ParameterListContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_functionSignature }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterFunctionSignature(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterFunctionSignature(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitFunctionSignature(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitFunctionSignature(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionSignature(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionSignature(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitFunctionSignature(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitFunctionSignature(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func functionSignature() throws -> FunctionSignatureContext {
-		let _localctx: FunctionSignatureContext = FunctionSignatureContext(_ctx, getState())
+	 open func functionSignature() throws -> FunctionSignatureContext {
+        let _localctx: FunctionSignatureContext = FunctionSignatureContext(_ctx, getState())
 		try enterRule(_localctx, 138, ObjectiveCParser.RULE_functionSignature)
 		var _la: Int = 0
 		defer {
@@ -6786,41 +7750,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class AttributeContext:ParserRuleContext {
-		open func attributeName() -> AttributeNameContext? {
-			return getRuleContext(AttributeNameContext.self,0)
+
+	public class AttributeContext: ParserRuleContext {
+			open
+			func attributeName() -> AttributeNameContext? {
+				return getRuleContext(AttributeNameContext.self, 0)
+			}
+			open
+			func attributeParameters() -> AttributeParametersContext? {
+				return getRuleContext(AttributeParametersContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_attribute
 		}
-		open func attributeParameters() -> AttributeParametersContext? {
-			return getRuleContext(AttributeParametersContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_attribute }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterAttribute(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterAttribute(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitAttribute(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitAttribute(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitAttribute(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAttribute(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitAttribute(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitAttribute(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func attribute() throws -> AttributeContext {
-		let _localctx: AttributeContext = AttributeContext(_ctx, getState())
+	 open func attribute() throws -> AttributeContext {
+        let _localctx: AttributeContext = AttributeContext(_ctx, getState())
 		try enterRule(_localctx, 140, ObjectiveCParser.RULE_attribute)
 		var _la: Int = 0
 		defer {
@@ -6853,39 +7824,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class AttributeNameContext:ParserRuleContext {
-		open func CONST() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.CONST.rawValue, 0) }
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class AttributeNameContext: ParserRuleContext {
+			open
+			func CONST() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.CONST.rawValue, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_attributeName
 		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_attributeName }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterAttributeName(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterAttributeName(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitAttributeName(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitAttributeName(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitAttributeName(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAttributeName(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitAttributeName(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitAttributeName(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func attributeName() throws -> AttributeNameContext {
-		let _localctx: AttributeNameContext = AttributeNameContext(_ctx, getState())
+	 open func attributeName() throws -> AttributeNameContext {
+        let _localctx: AttributeNameContext = AttributeNameContext(_ctx, getState())
 		try enterRule(_localctx, 142, ObjectiveCParser.RULE_attributeName)
 		defer {
 	    		try! exitRule()
@@ -6964,40 +7944,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class AttributeParametersContext:ParserRuleContext {
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func attributeParameterList() -> AttributeParameterListContext? {
-			return getRuleContext(AttributeParameterListContext.self,0)
+
+	public class AttributeParametersContext: ParserRuleContext {
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func attributeParameterList() -> AttributeParameterListContext? {
+				return getRuleContext(AttributeParameterListContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_attributeParameters
 		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_attributeParameters }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterAttributeParameters(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterAttributeParameters(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitAttributeParameters(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitAttributeParameters(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitAttributeParameters(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAttributeParameters(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitAttributeParameters(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitAttributeParameters(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func attributeParameters() throws -> AttributeParametersContext {
-		let _localctx: AttributeParametersContext = AttributeParametersContext(_ctx, getState())
+	 open func attributeParameters() throws -> AttributeParametersContext {
+        let _localctx: AttributeParametersContext = AttributeParametersContext(_ctx, getState())
 		try enterRule(_localctx, 144, ObjectiveCParser.RULE_attributeParameters)
 		var _la: Int = 0
 		defer {
@@ -7043,45 +8035,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class AttributeParameterListContext:ParserRuleContext {
-		open func attributeParameter() -> Array<AttributeParameterContext> {
-			return getRuleContexts(AttributeParameterContext.self)
+
+	public class AttributeParameterListContext: ParserRuleContext {
+			open
+			func attributeParameter() -> [AttributeParameterContext] {
+				return getRuleContexts(AttributeParameterContext.self)
+			}
+			open
+			func attributeParameter(_ i: Int) -> AttributeParameterContext? {
+				return getRuleContext(AttributeParameterContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_attributeParameterList
 		}
-		open func attributeParameter(_ i: Int) -> AttributeParameterContext? {
-			return getRuleContext(AttributeParameterContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_attributeParameterList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterAttributeParameterList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterAttributeParameterList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitAttributeParameterList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitAttributeParameterList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitAttributeParameterList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAttributeParameterList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitAttributeParameterList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitAttributeParameterList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func attributeParameterList() throws -> AttributeParameterListContext {
-		let _localctx: AttributeParameterListContext = AttributeParameterListContext(_ctx, getState())
+	 open func attributeParameterList() throws -> AttributeParameterListContext {
+        let _localctx: AttributeParameterListContext = AttributeParameterListContext(_ctx, getState())
 		try enterRule(_localctx, 146, ObjectiveCParser.RULE_attributeParameterList)
 		var _la: Int = 0
 		defer {
@@ -7119,47 +8122,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class AttributeParameterContext:ParserRuleContext {
-		open func attribute() -> AttributeContext? {
-			return getRuleContext(AttributeContext.self,0)
+
+	public class AttributeParameterContext: ParserRuleContext {
+			open
+			func attribute() -> AttributeContext? {
+				return getRuleContext(AttributeContext.self, 0)
+			}
+			open
+			func constant() -> ConstantContext? {
+				return getRuleContext(ConstantContext.self, 0)
+			}
+			open
+			func stringLiteral() -> StringLiteralContext? {
+				return getRuleContext(StringLiteralContext.self, 0)
+			}
+			open
+			func attributeParameterAssignment() -> AttributeParameterAssignmentContext? {
+				return getRuleContext(AttributeParameterAssignmentContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_attributeParameter
 		}
-		open func constant() -> ConstantContext? {
-			return getRuleContext(ConstantContext.self,0)
-		}
-		open func stringLiteral() -> StringLiteralContext? {
-			return getRuleContext(StringLiteralContext.self,0)
-		}
-		open func attributeParameterAssignment() -> AttributeParameterAssignmentContext? {
-			return getRuleContext(AttributeParameterAssignmentContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_attributeParameter }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterAttributeParameter(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterAttributeParameter(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitAttributeParameter(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitAttributeParameter(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitAttributeParameter(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAttributeParameter(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitAttributeParameter(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitAttributeParameter(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func attributeParameter() throws -> AttributeParameterContext {
-		let _localctx: AttributeParameterContext = AttributeParameterContext(_ctx, getState())
+	 open func attributeParameter() throws -> AttributeParameterContext {
+        let _localctx: AttributeParameterContext = AttributeParameterContext(_ctx, getState())
 		try enterRule(_localctx, 148, ObjectiveCParser.RULE_attributeParameter)
 		defer {
 	    		try! exitRule()
@@ -7203,48 +8215,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class AttributeParameterAssignmentContext:ParserRuleContext {
-		open func attributeName() -> Array<AttributeNameContext> {
-			return getRuleContexts(AttributeNameContext.self)
+
+	public class AttributeParameterAssignmentContext: ParserRuleContext {
+			open
+			func attributeName() -> [AttributeNameContext] {
+				return getRuleContexts(AttributeNameContext.self)
+			}
+			open
+			func attributeName(_ i: Int) -> AttributeNameContext? {
+				return getRuleContext(AttributeNameContext.self, i)
+			}
+			open
+			func ASSIGNMENT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue, 0)
+			}
+			open
+			func constant() -> ConstantContext? {
+				return getRuleContext(ConstantContext.self, 0)
+			}
+			open
+			func stringLiteral() -> StringLiteralContext? {
+				return getRuleContext(StringLiteralContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_attributeParameterAssignment
 		}
-		open func attributeName(_ i: Int) -> AttributeNameContext? {
-			return getRuleContext(AttributeNameContext.self,i)
-		}
-		open func ASSIGNMENT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue, 0) }
-		open func constant() -> ConstantContext? {
-			return getRuleContext(ConstantContext.self,0)
-		}
-		open func stringLiteral() -> StringLiteralContext? {
-			return getRuleContext(StringLiteralContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_attributeParameterAssignment }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterAttributeParameterAssignment(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterAttributeParameterAssignment(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitAttributeParameterAssignment(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitAttributeParameterAssignment(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitAttributeParameterAssignment(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAttributeParameterAssignment(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitAttributeParameterAssignment(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitAttributeParameterAssignment(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func attributeParameterAssignment() throws -> AttributeParameterAssignmentContext {
-		let _localctx: AttributeParameterAssignmentContext = AttributeParameterAssignmentContext(_ctx, getState())
+	 open func attributeParameterAssignment() throws -> AttributeParameterAssignmentContext {
+        let _localctx: AttributeParameterAssignmentContext = AttributeParameterAssignmentContext(_ctx, getState())
 		try enterRule(_localctx, 150, ObjectiveCParser.RULE_attributeParameterAssignment)
 		defer {
 	    		try! exitRule()
@@ -7347,51 +8371,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class DeclarationContext:ParserRuleContext {
-		open func functionCallExpression() -> FunctionCallExpressionContext? {
-			return getRuleContext(FunctionCallExpressionContext.self,0)
+
+	public class DeclarationContext: ParserRuleContext {
+			open
+			func functionCallExpression() -> FunctionCallExpressionContext? {
+				return getRuleContext(FunctionCallExpressionContext.self, 0)
+			}
+			open
+			func functionPointer() -> FunctionPointerContext? {
+				return getRuleContext(FunctionPointerContext.self, 0)
+			}
+			open
+			func SEMI() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
+			}
+			open
+			func enumDeclaration() -> EnumDeclarationContext? {
+				return getRuleContext(EnumDeclarationContext.self, 0)
+			}
+			open
+			func varDeclaration() -> VarDeclarationContext? {
+				return getRuleContext(VarDeclarationContext.self, 0)
+			}
+			open
+			func typedefDeclaration() -> TypedefDeclarationContext? {
+				return getRuleContext(TypedefDeclarationContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_declaration
 		}
-		open func functionPointer() -> FunctionPointerContext? {
-			return getRuleContext(FunctionPointerContext.self,0)
-		}
-		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
-		open func enumDeclaration() -> EnumDeclarationContext? {
-			return getRuleContext(EnumDeclarationContext.self,0)
-		}
-		open func varDeclaration() -> VarDeclarationContext? {
-			return getRuleContext(VarDeclarationContext.self,0)
-		}
-		open func typedefDeclaration() -> TypedefDeclarationContext? {
-			return getRuleContext(TypedefDeclarationContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_declaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func declaration() throws -> DeclarationContext {
-		let _localctx: DeclarationContext = DeclarationContext(_ctx, getState())
+	 open func declaration() throws -> DeclarationContext {
+        let _localctx: DeclarationContext = DeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 152, ObjectiveCParser.RULE_declaration)
 		defer {
 	    		try! exitRule()
@@ -7443,52 +8480,72 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class FunctionPointerContext:ParserRuleContext {
-		open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
-			return getRuleContext(DeclarationSpecifiersContext.self,0)
+
+	public class FunctionPointerContext: ParserRuleContext {
+			open
+			func declarationSpecifiers() -> DeclarationSpecifiersContext? {
+				return getRuleContext(DeclarationSpecifiersContext.self, 0)
+			}
+			open
+			func LP() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.LP.rawValue)
+			}
+			open
+			func LP(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, i)
+			}
+			open
+			func MUL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.MUL.rawValue, 0)
+			}
+			open
+			func RP() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.RP.rawValue)
+			}
+			open
+			func RP(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, i)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func functionPointerParameterList() -> FunctionPointerParameterListContext? {
+				return getRuleContext(FunctionPointerParameterListContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_functionPointer
 		}
-		open func LP() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.LP.rawValue) }
-		open func LP(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.LP.rawValue, i)
-		}
-		open func RP() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.RP.rawValue) }
-		open func RP(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.RP.rawValue, i)
-		}
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
-		}
-		open func functionPointerParameterList() -> FunctionPointerParameterListContext? {
-			return getRuleContext(FunctionPointerParameterListContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_functionPointer }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterFunctionPointer(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterFunctionPointer(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitFunctionPointer(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitFunctionPointer(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionPointer(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionPointer(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitFunctionPointer(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitFunctionPointer(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func functionPointer() throws -> FunctionPointerContext {
-		let _localctx: FunctionPointerContext = FunctionPointerContext(_ctx, getState())
+	 open func functionPointer() throws -> FunctionPointerContext {
+        let _localctx: FunctionPointerContext = FunctionPointerContext(_ctx, getState())
 		try enterRule(_localctx, 154, ObjectiveCParser.RULE_functionPointer)
 		var _la: Int = 0
 		defer {
@@ -7558,40 +8615,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class FunctionPointerParameterListContext:ParserRuleContext {
-		open func functionPointerParameterDeclarationList() -> FunctionPointerParameterDeclarationListContext? {
-			return getRuleContext(FunctionPointerParameterDeclarationListContext.self,0)
+
+	public class FunctionPointerParameterListContext: ParserRuleContext {
+			open
+			func functionPointerParameterDeclarationList() -> FunctionPointerParameterDeclarationListContext? {
+				return getRuleContext(FunctionPointerParameterDeclarationListContext.self, 0)
+			}
+			open
+			func COMMA() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, 0)
+			}
+			open
+			func ELIPSIS() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ELIPSIS.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_functionPointerParameterList
 		}
-		open func COMMA() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, 0) }
-		open func ELIPSIS() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ELIPSIS.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_functionPointerParameterList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterFunctionPointerParameterList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterFunctionPointerParameterList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitFunctionPointerParameterList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitFunctionPointerParameterList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionPointerParameterList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionPointerParameterList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitFunctionPointerParameterList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitFunctionPointerParameterList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func functionPointerParameterList() throws -> FunctionPointerParameterListContext {
-		let _localctx: FunctionPointerParameterListContext = FunctionPointerParameterListContext(_ctx, getState())
+	 open func functionPointerParameterList() throws -> FunctionPointerParameterListContext {
+        let _localctx: FunctionPointerParameterListContext = FunctionPointerParameterListContext(_ctx, getState())
 		try enterRule(_localctx, 156, ObjectiveCParser.RULE_functionPointerParameterList)
 		var _la: Int = 0
 		defer {
@@ -7626,45 +8695,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class FunctionPointerParameterDeclarationListContext:ParserRuleContext {
-		open func functionPointerParameterDeclaration() -> Array<FunctionPointerParameterDeclarationContext> {
-			return getRuleContexts(FunctionPointerParameterDeclarationContext.self)
+
+	public class FunctionPointerParameterDeclarationListContext: ParserRuleContext {
+			open
+			func functionPointerParameterDeclaration() -> [FunctionPointerParameterDeclarationContext] {
+				return getRuleContexts(FunctionPointerParameterDeclarationContext.self)
+			}
+			open
+			func functionPointerParameterDeclaration(_ i: Int) -> FunctionPointerParameterDeclarationContext? {
+				return getRuleContext(FunctionPointerParameterDeclarationContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_functionPointerParameterDeclarationList
 		}
-		open func functionPointerParameterDeclaration(_ i: Int) -> FunctionPointerParameterDeclarationContext? {
-			return getRuleContext(FunctionPointerParameterDeclarationContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_functionPointerParameterDeclarationList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterFunctionPointerParameterDeclarationList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterFunctionPointerParameterDeclarationList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitFunctionPointerParameterDeclarationList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitFunctionPointerParameterDeclarationList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionPointerParameterDeclarationList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionPointerParameterDeclarationList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitFunctionPointerParameterDeclarationList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitFunctionPointerParameterDeclarationList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func functionPointerParameterDeclarationList() throws -> FunctionPointerParameterDeclarationListContext {
-		let _localctx: FunctionPointerParameterDeclarationListContext = FunctionPointerParameterDeclarationListContext(_ctx, getState())
+	 open func functionPointerParameterDeclarationList() throws -> FunctionPointerParameterDeclarationListContext {
+        let _localctx: FunctionPointerParameterDeclarationListContext = FunctionPointerParameterDeclarationListContext(_ctx, getState())
 		try enterRule(_localctx, 158, ObjectiveCParser.RULE_functionPointerParameterDeclarationList)
 		defer {
 	    		try! exitRule()
@@ -7700,45 +8780,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class FunctionPointerParameterDeclarationContext:ParserRuleContext {
-		open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
-			return getRuleContext(DeclarationSpecifiersContext.self,0)
+
+	public class FunctionPointerParameterDeclarationContext: ParserRuleContext {
+			open
+			func declarationSpecifiers() -> DeclarationSpecifiersContext? {
+				return getRuleContext(DeclarationSpecifiersContext.self, 0)
+			}
+			open
+			func functionPointer() -> FunctionPointerContext? {
+				return getRuleContext(FunctionPointerContext.self, 0)
+			}
+			open
+			func declarator() -> DeclaratorContext? {
+				return getRuleContext(DeclaratorContext.self, 0)
+			}
+			open
+			func VOID() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.VOID.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_functionPointerParameterDeclaration
 		}
-		open func functionPointer() -> FunctionPointerContext? {
-			return getRuleContext(FunctionPointerContext.self,0)
-		}
-		open func declarator() -> DeclaratorContext? {
-			return getRuleContext(DeclaratorContext.self,0)
-		}
-		open func VOID() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.VOID.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_functionPointerParameterDeclaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterFunctionPointerParameterDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterFunctionPointerParameterDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitFunctionPointerParameterDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitFunctionPointerParameterDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionPointerParameterDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionPointerParameterDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitFunctionPointerParameterDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitFunctionPointerParameterDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func functionPointerParameterDeclaration() throws -> FunctionPointerParameterDeclarationContext {
-		let _localctx: FunctionPointerParameterDeclarationContext = FunctionPointerParameterDeclarationContext(_ctx, getState())
+	 open func functionPointerParameterDeclaration() throws -> FunctionPointerParameterDeclarationContext {
+        let _localctx: FunctionPointerParameterDeclarationContext = FunctionPointerParameterDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 160, ObjectiveCParser.RULE_functionPointerParameterDeclaration)
 		var _la: Int = 0
 		defer {
@@ -7804,50 +8895,68 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class FunctionCallExpressionContext:ParserRuleContext {
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class FunctionCallExpressionContext: ParserRuleContext {
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func directDeclarator() -> DirectDeclaratorContext? {
+				return getRuleContext(DirectDeclaratorContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func SEMI() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
+			}
+			open
+			func attributeSpecifier() -> [AttributeSpecifierContext] {
+				return getRuleContexts(AttributeSpecifierContext.self)
+			}
+			open
+			func attributeSpecifier(_ i: Int) -> AttributeSpecifierContext? {
+				return getRuleContext(AttributeSpecifierContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_functionCallExpression
 		}
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func directDeclarator() -> DirectDeclaratorContext? {
-			return getRuleContext(DirectDeclaratorContext.self,0)
-		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
-		open func attributeSpecifier() -> Array<AttributeSpecifierContext> {
-			return getRuleContexts(AttributeSpecifierContext.self)
-		}
-		open func attributeSpecifier(_ i: Int) -> AttributeSpecifierContext? {
-			return getRuleContext(AttributeSpecifierContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_functionCallExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterFunctionCallExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterFunctionCallExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitFunctionCallExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitFunctionCallExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionCallExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionCallExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitFunctionCallExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitFunctionCallExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func functionCallExpression() throws -> FunctionCallExpressionContext {
-		let _localctx: FunctionCallExpressionContext = FunctionCallExpressionContext(_ctx, getState())
+	 open func functionCallExpression() throws -> FunctionCallExpressionContext {
+        let _localctx: FunctionCallExpressionContext = FunctionCallExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 162, ObjectiveCParser.RULE_functionCallExpression)
 		var _la: Int = 0
 		defer {
@@ -7901,46 +9010,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class EnumDeclarationContext:ParserRuleContext {
-		open func enumSpecifier() -> EnumSpecifierContext? {
-			return getRuleContext(EnumSpecifierContext.self,0)
+
+	public class EnumDeclarationContext: ParserRuleContext {
+			open
+			func enumSpecifier() -> EnumSpecifierContext? {
+				return getRuleContext(EnumSpecifierContext.self, 0)
+			}
+			open
+			func SEMI() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
+			}
+			open
+			func attributeSpecifier() -> AttributeSpecifierContext? {
+				return getRuleContext(AttributeSpecifierContext.self, 0)
+			}
+			open
+			func TYPEDEF() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.TYPEDEF.rawValue, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_enumDeclaration
 		}
-		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
-		open func attributeSpecifier() -> AttributeSpecifierContext? {
-			return getRuleContext(AttributeSpecifierContext.self,0)
-		}
-		open func TYPEDEF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.TYPEDEF.rawValue, 0) }
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_enumDeclaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterEnumDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterEnumDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitEnumDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitEnumDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitEnumDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitEnumDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitEnumDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitEnumDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func enumDeclaration() throws -> EnumDeclarationContext {
-		let _localctx: EnumDeclarationContext = EnumDeclarationContext(_ctx, getState())
+	 open func enumDeclaration() throws -> EnumDeclarationContext {
+        let _localctx: EnumDeclarationContext = EnumDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 164, ObjectiveCParser.RULE_enumDeclaration)
 		var _la: Int = 0
 		defer {
@@ -8008,42 +9131,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class VarDeclarationContext:ParserRuleContext {
-		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
-		open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
-			return getRuleContext(DeclarationSpecifiersContext.self,0)
+
+	public class VarDeclarationContext: ParserRuleContext {
+			open
+			func SEMI() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
+			}
+			open
+			func declarationSpecifiers() -> DeclarationSpecifiersContext? {
+				return getRuleContext(DeclarationSpecifiersContext.self, 0)
+			}
+			open
+			func initDeclaratorList() -> InitDeclaratorListContext? {
+				return getRuleContext(InitDeclaratorListContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_varDeclaration
 		}
-		open func initDeclaratorList() -> InitDeclaratorListContext? {
-			return getRuleContext(InitDeclaratorListContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_varDeclaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterVarDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterVarDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitVarDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitVarDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitVarDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitVarDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitVarDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitVarDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func varDeclaration() throws -> VarDeclarationContext {
-		let _localctx: VarDeclarationContext = VarDeclarationContext(_ctx, getState())
+	 open func varDeclaration() throws -> VarDeclarationContext {
+        let _localctx: VarDeclarationContext = VarDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 166, ObjectiveCParser.RULE_varDeclaration)
 		defer {
 	    		try! exitRule()
@@ -8079,52 +9212,68 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class TypedefDeclarationContext:ParserRuleContext {
-		open func TYPEDEF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.TYPEDEF.rawValue, 0) }
-		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
-		open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
-			return getRuleContext(DeclarationSpecifiersContext.self,0)
+
+	public class TypedefDeclarationContext: ParserRuleContext {
+			open
+			func TYPEDEF() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.TYPEDEF.rawValue, 0)
+			}
+			open
+			func SEMI() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
+			}
+			open
+			func declarationSpecifiers() -> DeclarationSpecifiersContext? {
+				return getRuleContext(DeclarationSpecifiersContext.self, 0)
+			}
+			open
+			func typeDeclaratorList() -> TypeDeclaratorListContext? {
+				return getRuleContext(TypeDeclaratorListContext.self, 0)
+			}
+			open
+			func attributeSpecifier() -> AttributeSpecifierContext? {
+				return getRuleContext(AttributeSpecifierContext.self, 0)
+			}
+			open
+			func macro() -> MacroContext? {
+				return getRuleContext(MacroContext.self, 0)
+			}
+			open
+			func functionPointer() -> FunctionPointerContext? {
+				return getRuleContext(FunctionPointerContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_typedefDeclaration
 		}
-		open func typeDeclaratorList() -> TypeDeclaratorListContext? {
-			return getRuleContext(TypeDeclaratorListContext.self,0)
-		}
-		open func attributeSpecifier() -> AttributeSpecifierContext? {
-			return getRuleContext(AttributeSpecifierContext.self,0)
-		}
-		open func macro() -> MacroContext? {
-			return getRuleContext(MacroContext.self,0)
-		}
-		open func functionPointer() -> FunctionPointerContext? {
-			return getRuleContext(FunctionPointerContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_typedefDeclaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterTypedefDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterTypedefDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitTypedefDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitTypedefDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypedefDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypedefDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitTypedefDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitTypedefDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func typedefDeclaration() throws -> TypedefDeclarationContext {
-		let _localctx: TypedefDeclarationContext = TypedefDeclarationContext(_ctx, getState())
+	 open func typedefDeclaration() throws -> TypedefDeclarationContext {
+        let _localctx: TypedefDeclarationContext = TypedefDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 168, ObjectiveCParser.RULE_typedefDeclaration)
 		var _la: Int = 0
 		defer {
@@ -8226,45 +9375,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class TypeDeclaratorListContext:ParserRuleContext {
-		open func declarator() -> Array<DeclaratorContext> {
-			return getRuleContexts(DeclaratorContext.self)
+
+	public class TypeDeclaratorListContext: ParserRuleContext {
+			open
+			func declarator() -> [DeclaratorContext] {
+				return getRuleContexts(DeclaratorContext.self)
+			}
+			open
+			func declarator(_ i: Int) -> DeclaratorContext? {
+				return getRuleContext(DeclaratorContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_typeDeclaratorList
 		}
-		open func declarator(_ i: Int) -> DeclaratorContext? {
-			return getRuleContext(DeclaratorContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_typeDeclaratorList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterTypeDeclaratorList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterTypeDeclaratorList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitTypeDeclaratorList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitTypeDeclaratorList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeDeclaratorList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeDeclaratorList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitTypeDeclaratorList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitTypeDeclaratorList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func typeDeclaratorList() throws -> TypeDeclaratorListContext {
-		let _localctx: TypeDeclaratorListContext = TypeDeclaratorListContext(_ctx, getState())
+	 open func typeDeclaratorList() throws -> TypeDeclaratorListContext {
+        let _localctx: TypeDeclaratorListContext = TypeDeclaratorListContext(_ctx, getState())
 		try enterRule(_localctx, 170, ObjectiveCParser.RULE_typeDeclaratorList)
 		var _la: Int = 0
 		defer {
@@ -8302,83 +9462,104 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class DeclarationSpecifiersContext:ParserRuleContext {
-		open func storageClassSpecifier() -> Array<StorageClassSpecifierContext> {
-			return getRuleContexts(StorageClassSpecifierContext.self)
+
+	public class DeclarationSpecifiersContext: ParserRuleContext {
+			open
+			func storageClassSpecifier() -> [StorageClassSpecifierContext] {
+				return getRuleContexts(StorageClassSpecifierContext.self)
+			}
+			open
+			func storageClassSpecifier(_ i: Int) -> StorageClassSpecifierContext? {
+				return getRuleContext(StorageClassSpecifierContext.self, i)
+			}
+			open
+			func attributeSpecifier() -> [AttributeSpecifierContext] {
+				return getRuleContexts(AttributeSpecifierContext.self)
+			}
+			open
+			func attributeSpecifier(_ i: Int) -> AttributeSpecifierContext? {
+				return getRuleContext(AttributeSpecifierContext.self, i)
+			}
+			open
+			func arcBehaviourSpecifier() -> [ArcBehaviourSpecifierContext] {
+				return getRuleContexts(ArcBehaviourSpecifierContext.self)
+			}
+			open
+			func arcBehaviourSpecifier(_ i: Int) -> ArcBehaviourSpecifierContext? {
+				return getRuleContext(ArcBehaviourSpecifierContext.self, i)
+			}
+			open
+			func nullabilitySpecifier() -> [NullabilitySpecifierContext] {
+				return getRuleContexts(NullabilitySpecifierContext.self)
+			}
+			open
+			func nullabilitySpecifier(_ i: Int) -> NullabilitySpecifierContext? {
+				return getRuleContext(NullabilitySpecifierContext.self, i)
+			}
+			open
+			func ibOutletQualifier() -> [IbOutletQualifierContext] {
+				return getRuleContexts(IbOutletQualifierContext.self)
+			}
+			open
+			func ibOutletQualifier(_ i: Int) -> IbOutletQualifierContext? {
+				return getRuleContext(IbOutletQualifierContext.self, i)
+			}
+			open
+			func typePrefix() -> [TypePrefixContext] {
+				return getRuleContexts(TypePrefixContext.self)
+			}
+			open
+			func typePrefix(_ i: Int) -> TypePrefixContext? {
+				return getRuleContext(TypePrefixContext.self, i)
+			}
+			open
+			func typeQualifier() -> [TypeQualifierContext] {
+				return getRuleContexts(TypeQualifierContext.self)
+			}
+			open
+			func typeQualifier(_ i: Int) -> TypeQualifierContext? {
+				return getRuleContext(TypeQualifierContext.self, i)
+			}
+			open
+			func typeSpecifier() -> [TypeSpecifierContext] {
+				return getRuleContexts(TypeSpecifierContext.self)
+			}
+			open
+			func typeSpecifier(_ i: Int) -> TypeSpecifierContext? {
+				return getRuleContext(TypeSpecifierContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_declarationSpecifiers
 		}
-		open func storageClassSpecifier(_ i: Int) -> StorageClassSpecifierContext? {
-			return getRuleContext(StorageClassSpecifierContext.self,i)
-		}
-		open func attributeSpecifier() -> Array<AttributeSpecifierContext> {
-			return getRuleContexts(AttributeSpecifierContext.self)
-		}
-		open func attributeSpecifier(_ i: Int) -> AttributeSpecifierContext? {
-			return getRuleContext(AttributeSpecifierContext.self,i)
-		}
-		open func arcBehaviourSpecifier() -> Array<ArcBehaviourSpecifierContext> {
-			return getRuleContexts(ArcBehaviourSpecifierContext.self)
-		}
-		open func arcBehaviourSpecifier(_ i: Int) -> ArcBehaviourSpecifierContext? {
-			return getRuleContext(ArcBehaviourSpecifierContext.self,i)
-		}
-		open func nullabilitySpecifier() -> Array<NullabilitySpecifierContext> {
-			return getRuleContexts(NullabilitySpecifierContext.self)
-		}
-		open func nullabilitySpecifier(_ i: Int) -> NullabilitySpecifierContext? {
-			return getRuleContext(NullabilitySpecifierContext.self,i)
-		}
-		open func ibOutletQualifier() -> Array<IbOutletQualifierContext> {
-			return getRuleContexts(IbOutletQualifierContext.self)
-		}
-		open func ibOutletQualifier(_ i: Int) -> IbOutletQualifierContext? {
-			return getRuleContext(IbOutletQualifierContext.self,i)
-		}
-		open func typePrefix() -> Array<TypePrefixContext> {
-			return getRuleContexts(TypePrefixContext.self)
-		}
-		open func typePrefix(_ i: Int) -> TypePrefixContext? {
-			return getRuleContext(TypePrefixContext.self,i)
-		}
-		open func typeQualifier() -> Array<TypeQualifierContext> {
-			return getRuleContexts(TypeQualifierContext.self)
-		}
-		open func typeQualifier(_ i: Int) -> TypeQualifierContext? {
-			return getRuleContext(TypeQualifierContext.self,i)
-		}
-		open func typeSpecifier() -> Array<TypeSpecifierContext> {
-			return getRuleContexts(TypeSpecifierContext.self)
-		}
-		open func typeSpecifier(_ i: Int) -> TypeSpecifierContext? {
-			return getRuleContext(TypeSpecifierContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_declarationSpecifiers }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterDeclarationSpecifiers(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterDeclarationSpecifiers(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitDeclarationSpecifiers(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitDeclarationSpecifiers(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitDeclarationSpecifiers(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDeclarationSpecifiers(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitDeclarationSpecifiers(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitDeclarationSpecifiers(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func declarationSpecifiers() throws -> DeclarationSpecifiersContext {
-		let _localctx: DeclarationSpecifiersContext = DeclarationSpecifiersContext(_ctx, getState())
+	 open func declarationSpecifiers() throws -> DeclarationSpecifiersContext {
+        let _localctx: DeclarationSpecifiersContext = DeclarationSpecifiersContext(_ctx, getState())
 		try enterRule(_localctx, 172, ObjectiveCParser.RULE_declarationSpecifiers)
 		defer {
 	    		try! exitRule()
@@ -8456,53 +9637,76 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class AttributeSpecifierContext:ParserRuleContext {
-		open func LP() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.LP.rawValue) }
-		open func LP(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.LP.rawValue, i)
+
+	public class AttributeSpecifierContext: ParserRuleContext {
+			open
+			func ATTRIBUTE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ATTRIBUTE.rawValue, 0)
+			}
+			open
+			func LP() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.LP.rawValue)
+			}
+			open
+			func LP(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, i)
+			}
+			open
+			func attribute() -> [AttributeContext] {
+				return getRuleContexts(AttributeContext.self)
+			}
+			open
+			func attribute(_ i: Int) -> AttributeContext? {
+				return getRuleContext(AttributeContext.self, i)
+			}
+			open
+			func RP() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.RP.rawValue)
+			}
+			open
+			func RP(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_attributeSpecifier
 		}
-		open func attribute() -> Array<AttributeContext> {
-			return getRuleContexts(AttributeContext.self)
-		}
-		open func attribute(_ i: Int) -> AttributeContext? {
-			return getRuleContext(AttributeContext.self,i)
-		}
-		open func RP() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.RP.rawValue) }
-		open func RP(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.RP.rawValue, i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_attributeSpecifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterAttributeSpecifier(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterAttributeSpecifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitAttributeSpecifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitAttributeSpecifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitAttributeSpecifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAttributeSpecifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitAttributeSpecifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitAttributeSpecifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func attributeSpecifier() throws -> AttributeSpecifierContext {
-		let _localctx: AttributeSpecifierContext = AttributeSpecifierContext(_ctx, getState())
+	 open func attributeSpecifier() throws -> AttributeSpecifierContext {
+        let _localctx: AttributeSpecifierContext = AttributeSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 174, ObjectiveCParser.RULE_attributeSpecifier)
 		var _la: Int = 0
 		defer {
@@ -8550,45 +9754,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class InitDeclaratorListContext:ParserRuleContext {
-		open func initDeclarator() -> Array<InitDeclaratorContext> {
-			return getRuleContexts(InitDeclaratorContext.self)
+
+	public class InitDeclaratorListContext: ParserRuleContext {
+			open
+			func initDeclarator() -> [InitDeclaratorContext] {
+				return getRuleContexts(InitDeclaratorContext.self)
+			}
+			open
+			func initDeclarator(_ i: Int) -> InitDeclaratorContext? {
+				return getRuleContext(InitDeclaratorContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_initDeclaratorList
 		}
-		open func initDeclarator(_ i: Int) -> InitDeclaratorContext? {
-			return getRuleContext(InitDeclaratorContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_initDeclaratorList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterInitDeclaratorList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterInitDeclaratorList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitInitDeclaratorList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitInitDeclaratorList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitInitDeclaratorList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInitDeclaratorList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitInitDeclaratorList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitInitDeclaratorList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func initDeclaratorList() throws -> InitDeclaratorListContext {
-		let _localctx: InitDeclaratorListContext = InitDeclaratorListContext(_ctx, getState())
+	 open func initDeclaratorList() throws -> InitDeclaratorListContext {
+        let _localctx: InitDeclaratorListContext = InitDeclaratorListContext(_ctx, getState())
 		try enterRule(_localctx, 176, ObjectiveCParser.RULE_initDeclaratorList)
 		var _la: Int = 0
 		defer {
@@ -8626,42 +9841,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class InitDeclaratorContext:ParserRuleContext {
-		open func declarator() -> DeclaratorContext? {
-			return getRuleContext(DeclaratorContext.self,0)
+
+	public class InitDeclaratorContext: ParserRuleContext {
+			open
+			func declarator() -> DeclaratorContext? {
+				return getRuleContext(DeclaratorContext.self, 0)
+			}
+			open
+			func ASSIGNMENT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue, 0)
+			}
+			open
+			func initializer() -> InitializerContext? {
+				return getRuleContext(InitializerContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_initDeclarator
 		}
-		open func ASSIGNMENT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue, 0) }
-		open func initializer() -> InitializerContext? {
-			return getRuleContext(InitializerContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_initDeclarator }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterInitDeclarator(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterInitDeclarator(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitInitDeclarator(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitInitDeclarator(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitInitDeclarator(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInitDeclarator(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitInitDeclarator(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitInitDeclarator(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func initDeclarator() throws -> InitDeclaratorContext {
-		let _localctx: InitDeclaratorContext = InitDeclaratorContext(_ctx, getState())
+	 open func initDeclarator() throws -> InitDeclaratorContext {
+        let _localctx: InitDeclaratorContext = InitDeclaratorContext(_ctx, getState())
 		try enterRule(_localctx, 178, ObjectiveCParser.RULE_initDeclarator)
 		var _la: Int = 0
 		defer {
@@ -8696,54 +9921,76 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class StructOrUnionSpecifierContext:ParserRuleContext {
-		open func STRUCT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.STRUCT.rawValue, 0) }
-		open func UNION() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.UNION.rawValue, 0) }
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class StructOrUnionSpecifierContext: ParserRuleContext {
+			open
+			func STRUCT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.STRUCT.rawValue, 0)
+			}
+			open
+			func UNION() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.UNION.rawValue, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func LBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0)
+			}
+			open
+			func RBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0)
+			}
+			open
+			func attributeSpecifier() -> [AttributeSpecifierContext] {
+				return getRuleContexts(AttributeSpecifierContext.self)
+			}
+			open
+			func attributeSpecifier(_ i: Int) -> AttributeSpecifierContext? {
+				return getRuleContext(AttributeSpecifierContext.self, i)
+			}
+			open
+			func fieldDeclaration() -> [FieldDeclarationContext] {
+				return getRuleContexts(FieldDeclarationContext.self)
+			}
+			open
+			func fieldDeclaration(_ i: Int) -> FieldDeclarationContext? {
+				return getRuleContext(FieldDeclarationContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_structOrUnionSpecifier
 		}
-		open func LBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0) }
-		open func RBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0) }
-		open func attributeSpecifier() -> Array<AttributeSpecifierContext> {
-			return getRuleContexts(AttributeSpecifierContext.self)
-		}
-		open func attributeSpecifier(_ i: Int) -> AttributeSpecifierContext? {
-			return getRuleContext(AttributeSpecifierContext.self,i)
-		}
-		open func fieldDeclaration() -> Array<FieldDeclarationContext> {
-			return getRuleContexts(FieldDeclarationContext.self)
-		}
-		open func fieldDeclaration(_ i: Int) -> FieldDeclarationContext? {
-			return getRuleContext(FieldDeclarationContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_structOrUnionSpecifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterStructOrUnionSpecifier(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterStructOrUnionSpecifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitStructOrUnionSpecifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitStructOrUnionSpecifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitStructOrUnionSpecifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitStructOrUnionSpecifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitStructOrUnionSpecifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitStructOrUnionSpecifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func structOrUnionSpecifier() throws -> StructOrUnionSpecifierContext {
-		let _localctx: StructOrUnionSpecifierContext = StructOrUnionSpecifierContext(_ctx, getState())
+	 open func structOrUnionSpecifier() throws -> StructOrUnionSpecifierContext {
+        let _localctx: StructOrUnionSpecifierContext = StructOrUnionSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 180, ObjectiveCParser.RULE_structOrUnionSpecifier)
 		var _la: Int = 0
 		defer {
@@ -8850,48 +10097,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class FieldDeclarationContext:ParserRuleContext {
-		open func specifierQualifierList() -> SpecifierQualifierListContext? {
-			return getRuleContext(SpecifierQualifierListContext.self,0)
+
+	public class FieldDeclarationContext: ParserRuleContext {
+			open
+			func specifierQualifierList() -> SpecifierQualifierListContext? {
+				return getRuleContext(SpecifierQualifierListContext.self, 0)
+			}
+			open
+			func fieldDeclaratorList() -> FieldDeclaratorListContext? {
+				return getRuleContext(FieldDeclaratorListContext.self, 0)
+			}
+			open
+			func SEMI() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
+			}
+			open
+			func macro() -> MacroContext? {
+				return getRuleContext(MacroContext.self, 0)
+			}
+			open
+			func functionPointer() -> FunctionPointerContext? {
+				return getRuleContext(FunctionPointerContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_fieldDeclaration
 		}
-		open func fieldDeclaratorList() -> FieldDeclaratorListContext? {
-			return getRuleContext(FieldDeclaratorListContext.self,0)
-		}
-		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
-		open func macro() -> MacroContext? {
-			return getRuleContext(MacroContext.self,0)
-		}
-		open func functionPointer() -> FunctionPointerContext? {
-			return getRuleContext(FunctionPointerContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_fieldDeclaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterFieldDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterFieldDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitFieldDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitFieldDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitFieldDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFieldDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitFieldDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitFieldDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func fieldDeclaration() throws -> FieldDeclarationContext {
-		let _localctx: FieldDeclarationContext = FieldDeclarationContext(_ctx, getState())
+	 open func fieldDeclaration() throws -> FieldDeclarationContext {
+        let _localctx: FieldDeclarationContext = FieldDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 182, ObjectiveCParser.RULE_fieldDeclaration)
 		var _la: Int = 0
 		defer {
@@ -8950,71 +10209,88 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class SpecifierQualifierListContext:ParserRuleContext {
-		open func arcBehaviourSpecifier() -> Array<ArcBehaviourSpecifierContext> {
-			return getRuleContexts(ArcBehaviourSpecifierContext.self)
+
+	public class SpecifierQualifierListContext: ParserRuleContext {
+			open
+			func arcBehaviourSpecifier() -> [ArcBehaviourSpecifierContext] {
+				return getRuleContexts(ArcBehaviourSpecifierContext.self)
+			}
+			open
+			func arcBehaviourSpecifier(_ i: Int) -> ArcBehaviourSpecifierContext? {
+				return getRuleContext(ArcBehaviourSpecifierContext.self, i)
+			}
+			open
+			func nullabilitySpecifier() -> [NullabilitySpecifierContext] {
+				return getRuleContexts(NullabilitySpecifierContext.self)
+			}
+			open
+			func nullabilitySpecifier(_ i: Int) -> NullabilitySpecifierContext? {
+				return getRuleContext(NullabilitySpecifierContext.self, i)
+			}
+			open
+			func ibOutletQualifier() -> [IbOutletQualifierContext] {
+				return getRuleContexts(IbOutletQualifierContext.self)
+			}
+			open
+			func ibOutletQualifier(_ i: Int) -> IbOutletQualifierContext? {
+				return getRuleContext(IbOutletQualifierContext.self, i)
+			}
+			open
+			func typePrefix() -> [TypePrefixContext] {
+				return getRuleContexts(TypePrefixContext.self)
+			}
+			open
+			func typePrefix(_ i: Int) -> TypePrefixContext? {
+				return getRuleContext(TypePrefixContext.self, i)
+			}
+			open
+			func typeQualifier() -> [TypeQualifierContext] {
+				return getRuleContexts(TypeQualifierContext.self)
+			}
+			open
+			func typeQualifier(_ i: Int) -> TypeQualifierContext? {
+				return getRuleContext(TypeQualifierContext.self, i)
+			}
+			open
+			func typeSpecifier() -> [TypeSpecifierContext] {
+				return getRuleContexts(TypeSpecifierContext.self)
+			}
+			open
+			func typeSpecifier(_ i: Int) -> TypeSpecifierContext? {
+				return getRuleContext(TypeSpecifierContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_specifierQualifierList
 		}
-		open func arcBehaviourSpecifier(_ i: Int) -> ArcBehaviourSpecifierContext? {
-			return getRuleContext(ArcBehaviourSpecifierContext.self,i)
-		}
-		open func nullabilitySpecifier() -> Array<NullabilitySpecifierContext> {
-			return getRuleContexts(NullabilitySpecifierContext.self)
-		}
-		open func nullabilitySpecifier(_ i: Int) -> NullabilitySpecifierContext? {
-			return getRuleContext(NullabilitySpecifierContext.self,i)
-		}
-		open func ibOutletQualifier() -> Array<IbOutletQualifierContext> {
-			return getRuleContexts(IbOutletQualifierContext.self)
-		}
-		open func ibOutletQualifier(_ i: Int) -> IbOutletQualifierContext? {
-			return getRuleContext(IbOutletQualifierContext.self,i)
-		}
-		open func typePrefix() -> Array<TypePrefixContext> {
-			return getRuleContexts(TypePrefixContext.self)
-		}
-		open func typePrefix(_ i: Int) -> TypePrefixContext? {
-			return getRuleContext(TypePrefixContext.self,i)
-		}
-		open func typeQualifier() -> Array<TypeQualifierContext> {
-			return getRuleContexts(TypeQualifierContext.self)
-		}
-		open func typeQualifier(_ i: Int) -> TypeQualifierContext? {
-			return getRuleContext(TypeQualifierContext.self,i)
-		}
-		open func typeSpecifier() -> Array<TypeSpecifierContext> {
-			return getRuleContexts(TypeSpecifierContext.self)
-		}
-		open func typeSpecifier(_ i: Int) -> TypeSpecifierContext? {
-			return getRuleContext(TypeSpecifierContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_specifierQualifierList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterSpecifierQualifierList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterSpecifierQualifierList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitSpecifierQualifierList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitSpecifierQualifierList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitSpecifierQualifierList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSpecifierQualifierList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitSpecifierQualifierList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitSpecifierQualifierList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func specifierQualifierList() throws -> SpecifierQualifierListContext {
-		let _localctx: SpecifierQualifierListContext = SpecifierQualifierListContext(_ctx, getState())
+	 open func specifierQualifierList() throws -> SpecifierQualifierListContext {
+        let _localctx: SpecifierQualifierListContext = SpecifierQualifierListContext(_ctx, getState())
 		try enterRule(_localctx, 184, ObjectiveCParser.RULE_specifierQualifierList)
 		defer {
 	    		try! exitRule()
@@ -9082,42 +10358,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class IbOutletQualifierContext:ParserRuleContext {
-		open func IB_OUTLET_COLLECTION() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class IbOutletQualifierContext: ParserRuleContext {
+			open
+			func IB_OUTLET_COLLECTION() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func IB_OUTLET() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IB_OUTLET.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_ibOutletQualifier
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func IB_OUTLET() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IB_OUTLET.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_ibOutletQualifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterIbOutletQualifier(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterIbOutletQualifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitIbOutletQualifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitIbOutletQualifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitIbOutletQualifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitIbOutletQualifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitIbOutletQualifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitIbOutletQualifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func ibOutletQualifier() throws -> IbOutletQualifierContext {
-		let _localctx: IbOutletQualifierContext = IbOutletQualifierContext(_ctx, getState())
+	 open func ibOutletQualifier() throws -> IbOutletQualifierContext {
+        let _localctx: IbOutletQualifierContext = IbOutletQualifierContext(_ctx, getState())
 		try enterRule(_localctx, 186, ObjectiveCParser.RULE_ibOutletQualifier)
 		defer {
 	    		try! exitRule()
@@ -9157,39 +10451,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ArcBehaviourSpecifierContext:ParserRuleContext {
-		open func WEAK_QUALIFIER() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.WEAK_QUALIFIER.rawValue, 0) }
-		open func STRONG_QUALIFIER() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.STRONG_QUALIFIER.rawValue, 0) }
-		open func AUTORELEASING_QUALIFIER() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.AUTORELEASING_QUALIFIER.rawValue, 0) }
-		open func UNSAFE_UNRETAINED_QUALIFIER() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.UNSAFE_UNRETAINED_QUALIFIER.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_arcBehaviourSpecifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterArcBehaviourSpecifier(self)
+
+	public class ArcBehaviourSpecifierContext: ParserRuleContext {
+			open
+			func WEAK_QUALIFIER() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.WEAK_QUALIFIER.rawValue, 0)
+			}
+			open
+			func STRONG_QUALIFIER() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.STRONG_QUALIFIER.rawValue, 0)
+			}
+			open
+			func AUTORELEASING_QUALIFIER() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.AUTORELEASING_QUALIFIER.rawValue, 0)
+			}
+			open
+			func UNSAFE_UNRETAINED_QUALIFIER() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.UNSAFE_UNRETAINED_QUALIFIER.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_arcBehaviourSpecifier
+		}
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterArcBehaviourSpecifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitArcBehaviourSpecifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitArcBehaviourSpecifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitArcBehaviourSpecifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitArcBehaviourSpecifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitArcBehaviourSpecifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitArcBehaviourSpecifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func arcBehaviourSpecifier() throws -> ArcBehaviourSpecifierContext {
-		let _localctx: ArcBehaviourSpecifierContext = ArcBehaviourSpecifierContext(_ctx, getState())
+	 open func arcBehaviourSpecifier() throws -> ArcBehaviourSpecifierContext {
+        let _localctx: ArcBehaviourSpecifierContext = ArcBehaviourSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 188, ObjectiveCParser.RULE_arcBehaviourSpecifier)
 		var _la: Int = 0
 		defer {
@@ -9223,39 +10534,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class NullabilitySpecifierContext:ParserRuleContext {
-		open func NULL_UNSPECIFIED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue, 0) }
-		open func NULLABLE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NULLABLE.rawValue, 0) }
-		open func NONNULL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NONNULL.rawValue, 0) }
-		open func NULL_RESETTABLE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NULL_RESETTABLE.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_nullabilitySpecifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterNullabilitySpecifier(self)
+
+	public class NullabilitySpecifierContext: ParserRuleContext {
+			open
+			func NULL_UNSPECIFIED() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue, 0)
+			}
+			open
+			func NULLABLE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NULLABLE.rawValue, 0)
+			}
+			open
+			func NONNULL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NONNULL.rawValue, 0)
+			}
+			open
+			func NULL_RESETTABLE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NULL_RESETTABLE.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_nullabilitySpecifier
+		}
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterNullabilitySpecifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitNullabilitySpecifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitNullabilitySpecifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitNullabilitySpecifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitNullabilitySpecifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitNullabilitySpecifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitNullabilitySpecifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func nullabilitySpecifier() throws -> NullabilitySpecifierContext {
-		let _localctx: NullabilitySpecifierContext = NullabilitySpecifierContext(_ctx, getState())
+	 open func nullabilitySpecifier() throws -> NullabilitySpecifierContext {
+        let _localctx: NullabilitySpecifierContext = NullabilitySpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 190, ObjectiveCParser.RULE_nullabilitySpecifier)
 		var _la: Int = 0
 		defer {
@@ -9289,39 +10617,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class StorageClassSpecifierContext:ParserRuleContext {
-		open func AUTO() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.AUTO.rawValue, 0) }
-		open func REGISTER() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.REGISTER.rawValue, 0) }
-		open func STATIC() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.STATIC.rawValue, 0) }
-		open func EXTERN() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.EXTERN.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_storageClassSpecifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterStorageClassSpecifier(self)
+
+	public class StorageClassSpecifierContext: ParserRuleContext {
+			open
+			func AUTO() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.AUTO.rawValue, 0)
+			}
+			open
+			func REGISTER() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.REGISTER.rawValue, 0)
+			}
+			open
+			func STATIC() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.STATIC.rawValue, 0)
+			}
+			open
+			func EXTERN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.EXTERN.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_storageClassSpecifier
+		}
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterStorageClassSpecifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitStorageClassSpecifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitStorageClassSpecifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitStorageClassSpecifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitStorageClassSpecifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitStorageClassSpecifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitStorageClassSpecifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func storageClassSpecifier() throws -> StorageClassSpecifierContext {
-		let _localctx: StorageClassSpecifierContext = StorageClassSpecifierContext(_ctx, getState())
+	 open func storageClassSpecifier() throws -> StorageClassSpecifierContext {
+        let _localctx: StorageClassSpecifierContext = StorageClassSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 192, ObjectiveCParser.RULE_storageClassSpecifier)
 		var _la: Int = 0
 		defer {
@@ -9355,42 +10700,68 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class TypePrefixContext:ParserRuleContext {
-		open func BRIDGE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BRIDGE.rawValue, 0) }
-		open func BRIDGE_TRANSFER() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BRIDGE_TRANSFER.rawValue, 0) }
-		open func BRIDGE_RETAINED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BRIDGE_RETAINED.rawValue, 0) }
-		open func BLOCK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BLOCK.rawValue, 0) }
-		open func INLINE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.INLINE.rawValue, 0) }
-		open func NS_INLINE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NS_INLINE.rawValue, 0) }
-		open func KINDOF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.KINDOF.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_typePrefix }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterTypePrefix(self)
+
+	public class TypePrefixContext: ParserRuleContext {
+			open
+			func BRIDGE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BRIDGE.rawValue, 0)
+			}
+			open
+			func BRIDGE_TRANSFER() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BRIDGE_TRANSFER.rawValue, 0)
+			}
+			open
+			func BRIDGE_RETAINED() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BRIDGE_RETAINED.rawValue, 0)
+			}
+			open
+			func BLOCK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BLOCK.rawValue, 0)
+			}
+			open
+			func INLINE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.INLINE.rawValue, 0)
+			}
+			open
+			func NS_INLINE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NS_INLINE.rawValue, 0)
+			}
+			open
+			func KINDOF() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.KINDOF.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_typePrefix
+		}
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterTypePrefix(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitTypePrefix(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitTypePrefix(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypePrefix(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypePrefix(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitTypePrefix(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitTypePrefix(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func typePrefix() throws -> TypePrefixContext {
-		let _localctx: TypePrefixContext = TypePrefixContext(_ctx, getState())
+	 open func typePrefix() throws -> TypePrefixContext {
+        let _localctx: TypePrefixContext = TypePrefixContext(_ctx, getState())
 		try enterRule(_localctx, 194, ObjectiveCParser.RULE_typePrefix)
 		var _la: Int = 0
 		defer {
@@ -9425,41 +10796,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class TypeQualifierContext:ParserRuleContext {
-		open func CONST() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.CONST.rawValue, 0) }
-		open func VOLATILE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.VOLATILE.rawValue, 0) }
-		open func RESTRICT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RESTRICT.rawValue, 0) }
-		open func protocolQualifier() -> ProtocolQualifierContext? {
-			return getRuleContext(ProtocolQualifierContext.self,0)
+
+	public class TypeQualifierContext: ParserRuleContext {
+			open
+			func CONST() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.CONST.rawValue, 0)
+			}
+			open
+			func VOLATILE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.VOLATILE.rawValue, 0)
+			}
+			open
+			func RESTRICT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RESTRICT.rawValue, 0)
+			}
+			open
+			func protocolQualifier() -> ProtocolQualifierContext? {
+				return getRuleContext(ProtocolQualifierContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_typeQualifier
 		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_typeQualifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterTypeQualifier(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterTypeQualifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitTypeQualifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitTypeQualifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeQualifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeQualifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitTypeQualifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitTypeQualifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func typeQualifier() throws -> TypeQualifierContext {
-		let _localctx: TypeQualifierContext = TypeQualifierContext(_ctx, getState())
+	 open func typeQualifier() throws -> TypeQualifierContext {
+        let _localctx: TypeQualifierContext = TypeQualifierContext(_ctx, getState())
 		try enterRule(_localctx, 196, ObjectiveCParser.RULE_typeQualifier)
 		defer {
 	    		try! exitRule()
@@ -9511,41 +10897,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ProtocolQualifierContext:ParserRuleContext {
-		open func IN() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IN.rawValue, 0) }
-		open func OUT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.OUT.rawValue, 0) }
-		open func INOUT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.INOUT.rawValue, 0) }
-		open func BYCOPY() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BYCOPY.rawValue, 0) }
-		open func BYREF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BYREF.rawValue, 0) }
-		open func ONEWAY() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ONEWAY.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_protocolQualifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterProtocolQualifier(self)
+
+	public class ProtocolQualifierContext: ParserRuleContext {
+			open
+			func IN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IN.rawValue, 0)
+			}
+			open
+			func OUT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.OUT.rawValue, 0)
+			}
+			open
+			func INOUT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.INOUT.rawValue, 0)
+			}
+			open
+			func BYCOPY() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BYCOPY.rawValue, 0)
+			}
+			open
+			func BYREF() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BYREF.rawValue, 0)
+			}
+			open
+			func ONEWAY() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ONEWAY.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_protocolQualifier
+		}
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterProtocolQualifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitProtocolQualifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitProtocolQualifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitProtocolQualifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitProtocolQualifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitProtocolQualifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitProtocolQualifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func protocolQualifier() throws -> ProtocolQualifierContext {
-		let _localctx: ProtocolQualifierContext = ProtocolQualifierContext(_ctx, getState())
+	 open func protocolQualifier() throws -> ProtocolQualifierContext {
+        let _localctx: ProtocolQualifierContext = ProtocolQualifierContext(_ctx, getState())
 		try enterRule(_localctx, 198, ObjectiveCParser.RULE_protocolQualifier)
 		var _la: Int = 0
 		defer {
@@ -9579,57 +10988,72 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class TypeSpecifierContext:ParserRuleContext {
-		open func scalarTypeSpecifier() -> ScalarTypeSpecifierContext? {
-			return getRuleContext(ScalarTypeSpecifierContext.self,0)
+
+	public class TypeSpecifierContext: ParserRuleContext {
+			open
+			func scalarTypeSpecifier() -> ScalarTypeSpecifierContext? {
+				return getRuleContext(ScalarTypeSpecifierContext.self, 0)
+			}
+			open
+			func pointer() -> PointerContext? {
+				return getRuleContext(PointerContext.self, 0)
+			}
+			open
+			func typeofExpression() -> TypeofExpressionContext? {
+				return getRuleContext(TypeofExpressionContext.self, 0)
+			}
+			open
+			func genericTypeSpecifier() -> GenericTypeSpecifierContext? {
+				return getRuleContext(GenericTypeSpecifierContext.self, 0)
+			}
+			open
+			func KINDOF() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.KINDOF.rawValue, 0)
+			}
+			open
+			func structOrUnionSpecifier() -> StructOrUnionSpecifierContext? {
+				return getRuleContext(StructOrUnionSpecifierContext.self, 0)
+			}
+			open
+			func enumSpecifier() -> EnumSpecifierContext? {
+				return getRuleContext(EnumSpecifierContext.self, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_typeSpecifier
 		}
-		open func pointer() -> PointerContext? {
-			return getRuleContext(PointerContext.self,0)
-		}
-		open func typeofExpression() -> TypeofExpressionContext? {
-			return getRuleContext(TypeofExpressionContext.self,0)
-		}
-		open func genericTypeSpecifier() -> GenericTypeSpecifierContext? {
-			return getRuleContext(GenericTypeSpecifierContext.self,0)
-		}
-		open func KINDOF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.KINDOF.rawValue, 0) }
-		open func structOrUnionSpecifier() -> StructOrUnionSpecifierContext? {
-			return getRuleContext(StructOrUnionSpecifierContext.self,0)
-		}
-		open func enumSpecifier() -> EnumSpecifierContext? {
-			return getRuleContext(EnumSpecifierContext.self,0)
-		}
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_typeSpecifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterTypeSpecifier(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterTypeSpecifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitTypeSpecifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitTypeSpecifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeSpecifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeSpecifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitTypeSpecifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitTypeSpecifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func typeSpecifier() throws -> TypeSpecifierContext {
-		let _localctx: TypeSpecifierContext = TypeSpecifierContext(_ctx, getState())
+	 open func typeSpecifier() throws -> TypeSpecifierContext {
+        let _localctx: TypeSpecifierContext = TypeSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 200, ObjectiveCParser.RULE_typeSpecifier)
 		defer {
 	    		try! exitRule()
@@ -9745,44 +11169,76 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ScalarTypeSpecifierContext:ParserRuleContext {
-		open func VOID() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.VOID.rawValue, 0) }
-		open func CHAR() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.CHAR.rawValue, 0) }
-		open func SHORT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SHORT.rawValue, 0) }
-		open func INT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.INT.rawValue, 0) }
-		open func LONG() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LONG.rawValue, 0) }
-		open func FLOAT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.FLOAT.rawValue, 0) }
-		open func DOUBLE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DOUBLE.rawValue, 0) }
-		open func SIGNED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SIGNED.rawValue, 0) }
-		open func UNSIGNED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.UNSIGNED.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_scalarTypeSpecifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterScalarTypeSpecifier(self)
+
+	public class ScalarTypeSpecifierContext: ParserRuleContext {
+			open
+			func VOID() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.VOID.rawValue, 0)
+			}
+			open
+			func CHAR() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.CHAR.rawValue, 0)
+			}
+			open
+			func SHORT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SHORT.rawValue, 0)
+			}
+			open
+			func INT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.INT.rawValue, 0)
+			}
+			open
+			func LONG() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LONG.rawValue, 0)
+			}
+			open
+			func FLOAT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.FLOAT.rawValue, 0)
+			}
+			open
+			func DOUBLE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.DOUBLE.rawValue, 0)
+			}
+			open
+			func SIGNED() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SIGNED.rawValue, 0)
+			}
+			open
+			func UNSIGNED() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.UNSIGNED.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_scalarTypeSpecifier
+		}
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterScalarTypeSpecifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitScalarTypeSpecifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitScalarTypeSpecifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitScalarTypeSpecifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitScalarTypeSpecifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitScalarTypeSpecifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitScalarTypeSpecifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func scalarTypeSpecifier() throws -> ScalarTypeSpecifierContext {
-		let _localctx: ScalarTypeSpecifierContext = ScalarTypeSpecifierContext(_ctx, getState())
+	 open func scalarTypeSpecifier() throws -> ScalarTypeSpecifierContext {
+        let _localctx: ScalarTypeSpecifierContext = ScalarTypeSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 202, ObjectiveCParser.RULE_scalarTypeSpecifier)
 		var _la: Int = 0
 		defer {
@@ -9816,41 +11272,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class TypeofExpressionContext:ParserRuleContext {
-		open func TYPEOF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.TYPEOF.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
+
+	public class TypeofExpressionContext: ParserRuleContext {
+			open
+			func TYPEOF() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.TYPEOF.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_typeofExpression
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_typeofExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterTypeofExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterTypeofExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitTypeofExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitTypeofExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeofExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeofExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitTypeofExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitTypeofExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func typeofExpression() throws -> TypeofExpressionContext {
-		let _localctx: TypeofExpressionContext = TypeofExpressionContext(_ctx, getState())
+	 open func typeofExpression() throws -> TypeofExpressionContext {
+        let _localctx: TypeofExpressionContext = TypeofExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 204, ObjectiveCParser.RULE_typeofExpression)
 		defer {
 	    		try! exitRule()
@@ -9877,45 +11348,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class FieldDeclaratorListContext:ParserRuleContext {
-		open func fieldDeclarator() -> Array<FieldDeclaratorContext> {
-			return getRuleContexts(FieldDeclaratorContext.self)
+
+	public class FieldDeclaratorListContext: ParserRuleContext {
+			open
+			func fieldDeclarator() -> [FieldDeclaratorContext] {
+				return getRuleContexts(FieldDeclaratorContext.self)
+			}
+			open
+			func fieldDeclarator(_ i: Int) -> FieldDeclaratorContext? {
+				return getRuleContext(FieldDeclaratorContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_fieldDeclaratorList
 		}
-		open func fieldDeclarator(_ i: Int) -> FieldDeclaratorContext? {
-			return getRuleContext(FieldDeclaratorContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_fieldDeclaratorList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterFieldDeclaratorList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterFieldDeclaratorList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitFieldDeclaratorList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitFieldDeclaratorList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitFieldDeclaratorList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFieldDeclaratorList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitFieldDeclaratorList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitFieldDeclaratorList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func fieldDeclaratorList() throws -> FieldDeclaratorListContext {
-		let _localctx: FieldDeclaratorListContext = FieldDeclaratorListContext(_ctx, getState())
+	 open func fieldDeclaratorList() throws -> FieldDeclaratorListContext {
+        let _localctx: FieldDeclaratorListContext = FieldDeclaratorListContext(_ctx, getState())
 		try enterRule(_localctx, 206, ObjectiveCParser.RULE_fieldDeclaratorList)
 		var _la: Int = 0
 		defer {
@@ -9953,42 +11435,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class FieldDeclaratorContext:ParserRuleContext {
-		open func declarator() -> DeclaratorContext? {
-			return getRuleContext(DeclaratorContext.self,0)
+
+	public class FieldDeclaratorContext: ParserRuleContext {
+			open
+			func declarator() -> DeclaratorContext? {
+				return getRuleContext(DeclaratorContext.self, 0)
+			}
+			open
+			func COLON() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0)
+			}
+			open
+			func constant() -> ConstantContext? {
+				return getRuleContext(ConstantContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_fieldDeclarator
 		}
-		open func COLON() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0) }
-		open func constant() -> ConstantContext? {
-			return getRuleContext(ConstantContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_fieldDeclarator }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterFieldDeclarator(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterFieldDeclarator(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitFieldDeclarator(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitFieldDeclarator(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitFieldDeclarator(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFieldDeclarator(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitFieldDeclarator(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitFieldDeclarator(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func fieldDeclarator() throws -> FieldDeclaratorContext {
-		let _localctx: FieldDeclaratorContext = FieldDeclaratorContext(_ctx, getState())
+	 open func fieldDeclarator() throws -> FieldDeclaratorContext {
+        let _localctx: FieldDeclaratorContext = FieldDeclaratorContext(_ctx, getState())
 		try enterRule(_localctx, 208, ObjectiveCParser.RULE_fieldDeclarator)
 		var _la: Int = 0
 		defer {
@@ -10043,56 +11535,92 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class EnumSpecifierContext:ParserRuleContext {
-		open func ENUM() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ENUM.rawValue, 0) }
-		open func identifier() -> Array<IdentifierContext> {
-			return getRuleContexts(IdentifierContext.self)
+
+	public class EnumSpecifierContext: ParserRuleContext {
+			open
+			func ENUM() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ENUM.rawValue, 0)
+			}
+			open
+			func identifier() -> [IdentifierContext] {
+				return getRuleContexts(IdentifierContext.self)
+			}
+			open
+			func identifier(_ i: Int) -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, i)
+			}
+			open
+			func LBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0)
+			}
+			open
+			func enumeratorList() -> EnumeratorListContext? {
+				return getRuleContext(EnumeratorListContext.self, 0)
+			}
+			open
+			func RBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0)
+			}
+			open
+			func COLON() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0)
+			}
+			open
+			func typeName() -> TypeNameContext? {
+				return getRuleContext(TypeNameContext.self, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func COMMA() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func NS_OPTIONS() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NS_OPTIONS.rawValue, 0)
+			}
+			open
+			func NS_ENUM() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NS_ENUM.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_enumSpecifier
 		}
-		open func identifier(_ i: Int) -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,i)
-		}
-		open func LBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0) }
-		open func enumeratorList() -> EnumeratorListContext? {
-			return getRuleContext(EnumeratorListContext.self,0)
-		}
-		open func RBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0) }
-		open func COLON() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0) }
-		open func typeName() -> TypeNameContext? {
-			return getRuleContext(TypeNameContext.self,0)
-		}
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func COMMA() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, 0) }
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func NS_OPTIONS() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NS_OPTIONS.rawValue, 0) }
-		open func NS_ENUM() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NS_ENUM.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_enumSpecifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterEnumSpecifier(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterEnumSpecifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitEnumSpecifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitEnumSpecifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitEnumSpecifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitEnumSpecifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitEnumSpecifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitEnumSpecifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func enumSpecifier() throws -> EnumSpecifierContext {
-		let _localctx: EnumSpecifierContext = EnumSpecifierContext(_ctx, getState())
+	 open func enumSpecifier() throws -> EnumSpecifierContext {
+        let _localctx: EnumSpecifierContext = EnumSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 210, ObjectiveCParser.RULE_enumSpecifier)
 		var _la: Int = 0
 		defer {
@@ -10267,45 +11795,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class EnumeratorListContext:ParserRuleContext {
-		open func enumerator() -> Array<EnumeratorContext> {
-			return getRuleContexts(EnumeratorContext.self)
+
+	public class EnumeratorListContext: ParserRuleContext {
+			open
+			func enumerator() -> [EnumeratorContext] {
+				return getRuleContexts(EnumeratorContext.self)
+			}
+			open
+			func enumerator(_ i: Int) -> EnumeratorContext? {
+				return getRuleContext(EnumeratorContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_enumeratorList
 		}
-		open func enumerator(_ i: Int) -> EnumeratorContext? {
-			return getRuleContext(EnumeratorContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_enumeratorList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterEnumeratorList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterEnumeratorList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitEnumeratorList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitEnumeratorList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitEnumeratorList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitEnumeratorList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitEnumeratorList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitEnumeratorList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func enumeratorList() throws -> EnumeratorListContext {
-		let _localctx: EnumeratorListContext = EnumeratorListContext(_ctx, getState())
+	 open func enumeratorList() throws -> EnumeratorListContext {
+        let _localctx: EnumeratorListContext = EnumeratorListContext(_ctx, getState())
 		try enterRule(_localctx, 212, ObjectiveCParser.RULE_enumeratorList)
 		var _la: Int = 0
 		defer {
@@ -10355,42 +11894,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class EnumeratorContext:ParserRuleContext {
-		open func enumeratorIdentifier() -> EnumeratorIdentifierContext? {
-			return getRuleContext(EnumeratorIdentifierContext.self,0)
+
+	public class EnumeratorContext: ParserRuleContext {
+			open
+			func enumeratorIdentifier() -> EnumeratorIdentifierContext? {
+				return getRuleContext(EnumeratorIdentifierContext.self, 0)
+			}
+			open
+			func ASSIGNMENT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_enumerator
 		}
-		open func ASSIGNMENT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue, 0) }
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_enumerator }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterEnumerator(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterEnumerator(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitEnumerator(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitEnumerator(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitEnumerator(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitEnumerator(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitEnumerator(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitEnumerator(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func enumerator() throws -> EnumeratorContext {
-		let _localctx: EnumeratorContext = EnumeratorContext(_ctx, getState())
+	 open func enumerator() throws -> EnumeratorContext {
+        let _localctx: EnumeratorContext = EnumeratorContext(_ctx, getState())
 		try enterRule(_localctx, 214, ObjectiveCParser.RULE_enumerator)
 		var _la: Int = 0
 		defer {
@@ -10425,38 +11974,44 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class EnumeratorIdentifierContext:ParserRuleContext {
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class EnumeratorIdentifierContext: ParserRuleContext {
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_enumeratorIdentifier
 		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_enumeratorIdentifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterEnumeratorIdentifier(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterEnumeratorIdentifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitEnumeratorIdentifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitEnumeratorIdentifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitEnumeratorIdentifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitEnumeratorIdentifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitEnumeratorIdentifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitEnumeratorIdentifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func enumeratorIdentifier() throws -> EnumeratorIdentifierContext {
-		let _localctx: EnumeratorIdentifierContext = EnumeratorIdentifierContext(_ctx, getState())
+	 open func enumeratorIdentifier() throws -> EnumeratorIdentifierContext {
+        let _localctx: EnumeratorIdentifierContext = EnumeratorIdentifierContext(_ctx, getState())
 		try enterRule(_localctx, 216, ObjectiveCParser.RULE_enumeratorIdentifier)
 		defer {
 	    		try! exitRule()
@@ -10475,60 +12030,84 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class DirectDeclaratorContext:ParserRuleContext {
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class DirectDeclaratorContext: ParserRuleContext {
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func declarator() -> DeclaratorContext? {
+				return getRuleContext(DeclaratorContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func declaratorSuffix() -> [DeclaratorSuffixContext] {
+				return getRuleContexts(DeclaratorSuffixContext.self)
+			}
+			open
+			func declaratorSuffix(_ i: Int) -> DeclaratorSuffixContext? {
+				return getRuleContext(DeclaratorSuffixContext.self, i)
+			}
+			open
+			func attributeSpecifier() -> AttributeSpecifierContext? {
+				return getRuleContext(AttributeSpecifierContext.self, 0)
+			}
+			open
+			func BITXOR() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BITXOR.rawValue, 0)
+			}
+			open
+			func blockParameters() -> BlockParametersContext? {
+				return getRuleContext(BlockParametersContext.self, 0)
+			}
+			open
+			func nullabilitySpecifier() -> NullabilitySpecifierContext? {
+				return getRuleContext(NullabilitySpecifierContext.self, 0)
+			}
+			open
+			func MUL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.MUL.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_directDeclarator
 		}
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func declarator() -> DeclaratorContext? {
-			return getRuleContext(DeclaratorContext.self,0)
-		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func declaratorSuffix() -> Array<DeclaratorSuffixContext> {
-			return getRuleContexts(DeclaratorSuffixContext.self)
-		}
-		open func declaratorSuffix(_ i: Int) -> DeclaratorSuffixContext? {
-			return getRuleContext(DeclaratorSuffixContext.self,i)
-		}
-		open func attributeSpecifier() -> AttributeSpecifierContext? {
-			return getRuleContext(AttributeSpecifierContext.self,0)
-		}
-		open func BITXOR() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BITXOR.rawValue, 0) }
-		open func blockParameters() -> BlockParametersContext? {
-			return getRuleContext(BlockParametersContext.self,0)
-		}
-		open func nullabilitySpecifier() -> NullabilitySpecifierContext? {
-			return getRuleContext(NullabilitySpecifierContext.self,0)
-		}
-		open func MUL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.MUL.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_directDeclarator }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterDirectDeclarator(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterDirectDeclarator(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitDirectDeclarator(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitDirectDeclarator(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitDirectDeclarator(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDirectDeclarator(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitDirectDeclarator(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitDirectDeclarator(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func directDeclarator() throws -> DirectDeclaratorContext {
-		let _localctx: DirectDeclaratorContext = DirectDeclaratorContext(_ctx, getState())
+	 open func directDeclarator() throws -> DirectDeclaratorContext {
+        let _localctx: DirectDeclaratorContext = DirectDeclaratorContext(_ctx, getState())
 		try enterRule(_localctx, 218, ObjectiveCParser.RULE_directDeclarator)
 		var _la: Int = 0
 		defer {
@@ -10730,40 +12309,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class DeclaratorSuffixContext:ParserRuleContext {
-		open func LBRACK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, 0) }
-		open func RBRACK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RBRACK.rawValue, 0) }
-		open func constantExpression() -> ConstantExpressionContext? {
-			return getRuleContext(ConstantExpressionContext.self,0)
+
+	public class DeclaratorSuffixContext: ParserRuleContext {
+			open
+			func LBRACK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, 0)
+			}
+			open
+			func RBRACK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACK.rawValue, 0)
+			}
+			open
+			func constantExpression() -> ConstantExpressionContext? {
+				return getRuleContext(ConstantExpressionContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_declaratorSuffix
 		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_declaratorSuffix }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterDeclaratorSuffix(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterDeclaratorSuffix(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitDeclaratorSuffix(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitDeclaratorSuffix(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitDeclaratorSuffix(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDeclaratorSuffix(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitDeclaratorSuffix(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitDeclaratorSuffix(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func declaratorSuffix() throws -> DeclaratorSuffixContext {
-		let _localctx: DeclaratorSuffixContext = DeclaratorSuffixContext(_ctx, getState())
+	 open func declaratorSuffix() throws -> DeclaratorSuffixContext {
+        let _localctx: DeclaratorSuffixContext = DeclaratorSuffixContext(_ctx, getState())
 		try enterRule(_localctx, 220, ObjectiveCParser.RULE_declaratorSuffix)
 		var _la: Int = 0
 		defer {
@@ -10809,40 +12400,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ParameterListContext:ParserRuleContext {
-		open func parameterDeclarationList() -> ParameterDeclarationListContext? {
-			return getRuleContext(ParameterDeclarationListContext.self,0)
+
+	public class ParameterListContext: ParserRuleContext {
+			open
+			func parameterDeclarationList() -> ParameterDeclarationListContext? {
+				return getRuleContext(ParameterDeclarationListContext.self, 0)
+			}
+			open
+			func COMMA() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, 0)
+			}
+			open
+			func ELIPSIS() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ELIPSIS.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_parameterList
 		}
-		open func COMMA() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, 0) }
-		open func ELIPSIS() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ELIPSIS.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_parameterList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterParameterList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterParameterList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitParameterList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitParameterList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitParameterList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitParameterList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitParameterList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitParameterList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func parameterList() throws -> ParameterListContext {
-		let _localctx: ParameterListContext = ParameterListContext(_ctx, getState())
+	 open func parameterList() throws -> ParameterListContext {
+        let _localctx: ParameterListContext = ParameterListContext(_ctx, getState())
 		try enterRule(_localctx, 222, ObjectiveCParser.RULE_parameterList)
 		var _la: Int = 0
 		defer {
@@ -10877,41 +12480,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class PointerContext:ParserRuleContext {
-		open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
-			return getRuleContext(DeclarationSpecifiersContext.self,0)
+
+	public class PointerContext: ParserRuleContext {
+			open
+			func MUL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.MUL.rawValue, 0)
+			}
+			open
+			func declarationSpecifiers() -> DeclarationSpecifiersContext? {
+				return getRuleContext(DeclarationSpecifiersContext.self, 0)
+			}
+			open
+			func pointer() -> PointerContext? {
+				return getRuleContext(PointerContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_pointer
 		}
-		open func pointer() -> PointerContext? {
-			return getRuleContext(PointerContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_pointer }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterPointer(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterPointer(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitPointer(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitPointer(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitPointer(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPointer(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitPointer(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitPointer(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func pointer() throws -> PointerContext {
-		let _localctx: PointerContext = PointerContext(_ctx, getState())
+	 open func pointer() throws -> PointerContext {
+        let _localctx: PointerContext = PointerContext(_ctx, getState())
 		try enterRule(_localctx, 224, ObjectiveCParser.RULE_pointer)
 		defer {
 	    		try! exitRule()
@@ -10950,50 +12564,68 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class MacroContext:ParserRuleContext {
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class MacroContext: ParserRuleContext {
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func primaryExpression() -> [PrimaryExpressionContext] {
+				return getRuleContexts(PrimaryExpressionContext.self)
+			}
+			open
+			func primaryExpression(_ i: Int) -> PrimaryExpressionContext? {
+				return getRuleContext(PrimaryExpressionContext.self, i)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_macro
 		}
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func primaryExpression() -> Array<PrimaryExpressionContext> {
-			return getRuleContexts(PrimaryExpressionContext.self)
-		}
-		open func primaryExpression(_ i: Int) -> PrimaryExpressionContext? {
-			return getRuleContext(PrimaryExpressionContext.self,i)
-		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_macro }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterMacro(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterMacro(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitMacro(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitMacro(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitMacro(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitMacro(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitMacro(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitMacro(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func macro() throws -> MacroContext {
-		let _localctx: MacroContext = MacroContext(_ctx, getState())
+	 open func macro() throws -> MacroContext {
+        let _localctx: MacroContext = MacroContext(_ctx, getState())
 		try enterRule(_localctx, 226, ObjectiveCParser.RULE_macro)
 		var _la: Int = 0
 		defer {
@@ -11048,47 +12680,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ArrayInitializerContext:ParserRuleContext {
-		open func LBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0) }
-		open func RBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0) }
-		open func expression() -> Array<ExpressionContext> {
-			return getRuleContexts(ExpressionContext.self)
+
+	public class ArrayInitializerContext: ParserRuleContext {
+			open
+			func LBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0)
+			}
+			open
+			func RBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0)
+			}
+			open
+			func expression() -> [ExpressionContext] {
+				return getRuleContexts(ExpressionContext.self)
+			}
+			open
+			func expression(_ i: Int) -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_arrayInitializer
 		}
-		open func expression(_ i: Int) -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_arrayInitializer }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterArrayInitializer(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterArrayInitializer(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitArrayInitializer(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitArrayInitializer(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitArrayInitializer(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitArrayInitializer(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitArrayInitializer(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitArrayInitializer(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func arrayInitializer() throws -> ArrayInitializerContext {
-		let _localctx: ArrayInitializerContext = ArrayInitializerContext(_ctx, getState())
+	 open func arrayInitializer() throws -> ArrayInitializerContext {
+        let _localctx: ArrayInitializerContext = ArrayInitializerContext(_ctx, getState())
 		try enterRule(_localctx, 228, ObjectiveCParser.RULE_arrayInitializer)
 		var _la: Int = 0
 		defer {
@@ -11164,47 +12813,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class StructInitializerContext:ParserRuleContext {
-		open func LBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0) }
-		open func RBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0) }
-		open func structInitializerItem() -> Array<StructInitializerItemContext> {
-			return getRuleContexts(StructInitializerItemContext.self)
+
+	public class StructInitializerContext: ParserRuleContext {
+			open
+			func LBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0)
+			}
+			open
+			func RBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0)
+			}
+			open
+			func structInitializerItem() -> [StructInitializerItemContext] {
+				return getRuleContexts(StructInitializerItemContext.self)
+			}
+			open
+			func structInitializerItem(_ i: Int) -> StructInitializerItemContext? {
+				return getRuleContext(StructInitializerItemContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_structInitializer
 		}
-		open func structInitializerItem(_ i: Int) -> StructInitializerItemContext? {
-			return getRuleContext(StructInitializerItemContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_structInitializer }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterStructInitializer(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterStructInitializer(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitStructInitializer(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitStructInitializer(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitStructInitializer(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitStructInitializer(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitStructInitializer(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitStructInitializer(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func structInitializer() throws -> StructInitializerContext {
-		let _localctx: StructInitializerContext = StructInitializerContext(_ctx, getState())
+	 open func structInitializer() throws -> StructInitializerContext {
+        let _localctx: StructInitializerContext = StructInitializerContext(_ctx, getState())
 		try enterRule(_localctx, 230, ObjectiveCParser.RULE_structInitializer)
 		var _la: Int = 0
 		defer {
@@ -11269,44 +12935,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class StructInitializerItemContext:ParserRuleContext {
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
+
+	public class StructInitializerItemContext: ParserRuleContext {
+			open
+			func DOT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.DOT.rawValue, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+			open
+			func structInitializer() -> StructInitializerContext? {
+				return getRuleContext(StructInitializerContext.self, 0)
+			}
+			open
+			func arrayInitializer() -> ArrayInitializerContext? {
+				return getRuleContext(ArrayInitializerContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_structInitializerItem
 		}
-		open func structInitializer() -> StructInitializerContext? {
-			return getRuleContext(StructInitializerContext.self,0)
-		}
-		open func arrayInitializer() -> ArrayInitializerContext? {
-			return getRuleContext(ArrayInitializerContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_structInitializerItem }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterStructInitializerItem(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterStructInitializerItem(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitStructInitializerItem(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitStructInitializerItem(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitStructInitializerItem(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitStructInitializerItem(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitStructInitializerItem(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitStructInitializerItem(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func structInitializerItem() throws -> StructInitializerItemContext {
-		let _localctx: StructInitializerItemContext = StructInitializerItemContext(_ctx, getState())
+	 open func structInitializerItem() throws -> StructInitializerItemContext {
+        let _localctx: StructInitializerItemContext = StructInitializerItemContext(_ctx, getState())
 		try enterRule(_localctx, 232, ObjectiveCParser.RULE_structInitializerItem)
 		defer {
 	    		try! exitRule()
@@ -11346,45 +13024,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class InitializerListContext:ParserRuleContext {
-		open func initializer() -> Array<InitializerContext> {
-			return getRuleContexts(InitializerContext.self)
+
+	public class InitializerListContext: ParserRuleContext {
+			open
+			func initializer() -> [InitializerContext] {
+				return getRuleContexts(InitializerContext.self)
+			}
+			open
+			func initializer(_ i: Int) -> InitializerContext? {
+				return getRuleContext(InitializerContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_initializerList
 		}
-		open func initializer(_ i: Int) -> InitializerContext? {
-			return getRuleContext(InitializerContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_initializerList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterInitializerList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterInitializerList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitInitializerList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitInitializerList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitInitializerList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInitializerList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitInitializerList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitInitializerList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func initializerList() throws -> InitializerListContext {
-		let _localctx: InitializerListContext = InitializerListContext(_ctx, getState())
+	 open func initializerList() throws -> InitializerListContext {
+        let _localctx: InitializerListContext = InitializerListContext(_ctx, getState())
 		try enterRule(_localctx, 234, ObjectiveCParser.RULE_initializerList)
 		var _la: Int = 0
 		defer {
@@ -11434,44 +13123,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class TypeNameContext:ParserRuleContext {
-		open func specifierQualifierList() -> SpecifierQualifierListContext? {
-			return getRuleContext(SpecifierQualifierListContext.self,0)
+
+	public class TypeNameContext: ParserRuleContext {
+			open
+			func specifierQualifierList() -> SpecifierQualifierListContext? {
+				return getRuleContext(SpecifierQualifierListContext.self, 0)
+			}
+			open
+			func abstractDeclarator() -> AbstractDeclaratorContext? {
+				return getRuleContext(AbstractDeclaratorContext.self, 0)
+			}
+			open
+			func blockType() -> BlockTypeContext? {
+				return getRuleContext(BlockTypeContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_typeName
 		}
-		open func abstractDeclarator() -> AbstractDeclaratorContext? {
-			return getRuleContext(AbstractDeclaratorContext.self,0)
-		}
-		open func blockType() -> BlockTypeContext? {
-			return getRuleContext(BlockTypeContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_typeName }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterTypeName(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterTypeName(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitTypeName(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitTypeName(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeName(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeName(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitTypeName(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitTypeName(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func typeName() throws -> TypeNameContext {
-		let _localctx: TypeNameContext = TypeNameContext(_ctx, getState())
+	 open func typeName() throws -> TypeNameContext {
+        let _localctx: TypeNameContext = TypeNameContext(_ctx, getState())
 		try enterRule(_localctx, 236, ObjectiveCParser.RULE_typeName)
 		var _la: Int = 0
 		defer {
@@ -11520,63 +13217,88 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class AbstractDeclaratorContext:ParserRuleContext {
-		open func pointer() -> PointerContext? {
-			return getRuleContext(PointerContext.self,0)
+
+	public class AbstractDeclaratorContext: ParserRuleContext {
+			open
+			func pointer() -> PointerContext? {
+				return getRuleContext(PointerContext.self, 0)
+			}
+			open
+			func abstractDeclarator() -> AbstractDeclaratorContext? {
+				return getRuleContext(AbstractDeclaratorContext.self, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func abstractDeclaratorSuffix() -> [AbstractDeclaratorSuffixContext] {
+				return getRuleContexts(AbstractDeclaratorSuffixContext.self)
+			}
+			open
+			func abstractDeclaratorSuffix(_ i: Int) -> AbstractDeclaratorSuffixContext? {
+				return getRuleContext(AbstractDeclaratorSuffixContext.self, i)
+			}
+			open
+			func LBRACK() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.LBRACK.rawValue)
+			}
+			open
+			func LBRACK(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, i)
+			}
+			open
+			func RBRACK() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.RBRACK.rawValue)
+			}
+			open
+			func RBRACK(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACK.rawValue, i)
+			}
+			open
+			func constantExpression() -> [ConstantExpressionContext] {
+				return getRuleContexts(ConstantExpressionContext.self)
+			}
+			open
+			func constantExpression(_ i: Int) -> ConstantExpressionContext? {
+				return getRuleContext(ConstantExpressionContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_abstractDeclarator
 		}
-		open func abstractDeclarator() -> AbstractDeclaratorContext? {
-			return getRuleContext(AbstractDeclaratorContext.self,0)
-		}
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func abstractDeclaratorSuffix() -> Array<AbstractDeclaratorSuffixContext> {
-			return getRuleContexts(AbstractDeclaratorSuffixContext.self)
-		}
-		open func abstractDeclaratorSuffix(_ i: Int) -> AbstractDeclaratorSuffixContext? {
-			return getRuleContext(AbstractDeclaratorSuffixContext.self,i)
-		}
-		open func LBRACK() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.LBRACK.rawValue) }
-		open func LBRACK(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, i)
-		}
-		open func RBRACK() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.RBRACK.rawValue) }
-		open func RBRACK(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.RBRACK.rawValue, i)
-		}
-		open func constantExpression() -> Array<ConstantExpressionContext> {
-			return getRuleContexts(ConstantExpressionContext.self)
-		}
-		open func constantExpression(_ i: Int) -> ConstantExpressionContext? {
-			return getRuleContext(ConstantExpressionContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_abstractDeclarator }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterAbstractDeclarator(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterAbstractDeclarator(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitAbstractDeclarator(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitAbstractDeclarator(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitAbstractDeclarator(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAbstractDeclarator(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitAbstractDeclarator(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitAbstractDeclarator(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func abstractDeclarator() throws -> AbstractDeclaratorContext {
-		let _localctx: AbstractDeclaratorContext = AbstractDeclaratorContext(_ctx, getState())
+	 open func abstractDeclarator() throws -> AbstractDeclaratorContext {
+        let _localctx: AbstractDeclaratorContext = AbstractDeclaratorContext(_ctx, getState())
 		try enterRule(_localctx, 238, ObjectiveCParser.RULE_abstractDeclarator)
 		var _la: Int = 0
 		defer {
@@ -11708,45 +13430,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class AbstractDeclaratorSuffixContext:ParserRuleContext {
-		open func LBRACK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, 0) }
-		open func RBRACK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RBRACK.rawValue, 0) }
-		open func constantExpression() -> ConstantExpressionContext? {
-			return getRuleContext(ConstantExpressionContext.self,0)
+
+	public class AbstractDeclaratorSuffixContext: ParserRuleContext {
+			open
+			func LBRACK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, 0)
+			}
+			open
+			func RBRACK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACK.rawValue, 0)
+			}
+			open
+			func constantExpression() -> ConstantExpressionContext? {
+				return getRuleContext(ConstantExpressionContext.self, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func parameterDeclarationList() -> ParameterDeclarationListContext? {
+				return getRuleContext(ParameterDeclarationListContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_abstractDeclaratorSuffix
 		}
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func parameterDeclarationList() -> ParameterDeclarationListContext? {
-			return getRuleContext(ParameterDeclarationListContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_abstractDeclaratorSuffix }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterAbstractDeclaratorSuffix(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterAbstractDeclaratorSuffix(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitAbstractDeclaratorSuffix(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitAbstractDeclaratorSuffix(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitAbstractDeclaratorSuffix(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAbstractDeclaratorSuffix(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitAbstractDeclaratorSuffix(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitAbstractDeclaratorSuffix(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func abstractDeclaratorSuffix() throws -> AbstractDeclaratorSuffixContext {
-		let _localctx: AbstractDeclaratorSuffixContext = AbstractDeclaratorSuffixContext(_ctx, getState())
+	 open func abstractDeclaratorSuffix() throws -> AbstractDeclaratorSuffixContext {
+        let _localctx: AbstractDeclaratorSuffixContext = AbstractDeclaratorSuffixContext(_ctx, getState())
 		try enterRule(_localctx, 240, ObjectiveCParser.RULE_abstractDeclaratorSuffix)
 		var _la: Int = 0
 		defer {
@@ -11829,45 +13570,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ParameterDeclarationListContext:ParserRuleContext {
-		open func parameterDeclaration() -> Array<ParameterDeclarationContext> {
-			return getRuleContexts(ParameterDeclarationContext.self)
+
+	public class ParameterDeclarationListContext: ParserRuleContext {
+			open
+			func parameterDeclaration() -> [ParameterDeclarationContext] {
+				return getRuleContexts(ParameterDeclarationContext.self)
+			}
+			open
+			func parameterDeclaration(_ i: Int) -> ParameterDeclarationContext? {
+				return getRuleContext(ParameterDeclarationContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_parameterDeclarationList
 		}
-		open func parameterDeclaration(_ i: Int) -> ParameterDeclarationContext? {
-			return getRuleContext(ParameterDeclarationContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_parameterDeclarationList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterParameterDeclarationList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterParameterDeclarationList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitParameterDeclarationList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitParameterDeclarationList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitParameterDeclarationList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitParameterDeclarationList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitParameterDeclarationList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitParameterDeclarationList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func parameterDeclarationList() throws -> ParameterDeclarationListContext {
-		let _localctx: ParameterDeclarationListContext = ParameterDeclarationListContext(_ctx, getState())
+	 open func parameterDeclarationList() throws -> ParameterDeclarationListContext {
+        let _localctx: ParameterDeclarationListContext = ParameterDeclarationListContext(_ctx, getState())
 		try enterRule(_localctx, 242, ObjectiveCParser.RULE_parameterDeclarationList)
 		defer {
 	    		try! exitRule()
@@ -11903,45 +13655,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ParameterDeclarationContext:ParserRuleContext {
-		open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
-			return getRuleContext(DeclarationSpecifiersContext.self,0)
+
+	public class ParameterDeclarationContext: ParserRuleContext {
+			open
+			func declarationSpecifiers() -> DeclarationSpecifiersContext? {
+				return getRuleContext(DeclarationSpecifiersContext.self, 0)
+			}
+			open
+			func declarator() -> DeclaratorContext? {
+				return getRuleContext(DeclaratorContext.self, 0)
+			}
+			open
+			func functionPointer() -> FunctionPointerContext? {
+				return getRuleContext(FunctionPointerContext.self, 0)
+			}
+			open
+			func VOID() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.VOID.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_parameterDeclaration
 		}
-		open func declarator() -> DeclaratorContext? {
-			return getRuleContext(DeclaratorContext.self,0)
-		}
-		open func functionPointer() -> FunctionPointerContext? {
-			return getRuleContext(FunctionPointerContext.self,0)
-		}
-		open func VOID() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.VOID.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_parameterDeclaration }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterParameterDeclaration(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterParameterDeclaration(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitParameterDeclaration(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitParameterDeclaration(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitParameterDeclaration(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitParameterDeclaration(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitParameterDeclaration(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitParameterDeclaration(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func parameterDeclaration() throws -> ParameterDeclarationContext {
-		let _localctx: ParameterDeclarationContext = ParameterDeclarationContext(_ctx, getState())
+	 open func parameterDeclaration() throws -> ParameterDeclarationContext {
+        let _localctx: ParameterDeclarationContext = ParameterDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 244, ObjectiveCParser.RULE_parameterDeclaration)
 		defer {
 	    		try! exitRule()
@@ -11981,41 +13744,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class DeclaratorContext:ParserRuleContext {
-		open func directDeclarator() -> DirectDeclaratorContext? {
-			return getRuleContext(DirectDeclaratorContext.self,0)
+
+	public class DeclaratorContext: ParserRuleContext {
+			open
+			func directDeclarator() -> DirectDeclaratorContext? {
+				return getRuleContext(DirectDeclaratorContext.self, 0)
+			}
+			open
+			func pointer() -> PointerContext? {
+				return getRuleContext(PointerContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_declarator
 		}
-		open func pointer() -> PointerContext? {
-			return getRuleContext(PointerContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_declarator }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterDeclarator(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterDeclarator(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitDeclarator(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitDeclarator(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitDeclarator(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDeclarator(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitDeclarator(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitDeclarator(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func declarator() throws -> DeclaratorContext {
-		let _localctx: DeclaratorContext = DeclaratorContext(_ctx, getState())
+	 open func declarator() throws -> DeclaratorContext {
+        let _localctx: DeclaratorContext = DeclaratorContext(_ctx, getState())
 		try enterRule(_localctx, 246, ObjectiveCParser.RULE_declarator)
 		var _la: Int = 0
 		defer {
@@ -12048,66 +13818,84 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class StatementContext:ParserRuleContext {
-		open func labeledStatement() -> LabeledStatementContext? {
-			return getRuleContext(LabeledStatementContext.self,0)
+
+	public class StatementContext: ParserRuleContext {
+			open
+			func labeledStatement() -> LabeledStatementContext? {
+				return getRuleContext(LabeledStatementContext.self, 0)
+			}
+			open
+			func SEMI() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
+			}
+			open
+			func compoundStatement() -> CompoundStatementContext? {
+				return getRuleContext(CompoundStatementContext.self, 0)
+			}
+			open
+			func selectionStatement() -> SelectionStatementContext? {
+				return getRuleContext(SelectionStatementContext.self, 0)
+			}
+			open
+			func iterationStatement() -> IterationStatementContext? {
+				return getRuleContext(IterationStatementContext.self, 0)
+			}
+			open
+			func jumpStatement() -> JumpStatementContext? {
+				return getRuleContext(JumpStatementContext.self, 0)
+			}
+			open
+			func synchronizedStatement() -> SynchronizedStatementContext? {
+				return getRuleContext(SynchronizedStatementContext.self, 0)
+			}
+			open
+			func autoreleaseStatement() -> AutoreleaseStatementContext? {
+				return getRuleContext(AutoreleaseStatementContext.self, 0)
+			}
+			open
+			func throwStatement() -> ThrowStatementContext? {
+				return getRuleContext(ThrowStatementContext.self, 0)
+			}
+			open
+			func tryBlock() -> TryBlockContext? {
+				return getRuleContext(TryBlockContext.self, 0)
+			}
+			open
+			func expressions() -> ExpressionsContext? {
+				return getRuleContext(ExpressionsContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_statement
 		}
-		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
-		open func compoundStatement() -> CompoundStatementContext? {
-			return getRuleContext(CompoundStatementContext.self,0)
-		}
-		open func selectionStatement() -> SelectionStatementContext? {
-			return getRuleContext(SelectionStatementContext.self,0)
-		}
-		open func iterationStatement() -> IterationStatementContext? {
-			return getRuleContext(IterationStatementContext.self,0)
-		}
-		open func jumpStatement() -> JumpStatementContext? {
-			return getRuleContext(JumpStatementContext.self,0)
-		}
-		open func synchronizedStatement() -> SynchronizedStatementContext? {
-			return getRuleContext(SynchronizedStatementContext.self,0)
-		}
-		open func autoreleaseStatement() -> AutoreleaseStatementContext? {
-			return getRuleContext(AutoreleaseStatementContext.self,0)
-		}
-		open func throwStatement() -> ThrowStatementContext? {
-			return getRuleContext(ThrowStatementContext.self,0)
-		}
-		open func tryBlock() -> TryBlockContext? {
-			return getRuleContext(TryBlockContext.self,0)
-		}
-		open func expressions() -> ExpressionsContext? {
-			return getRuleContext(ExpressionsContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_statement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func statement() throws -> StatementContext {
-		let _localctx: StatementContext = StatementContext(_ctx, getState())
+	 open func statement() throws -> StatementContext {
+        let _localctx: StatementContext = StatementContext(_ctx, getState())
 		try enterRule(_localctx, 248, ObjectiveCParser.RULE_statement)
 		defer {
 	    		try! exitRule()
@@ -12269,42 +14057,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class LabeledStatementContext:ParserRuleContext {
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class LabeledStatementContext: ParserRuleContext {
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func COLON() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0)
+			}
+			open
+			func statement() -> StatementContext? {
+				return getRuleContext(StatementContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_labeledStatement
 		}
-		open func COLON() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0) }
-		open func statement() -> StatementContext? {
-			return getRuleContext(StatementContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_labeledStatement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterLabeledStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterLabeledStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitLabeledStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitLabeledStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitLabeledStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitLabeledStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitLabeledStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitLabeledStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func labeledStatement() throws -> LabeledStatementContext {
-		let _localctx: LabeledStatementContext = LabeledStatementContext(_ctx, getState())
+	 open func labeledStatement() throws -> LabeledStatementContext {
+        let _localctx: LabeledStatementContext = LabeledStatementContext(_ctx, getState())
 		try enterRule(_localctx, 250, ObjectiveCParser.RULE_labeledStatement)
 		defer {
 	    		try! exitRule()
@@ -12327,42 +14125,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class RangeExpressionContext:ParserRuleContext {
-		open func expression() -> Array<ExpressionContext> {
-			return getRuleContexts(ExpressionContext.self)
+
+	public class RangeExpressionContext: ParserRuleContext {
+			open
+			func expression() -> [ExpressionContext] {
+				return getRuleContexts(ExpressionContext.self)
+			}
+			open
+			func expression(_ i: Int) -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, i)
+			}
+			open
+			func ELIPSIS() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ELIPSIS.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_rangeExpression
 		}
-		open func expression(_ i: Int) -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,i)
-		}
-		open func ELIPSIS() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ELIPSIS.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_rangeExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterRangeExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterRangeExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitRangeExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitRangeExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitRangeExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitRangeExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitRangeExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitRangeExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func rangeExpression() throws -> RangeExpressionContext {
-		let _localctx: RangeExpressionContext = RangeExpressionContext(_ctx, getState())
+	 open func rangeExpression() throws -> RangeExpressionContext {
+        let _localctx: RangeExpressionContext = RangeExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 252, ObjectiveCParser.RULE_rangeExpression)
 		var _la: Int = 0
 		defer {
@@ -12397,49 +14205,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class CompoundStatementContext:ParserRuleContext {
-		open func LBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0) }
-		open func RBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0) }
-		open func declaration() -> Array<DeclarationContext> {
-			return getRuleContexts(DeclarationContext.self)
+
+	public class CompoundStatementContext: ParserRuleContext {
+			open
+			func LBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0)
+			}
+			open
+			func RBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0)
+			}
+			open
+			func declaration() -> [DeclarationContext] {
+				return getRuleContexts(DeclarationContext.self)
+			}
+			open
+			func declaration(_ i: Int) -> DeclarationContext? {
+				return getRuleContext(DeclarationContext.self, i)
+			}
+			open
+			func statement() -> [StatementContext] {
+				return getRuleContexts(StatementContext.self)
+			}
+			open
+			func statement(_ i: Int) -> StatementContext? {
+				return getRuleContext(StatementContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_compoundStatement
 		}
-		open func declaration(_ i: Int) -> DeclarationContext? {
-			return getRuleContext(DeclarationContext.self,i)
-		}
-		open func statement() -> Array<StatementContext> {
-			return getRuleContexts(StatementContext.self)
-		}
-		open func statement(_ i: Int) -> StatementContext? {
-			return getRuleContext(StatementContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_compoundStatement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterCompoundStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterCompoundStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitCompoundStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitCompoundStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitCompoundStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitCompoundStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitCompoundStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitCompoundStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func compoundStatement() throws -> CompoundStatementContext {
-		let _localctx: CompoundStatementContext = CompoundStatementContext(_ctx, getState())
+	 open func compoundStatement() throws -> CompoundStatementContext {
+        let _localctx: CompoundStatementContext = CompoundStatementContext(_ctx, getState())
 		try enterRule(_localctx, 254, ObjectiveCParser.RULE_compoundStatement)
 		var _la: Int = 0
 		defer {
@@ -12500,53 +14323,74 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class SelectionStatementContext:ParserRuleContext {
-		public var ifBody: StatementContext!
-		public var elseBody: StatementContext!
-		open func IF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IF.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func expressions() -> ExpressionsContext? {
-			return getRuleContext(ExpressionsContext.self,0)
+
+	public class SelectionStatementContext: ParserRuleContext {
+		open var ifBody: StatementContext!
+		open var elseBody: StatementContext!
+			open
+			func IF() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IF.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func expressions() -> ExpressionsContext? {
+				return getRuleContext(ExpressionsContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func statement() -> [StatementContext] {
+				return getRuleContexts(StatementContext.self)
+			}
+			open
+			func statement(_ i: Int) -> StatementContext? {
+				return getRuleContext(StatementContext.self, i)
+			}
+			open
+			func ELSE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ELSE.rawValue, 0)
+			}
+			open
+			func switchStatement() -> SwitchStatementContext? {
+				return getRuleContext(SwitchStatementContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_selectionStatement
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func statement() -> Array<StatementContext> {
-			return getRuleContexts(StatementContext.self)
-		}
-		open func statement(_ i: Int) -> StatementContext? {
-			return getRuleContext(StatementContext.self,i)
-		}
-		open func ELSE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ELSE.rawValue, 0) }
-		open func switchStatement() -> SwitchStatementContext? {
-			return getRuleContext(SwitchStatementContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_selectionStatement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterSelectionStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterSelectionStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitSelectionStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitSelectionStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitSelectionStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSelectionStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitSelectionStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitSelectionStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func selectionStatement() throws -> SelectionStatementContext {
-		let _localctx: SelectionStatementContext = SelectionStatementContext(_ctx, getState())
+	 open func selectionStatement() throws -> SelectionStatementContext {
+        let _localctx: SelectionStatementContext = SelectionStatementContext(_ctx, getState())
 		try enterRule(_localctx, 256, ObjectiveCParser.RULE_selectionStatement)
 		defer {
 	    		try! exitRule()
@@ -12608,44 +14452,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class SwitchStatementContext:ParserRuleContext {
-		open func SWITCH() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SWITCH.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
+
+	public class SwitchStatementContext: ParserRuleContext {
+			open
+			func SWITCH() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SWITCH.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func switchBlock() -> SwitchBlockContext? {
+				return getRuleContext(SwitchBlockContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_switchStatement
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func switchBlock() -> SwitchBlockContext? {
-			return getRuleContext(SwitchBlockContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_switchStatement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterSwitchStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterSwitchStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitSwitchStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitSwitchStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitSwitchStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSwitchStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitSwitchStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitSwitchStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func switchStatement() throws -> SwitchStatementContext {
-		let _localctx: SwitchStatementContext = SwitchStatementContext(_ctx, getState())
+	 open func switchStatement() throws -> SwitchStatementContext {
+        let _localctx: SwitchStatementContext = SwitchStatementContext(_ctx, getState())
 		try enterRule(_localctx, 258, ObjectiveCParser.RULE_switchStatement)
 		defer {
 	    		try! exitRule()
@@ -12672,43 +14532,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class SwitchBlockContext:ParserRuleContext {
-		open func LBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0) }
-		open func RBRACE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0) }
-		open func switchSection() -> Array<SwitchSectionContext> {
-			return getRuleContexts(SwitchSectionContext.self)
+
+	public class SwitchBlockContext: ParserRuleContext {
+			open
+			func LBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0)
+			}
+			open
+			func RBRACE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACE.rawValue, 0)
+			}
+			open
+			func switchSection() -> [SwitchSectionContext] {
+				return getRuleContexts(SwitchSectionContext.self)
+			}
+			open
+			func switchSection(_ i: Int) -> SwitchSectionContext? {
+				return getRuleContext(SwitchSectionContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_switchBlock
 		}
-		open func switchSection(_ i: Int) -> SwitchSectionContext? {
-			return getRuleContext(SwitchSectionContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_switchBlock }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterSwitchBlock(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterSwitchBlock(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitSwitchBlock(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitSwitchBlock(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitSwitchBlock(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSwitchBlock(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitSwitchBlock(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitSwitchBlock(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func switchBlock() throws -> SwitchBlockContext {
-		let _localctx: SwitchBlockContext = SwitchBlockContext(_ctx, getState())
+	 open func switchBlock() throws -> SwitchBlockContext {
+        let _localctx: SwitchBlockContext = SwitchBlockContext(_ctx, getState())
 		try enterRule(_localctx, 260, ObjectiveCParser.RULE_switchBlock)
 		var _la: Int = 0
 		defer {
@@ -12746,47 +14619,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class SwitchSectionContext:ParserRuleContext {
-		open func switchLabel() -> Array<SwitchLabelContext> {
-			return getRuleContexts(SwitchLabelContext.self)
+
+	public class SwitchSectionContext: ParserRuleContext {
+			open
+			func switchLabel() -> [SwitchLabelContext] {
+				return getRuleContexts(SwitchLabelContext.self)
+			}
+			open
+			func switchLabel(_ i: Int) -> SwitchLabelContext? {
+				return getRuleContext(SwitchLabelContext.self, i)
+			}
+			open
+			func statement() -> [StatementContext] {
+				return getRuleContexts(StatementContext.self)
+			}
+			open
+			func statement(_ i: Int) -> StatementContext? {
+				return getRuleContext(StatementContext.self, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_switchSection
 		}
-		open func switchLabel(_ i: Int) -> SwitchLabelContext? {
-			return getRuleContext(SwitchLabelContext.self,i)
-		}
-		open func statement() -> Array<StatementContext> {
-			return getRuleContexts(StatementContext.self)
-		}
-		open func statement(_ i: Int) -> StatementContext? {
-			return getRuleContext(StatementContext.self,i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_switchSection }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterSwitchSection(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterSwitchSection(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitSwitchSection(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitSwitchSection(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitSwitchSection(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSwitchSection(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitSwitchSection(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitSwitchSection(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func switchSection() throws -> SwitchSectionContext {
-		let _localctx: SwitchSectionContext = SwitchSectionContext(_ctx, getState())
+	 open func switchSection() throws -> SwitchSectionContext {
+        let _localctx: SwitchSectionContext = SwitchSectionContext(_ctx, getState())
 		try enterRule(_localctx, 262, ObjectiveCParser.RULE_switchSection)
 		var _la: Int = 0
 		defer {
@@ -12847,43 +14729,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class SwitchLabelContext:ParserRuleContext {
-		open func CASE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.CASE.rawValue, 0) }
-		open func COLON() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0) }
-		open func rangeExpression() -> RangeExpressionContext? {
-			return getRuleContext(RangeExpressionContext.self,0)
+
+	public class SwitchLabelContext: ParserRuleContext {
+			open
+			func CASE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.CASE.rawValue, 0)
+			}
+			open
+			func COLON() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0)
+			}
+			open
+			func rangeExpression() -> RangeExpressionContext? {
+				return getRuleContext(RangeExpressionContext.self, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func DEFAULT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.DEFAULT.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_switchLabel
 		}
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func DEFAULT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DEFAULT.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_switchLabel }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterSwitchLabel(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterSwitchLabel(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitSwitchLabel(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitSwitchLabel(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitSwitchLabel(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSwitchLabel(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitSwitchLabel(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitSwitchLabel(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func switchLabel() throws -> SwitchLabelContext {
-		let _localctx: SwitchLabelContext = SwitchLabelContext(_ctx, getState())
+	 open func switchLabel() throws -> SwitchLabelContext {
+        let _localctx: SwitchLabelContext = SwitchLabelContext(_ctx, getState())
 		try enterRule(_localctx, 264, ObjectiveCParser.RULE_switchLabel)
 		defer {
 	    		try! exitRule()
@@ -12940,47 +14843,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class IterationStatementContext:ParserRuleContext {
-		open func whileStatement() -> WhileStatementContext? {
-			return getRuleContext(WhileStatementContext.self,0)
+
+	public class IterationStatementContext: ParserRuleContext {
+			open
+			func whileStatement() -> WhileStatementContext? {
+				return getRuleContext(WhileStatementContext.self, 0)
+			}
+			open
+			func doStatement() -> DoStatementContext? {
+				return getRuleContext(DoStatementContext.self, 0)
+			}
+			open
+			func forStatement() -> ForStatementContext? {
+				return getRuleContext(ForStatementContext.self, 0)
+			}
+			open
+			func forInStatement() -> ForInStatementContext? {
+				return getRuleContext(ForInStatementContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_iterationStatement
 		}
-		open func doStatement() -> DoStatementContext? {
-			return getRuleContext(DoStatementContext.self,0)
-		}
-		open func forStatement() -> ForStatementContext? {
-			return getRuleContext(ForStatementContext.self,0)
-		}
-		open func forInStatement() -> ForInStatementContext? {
-			return getRuleContext(ForInStatementContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_iterationStatement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterIterationStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterIterationStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitIterationStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitIterationStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitIterationStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitIterationStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitIterationStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitIterationStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func iterationStatement() throws -> IterationStatementContext {
-		let _localctx: IterationStatementContext = IterationStatementContext(_ctx, getState())
+	 open func iterationStatement() throws -> IterationStatementContext {
+        let _localctx: IterationStatementContext = IterationStatementContext(_ctx, getState())
 		try enterRule(_localctx, 266, ObjectiveCParser.RULE_iterationStatement)
 		defer {
 	    		try! exitRule()
@@ -13024,44 +14936,60 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class WhileStatementContext:ParserRuleContext {
-		open func WHILE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.WHILE.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
+
+	public class WhileStatementContext: ParserRuleContext {
+			open
+			func WHILE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.WHILE.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func statement() -> StatementContext? {
+				return getRuleContext(StatementContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_whileStatement
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func statement() -> StatementContext? {
-			return getRuleContext(StatementContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_whileStatement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterWhileStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterWhileStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitWhileStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitWhileStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitWhileStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitWhileStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitWhileStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitWhileStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func whileStatement() throws -> WhileStatementContext {
-		let _localctx: WhileStatementContext = WhileStatementContext(_ctx, getState())
+	 open func whileStatement() throws -> WhileStatementContext {
+        let _localctx: WhileStatementContext = WhileStatementContext(_ctx, getState())
 		try enterRule(_localctx, 268, ObjectiveCParser.RULE_whileStatement)
 		defer {
 	    		try! exitRule()
@@ -13088,46 +15016,68 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class DoStatementContext:ParserRuleContext {
-		open func DO() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DO.rawValue, 0) }
-		open func statement() -> StatementContext? {
-			return getRuleContext(StatementContext.self,0)
+
+	public class DoStatementContext: ParserRuleContext {
+			open
+			func DO() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.DO.rawValue, 0)
+			}
+			open
+			func statement() -> StatementContext? {
+				return getRuleContext(StatementContext.self, 0)
+			}
+			open
+			func WHILE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.WHILE.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func SEMI() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_doStatement
 		}
-		open func WHILE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.WHILE.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
-		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_doStatement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterDoStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterDoStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitDoStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitDoStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitDoStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDoStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitDoStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitDoStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func doStatement() throws -> DoStatementContext {
-		let _localctx: DoStatementContext = DoStatementContext(_ctx, getState())
+	 open func doStatement() throws -> DoStatementContext {
+        let _localctx: DoStatementContext = DoStatementContext(_ctx, getState())
 		try enterRule(_localctx, 270, ObjectiveCParser.RULE_doStatement)
 		defer {
 	    		try! exitRule()
@@ -13158,54 +15108,76 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ForStatementContext:ParserRuleContext {
-		open func FOR() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.FOR.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func SEMI() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.SEMI.rawValue) }
-		open func SEMI(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, i)
+
+	public class ForStatementContext: ParserRuleContext {
+			open
+			func FOR() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.FOR.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func SEMI() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.SEMI.rawValue)
+			}
+			open
+			func SEMI(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, i)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func statement() -> StatementContext? {
+				return getRuleContext(StatementContext.self, 0)
+			}
+			open
+			func forLoopInitializer() -> ForLoopInitializerContext? {
+				return getRuleContext(ForLoopInitializerContext.self, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+			open
+			func expressions() -> ExpressionsContext? {
+				return getRuleContext(ExpressionsContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_forStatement
 		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func statement() -> StatementContext? {
-			return getRuleContext(StatementContext.self,0)
-		}
-		open func forLoopInitializer() -> ForLoopInitializerContext? {
-			return getRuleContext(ForLoopInitializerContext.self,0)
-		}
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
-		}
-		open func expressions() -> ExpressionsContext? {
-			return getRuleContext(ExpressionsContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_forStatement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterForStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterForStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitForStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitForStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitForStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitForStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitForStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitForStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func forStatement() throws -> ForStatementContext {
-		let _localctx: ForStatementContext = ForStatementContext(_ctx, getState())
+	 open func forStatement() throws -> ForStatementContext {
+        let _localctx: ForStatementContext = ForStatementContext(_ctx, getState())
 		try enterRule(_localctx, 272, ObjectiveCParser.RULE_forStatement)
 		var _la: Int = 0
 		defer {
@@ -13307,44 +15279,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ForLoopInitializerContext:ParserRuleContext {
-		open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
-			return getRuleContext(DeclarationSpecifiersContext.self,0)
+
+	public class ForLoopInitializerContext: ParserRuleContext {
+			open
+			func declarationSpecifiers() -> DeclarationSpecifiersContext? {
+				return getRuleContext(DeclarationSpecifiersContext.self, 0)
+			}
+			open
+			func initDeclaratorList() -> InitDeclaratorListContext? {
+				return getRuleContext(InitDeclaratorListContext.self, 0)
+			}
+			open
+			func expressions() -> ExpressionsContext? {
+				return getRuleContext(ExpressionsContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_forLoopInitializer
 		}
-		open func initDeclaratorList() -> InitDeclaratorListContext? {
-			return getRuleContext(InitDeclaratorListContext.self,0)
-		}
-		open func expressions() -> ExpressionsContext? {
-			return getRuleContext(ExpressionsContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_forLoopInitializer }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterForLoopInitializer(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterForLoopInitializer(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitForLoopInitializer(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitForLoopInitializer(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitForLoopInitializer(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitForLoopInitializer(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitForLoopInitializer(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitForLoopInitializer(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func forLoopInitializer() throws -> ForLoopInitializerContext {
-		let _localctx: ForLoopInitializerContext = ForLoopInitializerContext(_ctx, getState())
+	 open func forLoopInitializer() throws -> ForLoopInitializerContext {
+        let _localctx: ForLoopInitializerContext = ForLoopInitializerContext(_ctx, getState())
 		try enterRule(_localctx, 274, ObjectiveCParser.RULE_forLoopInitializer)
 		defer {
 	    		try! exitRule()
@@ -13378,48 +15358,68 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ForInStatementContext:ParserRuleContext {
-		open func FOR() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.FOR.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func typeVariableDeclarator() -> TypeVariableDeclaratorContext? {
-			return getRuleContext(TypeVariableDeclaratorContext.self,0)
+
+	public class ForInStatementContext: ParserRuleContext {
+			open
+			func FOR() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.FOR.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func typeVariableDeclarator() -> TypeVariableDeclaratorContext? {
+				return getRuleContext(TypeVariableDeclaratorContext.self, 0)
+			}
+			open
+			func IN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IN.rawValue, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func statement() -> StatementContext? {
+				return getRuleContext(StatementContext.self, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_forInStatement
 		}
-		open func IN() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IN.rawValue, 0) }
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func statement() -> StatementContext? {
-			return getRuleContext(StatementContext.self,0)
-		}
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_forInStatement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterForInStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterForInStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitForInStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitForInStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitForInStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitForInStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitForInStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitForInStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func forInStatement() throws -> ForInStatementContext {
-		let _localctx: ForInStatementContext = ForInStatementContext(_ctx, getState())
+	 open func forInStatement() throws -> ForInStatementContext {
+        let _localctx: ForInStatementContext = ForInStatementContext(_ctx, getState())
 		try enterRule(_localctx, 276, ObjectiveCParser.RULE_forInStatement)
 		var _la: Int = 0
 		defer {
@@ -13473,45 +15473,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class JumpStatementContext:ParserRuleContext {
-		open func GOTO() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.GOTO.rawValue, 0) }
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class JumpStatementContext: ParserRuleContext {
+			open
+			func GOTO() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.GOTO.rawValue, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func CONTINUE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.CONTINUE.rawValue, 0)
+			}
+			open
+			func BREAK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BREAK.rawValue, 0)
+			}
+			open
+			func RETURN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RETURN.rawValue, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_jumpStatement
 		}
-		open func CONTINUE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.CONTINUE.rawValue, 0) }
-		open func BREAK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BREAK.rawValue, 0) }
-		open func RETURN() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RETURN.rawValue, 0) }
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_jumpStatement }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterJumpStatement(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterJumpStatement(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitJumpStatement(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitJumpStatement(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitJumpStatement(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitJumpStatement(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitJumpStatement(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitJumpStatement(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func jumpStatement() throws -> JumpStatementContext {
-		let _localctx: JumpStatementContext = JumpStatementContext(_ctx, getState())
+	 open func jumpStatement() throws -> JumpStatementContext {
+        let _localctx: JumpStatementContext = JumpStatementContext(_ctx, getState())
 		try enterRule(_localctx, 278, ObjectiveCParser.RULE_jumpStatement)
 		var _la: Int = 0
 		defer {
@@ -13586,45 +15605,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ExpressionsContext:ParserRuleContext {
-		open func expression() -> Array<ExpressionContext> {
-			return getRuleContexts(ExpressionContext.self)
+
+	public class ExpressionsContext: ParserRuleContext {
+			open
+			func expression() -> [ExpressionContext] {
+				return getRuleContexts(ExpressionContext.self)
+			}
+			open
+			func expression(_ i: Int) -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_expressions
 		}
-		open func expression(_ i: Int) -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_expressions }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterExpressions(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterExpressions(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitExpressions(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitExpressions(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitExpressions(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitExpressions(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitExpressions(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitExpressions(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func expressions() throws -> ExpressionsContext {
-		let _localctx: ExpressionsContext = ExpressionsContext(_ctx, getState())
+	 open func expressions() throws -> ExpressionsContext {
+        let _localctx: ExpressionsContext = ExpressionsContext(_ctx, getState())
 		try enterRule(_localctx, 280, ObjectiveCParser.RULE_expressions)
 		defer {
 	    		try! exitRule()
@@ -13661,90 +15691,163 @@ open class ObjectiveCParser: Parser {
 		return _localctx
 	}
 
-	open class ExpressionContext:ParserRuleContext {
-		public var assignmentExpression: ExpressionContext!
-		public var op: Token!
-		public var trueExpression: ExpressionContext!
-		public var falseExpression: ExpressionContext!
-		open func castExpression() -> CastExpressionContext? {
-			return getRuleContext(CastExpressionContext.self,0)
+
+	public class ExpressionContext: ParserRuleContext {
+		open var assignmentExpression: ExpressionContext!
+		open var op: Token!
+		open var trueExpression: ExpressionContext!
+		open var falseExpression: ExpressionContext!
+			open
+			func castExpression() -> CastExpressionContext? {
+				return getRuleContext(CastExpressionContext.self, 0)
+			}
+			open
+			func unaryExpression() -> UnaryExpressionContext? {
+				return getRuleContext(UnaryExpressionContext.self, 0)
+			}
+			open
+			func assignmentOperator() -> AssignmentOperatorContext? {
+				return getRuleContext(AssignmentOperatorContext.self, 0)
+			}
+			open
+			func expression() -> [ExpressionContext] {
+				return getRuleContexts(ExpressionContext.self)
+			}
+			open
+			func expression(_ i: Int) -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, i)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func compoundStatement() -> CompoundStatementContext? {
+				return getRuleContext(CompoundStatementContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func MUL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.MUL.rawValue, 0)
+			}
+			open
+			func DIV() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.DIV.rawValue, 0)
+			}
+			open
+			func MOD() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.MOD.rawValue, 0)
+			}
+			open
+			func ADD() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ADD.rawValue, 0)
+			}
+			open
+			func SUB() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SUB.rawValue, 0)
+			}
+			open
+			func LT() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.LT.rawValue)
+			}
+			open
+			func LT(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LT.rawValue, i)
+			}
+			open
+			func GT() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.GT.rawValue)
+			}
+			open
+			func GT(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.GT.rawValue, i)
+			}
+			open
+			func LE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LE.rawValue, 0)
+			}
+			open
+			func GE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.GE.rawValue, 0)
+			}
+			open
+			func NOTEQUAL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NOTEQUAL.rawValue, 0)
+			}
+			open
+			func EQUAL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.EQUAL.rawValue, 0)
+			}
+			open
+			func BITAND() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BITAND.rawValue, 0)
+			}
+			open
+			func BITXOR() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BITXOR.rawValue, 0)
+			}
+			open
+			func BITOR() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BITOR.rawValue, 0)
+			}
+			open
+			func AND() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.AND.rawValue, 0)
+			}
+			open
+			func OR() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.OR.rawValue, 0)
+			}
+			open
+			func QUESTION() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.QUESTION.rawValue, 0)
+			}
+			open
+			func COLON() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_expression
 		}
-		open func unaryExpression() -> UnaryExpressionContext? {
-			return getRuleContext(UnaryExpressionContext.self,0)
-		}
-		open func assignmentOperator() -> AssignmentOperatorContext? {
-			return getRuleContext(AssignmentOperatorContext.self,0)
-		}
-		open func expression() -> Array<ExpressionContext> {
-			return getRuleContexts(ExpressionContext.self)
-		}
-		open func expression(_ i: Int) -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,i)
-		}
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func compoundStatement() -> CompoundStatementContext? {
-			return getRuleContext(CompoundStatementContext.self,0)
-		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func MUL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.MUL.rawValue, 0) }
-		open func DIV() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DIV.rawValue, 0) }
-		open func MOD() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.MOD.rawValue, 0) }
-		open func ADD() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ADD.rawValue, 0) }
-		open func SUB() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SUB.rawValue, 0) }
-		open func LT() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.LT.rawValue) }
-		open func LT(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.LT.rawValue, i)
-		}
-		open func GT() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.GT.rawValue) }
-		open func GT(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.GT.rawValue, i)
-		}
-		open func LE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LE.rawValue, 0) }
-		open func GE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.GE.rawValue, 0) }
-		open func NOTEQUAL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NOTEQUAL.rawValue, 0) }
-		open func EQUAL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.EQUAL.rawValue, 0) }
-		open func BITAND() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BITAND.rawValue, 0) }
-		open func BITXOR() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BITXOR.rawValue, 0) }
-		open func BITOR() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BITOR.rawValue, 0) }
-		open func AND() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.AND.rawValue, 0) }
-		open func OR() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.OR.rawValue, 0) }
-		open func QUESTION() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.QUESTION.rawValue, 0) }
-		open func COLON() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_expression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 
-	public final  func expression( ) throws -> ExpressionContext   {
+	 public final  func expression( ) throws -> ExpressionContext   {
 		return try expression(0)
 	}
 	@discardableResult
 	private func expression(_ _p: Int) throws -> ExpressionContext   {
 		let _parentctx: ParserRuleContext? = _ctx
-		let _parentState: Int = getState()
+        let _parentState: Int = getState()
 		var _localctx: ExpressionContext = ExpressionContext(_ctx, _parentState)
-		let _startState: Int = 282
+        let _startState: Int = 282
 		try enterRecursionRule(_localctx, 282, ObjectiveCParser.RULE_expression, _p)
 		var _la: Int = 0
 		defer {
@@ -14085,36 +16188,84 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx;
 	}
-	open class AssignmentOperatorContext:ParserRuleContext {
-		open func ASSIGNMENT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_assignmentOperator }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterAssignmentOperator(self)
+
+	public class AssignmentOperatorContext: ParserRuleContext {
+			open
+			func ASSIGNMENT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue, 0)
+			}
+			open
+			func MUL_ASSIGN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.MUL_ASSIGN.rawValue, 0)
+			}
+			open
+			func DIV_ASSIGN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.DIV_ASSIGN.rawValue, 0)
+			}
+			open
+			func MOD_ASSIGN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.MOD_ASSIGN.rawValue, 0)
+			}
+			open
+			func ADD_ASSIGN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ADD_ASSIGN.rawValue, 0)
+			}
+			open
+			func SUB_ASSIGN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SUB_ASSIGN.rawValue, 0)
+			}
+			open
+			func LSHIFT_ASSIGN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LSHIFT_ASSIGN.rawValue, 0)
+			}
+			open
+			func RSHIFT_ASSIGN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RSHIFT_ASSIGN.rawValue, 0)
+			}
+			open
+			func AND_ASSIGN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.AND_ASSIGN.rawValue, 0)
+			}
+			open
+			func XOR_ASSIGN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.XOR_ASSIGN.rawValue, 0)
+			}
+			open
+			func OR_ASSIGN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.OR_ASSIGN.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_assignmentOperator
+		}
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterAssignmentOperator(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitAssignmentOperator(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitAssignmentOperator(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitAssignmentOperator(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAssignmentOperator(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitAssignmentOperator(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitAssignmentOperator(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func assignmentOperator() throws -> AssignmentOperatorContext {
-		let _localctx: AssignmentOperatorContext = AssignmentOperatorContext(_ctx, getState())
+	 open func assignmentOperator() throws -> AssignmentOperatorContext {
+        let _localctx: AssignmentOperatorContext = AssignmentOperatorContext(_ctx, getState())
 		try enterRule(_localctx, 284, ObjectiveCParser.RULE_assignmentOperator)
 		var _la: Int = 0
 		defer {
@@ -14148,49 +16299,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class CastExpressionContext:ParserRuleContext {
-		open func unaryExpression() -> UnaryExpressionContext? {
-			return getRuleContext(UnaryExpressionContext.self,0)
+
+	public class CastExpressionContext: ParserRuleContext {
+			open
+			func unaryExpression() -> UnaryExpressionContext? {
+				return getRuleContext(UnaryExpressionContext.self, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func typeName() -> TypeNameContext? {
+				return getRuleContext(TypeNameContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func castExpression() -> CastExpressionContext? {
+				return getRuleContext(CastExpressionContext.self, 0)
+			}
+			open
+			func initializer() -> InitializerContext? {
+				return getRuleContext(InitializerContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_castExpression
 		}
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func typeName() -> TypeNameContext? {
-			return getRuleContext(TypeNameContext.self,0)
-		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func castExpression() -> CastExpressionContext? {
-			return getRuleContext(CastExpressionContext.self,0)
-		}
-		open func initializer() -> InitializerContext? {
-			return getRuleContext(InitializerContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_castExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterCastExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterCastExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitCastExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitCastExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitCastExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitCastExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitCastExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitCastExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func castExpression() throws -> CastExpressionContext {
-		let _localctx: CastExpressionContext = CastExpressionContext(_ctx, getState())
+	 open func castExpression() throws -> CastExpressionContext {
+        let _localctx: CastExpressionContext = CastExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 286, ObjectiveCParser.RULE_castExpression)
 		defer {
 	    		try! exitRule()
@@ -14242,44 +16408,52 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class InitializerContext:ParserRuleContext {
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
+
+	public class InitializerContext: ParserRuleContext {
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+			open
+			func arrayInitializer() -> ArrayInitializerContext? {
+				return getRuleContext(ArrayInitializerContext.self, 0)
+			}
+			open
+			func structInitializer() -> StructInitializerContext? {
+				return getRuleContext(StructInitializerContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_initializer
 		}
-		open func arrayInitializer() -> ArrayInitializerContext? {
-			return getRuleContext(ArrayInitializerContext.self,0)
-		}
-		open func structInitializer() -> StructInitializerContext? {
-			return getRuleContext(StructInitializerContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_initializer }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterInitializer(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterInitializer(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitInitializer(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitInitializer(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitInitializer(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInitializer(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitInitializer(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitInitializer(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func initializer() throws -> InitializerContext {
-		let _localctx: InitializerContext = InitializerContext(_ctx, getState())
+	 open func initializer() throws -> InitializerContext {
+        let _localctx: InitializerContext = InitializerContext(_ctx, getState())
 		try enterRule(_localctx, 288, ObjectiveCParser.RULE_initializer)
 		defer {
 	    		try! exitRule()
@@ -14317,41 +16491,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ConstantExpressionContext:ParserRuleContext {
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class ConstantExpressionContext: ParserRuleContext {
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func constant() -> ConstantContext? {
+				return getRuleContext(ConstantContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_constantExpression
 		}
-		open func constant() -> ConstantContext? {
-			return getRuleContext(ConstantContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_constantExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterConstantExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterConstantExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitConstantExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitConstantExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitConstantExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitConstantExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitConstantExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitConstantExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func constantExpression() throws -> ConstantExpressionContext {
-		let _localctx: ConstantExpressionContext = ConstantExpressionContext(_ctx, getState())
+	 open func constantExpression() throws -> ConstantExpressionContext {
+        let _localctx: ConstantExpressionContext = ConstantExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 290, ObjectiveCParser.RULE_constantExpression)
 		defer {
 	    		try! exitRule()
@@ -14443,56 +16624,81 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class UnaryExpressionContext:ParserRuleContext {
-		public var op: Token!
-		open func postfixExpression() -> PostfixExpressionContext? {
-			return getRuleContext(PostfixExpressionContext.self,0)
+
+	public class UnaryExpressionContext: ParserRuleContext {
+		open var op: Token!
+			open
+			func postfixExpression() -> PostfixExpressionContext? {
+				return getRuleContext(PostfixExpressionContext.self, 0)
+			}
+			open
+			func SIZEOF() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SIZEOF.rawValue, 0)
+			}
+			open
+			func unaryExpression() -> UnaryExpressionContext? {
+				return getRuleContext(UnaryExpressionContext.self, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func typeSpecifier() -> TypeSpecifierContext? {
+				return getRuleContext(TypeSpecifierContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func INC() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.INC.rawValue, 0)
+			}
+			open
+			func DEC() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.DEC.rawValue, 0)
+			}
+			open
+			func unaryOperator() -> UnaryOperatorContext? {
+				return getRuleContext(UnaryOperatorContext.self, 0)
+			}
+			open
+			func castExpression() -> CastExpressionContext? {
+				return getRuleContext(CastExpressionContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_unaryExpression
 		}
-		open func SIZEOF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SIZEOF.rawValue, 0) }
-		open func unaryExpression() -> UnaryExpressionContext? {
-			return getRuleContext(UnaryExpressionContext.self,0)
-		}
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func typeSpecifier() -> TypeSpecifierContext? {
-			return getRuleContext(TypeSpecifierContext.self,0)
-		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func INC() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.INC.rawValue, 0) }
-		open func DEC() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DEC.rawValue, 0) }
-		open func unaryOperator() -> UnaryOperatorContext? {
-			return getRuleContext(UnaryOperatorContext.self,0)
-		}
-		open func castExpression() -> CastExpressionContext? {
-			return getRuleContext(CastExpressionContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_unaryExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterUnaryExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterUnaryExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitUnaryExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitUnaryExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitUnaryExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitUnaryExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitUnaryExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitUnaryExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func unaryExpression() throws -> UnaryExpressionContext {
-		let _localctx: UnaryExpressionContext = UnaryExpressionContext(_ctx, getState())
+	 open func unaryExpression() throws -> UnaryExpressionContext {
+        let _localctx: UnaryExpressionContext = UnaryExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 292, ObjectiveCParser.RULE_unaryExpression)
 		var _la: Int = 0
 		defer {
@@ -14572,38 +16778,64 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class UnaryOperatorContext:ParserRuleContext {
-		open func ADD() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ADD.rawValue, 0) }
-		open func SUB() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SUB.rawValue, 0) }
-		open func BANG() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BANG.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_unaryOperator }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterUnaryOperator(self)
+
+	public class UnaryOperatorContext: ParserRuleContext {
+			open
+			func BITAND() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BITAND.rawValue, 0)
+			}
+			open
+			func MUL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.MUL.rawValue, 0)
+			}
+			open
+			func ADD() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ADD.rawValue, 0)
+			}
+			open
+			func SUB() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SUB.rawValue, 0)
+			}
+			open
+			func TILDE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.TILDE.rawValue, 0)
+			}
+			open
+			func BANG() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BANG.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_unaryOperator
+		}
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterUnaryOperator(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitUnaryOperator(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitUnaryOperator(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitUnaryOperator(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitUnaryOperator(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitUnaryOperator(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitUnaryOperator(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func unaryOperator() throws -> UnaryOperatorContext {
-		let _localctx: UnaryOperatorContext = UnaryOperatorContext(_ctx, getState())
+	 open func unaryOperator() throws -> UnaryOperatorContext {
+        let _localctx: UnaryOperatorContext = UnaryOperatorContext(_ctx, getState())
 		try enterRule(_localctx, 294, ObjectiveCParser.RULE_unaryOperator)
 		var _la: Int = 0
 		defer {
@@ -14638,59 +16870,75 @@ open class ObjectiveCParser: Parser {
 		return _localctx
 	}
 
-	open class PostfixExpressionContext:ParserRuleContext {
-		open func primaryExpression() -> PrimaryExpressionContext? {
-			return getRuleContext(PrimaryExpressionContext.self,0)
+
+	public class PostfixExpressionContext: ParserRuleContext {
+			open
+			func primaryExpression() -> PrimaryExpressionContext? {
+				return getRuleContext(PrimaryExpressionContext.self, 0)
+			}
+			open
+			func postfixExpr() -> [PostfixExprContext] {
+				return getRuleContexts(PostfixExprContext.self)
+			}
+			open
+			func postfixExpr(_ i: Int) -> PostfixExprContext? {
+				return getRuleContext(PostfixExprContext.self, i)
+			}
+			open
+			func postfixExpression() -> PostfixExpressionContext? {
+				return getRuleContext(PostfixExpressionContext.self, 0)
+			}
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func DOT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.DOT.rawValue, 0)
+			}
+			open
+			func STRUCTACCESS() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.STRUCTACCESS.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_postfixExpression
 		}
-		open func postfixExpr() -> Array<PostfixExprContext> {
-			return getRuleContexts(PostfixExprContext.self)
-		}
-		open func postfixExpr(_ i: Int) -> PostfixExprContext? {
-			return getRuleContext(PostfixExprContext.self,i)
-		}
-		open func postfixExpression() -> PostfixExpressionContext? {
-			return getRuleContext(PostfixExpressionContext.self,0)
-		}
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
-		}
-		open func DOT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DOT.rawValue, 0) }
-		open func STRUCTACCESS() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.STRUCTACCESS.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_postfixExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterPostfixExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterPostfixExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitPostfixExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitPostfixExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitPostfixExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPostfixExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitPostfixExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitPostfixExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 
-	public final  func postfixExpression( ) throws -> PostfixExpressionContext   {
+	 public final  func postfixExpression( ) throws -> PostfixExpressionContext   {
 		return try postfixExpression(0)
 	}
 	@discardableResult
 	private func postfixExpression(_ _p: Int) throws -> PostfixExpressionContext   {
 		let _parentctx: ParserRuleContext? = _ctx
-		let _parentState: Int = getState()
+        let _parentState: Int = getState()
 		var _localctx: PostfixExpressionContext = PostfixExpressionContext(_ctx, _parentState)
-		let _startState: Int = 296
+        let _startState: Int = 296
 		try enterRecursionRule(_localctx, 296, ObjectiveCParser.RULE_postfixExpression, _p)
 		var _la: Int = 0
 		defer {
@@ -14777,58 +17025,88 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx;
 	}
-	open class PostfixExprContext:ParserRuleContext {
-		public var _RP: Token!
-		public var macroArguments: Array<Token> = Array<Token>()
-		public var _tset3398: Token!
-		public var op: Token!
-		open func LBRACK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, 0) }
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
+
+	public class PostfixExprContext: ParserRuleContext {
+		open var _RP: Token!
+		open var macroArguments: [Token] = [Token]()
+		open var _tset3398: Token!
+		open var op: Token!
+			open
+			func LBRACK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+			open
+			func RBRACK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RBRACK.rawValue, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func RP() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.RP.rawValue)
+			}
+			open
+			func RP(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, i)
+			}
+			open
+			func argumentExpressionList() -> ArgumentExpressionListContext? {
+				return getRuleContext(ArgumentExpressionListContext.self, 0)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+			open
+			func INC() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.INC.rawValue, 0)
+			}
+			open
+			func DEC() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.DEC.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_postfixExpr
 		}
-		open func RBRACK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RBRACK.rawValue, 0) }
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func RP() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.RP.rawValue) }
-		open func RP(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.RP.rawValue, i)
-		}
-		open func argumentExpressionList() -> ArgumentExpressionListContext? {
-			return getRuleContext(ArgumentExpressionListContext.self,0)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open func INC() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.INC.rawValue, 0) }
-		open func DEC() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DEC.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_postfixExpr }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterPostfixExpr(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterPostfixExpr(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitPostfixExpr(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitPostfixExpr(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitPostfixExpr(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPostfixExpr(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitPostfixExpr(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitPostfixExpr(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func postfixExpr() throws -> PostfixExprContext {
-		let _localctx: PostfixExprContext = PostfixExprContext(_ctx, getState())
+	 open func postfixExpr() throws -> PostfixExprContext {
+        let _localctx: PostfixExprContext = PostfixExprContext(_ctx, getState())
 		try enterRule(_localctx, 298, ObjectiveCParser.RULE_postfixExpr)
 		var _la: Int = 0
 		defer {
@@ -14973,45 +17251,56 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ArgumentExpressionListContext:ParserRuleContext {
-		open func argumentExpression() -> Array<ArgumentExpressionContext> {
-			return getRuleContexts(ArgumentExpressionContext.self)
+
+	public class ArgumentExpressionListContext: ParserRuleContext {
+			open
+			func argumentExpression() -> [ArgumentExpressionContext] {
+				return getRuleContexts(ArgumentExpressionContext.self)
+			}
+			open
+			func argumentExpression(_ i: Int) -> ArgumentExpressionContext? {
+				return getRuleContext(ArgumentExpressionContext.self, i)
+			}
+			open
+			func COMMA() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue)
+			}
+			open
+			func COMMA(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_argumentExpressionList
 		}
-		open func argumentExpression(_ i: Int) -> ArgumentExpressionContext? {
-			return getRuleContext(ArgumentExpressionContext.self,i)
-		}
-		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
-		open func COMMA(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.COMMA.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_argumentExpressionList }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterArgumentExpressionList(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterArgumentExpressionList(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitArgumentExpressionList(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitArgumentExpressionList(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitArgumentExpressionList(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitArgumentExpressionList(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitArgumentExpressionList(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitArgumentExpressionList(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func argumentExpressionList() throws -> ArgumentExpressionListContext {
-		let _localctx: ArgumentExpressionListContext = ArgumentExpressionListContext(_ctx, getState())
+	 open func argumentExpressionList() throws -> ArgumentExpressionListContext {
+        let _localctx: ArgumentExpressionListContext = ArgumentExpressionListContext(_ctx, getState())
 		try enterRule(_localctx, 300, ObjectiveCParser.RULE_argumentExpressionList)
 		var _la: Int = 0
 		defer {
@@ -15049,41 +17338,48 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ArgumentExpressionContext:ParserRuleContext {
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
+
+	public class ArgumentExpressionContext: ParserRuleContext {
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+			open
+			func genericTypeSpecifier() -> GenericTypeSpecifierContext? {
+				return getRuleContext(GenericTypeSpecifierContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_argumentExpression
 		}
-		open func genericTypeSpecifier() -> GenericTypeSpecifierContext? {
-			return getRuleContext(GenericTypeSpecifierContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_argumentExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterArgumentExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterArgumentExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitArgumentExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitArgumentExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitArgumentExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitArgumentExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitArgumentExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitArgumentExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func argumentExpression() throws -> ArgumentExpressionContext {
-		let _localctx: ArgumentExpressionContext = ArgumentExpressionContext(_ctx, getState())
+	 open func argumentExpression() throws -> ArgumentExpressionContext {
+        let _localctx: ArgumentExpressionContext = ArgumentExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 302, ObjectiveCParser.RULE_argumentExpression)
 		defer {
 	    		try! exitRule()
@@ -15115,73 +17411,96 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class PrimaryExpressionContext:ParserRuleContext {
-		open func identifier() -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,0)
+
+	public class PrimaryExpressionContext: ParserRuleContext {
+			open
+			func identifier() -> IdentifierContext? {
+				return getRuleContext(IdentifierContext.self, 0)
+			}
+			open
+			func constant() -> ConstantContext? {
+				return getRuleContext(ConstantContext.self, 0)
+			}
+			open
+			func stringLiteral() -> StringLiteralContext? {
+				return getRuleContext(StringLiteralContext.self, 0)
+			}
+			open
+			func LP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0)
+			}
+			open
+			func expression() -> ExpressionContext? {
+				return getRuleContext(ExpressionContext.self, 0)
+			}
+			open
+			func RP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0)
+			}
+			open
+			func messageExpression() -> MessageExpressionContext? {
+				return getRuleContext(MessageExpressionContext.self, 0)
+			}
+			open
+			func selectorExpression() -> SelectorExpressionContext? {
+				return getRuleContext(SelectorExpressionContext.self, 0)
+			}
+			open
+			func protocolExpression() -> ProtocolExpressionContext? {
+				return getRuleContext(ProtocolExpressionContext.self, 0)
+			}
+			open
+			func encodeExpression() -> EncodeExpressionContext? {
+				return getRuleContext(EncodeExpressionContext.self, 0)
+			}
+			open
+			func dictionaryExpression() -> DictionaryExpressionContext? {
+				return getRuleContext(DictionaryExpressionContext.self, 0)
+			}
+			open
+			func arrayExpression() -> ArrayExpressionContext? {
+				return getRuleContext(ArrayExpressionContext.self, 0)
+			}
+			open
+			func boxExpression() -> BoxExpressionContext? {
+				return getRuleContext(BoxExpressionContext.self, 0)
+			}
+			open
+			func blockExpression() -> BlockExpressionContext? {
+				return getRuleContext(BlockExpressionContext.self, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_primaryExpression
 		}
-		open func constant() -> ConstantContext? {
-			return getRuleContext(ConstantContext.self,0)
-		}
-		open func stringLiteral() -> StringLiteralContext? {
-			return getRuleContext(StringLiteralContext.self,0)
-		}
-		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
-		}
-		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
-		open func messageExpression() -> MessageExpressionContext? {
-			return getRuleContext(MessageExpressionContext.self,0)
-		}
-		open func selectorExpression() -> SelectorExpressionContext? {
-			return getRuleContext(SelectorExpressionContext.self,0)
-		}
-		open func protocolExpression() -> ProtocolExpressionContext? {
-			return getRuleContext(ProtocolExpressionContext.self,0)
-		}
-		open func encodeExpression() -> EncodeExpressionContext? {
-			return getRuleContext(EncodeExpressionContext.self,0)
-		}
-		open func dictionaryExpression() -> DictionaryExpressionContext? {
-			return getRuleContext(DictionaryExpressionContext.self,0)
-		}
-		open func arrayExpression() -> ArrayExpressionContext? {
-			return getRuleContext(ArrayExpressionContext.self,0)
-		}
-		open func boxExpression() -> BoxExpressionContext? {
-			return getRuleContext(BoxExpressionContext.self,0)
-		}
-		open func blockExpression() -> BlockExpressionContext? {
-			return getRuleContext(BlockExpressionContext.self,0)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_primaryExpression }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterPrimaryExpression(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterPrimaryExpression(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitPrimaryExpression(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitPrimaryExpression(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitPrimaryExpression(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPrimaryExpression(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitPrimaryExpression(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitPrimaryExpression(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func primaryExpression() throws -> PrimaryExpressionContext {
-		let _localctx: PrimaryExpressionContext = PrimaryExpressionContext(_ctx, getState())
+	 open func primaryExpression() throws -> PrimaryExpressionContext {
+        let _localctx: PrimaryExpressionContext = PrimaryExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 304, ObjectiveCParser.RULE_primaryExpression)
 		defer {
 	    		try! exitRule()
@@ -15277,49 +17596,96 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class ConstantContext:ParserRuleContext {
-		open func HEX_LITERAL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.HEX_LITERAL.rawValue, 0) }
-		open func OCTAL_LITERAL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.OCTAL_LITERAL.rawValue, 0) }
-		open func BINARY_LITERAL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BINARY_LITERAL.rawValue, 0) }
-		open func DECIMAL_LITERAL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DECIMAL_LITERAL.rawValue, 0) }
-		open func ADD() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ADD.rawValue, 0) }
-		open func SUB() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SUB.rawValue, 0) }
-		open func FLOATING_POINT_LITERAL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.FLOATING_POINT_LITERAL.rawValue, 0) }
-		open func CHARACTER_LITERAL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.CHARACTER_LITERAL.rawValue, 0) }
-		open func NIL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NIL.rawValue, 0) }
-		open func NULL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NULL.rawValue, 0) }
-		open func YES() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.YES.rawValue, 0) }
-		open func NO() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NO.rawValue, 0) }
-		open func TRUE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.TRUE.rawValue, 0) }
-		open func FALSE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.FALSE.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_constant }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterConstant(self)
+
+	public class ConstantContext: ParserRuleContext {
+			open
+			func HEX_LITERAL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.HEX_LITERAL.rawValue, 0)
+			}
+			open
+			func OCTAL_LITERAL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.OCTAL_LITERAL.rawValue, 0)
+			}
+			open
+			func BINARY_LITERAL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BINARY_LITERAL.rawValue, 0)
+			}
+			open
+			func DECIMAL_LITERAL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.DECIMAL_LITERAL.rawValue, 0)
+			}
+			open
+			func ADD() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ADD.rawValue, 0)
+			}
+			open
+			func SUB() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SUB.rawValue, 0)
+			}
+			open
+			func FLOATING_POINT_LITERAL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.FLOATING_POINT_LITERAL.rawValue, 0)
+			}
+			open
+			func CHARACTER_LITERAL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.CHARACTER_LITERAL.rawValue, 0)
+			}
+			open
+			func NIL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NIL.rawValue, 0)
+			}
+			open
+			func NULL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NULL.rawValue, 0)
+			}
+			open
+			func YES() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.YES.rawValue, 0)
+			}
+			open
+			func NO() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NO.rawValue, 0)
+			}
+			open
+			func TRUE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.TRUE.rawValue, 0)
+			}
+			open
+			func FALSE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.FALSE.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_constant
+		}
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterConstant(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitConstant(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitConstant(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitConstant(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitConstant(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitConstant(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitConstant(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func constant() throws -> ConstantContext {
-		let _localctx: ConstantContext = ConstantContext(_ctx, getState())
+	 open func constant() throws -> ConstantContext {
+        let _localctx: ConstantContext = ConstantContext(_ctx, getState())
 		try enterRule(_localctx, 306, ObjectiveCParser.RULE_constant)
 		var _la: Int = 0
 		defer {
@@ -15460,51 +17826,72 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class StringLiteralContext:ParserRuleContext {
-		open func STRING_START() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.STRING_START.rawValue) }
-		open func STRING_START(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.STRING_START.rawValue, i)
+
+	public class StringLiteralContext: ParserRuleContext {
+			open
+			func STRING_START() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.STRING_START.rawValue)
+			}
+			open
+			func STRING_START(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.STRING_START.rawValue, i)
+			}
+			open
+			func STRING_END() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.STRING_END.rawValue)
+			}
+			open
+			func STRING_END(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.STRING_END.rawValue, i)
+			}
+			open
+			func STRING_VALUE() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.STRING_VALUE.rawValue)
+			}
+			open
+			func STRING_VALUE(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.STRING_VALUE.rawValue, i)
+			}
+			open
+			func STRING_NEWLINE() -> [TerminalNode] {
+				return getTokens(ObjectiveCParser.Tokens.STRING_NEWLINE.rawValue)
+			}
+			open
+			func STRING_NEWLINE(_ i:Int) -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.STRING_NEWLINE.rawValue, i)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_stringLiteral
 		}
-		open func STRING_END() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.STRING_END.rawValue) }
-		open func STRING_END(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.STRING_END.rawValue, i)
-		}
-		open func STRING_VALUE() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.STRING_VALUE.rawValue) }
-		open func STRING_VALUE(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.STRING_VALUE.rawValue, i)
-		}
-		open func STRING_NEWLINE() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.STRING_NEWLINE.rawValue) }
-		open func STRING_NEWLINE(_ i:Int) -> TerminalNode?{
-			return getToken(ObjectiveCParser.Tokens.STRING_NEWLINE.rawValue, i)
-		}
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_stringLiteral }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterStringLiteral(self)
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterStringLiteral(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitStringLiteral(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitStringLiteral(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitStringLiteral(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitStringLiteral(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitStringLiteral(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitStringLiteral(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func stringLiteral() throws -> StringLiteralContext {
-		let _localctx: StringLiteralContext = StringLiteralContext(_ctx, getState())
+	 open func stringLiteral() throws -> StringLiteralContext {
+        let _localctx: StringLiteralContext = StringLiteralContext(_ctx, getState())
 		try enterRule(_localctx, 308, ObjectiveCParser.RULE_stringLiteral)
 		var _la: Int = 0
 		defer {
@@ -15570,82 +17957,228 @@ open class ObjectiveCParser: Parser {
 
 		return _localctx
 	}
-	open class IdentifierContext:ParserRuleContext {
-		open func IDENTIFIER() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IDENTIFIER.rawValue, 0) }
-		open func BOOL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BOOL.rawValue, 0) }
-		open func Class() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.Class.rawValue, 0) }
-		open func BYCOPY() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BYCOPY.rawValue, 0) }
-		open func BYREF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BYREF.rawValue, 0) }
-		open func ID() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ID.rawValue, 0) }
-		open func IMP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IMP.rawValue, 0) }
-		open func IN() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IN.rawValue, 0) }
-		open func INOUT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.INOUT.rawValue, 0) }
-		open func ONEWAY() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ONEWAY.rawValue, 0) }
-		open func OUT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.OUT.rawValue, 0) }
-		open func PROTOCOL_() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.PROTOCOL_.rawValue, 0) }
-		open func SEL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEL.rawValue, 0) }
-		open func SELF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SELF.rawValue, 0) }
-		open func SUPER() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SUPER.rawValue, 0) }
-		open func ATOMIC() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ATOMIC.rawValue, 0) }
-		open func NONATOMIC() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NONATOMIC.rawValue, 0) }
-		open func RETAIN() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RETAIN.rawValue, 0) }
-		open func AUTORELEASING_QUALIFIER() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.AUTORELEASING_QUALIFIER.rawValue, 0) }
-		open func BLOCK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BLOCK.rawValue, 0) }
-		open func BRIDGE_RETAINED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BRIDGE_RETAINED.rawValue, 0) }
-		open func BRIDGE_TRANSFER() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.BRIDGE_TRANSFER.rawValue, 0) }
-		open func COVARIANT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COVARIANT.rawValue, 0) }
-		open func CONTRAVARIANT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.CONTRAVARIANT.rawValue, 0) }
-		open func DEPRECATED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DEPRECATED.rawValue, 0) }
-		open func KINDOF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.KINDOF.rawValue, 0) }
-		open func UNUSED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.UNUSED.rawValue, 0) }
-		open func NS_INLINE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NS_INLINE.rawValue, 0) }
-		open func NS_ENUM() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NS_ENUM.rawValue, 0) }
-		open func NS_OPTIONS() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NS_OPTIONS.rawValue, 0) }
-		open func NULL_UNSPECIFIED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue, 0) }
-		open func NULLABLE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NULLABLE.rawValue, 0) }
-		open func NONNULL() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NONNULL.rawValue, 0) }
-		open func NULL_RESETTABLE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NULL_RESETTABLE.rawValue, 0) }
-		open func ASSIGN() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ASSIGN.rawValue, 0) }
-		open func COPY() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.COPY.rawValue, 0) }
-		open func GETTER() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.GETTER.rawValue, 0) }
-		open func SETTER() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SETTER.rawValue, 0) }
-		open func STRONG() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.STRONG.rawValue, 0) }
-		open func READONLY() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.READONLY.rawValue, 0) }
-		open func READWRITE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.READWRITE.rawValue, 0) }
-		open func WEAK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.WEAK.rawValue, 0) }
-		open func UNSAFE_UNRETAINED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue, 0) }
-		open func IB_OUTLET() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IB_OUTLET.rawValue, 0) }
-		open func IB_OUTLET_COLLECTION() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue, 0) }
-		open func IB_INSPECTABLE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue, 0) }
-		open func IB_DESIGNABLE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue, 0) }
-		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_identifier }
-		override
-		open func enterRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).enterIdentifier(self)
+
+	public class IdentifierContext: ParserRuleContext {
+			open
+			func IDENTIFIER() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IDENTIFIER.rawValue, 0)
+			}
+			open
+			func BOOL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BOOL.rawValue, 0)
+			}
+			open
+			func Class() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.Class.rawValue, 0)
+			}
+			open
+			func BYCOPY() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BYCOPY.rawValue, 0)
+			}
+			open
+			func BYREF() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BYREF.rawValue, 0)
+			}
+			open
+			func ID() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ID.rawValue, 0)
+			}
+			open
+			func IMP() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IMP.rawValue, 0)
+			}
+			open
+			func IN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IN.rawValue, 0)
+			}
+			open
+			func INOUT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.INOUT.rawValue, 0)
+			}
+			open
+			func ONEWAY() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ONEWAY.rawValue, 0)
+			}
+			open
+			func OUT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.OUT.rawValue, 0)
+			}
+			open
+			func PROTOCOL_() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.PROTOCOL_.rawValue, 0)
+			}
+			open
+			func SEL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SEL.rawValue, 0)
+			}
+			open
+			func SELF() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SELF.rawValue, 0)
+			}
+			open
+			func SUPER() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SUPER.rawValue, 0)
+			}
+			open
+			func ATOMIC() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ATOMIC.rawValue, 0)
+			}
+			open
+			func NONATOMIC() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NONATOMIC.rawValue, 0)
+			}
+			open
+			func RETAIN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.RETAIN.rawValue, 0)
+			}
+			open
+			func AUTORELEASING_QUALIFIER() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.AUTORELEASING_QUALIFIER.rawValue, 0)
+			}
+			open
+			func BLOCK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BLOCK.rawValue, 0)
+			}
+			open
+			func BRIDGE_RETAINED() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BRIDGE_RETAINED.rawValue, 0)
+			}
+			open
+			func BRIDGE_TRANSFER() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.BRIDGE_TRANSFER.rawValue, 0)
+			}
+			open
+			func COVARIANT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COVARIANT.rawValue, 0)
+			}
+			open
+			func CONTRAVARIANT() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.CONTRAVARIANT.rawValue, 0)
+			}
+			open
+			func DEPRECATED() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.DEPRECATED.rawValue, 0)
+			}
+			open
+			func KINDOF() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.KINDOF.rawValue, 0)
+			}
+			open
+			func UNUSED() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.UNUSED.rawValue, 0)
+			}
+			open
+			func NS_INLINE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NS_INLINE.rawValue, 0)
+			}
+			open
+			func NS_ENUM() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NS_ENUM.rawValue, 0)
+			}
+			open
+			func NS_OPTIONS() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NS_OPTIONS.rawValue, 0)
+			}
+			open
+			func NULL_UNSPECIFIED() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue, 0)
+			}
+			open
+			func NULLABLE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NULLABLE.rawValue, 0)
+			}
+			open
+			func NONNULL() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NONNULL.rawValue, 0)
+			}
+			open
+			func NULL_RESETTABLE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.NULL_RESETTABLE.rawValue, 0)
+			}
+			open
+			func ASSIGN() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.ASSIGN.rawValue, 0)
+			}
+			open
+			func COPY() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.COPY.rawValue, 0)
+			}
+			open
+			func GETTER() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.GETTER.rawValue, 0)
+			}
+			open
+			func SETTER() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.SETTER.rawValue, 0)
+			}
+			open
+			func STRONG() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.STRONG.rawValue, 0)
+			}
+			open
+			func READONLY() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.READONLY.rawValue, 0)
+			}
+			open
+			func READWRITE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.READWRITE.rawValue, 0)
+			}
+			open
+			func WEAK() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.WEAK.rawValue, 0)
+			}
+			open
+			func UNSAFE_UNRETAINED() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue, 0)
+			}
+			open
+			func IB_OUTLET() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IB_OUTLET.rawValue, 0)
+			}
+			open
+			func IB_OUTLET_COLLECTION() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue, 0)
+			}
+			open
+			func IB_INSPECTABLE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue, 0)
+			}
+			open
+			func IB_DESIGNABLE() -> TerminalNode? {
+				return getToken(ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCParser.RULE_identifier
+		}
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.enterIdentifier(self)
 			}
 		}
-		override
-		open func exitRule(_ listener: ParseTreeListener) {
-			if listener is ObjectiveCParserListener {
-			 	(listener as! ObjectiveCParserListener).exitIdentifier(self)
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCParserListener {
+				listener.exitIdentifier(self)
 			}
 		}
-		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
-			if visitor is ObjectiveCParserVisitor {
-			     return (visitor as! ObjectiveCParserVisitor<T>).visitIdentifier(self)
-			}else if visitor is ObjectiveCParserBaseVisitor {
-		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitIdentifier(self)
-		    }
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCParserVisitor {
+			    return visitor.visitIdentifier(self)
+			}
+			else if let visitor = visitor as? ObjectiveCParserBaseVisitor {
+			    return visitor.visitIdentifier(self)
+			}
 			else {
 			     return visitor.visitChildren(self)
 			}
 		}
 	}
 	@discardableResult
-	open func identifier() throws -> IdentifierContext {
-		let _localctx: IdentifierContext = IdentifierContext(_ctx, getState())
+	 open func identifier() throws -> IdentifierContext {
+        let _localctx: IdentifierContext = IdentifierContext(_ctx, getState())
 		try enterRule(_localctx, 310, ObjectiveCParser.RULE_identifier)
 		var _la: Int = 0
 		defer {
@@ -15684,8 +18217,8 @@ open class ObjectiveCParser: Parser {
 		return _localctx
 	}
 
-    override
-	open func sempred(_ _localctx: RuleContext?, _ ruleIndex: Int,  _ predIndex: Int)throws -> Bool {
+	override open
+	func sempred(_ _localctx: RuleContext?, _ ruleIndex: Int,  _ predIndex: Int)throws -> Bool {
 		switch (ruleIndex) {
 		case  141:
 			return try expression_sempred(_localctx?.castdown(ExpressionContext.self), predIndex)
@@ -15717,5 +18250,7 @@ open class ObjectiveCParser: Parser {
 		}
 	}
 
-   public static let _serializedATN : String = ObjectiveCParserATN().jsonString
+
+	public
+	static let _serializedATN = ObjectiveCParserATN().jsonString
 }
