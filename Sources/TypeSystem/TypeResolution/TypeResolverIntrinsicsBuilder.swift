@@ -42,6 +42,13 @@ class TypeResolverIntrinsicsBuilder {
         typeResolver.ignoreResolvedExpressions = !force
     }
     
+    func setupIntrinsics(forFile file: FileGenerationIntention,
+                         intentions: IntentionCollection) {
+        
+        let intrinsics = createIntrinsics(forFile: file, intentions: intentions)
+        typeResolver.intrinsicVariables = intrinsics
+    }
+    
     func setupIntrinsics(forFunction function: GlobalFunctionGenerationIntention,
                          intentions: IntentionCollection) {
         
@@ -91,6 +98,24 @@ class TypeResolverIntrinsicsBuilder {
         typeResolver.intrinsicVariables = EmptyCodeScope()
         miscellaneousDefinitions.removeAllDefinitions()
         knownTypeDefinitionsSource = nil
+    }
+    
+    private func createIntrinsics(forFile file: FileGenerationIntention,
+                                  intentions: IntentionCollection) -> DefinitionsSource {
+        
+        // Push file-level global definitions (variables and functions)
+        let intentionGlobals =
+            IntentionCollectionFileGlobalsDefinitionsSource(globals: self.intentionGlobals,
+                                                            file: file)
+        
+        // Push global definitions
+        let compoundIntrinsics = CompoundDefinitionsSource()
+        
+        compoundIntrinsics.addSource(intentionGlobals)
+        compoundIntrinsics.addSource(miscellaneousDefinitions)
+        compoundIntrinsics.addSource(globals)
+        
+        return compoundIntrinsics
     }
     
     private func createIntrinsics(forFunction function: GlobalFunctionGenerationIntention,
@@ -310,6 +335,70 @@ class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
             globals.funcMap.flatMap(\.value)
                 .filter { global in
                     global.isVisible(for: symbol)
+                }.map { global in
+                    CodeDefinition.forGlobalFunction(global)
+                }
+        
+        return variables + functions
+    }
+}
+
+class IntentionCollectionFileGlobalsDefinitionsSource: DefinitionsSource {
+    var globals: IntentionCollectionGlobals
+    var file: FileGenerationIntention
+    
+    init(globals: IntentionCollectionGlobals, file: FileGenerationIntention) {
+        self.globals = globals
+        self.file = file
+    }
+    
+    func firstDefinition(named name: String) -> CodeDefinition? {
+        if let functions = globals.funcMap[name] {
+            for function in functions {
+                if function.isVisible(in: file) {
+                    return CodeDefinition.forGlobalFunction(function)
+                }
+            }
+        }
+        if let variables = globals.varMap[name] {
+            for variable in variables {
+                if variable.isVisible(in: file) {
+                    return CodeDefinition.forGlobalVariable(variable)
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
+        guard let functions = globals.funcIdentMap[identifier] else {
+            return []
+        }
+        
+        return
+            functions.compactMap { function in
+                if function.isVisible(in: file) {
+                    return CodeDefinition.forGlobalFunction(function)
+                }
+                
+                return nil
+            }
+    }
+    
+    func allDefinitions() -> [CodeDefinition] {
+        let variables: [CodeDefinition] =
+            globals.varMap.flatMap(\.value)
+                .filter { global in
+                    global.isVisible(in: file)
+                }.map { global in
+                    CodeDefinition.forGlobalVariable(global)
+                }
+        
+        let functions: [CodeDefinition] =
+            globals.funcMap.flatMap(\.value)
+                .filter { global in
+                    global.isVisible(in: file)
                 }.map { global in
                     CodeDefinition.forGlobalFunction(global)
                 }
