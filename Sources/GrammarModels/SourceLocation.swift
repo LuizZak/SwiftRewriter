@@ -1,5 +1,5 @@
 // Based on SwiftSyntax's own 'AbsolutePosition' structure
-public struct SourceLocation: Comparable {
+public struct SourceLocation: Comparable, Codable {
     public static let invalid = SourceLocation(line: 0, column: 0, utf8Offset: 0)
     
     public var isValid: Bool {

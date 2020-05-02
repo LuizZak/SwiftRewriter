@@ -57,7 +57,7 @@ public class ObjcParser {
     public var comments: [ObjcComment] = []
     
     /// Preprocessor directives found on this file
-    public var preprocessorDirectives: [String] = []
+    public var preprocessorDirectives: [ObjcPreprocessorDirective] = []
     public var importDirectives: [ObjcImportDecl] = []
     
     public var antlrSettings: AntlrSettings = .default
@@ -200,12 +200,30 @@ public class ObjcParser {
         let preprocessors = ObjcPreprocessorListener.walk(root)
         
         // Extract preprocessors now
-        for preprocessor in preprocessors {
-            let start = src.index(src.startIndex, offsetBy: preprocessor.lowerBound)
-            let end = src.index(src.startIndex, offsetBy: preprocessor.upperBound)
+        for preprocessorRange in preprocessors {
+            let start = src.index(src.startIndex, offsetBy: preprocessorRange.lowerBound)
+            let end = src.index(src.startIndex, offsetBy: preprocessorRange.upperBound)
             let line = String(src[start..<end])
+            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
             
-            preprocessorDirectives.append(line.trimmingCharacters(in: .whitespacesAndNewlines))
+            let startLine = src.lineNumber(at: start)
+            let startColumn = src.columnOffset(at: start)
+            let endLine = src.lineNumber(at: end)
+            let endColumn = src.columnOffset(at: end)
+            
+            let location = SourceLocation(line: startLine,
+                                          column: startColumn,
+                                          utf8Offset: preprocessorRange.lowerBound)
+            let length = SourceLength(newlines: endLine - startLine,
+                                      columnsAtLastLine: startLine == endLine ? 0 : endColumn,
+                                      utf8Length: preprocessorRange.count)
+            
+            let directive = ObjcPreprocessorDirective(string: trimmed,
+                                                      range: preprocessorRange,
+                                                      location: location,
+                                                      length: length)
+            
+            preprocessorDirectives.append(directive)
         }
         
         // Return proper code
@@ -514,12 +532,12 @@ public class ObjcParser {
         return items
     }
 
-    private static func parseObjcImports(in directives: [String]) -> [ObjcImportDecl] {
+    private static func parseObjcImports(in directives: [ObjcPreprocessorDirective]) -> [ObjcImportDecl] {
         var imports: [ObjcImportDecl] = []
 
         for directive in directives {
             do {
-                let lexer = MiniLexer.Lexer(input: directive)
+                let lexer = MiniLexer.Lexer(input: directive.string)
 
                 // "#import <[PATH]>"
                 try lexer.advance(expectingCurrent: "#"); lexer.skipWhitespace()

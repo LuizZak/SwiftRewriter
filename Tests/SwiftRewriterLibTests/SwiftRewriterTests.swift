@@ -915,7 +915,7 @@ class SwiftRewriterTests: XCTestCase {
             #import <File.h>
             #if 0
             #endif
-            #define MACRO 123
+            #define MACRO(A) 123 * A
             """,
             swift: """
             import File
@@ -925,7 +925,7 @@ class SwiftRewriterTests: XCTestCase {
             // #import <File.h>
             // #if 0
             // #endif
-            // #define MACRO 123
+            // #define MACRO(A) 123 * A
             """)
     }
     

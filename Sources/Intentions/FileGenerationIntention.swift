@@ -19,7 +19,7 @@ public final class FileGenerationIntention: Intention {
     public private(set) var typeIntentions: [TypeGenerationIntention] = []
     
     /// All preprocessor directives found on this file.
-    public var preprocessorDirectives: [String] = []
+    public var preprocessorDirectives: [ObjcPreprocessorDirective] = []
     
     /// Gets the (Swift) import directives should be printed at this file's top
     /// header section.
@@ -106,7 +106,7 @@ public final class FileGenerationIntention: Intention {
         targetPath = try container.decode(String.self, forKey: .targetPath)
         
         preprocessorDirectives =
-            try container.decode([String].self, forKey: .preprocessorDirectives)
+            try container.decode([ObjcPreprocessorDirective].self, forKey: .preprocessorDirectives)
         importDirectives =
             try container.decode([String].self, forKey: .importDirectives)
         

@@ -255,7 +255,7 @@ public final class SwiftRewriter {
                         typeSystem: typeSystem,
                         typeResolverInvoker: resolver)
                 
-                guard let declaration = converter.convert(directive: directive, inFile: file) else {
+                guard let declaration = converter.convert(directive: directive.string, inFile: file) else {
                     continue
                 }
                 
@@ -271,7 +271,14 @@ public final class SwiftRewriter {
                 
                 varDecl.storage.isConstant = true
                 varDecl.initialValue = declaration.expresion
-                varDecl.history.recordCreation(description: "Converted from compiler directive \(directive)")
+                
+                let sourceName = (file.sourcePath as NSString).lastPathComponent
+                let history = """
+                    Converted from compiler directive from \(sourceName) \
+                    line \(directive.location.line): \(directive.string)
+                    """
+                
+                varDecl.history.recordCreation(description: history)
                 
                 file.addGlobalVariable(varDecl)
                 

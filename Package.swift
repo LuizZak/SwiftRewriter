@@ -76,7 +76,7 @@ let package = Package(
         .target(
             name: "IntentionPasses",
             dependencies: ["SwiftAST", "Commons", "Utils", "MiniLexer",
-                           "Intentions"]),
+                           "Intentions", "GrammarModels"]),
         .target(
             name: "GlobalsProviders",
             dependencies: ["SwiftAST", "Commons", "TypeSystem"]),
