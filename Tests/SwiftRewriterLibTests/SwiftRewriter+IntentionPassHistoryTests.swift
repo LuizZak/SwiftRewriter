@@ -173,4 +173,18 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
             .transpile(options: SwiftSyntaxOptions.default.with(\.printIntentionHistory, true))
             .assertExpectedSwiftFiles()
     }
+    
+    func testDefineDeclarationHistoryTracking() {
+        assertRewrite(
+            objc: """
+            #define CONSTANT 1
+            """,
+            swift: """
+            // Preprocessor directives found in file:
+            // #define CONSTANT 1
+            // [Creation] Converted from compiler directive #define CONSTANT 1
+            private let CONSTANT: Int = 1
+            """,
+            options: SwiftSyntaxOptions.default.with(\.printIntentionHistory, true))
+    }
 }

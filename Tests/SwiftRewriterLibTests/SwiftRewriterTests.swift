@@ -3104,7 +3104,7 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteConstantFromMacro() {
+    func testRewriteConstantFromMacroInHeader() {
         assertRewrite(
             objc: """
             #define CONSTANT 1
@@ -3116,6 +3116,36 @@ class SwiftRewriterTests: XCTestCase {
             // #define CONSTANT2 1 + 1
             let CONSTANT: Int = 1
             let CONSTANT2: Int = 1 + 1
+            """,
+            inputFileName: "test.h")
+    }
+    
+    func testRewriteConstantFromMacroInImplementation() {
+        assertRewrite(
+            objc: """
+            #define CONSTANT 1
+            #define CONSTANT2 1 + 1
+            """,
+            swift: """
+            // Preprocessor directives found in file:
+            // #define CONSTANT 1
+            // #define CONSTANT2 1 + 1
+            private let CONSTANT: Int = 1
+            private let CONSTANT2: Int = 1 + 1
+            """,
+            inputFileName: "test.m")
+    }
+    
+    func testRewriteIgnoresInvalidConstantFromMacro() {
+        assertRewrite(
+            objc: """
+            #define CONSTANT (1
+            #define CONSTANT2 unknown + identifiers
+            """,
+            swift: """
+            // Preprocessor directives found in file:
+            // #define CONSTANT (1
+            // #define CONSTANT2 unknown + identifiers
             """)
     }
 }

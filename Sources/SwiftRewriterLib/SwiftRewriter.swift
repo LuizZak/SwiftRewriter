@@ -112,6 +112,7 @@ public final class SwiftRewriter {
         try autoreleasepool {
             try loadInputSources()
             let autotypeDecls = parseStatements()
+            parseDefinePreprocessorDirectives()
             evaluateTypes()
             resolveAutotypeDeclarations(autotypeDecls)
             performIntentionAndSyntaxPasses()
@@ -241,6 +242,44 @@ public final class SwiftRewriter {
         return autotypeDeclarations.wrappedValue
     }
     
+    /// Analyzes and converts #define directives and converts them into global
+    /// variables when suitable
+    private func parseDefinePreprocessorDirectives() {
+        let resolver = makeTypeResolverInvoker()
+        
+        for file in intentionCollection.fileIntentions() {
+            for directive in file.preprocessorDirectives {
+                let converter =
+                    PreprocessorDirectiveConverter(
+                        parserStatePool: parserStatePool,
+                        typeSystem: typeSystem,
+                        typeResolverInvoker: resolver)
+                
+                guard let declaration = converter.convert(directive: directive, inFile: file) else {
+                    continue
+                }
+                
+                let varDecl =
+                    GlobalVariableGenerationIntention(
+                        name: declaration.name,
+                        type: declaration.type,
+                        // TODO: Abstract detection of .m/.c translation unit files
+                        // here so we can properly generalize to any translation
+                        // unit file kind
+                        accessLevel: file.sourcePath.hasSuffix("m") ? .private : .internal,
+                        source: nil)
+                
+                varDecl.storage.isConstant = true
+                varDecl.initialValue = declaration.expresion
+                varDecl.history.recordCreation(description: "Converted from compiler directive \(directive)")
+                
+                file.addGlobalVariable(varDecl)
+                
+                resolver.refreshIntentionGlobals()
+            }
+        }
+    }
+    
     /// Evaluate all type signatures, now with the knowledge of all types present
     /// in the program.
     private func evaluateTypes() {
@@ -363,19 +402,11 @@ public final class SwiftRewriter {
     }
 
     private func resolveAutotypeDeclarations(_ declarations: [LazyAutotypeVarDeclResolve]) {
-        let globals = CompoundDefinitionsSource()
-
-        // Register globals first
-        for provider in globalsProvidersSource.globalsProviders {
-            globals.addSource(provider.definitionsSource())
-        }
-
-        let typeResolverInvoker =
-            DefaultTypeResolverInvoker(globals: globals, typeSystem: typeSystem,
-                                       numThreads: settings.numThreads)
+        let typeResolverInvoker = makeTypeResolverInvoker()
 
         // Make a pre-type resolve before applying passes
-        typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection, force: true)
+        typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection,
+                                                      force: true)
 
         for declaration in declarations {
             let stmt = declaration.statement
@@ -409,9 +440,7 @@ public final class SwiftRewriter {
             globals.addSource(provider.definitionsSource())
         }
         
-        let typeResolverInvoker =
-            DefaultTypeResolverInvoker(globals: globals, typeSystem: typeSystem,
-                                       numThreads: settings.numThreads)
+        let typeResolverInvoker = makeTypeResolverInvoker()
         
         // Make a pre-type resolve before applying passes
         typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection, force: true)
@@ -624,6 +653,21 @@ public final class SwiftRewriter {
         print("Diagnose file: \(match.targetPath)\ncontext: \(step)")
         print(output)
         print("")
+    }
+    
+    private func makeTypeResolverInvoker() -> DefaultTypeResolverInvoker {
+        let globals = CompoundDefinitionsSource()
+
+        // Register globals first
+        for provider in globalsProvidersSource.globalsProviders {
+            globals.addSource(provider.definitionsSource())
+        }
+
+        let typeResolverInvoker =
+            DefaultTypeResolverInvoker(globals: globals, typeSystem: typeSystem,
+                                       numThreads: settings.numThreads)
+        
+        return typeResolverInvoker
     }
     
     private func makeAntlrSettings() -> AntlrSettings {

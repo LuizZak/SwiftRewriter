@@ -62,6 +62,14 @@ class PreprocessorDirectiveConverterTests: XCTestCase {
         XCTAssertEqual(result?.expresion, Expression.constant(1).binary(op: .add, rhs: .constant(1)))
     }
     
+    func testConvertScalarTypeCasts() {
+        let result = sut.convert(directive: "#define CONSTANT (unsigned int)1", inFile: file)
+        
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.type, .optional("CUnsignedInt"))
+        XCTAssertEqual(result?.expresion, Expression.cast(.constant(1), type: "CUnsignedInt"))
+    }
+    
     func testConvertSymbolReferencingExistingDeclarations() {
         let v = GlobalVariableGenerationIntention(name: "symbol", type: .int)
         file.addGlobalVariable(v)
@@ -88,6 +96,18 @@ class PreprocessorDirectiveConverterTests: XCTestCase {
     
     func testDontConvertInvalidBinaryExpression() {
         let result = sut.convert(directive: "#define CONSTANT \"1\" + 1", inFile: file)
+        
+        XCTAssertNil(result)
+    }
+    
+    func testDontConvertMacrosWithParameters() {
+        let result = sut.convert(directive: "#define MACRO(c) 1", inFile: file)
+        
+        XCTAssertNil(result)
+    }
+    
+    func testDontConvertNonScalarTypeCasts() {
+        let result = sut.convert(directive: "#define MACRO (UnknownType)1", inFile: file)
         
         XCTAssertNil(result)
     }

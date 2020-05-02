@@ -34,6 +34,9 @@ public class PreprocessorDirectiveConverter {
         guard let parser = try? state.makeMainParser(input: directive.expression) else {
             return nil
         }
+        // Avoid printing paring errors to console
+        parser.parser.removeErrorListeners()
+        parser.lexer.removeErrorListeners()
         guard let expressionContext = try? parser.parser.expression() else {
             return nil
         }
@@ -59,6 +62,11 @@ public class PreprocessorDirectiveConverter {
             lexer.skipWhitespace()
             
             let identifier = String(try lexer.lexIdentifier())
+            // Detect and ignore macros that take in parameters
+            if try lexer.peek() == "(" {
+                return nil
+            }
+            
             let expression = String(lexer.consumeRemaining())
             
             return Directive(identifier: identifier, expression: expression)
@@ -78,7 +86,7 @@ public class PreprocessorDirectiveConverter {
     }
     
     func validateExpression(_ exp: Expression, fromFile file: FileGenerationIntention) -> Declaration? {
-        let validator = ValidatorExpressionVisitor()
+        let validator = ValidatorExpressionVisitor(typeSystem: typeSystem)
         if !validator.visitExpression(exp) {
             return nil
         }
@@ -120,6 +128,12 @@ public struct DirectiveDeclaration {
 
 /// Validates that expressions can be properly converted into constant expressions
 private class ValidatorExpressionVisitor: ExpressionVisitor {
+    let typeSystem: TypeSystem
+    
+    init(typeSystem: TypeSystem) {
+        self.typeSystem = typeSystem
+    }
+    
     func visitExpression(_ expression: Expression) -> Bool {
         return expression.accept(self)
     }
@@ -166,6 +180,10 @@ private class ValidatorExpressionVisitor: ExpressionVisitor {
     }
     
     func visitCast(_ exp: CastExpression) -> Bool {
+        if !typeSystem.isScalarType(exp.type) {
+            return false
+        }
+        
         return exp.exp.accept(self)
     }
     
