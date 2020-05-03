@@ -114,6 +114,34 @@ public class FromSourceIntention: Intention, NonNullScopedIntention {
         }
     }
     
+    /// Returns `true` if this intention's symbol is visible for a given file intention.
+    ///
+    /// - Parameter file: A file intention to compare the visibility to
+    /// - Returns: `true` if this intention's symbol is visible within the given
+    /// file intention, `false` otherwise.
+    public func isVisible(in file: FileGenerationIntention) -> Bool {
+        switch accessLevel {
+        // Internal/public/open are visible everywhere
+        case .internal, .public, .open:
+            return true
+            
+        case .fileprivate:
+            return self.file?.targetPath == file.targetPath
+            
+        // Type-level visibility
+        case .private:
+            switch self {
+            // Private file-level member is visible to all other declarations on
+            // the same file
+            case is FileLevelIntention:
+                return self.file?.targetPath == file.targetPath
+                
+            default:
+                return false
+            }
+        }
+    }
+    
     private enum CodingKeys: String, CodingKey {
         case accessLevel
         case inNonnullContext

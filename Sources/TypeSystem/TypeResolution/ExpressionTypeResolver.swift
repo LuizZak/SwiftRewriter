@@ -675,7 +675,7 @@ extension ExpressionTypeResolver {
         }
         
         // Check type system for a metatype with the identifier name
-        if typeSystem.typeExists(exp.identifier) {
+        if typeSystem.nominalTypeExists(exp.identifier) {
             return CodeDefinition.forType(named: exp.identifier)
         }
         

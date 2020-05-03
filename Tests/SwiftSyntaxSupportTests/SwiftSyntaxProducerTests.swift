@@ -453,8 +453,8 @@ extension SwiftSyntaxProducerTests {
     func testGeneratePreprocessorDirectivesInEmptyFile() {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
-                builder.addPreprocessorDirective("#import <Abc.h>")
-                builder.addPreprocessorDirective("#define MAX(a, b) ((a) > (b) ? (a) : (b))")
+                builder.addPreprocessorDirective("#import <Abc.h>", line: 1)
+                builder.addPreprocessorDirective("#define MAX(a, b) ((a) > (b) ? (a) : (b))", line: 2)
             }
         let sut = SwiftSyntaxProducer()
         
@@ -470,8 +470,8 @@ extension SwiftSyntaxProducerTests {
     func testGeneratePreprocessorDirectivesInPopulatedFile() {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
-                builder.addPreprocessorDirective("#import <Abc.h>")
-                builder.addPreprocessorDirective("#define MAX(a, b) ((a) > (b) ? (a) : (b))")
+                builder.addPreprocessorDirective("#import <Abc.h>", line: 1)
+                builder.addPreprocessorDirective("#define MAX(a, b) ((a) > (b) ? (a) : (b))", line: 2)
                 builder.createClass(withName: "A")
             }
         let sut = SwiftSyntaxProducer()

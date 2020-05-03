@@ -10,7 +10,7 @@ class IntentionSerializerTests: XCTestCase {
         
         let intentions = IntentionCollectionBuilder()
             .createFile(named: "A.swift") { file in
-                file.addPreprocessorDirective("#preprocessor")
+                file.addPreprocessorDirective("#preprocessor", line: 1)
                     .createClass(withName: "Class") { type in
                         type.createConformance(protocolName: "Protocol")
                             .createConstructor()

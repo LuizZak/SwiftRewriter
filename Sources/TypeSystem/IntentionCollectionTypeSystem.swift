@@ -76,7 +76,7 @@ public class IntentionCollectionTypeSystem: TypeSystem {
         return super.isClassInstanceType(typeName)
     }
     
-    public override func typeExists(_ name: String) -> Bool {
+    public override func nominalTypeExists(_ name: String) -> Bool {
         if let cache = intentionsProvider.cache {
             if cache.types.keys.contains(name) {
                 return true
@@ -89,7 +89,7 @@ public class IntentionCollectionTypeSystem: TypeSystem {
             }
         }
         
-        return super.typeExists(name)
+        return super.nominalTypeExists(name)
     }
     
     private class IntentionCollectionProvider: TypealiasProvider, KnownTypeProvider {

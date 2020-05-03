@@ -170,8 +170,11 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
     }
     
     func testMergeKeepsEmptyFilesWithPreprocessorDirectives() {
-        let intentions = IntentionCollectionBuilder().createFile(named: "A.h").build()
-        intentions.fileIntentions()[0].preprocessorDirectives = ["#define Abcde"]
+        let intentions = IntentionCollectionBuilder()
+            .createFile(named: "A.h") { file in
+                file.addPreprocessorDirective("#define Abcde", line: 1)
+            }
+            .build()
         let sut = FileTypeMergingIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
@@ -216,13 +219,14 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
     func testMergeDirectivesIntoImplementationFile() {
         let intentions =
             IntentionCollectionBuilder()
-                .createFile(named: "A.h")
+                .createFile(named: "A.h") { file in
+                    file.addPreprocessorDirective("#directive1", line: 1)
+                }
                 .createFile(named: "A.m") { file in
+                    file.addPreprocessorDirective("#directive2", line: 1)
                     file.createClass(withName: "A")
                 }
                 .build()
-        intentions.fileIntentions()[0].preprocessorDirectives = ["#directive1"]
-        intentions.fileIntentions()[1].preprocessorDirectives = ["#directive2"]
         let sut = FileTypeMergingIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
@@ -230,7 +234,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         let files = intentions.fileIntentions()
         XCTAssertEqual(files.count, 1)
         XCTAssertEqual(files[0].sourcePath, "A.m")
-        XCTAssertEqual(files[0].preprocessorDirectives, ["#directive1", "#directive2"])
+        XCTAssertEqual(files[0].preprocessorDirectives.map(\.string), ["#directive1", "#directive2"])
         XCTAssertEqual(files[0].classIntentions.count, 1)
     }
     

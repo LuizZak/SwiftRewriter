@@ -297,7 +297,7 @@ extension SwiftSyntaxProducer {
         var trivia: Trivia = .lineComment("// Preprocessor directives found in file:")
         
         for directive in file.preprocessorDirectives {
-            trivia = trivia + .newlines(1) + .lineComment("// \(directive)")
+            trivia = trivia + .newlines(1) + .lineComment("// \(directive.string)")
         }
         
         return trivia

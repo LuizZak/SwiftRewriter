@@ -26,12 +26,15 @@ class SingleFileTestBuilder {
     }
     
     func assertObjcParse(swift expectedSwift: String,
+                         fileName: String = "test.m",
                          expectsErrors: Bool = false,
                          file: String = #file,
                          line: Int = #line) {
         
         let output = TestSingleFileWriterOutput()
-        let input = TestSingleInputProvider(code: objc, isPrimary: true)
+        let input = TestSingleInputProvider(fileName: fileName,
+                                            code: objc,
+                                            isPrimary: true)
         
         let sut = SwiftRewriter(input: input, output: output)
         sut.writerOptions = options
@@ -92,10 +95,16 @@ class SingleFileTestBuilder {
 }
 
 class TestSingleInputProvider: InputSourcesProvider, InputSource {
+    var fileName: String
     var code: String
     var isPrimary: Bool
     
-    init(code: String, isPrimary: Bool) {
+    convenience init(code: String, isPrimary: Bool) {
+        self.init(fileName: "\(type(of: self)).m", code: code, isPrimary: isPrimary)
+    }
+    
+    init(fileName: String, code: String, isPrimary: Bool) {
+        self.fileName = fileName
         self.code = code
         self.isPrimary = isPrimary
     }
@@ -105,7 +114,7 @@ class TestSingleInputProvider: InputSourcesProvider, InputSource {
     }
     
     func sourcePath() -> String {
-        return "\(type(of: self)).m"
+        return fileName
     }
     
     func loadSource() throws -> CodeSource {
@@ -139,6 +148,7 @@ extension XCTestCase {
     
     @discardableResult
     func assertRewrite(objc: String, swift expectedSwift: String,
+                       inputFileName: String = "test.m",
                        options: SwiftSyntaxOptions = .default,
                        rewriterSettings: SwiftRewriter.Settings = .default,
                        expectsErrors: Bool = false,
@@ -151,6 +161,7 @@ extension XCTestCase {
                                          settings: rewriterSettings)
         
         test.assertObjcParse(swift: expectedSwift,
+                             fileName: inputFileName,
                              expectsErrors: expectsErrors,
                              file: file, line: line)
         

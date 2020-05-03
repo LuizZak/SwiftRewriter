@@ -14,8 +14,14 @@ public protocol TypeResolverInvoker {
     func resolveExpressionTypes(in method: MethodGenerationIntention, force: Bool)
     
     /// Resolves all types from all expressions that may be contained within
-    /// computed accessors of a given property
+    /// computed accessors of a given property.
     func resolveExpressionTypes(in property: PropertyGenerationIntention, force: Bool)
+    
+    /// Resolves the type of a given expression as if it was a global expression
+    /// located at a given file.
+    func resolveGlobalExpressionType(in expression: Expression,
+                                     inFile file: FileGenerationIntention,
+                                     force: Bool)
 }
 
 public class DefaultTypeResolverInvoker: TypeResolverInvoker {
@@ -63,6 +69,22 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
         resolveFromQueue(queue)
     }
     
+    public func resolveGlobalExpressionType(in expression: Expression,
+                                            inFile file: FileGenerationIntention,
+                                            force: Bool) {
+        
+        let context = makeQueueDelegate().makeContext(forFile: file)
+        
+        context.intrinsicsBuilder.makeCache()
+        context.typeResolver.ignoreResolvedExpressions = !force
+        _=context.typeResolver.resolveType(expression)
+        context.intrinsicsBuilder.tearDownCache()
+    }
+    
+    public func refreshIntentionGlobals() {
+        intentionGlobals = IntentionCollectionGlobals(intentions: typeSystem.intentions)
+    }
+    
     private func resolveFromQueue(_ queue: FunctionBodyQueue<TypeResolvingQueueDelegate>) {
         // Make a file invoker for each file and execute resolving in parallel
         let opQueue = OperationQueue()
@@ -107,6 +129,17 @@ public class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
         self.globals = globals
         self.typeSystem = typeSystem
         self.intentionGlobals = intentionGlobals
+    }
+    
+    public func makeContext(forFile file: FileGenerationIntention)
+        -> TypeResolvingQueueDelegate.Context {
+        
+        let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        
+        let intrinsics = makeIntrinsics(typeResolver: resolver)
+        intrinsics.setupIntrinsics(forFile: file, intentions: intentions)
+        
+        return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
     }
     
     public func makeContext(forFunction function: GlobalFunctionGenerationIntention)

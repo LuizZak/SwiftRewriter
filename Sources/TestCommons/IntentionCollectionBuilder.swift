@@ -287,7 +287,23 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
-    public func addPreprocessorDirective(_ directive: String) -> FileIntentionBuilder {
+    public func addPreprocessorDirective(_ directive: String, line: Int) -> FileIntentionBuilder {
+        let location = SourceLocation(line: line, column: 1, utf8Offset: 0)
+        let lineRanges = directive.lineRanges()
+        
+        let columnsAtLastLine = lineRanges.count == 1
+            ? directive.count
+            : directive.distance(from: lineRanges.last!.lowerBound, to: lineRanges.last!.upperBound)
+        
+        let length = SourceLength(newlines: lineRanges.count - line,
+                                  columnsAtLastLine: columnsAtLastLine,
+                                  utf8Length: directive.count)
+        
+        let directive = ObjcPreprocessorDirective(string: directive,
+                                                  range: 0..<directive.count,
+                                                  location: location,
+                                                  length: length)
+        
         intention.preprocessorDirectives.append(directive)
         
         return self
