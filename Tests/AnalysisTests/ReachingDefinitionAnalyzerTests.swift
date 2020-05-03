@@ -5,7 +5,7 @@ import Intentions
 import SwiftAST
 import TestCommons
 
-class ReachingDefinitionAnalysisTests: XCTestCase {
+class ReachingDefinitionAnalyzerTests: XCTestCase {
     var controlFlowGraph: ControlFlowGraph!
     var sut: ReachingDefinitionAnalyzer!
     
@@ -166,7 +166,7 @@ class ReachingDefinitionAnalysisTests: XCTestCase {
     }
 }
 
-private extension ReachingDefinitionAnalysisTests {
+private extension ReachingDefinitionAnalyzerTests {
     func setupTest(with body: CompoundStatement) {
         let typeSystem = TypeSystem.defaultTypeSystem
         

@@ -259,7 +259,7 @@ public enum TraitType: Equatable, Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        switch try container.decode(Int.self, forKey: .flag) {
+        switch try container.decode(Int.self, forKey: .discriminator) {
         case 0:
             self = .swiftType(try container.decode(SwiftType.self, forKey: .field))
             
@@ -268,10 +268,10 @@ public enum TraitType: Equatable, Codable {
             
         default:
             let message = """
-                Unknown TraitType flag. Maybe data was encoded using a \
+                Unknown TraitType discriminator. Maybe data was encoded using a \
                 different version of SwiftRewriter?
                 """
-            throw DecodingError.dataCorruptedError(forKey: .flag, in: container,
+            throw DecodingError.dataCorruptedError(forKey: .discriminator, in: container,
                                                    debugDescription: message)
         }
     }
@@ -281,17 +281,17 @@ public enum TraitType: Equatable, Codable {
         
         switch self {
         case .swiftType(let type):
-            try container.encode(0, forKey: .flag)
+            try container.encode(0, forKey: .discriminator)
             try container.encode(type, forKey: .field)
             
         case .semantics(let semantics):
-            try container.encode(1, forKey: .flag)
+            try container.encode(1, forKey: .discriminator)
             try container.encode(semantics, forKey: .field)
         }
     }
     
     private enum CodingKeys: Int, CodingKey {
-        case flag
+        case discriminator
         case field
     }
 }
