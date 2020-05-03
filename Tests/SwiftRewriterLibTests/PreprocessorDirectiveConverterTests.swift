@@ -90,6 +90,14 @@ class PreprocessorDirectiveConverterTests: XCTestCase {
         XCTAssertEqual(result?.expresion, Expression.sizeof(type: "CInt"))
     }
     
+    func testConvertNilConstant() {
+        let result = sut.convert(directive: "#define CONSTANT nil", inFile: file)
+        
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.type, .optional("AnyObject"))
+        XCTAssertEqual(result?.expresion, .constant(.nil))
+    }
+    
     func testDontConvertUnevenExpressions() {
         let result = sut.convert(directive: "#define CONSTANT (1", inFile: file)
         

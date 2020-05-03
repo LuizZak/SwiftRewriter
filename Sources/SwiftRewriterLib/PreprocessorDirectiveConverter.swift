@@ -159,7 +159,6 @@ private class ValidatorExpressionVisitor: ExpressionVisitor {
         }
     }
     
-    // TODO: Validate prefix operator
     func visitPrefix(_ exp: PrefixExpression) -> Bool {
         return exp.exp.accept(self)
     }
@@ -168,7 +167,6 @@ private class ValidatorExpressionVisitor: ExpressionVisitor {
         return exp.exp.accept(self)
     }
     
-    // TODO: Validate constant types
     func visitConstant(_ exp: ConstantExpression) -> Bool {
         return true
     }
