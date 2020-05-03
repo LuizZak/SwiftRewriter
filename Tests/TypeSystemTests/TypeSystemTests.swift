@@ -835,21 +835,21 @@ class TypeSystemTests: XCTestCase {
         XCTAssertEqual(sut.category(forType: "GLenum"), .integer)
     }
     
-    func testTypeExists() {
+    func testNominalTypeExists() {
         let type = KnownTypeBuilder(typeName: "A").build()
         sut.addType(type)
         
-        XCTAssert(sut.typeExists("A"))
-        XCTAssertFalse(sut.typeExists("Unknown"))
+        XCTAssert(sut.nominalTypeExists("A"))
+        XCTAssertFalse(sut.nominalTypeExists("Unknown"))
     }
     
-    func testTypeExistsQueriesTypeProviders() {
+    func testNominalTypeExistsQueriesTypeProviders() {
         let type = KnownTypeBuilder(typeName: "A").build()
         let provider = CollectionKnownTypeProvider(knownTypes: [type])
         sut.addKnownTypeProvider(provider)
         
-        XCTAssert(sut.typeExists("A"))
-        XCTAssertFalse(sut.typeExists("Unknown"))
+        XCTAssert(sut.nominalTypeExists("A"))
+        XCTAssertFalse(sut.nominalTypeExists("Unknown"))
     }
     
     func testExtensionTypesDontOvershadowOriginalImplementation() {

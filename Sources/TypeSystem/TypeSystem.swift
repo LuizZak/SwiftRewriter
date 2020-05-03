@@ -114,8 +114,8 @@ public class TypeSystem {
         return expanded1 == expanded2
     }
     
-    /// Returns `true` if a type is known to exists with a given name.
-    public func typeExists(_ name: String) -> Bool {
+    /// Returns `true` if a type with a given name is known.
+    public func nominalTypeExists(_ name: String) -> Bool {
         if _typeExistsCache.usingCache, let result = typeExistsCache[name] {
             return result
         }
@@ -135,6 +135,18 @@ public class TypeSystem {
         }
         
         return result
+    }
+    
+    /// Returns `true` if a given type is known to exist.
+    ///
+    /// Returns `false` for typenames other than `.nominal` and `.metatype` of
+    /// nominals.
+    public func typeExists(_ type: SwiftType) -> Bool {
+        guard let typeName = typeNameIn(swiftType: type) else {
+            return false
+        }
+        
+        return nominalTypeExists(typeName)
     }
     
     /// Returns all known types that match a specified type
@@ -1209,6 +1221,10 @@ extension TypeSystem {
     }
 }
 
+/// Returns the contained type name within a given type.
+///
+/// Returns the nominal type name for `.nominal` and `.metatype` types of nominal
+/// types, `nil` otherwise.
 func typeNameIn(swiftType: SwiftType) -> String? {
     let swiftType = swiftType.deepUnwrapped
     

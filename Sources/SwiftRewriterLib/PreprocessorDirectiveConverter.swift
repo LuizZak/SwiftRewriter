@@ -142,19 +142,21 @@ private class ValidatorExpressionVisitor: ExpressionVisitor {
         return false
     }
     
-    // TODO: Validate binary operator
     func visitBinary(_ exp: BinaryExpression) -> Bool {
         return exp.lhs.accept(self) && exp.rhs.accept(self)
     }
     
-    // TODO: Validate unary operator
     func visitUnary(_ exp: UnaryExpression) -> Bool {
         return exp.exp.accept(self)
     }
     
-    // TODO: Don't see why not support sizeof expressions
     func visitSizeOf(_ exp: SizeOfExpression) -> Bool {
-        return false
+        switch exp.value {
+        case .type(let type):
+            return typeSystem.isScalarType(type) || typeSystem.typeExists(type)
+        default:
+            return false
+        }
     }
     
     // TODO: Validate prefix operator
