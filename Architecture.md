@@ -91,7 +91,7 @@ Expression passes are provided via an `ASTRewriterPassSource` protocol provided 
 - Expression types are resolved again after each individual rewriter pass finishes modifying the method's body, before the AST is handed to the next pass.
     - Rewriter passes must notify when changes are made via `ASTRewriterPassContext.notifyChangedTree` to allow type resolution to kick in in between rewriter passes.
 
-#### 6. Code output
+#### 6. Post-rewriting formatting
 
 At this point, a syntax tree produced by [`swift-syntax`](https://github.com/apple/swift-syntax) is produced and passed to intermediary syntax rewriters that implement `SwiftSyntaxRewriterPass`, which refine the final AST before output.
 
