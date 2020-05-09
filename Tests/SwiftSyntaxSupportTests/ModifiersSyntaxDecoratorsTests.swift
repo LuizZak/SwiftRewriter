@@ -246,7 +246,9 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
                element: .intention(_convenience),
                producesModifier: "convenience")
         
-        assert(decorator: sut, element: .intention(nonConvenience), producesModifier: nil)
+        assert(decorator: sut,
+               element: .intention(nonConvenience),
+               producesModifier: nil)
     }
     
     func testProtocolOptionalModifierDecorator() {
