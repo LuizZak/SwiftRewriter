@@ -153,6 +153,17 @@ class IntentionCollectorTests: XCTestCase {
             """, \FileGenerationIntention.classIntentions[0].methods[0])
     }
     
+    func testCollectDeinitComments() throws {
+        testCommentCollection("""
+            @implementation A
+            // A comment
+            // Another comment
+            - (void)dealloc {
+            }
+            @end
+            """, \FileGenerationIntention.classIntentions[0].deinitIntention!)
+    }
+    
     func testCollectPropertyComments() throws {
         testCommentCollection("""
             @interface A
