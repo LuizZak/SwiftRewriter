@@ -214,7 +214,11 @@ public extension PropertyGenerationIntention {
 
 public extension MethodGenerationIntention {
     convenience init(name: String, builder: (MethodBuilder) -> Void) {
-        self.init(signature: FunctionSignature(name: name))
+        self.init(signature: FunctionSignature(name: name), builder: builder)
+    }
+    
+    convenience init(signature: FunctionSignature, builder: (MethodBuilder) -> Void) {
+        self.init(signature: signature)
         
         builder(MethodBuilder(targetMember: self))
     }

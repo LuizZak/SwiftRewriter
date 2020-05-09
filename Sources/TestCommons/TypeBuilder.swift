@@ -122,17 +122,14 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
         if targetType is ProtocolGenerationIntention {
             method = ProtocolMethodGenerationIntention(signature: signature)
         } else {
-            method = MethodGenerationIntention(signature: signature)
+            method = MethodGenerationIntention(signature: signature) { bm in
+                bm.setBody([])
+                
+                builder(bm)
+            }
         }
         
-        if !(targetType is ProtocolGenerationIntention) {
-            method.functionBody = FunctionBodyIntention(body: [])
-        }
-        
-        let mbuilder = MemberBuilder(targetMember: method)
-        builder(mbuilder)
-        
-        targetType.addMethod(mbuilder.build())
+        targetType.addMethod(method)
         
         return self
     }
