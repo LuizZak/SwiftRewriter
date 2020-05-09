@@ -656,7 +656,6 @@ public class TypeSystem {
     
     private func bitwidth(intType: SwiftType) -> Int {
         func internalBitwidth(_ type: SwiftType) -> Int? {
-            // TODO: Validate these results
             switch type {
             case .int, .uint:
                 return 64
