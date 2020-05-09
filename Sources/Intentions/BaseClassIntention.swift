@@ -2,7 +2,7 @@ import GrammarModels
 import SwiftAST
 import KnownType
 
-/// Base intention for Class and Class Category intentions
+/// Base intention for Class and Class Category/Extension intentions
 public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContainerIntention {
     /// Returns `true` if this class intention originated from an `@interface`
     /// declaration.
@@ -20,6 +20,17 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
         instanceVariables
     }
     
+    /// If present, represents the deinit method defined for this class type
+    public var deinitIntention: DeinitGenerationIntention? {
+        didSet {
+            deinitIntention?.parent = self
+            deinitIntention?.type = self
+            
+            oldValue?.parent = nil
+            oldValue?.type = nil
+        }
+    }
+    
     public override init(typeName: String,
                          accessLevel: AccessLevel = .internal,
                          source: ASTNode? = nil) {
@@ -35,6 +46,7 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
         isInterfaceSource = try container.decode(Bool.self, forKey: .isInterfaceSource)
         instanceVariables = try container.decodeIntentions(forKey: .instanceVariables)
         synthesizations = try container.decodeIntentions(forKey: .synthesizations)
+        deinitIntention = try container.decodeIntentionIfPresent(forKey: .deinitIntention)
         
         try super.init(from: container.superDecoder())
     }
@@ -45,6 +57,7 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
         try container.encode(isInterfaceSource, forKey: .isInterfaceSource)
         try container.encodeIntentions(instanceVariables, forKey: .instanceVariables)
         try container.encodeIntentions(synthesizations, forKey: .synthesizations)
+        try container.encodeIntentionIfPresent(deinitIntention, forKey: .deinitIntention)
         
         try super.encode(to: container.superEncoder())
     }
@@ -91,5 +104,6 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
         case isInterfaceSource
         case instanceVariables
         case synthesizations
+        case deinitIntention
     }
 }

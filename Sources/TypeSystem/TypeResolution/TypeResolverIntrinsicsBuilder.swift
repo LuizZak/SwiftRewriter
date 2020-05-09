@@ -185,7 +185,7 @@ class TypeResolverIntrinsicsBuilder {
         }
         
         // Push function parameters as intrinsics, if member is a method type
-        if let function = member as? FunctionIntention {
+        if let function = member as? ParameterizedFunctionIntention {
             let functionIntrinsics = DefaultCodeScope()
             
             functionIntrinsics.recordDefinitions(

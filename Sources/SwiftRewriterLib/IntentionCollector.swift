@@ -501,34 +501,55 @@ public class IntentionCollector {
                                               inNonnullContext: context.inNonnullContext)
         let sign = signGen.generateDefinitionSignature(from: node)
         
-        let method: MethodGenerationIntention
-        
-        if context.findContext(ofType: ProtocolGenerationIntention.self) != nil {
-            let protMethod = ProtocolMethodGenerationIntention(signature: sign, source: node)
-            protMethod.isOptional = node.isOptionalMethod
-            recordSourceHistory(intention: protMethod, node: node)
+        if sign == FunctionSignature(name: "dealloc") {
+            let deinitIntention = DeinitGenerationIntention(accessLevel: .internal, source: node)
             
-            method = protMethod
+            deinitIntention.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
+            
+            mapComments(node, deinitIntention)
+            recordSourceHistory(intention: deinitIntention, node: node)
+            
+            if let body = node.body {
+                let bodyIntention = FunctionBodyIntention(body: [], source: body)
+                recordSourceHistory(intention: bodyIntention, node: body)
+                
+                delegate?.reportForLazyParsing(intention: bodyIntention)
+                deinitIntention.functionBody = bodyIntention
+            }
+            
+            if let baseClass = ctx as? BaseClassIntention {
+                baseClass.deinitIntention = deinitIntention
+            }
         } else {
-            method = MethodGenerationIntention(signature: sign, source: node)
-        }
-        
-        method.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
-        
-        mapComments(node, method)
-        recordSourceHistory(intention: method, node: node)
-        
-        if let body = node.body {
-            let methodBodyIntention = FunctionBodyIntention(body: [], source: body)
-            recordSourceHistory(intention: methodBodyIntention, node: body)
+            let method: MethodGenerationIntention
             
-            delegate?.reportForLazyParsing(intention: methodBodyIntention)
-            method.functionBody = methodBodyIntention
+            if context.findContext(ofType: ProtocolGenerationIntention.self) != nil {
+                let protMethod = ProtocolMethodGenerationIntention(signature: sign, source: node)
+                protMethod.isOptional = node.isOptionalMethod
+                recordSourceHistory(intention: protMethod, node: node)
+                
+                method = protMethod
+            } else {
+                method = MethodGenerationIntention(signature: sign, source: node)
+            }
+            
+            method.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
+            
+            mapComments(node, method)
+            recordSourceHistory(intention: method, node: node)
+            
+            if let body = node.body {
+                let bodyIntention = FunctionBodyIntention(body: [], source: body)
+                recordSourceHistory(intention: bodyIntention, node: body)
+                
+                delegate?.reportForLazyParsing(intention: bodyIntention)
+                method.functionBody = bodyIntention
+            }
+            
+            ctx.addMethod(method)
+            
+            delegate?.reportForLazyResolving(intention: method)
         }
-        
-        ctx.addMethod(method)
-        
-        delegate?.reportForLazyResolving(intention: method)
     }
     
     private func visitObjcClassSuperclassName(_ node: SuperclassName) {

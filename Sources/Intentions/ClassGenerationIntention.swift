@@ -6,10 +6,6 @@ import KnownType
 public final class ClassGenerationIntention: BaseClassIntention {
     public var superclassName: String?
     
-    public override var isEmptyType: Bool {
-        super.isEmptyType
-    }
-    
     public override var supertype: KnownTypeReference? {
         if let superclassName = superclassName {
             return KnownTypeReference.typeName(superclassName)

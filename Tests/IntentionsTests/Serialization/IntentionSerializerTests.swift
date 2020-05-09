@@ -14,6 +14,7 @@ class IntentionSerializerTests: XCTestCase {
                     .createClass(withName: "Class") { type in
                         type.createConformance(protocolName: "Protocol")
                             .createConstructor()
+                            .createDeinit()
                             .createInstanceVariable(named: "a", type: .int)
                             .createProperty(named: "b",
                                             type: .float,

@@ -12,7 +12,6 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     @discardableResult
     public func addHistory(tag: String, description: String) -> TypeBuilder {
         targetType.history.recordChange(tag: tag, description: description)
-        
         return self
     }
     
@@ -72,12 +71,9 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     public func createConstructor(withParameters parameters: [ParameterSignature] = [],
                                   builder: (InitializerBuilder) -> Void = emptyInit) -> TypeBuilder {
         
-        let ctor = InitGenerationIntention(parameters: parameters)
-        let mbuilder = MemberBuilder(targetMember: ctor)
+        let ctor = InitGenerationIntention(parameters: parameters, builder: builder)
         
-        builder(mbuilder)
-        
-        targetType.addConstructor(mbuilder.build())
+        targetType.addConstructor(ctor)
         
         return self
     }
@@ -161,11 +157,7 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
         let sub = SubscriptGenerationIntention(parameters: parameters,
                                                returnType: returnType,
                                                mode: .getter(FunctionBodyIntention(body: [])),
-                                               accessLevel: .internal,
-                                               source: nil)
-        
-        let sbuilder = SubscriptBuilder(targetMember: sub)
-        builder(sbuilder)
+                                               builder: builder)
         
         targetType.addSubscript(sub)
         
@@ -240,6 +232,19 @@ public extension TypeBuilder where T: BaseClassIntention {
                 type: .synthesize)
         
         targetType.addSynthesization(intent)
+        
+        return self
+    }
+    
+    @discardableResult
+    func createDeinit(builder: (DeinitBuilder) -> Void = emptyInit) -> TypeBuilder {
+        
+        let deinitIntention = DeinitGenerationIntention(builder: { bm in
+            bm.setBody([])
+            builder(bm)
+        })
+        
+        targetType.deinitIntention = deinitIntention
         
         return self
     }

@@ -207,6 +207,23 @@ class IntentionCollectorTests: XCTestCase {
             """, \FileGenerationIntention.structIntentions[0])
     }
     
+    func testCollectDealloc() throws {
+        let parser = ObjcParser(string: """
+            @implementation A
+            - (void)dealloc {
+            }
+            @end
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertNotNil(file.classTypeIntentions[0].deinitIntention)
+        XCTAssertNotNil(file.classTypeIntentions[0].deinitIntention?.functionBody)
+        XCTAssert(delegate.reportedForLazyParsing[0] === file.classTypeIntentions[0].deinitIntention?.functionBody)
+    }
+    
     private func testCommentCollection<T: FromSourceIntention>(
         _ code: String,
         _ keyPath: KeyPath<FileGenerationIntention, T>,

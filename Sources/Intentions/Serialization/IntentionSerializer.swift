@@ -73,6 +73,9 @@ public final class IntentionSerializer {
             case is SubscriptGenerationIntention:
                 kind = .subscript
                 
+            case is DeinitGenerationIntention:
+                kind = .deinit
+                
             default:
                 throw Error.unknownIntentionType(type(of: intention))
             }
@@ -149,6 +152,9 @@ public final class IntentionSerializer {
                 
             case .subscript:
                 intention = try container.decode(SubscriptGenerationIntention.self, forKey: .intention)
+                
+            case .deinit:
+                intention = try container.decode(DeinitGenerationIntention.self, forKey: .intention)
             }
         }
         
@@ -187,6 +193,7 @@ public final class IntentionSerializer {
         case `typealias`
         case functionBody
         case `subscript`
+        case `deinit`
     }
     
     public enum Error: Swift.Error {

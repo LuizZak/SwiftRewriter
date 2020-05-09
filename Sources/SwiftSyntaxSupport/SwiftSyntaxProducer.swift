@@ -690,26 +690,20 @@ extension SwiftSyntaxProducer {
                 )
             }
             
-            // Dealloc methods are treated differently
-            // TODO: Create a separate GenerationIntention entirely for dealloc
-            // methods and detect them during SwiftRewriter's parsing with
-            // IntentionPass's instead of postponing to here.
-            var methods = intention.methods
-            let _deinit = methods.first(where: isDeallocMethod)
-            methods.removeAll(where: { $0 === _deinit })
-            if let _deinit = _deinit {
+            // TODO: ...and once more...
+            if let deinitIntention = (intention as? BaseClassIntention)?.deinitIntention {
                 addExtraLeading(indentation())
                 
                 builder.addMember(
                     SyntaxFactory.makeMemberDeclListItem(
-                        decl: generateDeinitializer(_deinit).asDeclSyntax,
+                        decl: generateDeinitializer(deinitIntention).asDeclSyntax,
                         semicolon: nil
                     )
                 )
                 addExtraLeading(.newlines(2))
             }
             
-            iterating(methods) { method in
+            iterating(intention.methods) { method in
                 addExtraLeading(indentation())
                 
                 builder.addMember(
@@ -759,7 +753,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateDeinitializer(_ intention: FunctionIntention) -> DeinitializerDeclSyntax {
+    func generateDeinitializer(_ intention: DeinitGenerationIntention) -> DeinitializerDeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
         
         return DeinitializerDeclSyntax { builder in
