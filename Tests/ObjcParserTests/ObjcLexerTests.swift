@@ -1,8 +1,6 @@
 import XCTest
 @testable import ObjcParser
 
-// TODO: Refactor these tests; they don't make much sense since SourceLocation was
-// refactored with a struct with just line/column indexes
 class ObjcLexerTests: XCTestCase {
     func testStartRange() {
         let source = "@end abc def"
@@ -33,10 +31,11 @@ class ObjcLexerTests: XCTestCase {
         
         let range = sut.startRange()
         _=sut.nextToken()
+        let rangeNext = sut.startRange()
         
         XCTAssertEqual(range.makeString(), "@end")
-        XCTAssertEqual(range.makeLocation().line, 1)
-        XCTAssertEqual(range.makeLocation().column, 1)
+        XCTAssertEqual(rangeNext.makeLocation().line, 1)
+        XCTAssertEqual(rangeNext.makeLocation().column, 6)
     }
     
     func testStartRangeSkippingToken() {
@@ -45,10 +44,11 @@ class ObjcLexerTests: XCTestCase {
         
         let range = sut.startRange()
         sut.skipToken()
+        let nextRange = sut.startRange()
         
         XCTAssertEqual(range.makeString(), "@end")
-        XCTAssertEqual(range.makeLocation().line, 1)
-        XCTAssertEqual(range.makeLocation().column, 1)
+        XCTAssertEqual(nextRange.makeLocation().line, 1)
+        XCTAssertEqual(nextRange.makeLocation().column, 6)
     }
     
     func testStartRangeSkippingTokenAfterConsumingToken() {
@@ -58,10 +58,11 @@ class ObjcLexerTests: XCTestCase {
         _=sut.token() // Consume a token to force-parse it
         let range = sut.startRange()
         sut.skipToken()
+        let nextRange = sut.startRange()
         
         XCTAssertEqual(range.makeString(), "@end")
-        XCTAssertEqual(range.makeLocation().line, 1)
-        XCTAssertEqual(range.makeLocation().column, 1)
+        XCTAssertEqual(nextRange.makeLocation().line, 1)
+        XCTAssertEqual(nextRange.makeLocation().column, 6)
     }
     
     private func makeLexer(_ str: String) -> ObjcLexer {
