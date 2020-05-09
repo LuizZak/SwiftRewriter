@@ -2935,9 +2935,17 @@ class SwiftRewriterTests: XCTestCase {
     func testCommentTransposing() {
         assertRewrite(
             objc: """
+            void globalFunc() {
+                // Global function comment
+                test();
+            }
             @interface A
             @end
             @implementation A
+            - (instancetype)init {
+                // Init comment
+                test();
+            }
             - (NSObject*)getObject {
                 // A comment
                 test();
@@ -2946,10 +2954,29 @@ class SwiftRewriterTests: XCTestCase {
                 // Comment
                 return nil;
             }
+            - (void)dealloc {
+                // Dealloc comment
+                test();
+            }
             @end
             """,
             swift: """
+            func globalFunc() {
+                // Global function comment
+                test()
+            }
+
             class A {
+                override init() {
+                    // Init comment
+                    test()
+                }
+
+                deinit {
+                    // Dealloc comment
+                    test()
+                }
+
                 func getObject() -> NSObject! {
                     // A comment
                     test()

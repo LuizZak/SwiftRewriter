@@ -2,14 +2,17 @@ import SwiftAST
 
 /// Defines a protocol for function-generating intentions
 public protocol FunctionIntention: IntentionProtocol {
-    var parameters: [ParameterSignature] { get }
-    
     var functionBody: FunctionBodyIntention? { get }
 }
 
 /// Defines a protocol for function-generating intentions that contain a body
 public protocol MutableFunctionIntention: FunctionIntention {
     var functionBody: FunctionBodyIntention? { get set }
+}
+
+/// Defines a protocol for function intentions that feature parameters
+public protocol ParameterizedFunctionIntention: FunctionIntention {
+    var parameters: [ParameterSignature] { get }
 }
 
 /// Defines a protocol for intentions that feature full function signatures

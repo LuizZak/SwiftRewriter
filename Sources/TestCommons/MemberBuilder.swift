@@ -194,6 +194,7 @@ public typealias InstanceVarBuilder = MemberBuilder<InstanceVariableGenerationIn
 public typealias MethodBuilder = MemberBuilder<MethodGenerationIntention>
 public typealias InitializerBuilder = MemberBuilder<InitGenerationIntention>
 public typealias SubscriptBuilder = MemberBuilder<SubscriptGenerationIntention>
+public typealias DeinitBuilder = MemberBuilder<DeinitGenerationIntention>
 
 public extension MemberBuilder where T == PropertyGenerationIntention {
     convenience init(name: String, type: SwiftType) {
@@ -213,16 +214,46 @@ public extension PropertyGenerationIntention {
 
 public extension MethodGenerationIntention {
     convenience init(name: String, builder: (MethodBuilder) -> Void) {
-        self.init(signature: FunctionSignature(name: name))
+        self.init(signature: FunctionSignature(name: name), builder: builder)
+    }
+    
+    convenience init(signature: FunctionSignature, builder: (MethodBuilder) -> Void) {
+        self.init(signature: signature)
         
         builder(MethodBuilder(targetMember: self))
     }
 }
 
 public extension InitGenerationIntention {
+    convenience init(parameters: [ParameterSignature], builder: (InitializerBuilder) -> Void) {
+        self.init(parameters: parameters)
+        
+        builder(InitializerBuilder(targetMember: self))
+    }
+    
     convenience init(builder: (InitializerBuilder) -> Void) {
         self.init(parameters: [])
         
         builder(InitializerBuilder(targetMember: self))
+    }
+}
+
+public extension SubscriptGenerationIntention {
+    convenience init(parameters: [ParameterSignature],
+                     returnType: SwiftType,
+                     mode: SubscriptGenerationIntention.Mode,
+                     builder: (SubscriptBuilder) -> Void) {
+        
+        self.init(parameters: parameters, returnType: returnType, mode: mode)
+        
+        builder(SubscriptBuilder(targetMember: self))
+    }
+}
+
+public extension DeinitGenerationIntention {
+    convenience init(builder: (DeinitBuilder) -> Void) {
+        self.init()
+        
+        builder(DeinitBuilder(targetMember: self))
     }
 }

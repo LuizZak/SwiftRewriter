@@ -3,7 +3,7 @@ import SwiftAST
 import KnownType
 
 /// An intention to generate a global function.
-public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIntention, MutableSignatureFunctionIntention, MutableFunctionIntention, AttributeTaggeableObject {
+public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIntention, MutableSignatureFunctionIntention, MutableFunctionIntention, ParameterizedFunctionIntention, AttributeTaggeableObject {
     public var typedSource: FunctionDefinition? {
         source as? FunctionDefinition
     }

@@ -1027,6 +1027,24 @@ extension SwiftSyntaxProducerTests {
             """)
     }
     
+    func testGenerateFileWithClassWithDeinit() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A") { builder in
+                    builder.createDeinit()
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(result, matches: """
+            class A {
+                deinit {
+                }
+            }
+            """)
+    }
 }
 
 // MARK: - Struct Generation

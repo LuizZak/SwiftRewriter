@@ -153,6 +153,17 @@ class IntentionCollectorTests: XCTestCase {
             """, \FileGenerationIntention.classIntentions[0].methods[0])
     }
     
+    func testCollectDeinitComments() throws {
+        testCommentCollection("""
+            @implementation A
+            // A comment
+            // Another comment
+            - (void)dealloc {
+            }
+            @end
+            """, \FileGenerationIntention.classIntentions[0].deinitIntention!)
+    }
+    
     func testCollectPropertyComments() throws {
         testCommentCollection("""
             @interface A
@@ -205,6 +216,23 @@ class IntentionCollectorTests: XCTestCase {
                 int a;
             } A;
             """, \FileGenerationIntention.structIntentions[0])
+    }
+    
+    func testCollectDealloc() throws {
+        let parser = ObjcParser(string: """
+            @implementation A
+            - (void)dealloc {
+            }
+            @end
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertNotNil(file.classTypeIntentions[0].deinitIntention)
+        XCTAssertNotNil(file.classTypeIntentions[0].deinitIntention?.functionBody)
+        XCTAssert(delegate.reportedForLazyParsing[0] === file.classTypeIntentions[0].deinitIntention?.functionBody)
     }
     
     private func testCommentCollection<T: FromSourceIntention>(
