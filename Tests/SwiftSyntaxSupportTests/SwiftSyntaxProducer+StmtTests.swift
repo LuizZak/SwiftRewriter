@@ -271,6 +271,62 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 """)
     }
     
+    func testSwitchStatementMultiplePatterns() {
+        let stmt = Statement
+            .switch(
+                .identifier("value"),
+                cases: [
+                    SwitchCase(
+                        patterns: [
+                            .expression(.constant(0)),
+                            .expression(.constant(1))
+                        ],
+                        statements: [
+                            .break()
+                        ]
+                    )
+                ],
+                default: nil)
+        
+        assert(
+            stmt,
+            producer: SwiftSyntaxProducer.generateSwitchStmt,
+            matches: """
+                switch value {
+                case 0, 1:
+                    break
+                }
+                """)
+    }
+    
+    func testSwitchStatementTuplePattern() {
+        let stmt = Statement
+            .switch(
+                .identifier("value"),
+                cases: [
+                    SwitchCase(
+                        patterns: [
+                            .tuple([.expression(.constant(0)),
+                                    .expression(.constant(1))])
+                        ],
+                        statements: [
+                            .break()
+                        ]
+                    )
+                ],
+                default: nil)
+        
+        assert(
+            stmt,
+            producer: SwiftSyntaxProducer.generateSwitchStmt,
+            matches: """
+                switch value {
+                case (0, 1):
+                    break
+                }
+                """)
+    }
+    
     func testSwitchStatementTwoCases() {
         let stmt = Statement
             .switch(
@@ -286,8 +342,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                     ),
                     SwitchCase(
                         patterns: [
-                            .tuple([.expression(.constant(0)),
-                                    .expression(.constant(0))])
+                            .expression(.constant(1))
                         ],
                         statements: [
                             .break()
@@ -303,7 +358,27 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 switch value {
                 case 0:
                     break
-                case (0, 0):
+                case 1:
+                    break
+                }
+                """)
+    }
+    
+    func testSwitchStatementDefaultOnly() {
+        let stmt = Statement
+            .switch(
+                .identifier("value"),
+                cases: [],
+                default: [
+                    .break()
+                ])
+        
+        assert(
+            stmt,
+            producer: SwiftSyntaxProducer.generateSwitchStmt,
+            matches: """
+                switch value {
+                default:
                     break
                 }
                 """)
@@ -340,15 +415,14 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 """)
     }
     
-    func testSwitchStatementFull() {
+    func testSwitchStatementTwoCasesWithDefault() {
         let stmt = Statement
             .switch(
                 .identifier("value"),
                 cases: [
                     SwitchCase(
                         patterns: [
-                            .expression(.constant(0)),
-                            .expression(.constant(1))
+                            .expression(.constant(0))
                         ],
                         statements: [
                             .expression(Expression.identifier("foo").call())
@@ -356,8 +430,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                     ),
                     SwitchCase(
                         patterns: [
-                            .tuple([.expression(.constant(0)),
-                                    .expression(.constant(0))])
+                            .expression(.constant(1))
                         ],
                         statements: [
                             .expression(Expression.identifier("foo").call()),
@@ -374,9 +447,9 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             producer: SwiftSyntaxProducer.generateSwitchStmt,
             matches: """
                 switch value {
-                case 0, 1:
+                case 0:
                     foo()
-                case (0, 0):
+                case 1:
                     foo()
                     bar()
                 default:

@@ -68,9 +68,7 @@ public class ForStatement: Statement {
     }
     
     private func reloadChildrenNodes() {
-        _childrenNodes.removeAll()
-        
-        _childrenNodes.append(exp)
+        _childrenNodes = [exp]
         
         pattern.collect(expressions: &_childrenNodes)
         

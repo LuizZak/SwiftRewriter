@@ -99,7 +99,7 @@ extension SwiftSyntaxProducer {
             addExtraLeading(.newlines(1) + indentation())
             
             // TODO: Perhaps Statement.comments should be an enum describing these
-            // cases, instead of relegating this detection to here?
+            // cases, instead of performing this detection here?
             if comment.hasPrefix("//") {
                 addExtraLeading(.lineComment(comment))
             } else if comment.hasPrefix("///") {

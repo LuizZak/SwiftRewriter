@@ -95,9 +95,7 @@ public class SwitchStatement: Statement {
     }
     
     private func reloadChildrenNodes() {
-        _childrenNodes.removeAll()
-        
-        _childrenNodes.append(exp)
+        _childrenNodes = [exp]
         
         cases.forEach {
             $0.patterns.forEach {
