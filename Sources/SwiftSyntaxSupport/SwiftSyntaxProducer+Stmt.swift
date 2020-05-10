@@ -35,7 +35,7 @@ extension SwiftSyntaxProducer {
                     addExtraLeading(.newlines(1))
                 }
                 
-                builder.addStatement(stmt())
+                builder.addStatement(stmt(self))
             }
         }
     }
@@ -70,7 +70,7 @@ extension SwiftSyntaxProducer {
             
             for item in stmtSyntax {
                 addExtraLeading(.newlines(1) + indentation())
-                items.append(item())
+                items.append(item(self))
             }
             
             if i < stmtList.count - 1 && _shouldEmitNewlineSpacing(between: stmt, stmt2: stmtList[i + 1]) {
@@ -94,51 +94,21 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateStatementBlockItems(_ stmt: Statement) -> [() -> CodeBlockItemSyntax] {
-        for comment in stmt.comments {
-            addExtraLeading(.newlines(1) + indentation())
-            
-            // TODO: Perhaps Statement.comments should be an enum describing these
-            // cases, instead of performing this detection here?
-            if comment.hasPrefix("//") {
-                addExtraLeading(.lineComment(comment))
-            } else if comment.hasPrefix("///") {
-                addExtraLeading(.docLineComment(comment))
-            } else if comment.hasPrefix("/*") {
-                addExtraLeading(.blockComment(comment))
-            } else if comment.hasPrefix("/**") {
-                addExtraLeading(.docBlockComment(comment))
-            } else {
-                addExtraLeading(.lineComment(comment))
-            }
-        }
-        
-        if let label = stmt.label, !stmt.isLabelableStatementType {
-            if !stmt.comments.isEmpty {
-                addExtraLeading(.newlines(1) + indentation())
-            }
-            
-            addExtraLeading(.lineComment("// \(label):"))
-            
-            if stmt.comments.isEmpty {
-                addExtraLeading(.newlines(1) + indentation())
-            }
-        }
-        
-        let genList: [() -> CodeBlockItemSyntax]
+    func generateStatementBlockItems(_ stmt: Statement) -> [(SwiftSyntaxProducer) -> CodeBlockItemSyntax] {
+        var genList: [(SwiftSyntaxProducer) -> CodeBlockItemSyntax]
         
         switch stmt {
         case let stmt as ReturnStatement:
-            genList = [{ self.generateReturn(stmt).inCodeBlock() }]
+            genList = [{ $0.generateReturn(stmt).inCodeBlock() }]
             
         case let stmt as ContinueStatement:
-            genList = [{ self.generateContinue(stmt).inCodeBlock() }]
+            genList = [{ $0.generateContinue(stmt).inCodeBlock() }]
             
         case let stmt as BreakStatement:
-            genList = [{ self.generateBreak(stmt).inCodeBlock() }]
+            genList = [{ $0.generateBreak(stmt).inCodeBlock() }]
             
         case let stmt as FallthroughStatement:
-            genList = [{ self.generateFallthrough(stmt).inCodeBlock() }]
+            genList = [{ $0.generateFallthrough(stmt).inCodeBlock() }]
             
         case let stmt as ExpressionsStatement:
             genList = generateExpressions(stmt)
@@ -147,43 +117,85 @@ extension SwiftSyntaxProducer {
             genList = generateVariableDeclarations(stmt)
             
         case let stmt as IfStatement:
-            genList = [{ self.generateIfStmt(stmt).inCodeBlock() }]
+            genList = [{ $0.generateIfStmt(stmt).inCodeBlock() }]
             
         case let stmt as SwitchStatement:
-            genList = [{ self.generateSwitchStmt(stmt).inCodeBlock() }]
+            genList = [{ $0.generateSwitchStmt(stmt).inCodeBlock() }]
             
         case let stmt as WhileStatement:
-            genList = [{ self.generateWhileStmt(stmt).inCodeBlock() }]
+            genList = [{ $0.generateWhileStmt(stmt).inCodeBlock() }]
             
         case let stmt as DoStatement:
-            genList = [{ self.generateDo(stmt).inCodeBlock() }]
+            genList = [{ $0.generateDo(stmt).inCodeBlock() }]
             
         case let stmt as DoWhileStatement:
-            genList = [{ self.generateDoWhileStmt(stmt).inCodeBlock() }]
+            genList = [{ $0.generateDoWhileStmt(stmt).inCodeBlock() }]
             
         case let stmt as ForStatement:
-            genList = [{ self.generateForIn(stmt).inCodeBlock() }]
+            genList = [{ $0.generateForIn(stmt).inCodeBlock() }]
             
         case let stmt as DeferStatement:
-            genList = [{ self.generateDefer(stmt).inCodeBlock() }]
+            genList = [{ $0.generateDefer(stmt).inCodeBlock() }]
             
         case let stmt as CompoundStatement:
             genList = stmt.statements.flatMap(generateStatementBlockItems)
             
         case let stmt as UnknownStatement:
-            genList = [{ self.generateUnknown(stmt).inCodeBlock() }]
+            genList = [{ $0.generateUnknown(stmt).inCodeBlock() }]
             
         default:
-            genList = [{ SyntaxFactory.makeBlankExpressionStmt().inCodeBlock() }]
+            genList = [{ _ in SyntaxFactory.makeBlankExpressionStmt().inCodeBlock() }]
         }
         
-        return applyingTrailingComment(comment: stmt.trailingComment,
-                                       toList: genList)
+        var leadingComments = stmt.comments
+        if let label = stmt.label, !stmt.isLabelableStatementType {
+            leadingComments.append("// \(label):")
+        }
+        
+        genList = applyingLeadingComments(leadingComments, toList: genList)
+        genList = applyingTrailingComment(comment: stmt.trailingComment, toList: genList)
+        
+        return genList
+    }
+    
+    private func applyingLeadingComments(
+        _ comments: [String],
+        toList list: [(SwiftSyntaxProducer) -> CodeBlockItemSyntax]) -> [(SwiftSyntaxProducer) -> CodeBlockItemSyntax] {
+        
+        guard let first = list.first else {
+            return list
+        }
+        
+        var list = list
+        
+        list[0] = {
+            for comment in comments {
+                // TODO: Perhaps Statement.comments should be an enum describing
+                // these cases, instead of performing this detection here?
+                if comment.hasPrefix("//") {
+                    $0.addExtraLeading(.lineComment(comment))
+                } else if comment.hasPrefix("///") {
+                    $0.addExtraLeading(.docLineComment(comment))
+                } else if comment.hasPrefix("/*") {
+                    $0.addExtraLeading(.blockComment(comment))
+                } else if comment.hasPrefix("/**") {
+                    $0.addExtraLeading(.docBlockComment(comment))
+                } else {
+                    $0.addExtraLeading(.lineComment(comment))
+                }
+                
+                $0.addExtraLeading(.newlines(1) + $0.indentation())
+            }
+            
+            return first($0)
+        }
+        
+        return list
     }
     
     private func applyingTrailingComment(
         comment: String?,
-        toList list: [() -> CodeBlockItemSyntax]) -> [() -> CodeBlockItemSyntax] {
+        toList list: [(SwiftSyntaxProducer) -> CodeBlockItemSyntax]) -> [(SwiftSyntaxProducer) -> CodeBlockItemSyntax] {
         
         guard let comment = comment, let last = list.last else {
             return list
@@ -192,28 +204,27 @@ extension SwiftSyntaxProducer {
         var list = list
         
         list[list.count - 1] = {
-            return last().withTrailingTrivia(.spaces(1) + .lineComment(comment))
+            return last($0).withTrailingTrivia(.spaces(1) + .lineComment(comment))
         }
         
         return list
     }
     
-    func generateExpressions(_ stmt: ExpressionsStatement) -> [() -> CodeBlockItemSyntax] {
+    func generateExpressions(_ stmt: ExpressionsStatement) -> [(SwiftSyntaxProducer) -> CodeBlockItemSyntax] {
         stmt.expressions
-            .map { exp -> () -> CodeBlockItemSyntax in
+            .map { exp -> (SwiftSyntaxProducer) -> CodeBlockItemSyntax in
                 return {
-                    if self.settings.outputExpressionTypes {
-                        self.addExtraLeading(Trivia.lineComment("// type: \(exp.resolvedType ?? "<nil>")"))
-                        self.addExtraLeading(.newlines(1))
-                        self.addExtraLeading(self.indentation())
+                    if $0.settings.outputExpressionTypes {
+                        $0.addExtraLeading(Trivia.lineComment("// type: \(exp.resolvedType ?? "<nil>")"))
+                        $0.addExtraLeading(.newlines(1) + $0.indentation())
                     }
                     
-                    return self.generateExpression(exp).inCodeBlock()
+                    return $0.generateExpression(exp).inCodeBlock()
                 }
             }
     }
     
-    func generateVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> [() -> CodeBlockItemSyntax] {
+    func generateVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> [(SwiftSyntaxProducer) -> CodeBlockItemSyntax] {
         if stmt.decl.isEmpty {
             return []
         }
@@ -223,15 +234,13 @@ extension SwiftSyntaxProducer {
             .enumerated()
             .map { (i, decl) in
                 return {
-                    if self.settings.outputExpressionTypes {
-                        self.addExtraLeading(Trivia.lineComment("// decl type: \(stmt.decl[i].type)"))
-                        self.addExtraLeading(.newlines(1))
-                        self.addExtraLeading(self.indentation())
+                    if $0.settings.outputExpressionTypes {
+                        $0.addExtraLeading(Trivia.lineComment("// decl type: \(stmt.decl[i].type)"))
+                        $0.addExtraLeading(.newlines(1) + $0.indentation())
 
                         if let exp = stmt.decl[i].initialization {
-                            self.addExtraLeading(Trivia.lineComment("// init type: \(exp.resolvedType ?? "<nil>")"))
-                            self.addExtraLeading(.newlines(1))
-                            self.addExtraLeading(self.indentation())
+                            $0.addExtraLeading(Trivia.lineComment("// init type: \(exp.resolvedType ?? "<nil>")"))
+                            $0.addExtraLeading(.newlines(1) + $0.indentation())
                         }
                     }
 

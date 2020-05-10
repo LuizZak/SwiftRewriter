@@ -10,14 +10,15 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
     
     func testExpressions() {
         let stmt = Statement.expressions([.identifier("foo"), .identifier("bar")])
-        let syntax = SwiftSyntaxProducer().generateExpressions(stmt)
+        let sut = SwiftSyntaxProducer()
+        let syntax = sut.generateExpressions(stmt)
         
-        assert(syntax[0](),
+        assert(syntax[0](sut),
                matches: """
                 foo
                 """)
         
-        assert(syntax[1](),
+        assert(syntax[1](sut),
                matches: """
                 bar
                 """)
@@ -43,9 +44,10 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                                              type: .int,
                                              initialization: .constant(0))
             ])
-        let syntax = SwiftSyntaxProducer().generateVariableDeclarations(stmt)
+        let sut = SwiftSyntaxProducer()
+        let syntax = sut.generateVariableDeclarations(stmt)
         
-        assert(syntax[0](),
+        assert(syntax[0](sut),
                matches: """
                 var foo: Int = 0
                 """)
