@@ -31,7 +31,9 @@ class VariableDeclSyntaxGenerator {
                 builder.addModifier(modifier(producer))
             }
             
-            builder.useSubscriptKeyword(producer.makeStartToken(SyntaxFactory.makeSubscriptKeyword))
+            builder.useSubscriptKeyword(
+                producer.makeStartToken(SyntaxFactory.makeSubscriptKeyword)
+            )
             builder.useIndices(producer.generateParameterClause(intention.parameters))
             builder.useResult(producer.generateReturn(intention.returnType))
             
@@ -82,7 +84,11 @@ class VariableDeclSyntaxGenerator {
                     ? SyntaxFactory.makeLetKeyword
                     : SyntaxFactory.makeVarKeyword
             
-            builder.useLetOrVarKeyword(producer.makeStartToken(letOrVar).addingTrailingSpace())
+            builder.useLetOrVarKeyword(
+                producer
+                    .makeStartToken(letOrVar)
+                    .addingTrailingSpace()
+            )
             
             switch variableDecl.kind {
             case let .single(pattern, accessors):
@@ -119,7 +125,8 @@ class VariableDeclSyntaxGenerator {
                 builder.useTrailingComma(
                     SyntaxFactory
                         .makeCommaToken()
-                        .withTrailingSpace())
+                        .withTrailingSpace()
+                )
             }
             
             if let accessor = accessors {
@@ -128,7 +135,11 @@ class VariableDeclSyntaxGenerator {
             
             if let initialization = binding.initialization {
                 builder.useInitializer(InitializerClauseSyntax { builder in
-                    builder.useEqual(SyntaxFactory.makeEqualToken().withLeadingSpace().withTrailingSpace())
+                    builder.useEqual(
+                        SyntaxFactory
+                            .makeEqualToken()
+                            .addingSurroundingSpaces()
+                    )
                     builder.useValue(producer.generateExpression(initialization))
                 })
             }
@@ -201,7 +212,10 @@ class VariableDeclSyntaxGenerator {
         
         return {
             return CodeBlockSyntax { builder in
-                builder.useLeftBrace(producer.makeStartToken(SyntaxFactory.makeLeftBraceToken).withLeadingSpace())
+                builder.useLeftBrace(
+                    producer.makeStartToken(SyntaxFactory.makeLeftBraceToken)
+                        .withLeadingSpace()
+                )
                 
                 producer.indent()
                 let blocks = producer._generateStatements(getter.body.statements)
@@ -215,7 +229,9 @@ class VariableDeclSyntaxGenerator {
                 builder.addStatement(codeBlock)
                 
                 producer.addExtraLeading(.newlines(1) + producer.indentation())
-                builder.useRightBrace(producer.makeStartToken(SyntaxFactory.makeRightBraceToken))
+                builder.useRightBrace(
+                    producer.makeStartToken(SyntaxFactory.makeRightBraceToken)
+                )
             }.asSyntax
         }
     }
@@ -227,7 +243,11 @@ class VariableDeclSyntaxGenerator {
         
         return {
             return AccessorBlockSyntax { builder in
-                builder.useLeftBrace(producer.makeStartToken(SyntaxFactory.makeLeftBraceToken).withLeadingSpace())
+                builder.useLeftBrace(
+                    producer
+                        .makeStartToken(SyntaxFactory.makeLeftBraceToken)
+                        .withLeadingSpace()
+                )
                 
                 producer.indent()
                 
@@ -258,7 +278,10 @@ class VariableDeclSyntaxGenerator {
                     
                     if set.valueIdentifier != "newValue" {
                         builder.useParameter(AccessorParameterSyntax { builder in
-                            builder.useLeftParen(producer.makeStartToken(SyntaxFactory.makeLeftParenToken))
+                            builder.useLeftParen(
+                                producer
+                                    .makeStartToken(SyntaxFactory.makeLeftParenToken)
+                            )
                             builder.useName(makeIdentifier(set.valueIdentifier))
                             builder.useRightParen(SyntaxFactory.makeRightParenToken())
                         })
@@ -273,7 +296,9 @@ class VariableDeclSyntaxGenerator {
                 builder.addAccessor(setter)
                 
                 producer.addExtraLeading(.newlines(1) + producer.indentation())
-                builder.useRightBrace(producer.makeStartToken(SyntaxFactory.makeRightBraceToken))
+                builder.useRightBrace(
+                    producer.makeStartToken(SyntaxFactory.makeRightBraceToken)
+                )
             }.asSyntax
         }
     }
@@ -293,7 +318,9 @@ private extension VariableDeclSyntaxGenerator {
             }
         }
         
-        return producer.delegate?.swiftSyntaxProducer(producer, initialValueFor: intention)
+        return producer
+            .delegate?
+            .swiftSyntaxProducer(producer, initialValueFor: intention)
     }
 }
 
@@ -318,7 +345,8 @@ private extension VariableDeclSyntaxGenerator {
         
         return makeDeclaration(name: intention.name,
                                storage: intention.storage,
-                               attributes: producer.attributes(for: intention, inline: true),
+                               attributes: producer.attributes(for: intention,
+                                                               inline: true),
                                intention: intention,
                                modifiers: producer.modifiers(for: intention),
                                accessors: accessors,
@@ -333,7 +361,9 @@ private extension VariableDeclSyntaxGenerator {
                          accessors: (() -> Syntax)? = nil,
                          initialization: Expression? = nil) -> VariableDeclaration {
         
-        var patternBinding = makePatternBinding(name: name, type: storage.type, initialization: initialization)
+        var patternBinding = makePatternBinding(name: name,
+                                                type: storage.type,
+                                                initialization: initialization)
         
         if producer.delegate?.swiftSyntaxProducer(producer,
                                                   shouldEmitTypeFor: storage,
@@ -358,9 +388,9 @@ private extension VariableDeclSyntaxGenerator {
                                     initialization: Expression?) -> PatternBindingElement {
         
         PatternBindingElement(name: name,
-                                     type: type,
-                                     intention: nil,
-                                     initialization: initialization)
+                              type: type,
+                              intention: nil,
+                              initialization: initialization)
     }
     
     private func makePatternBinding(_ intention: ValueStorageIntention) -> PatternBindingElement {
@@ -374,11 +404,11 @@ private extension VariableDeclSyntaxGenerator {
 }
 
 private func group(_ declarations: [VariableDeclaration]) -> [VariableDeclaration] {
-    if declarations.isEmpty {
+    guard let first = declarations.first else {
         return declarations
     }
     
-    var result: [VariableDeclaration] = [declarations[0]]
+    var result: [VariableDeclaration] = [first]
     
     for decl in declarations.dropFirst() {
         let last = result[result.count - 1]
@@ -393,7 +423,9 @@ private func group(_ declarations: [VariableDeclaration]) -> [VariableDeclaratio
     return result
 }
 
-private func groupDeclarations(_ decl1: VariableDeclaration, _ decl2: VariableDeclaration) -> VariableDeclaration? {
+private func groupDeclarations(_ decl1: VariableDeclaration,
+                               _ decl2: VariableDeclaration) -> VariableDeclaration? {
+    
     // Attributed or modified declarations cannot be merged
     guard decl1.attributes.isEmpty && decl2.attributes.isEmpty else {
         return nil

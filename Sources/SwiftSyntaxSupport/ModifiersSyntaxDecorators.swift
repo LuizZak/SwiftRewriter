@@ -158,7 +158,11 @@ class PropertySetterAccessModifiersDecorator: ModifiersSyntaxDecorator {
                 builder.useName(setterAccessLevel.withExtraLeading(from: producer))
                 builder.useDetailLeftParen(SyntaxFactory.makeLeftParenToken())
                 builder.useDetail(makeIdentifier("set"))
-                builder.useDetailRightParen(SyntaxFactory.makeRightParenToken().withTrailingSpace())
+                builder.useDetailRightParen(
+                    SyntaxFactory
+                        .makeRightParenToken()
+                        .withTrailingSpace()
+                )
             }
         }
     }
@@ -202,9 +206,16 @@ class OwnershipModifiersDecorator: ModifiersSyntaxDecorator {
             
             return SyntaxFactory
                 .makeDeclModifier(name: token.withExtraLeading(from: $0),
-                                  detailLeftParen: detail == nil ? nil : SyntaxFactory.makeLeftParenToken(),
+                                  detailLeftParen: detail == nil
+                                    ? nil
+                                    : SyntaxFactory.makeLeftParenToken(),
                                   detail: detail,
-                                  detailRightParen: detail == nil ? nil : SyntaxFactory.makeRightParenToken().withTrailingSpace())
+                                  detailRightParen: detail == nil
+                                    ? nil
+                                    : SyntaxFactory
+                                        .makeRightParenToken()
+                                        .withTrailingSpace()
+                )
         }
     }
     

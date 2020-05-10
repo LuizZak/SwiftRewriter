@@ -11,7 +11,9 @@ public class BaseSwiftSyntaxProducer {
             .makeDefaultDecoratorApplier()
     
     func indentation() -> Trivia {
-        return indentationLevel == 0 ? .zero : Trivia.spaces(indentationLevel * spacesInIndentation)
+        return indentationLevel == 0
+            ? .zero
+            : Trivia.spaces(indentationLevel * spacesInIndentation)
     }
     
     func indentationString() -> String {

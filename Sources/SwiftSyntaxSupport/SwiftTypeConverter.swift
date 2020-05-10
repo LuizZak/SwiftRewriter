@@ -77,7 +77,11 @@ public class SwiftTypeConverter {
             
             return AttributedTypeSyntax { builder in
                 let functionType = FunctionTypeSyntax { builder in
-                    builder.useArrow(SyntaxFactory.makeArrowToken().addingSurroundingSpaces())
+                    builder.useArrow(
+                        SyntaxFactory
+                            .makeArrowToken()
+                            .addingSurroundingSpaces()
+                    )
                     builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
                     builder.useRightParen(SyntaxFactory.makeRightParenToken())
                     builder.useReturnType(makeTypeSyntax(returnType))
@@ -126,7 +130,9 @@ public class SwiftTypeConverter {
                                 tokenList: SyntaxFactory.makeTokenList([
                                     SyntaxFactory.makeLeftParenToken(),
                                     makeIdentifier(convention.rawValue),
-                                    SyntaxFactory.makeRightParenToken().withTrailingSpace()
+                                    SyntaxFactory
+                                        .makeRightParenToken()
+                                        .withTrailingSpace()
                                 ])
                             )
                     }
@@ -160,7 +166,11 @@ public class SwiftTypeConverter {
                         }
                         
                         if i != count - 1 {
-                            builder.useAmpersand(SyntaxFactory.makePrefixAmpersandToken().addingSurroundingSpaces())
+                            builder.useAmpersand(
+                                SyntaxFactory
+                                    .makePrefixAmpersandToken()
+                                    .addingSurroundingSpaces()
+                            )
                         }
                     })
                 }
@@ -168,17 +178,33 @@ public class SwiftTypeConverter {
             
         case .array(let inner):
             return ArrayTypeSyntax { builder in
-                builder.useLeftSquareBracket(SyntaxFactory.makeLeftSquareBracketToken())
-                builder.useRightSquareBracket(SyntaxFactory.makeRightSquareBracketToken())
+                builder.useLeftSquareBracket(
+                    SyntaxFactory
+                        .makeLeftSquareBracketToken()
+                )
+                builder.useRightSquareBracket(
+                    SyntaxFactory
+                        .makeRightSquareBracketToken()
+                )
                 
                 builder.useElementType(makeTypeSyntax(inner))
             }.asTypeSyntax
             
         case let .dictionary(key, value):
             return DictionaryTypeSyntax { builder in
-                builder.useLeftSquareBracket(SyntaxFactory.makeLeftSquareBracketToken())
-                builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
-                builder.useRightSquareBracket(SyntaxFactory.makeRightSquareBracketToken())
+                builder.useLeftSquareBracket(
+                    SyntaxFactory
+                        .makeLeftSquareBracketToken()
+                )
+                builder.useColon(
+                    SyntaxFactory
+                        .makeColonToken()
+                        .withTrailingSpace()
+                )
+                builder.useRightSquareBracket(
+                    SyntaxFactory
+                        .makeRightSquareBracketToken()
+                )
                 
                 builder.useKeyType(makeTypeSyntax(key))
                 builder.useValueType(makeTypeSyntax(value))
@@ -196,7 +222,11 @@ public class SwiftTypeConverter {
                     builder.useType(makeTypeSyntax(type))
                     
                     if hasComma {
-                        builder.useTrailingComma(SyntaxFactory.makeCommaToken().withTrailingSpace())
+                        builder.useTrailingComma(
+                            SyntaxFactory
+                                .makeCommaToken()
+                                .withTrailingSpace()
+                        )
                     }
                 })
             }
@@ -204,20 +234,6 @@ public class SwiftTypeConverter {
     }
 
     func makeNestedTypeSyntax(_ nestedType: NestedSwiftType) -> MemberTypeIdentifierSyntax {
-        typealias Produce = (MemberTypeIdentifierSyntax, NominalSwiftType) -> MemberTypeIdentifierSyntax
-        
-        let produce: Produce = { (previous, type) in
-            let typeSyntax = self.makeNominalTypeSyntax(type)
-            
-            return SyntaxFactory
-                .makeMemberTypeIdentifier(
-                    baseType: previous.asTypeSyntax,
-                    period: SyntaxFactory.makePeriodToken(),
-                    name: typeSyntax.name,
-                    genericArgumentClause: typeSyntax.genericArgumentClause
-            )
-        }
-        
         let typeSyntax = makeNominalTypeSyntax(nestedType.second)
         
         let initial = SyntaxFactory
@@ -228,7 +244,17 @@ public class SwiftTypeConverter {
                 genericArgumentClause: typeSyntax.genericArgumentClause
             )
         
-        return nestedType.reduce(initial, produce)
+        return nestedType.reduce(initial) { (previous, type) in
+            let typeSyntax = self.makeNominalTypeSyntax(type)
+            
+            return SyntaxFactory
+                .makeMemberTypeIdentifier(
+                    baseType: previous.asTypeSyntax,
+                    period: SyntaxFactory.makePeriodToken(),
+                    name: typeSyntax.name,
+                    genericArgumentClause: typeSyntax.genericArgumentClause
+                )
+        }
     }
     
     func makeNominalTypeSyntax(_ nominal: NominalSwiftType) -> SimpleTypeIdentifierSyntax {
@@ -250,7 +276,11 @@ public class SwiftTypeConverter {
                             SyntaxFactory
                                 .makeGenericArgument(
                                     argumentType: type,
-                                    trailingComma: hasComma ? SyntaxFactory.makeCommaToken().withTrailingSpace() : nil)
+                                    trailingComma: hasComma
+                                        ? SyntaxFactory
+                                            .makeCommaToken()
+                                            .withTrailingSpace()
+                                        : nil)
                         })
             
             let genericArgumentClause = SyntaxFactory

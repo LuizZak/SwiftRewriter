@@ -35,3 +35,21 @@ extension PatternSyntaxProtocol {
         return PatternSyntax(self)
     }
 }
+
+extension Syntax {
+    func inCodeBlock() -> CodeBlockItemSyntax {
+        return CodeBlockItemSyntax { $0.useItem(self) }
+    }
+}
+
+extension ExprSyntaxProtocol {
+    func inCodeBlock() -> CodeBlockItemSyntax {
+        self.asSyntax.inCodeBlock()
+    }
+}
+
+extension StmtSyntaxProtocol {
+    func inCodeBlock() -> CodeBlockItemSyntax {
+        self.asSyntax.inCodeBlock()
+    }
+}

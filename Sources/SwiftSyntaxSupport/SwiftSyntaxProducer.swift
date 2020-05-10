@@ -209,65 +209,49 @@ extension SwiftSyntaxProducer {
             iterating(file.typealiasIntentions) { intention in
                 let syntax = generateTypealias(intention)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
-                
-                builder.addStatement(codeBlock)
+                builder.addStatement(syntax.asSyntax.inCodeBlock())
             }
             
             iterating(file.enumIntentions) { intention in
                 let syntax = generateEnum(intention)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
-                
-                builder.addStatement(codeBlock)
+                builder.addStatement(syntax.asSyntax.inCodeBlock())
             }
             
             iterating(file.structIntentions) { _struct in
                 let syntax = generateStruct(_struct)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
-                
-                builder.addStatement(codeBlock)
+                builder.addStatement(syntax.asSyntax.inCodeBlock())
             }
             
             iterating(file.globalVariableIntentions) { variable in
                 let syntax = varDeclGenerator.generateGlobalVariable(variable)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
-                
-                builder.addStatement(codeBlock)
+                builder.addStatement(syntax.asSyntax.inCodeBlock())
             }
             
             iterating(file.globalFunctionIntentions) { function in
                 let syntax = generateFunction(function, alwaysEmitBody: true)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
-                
-                builder.addStatement(codeBlock)
+                builder.addStatement(syntax.asSyntax.inCodeBlock())
             }
             
             iterating(file.protocolIntentions) { _protocol in
                 let syntax = generateProtocol(_protocol)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
-                
-                builder.addStatement(codeBlock)
+                builder.addStatement(syntax.asSyntax.inCodeBlock())
             }
             
             iterating(file.classIntentions) { _class in
                 let syntax = generateClass(_class)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
-                
-                builder.addStatement(codeBlock)
+                builder.addStatement(syntax.asSyntax.inCodeBlock())
             }
             
             iterating(file.extensionIntentions) { _class in
                 let syntax = generateExtension(_class)
                 
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
-                
-                builder.addStatement(codeBlock)
+                builder.addStatement(syntax.asSyntax.inCodeBlock())
             }
             
             // Noone consumed the leading trivia - emit a dummy token just so we
@@ -277,8 +261,7 @@ extension SwiftSyntaxProducer {
                 
                 let item = CodeBlockItemSyntax { builder in
                     builder.useItem(SyntaxFactory
-                        .makeToken(TokenKind.identifier(""),
-                                   presence: .present)
+                        .makeToken(.identifier(""), presence: .present)
                         .withExtraLeading(consuming: &extraLeading)
                         .asSyntax
                     )
@@ -308,7 +291,10 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     func generateImport(_ module: String) -> ImportDeclSyntax {
         ImportDeclSyntax { builder in
-            builder.useImportTok(makeStartToken(SyntaxFactory.makeImportKeyword).withTrailingSpace())
+            builder.useImportTok(
+                makeStartToken(SyntaxFactory.makeImportKeyword)
+                    .withTrailingSpace()
+            )
             builder.addPathComponent(AccessPathComponentSyntax { builder in
                 builder.useName(makeIdentifier(module))
             })
@@ -323,11 +309,21 @@ extension SwiftSyntaxProducer {
         addCommentsIfAvailable(intention)
         
         return TypealiasDeclSyntax { builder in
-            builder.useTypealiasKeyword(makeStartToken(SyntaxFactory.makeTypealiasKeyword).withTrailingSpace())
+            builder.useTypealiasKeyword(
+                makeStartToken(SyntaxFactory.makeTypealiasKeyword)
+                    .withTrailingSpace()
+            )
             builder.useIdentifier(makeIdentifier(intention.name))
             builder.useInitializer(TypeInitializerClauseSyntax { builder in
-                builder.useEqual(SyntaxFactory.makeEqualToken().addingSurroundingSpaces())
-                builder.useValue(SwiftTypeConverter.makeTypeSyntax(intention.fromType))
+                builder.useEqual(
+                    SyntaxFactory
+                        .makeEqualToken()
+                        .addingSurroundingSpaces()
+                )
+                builder.useValue(
+                    SwiftTypeConverter
+                        .makeTypeSyntax(intention.fromType)
+                )
             })
         }
     }
@@ -348,15 +344,25 @@ extension SwiftSyntaxProducer {
                 builder.addAttribute(attribute().asSyntax)
             }
             
-            builder.useEnumKeyword(makeStartToken(SyntaxFactory.makeEnumKeyword).withTrailingSpace())
+            builder.useEnumKeyword(
+                makeStartToken(SyntaxFactory.makeEnumKeyword)
+                    .withTrailingSpace()
+            )
             builder.useIdentifier(makeIdentifier(intention.typeName))
             
             addExtraLeading(.spaces(1))
             
             builder.useInheritanceClause(TypeInheritanceClauseSyntax { builder in
-                builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
+                builder.useColon(
+                    SyntaxFactory
+                        .makeColonToken()
+                        .withTrailingSpace()
+                )
                 builder.addInheritedType(InheritedTypeSyntax { builder in
-                    builder.useTypeName(SwiftTypeConverter.makeTypeSyntax(intention.rawValueType))
+                    builder.useTypeName(
+                        SwiftTypeConverter
+                            .makeTypeSyntax(intention.rawValueType)
+                    )
                 })
             })
             
@@ -374,14 +380,21 @@ extension SwiftSyntaxProducer {
         addCommentsIfAvailable(_case)
         
         return EnumCaseDeclSyntax { builder in
-            builder.useCaseKeyword(makeStartToken(SyntaxFactory.makeCaseKeyword).withTrailingSpace())
+            builder.useCaseKeyword(
+                makeStartToken(SyntaxFactory.makeCaseKeyword)
+                    .withTrailingSpace()
+            )
             
             builder.addElement(EnumCaseElementSyntax { builder in
                 builder.useIdentifier(makeIdentifier(_case.name))
                 
                 if let rawValue = _case.expression {
                     builder.useRawValue(InitializerClauseSyntax { builder in
-                        builder.useEqual(SyntaxFactory.makeEqualToken().addingSurroundingSpaces())
+                        builder.useEqual(
+                            SyntaxFactory
+                                .makeEqualToken()
+                                .addingSurroundingSpaces()
+                        )
                         builder.useValue(generateExpression(rawValue))
                     })
                 }
@@ -418,7 +431,9 @@ extension SwiftSyntaxProducer {
             }
             
             builder.useExtensionKeyword(
-                makeStartToken(SyntaxFactory.makeExtensionKeyword).addingTrailingSpace())
+                makeStartToken(SyntaxFactory.makeExtensionKeyword)
+                    .addingTrailingSpace()
+            )
             
             builder.useExtendedType(
                 SwiftTypeConverter.makeTypeSyntax(.typeName(intention.typeName))
@@ -522,7 +537,11 @@ extension SwiftSyntaxProducer {
                     var identifier = makeIdentifier(inheritance)
                     
                     if i != inheritances.count - 1 {
-                        builder.useTrailingComma(SyntaxFactory.makeCommaToken().withTrailingSpace())
+                        builder.useTrailingComma(
+                            SyntaxFactory
+                                .makeCommaToken()
+                                .withTrailingSpace()
+                        )
                     } else {
                         identifier = identifier.withTrailingSpace()
                     }
@@ -556,7 +575,8 @@ extension SwiftSyntaxProducer {
             }
             builder.useStructKeyword(
                 makeStartToken(SyntaxFactory.makeStructKeyword)
-                    .addingTrailingSpace())
+                    .addingTrailingSpace()
+            )
             
             let identifier = makeIdentifier(intention.typeName)
             
@@ -594,7 +614,9 @@ extension SwiftSyntaxProducer {
             }
             
             builder.useProtocolKeyword(
-                makeStartToken(SyntaxFactory.makeProtocolKeyword).addingTrailingSpace())
+                makeStartToken(SyntaxFactory.makeProtocolKeyword)
+                    .addingTrailingSpace()
+            )
             
             let identifier = makeIdentifier(intention.typeName)
             
@@ -643,7 +665,11 @@ extension SwiftSyntaxProducer {
                 }
             }
             // TODO: ...and neither enums
-            iterating(intention.properties.compactMap { $0 as? EnumCaseGenerationIntention }) { prop in
+            let enumCases = intention
+                .properties
+                .compactMap { $0 as? EnumCaseGenerationIntention }
+            
+            iterating(enumCases) { prop in
                 addExtraLeading(indentation())
                 
                 builder.addMember(
@@ -654,7 +680,11 @@ extension SwiftSyntaxProducer {
                 )
             }
             // TODO: ...and again...
-            iterating(intention.properties.filter { !($0 is EnumCaseGenerationIntention) }) { prop in
+            let properties = intention
+                .properties
+                .filter { !($0 is EnumCaseGenerationIntention) }
+            
+            iterating(properties) { prop in
                 addExtraLeading(indentation())
                 
                 builder.addMember(
@@ -782,7 +812,10 @@ extension SwiftSyntaxProducer {
                 builder.addModifier(modifier(self))
             }
             
-            builder.useFuncKeyword(makeStartToken(SyntaxFactory.makeFuncKeyword).addingTrailingSpace())
+            builder.useFuncKeyword(
+                makeStartToken(SyntaxFactory.makeFuncKeyword)
+                    .addingTrailingSpace()
+            )
             builder.useSignature(generateSignature(intention.signature))
             builder.useIdentifier(makeIdentifier(intention.signature.name))
             
@@ -806,7 +839,12 @@ extension SwiftSyntaxProducer {
     
     func generateReturn(_ ret: SwiftType) -> ReturnClauseSyntax {
         ReturnClauseSyntax { builder in
-            builder.useArrow(SyntaxFactory.makeArrowToken().addingLeadingSpace().addingTrailingSpace())
+            builder.useArrow(
+                SyntaxFactory
+                    .makeArrowToken()
+                    .addingLeadingSpace()
+                    .addingTrailingSpace()
+            )
             builder.useReturnType(SwiftTypeConverter.makeTypeSyntax(ret))
         }
     }
@@ -829,12 +867,20 @@ extension SwiftSyntaxProducer {
         
         FunctionParameterSyntax { builder in
             if parameter.label == parameter.name {
-                builder.useFirstName(prepareStartToken(makeIdentifier(parameter.name)))
+                builder.useFirstName(
+                    prepareStartToken(makeIdentifier(parameter.name))
+                )
             } else if let label = parameter.label {
-                builder.useFirstName(prepareStartToken(makeIdentifier(label)).withTrailingSpace())
+                builder.useFirstName(
+                    prepareStartToken(makeIdentifier(label))
+                        .withTrailingSpace()
+                )
                 builder.useSecondName(makeIdentifier(parameter.name))
             } else {
-                builder.useFirstName(prepareStartToken(SyntaxFactory.makeWildcardKeyword()).withTrailingSpace())
+                builder.useFirstName(
+                    prepareStartToken(SyntaxFactory.makeWildcardKeyword())
+                        .withTrailingSpace()
+                )
                 builder.useSecondName(makeIdentifier(parameter.name))
             }
             
@@ -843,7 +889,9 @@ extension SwiftSyntaxProducer {
             builder.useType(SwiftTypeConverter.makeTypeSyntax(parameter.type))
             
             if withTrailingComma {
-                builder.useTrailingComma(SyntaxFactory.makeCommaToken().withTrailingSpace())
+                builder.useTrailingComma(
+                    SyntaxFactory.makeCommaToken().withTrailingSpace()
+                )
             }
         }
     }
@@ -854,8 +902,17 @@ extension SwiftSyntaxProducer {
     
     func generateEmptyFunctionBody() -> CodeBlockSyntax {
         CodeBlockSyntax { builder in
-            builder.useLeftBrace(SyntaxFactory.makeLeftBraceToken().withLeadingSpace())
-            builder.useRightBrace(SyntaxFactory.makeRightBraceToken().onNewline().addingLeadingTrivia(indentation()))
+            builder.useLeftBrace(
+                SyntaxFactory
+                    .makeLeftBraceToken()
+                    .withLeadingSpace()
+            )
+            builder.useRightBrace(
+                SyntaxFactory
+                    .makeRightBraceToken()
+                    .onNewline()
+                    .addingLeadingTrivia(indentation())
+            )
         }
     }
     
