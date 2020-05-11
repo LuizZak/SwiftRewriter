@@ -40,6 +40,14 @@ public class ClassVisitingIntentionPass: IntentionPass {
         for sub in type.subscripts {
             applyOnSubscript(sub)
         }
+        
+        if let deinitIntent = (type as? BaseClassIntention)?.deinitIntention {
+            applyOnDeinit(deinitIntent)
+        }
+    }
+    
+    func applyOnDeinit(_ deinitIntent: DeinitGenerationIntention) {
+        
     }
     
     func applyOnInstanceVar(_ ivar: InstanceVariableGenerationIntention) {
