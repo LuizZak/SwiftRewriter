@@ -145,10 +145,8 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
         if intention is InitGenerationIntention {
             return true
         }
-        if let method = intention as? MethodGenerationIntention {
-            if !isDeallocMethod(method) {
-                return true
-            }
+        if intention is MethodGenerationIntention {
+            return true
         }
         if let type = intention as? TypeGenerationIntention,
             type.kind != .struct {
@@ -174,10 +172,6 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
             addExtraLeading(.lineComment("// \(entry.summary)"))
             addExtraLeading(.newlines(1) + indentation())
         }
-    }
-    
-    private func isDeallocMethod(_ intention: MethodGenerationIntention) -> Bool {
-        intention.name == "dealloc" && intention.parameters.isEmpty
     }
 }
 
@@ -209,49 +203,49 @@ extension SwiftSyntaxProducer {
             iterating(file.typealiasIntentions) { intention in
                 let syntax = generateTypealias(intention)
                 
-                builder.addStatement(syntax.asSyntax.inCodeBlock())
+                builder.addStatement(syntax.inCodeBlock())
             }
             
             iterating(file.enumIntentions) { intention in
                 let syntax = generateEnum(intention)
                 
-                builder.addStatement(syntax.asSyntax.inCodeBlock())
+                builder.addStatement(syntax.inCodeBlock())
             }
             
             iterating(file.structIntentions) { _struct in
                 let syntax = generateStruct(_struct)
                 
-                builder.addStatement(syntax.asSyntax.inCodeBlock())
+                builder.addStatement(syntax.inCodeBlock())
             }
             
             iterating(file.globalVariableIntentions) { variable in
                 let syntax = varDeclGenerator.generateGlobalVariable(variable)
                 
-                builder.addStatement(syntax.asSyntax.inCodeBlock())
+                builder.addStatement(syntax.inCodeBlock())
             }
             
             iterating(file.globalFunctionIntentions) { function in
                 let syntax = generateFunction(function, alwaysEmitBody: true)
                 
-                builder.addStatement(syntax.asSyntax.inCodeBlock())
+                builder.addStatement(syntax.inCodeBlock())
             }
             
             iterating(file.protocolIntentions) { _protocol in
                 let syntax = generateProtocol(_protocol)
                 
-                builder.addStatement(syntax.asSyntax.inCodeBlock())
+                builder.addStatement(syntax.inCodeBlock())
             }
             
             iterating(file.classIntentions) { _class in
                 let syntax = generateClass(_class)
                 
-                builder.addStatement(syntax.asSyntax.inCodeBlock())
+                builder.addStatement(syntax.inCodeBlock())
             }
             
             iterating(file.extensionIntentions) { _class in
                 let syntax = generateExtension(_class)
                 
-                builder.addStatement(syntax.asSyntax.inCodeBlock())
+                builder.addStatement(syntax.inCodeBlock())
             }
             
             // Noone consumed the leading trivia - emit a dummy token just so we

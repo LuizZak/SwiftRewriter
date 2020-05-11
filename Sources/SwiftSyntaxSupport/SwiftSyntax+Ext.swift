@@ -4,6 +4,10 @@ extension SyntaxProtocol {
     var asSyntax: Syntax {
         return Syntax(self)
     }
+    
+    func inCodeBlock() -> CodeBlockItemSyntax {
+        return asSyntax.inCodeBlock()
+    }
 }
 
 extension TypeSyntaxProtocol {

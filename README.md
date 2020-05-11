@@ -48,7 +48,7 @@ MyClass.m:
 Running SwiftRewriter as shown:
 
 ```bash
-$ swift run SwiftRewriter --colorize --target stdout files MyClass.h MyClass.m
+$ swift run SwiftRewriter files --colorize --target stdout MyClass.h MyClass.m
 ```
 
 will produce the following Swift file in the standard output:
