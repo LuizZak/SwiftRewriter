@@ -4,7 +4,7 @@ import Intentions
 /// Analyzes non-overriden methods that have implicitly unwrapped optional returns,
 /// detecting non-null return signature by looking into all return statements
 /// on all exit paths and the values they return.
-public class DetectNonnullReturnsIntentionPass: ClassVisitingIntentionPass {
+public class DetectNonnullReturnsIntentionPass: TypeVisitingIntentionPass {
     private let tag = "\(DetectNonnullReturnsIntentionPass.self)"
     
     var didWork = false

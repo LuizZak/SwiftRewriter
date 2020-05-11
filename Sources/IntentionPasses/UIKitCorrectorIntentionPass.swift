@@ -5,7 +5,7 @@ import Commons
 
 /// Makes correction for signatures of subclasses and conformeds of known UIKit
 /// classes and protocols
-public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
+public class UIKitCorrectorIntentionPass: TypeVisitingIntentionPass {
     private var historyTag = "\(UIKitCorrectorIntentionPass.self)"
     
     private var conversions: [SignatureConversion] = []

@@ -3,7 +3,7 @@ import SwiftAST
 
 /// Detects [objectAtIndexSubscript:] and [setObject:atIndexedSubscript:] methods
 /// and converts them into proper subscript declarations.
-public class SubscriptDeclarationIntentionPass: ClassVisitingIntentionPass {
+public class SubscriptDeclarationIntentionPass: TypeVisitingIntentionPass {
     public override init() {
         
     }
