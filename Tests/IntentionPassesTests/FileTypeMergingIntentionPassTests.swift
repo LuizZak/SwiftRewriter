@@ -19,6 +19,11 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                             }
                             .setAsInterfaceSource()
                     }
+                    file.createExtension(forClassNamed: "A") { builder in
+                        builder
+                            .createVoidMethod(named: "fromHeaderExt")
+                            .setAsInterfaceSource()
+                    }
                 }.createFile(named: "A.m") { file in
                     file.createClass(withName: "A") { builder in
                         builder
@@ -33,6 +38,9 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                                     ])
                             }
                     }
+                    file.createExtension(forClassNamed: "A") { builder in
+                        builder.createVoidMethod(named: "fromImplementationExt")
+                    }
                 }.build()
         let sut = FileTypeMergingIntentionPass()
         
@@ -42,6 +50,8 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         XCTAssertEqual(files.count, 1)
         XCTAssertEqual(files[0].sourcePath, "A.m")
         XCTAssertEqual(files[0].classIntentions.count, 1)
+        XCTAssertEqual(files[0].extensionIntentions.count, 1)
+        XCTAssertEqual(files[0].extensionIntentions[0].typeName, "A")
         XCTAssertEqual(files[0].classIntentions[0].precedingComments, [
             "// Header comment",
             "// Implementation comment"
@@ -618,5 +628,42 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         XCTAssert(file.sourcePath.hasSuffix(".m"))
         XCTAssertEqual(file.structIntentions.count, 1)
         XCTAssertEqual(file.structIntentions[0].instanceVariables.count, 1)
+    }
+    
+    func testMergeExtensions() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createExtension(forClassNamed: "A") { builder in
+                        builder
+                            .createMethod(named: "test") { builder in
+                                builder.createSignature { builder in
+                                    builder.addParameter(name: "test",
+                                                         type: .string)
+                                }
+                            }
+                            .setAsInterfaceSource()
+                    }
+                }.createFile(named: "A.m") { file in
+                    file.createExtension(forClassNamed: "A") { builder in
+                        builder
+                            .createMethod(named: "test") { builder in
+                                builder.createSignature { builder in
+                                    builder.addParameter(name: "test",
+                                                         type: .nullabilityUnspecified(.string))
+                                }
+                            }
+                    }
+                }.build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files[0].extensionIntentions[0].methods.count, 1)
+        XCTAssertEqual(files[0].extensionIntentions[0].methods[0].name, "test")
+        XCTAssertEqual(files[0].extensionIntentions[0].methods[0].signature,
+                       FunctionSignature(name: "test",
+                                         parameters: [ParameterSignature(name: "test", type: .string)]))
     }
 }

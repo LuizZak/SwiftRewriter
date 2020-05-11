@@ -228,6 +228,7 @@ class TypeMerger {
         
         if let first = first as? ClassGenerationIntention,
             let second = second as? ClassGenerationIntention {
+            
             // Inheritance
             if let superclass = first.superclassName, second.superclassName == nil {
                 second.superclassName = superclass
@@ -244,6 +245,7 @@ class TypeMerger {
         
         if let first = first as? BaseClassIntention,
             let second = second as? BaseClassIntention {
+            
             // Instance vars
             for ivar in first.instanceVariables {
                 if !second.hasInstanceVariable(named: ivar.name) {
