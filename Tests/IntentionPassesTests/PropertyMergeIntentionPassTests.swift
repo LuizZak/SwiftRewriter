@@ -282,6 +282,54 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         )
     }
     
+    func testSynthesizeBackingFieldWhenUsageOfBackingFieldIsDetectedInDeinit() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { (builder) in
+                    builder
+                        .createProperty(named: "a", type: .int)
+                        .createDeinit { method in
+                            method.setBody([
+                                .expression(.assignment(lhs: .identifier("_a"), op: .assign, rhs: .constant(1)))
+                            ])
+                        }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.instanceVariables.count, 1)
+        XCTAssertEqual(cls.instanceVariables[0].name, "_a")
+        XCTAssertEqual(cls.properties.count, 1)
+        
+        switch cls.properties[0].mode {
+        case let .property(get, set):
+            XCTAssertEqual(get.body, [.return(Expression.identifier("self").dot("_a"))])
+            XCTAssertEqual(set.valueIdentifier, "newValue")
+            XCTAssertEqual(set.body.body, [.expression(.assignment(lhs: Expression.identifier("self").dot("_a"),
+                                                                   op: .assign,
+                                                                   rhs: .identifier("newValue")))])
+        default:
+            XCTFail("Expected to synthesize getter/setter with backing field.")
+        }
+        
+        XCTAssertEqual(
+            cls.history.summary,
+            """
+            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+            that the backing field of A.a: Int (_a) was being used in A.deinit.
+            """
+        )
+        XCTAssertEqual(
+            cls.properties[0].history.summary,
+            """
+            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+            that the backing field of A.a: Int (_a) was being used in A.deinit.
+            """
+        )
+    }
+    
     /// If a property is marked as `readonly` in Objective-C, don't synthesize
     /// a setter during backing-field search
     func testSynthesizesReadOnlyBackingFieldIfPropertyIsReadOnly() {

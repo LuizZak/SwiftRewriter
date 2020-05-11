@@ -196,7 +196,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
         
         func collectMethodBodies(fromClass classIntention: BaseClassIntention)
             -> [(FunctionBodyIntention, source: String)] {
-                
+            
             var bodies: [(FunctionBodyIntention, source: String)] = []
             
             for method in collectMethods(fromClass: classIntention) {
@@ -226,6 +226,12 @@ public class PropertyMergeIntentionPass: IntentionPass {
                             + ":setter"
                     bodies.append((setter.body, source))
                 }
+            }
+            
+            if let deinitIntentBody = classIntention.deinitIntention?.functionBody {
+                let source = "\(classIntention.typeName).deinit"
+                
+                bodies.append((deinitIntentBody, source))
             }
             
             return bodies

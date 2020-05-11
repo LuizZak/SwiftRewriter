@@ -121,6 +121,7 @@ class FunctionBodyQueueTests: XCTestCase {
                     file.createGlobalFunction(withName: "a", body: [])
                         .createClass(withName: "B") { type in
                             type.createProperty(named: "b", type: .int, mode: .computed(FunctionBodyIntention(body: [])))
+                                .createDeinit()
                         }
                 }.createFile(named: "C") { file in
                     file.createClass(withName: "C") { type in
@@ -129,6 +130,7 @@ class FunctionBodyQueueTests: XCTestCase {
                     }
                 }.build()
         let global = intentions.fileIntentions()[0].globalFunctionIntentions[0].functionBody
+        let deinitBody = intentions.fileIntentions()[0].classIntentions[0].deinitIntention?.functionBody
         let bodyGetter1 = intentions.fileIntentions()[0].typeIntentions[0].properties[0].getter
         let bodyGetter2 = intentions.fileIntentions()[1].typeIntentions[0].properties[0].getter
         let bodySetter = intentions.fileIntentions()[1].typeIntentions[0].properties[0].setter?.body
@@ -136,8 +138,9 @@ class FunctionBodyQueueTests: XCTestCase {
         sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate, numThreads: 8)
         let items = sut.items
         
-        XCTAssertEqual(items.count, 4)
+        XCTAssertEqual(items.count, 5)
         XCTAssert(items.contains(where: { $0.body === global }))
+        XCTAssert(items.contains(where: { $0.body === deinitBody }))
         XCTAssert(items.contains(where: { $0.body === bodyGetter1 }))
         XCTAssert(items.contains(where: { $0.body === bodyGetter2 }))
         XCTAssert(items.contains(where: { $0.body === bodySetter }))
