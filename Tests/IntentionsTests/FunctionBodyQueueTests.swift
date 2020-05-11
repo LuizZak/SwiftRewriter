@@ -47,6 +47,25 @@ class FunctionBodyQueueTests: XCTestCase {
         XCTAssert(items.first?.body === body)
     }
     
+    func testQueueStructMethodBody() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A") { file in
+                    file.createStruct(withName: "A") { type in
+                        type.createMethod(named: "a") { method in
+                            method.setBody([])
+                        }
+                    }
+                }.build()
+        let body = intentions.fileIntentions()[0].typeIntentions[0].methods[0].functionBody
+        
+        sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate, numThreads: 8)
+        let items = sut.items
+        
+        XCTAssertEqual(items.count, 1)
+        XCTAssert(items.first?.body === body)
+    }
+    
     func testQueuePropertyGetter() {
         let intentions =
             IntentionCollectionBuilder()
@@ -112,6 +131,26 @@ class FunctionBodyQueueTests: XCTestCase {
         
         XCTAssertEqual(items.count, 1)
         XCTAssert(items.first?.body === deinitIntent?.functionBody)
+    }
+    
+    func testQueueSubscript() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { file in
+                    file.createSubscript("(index: Int)", returnType: .int) { builder in
+                        builder.setAsGetterSetter(getter: [],
+                                                  setter: .init(valueIdentifier: "newValue", body: []))
+                    }
+                }.build()
+        let bodyGetter = intentions.fileIntentions()[0].classIntentions[0].subscripts[0].mode.getter
+        let bodySetter = intentions.fileIntentions()[0].classIntentions[0].subscripts[0].mode.setter?.body
+        
+        sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate, numThreads: 8)
+        let items = sut.items
+        
+        XCTAssertEqual(items.count, 2)
+        XCTAssert(items.contains(where: { $0.body === bodyGetter }))
+        XCTAssert(items.contains(where: { $0.body === bodySetter }))
     }
     
     func testQueueAllBodiesFound() {

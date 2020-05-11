@@ -202,15 +202,6 @@ public extension TypeBuilder where T: BaseClassIntention {
         return self
     }
     
-    /// Marks the target type for this type builder as coming from a category
-    /// extension interface declaration.
-    @discardableResult
-    func setAsCategoryInterfaceSource() -> TypeBuilder {
-        targetType.isInterfaceSource = true
-        
-        return self
-    }
-    
     @discardableResult
     func createConformance(protocolName: String) -> TypeBuilder {
         let prot = ProtocolInheritanceIntention(protocolName: protocolName)
@@ -251,6 +242,17 @@ public extension TypeBuilder where T: ClassGenerationIntention {
     @discardableResult
     func inherit(from className: String) -> TypeBuilder {
         targetType.superclassName = className
+        
+        return self
+    }
+}
+
+public extension TypeBuilder where T: ClassExtensionGenerationIntention {
+    /// Marks the target type for this type builder as coming from a category
+    /// extension interface declaration.
+    @discardableResult
+    func setAsCategoryInterfaceSource() -> TypeBuilder {
+        targetType.isInterfaceSource = true
         
         return self
     }

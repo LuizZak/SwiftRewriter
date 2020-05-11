@@ -2925,7 +2925,7 @@ class SwiftRewriterTests: XCTestCase {
                         return self
                     }
                     set(object) {
-                        (object)
+                        object
                     }
                 }
             }

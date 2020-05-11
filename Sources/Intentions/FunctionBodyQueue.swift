@@ -17,6 +17,12 @@ public protocol FunctionBodyQueueDelegate: class {
     
     func makeContext(forPropertySetter property: PropertyGenerationIntention,
                      setter: PropertyGenerationIntention.Setter) -> Context
+    
+    func makeContext(forSubscriptGetter subscriptIntent: SubscriptGenerationIntention,
+                     getter: FunctionBodyIntention) -> Context
+    
+    func makeContext(forSubscriptSetter subscriptIntent: SubscriptGenerationIntention,
+                     setter: PropertyGenerationIntention.Setter) -> Context
 }
 
 /// Allows collecting function bodies across intention collections from functions,
@@ -105,6 +111,10 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
             collectFromFunction(function)
         }
         
+        for type in file.typeIntentions {
+            collectFromType(type)
+        }
+        
         for cls in file.classIntentions {
             collectFromClass(cls)
         }
@@ -123,17 +133,23 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         collectFunctionBody(body, .global(function), context: context)
     }
     
-    private func collectFromClass(_ cls: BaseClassIntention) {
-        for prop in cls.properties {
+    private func collectFromType(_ typeIntent: TypeGenerationIntention) {
+        for prop in typeIntent.properties {
             collectProperty(prop)
         }
         
-        for ctor in cls.constructors {
+        for ctor in typeIntent.constructors {
             collectInit(ctor)
         }
         
-        for method in cls.methods {
+        for method in typeIntent.methods {
             collectMethod(method)
+        }
+    }
+    
+    private func collectFromClass(_ cls: BaseClassIntention) {
+        for sub in cls.subscripts {
+            collectSubscript(sub)
         }
         
         if let deinitIntent = cls.deinitIntention {
@@ -205,6 +221,31 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         }
     }
     
+    private func collectSubscript(_ subscriptIntent: SubscriptGenerationIntention) {
+        guard let delegate = delegate else {
+            return
+        }
+        
+        switch subscriptIntent.mode {
+        case .getter(let getter):
+            let context =
+                delegate.makeContext(forSubscriptGetter: subscriptIntent, getter: getter)
+            
+            collectFunctionBody(getter, .subscript(subscriptIntent, isSetter: false), context: context)
+            
+        case let .getterAndSetter(getter, setter):
+            let getterContext =
+                delegate.makeContext(forSubscriptGetter: subscriptIntent, getter: getter)
+            
+            collectFunctionBody(getter, .subscript(subscriptIntent, isSetter: false), context: getterContext)
+            
+            let setterContext =
+                delegate.makeContext(forSubscriptSetter: subscriptIntent, setter: setter)
+            
+            collectFunctionBody(setter.body, .subscript(subscriptIntent, isSetter: true), context: setterContext)
+        }
+    }
+    
     private func collectFunctionBody(_ functionBody: FunctionBodyIntention,
                                      _ intention: FunctionBodyCarryingIntention,
                                      context: Context) {
@@ -240,6 +281,7 @@ public enum FunctionBodyCarryingIntention {
     case `deinit`(DeinitGenerationIntention)
     case global(GlobalFunctionGenerationIntention)
     case property(PropertyGenerationIntention, isSetter: Bool)
+    case `subscript`(SubscriptGenerationIntention, isSetter: Bool)
 }
 
 /// An empty funtion body queue implementation which always return an empty
@@ -269,6 +311,15 @@ public class EmptyFunctionBodyQueueDelegate: FunctionBodyQueueDelegate {
     }
     public func makeContext(forPropertySetter property: PropertyGenerationIntention,
                             setter: PropertyGenerationIntention.Setter) {
+        
+    }
+    public func makeContext(forSubscriptGetter subscriptIntent: SubscriptGenerationIntention,
+                            getter: FunctionBodyIntention) -> Void {
+        
+    }
+    
+    public func makeContext(forSubscriptSetter subscriptIntent: SubscriptGenerationIntention,
+                            setter: PropertyGenerationIntention.Setter) -> Void {
         
     }
 }
