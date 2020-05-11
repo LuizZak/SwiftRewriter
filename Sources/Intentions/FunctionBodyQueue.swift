@@ -8,6 +8,8 @@ public protocol FunctionBodyQueueDelegate: class {
     
     func makeContext(forInit ctor: InitGenerationIntention) -> Context
     
+    func makeContext(forDeinit deinitIntent: DeinitGenerationIntention) -> Context
+    
     func makeContext(forMethod method: MethodGenerationIntention) -> Context
     
     func makeContext(forPropertyGetter property: PropertyGenerationIntention,
@@ -40,6 +42,16 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         
         let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
         queue.collect(from: intentionCollection, numThreads: numThreads)
+        
+        return queue
+    }
+    
+    public static func fromDeinit(_ intentionCollection: IntentionCollection,
+                                  deinitIntent: DeinitGenerationIntention,
+                                  delegate: Delegate) -> FunctionBodyQueue {
+        
+        let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
+        queue.collectDeinit(deinitIntent)
         
         return queue
     }
@@ -123,6 +135,10 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         for method in cls.methods {
             collectMethod(method)
         }
+        
+        if let deinitIntent = cls.deinitIntention {
+            collectDeinit(deinitIntent)
+        }
     }
     
     private func collectFunction(_ f: FunctionIntention,
@@ -141,6 +157,15 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         
         let context = delegate.makeContext(forInit: ctor)
         collectFunction(ctor, .initializer(ctor), context: context)
+    }
+    
+    private func collectDeinit(_ deinitIntent: DeinitGenerationIntention) {
+        guard let delegate = delegate else {
+            return
+        }
+        
+        let context = delegate.makeContext(forDeinit: deinitIntent)
+        collectFunction(deinitIntent, .deinit(deinitIntent), context: context)
     }
     
     private func collectMethod(_ method: MethodGenerationIntention) {
@@ -212,6 +237,7 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
 public enum FunctionBodyCarryingIntention {
     case method(MethodGenerationIntention)
     case initializer(InitGenerationIntention)
+    case `deinit`(DeinitGenerationIntention)
     case global(GlobalFunctionGenerationIntention)
     case property(PropertyGenerationIntention, isSetter: Bool)
 }
@@ -232,6 +258,9 @@ public class EmptyFunctionBodyQueueDelegate: FunctionBodyQueueDelegate {
         
     }
     public func makeContext(forInit ctor: InitGenerationIntention) {
+        
+    }
+    public func makeContext(forDeinit deinitIntent: DeinitGenerationIntention) -> Void {
         
     }
     public func makeContext(forPropertyGetter property: PropertyGenerationIntention,

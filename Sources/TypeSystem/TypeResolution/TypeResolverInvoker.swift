@@ -163,6 +163,15 @@ public class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
         return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
     }
     
+    public func makeContext(forDeinit deinitIntent: DeinitGenerationIntention) -> Context {
+        let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        
+        let intrinsics = makeIntrinsics(typeResolver: resolver)
+        intrinsics.setupIntrinsics(forMember: deinitIntent, intentions: intentions)
+        
+        return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
+    }
+    
     public func makeContext(forMethod method: MethodGenerationIntention) -> Context {
         let resolver = ExpressionTypeResolver(
             typeSystem: typeSystem, contextFunctionReturnType: method.returnType)

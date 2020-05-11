@@ -84,6 +84,36 @@ class FunctionBodyQueueTests: XCTestCase {
         XCTAssert(items.contains(where: { $0.body === bodySetter }))
     }
     
+    func testQueueDeinit() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { file in
+                    file.createDeinit()
+                }.build()
+        let body = intentions.fileIntentions()[0].classIntentions[0].deinitIntention?.functionBody
+        
+        sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate, numThreads: 8)
+        let items = sut.items
+        
+        XCTAssertEqual(items.count, 1)
+        XCTAssert(items.first?.body === body)
+    }
+    
+    func testFromDeinit() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { file in
+                    file.createDeinit()
+                }.build()
+        let deinitIntent = intentions.fileIntentions()[0].classIntentions[0].deinitIntention
+        
+        sut = FunctionBodyQueue.fromDeinit(intentions, deinitIntent: deinitIntent!, delegate: delegate)
+        let items = sut.items
+        
+        XCTAssertEqual(items.count, 1)
+        XCTAssert(items.first?.body === deinitIntent?.functionBody)
+    }
+    
     func testQueueAllBodiesFound() {
         let intentions =
             IntentionCollectionBuilder()
