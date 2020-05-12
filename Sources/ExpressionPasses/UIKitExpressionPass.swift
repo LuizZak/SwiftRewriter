@@ -59,46 +59,8 @@ public class UIKitExpressionPass: BaseExpressionPass {
             
             return visitExpression(exp)
         }
-        if let exp = convertBooleanGetters(exp) {
-            notifyChange()
-            
-            return visitExpression(exp)
-        }
         
         return super.visitPostfix(exp)
-    }
-    
-    /// Corrects boolean getters `.hidden` -> `.isHidden`, `.editable` -> `.isEditable`, etc.
-    // TODO: Extend compounded mapping types to support property renaming and record
-    // these directly in UIViewCompoundType
-    func convertBooleanGetters(_ exp: PostfixExpression) -> Expression? {
-        // Make sure we're handling a UIView subclass here
-        guard let typeName = exp.exp.resolvedType?.deepUnwrapped.typeName else {
-            return nil
-        }
-        guard let member = exp.member else {
-            return nil
-        }
-        
-        let conversions: [String: String] = [
-            "editable": "isEditable",
-            "firstResponder": "isFirstResponder"
-        ]
-        
-        guard let converted = conversions[member.name] else {
-            return nil
-        }
-        
-        if !typeSystem.isType(typeName, subtypeOf: "UIView") {
-            return nil
-        }
-        
-        let op = Postfix.member(converted)
-        op.optionalAccessKind = exp.op.optionalAccessKind
-        
-        exp.op = op
-        
-        return exp
     }
     
     /// Converts [<exp> addTarget:<a1> action:<a2> forControlEvents:<a3>]

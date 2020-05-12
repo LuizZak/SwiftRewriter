@@ -48,52 +48,6 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
-    func testConvertUIViewBooleanGetters() {
-        let _exp = Expression.identifier("view")
-        _exp.resolvedType = .typeName("UIView")
-        
-        var exp: Expression {
-            return _exp.copy()
-        }
-        
-        let makeGetter: (String) -> Expression = {
-            return exp.dot($0)
-        }
-        
-        assertTransform(
-            expression: makeGetter("editable"),
-            into: exp.dot("isEditable")
-        ); assertNotifiedChange()
-        
-        assertTransform(
-            expression: makeGetter("firstResponder"),
-            into: exp.dot("isFirstResponder")
-        ); assertNotifiedChange()
-    }
-    
-    func testConvertBooleanGettersOnOptionalViews() {
-        let _exp = Expression.identifier("view").optional()
-        _exp.exp.resolvedType = .optional(.typeName("UIView"))
-        
-        var exp: OptionalAccessPostfixBuilder {
-            return _exp.copy()
-        }
-        
-        let makeGetter: (String) -> Expression = {
-            return exp.dot($0)
-        }
-        
-        assertTransform(
-            expression: makeGetter("editable"),
-            into: exp.dot("isEditable")
-        ); assertNotifiedChange()
-        
-        assertTransform(
-            expression: makeGetter("firstResponder"),
-            into: exp.dot("isFirstResponder")
-        ); assertNotifiedChange()
-    }
-    
     func testUIFontInitializers() {
         assertTransformParsed(
             expression: "[UIFont systemFontOfSize:12]",

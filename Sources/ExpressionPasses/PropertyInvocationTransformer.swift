@@ -16,7 +16,6 @@ public class PropertyInvocationTransformer: PostfixInvocationTransformer {
         self.baseExpressionMatcher = baseExpressionMatcher
         self.oldName = oldName
         self.newName = newName
-        
     }
     
     public func canApply(to postfix: PostfixExpression) -> Bool {

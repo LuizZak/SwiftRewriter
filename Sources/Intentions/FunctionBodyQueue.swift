@@ -123,15 +123,6 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
             collectFromClass(cls)
         }
     }
-
-    private func collectFromFunction(_ function: GlobalFunctionGenerationIntention) {
-        guard let body = function.functionBody, let delegate = delegate else {
-            return
-        }
-        
-        let context = delegate.makeContext(forFunction: function)
-        collectFunctionBody(body, .global(function), context: context)
-    }
     
     private func collectFromType(_ typeIntent: TypeGenerationIntention) {
         for prop in typeIntent.properties {
@@ -155,6 +146,15 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         if let deinitIntent = cls.deinitIntention {
             collectDeinit(deinitIntent)
         }
+    }
+    
+    private func collectFromFunction(_ function: GlobalFunctionGenerationIntention) {
+        guard let body = function.functionBody, let delegate = delegate else {
+            return
+        }
+        
+        let context = delegate.makeContext(forFunction: function)
+        collectFunctionBody(body, .global(function), context: context)
     }
     
     private func collectFunction(_ f: FunctionIntention,

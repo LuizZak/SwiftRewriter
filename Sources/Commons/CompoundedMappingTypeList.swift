@@ -16,6 +16,7 @@ public enum CompoundedMappingTypeList {
             CoreGraphicsCompoundTypes.cgRect.create(),
             UIResponderCompoundType.create(),
             UIViewCompoundType.create(),
+            UIControlCompoundType.create(),
             UIColorCompoundType.create(),
             UIGestureRecognizerCompoundType.create(),
             UILabelCompoundType.create(),
