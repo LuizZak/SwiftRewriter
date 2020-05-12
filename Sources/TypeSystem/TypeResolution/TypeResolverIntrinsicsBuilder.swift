@@ -195,6 +195,16 @@ class TypeResolverIntrinsicsBuilder {
             functionArgumentsIntrinsics = functionIntrinsics
         }
         
+        if let sub = member as? SubscriptGenerationIntention {
+            let subscriptIntrinsics = DefaultCodeScope()
+            
+            subscriptIntrinsics.recordDefinitions(
+                CodeDefinition.forParameters(sub.parameters)
+            )
+            
+            functionArgumentsIntrinsics = subscriptIntrinsics
+        }
+        
         // Push file-level global definitions (variables and functions)
         let intentionGlobals =
             IntentionCollectionGlobalsDefinitionsSource(globals: self.intentionGlobals,

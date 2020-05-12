@@ -225,7 +225,6 @@ public class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
 
         let intrinsics = makeIntrinsics(typeResolver: resolver)
         intrinsics.setupIntrinsics(forMember: subscriptIntent, intentions: intentions)
-        intrinsics.addSetterIntrinsics(setter: setter, type: subscriptIntent.returnType)
         
         return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
     }

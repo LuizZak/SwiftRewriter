@@ -1391,6 +1391,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             @implementation A
             - (NSObject*)objectAtIndexSubscript:(NSUInteger)index {
+                (index);
                 return self;
             }
             - (void)test {
@@ -1401,6 +1402,9 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             class A {
                 subscript(index: UInt) -> NSObject! {
+                    // type: UInt
+                    index
+
                     return self
                 }
 
