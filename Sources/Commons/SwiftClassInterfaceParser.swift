@@ -371,7 +371,7 @@ public final class SwiftClassInterfaceParser {
     
     /// ```
     /// initializer-declaration
-    ///     : 'init' '?'? function-parameters
+    ///     : 'init' '?'? parameter-signature
     ///     ;
     /// ```
     private static func parseInitializerDeclaration(from tokenizer: Tokenizer) throws -> InitializerDeclaration {
@@ -543,8 +543,8 @@ public final class SwiftClassInterfaceParser {
         return Attribute.generic(name: name, content: content)
     }
     
-    /// Parses a Swift attribute in the form of a SwiftRewriterAttribute from a
-    /// given input lexer.
+    /// Parses a Swift attribute in the form of a `SwiftRewriterAttribute` from
+    /// a given input lexer.
     ///
     /// Formal grammar:
     ///
