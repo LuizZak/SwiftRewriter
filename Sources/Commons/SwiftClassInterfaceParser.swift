@@ -394,7 +394,7 @@ public final class SwiftClassInterfaceParser {
 
     /// ```
     /// subscript-declaration
-    ///     : 'subscript' '(' identifier ':' swift-type ')' '->' swift-type getter-setter-keywords?
+    ///     : 'subscript' parameter-signature '->' swift-type getter-setter-keywords?
     /// ```
     private static func parseSubscriptDeclaration(from tokenizer: Tokenizer) throws -> SubscriptDeclaration {
         try tokenizer.advance(overTokenType: .subscript)
