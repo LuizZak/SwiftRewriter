@@ -265,7 +265,7 @@ public class ObjcParser {
     private func parsePreprocessorDirectivesChannel() throws {
         let src = source.fetchSource()
         
-        let parser = try self.state.makeMainParser(input: src)
+        let parser = try state.makeMainParser(input: src)
         parser.lexer.setChannel(ObjectiveCLexer.DIRECTIVE_CHANNEL)
         defer {
             // Don't forget to reset token channel, as this state may be shared

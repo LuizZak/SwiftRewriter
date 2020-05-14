@@ -34,12 +34,13 @@ open class ObjectiveCPreprocessorLexer: Lexer {
 	public
 	static let SHARP=1, CODE=2, IMPORT=3, INCLUDE=4, PRAGMA=5, DEFINE=6, DEFINED=7, 
             IF=8, ELIF=9, ELSE=10, UNDEF=11, IFDEF=12, IFNDEF=13, ENDIF=14, 
-            TRUE=15, FALSE=16, ERROR=17, WARNING=18, BANG=19, LPAREN=20, 
-            RPAREN=21, EQUAL=22, NOTEQUAL=23, AND=24, OR=25, LT=26, GT=27, 
-            LE=28, GE=29, DIRECTIVE_WHITESPACES=30, DIRECTIVE_STRING=31, 
-            CONDITIONAL_SYMBOL=32, DECIMAL_LITERAL=33, FLOAT=34, NEW_LINE=35, 
-            DIRECITVE_COMMENT=36, DIRECITVE_LINE_COMMENT=37, DIRECITVE_NEW_LINE=38, 
-            DIRECITVE_TEXT_NEW_LINE=39, TEXT=40, SLASH=41
+            TRUE=15, FALSE=16, ERROR=17, WARNING=18, HASINCLUDE=19, BANG=20, 
+            LPAREN=21, RPAREN=22, EQUAL=23, NOTEQUAL=24, AND=25, OR=26, 
+            LT=27, GT=28, LE=29, GE=30, DIRECTIVE_WHITESPACES=31, DIRECTIVE_STRING=32, 
+            DIRECTIVE_PATH=33, CONDITIONAL_SYMBOL=34, DECIMAL_LITERAL=35, 
+            FLOAT=36, NEW_LINE=37, DIRECITVE_COMMENT=38, DIRECITVE_LINE_COMMENT=39, 
+            DIRECITVE_NEW_LINE=40, DIRECITVE_TEXT_NEW_LINE=41, TEXT=42, 
+            SLASH=43
 
 	public
 	static let COMMENTS_CHANNEL=2
@@ -58,33 +59,34 @@ open class ObjectiveCPreprocessorLexer: Lexer {
 	public
 	static let ruleNames: [String] = [
 		"SHARP", "COMMENT", "LINE_COMMENT", "SLASH", "CHARACTER_LITERAL", "QUOTE_STRING", 
-		"STRING", "CODE", "IMPORT", "INCLUDE", "PRAGMA", "DEFINE", "DEFINED", 
+		"STRING", "PATH", "CODE", "IMPORT", "INCLUDE", "PRAGMA", "DEFINE", "DEFINED", 
 		"IF", "ELIF", "ELSE", "UNDEF", "IFDEF", "IFNDEF", "ENDIF", "TRUE", "FALSE", 
-		"ERROR", "WARNING", "BANG", "LPAREN", "RPAREN", "EQUAL", "NOTEQUAL", "AND", 
-		"OR", "LT", "GT", "LE", "GE", "DIRECTIVE_WHITESPACES", "DIRECTIVE_STRING", 
-		"CONDITIONAL_SYMBOL", "DECIMAL_LITERAL", "FLOAT", "NEW_LINE", "DIRECITVE_COMMENT", 
-		"DIRECITVE_LINE_COMMENT", "DIRECITVE_NEW_LINE", "DIRECTIVE_DEFINE_CONDITIONAL_SYMBOL", 
-		"DIRECITVE_TEXT_NEW_LINE", "BACK_SLASH_ESCAPE", "TEXT_NEW_LINE", "DIRECTIVE_COMMENT", 
-		"DIRECTIVE_LINE_COMMENT", "DIRECTIVE_SLASH", "TEXT", "EscapeSequence", 
-		"OctalEscape", "UnicodeEscape", "HexDigit", "StringFragment", "LETTER", 
-		"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", 
-		"O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
+		"ERROR", "WARNING", "HASINCLUDE", "BANG", "LPAREN", "RPAREN", "EQUAL", 
+		"NOTEQUAL", "AND", "OR", "LT", "GT", "LE", "GE", "DIRECTIVE_WHITESPACES", 
+		"DIRECTIVE_STRING", "DIRECTIVE_PATH", "CONDITIONAL_SYMBOL", "DECIMAL_LITERAL", 
+		"FLOAT", "NEW_LINE", "DIRECITVE_COMMENT", "DIRECITVE_LINE_COMMENT", "DIRECITVE_NEW_LINE", 
+		"DIRECTIVE_DEFINE_CONDITIONAL_SYMBOL", "DIRECITVE_TEXT_NEW_LINE", "BACK_SLASH_ESCAPE", 
+		"TEXT_NEW_LINE", "DIRECTIVE_COMMENT", "DIRECTIVE_LINE_COMMENT", "DIRECTIVE_SLASH", 
+		"TEXT", "EscapeSequence", "OctalEscape", "UnicodeEscape", "HexDigit", 
+		"StringFragment", "PathFragment", "LETTER", "A", "B", "C", "D", "E", "F", 
+		"G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", 
+		"U", "V", "W", "X", "Y", "Z"
 	]
 
 	private static let _LITERAL_NAMES: [String?] = [
 		nil, "'#'", nil, nil, nil, "'pragma'", nil, "'defined'", "'if'", "'elif'", 
 		"'else'", "'undef'", "'ifdef'", "'ifndef'", "'endif'", nil, nil, "'error'", 
-		"'warning'", "'!'", "'('", "')'", "'=='", "'!='", "'&&'", "'||'", "'<'", 
-		"'>'", "'<='", "'>='"
+		"'warning'", "'__has_include'", "'!'", "'('", "')'", "'=='", "'!='", "'&&'", 
+		"'||'", "'<'", "'>'", "'<='", "'>='"
 	]
 	private static let _SYMBOLIC_NAMES: [String?] = [
 		nil, "SHARP", "CODE", "IMPORT", "INCLUDE", "PRAGMA", "DEFINE", "DEFINED", 
 		"IF", "ELIF", "ELSE", "UNDEF", "IFDEF", "IFNDEF", "ENDIF", "TRUE", "FALSE", 
-		"ERROR", "WARNING", "BANG", "LPAREN", "RPAREN", "EQUAL", "NOTEQUAL", "AND", 
-		"OR", "LT", "GT", "LE", "GE", "DIRECTIVE_WHITESPACES", "DIRECTIVE_STRING", 
-		"CONDITIONAL_SYMBOL", "DECIMAL_LITERAL", "FLOAT", "NEW_LINE", "DIRECITVE_COMMENT", 
-		"DIRECITVE_LINE_COMMENT", "DIRECITVE_NEW_LINE", "DIRECITVE_TEXT_NEW_LINE", 
-		"TEXT", "SLASH"
+		"ERROR", "WARNING", "HASINCLUDE", "BANG", "LPAREN", "RPAREN", "EQUAL", 
+		"NOTEQUAL", "AND", "OR", "LT", "GT", "LE", "GE", "DIRECTIVE_WHITESPACES", 
+		"DIRECTIVE_STRING", "DIRECTIVE_PATH", "CONDITIONAL_SYMBOL", "DECIMAL_LITERAL", 
+		"FLOAT", "NEW_LINE", "DIRECITVE_COMMENT", "DIRECITVE_LINE_COMMENT", "DIRECITVE_NEW_LINE", 
+		"DIRECITVE_TEXT_NEW_LINE", "TEXT", "SLASH"
 	]
 	public
 	static let VOCABULARY = Vocabulary(_LITERAL_NAMES, _SYMBOLIC_NAMES)
@@ -104,7 +106,7 @@ open class ObjectiveCPreprocessorLexer: Lexer {
     init(_ input: CharStream, _ state: State) {
         self.state = state
         
-        RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
+        RuntimeMetaData.checkVersion("4.8", RuntimeMetaData.VERSION)
         super.init(input)
         _interp = LexerATNSimulator(self,
                                     _ATN,

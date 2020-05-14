@@ -36,38 +36,39 @@ open class ObjectiveCPreprocessorParser: Parser {
 		case EOF = -1, SHARP = 1, CODE = 2, IMPORT = 3, INCLUDE = 4, PRAGMA = 5, 
                  DEFINE = 6, DEFINED = 7, IF = 8, ELIF = 9, ELSE = 10, UNDEF = 11, 
                  IFDEF = 12, IFNDEF = 13, ENDIF = 14, TRUE = 15, FALSE = 16, 
-                 ERROR = 17, WARNING = 18, BANG = 19, LPAREN = 20, RPAREN = 21, 
-                 EQUAL = 22, NOTEQUAL = 23, AND = 24, OR = 25, LT = 26, 
-                 GT = 27, LE = 28, GE = 29, DIRECTIVE_WHITESPACES = 30, 
-                 DIRECTIVE_STRING = 31, CONDITIONAL_SYMBOL = 32, DECIMAL_LITERAL = 33, 
-                 FLOAT = 34, NEW_LINE = 35, DIRECITVE_COMMENT = 36, DIRECITVE_LINE_COMMENT = 37, 
-                 DIRECITVE_NEW_LINE = 38, DIRECITVE_TEXT_NEW_LINE = 39, 
-                 TEXT = 40, SLASH = 41
+                 ERROR = 17, WARNING = 18, HASINCLUDE = 19, BANG = 20, LPAREN = 21, 
+                 RPAREN = 22, EQUAL = 23, NOTEQUAL = 24, AND = 25, OR = 26, 
+                 LT = 27, GT = 28, LE = 29, GE = 30, DIRECTIVE_WHITESPACES = 31, 
+                 DIRECTIVE_STRING = 32, DIRECTIVE_PATH = 33, CONDITIONAL_SYMBOL = 34, 
+                 DECIMAL_LITERAL = 35, FLOAT = 36, NEW_LINE = 37, DIRECITVE_COMMENT = 38, 
+                 DIRECITVE_LINE_COMMENT = 39, DIRECITVE_NEW_LINE = 40, DIRECITVE_TEXT_NEW_LINE = 41, 
+                 TEXT = 42, SLASH = 43
 	}
 
 	public
 	static let RULE_objectiveCDocument = 0, RULE_text = 1, RULE_code = 2, RULE_directive = 3, 
-            RULE_directive_text = 4, RULE_preprocessor_expression = 5
+            RULE_directive_text = 4, RULE_path_directive = 5, RULE_preprocessor_expression = 6
 
 	public
 	static let ruleNames: [String] = [
-		"objectiveCDocument", "text", "code", "directive", "directive_text", "preprocessor_expression"
+		"objectiveCDocument", "text", "code", "directive", "directive_text", "path_directive", 
+		"preprocessor_expression"
 	]
 
 	private static let _LITERAL_NAMES: [String?] = [
 		nil, "'#'", nil, nil, nil, "'pragma'", nil, "'defined'", "'if'", "'elif'", 
 		"'else'", "'undef'", "'ifdef'", "'ifndef'", "'endif'", nil, nil, "'error'", 
-		"'warning'", "'!'", "'('", "')'", "'=='", "'!='", "'&&'", "'||'", "'<'", 
-		"'>'", "'<='", "'>='"
+		"'warning'", "'__has_include'", "'!'", "'('", "')'", "'=='", "'!='", "'&&'", 
+		"'||'", "'<'", "'>'", "'<='", "'>='"
 	]
 	private static let _SYMBOLIC_NAMES: [String?] = [
 		nil, "SHARP", "CODE", "IMPORT", "INCLUDE", "PRAGMA", "DEFINE", "DEFINED", 
 		"IF", "ELIF", "ELSE", "UNDEF", "IFDEF", "IFNDEF", "ENDIF", "TRUE", "FALSE", 
-		"ERROR", "WARNING", "BANG", "LPAREN", "RPAREN", "EQUAL", "NOTEQUAL", "AND", 
-		"OR", "LT", "GT", "LE", "GE", "DIRECTIVE_WHITESPACES", "DIRECTIVE_STRING", 
-		"CONDITIONAL_SYMBOL", "DECIMAL_LITERAL", "FLOAT", "NEW_LINE", "DIRECITVE_COMMENT", 
-		"DIRECITVE_LINE_COMMENT", "DIRECITVE_NEW_LINE", "DIRECITVE_TEXT_NEW_LINE", 
-		"TEXT", "SLASH"
+		"ERROR", "WARNING", "HASINCLUDE", "BANG", "LPAREN", "RPAREN", "EQUAL", 
+		"NOTEQUAL", "AND", "OR", "LT", "GT", "LE", "GE", "DIRECTIVE_WHITESPACES", 
+		"DIRECTIVE_STRING", "DIRECTIVE_PATH", "CONDITIONAL_SYMBOL", "DECIMAL_LITERAL", 
+		"FLOAT", "NEW_LINE", "DIRECITVE_COMMENT", "DIRECITVE_LINE_COMMENT", "DIRECITVE_NEW_LINE", 
+		"DIRECITVE_TEXT_NEW_LINE", "TEXT", "SLASH"
 	]
 	public
 	static let VOCABULARY = Vocabulary(_LITERAL_NAMES, _SYMBOLIC_NAMES)
@@ -99,7 +100,7 @@ open class ObjectiveCPreprocessorParser: Parser {
     init(_ input: TokenStream, _ state: State) throws {
         self.state = state
         
-        RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
+        RuntimeMetaData.checkVersion("4.8", RuntimeMetaData.VERSION)
         try super.init(input)
         _interp = ParserATNSimulator(self,
                                      _ATN,
@@ -161,7 +162,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(15)
+		 	setState(17)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -169,15 +170,15 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCPreprocessorParser.Tokens.SHARP.rawValue || _la == ObjectiveCPreprocessorParser.Tokens.CODE.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(12)
+		 		setState(14)
 		 		try text()
 
 
-		 		setState(17)
+		 		setState(19)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
-		 	setState(18)
+		 	setState(20)
 		 	try match(ObjectiveCPreprocessorParser.Tokens.EOF.rawValue)
 
 		}
@@ -249,23 +250,23 @@ open class ObjectiveCPreprocessorParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(25)
+		 	setState(27)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCPreprocessorParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .CODE:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(20)
+		 		setState(22)
 		 		try code()
 
 		 		break
 
 		 	case .SHARP:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(21)
-		 		try match(ObjectiveCPreprocessorParser.Tokens.SHARP.rawValue)
-		 		setState(22)
-		 		try directive()
 		 		setState(23)
+		 		try match(ObjectiveCPreprocessorParser.Tokens.SHARP.rawValue)
+		 		setState(24)
+		 		try directive()
+		 		setState(25)
 		 		_la = try _input.LA(1)
 		 		if (!(//closure
 		 		 { () -> Bool in
@@ -341,13 +342,13 @@ open class ObjectiveCPreprocessorParser: Parser {
 		do {
 			var _alt:Int
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(28); 
+		 	setState(30); 
 		 	try _errHandler.sync(self)
 		 	_alt = 1;
 		 	repeat {
 		 		switch (_alt) {
 		 		case 1:
-		 			setState(27)
+		 			setState(29)
 		 			try match(ObjectiveCPreprocessorParser.Tokens.CODE.rawValue)
 
 
@@ -355,7 +356,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 		default:
 		 			throw ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
-		 		setState(30); 
+		 		setState(32); 
 		 		try _errHandler.sync(self)
 		 		_alt = try getInterpreter().adaptivePredict(_input,2,_ctx)
 		 	} while (_alt != 2 && _alt !=  ATN.INVALID_ALT_NUMBER)
@@ -693,14 +694,14 @@ open class ObjectiveCPreprocessorParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(57)
+		 	setState(59)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCPreprocessorParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .IMPORT:fallthrough
 		 	case .INCLUDE:
 		 		_localctx =  PreprocessorImportContext(_localctx);
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(32)
+		 		setState(34)
 		 		_la = try _input.LA(1)
 		 		if (!(//closure
 		 		 { () -> Bool in
@@ -713,7 +714,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 			_errHandler.reportMatch(self)
 		 			try consume()
 		 		}
-		 		setState(33)
+		 		setState(35)
 		 		try directive_text()
 
 		 		break
@@ -721,9 +722,9 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 	case .IF:
 		 		_localctx =  PreprocessorConditionalContext(_localctx);
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(34)
+		 		setState(36)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.IF.rawValue)
-		 		setState(35)
+		 		setState(37)
 		 		try preprocessor_expression(0)
 
 		 		break
@@ -731,9 +732,9 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 	case .ELIF:
 		 		_localctx =  PreprocessorConditionalContext(_localctx);
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(36)
+		 		setState(38)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.ELIF.rawValue)
-		 		setState(37)
+		 		setState(39)
 		 		try preprocessor_expression(0)
 
 		 		break
@@ -741,7 +742,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 	case .ELSE:
 		 		_localctx =  PreprocessorConditionalContext(_localctx);
 		 		try enterOuterAlt(_localctx, 4)
-		 		setState(38)
+		 		setState(40)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.ELSE.rawValue)
 
 		 		break
@@ -749,7 +750,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 	case .ENDIF:
 		 		_localctx =  PreprocessorConditionalContext(_localctx);
 		 		try enterOuterAlt(_localctx, 5)
-		 		setState(39)
+		 		setState(41)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.ENDIF.rawValue)
 
 		 		break
@@ -757,9 +758,9 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 	case .IFDEF:
 		 		_localctx =  PreprocessorDefContext(_localctx);
 		 		try enterOuterAlt(_localctx, 6)
-		 		setState(40)
+		 		setState(42)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.IFDEF.rawValue)
-		 		setState(41)
+		 		setState(43)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue)
 
 		 		break
@@ -767,9 +768,9 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 	case .IFNDEF:
 		 		_localctx =  PreprocessorDefContext(_localctx);
 		 		try enterOuterAlt(_localctx, 7)
-		 		setState(42)
+		 		setState(44)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.IFNDEF.rawValue)
-		 		setState(43)
+		 		setState(45)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue)
 
 		 		break
@@ -777,9 +778,9 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 	case .UNDEF:
 		 		_localctx =  PreprocessorDefContext(_localctx);
 		 		try enterOuterAlt(_localctx, 8)
-		 		setState(44)
+		 		setState(46)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.UNDEF.rawValue)
-		 		setState(45)
+		 		setState(47)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue)
 
 		 		break
@@ -787,9 +788,9 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 	case .PRAGMA:
 		 		_localctx =  PreprocessorPragmaContext(_localctx);
 		 		try enterOuterAlt(_localctx, 9)
-		 		setState(46)
+		 		setState(48)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.PRAGMA.rawValue)
-		 		setState(47)
+		 		setState(49)
 		 		try directive_text()
 
 		 		break
@@ -797,9 +798,9 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 	case .ERROR:
 		 		_localctx =  PreprocessorErrorContext(_localctx);
 		 		try enterOuterAlt(_localctx, 10)
-		 		setState(48)
+		 		setState(50)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.ERROR.rawValue)
-		 		setState(49)
+		 		setState(51)
 		 		try directive_text()
 
 		 		break
@@ -807,9 +808,9 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 	case .WARNING:
 		 		_localctx =  PreprocessorWarningContext(_localctx);
 		 		try enterOuterAlt(_localctx, 11)
-		 		setState(50)
+		 		setState(52)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.WARNING.rawValue)
-		 		setState(51)
+		 		setState(53)
 		 		try directive_text()
 
 		 		break
@@ -817,11 +818,11 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 	case .DEFINE:
 		 		_localctx =  PreprocessorDefineContext(_localctx);
 		 		try enterOuterAlt(_localctx, 12)
-		 		setState(52)
+		 		setState(54)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.DEFINE.rawValue)
-		 		setState(53)
-		 		try match(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue)
 		 		setState(55)
+		 		try match(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue)
+		 		setState(57)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -829,7 +830,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 		      let testSet: Bool = _la == ObjectiveCPreprocessorParser.Tokens.TEXT.rawValue
 		 		      return testSet
 		 		 }()) {
-		 			setState(54)
+		 			setState(56)
 		 			try directive_text()
 
 		 		}
@@ -897,15 +898,15 @@ open class ObjectiveCPreprocessorParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(60) 
+		 	setState(62) 
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	repeat {
-		 		setState(59)
+		 		setState(61)
 		 		try match(ObjectiveCPreprocessorParser.Tokens.TEXT.rawValue)
 
 
-		 		setState(62); 
+		 		setState(64); 
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	} while (//closure
@@ -913,6 +914,78 @@ open class ObjectiveCPreprocessorParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCPreprocessorParser.Tokens.TEXT.rawValue
 		 	      return testSet
 		 	 }())
+
+		}
+		catch ANTLRException.recognition(let re) {
+			_localctx.exception = re
+			_errHandler.reportError(self, re)
+			try _errHandler.recover(self, re)
+		}
+
+		return _localctx
+	}
+
+	public class Path_directiveContext: ParserRuleContext {
+			open
+			func DIRECTIVE_STRING() -> TerminalNode? {
+				return getToken(ObjectiveCPreprocessorParser.Tokens.DIRECTIVE_STRING.rawValue, 0)
+			}
+			open
+			func DIRECTIVE_PATH() -> TerminalNode? {
+				return getToken(ObjectiveCPreprocessorParser.Tokens.DIRECTIVE_PATH.rawValue, 0)
+			}
+		override open
+		func getRuleIndex() -> Int {
+			return ObjectiveCPreprocessorParser.RULE_path_directive
+		}
+		override open
+		func enterRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCPreprocessorParserListener {
+				listener.enterPath_directive(self)
+			}
+		}
+		override open
+		func exitRule(_ listener: ParseTreeListener) {
+			if let listener = listener as? ObjectiveCPreprocessorParserListener {
+				listener.exitPath_directive(self)
+			}
+		}
+		override open
+		func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if let visitor = visitor as? ObjectiveCPreprocessorParserVisitor {
+			    return visitor.visitPath_directive(self)
+			}
+			else if let visitor = visitor as? ObjectiveCPreprocessorParserBaseVisitor {
+			    return visitor.visitPath_directive(self)
+			}
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
+	}
+	@discardableResult
+	 open func path_directive() throws -> Path_directiveContext {
+        let _localctx: Path_directiveContext = Path_directiveContext(_ctx, getState())
+		try enterRule(_localctx, 10, ObjectiveCPreprocessorParser.RULE_path_directive)
+		var _la: Int = 0
+		defer {
+	    		try! exitRule()
+	    }
+		do {
+		 	try enterOuterAlt(_localctx, 1)
+		 	setState(66)
+		 	_la = try _input.LA(1)
+		 	if (!(//closure
+		 	 { () -> Bool in
+		 	      let testSet: Bool = _la == ObjectiveCPreprocessorParser.Tokens.DIRECTIVE_STRING.rawValue || _la == ObjectiveCPreprocessorParser.Tokens.DIRECTIVE_PATH.rawValue
+		 	      return testSet
+		 	 }())) {
+		 	try _errHandler.recoverInline(self)
+		 	}
+		 	else {
+		 		_errHandler.reportMatch(self)
+		 		try consume()
+		 	}
 
 		}
 		catch ANTLRException.recognition(let re) {
@@ -1153,6 +1226,14 @@ open class ObjectiveCPreprocessorParser: Parser {
 			func RPAREN() -> TerminalNode? {
 				return getToken(ObjectiveCPreprocessorParser.Tokens.RPAREN.rawValue, 0)
 			}
+			open
+			func HASINCLUDE() -> TerminalNode? {
+				return getToken(ObjectiveCPreprocessorParser.Tokens.HASINCLUDE.rawValue, 0)
+			}
+			open
+			func path_directive() -> Path_directiveContext? {
+				return getRuleContext(Path_directiveContext.self, 0)
+			}
 
 		public
 		init(_ ctx: Preprocessor_expressionContext) {
@@ -1241,8 +1322,8 @@ open class ObjectiveCPreprocessorParser: Parser {
 		let _parentctx: ParserRuleContext? = _ctx
         let _parentState: Int = getState()
 		var _localctx: Preprocessor_expressionContext = Preprocessor_expressionContext(_ctx, _parentState)
-        let _startState: Int = 10
-		try enterRecursionRule(_localctx, 10, ObjectiveCPreprocessorParser.RULE_preprocessor_expression, _p)
+        let _startState: Int = 12
+		try enterRecursionRule(_localctx, 12, ObjectiveCPreprocessorParser.RULE_preprocessor_expression, _p)
 		var _la: Int = 0
 		defer {
 	    		try! unrollRecursionContexts(_parentctx)
@@ -1250,14 +1331,14 @@ open class ObjectiveCPreprocessorParser: Parser {
 		do {
 			var _alt: Int
 			try enterOuterAlt(_localctx, 1)
-			setState(89)
+			setState(98)
 			try _errHandler.sync(self)
 			switch (ObjectiveCPreprocessorParser.Tokens(rawValue: try _input.LA(1))!) {
 			case .TRUE:
 				_localctx = PreprocessorConstantContext(_localctx)
 				_ctx = _localctx
 
-				setState(65)
+				setState(69)
 				try match(ObjectiveCPreprocessorParser.Tokens.TRUE.rawValue)
 
 				break
@@ -1265,7 +1346,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .FALSE:
 				_localctx = PreprocessorConstantContext(_localctx)
 				_ctx = _localctx
-				setState(66)
+				setState(70)
 				try match(ObjectiveCPreprocessorParser.Tokens.FALSE.rawValue)
 
 				break
@@ -1273,7 +1354,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .DECIMAL_LITERAL:
 				_localctx = PreprocessorConstantContext(_localctx)
 				_ctx = _localctx
-				setState(67)
+				setState(71)
 				try match(ObjectiveCPreprocessorParser.Tokens.DECIMAL_LITERAL.rawValue)
 
 				break
@@ -1281,7 +1362,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .DIRECTIVE_STRING:
 				_localctx = PreprocessorConstantContext(_localctx)
 				_ctx = _localctx
-				setState(68)
+				setState(72)
 				try match(ObjectiveCPreprocessorParser.Tokens.DIRECTIVE_STRING.rawValue)
 
 				break
@@ -1289,17 +1370,17 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .CONDITIONAL_SYMBOL:
 				_localctx = PreprocessorConditionalSymbolContext(_localctx)
 				_ctx = _localctx
-				setState(69)
+				setState(73)
 				try match(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue)
-				setState(74)
+				setState(78)
 				try _errHandler.sync(self)
 				switch (try getInterpreter().adaptivePredict(_input,6,_ctx)) {
 				case 1:
-					setState(70)
+					setState(74)
 					try match(ObjectiveCPreprocessorParser.Tokens.LPAREN.rawValue)
-					setState(71)
+					setState(75)
 					try preprocessor_expression(0)
-					setState(72)
+					setState(76)
 					try match(ObjectiveCPreprocessorParser.Tokens.RPAREN.rawValue)
 
 					break
@@ -1311,11 +1392,11 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .LPAREN:
 				_localctx = PreprocessorParenthesisContext(_localctx)
 				_ctx = _localctx
-				setState(76)
+				setState(80)
 				try match(ObjectiveCPreprocessorParser.Tokens.LPAREN.rawValue)
-				setState(77)
+				setState(81)
 				try preprocessor_expression(0)
-				setState(78)
+				setState(82)
 				try match(ObjectiveCPreprocessorParser.Tokens.RPAREN.rawValue)
 
 				break
@@ -1323,33 +1404,33 @@ open class ObjectiveCPreprocessorParser: Parser {
 			case .BANG:
 				_localctx = PreprocessorNotContext(_localctx)
 				_ctx = _localctx
-				setState(80)
+				setState(84)
 				try match(ObjectiveCPreprocessorParser.Tokens.BANG.rawValue)
-				setState(81)
-				try preprocessor_expression(6)
+				setState(85)
+				try preprocessor_expression(7)
 
 				break
 
 			case .DEFINED:
 				_localctx = PreprocessorDefinedContext(_localctx)
 				_ctx = _localctx
-				setState(82)
+				setState(86)
 				try match(ObjectiveCPreprocessorParser.Tokens.DEFINED.rawValue)
-				setState(87)
+				setState(91)
 				try _errHandler.sync(self)
 				switch (ObjectiveCPreprocessorParser.Tokens(rawValue: try _input.LA(1))!) {
 				case .CONDITIONAL_SYMBOL:
-					setState(83)
+					setState(87)
 					try match(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue)
 
 					break
 
 				case .LPAREN:
-					setState(84)
+					setState(88)
 					try match(ObjectiveCPreprocessorParser.Tokens.LPAREN.rawValue)
-					setState(85)
+					setState(89)
 					try match(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue)
-					setState(86)
+					setState(90)
 					try match(ObjectiveCPreprocessorParser.Tokens.RPAREN.rawValue)
 
 					break
@@ -1358,11 +1439,25 @@ open class ObjectiveCPreprocessorParser: Parser {
 				}
 
 				break
+
+			case .HASINCLUDE:
+				_localctx = PreprocessorConditionalSymbolContext(_localctx)
+				_ctx = _localctx
+				setState(93)
+				try match(ObjectiveCPreprocessorParser.Tokens.HASINCLUDE.rawValue)
+				setState(94)
+				try match(ObjectiveCPreprocessorParser.Tokens.LPAREN.rawValue)
+				setState(95)
+				try path_directive()
+				setState(96)
+				try match(ObjectiveCPreprocessorParser.Tokens.RPAREN.rawValue)
+
+				break
 			default:
 				throw ANTLRException.recognition(e: NoViableAltException(self))
 			}
 			_ctx!.stop = try _input.LT(-1)
-			setState(105)
+			setState(114)
 			try _errHandler.sync(self)
 			_alt = try getInterpreter().adaptivePredict(_input,10,_ctx)
 			while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
@@ -1370,17 +1465,17 @@ open class ObjectiveCPreprocessorParser: Parser {
 					if _parseListeners != nil {
 					   try triggerExitRuleEvent()
 					}
-					setState(103)
+					setState(112)
 					try _errHandler.sync(self)
 					switch(try getInterpreter().adaptivePredict(_input,9, _ctx)) {
 					case 1:
 						_localctx = PreprocessorBinaryContext(  Preprocessor_expressionContext(_parentctx, _parentState))
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCPreprocessorParser.RULE_preprocessor_expression)
-						setState(91)
-						if (!(precpred(_ctx, 5))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 5)"))
+						setState(100)
+						if (!(precpred(_ctx, 6))) {
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 6)"))
 						}
-						setState(92)
+						setState(101)
 						_localctx.castdown(PreprocessorBinaryContext.self).op = try _input.LT(1)
 						_la = try _input.LA(1)
 						if (!(//closure
@@ -1394,52 +1489,52 @@ open class ObjectiveCPreprocessorParser: Parser {
 							_errHandler.reportMatch(self)
 							try consume()
 						}
-						setState(93)
-						try preprocessor_expression(6)
+						setState(102)
+						try preprocessor_expression(7)
 
 						break
 					case 2:
 						_localctx = PreprocessorBinaryContext(  Preprocessor_expressionContext(_parentctx, _parentState))
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCPreprocessorParser.RULE_preprocessor_expression)
-						setState(94)
-						if (!(precpred(_ctx, 4))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 4)"))
+						setState(103)
+						if (!(precpred(_ctx, 5))) {
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 5)"))
 						}
-						setState(95)
+						setState(104)
 						try {
 								let assignmentValue = try match(ObjectiveCPreprocessorParser.Tokens.AND.rawValue)
 								_localctx.castdown(PreprocessorBinaryContext.self).op = assignmentValue
 						     }()
 
-						setState(96)
-						try preprocessor_expression(5)
+						setState(105)
+						try preprocessor_expression(6)
 
 						break
 					case 3:
 						_localctx = PreprocessorBinaryContext(  Preprocessor_expressionContext(_parentctx, _parentState))
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCPreprocessorParser.RULE_preprocessor_expression)
-						setState(97)
-						if (!(precpred(_ctx, 3))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 3)"))
+						setState(106)
+						if (!(precpred(_ctx, 4))) {
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 4)"))
 						}
-						setState(98)
+						setState(107)
 						try {
 								let assignmentValue = try match(ObjectiveCPreprocessorParser.Tokens.OR.rawValue)
 								_localctx.castdown(PreprocessorBinaryContext.self).op = assignmentValue
 						     }()
 
-						setState(99)
-						try preprocessor_expression(4)
+						setState(108)
+						try preprocessor_expression(5)
 
 						break
 					case 4:
 						_localctx = PreprocessorBinaryContext(  Preprocessor_expressionContext(_parentctx, _parentState))
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCPreprocessorParser.RULE_preprocessor_expression)
-						setState(100)
-						if (!(precpred(_ctx, 2))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 2)"))
+						setState(109)
+						if (!(precpred(_ctx, 3))) {
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 3)"))
 						}
-						setState(101)
+						setState(110)
 						_localctx.castdown(PreprocessorBinaryContext.self).op = try _input.LT(1)
 						_la = try _input.LA(1)
 						if (!(//closure
@@ -1456,15 +1551,15 @@ open class ObjectiveCPreprocessorParser: Parser {
 							_errHandler.reportMatch(self)
 							try consume()
 						}
-						setState(102)
-						try preprocessor_expression(3)
+						setState(111)
+						try preprocessor_expression(4)
 
 						break
 					default: break
 					}
 			 
 				}
-				setState(107)
+				setState(116)
 				try _errHandler.sync(self)
 				_alt = try getInterpreter().adaptivePredict(_input,10,_ctx)
 			}
@@ -1482,17 +1577,17 @@ open class ObjectiveCPreprocessorParser: Parser {
 	override open
 	func sempred(_ _localctx: RuleContext?, _ ruleIndex: Int,  _ predIndex: Int)throws -> Bool {
 		switch (ruleIndex) {
-		case  5:
+		case  6:
 			return try preprocessor_expression_sempred(_localctx?.castdown(Preprocessor_expressionContext.self), predIndex)
 	    default: return true
 		}
 	}
 	private func preprocessor_expression_sempred(_ _localctx: Preprocessor_expressionContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 0:return precpred(_ctx, 5)
-		    case 1:return precpred(_ctx, 4)
-		    case 2:return precpred(_ctx, 3)
-		    case 3:return precpred(_ctx, 2)
+		    case 0:return precpred(_ctx, 6)
+		    case 1:return precpred(_ctx, 5)
+		    case 2:return precpred(_ctx, 4)
+		    case 3:return precpred(_ctx, 3)
 		    default: return true
 		}
 	}

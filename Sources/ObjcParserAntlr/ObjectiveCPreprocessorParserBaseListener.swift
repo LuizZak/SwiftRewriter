@@ -158,6 +158,19 @@ open class ObjectiveCPreprocessorParserBaseListener: ObjectiveCPreprocessorParse
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	open func enterPath_directive(_ ctx: ObjectiveCPreprocessorParser.Path_directiveContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitPath_directive(_ ctx: ObjectiveCPreprocessorParser.Path_directiveContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	open func enterPreprocessorParenthesis(_ ctx: ObjectiveCPreprocessorParser.PreprocessorParenthesisContext) { }
 	/**
 	 * {@inheritDoc}

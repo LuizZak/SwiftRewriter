@@ -9,7 +9,7 @@ import Antlr4
  * of the available methods.
  */
 open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
-    public init() { }
+     public init() { }
 	/**
 	 * {@inheritDoc}
 	 *

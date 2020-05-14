@@ -475,6 +475,14 @@ class ObjcParserTests: XCTestCase {
             }
             """)
     }
+    
+    func testParseHasIncludeDirective() {
+        _=parserTest(
+            """
+            #if (defined(USE_UIKIT_PUBLIC_HEADERS) && USE_UIKIT_PUBLIC_HEADERS) || !__has_include(<UIKitCore/UIDynamicBehavior.h>)
+            #endif
+            """)
+    }
 
     func testParseImportDirectives() throws {
         let sut = ObjcParser(string: """
