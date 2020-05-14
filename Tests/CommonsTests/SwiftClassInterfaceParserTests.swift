@@ -303,6 +303,17 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownMethods[2].signature.returnType, "MyClass")
     }
     
+    func testParseEscapedIdentifier() throws {
+        let type = try parseType("""
+            class MyClass {
+                var `default`: Int { get }
+            }
+            """)
+        
+        XCTAssertEqual(type.knownProperties.count, 1)
+        XCTAssertEqual(type.knownProperties[0].name, "default")
+    }
+    
     func testParseAttributes() throws {
         let type = try parseType("""
             @attribute1

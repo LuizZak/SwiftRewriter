@@ -521,7 +521,7 @@ public final class SwiftClassInterfaceParser {
         
         try tokenizer.advance(overTokenType: .at)
         
-        let name = String(try tokenizer.advance(overTokenType: .identifier).value)
+        let name = try identifier(from: tokenizer)
         let content: String?
         
         // attribute-argument-clause
@@ -573,9 +573,9 @@ public final class SwiftClassInterfaceParser {
     private static func parseSwiftRewriterAttribute(from tokenizer: Tokenizer) throws -> SwiftRewriterAttribute {
         
         try tokenizer.advance(overTokenType: .at)
-        let ident = try tokenizer.advance(overTokenType: .identifier)
+        let ident = try identifier(from: tokenizer)
         
-        if ident.value != "_swiftrewriter" {
+        if ident != "_swiftrewriter" {
             throw tokenizer.lexer.syntaxError(
                 "Expected '_swiftrewriter' to initiate SwiftRewriter attribute"
             )
@@ -619,9 +619,9 @@ public final class SwiftClassInterfaceParser {
             tokenizer.skipToken()
             try tokenizer.advance(overTokenType: .colon)
             
-            let ident = try tokenizer.advance(overTokenType: .identifier)
+            let ident = try identifier(from: tokenizer)
             
-            content = .renameFrom(String(ident.value))
+            content = .renameFrom(ident)
             
         } else if tokenizer.token().value == "initFromFunction" {
             tokenizer.skipToken()
@@ -791,9 +791,7 @@ public final class SwiftClassInterfaceParser {
     
     private static func typeName(from tokenizer: Tokenizer) throws -> String {
         do {
-            let token = try tokenizer.advance(overTokenType: .identifier)
-            
-            return String(token.value)
+            return try identifier(from: tokenizer)
         } catch {
             throw tokenizer.lexer.syntaxError("Expected type name")
         }
@@ -801,9 +799,18 @@ public final class SwiftClassInterfaceParser {
     
     private static func identifier(from tokenizer: Tokenizer) throws -> String {
         do {
-            let token = try tokenizer.advance(overTokenType: .identifier)
+            let token = try tokenizer.advance(matching: \.tokenType.isIdentifier)
             
-            return String(token.value)
+            switch token.tokenType {
+            case .identifier(let isEscaped):
+                if isEscaped {
+                    return String(token.value.dropFirst().dropLast())
+                }
+                
+                return String(token.value)
+            default:
+                throw tokenizer.lexer.syntaxError("Expected identifier")
+            }
         } catch {
             throw tokenizer.lexer.syntaxError("Expected identifier")
         }
@@ -920,7 +927,7 @@ extension SwiftClassInterfaceParser {
         case qmark
         case period
         case underscore
-        case identifier
+        case identifier(isEscaped: Bool)
         case functionArrow
         case integerLiteral
         case stringLiteral
@@ -991,8 +998,14 @@ extension SwiftClassInterfaceParser {
                 return 12
             case .unowned_unsafe:
                 return 14
-            case .identifier:
-                return Token.identifierLexer.maximumLength(in: lexer) ?? 0
+            case .identifier(let isEscaped):
+                if isEscaped {
+                    _=lexer.safeAdvance()
+                }
+                
+                let length = Token.identifierLexer.maximumLength(in: lexer) ?? 0
+                
+                return length + (isEscaped ? 2 : 0)
             case .integerLiteral:
                 return Token.integerLexer.maximumLength(in: lexer) ?? 0
             case .stringLiteral:
@@ -1121,7 +1134,7 @@ extension SwiftClassInterfaceParser {
                         return .underscore
                     }
                     
-                    return .identifier
+                    return .identifier(isEscaped: false)
                 }
             }
             
@@ -1244,6 +1257,11 @@ extension SwiftClassInterfaceParser {
                 return .integerLiteral
             }
             
+            // Escaped identifiers
+            if lexer.safeIsNextChar(equalTo: "`") {
+                return .identifier(isEscaped: true)
+            }
+            
             // Identifiers and keywords
             if Lexer.isLetter(next) {
                 guard let ident = try? lexer.withTemporaryIndex(changes: {
@@ -1315,7 +1333,7 @@ extension SwiftClassInterfaceParser {
                     return .convenience
                     
                 default:
-                    return .identifier
+                    return .identifier(isEscaped: false)
                 }
             }
             
@@ -1355,6 +1373,15 @@ extension SwiftClassInterfaceParser {
 }
 
 extension SwiftClassInterfaceParser.Token {
+    
+    var isIdentifier: Bool {
+        switch self {
+        case .identifier:
+            return true
+        default:
+            return false
+        }
+    }
     
     var isOperator: Bool {
         switch self {
