@@ -13,6 +13,22 @@ public struct KnownTypeBuilder {
         type.typeName
     }
     
+    public var kind: KnownTypeKind {
+        type.kind
+    }
+    
+    public var properties: [KnownProperty] {
+        type.properties
+    }
+    
+    public var methods: [KnownMethod] {
+        type.methods
+    }
+    
+    public var constructors: [KnownConstructor] {
+        type.constructors
+    }
+    
     public init(from existingType: KnownType, file: String = #file, line: Int = #line) {
         var type =
             BuildingKnownType(typeName: existingType.typeName,
@@ -590,24 +606,6 @@ extension KnownTypeBuilder {
     /// Gets the supertype currently registered on this known type builder.
     public var supertype: KnownTypeReferenceConvertible? {
         type.supertype
-    }
-    
-    /// Returns a reference to the latest constructor added to this `KnownTypeBuilder`
-    /// via a `.constructor(...)` call
-    public var lastConstructor: KnownConstructor? {
-        type.constructors.last
-    }
-    
-    /// Returns a reference to the latest method added to this `KnownTypeBuilder`
-    /// via a `.method(...)` call
-    public var latestMethod: KnownMethod? {
-        type.methods.last
-    }
-    
-    /// Returns a reference to the latest property added to this `KnownTypeBuilder`
-    /// via a `.property(...)` call
-    public var lastProperty: KnownProperty? {
-        type.properties.last
     }
     
     /// Returns the currently recorded protocol conformances for the final type

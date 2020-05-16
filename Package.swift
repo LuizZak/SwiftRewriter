@@ -25,7 +25,8 @@ let package = Package(
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.31"),
         .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.0")),
         .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50200.0")),
-        .package(url: "https://github.com/apple/swift-argument-parser.git", .exact("0.0.4"))
+        .package(url: "https://github.com/apple/swift-argument-parser.git", .exact("0.0.4")),
+        .package(url: "https://github.com/jpsim/SourceKitten.git", from: "0.29.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define
@@ -72,14 +73,15 @@ let package = Package(
                            "Intentions", "KnownType", "GrammarModels"]),
         .target(
             name: "Commons",
-            dependencies: ["SwiftAST", "Utils", "TypeSystem", "KnownType"]),
+            dependencies: ["SwiftAST", "Utils", "TypeSystem", "KnownType",
+                           "SwiftSyntax"]),
         .target(
             name: "IntentionPasses",
             dependencies: ["SwiftAST", "Commons", "Utils", "MiniLexer",
                            "Intentions", "GrammarModels"]),
         .target(
             name: "GlobalsProviders",
-            dependencies: ["SwiftAST", "Commons", "TypeSystem"]),
+            dependencies: ["SwiftAST", "Commons", "TypeSystem", "KnownType"]),
         .target(
             name: "Analysis",
             dependencies: ["SwiftAST", "KnownType", "Commons", "Utils",
@@ -105,7 +107,7 @@ let package = Package(
                 "SwiftRewriterLib", "ObjcParser", "GrammarModels", "Console",
                 "ExpressionPasses", "Utils", "SourcePreprocessors", "SwiftAST",
                 "IntentionPasses", "MiniLexer", "GlobalsProviders", "Commons",
-                "ArgumentParser"
+                "ArgumentParser", "SourceKittenFramework"
             ]),
         .target(
             name: "TestCommons",

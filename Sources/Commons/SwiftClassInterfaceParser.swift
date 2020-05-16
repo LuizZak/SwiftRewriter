@@ -872,7 +872,27 @@ public class IncompleteKnownType {
     
     private var knownTypeBuilder: KnownTypeBuilder
     
-    fileprivate init(typeBuilder: KnownTypeBuilder) {
+    public var typeName: String {
+        knownTypeBuilder.typeName
+    }
+    
+    public var kind: KnownTypeKind {
+        knownTypeBuilder.kind
+    }
+    
+    public var properties: [KnownProperty] {
+        knownTypeBuilder.properties
+    }
+    
+    public var methods: [KnownMethod] {
+        knownTypeBuilder.methods
+    }
+    
+    public var constructors: [KnownConstructor] {
+        knownTypeBuilder.constructors
+    }
+    
+    public init(typeBuilder: KnownTypeBuilder) {
         self.knownTypeBuilder = typeBuilder
     }
     
