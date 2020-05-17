@@ -20,18 +20,27 @@ public final class KnownTypeSerializer {
 }
 
 extension KnownTypeReference: Codable {
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(asTypeName)
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        
+        var next = try KnownTypeReference.typeName(container.decode(String.self))
+        while !container.isAtEnd {
+            next = try KnownTypeReference.nested(base: next, typeName: container.decode(String.self))
+        }
+        
+        self = next
     }
     
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        self = .typeName(try container.decode(String.self))
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+        
+        for name in asNestedTypeNames {
+            try container.encode(name)
+        }
     }
 }
 
-public extension KeyedEncodingContainerProtocol {
+extension KeyedEncodingContainerProtocol {
     mutating func encodeKnownType(_ type: KnownType, forKey key: Key) throws {
         let builder = KnownTypeBuilder(from: type)
         
@@ -47,7 +56,7 @@ public extension KeyedEncodingContainerProtocol {
     }
 }
 
-public extension KeyedDecodingContainerProtocol {
+extension KeyedDecodingContainerProtocol {
     func decodeKnownType(forKey key: Key) throws -> KnownType {
         return try decode(BuildingKnownType.self, forKey: key)
     }

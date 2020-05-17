@@ -1288,6 +1288,16 @@ class TypeSystemTests: XCTestCase {
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.typeName, "B")
     }
+    
+    func testKnownTypeFromNestedTypes() {
+        let type = KnownTypeBuilder(typeName: "A")
+            .nestedType(named: "B")
+            .build()
+        sut.addType(type)
+        
+        let result = sut.knownTypeFromNested(["A", "B"])
+        XCTAssertEqual(result?.parentType, .typeName("A"))
+    }
 }
 
 private extension TypeSystemTests {

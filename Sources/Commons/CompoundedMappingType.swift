@@ -73,4 +73,7 @@ extension CompoundedMappingType: KnownType {
     public var nestedTypes: [KnownType] {
         knownType.nestedTypes
     }
+    public var parentType: KnownTypeReference? {
+        knownType.parentType
+    }
 }

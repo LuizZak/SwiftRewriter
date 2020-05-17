@@ -167,6 +167,31 @@ public class TypeSystem {
         return _knownTypeWithNameUnaliased(name)
     }
     
+    /// Gets a known type from a nested type reference
+    public func knownTypeFromNested(_ nested: [String]) -> KnownType? {
+        guard let first = nested.first else {
+            return nil
+        }
+        guard let base = knownTypeWithName(first) else {
+            return nil
+        }
+        
+        var stack = nested.dropFirst()
+        
+        var current = base
+        
+        while !stack.isEmpty {
+            let next = stack.removeFirst()
+            if let reference = current.nestedTypes.first(where: { $0.typeName == next }) {
+                current = reference
+            } else {
+                return nil
+            }
+        }
+        
+        return current
+    }
+    
     private func _knownTypeWithNameUnaliased(_ name: String) -> KnownType? {
         knownTypeProviders.knownType(withName: name)
     }
@@ -796,6 +821,9 @@ public class TypeSystem {
             
         case .typeName(let type):
             return knownTypeWithName(type)
+            
+        case .nested:
+            return knownTypeFromNested(supertype.asNestedTypeNames)
         }
     }
     
@@ -1487,6 +1515,7 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
         let knownAttributes: [KnownAttribute] = []
         let semantics: Set<Semantic> = []
         let nestedTypes: [KnownType] = []
+        var parentType: KnownTypeReference? = nil
         
         init(protocolType: ProtocolType) {
             self.typeName = protocolType.protocolName
@@ -1571,6 +1600,7 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         let knownAttributes: [KnownAttribute] = []
         let semantics: Set<Semantic> = []
         let nestedTypes: [KnownType] = []
+        var parentType: KnownTypeReference? = nil
         
         init(classType: ClassType) {
             self.typeName = classType.typeName

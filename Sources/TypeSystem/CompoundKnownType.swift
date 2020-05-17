@@ -22,6 +22,7 @@ class CompoundKnownType: KnownType {
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
     var nestedTypes: [KnownType]
+    var parentType: KnownTypeReference?
     
     init(typeName: String, types: [KnownType], typeSystem: TypeSystem? = nil) {
         self.typeName = typeName
@@ -58,6 +59,7 @@ class CompoundKnownType: KnownType {
         
         kind = types[0].kind
         origin = types[0].origin
+        parentType = types[0].parentType
         
         for type in types {
             // Search supertypes known here

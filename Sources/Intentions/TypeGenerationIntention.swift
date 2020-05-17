@@ -286,4 +286,7 @@ extension TypeGenerationIntention: KnownType {
     public var nestedTypes: [KnownType] {
         []
     }
+    public var parentType: KnownTypeReference? {
+        return nil
+    }
 }

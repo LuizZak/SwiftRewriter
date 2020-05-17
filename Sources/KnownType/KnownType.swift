@@ -46,6 +46,10 @@ public protocol KnownType: KnownTypeReferenceConvertible, KnownDeclaration, Attr
     /// Any nested types within this known type
     var nestedTypes: [KnownType] { get }
     
+    /// If this known type is nested within another known type, this value points
+    /// to the base parent type
+    var parentType: KnownTypeReference? { get }
+    
     /// Gets a known type trait from this type
     func knownTrait(_ traitName: String) -> TraitType?
 }
@@ -69,6 +73,34 @@ public enum KnownTypeKind: String, Codable {
 public enum KnownTypeReference: KnownTypeReferenceConvertible {
     case knownType(KnownType)
     case typeName(String)
+    indirect case nested(base: KnownTypeReference, typeName: String)
+    
+    public var asSwiftType: SwiftType {
+        switch self {
+        case .typeName(let typeName):
+            return .typeName(typeName)
+            
+        case let .nested(base, typeName):
+            switch base.asSwiftType {
+            case .nested(let nested):
+                return .nested(nested + [.typeName(typeName)])
+            case .nominal(let nominal):
+                return .nested([nominal, .typeName(typeName)])
+            default:
+                return .typeName(typeName)
+            }
+        
+        case .knownType(let type):
+            switch type.parentType?.asSwiftType {
+            case .nested(let nested):
+                return .nested(nested + [.typeName(type.typeName)])
+            case .nominal(let nominal):
+                return .nested([nominal, .typeName(type.typeName)])
+            default:
+                return .typeName(type.typeName)
+            }
+        }
+    }
     
     public var asTypeName: String {
         switch self {
@@ -76,11 +108,39 @@ public enum KnownTypeReference: KnownTypeReferenceConvertible {
             return type.typeName
         case .typeName(let name):
             return name
+        case .nested(_, let name):
+            return name
+        }
+    }
+    
+    public var asNestedTypeNames: [String] {
+        switch self {
+        case .knownType(let type):
+            return [type.typeName]
+        case .typeName(let name):
+            return [name]
+        case .nested(let base, let typeName):
+            return base.asNestedTypeNames + [typeName]
         }
     }
     
     public var asKnownTypeReference: KnownTypeReference {
         self
+    }
+}
+
+extension KnownTypeReference: Equatable {
+    public static func == (lhs: KnownTypeReference, rhs: KnownTypeReference) -> Bool {
+        switch (lhs, rhs) {
+        case (.knownType(let l), .knownType(let r)):
+            return l.typeName == r.typeName
+        case (.typeName(let l), .typeName(let r)):
+            return l == r
+        case (let .nested(bl, ltype), let .nested(br, rtype)):
+            return bl == br && ltype == rtype
+        default:
+            return false
+        }
     }
 }
 
@@ -97,7 +157,15 @@ extension String: KnownTypeReferenceConvertible {
 /// Default implementations
 public extension KnownType {
     var asKnownTypeReference: KnownTypeReference {
-        .knownType(self)
+        if let parent = parentType {
+            return .nested(base: parent, typeName: self.typeName)
+        }
+        
+        return .knownType(self)
+    }
+    
+    var asSwiftType: SwiftType {
+        return asKnownTypeReference.asSwiftType
     }
 }
 

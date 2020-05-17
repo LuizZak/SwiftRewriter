@@ -84,4 +84,15 @@ class KnownTypeSerializerTests: XCTestCase {
         
         XCTAssertEqual(trait, unserialized)
     }
+    
+    func testSerializeParentType() throws {
+        let type = KnownTypeBuilder(typeName: "A")
+            .nestedType(named: "B")
+            .build()
+        
+        let data = try KnownTypeSerializer.serialize(type: type)
+        let resultType = try KnownTypeSerializer.deserialize(from: data)
+        
+        XCTAssertEqual(resultType.nestedTypes[0].parentType?.asTypeName, "A")
+    }
 }
