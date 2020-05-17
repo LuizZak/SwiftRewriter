@@ -924,7 +924,7 @@ private class MemberInvocationResolver {
             return postfix
         }
         // Direct type constuctor `MyClass([params])`
-        if let target = postfix.exp.asIdentifier, let metatype = extractMetatype(from: target) {
+        if let metatype = extractMetatype(from: postfix.exp) {
             guard let ctor = typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: metatype) else {
                 return postfix.makeErrorTyped()
             }
