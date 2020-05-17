@@ -9,10 +9,6 @@ public protocol KnownType: KnownTypeReferenceConvertible, KnownDeclaration, Attr
     /// or was synthesized, etc.
     var origin: String { get }
     
-    /// Returns `true` if this known type represents an extension for another
-    /// known type.
-    var isExtension: Bool { get }
-    
     /// The supertype for this known type, if any.
     var supertype: KnownTypeReference? { get }
     
@@ -57,6 +53,8 @@ public enum KnownTypeKind: String, Codable {
     case `enum`
     /// A struct type
     case `struct`
+    /// An extension of a type
+    case `extension`
 }
 
 /// Defines a reference to a known type.

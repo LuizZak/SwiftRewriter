@@ -28,7 +28,6 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownConstructors.count, 0)
         XCTAssertEqual(type.knownFields.count, 0)
         XCTAssertEqual(type.knownProtocolConformances.count, 0)
-        XCTAssertFalse(type.isExtension)
     }
     
     func testParseEmptyExtension() throws {
@@ -37,14 +36,13 @@ class SwiftClassInterfaceParserTests: XCTestCase {
             }
             """)
         
-        XCTAssertEqual(type.kind, .class)
+        XCTAssertEqual(type.kind, .extension)
         XCTAssertEqual(type.typeName, "Empty")
         XCTAssertEqual(type.knownProperties.count, 0)
         XCTAssertEqual(type.knownMethods.count, 0)
         XCTAssertEqual(type.knownConstructors.count, 0)
         XCTAssertEqual(type.knownFields.count, 0)
         XCTAssertEqual(type.knownProtocolConformances.count, 0)
-        XCTAssert(type.isExtension)
     }
     
     func testParseEmptyStruct() throws {
@@ -60,7 +58,6 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownConstructors.count, 0)
         XCTAssertEqual(type.knownFields.count, 0)
         XCTAssertEqual(type.knownProtocolConformances.count, 0)
-        XCTAssertFalse(type.isExtension)
     }
     
     func testParseWithSwiftSignatureMatching() throws {

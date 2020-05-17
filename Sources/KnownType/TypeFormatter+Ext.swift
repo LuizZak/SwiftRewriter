@@ -51,11 +51,7 @@ public extension TypeFormatter {
         _=outputAttributesAndAnnotations(type.knownAttributes, [], false)
         _onFirstDeclaration = true
         
-        if type.isExtension {
-            o.outputInline("extension \(type.typeName)")
-        } else {
-            o.outputInline("\(type.kind.rawValue) \(type.typeName)")
-        }
+        o.outputInline("\(type.kind.rawValue) \(type.typeName)")
         
         var inheritances: [String] = []
         

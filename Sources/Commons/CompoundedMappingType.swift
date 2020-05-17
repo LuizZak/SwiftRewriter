@@ -25,6 +25,13 @@ public class CompoundedMappingType {
         self.semantics = semantics
         self.nonCanonicalNames = aliases
     }
+    
+    public func withTransformations(_ transformations: [PostfixTransformation]) -> CompoundedMappingType {
+        return CompoundedMappingType(knownType: knownType,
+                                     transformations: transformations,
+                                     semantics: semantics,
+                                     aliases: nonCanonicalNames)
+    }
 }
 
 extension CompoundedMappingType: KnownType {
@@ -42,9 +49,6 @@ extension CompoundedMappingType: KnownType {
     }
     public var kind: KnownTypeKind {
         knownType.kind
-    }
-    public var isExtension: Bool {
-        knownType.isExtension
     }
     public var knownTraits: [String : TraitType] {
         knownType.knownTraits

@@ -483,6 +483,9 @@ public class TypeSystem {
                 
             case .struct:
                 return .struct
+                
+            case .extension:
+                assertionFailure("Should not find type extensions")
             }
         }
         

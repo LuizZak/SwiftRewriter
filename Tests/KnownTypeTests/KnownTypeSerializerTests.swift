@@ -43,7 +43,7 @@ class KnownTypeSerializerTests: XCTestCase {
     func testSerializeEnumType() throws {
         let type =
             KnownTypeBuilder(typeName: "A", kind: .enum)
-                .enumRawValue(type: .int)
+                .settingEnumRawValue(type: .int)
                 .enumCase(named: "a")
                 .build()
         let expected = TypeFormatter.asString(knownType: type)

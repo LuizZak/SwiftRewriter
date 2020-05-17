@@ -68,7 +68,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
     func createUILayoutConstraintAxis() {
         makeType(named: "UILayoutConstraintAxis", kind: .enum) { type -> KnownType in
             type
-                .enumRawValue(type: .int)
+                .settingEnumRawValue(type: .int)
                 .enumCase(named: "horizontal", rawValue: .constant(0))
                 .enumCase(named: "vertical", rawValue: .constant(1))
                 .build()

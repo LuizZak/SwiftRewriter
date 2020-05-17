@@ -1,7 +1,6 @@
 /// Returns `true` if two types have the same type signature.
 func areEquivalent(_ type1: KnownType, _ type2: KnownType) -> Bool {
     if type1.typeName != type2.typeName
-        || type1.isExtension != type2.isExtension
         || type1.kind != type2.kind
         || type1.supertype?.asTypeName != type2.supertype?.asTypeName
         || type1.knownTraits != type2.knownTraits {

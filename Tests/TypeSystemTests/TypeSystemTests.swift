@@ -854,8 +854,7 @@ class TypeSystemTests: XCTestCase {
     
     func testExtensionTypesDontOvershadowOriginalImplementation() {
         let ext =
-            KnownTypeBuilder(typeName: "UIView")
-                .settingIsExtension(true)
+            KnownTypeBuilder(typeName: "UIView", kind: .extension)
                 .method(named: "fromExtension")
                 .build()
         let viewType =

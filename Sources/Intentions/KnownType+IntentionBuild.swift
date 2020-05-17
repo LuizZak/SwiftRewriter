@@ -10,11 +10,7 @@ extension KnownTypeBuilder {
         
         switch type.kind {
         case .class:
-            if type.isExtension {
-                typeIntention = ClassExtensionGenerationIntention(typeName: type.typeName)
-            } else {
-                typeIntention = ClassGenerationIntention(typeName: type.typeName)
-            }
+            typeIntention = ClassGenerationIntention(typeName: type.typeName)
             
         case .struct:
             typeIntention = StructGenerationIntention(typeName: type.typeName)
@@ -26,6 +22,9 @@ extension KnownTypeBuilder {
             
         case .protocol:
             typeIntention = ProtocolGenerationIntention(typeName: type.typeName)
+            
+        case .extension:
+            typeIntention = ClassExtensionGenerationIntention(typeName: type.typeName)
         }
         
         if let cls = typeIntention as? BaseClassIntention {

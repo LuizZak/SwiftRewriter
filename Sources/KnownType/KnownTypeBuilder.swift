@@ -29,6 +29,22 @@ public struct KnownTypeBuilder {
         type.constructors
     }
     
+    public var attributes: [KnownAttribute] {
+        type.attributes
+    }
+    
+    public var subscripts: [KnownSubscript] {
+        type.subscripts
+    }
+    
+    public var traits: [String: TraitType] {
+        type.traits
+    }
+    
+    public var conformances: [KnownProtocolConformance] {
+        type.knownProtocolConformances
+    }
+    
     public init(from existingType: KnownType, file: String = #file, line: Int = #line) {
         var type =
             BuildingKnownType(typeName: existingType.typeName,
@@ -154,14 +170,6 @@ public struct KnownTypeBuilder {
     public func settingKind(_ kind: KnownTypeKind) -> KnownTypeBuilder {
         var new = clone()
         new.type.kind = kind
-        return new
-    }
-    
-    /// Sets the flag that indicates whether this known type is an extension of
-    /// another concrete known type
-    public func settingIsExtension(_ isExtension: Bool) -> KnownTypeBuilder {
-        var new = clone()
-        new.type.isExtension = isExtension
         return new
     }
     
@@ -514,7 +522,7 @@ public struct KnownTypeBuilder {
         return result
     }
     
-    public func enumRawValue(type rawValueType: SwiftType) -> KnownTypeBuilder {
+    public func settingEnumRawValue(type rawValueType: SwiftType) -> KnownTypeBuilder {
         precondition(type.kind == .enum,
                      "cannot add enum raw value to non-enum type kind \(type.kind)")
         
@@ -619,7 +627,6 @@ private final class DummyType: KnownType {
     var typeName: String
     var knownFile: KnownFile?
     var kind: KnownTypeKind = .class
-    var isExtension: Bool = false
     var knownTraits: [String: TraitType] = [:]
     var knownConstructors: [KnownConstructor] = []
     var knownMethods: [KnownMethod] = []
@@ -645,7 +652,6 @@ private final class DummyType: KnownType {
         knownAttributes = type.knownAttributes
         supertype = type.supertype
         semantics = type.semantics
-        isExtension = type.isExtension
     }
     
     init(typeName: String, supertype: KnownTypeReferenceConvertible? = nil) {
@@ -664,7 +670,6 @@ struct BuildingKnownType: Codable {
     var typeName: String
     var knownFile: KnownFile?
     var kind: KnownTypeKind = .class
-    var isExtension: Bool = false
     var traits: [String: TraitType] = [:]
     var constructors: [BuildingKnownConstructor] = []
     var methods: [BuildingKnownMethod] = []
@@ -686,7 +691,6 @@ struct BuildingKnownType: Codable {
         case origin
         case typeName
         case kind
-        case isExtension
         case traits
         case constructors
         case methods

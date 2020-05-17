@@ -239,8 +239,7 @@ class TypeFormatterTests: XCTestCase {
     }
     
     func testAsStringKnownTypeExtension() {
-        let type = KnownTypeBuilder(typeName: "A", kind: .class)
-            .settingIsExtension(true)
+        let type = KnownTypeBuilder(typeName: "A", kind: .extension)
             .property(named: "a", type: .int)
             .build()
         
@@ -256,7 +255,7 @@ class TypeFormatterTests: XCTestCase {
     
     func testAsStringKnownTypeEnum() {
         let type = KnownTypeBuilder(typeName: "A", kind: .enum)
-            .enumRawValue(type: .int)
+            .settingEnumRawValue(type: .int)
             .enumCase(named: "a")
             .enumCase(named: "b", rawValue: .constant(1))
             .build()

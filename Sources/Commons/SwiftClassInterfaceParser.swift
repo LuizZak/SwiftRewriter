@@ -83,7 +83,6 @@ public final class SwiftClassInterfaceParser {
                                                    _ typeBuilder: inout KnownTypeBuilder) throws {
         
         let attributes: [Attribute]
-        let isExtension: Bool
         
         // Verify attributes
         if tokenizer.tokenType(is: .at) {
@@ -94,16 +93,16 @@ public final class SwiftClassInterfaceParser {
         
         if tokenizer.tokenType(is: .extension) {
             try tokenizer.advance(overTokenType: .extension)
-            isExtension = true
+            
+            typeBuilder =
+                typeBuilder.settingKind(.extension)
         } else if tokenizer.tokenType(is: .class) {
             try tokenizer.advance(overTokenType: .class)
-            isExtension = false
             
             typeBuilder =
                 typeBuilder.settingKind(.class)
         } else {
             try tokenizer.advance(overTokenType: .struct)
-            isExtension = false
             
             typeBuilder =
                 typeBuilder.settingKind(.struct)
@@ -134,7 +133,6 @@ public final class SwiftClassInterfaceParser {
         
         typeBuilder = typeBuilder
             .named(name)
-            .settingIsExtension(isExtension)
             .protocolConformances(protocolNames: supertypes)
             .settingAttributes(attributes.map(\.asKnownAttribute))
     }
@@ -890,6 +888,22 @@ public class IncompleteKnownType {
     
     public var constructors: [KnownConstructor] {
         knownTypeBuilder.constructors
+    }
+    
+    public var attributes: [KnownAttribute] {
+        knownTypeBuilder.attributes
+    }
+    
+    public var subscripts: [KnownSubscript] {
+        knownTypeBuilder.subscripts
+    }
+    
+    public var traits: [String: TraitType] {
+        knownTypeBuilder.traits
+    }
+    
+    public var conformances: [KnownProtocolConformance] {
+        knownTypeBuilder.conformances
     }
     
     public init(typeBuilder: KnownTypeBuilder) {

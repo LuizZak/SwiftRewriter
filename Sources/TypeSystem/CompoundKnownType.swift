@@ -11,7 +11,6 @@ class CompoundKnownType: KnownType {
     var knownFile: KnownFile?
     var knownTraits: [String: TraitType]
     var origin: String
-    var isExtension: Bool
     var supertype: KnownTypeReference?
     var knownConstructors: [KnownConstructor]
     var knownMethods: [KnownMethod]
@@ -35,12 +34,7 @@ class CompoundKnownType: KnownType {
         knownProtocolConformances = []
         knownAttributes = []
         semantics = []
-        var isExt = true
-        for type in types {
-            if !type.isExtension {
-                isExt = false
-            }
-            
+        for type in types  {
             knownConstructors.append(contentsOf: type.knownConstructors)
             knownMethods.append(contentsOf: type.knownMethods)
             knownProperties.append(contentsOf: type.knownProperties)
@@ -51,9 +45,7 @@ class CompoundKnownType: KnownType {
             semantics.formUnion(type.semantics)
         }
         
-        isExtension = isExt
-        
-        kind = types[0].kind
+        kind = types.first(where: { $0.kind != .extension })?.kind ?? types[0].kind
         origin = types[0].origin
         
         for type in types {

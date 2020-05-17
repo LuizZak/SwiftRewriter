@@ -266,8 +266,7 @@ extension SwiftSyntaxProducerTests {
     }
     
     func testWriteExtensionAttributes() {
-        let type = KnownTypeBuilder(typeName: "A", kind: .class)
-            .settingIsExtension(true)
+        let type = KnownTypeBuilder(typeName: "A", kind: .extension)
             .settingAttributes([
                 KnownAttribute(name: "attr"),
                 KnownAttribute(name: "otherAttr", parameters: ""),
