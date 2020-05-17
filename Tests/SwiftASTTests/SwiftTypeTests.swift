@@ -271,4 +271,132 @@ class SwiftTypeTests: XCTestCase {
         
         XCTAssertEqual(result, [1, 2, 3])
     }
+    
+    func testPrependArrayOneOrMore() {
+        let sut: OneOrMore<Int> = [1, 2]
+        
+        let result = [3, 4] + sut
+        
+        XCTAssertEqual(result, [3, 4, 1, 2])
+    }
+    
+    func testPrependOneOrMore() {
+        let sut: OneOrMore<Int> = [1, 2]
+        
+        let result = [3, 4] as OneOrMore<Int> + sut
+        
+        XCTAssertEqual(result, [3, 4, 1, 2])
+    }
+    
+    func testPrependArraySingleElementOneOrMore() {
+        let sut: OneOrMore<Int> = [1, 2]
+        
+        let result = [3] + sut
+        
+        XCTAssertEqual(result, [3, 1, 2])
+    }
+    
+    func testPrependArrayEmptyOneOrMore() {
+        let sut: OneOrMore<Int> = [1, 2]
+        
+        let result = [] + sut
+        
+        XCTAssertEqual(result, [1, 2])
+    }
+    
+    func testAppendArrayOneOrMore() {
+        let sut: OneOrMore<Int> = [1, 2]
+        
+        let result = sut + [3, 4]
+        
+        XCTAssertEqual(result, [1, 2, 3, 4])
+    }
+    
+    func testAppendOneOrMore() {
+        let sut: OneOrMore<Int> = [1, 2]
+        
+        let result = sut + [3, 4] as OneOrMore<Int>
+        
+        XCTAssertEqual(result, [1, 2, 3, 4])
+    }
+    
+    func testAppendArraySingleElementOneOrMore() {
+        let sut: OneOrMore<Int> = [1, 2]
+        
+        let result = sut + [3]
+        
+        XCTAssertEqual(result, [1, 2, 3])
+    }
+    
+    func testAppendArrayEmptyOneOrMore() {
+        let sut: OneOrMore<Int> = [1, 2]
+        
+        let result = sut + []
+        
+        XCTAssertEqual(result, [1, 2])
+    }
+    
+    func testPrependArrayTwoOrMore() {
+        let sut: TwoOrMore<Int> = [1, 2, 3]
+        
+        let result = [4, 5] + sut
+        
+        XCTAssertEqual(result, [4, 5, 1, 2, 3])
+    }
+    
+    func testPrependTwoOrMore() {
+        let sut: TwoOrMore<Int> = [1, 2, 3]
+        
+        let result = [4, 5] as TwoOrMore<Int> + sut
+        
+        XCTAssertEqual(result, [4, 5, 1, 2, 3])
+    }
+    
+    func testPrependArraySingleElementTwoOrMore() {
+        let sut: TwoOrMore<Int> = [1, 2, 3]
+        
+        let result = [4] + sut
+        
+        XCTAssertEqual(result, [4, 1, 2, 3])
+    }
+    
+    func testPrependArrayEmptyTwoOrMore() {
+        let sut: TwoOrMore<Int> = [1, 2, 3]
+        
+        let result = [] + sut
+        
+        XCTAssertEqual(result, [1, 2, 3])
+    }
+    
+    func testAppendArrayTwoOrMore() {
+        let sut: TwoOrMore<Int> = [1, 2, 3]
+        
+        let result = sut + [4, 5]
+        
+        XCTAssertEqual(result, [1, 2, 3, 4, 5])
+    }
+    
+    func testAppendTwoOrMore() {
+        let sut: TwoOrMore<Int> = [1, 2, 3]
+        
+        let result = sut + [4, 5] as TwoOrMore<Int>
+        
+        XCTAssertEqual(result, [1, 2, 3, 4, 5])
+    }
+    
+    func testAppendArraySingleElementTwoOrMore() {
+        let sut: TwoOrMore<Int> = [1, 2, 3]
+        
+        let result = sut + [4]
+        
+        XCTAssertEqual(result, [1, 2, 3, 4])
+    }
+    
+    func testAppendArrayEmptyTwoOrMore() {
+        let sut: TwoOrMore<Int> = [1, 2, 3]
+        
+        let result = sut + []
+        
+        XCTAssertEqual(result, [1, 2, 3])
+    }
 }

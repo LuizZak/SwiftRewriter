@@ -844,7 +844,25 @@ private class MemberInvocationResolver {
                 member.memberDefinition = field
                 exp.resolvedType = field.storage.type
                 exp.op.returnType = exp.resolvedType
-            } else {
+            } else if innerType.isMetatype {
+                
+                if case .metatype(.nominal(let nominal)) = innerType,
+                    typeSystem.nestedType(named: member.name, in: innerType) != nil {
+                    
+                    exp.resolvedType = .metatype(for: .nested([nominal, .typeName(member.name)]))
+                    exp.op.returnType = exp.resolvedType
+                    
+                    break
+                }
+                if case .metatype(.nested(let nested)) = innerType,
+                    typeSystem.nestedType(named: member.name, in: .nested(nested)) != nil {
+                    
+                    exp.resolvedType = .metatype(for: .nested(nested + [.typeName(member.name)]))
+                    exp.op.returnType = exp.resolvedType
+                    
+                    break
+                }
+                
                 return exp.makeErrorTyped()
             }
             

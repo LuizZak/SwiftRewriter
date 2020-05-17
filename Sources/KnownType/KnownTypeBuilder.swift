@@ -543,12 +543,12 @@ public struct KnownTypeBuilder {
     }
     
     public func nestedType(named name: String,
-                           _ initializer: (KnownTypeBuilder) -> Void = { _ in }) -> KnownTypeBuilder {
+                           _ initializer: (KnownTypeBuilder) -> KnownTypeBuilder = { $0 }) -> KnownTypeBuilder {
         
         var new = clone()
         
-        let nested = KnownTypeBuilder(typeName: name)
-        initializer(nested)
+        var nested = KnownTypeBuilder(typeName: name)
+        nested = initializer(nested)
         
         new.type.nestedTypes.append(nested.build())
         

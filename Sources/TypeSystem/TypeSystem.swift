@@ -987,6 +987,21 @@ public class TypeSystem {
         case .nominal(.typeName(let typeName)):
             result = knownTypeWithName(typeName)
             
+        case .nested(let nested):
+            guard var current = findType(for: .nominal(nested[0])) else {
+                return nil
+            }
+            
+            for next in nested.dropFirst() {
+                if let type = current.nestedTypes.first(where: { $0.typeName == next.typeNameValue }) {
+                    current = type
+                } else {
+                    return nil
+                }
+            }
+            
+            result = current
+            
         // Meta-types recurse on themselves
         case .metatype(for: let inner):
             let type = inner.deepUnwrapped
@@ -1034,6 +1049,15 @@ public class TypeSystem {
             return nil
         }
         return conformance(toProtocolName: name, in: knownType)
+    }
+    
+    /// Attempts to search for a nested type within a given type reference
+    public func nestedType(named name: String, in type: SwiftType) -> KnownType? {
+        guard let knownType = self.findType(for: type) else {
+            return nil
+        }
+        
+        return knownType.nestedTypes.first(where: { $0.typeName == name })
     }
     
     /// Searches for a method with a given Swift function identifier, also

@@ -1222,6 +1222,34 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(resolvedAs: .optional(.bool))
     }
+    
+    func testNestedTypeReference() {
+        _=startScopedTest(with:
+            Expression.identifier("A").dot("Nested").dot("self"),
+                          sut: ExpressionTypeResolver())
+            .definingType(named: "A", with: { builder -> KnownType in
+                builder
+                    .nestedType(named: "Nested")
+                    .build()
+            })
+            .resolve()
+            .thenAssertExpression(resolvedAs: .metatype(for: .nested(["A", "Nested"])))
+    }
+    
+    func testNestedTypeNestedTypeReference() {
+        _=startScopedTest(with:
+            Expression.identifier("A").dot("Nested").dot("Nested").dot("self"),
+                          sut: ExpressionTypeResolver())
+            .definingType(named: "A", with: { builder -> KnownType in
+                builder
+                    .nestedType(named: "Nested") { builder in
+                        builder.nestedType(named: "Nested")
+                    }
+                    .build()
+            })
+            .resolve()
+            .thenAssertExpression(resolvedAs: .metatype(for: .nested(["A", "Nested", "Nested"])))
+    }
 }
 
 // MARK: - Test Building Helpers
