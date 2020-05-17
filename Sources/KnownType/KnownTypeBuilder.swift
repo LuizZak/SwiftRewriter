@@ -542,6 +542,19 @@ public struct KnownTypeBuilder {
         return new
     }
     
+    public func nestedType(named name: String,
+                           _ initializer: (KnownTypeBuilder) -> Void = { _ in }) -> KnownTypeBuilder {
+        
+        var new = clone()
+        
+        let nested = KnownTypeBuilder(typeName: name)
+        initializer(nested)
+        
+        new.type.nestedTypes.append(nested.build())
+        
+        return new
+    }
+    
     func clone() -> KnownTypeBuilder {
         KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
     }
@@ -632,6 +645,7 @@ private final class DummyType: KnownType {
     var knownAttributes: [KnownAttribute] = []
     var supertype: KnownTypeReference?
     var semantics: Set<Semantic> = []
+    var nestedTypes: [KnownType] = []
     
     init(type: BuildingKnownType) {
         origin = type.origin
@@ -648,6 +662,7 @@ private final class DummyType: KnownType {
         supertype = type.supertype
         semantics = type.semantics
         isExtension = type.isExtension
+        nestedTypes = type.nestedTypes
     }
     
     init(typeName: String, supertype: KnownTypeReferenceConvertible? = nil) {
@@ -677,11 +692,52 @@ struct BuildingKnownType: Codable {
     var attributes: [KnownAttribute] = []
     var supertype: KnownTypeReference?
     var semantics: Set<Semantic> = []
+    var nestedTypes: [KnownType] = []
     
     init(typeName: String, supertype: KnownTypeReference? = nil) {
         self.origin = "Synthesized type"
         self.typeName = typeName
         self.supertype = supertype
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        origin = try container.decode(String.self, forKey: .origin)
+        typeName = try container.decode(String.self, forKey: .typeName)
+        kind = try container.decode(KnownTypeKind.self, forKey: .kind)
+        isExtension = try container.decode(Bool.self, forKey: .isExtension)
+        traits = try container.decode([String: TraitType].self, forKey: .traits)
+        constructors = try container.decode([BuildingKnownConstructor].self, forKey: .constructors)
+        methods = try container.decode([BuildingKnownMethod].self, forKey: .methods)
+        properties = try container.decode([BuildingKnownProperty].self, forKey: .properties)
+        fields = try container.decode([BuildingKnownProperty].self, forKey: .fields)
+        subscripts = try container.decode([BuildingKnownSubscript].self, forKey: .subscripts)
+        protocols = try container.decode([BuildingKnownProtocolConformance].self, forKey: .protocols)
+        attributes = try container.decode([KnownAttribute].self, forKey: .attributes)
+        supertype = try container.decode(KnownTypeReference?.self, forKey: .supertype)
+        semantics = try container.decode(Set<Semantic>.self, forKey: .semantics)
+        nestedTypes = try container.decodeKnownTypes(forKey: .nestedTypes)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(origin, forKey: .origin)
+        try container.encode(typeName, forKey: .typeName)
+        try container.encode(kind, forKey: .kind)
+        try container.encode(isExtension, forKey: .isExtension)
+        try container.encode(traits, forKey: .traits)
+        try container.encode(constructors, forKey: .constructors)
+        try container.encode(methods, forKey: .methods)
+        try container.encode(properties, forKey: .properties)
+        try container.encode(fields, forKey: .fields)
+        try container.encode(subscripts, forKey: .subscripts)
+        try container.encode(protocols, forKey: .protocols)
+        try container.encode(attributes, forKey: .attributes)
+        try container.encode(supertype, forKey: .supertype)
+        try container.encode(semantics, forKey: .semantics)
+        try container.encodeKnownTypes(nestedTypes, forKey: .nestedTypes)
     }
     
     enum CodingKeys: String, CodingKey {
@@ -699,6 +755,7 @@ struct BuildingKnownType: Codable {
         case attributes
         case supertype
         case semantics
+        case nestedTypes
     }
 }
 

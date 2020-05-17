@@ -70,4 +70,7 @@ extension CompoundedMappingType: KnownType {
     public var knownAttributes: [KnownAttribute] {
         knownType.knownAttributes
     }
+    public var nestedTypes: [KnownType] {
+        knownType.nestedTypes
+    }
 }

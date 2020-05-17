@@ -21,6 +21,7 @@ class CompoundKnownType: KnownType {
     var knownProtocolConformances: [KnownProtocolConformance]
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
+    var nestedTypes: [KnownType]
     
     init(typeName: String, types: [KnownType], typeSystem: TypeSystem? = nil) {
         self.typeName = typeName
@@ -35,6 +36,7 @@ class CompoundKnownType: KnownType {
         knownProtocolConformances = []
         knownAttributes = []
         semantics = []
+        nestedTypes = []
         var isExt = true
         for type in types {
             if !type.isExtension {
@@ -49,6 +51,7 @@ class CompoundKnownType: KnownType {
             knownProtocolConformances.append(contentsOf: type.knownProtocolConformances)
             knownAttributes.append(contentsOf: type.knownAttributes)
             semantics.formUnion(type.semantics)
+            nestedTypes.append(contentsOf: type.nestedTypes)
         }
         
         isExtension = isExt

@@ -1462,6 +1462,7 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
         let knownProtocolConformances: [KnownProtocolConformance]
         let knownAttributes: [KnownAttribute] = []
         let semantics: Set<Semantic> = []
+        let nestedTypes: [KnownType] = []
         
         init(protocolType: ProtocolType) {
             self.typeName = protocolType.protocolName
@@ -1545,6 +1546,7 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         let knownProtocolConformances: [KnownProtocolConformance]
         let knownAttributes: [KnownAttribute] = []
         let semantics: Set<Semantic> = []
+        let nestedTypes: [KnownType] = []
         
         init(classType: ClassType) {
             self.typeName = classType.typeName

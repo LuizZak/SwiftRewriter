@@ -43,6 +43,9 @@ public protocol KnownType: KnownTypeReferenceConvertible, KnownDeclaration, Attr
     /// Gets an array of all known protocol conformances for this type
     var knownProtocolConformances: [KnownProtocolConformance] { get }
     
+    /// Any nested types within this known type
+    var nestedTypes: [KnownType] { get }
+    
     /// Gets a known type trait from this type
     func knownTrait(_ traitName: String) -> TraitType?
 }
