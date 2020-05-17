@@ -837,6 +837,7 @@ private class MemberInvocationResolver {
                 exp.resolvedType = property.storage.type
                 exp.op.returnType = exp.resolvedType
                 
+                break
             } else if let field = typeSystem.field(named: member.name,
                                                    static: innerType.isMetatype,
                                                    in: innerType) {
@@ -844,8 +845,9 @@ private class MemberInvocationResolver {
                 member.memberDefinition = field
                 exp.resolvedType = field.storage.type
                 exp.op.returnType = exp.resolvedType
-            } else if innerType.isMetatype {
                 
+                break
+            } else if innerType.isMetatype {
                 if case .metatype(.nominal(let nominal)) = innerType,
                     typeSystem.nestedType(named: member.name, in: innerType) != nil {
                     
@@ -862,9 +864,9 @@ private class MemberInvocationResolver {
                     
                     break
                 }
-                
-                return exp.makeErrorTyped()
             }
+            
+            return exp.makeErrorTyped()
             
         default:
             break
