@@ -70,7 +70,7 @@ public enum KnownTypeKind: String, Codable {
 ///
 /// - knownType: A concrete known type reference.
 /// - typeName: The type that is referenced by a loose type name.
-public enum KnownTypeReference: KnownTypeReferenceConvertible {
+public enum KnownTypeReference: KnownTypeReferenceConvertible, Equatable {
     case typeName(String)
     indirect case nested(base: KnownTypeReference, typeName: String)
     
@@ -111,19 +111,6 @@ public enum KnownTypeReference: KnownTypeReferenceConvertible {
     
     public var asKnownTypeReference: KnownTypeReference {
         self
-    }
-}
-
-extension KnownTypeReference: Equatable {
-    public static func == (lhs: KnownTypeReference, rhs: KnownTypeReference) -> Bool {
-        switch (lhs, rhs) {
-        case (.typeName(let l), .typeName(let r)):
-            return l == r
-        case (let .nested(bl, ltype), let .nested(br, rtype)):
-            return bl == br && ltype == rtype
-        default:
-            return false
-        }
     }
 }
 
