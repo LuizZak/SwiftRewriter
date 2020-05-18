@@ -21,21 +21,35 @@ public final class KnownTypeSerializer {
 
 extension KnownTypeReference: Codable {
     public init(from decoder: Decoder) throws {
-        var container = try decoder.unkeyedContainer()
-        
-        var next = try KnownTypeReference.typeName(container.decode(String.self))
-        while !container.isAtEnd {
-            next = try KnownTypeReference.nested(base: next, typeName: container.decode(String.self))
+        if var container = try? decoder.unkeyedContainer() {
+            var next = try KnownTypeReference.typeName(container.decode(String.self))
+            while !container.isAtEnd {
+                next = try KnownTypeReference.nested(base: next, typeName: container.decode(String.self))
+            }
+            
+            self = next
+            
+            return
         }
         
-        self = next
+        let container = try decoder.singleValueContainer()
+        
+        self = try .typeName(container.decode(String.self))
     }
     
     public func encode(to encoder: Encoder) throws {
-        var container = encoder.unkeyedContainer()
-        
-        for name in asNestedTypeNames {
+        switch self {
+        case .typeName(let name):
+            var container = encoder.singleValueContainer()
+            
             try container.encode(name)
+            
+        case .nested:
+            var container = encoder.unkeyedContainer()
+            
+            for name in asNestedTypeNames {
+                try container.encode(name)
+            }
         }
     }
 }
