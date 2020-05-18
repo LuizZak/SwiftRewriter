@@ -40,9 +40,17 @@ extension KnownTypeReference: Codable {
     public func encode(to encoder: Encoder) throws {
         switch self {
         case .typeName(let name):
-            var container = encoder.singleValueContainer()
-            
-            try container.encode(name)
+            if encoder.codingPath.isEmpty {
+                var container = encoder.unkeyedContainer()
+                
+                for name in asNestedTypeNames {
+                    try container.encode(name)
+                }
+            } else {
+                var container = encoder.singleValueContainer()
+                
+                try container.encode(name)
+            }
             
         case .nested:
             var container = encoder.unkeyedContainer()
