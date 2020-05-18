@@ -391,9 +391,6 @@ public class TypeSystem {
         case .typeName(let tn)? where tn == unaliasedSupertypeName:
             return true
             
-        case .knownType(let kt)?:
-            return isType(kt.typeName, subtypeOf: unaliasedSupertypeName)
-            
         default:
             break
         }
@@ -409,10 +406,10 @@ public class TypeSystem {
             }
             
             switch c.supertype {
-            case .knownType(let type)?:
-                current = type
             case .typeName(let name)?:
                 current = knownTypeWithName(name)
+            case let .nested(base, typeName):
+                current = knownTypeFromNested(base.asNestedTypeNames + [typeName])
             default:
                 current = nil
             }
@@ -816,9 +813,6 @@ public class TypeSystem {
         }
         
         switch supertype {
-        case .knownType(let type):
-            return type
-            
         case .typeName(let type):
             return knownTypeWithName(type)
             

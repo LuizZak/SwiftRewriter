@@ -63,16 +63,7 @@ class CompoundKnownType: KnownType {
         
         for type in types {
             // Search supertypes known here
-            switch type.supertype {
-            case .typeName(let supertypeName)?:
-                supertype =
-                    typeSystem?.knownTypeWithName(supertypeName).map { .knownType($0) }
-                        ?? .typeName(supertypeName)
-            case .knownType?:
-                supertype = type.supertype
-            default:
-                break
-            }
+            supertype = type.supertype
         }
     }
 }

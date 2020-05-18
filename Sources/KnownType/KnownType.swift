@@ -71,7 +71,6 @@ public enum KnownTypeKind: String, Codable {
 /// - knownType: A concrete known type reference.
 /// - typeName: The type that is referenced by a loose type name.
 public enum KnownTypeReference: KnownTypeReferenceConvertible {
-    case knownType(KnownType)
     case typeName(String)
     indirect case nested(base: KnownTypeReference, typeName: String)
     
@@ -89,23 +88,11 @@ public enum KnownTypeReference: KnownTypeReferenceConvertible {
             default:
                 return .typeName(typeName)
             }
-        
-        case .knownType(let type):
-            switch type.parentType?.asSwiftType {
-            case .nested(let nested):
-                return .nested(nested + [.typeName(type.typeName)])
-            case .nominal(let nominal):
-                return .nested([nominal, .typeName(type.typeName)])
-            default:
-                return .typeName(type.typeName)
-            }
         }
     }
     
     public var asTypeName: String {
         switch self {
-        case .knownType(let type):
-            return type.typeName
         case .typeName(let name):
             return name
         case .nested(_, let name):
@@ -115,8 +102,6 @@ public enum KnownTypeReference: KnownTypeReferenceConvertible {
     
     public var asNestedTypeNames: [String] {
         switch self {
-        case .knownType(let type):
-            return [type.typeName]
         case .typeName(let name):
             return [name]
         case .nested(let base, let typeName):
@@ -132,8 +117,6 @@ public enum KnownTypeReference: KnownTypeReferenceConvertible {
 extension KnownTypeReference: Equatable {
     public static func == (lhs: KnownTypeReference, rhs: KnownTypeReference) -> Bool {
         switch (lhs, rhs) {
-        case (.knownType(let l), .knownType(let r)):
-            return l.typeName == r.typeName
         case (.typeName(let l), .typeName(let r)):
             return l == r
         case (let .nested(bl, ltype), let .nested(br, rtype)):
@@ -161,7 +144,7 @@ public extension KnownType {
             return .nested(base: parent, typeName: self.typeName)
         }
         
-        return .knownType(self)
+        return .typeName(typeName)
     }
     
     var asSwiftType: SwiftType {
