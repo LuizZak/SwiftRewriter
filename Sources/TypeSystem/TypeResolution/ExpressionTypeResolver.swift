@@ -837,6 +837,7 @@ private class MemberInvocationResolver {
                 exp.resolvedType = property.storage.type
                 exp.op.returnType = exp.resolvedType
                 
+                break
             } else if let field = typeSystem.field(named: member.name,
                                                    static: innerType.isMetatype,
                                                    in: innerType) {
@@ -844,9 +845,28 @@ private class MemberInvocationResolver {
                 member.memberDefinition = field
                 exp.resolvedType = field.storage.type
                 exp.op.returnType = exp.resolvedType
-            } else {
-                return exp.makeErrorTyped()
+                
+                break
+            } else if innerType.isMetatype {
+                if case .metatype(.nominal(let nominal)) = innerType,
+                    typeSystem.nestedType(named: member.name, in: innerType) != nil {
+                    
+                    exp.resolvedType = .metatype(for: .nested([nominal, .typeName(member.name)]))
+                    exp.op.returnType = exp.resolvedType
+                    
+                    break
+                }
+                if case .metatype(.nested(let nested)) = innerType,
+                    typeSystem.nestedType(named: member.name, in: .nested(nested)) != nil {
+                    
+                    exp.resolvedType = .metatype(for: .nested(nested + [.typeName(member.name)]))
+                    exp.op.returnType = exp.resolvedType
+                    
+                    break
+                }
             }
+            
+            return exp.makeErrorTyped()
             
         default:
             break
@@ -904,7 +924,7 @@ private class MemberInvocationResolver {
             return postfix
         }
         // Direct type constuctor `MyClass([params])`
-        if let target = postfix.exp.asIdentifier, let metatype = extractMetatype(from: target) {
+        if let metatype = extractMetatype(from: postfix.exp) {
             guard let ctor = typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: metatype) else {
                 return postfix.makeErrorTyped()
             }

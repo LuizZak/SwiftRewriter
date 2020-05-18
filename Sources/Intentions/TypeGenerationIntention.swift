@@ -283,4 +283,10 @@ extension TypeGenerationIntention: KnownType {
     public var knownSubscripts: [KnownSubscript] {
         subscripts
     }
+    public var nestedTypes: [KnownType] {
+        []
+    }
+    public var parentType: KnownTypeReference? {
+        return nil
+    }
 }
