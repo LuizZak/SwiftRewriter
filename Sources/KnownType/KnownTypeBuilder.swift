@@ -9,6 +9,10 @@ public struct KnownTypeBuilder {
     var type: BuildingKnownType
     public var useSwiftSignatureMatching: Bool = false
     
+    /// If set, indicates that the type being built is nested within a given
+    /// base type.
+    public var nestedType: SwiftType?
+    
     public var typeName: String {
         type.typeName
     }
@@ -53,6 +57,7 @@ public struct KnownTypeBuilder {
         type.semantics = existingType.semantics
         type.kind = existingType.kind
         type.origin = "Cloned from existing type with \(KnownTypeBuilder.self) at \(file) line \(line)"
+        type.parentType = existingType.parentType
         
         self.type = type
         
@@ -100,6 +105,13 @@ public struct KnownTypeBuilder {
                                      semantics: sub.semantics,
                                      annotations: sub.annotations)
         }
+        for nested in existingType.nestedTypes {
+            let subType = KnownTypeBuilder(from: nested)
+                .setParentType(self.type.asKnownTypeReference)
+                .build()
+            self.type.nestedTypes.append(subType)
+        }
+        
         self.type.traits = existingType.knownTraits
     }
     
@@ -183,6 +195,7 @@ public struct KnownTypeBuilder {
     /// Adds a parameter-less constructor to this type
     public func constructor(isFailable: Bool = false,
                             annotations: [String] = []) -> KnownTypeBuilder {
+        
         assert(!type.knownConstructors.contains(where: \.parameters.isEmpty),
                "An empty constructor is already provided")
         
@@ -544,7 +557,8 @@ public struct KnownTypeBuilder {
         var new = clone()
         
         let storage =
-            ValueStorage(type: .typeName(type.typeName), ownership: .strong,
+            ValueStorage(type: type.asSwiftType,
+                         ownership: .strong,
                          isConstant: true)
         
         let cs =
@@ -563,6 +577,30 @@ public struct KnownTypeBuilder {
         
         new.type.properties.append(cs)
         
+        return new
+    }
+    
+    public func nestedType(named name: String,
+                           _ initializer: (KnownTypeBuilder) -> KnownTypeBuilder = { $0 }) -> KnownTypeBuilder {
+        
+        var new = clone()
+        
+        var nested = KnownTypeBuilder(typeName: name)
+        if let parent = type.parentType {
+            nested = nested.setParentType(.nested(base: parent, typeName: typeName))
+        } else {
+            nested = nested.setParentType(.typeName(typeName))
+        }
+        nested = initializer(nested)
+        
+        new.type.nestedTypes.append(nested.build())
+        
+        return new
+    }
+    
+    public func setParentType(_ typeReference: KnownTypeReference?) -> KnownTypeBuilder {
+        var new = clone()
+        new.type.parentType = typeReference
         return new
     }
     
@@ -637,6 +675,8 @@ private final class DummyType: KnownType {
     var knownAttributes: [KnownAttribute] = []
     var supertype: KnownTypeReference?
     var semantics: Set<Semantic> = []
+    var nestedTypes: [KnownType] = []
+    var parentType: KnownTypeReference?
     
     init(type: BuildingKnownType) {
         origin = type.origin
@@ -652,6 +692,8 @@ private final class DummyType: KnownType {
         knownAttributes = type.knownAttributes
         supertype = type.supertype
         semantics = type.semantics
+        nestedTypes = type.nestedTypes
+        parentType = type.parentType
     }
     
     init(typeName: String, supertype: KnownTypeReferenceConvertible? = nil) {
@@ -680,11 +722,56 @@ struct BuildingKnownType: Codable {
     var attributes: [KnownAttribute] = []
     var supertype: KnownTypeReference?
     var semantics: Set<Semantic> = []
+    var nestedTypes: [KnownType] = []
+    var nestedType: SwiftType?
+    var parentType: KnownTypeReference?
     
     init(typeName: String, supertype: KnownTypeReference? = nil) {
         self.origin = "Synthesized type"
         self.typeName = typeName
         self.supertype = supertype
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        origin = try container.decode(String.self, forKey: .origin)
+        typeName = try container.decode(String.self, forKey: .typeName)
+        kind = try container.decode(KnownTypeKind.self, forKey: .kind)
+        isExtension = try container.decode(Bool.self, forKey: .isExtension)
+        traits = try container.decode([String: TraitType].self, forKey: .traits)
+        constructors = try container.decode([BuildingKnownConstructor].self, forKey: .constructors)
+        methods = try container.decode([BuildingKnownMethod].self, forKey: .methods)
+        properties = try container.decode([BuildingKnownProperty].self, forKey: .properties)
+        fields = try container.decode([BuildingKnownProperty].self, forKey: .fields)
+        subscripts = try container.decode([BuildingKnownSubscript].self, forKey: .subscripts)
+        protocols = try container.decode([BuildingKnownProtocolConformance].self, forKey: .protocols)
+        attributes = try container.decode([KnownAttribute].self, forKey: .attributes)
+        supertype = try container.decode(KnownTypeReference?.self, forKey: .supertype)
+        semantics = try container.decode(Set<Semantic>.self, forKey: .semantics)
+        nestedTypes = try container.decodeKnownTypes(forKey: .nestedTypes)
+        parentType = try container.decodeIfPresent(KnownTypeReference.self, forKey: .parentType)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(origin, forKey: .origin)
+        try container.encode(typeName, forKey: .typeName)
+        try container.encode(kind, forKey: .kind)
+        try container.encode(isExtension, forKey: .isExtension)
+        try container.encode(traits, forKey: .traits)
+        try container.encode(constructors, forKey: .constructors)
+        try container.encode(methods, forKey: .methods)
+        try container.encode(properties, forKey: .properties)
+        try container.encode(fields, forKey: .fields)
+        try container.encode(subscripts, forKey: .subscripts)
+        try container.encode(protocols, forKey: .protocols)
+        try container.encode(attributes, forKey: .attributes)
+        try container.encode(supertype, forKey: .supertype)
+        try container.encode(semantics, forKey: .semantics)
+        try container.encodeKnownTypes(nestedTypes, forKey: .nestedTypes)
+        try container.encode(parentType, forKey: .parentType)
     }
     
     enum CodingKeys: String, CodingKey {
@@ -701,6 +788,8 @@ struct BuildingKnownType: Codable {
         case attributes
         case supertype
         case semantics
+        case nestedTypes
+        case parentType
     }
 }
 

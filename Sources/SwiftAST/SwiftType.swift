@@ -85,6 +85,19 @@ public extension SwiftType {
         }
     }
     
+    /// If this Swift type is a nominal typename, returns the inner type name as
+    /// a string, and if it's a nested type, returns the last nominal type's name
+    var lastNominalTypeName: String? {
+        switch self {
+        case .nominal(.typeName(let name)):
+            return name
+        case .nested(let names):
+            return names.last.typeNameValue
+        default:
+            return nil
+        }
+    }
+    
     /// Whether this type requires surrounding parenthesis when this type is used
     /// within an optional or metatype.
     var requiresSurroundingParens: Bool {
@@ -681,5 +694,61 @@ extension TwoOrMore: ExpressibleByArrayLiteral {
     /// - precondition: At least two array elements must be provided.
     public init(arrayLiteral elements: T...) {
         self = .fromCollection(elements)
+    }
+}
+
+// MARK: Operators
+public extension OneOrMore {
+    static func + (lhs: OneOrMore, rhs: OneOrMore) -> OneOrMore {
+        let remaining = lhs.remaining + [rhs.first] + rhs.remaining
+        
+        return .init(first: lhs.first, remaining: remaining)
+    }
+    
+    static func + (lhs: [T], rhs: OneOrMore) -> OneOrMore {
+        let remaining = [rhs.first] + rhs.remaining
+        
+        if lhs.count > 1 {
+            return .init(first: lhs[0], remaining: [lhs[1]] + remaining)
+        }
+        if lhs.count == 1 {
+            return .init(first: lhs[0], remaining: remaining)
+        }
+        
+        return rhs
+    }
+    
+    static func + (lhs: OneOrMore, rhs: [T]) -> OneOrMore {
+        return .init(first: lhs.first, remaining: lhs.remaining + rhs)
+    }
+}
+
+public extension TwoOrMore {
+    static func + (lhs: TwoOrMore, rhs: TwoOrMore) -> TwoOrMore {
+        let remaining = lhs.remaining + [rhs.first, rhs.second] + rhs.remaining
+        
+        return .init(first: lhs.first, second: lhs.second, remaining: remaining)
+    }
+    
+    static func + (lhs: [T], rhs: TwoOrMore) -> TwoOrMore {
+        let remaining = [rhs.first, rhs.second] + rhs.remaining
+        
+        if lhs.count >= 2 {
+            return .init(first: lhs[0],
+                         second: lhs[1],
+                         remaining: remaining)
+        }
+        
+        if lhs.count == 1 {
+            return .init(first: lhs[0],
+                         second: remaining[0],
+                         remaining: Array(remaining.dropFirst()))
+        }
+        
+        return rhs
+    }
+    
+    static func + (lhs: TwoOrMore, rhs: [T]) -> TwoOrMore {
+        return .init(first: lhs.first, second: lhs.second, remaining: lhs.remaining + rhs)
     }
 }

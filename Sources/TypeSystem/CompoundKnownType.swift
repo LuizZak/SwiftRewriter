@@ -20,6 +20,8 @@ class CompoundKnownType: KnownType {
     var knownProtocolConformances: [KnownProtocolConformance]
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
+    var nestedTypes: [KnownType]
+    var parentType: KnownTypeReference?
     
     init(typeName: String, types: [KnownType], typeSystem: TypeSystem? = nil) {
         self.typeName = typeName
@@ -34,6 +36,7 @@ class CompoundKnownType: KnownType {
         knownProtocolConformances = []
         knownAttributes = []
         semantics = []
+        nestedTypes = []
         for type in types  {
             knownConstructors.append(contentsOf: type.knownConstructors)
             knownMethods.append(contentsOf: type.knownMethods)
@@ -43,23 +46,16 @@ class CompoundKnownType: KnownType {
             knownProtocolConformances.append(contentsOf: type.knownProtocolConformances)
             knownAttributes.append(contentsOf: type.knownAttributes)
             semantics.formUnion(type.semantics)
+            nestedTypes.append(contentsOf: type.nestedTypes)
         }
         
         kind = types.first(where: { $0.kind != .extension })?.kind ?? types[0].kind
         origin = types[0].origin
+        parentType = types[0].parentType
         
         for type in types {
             // Search supertypes known here
-            switch type.supertype {
-            case .typeName(let supertypeName)?:
-                supertype =
-                    typeSystem?.knownTypeWithName(supertypeName).map { .knownType($0) }
-                        ?? .typeName(supertypeName)
-            case .knownType?:
-                supertype = type.supertype
-            default:
-                break
-            }
+            supertype = type.supertype
         }
     }
 }

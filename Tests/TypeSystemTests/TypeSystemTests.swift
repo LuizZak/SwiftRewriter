@@ -1265,6 +1265,38 @@ class TypeSystemTests: XCTestCase {
                                         in: type)?.returnType,
                        .string)
     }
+    
+    func testFindTypeNestedType() {
+        let type = KnownTypeBuilder(typeName: "A")
+            .nestedType(named: "B")
+            .build()
+        sut.addType(type)
+        
+        let result = sut.findType(for: .nested(["A", "B"]))
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.typeName, "B")
+    }
+    
+    func testFindTypeMetatypeOfNestedType() {
+        let type = KnownTypeBuilder(typeName: "A")
+            .nestedType(named: "B")
+            .build()
+        sut.addType(type)
+        
+        let result = sut.findType(for: .metatype(for: .nested(["A", "B"])))
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.typeName, "B")
+    }
+    
+    func testKnownTypeFromNestedTypes() {
+        let type = KnownTypeBuilder(typeName: "A")
+            .nestedType(named: "B")
+            .build()
+        sut.addType(type)
+        
+        let result = sut.knownTypeFromNested(["A", "B"])
+        XCTAssertEqual(result?.parentType, .typeName("A"))
+    }
 }
 
 private extension TypeSystemTests {

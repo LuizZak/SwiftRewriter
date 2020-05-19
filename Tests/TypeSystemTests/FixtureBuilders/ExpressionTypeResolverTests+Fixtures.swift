@@ -355,7 +355,7 @@ extension ExpressionTypeResolverTests {
                 if expression.resolvedType != type {
                     testCase.recordFailure(withDescription: """
                         Expected expression to resolve as \(type?.description ?? "nil"), \
-                        but received \(expression.resolvedType?.description ?? "nil")"
+                        but received \(expression.resolvedType?.description ?? "nil")
                         """,
                         inFile: file, atLine: line, expected: true)
                 }
@@ -373,7 +373,7 @@ extension ExpressionTypeResolverTests {
                 if expression.expectedType != type {
                     testCase.recordFailure(withDescription: """
                         Expected expression to resolve as expecting type \(type?.description ?? "nil"), \
-                        but it expects \(expression.expectedType?.description ?? "nil")"
+                        but it expects \(expression.expectedType?.description ?? "nil")
                         """,
                         inFile: file, atLine: line, expected: true)
                 }
@@ -400,7 +400,7 @@ extension ExpressionTypeResolverTests {
                 if exp.resolvedType != type {
                     testCase.recordFailure(withDescription: """
                         Expected expression to resolve with type \(type?.description ?? "nil"), \
-                        but it resolved as \(exp.resolvedType?.description ?? "nil")"
+                        but it resolved as \(exp.resolvedType?.description ?? "nil")
                         """,
                         inFile: file, atLine: line, expected: true)
                 }
@@ -427,7 +427,7 @@ extension ExpressionTypeResolverTests {
                 if exp.expectedType != type {
                     testCase.recordFailure(withDescription: """
                         Expected expression to resolve as expecting type \(type?.description ?? "nil"), \
-                        but it expects \(exp.expectedType?.description ?? "nil")"
+                        but it expects \(exp.expectedType?.description ?? "nil")
                         """,
                         inFile: file, atLine: line, expected: true)
                 }

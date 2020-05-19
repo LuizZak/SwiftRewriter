@@ -167,6 +167,31 @@ public class TypeSystem {
         return _knownTypeWithNameUnaliased(name)
     }
     
+    /// Gets a known type from a nested type reference
+    public func knownTypeFromNested(_ nested: [String]) -> KnownType? {
+        guard let first = nested.first else {
+            return nil
+        }
+        guard let base = knownTypeWithName(first) else {
+            return nil
+        }
+        
+        var stack = nested.dropFirst()
+        
+        var current = base
+        
+        while !stack.isEmpty {
+            let next = stack.removeFirst()
+            if let reference = current.nestedTypes.first(where: { $0.typeName == next }) {
+                current = reference
+            } else {
+                return nil
+            }
+        }
+        
+        return current
+    }
+    
     private func _knownTypeWithNameUnaliased(_ name: String) -> KnownType? {
         knownTypeProviders.knownType(withName: name)
     }
@@ -366,9 +391,6 @@ public class TypeSystem {
         case .typeName(let tn)? where tn == unaliasedSupertypeName:
             return true
             
-        case .knownType(let kt)?:
-            return isType(kt.typeName, subtypeOf: unaliasedSupertypeName)
-            
         default:
             break
         }
@@ -384,10 +406,10 @@ public class TypeSystem {
             }
             
             switch c.supertype {
-            case .knownType(let type)?:
-                current = type
             case .typeName(let name)?:
                 current = knownTypeWithName(name)
+            case let .nested(base, typeName):
+                current = knownTypeFromNested(base.asNestedTypeNames + [typeName])
             default:
                 current = nil
             }
@@ -794,11 +816,11 @@ public class TypeSystem {
         }
         
         switch supertype {
-        case .knownType(let type):
-            return type
-            
         case .typeName(let type):
             return knownTypeWithName(type)
+            
+        case .nested:
+            return knownTypeFromNested(supertype.asNestedTypeNames)
         }
     }
     
@@ -990,6 +1012,21 @@ public class TypeSystem {
         case .nominal(.typeName(let typeName)):
             result = knownTypeWithName(typeName)
             
+        case .nested(let nested):
+            guard var current = findType(for: .nominal(nested[0])) else {
+                return nil
+            }
+            
+            for next in nested.dropFirst() {
+                if let type = current.nestedTypes.first(where: { $0.typeName == next.typeNameValue }) {
+                    current = type
+                } else {
+                    return nil
+                }
+            }
+            
+            result = current
+            
         // Meta-types recurse on themselves
         case .metatype(for: let inner):
             let type = inner.deepUnwrapped
@@ -1037,6 +1074,15 @@ public class TypeSystem {
             return nil
         }
         return conformance(toProtocolName: name, in: knownType)
+    }
+    
+    /// Attempts to search for a nested type within a given type reference
+    public func nestedType(named name: String, in type: SwiftType) -> KnownType? {
+        guard let knownType = self.findType(for: type) else {
+            return nil
+        }
+        
+        return knownType.nestedTypes.first(where: { $0.typeName == name })
     }
     
     /// Searches for a method with a given Swift function identifier, also
@@ -1465,6 +1511,8 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
         let knownProtocolConformances: [KnownProtocolConformance]
         let knownAttributes: [KnownAttribute] = []
         let semantics: Set<Semantic> = []
+        let nestedTypes: [KnownType] = []
+        var parentType: KnownTypeReference? = nil
         
         init(protocolType: ProtocolType) {
             self.typeName = protocolType.protocolName
@@ -1548,6 +1596,8 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         let knownProtocolConformances: [KnownProtocolConformance]
         let knownAttributes: [KnownAttribute] = []
         let semantics: Set<Semantic> = []
+        let nestedTypes: [KnownType] = []
+        var parentType: KnownTypeReference? = nil
         
         init(classType: ClassType) {
             self.typeName = classType.typeName
