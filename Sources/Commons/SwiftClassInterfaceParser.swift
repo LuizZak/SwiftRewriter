@@ -906,6 +906,10 @@ public class IncompleteKnownType {
         knownTypeBuilder.conformances
     }
     
+    public var nestedTypes: [KnownType] {
+        knownTypeBuilder.nestedTypes
+    }
+    
     public init(typeBuilder: KnownTypeBuilder) {
         self.knownTypeBuilder = typeBuilder
     }

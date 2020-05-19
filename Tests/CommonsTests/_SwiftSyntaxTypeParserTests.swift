@@ -223,6 +223,19 @@ class _SwiftSyntaxTypeParserTests: XCTestCase {
         XCTAssertEqual(type.methods[1].knownAttributes[1].name, "_swiftrewriter")
         XCTAssertEqual(type.methods[1].knownAttributes[1].parameters, "mapFrom: c(x: Int)")
     }
+    
+    func testParseNestedType() {
+        let result = parse("""
+            class A {
+                enum B {
+                }
+            }
+            """)
+        
+        let type = result.type(named: "A")!
+        XCTAssertEqual(type.nestedTypes.count, 1)
+        XCTAssertEqual(type.nestedTypes[0].typeName, "B")
+    }
 }
 
 private extension _SwiftSyntaxTypeParserTests {

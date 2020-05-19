@@ -49,6 +49,10 @@ public struct KnownTypeBuilder {
         type.knownProtocolConformances
     }
     
+    public var nestedTypes: [KnownType] {
+        type.nestedTypes
+    }
+    
     public init(from existingType: KnownType, file: String = #file, line: Int = #line) {
         var type =
             BuildingKnownType(typeName: existingType.typeName,

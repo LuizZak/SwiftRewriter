@@ -43,7 +43,9 @@ private class _SwiftSyntaxTypeParserVisitor: SyntaxVisitor {
     override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
         let name = node.identifier.text
         
-        type = KnownTypeBuilder(typeName: name)
+        if type == nil {
+            type = KnownTypeBuilder(typeName: name)
+        }
         type = type?.settingKind(.class)
         type = type?.settingAttributes(attributes(in: node.attributes))
         
@@ -56,7 +58,9 @@ private class _SwiftSyntaxTypeParserVisitor: SyntaxVisitor {
     override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
         let name = node.identifier.text
         
-        type = KnownTypeBuilder(typeName: name)
+        if type == nil {
+            type = KnownTypeBuilder(typeName: name)
+        }
         type = type?.settingUseSwiftSignatureMatching(true)
         type = type?.settingKind(.protocol)
         type = type?.settingAttributes(attributes(in: node.attributes))
@@ -70,7 +74,9 @@ private class _SwiftSyntaxTypeParserVisitor: SyntaxVisitor {
     override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
         let name = node.identifier.text
         
-        type = KnownTypeBuilder(typeName: name)
+        if type == nil {
+            type = KnownTypeBuilder(typeName: name)
+        }
         type = type?.settingUseSwiftSignatureMatching(true)
         type = type?.settingKind(.struct)
         type = type?.settingAttributes(attributes(in: node.attributes))
@@ -84,7 +90,9 @@ private class _SwiftSyntaxTypeParserVisitor: SyntaxVisitor {
     override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
         let name = node.identifier.text
         
-        type = KnownTypeBuilder(typeName: name)
+        if type == nil {
+            type = KnownTypeBuilder(typeName: name)
+        }
         type = type?.settingUseSwiftSignatureMatching(true)
         type = type?.settingKind(.enum)
         type = type?.settingAttributes(attributes(in: node.attributes))
@@ -104,7 +112,9 @@ private class _SwiftSyntaxTypeParserVisitor: SyntaxVisitor {
             return .skipChildren
         }
         
-        type = KnownTypeBuilder(typeName: name)
+        if type == nil {
+            type = KnownTypeBuilder(typeName: name)
+        }
         type = type?.settingUseSwiftSignatureMatching(true)
         type = type?.settingKind(.extension)
         type = type?.settingAttributes(attributes(in: node.attributes))
@@ -248,18 +258,35 @@ private class _SwiftSyntaxMemberVisitor: SyntaxVisitor {
     // Ignore nested type definitions
     
     override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-    
-    override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
+        typeBuilder = typeBuilder.nestedType(named: node.identifier.text) { builder in
+            let visitor = _SwiftSyntaxTypeParserVisitor()
+            visitor.type = builder
+            visitor.walk(node)
+            return visitor.type!
+        }
+        
         return .skipChildren
     }
     
     override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+        typeBuilder = typeBuilder.nestedType(named: node.identifier.text) { builder in
+            let visitor = _SwiftSyntaxTypeParserVisitor()
+            visitor.type = builder
+            visitor.walk(node)
+            return visitor.type!
+        }
+        
         return .skipChildren
     }
     
     override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
+        typeBuilder = typeBuilder.nestedType(named: node.identifier.text) { builder in
+            let visitor = _SwiftSyntaxTypeParserVisitor()
+            visitor.type = builder
+            visitor.walk(node)
+            return visitor.type!
+        }
+        
         return .skipChildren
     }
 }
