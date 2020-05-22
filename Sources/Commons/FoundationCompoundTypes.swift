@@ -24,15 +24,15 @@ public enum CalendarCompoundType {
     
     static func typeString() -> String {
         let type = """
-            @_swiftrewriter(renameFrom: NSCalendar)
+            @_swiftrewriter(renameFrom: "NSCalendar")
             class Calendar: NSObject {
-                @_swiftrewriter(mapFrom: calendarWithIdentifier(_:))
+                @_swiftrewriter(mapFrom: "calendarWithIdentifier(_:)")
                 init(identifier: Calendar.Identifier)
                 
-                @_swiftrewriter(mapFrom: component(_:fromDate:))
+                @_swiftrewriter(mapFrom: "component(_:fromDate:)")
                 func component(_ component: Calendar.Component, from date: Date) -> Int
                 
-                @_swiftrewriter(mapFrom: dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?)
+                @_swiftrewriter(mapFrom: "dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?")
                 func date(byAdding component: Calendar.Component, value: Int, to date: Date) -> Date?
             }
             """
@@ -53,42 +53,42 @@ public enum NSArrayCompoundType {
             class NSArray: NSObject, NSCopying, NSMutableCopying, NSSecureCoding, NSFastEnumeration {
                 var count: Int { get }
                 
-                @_swiftrewriter(mapFrom: firstObject())
+                @_swiftrewriter(mapFrom: "firstObject()")
                 var firstObject: Any? { get }
                 
-                @_swiftrewriter(mapFrom: lastObject())
+                @_swiftrewriter(mapFrom: "lastObject()")
                 var lastObject: Any? { get }
                 var description: String { get }
                 var sortedArrayHint: Data { get }
                 
-                subscript(index: Int) -> Any { get set }
+                subscript(index: Int) -> Any
                 
-                @_swiftrewriter(mapFrom: objectAtIndex(_:))
+                @_swiftrewriter(mapFrom: "objectAtIndex(_:)")
                 func object(at index: Int) -> Any
                 
-                @_swiftrewriter(mapFrom: containsObject(_:))
+                @_swiftrewriter(mapFrom: "containsObject(_:)")
                 func contains(_ anObject: Any) -> Bool
                 
-                @_swiftrewriter(mapFrom: addingObject(_:))
+                @_swiftrewriter(mapFrom: "addingObject(_:)")
                 func adding(_ anObject: Any) -> [Any]
                 
-                @_swiftrewriter(mapFrom: addingObjectsFromArray(_:))
+                @_swiftrewriter(mapFrom: "addingObjectsFromArray(_:)")
                 func addingObjects(from otherArray: [Any]) -> [Any]
                 func componentsJoined(by separator: String) -> String
                 func description(withLocale locale: Any?) -> String
                 func description(withLocale locale: Any?, indent level: Int) -> String
                 func firstObjectCommon(with otherArray: [Any]) -> Any?
                 
-                @_swiftrewriter(mapFrom: indexOfObject(_:))
+                @_swiftrewriter(mapFrom: "indexOfObject(_:)")
                 func index(of anObject: Any) -> Int
                 
-                @_swiftrewriter(mapFrom: indexOf(_:inRange:))
+                @_swiftrewriter(mapFrom: "indexOf(_:inRange:)")
                 func index(of anObject: Any, in range: NSRange) -> Int
                 
-                @_swiftrewriter(mapFrom: indexOfObjectIdenticalTo(_:))
+                @_swiftrewriter(mapFrom: "indexOfObjectIdenticalTo(_:)")
                 func indexOfObjectIdentical(to anObject: Any) -> Int
                 
-                @_swiftrewriter(mapFrom: indexOfObjectIdenticalTo(_:inRange:))
+                @_swiftrewriter(mapFrom: "indexOfObjectIdenticalTo(_:inRange:)")
                 func indexOfObjectIdentical(to anObject: Any, in range: NSRange) -> Int
                 func isEqual(to otherArray: [Any]) -> Bool
                 func objectEnumerator() -> NSEnumerator
@@ -179,32 +179,32 @@ public enum NSMutableArrayCompoundType {
     static func typeString() -> String {
         let type = """
             class NSMutableArray: NSArray {
-                @_swiftrewriter(mapFrom: addObject(_:))
+                @_swiftrewriter(mapFrom: "addObject(_:)")
                 func add(_ anObject: Any)
                 
-                @_swiftrewriter(mapFrom: addObjectsFromArray(_:))
+                @_swiftrewriter(mapFrom: "addObjectsFromArray(_:)")
                 func addObjects(from otherArray: [Any])
                 
-                @_swiftrewriter(mapFrom: removeObject(_:))
+                @_swiftrewriter(mapFrom: "removeObject(_:)")
                 func remove(_ anObject: Any)
 
                 open func exchangeObject(at idx1: Int, withObjectAt idx2: Int)
 
                 open func removeAllObjects()
 
-                @_swiftrewriter(mapFrom: removeObject(_:inRange:))
+                @_swiftrewriter(mapFrom: "removeObject(_:inRange:)")
                 open func remove(_ anObject: Any, in range: NSRange)
                 
-                @_swiftrewriter(mapFrom: removeObjectIdenticalTo(_:inRange:))
+                @_swiftrewriter(mapFrom: "removeObjectIdenticalTo(_:inRange:)")
                 open func removeObject(identicalTo anObject: Any, in range: NSRange)
                 
-                @_swiftrewriter(mapFrom: removeObjectIdenticalTo(_:))
+                @_swiftrewriter(mapFrom: "removeObjectIdenticalTo(_:)")
                 open func removeObject(identicalTo anObject: Any)
 
                 
                 open func removeObjects(in otherArray: [Any])
                 
-                @_swiftrewriter(mapFrom: removeObjectsInRange(_:))
+                @_swiftrewriter(mapFrom: "removeObjectsInRange(_:)")
                 open func removeObjects(in range: NSRange)
 
                 open func replaceObjects(in range: NSRange, withObjectsFrom otherArray: [Any], range otherRange: NSRange)
@@ -329,14 +329,14 @@ public enum NSDateFormatterCompoundType {
     static func typeString() -> String {
         let type = """
             class DateFormatter: Formatter {
-                @_swiftrewriter(mapFrom: dateFormat())
-                @_swiftrewriter(mapFrom: setDateFormat(_:))
+                @_swiftrewriter(mapFrom: "dateFormat()")
+                @_swiftrewriter(mapFrom: "setDateFormat(_:)")
                 var dateFormat: String!
                 
-                @_swiftrewriter(mapFrom: stringFromDate(_:))
+                @_swiftrewriter(mapFrom: "stringFromDate(_:)")
                 func string(from date: Date) -> String
                 
-                @_swiftrewriter(mapFrom: dateFromString(_:))
+                @_swiftrewriter(mapFrom: "dateFromString(_:)")
                 func date(from string: Date) -> Date?
             }
             """
@@ -354,7 +354,7 @@ public enum NSDateCompoundType {
     
     static func typeString() -> String {
         let type = """
-            @_swiftrewriter(renameFrom: NSDate)
+            @_swiftrewriter(renameFrom: "NSDate")
             struct Date: Hashable, Equatable {
                 static let distantFuture: Date
                 static let distantPast: Date
@@ -363,14 +363,14 @@ public enum NSDateCompoundType {
                 var timeIntervalSinceNow: TimeInterval { get }
                 var timeIntervalSince1970: TimeInterval { get }
                 
-                @_swiftrewriter(mapFrom: date() -> Date)
+                @_swiftrewriter(mapFrom: "date() -> Date")
                 init()
                 static func date() -> Date
                 
-                @_swiftrewriter(mapFrom: timeIntervalSinceDate(_:))
+                @_swiftrewriter(mapFrom: "timeIntervalSinceDate(_:)")
                 func timeIntervalSince(_ anotherDate: Date) -> TimeInterval
                 
-                @_swiftrewriter(mapFrom: dateByAddingTimeInterval(_:))
+                @_swiftrewriter(mapFrom: "dateByAddingTimeInterval(_:)")
                 func addingTimeInterval(_ timeInterval: TimeInterval) -> Date
                 
                 func earlierDate(_ anotherDate: Date) -> Date
@@ -379,13 +379,13 @@ public enum NSDateCompoundType {
                 
                 func compare(_ other: Date) -> ComparisonResult
 
-                @_swiftrewriter(mapFrom: timeIntervalSinceDate(_:))
+                @_swiftrewriter(mapFrom: "timeIntervalSinceDate(_:)")
                 func timeIntervalSince(_ date: Date) -> TimeInterval
                 
-                @_swiftrewriter(mapToBinary: ==)
+                @_swiftrewriter(mapToBinary: "==")
                 func isEqual(_ other: AnyObject) -> Bool
                 
-                @_swiftrewriter(mapToBinary: ==)
+                @_swiftrewriter(mapToBinary: "==")
                 func isEqualToDate(_ other: Date) -> Bool
             }
             """
@@ -403,10 +403,10 @@ public enum NSLocaleCompoundType {
     
     static func typeString() -> String {
         let type = """
-            @_swiftrewriter(renameFrom: NSLocale)
+            @_swiftrewriter(renameFrom: "NSLocale")
             struct Locale: Hashable, Equatable {
-                @_swiftrewriter(mapFrom: localeWithLocaleIdentifier(_:))
-                @_swiftrewriter(mapFrom: init(localeIdentifier:))
+                @_swiftrewriter(mapFrom: "localeWithLocaleIdentifier(_:)")
+                @_swiftrewriter(mapFrom: "init(localeIdentifier:)")
                 init(identifier: String)
             }
             """
@@ -442,24 +442,24 @@ public enum NSMutableStringCompoundType {
     static func typeString() -> String {
         let type = """
             class NSMutableString: NSString {
-                @_swiftrewriter(mapFrom: stringWithCapacity(_:))
+                @_swiftrewriter(mapFrom: "stringWithCapacity(_:)")
                 public init(capacity: Int)
                 
-                @_swiftrewriter(mapFrom: replaceCharactersInRange(_:withString:))
+                @_swiftrewriter(mapFrom: "replaceCharactersInRange(_:withString:)")
                 open func replaceCharacters(in range: NSRange, with aString: String)
                 
-                @_swiftrewriter(mapFrom: insertString(_:atIndex:))
+                @_swiftrewriter(mapFrom: "insertString(_:atIndex:)")
                 open func insert(_ aString: String, at loc: Int)
                 
-                @_swiftrewriter(mapFrom: deleteCharactersInRange(_:))
+                @_swiftrewriter(mapFrom: "deleteCharactersInRange(_:)")
                 open func deleteCharacters(in range: NSRange)
                 
-                @_swiftrewriter(mapFrom: appendString(_:))
+                @_swiftrewriter(mapFrom: "appendString(_:)")
                 open func append(_ aString: String)
                 
                 open func setString(_ aString: String)
                 
-                @_swiftrewriter(mapFrom: replaceOccurrencesOfString(_:withString:options:range:))
+                @_swiftrewriter(mapFrom: "replaceOccurrencesOfString(_:withString:options:range:)")
                 open func replaceOccurrences(of target: String,
                                              with replacement: String,
                                              options: NSString.CompareOptions = [],

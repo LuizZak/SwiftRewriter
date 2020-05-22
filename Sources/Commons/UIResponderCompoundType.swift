@@ -16,7 +16,7 @@ public enum UIResponderCompoundType {
                 var canBecomeFirstResponder: Bool { get }
                 var keyCommands: [UIKeyCommand]? { get }
                 var canResignFirstResponder: Bool { get }
-                @_swiftrewriter(renameFrom: firstResponder)
+                @_swiftrewriter(renameFrom: "firstResponder")
                 var isFirstResponder: Bool { get }
                 var inputView: UIView? { get }
                 var inputAccessoryView: UIView? { get }

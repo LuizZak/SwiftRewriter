@@ -21,6 +21,10 @@ public struct KnownTypeBuilder {
         type.kind
     }
     
+    public var fields: [KnownProperty] {
+        type.fields
+    }
+    
     public var properties: [KnownProperty] {
         type.properties
     }

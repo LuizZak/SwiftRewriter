@@ -11,11 +11,11 @@ public class UIControlCompoundType {
     static func typeString() -> String {
         let string = """
             class UIControl: UIView {
-                @_swiftrewriter(renameFrom: enabled)
+                @_swiftrewriter(renameFrom: "enabled")
                 var isEnabled: Bool
-                @_swiftrewriter(renameFrom: selected)
+                @_swiftrewriter(renameFrom: "selected")
                 var isSelected: Bool
-                @_swiftrewriter(renameFrom: highlighted)
+                @_swiftrewriter(renameFrom: "highlighted")
                 var isHighlighted: Bool
                 var contentVerticalAlignment: UIControlContentVerticalAlignment
                 var contentHorizontalAlignment: UIControlContentHorizontalAlignment

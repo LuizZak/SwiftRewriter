@@ -22,7 +22,7 @@ public enum CGPointCompoundType {
                 
                 init()
                 
-                @_swiftrewriter(initFromFunction: CGPointMake(_:_:))
+                @_swiftrewriter(initFromFunction: "CGPointMake(_:_:)")
                 init(x: CGFloat, y: CGFloat)
             }
             """
@@ -47,7 +47,7 @@ public enum CGSizeCompoundType {
                 
                 init()
                 
-                @_swiftrewriter(initFromFunction: CGSizeMake(_:_:))
+                @_swiftrewriter(initFromFunction: "CGSizeMake(_:_:)")
                 init(width: CGFloat, height: CGFloat)
             }
             """
@@ -73,67 +73,67 @@ public enum CGRectCompoundType {
                 var origin: CGPoint
                 var size: CGSize
                 
-                @_swiftrewriter(mapFrom: CGRectGetMinX(self:))
+                @_swiftrewriter(mapFrom: "CGRectGetMinX(self:)")
                 var minX: CGFloat { get }
                 
-                @_swiftrewriter(mapFrom: CGRectGetMidX(self:))
+                @_swiftrewriter(mapFrom: "CGRectGetMidX(self:)")
                 var midX: CGFloat { get }
                 
-                @_swiftrewriter(mapFrom: CGRectGetMaxX(self:))
+                @_swiftrewriter(mapFrom: "CGRectGetMaxX(self:)")
                 var maxX: CGFloat { get }
                 
-                @_swiftrewriter(mapFrom: CGRectGetMinY(self:))
+                @_swiftrewriter(mapFrom: "CGRectGetMinY(self:)")
                 var minY: CGFloat { get }
                 
-                @_swiftrewriter(mapFrom: CGRectGetMidY(self:))
+                @_swiftrewriter(mapFrom: "CGRectGetMidY(self:)")
                 var midY: CGFloat { get }
                 
-                @_swiftrewriter(mapFrom: CGRectGetMaxY(self:))
+                @_swiftrewriter(mapFrom: "CGRectGetMaxY(self:)")
                 var maxY: CGFloat { get }
                 
-                @_swiftrewriter(mapFrom: CGRectGetWidth(self:))
+                @_swiftrewriter(mapFrom: "CGRectGetWidth(self:)")
                 var width: CGFloat { get }
                 
-                @_swiftrewriter(mapFrom: CGRectGetHeight(self:))
+                @_swiftrewriter(mapFrom: "CGRectGetHeight(self:)")
                 var height: CGFloat { get }
                 var standardized: CGRect { get }
                 
-                @_swiftrewriter(mapFrom: CGRectIsEmpty(self:))
+                @_swiftrewriter(mapFrom: "CGRectIsEmpty(self:)")
                 var isEmpty: Bool { get }
                 
-                @_swiftrewriter(mapFrom: CGRectIsNull(self:))
+                @_swiftrewriter(mapFrom: "CGRectIsNull(self:)")
                 var isNull: Bool { get }
                 
-                @_swiftrewriter(mapFrom: CGRectIsInfinite(self:))
+                @_swiftrewriter(mapFrom: "CGRectIsInfinite(self:)")
                 var isInfinite: Bool { get }
                 
-                @_swiftrewriter(mapFrom: CGRectIntegral(self:))
+                @_swiftrewriter(mapFrom: "CGRectIntegral(self:)")
                 var integral: CGRect { get }
                 
                 init()
                 
-                @_swiftrewriter(initFromFunction: CGRectMake(_:_:_:_:))
+                @_swiftrewriter(initFromFunction: "CGRectMake(_:_:_:_:)")
                 init(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat)
                 
-                @_swiftrewriter(mapFrom: CGRectInset(self:_:_:))
+                @_swiftrewriter(mapFrom: "CGRectInset(self:_:_:)")
                 func insetBy(dx: CGFloat, dy: CGFloat) -> CGRect
                 
-                @_swiftrewriter(mapFrom: CGRectOffset(self:_:_:))
+                @_swiftrewriter(mapFrom: "CGRectOffset(self:_:_:)")
                 func offsetBy(dx: CGFloat, dy: CGFloat) -> CGRect
                 
-                @_swiftrewriter(mapFrom: CGRectIntersection(self:_:))
+                @_swiftrewriter(mapFrom: "CGRectIntersection(self:_:)")
                 func intersection(_ r2: CGRect) -> CGRect
                 
-                @_swiftrewriter(mapFrom: CGRectContainsRect(self:_:))
+                @_swiftrewriter(mapFrom: "CGRectContainsRect(self:_:)")
                 func contains(_ rect2: CGRect) -> Bool
                 
-                @_swiftrewriter(mapFrom: CGRectContainsPoint(self:_:))
+                @_swiftrewriter(mapFrom: "CGRectContainsPoint(self:_:)")
                 func contains(_ point: CGPoint) -> Bool
                 
-                @_swiftrewriter(mapFrom: CGRectIntersectsRect(self:_:))
+                @_swiftrewriter(mapFrom: "CGRectIntersectsRect(self:_:)")
                 func intersects(_ rect2: CGRect) -> Bool
                 
-                @_swiftrewriter(mapFrom: CGRectEqualToRect(self:_:))
+                @_swiftrewriter(mapFrom: "CGRectEqualToRect(self:_:)")
                 func equalTo(_ rect2: CGRect) -> Bool
             }
             """

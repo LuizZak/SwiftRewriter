@@ -15,13 +15,13 @@ class UIControlCompoundTypeTests: XCTestCase {
         
         assertSignature(type: type, matches: """
             class UIControl: UIView {
-                @_swiftrewriter(renameFrom: enabled)
+                @_swiftrewriter(renameFrom: "enabled")
                 var isEnabled: Bool
                 
-                @_swiftrewriter(renameFrom: selected)
+                @_swiftrewriter(renameFrom: "selected")
                 var isSelected: Bool
                 
-                @_swiftrewriter(renameFrom: highlighted)
+                @_swiftrewriter(renameFrom: "highlighted")
                 var isHighlighted: Bool
                 var contentVerticalAlignment: UIControlContentVerticalAlignment
                 var contentHorizontalAlignment: UIControlContentHorizontalAlignment

@@ -356,11 +356,11 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         let type = try parseType("""
             @_swiftrewriter(renameFrom: NSMyClass)
             class MyClass {
-                @_swiftrewriter(mapFrom: b())
+                @_swiftrewriter(mapFrom: "b()")
                 func a()
                 @inlinable
-                @_swiftrewriter(mapFrom: c(x: Int))
-                @_swiftrewriter(mapFrom: d(x:))
+                @_swiftrewriter(mapFrom: "c(x: Int)")
+                @_swiftrewriter(mapFrom: "d(x:)")
                 func b(y: Int)
             }
             """)
@@ -368,26 +368,26 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownAttributes[0].name, "_swiftrewriter")
         XCTAssertEqual(type.knownAttributes[0].parameters, "renameFrom: NSMyClass")
         XCTAssertEqual(type.knownMethods[0].knownAttributes[0].name, "_swiftrewriter")
-        XCTAssertEqual(type.knownMethods[0].knownAttributes[0].parameters, "mapFrom: b()")
+        XCTAssertEqual(type.knownMethods[0].knownAttributes[0].parameters, #"mapFrom: "b()""#)
         XCTAssertEqual(type.knownMethods[1].knownAttributes[0].name, "inlinable")
         XCTAssertNil(type.knownMethods[1].knownAttributes[0].parameters)
         XCTAssertEqual(type.knownMethods[1].knownAttributes[1].name, "_swiftrewriter")
-        XCTAssertEqual(type.knownMethods[1].knownAttributes[1].parameters, "mapFrom: c(x: Int)")
+        XCTAssertEqual(type.knownMethods[1].knownAttributes[1].parameters, #"mapFrom: "c(x: Int)""#)
     }
     
     func testParseSwiftAttribute() throws {
         let attribute = try parseAttribute("""
-            @_swiftrewriter(mapFrom: dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?)
+            @_swiftrewriter(mapFrom: "dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?")
             """)
         
         XCTAssertEqual(attribute.content.asString, """
-            mapFrom: dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?
+            mapFrom: "dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?"
             """)
     }
     
     func testParseSwiftAttributeRoundtrip() throws {
         _=try parseAttribute("""
-            @_swiftrewriter(mapFrom: date() -> Date)
+            @_swiftrewriter(mapFrom: "date() -> Date")
             """)
     }
     

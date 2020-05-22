@@ -1,6 +1,7 @@
 import KnownType
 import SwiftAST
 import SwiftSyntax
+import Foundation
 
 public class _SwiftSyntaxTypeParser {
     var types: [IncompleteKnownType] = []
@@ -46,6 +47,7 @@ private class _SwiftSyntaxTypeParserVisitor: SyntaxVisitor {
         if type == nil {
             type = KnownTypeBuilder(typeName: name)
         }
+        type = type?.settingUseSwiftSignatureMatching(true)
         type = type?.settingKind(.class)
         type = type?.settingAttributes(attributes(in: node.attributes))
         
@@ -155,7 +157,7 @@ private class _SwiftSyntaxMemberVisitor: SyntaxVisitor {
     }
     
     override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
-        let isConstant = node.letOrVarKeyword.text == "let"
+        let isLet = node.letOrVarKeyword.text == "let"
         let modifierList = modifiers(in: node.modifiers)
         let attributeList = attributes(in: node.attributes)
         let ownership = modifierList.first?.ownership ?? .strong
@@ -172,13 +174,20 @@ private class _SwiftSyntaxMemberVisitor: SyntaxVisitor {
             
             let storage = ValueStorage(type: typeAnnotation.type.asSwiftType,
                                        ownership: ownership,
-                                       isConstant: isConstant)
+                                       isConstant: isLet)
             
-            typeBuilder = typeBuilder.property(named: ident,
-                                               storage: storage,
-                                               isStatic: isStatic,
-                                               accessor: accessors.propertyAccessor,
-                                               attributes: attributeList)
+            if isLet {
+                typeBuilder = typeBuilder.field(named: ident,
+                                                storage: storage,
+                                                isStatic: isStatic,
+                                                attributes: attributeList)
+            } else {
+                typeBuilder = typeBuilder.property(named: ident,
+                                                   storage: storage,
+                                                   isStatic: isStatic,
+                                                   accessor: accessors.propertyAccessor,
+                                                   attributes: attributeList)
+            }
         }
         
         return .skipChildren
@@ -258,7 +267,7 @@ private class _SwiftSyntaxMemberVisitor: SyntaxVisitor {
     // Ignore nested type definitions
     
     override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-        typeBuilder = typeBuilder.nestedType(named: node.identifier.text) { builder in
+        typeBuilder = typeBuilder.nestedType(named: textFromToken(node.identifier)) { builder in
             let visitor = _SwiftSyntaxTypeParserVisitor()
             visitor.type = builder
             visitor.walk(node)
@@ -269,7 +278,7 @@ private class _SwiftSyntaxMemberVisitor: SyntaxVisitor {
     }
     
     override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
-        typeBuilder = typeBuilder.nestedType(named: node.identifier.text) { builder in
+        typeBuilder = typeBuilder.nestedType(named: textFromToken(node.identifier)) { builder in
             let visitor = _SwiftSyntaxTypeParserVisitor()
             visitor.type = builder
             visitor.walk(node)
@@ -280,7 +289,7 @@ private class _SwiftSyntaxMemberVisitor: SyntaxVisitor {
     }
     
     override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
-        typeBuilder = typeBuilder.nestedType(named: node.identifier.text) { builder in
+        typeBuilder = typeBuilder.nestedType(named: textFromToken(node.identifier)) { builder in
             let visitor = _SwiftSyntaxTypeParserVisitor()
             visitor.type = builder
             visitor.walk(node)
@@ -369,10 +378,14 @@ private func parameterSignatures(in parameterList: FunctionParameterListSyntax) 
 
 private func identifier(inPattern pattern: PatternSyntax) -> String? {
     if let ident = pattern.as(IdentifierPatternSyntax.self) {
-        return ident.identifier.text
+        return textFromToken(ident.identifier)
     }
     
     return nil
+}
+
+private func textFromToken(_ token: TokenSyntax) -> String {
+    token.text.trimmingCharacters(in: CharacterSet(charactersIn: "`"))
 }
 
 private func modifiers(in modifierList: ModifierListSyntax?) -> [Modifier] {

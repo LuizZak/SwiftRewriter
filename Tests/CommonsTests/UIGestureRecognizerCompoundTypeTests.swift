@@ -13,10 +13,10 @@ class UIGestureRecognizerCompoundTypeTests: XCTestCase {
         
         assertSignature(type: type, matches: """
             class UIGestureRecognizer: NSObject {
-                @_swiftrewriter(mapFrom: locationInView(_:))
+                @_swiftrewriter(mapFrom: "locationInView(_:)")
                 func location(in view: UIView?) -> CGPoint
                 
-                @_swiftrewriter(mapFrom: requireGestureRecognizerToFail(_:))
+                @_swiftrewriter(mapFrom: "requireGestureRecognizerToFail(_:)")
                 func require(toFail otherGestureRecognizer: UIGestureRecognizer)
             }
             """)

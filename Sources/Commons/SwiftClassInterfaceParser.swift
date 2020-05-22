@@ -552,11 +552,11 @@ public final class SwiftClassInterfaceParser {
     ///     ;
     ///
     /// swift-rewriter-attribute-clause
-    ///     : 'mapFrom' ':' function-identifier
-    ///     | 'mapFrom' ':' function-signature
-    ///     | 'initFromFunction' ':' function-signature
-    ///     | 'mapToBinary' ':' swift-operator
-    ///     | 'renameFrom' ':' identifier
+    ///     : 'mapFrom' ':' '"' function-identifier '"'
+    ///     | 'mapFrom' ':' '"' function-signature '"'
+    ///     | 'initFromFunction' ':' '"' function-signature '"'
+    ///     | 'mapToBinary' ':' '"' swift-operator '"'
+    ///     | 'renameFrom' ':' '"' identifier '"'
     ///     ;
     /// ```
     ///
@@ -579,6 +579,13 @@ public final class SwiftClassInterfaceParser {
             )
         }
         
+        func tokenizingString<T>(_ block: (Tokenizer) throws -> T) throws -> T {
+            let string = String(try tokenizer.advance(overTokenType: .stringLiteral).value.dropFirst().dropLast())
+            let tokenizer = Tokenizer(input: string)
+            
+            return try block(tokenizer)
+        }
+        
         let content: SwiftRewriterAttribute.Content
         
         try tokenizer.advance(overTokenType: .openParens)
@@ -591,7 +598,9 @@ public final class SwiftClassInterfaceParser {
             let backtracker = tokenizer.backtracker()
             do {
                 let identifier =
-                    try FunctionSignatureParser.parseIdentifier(from: tokenizer.lexer)
+                    try tokenizingString {
+                        try FunctionSignatureParser.parseIdentifier(from: $0.lexer)
+                    }
                 
                 try tokenizer.advance(overTokenType: .closeParens)
                 
@@ -600,7 +609,9 @@ public final class SwiftClassInterfaceParser {
                 backtracker.backtrack()
                 
                 let signature =
-                    try FunctionSignatureParser.parseSignature(from: tokenizer.lexer)
+                    try tokenizingString {
+                        try FunctionSignatureParser.parseSignature(from: $0.lexer)
+                    }
                 
                 content = .mapFrom(signature)
             }
@@ -609,7 +620,7 @@ public final class SwiftClassInterfaceParser {
             tokenizer.skipToken()
             try tokenizer.advance(overTokenType: .colon)
             
-            let op = try parseSwiftOperator(from: tokenizer)
+            let op = try tokenizingString { try parseSwiftOperator(from: $0) }
             
             content = .mapToBinaryOperator(op)
             
@@ -617,7 +628,7 @@ public final class SwiftClassInterfaceParser {
             tokenizer.skipToken()
             try tokenizer.advance(overTokenType: .colon)
             
-            let ident = try identifier(from: tokenizer)
+            let ident = try tokenizingString { try identifier(from: $0) }
             
             content = .renameFrom(ident)
             
@@ -626,7 +637,9 @@ public final class SwiftClassInterfaceParser {
             try tokenizer.advance(overTokenType: .colon)
             
             let identifier =
-                try FunctionSignatureParser.parseIdentifier(from: tokenizer.lexer)
+                try tokenizingString {
+                    try FunctionSignatureParser.parseIdentifier(from: $0.lexer)
+                }
             
             try tokenizer.advance(overTokenType: .closeParens)
             
@@ -876,6 +889,10 @@ public class IncompleteKnownType {
     
     public var kind: KnownTypeKind {
         knownTypeBuilder.kind
+    }
+    
+    public var fields: [KnownProperty] {
+        knownTypeBuilder.fields
     }
     
     public var properties: [KnownProperty] {

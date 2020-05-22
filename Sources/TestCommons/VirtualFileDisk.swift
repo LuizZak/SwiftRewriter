@@ -257,6 +257,9 @@ private extension Sequence where Element: StringProtocol {
 }
 
 extension VirtualFileDisk: FileProvider {
+    public var userHomeURL: URL {
+        return URL(fileURLWithPath: "/user/home")
+    }
     public func enumerator(atPath path: String) -> [String]? {
         do {
             return try filesInDirectory(atPath: path, recursive: true)
@@ -267,6 +270,14 @@ extension VirtualFileDisk: FileProvider {
     public func fileExists(atPath path: String) -> Bool {
         do {
             _ = try file(atPath: path)
+            return true
+        } catch {
+            return false
+        }
+    }
+    public func directoryExists(atPath path: String) -> Bool {
+        do {
+            _ = try directory(atPath: path)
             return true
         } catch {
             return false

@@ -48,17 +48,17 @@ class UIViewCompoundTypeTests: XCTestCase {
                 var intrinsicContentSize: CGSize { get }
                 var isExclusiveTouch: Bool
                 
-                @_swiftrewriter(renameFrom: focused)
+                @_swiftrewriter(renameFrom: "focused")
                 var isFocused: Bool { get }
                 
-                @_swiftrewriter(renameFrom: hidden)
+                @_swiftrewriter(renameFrom: "hidden")
                 var isHidden: Bool
                 var isMultipleTouchEnabled: Bool
                 
-                @_swiftrewriter(renameFrom: opaque)
+                @_swiftrewriter(renameFrom: "opaque")
                 var isOpaque: Bool
                 
-                @_swiftrewriter(renameFrom: userInteractionEnabled)
+                @_swiftrewriter(renameFrom: "userInteractionEnabled")
                 var isUserInteractionEnabled: Bool
                 var lastBaselineAnchor: NSLayoutYAxisAnchor { get }
                 var layer: CALayer { get }
@@ -91,16 +91,16 @@ class UIViewCompoundTypeTests: XCTestCase {
                 init(frame: CGRect)
                 static func addKeyframe(withRelativeStartTime frameStartTime: Double, relativeDuration frameDuration: Double, animations: () -> Void)
                 
-                @_swiftrewriter(mapFrom: animateWithDuration(_:animations:completion:))
+                @_swiftrewriter(mapFrom: "animateWithDuration(_:animations:completion:)")
                 static func animate(withDuration duration: TimeInterval, animations: () -> Void, completion: ((Bool) -> Void)?)
                 
-                @_swiftrewriter(mapFrom: animateWithDuration(_:animations:))
+                @_swiftrewriter(mapFrom: "animateWithDuration(_:animations:)")
                 static func animate(withDuration duration: TimeInterval, animations: () -> Void)
                 
-                @_swiftrewriter(mapFrom: animateWithDuration(_:delay:options:animations:completion:))
+                @_swiftrewriter(mapFrom: "animateWithDuration(_:delay:options:animations:completion:)")
                 static func animate(withDuration duration: TimeInterval, delay: TimeInterval, options: UIViewAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
                 
-                @_swiftrewriter(mapFrom: animateWithDuration(delay:usingSpringWithDamping:initialSpringVelocity:options:animations:completion:))
+                @_swiftrewriter(mapFrom: "animateWithDuration(delay:usingSpringWithDamping:initialSpringVelocity:options:animations:completion:)")
                 static func animate(withDuration duration: TimeInterval, delay: TimeInterval, usingSpringWithDamping dampingRatio: CGFloat, initialSpringVelocity velocity: CGFloat, options: UIViewAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
                 static func animateKeyframes(withDuration duration: TimeInterval, delay: TimeInterval, options: UIViewKeyframeAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
                 static func beginAnimations(_ animationID: String?, context: UnsafeMutableRawPointer?)
@@ -131,29 +131,29 @@ class UIViewCompoundTypeTests: XCTestCase {
                 func addSubview(_ view: UIView)
                 func alignmentRect(forFrame frame: CGRect) -> CGRect
                 
-                @_swiftrewriter(mapFrom: bringSubviewToFront(_:))
+                @_swiftrewriter(mapFrom: "bringSubviewToFront(_:)")
                 func bringSubview(toFront view: UIView)
                 func constraintsAffectingLayout(for axis: UILayoutConstraintAxis) -> [NSLayoutConstraint]
                 func contentCompressionResistancePriority(for axis: UILayoutConstraintAxis) -> UILayoutPriority
                 func contentHuggingPriority(for axis: UILayoutConstraintAxis) -> UILayoutPriority
                 
-                @_swiftrewriter(mapFrom: convertPoint(_:fromView:))
+                @_swiftrewriter(mapFrom: "convertPoint(_:fromView:)")
                 func convert(_ point: CGPoint, from view: UIView?) -> CGPoint
                 
-                @_swiftrewriter(mapFrom: convertPoint(_:toView:))
+                @_swiftrewriter(mapFrom: "convertPoint(_:toView:)")
                 func convert(_ point: CGPoint, to view: UIView?) -> CGPoint
                 
-                @_swiftrewriter(mapFrom: convertRect(_:fromView:))
+                @_swiftrewriter(mapFrom: "convertRect(_:fromView:)")
                 func convert(_ rect: CGRect, from view: UIView?) -> CGRect
                 
-                @_swiftrewriter(mapFrom: convertRect(_:toView:))
+                @_swiftrewriter(mapFrom: "convertRect(_:toView:)")
                 func convert(_ rect: CGRect, to view: UIView?) -> CGRect
                 func decodeRestorableState(with coder: NSCoder)
                 func didAddSubview(_ subview: UIView)
                 func didMoveToSuperview()
                 func didMoveToWindow()
                 
-                @_swiftrewriter(mapFrom: drawRect(_:))
+                @_swiftrewriter(mapFrom: "drawRect(_:)")
                 func draw(_ rect: CGRect)
                 func drawHierarchy(in rect: CGRect, afterScreenUpdates afterUpdates: Bool) -> Bool
                 func encodeRestorableState(with coder: NSCoder)
@@ -165,7 +165,7 @@ class UIViewCompoundTypeTests: XCTestCase {
                 func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView?
                 func insertSubview(_ view: UIView, aboveSubview siblingSubview: UIView)
                 
-                @_swiftrewriter(mapFrom: insertSubview(_:atIndex:))
+                @_swiftrewriter(mapFrom: "insertSubview(_:atIndex:)")
                 func insertSubview(_ view: UIView, at index: Int)
                 func insertSubview(_ view: UIView, belowSubview siblingSubview: UIView)
                 func invalidateIntrinsicContentSize()
@@ -200,10 +200,10 @@ class UIViewCompoundTypeTests: XCTestCase {
                 func updateConstraintsIfNeeded()
                 func viewWithTag(_ tag: Int) -> UIView?
                 
-                @_swiftrewriter(mapFrom: willMoveToSuperview(_:))
+                @_swiftrewriter(mapFrom: "willMoveToSuperview(_:)")
                 func willMove(toSuperview newSuperview: UIView?)
                 
-                @_swiftrewriter(mapFrom: willMoveToWindow(_:))
+                @_swiftrewriter(mapFrom: "willMoveToWindow(_:)")
                 func willMove(toWindow newWindow: UIWindow?)
                 func willRemoveSubview(_ subview: UIView)
             }

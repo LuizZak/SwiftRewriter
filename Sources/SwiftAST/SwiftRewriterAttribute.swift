@@ -18,24 +18,23 @@ public struct SwiftRewriterAttribute {
             switch self {
             case .mapFrom(let signature):
                 return
-                    "mapFrom: " +
+                    "mapFrom: \"" +
                         TypeFormatter.asString(signature: signature,
                                                includeName: true,
                                                includeFuncKeyword: false,
-                                               includeStatic: false)
+                                               includeStatic: false) + "\""
                 
             case .mapFromIdentifier(let identifier):
-                return
-                    "mapFrom: \(identifier.description)"
+                return #"mapFrom: "\#(identifier.description)""#
                 
             case .mapToBinaryOperator(let op):
-                return "mapToBinary: \(op)"
+                return #"mapToBinary: "\#(op)""#
                 
             case .initFromFunction(let identifier):
-                return "initFromFunction: \(identifier.description)"
+                return #"initFromFunction: "\#(identifier.description)""#
                 
             case .renameFrom(let name):
-                return "renameFrom: \(name)"
+                return #"renameFrom: "\#(name)""#
             }
         }
     }
