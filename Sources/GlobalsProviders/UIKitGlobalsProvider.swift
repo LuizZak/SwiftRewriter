@@ -267,100 +267,95 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
     }
     
     func createUITableView() {
-        makeType(named: "UITableView") { type -> KnownType in
-            
-            var type = type
-            
-            type.useSwiftSignatureMatching = true
-            
-            let typeString = """
-                class UITableView: UIScrollView {
-                    var allowsMultipleSelection: Bool
-                    var allowsMultipleSelectionDuringEditing: Bool
-                    var allowsSelection: Bool
-                    var allowsSelectionDuringEditing: Bool
-                    var backgroundView: UIView?
-                    var cellLayoutMarginsFollowReadableWidth: Bool
-                    var dragInteractionEnabled: Bool
-                    var estimatedRowHeight: CGFloat
-                    var estimatedSectionFooterHeight: CGFloat
-                    var estimatedSectionHeaderHeight: CGFloat
-                    var hasActiveDrag: Bool { get }
-                    var hasActiveDrop: Bool { get }
-                    var hasUncommittedUpdates: Bool { get }
-                    var indexPathForSelectedRow: IndexPath? { get }
-                    var indexPathsForSelectedRows: [IndexPath]? { get }
-                    var indexPathsForVisibleRows: [IndexPath]? { get }
-                    var insetsContentViewsToSafeArea: Bool
-                    var isEditing: Bool
-                    var numberOfSections: Int { get }
-                    var remembersLastFocusedIndexPath: Bool
-                    var rowHeight: CGFloat
-                    var sectionFooterHeight: CGFloat
-                    var sectionHeaderHeight: CGFloat
-                    var sectionIndexBackgroundColor: UIColor?
-                    var sectionIndexColor: UIColor?
-                    var sectionIndexMinimumDisplayRowCount: Int
-                    var sectionIndexTrackingBackgroundColor: UIColor?
-                    var separatorColor: UIColor?
-                    var separatorEffect: UIVisualEffect?
-                    var separatorInset: UIEdgeInsets
-                    var separatorInsetReference: UITableViewSeparatorInsetReference
-                    var separatorStyle: UITableViewCellSeparatorStyle
-                    var style: UITableViewStyle { get }
-                    var tableFooterView: UIView?
-                    var tableHeaderView: UIView?
-                    var visibleCells: [UITableViewCell] { get }
-                    weak var dataSource: UITableViewDataSource?
-                    weak var delegate: UITableViewDelegate?
-                    weak var dragDelegate: UITableViewDragDelegate?
-                    weak var dropDelegate: UITableViewDropDelegate?
-                    weak var prefetchDataSource: UITableViewDataSourcePrefetching?
-                    
-                    init(frame: CGRect, style: UITableViewStyle)
-                    func beginUpdates()
-                    func cellForRow(at indexPath: IndexPath) -> UITableViewCell?
-                    func deleteRows(at indexPaths: [IndexPath], with animation: UITableViewRowAnimation)
-                    func deleteSections(_ sections: IndexSet, with animation: UITableViewRowAnimation)
-                    func dequeueReusableCell(withIdentifier identifier: String, for indexPath: IndexPath) -> UITableViewCell
-                    func dequeueReusableCell(withIdentifier identifier: String) -> UITableViewCell?
-                    func dequeueReusableHeaderFooterView(withIdentifier identifier: String) -> UITableViewHeaderFooterView?
-                    func deselectRow(at indexPath: IndexPath, animated: Bool)
-                    func endUpdates()
-                    func footerView(forSection section: Int) -> UITableViewHeaderFooterView?
-                    func headerView(forSection section: Int) -> UITableViewHeaderFooterView?
-                    func indexPath(for cell: UITableViewCell) -> IndexPath?
-                    func indexPathForRow(at point: CGPoint) -> IndexPath?
-                    func indexPathsForRows(in rect: CGRect) -> [IndexPath]?
-                    func insertRows(at indexPaths: [IndexPath], with animation: UITableViewRowAnimation)
-                    func insertSections(_ sections: IndexSet, with animation: UITableViewRowAnimation)
-                    func moveRow(at indexPath: IndexPath, to newIndexPath: IndexPath)
-                    func moveSection(_ section: Int, toSection newSection: Int)
-                    func numberOfRows(inSection section: Int) -> Int
-                    func performBatchUpdates(_ updates: (() -> Void)?, completion: ((Bool) -> Void)?)
-                    func rect(forSection section: Int) -> CGRect
-                    func rectForFooter(inSection section: Int) -> CGRect
-                    func rectForHeader(inSection section: Int) -> CGRect
-                    func rectForRow(at indexPath: IndexPath) -> CGRect
-                    func register(_ aClass: AnyClass?, forHeaderFooterViewReuseIdentifier identifier: String)
-                    func register(_ cellClass: AnyClass?, forCellReuseIdentifier identifier: String)
-                    func register(_ nib: UINib?, forCellReuseIdentifier identifier: String)
-                    func register(_ nib: UINib?, forHeaderFooterViewReuseIdentifier identifier: String)
-                    func reloadData()
-                    func reloadRows(at indexPaths: [IndexPath], with animation: UITableViewRowAnimation)
-                    func reloadSectionIndexTitles()
-                    func reloadSections(_ sections: IndexSet, with animation: UITableViewRowAnimation)
-                    func scrollToNearestSelectedRow(at scrollPosition: UITableViewScrollPosition, animated: Bool)
-                    func scrollToRow(at indexPath: IndexPath, at scrollPosition: UITableViewScrollPosition, animated: Bool)
-                    func selectRow(at indexPath: IndexPath?, animated: Bool, scrollPosition: UITableViewScrollPosition)
-                    func setEditing(_ editing: Bool, animated: Bool)
-                }
-                """
-            
-            try! SwiftClassInterfaceParser
-                .parseDeclaration(from: typeString, into: &type)
-            
-            return type.build()
-        }
+        let typeString = """
+            class UITableView: UIScrollView {
+                var allowsMultipleSelection: Bool
+                var allowsMultipleSelectionDuringEditing: Bool
+                var allowsSelection: Bool
+                var allowsSelectionDuringEditing: Bool
+                var backgroundView: UIView?
+                var cellLayoutMarginsFollowReadableWidth: Bool
+                var dragInteractionEnabled: Bool
+                var estimatedRowHeight: CGFloat
+                var estimatedSectionFooterHeight: CGFloat
+                var estimatedSectionHeaderHeight: CGFloat
+                var hasActiveDrag: Bool { get }
+                var hasActiveDrop: Bool { get }
+                var hasUncommittedUpdates: Bool { get }
+                var indexPathForSelectedRow: IndexPath? { get }
+                var indexPathsForSelectedRows: [IndexPath]? { get }
+                var indexPathsForVisibleRows: [IndexPath]? { get }
+                var insetsContentViewsToSafeArea: Bool
+                var isEditing: Bool
+                var numberOfSections: Int { get }
+                var remembersLastFocusedIndexPath: Bool
+                var rowHeight: CGFloat
+                var sectionFooterHeight: CGFloat
+                var sectionHeaderHeight: CGFloat
+                var sectionIndexBackgroundColor: UIColor?
+                var sectionIndexColor: UIColor?
+                var sectionIndexMinimumDisplayRowCount: Int
+                var sectionIndexTrackingBackgroundColor: UIColor?
+                var separatorColor: UIColor?
+                var separatorEffect: UIVisualEffect?
+                var separatorInset: UIEdgeInsets
+                var separatorInsetReference: UITableViewSeparatorInsetReference
+                var separatorStyle: UITableViewCellSeparatorStyle
+                var style: UITableViewStyle { get }
+                var tableFooterView: UIView?
+                var tableHeaderView: UIView?
+                var visibleCells: [UITableViewCell] { get }
+                weak var dataSource: UITableViewDataSource?
+                weak var delegate: UITableViewDelegate?
+                weak var dragDelegate: UITableViewDragDelegate?
+                weak var dropDelegate: UITableViewDropDelegate?
+                weak var prefetchDataSource: UITableViewDataSourcePrefetching?
+                
+                init(frame: CGRect, style: UITableViewStyle)
+                func beginUpdates()
+                func cellForRow(at indexPath: IndexPath) -> UITableViewCell?
+                func deleteRows(at indexPaths: [IndexPath], with animation: UITableViewRowAnimation)
+                func deleteSections(_ sections: IndexSet, with animation: UITableViewRowAnimation)
+                func dequeueReusableCell(withIdentifier identifier: String, for indexPath: IndexPath) -> UITableViewCell
+                func dequeueReusableCell(withIdentifier identifier: String) -> UITableViewCell?
+                func dequeueReusableHeaderFooterView(withIdentifier identifier: String) -> UITableViewHeaderFooterView?
+                func deselectRow(at indexPath: IndexPath, animated: Bool)
+                func endUpdates()
+                func footerView(forSection section: Int) -> UITableViewHeaderFooterView?
+                func headerView(forSection section: Int) -> UITableViewHeaderFooterView?
+                func indexPath(for cell: UITableViewCell) -> IndexPath?
+                func indexPathForRow(at point: CGPoint) -> IndexPath?
+                func indexPathsForRows(in rect: CGRect) -> [IndexPath]?
+                func insertRows(at indexPaths: [IndexPath], with animation: UITableViewRowAnimation)
+                func insertSections(_ sections: IndexSet, with animation: UITableViewRowAnimation)
+                func moveRow(at indexPath: IndexPath, to newIndexPath: IndexPath)
+                func moveSection(_ section: Int, toSection newSection: Int)
+                func numberOfRows(inSection section: Int) -> Int
+                func performBatchUpdates(_ updates: (() -> Void)?, completion: ((Bool) -> Void)?)
+                func rect(forSection section: Int) -> CGRect
+                func rectForFooter(inSection section: Int) -> CGRect
+                func rectForHeader(inSection section: Int) -> CGRect
+                func rectForRow(at indexPath: IndexPath) -> CGRect
+                func register(_ aClass: AnyClass?, forHeaderFooterViewReuseIdentifier identifier: String)
+                func register(_ cellClass: AnyClass?, forCellReuseIdentifier identifier: String)
+                func register(_ nib: UINib?, forCellReuseIdentifier identifier: String)
+                func register(_ nib: UINib?, forHeaderFooterViewReuseIdentifier identifier: String)
+                func reloadData()
+                func reloadRows(at indexPaths: [IndexPath], with animation: UITableViewRowAnimation)
+                func reloadSectionIndexTitles()
+                func reloadSections(_ sections: IndexSet, with animation: UITableViewRowAnimation)
+                func scrollToNearestSelectedRow(at scrollPosition: UITableViewScrollPosition, animated: Bool)
+                func scrollToRow(at indexPath: IndexPath, at scrollPosition: UITableViewScrollPosition, animated: Bool)
+                func selectRow(at indexPath: IndexPath?, animated: Bool, scrollPosition: UITableViewScrollPosition)
+                func setEditing(_ editing: Bool, animated: Bool)
+            }
+            """
+        
+        let result = _SwiftSyntaxTypeParser(source: typeString)
+        let incomplete = result.parseTypes()[0]
+        
+        let type = incomplete.complete(typeSystem: TypeSystem())
+        
+        add(type)
     }
 }

@@ -351,7 +351,7 @@ class SwiftAttributeTransformationsExtractor {
     private func parseAttribute(_ attribute: KnownAttribute) throws -> SwiftRewriterAttribute {
         let lexer = Lexer(input: attribute.attributeString)
         let attribute =
-            try SwiftClassInterfaceParser
+            try SwiftRewriterAttributeParser
                 .parseSwiftRewriterAttribute(from: lexer)
         
         return attribute

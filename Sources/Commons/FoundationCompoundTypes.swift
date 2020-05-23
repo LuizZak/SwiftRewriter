@@ -155,7 +155,9 @@ public enum NSMutableArrayCompoundType {
         let string = typeString()
         
         do {
-            let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: string)
+            let result = _SwiftSyntaxTypeParser(source: string)
+            let incomplete = result.parseTypes()[0]
+            
             // FIXME: Currently we have to manually transform NSArray from a protocol
             // to a class inheritance; this is due to the way we detect supertypes
             // when completing IncompleteKnownTypes.

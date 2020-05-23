@@ -3,7 +3,6 @@ import MiniLexer
 
 func makeType(from typeString: String, typeName: String) -> CompoundedMappingType {
     do {
-//        let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: typeString)
         let result = _SwiftSyntaxTypeParser(source: typeString)
         let incomplete = result.parseTypes()[0]
         
