@@ -155,7 +155,7 @@ public enum NSMutableArrayCompoundType {
         let string = typeString()
         
         do {
-            let result = _SwiftSyntaxTypeParser(source: string)
+            let result = SwiftSyntaxTypeParser(source: string)
             let incomplete = result.parseTypes()[0]
             
             // FIXME: Currently we have to manually transform NSArray from a protocol

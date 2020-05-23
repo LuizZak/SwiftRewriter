@@ -3,7 +3,7 @@ import SwiftAST
 import SwiftSyntax
 import Foundation
 
-public class _SwiftSyntaxTypeParser {
+public class SwiftSyntaxTypeParser {
     var types: [IncompleteKnownType] = []
     let source: String
     

@@ -4,7 +4,7 @@ import KnownType
 import TypeSystem
 import Commons
 
-class _SwiftSyntaxTypeParserTests: XCTestCase {
+class SwiftSyntaxTypeParserTests: XCTestCase {
     var typeSystem: TypeSystem!
     
     override func setUp() {
@@ -514,16 +514,16 @@ class _SwiftSyntaxTypeParserTests: XCTestCase {
     }
 }
 
-private extension _SwiftSyntaxTypeParserTests {
+private extension SwiftSyntaxTypeParserTests {
     func parse(_ source: String) -> SwiftSyntaxTypeParserTestFixture {
-        let parser = _SwiftSyntaxTypeParser(source: source)
+        let parser = SwiftSyntaxTypeParser(source: source)
         let result = parser.parseTypes()
         
         return SwiftSyntaxTypeParserTestFixture(types: result)
     }
     
     func parseType(_ source: String) -> KnownType {
-        let parser = _SwiftSyntaxTypeParser(source: source)
+        let parser = SwiftSyntaxTypeParser(source: source)
         let result = parser.parseTypes()
         let type = result[0]
         

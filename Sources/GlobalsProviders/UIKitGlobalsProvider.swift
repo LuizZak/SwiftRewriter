@@ -351,7 +351,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
             }
             """
         
-        let result = _SwiftSyntaxTypeParser(source: typeString)
+        let result = SwiftSyntaxTypeParser(source: typeString)
         let incomplete = result.parseTypes()[0]
         
         let type = incomplete.complete(typeSystem: TypeSystem())
