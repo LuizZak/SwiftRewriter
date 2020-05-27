@@ -260,7 +260,7 @@ extension VirtualFileDisk: FileProvider {
     public var userHomeURL: URL {
         return URL(fileURLWithPath: "/user/home")
     }
-    public func enumerator(atPath path: String) -> [String]? {
+    public func allFilesRecursive(inPath path: String) -> [String]? {
         do {
             return try filesInDirectory(atPath: path, recursive: true)
         } catch {
@@ -281,6 +281,13 @@ extension VirtualFileDisk: FileProvider {
             return true
         } catch {
             return false
+        }
+    }
+    public func save(data: Data, atPath path: String) throws {
+        if !fileExists(atPath: path) {
+            try createFile(atPath: path, data: data)
+        } else {
+            try writeContentsOfFile(atPath: path, data: data)
         }
     }
 }

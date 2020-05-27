@@ -100,7 +100,8 @@ let package = Package(
                            "TypeSystem", "IntentionPasses", "KnownType",
                            "WriterTargetOutput", "SwiftSyntaxSupport",
                            "GlobalsProviders", "ExpressionPasses",
-                           "SourcePreprocessors", "SwiftSyntaxRewriterPasses"]),
+                           "SourcePreprocessors", "SwiftSyntaxRewriterPasses",
+                           "SourceKittenFramework"]),
         .target(
             name: "SwiftRewriter",
             dependencies: [
