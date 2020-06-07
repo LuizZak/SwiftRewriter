@@ -150,13 +150,13 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                         }.createMethod(named: "setA",
                                        parameters: [
                                         ParameterSignature(label: nil, name: "a", type: .int)]) { method in
-                                            method.setBody([
-                                                .expression(
-                                                    Expression
-                                                        .identifier("innerA")
-                                                        .assignment(op: .assign, rhs: .identifier("a")))
-                                                ])
-                                        }
+                            method.setBody([
+                                .expression(
+                                    Expression
+                                        .identifier("innerA")
+                                        .assignment(op: .assign, rhs: .identifier("a")))
+                                ])
+                        }
                 }.build()
         let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()

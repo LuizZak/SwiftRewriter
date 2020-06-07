@@ -125,7 +125,7 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
                                   isStatic: false))
             .converts(toInitializer: [
                 ParameterSignature(label: "b", name: "b", type: .typeName("B"))
-                ])
+            ])
     }
     
     func testConvertInitWithNonMatchingSelectorName() {
@@ -150,8 +150,7 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
             .converts(to: FunctionSignature(name: "getSqueakWithID",
                                             parameters: [ParameterSignature(label: nil, name: "id", type: .int)],
                                             returnType: .nullabilityUnspecified(.typeName("Squeak")),
-                                            isStatic: false)
-        )
+                                            isStatic: false))
     }
     
     func testConvertNullableReturnInitsIntoFailableInits() {

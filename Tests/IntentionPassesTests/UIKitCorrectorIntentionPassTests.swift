@@ -131,7 +131,7 @@ extension UIKitCorrectorIntentionPassTests {
         }
         if markAsOverride && !method.isOverride {
             recordFailure(withDescription: "Expected to mark method \(format(result)) as override",
-                inFile: file, atLine: line, expected: true)
+                          inFile: file, atLine: line, expected: true)
         }
     }
     

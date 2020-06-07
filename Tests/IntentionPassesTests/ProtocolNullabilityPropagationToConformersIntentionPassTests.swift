@@ -17,8 +17,7 @@ class ProtocolNullabilityPropagationToConformersIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
                 .createFile(named: "A.h") { file in
-                    file
-                        .createProtocol(withName: "A") { prot in
+                    file.createProtocol(withName: "A") { prot in
                             prot.createMethod(named: "takesValue",
                                               returnType: .void,
                                               parameters: [ParameterSignature(name: "value", type: .string)])
@@ -43,8 +42,7 @@ class ProtocolNullabilityPropagationToConformersIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
                 .createFile(named: "A.h") { file in
-                    file
-                        .createProtocol(withName: "A") { prot in
+                    file.createProtocol(withName: "A") { prot in
                             prot.createMethod(named: "takesValue",
                                               returnType: .void,
                                               parameters: [ParameterSignature(name: "value", type: .string)])
