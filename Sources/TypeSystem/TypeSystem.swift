@@ -429,6 +429,8 @@ public class TypeSystem {
     }
     
     /// Returns `true` if a given type can be assigned to a value of another type.
+    ///
+    /// Returns true if `let value: baseType = x as type` is a valid assignment.
     public func isType(_ type: SwiftType, assignableTo baseType: SwiftType) -> Bool {
         if type == baseType {
             return true

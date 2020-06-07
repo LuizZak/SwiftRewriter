@@ -45,15 +45,13 @@ public class DetectNonnullReturnsIntentionPass: TypeVisitingIntentionPass {
         
         visitor.visitStatement(body.body)
         
-        // TODO: Be aware of polymorphism/inheritance here.
-        
         // Analyze individual returns, checking if they all return the same non-null
         // type value
         for ret in returns {
             guard let retType = ret.exp?.resolvedType, !retType.isOptional else {
                 return
             }
-            guard retType == method.returnType.deepUnwrapped else {
+            guard context.typeSystem.isType(retType, assignableTo: method.returnType.deepUnwrapped) else {
                 return
             }
         }

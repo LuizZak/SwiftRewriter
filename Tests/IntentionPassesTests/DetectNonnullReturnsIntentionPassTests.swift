@@ -23,6 +23,28 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
         XCTAssertEqual(file.classIntentions[0].methods[0].returnType, .typeName("A"))
     }
     
+    func testApplyOnMethodPolymorphicDetection() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "B") { type in
+                    type.inherit(from: "A")
+                }
+                .createFileWithClass(named: "A") { type in
+                    type.createProperty(named: "b", type: "B")
+                        .createMethod(named: "a", returnType: .nullabilityUnspecified(.typeName("A"))) { method in
+                        method.setBody([
+                            Statement.return(Expression.identifier("self").dot("b").typed(.typeName("B")))
+                        ])
+                    }
+                }.build()
+        let sut = DetectNonnullReturnsIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let file = intentions.fileIntentions()[1]
+        XCTAssertEqual(file.classIntentions[0].methods[0].returnType, .typeName("A"))
+    }
+    
     func testDontApplyOnMethodWithExplicitOptionalReturnType() {
         let intentions =
             IntentionCollectionBuilder()
