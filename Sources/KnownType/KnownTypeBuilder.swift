@@ -17,7 +17,7 @@ public struct KnownTypeBuilder {
         type.typeName
     }
     
-    public init(from existingType: KnownType, file: String = #file, line: Int = #line) {
+    public init(from existingType: KnownType, file: StaticString = #filePath, line: UInt = #line) {
         var type =
             BuildingKnownType(typeName: existingType.typeName,
                               supertype: (existingType.supertype?.asTypeName).map(KnownTypeReference.typeName))

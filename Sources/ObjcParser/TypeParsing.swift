@@ -42,7 +42,7 @@ public class TypeParsing {
                 continue
             }
             
-            let pointer = declarator.pointer()?.accept(VarDeclarationTypeExtractor())
+            let pointer = declarator.pointer()?.accept(VarDeclarationTypeStringExtractor())
             
             var typeName = "\(baseTypeString) \(pointer ?? "")"
             
@@ -77,7 +77,7 @@ public class TypeParsing {
     }
     
     public func parseObjcType(in specQual: Parser.SpecifierQualifierListContext) -> ObjcType? {
-        guard let typeName = VarDeclarationTypeExtractor.extract(from: specQual) else {
+        guard let typeName = VarDeclarationTypeStringExtractor.extract(from: specQual) else {
             return nil
         }
         
@@ -87,11 +87,11 @@ public class TypeParsing {
     public func parseObjcType(in specifierQualifierList: Parser.SpecifierQualifierListContext,
                               declarator: Parser.DeclaratorContext) -> ObjcType? {
         
-        guard let specifiersString = VarDeclarationTypeExtractor.extract(from: specifierQualifierList) else {
+        guard let specifiersString = VarDeclarationTypeStringExtractor.extract(from: specifierQualifierList) else {
             return nil
         }
         
-        let pointer = declarator.pointer()?.accept(VarDeclarationTypeExtractor())
+        let pointer = declarator.pointer()?.accept(VarDeclarationTypeStringExtractor())
         
         let typeString = "\(specifiersString) \(pointer ?? "")"
         
@@ -110,7 +110,7 @@ public class TypeParsing {
     }
     
     public func parseObjcType(in declarationSpecifiers: Parser.DeclarationSpecifiersContext) -> ObjcType? {
-        guard let specifiersString = VarDeclarationTypeExtractor.extract(from: declarationSpecifiers) else {
+        guard let specifiersString = VarDeclarationTypeStringExtractor.extract(from: declarationSpecifiers) else {
             return nil
         }
         
@@ -120,7 +120,7 @@ public class TypeParsing {
     public func parseObjcType(in declarationSpecifiers: Parser.DeclarationSpecifiersContext,
                               declarator: Parser.DeclaratorContext) -> ObjcType? {
         
-        guard let specifiersString = VarDeclarationTypeExtractor.extract(from: declarationSpecifiers) else {
+        guard let specifiersString = VarDeclarationTypeStringExtractor.extract(from: declarationSpecifiers) else {
             return nil
         }
         
@@ -213,7 +213,7 @@ public class TypeParsing {
             }
         }
         
-        guard let typeString = VarDeclarationTypeExtractor.extract(from: typeContext) else {
+        guard let typeString = VarDeclarationTypeStringExtractor.extract(from: typeContext) else {
             return nil
         }
         
@@ -231,7 +231,7 @@ public class TypeParsing {
             let isFunctionPointer = directDeclarator.MUL() != nil
             let parameters = parseObjcTypes(from: blockParameters)
             
-            guard let returnTypeName = VarDeclarationTypeExtractor.extract(from: declarationSpecifiers) else {
+            guard let returnTypeName = VarDeclarationTypeStringExtractor.extract(from: declarationSpecifiers) else {
                 return nil
             }
             guard let returnType = parseObjcType(returnTypeName) else { return nil }
@@ -257,7 +257,7 @@ public class TypeParsing {
             return type
         }
         
-        guard let typeString = VarDeclarationTypeExtractor.extract(from: typeVariableDecl) else {
+        guard let typeString = VarDeclarationTypeStringExtractor.extract(from: typeVariableDecl) else {
             return nil
         }
         guard let type = parseObjcType(typeString) else {
@@ -268,7 +268,7 @@ public class TypeParsing {
     }
     
     public func parseObjcType(from typeSpecifier: Parser.TypeSpecifierContext) -> ObjcType? {
-        guard let typeString = VarDeclarationTypeExtractor.extract(from: typeSpecifier) else {
+        guard let typeString = VarDeclarationTypeStringExtractor.extract(from: typeSpecifier) else {
             return nil
         }
         guard let type = parseObjcType(typeString) else {
@@ -313,7 +313,7 @@ public class TypeParsing {
             return parseObjcType(from: blockType)
         }
         
-        guard let typeString = VarDeclarationTypeExtractor.extract(from: typeName) else {
+        guard let typeString = VarDeclarationTypeStringExtractor.extract(from: typeName) else {
             return nil
         }
         guard let type = parseObjcType(typeString) else {

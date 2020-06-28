@@ -425,7 +425,7 @@ extension DefaultTypeMapperTests {
                         inNonnullContext: Bool = false,
                         withExplicitNullability nullability: TypeNullability? = .nonnull,
                         toConvertTo expected: String,
-                        file: String = #file, line: Int = #line) {
+                        file: StaticString = #filePath, line: UInt = #line) {
         
         let converted = typeMapperConvert(type,
                                           inNonnullContext: inNonnullContext,
@@ -433,26 +433,26 @@ extension DefaultTypeMapperTests {
                                           typeSystem: typeSystem)
         
         if converted != expected {
-            recordFailure(withDescription: """
+            XCTFail("""
                 Expected Objective-C type \(type) to convert into '\(expected)', \
                 but received '\(converted)' instead.
                 """,
-                inFile: file, atLine: line, expected: true)
+                file: file, line: line)
         }
     }
     
     private func expectSwift(_ type: SwiftType,
                              toConvertTo expected: String,
-                             file: String = #file, line: Int = #line) {
+                             file: StaticString = #filePath, line: UInt = #line) {
         
         let converted = typeMapperConvert(type, typeSystem: typeSystem)
         
         if converted != expected {
-            recordFailure(withDescription: """
+            XCTFail("""
                 Expected Swift type \(type) to convert into '\(expected)', but \
                 received '\(converted)' instead.
                 """,
-                inFile: file, atLine: line, expected: true)
+                file: file, line: line)
         }
     }
     

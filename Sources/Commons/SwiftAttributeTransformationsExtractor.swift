@@ -49,7 +49,6 @@ class SwiftAttributeTransformationsExtractor {
             case .renameFrom(let name):
                 aliases.append(name)
             default:
-                // TODO: Throw diagnostic error for unsupported mappings
                 break
             }
         }

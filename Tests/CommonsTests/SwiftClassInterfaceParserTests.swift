@@ -447,7 +447,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
 
 extension SwiftClassInterfaceParserTests {
     
-    func parseType(_ string: String, file: String = #file, line: Int = #line) throws -> KnownType {
+    func parseType(_ string: String, file: StaticString = #filePath, line: UInt = #line) throws -> KnownType {
         do {
             let type =
                 try SwiftClassInterfaceParser
@@ -462,18 +462,17 @@ extension SwiftClassInterfaceParserTests {
                 description = "\(error)"
             }
             
-            recordFailure(withDescription: "Error while parsing type: \(description)",
-                          inFile: file,
-                          atLine: line,
-                          expected: true)
+            XCTFail("Error while parsing type: \(description)",
+                    file: file,
+                    line: line)
             
             throw error
         }
     }
     
     func parseAttribute(_ string: String,
-                        file: String = #file,
-                        line: Int = #line) throws -> SwiftRewriterAttribute {
+                        file: StaticString = #filePath,
+                        line: UInt = #line) throws -> SwiftRewriterAttribute {
         
         do {
             let type =
@@ -490,10 +489,9 @@ extension SwiftClassInterfaceParserTests {
                 description = "\(error)"
             }
             
-            recordFailure(withDescription: "Error while parsing attribute: \(description)",
-                          inFile: file,
-                          atLine: line,
-                          expected: true)
+            XCTFail("Error while parsing attribute: \(description)",
+                    file: file,
+                    line: line)
             
             throw error
         }

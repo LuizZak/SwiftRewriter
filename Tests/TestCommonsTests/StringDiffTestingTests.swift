@@ -325,8 +325,8 @@ class StringDiffTestingTests: XCTestCase {
 
 extension StringDiffTestingTests {
     public func diffTest(expected input: String,
-                         file: String = #file,
-                         line: Int = #line) -> DiffingTest {
+                         file: StaticString = #filePath,
+                         line: UInt = #line) -> DiffingTest {
         
         let location = DiffLocation(file: file, line: line)
         let diffable = DiffableString(string: input, location: location)
@@ -340,12 +340,11 @@ extension StringDiffTestingTests {
 class TestDiffReporter: DiffTestCaseFailureReporter {
     var messages: [String] = []
     
-    func recordFailure(withDescription description: String,
-                       inFile filePath: String,
-                       atLine lineNumber: Int,
-                       expected: Bool) {
+    func _recordFailure(withDescription description: String,
+                        inFile filePath: StaticString,
+                        atLine lineNumber: UInt,
+                        expected: Bool) {
         
         messages.append("\(filePath):\(lineNumber): " + description)
-        
     }
 }

@@ -1680,122 +1680,103 @@ class ControlFlowGraphCreationTests: XCTestCase {
 private extension ControlFlowGraphCreationTests {
     func sanitize(_ graph: ControlFlowGraph,
                   expectsUnreachable: Bool = false,
-                  line: Int = #line) {
+                  line: UInt = #line) {
         
         if !graph.nodes.contains(where: { $0 === graph.entry }) {
-            recordFailure(
-                withDescription: """
-                Graph's entry node is not currently present in nodes array
-                """,
-                inFile: #file,
-                atLine: line,
-                expected: true)
+            XCTFail("""
+                    Graph's entry node is not currently present in nodes array
+                    """,
+                    file: #filePath,
+                    line: line)
         }
         if !graph.nodes.contains(where: { $0 === graph.exit }) {
-            recordFailure(
-                withDescription: """
+            XCTFail("""
                 Graph's exit node is not currently present in nodes array
                 """,
-                inFile: #file,
-                atLine: line,
-                expected: true)
+                file: #filePath,
+                line: line)
         }
         
         if graph.entry.node !== graph.exit.node {
-            recordFailure(
-                withDescription: """
+            XCTFail("""
                 Graph's entry and exit nodes must point to the same AST node
                 """,
-                inFile: #file,
-                atLine: line,
-                expected: true)
+                file: #filePath,
+                line: line)
         }
         
         for edge in graph.edges {
             if !graph.containsNode(edge.start) {
-                recordFailure(
-                    withDescription: """
-                    Edge contains reference for node that is not present in graph: \(edge.start.node)
-                    """,
-                    inFile: #file,
-                    atLine: line,
-                    expected: true)
+                XCTFail("""
+                        Edge contains reference for node that is not present in graph: \(edge.start.node)
+                        """,
+                        file: #filePath,
+                        line: line)
             }
             if !graph.containsNode(edge.end) {
-                recordFailure(
-                    withDescription: """
-                    Edge contains reference for node that is not present in graph: \(edge.end.node)
-                    """,
-                    inFile: #file,
-                    atLine: line,
-                    expected: true)
+                XCTFail("""
+                        Edge contains reference for node that is not present in graph: \(edge.end.node)
+                        """,
+                        file: #filePath,
+                        line: line)
             }
         }
         
         for node in graph.nodes {
             if node is ControlFlowSubgraphNode {
-                recordFailure(
-                    withDescription: """
-                    Found non-expanded subgraph node: \(node.node)
-                    """,
-                    inFile: #file,
-                    atLine: line,
-                    expected: true)
+                XCTFail("""
+                        Found non-expanded subgraph node: \(node.node)
+                        """,
+                        file: #filePath,
+                        line: line)
             }
             
             if graph.allEdges(for: node).isEmpty {
-                recordFailure(
-                    withDescription: """
-                    Found a free node with no edges or connections: \(node.node)
-                    """,
-                    inFile: #file,
-                    atLine: line,
-                    expected: true)
+                XCTFail("""
+                        Found a free node with no edges or connections: \(node.node)
+                        """,
+                        file: #filePath,
+                        line: line)
                 
                 continue
             }
             
             if !expectsUnreachable && node !== graph.entry && graph.edges(towards: node).isEmpty {
-                recordFailure(
-                    withDescription: """
-                    Found non-entry node that has no connections towards it: \(node.node)
-                    """,
-                    inFile: #file,
-                    atLine: line,
-                    expected: true)
+                XCTFail("""
+                        Found non-entry node that has no connections towards it: \(node.node)
+                        """,
+                        file: #filePath,
+                        line: line)
             }
             
             if node !== graph.exit && graph.edges(from: node).isEmpty {
-                recordFailure(
-                    withDescription: """
-                    Found non-exit node that has no connections from it: \(node.node)
-                    """,
-                    inFile: #file,
-                    atLine: line,
-                    expected: true)
+                XCTFail("""
+                        Found non-exit node that has no connections from it: \(node.node)
+                        """,
+                        file: #filePath,
+                        line: line)
             }
         }
     }
     
-    func assertGraphviz(graph: ControlFlowGraph, matches expected: String, line: Int = #line) {
+    func assertGraphviz(graph: ControlFlowGraph, matches expected: String, line: UInt = #line) {
         let text = graphviz(graph: graph)
         
         if text == expected {
             return
         }
         
-        recordFailure(withDescription: """
-            Expected produced graph to be
-            
-            \(expected)
-            
-            But found:
-            
-            \(text.makeDifferenceMarkString(against: expected))
-            """,
-                      inFile: #file,
-                      atLine: line,
-                      expected: true)
+        XCTFail("""
+                Expected produced graph to be
+                
+                \(expected)
+                
+                But found:
+                
+                \(text.makeDifferenceMarkString(against: expected))
+                """,
+                file: #filePath,
+                line: line)
     }
     
     func printGraphviz(graph: ControlFlowGraph) {

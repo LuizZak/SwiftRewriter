@@ -117,7 +117,7 @@ class ObjcLexer_TokenizerTests: XCTestCase {
 extension ObjcLexer_TokenizerTests {
     
     private func expect(sequence string: String, toTokenizeAs expectedTypes: [TokenType],
-                        file: String = #file, line: Int = #line) {
+                        file: StaticString = #filePath, line: UInt = #line) {
         
         let lexer = makeLexer(string)
         
@@ -127,20 +127,19 @@ extension ObjcLexer_TokenizerTests {
             let expected = pair.1
             
             if actual.tokenType != expected {
-                recordFailure(
-                    withDescription:
+                XCTFail(
                     """
                     Expected token type: \(expected) received token: \
                     \(actual) at loc. \(actual.range as Any)
                     """,
-                    inFile: file, atLine: line, expected: true)
+                    file: file, line: line)
             }
         }
     }
     
     private func expect(_ string: String, toTokenizeAs expectedType: TokenType,
                         _ expectedString: String? = nil,
-                        file: String = #file, line: Int = #line) {
+                        file: StaticString = #filePath, line: UInt = #line) {
         
         let expString = expectedString ?? string
         
@@ -152,13 +151,13 @@ extension ObjcLexer_TokenizerTests {
     }
     
     private func tokenizeTest(_ string: String, _ expected: ObjcLexer.Token,
-                              file: String = #file, line: Int = #line) {
+                              file: StaticString = #filePath, line: UInt = #line) {
         
         let lexer = makeLexer(string)
         
         if lexer.token() != expected {
-            recordFailure(withDescription: "Expected token: \(expected) received token: \(lexer.token())",
-                          inFile: file, atLine: line, expected: true)
+            XCTFail("Expected token: \(expected) received token: \(lexer.token())",
+                    file: file, line: line)
         }
     }
     

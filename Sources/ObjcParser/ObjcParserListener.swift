@@ -783,7 +783,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                 return declarations
             }
             
-            let allTypes = VarDeclarationTypeExtractor.extractAll(from: ctx)
+            let allTypes = VarDeclarationTypeStringExtractor.extractAll(from: ctx)
             
             for (initDeclarator, typeString) in zip(initDeclarators, allTypes) {
                 guard let identifier = initDeclarator.declarator()?.directDeclarator()?.identifier() else { continue }

@@ -462,8 +462,8 @@ extension SwiftStatementASTReaderTests {
                 comments: [ObjcComment] = [],
                 parseBlock: (ObjectiveCParser) throws -> (ParserRuleContext) = { try $0.statement() },
                 readsAs expected: Statement,
-                file: String = #file,
-                line: Int = #line) -> Statement? {
+                file: StaticString = #filePath,
+                line: UInt = #line) -> Statement? {
         
         let typeSystem = TypeSystem()
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
@@ -508,23 +508,24 @@ extension SwiftStatementASTReaderTests {
                 dump(expected, to: &expString)
                 dump(result, to: &resString)
                 
-                recordFailure(withDescription: """
-                    Failed: Expected to read Objective-C expression
-                    \(objcStmt)
-                    as
-                    
-                    \(expString)
-                    
-                    but read as
-                    
-                    \(resString)
-                    
-                    """, inFile: file, atLine: line, expected: true)
+                XCTFail("""
+                        Failed: Expected to read Objective-C expression
+                        \(objcStmt)
+                        as
+                        
+                        \(expString)
+                        
+                        but read as
+                        
+                        \(resString)
+                        
+                        """,
+                        file: file, line: line)
             }
             
             return result
         } catch {
-            recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)", inFile: file, atLine: line, expected: false)
+            XCTFail("Unexpected error(s) parsing objective-c: \(error)", file: file, line: line)
         }
         
         return nil

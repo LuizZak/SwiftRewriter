@@ -4,11 +4,11 @@ import SwiftAST
 ///
 /// 1. Renaming method member name
 /// ```
-///     \<exp>.method()
+/// \<exp>.method()
 /// ```
 /// to
 /// ```
-///     \<exp>.otherMethod()
+/// \<exp>.otherMethod()
 /// ```
 ///
 /// 2. Add or remove arguments in arbitrary position

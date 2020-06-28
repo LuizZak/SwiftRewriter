@@ -48,12 +48,12 @@ class SwiftOperatorTests: XCTestCase {
         assert(.closedRange, is: .range)
     }
     
-    private func assert(_ op: SwiftOperator, is category: SwiftOperatorCategory, line: Int = #line) {
+    private func assert(_ op: SwiftOperator, is category: SwiftOperatorCategory, line: UInt = #line) {
         if op.category == category {
             return
         }
         
-        recordFailure(withDescription: "Assertion failure: Expected '\(op)' to be '\(category)', received '\(op.category)'",
-                      inFile: #file, atLine: line, expected: true)
+        XCTFail("Assertion failure: Expected '\(op)' to be '\(category)', received '\(op.category)'",
+                file: #filePath, line: line)
     }
 }

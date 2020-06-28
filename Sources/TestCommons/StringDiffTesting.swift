@@ -2,18 +2,18 @@ import Utils
 import XCTest
 
 public protocol DiffTestCaseFailureReporter {
-    func recordFailure(withDescription description: String,
-                       inFile filePath: String,
-                       atLine lineNumber: Int,
-                       expected: Bool)
+    func _recordFailure(withDescription description: String,
+                        inFile filePath: StaticString,
+                        atLine lineNumber: UInt,
+                        expected: Bool)
 }
 
 public extension DiffTestCaseFailureReporter {
     
     func diffTest(expected input: String,
                   highlightLineInEditor: Bool = true,
-                  file: String = #file,
-                  line: Int = #line) -> DiffingTest {
+                  file: StaticString = #filePath,
+                  line: UInt = #line) -> DiffingTest {
         
         let location = DiffLocation(file: file, line: line)
         let diffable = DiffableString(string: input, location: location)
@@ -26,10 +26,10 @@ public extension DiffTestCaseFailureReporter {
 
 /// Represents a location for a diff'd string
 public struct DiffLocation {
-    var file: String
-    var line: Int
+    var file: StaticString
+    var line: UInt
     
-    public init(file: String, line: Int) {
+    public init(file: StaticString, line: UInt) {
         self.file = file
         self.line = line
     }
@@ -61,14 +61,14 @@ public class DiffingTest {
     }
     
     public func diff(_ res: String,
-                     file: String = #file,
-                     line: Int = #line) {
+                     file: StaticString = #filePath,
+                     line: UInt = #line) {
         
         if expectedDiff.string == res {
             return
         }
         
-        testCase.recordFailure(
+        testCase._recordFailure(
             withDescription: """
             Strings don't match:
             
@@ -110,12 +110,12 @@ public class DiffingTest {
         if diffStartLine - 1 < expectedLineRanges.count && resLineRanges.count == expectedLineRanges.count {
             let resLineContent = res[resLineRanges[max(0, diffStartLine - 1)]]
             
-            testCase.recordFailure(
+            testCase._recordFailure(
                 withDescription: """
                 Difference starts here: Actual line reads '\(resLineContent)'
                 """,
                 inFile: file,
-                atLine: expectedDiff.location.line + diffStartLine,
+                atLine: expectedDiff.location.line + UInt(diffStartLine),
                 expected: true
             )
         } else if resLineRanges.count < expectedLineRanges.count {
@@ -132,33 +132,33 @@ public class DiffingTest {
             if diffStartLine == expectedLineRanges.count - 1 && isAtLastColumn {
                 let resultLineContent = expectedDiff.string[expectedLineRanges[diffStartLine]]
                 
-                testCase.recordFailure(
+                testCase._recordFailure(
                     withDescription: """
                     Difference starts here: Expected matching line '\(resultLineContent)'
                     """,
                     inFile: file,
-                    atLine: expectedDiff.location.line + diffStartLine + 1,
+                    atLine: expectedDiff.location.line + UInt(diffStartLine + 1),
                     expected: true
                 )
             } else {
                 let resLineContent = res[resLineRanges[max(0, diffStartLine - 1)]]
                 
-                testCase.recordFailure(
+                testCase._recordFailure(
                     withDescription: """
                     Difference starts here: Actual line reads '\(resLineContent)'
                     """,
                     inFile: file,
-                    atLine: expectedDiff.location.line + diffStartLine,
+                    atLine: expectedDiff.location.line + UInt(diffStartLine),
                     expected: true
                 )
             }
         } else {
-            testCase.recordFailure(
+            testCase._recordFailure(
                 withDescription: """
                 Difference starts here: Extraneous content after this line
                 """,
                 inFile: file,
-                atLine: expectedDiff.location.line + expectedLineRanges.count,
+                atLine: expectedDiff.location.line + UInt(expectedLineRanges.count),
                 expected: true
             )
         }
@@ -166,4 +166,8 @@ public class DiffingTest {
 }
 
 // MARK: - XCTestCase: TestCaseFailureReporter
-extension XCTestCase: DiffTestCaseFailureReporter { }
+extension XCTestCase: DiffTestCaseFailureReporter {
+    public func _recordFailure(withDescription description: String, inFile filePath: StaticString, atLine lineNumber: UInt, expected: Bool) {
+        XCTFail(description, file: filePath, line: lineNumber)
+    }
+}

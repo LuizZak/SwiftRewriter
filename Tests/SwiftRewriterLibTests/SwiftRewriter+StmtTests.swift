@@ -1180,7 +1180,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
 }
 
 private extension SwiftRewriter_StmtTests {
-    func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) {
+    func assertSingleStatement(objc: String, swift: String, file: StaticString = #filePath, line: UInt = #line) {
         let objc = """
             @implementation MyClass: UIView
             - (void)myMethod {

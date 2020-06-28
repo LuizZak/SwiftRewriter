@@ -337,39 +337,39 @@ class FunctionSignatureParserTests: XCTestCase {
 }
 
 extension FunctionSignatureParserTests {
-    func assert(string: String, parseInto expected: [ParameterSignature], line: Int = #line) {
+    func assert(string: String, parseInto expected: [ParameterSignature], line: UInt = #line) {
         do {
             let parsed = try FunctionSignatureParser.parseParameters(from: string)
             
             if parsed != expected {
-                recordFailure(withDescription: """
+                XCTFail("""
                     Expected to parse '\(string)' into parameter signature \
                     \(TypeFormatter.asString(parameters: expected)) but received \
                     \(TypeFormatter.asString(parameters: parsed))
                     """,
-                    inFile: #file, atLine: line, expected: true)
+                    file: #filePath, line: line)
             }
         } catch {
-            recordFailure(withDescription: "Error parsing signature: \(error)",
-                          inFile: #file, atLine: line, expected: true)
+            XCTFail("Error parsing signature: \(error)",
+                    file: #filePath, line: line)
         }
     }
     
-    func assert(string: String, parseInto expected: FunctionSignature, line: Int = #line) {
+    func assert(string: String, parseInto expected: FunctionSignature, line: UInt = #line) {
         do {
             let parsed = try FunctionSignatureParser.parseSignature(from: string)
             
             if parsed != expected {
-                recordFailure(withDescription: """
-                    Expected to parse '\(string)' into function signature \
-                    \(TypeFormatter.asString(signature: expected)) but received \
-                    \(TypeFormatter.asString(signature: parsed))
-                    """,
-                    inFile: #file, atLine: line, expected: true)
+                XCTFail("""
+                        Expected to parse '\(string)' into function signature \
+                        \(TypeFormatter.asString(signature: expected)) but received \
+                        \(TypeFormatter.asString(signature: parsed))
+                        """,
+                        file: #filePath, line: line)
             }
         } catch {
-            recordFailure(withDescription: "Error parsing signature: \(error)",
-                          inFile: #file, atLine: line, expected: true)
+            XCTFail("Error parsing signature: \(error)",
+                    file: #filePath, line: line)
         }
     }
 }

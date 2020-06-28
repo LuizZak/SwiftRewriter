@@ -255,37 +255,37 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
             self.typeMapper = DefaultTypeMapper(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
         }
         
-        func converts(toInitializer parameters: [ParameterSignature], file: String = #file, line: Int = #line) {
+        func converts(toInitializer parameters: [ParameterSignature], file: StaticString = #filePath, line: UInt = #line) {
             guard let ctor = type.constructors.first else {
-                testCase.recordFailure(withDescription: """
-                    Failed to generate initializer: No initializers where found \
-                    on target type.
-                    Found these methods instead:
-                    \(dumpType())
-                    """
-                    , inFile: file, atLine: line, expected: true)
+                XCTFail("""
+                        Failed to generate initializer: No initializers where found \
+                        on target type.
+                        Found these methods instead:
+                        \(dumpType())
+                        """,
+                        file: file, line: line)
                 return
             }
             guard ctor.parameters != parameters else {
                 return
             }
             
-            testCase.recordFailure(withDescription: """
-                Expected to generate constructor with parameters \(parameters),
-                but converted to \(ctor.parameters)
-                """
-                , inFile: file, atLine: line, expected: true)
+            XCTFail("""
+                    Expected to generate constructor with parameters \(parameters),
+                    but converted to \(ctor.parameters)
+                    """,
+                    file: file, line: line)
         }
         
-        func converts(toInitializer expected: String, file: String = #file, line: Int = #line) {
+        func converts(toInitializer expected: String, file: StaticString = #filePath, line: UInt = #line) {
             guard let ctor = type.constructors.first else {
-                testCase.recordFailure(withDescription: """
-                    Failed to generate initializer: No initializers where found \
-                    on target type.
-                    Found these methods instead:
-                    \(dumpType())
-                    """
-                    , inFile: file, atLine: line, expected: true)
+                XCTFail("""
+                        Failed to generate initializer: No initializers where found \
+                        on target type.
+                        Found these methods instead:
+                        \(dumpType())
+                        """,
+                        file: file, line: line)
                 return
             }
             
@@ -295,22 +295,22 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                 return
             }
             
-            testCase.recordFailure(withDescription: """
-                Expected to generate constructor with parameters \(expected),
-                but converted to \(result)
-                """
-                , inFile: file, atLine: line, expected: true)
+            XCTFail("""
+                    Expected to generate constructor with parameters \(expected),
+                    but converted to \(result)
+                    """,
+                    file: file, line: line)
         }
         
-        func converts(to signature: FunctionSignature, file: String = #file, line: Int = #line) {
+        func converts(to signature: FunctionSignature, file: StaticString = #filePath, line: UInt = #line) {
             guard let method = type.methods.first else {
-                testCase.recordFailure(withDescription: """
-                    Failed to generate method: No methods where found on \
-                    target type.
-                    Found these methods instead:
-                    \(dumpType())
-                    """
-                    , inFile: file, atLine: line, expected: true)
+                XCTFail("""
+                        Failed to generate method: No methods where found on \
+                        target type.
+                        Found these methods instead:
+                        \(dumpType())
+                        """,
+                        file: file, line: line)
                 return
             }
             
@@ -318,22 +318,22 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                 return
             }
             
-            testCase.recordFailure(withDescription: """
-                Expected signature \(TypeFormatter.asString(signature: signature, includeName: true)), \
-                but converted to \(TypeFormatter.asString(signature: method.signature, includeName: true))
-                """
-                , inFile: file, atLine: line, expected: true)
+            XCTFail("""
+                    Expected signature \(TypeFormatter.asString(signature: signature, includeName: true)), \
+                    but converted to \(TypeFormatter.asString(signature: method.signature, includeName: true))
+                    """,
+                    file: file, line: line)
         }
         
-        func converts(to signature: String, file: String = #file, line: Int = #line) {
+        func converts(to signature: String, file: StaticString = #filePath, line: UInt = #line) {
             guard let method = type.methods.first else {
-                testCase.recordFailure(withDescription: """
-                    Failed to generate method: No methods where found on \
-                    target type.
-                    Found these methods instead:
-                    \(dumpType())
-                    """
-                    , inFile: file, atLine: line, expected: true)
+                XCTFail("""
+                        Failed to generate method: No methods where found on \
+                        target type.
+                        Found these methods instead:
+                        \(dumpType())
+                        """,
+                        file: file, line: line)
                 return
             }
             
@@ -342,10 +342,10 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                 return
             }
             
-            testCase.recordFailure(withDescription: """
-                Expected signature \(signature), but converted to \(converted)
-                """
-                , inFile: file, atLine: line, expected: true)
+            XCTFail("""
+                    Expected signature \(signature), but converted to \(converted)
+                    """,
+                    file: file, line: line)
         }
         
         func dumpType() -> String {

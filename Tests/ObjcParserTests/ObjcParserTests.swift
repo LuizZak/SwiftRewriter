@@ -769,13 +769,13 @@ extension ObjcParserTests {
         }
     }
     
-    private func parserTest(_ source: String, file: String = #file, line: Int = #line) -> GlobalContextNode {
+    private func parserTest(_ source: String, file: StaticString = #filePath, line: UInt = #line) -> GlobalContextNode {
         let sut = ObjcParser(string: source)
         
         return _parseTestGlobalContextNode(source: source, parser: sut, file: file, line: line)
     }
     
-    private func _parseTestGlobalContextNode(source: String, parser: ObjcParser, file: String = #file, line: Int = #line) -> GlobalContextNode {
+    private func _parseTestGlobalContextNode(source: String, parser: ObjcParser, file: StaticString = #filePath, line: UInt = #line) -> GlobalContextNode {
         do {
             try parser.parse()
             
@@ -783,12 +783,12 @@ extension ObjcParserTests {
                 var diag = ""
                 parser.diagnostics.printDiagnostics(to: &diag)
                 
-                recordFailure(withDescription: "Unexpected diagnostics while parsing:\n\(diag)", inFile: file, atLine: line, expected: true)
+                XCTFail("Unexpected diagnostics while parsing:\n\(diag)", file: file, line: line)
             }
             
             return parser.rootNode
         } catch {
-            recordFailure(withDescription: "Failed to parse test '\(source)': \(error)", inFile: #file, atLine: line, expected: false)
+            XCTFail("Failed to parse test '\(source)': \(error)", file: file, line: line)
             fatalError()
         }
     }

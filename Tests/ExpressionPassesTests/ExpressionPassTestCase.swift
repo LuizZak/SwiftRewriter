@@ -29,32 +29,30 @@ class ExpressionPassTestCase: XCTestCase {
         functionBodyContext = nil
     }
     
-    func assertNotifiedChange(file: String = #file, line: Int = #line) {
+    func assertNotifiedChange(file: StaticString = #filePath, line: UInt = #line) {
         if !notified {
-            recordFailure(withDescription:
-                """
-                Expected syntax rewriter \(sutType!) to notify change via \
-                \(\ASTRewriterPassContext.notifyChangedTree), but it did not.
-                """,
-                inFile: file, atLine: line, expected: true)
+            XCTFail("""
+                    Expected syntax rewriter \(sutType!) to notify change via \
+                    \(\ASTRewriterPassContext.notifyChangedTree), but it did not.
+                    """,
+                    file: file, line: line)
         }
     }
     
-    func assertDidNotNotifyChange(file: String = #file, line: Int = #line) {
+    func assertDidNotNotifyChange(file: StaticString = #filePath, line: UInt = #line) {
         if notified {
-            recordFailure(withDescription:
-                """
-                Expected syntax rewriter \(sutType!) to not notify any changes \
-                via \(\ASTRewriterPassContext.notifyChangedTree), but it did.
-                """,
-                inFile: file, atLine: line, expected: true)
+            XCTFail("""
+                    Expected syntax rewriter \(sutType!) to not notify any changes \
+                    via \(\ASTRewriterPassContext.notifyChangedTree), but it did.
+                    """,
+                    file: file, line: line)
         }
     }
     
     @discardableResult
     func assertTransformParsed(expression original: String,
                                into expected: String,
-                               file: String = #file, line: Int = #line) -> Expression {
+                               file: StaticString = #filePath, line: UInt = #line) -> Expression {
         notified = false
         let exp = parse(original, file: file, line: line)
         
@@ -62,7 +60,7 @@ class ExpressionPassTestCase: XCTestCase {
         let result = sut.apply(on: exp, context: makeContext())
         
         if expected != result.description {
-            recordFailure(withDescription:
+            XCTFail(
                 """
                 Failed to convert: Expected to convert expression
                 
@@ -72,7 +70,7 @@ class ExpressionPassTestCase: XCTestCase {
                 
                 \(result.description)
                 """,
-                inFile: file, atLine: line, expected: true)
+                file: file, line: line)
         }
         
         return result
@@ -81,7 +79,7 @@ class ExpressionPassTestCase: XCTestCase {
     @discardableResult
     func assertTransformParsed(expression original: String,
                                into expected: Expression,
-                               file: String = #file, line: Int = #line) -> Expression {
+                               file: StaticString = #filePath, line: UInt = #line) -> Expression {
         
         let exp = parse(original, file: file, line: line)
         return assertTransform(expression: exp, into: expected, file: file, line: line)
@@ -90,7 +88,7 @@ class ExpressionPassTestCase: XCTestCase {
     @discardableResult
     func assertTransformParsed(statement original: String,
                                into expected: Statement,
-                               file: String = #file, line: Int = #line) -> Statement {
+                               file: StaticString = #filePath, line: UInt = #line) -> Statement {
         
         let stmt = parseStmt(original, file: file, line: line)
         return assertTransform(statement: stmt, into: expected, file: file, line: line)
@@ -99,8 +97,8 @@ class ExpressionPassTestCase: XCTestCase {
     @discardableResult
     func assertTransform(expression: Expression,
                          into expected: Expression,
-                         file: String = #file,
-                         line: Int = #line) -> Expression {
+                         file: StaticString = #filePath,
+                         line: UInt = #line) -> Expression {
         
         notified = false
         let sut = makeSut()
@@ -113,13 +111,13 @@ class ExpressionPassTestCase: XCTestCase {
             dump(expected, to: &expString)
             dump(result, to: &resString)
             
-            recordFailure(withDescription: """
-                            Failed to convert: Expected to convert expression into
-                            \(expString)
-                            but received
-                            \(resString)
-                            """,
-                          inFile: file, atLine: line, expected: true)
+            XCTFail("""
+                    Failed to convert: Expected to convert expression into
+                    \(expString)
+                    but received
+                    \(resString)
+                    """,
+                    file: file, line: line)
         }
         
         return result
@@ -128,8 +126,8 @@ class ExpressionPassTestCase: XCTestCase {
     @discardableResult
     func assertTransform(statement: Statement,
                          into expected: Statement,
-                         file: String = #file,
-                         line: Int = #line) -> Statement {
+                         file: StaticString = #filePath,
+                         line: UInt = #line) -> Statement {
         
         notified = false
         let sut = makeSut()
@@ -147,22 +145,22 @@ class ExpressionPassTestCase: XCTestCase {
             dump(expected, to: &expString)
             dump(result, to: &resString)
             
-            recordFailure(withDescription: """
-                            Failed to convert: Expected to convert statement into
+            XCTFail("""
+                    Failed to convert: Expected to convert statement into
 
-                            \(expString)
+                    \(expString)
 
-                            but received
+                    but received
 
-                            \(resString)
-                            """,
-                          inFile: file, atLine: line, expected: true)
+                    \(resString)
+                    """,
+                    file: file, line: line)
         }
         
         return result
     }
     
-    func parse(_ exp: String, file: String = #file, line: Int = #line) -> Expression {
+    func parse(_ exp: String, file: StaticString = #filePath, line: UInt = #line) -> Expression {
         let (stream, parser) = objcParser(for: exp)
         defer {
             _=stream // Keep alive!
@@ -175,9 +173,8 @@ class ExpressionPassTestCase: XCTestCase {
         
         if !diag.diagnostics.diagnostics.isEmpty {
             let summary = diag.diagnostics.diagnosticsSummary()
-            recordFailure(withDescription:
-                "Unexpected diagnostics while parsing expression:\n\(summary)",
-                inFile: file, atLine: line, expected: true)
+            XCTFail("Unexpected diagnostics while parsing expression:\n\(summary)",
+                    file: file, line: line)
         }
         
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
@@ -194,7 +191,7 @@ class ExpressionPassTestCase: XCTestCase {
         return expression.accept(reader)!
     }
     
-    func parseStmt(_ stmtString: String, file: String = #file, line: Int = #line) -> Statement {
+    func parseStmt(_ stmtString: String, file: StaticString = #filePath, line: UInt = #line) -> Statement {
         let (stream, parser) = objcParser(for: stmtString)
         defer {
             _=stream // Keep alive!
@@ -207,9 +204,8 @@ class ExpressionPassTestCase: XCTestCase {
         
         if !diag.diagnostics.diagnostics.isEmpty {
             let summary = diag.diagnostics.diagnosticsSummary()
-            recordFailure(withDescription:
-                "Unexpected diagnostics while parsing statement:\n\(summary)",
-                inFile: file, atLine: line, expected: true)
+            XCTFail("Unexpected diagnostics while parsing statement:\n\(summary)",
+                    file: file, line: line)
         }
         
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)

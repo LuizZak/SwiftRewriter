@@ -289,7 +289,7 @@ extension ModifiersSyntaxDecoratorsTests {
     func assert(decorator: ModifiersSyntaxDecorator,
                 element: DecoratableElement,
                 producesModifier expected: String?,
-                line: Int = #line) {
+                line: UInt = #line) {
         
         let producer = SwiftSyntaxProducer()
         let modifiers = decorator.modifier(for: element)
@@ -302,13 +302,11 @@ extension ModifiersSyntaxDecoratorsTests {
             }
         
         if expected != modifierString {
-            recordFailure(
-                withDescription: """
-                Expected to produce modifier \(expected ?? "<nil>"), but produced \(modifierString ?? "<nil>")
-                """,
-                inFile: #file,
-                atLine: line,
-                expected: true)
+            XCTFail("""
+                    Expected to produce modifier \(expected ?? "<nil>"), but produced \(modifierString ?? "<nil>")
+                    """,
+                    file: #filePath,
+                    line: line)
         }
     }
 }

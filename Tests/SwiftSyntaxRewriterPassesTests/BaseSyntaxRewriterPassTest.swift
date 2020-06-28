@@ -7,7 +7,7 @@ import TestCommons
 class BaseSyntaxRewriterPassTest: XCTestCase {
     var sut: SwiftSyntaxRewriterPass!
     
-    func assertRewrite(input: String, expected: String, file: String = #file, line: Int = #line) {
+    func assertRewrite(input: String, expected: String, file: StaticString = #filePath, line: UInt = #line) {
         do {
             let transformed = sut.rewrite(try createSyntax(input))
             
@@ -15,10 +15,9 @@ class BaseSyntaxRewriterPassTest: XCTestCase {
                 .diff(transformed.description, file: file, line: line)
             
         } catch {
-            recordFailure(withDescription: "Error creating test file: \(error)",
-                          inFile: file,
-                          atLine: line,
-                          expected: false)
+            XCTFail("Error creating test file: \(error)",
+                    file: file,
+                    line: line)
         }
     }
     
