@@ -250,7 +250,7 @@ public class TypeParsing {
                                   parameters: parameters)
             }
             
-            if let nullability = typeVariableDecl.declarator()?.directDeclarator()?.nullabilitySpecifier() {
+            if let nullability = directDeclarator.nullabilitySpecifier() {
                 type = .qualified(type, qualifiers: [nullability.getText()])
             }
             

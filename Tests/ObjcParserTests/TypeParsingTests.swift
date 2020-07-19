@@ -9,14 +9,23 @@ class TypeParsingTests: XCTestCase {
         prepareTester(ObjectiveCParser.fieldDeclaration, { $0.parseObjcType(in: $1) }) { tester in
             tester.assert("int a;", parsesAs: .struct("int"))
             tester.assert("int *a;", parsesAs: .pointer(.struct("int")))
+            tester.assert("__weak NSObject *a;", parsesAs: .specified(specifiers: ["__weak"], .pointer(.struct("NSObject"))))
         }
     }
     
     func testParseObjcTypeInFieldDeclarationContextMultiple() {
         let sut = makeSut()
         
-        withParserRule("int a, *b", { try $0.fieldDeclaration() }) { rule in
+        withParserRule("int a, *b;", { try $0.fieldDeclaration() }) { rule in
             XCTAssertEqual(sut.parseObjcTypes(in: rule), [.struct("int"), .pointer(.struct("int"))])
+        }
+    }
+    
+    func testParseObjcTypeInFieldDeclarationContextMultiple_withArcBehavior() {
+        let sut = makeSut()
+        
+        withParserRule("__weak NSObject *a;", { try $0.fieldDeclaration() }) { rule in
+            XCTAssertEqual(sut.parseObjcTypes(in: rule), [.specified(specifiers: ["__weak"], .pointer(.struct("NSObject")))])
         }
     }
     
@@ -27,6 +36,43 @@ class TypeParsingTests: XCTestCase {
             tester.assert("long long", parsesAs: .struct("long long"))
             tester.assert("__weak NSObject*", parsesAs: .specified(specifiers: ["__weak"], .pointer(.struct("NSObject"))))
             tester.assert("__weak _Nonnull NSObject*", parsesAs: .specified(specifiers: ["__weak", "_Nonnull"], .pointer(.struct("NSObject"))))
+        }
+    }
+    
+    func testParseObjcTypeInDeclarationSpecifiersContext() {
+        prepareTester(ObjectiveCParser.declarationSpecifiers, { $0.parseObjcType(in: $1) }) { tester in
+            tester.assert("__weak NSObject *a", parsesAs: .specified(specifiers: ["__weak"], .pointer(.struct("NSObject"))))
+        }
+    }
+    
+    func testParseObjcTypeInTypeVariableDeclaratorContext_blockType() {
+        prepareTester(ObjectiveCParser.typeVariableDeclarator, { $0.parseObjcType(from: $1) }) { tester in
+            tester.assert("NSObject (^)()", parsesAs: .blockType(name: nil, returnType: .struct("NSObject"), parameters: []))
+        }
+    }
+    
+    func testParseObjcTypeInDeclarationSpecifiersDeclaratorContext_blockType() {
+        prepareTester(ObjectiveCParser.typeVariableDeclarator, { $0.parseObjcType(in: $1.declarationSpecifiers()!, declarator: $1.declarator()!) }) { tester in
+            tester.assert("NSObject (^)()", parsesAs: .blockType(name: nil, returnType: .struct("NSObject"), parameters: []))
+        }
+    }
+    
+    func testParseObjcTypeInDeclarationSpecifiersDeclaratorContext_fixedArray() {
+        prepareTester(ObjectiveCParser.typeVariableDeclarator, { $0.parseObjcType(in: $1.declarationSpecifiers()!, declarator: $1.declarator()!) }) { tester in
+            tester.assert("NSObject (a)[2]", parsesAs: .fixedArray(.struct("NSObject"), length: 2))
+        }
+    }
+    
+    func testParseObjcTypeInTypeVariableDeclaratorOrNameContext_blockType() {
+        prepareTester(ObjectiveCParser.typeVariableDeclaratorOrName, { $0.parseObjcType(from: $1) }) { tester in
+            tester.assert("NSObject (^)void", parsesAs: .blockType(name: nil, returnType: .struct("NSObject"), parameters: []))
+        }
+    }
+    
+    // TODO: Make this test pass
+    func xtestParseObjcTypeInTypeVariableDeclaratorOrNameContext_fixedArray() {
+        prepareTester(ObjectiveCParser.typeVariableDeclaratorOrName, { $0.parseObjcType(from: $1) }) { tester in
+            tester.assert("NSObject (a)[2]", parsesAs: .fixedArray(.struct("NSObject"), length: 2))
         }
     }
 }
@@ -47,12 +93,23 @@ private extension TypeParsingTests {
         }
     }
     
-    func withParserRule<T: ParserRuleContext>(_ string: String, _ closure: (ObjectiveCParser) throws -> T, _ test: (T) -> Void) {
+    func withParserRule<T: ParserRuleContext>(_ string: String,
+                                              _ closure: (ObjectiveCParser) throws -> T,
+                                              _ test: (T) -> Void,
+                                              line: UInt = #line) {
+        
         let parserState = ObjcParserState()
         let parser = try! parserState.makeMainParser(input: string).parser
+        let errorListener = ErrorListener()
+        parser.removeErrorListeners()
+        parser.addErrorListener(errorListener)
         
         withExtendedLifetime(parser) {
             let rule = try! closure(parser)
+            
+            if errorListener.hasErrors {
+                XCTFail("Parser errors while parsing '\(string)': \(errorListener.errorDescription)", line: line)
+            }
             
             test(rule)
         }
@@ -80,9 +137,17 @@ private extension TypeParsingTests {
         
         func assert(_ string: String, parsesAs expected: ObjcType, line: UInt = #line) {
             let parser = try! parserState.makeMainParser(input: string).parser
+            let errorListener = ErrorListener()
+            parser.removeErrorListeners()
+            parser.addErrorListener(errorListener)
             
             withExtendedLifetime(parser) {
                 let rule = try! ruleDeriver(parser)()
+                
+                if errorListener.hasErrors {
+                    XCTFail("Parser errors while parsing '\(string)': \(errorListener.errorDescription)", line: line)
+                }
+                
                 let result = parseMethod(typeParsing, rule)
                 
                 var resultStr = ""
@@ -93,5 +158,27 @@ private extension TypeParsingTests {
                 XCTAssertEqual(result, expected, "(\(resultStr)) is not equal to (\(expectStr))", line: line)
             }
         }
+    }
+}
+
+private class ErrorListener: BaseErrorListener {
+    var errors: [String] = []
+    
+    var errorDescription: String {
+        return errors.joined(separator: "\n")
+    }
+    
+    var hasErrors: Bool {
+        return !errors.isEmpty
+    }
+    
+    override func syntaxError<T>(_ recognizer: Recognizer<T>,
+                                 _ offendingSymbol: AnyObject?,
+                                 _ line: Int,
+                                 _ charPositionInLine: Int,
+                                 _ msg: String,
+                                 _ e: AnyObject?) where T : ATNSimulator {
+        
+        errors.append(msg)
     }
 }
