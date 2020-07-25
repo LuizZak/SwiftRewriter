@@ -45,7 +45,7 @@ public class CompoundTypealiasProvider: TypealiasProvider {
             if let type = provider.unalias(typeName) {
                 
                 if _aliasesCache.usingCache {
-                    _aliasesCache.wrappedValue[typeName.hashValue] = type
+                    aliasesCache[typeName.hashValue] = type
                 }
                 
                 return type
@@ -54,7 +54,7 @@ public class CompoundTypealiasProvider: TypealiasProvider {
         
         // Store negative lookups
         if _negativeLookups.usingCache {
-            _negativeLookups.wrappedValue.insert(typeName)
+            negativeLookups.insert(typeName)
         }
         
         return nil
