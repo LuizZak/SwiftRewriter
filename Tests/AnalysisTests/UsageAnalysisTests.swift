@@ -2,11 +2,12 @@ import XCTest
 import SwiftAST
 import KnownType
 import Intentions
-import Analysis
 import TypeSystem
 import TestCommons
 
-class DefaultUsageAnalyzerTests: XCTestCase {
+@testable import Analysis
+
+class UsageAnalysisTests: XCTestCase {
     func testFindMethodUsages() {
         let builder = IntentionCollectionBuilder()
         let body: CompoundStatement = [
@@ -532,5 +533,149 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         XCTAssertEqual(usages.count, 2)
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)
         XCTAssertEqual(usages[1].isReadOnlyUsage, true)
+    }
+    
+    func testIsReadOnlyContext() {
+        let typeSystem = TypeSystem()
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
+        
+        XCTAssertTrue(sut.isReadOnlyContext(Expression.identifier("a")))
+    }
+    
+    func testIsReadOnlyContextWriteToVariable() {
+        let typeSystem = TypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A")
+                .constructor()
+                .build()
+        )
+        let exp = Expression.identifier("a").assignment(op: .assign, rhs: Expression.identifier("A").call())
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        typeResolver.intrinsicVariables = ArrayDefinitionsSource(definitions: [.forLocalIdentifier("a", type: "A", isConstant: false, location: .parameter(index: 0))])
+        _=typeResolver.resolveTypes(in: .expression(exp))
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
+        
+        XCTAssertFalse(sut.isReadOnlyContext(exp.asAssignment!.lhs))
+    }
+    
+    func testIsReadOnlyContextWritingPropertyOnValueType() {
+        let typeSystem = TypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .property(named: "b", type: .int)
+                .build()
+        )
+        let exp = Expression.identifier("a").dot("b").assignment(op: .assign, rhs: .constant(1))
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        typeResolver.intrinsicVariables = ArrayDefinitionsSource(definitions: [.forLocalIdentifier("a", type: "A", isConstant: false, location: .parameter(index: 0))])
+        _=typeResolver.resolveTypes(in: .expression(exp))
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
+        
+        XCTAssertFalse(sut.isReadOnlyContext(exp.asAssignment!.lhs.asPostfix!.exp))
+    }
+    
+    func testIsReadOnlyContextWritingPropertyOnReferenceType() {
+        let typeSystem = TypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A")
+                .property(named: "b", type: .int)
+                .build()
+        )
+        let exp = Expression.identifier("a").dot("b").assignment(op: .assign, rhs: .constant(1))
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        typeResolver.intrinsicVariables = ArrayDefinitionsSource(definitions: [.forLocalIdentifier("a", type: "A", isConstant: false, location: .parameter(index: 0))])
+        _=typeResolver.resolveTypes(in: .expression(exp))
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
+        
+        XCTAssertTrue(sut.isReadOnlyContext(exp.asAssignment!.lhs.asPostfix!.exp))
+    }
+    
+    func testIsReadOnlyContextMutatingMethodOnValueType() {
+        let typeSystem = TypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .method(named: "nonMut")
+                .method(named: "mut", isMutating: true)
+                .build()
+        )
+        let expNonMut = Expression.identifier("a").typed("A").dot("nonMut").call()
+        let expMut = Expression.identifier("a").typed("A").dot("mut").call()
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        typeResolver.intrinsicVariables = ArrayDefinitionsSource(definitions: [.forLocalIdentifier("a", type: "A", isConstant: false, location: .parameter(index: 0))])
+        _=typeResolver.resolveTypes(in: .expression(expNonMut))
+        _=typeResolver.resolveTypes(in: .expression(expMut))
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
+        
+        XCTAssertTrue(sut.isReadOnlyContext(expNonMut.asPostfix!.exp.asPostfix!.exp))
+        XCTAssertFalse(sut.isReadOnlyContext(expMut.asPostfix!.exp.asPostfix!.exp))
+    }
+    
+    func testIsReadOnlyContextMutatingMethodOnReferenceType() {
+        let typeSystem = TypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A")
+                .method(named: "nonMut")
+                .method(named: "mut", isMutating: true)
+                .build()
+        )
+        let expNonMut = Expression.identifier("a").typed("A").dot("nonMut").call()
+        let expMut = Expression.identifier("a").typed("A").dot("mut").call()
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        typeResolver.intrinsicVariables = ArrayDefinitionsSource(definitions: [.forLocalIdentifier("a", type: "A", isConstant: false, location: .parameter(index: 0))])
+        _=typeResolver.resolveTypes(in: .expression(expNonMut))
+        _=typeResolver.resolveTypes(in: .expression(expMut))
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
+        
+        XCTAssertTrue(sut.isReadOnlyContext(expNonMut.asPostfix!.exp.asPostfix!.exp))
+        XCTAssertTrue(sut.isReadOnlyContext(expMut.asPostfix!.exp.asPostfix!.exp))
+    }
+    
+    func testIsReadOnlyContextWritingSubscriptOnValueType() {
+        let typeSystem = TypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .subscription(indexType: .int, type: .int)
+                .build()
+        )
+        let exp = Expression.identifier("a").sub(.constant(1)).assignment(op: .assign, rhs: .constant(1))
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        typeResolver.intrinsicVariables = ArrayDefinitionsSource(definitions: [.forLocalIdentifier("a", type: "A", isConstant: false, location: .parameter(index: 0))])
+        _=typeResolver.resolveTypes(in: .expression(exp))
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
+        
+        XCTAssertFalse(sut.isReadOnlyContext(exp.asAssignment!.lhs.asPostfix!.exp))
+    }
+    
+    func testIsReadOnlyContextWritingSubscriptOnReferenceType() {
+        let typeSystem = TypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A")
+                .subscription(indexType: .int, type: .int)
+                .build()
+        )
+        let exp = Expression.identifier("a").sub(.constant(1)).assignment(op: .assign, rhs: .constant(1))
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        typeResolver.intrinsicVariables = ArrayDefinitionsSource(definitions: [.forLocalIdentifier("a", type: "A", isConstant: false, location: .parameter(index: 0))])
+        _=typeResolver.resolveTypes(in: .expression(exp))
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
+        
+        XCTAssertTrue(sut.isReadOnlyContext(exp.asAssignment!.lhs.asPostfix!.exp))
+    }
+    
+    func testIsReadOnlyContextWriteToResultOfValueTypeMethodCall() {
+        let typeSystem = TypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .property(named: "b", type: .int)
+                .method(named: "method", returning: "A")
+                .build()
+        )
+        let exp = Expression.identifier("a").dot("method").call().dot("b").assignment(op: .assign, rhs: .constant(0))
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        typeResolver.intrinsicVariables = ArrayDefinitionsSource(definitions: [.forLocalIdentifier("a", type: "A", isConstant: false, location: .parameter(index: 0))])
+        _=typeResolver.resolveTypes(in: .expression(exp))
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
+        
+        XCTAssertTrue(sut.isReadOnlyContext(exp.asAssignment!.lhs.asPostfix!.exp.asPostfix!.exp.asPostfix!.exp))
     }
 }
