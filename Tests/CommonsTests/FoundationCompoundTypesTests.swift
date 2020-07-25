@@ -127,6 +127,8 @@ class FoundationCompoundTypesTests: XCTestCase {
     func testNSMutableArrayDefinition() {
         let type = FoundationCompoundTypes.nsMutableArray.create()
         
+        XCTAssertEqual(type.supertype?.asSwiftType, "NSArray")
+        XCTAssert(type.knownProtocolConformances.isEmpty)
         XCTAssertEqual(type.nonCanonicalNames.count, 0)
         XCTAssertEqual(type.transformations.count, 7)
         
@@ -173,7 +175,7 @@ class FoundationCompoundTypesTests: XCTestCase {
             """)
     }
     
-    func testNSMutableDefinition() {
+    func testNSDictionaryDefinition() {
         let type = FoundationCompoundTypes.nsDictionary.create()
         
         XCTAssertEqual(type.nonCanonicalNames.count, 0)
@@ -227,6 +229,8 @@ class FoundationCompoundTypesTests: XCTestCase {
     func testNSMutableDictionaryDefinition() {
         let type = FoundationCompoundTypes.nsMutableDictionary.create()
         
+        XCTAssertEqual(type.supertype?.asSwiftType, "NSDictionary")
+        XCTAssert(type.knownProtocolConformances.isEmpty)
         XCTAssertEqual(type.nonCanonicalNames.count, 0)
         XCTAssertEqual(type.transformations.count, 0)
         

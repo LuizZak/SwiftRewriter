@@ -297,7 +297,28 @@ public enum NSMutableDictionaryCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "NSMutableDictionary")
     
     public static func create() -> CompoundedMappingType {
-        return singleton
+        let string = typeString()
+        
+        do {
+            let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: string)
+            // FIXME: Currently we have to manually transform NSDictionary from a protocol
+            // to a class inheritance; this is due to the way we detect supertypes
+            // when completing IncompleteKnownTypes.
+            // We need to improve the typing of CompoundTypes to allow callers
+            // collect incomplete types which are then completed externally, with
+            // all type informations.
+            incomplete.modifying { type in
+                type.removingConformance(to: "NSDictionary")
+                    .settingSupertype(KnownTypeReference.typeName("NSDictionary"))
+            }
+            let type = try incomplete.toCompoundedKnownType()
+            
+            return type
+        } catch {
+            fatalError(
+                "Found error while parsing NSMutableArray class interface: \(error)"
+            )
+        }
     }
     
     static func typeString() -> String {
