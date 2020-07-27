@@ -16,35 +16,35 @@ public class UIKitExpressionPass: BaseExpressionPass {
         // 'enumifications'
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UIControlEvent",
-                             swiftEnumName: "UIControlEvents") {
+                             swiftEnumName: Expression.identifier("UIControl").dot("Event")) {
             notifyChange()
             
             return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UIGestureRecognizerState",
-                             swiftEnumName: "UIGestureRecognizerState") {
+                             swiftEnumName: Expression.identifier("UIGestureRecognizer").dot("State")) {
             notifyChange()
             
             return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UITableViewCellSeparatorStyle",
-                             swiftEnumName: "UITableViewCellSeparatorStyle") {
+                             swiftEnumName: Expression.identifier("UITableViewCell").dot("SeparatorStyle")) {
             notifyChange()
             
             return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UITableViewCellSelectionStyle",
-                             swiftEnumName: "UITableViewCellSelectionStyle") {
+                             swiftEnumName: Expression.identifier("UITableViewCell").dot("SelectionStyle")) {
             notifyChange()
             
             return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UIViewAnimationOption",
-                             swiftEnumName: "UIViewAnimationOptions") {
+                             swiftEnumName: Expression.identifier("UIView").dot("AnimationOptions")) {
             notifyChange()
             
             return visitExpression(exp)
@@ -95,17 +95,20 @@ public class UIKitExpressionPass: BaseExpressionPass {
     /// it matches one.
     ///
     /// E.g.: "UIControlEventTouchUpInside" enumified over "UIControlEvent" (Objective-C) to
-    /// "UIControlEvents" (Swift)
-    /// will return `Expression.identifier("UIControlEvents").dot("touchUpInside")`.
-    func enumify(ident: String, enumPrefix: String, swiftEnumName: String) -> Expression? {
-        if !ident.hasPrefix(enumPrefix) || ident == swiftEnumName {
+    /// "UIControl.Event" (Swift)
+    /// will return `Expression.identifier("UIControl").dot("Events").dot("touchUpInside")`.
+    func enumify(ident: String,
+                 enumPrefix: String,
+                 swiftEnumName: Expression) -> Expression? {
+        
+        if !ident.hasPrefix(enumPrefix) {
             return nil
         }
         
         let suffix = ident.suffix(from: enumPrefix.endIndex)
         let enumCase = suffix.lowercasedFirstLetter
         
-        return Expression.identifier(swiftEnumName).dot(enumCase)
+        return swiftEnumName.dot(enumCase)
     }
 }
 
