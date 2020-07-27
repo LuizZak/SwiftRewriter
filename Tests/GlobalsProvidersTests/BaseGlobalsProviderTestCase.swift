@@ -111,21 +111,34 @@ class BaseGlobalsProviderTestCase: XCTestCase {
         }
     }
     
-    func assertDefined(typeName: String, file: StaticString = #filePath, line: UInt = #line) {
-        if types.knownType(withName: typeName) == nil {
+    func assertDefined(typeName: String, supertype: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
+        guard let type = types.knownType(withName: typeName) else {
             XCTFail("Expected to find type \(typeName)",
                     file: file, line: line)
+            return
+        }
+        
+        if let supertype = supertype, type.supertype?.asTypeName != supertype {
+            XCTFail("Expected supertype \(supertype), but found \(type.supertype?.asTypeName ?? "<nil>")",
+                    file: file,
+                    line: line)
         }
     }
     
     func assertDefined(typeName: String,
+                       supertype: String? = nil,
                        signature: String,
                        file: StaticString = #filePath, line: UInt = #line) {
         
         guard let type = types.knownType(withName: typeName) else {
             XCTFail("Expected to find type \(typeName)",
-                          file: file, line: line)
+                    file: file, line: line)
             return
+        }
+        
+        if let supertype = supertype, type.supertype?.asTypeName != supertype {
+            XCTFail("Expected supertype \(supertype), but found \(type.supertype?.asTypeName ?? "<nil>")",
+                    file: file, line: line)
         }
         
         let typeString = TypeFormatter.asString(knownType: type)

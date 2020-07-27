@@ -360,6 +360,16 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
             try! SwiftClassInterfaceParser
                 .parseDeclaration(from: typeString, into: &type)
             
+            // FIXME: Currently we have to manually transform UIScrollView from
+            // a protocol to a class inheritance; this is due to the way we
+            // detect supertypes when completing IncompleteKnownTypes.
+            // We need to improve the typing of CompoundTypes to allow callers
+            // collect incomplete types which are then completed externally, with
+            // all type informations.
+            type = type
+                .removingConformance(to: "UIScrollView")
+                .settingSupertype("UIScrollView")
+            
             return type.build()
         }
     }
