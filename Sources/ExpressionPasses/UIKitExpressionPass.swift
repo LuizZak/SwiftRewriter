@@ -96,7 +96,7 @@ public class UIKitExpressionPass: BaseExpressionPass {
     ///
     /// E.g.: "UIControlEventTouchUpInside" enumified over "UIControlEvent" (Objective-C) to
     /// "UIControl.Event" (Swift)
-    /// will return `Expression.identifier("UIControl").dot("Events").dot("touchUpInside")`.
+    /// will return `Expression.identifier("UIControl").dot("Event").dot("touchUpInside")`.
     func enumify(ident: String,
                  enumPrefix: String,
                  swiftEnumName: Expression) -> Expression? {

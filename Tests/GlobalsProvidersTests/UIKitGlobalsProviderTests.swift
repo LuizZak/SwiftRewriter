@@ -49,14 +49,14 @@ class UIKitGlobalsProviderTests: BaseGlobalsProviderTestCase {
     }
     
     func testDefinedUIWindow() {
-        assertDefined(typeName: "UIWindow", signature: """
+        assertDefined(typeName: "UIWindow", supertype: "UIView", signature: """
             class UIWindow: UIView {
             }
             """)
     }
     
     func testDefinedUITableViewCell() {
-        assertDefined(typeName: "UITableViewCell", signature: """
+        assertDefined(typeName: "UITableViewCell", supertype: "UIView", signature: """
             class UITableViewCell: UIView, UIGestureRecognizerDelegate {
                 var accessoryType: UITableViewCellAccessoryType
                 var accessoryView: UIView?
@@ -97,7 +97,7 @@ class UIKitGlobalsProviderTests: BaseGlobalsProviderTestCase {
     }
     
     func testDefinedUIScrollView() {
-        assertDefined(typeName: "UIScrollView", signature: """
+        assertDefined(typeName: "UIScrollView", supertype: "UIView", signature: """
             class UIScrollView: UIView {
                 var adjustedContentInset: UIEdgeInsets { get }
                 var alwaysBounceHorizontal: Bool
@@ -150,7 +150,7 @@ class UIKitGlobalsProviderTests: BaseGlobalsProviderTestCase {
     }
     
     func testDefinedUITableView() {
-        assertDefined(typeName: "UITableView", signature: """
+        assertDefined(typeName: "UITableView", supertype: "UIScrollView", signature: """
             class UITableView: UIScrollView {
                 var allowsMultipleSelection: Bool
                 var allowsMultipleSelectionDuringEditing: Bool

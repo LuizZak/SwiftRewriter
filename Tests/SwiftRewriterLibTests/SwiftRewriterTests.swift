@@ -3175,4 +3175,32 @@ class SwiftRewriterTests: XCTestCase {
             // #define CONSTANT2 unknown + identifiers
             """)
     }
+    
+    func testRewriteTableViewScrollViewInheritance() {
+        assertRewrite(
+            objc: """
+            @interface A : UIView
+            @property (nullable) UITableView *tableView;
+            @end
+            @implementation A
+            - (void)test {
+                CGRect aFrame = CGRectZero;
+                if (!CGRectEqualToRect(aFrame, self.tableView.frame)) {
+                }
+            }
+            @end
+            """,
+            swift: """
+            class A: UIView {
+                var tableView: UITableView?
+            
+                func test() {
+                    let aFrame = CGRect.zero
+
+                    if !aFrame.equalTo(self.tableView?.frame ?? CGRect()) {
+                    }
+                }
+            }
+            """)
+    }
 }

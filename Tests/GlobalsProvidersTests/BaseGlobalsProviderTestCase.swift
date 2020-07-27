@@ -114,37 +114,49 @@ class BaseGlobalsProviderTestCase: XCTestCase {
         }
     }
     
-    func assertDefined(typeName: String, file: String = #file, line: Int = #line) {
-        if types.knownType(withName: typeName) == nil {
-            recordFailure(withDescription: "Expected to find type \(typeName)",
-                          inFile: file, atLine: line, expected: true)
+    func assertDefined(typeName: String, supertype: String? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let type = types.knownType(withName: typeName) else {
+            XCTFail("Expected to find type \(typeName)",
+                    file: file, line: line)
+            return
+        }
+        
+        if let supertype = supertype, type.supertype?.asTypeName != supertype {
+            XCTFail("Expected supertype \(supertype), but found \(type.supertype?.asTypeName ?? "<nil>")",
+                    file: file,
+                    line: line)
         }
     }
     
     func assertDefined(typeName: String,
+                       supertype: String? = nil,
                        signature: String,
-                       file: String = #file, line: Int = #line) {
+                       file: StaticString = #file, line: UInt = #line) {
         
         guard let type = types.knownType(withName: typeName) else {
-            recordFailure(withDescription: "Expected to find type \(typeName)",
-                          inFile: file, atLine: line, expected: true)
+            XCTFail("Expected to find type \(typeName)",
+                    file: file, line: line)
             return
+        }
+        
+        if let supertype = supertype, type.supertype?.asTypeName != supertype {
+            XCTFail("Expected supertype \(supertype), but found \(type.supertype?.asTypeName ?? "<nil>")",
+                    file: file, line: line)
         }
         
         let typeString = TypeFormatter.asString(knownType: type)
         
         if typeString != signature {
-            recordFailure(
-                withDescription: """
-                Expected type signature of type \(typeName) to match
-                
-                \(signature)
-                
-                but found signature
-                
-                \(typeString.makeDifferenceMarkString(against: signature))
-                """,
-                inFile: file, atLine: line, expected: true)
+            XCTFail("""
+                    Expected type signature of type \(typeName) to match
+                    
+                    \(signature)
+                    
+                    but found signature
+                    
+                    \(typeString.makeDifferenceMarkString(against: signature))
+                    """,
+                    file: file, line: line)
         }
     }
     
