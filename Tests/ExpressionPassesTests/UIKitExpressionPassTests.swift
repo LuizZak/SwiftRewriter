@@ -36,7 +36,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
                 .call([
                     .unlabeled(.identifier("self")),
                     .labeled("action", Expression.identifier("Selector").call([.constant("didTapButton:")])),
-                    .labeled("for", Expression.identifier("UIControlEvents").dot("touchUpInside"))
+                    .labeled("for", Expression.identifier("UIControl").dot("Event").dot("touchUpInside"))
                 ])
         ); assertNotifiedChange()
     }
@@ -44,7 +44,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
     func testEnumifyUIGestureRecognizerState() {
         assertTransform(
             expression: .identifier("UIGestureRecognizerStateEnded"),
-            into: Expression.identifier("UIGestureRecognizerState").dot("ended")
+            into: Expression.identifier("UIGestureRecognizer").dot("State").dot("ended")
         ); assertNotifiedChange()
     }
     
@@ -165,39 +165,39 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
     func testUITableViewCellSeparatorStyle() {
         assertTransformParsed(
             expression: "UITableViewCellSeparatorStyleNone",
-            into: Expression.identifier("UITableViewCellSeparatorStyle").dot("none")
+            into: Expression.identifier("UITableViewCell").dot("SeparatorStyle").dot("none")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UITableViewCellSeparatorStyleSingleEtched",
-            into: Expression.identifier("UITableViewCellSeparatorStyle").dot("singleEtched")
+            into: Expression.identifier("UITableViewCell").dot("SeparatorStyle").dot("singleEtched")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UITableViewCellSeparatorStyleSingleLineEtched",
-            into: Expression.identifier("UITableViewCellSeparatorStyle").dot("singleLineEtched")
+            into: Expression.identifier("UITableViewCell").dot("SeparatorStyle").dot("singleLineEtched")
         ); assertNotifiedChange()
     }
     
     func testUITableViewCellSelectionStyle() {
         assertTransformParsed(
             expression: "UITableViewCellSelectionStyleNone",
-            into: Expression.identifier("UITableViewCellSelectionStyle").dot("none")
+            into: Expression.identifier("UITableViewCell").dot("SelectionStyle").dot("none")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UITableViewCellSelectionStyleBlue",
-            into: Expression.identifier("UITableViewCellSelectionStyle").dot("blue")
+            into: Expression.identifier("UITableViewCell").dot("SelectionStyle").dot("blue")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UITableViewCellSelectionStyleGray",
-            into: Expression.identifier("UITableViewCellSelectionStyle").dot("gray")
+            into: Expression.identifier("UITableViewCell").dot("SelectionStyle").dot("gray")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UITableViewCellSelectionStyleDefault",
-            into: Expression.identifier("UITableViewCellSelectionStyle").dot("default")
+            into: Expression.identifier("UITableViewCell").dot("SelectionStyle").dot("default")
         ); assertNotifiedChange()
     }
     
@@ -205,175 +205,200 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         assertTransform(
             expression: .identifier("UIViewAnimationOptionLayoutSubviews"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("layoutSubviews")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionAllowUserInteraction"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("allowUserInteraction")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionBeginFromCurrentState"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("beginFromCurrentState")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionRepeat"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("repeat")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionAutoreverse"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("autoreverse")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionOverrideInheritedDuration"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("overrideInheritedDuration")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionOverrideInheritedCurve"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("overrideInheritedCurve")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionAllowAnimatedContent"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("allowAnimatedContent")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionShowHideTransitionViews"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("showHideTransitionViews")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionOverrideInheritedOptions"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("overrideInheritedOptions")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionCurveEaseInOut"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("curveEaseInOut")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionCurveEaseIn"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("curveEaseIn")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionCurveEaseOut"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("curveEaseOut")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionCurveLinear"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("curveLinear")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionNone"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("transitionNone")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionFlipFromLeft"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("transitionFlipFromLeft")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionFlipFromRight"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("transitionFlipFromRight")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionCurlUp"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("transitionCurlUp")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionCurlDown"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("transitionCurlDown")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionCrossDissolve"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("transitionCrossDissolve")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionFlipFromTop"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("transitionFlipFromTop")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionFlipFromBottom"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("transitionFlipFromBottom")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionPreferredFramesPerSecondDefault"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("preferredFramesPerSecondDefault")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionPreferredFramesPerSecond60"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("preferredFramesPerSecond60")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionPreferredFramesPerSecond30"),
             into: Expression
-                .identifier("UIViewAnimationOptions")
+                .identifier("UIView")
+                .dot("AnimationOptions")
                 .dot("preferredFramesPerSecond30")
         ); assertNotifiedChange()
         
