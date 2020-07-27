@@ -16,35 +16,35 @@ public class UIKitExpressionPass: BaseExpressionPass {
         // 'enumifications'
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UIControlEvent",
-                             swiftEnumName: "UIControlEvents") {
+                             swiftEnumName: "UIControl.Event") {
             notifyChange()
             
             return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UIGestureRecognizerState",
-                             swiftEnumName: "UIGestureRecognizerState") {
+                             swiftEnumName: "UIGestureRecognizer.State") {
             notifyChange()
             
             return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UITableViewCellSeparatorStyle",
-                             swiftEnumName: "UITableViewCellSeparatorStyle") {
+                             swiftEnumName: "UITableViewCell.SeparatorStyle") {
             notifyChange()
             
             return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UITableViewCellSelectionStyle",
-                             swiftEnumName: "UITableViewCellSelectionStyle") {
+                             swiftEnumName: "UITableViewCell.SelectionStyle") {
             notifyChange()
             
             return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UIViewAnimationOption",
-                             swiftEnumName: "UIViewAnimationOptions") {
+                             swiftEnumName: "UIView.AnimationOptions") {
             notifyChange()
             
             return visitExpression(exp)
@@ -105,7 +105,7 @@ public class UIKitExpressionPass: BaseExpressionPass {
         let suffix = ident.suffix(from: enumPrefix.endIndex)
         let enumCase = suffix.lowercasedFirstLetter
         
-        return Expression.identifier(swiftEnumName).dot(enumCase)
+        return Expression.identifier("").dot(enumCase)
     }
 }
 
