@@ -1416,4 +1416,37 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             options: SwiftSyntaxOptions.default.with(\.outputExpressionTypes, true))
     }
+    
+    func testNSInitOptionality() {
+        assertRewrite(
+            objc: """
+            @implementation A
+            - (void)test {
+                NSArray *array = [[NSArray alloc] init];
+                NSMutableArray *arrayMut = [[NSMutableArray alloc] init];
+                NSDictionary *dict = [[NSDictionary alloc] init];
+                NSMutableDictionary *dictMut = [[NSMutableDictionary alloc] init];
+            }
+            @end
+            """,
+            swift: """
+            class A {
+                func test() {
+                    // decl type: NSArray
+                    // init type: NSArray
+                    let array = NSArray()
+                    // decl type: NSMutableArray
+                    // init type: NSMutableArray
+                    let arrayMut = NSMutableArray()
+                    // decl type: NSDictionary
+                    // init type: NSDictionary
+                    let dict = NSDictionary()
+                    // decl type: NSMutableDictionary
+                    // init type: NSMutableDictionary
+                    let dictMut = NSMutableDictionary()
+                }
+            }
+            """,
+            options: SwiftSyntaxOptions.default.with(\.outputExpressionTypes, true))
+    }
 }
