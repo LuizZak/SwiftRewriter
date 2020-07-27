@@ -209,38 +209,6 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
 // MARK: - Attribute writing
 extension SwiftSyntaxProducerTests {
     
-    func testWriteFailableInit() {
-        let initMethod = InitGenerationIntention(parameters: [])
-        initMethod.isFailable = true
-        initMethod.functionBody = FunctionBodyIntention(body: [])
-        let sut = SwiftSyntaxProducer()
-        
-        let output = sut.generateInitializer(initMethod, alwaysEmitBody: true).description
-        
-        let expected = """
-            init?() {
-            }
-            """
-        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines),
-                       expected)
-    }
-    
-    func testWriteConvenienceInit() {
-        let initMethod = InitGenerationIntention(parameters: [])
-        initMethod.isConvenience = true
-        initMethod.functionBody = FunctionBodyIntention(body: [])
-        let sut = SwiftSyntaxProducer()
-        
-        let output = sut.generateInitializer(initMethod, alwaysEmitBody: true).description
-        
-        let expected = """
-            convenience init() {
-            }
-            """
-        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines),
-                       expected)
-    }
-    
     func testWriteClassAttributes() {
         let type = KnownTypeBuilder(typeName: "A", kind: .class)
             .settingAttributes([
@@ -488,7 +456,7 @@ extension SwiftSyntaxProducerTests {
     }
 }
 
-// MARK: - Function generation
+// MARK: - Global Function generation
 extension SwiftSyntaxProducerTests {
     func testGenerateFileWithEmptyFunction() {
         let file = FileIntentionBuilder
@@ -540,10 +508,7 @@ extension SwiftSyntaxProducerTests {
             }
             """)
     }
-}
 
-// MARK: - Global function generation
-extension SwiftSyntaxProducerTests {
     func testGenerateFileWithGlobalFunction() {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
@@ -703,6 +668,43 @@ extension SwiftSyntaxProducerTests {
             }
             """)
     }
+}
+
+// MARK: - Init writing
+extension SwiftSyntaxProducerTests {
+    
+    func testWriteFailableInit() {
+        let initMethod = InitGenerationIntention(parameters: [])
+        initMethod.isFailable = true
+        initMethod.functionBody = FunctionBodyIntention(body: [])
+        let sut = SwiftSyntaxProducer()
+        
+        let output = sut.generateInitializer(initMethod, alwaysEmitBody: true).description
+        
+        let expected = """
+            init?() {
+            }
+            """
+        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines),
+                       expected)
+    }
+    
+    func testWriteConvenienceInit() {
+        let initMethod = InitGenerationIntention(parameters: [])
+        initMethod.isConvenience = true
+        initMethod.functionBody = FunctionBodyIntention(body: [])
+        let sut = SwiftSyntaxProducer()
+        
+        let output = sut.generateInitializer(initMethod, alwaysEmitBody: true).description
+        
+        let expected = """
+            convenience init() {
+            }
+            """
+        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines),
+                       expected)
+    }
+    
 }
 
 // MARK: - Subscript Generation
