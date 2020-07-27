@@ -759,6 +759,175 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             // End of file objc.swift
             """)
     }
+    
+    func testNSArrayExtensionDetection() {
+        assertThat()
+            .file(name: "NSArray+Ext.h",
+            """
+            NS_ASSUME_NONNULL_BEGIN
+            @interface NSArray (Filtering)
+            - (NSArray*)map:(id(^)(ObjectType obj))mapper __attribute__((warn_unused_result));
+            - (NSArray<ObjectType>*)filter:(BOOL(^)(ObjectType obj))filter __attribute__((warn_unused_result));
+            @end
+            NS_ASSUME_NONNULL_END
+            """)
+            .file(name: "NSArray+Ext.m",
+            """
+            @implementation NSArray (Filtering)
+            - (NSArray*)map:(id(^)(ObjectType obj))mapper {
+                return self;
+            }
+            - (NSArray<ObjectType>*)filter:(BOOL(^)(ObjectType obj))filter {
+                return self;
+            }
+            @end
+            """)
+            .file(name: "NSCollections+TypeSafe.h",
+            """
+            NS_ASSUME_NONNULL_BEGIN
+
+            @protocol TypeSafeNavigable <NSObject>
+
+            - (nullable __kindof NSArray*)arrayAt:(NSArray*)keyPath;
+            - (nullable __kindof NSDictionary*)dictionaryAt:(NSArray*)keyPath;
+            - (__kindof NSDictionary*)tryDictionaryAt:(NSArray*)keyPath;
+
+            - (__kindof NSArray*)tryArrayAt:(NSArray*)keyPath;
+
+            - (nullable __kindof NSDictionary*)tryDictionaryAt:(NSArray*)keyPath error:(NSError**)error;
+            - (nullable __kindof NSArray*)tryArrayAt:(NSArray*)keyPath error:(NSError**)error;
+
+            @end
+
+            @interface NSDictionary (TypeSafe) <TypeSafeNavigable>
+            @end
+
+            @interface NSArray (TypeSafe) <TypeSafeNavigable>
+            @end
+
+            NS_ASSUME_NONNULL_END
+            """)
+            .file(name: "Resource.h",
+            """
+            @interface Resource
+            @property (nullable) id ID;
+            @property (nullable) id BP;
+            @property (nullable) id firstName;
+            @property (nullable) id lastName;
+            @property (nullable) id middleName;
+            @property (nullable) id mothersMaidenName;
+            - (instancetype)init;
+            @end
+            """)
+            .file(name: "Resource.m",
+            """
+            @implementation Resource
+            @end
+            """)
+            .file(name: "A.h",
+            """
+            @interface A
+            - (nullable id)doWork;
+            @end
+            """)
+            .file(name: "A.m",
+            """
+            @implementation A
+            - (id)doWork {
+                NSDictionary *response = @{};
+                NSArray *resources = [response tryArrayAt:@[@"data", @"user", @"getByProfile"] error:errorPtr];
+                if(resources == nil)
+                    return nil;
+                
+                // - Filter by bases
+                // Start by transforming the bases array into an NSSet which is more efficient
+                // for querying
+                NSSet *baseIdsSet = [NSSet setWithArray:baseIds];
+                
+                NSArray *filtered =
+                    [resources filter:^BOOL(NSDictionary *res) {
+                        return [baseIdsSet containsObject:res[@"airbase"][@"id"]];
+                    }];
+                
+                // Transform them into resource objects, now
+                NSArray<CPResource*> *results =
+                    [filtered map:^Resource*(NSDictionary *obj) {
+                        Resource *resource = [[Resource alloc] init];
+                        
+                        resource.ID = obj[@"id"];
+                        resource.BP = obj[@"bp"];
+                        resource.firstName = AS(obj[@"firstName"], NSString);
+                        resource.lastName = AS(obj[@"lastName"], NSString);
+                        resource.middleName = AS(obj[@"middleName"], NSString);
+                        resource.mothersMaidenName = AS(obj[@"mothersMaidenName"], NSString);
+                        
+                        return resource;
+                    }];
+                
+                return results;
+            }
+            @end
+            """)
+            .expectSwiftFile(name: "A.swift",
+            """
+            class A {
+                func doWork() -> AnyObject? {
+                    // decl type: NSDictionary
+                    // init type: NSDictionary
+                    let response = [:]
+                    // decl type: NSArray!
+                    // init type: NSArray?
+                    let resources = response.tryArrayAt(["data", "user", "getByProfile"], error: errorPtr)
+
+                    if resources == nil {
+                        return nil
+                    }
+
+                    // - Filter by bases
+                    // Start by transforming the bases array into an NSSet which is more efficient
+                    // for querying
+                    // decl type: NSSet!
+                    // init type: <<error type>>
+                    let baseIdsSet: NSSet! = NSSet.setWithArray(baseIds)
+                    // decl type: NSArray!
+                    // init type: [ObjectType]?
+                    let filtered = resources?.filter { (res: NSDictionary!) -> Bool in
+                        return baseIdsSet.containsObject(res["airbase"]?["id"])
+                    }
+                    // decl type: [CPResource]
+                    // init type: NSArray
+                    let results = filtered.map { (obj: NSDictionary!) -> Resource! in
+                        // Transform them into resource objects, now
+                        // decl type: Resource
+                        // init type: Resource
+                        var resource = Resource()
+
+                        // type: AnyObject?
+                        resource.ID = obj["id"]
+                        // type: AnyObject?
+                        resource.BP = obj["bp"]
+                        // type: AnyObject?
+                        resource.firstName = AS(obj["firstName"], String)
+                        // type: AnyObject?
+                        resource.lastName = AS(obj["lastName"], String)
+                        // type: AnyObject?
+                        resource.middleName = AS(obj["middleName"], String)
+                        // type: AnyObject?
+                        resource.mothersMaidenName = AS(obj["mothersMaidenName"], String)
+
+                        return resource
+                    }
+
+                    return results
+                }
+            }
+            // End of file A.swift
+            """)
+            .transpile(options: SwiftSyntaxOptions(outputExpressionTypes: true,
+                                                   printIntentionHistory: false,
+                                                   emitObjcCompatibility: false))
+            .assertExpectedSwiftFiles()
+    }
 }
 
 extension SwiftRewriter_MultiFilesTests {
