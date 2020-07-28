@@ -1449,4 +1449,25 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             options: SwiftSyntaxOptions.default.with(\.outputExpressionTypes, true))
     }
+    
+    func testSelectorType() {
+        assertRewrite(
+            objc: """
+            @implementation A
+            - (void)test {
+                id selector = @selector(abc:);
+            }
+            @end
+            """,
+            swift: """
+            class A {
+                func test() {
+                    // decl type: AnyObject
+                    // init type: Selector
+                    let selector = #selector(abc(_:))
+                }
+            }
+            """,
+            options: SwiftSyntaxOptions.default.with(\.outputExpressionTypes, true))
+    }
 }
