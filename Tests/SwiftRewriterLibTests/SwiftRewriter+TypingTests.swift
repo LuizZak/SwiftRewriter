@@ -542,7 +542,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             
                 func method() {
                     // type: Bool?
-                    b?.responds(to: Selector("abc:"))
+                    b?.responds(to: #selector(abc(_:)))
                 }
             }
             """,
@@ -645,9 +645,9 @@ class SwiftRewriter_TypingTests: XCTestCase {
             
                 func method() {
                     // type: Bool?
-                    self.b?.responds(to: Selector("abc:"))
+                    self.b?.responds(to: #selector(abc(_:)))
 
-                    if self.b?.responds(to: Selector("abc:")) == true {
+                    if self.b?.responds(to: #selector(abc(_:))) == true {
                     }
                 }
             }

@@ -368,9 +368,9 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                     // type: Delegate?
                     self.delegate
                     // type: Bool?
-                    self.delegate?.responds(to: Selector("delegateMethod:"))
+                    self.delegate?.responds(to: #selector(delegateMethod(_:)))
             
-                    if self.delegate?.responds(to: Selector("delegateMethod:")) == true {
+                    if self.delegate?.responds(to: #selector(delegateMethod(_:))) == true {
                         // type: Void?
                         self.delegate?.delegateMethod(self)
                     }

@@ -47,6 +47,9 @@ extension SwiftSyntaxProducer {
         case let exp as TupleExpression:
             return generateTuple(exp)
             
+        case let exp as SelectorExpression:
+            return generateSelector(exp)
+            
         case let exp as BlockLiteralExpression:
             return generateClosure(exp).asExprSyntax
             
@@ -54,6 +57,7 @@ extension SwiftSyntaxProducer {
             return SyntaxFactory.makeBlankUnknownExpr().asExprSyntax
             
         default:
+            assertionFailure("Found unknown expression syntax node type \(type(of: expression))")
             return SyntaxFactory.makeBlankAsExpr().asExprSyntax
         }
     }
@@ -527,7 +531,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateSelector(_ exp: SelectorExpression) -> ExprSyntax {
-        ObjcSelectorExprSyntax { builder in
+        return ObjcSelectorExprSyntax { builder in
             builder.usePoundSelector(makeStartToken(SyntaxFactory.makePoundSelectorKeyword))
             builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
             builder.useRightParen(SyntaxFactory.makeRightParenToken())
@@ -544,23 +548,23 @@ extension SwiftSyntaxProducer {
                         builder.useName(makeIdentifier(property))
                     }.asExprSyntax
                 }
-                
+
                 return SyntaxFactory
                     .makeIdentifierExpr(
                         identifier: makeIdentifier(property),
                         declNameArguments: nil
                     ).asExprSyntax
             }
-            
+
             switch exp.kind {
             case let .function(type, identifier):
                 builder.useName(generateFunctionIdentifier(type: type, identifier).asExprSyntax)
-                
+
             case let .getter(type, property):
                 builder.useKind(makeIdentifier("getter"))
                 builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
                 builder.useName(makePropReference(type: type, property: property))
-                
+
             case let .setter(type, property):
                 builder.useKind(makeIdentifier("setter"))
                 builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
@@ -703,8 +707,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateFunctionIdentifier(type: SwiftType?, _ ident: FunctionIdentifier) -> FunctionCallExprSyntax {
-        FunctionCallExprSyntax { builder in
-            
+        return FunctionCallExprSyntax { builder in
             if let type = type {
                 let typeSyntax = SwiftTypeConverter.makeTypeSyntax(type)
                 
@@ -741,6 +744,7 @@ extension SwiftSyntaxProducer {
                     }
                     
                     builder.useColon(SyntaxFactory.makeColonToken())
+                    builder.useExpression(SyntaxFactory.makeBlankTupleExpr().asExprSyntax)
                 })
             }
         }

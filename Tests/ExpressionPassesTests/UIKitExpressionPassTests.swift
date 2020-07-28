@@ -35,7 +35,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
                 .dot("addTarget")
                 .call([
                     .unlabeled(.identifier("self")),
-                    .labeled("action", Expression.identifier("Selector").call([.constant("didTapButton:")])),
+                    .labeled("action", Expression.selector(FunctionIdentifier(name: "didTapButton", argumentLabels: [nil]))),
                     .labeled("for", Expression.identifier("UIControl").dot("Event").dot("touchUpInside"))
                 ])
         ); assertNotifiedChange()

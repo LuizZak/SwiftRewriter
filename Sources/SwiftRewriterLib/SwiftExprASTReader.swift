@@ -444,11 +444,14 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitSelectorExpression(_ ctx: ObjectiveCParser.SelectorExpressionContext) -> Expression? {
-        guard let selectorName = ctx.selectorName()?.accept(self) else {
+        guard let selectorName = ctx.selectorName() else {
+            return .unknown(UnknownASTContext(context: ctx.getText()))
+        }
+        guard let sel = convertSelectorToIdentifier(selectorName) else {
             return .unknown(UnknownASTContext(context: ctx.getText()))
         }
         
-        return Expression.identifier("Selector").call([selectorName])
+        return Expression.selector(sel)
     }
     
     public override func visitSelectorName(_ ctx: ObjectiveCParser.SelectorNameContext) -> Expression? {
@@ -495,6 +498,42 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             return .unlabeled(.unknown(UnknownASTContext(context: ctx.getText())))
         }
     }
+}
+
+func convertSelectorToIdentifier(_ ctx: ObjectiveCParser.SelectorNameContext) -> FunctionIdentifier? {
+    func selToLabel(_ sel: ObjectiveCParser.SelectorContext) -> String {
+        return sel.getText()
+    }
+    
+    guard let children = ctx.children else {
+        return nil
+    }
+    
+    let selectors = ctx.selector()
+    if selectors.isEmpty {
+        return nil
+    }
+    
+    let name = selToLabel(selectors[0])
+    var arguments: [String?] = []
+    
+    var previous: ParseTree? = nil
+    for child in children.dropFirst() {
+        // Flush selector name
+        if child.getText() == ":" {
+            if let previous = previous {
+                arguments.append(previous.getText())
+            } else {
+                arguments.append(nil)
+            }
+            
+            previous = nil
+        } else {
+            previous = child
+        }
+    }
+    
+    return FunctionIdentifier(name: name, argumentLabels: arguments)
 }
 
 private func swiftOperator(from string: String) -> SwiftOperator? {

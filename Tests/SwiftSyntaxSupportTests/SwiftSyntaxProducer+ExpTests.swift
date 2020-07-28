@@ -323,6 +323,13 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
             matches: "[(1, 2)]")
     }
     
+    func testSelectorExpressionRootExpression() {
+        assert(
+            Expression.selector(FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])),
+            producer: SwiftSyntaxProducer.generateExpression,
+            matches: "#selector(f(_:b:))")
+    }
+    
     func testSelectorExpression_functionIdentifier() {
         assert(
             Expression.selector(FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])),
