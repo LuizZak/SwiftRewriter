@@ -11,6 +11,22 @@ class SelectorExpressionTests: XCTestCase {
             SelectorExpression(type: "T", functionIdentifier: FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])).description,
             "#selector(T.f(_:b:))"
         )
+        XCTAssertEqual(
+            SelectorExpression(getter: "p").description,
+            "#selector(getter: p)"
+        )
+        XCTAssertEqual(
+            SelectorExpression(type: "T", getter: "p").description,
+            "#selector(getter: T.p)"
+        )
+        XCTAssertEqual(
+            SelectorExpression(setter: "p").description,
+            "#selector(setter: p)"
+        )
+        XCTAssertEqual(
+            SelectorExpression(type: "T", setter: "p").description,
+            "#selector(setter: T.p)"
+        )
     }
     
     func testEquality() {
@@ -23,5 +39,20 @@ class SelectorExpressionTests: XCTestCase {
         XCTAssertEqual(exp1, exp1)
         XCTAssertEqual(exp1, exp2)
         XCTAssertNotEqual(exp2, exp3)
+    }
+    
+    func testInequalityDifferentKinds() {
+        let exp1 = SelectorExpression(functionIdentifier: FunctionIdentifier(name: "", argumentLabels: []))
+        let exp2 = SelectorExpression(type: "T", functionIdentifier: FunctionIdentifier(name: "", argumentLabels: []))
+        let exp3 = SelectorExpression(getter: "p")
+        let exp4 = SelectorExpression(type: "T", getter: "p")
+        let exp5 = SelectorExpression(setter: "p")
+        let exp6 = SelectorExpression(type: "T", setter: "p")
+        
+        XCTAssertNotEqual(exp1, exp2)
+        XCTAssertNotEqual(exp2, exp3)
+        XCTAssertNotEqual(exp3, exp4)
+        XCTAssertNotEqual(exp4, exp5)
+        XCTAssertNotEqual(exp5, exp6)
     }
 }
