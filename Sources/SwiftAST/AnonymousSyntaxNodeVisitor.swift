@@ -172,6 +172,14 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
         exp.elements.forEach(visitExpression)
     }
     
+    /// Visits a selector reference node
+    ///
+    /// - Parameter exp: A selector reference expression to visit
+    /// - Returns: Result of visiting this tuple node
+    public func visitSelector(_ exp: SelectorExpression) {
+        listener(exp)
+    }
+    
     /// Visits an unknown expression node
     ///
     /// - Parameter exp: An UnknownExpression to visit

@@ -323,6 +323,48 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
             matches: "[(1, 2)]")
     }
     
+    func testSelectorExpression_functionIdentifier() {
+        assert(
+            Expression.selector(FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])),
+            producer: SwiftSyntaxProducer.generateSelector,
+            matches: "#selector(f(_:b:))")
+    }
+    
+    func testSelectorExpression_typeFunctionIdentifier() {
+        assert(
+            Expression.selector("T", FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])),
+            producer: SwiftSyntaxProducer.generateSelector,
+            matches: "#selector(T.f(_:b:))")
+    }
+    
+    func testSelectorExpression_getter() {
+        assert(
+            Expression.selector(getter: "p"),
+            producer: SwiftSyntaxProducer.generateSelector,
+            matches: "#selector(getter: p)")
+    }
+    
+    func testSelectorExpression_typeGetter() {
+        assert(
+            Expression.selector("T", getter: "p"),
+            producer: SwiftSyntaxProducer.generateSelector,
+            matches: "#selector(getter: T.p)")
+    }
+    
+    func testSelectorExpression_setter() {
+        assert(
+            Expression.selector(setter: "p"),
+            producer: SwiftSyntaxProducer.generateSelector,
+            matches: "#selector(setter: p)")
+    }
+    
+    func testSelectorExpression_typeSetter() {
+        assert(
+            Expression.selector("T", setter: "p"),
+            producer: SwiftSyntaxProducer.generateSelector,
+            matches: "#selector(setter: T.p)")
+    }
+    
     func testClosure() {
         assert(
             Expression.block(body: []),

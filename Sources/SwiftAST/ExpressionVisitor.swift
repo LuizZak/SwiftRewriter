@@ -100,6 +100,12 @@ public protocol ExpressionVisitor {
     /// - Returns: Result of visiting this tuple node
     func visitTuple(_ exp: TupleExpression) -> ExprResult
     
+    /// Visits a selector reference node
+    ///
+    /// - Parameter exp: A selector reference expression to visit
+    /// - Returns: Result of visiting this tuple node
+    func visitSelector(_ exp: SelectorExpression) -> ExprResult
+    
     /// Visits an unknown expression node
     ///
     /// - Parameter exp: An unknown expression to visit

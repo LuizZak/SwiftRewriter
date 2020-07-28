@@ -174,9 +174,17 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     ///
     /// - Parameter exp: A tuple expression to visit
     /// - Returns: Result of visiting this tuple node
-    public func visitTuple(_ exp: TupleExpression) -> Expression {
+    open func visitTuple(_ exp: TupleExpression) -> Expression {
         exp.elements = exp.elements.map(visitExpression)
         
+        return exp
+    }
+    
+    /// Visits a selector reference node
+    ///
+    /// - Parameter exp: A selector reference expression to visit
+    /// - Returns: Result of visiting this tuple node
+    open func visitSelector(_ exp: SelectorExpression) -> Expression {
         return exp
     }
     
