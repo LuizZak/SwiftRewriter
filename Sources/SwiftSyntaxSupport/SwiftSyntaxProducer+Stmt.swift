@@ -154,6 +154,7 @@ extension SwiftSyntaxProducer {
             genList = [{ $0.generateUnknown(stmt).inCodeBlock() }]
             
         default:
+            assertionFailure("Found unknown statement syntax node type \(type(of: stmt))")
             genList = [{ _ in SyntaxFactory.makeBlankExpressionStmt().inCodeBlock() }]
         }
         

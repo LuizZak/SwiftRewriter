@@ -236,6 +236,27 @@ public extension Expression {
         TupleExpression(elements: elements)
     }
     
+    static func selector(_ identifier: FunctionIdentifier) -> SelectorExpression {
+        SelectorExpression(functionIdentifier: identifier)
+    }
+    static func selector(_ type: SwiftType, _ identifier: FunctionIdentifier) -> SelectorExpression {
+        SelectorExpression(type: type, functionIdentifier: identifier)
+    }
+    
+    static func selector(getter: String) -> SelectorExpression {
+        SelectorExpression(getter: getter)
+    }
+    static func selector(_ type: SwiftType, getter: String) -> SelectorExpression {
+        SelectorExpression(type: type, getter: getter)
+    }
+    
+    static func selector(setter: String) -> SelectorExpression {
+        SelectorExpression(setter: setter)
+    }
+    static func selector(_ type: SwiftType, setter: String) -> SelectorExpression {
+        SelectorExpression(type: type, setter: setter)
+    }
+    
     static func unknown(_ exp: UnknownASTContext) -> UnknownExpression {
         UnknownExpression(context: exp)
     }

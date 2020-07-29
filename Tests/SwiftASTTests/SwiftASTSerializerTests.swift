@@ -83,7 +83,15 @@ class SwiftASTSerializerTests: XCTestCase {
             ),
             Statement.expression(
                 Expression.tuple([.constant(0), .constant(1)])
-            )
+            ),
+            Statement.expressions([
+                Expression.selector(FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])),
+                Expression.selector("T", FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])),
+                Expression.selector(getter: "p"),
+                Expression.selector("T", getter: "p"),
+                Expression.selector(setter: "p"),
+                Expression.selector("T", setter: "p"),
+            ])
         ]
         
         let encoder = JSONEncoder()

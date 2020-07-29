@@ -207,6 +207,10 @@ private class ValidatorExpressionVisitor: ExpressionVisitor {
         return exp.elements.reduce(true, { $0 && $1.accept(self) })
     }
     
+    func visitSelector(_ exp: SelectorExpression) -> Bool {
+        return false
+    }
+    
     func visitUnknown(_ exp: UnknownExpression) -> Bool {
         return false
     }

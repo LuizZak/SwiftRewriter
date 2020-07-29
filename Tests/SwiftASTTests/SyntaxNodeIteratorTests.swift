@@ -153,6 +153,12 @@ class SyntaxNodeIteratorTests: XCTestCase {
         )
     }
     
+    func testSelector() {
+        assertExpression(.selector(FunctionIdentifier(name: "f", argumentLabels: [])),
+                         iteratesAs: [
+                            Expression.selector(FunctionIdentifier(name: "f", argumentLabels: []))])
+    }
+    
     func testBlockTraversalFalse() {
         assertExpression(makeBlock(), iteratesAs: [makeBlock()])
     }

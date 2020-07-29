@@ -1,6 +1,6 @@
 /// Represents the complete name of a function, based on function name and its
 /// keywords, e.g. `function(a:b:_:)`
-public struct FunctionIdentifier: Hashable, Equatable, CustomStringConvertible {
+public struct FunctionIdentifier: Hashable, Equatable, Codable, CustomStringConvertible {
     /// Base name of function
     public var name: String
     

@@ -605,6 +605,14 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         return super.visitBlock(exp)
     }
     
+    public override func visitSelector(_ exp: SelectorExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+        
+        exp.resolvedType = .selector
+        
+        return super.visitSelector(exp)
+    }
+    
     public override func visitIf(_ stmt: IfStatement) -> Statement {
         if let pattern = stmt.pattern {
             let result = super.visitIf(stmt)

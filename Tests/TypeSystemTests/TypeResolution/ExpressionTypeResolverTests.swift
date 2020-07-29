@@ -379,6 +379,13 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(resolvedAs: .int)
     }
     
+    func testSelector() {
+        startScopedTest(with: Expression.selector(FunctionIdentifier(name: "f", argumentLabels: [])),
+                        sut: ExpressionTypeResolver())
+            .resolve()
+            .thenAssertExpression(resolvedAs: .selector)
+    }
+    
     func testDefinitionCollecting() {
         let stmt = Statement.variableDeclarations([
             StatementVariableDeclaration(identifier: "a", type: .int,
