@@ -558,7 +558,7 @@ extension SwiftSyntaxProducer {
 
             switch exp.kind {
             case let .function(type, identifier):
-                builder.useName(generateFunctionIdentifier(type: type, identifier).asExprSyntax)
+                builder.useName(generateFunctionIdentifier(type: type, identifier))
 
             case let .getter(type, property):
                 builder.useKind(makeIdentifier("getter"))
@@ -706,47 +706,44 @@ extension SwiftSyntaxProducer {
         return generateExpression(exp)
     }
     
-    func generateFunctionIdentifier(type: SwiftType?, _ ident: FunctionIdentifier) -> FunctionCallExprSyntax {
-        return FunctionCallExprSyntax { builder in
-            if let type = type {
-                let typeSyntax = SwiftTypeConverter.makeTypeSyntax(type)
-                
-                let member = MemberAccessExprSyntax { builder in
-                    builder.useBase(
-                        SyntaxFactory
-                            .makeTypeExpr(type: typeSyntax)
-                            .asExprSyntax
-                    )
-                    
-                    builder.useDot(SyntaxFactory.makePeriodToken())
-                    
-                    builder.useName(makeIdentifier(ident.name))
-                }
-                
-                builder.useCalledExpression(member.asExprSyntax)
-            } else {
-                builder.useCalledExpression(
-                    IdentifierExprSyntax { builder in
-                        builder.useIdentifier(prepareStartToken(makeIdentifier(ident.name)))
-                    }.asExprSyntax
-                )
-            }
-            
+    func generateFunctionIdentifier(type: SwiftType?, _ ident: FunctionIdentifier) -> ExprSyntax {
+        let declArgs = DeclNameArgumentsSyntax { builder in
             builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
             builder.useRightParen(SyntaxFactory.makeRightParenToken())
             
             for arg in ident.argumentLabels {
-                builder.addArgument(TupleExprElementSyntax { builder in
-                    if let label = arg {
-                        builder.useLabel(makeIdentifier(label))
+                builder.addArgument(DeclNameArgumentSyntax { builder in
+                    if let arg = arg {
+                        builder.useName(makeIdentifier(arg))
                     } else {
-                        builder.useLabel(SyntaxFactory.makeWildcardKeyword())
+                        builder.useName(SyntaxFactory.makeWildcardKeyword())
                     }
                     
                     builder.useColon(SyntaxFactory.makeColonToken())
-                    builder.useExpression(SyntaxFactory.makeBlankTupleExpr().asExprSyntax)
                 })
             }
+        }
+        
+        if let type = type {
+            let typeSyntax = SwiftTypeConverter.makeTypeSyntax(type)
+            
+            return MemberAccessExprSyntax { builder in
+                builder.useBase(
+                    SyntaxFactory
+                        .makeTypeExpr(type: typeSyntax)
+                        .asExprSyntax
+                )
+                
+                builder.useDot(SyntaxFactory.makePeriodToken())
+                
+                builder.useName(makeIdentifier(ident.name))
+                builder.useDeclNameArguments(declArgs)
+            }.asExprSyntax
+        } else {
+            return IdentifierExprSyntax { builder in
+                builder.useIdentifier(prepareStartToken(makeIdentifier(ident.name)))
+                builder.useDeclNameArguments(declArgs)
+            }.asExprSyntax
         }
     }
     
