@@ -88,7 +88,7 @@ extension SwiftSyntaxProducer {
                         
                         builder.addArgument(GenericArgumentSyntax { builder in
                             builder.useArgumentType(
-                                SwiftTypeConverter.makeTypeSyntax(type)
+                                SwiftTypeConverter.makeTypeSyntax(type, startTokenHandler: self)
                             )
                         })
                     })
@@ -159,7 +159,7 @@ extension SwiftSyntaxProducer {
                     )
                 }
                 
-                builder.useTypeName(SwiftTypeConverter.makeTypeSyntax(exp.type))
+                builder.useTypeName(SwiftTypeConverter.makeTypeSyntax(exp.type, startTokenHandler: self))
             }.asExprSyntax)
         }
     }
@@ -211,7 +211,7 @@ extension SwiftSyntaxProducer {
                                 
                                 builder.useType(
                                     SwiftTypeConverter
-                                        .makeTypeSyntax(arg.type)
+                                        .makeTypeSyntax(arg.type, startTokenHandler: self)
                                 )
                             }
                             
@@ -541,7 +541,7 @@ extension SwiftSyntaxProducer {
                     return MemberAccessExprSyntax { builder in
                         builder.useBase(
                             SyntaxFactory
-                                .makeTypeExpr(type: SwiftTypeConverter.makeTypeSyntax(type))
+                                .makeTypeExpr(type: SwiftTypeConverter.makeTypeSyntax(type, startTokenHandler: self))
                                 .asExprSyntax
                         )
                         builder.useDot(SyntaxFactory.makePeriodToken())
@@ -725,7 +725,7 @@ extension SwiftSyntaxProducer {
         }
         
         if let type = type {
-            let typeSyntax = SwiftTypeConverter.makeTypeSyntax(type)
+            let typeSyntax = SwiftTypeConverter.makeTypeSyntax(type, startTokenHandler: self)
             
             return MemberAccessExprSyntax { builder in
                 builder.useBase(

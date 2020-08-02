@@ -40,17 +40,18 @@ public class BaseSwiftSyntaxProducer {
     }
 }
 
-// MARK: - Utilities
-extension BaseSwiftSyntaxProducer {
-    
-    func makeStartToken(_ builder: (_ leading: Trivia, _ trailing: Trivia) -> TokenSyntax) -> TokenSyntax {
+extension BaseSwiftSyntaxProducer: StartTokenHandler {
+    public func makeStartToken(_ builder: (_ leading: Trivia, _ trailing: Trivia) -> TokenSyntax) -> TokenSyntax {
         prepareStartToken(builder([], []))
     }
     
-    func prepareStartToken(_ token: TokenSyntax) -> TokenSyntax {
+    public func prepareStartToken(_ token: TokenSyntax) -> TokenSyntax {
         token.withExtraLeading(consuming: &extraLeading)
     }
-    
+}
+
+// MARK: - Utilities
+extension BaseSwiftSyntaxProducer {
     func iterating<T>(_ elements: [T],
                       inBetweenSpacing: Trivia = .newlines(1),
                       postSeparator: Trivia = .newlines(2),

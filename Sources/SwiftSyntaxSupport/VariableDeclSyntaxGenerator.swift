@@ -117,7 +117,7 @@ class VariableDeclSyntaxGenerator {
             if let bindingType = binding.type {
                 builder.useTypeAnnotation(TypeAnnotationSyntax { builder in
                     builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
-                    builder.useType(SwiftTypeConverter.makeTypeSyntax(bindingType))
+                    builder.useType(SwiftTypeConverter.makeTypeSyntax(bindingType, startTokenHandler: producer))
                 })
             }
             

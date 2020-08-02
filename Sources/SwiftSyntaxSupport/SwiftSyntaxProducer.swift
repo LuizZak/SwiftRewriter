@@ -316,7 +316,7 @@ extension SwiftSyntaxProducer {
                 )
                 builder.useValue(
                     SwiftTypeConverter
-                        .makeTypeSyntax(intention.fromType)
+                        .makeTypeSyntax(intention.fromType, startTokenHandler: self)
                 )
             })
         }
@@ -344,23 +344,25 @@ extension SwiftSyntaxProducer {
             )
             builder.useIdentifier(makeIdentifier(intention.typeName))
             
-            addExtraLeading(.spaces(1))
-            
             builder.useInheritanceClause(TypeInheritanceClauseSyntax { builder in
                 builder.useColon(
-                    SyntaxFactory
-                        .makeColonToken()
-                        .withTrailingSpace()
+                    prepareStartToken(SyntaxFactory
+                        .makeColonToken())
                 )
+
+                addExtraLeading(.spaces(1))
+                
                 builder.addInheritedType(InheritedTypeSyntax { builder in
                     builder.useTypeName(
                         SwiftTypeConverter
-                            .makeTypeSyntax(intention.rawValueType)
+                            .makeTypeSyntax(intention.rawValueType, startTokenHandler: self)
                     )
                 })
             })
             
             indent()
+            
+            addExtraLeading(.spaces(1))
             
             let members = generateMembers(intention)
             
@@ -429,8 +431,9 @@ extension SwiftSyntaxProducer {
                     .addingTrailingSpace()
             )
             
+            // TODO: Support nested type extension
             builder.useExtendedType(
-                SwiftTypeConverter.makeTypeSyntax(.typeName(intention.typeName))
+                SwiftTypeConverter.makeTypeSyntax(.typeName(intention.typeName), startTokenHandler: self)
             )
             
             if let inheritanceClause = generateInheritanceClause(intention) {
@@ -839,7 +842,7 @@ extension SwiftSyntaxProducer {
                     .addingLeadingSpace()
                     .addingTrailingSpace()
             )
-            builder.useReturnType(SwiftTypeConverter.makeTypeSyntax(ret))
+            builder.useReturnType(SwiftTypeConverter.makeTypeSyntax(ret, startTokenHandler: self))
         }
     }
     
@@ -880,7 +883,7 @@ extension SwiftSyntaxProducer {
             
             builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
             
-            builder.useType(SwiftTypeConverter.makeTypeSyntax(parameter.type))
+            builder.useType(SwiftTypeConverter.makeTypeSyntax(parameter.type, startTokenHandler: self))
             
             if withTrailingComma {
                 builder.useTrailingComma(

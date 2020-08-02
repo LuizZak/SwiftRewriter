@@ -40,6 +40,6 @@ extension SwiftTypeConversionTests {
     }
     
     private func typeMapperConvert(_ type: SwiftType) -> String {
-        return SwiftTypeConverter.makeTypeSyntax(type).description
+        return SwiftTypeConverter.makeTypeSyntax(type, startTokenHandler: NullStartTokenHandler()).description
     }
 }

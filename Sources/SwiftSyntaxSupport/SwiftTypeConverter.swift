@@ -2,8 +2,8 @@ import SwiftSyntax
 import SwiftAST
 
 public class SwiftTypeConverter {
-    public static func makeTypeSyntax(_ type: SwiftType) -> TypeSyntax {
-        SwiftTypeConverter().makeTypeSyntax(type)
+    public static func makeTypeSyntax(_ type: SwiftType, startTokenHandler: StartTokenHandler) -> TypeSyntax {
+        SwiftTypeConverter().makeTypeSyntax(type, startTokenHandler: startTokenHandler)
     }
     
     private var _blockStackLevel = 0
@@ -12,28 +12,28 @@ public class SwiftTypeConverter {
         
     }
     
-    func makeWrappedInParensIfRequired(_ type: SwiftType) -> TypeSyntax {
+    func makeWrappedInParensIfRequired(_ type: SwiftType, startTokenHandler: StartTokenHandler) -> TypeSyntax {
         if type.requiresSurroundingParens {
-            return TypeSyntax(makeTupleTypeSyntax([type]))
+            return TypeSyntax(makeTupleTypeSyntax([type], startTokenHandler: startTokenHandler))
         }
         
-        return makeTypeSyntax(type)
+        return makeTypeSyntax(type, startTokenHandler: startTokenHandler)
     }
     
-    func makeTypeSyntax(_ type: SwiftType) -> TypeSyntax {
+    func makeTypeSyntax(_ type: SwiftType, startTokenHandler: StartTokenHandler) -> TypeSyntax {
         switch type {
         case .nominal(let nominal):
-            return makeNominalTypeSyntax(nominal).asTypeSyntax
+            return makeNominalTypeSyntax(nominal, startTokenHandler: startTokenHandler).asTypeSyntax
             
         case .implicitUnwrappedOptional(let type):
             return SyntaxFactory
                 .makeImplicitlyUnwrappedOptionalType(
-                    wrappedType: makeWrappedInParensIfRequired(type),
+                    wrappedType: makeWrappedInParensIfRequired(type, startTokenHandler: startTokenHandler),
                     exclamationMark: SyntaxFactory.makeExclamationMarkToken()
                 ).asTypeSyntax
             
         case .nullabilityUnspecified(let type):
-            let type = makeWrappedInParensIfRequired(type)
+            let type = makeWrappedInParensIfRequired(type, startTokenHandler: startTokenHandler)
             
             if _blockStackLevel > 0 {
                 return SyntaxFactory
@@ -52,20 +52,20 @@ public class SwiftTypeConverter {
         case .optional(let type):
             return SyntaxFactory
                 .makeOptionalType(
-                    wrappedType: makeWrappedInParensIfRequired(type),
+                    wrappedType: makeWrappedInParensIfRequired(type, startTokenHandler: startTokenHandler),
                     questionMark: SyntaxFactory.makePostfixQuestionMarkToken()
                 ).asTypeSyntax
             
         case .metatype(let type):
             return SyntaxFactory
                 .makeMetatypeType(
-                    baseType: makeTypeSyntax(type),
+                    baseType: makeTypeSyntax(type, startTokenHandler: startTokenHandler),
                     period: SyntaxFactory.makePeriodToken(),
                     typeOrProtocol: SyntaxFactory.makeTypeToken()
                 ).asTypeSyntax
             
         case .nested(let nested):
-            return makeNestedTypeSyntax(nested).asTypeSyntax
+            return makeNestedTypeSyntax(nested, startTokenHandler: startTokenHandler).asTypeSyntax
             
         case let .block(returnType, parameters, attributes):
             _blockStackLevel += 1
@@ -84,10 +84,10 @@ public class SwiftTypeConverter {
                     )
                     builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
                     builder.useRightParen(SyntaxFactory.makeRightParenToken())
-                    builder.useReturnType(makeTypeSyntax(returnType))
+                    builder.useReturnType(makeTypeSyntax(returnType, startTokenHandler: startTokenHandler))
                     
                     // Parameters
-                    makeTupleTypeSyntax(parameters)
+                    makeTupleTypeSyntax(parameters, startTokenHandler: startTokenHandler)
                         .elements
                         .forEach { builder.addArgument($0) }
                 }.asTypeSyntax
@@ -144,7 +144,7 @@ public class SwiftTypeConverter {
         case .tuple(let tuple):
             switch tuple {
             case .types(let types):
-                return makeTupleTypeSyntax(types).asTypeSyntax
+                return makeTupleTypeSyntax(types, startTokenHandler: startTokenHandler).asTypeSyntax
                 
             case .empty:
                 return SyntaxFactory.makeTypeIdentifier("Void")
@@ -159,10 +159,10 @@ public class SwiftTypeConverter {
                         
                         switch type {
                         case .nested(let nested):
-                            builder.useType(makeNestedTypeSyntax(nested).asTypeSyntax)
+                            builder.useType(makeNestedTypeSyntax(nested, startTokenHandler: startTokenHandler).asTypeSyntax)
                             
                         case .nominal(let nominal):
-                            builder.useType(makeNominalTypeSyntax(nominal).asTypeSyntax)
+                            builder.useType(makeNominalTypeSyntax(nominal, startTokenHandler: startTokenHandler).asTypeSyntax)
                         }
                         
                         if i != count - 1 {
@@ -187,7 +187,7 @@ public class SwiftTypeConverter {
                         .makeRightSquareBracketToken()
                 )
                 
-                builder.useElementType(makeTypeSyntax(inner))
+                builder.useElementType(makeTypeSyntax(inner, startTokenHandler: startTokenHandler))
             }.asTypeSyntax
             
         case let .dictionary(key, value):
@@ -206,20 +206,20 @@ public class SwiftTypeConverter {
                         .makeRightSquareBracketToken()
                 )
                 
-                builder.useKeyType(makeTypeSyntax(key))
-                builder.useValueType(makeTypeSyntax(value))
+                builder.useKeyType(makeTypeSyntax(key, startTokenHandler: startTokenHandler))
+                builder.useValueType(makeTypeSyntax(value, startTokenHandler: startTokenHandler))
             }.asTypeSyntax
         }
     }
     
-    func makeTupleTypeSyntax<C: Collection>(_ types: C) -> TupleTypeSyntax where C.Element == SwiftType {
+    func makeTupleTypeSyntax<C: Collection>(_ types: C, startTokenHandler: StartTokenHandler) -> TupleTypeSyntax where C.Element == SwiftType {
         TupleTypeSyntax { builder in
             builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
             builder.useRightParen(SyntaxFactory.makeRightParenToken())
             
             iterateWithComma(types) { (type, hasComma) in
                 builder.addElement(TupleTypeElementSyntax { builder in
-                    builder.useType(makeTypeSyntax(type))
+                    builder.useType(makeTypeSyntax(type, startTokenHandler: startTokenHandler))
                     
                     if hasComma {
                         builder.useTrailingComma(
@@ -233,19 +233,19 @@ public class SwiftTypeConverter {
         }
     }
 
-    func makeNestedTypeSyntax(_ nestedType: NestedSwiftType) -> MemberTypeIdentifierSyntax {
-        let typeSyntax = makeNominalTypeSyntax(nestedType.second)
+    func makeNestedTypeSyntax(_ nestedType: NestedSwiftType, startTokenHandler: StartTokenHandler) -> MemberTypeIdentifierSyntax {
+        let typeSyntax = makeNominalTypeSyntax(nestedType.second, startTokenHandler: startTokenHandler)
         
         let initial = SyntaxFactory
             .makeMemberTypeIdentifier(
-                baseType: makeNominalTypeSyntax(nestedType.first).asTypeSyntax,
+                baseType: makeNominalTypeSyntax(nestedType.first, startTokenHandler: startTokenHandler).asTypeSyntax,
                 period: SyntaxFactory.makePeriodToken(),
                 name: typeSyntax.name,
                 genericArgumentClause: typeSyntax.genericArgumentClause
             )
         
         return nestedType.reduce(initial) { (previous, type) in
-            let typeSyntax = self.makeNominalTypeSyntax(type)
+            let typeSyntax = self.makeNominalTypeSyntax(type, startTokenHandler: startTokenHandler)
             
             return SyntaxFactory
                 .makeMemberTypeIdentifier(
@@ -257,17 +257,19 @@ public class SwiftTypeConverter {
         }
     }
     
-    func makeNominalTypeSyntax(_ nominal: NominalSwiftType) -> SimpleTypeIdentifierSyntax {
+    func makeNominalTypeSyntax(_ nominal: NominalSwiftType, startTokenHandler: StartTokenHandler) -> SimpleTypeIdentifierSyntax {
         switch nominal {
         case .typeName(let name):
             return SyntaxFactory
                 .makeSimpleTypeIdentifier(
-                    name: SyntaxFactory.makeIdentifier(name),
+                    name: startTokenHandler.prepareStartToken(SyntaxFactory.makeIdentifier(name)),
                     genericArgumentClause: nil
                 )
             
         case let .generic(name, parameters):
-            let types = parameters.map(makeTypeSyntax)
+            let nameSyntax = startTokenHandler.prepareStartToken(SyntaxFactory.makeIdentifier(name))
+            
+            let types = parameters.map { makeTypeSyntax($0, startTokenHandler: startTokenHandler) }
             
             let genericArgumentList =
                 SyntaxFactory
@@ -291,7 +293,7 @@ public class SwiftTypeConverter {
                 )
             
             return SyntaxFactory.makeSimpleTypeIdentifier(
-                name: SyntaxFactory.makeIdentifier(name),
+                name: nameSyntax,
                 genericArgumentClause: genericArgumentClause
             )
         }
