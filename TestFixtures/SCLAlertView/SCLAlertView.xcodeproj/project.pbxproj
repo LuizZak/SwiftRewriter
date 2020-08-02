@@ -1,0 +1,716 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		572BB1471B8383B3002DEE38 /* SCLTimerDisplay.m in Sources */ = {isa = PBXBuildFile; fileRef = 572BB1461B8383B3002DEE38 /* SCLTimerDisplay.m */; };
+		726C8FA61EF803310060F33B /* SCLAlertView.h in Headers */ = {isa = PBXBuildFile; fileRef = DDB15FD819D5B98800173158 /* SCLAlertView.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		726C8FA71EF805520060F33B /* SCLButton.h in Headers */ = {isa = PBXBuildFile; fileRef = DDB15FD919D5BAA000173158 /* SCLButton.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		726C8FA81EF805620060F33B /* SCLTextView.h in Headers */ = {isa = PBXBuildFile; fileRef = DD24453A1BAC383600892117 /* SCLTextView.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		726C8FA91EF805650060F33B /* SCLSwitchView.h in Headers */ = {isa = PBXBuildFile; fileRef = CF6FB1221C5926FC009715F3 /* SCLSwitchView.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CF6FB1241C5926FC009715F3 /* SCLSwitchView.m in Sources */ = {isa = PBXBuildFile; fileRef = CF6FB1231C5926FC009715F3 /* SCLSwitchView.m */; };
+		DD06C22D1C64EAE500E6F6B0 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD06C22C1C64EAE500E6F6B0 /* UIKit.framework */; };
+		DD06C22F1C64EAF600E6F6B0 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD06C22E1C64EAF600E6F6B0 /* AudioToolbox.framework */; };
+		DD06C2331C64EB1A00E6F6B0 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD06C2321C64EB1A00E6F6B0 /* Accelerate.framework */; };
+		DD06C2371C64EB9200E6F6B0 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD06C2361C64EB9200E6F6B0 /* CoreGraphics.framework */; };
+		DD24453C1BAC383600892117 /* SCLTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = DD24453B1BAC383600892117 /* SCLTextView.m */; };
+		DD2E172A19FA84B800CBAEC3 /* UIImage+ImageEffects.m in Sources */ = {isa = PBXBuildFile; fileRef = DD2E172919FA84B800CBAEC3 /* UIImage+ImageEffects.m */; };
+		DD4B77E41D8C580B00CF97C7 /* SCLAlertViewFramework.h in Headers */ = {isa = PBXBuildFile; fileRef = 44E430DB1D889255002FE849 /* SCLAlertViewFramework.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DD4BA9C119DED8EF008D73EB /* right_answer.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = DD4BA9C019DED8EF008D73EB /* right_answer.mp3 */; };
+		DD7282B919D6087C00077F54 /* Storyboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DD7282B719D6087C00077F54 /* Storyboard.storyboard */; };
+		DDB15FBD19D5B7C600173158 /* SCLAlertViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB15FBC19D5B7C600173158 /* SCLAlertViewTests.m */; };
+		DDB15FCA19D5B88A00173158 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB15FC719D5B88A00173158 /* AppDelegate.m */; };
+		DDB15FCB19D5B88A00173158 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB15FC919D5B88A00173158 /* ViewController.m */; };
+		DDB15FD019D5B8BF00173158 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DDB15FCF19D5B8BF00173158 /* Images.xcassets */; };
+		DDB15FD419D5B8DB00173158 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB15FD319D5B8DB00173158 /* main.m */; };
+		DDB15FD719D5B96500173158 /* SCLAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB15FD619D5B96500173158 /* SCLAlertView.m */; };
+		DDB15FDB19D5BAA000173158 /* SCLButton.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB15FDA19D5BAA000173158 /* SCLButton.m */; };
+		DDB15FDE19D5BCF400173158 /* SCLAlertViewResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB15FDD19D5BCF400173158 /* SCLAlertViewResponder.m */; };
+		DDB15FE119D5D85B00173158 /* SCLAlertViewStyleKit.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB15FE019D5D85B00173158 /* SCLAlertViewStyleKit.m */; };
+		DDB2BA1B1E55D4260009DAC9 /* comic-sans.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DDB2BA1A1E55D4260009DAC9 /* comic-sans.ttf */; };
+		EF994B151D47AB4A00619DFF /* UIImage+ImageEffects.m in Sources */ = {isa = PBXBuildFile; fileRef = DD2E172919FA84B800CBAEC3 /* UIImage+ImageEffects.m */; };
+		EF994B161D47AB4A00619DFF /* SCLAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB15FD619D5B96500173158 /* SCLAlertView.m */; };
+		EF994B171D47AB4A00619DFF /* SCLButton.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB15FDA19D5BAA000173158 /* SCLButton.m */; };
+		EF994B181D47AB4A00619DFF /* SCLAlertViewResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB15FDD19D5BCF400173158 /* SCLAlertViewResponder.m */; };
+		EF994B191D47AB4A00619DFF /* SCLAlertViewStyleKit.m in Sources */ = {isa = PBXBuildFile; fileRef = DDB15FE019D5D85B00173158 /* SCLAlertViewStyleKit.m */; };
+		EF994B1A1D47AB4A00619DFF /* SCLTimerDisplay.m in Sources */ = {isa = PBXBuildFile; fileRef = 572BB1461B8383B3002DEE38 /* SCLTimerDisplay.m */; };
+		EF994B1B1D47AB4A00619DFF /* SCLTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = DD24453B1BAC383600892117 /* SCLTextView.m */; };
+		EF994B1C1D47AB4A00619DFF /* SCLSwitchView.m in Sources */ = {isa = PBXBuildFile; fileRef = CF6FB1231C5926FC009715F3 /* SCLSwitchView.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		DDB15FB719D5B7C600173158 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DDB15F9519D5B7C600173158 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DDB15F9C19D5B7C600173158;
+			remoteInfo = SCLAlertView;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		44E430DB1D889255002FE849 /* SCLAlertViewFramework.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SCLAlertViewFramework.h; sourceTree = "<group>"; };
+		572BB1451B8383B3002DEE38 /* SCLTimerDisplay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCLTimerDisplay.h; sourceTree = "<group>"; };
+		572BB1461B8383B3002DEE38 /* SCLTimerDisplay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCLTimerDisplay.m; sourceTree = "<group>"; };
+		CF6FB1221C5926FC009715F3 /* SCLSwitchView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCLSwitchView.h; sourceTree = "<group>"; };
+		CF6FB1231C5926FC009715F3 /* SCLSwitchView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCLSwitchView.m; sourceTree = "<group>"; };
+		DD06C22C1C64EAE500E6F6B0 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		DD06C22E1C64EAF600E6F6B0 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		DD06C2301C64EB0400E6F6B0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		DD06C2321C64EB1A00E6F6B0 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		DD06C2341C64EB5900E6F6B0 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		DD06C2361C64EB9200E6F6B0 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		DD0D295B19D902DA00881F53 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = SCLAlertViewExample/Info.plist; sourceTree = SOURCE_ROOT; };
+		DD24453A1BAC383600892117 /* SCLTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCLTextView.h; sourceTree = "<group>"; };
+		DD24453B1BAC383600892117 /* SCLTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCLTextView.m; sourceTree = "<group>"; };
+		DD2E172819FA84B800CBAEC3 /* UIImage+ImageEffects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ImageEffects.h"; sourceTree = "<group>"; };
+		DD2E172919FA84B800CBAEC3 /* UIImage+ImageEffects.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+ImageEffects.m"; sourceTree = "<group>"; };
+		DD2F03171AAFA4E0007BC507 /* SCLMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SCLMacros.h; sourceTree = "<group>"; };
+		DD4BA9C019DED8EF008D73EB /* right_answer.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = right_answer.mp3; sourceTree = "<group>"; };
+		DD4BA9C219DEDD8E008D73EB /* SCLAlertView-Objective-C-prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "SCLAlertView-Objective-C-prefix.pch"; path = "SCLAlertViewExample/SCLAlertView-Objective-C-prefix.pch"; sourceTree = SOURCE_ROOT; };
+		DD7282B819D6087C00077F54 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = SCLAlertViewExample/Base.lproj/Storyboard.storyboard; sourceTree = SOURCE_ROOT; };
+		DDB15F9D19D5B7C600173158 /* SCLAlertView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SCLAlertView.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DDB15FB619D5B7C600173158 /* SCLAlertViewTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SCLAlertViewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DDB15FBB19D5B7C600173158 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DDB15FBC19D5B7C600173158 /* SCLAlertViewTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SCLAlertViewTests.m; sourceTree = "<group>"; };
+		DDB15FC619D5B88A00173158 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = SCLAlertViewExample/AppDelegate.h; sourceTree = SOURCE_ROOT; };
+		DDB15FC719D5B88A00173158 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = SCLAlertViewExample/AppDelegate.m; sourceTree = SOURCE_ROOT; };
+		DDB15FC819D5B88A00173158 /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ViewController.h; path = SCLAlertViewExample/ViewController.h; sourceTree = SOURCE_ROOT; };
+		DDB15FC919D5B88A00173158 /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ViewController.m; path = SCLAlertViewExample/ViewController.m; sourceTree = SOURCE_ROOT; };
+		DDB15FCF19D5B8BF00173158 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = SCLAlertViewExample/Images.xcassets; sourceTree = SOURCE_ROOT; };
+		DDB15FD319D5B8DB00173158 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = SCLAlertViewExample/main.m; sourceTree = SOURCE_ROOT; };
+		DDB15FD619D5B96500173158 /* SCLAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCLAlertView.m; sourceTree = "<group>"; };
+		DDB15FD819D5B98800173158 /* SCLAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCLAlertView.h; sourceTree = "<group>"; };
+		DDB15FD919D5BAA000173158 /* SCLButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCLButton.h; sourceTree = "<group>"; };
+		DDB15FDA19D5BAA000173158 /* SCLButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCLButton.m; sourceTree = "<group>"; };
+		DDB15FDC19D5BCF400173158 /* SCLAlertViewResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCLAlertViewResponder.h; sourceTree = "<group>"; };
+		DDB15FDD19D5BCF400173158 /* SCLAlertViewResponder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCLAlertViewResponder.m; sourceTree = "<group>"; };
+		DDB15FDF19D5D85B00173158 /* SCLAlertViewStyleKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCLAlertViewStyleKit.h; sourceTree = "<group>"; };
+		DDB15FE019D5D85B00173158 /* SCLAlertViewStyleKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SCLAlertViewStyleKit.m; sourceTree = "<group>"; };
+		DDB2BA1A1E55D4260009DAC9 /* comic-sans.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "comic-sans.ttf"; sourceTree = "<group>"; };
+		EF994B081D47AB1400619DFF /* SCLAlertViewFramework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SCLAlertViewFramework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EF994B0C1D47AB1400619DFF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DDB15F9A19D5B7C600173158 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DD06C2371C64EB9200E6F6B0 /* CoreGraphics.framework in Frameworks */,
+				DD06C2331C64EB1A00E6F6B0 /* Accelerate.framework in Frameworks */,
+				DD06C22F1C64EAF600E6F6B0 /* AudioToolbox.framework in Frameworks */,
+				DD06C22D1C64EAE500E6F6B0 /* UIKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DDB15FB319D5B7C600173158 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EF994B041D47AB1400619DFF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DD06C2381C64EC5D00E6F6B0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DD06C2361C64EB9200E6F6B0 /* CoreGraphics.framework */,
+				DD06C2341C64EB5900E6F6B0 /* QuartzCore.framework */,
+				DD06C2321C64EB1A00E6F6B0 /* Accelerate.framework */,
+				DD06C2301C64EB0400E6F6B0 /* Foundation.framework */,
+				DD06C22E1C64EAF600E6F6B0 /* AudioToolbox.framework */,
+				DD06C22C1C64EAE500E6F6B0 /* UIKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DD4BA9BF19DED8EF008D73EB /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				DD4BA9C019DED8EF008D73EB /* right_answer.mp3 */,
+			);
+			name = Sounds;
+			path = SCLAlertViewExample/Sounds;
+			sourceTree = SOURCE_ROOT;
+		};
+		DDB15F9419D5B7C600173158 = {
+			isa = PBXGroup;
+			children = (
+				DDB15FD519D5B96500173158 /* SCLAlertView */,
+				DDB15F9F19D5B7C600173158 /* SCLAlertViewExample */,
+				DDB15FB919D5B7C600173158 /* SCLAlertViewTests */,
+				EF994B091D47AB1400619DFF /* SCLAlertViewFramework */,
+				DDB15F9E19D5B7C600173158 /* Products */,
+				DD06C2381C64EC5D00E6F6B0 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		DDB15F9E19D5B7C600173158 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DDB15F9D19D5B7C600173158 /* SCLAlertView.app */,
+				DDB15FB619D5B7C600173158 /* SCLAlertViewTests.xctest */,
+				EF994B081D47AB1400619DFF /* SCLAlertViewFramework.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DDB15F9F19D5B7C600173158 /* SCLAlertViewExample */ = {
+			isa = PBXGroup;
+			children = (
+				DDB15FCF19D5B8BF00173158 /* Images.xcassets */,
+				DDB15FC619D5B88A00173158 /* AppDelegate.h */,
+				DDB15FC719D5B88A00173158 /* AppDelegate.m */,
+				DDB15FC819D5B88A00173158 /* ViewController.h */,
+				DDB15FC919D5B88A00173158 /* ViewController.m */,
+				DDB15FA019D5B7C600173158 /* Supporting Files */,
+				DD7282B719D6087C00077F54 /* Storyboard.storyboard */,
+			);
+			name = SCLAlertViewExample;
+			path = SCLAlertView;
+			sourceTree = "<group>";
+		};
+		DDB15FA019D5B7C600173158 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				DDB15FD319D5B8DB00173158 /* main.m */,
+				DD4BA9C219DEDD8E008D73EB /* SCLAlertView-Objective-C-prefix.pch */,
+				DD0D295B19D902DA00881F53 /* Info.plist */,
+				DDB2BA191E55D4260009DAC9 /* Fonts */,
+				DD4BA9BF19DED8EF008D73EB /* Sounds */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		DDB15FB919D5B7C600173158 /* SCLAlertViewTests */ = {
+			isa = PBXGroup;
+			children = (
+				DDB15FBC19D5B7C600173158 /* SCLAlertViewTests.m */,
+				DDB15FBA19D5B7C600173158 /* Supporting Files */,
+			);
+			path = SCLAlertViewTests;
+			sourceTree = "<group>";
+		};
+		DDB15FBA19D5B7C600173158 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				DDB15FBB19D5B7C600173158 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		DDB15FD519D5B96500173158 /* SCLAlertView */ = {
+			isa = PBXGroup;
+			children = (
+				DD2E172819FA84B800CBAEC3 /* UIImage+ImageEffects.h */,
+				DD2E172919FA84B800CBAEC3 /* UIImage+ImageEffects.m */,
+				DDB15FD819D5B98800173158 /* SCLAlertView.h */,
+				DDB15FD619D5B96500173158 /* SCLAlertView.m */,
+				DDB15FD919D5BAA000173158 /* SCLButton.h */,
+				DDB15FDA19D5BAA000173158 /* SCLButton.m */,
+				DDB15FDC19D5BCF400173158 /* SCLAlertViewResponder.h */,
+				DDB15FDD19D5BCF400173158 /* SCLAlertViewResponder.m */,
+				DDB15FDF19D5D85B00173158 /* SCLAlertViewStyleKit.h */,
+				DDB15FE019D5D85B00173158 /* SCLAlertViewStyleKit.m */,
+				DD2F03171AAFA4E0007BC507 /* SCLMacros.h */,
+				572BB1451B8383B3002DEE38 /* SCLTimerDisplay.h */,
+				572BB1461B8383B3002DEE38 /* SCLTimerDisplay.m */,
+				DD24453A1BAC383600892117 /* SCLTextView.h */,
+				DD24453B1BAC383600892117 /* SCLTextView.m */,
+				CF6FB1221C5926FC009715F3 /* SCLSwitchView.h */,
+				CF6FB1231C5926FC009715F3 /* SCLSwitchView.m */,
+			);
+			path = SCLAlertView;
+			sourceTree = "<group>";
+		};
+		DDB2BA191E55D4260009DAC9 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				DDB2BA1A1E55D4260009DAC9 /* comic-sans.ttf */,
+			);
+			name = Fonts;
+			path = SCLAlertViewExample/Fonts;
+			sourceTree = SOURCE_ROOT;
+		};
+		EF994B091D47AB1400619DFF /* SCLAlertViewFramework */ = {
+			isa = PBXGroup;
+			children = (
+				EF994B0C1D47AB1400619DFF /* Info.plist */,
+				44E430DB1D889255002FE849 /* SCLAlertViewFramework.h */,
+			);
+			path = SCLAlertViewFramework;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		EF994B051D47AB1400619DFF /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				726C8FA61EF803310060F33B /* SCLAlertView.h in Headers */,
+				726C8FA91EF805650060F33B /* SCLSwitchView.h in Headers */,
+				726C8FA81EF805620060F33B /* SCLTextView.h in Headers */,
+				726C8FA71EF805520060F33B /* SCLButton.h in Headers */,
+				DD4B77E41D8C580B00CF97C7 /* SCLAlertViewFramework.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		DDB15F9C19D5B7C600173158 /* SCLAlertView */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DDB15FC019D5B7C600173158 /* Build configuration list for PBXNativeTarget "SCLAlertView" */;
+			buildPhases = (
+				DDB15F9919D5B7C600173158 /* Sources */,
+				DDB15F9A19D5B7C600173158 /* Frameworks */,
+				DDB15F9B19D5B7C600173158 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SCLAlertView;
+			productName = SCLAlertView;
+			productReference = DDB15F9D19D5B7C600173158 /* SCLAlertView.app */;
+			productType = "com.apple.product-type.application";
+		};
+		DDB15FB519D5B7C600173158 /* SCLAlertViewTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DDB15FC319D5B7C600173158 /* Build configuration list for PBXNativeTarget "SCLAlertViewTests" */;
+			buildPhases = (
+				DDB15FB219D5B7C600173158 /* Sources */,
+				DDB15FB319D5B7C600173158 /* Frameworks */,
+				DDB15FB419D5B7C600173158 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DDB15FB819D5B7C600173158 /* PBXTargetDependency */,
+			);
+			name = SCLAlertViewTests;
+			productName = SCLAlertViewTests;
+			productReference = DDB15FB619D5B7C600173158 /* SCLAlertViewTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		EF994B071D47AB1400619DFF /* SCLAlertViewFramework */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EF994B131D47AB1400619DFF /* Build configuration list for PBXNativeTarget "SCLAlertViewFramework" */;
+			buildPhases = (
+				EF994B031D47AB1400619DFF /* Sources */,
+				EF994B041D47AB1400619DFF /* Frameworks */,
+				EF994B051D47AB1400619DFF /* Headers */,
+				EF994B061D47AB1400619DFF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SCLAlertViewFramework;
+			productName = SCLAlertViewFramework;
+			productReference = EF994B081D47AB1400619DFF /* SCLAlertViewFramework.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DDB15F9519D5B7C600173158 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1000;
+				ORGANIZATIONNAME = "AnyKey Entertainment";
+				TargetAttributes = {
+					DDB15F9C19D5B7C600173158 = {
+						CreatedOnToolsVersion = 6.0.1;
+					};
+					DDB15FB519D5B7C600173158 = {
+						CreatedOnToolsVersion = 6.0.1;
+						TestTargetID = DDB15F9C19D5B7C600173158;
+					};
+					EF994B071D47AB1400619DFF = {
+						CreatedOnToolsVersion = 7.3.1;
+					};
+				};
+			};
+			buildConfigurationList = DDB15F9819D5B7C600173158 /* Build configuration list for PBXProject "SCLAlertView" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = DDB15F9419D5B7C600173158;
+			productRefGroup = DDB15F9E19D5B7C600173158 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DDB15F9C19D5B7C600173158 /* SCLAlertView */,
+				DDB15FB519D5B7C600173158 /* SCLAlertViewTests */,
+				EF994B071D47AB1400619DFF /* SCLAlertViewFramework */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DDB15F9B19D5B7C600173158 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DD4BA9C119DED8EF008D73EB /* right_answer.mp3 in Resources */,
+				DDB15FD019D5B8BF00173158 /* Images.xcassets in Resources */,
+				DD7282B919D6087C00077F54 /* Storyboard.storyboard in Resources */,
+				DDB2BA1B1E55D4260009DAC9 /* comic-sans.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DDB15FB419D5B7C600173158 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EF994B061D47AB1400619DFF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DDB15F9919D5B7C600173158 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DD2E172A19FA84B800CBAEC3 /* UIImage+ImageEffects.m in Sources */,
+				DDB15FCB19D5B88A00173158 /* ViewController.m in Sources */,
+				DDB15FD419D5B8DB00173158 /* main.m in Sources */,
+				CF6FB1241C5926FC009715F3 /* SCLSwitchView.m in Sources */,
+				DDB15FE119D5D85B00173158 /* SCLAlertViewStyleKit.m in Sources */,
+				DD24453C1BAC383600892117 /* SCLTextView.m in Sources */,
+				572BB1471B8383B3002DEE38 /* SCLTimerDisplay.m in Sources */,
+				DDB15FD719D5B96500173158 /* SCLAlertView.m in Sources */,
+				DDB15FDB19D5BAA000173158 /* SCLButton.m in Sources */,
+				DDB15FCA19D5B88A00173158 /* AppDelegate.m in Sources */,
+				DDB15FDE19D5BCF400173158 /* SCLAlertViewResponder.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DDB15FB219D5B7C600173158 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DDB15FBD19D5B7C600173158 /* SCLAlertViewTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EF994B031D47AB1400619DFF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EF994B191D47AB4A00619DFF /* SCLAlertViewStyleKit.m in Sources */,
+				EF994B1C1D47AB4A00619DFF /* SCLSwitchView.m in Sources */,
+				EF994B1A1D47AB4A00619DFF /* SCLTimerDisplay.m in Sources */,
+				EF994B161D47AB4A00619DFF /* SCLAlertView.m in Sources */,
+				EF994B181D47AB4A00619DFF /* SCLAlertViewResponder.m in Sources */,
+				EF994B171D47AB4A00619DFF /* SCLButton.m in Sources */,
+				EF994B1B1D47AB4A00619DFF /* SCLTextView.m in Sources */,
+				EF994B151D47AB4A00619DFF /* UIImage+ImageEffects.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DDB15FB819D5B7C600173158 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DDB15F9C19D5B7C600173158 /* SCLAlertView */;
+			targetProxy = DDB15FB719D5B7C600173158 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		DD7282B719D6087C00077F54 /* Storyboard.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DD7282B819D6087C00077F54 /* Base */,
+			);
+			name = Storyboard.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		DDB15FBE19D5B7C600173158 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DDB15FBF19D5B7C600173158 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		DDB15FC119D5B7C600173158 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				INFOPLIST_FILE = "$(SRCROOT)/SCLAlertViewExample/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "br.com.anykey.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		DDB15FC219D5B7C600173158 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				INFOPLIST_FILE = "$(SRCROOT)/SCLAlertViewExample/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "br.com.anykey.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		DDB15FC419D5B7C600173158 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = SCLAlertViewTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "br.com.anykey.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SCLAlertView.app/SCLAlertView";
+			};
+			name = Debug;
+		};
+		DDB15FC519D5B7C600173158 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = SCLAlertViewTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "br.com.anykey.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SCLAlertView.app/SCLAlertView";
+			};
+			name = Release;
+		};
+		EF994B111D47AB1400619DFF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = SCLAlertViewFramework/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = br.com.anykey.SCLAlertViewFramework;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		EF994B121D47AB1400619DFF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = SCLAlertViewFramework/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = br.com.anykey.SCLAlertViewFramework;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DDB15F9819D5B7C600173158 /* Build configuration list for PBXProject "SCLAlertView" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDB15FBE19D5B7C600173158 /* Debug */,
+				DDB15FBF19D5B7C600173158 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DDB15FC019D5B7C600173158 /* Build configuration list for PBXNativeTarget "SCLAlertView" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDB15FC119D5B7C600173158 /* Debug */,
+				DDB15FC219D5B7C600173158 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DDB15FC319D5B7C600173158 /* Build configuration list for PBXNativeTarget "SCLAlertViewTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDB15FC419D5B7C600173158 /* Debug */,
+				DDB15FC519D5B7C600173158 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EF994B131D47AB1400619DFF /* Build configuration list for PBXNativeTarget "SCLAlertViewFramework" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EF994B111D47AB1400619DFF /* Debug */,
+				EF994B121D47AB1400619DFF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DDB15F9519D5B7C600173158 /* Project object */;
+}
