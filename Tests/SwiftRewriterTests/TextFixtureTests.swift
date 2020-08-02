@@ -20,6 +20,7 @@ extension TestFixtureTests {
         baseProjectPath
             .appendingPathComponent("TestFixtures")
             .appendingPathComponent("SCLAlertView")
+            .appendingPathComponent("SCLAlertView")
     }
     
     @available(OSX 10.13, *)

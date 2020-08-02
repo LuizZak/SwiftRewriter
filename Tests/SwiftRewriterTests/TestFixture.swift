@@ -18,18 +18,20 @@ class TestFixture {
         
         let process = Process()
         process.executableURL = swiftRewriterBinaryPath
-        process.arguments = ["path", baseUrl.path, "-t", "8"]
+        process.arguments = ["path", baseUrl.path, "-t", "8", "-s", "-o"]
+        
+        print("Running $ \(asInvocation(process))")
         
         do {
             let result = try runProcess(process, stdin: nil)
             
-            XCTAssertEqual(result.terminationStatus, 0)
+            XCTAssertEqual(result.terminationStatus, 0, "Error executing SwiftRewriter: \n\(result.standardOutput)")
             
             assertStatusClean(message: """
                 Unexpected changes introduced to test fixture project, please check command execution
                 and result - command:
                 
-                \(process.executableURL?.path ?? "<nil>") \(process.arguments?.joined(separator: " ") ?? "")
+                \(asInvocation(process))
                 
                 dirty files:
                 """)

@@ -23,6 +23,10 @@ var baseProjectPath: URL {
         .deletingLastPathComponent()
 }
 
+func asInvocation(_ process: Process) -> String {
+    return "\(process.executableURL?.path ?? "<nil>") \(process.arguments?.joined(separator: " ") ?? "")"
+}
+
 @available(OSX 10.13, *)
 func runProcess(_ process: Process, stdin: String?) throws -> ProcessResult {
     try runProcess(process, stdinData: stdin?.data(using: .utf8))
