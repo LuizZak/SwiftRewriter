@@ -18,7 +18,7 @@ class TestFixture {
         
         let process = Process()
         process.executableURL = swiftRewriterBinaryPath
-        process.arguments = ["path", baseUrl.path, "-t", "8", "-s", "-o"]
+        process.arguments = ["path", baseUrl.path, "-t", "8", "-s", "-o", "-v"]
         
         print("Running $ \(asInvocation(process))")
         

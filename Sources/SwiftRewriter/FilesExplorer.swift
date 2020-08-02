@@ -246,10 +246,14 @@ class SuggestConversionInterface {
             let duration = stopwatch.stop()
             
             console.printLine("Finished converting \(objcFiles.count) files in \(String(format: "%.2lf", duration))s.")
-            _=console.readLineWith(prompt: "Press [Enter] to continue.")
+            if !options.skipConfirm {
+                _=console.readLineWith(prompt: "Press [Enter] to continue.")
+            }
         } catch {
             console.printLine("Error converting files: \(error)")
-            _=console.readLineWith(prompt: "Press [Enter] to continue.")
+            if !options.skipConfirm {
+                _=console.readLineWith(prompt: "Press [Enter] to continue.")
+            }
         }
     }
 }

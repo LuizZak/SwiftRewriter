@@ -1,0 +1,32 @@
+{
+  "configurations" : [
+    {
+      "id" : "C0C00901-5067-422A-9239-3FABA6E02BB2",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "environmentVariableEntries" : [
+      {
+        "key" : "END_TO_END_TESTING",
+        "value" : "YES"
+      }
+    ]
+  },
+  "testTargets" : [
+    {
+      "skippedTests" : [
+        "SwiftRewriterTests"
+      ],
+      "target" : {
+        "containerPath" : "container:SwiftRewriter.xcodeproj",
+        "identifier" : "SwiftRewriter::SwiftRewriterTests",
+        "name" : "SwiftRewriterTests"
+      }
+    }
+  ],
+  "version" : 1
+}

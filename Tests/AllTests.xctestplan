@@ -142,6 +142,9 @@
       }
     },
     {
+      "skippedTests" : [
+        "TestFixtureTests"
+      ],
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::SwiftRewriterTests",
