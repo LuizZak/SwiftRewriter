@@ -5890,6 +5890,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A0ADD1FE24D843E200BCDD20 /* AllTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = AllTests.xctestplan; path = Tests/AllTests.xctestplan; sourceTree = "<group>"; };
+		A0ADD1FF24D843E200BCDD20 /* FastTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = FastTests.xctestplan; path = Tests/FastTests.xctestplan; sourceTree = "<group>"; };
+		A0ADD20024D843E200BCDD20 /* IntegrationTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = IntegrationTests.xctestplan; path = Tests/IntegrationTests.xctestplan; sourceTree = "<group>"; };
 		"Antlr4::Antlr4::Product" /* Antlr4.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Antlr4.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Console::Console::Product" /* Console.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Console.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"MiniLexer::MiniLexer::Product" /* MiniLexer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MiniLexer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -8147,6 +8150,9 @@
 		OBJ_400 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				A0ADD20024D843E200BCDD20 /* IntegrationTests.xctestplan */,
+				A0ADD1FF24D843E200BCDD20 /* FastTests.xctestplan */,
+				A0ADD1FE24D843E200BCDD20 /* AllTests.xctestplan */,
 				OBJ_401 /* AnalysisTests */,
 				OBJ_405 /* CommonsTests */,
 				OBJ_417 /* ExpressionPassesTests */,

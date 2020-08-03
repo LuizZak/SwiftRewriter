@@ -108,7 +108,7 @@ class StringDiffTestingTests: XCTestCase {
 
                ---
                test
-                ~ Difference at start of string.
+               ^ Difference starts here
                ---
                """
            )
@@ -116,7 +116,7 @@ class StringDiffTestingTests: XCTestCase {
            XCTAssertEqual(
                testReporter.messages[1],
                """
-               test.swift:1: Difference starts here: Actual line reads 'test'
+               test.swift:2: Difference starts here: Actual line reads 'test'
                """
            )
        }
@@ -308,8 +308,8 @@ class StringDiffTestingTests: XCTestCase {
 
             ---
             if true {
+            ^ Difference starts here
                 }
-             ~ Difference at start of string.
             ---
             """
         )
@@ -317,7 +317,212 @@ class StringDiffTestingTests: XCTestCase {
         XCTAssertEqual(
             testReporter.messages[1],
             """
-            test.swift:1: Difference starts here: Actual line reads 'if true {'
+            test.swift:2: Difference starts here: Actual line reads 'if true {'
+            """
+        )
+    }
+    
+    func testDiffLargeMultiLineStrings() {
+        #sourceLocation(file: "test.swift", line: 1)
+        diffTest(expected: """
+                line 1
+                line 2
+                line 3
+                line 4
+                line 5
+                line 6
+                line 7
+                line 8
+                line 9
+                line 10
+                """).diff("""
+                line 1
+                line 2
+                line 3
+                line 4
+                DIFFERENCE
+                line 6
+                line 7
+                line 8
+                line 9
+                line 10
+                """)
+        #sourceLocation()
+        
+        XCTAssertEqual(
+            testReporter.messages[0],
+            """
+            test.swift:12: Strings don't match:
+
+            Expected (between ---):
+
+            ---
+            line 1
+            line 2
+            line 3
+            line 4
+            line 5
+            line 6
+            line 7
+            line 8
+            line 9
+            line 10
+            ---
+
+            Actual result (between ---):
+
+            ---
+            line 1
+            line 2
+            line 3
+            line 4
+            DIFFERENCE
+            line 6
+            line 7
+            line 8
+            line 9
+            line 10
+            ---
+
+            Diff (between ---):
+
+            --- [2 lines omitted]
+            line 3
+            line 4
+            DIFFERENCE
+            ^ Difference starts here
+            line 6
+            line 7
+            --- [3 lines omitted]
+            """
+        )
+        
+        XCTAssertEqual(
+            testReporter.messages[1],
+            """
+            test.swift:6: Difference starts here: Actual line reads 'DIFFERENCE'
+            """
+        )
+    }
+    
+    func testDiffLargeMultiLineStringsNoLinesOmittedBefore() {
+        #sourceLocation(file: "test.swift", line: 1)
+        diffTest(expected: """
+                line 1
+                line 2
+                line 3
+                line 4
+                line 5
+                """).diff("""
+                DIFFERENCE
+                line 2
+                line 3
+                line 4
+                line 5
+                """)
+        #sourceLocation()
+        
+        XCTAssertEqual(
+            testReporter.messages[0],
+            """
+            test.swift:7: Strings don't match:
+
+            Expected (between ---):
+
+            ---
+            line 1
+            line 2
+            line 3
+            line 4
+            line 5
+            ---
+
+            Actual result (between ---):
+
+            ---
+            DIFFERENCE
+            line 2
+            line 3
+            line 4
+            line 5
+            ---
+
+            Diff (between ---):
+
+            ---
+            DIFFERENCE
+            ^ Difference starts here
+            line 2
+            line 3
+            --- [2 lines omitted]
+            """
+        )
+        
+        XCTAssertEqual(
+            testReporter.messages[1],
+            """
+            test.swift:2: Difference starts here: Actual line reads 'DIFFERENCE'
+            """
+        )
+    }
+    
+    func testDiffLargeMultiLineStringsNoLinesOmittedAfter() {
+        #sourceLocation(file: "test.swift", line: 1)
+        diffTest(expected: """
+                line 1
+                line 2
+                line 3
+                line 4
+                line 5
+                """).diff("""
+                line 1
+                line 2
+                line 3
+                line 4
+                DIFFERENCE
+                """)
+        #sourceLocation()
+        
+        XCTAssertEqual(
+            testReporter.messages[0],
+            """
+            test.swift:7: Strings don't match:
+
+            Expected (between ---):
+
+            ---
+            line 1
+            line 2
+            line 3
+            line 4
+            line 5
+            ---
+
+            Actual result (between ---):
+
+            ---
+            line 1
+            line 2
+            line 3
+            line 4
+            DIFFERENCE
+            ---
+
+            Diff (between ---):
+
+            --- [2 lines omitted]
+            line 3
+            line 4
+            DIFFERENCE
+            ^ Difference starts here
+            ---
+            """
+        )
+        
+        XCTAssertEqual(
+            testReporter.messages[1],
+            """
+            test.swift:6: Difference starts here: Actual line reads 'DIFFERENCE'
             """
         )
     }

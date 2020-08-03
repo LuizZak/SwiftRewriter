@@ -86,9 +86,7 @@ public class DiffingTest {
             
             Diff (between ---):
             
-            ---
-            \(res.makeDifferenceMarkString(against: expectedDiff.string))
-            ---
+            \(makeDiffStringSection(expected: expectedDiff.string, actual: res))
             """,
             inFile: file,
             atLine: line,
@@ -162,6 +160,61 @@ public class DiffingTest {
                 expected: true
             )
         }
+    }
+    
+    func makeDiffStringSection(expected: String, actual: String) -> String {
+        func formatOmittedLinesMessage(_ omittedLines: Int) -> String {
+            switch omittedLines {
+            case 0:
+                return ""
+            case 1:
+                return " [1 line omitted]"
+            default:
+                return " [\(omittedLines) lines omitted]"
+            }
+        }
+        
+        guard let (diffLine, _) = actual.firstDifferingLineColumn(against: expected) else {
+            return """
+            ---
+            \(actual.makeDifferenceMarkString(against: expected))
+            ---
+            """
+        }
+        
+        let diffString = actual.makeDifferenceMarkString(against: expected)
+        
+        let (result, linesBefore, linesAfter) = omitLines(diffString, aroundLine: diffLine)
+        
+        return """
+        ---\(formatOmittedLinesMessage(linesBefore))
+        \(result)
+        ---\(formatOmittedLinesMessage(linesAfter))
+        """
+    }
+    
+    func omitLines(_ string: String,
+                   aroundLine line: Int,
+                   contextLinesBefore: Int = 3,
+                   contextLinesAfter: Int = 3) -> (result: String, linesBefore: Int, linesAfter: Int) {
+        
+        let lines = string.split(separator: "\n")
+        let minLine = max(0, line - contextLinesBefore)
+        let maxLine = min(lines.count, line + contextLinesAfter)
+        
+        var result: [Substring] = []
+        
+        for lineIndex in minLine..<line {
+            result.append(lines[lineIndex])
+        }
+        
+        result.append(lines[line])
+        
+        for lineIndex in (line + 1)..<maxLine {
+            result.append(lines[lineIndex])
+        }
+        
+        return (result.joined(separator: "\n"), minLine, lines.count - maxLine)
     }
 }
 
