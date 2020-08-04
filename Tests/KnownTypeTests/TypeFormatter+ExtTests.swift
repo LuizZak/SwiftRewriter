@@ -3,7 +3,7 @@ import SwiftAST
 import KnownType
 import Intentions
 
-class TypeFormatterTests: XCTestCase {
+class TypeFormatter_ExtTests: XCTestCase {
     func testAsStringMethodFromType() {
         let type =
             KnownTypeBuilder(typeName: "A")

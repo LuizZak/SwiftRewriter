@@ -623,7 +623,7 @@
 		OBJ_1874 /* Utils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftRewriter::Utils::Product" /* Utils.framework */; };
 		OBJ_1884 /* KnownFileBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_466 /* KnownFileBuilderTests.swift */; };
 		OBJ_1885 /* KnownTypeSerializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_467 /* KnownTypeSerializerTests.swift */; };
-		OBJ_1886 /* TypeFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_468 /* TypeFormatterTests.swift */; };
+		OBJ_1886 /* TypeFormatter+ExtTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_468 /* TypeFormatter+ExtTests.swift */; };
 		OBJ_1888 /* TestCommons.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftRewriter::TestCommons::Product" /* TestCommons.framework */; };
 		OBJ_1889 /* SwiftRewriterLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftRewriter::SwiftRewriterLib::Product" /* SwiftRewriterLib.framework */; };
 		OBJ_1890 /* SwiftSyntaxRewriterPasses.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftRewriter::SwiftSyntaxRewriterPasses::Product" /* SwiftSyntaxRewriterPasses.framework */; };
@@ -6266,7 +6266,7 @@
 		OBJ_464 /* IntentionSerializerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentionSerializerTests.swift; sourceTree = "<group>"; };
 		OBJ_466 /* KnownFileBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnownFileBuilderTests.swift; sourceTree = "<group>"; };
 		OBJ_467 /* KnownTypeSerializerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnownTypeSerializerTests.swift; sourceTree = "<group>"; };
-		OBJ_468 /* TypeFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeFormatterTests.swift; sourceTree = "<group>"; };
+		OBJ_468 /* TypeFormatter+ExtTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TypeFormatter+ExtTests.swift"; sourceTree = "<group>"; };
 		OBJ_47 /* EnumRewriterExpressionPass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnumRewriterExpressionPass.swift; sourceTree = "<group>"; };
 		OBJ_470 /* ObjcLexer+TokenizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ObjcLexer+TokenizerTests.swift"; sourceTree = "<group>"; };
 		OBJ_471 /* ObjcLexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjcLexerTests.swift; sourceTree = "<group>"; };
@@ -8301,7 +8301,7 @@
 			children = (
 				OBJ_466 /* KnownFileBuilderTests.swift */,
 				OBJ_467 /* KnownTypeSerializerTests.swift */,
-				OBJ_468 /* TypeFormatterTests.swift */,
+				OBJ_468 /* TypeFormatter+ExtTests.swift */,
 			);
 			name = KnownTypeTests;
 			path = Tests/KnownTypeTests;
@@ -11258,7 +11258,7 @@
 			files = (
 				OBJ_1884 /* KnownFileBuilderTests.swift in Sources */,
 				OBJ_1885 /* KnownTypeSerializerTests.swift in Sources */,
-				OBJ_1886 /* TypeFormatterTests.swift in Sources */,
+				OBJ_1886 /* TypeFormatter+ExtTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
