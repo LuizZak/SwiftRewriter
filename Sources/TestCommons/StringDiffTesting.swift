@@ -12,6 +12,7 @@ public extension DiffTestCaseFailureReporter {
     
     func diffTest(expected input: String,
                   highlightLineInEditor: Bool = true,
+                  diffOnly: Bool = false,
                   file: String = #file,
                   line: Int = #line) -> DiffingTest {
         
@@ -20,7 +21,8 @@ public extension DiffTestCaseFailureReporter {
         
         return DiffingTest(expected: diffable,
                            testCase: self,
-                           highlightLineInEditor: highlightLineInEditor)
+                           highlightLineInEditor: highlightLineInEditor,
+                           diffOnly: diffOnly)
     }
 }
 
@@ -50,14 +52,17 @@ public class DiffingTest {
     var expectedDiff: DiffableString
     let testCase: DiffTestCaseFailureReporter
     let highlightLineInEditor: Bool
+    let diffOnly: Bool
     
     public init(expected: DiffableString,
                 testCase: DiffTestCaseFailureReporter,
-                highlightLineInEditor: Bool) {
+                highlightLineInEditor: Bool,
+                diffOnly: Bool) {
         
         self.expectedDiff = expected
         self.testCase = testCase
         self.highlightLineInEditor = highlightLineInEditor
+        self.diffOnly = diffOnly
     }
     
     public func diff(_ res: String,
@@ -68,30 +73,45 @@ public class DiffingTest {
             return
         }
         
-        testCase.recordFailure(
-            withDescription: """
-            Strings don't match:
-            
-            Expected (between ---):
-            
-            ---
-            \(expectedDiff.string)
-            ---
-            
-            Actual result (between ---):
-            
-            ---
-            \(res)
-            ---
-            
-            Diff (between ---):
-            
-            \(makeDiffStringSection(expected: expectedDiff.string, actual: res))
-            """,
-            inFile: file,
-            atLine: line,
-            expected: true
-        )
+        if diffOnly {
+            testCase.recordFailure(
+                withDescription: """
+                Strings don't match:
+                
+                Diff (between ---):
+                
+                \(makeDiffStringSection(expected: expectedDiff.string, actual: res))
+                """,
+                inFile: file,
+                atLine: line,
+                expected: true
+            )
+        } else {
+            testCase.recordFailure(
+                withDescription: """
+                Strings don't match:
+                
+                Expected (between ---):
+                
+                ---
+                \(expectedDiff.string)
+                ---
+                
+                Actual result (between ---):
+                
+                ---
+                \(res)
+                ---
+                
+                Diff (between ---):
+                
+                \(makeDiffStringSection(expected: expectedDiff.string, actual: res))
+                """,
+                inFile: file,
+                atLine: line,
+                expected: true
+            )
+        }
         
         if !highlightLineInEditor {
             return

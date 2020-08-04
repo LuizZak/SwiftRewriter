@@ -526,10 +526,45 @@ class StringDiffTestingTests: XCTestCase {
             """
         )
     }
+    
+    func testDiffOnly() {
+        #sourceLocation(file: "test.swift", line: 1)
+        diffTest(expected: """
+                abc
+                def
+                """, diffOnly: true).diff("""
+                abc
+                df
+                """)
+        #sourceLocation()
+        
+        XCTAssertEqual(
+            testReporter.messages[0],
+            """
+            test.swift:4: Strings don't match:
+
+            Diff (between ---):
+
+            ---
+            abc
+            df
+            ~^ Difference starts here
+            ---
+            """
+        )
+        
+        XCTAssertEqual(
+            testReporter.messages[1],
+            """
+            test.swift:3: Difference starts here: Actual line reads 'df'
+            """
+        )
+    }
 }
 
 extension StringDiffTestingTests {
     public func diffTest(expected input: String,
+                         diffOnly: Bool = false,
                          file: String = #file,
                          line: Int = #line) -> DiffingTest {
         
@@ -538,7 +573,8 @@ extension StringDiffTestingTests {
         
         return DiffingTest(expected: diffable,
                            testCase: testReporter,
-                           highlightLineInEditor: true)
+                           highlightLineInEditor: true,
+                           diffOnly: diffOnly)
     }
 }
 
