@@ -2663,7 +2663,7 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func test() {
-                let obj = Date()
+                let obj: AnyObject = Date()
 
                 objc.isKindOfClass(Date.self)
             }

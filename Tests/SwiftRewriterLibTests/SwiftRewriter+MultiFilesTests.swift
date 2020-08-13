@@ -891,7 +891,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                     let baseIdsSet: NSSet! = NSSet.setWithArray(baseIds)
                     // decl type: NSArray!
                     // init type: [ObjectType]?
-                    let filtered = resources?.filter { (res: NSDictionary!) -> Bool in
+                    let filtered: NSArray! = resources?.filter { (res: NSDictionary!) -> Bool in
                         return baseIdsSet.containsObject(res["airbase"]?["id"])
                     }
                     // decl type: [CPResource]

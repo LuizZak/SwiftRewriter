@@ -1464,7 +1464,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 func test() {
                     // decl type: AnyObject
                     // init type: Selector
-                    let selector = #selector(abc(_:))
+                    let selector: AnyObject = #selector(abc(_:))
                 }
             }
             """,

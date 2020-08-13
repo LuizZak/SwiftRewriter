@@ -257,7 +257,7 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
             }
         } else if let type = exp.resolvedType {
             guard typeSystem.isClassInstanceType(type) else {
-                return false
+                return !typeSystem.typesMatch(type, varType, ignoreNullability: true)
             }
             
             if isConstant {
