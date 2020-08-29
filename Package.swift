@@ -26,7 +26,7 @@ let package = Package(
         .package(url: "https://github.com/LuizZak/MiniLexer.git", .exact("0.10.0")),
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.32"),
         .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.0")),
-        .package(url: "https://github.com/apple/swift-syntax.git", .branch("swift-5.3-DEVELOPMENT-SNAPSHOT-2020-06-24-a")),
+        .package(url: "https://github.com/apple/swift-syntax.git", .branch("swift-5.3-DEVELOPMENT-SNAPSHOT-2020-08-27-a")),
         .package(url: "https://github.com/apple/swift-argument-parser.git", .exact("0.0.4"))
     ],
     targets: [
