@@ -270,8 +270,8 @@ extension SwiftExprASTReaderTests {
     func assert(objcExpr: String,
                 parseWith: (ObjectiveCParser) throws -> ParserRuleContext = { parser in try parser.expression() },
                 readsAs expected: Expression,
-                file: String = #file,
-                line: Int = #line) {
+                file: StaticString = #filePath,
+                line: UInt = #line) {
         
         let typeSystem = TypeSystem()
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
@@ -303,20 +303,20 @@ extension SwiftExprASTReaderTests {
                 }
                 dump(expected, to: &expStr)
                 
-                recordFailure(withDescription: """
-                    Failed: Expected to read Objective-C expression
-                    \(objcExpr)
-                    as
-                    \(expStr)
-                    but read as
-                    \(resStr)
-                    """, inFile: file, atLine: line, expected: true)
+                XCTFail("""
+                        Failed: Expected to read Objective-C expression
+                        \(objcExpr)
+                        as
+                        \(expStr)
+                        but read as
+                        \(resStr)
+                        """,
+                        file: file, line: line)
             }
         } catch {
-            recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)",
-                          inFile: file,
-                          atLine: line,
-                          expected: false)
+            XCTFail("Unexpected error(s) parsing objective-c: \(error)",
+                    file: file,
+                    line: line)
         }
     }
     

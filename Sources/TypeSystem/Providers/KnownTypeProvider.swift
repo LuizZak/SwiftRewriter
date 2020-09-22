@@ -64,7 +64,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         
         if types.isEmpty {
             if _typesCache.usingCache {
-                _typesCache.wrappedValue[name] = nil
+                typesCache[name] = nil
             }
             return nil
         }
@@ -72,7 +72,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         let type = CompoundKnownType(typeName: name, types: types)
         
         if _typesCache.usingCache {
-            _typesCache.wrappedValue[name] = type
+            typesCache[name] = type
         }
         
         return type

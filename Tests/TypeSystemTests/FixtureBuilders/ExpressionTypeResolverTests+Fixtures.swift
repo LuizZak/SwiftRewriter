@@ -137,7 +137,7 @@ extension ExpressionTypeResolverTests {
                                type: SwiftType,
                                ownership: Ownership = .strong,
                                isConstant: Bool = false,
-                               file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+                               file: StaticString = #filePath, line: UInt = #line) -> StatementTypeTestBuilder {
             let storage =
                 ValueStorage(type: type, ownership: ownership, isConstant: isConstant)
             
@@ -155,7 +155,7 @@ extension ExpressionTypeResolverTests {
                                type: SwiftType,
                                ownership: Ownership = .strong,
                                isConstant: Bool = false,
-                               file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+                               file: StaticString = #filePath, line: UInt = #line) -> StatementTypeTestBuilder {
             let storage =
                 ValueStorage(type: type, ownership: ownership, isConstant: isConstant)
                 
@@ -171,7 +171,7 @@ extension ExpressionTypeResolverTests {
         @discardableResult
         func thenAssertDefined(localNamed name: String,
                                storage: ValueStorage,
-                               file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+                               file: StaticString = #filePath, line: UInt = #line) -> StatementTypeTestBuilder {
             
             return thenAssertDefined(in: scope, localNamed: name, storage: storage,
                                      file: file, line: line)
@@ -182,7 +182,7 @@ extension ExpressionTypeResolverTests {
         func thenAssertDefined(in scope: CodeScopeNode,
                                localNamed name: String,
                                storage: ValueStorage,
-                               file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+                               file: StaticString = #filePath, line: UInt = #line) -> StatementTypeTestBuilder {
             
             // Make sure to apply definitions just before starting assertions
             if !applied {
@@ -195,30 +195,30 @@ extension ExpressionTypeResolverTests {
             }
             
             guard let defined = scope.definitions.firstDefinition(named: name) else {
-                testCase.recordFailure(withDescription: """
-                    Failed to find expected local definition '\(name)' on scope.
-                    """,
-                    inFile: file, atLine: line, expected: true)
+                XCTFail("""
+                        Failed to find expected local definition '\(name)' on scope.
+                        """,
+                        file: file, line: line)
                 
                 return self
             }
             
             guard case .variable(_, let definedStorage) = defined.kind else {
-                testCase.recordFailure(withDescription: """
-                    Expected to find a variable local, but found \(defined.kind) \
-                    instead.
-                    """,
-                    inFile: file, atLine: line, expected: true)
+                XCTFail("""
+                        Expected to find a variable local, but found \(defined.kind) \
+                        instead.
+                        """,
+                        file: file, line: line)
                 
                 return self
             }
             
             if definedStorage != storage {
-                testCase.recordFailure(withDescription: """
-                    Definition '\(name)' has different storage \(definedStorage) \
-                    than expected storage \(storage)
-                    """,
-                    inFile: file, atLine: line, expected: true)
+                XCTFail("""
+                        Definition '\(name)' has different storage \(definedStorage) \
+                        than expected storage \(storage)
+                        """,
+                        file: file, line: line)
             }
             
             return self
@@ -229,8 +229,8 @@ extension ExpressionTypeResolverTests {
         @discardableResult
         func thenAssertExpression(at keyPath: KeyPath<Statement, Expression?>,
                                   expectsType type: SwiftType?,
-                                  file: String = #file,
-                                  line: Int = #line) -> StatementTypeTestBuilder {
+                                  file: StaticString = #filePath,
+                                  line: UInt = #line) -> StatementTypeTestBuilder {
             
             // Make sure to apply definitions just before starting assertions
             if !applied {
@@ -243,19 +243,19 @@ extension ExpressionTypeResolverTests {
             }
             
             guard let exp = statement[keyPath: keyPath] else {
-                testCase.recordFailure(withDescription: """
-                    Could not locale expression at keypath \(keyPath)
-                    """,
-                    inFile: file, atLine: line, expected: true)
+                XCTFail("""
+                        Could not locale expression at keypath \(keyPath)
+                        """,
+                        file: file, line: line)
                 return self
             }
             
             if exp.expectedType != type {
-                testCase.recordFailure(withDescription: """
-                    Expected expression to resolve as expecting type \(type?.description ?? "nil"), \
-                    but it expects \(exp.expectedType?.description ?? "nil")"
-                    """,
-                    inFile: file, atLine: line, expected: true)
+                XCTFail("""
+                        Expected expression to resolve as expecting type \(type?.description ?? "nil"), \
+                        but it expects \(exp.expectedType?.description ?? "nil")"
+                        """,
+                        file: file, line: line)
             }
             
             return self
@@ -266,8 +266,8 @@ extension ExpressionTypeResolverTests {
         @discardableResult
         func thenAssertExpression(at keyPath: KeyPath<Statement, Expression?>,
                                   resolvedAs type: SwiftType?,
-                                  file: String = #file,
-                                  line: Int = #line) -> StatementTypeTestBuilder {
+                                  file: StaticString = #filePath,
+                                  line: UInt = #line) -> StatementTypeTestBuilder {
             
             // Make sure to apply definitions just before starting assertions
             if !applied {
@@ -280,19 +280,19 @@ extension ExpressionTypeResolverTests {
             }
             
             guard let exp = statement[keyPath: keyPath] else {
-                testCase.recordFailure(withDescription: """
-                    Could not locale expression at keypath \(keyPath)
-                    """,
-                    inFile: file, atLine: line, expected: true)
+                XCTFail("""
+                        Could not locale expression at keypath \(keyPath)
+                        """,
+                        file: file, line: line)
                 return self
             }
             
             if exp.resolvedType != type {
-                testCase.recordFailure(withDescription: """
-                    Expected expression to resolve as type \(type?.description ?? "nil"), \
-                    but it resolved as \(exp.resolvedType?.description ?? "nil")"
-                    """,
-                    inFile: file, atLine: line, expected: true)
+                XCTFail("""
+                        Expected expression to resolve as type \(type?.description ?? "nil"), \
+                        but it resolved as \(exp.resolvedType?.description ?? "nil")"
+                        """,
+                        file: file, line: line)
             }
             
             return self
@@ -349,15 +349,15 @@ extension ExpressionTypeResolverTests {
             /// Makes an assertion the initial expression resolved to a given type
             @discardableResult
             func thenAssertExpression(resolvedAs type: SwiftType?,
-                                      file: String = #file,
-                                      line: Int = #line) -> Asserter {
+                                      file: StaticString = #filePath,
+                                      line: UInt = #line) -> Asserter {
                 
                 if expression.resolvedType != type {
-                    testCase.recordFailure(withDescription: """
-                        Expected expression to resolve as \(type?.description ?? "nil"), \
-                        but received \(expression.resolvedType?.description ?? "nil")
-                        """,
-                        inFile: file, atLine: line, expected: true)
+                    XCTFail("""
+                            Expected expression to resolve as \(type?.description ?? "nil"), \
+                            but received \(expression.resolvedType?.description ?? "nil")
+                            """,
+                            file: file, line: line)
                 }
                 
                 return self
@@ -367,15 +367,15 @@ extension ExpressionTypeResolverTests {
             /// type
             @discardableResult
             func thenAssertExpression(expectsType type: SwiftType?,
-                                      file: String = #file,
-                                      line: Int = #line) -> Asserter {
+                                      file: StaticString = #filePath,
+                                      line: UInt = #line) -> Asserter {
                 
                 if expression.expectedType != type {
-                    testCase.recordFailure(withDescription: """
-                        Expected expression to resolve as expecting type \(type?.description ?? "nil"), \
-                        but it expects \(expression.expectedType?.description ?? "nil")
-                        """,
-                        inFile: file, atLine: line, expected: true)
+                    XCTFail("""
+                            Expected expression to resolve as expecting type \(type?.description ?? "nil"), \
+                            but it expects \(expression.expectedType?.description ?? "nil")
+                            """,
+                            file: file, line: line)
                 }
                 
                 return self
@@ -386,23 +386,23 @@ extension ExpressionTypeResolverTests {
             @discardableResult
             func thenAssertExpression(at keyPath: KeyPath<Expression, Expression?>,
                                       resolvedAs type: SwiftType?,
-                                      file: String = #file,
-                                      line: Int = #line) -> Asserter {
+                                      file: StaticString = #filePath,
+                                      line: UInt = #line) -> Asserter {
                 
                 guard let exp = expression[keyPath: keyPath] else {
-                    testCase.recordFailure(withDescription: """
-                        Could not locale expression at keypath \(keyPath)
-                        """,
-                        inFile: file, atLine: line, expected: true)
+                    XCTFail("""
+                            Could not locale expression at keypath \(keyPath)
+                            """,
+                            file: file, line: line)
                     return self
                 }
                 
                 if exp.resolvedType != type {
-                    testCase.recordFailure(withDescription: """
-                        Expected expression to resolve with type \(type?.description ?? "nil"), \
-                        but it resolved as \(exp.resolvedType?.description ?? "nil")
-                        """,
-                        inFile: file, atLine: line, expected: true)
+                    XCTFail("""
+                            Expected expression to resolve with type \(type?.description ?? "nil"), \
+                            but it resolved as \(exp.resolvedType?.description ?? "nil")
+                            """,
+                            file: file, line: line)
                 }
                 
                 return self
@@ -413,23 +413,23 @@ extension ExpressionTypeResolverTests {
             @discardableResult
             func thenAssertExpression(at keyPath: KeyPath<Expression, Expression?>,
                                       expectsType type: SwiftType?,
-                                      file: String = #file,
-                                      line: Int = #line) -> Asserter {
+                                      file: StaticString = #filePath,
+                                      line: UInt = #line) -> Asserter {
                 
                 guard let exp = expression[keyPath: keyPath] else {
-                    testCase.recordFailure(withDescription: """
-                        Could not locale expression at keypath \(keyPath)
-                        """,
-                        inFile: file, atLine: line, expected: true)
+                    XCTFail("""
+                            Could not locale expression at keypath \(keyPath)
+                            """,
+                            file: file, line: line)
                     return self
                 }
                 
                 if exp.expectedType != type {
-                    testCase.recordFailure(withDescription: """
-                        Expected expression to resolve as expecting type \(type?.description ?? "nil"), \
-                        but it expects \(exp.expectedType?.description ?? "nil")
-                        """,
-                        inFile: file, atLine: line, expected: true)
+                    XCTFail("""
+                            Expected expression to resolve as expecting type \(type?.description ?? "nil"), \
+                            but it expects \(exp.expectedType?.description ?? "nil")
+                            """,
+                            file: file, line: line)
                 }
                 
                 return self

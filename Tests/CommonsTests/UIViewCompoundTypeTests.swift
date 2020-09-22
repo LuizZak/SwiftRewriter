@@ -214,14 +214,14 @@ class UIViewCompoundTypeTests: XCTestCase {
 extension XCTestCase {
     func assertSignature(type: CompoundedMappingType,
                          matches signature: String,
-                         file: String = #file,
-                         line: Int = #line) {
+                         file: StaticString = #filePath,
+                         line: UInt = #line) {
         
         let typeString = TypeFormatter.asString(knownType: type)
         
         if typeString != signature {
-            recordFailure(
-                withDescription: """
+            XCTFail(
+                """
                 Expected type signature of type \(type.typeName) to match
                 
                 \(signature)
@@ -230,7 +230,7 @@ extension XCTestCase {
                 
                 \(typeString.makeDifferenceMarkString(against: signature))
                 """,
-                inFile: file, atLine: line, expected: true)
+                file: file, line: line)
         }
     }
 }

@@ -278,7 +278,7 @@ class OverloadResolverState {
         }
         
         let entry = CacheEntry(signatures: signatures, arguments: arguments)
-        _cache.wrappedValue[entry] = resolutionIndex
+        cache[entry] = resolutionIndex
     }
     
     struct CacheEntry: Hashable {

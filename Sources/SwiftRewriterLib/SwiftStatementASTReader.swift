@@ -448,7 +448,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
                 return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             
-            let types = VarDeclarationTypeExtractor.extractAll(from: ctx)
+            let types = VarDeclarationTypeStringExtractor.extractAll(from: ctx)
             
             var declarations: [StatementVariableDeclaration] = []
             

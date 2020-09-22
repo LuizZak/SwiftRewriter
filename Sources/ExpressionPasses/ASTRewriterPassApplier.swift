@@ -145,7 +145,7 @@ public final class ASTRewriterPassApplier {
         @ConcurrentValue var dirty: Set<FunctionBodyIntention> = []
         
         func markDirty(_ body: FunctionBodyIntention) {
-            _dirty.wrappedValue.insert(body)
+            dirty.insert(body)
         }
         
         func isDirty(_ body: FunctionBodyIntention) -> Bool {

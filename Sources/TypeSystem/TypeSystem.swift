@@ -131,7 +131,7 @@ public class TypeSystem {
         }
         
         if _typeExistsCache.usingCache {
-            _typeExistsCache.wrappedValue[name] = result
+            typeExistsCache[name] = result
         }
         
         return result
@@ -799,7 +799,7 @@ public class TypeSystem {
         let result = resolver.expand(in: type)
         
         if _aliasCache.usingCache {
-            _aliasCache.wrappedValue[type] = result
+            aliasCache[type] = result
         }
         
         return result
@@ -932,7 +932,7 @@ public class TypeSystem {
         }
         
         if _allConformancesCache.usingCache {
-            _allConformancesCache.wrappedValue[type.typeName] = protocols
+            allConformancesCache[type.typeName] = protocols
         }
         
         return protocols
@@ -1046,7 +1046,7 @@ public class TypeSystem {
         }
         
         if _knownTypeForSwiftType.usingCache {
-            _knownTypeForSwiftType.wrappedValue[swiftType] = result
+            knownTypeForSwiftType[swiftType] = result
         }
         
         return result
@@ -1417,7 +1417,7 @@ private final class CompoundKnownTypesCache {
     }
     
     func record(type: KnownType, names: [String]) {
-        _types.wrappedValue[names] = type
+        types[names] = type
     }
 }
 
@@ -1429,9 +1429,7 @@ private final class ProtocolConformanceCache {
     }
     
     func record(typeName: String, conformsTo protocolName: String, _ value: Bool) {
-        _cache
-            .wrappedValue[typeName, default: Entry()]
-            .conformances[protocolName] = value
+        cache[typeName, default: Entry()].conformances[protocolName] = value
     }
     
     func typeName(_ type: String, conformsTo protocolName: String) -> Bool? {
@@ -1462,14 +1460,14 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
         
         let protocols = TypeDefinitions.protocolsList.protocols
         guard let prot = protocols.first(where: { $0.protocolName == name }) else {
-            _negativeLookupResults.wrappedValue.insert(name)
+            negativeLookupResults.insert(name)
             
             return nil
         }
         
         let type = makeType(from: prot)
         
-        _cache.wrappedValue[name] = type
+        cache[name] = type
         
         return type
     }
@@ -1547,14 +1545,14 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         }
         
         guard let prot = TypeDefinitions.classesList.classes.first(where: { $0.typeName == name }) else {
-            _negativeLookupResults.wrappedValue.insert(name)
+            negativeLookupResults.insert(name)
             
             return nil
         }
         
         let type = makeType(from: prot)
         
-        _cache.wrappedValue[name] = type
+        cache[name] = type
         
         return type
     }
@@ -1652,7 +1650,7 @@ internal final class MemberSearchCache {
                                       includeOptional: includeOptional,
                                       typeName: typeName)
         
-        _methodsCache.wrappedValue[entry] = method
+        methodsCache[entry] = method
     }
 
     func storeProperty(named name: String,
@@ -1666,7 +1664,7 @@ internal final class MemberSearchCache {
                                         includeOptional: includeOptional,
                                         typeName: typeName)
         
-        _propertiesCache.wrappedValue[entry] = property
+        propertiesCache[entry] = property
     }
 
     func storeField(named name: String,
@@ -1678,7 +1676,7 @@ internal final class MemberSearchCache {
                                      isStatic: isStatic,
                                      typeName: typeName)
         
-        _fieldsCache.wrappedValue[entry] = field
+        fieldsCache[entry] = field
     }
     
     func storeSubscript(withParameterLabels labels: [String?],
@@ -1692,7 +1690,7 @@ internal final class MemberSearchCache {
                                          isStatic: isStatic,
                                          typeName: typeName)
         
-        _subscriptsCache.wrappedValue[entry] = sub
+        subscriptsCache[entry] = sub
     }
 
     func lookupMethod(withIdentifier identifier: FunctionIdentifier,

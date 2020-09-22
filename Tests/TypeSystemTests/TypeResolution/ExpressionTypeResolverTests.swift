@@ -207,7 +207,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testBitwiseBinaryDeducesResultAsOperandTypes() {
-        func test(_ op: SwiftOperator, line: Int = #line) {
+        func test(_ op: SwiftOperator, line: UInt = #line) {
             assertResolve(Expression.constant(1).binary(op: op, rhs: .constant(2)),
                           expect: .int, line: line)
             
@@ -1303,14 +1303,14 @@ private extension ExpressionTypeResolverTests {
     }
     
     func assertResolve(_ exp: Expression, expect type: SwiftType?,
-                       file: String = #file, line: Int = #line) {
+                       file: StaticString = #filePath, line: UInt = #line) {
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .resolve()
             .thenAssertExpression(resolvedAs: type, file: file, line: line)
     }
     
     func assertExpects(_ exp: Expression, expect type: SwiftType?,
-                       file: String = #file, line: Int = #line) {
+                       file: StaticString = #filePath, line: UInt = #line) {
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .resolve()
             .thenAssertExpression(expectsType: type, file: file, line: line)

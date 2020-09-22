@@ -1302,15 +1302,14 @@ class TypeSystemTests: XCTestCase {
 
 private extension TypeSystemTests {
     
-    func assertIsNumeric(_ type: SwiftType, line: Int) {
+    func assertIsNumeric(_ type: SwiftType, line: UInt) {
         if !sut.isNumeric(type) {
-            recordFailure(
-                withDescription:
+            XCTFail(
                 """
                 Provided type \(type) is not recognized as a numeric type by the \
                 tested TypeSystem
                 """,
-                inFile: #file, atLine: line, expected: true)
+                file: #filePath, line: line)
             return
         }
     }
@@ -1318,59 +1317,55 @@ private extension TypeSystemTests {
     func assertCoerce(between type1: SwiftType,
                       _ type2: SwiftType,
                       resultsIn result: SwiftType,
-                      line: Int = #line) {
+                      line: UInt = #line) {
         
         assertIsNumeric(type1, line: line)
         assertIsNumeric(type2, line: line)
         
         let r1 = sut.implicitCoercedNumericType(for: type1, type2)
         if r1 != result {
-            recordFailure(
-                withDescription:
+            XCTFail(
                 """
                 Expected coercion between \(type1) and \(type2) to result in \
                 \(result), but received \(r1?.description ?? "<nil>")
                 """,
-                inFile: #file, atLine: line, expected: true)
+                file: #filePath, line: line)
         }
         
         let r2 = sut.implicitCoercedNumericType(for: type2, type1)
         if r2 != result {
-            recordFailure(
-                withDescription:
+            XCTFail(
                 """
                 Expected coercion between \(type2) and \(type1) to result in \
                 \(result), but received \(r2?.description ?? "<nil>")
                 """,
-                inFile: #file, atLine: line, expected: true)
+                file: #filePath, line: line)
         }
     }
     
     func assertNoCoerce(between type1: SwiftType,
                         _ type2: SwiftType,
-                        line: Int = #line) {
+                        line: UInt = #line) {
         
         assertIsNumeric(type1, line: line)
         assertIsNumeric(type2, line: line)
         
         if let r1 = sut.implicitCoercedNumericType(for: type1, type2) {
-            recordFailure(
-                withDescription:
+            XCTFail(
                 """
                 Expected coercion between \(type1) and \(type2) to result in nil, \
                 but received \(r1)
                 """,
-                inFile: #file, atLine: line, expected: true)
+                file: #filePath, line: line)
         }
         
         if let r2 = sut.implicitCoercedNumericType(for: type2, type1) {
-            recordFailure(
-                withDescription:
+            XCTFail(
                 """
                 Expected coercion between \(type2) and \(type1) to result in nil, \
                 but received \(r2)
                 """,
-                inFile: #file, atLine: line, expected: true)
+                file: #filePath, line: line)
         }
     }
 }

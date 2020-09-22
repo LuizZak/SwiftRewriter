@@ -9,8 +9,8 @@ class BaseSwiftSyntaxProducerTests: XCTestCase {
         _ node: T,
         producer: (SwiftSyntaxProducer) -> (T) -> U,
         matches expected: String,
-        file: String = #file,
-        line: Int = #line) {
+        file: StaticString = #filePath,
+        line: UInt = #line) {
         
         let syntax = producer(SwiftSyntaxProducer())(node)
         
@@ -20,8 +20,8 @@ class BaseSwiftSyntaxProducerTests: XCTestCase {
     
     func assert<T: SyntaxProtocol>(_ node: T,
                                    matches expected: String,
-                                   file: String = #file,
-                                   line: Int = #line) {
+                                   file: StaticString = #filePath,
+                                   line: UInt = #line) {
         
         diffTest(expected: expected, file: file, line: line)
             .diff(node.description, file: file, line: line)

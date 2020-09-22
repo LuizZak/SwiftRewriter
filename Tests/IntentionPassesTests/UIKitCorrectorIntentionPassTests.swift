@@ -110,7 +110,7 @@ extension UIKitCorrectorIntentionPassTests {
                                      _ expected: FunctionSignature,
                                      _ signature: FunctionSignature,
                                      _ markAsOverride: Bool,
-                                     _ file: String, _ line: Int) {
+                                     _ file: StaticString, _ line: UInt) {
         
         let format = { TypeFormatter.asString(signature: $0, includeName: true, includeFuncKeyword: true) }
         let type = intentions.fileIntentions()[0].typeIntentions[0]
@@ -118,20 +118,19 @@ extension UIKitCorrectorIntentionPassTests {
         let result = method.signature
         
         if result != expected {
-            
-            recordFailure(withDescription: """
-                Expected to convert signature
-                \(format(signature))
-                into
-                \(format(expected))
-                but converted to
-                \(format(result))
-                """
-                , inFile: file, atLine: line, expected: true)
+            XCTFail("""
+                    Expected to convert signature
+                    \(format(signature))
+                    into
+                    \(format(expected))
+                    but converted to
+                    \(format(result))
+                    """,
+                    file: file, line: line)
         }
         if markAsOverride && !method.isOverride {
-            recordFailure(withDescription: "Expected to mark method \(format(result)) as override",
-                          inFile: file, atLine: line, expected: true)
+            XCTFail("Expected to mark method \(format(result)) as override",
+                    file: file, line: line)
         }
     }
     
@@ -140,7 +139,7 @@ extension UIKitCorrectorIntentionPassTests {
                 into expected: FunctionSignature,
                 markAsOverride: Bool,
                 onSubclassesOf subclassOf: String,
-                file: String = #file, line: Int = #line) {
+                file: StaticString = #file, line: UInt = #line) {
         
         let intentions = IntentionCollectionBuilder()
             .createFileWithClass(named: "A") { type in
@@ -157,7 +156,7 @@ extension UIKitCorrectorIntentionPassTests {
                 convertsSignature signature: FunctionSignature,
                 into expected: FunctionSignature,
                 onImplementersOfProtocol protocolName: String,
-                file: String = #file, line: Int = #line) {
+                file: StaticString = #file, line: UInt = #line) {
         
         let intentions = IntentionCollectionBuilder()
             .createFileWithClass(named: "A") { type in

@@ -93,7 +93,7 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
                                 .id(protocols: ["UIDelegate", "_MyDelegateProtocol"]))
     }
     
-    private func assertObjcTypeParse(_ source: String, _ expectedType: ObjcType, file: String = #file, line: Int = #line) throws {
+    private func assertObjcTypeParse(_ source: String, _ expectedType: ObjcType, file: StaticString = #filePath, line: UInt = #line) throws {
         // Arrange
         let sut = ObjcParser(string: source)
         
@@ -107,17 +107,17 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
             
             // Assert
             if type != expectedType {
-                recordFailure(withDescription: "Failed: Expected to parse type '\(source)' as '\(expectedType)', but received '\(type as Any)'",
-                              inFile: file, atLine: line, expected: true)
+                XCTFail("Failed: Expected to parse type '\(source)' as '\(expectedType)', but received '\(type as Any)'",
+                        file: file, line: line)
             }
             
             if sut.diagnostics.errors.count != 0 {
-                recordFailure(withDescription: "Error(s) parsing type: \(sut.diagnostics.errors.description)",
-                              inFile: file, atLine: line, expected: true)
+                XCTFail("Error(s) parsing type: \(sut.diagnostics.errors.description)",
+                        file: file, line: line)
             }
         } catch {
-            recordFailure(withDescription: "Error(s) parsing type: \(error)",
-                          inFile: file, atLine: line, expected: true)
+            XCTFail("Error(s) parsing type: \(error)",
+                    file: file, line: line)
         }
     }
 }

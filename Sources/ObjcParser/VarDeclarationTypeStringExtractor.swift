@@ -1,67 +1,65 @@
 import ObjcParserAntlr
 import Antlr4
 
-public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
+public class VarDeclarationTypeStringExtractor: ObjectiveCParserBaseVisitor<String> {
     public typealias Parser = ObjectiveCParser
-    
-    public typealias TypeName = String
     
     public var declaratorIndex: Int = 0
     
-    public static func extract(from typeDeclaratorOrName: Parser.TypeVariableDeclaratorOrNameContext) -> TypeName? {
+    public static func extract(from typeDeclaratorOrName: Parser.TypeVariableDeclaratorOrNameContext) -> String? {
         _extract(from: typeDeclaratorOrName)
     }
-    public static func extract(from typeSpecifier: Parser.TypeSpecifierContext) -> TypeName? {
+    public static func extract(from typeSpecifier: Parser.TypeSpecifierContext) -> String? {
         _extract(from: typeSpecifier)
     }
-    public static func extract(from typeName: Parser.TypeNameContext) -> TypeName? {
+    public static func extract(from typeName: Parser.TypeNameContext) -> String? {
         _extract(from: typeName)
     }
-    public static func extract(from rule: Parser.TypeVariableDeclaratorContext) -> TypeName? {
+    public static func extract(from rule: Parser.TypeVariableDeclaratorContext) -> String? {
         _extract(from: rule)
     }
-    public static func extract(from rule: Parser.SpecifierQualifierListContext) -> TypeName? {
+    public static func extract(from rule: Parser.SpecifierQualifierListContext) -> String? {
         _extract(from: rule)
     }
-    public static func extract(from rule: Parser.DeclarationSpecifiersContext) -> TypeName? {
+    public static func extract(from rule: Parser.DeclarationSpecifiersContext) -> String? {
         _extract(from: rule)
     }
-    public static func extract(from rule: Parser.VarDeclarationContext, atIndex index: Int = 0) -> TypeName? {
+    public static func extract(from rule: Parser.VarDeclarationContext, atIndex index: Int = 0) -> String? {
         _extract(from: rule, atIndex: index)
     }
-    public static func extract(from rule: Parser.ForLoopInitializerContext, atIndex index: Int = 0) -> TypeName? {
+    public static func extract(from rule: Parser.ForLoopInitializerContext, atIndex index: Int = 0) -> String? {
         _extract(from: rule, atIndex: index)
     }
     
-    public static func extractAll(from rule: Parser.VarDeclarationContext) -> [TypeName] {
+    public static func extractAll(from rule: Parser.VarDeclarationContext) -> [String] {
         _extractAll(from: rule)
     }
-    public static func extractAll(from rule: Parser.ForLoopInitializerContext) -> [TypeName] {
+    public static func extractAll(from rule: Parser.ForLoopInitializerContext) -> [String] {
         _extractAll(from: rule)
     }
-    public static func extractAll(from rule: Parser.BlockParametersContext) -> [TypeName] {
+    public static func extractAll(from rule: Parser.BlockParametersContext) -> [String] {
         _extractAll(from: rule)
     }
-    public static func extractAll(from rule: Parser.FieldDeclarationContext) -> [TypeName] {
+    public static func extractAll(from rule: Parser.FieldDeclarationContext) -> [String] {
         _extractAll(from: rule)
     }
     
-    private static func _extract(from rule: ParserRuleContext, atIndex index: Int = 0) -> TypeName? {
-        let ext = VarDeclarationTypeExtractor()
+    private static func _extract(from rule: ParserRuleContext, atIndex index: Int = 0) -> String? {
+        let ext = VarDeclarationTypeStringExtractor()
         ext.declaratorIndex = index
         
         return rule.accept(ext)
     }
     
-    private static func _extractAll(from rule: ParserRuleContext) -> [TypeName] {
-        let ext = VarDeclarationTypeExtractor()
+    private static func _extractAll(from rule: ParserRuleContext) -> [String] {
+        let ext = VarDeclarationTypeStringExtractor()
         
         if let vdec = rule as? Parser.VarDeclarationContext {
             guard let count = vdec.initDeclaratorList()?.initDeclarator().count else {
                 return []
             }
             
-            return (0..<count).compactMap { i -> TypeName? in
+            return (0..<count).compactMap { i -> String? in
                 ext.declaratorIndex = i
                 
                 return vdec.accept(ext)
@@ -72,14 +70,14 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
                 return []
             }
             
-            return (0..<count).compactMap { i -> TypeName? in
+            return (0..<count).compactMap { i -> String? in
                 ext.declaratorIndex = i
                 
                 return loopInit.accept(ext)
             }
         }
         if let blockParameters = rule as? Parser.BlockParametersContext {
-            var parameterTypes: [TypeName] = []
+            var parameterTypes: [String] = []
             
             for param in blockParameters.typeVariableDeclaratorOrName() {
                 guard let paramType = param.accept(ext) else {
@@ -92,7 +90,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
             return parameterTypes
         }
         if let fieldDeclaration = rule as? Parser.FieldDeclarationContext {
-            var typeNames: [TypeName] = []
+            var typeNames: [String] = []
             
             guard let fieldDeclaratorList = fieldDeclaration.fieldDeclaratorList() else {
                 return []
@@ -140,7 +138,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return rule.accept(ext).map { [$0] } ?? []
     }
     
-    public override func visitVarDeclaration(_ ctx: Parser.VarDeclarationContext) -> TypeName? {
+    public override func visitVarDeclaration(_ ctx: Parser.VarDeclarationContext) -> String? {
         guard let initDeclarator = ctx.initDeclaratorList()?.initDeclarator(declaratorIndex) else { return nil }
         
         // Get a type string to convert into a proper type
@@ -159,7 +157,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return typeString
     }
     
-    public override func visitForLoopInitializer(_ ctx: Parser.ForLoopInitializerContext) -> TypeName? {
+    public override func visitForLoopInitializer(_ ctx: Parser.ForLoopInitializerContext) -> String? {
         guard let initDeclarator = ctx.initDeclaratorList()?.initDeclarator(declaratorIndex) else { return nil }
         
         // Get a type string to convert into a proper type
@@ -177,7 +175,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return typeString
     }
     
-    public override func visitTypeVariableDeclarator(_ ctx: Parser.TypeVariableDeclaratorContext) -> TypeName? {
+    public override func visitTypeVariableDeclarator(_ ctx: Parser.TypeVariableDeclaratorContext) -> String? {
         guard let declarator = ctx.declarator() else { return nil }
         
         // Get a type string to convert into a proper type
@@ -190,7 +188,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return typeString
     }
     
-    public override func visitTypeSpecifier(_ ctx: Parser.TypeSpecifierContext) -> TypeName? {
+    public override func visitTypeSpecifier(_ ctx: Parser.TypeSpecifierContext) -> String? {
         // TODO: Support typeofExpression
         if ctx.typeofExpression() != nil {
             return nil
@@ -212,7 +210,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
     }
     
     public override func visitTypeVariableDeclaratorOrName(
-        _ ctx: Parser.TypeVariableDeclaratorOrNameContext) -> TypeName? {
+        _ ctx: Parser.TypeVariableDeclaratorOrNameContext) -> String? {
         
         if let typeName = ctx.typeName() {
             return typeName.accept(self)
@@ -239,7 +237,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return typeString
     }
     
-    public override func visitBlockType(_ ctx: Parser.BlockTypeContext) -> TypeName? {
+    public override func visitBlockType(_ ctx: Parser.BlockTypeContext) -> String? {
         guard let returnTypeSpecifier = ctx.typeSpecifier(0) else {
             return nil
         }
@@ -270,7 +268,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         type += ")"
         
         if let blockParameters = ctx.blockParameters() {
-            let parameterTypes = VarDeclarationTypeExtractor.extractAll(from: blockParameters)
+            let parameterTypes = VarDeclarationTypeStringExtractor.extractAll(from: blockParameters)
             
             type += "("
             type += parameterTypes.joined(separator: ", ")
@@ -280,7 +278,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return type
     }
     
-    public override func visitDeclarator(_ ctx: Parser.DeclaratorContext) -> TypeName? {
+    public override func visitDeclarator(_ ctx: Parser.DeclaratorContext) -> String? {
         guard let directDeclarator = ctx.directDeclarator()?.accept(self) else {
             return nil
         }
@@ -292,9 +290,9 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return directDeclarator
     }
     
-    public override func visitDirectDeclarator(_ ctx: Parser.DirectDeclaratorContext) -> TypeName? {
+    public override func visitDirectDeclarator(_ ctx: Parser.DirectDeclaratorContext) -> String? {
         if let blockParameters = ctx.blockParameters() {
-            let parameterTypes = VarDeclarationTypeExtractor.extractAll(from: blockParameters)
+            let parameterTypes = VarDeclarationTypeStringExtractor.extractAll(from: blockParameters)
             
             var type = ""
             
@@ -318,7 +316,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return nil
     }
     
-    public override func visitTypeName(_ ctx: Parser.TypeNameContext) -> TypeName? {
+    public override func visitTypeName(_ ctx: Parser.TypeNameContext) -> String? {
         // Block type
         if let blockType = ctx.blockType() {
             return blockType.accept(self)
@@ -336,7 +334,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return specifierList
     }
     
-    public override func visitPointer(_ ctx: Parser.PointerContext) -> TypeName? {
+    public override func visitPointer(_ ctx: Parser.PointerContext) -> String? {
         var pointerStr = "*"
         
         if let declSpecifier = ctx.declarationSpecifiers()?.accept(self) {
@@ -349,7 +347,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return pointerStr
     }
     
-    public override func visitSpecifierQualifierList(_ ctx: Parser.SpecifierQualifierListContext) -> TypeName? {
+    public override func visitSpecifierQualifierList(_ ctx: Parser.SpecifierQualifierListContext) -> String? {
         guard let children = ctx.children else {
             return nil
         }
@@ -359,7 +357,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         }.joined(separator: " ")
     }
     
-    public override func visitDeclarationSpecifiers(_ ctx: Parser.DeclarationSpecifiersContext) -> TypeName? {
+    public override func visitDeclarationSpecifiers(_ ctx: Parser.DeclarationSpecifiersContext) -> String? {
         guard let children = ctx.children else {
             return nil
         }
@@ -386,7 +384,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return output
     }
     
-    public override func visitFunctionPointer(_ ctx: ObjectiveCParser.FunctionPointerContext) -> TypeName? {
+    public override func visitFunctionPointer(_ ctx: ObjectiveCParser.FunctionPointerContext) -> String? {
         var output = ""
         
         if let specifiers = ctx.declarationSpecifiers()?.accept(self) {

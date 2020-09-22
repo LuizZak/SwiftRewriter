@@ -28,8 +28,8 @@ class SingleFileTestBuilder {
     func assertObjcParse(swift expectedSwift: String,
                          fileName: String = "test.m",
                          expectsErrors: Bool = false,
-                         file: String = #file,
-                         line: Int = #line) {
+                         file: StaticString = #filePath,
+                         line: UInt = #line) {
         
         let output = TestSingleFileWriterOutput()
         let input = TestSingleInputProvider(fileName: fileName,
@@ -48,7 +48,7 @@ class SingleFileTestBuilder {
             try sut.rewrite()
             
             if output.buffer != expectedSwift {
-                test.recordFailure(withDescription: """
+                XCTFail("""
                     Failed: Expected to translate Objective-C
                     \(formatCodeForDisplay(objc))
                     
@@ -65,27 +65,27 @@ class SingleFileTestBuilder {
                     \(formatCodeForDisplay(output.buffer)
                         .makeDifferenceMarkString(against:
                             formatCodeForDisplay(expectedSwift)))
-                    """, inFile: file, atLine: line, expected: true)
+                    """, file: file, line: line)
             }
             
             if !expectsErrors && sut.diagnostics.errors.count != 0 {
-                test.recordFailure(withDescription: "Unexpected error(s) converting objective-c: \(sut.diagnostics.errors.description)",
-                                   inFile: file, atLine: line, expected: true)
+                XCTFail("Unexpected error(s) converting objective-c: \(sut.diagnostics.errors.description)",
+                        file: file, line: line)
             }
             
             diagnosticsStream = ""
             sut.diagnostics.printDiagnostics(to: &diagnosticsStream)
             diagnosticsStream = diagnosticsStream.trimmingCharacters(in: .whitespacesAndNewlines)
         } catch {
-            test.recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)",
-                               inFile: file, atLine: line, expected: false)
+            XCTFail("Unexpected error(s) parsing objective-c: \(error)",
+                    file: file, line: line)
         }
     }
     
-    func assertDiagnostics(_ expected: String, file: String = #file, line: Int = #line) {
+    func assertDiagnostics(_ expected: String, file: StaticString = #filePath, line: UInt = #line) {
         if diagnosticsStream != expected {
-            test.recordFailure(withDescription: "Mismatched output stream. Expected \(expected) but found \(diagnosticsStream)",
-                               inFile: file, atLine: line, expected: true)
+            XCTFail("Mismatched output stream. Expected \(expected) but found \(diagnosticsStream)",
+                    file: file, line: line)
         }
     }
     
@@ -152,8 +152,8 @@ extension XCTestCase {
                        options: SwiftSyntaxOptions = .default,
                        rewriterSettings: SwiftRewriter.Settings = .default,
                        expectsErrors: Bool = false,
-                       file: String = #file,
-                       line: Int = #line) -> SingleFileTestBuilder  {
+                       file: StaticString = #filePath,
+                       line: UInt = #line) -> SingleFileTestBuilder  {
         
         let test = SingleFileTestBuilder(test: self,
                                          objc: objc,

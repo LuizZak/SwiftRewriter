@@ -125,7 +125,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
         return usages
     }
     
-    func isReadOnlyContext(_ expression: Expression) -> Bool {
+    func isReadOnlyContext(_ expression: Expression) -> Bool { 
         if let assignment = expression.parentExpression?.asAssignment {
             return expression !== assignment.lhs
         }
@@ -137,7 +137,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
             let root = postfix.topPostfixExpression
             
             // If at any point we find a function call, the original value cannot
-            // be mutated due to any change on the return's value, so we just
+            // be mutated due to any change on the returned value, so we just
             // assume it's never written.
             let chain = PostfixChainInverter.invert(expression: root)
             if let call = chain.first(where: { $0.postfix is FunctionCallPostfix }),

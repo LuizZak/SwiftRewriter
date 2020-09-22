@@ -26,16 +26,17 @@ class SwiftTypeConversionTests: XCTestCase {
 extension SwiftTypeConversionTests {
     private func expectSwift(_ type: SwiftType,
                              toConvertTo expected: String,
-                             file: String = #file, line: Int = #line) {
+                             file: StaticString = #filePath,
+                             line: UInt = #line) {
         
         let converted = typeMapperConvert(type)
         
         if converted != expected {
-            recordFailure(withDescription: """
-                Expected Swift type \(type) to convert into '\(expected)', but \
-                received '\(converted)' instead.
-                """,
-                inFile: file, atLine: line, expected: true)
+            XCTFail("""
+                    Expected Swift type \(type) to convert into '\(expected)', but \
+                    received '\(converted)' instead.
+                    """,
+                    file: file, line: line)
         }
     }
     

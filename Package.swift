@@ -3,9 +3,11 @@
 // build this package.
 
 import PackageDescription
-
 let package = Package(
     name: "SwiftRewriter",
+    platforms: [
+        .macOS(.v10_12)
+    ],
     products: [
         // Products define the executables and libraries produced by a package,
         // and make them visible to other packages.
@@ -24,8 +26,8 @@ let package = Package(
         .package(url: "https://github.com/LuizZak/MiniLexer.git", .exact("0.10.0")),
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.32"),
         .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.0")),
-        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50200.0")),
-        .package(url: "https://github.com/apple/swift-argument-parser.git", .exact("0.2.1"))
+        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50300.0")),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", .exact("0.0.4"))
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define

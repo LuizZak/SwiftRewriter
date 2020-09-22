@@ -107,7 +107,7 @@ class InitAnalysisIntentionPassTests: XCTestCase {
 
 private extension InitAnalysisIntentionPassTests {
     
-    func testFlagsBody(as flags: InitFlags, _ body: CompoundStatement, line: Int = #line) {
+    func testFlagsBody(as flags: InitFlags, _ body: CompoundStatement, line: UInt = #line) {
         
         let intentions =
             IntentionCollectionBuilder()
@@ -126,10 +126,11 @@ private extension InitAnalysisIntentionPassTests {
             let actFlagsString = actFlags.description
             let expFlagsString = flags.description
             
-            recordFailure(withDescription: """
-                Expected to flag initializer as \(expFlagsString) but found \
-                \(actFlagsString) instead.
-                """, inFile: #file, atLine: line, expected: true)
+            XCTFail("""
+                    Expected to flag initializer as \(expFlagsString) but found \
+                    \(actFlagsString) instead.
+                    """,
+                    file: #filePath, line: line)
         }
     }
     

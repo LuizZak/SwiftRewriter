@@ -706,7 +706,7 @@ extension SyntaxNodeIteratorTests {
     }
     
     private func assertExpression(_ source: Expression, inspectingBlocks: Bool = false,
-                                  iteratesAs expected: [SyntaxNode], file: String = #file, line: Int = #line) {
+                                  iteratesAs expected: [SyntaxNode], file: StaticString = #filePath, line: UInt = #line) {
         let iterator =
             SyntaxNodeIterator(expression: source,
                                inspectBlocks: inspectingBlocks)
@@ -715,7 +715,7 @@ extension SyntaxNodeIteratorTests {
     }
     
     private func assertStatement(_ source: Statement, inspectingBlocks: Bool = false,
-                                 iteratesAs expected: [SyntaxNode], file: String = #file, line: Int = #line) {
+                                 iteratesAs expected: [SyntaxNode], file: StaticString = #filePath, line: UInt = #line) {
         let iterator =
             SyntaxNodeIterator(statement: source,
                                inspectBlocks: inspectingBlocks)
@@ -725,7 +725,7 @@ extension SyntaxNodeIteratorTests {
     
     private func assertIterator(iterator: SyntaxNodeIterator,
                                 iterates expected: [SyntaxNode],
-                                file: String = #file, line: Int = #line) {
+                                file: StaticString = #filePath, line: UInt = #line) {
         let result = Array(AnyIterator(iterator))
         
         for (i, (actual, expect)) in zip(result, expected).enumerated() {
@@ -739,10 +739,10 @@ extension SyntaxNodeIteratorTests {
                     continue
                 }
             default:
-                recordFailure(withDescription: """
+                XCTFail("""
                     Items at index \(i) of type \(type(of: expect)) and \(type(of: actual)) \
                     cannot be compared.
-                    """, inFile: file, atLine: line, expected: true)
+                    """, file: file, line: line)
                 break
             }
             
@@ -752,20 +752,20 @@ extension SyntaxNodeIteratorTests {
             dump(expect, to: &expString)
             dump(actual, to: &actString)
             
-            recordFailure(withDescription: """
+            XCTFail("""
                 Expected index \(i) of iterator to be:
                 \(expString)
                 but found:
                 \(actString)
-                """, inFile: file, atLine: line, expected: true)
+                """, file: file, line: line)
             return
         }
         
         if expected.count != result.count {
-            recordFailure(withDescription: """
+            XCTFail("""
                 Mismatched result count: Expected \(expected.count) item(s) but \
                 received \(result.count)
-                """, inFile: file, atLine: line, expected: true)
+                """, file: file, line: line)
         }
     }
 }

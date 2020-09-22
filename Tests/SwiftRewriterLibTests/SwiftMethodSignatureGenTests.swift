@@ -188,7 +188,7 @@ class SwiftMethodSignatureGenTests: XCTestCase {
                                        instanceTypeAlias: nil)
     }
     
-    private func parseMethodSign(_ source: String, file: String = #file, line: Int = #line) -> MethodDefinition {
+    private func parseMethodSign(_ source: String, file: StaticString = #filePath, line: UInt = #line) -> MethodDefinition {
         let finalSrc = """
             @interface myClass
             \(source)
@@ -206,7 +206,7 @@ class SwiftMethodSignatureGenTests: XCTestCase {
                     .firstChild(ofType: MethodDefinition.self)
             return node!
         } catch {
-            recordFailure(withDescription: "Failed to parse test '\(source)': \(error)", inFile: #file, atLine: line, expected: false)
+            XCTFail("Failed to parse test '\(source)': \(error)", file: file, line: line)
             fatalError()
         }
     }

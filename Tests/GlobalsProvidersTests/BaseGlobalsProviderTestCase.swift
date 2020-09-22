@@ -23,49 +23,46 @@ class BaseGlobalsProviderTestCase: XCTestCase {
     
     func assertDefined(typealiasFrom typealiasName: String,
                        to type: SwiftType,
-                       file: String = #file, line: Int = #line) {
+                       file: StaticString = #filePath, line: UInt = #line) {
         
         guard let actual = typealiases.unalias(typealiasName) else {
-            recordFailure(withDescription: "Expected to find typealias with name \(typealiasName)",
-                inFile: file, atLine: line, expected: true)
+            XCTFail("Expected to find typealias with name \(typealiasName)",
+                    file: file, line: line)
             return
         }
         
         if actual != type {
-            recordFailure(
-                withDescription: "Expected typealias to be of type \(type), but found \(actual) instead.",
-                inFile: file, atLine: line, expected: true)
+            XCTFail("Expected typealias to be of type \(type), but found \(actual) instead.",
+                    file: file, line: line)
         }
     }
     
     func assertDefined(variable: String,
                        type: SwiftType,
-                       file: String = #file, line: Int = #line) {
+                       file: StaticString = #filePath, line: UInt = #line) {
         
         guard let definition = globals.firstDefinition(named: variable) else {
-            recordFailure(withDescription: "Expected to find definition \(variable)",
-                inFile: file, atLine: line, expected: true)
+            XCTFail("Expected to find definition \(variable)",
+                file: file, line: line)
             return
         }
         
         guard case let .variable(_, storage) = definition.kind else {
-            recordFailure(
-                withDescription: "Expected to find a variable defined, but found \(definition.kind) instead",
-                inFile: file, atLine: line, expected: true)
+            XCTFail("Expected to find a variable defined, but found \(definition.kind) instead",
+                    file: file, line: line)
             return
         }
         
         if storage.type != type {
-            recordFailure(
-                withDescription: "Expected variable to be of type \(type), but found \(storage.type) instead.",
-                inFile: file, atLine: line, expected: true)
+            XCTFail("Expected variable to be of type \(type), but found \(storage.type) instead.",
+                    file: file, line: line)
         }
     }
     
     func assertDefined(function: String,
                        paramTypes: [SwiftType],
                        returnType: SwiftType,
-                       file: String = #file, line: Int = #line) {
+                       file: StaticString = #filePath, line: UInt = #line) {
         
         let asSignature =
             FunctionSignature(
@@ -80,7 +77,7 @@ class BaseGlobalsProviderTestCase: XCTestCase {
     }
     
     func assertDefined(functionSignature: String,
-                       file: String = #file, line: Int = #line) {
+                       file: StaticString = #filePath, line: UInt = #line) {
         
         let asSignature = try! FunctionSignature(signatureString: functionSignature)
         
@@ -96,25 +93,25 @@ class BaseGlobalsProviderTestCase: XCTestCase {
                 }
         
         guard !signatures.isEmpty else {
-            recordFailure(withDescription: "Expected to find definition for \(functionSignature)",
-                inFile: file, atLine: line, expected: true)
+            XCTFail("Expected to find definition for \(functionSignature)",
+                file: file, line: line)
             return
         }
         
         if !signatures.contains(where: { asSignature.asIdentifier == $0.asIdentifier }) {
-            recordFailure(
-                withDescription: """
+            XCTFail(
+                """
                 Failed to find function definition \(functionSignature).
                 
                 Function signatures found:
                 
                 \(signatures.map { TypeFormatter.asString(signature: $0, includeName: true) }.joined(separator: "\n -"))
                 """,
-                inFile: file, atLine: line, expected: true)
+                file: file, line: line)
         }
     }
     
-    func assertDefined(typeName: String, supertype: String? = nil, file: StaticString = #file, line: UInt = #line) {
+    func assertDefined(typeName: String, supertype: String? = nil, file: StaticString = #filePath, line: UInt = #line) {
         guard let type = types.knownType(withName: typeName) else {
             XCTFail("Expected to find type \(typeName)",
                     file: file, line: line)
@@ -131,7 +128,7 @@ class BaseGlobalsProviderTestCase: XCTestCase {
     func assertDefined(typeName: String,
                        supertype: String? = nil,
                        signature: String,
-                       file: StaticString = #file, line: UInt = #line) {
+                       file: StaticString = #filePath, line: UInt = #line) {
         
         guard let type = types.knownType(withName: typeName) else {
             XCTFail("Expected to find type \(typeName)",
@@ -162,21 +159,21 @@ class BaseGlobalsProviderTestCase: XCTestCase {
     
     func assertDefined(canonicalTypeName: String,
                        forNonCanon nonCanon: String,
-                       file: String = #file, line: Int = #line) {
+                       file: StaticString = #filePath, line: UInt = #line) {
         
         guard let canonName = types.canonicalName(for: nonCanon) else {
-            recordFailure(withDescription: "Expected to find canonical type mapping for \(nonCanon)",
-                          inFile: file, atLine: line, expected: true)
+            XCTFail("Expected to find canonical type mapping for \(nonCanon)",
+                          file: file, line: line)
             return
         }
         
         if canonName != canonicalTypeName {
-            recordFailure(
-                withDescription: """
+            XCTFail(
+                """
                 Expected canonical type '\(nonCanon)' to map to \(canonicalTypeName), \
                 but it maps to \(canonName)
                 """,
-                inFile: file, atLine: line, expected: true)
+                file: file, line: line)
         }
     }
 }

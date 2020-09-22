@@ -33,8 +33,8 @@ class VarDeclarationTypeExtractorTests: XCTestCase {
     }
     
     func assertTypeVisit(objc: String, _ parseBlock: (ObjectiveCParser) throws -> ParserRuleContext,
-                         expected: String, file: String = #file, line: Int = #line) {
-        let sut = VarDeclarationTypeExtractor()
+                         expected: String, file: StaticString = #filePath, line: UInt = #line) {
+        let sut = VarDeclarationTypeStringExtractor()
         
         do {
             let (toks, parser) = objcParser(for: objc)
@@ -46,7 +46,7 @@ class VarDeclarationTypeExtractorTests: XCTestCase {
             let output = parserRuleContext.accept(sut)
             
             if output != expected {
-                recordFailure(withDescription: """
+                XCTFail("""
                     Failed: Expected to translate Objective-C
                     \(objc)
                     
@@ -57,11 +57,13 @@ class VarDeclarationTypeExtractorTests: XCTestCase {
                     but translated as
                     
                     \(output as Any)
-                    """, inFile: file, atLine: line, expected: true)
+                    """,
+                        file: file,
+                        line: line)
             }
         } catch {
-            recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)",
-                          inFile: file, atLine: line, expected: false)
+            XCTFail("Unexpected error(s) parsing objective-c: \(error)",
+                    file: file, line: line)
         }
     }
     
