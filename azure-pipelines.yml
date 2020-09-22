@@ -11,12 +11,12 @@ jobs:
   pool:
     vmImage: 'macOS-10.15'
   steps:
-  - bash: 'sudo xcode-select -s /Applications/Xcode_12_beta.app/Contents/Developer'
+  - bash: 'sudo xcode-select -s /Applications/Xcode_12.app/Contents/Developer'
   - bash: 'swift test'
 
 - job: Linux
   container:
-    image: swift:nightly-5.3-xenial
+    image: swift:5.3-xenial
   pool:
     vmImage: ubuntu-16.04
   steps:
