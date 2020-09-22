@@ -25,8 +25,7 @@ public struct SwiftRewriterAttribute {
                                                includeStatic: false)
                 
             case .mapFromIdentifier(let identifier):
-                return
-                    "mapFrom: \(identifier.description)"
+                return "mapFrom: \(identifier.description)"
                 
             case .mapToBinaryOperator(let op):
                 return "mapToBinary: \(op)"

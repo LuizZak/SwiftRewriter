@@ -1,5 +1,9 @@
 .DS_Store
 /.build
 /Packages
-/*.xcodeproj
 .swiftpm/
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings

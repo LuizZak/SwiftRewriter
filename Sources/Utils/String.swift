@@ -38,10 +38,6 @@ public extension String {
             return self + "\n ~ Strings are equal."
         }
         
-        if line == 0 && column == 0 {
-            return self + "\n ~ Difference at start of string."
-        }
-        
         let marker = String(repeating: "~", count: column - 1) + "^ Difference starts here"
         
         return insertingStringLine(marker, after: line)
@@ -53,7 +49,7 @@ public extension String {
         }
         
         if first != string.first {
-            return (0, 0)
+            return (1, 1)
         }
         
         // Find first character differing across both strings

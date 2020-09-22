@@ -2,7 +2,7 @@ import XCTest
 import Antlr4
 import ObjcParser
 import ObjcParserAntlr
-import SwiftRewriterLib
+@testable import SwiftRewriterLib
 import TypeSystem
 import SwiftAST
 
@@ -88,8 +88,16 @@ class SwiftExprASTReaderTests: XCTestCase {
     }
     
     func testSelectorExpression() {
+        assert(objcExpr: "@selector(abc)",
+               readsAs: Expression.selector(FunctionIdentifier(name: "abc", argumentLabels: [])))
+        assert(objcExpr: "@selector(abc:)",
+               readsAs: Expression.selector(FunctionIdentifier(name: "abc", argumentLabels: [nil])))
         assert(objcExpr: "@selector(abc:def:)",
-               readsAs: Expression.identifier("Selector").call([.constant("abc:def:")]))
+               readsAs: Expression.selector(FunctionIdentifier(name: "abc", argumentLabels: [nil, "def"])))
+        assert(objcExpr: "@selector(abc::def:)",
+               readsAs: Expression.selector(FunctionIdentifier(name: "abc", argumentLabels: [nil, nil, "def"])))
+        assert(objcExpr: "@selector(abc::def::)",
+               readsAs: Expression.selector(FunctionIdentifier(name: "abc", argumentLabels: [nil, nil, "def", nil])))
     }
     
     func testAssignmentWithMethodCall() {
@@ -237,6 +245,24 @@ class SwiftExprASTReaderTests: XCTestCase {
                 .call()
         )
     }
+    
+    func testConvertSelectorToIdentifier() {
+        assert(
+            objcSelector: "f",
+            readsAsIdentifier: FunctionIdentifier(name: "f", argumentLabels: []))
+        assert(
+            objcSelector: "f:",
+            readsAsIdentifier: FunctionIdentifier(name: "f", argumentLabels: [nil]))
+        assert(
+            objcSelector: "f:a:",
+            readsAsIdentifier: FunctionIdentifier(name: "f", argumentLabels: [nil, "a"]))
+        assert(
+            objcSelector: "f::",
+            readsAsIdentifier: FunctionIdentifier(name: "f", argumentLabels: [nil, nil]))
+        assert(
+            objcSelector: "f::b:",
+            readsAsIdentifier: FunctionIdentifier(name: "f", argumentLabels: [nil, nil, "b"]))
+    }
 }
 
 extension SwiftExprASTReaderTests {
@@ -291,6 +317,36 @@ extension SwiftExprASTReaderTests {
             XCTFail("Unexpected error(s) parsing objective-c: \(error)",
                     file: file,
                     line: line)
+        }
+    }
+    
+    func assert(objcSelector: String,
+                readsAsIdentifier expected: FunctionIdentifier,
+                line: Int = #line) {
+        
+        do {
+            let state = try SwiftExprASTReaderTests._state.makeMainParser(input: objcSelector)
+            tokens = state.tokens
+            
+            let expr = try state.parser.selectorName()
+            
+            let result = convertSelectorToIdentifier(expr)
+            
+            if result != expected {
+                recordFailure(withDescription: """
+                    Failed: Expected to read Objective-C selector
+                    \(objcSelector)
+                    as
+                    \(expected)
+                    but read as
+                    \(result?.description ?? "<nil>")
+                    """, inFile: #file, atLine: line, expected: true)
+            }
+        } catch {
+            recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)",
+                          inFile: #file,
+                          atLine: line,
+                          expected: false)
         }
     }
     

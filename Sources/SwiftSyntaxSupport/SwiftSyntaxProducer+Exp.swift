@@ -47,6 +47,9 @@ extension SwiftSyntaxProducer {
         case let exp as TupleExpression:
             return generateTuple(exp)
             
+        case let exp as SelectorExpression:
+            return generateSelector(exp)
+            
         case let exp as BlockLiteralExpression:
             return generateClosure(exp).asExprSyntax
             
@@ -54,6 +57,7 @@ extension SwiftSyntaxProducer {
             return SyntaxFactory.makeBlankUnknownExpr().asExprSyntax
             
         default:
+            assertionFailure("Found unknown expression syntax node type \(type(of: expression))")
             return SyntaxFactory.makeBlankAsExpr().asExprSyntax
         }
     }
@@ -84,7 +88,7 @@ extension SwiftSyntaxProducer {
                         
                         builder.addArgument(GenericArgumentSyntax { builder in
                             builder.useArgumentType(
-                                SwiftTypeConverter.makeTypeSyntax(type)
+                                SwiftTypeConverter.makeTypeSyntax(type, startTokenHandler: self)
                             )
                         })
                     })
@@ -155,7 +159,7 @@ extension SwiftSyntaxProducer {
                     )
                 }
                 
-                builder.useTypeName(SwiftTypeConverter.makeTypeSyntax(exp.type))
+                builder.useTypeName(SwiftTypeConverter.makeTypeSyntax(exp.type, startTokenHandler: self))
             }.asExprSyntax)
         }
     }
@@ -207,7 +211,7 @@ extension SwiftSyntaxProducer {
                                 
                                 builder.useType(
                                     SwiftTypeConverter
-                                        .makeTypeSyntax(arg.type)
+                                        .makeTypeSyntax(arg.type, startTokenHandler: self)
                                 )
                             }
                             
@@ -526,6 +530,49 @@ extension SwiftSyntaxProducer {
         }.asExprSyntax
     }
     
+    func generateSelector(_ exp: SelectorExpression) -> ExprSyntax {
+        return ObjcSelectorExprSyntax { builder in
+            builder.usePoundSelector(makeStartToken(SyntaxFactory.makePoundSelectorKeyword))
+            builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
+            builder.useRightParen(SyntaxFactory.makeRightParenToken())
+            
+            func makePropReference(type: SwiftType?, property: String) -> ExprSyntax {
+                if let type = type {
+                    return MemberAccessExprSyntax { builder in
+                        builder.useBase(
+                            SyntaxFactory
+                                .makeTypeExpr(type: SwiftTypeConverter.makeTypeSyntax(type, startTokenHandler: self))
+                                .asExprSyntax
+                        )
+                        builder.useDot(SyntaxFactory.makePeriodToken())
+                        builder.useName(makeIdentifier(property))
+                    }.asExprSyntax
+                }
+
+                return SyntaxFactory
+                    .makeIdentifierExpr(
+                        identifier: makeIdentifier(property),
+                        declNameArguments: nil
+                    ).asExprSyntax
+            }
+
+            switch exp.kind {
+            case let .function(type, identifier):
+                builder.useName(generateFunctionIdentifier(type: type, identifier))
+
+            case let .getter(type, property):
+                builder.useKind(makeIdentifier("getter"))
+                builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
+                builder.useName(makePropReference(type: type, property: property))
+
+            case let .setter(type, property):
+                builder.useKind(makeIdentifier("setter"))
+                builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
+                builder.useName(makePropReference(type: type, property: property))
+            }
+        }.asExprSyntax
+    }
+    
     func generateConstant(_ constant: ConstantExpression) -> ExprSyntax {
         switch constant.constant {
         case .boolean(let bool):
@@ -657,6 +704,47 @@ extension SwiftSyntaxProducer {
         }
         
         return generateExpression(exp)
+    }
+    
+    func generateFunctionIdentifier(type: SwiftType?, _ ident: FunctionIdentifier) -> ExprSyntax {
+        let declArgs = DeclNameArgumentsSyntax { builder in
+            builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
+            builder.useRightParen(SyntaxFactory.makeRightParenToken())
+            
+            for arg in ident.argumentLabels {
+                builder.addArgument(DeclNameArgumentSyntax { builder in
+                    if let arg = arg {
+                        builder.useName(makeIdentifier(arg))
+                    } else {
+                        builder.useName(SyntaxFactory.makeWildcardKeyword())
+                    }
+                    
+                    builder.useColon(SyntaxFactory.makeColonToken())
+                })
+            }
+        }
+        
+        if let type = type {
+            let typeSyntax = SwiftTypeConverter.makeTypeSyntax(type, startTokenHandler: self)
+            
+            return MemberAccessExprSyntax { builder in
+                builder.useBase(
+                    SyntaxFactory
+                        .makeTypeExpr(type: typeSyntax)
+                        .asExprSyntax
+                )
+                
+                builder.useDot(SyntaxFactory.makePeriodToken())
+                
+                builder.useName(makeIdentifier(ident.name))
+                builder.useDeclNameArguments(declArgs)
+            }.asExprSyntax
+        } else {
+            return IdentifierExprSyntax { builder in
+                builder.useIdentifier(prepareStartToken(makeIdentifier(ident.name)))
+                builder.useDeclNameArguments(declArgs)
+            }.asExprSyntax
+        }
     }
     
     enum OperatorMode {

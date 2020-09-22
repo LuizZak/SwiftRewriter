@@ -110,7 +110,7 @@ class StringTests: XCTestCase {
         
         XCTAssertEqual("""
             Abc
-             ~ Difference at start of string.
+            ^ Difference starts here
             """, result)
     }
     

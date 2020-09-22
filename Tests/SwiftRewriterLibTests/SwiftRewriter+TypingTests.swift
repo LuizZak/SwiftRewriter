@@ -542,7 +542,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             
                 func method() {
                     // type: Bool?
-                    b?.responds(to: Selector("abc:"))
+                    b?.responds(to: #selector(abc(_:)))
                 }
             }
             """,
@@ -645,9 +645,9 @@ class SwiftRewriter_TypingTests: XCTestCase {
             
                 func method() {
                     // type: Bool?
-                    self.b?.responds(to: Selector("abc:"))
+                    self.b?.responds(to: #selector(abc(_:)))
 
-                    if self.b?.responds(to: Selector("abc:")) == true {
+                    if self.b?.responds(to: #selector(abc(_:))) == true {
                     }
                 }
             }
@@ -1444,6 +1444,27 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     // decl type: NSMutableDictionary
                     // init type: NSMutableDictionary
                     let dictMut = NSMutableDictionary()
+                }
+            }
+            """,
+            options: SwiftSyntaxOptions.default.with(\.outputExpressionTypes, true))
+    }
+    
+    func testSelectorType() {
+        assertRewrite(
+            objc: """
+            @implementation A
+            - (void)test {
+                id selector = @selector(abc:);
+            }
+            @end
+            """,
+            swift: """
+            class A {
+                func test() {
+                    // decl type: AnyObject
+                    // init type: Selector
+                    let selector: AnyObject = #selector(abc(_:))
                 }
             }
             """,

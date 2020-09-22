@@ -769,7 +769,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             class MyClass {
                 func myMethod() {
-                    if self.responds(to: Selector("abc:")) {
+                    if self.responds(to: #selector(abc(_:))) {
                         thing()
                     }
                 }
@@ -2663,7 +2663,7 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func test() {
-                let obj = Date()
+                let obj: AnyObject = Date()
 
                 objc.isKindOfClass(Date.self)
             }
