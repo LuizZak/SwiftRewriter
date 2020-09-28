@@ -22,11 +22,11 @@ extension SwiftRewriterCommand {
     struct Options: ParsableArguments {
         @Flag(name: .shortAndLong,
               help: "Pass this parameter as true to enable terminal colorization during output.")
-        var colorize: Bool
+        var colorize: Bool = false
         
         @Flag(name: [.long, .customShort("e")],
               help: "Prints the type of each top-level resolved expression statement found in function bodies.")
-        var printExpressionTypes: Bool
+        var printExpressionTypes: Bool = false
         
         @Flag(name: [.long, .customShort("p")],
               help: """
@@ -34,11 +34,11 @@ extension SwiftRewriterCommand {
             inner logical decisions of intention passes as they change the structure \
             of declarations.
             """)
-        var printTracingHistory: Bool
+        var printTracingHistory: Bool = false
         
         @Flag(name: .shortAndLong,
               help: "Prints progress information to the console while performing a transpiling job.")
-        var verbose: Bool
+        var verbose: Bool = false
         
         @Option(name: [.long, .customShort("t")],
                 help: """
@@ -54,7 +54,7 @@ extension SwiftRewriterCommand {
             May be more performant in some circumstances depending on complexity of \
             original source code.
             """)
-        var forceLl: Bool
+        var forceLl: Bool = false
         
         @Flag(help: """
             Emits '@objc' attributes on definitions, and emits NSObject subclass \
@@ -63,7 +63,7 @@ extension SwiftRewriterCommand {
             This forces Swift to create Objective-C-compatible subclassing structures
             which may increase compatibility with previous Obj-C code.
             """)
-        var emitObjcCompatibility: Bool
+        var emitObjcCompatibility: Bool = false
         
         @Option(help: """
             Provides a target file path to diagnose during rewriting.
@@ -91,7 +91,7 @@ extension SwiftRewriterCommand {
               Follows #import declarations in files in order to parse other relevant files.
               Ignored when converting from standard input.
               """)
-        var followImports: Bool
+        var followImports: Bool = false
     }
 }
 
@@ -158,11 +158,11 @@ extension SwiftRewriterCommand {
         
         @Flag(name: .shortAndLong,
               help: "Skips asking for confirmation prior to parsing.")
-        var skipConfirm: Bool
+        var skipConfirm: Bool = false
         
         @Flag(name: .shortAndLong,
               help: "Overwrites any .swift file with a matching output name on the target path.")
-        var overwrite: Bool
+        var overwrite: Bool = false
         
         @OptionGroup()
         var options: Options
