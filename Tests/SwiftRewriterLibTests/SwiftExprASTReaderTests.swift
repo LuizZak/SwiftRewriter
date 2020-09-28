@@ -322,7 +322,7 @@ extension SwiftExprASTReaderTests {
     
     func assert(objcSelector: String,
                 readsAsIdentifier expected: FunctionIdentifier,
-                line: Int = #line) {
+                line: UInt = #line) {
         
         do {
             let state = try SwiftExprASTReaderTests._state.makeMainParser(input: objcSelector)
@@ -333,20 +333,20 @@ extension SwiftExprASTReaderTests {
             let result = convertSelectorToIdentifier(expr)
             
             if result != expected {
-                recordFailure(withDescription: """
-                    Failed: Expected to read Objective-C selector
-                    \(objcSelector)
-                    as
-                    \(expected)
-                    but read as
-                    \(result?.description ?? "<nil>")
-                    """, inFile: #file, atLine: line, expected: true)
+                XCTFail("""
+                        Failed: Expected to read Objective-C selector
+                        \(objcSelector)
+                        as
+                        \(expected)
+                        but read as
+                        \(result?.description ?? "<nil>")
+                        """,
+                        file: #file, line: line)
             }
         } catch {
-            recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)",
-                          inFile: #file,
-                          atLine: line,
-                          expected: false)
+            XCTFail("Unexpected error(s) parsing objective-c: \(error)",
+                    file: #file,
+                    line: line)
         }
     }
     
