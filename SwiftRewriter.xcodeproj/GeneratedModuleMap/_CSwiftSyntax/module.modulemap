@@ -1,4 +1,0 @@
-module _CSwiftSyntax {
-    umbrella "/Users/luizfernandosilva/Documents/Projetos/swiftrewriter/.build/checkouts/swift-syntax/Sources/_CSwiftSyntax/include"
-    export *
-}
