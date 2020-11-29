@@ -1,7 +1,14 @@
-MMAP="SwiftRewriter.xcodeproj/GeneratedModuleMap/_CSwiftSyntax/module.modulemap"
 ROOT=$(pwd)
+MMAP_FOLDER="SwiftRewriter.xcodeproj/GeneratedModuleMap/_CSwiftSyntax"
+MMAP="$MMAP_FOLDER/module.modulemap"
 
-rm -r "$MMAP"
+if [[ -e "$MMAP" ]]; then
+    rm "$MMAP"
+fi
+if [[ ! -e "$MMAP_FOLDER" ]]; then
+    mkdir "$MMAP_FOLDER"
+fi
+
 touch "$MMAP"
 
 echo "module _CSwiftSyntax {"                                                                   >> "$MMAP"
