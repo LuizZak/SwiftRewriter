@@ -11,6 +11,7 @@ jobs:
   pool:
     vmImage: 'macOS-10.15'
   steps:
+  - bash: 'swift package resolve'
   - bash: 'sudo xcode-select -s /Applications/Xcode_12.app/Contents/Developer'
   - bash: 'xcodebuild -scheme SwiftRewriter-Package build test'
   - bash: 'bash <(curl -s https://codecov.io/bash)'
