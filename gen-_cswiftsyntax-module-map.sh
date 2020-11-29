@@ -6,7 +6,7 @@ if [[ -e "$MMAP" ]]; then
     rm "$MMAP"
 fi
 if [[ ! -e "$MMAP_FOLDER" ]]; then
-    mkdir "$MMAP_FOLDER"
+    mkdir -p "$MMAP_FOLDER"
 fi
 
 touch "$MMAP"
