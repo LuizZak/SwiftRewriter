@@ -1,2 +1,2 @@
 ignore:
-  Sources/ObjcParserAntlr
+  - "Sources/ObjcParserAntlr"
