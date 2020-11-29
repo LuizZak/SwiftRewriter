@@ -12,7 +12,8 @@ jobs:
     vmImage: 'macOS-10.15'
   steps:
   - bash: 'sudo xcode-select -s /Applications/Xcode_12.app/Contents/Developer'
-  - bash: 'swift test'
+  - bash: 'xcodebuild -scheme SwiftRewriter-Package build test'
+  - bash: 'bash <(curl -s https://codecov.io/bash)'
 
 - job: Linux
   container:
