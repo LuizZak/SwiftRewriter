@@ -2,7 +2,7 @@ import Intentions
 import SwiftAST
 
 /// Delegate for controlling some aspects of SwiftSyntax AST generation
-public protocol SwiftSyntaxProducerDelegate: class {
+public protocol SwiftSyntaxProducerDelegate: AnyObject {
     /// Returns whether or not to emit the type annotation for a variable declaration
     /// with a given initial value.
     func swiftSyntaxProducer(_ producer: SwiftSyntaxProducer,

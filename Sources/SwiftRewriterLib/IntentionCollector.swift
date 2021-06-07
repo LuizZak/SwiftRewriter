@@ -5,7 +5,7 @@ import KnownType
 import Intentions
 import TypeSystem
 
-public protocol IntentionCollectorDelegate: class {
+public protocol IntentionCollectorDelegate: AnyObject {
     func isNodeInNonnullContext(_ node: ASTNode) -> Bool
     func reportForLazyParsing(intention: Intention)
     func reportForLazyResolving(intention: Intention)

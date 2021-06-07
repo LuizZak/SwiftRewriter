@@ -18,7 +18,7 @@ public struct RewriterOutputSettings {
 }
 
 /// Protocol for output targets of `SwiftRewriter` instances.
-public protocol RewriterOutputTarget: class {
+public protocol RewriterOutputTarget: AnyObject {
     /// Outputs a raw series of characters, with no indentation or extra line
     /// feed
     func outputRaw(_ text: String)

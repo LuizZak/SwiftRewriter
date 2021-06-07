@@ -85,7 +85,7 @@ public extension RangeMarker {
     }
 }
 
-public protocol Backtrack: class {
+public protocol Backtrack: AnyObject {
     func backtrack()
 }
 

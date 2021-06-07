@@ -1,7 +1,7 @@
 import Foundation
 import Utils
 
-public protocol FunctionBodyQueueDelegate: class {
+public protocol FunctionBodyQueueDelegate: AnyObject {
     associatedtype Context
     
     func makeContext(forFunction function: GlobalFunctionGenerationIntention) -> Context

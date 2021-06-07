@@ -4,7 +4,7 @@ import ObjcParser
 import Antlr4
 import SwiftAST
 
-public protocol SwiftStatementASTReaderDelegate: class {
+public protocol SwiftStatementASTReaderDelegate: AnyObject {
     func swiftStatementASTReader(reportAutoTypeDeclaration varDecl: VariableDeclarationsStatement,
                                  declarationAtIndex index: Int)
 }

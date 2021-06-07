@@ -10,7 +10,7 @@ import WriterTargetOutput
 import SwiftSyntaxSupport
 import Utils
 
-public protocol SwiftWriterProgressListener: class {
+public protocol SwiftWriterProgressListener: AnyObject {
     func swiftWriterReportProgress(_ writer: SwiftWriter,
                                    filesEmitted: Int,
                                    totalFiles: Int,

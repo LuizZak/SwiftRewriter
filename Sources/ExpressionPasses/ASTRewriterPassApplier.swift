@@ -164,7 +164,7 @@ extension FunctionBodyIntention: Hashable {
     }
 }
 
-public protocol ASTRewriterPassApplierProgressDelegate: class {
+public protocol ASTRewriterPassApplierProgressDelegate: AnyObject {
     func astWriterPassApplier(_ passApplier: ASTRewriterPassApplier,
                               applyingPassType passType: ASTRewriterPass.Type,
                               toFile file: FileGenerationIntention)
