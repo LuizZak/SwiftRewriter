@@ -24,6 +24,7 @@ class SwiftExprASTReaderTests: XCTestCase {
         assert(objcExpr: "0123", readsAs: .constant(.octal(0o123)))
         assert(objcExpr: "0x123", readsAs: .constant(.hexadecimal(0x123)))
         assert(objcExpr: "\"abc\"", readsAs: .constant(.string("abc")))
+        assert(objcExpr: "123.456e+20f", readsAs: .constant(.float(123.456e+20)))
     }
     
     func testParensExpression() {

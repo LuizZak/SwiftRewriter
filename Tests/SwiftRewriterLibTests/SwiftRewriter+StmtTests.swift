@@ -69,8 +69,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
     
     func testFloatLiteral() {
         assertSingleStatement(
-            objc: "123.456e+99f;",
-            swift: "123.456e+99"
+            objc: "123.456e+20f;",
+            swift: "1.23456e+22"
         )
     }
     
