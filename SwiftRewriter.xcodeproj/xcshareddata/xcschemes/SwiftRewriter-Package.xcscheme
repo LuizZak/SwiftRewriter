@@ -14,135 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::ExpressionPasses"
-               BuildableName = "ExpressionPasses.framework"
-               BlueprintName = "ExpressionPasses"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::GrammarModels"
-               BuildableName = "GrammarModels.framework"
-               BlueprintName = "GrammarModels"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::SwiftSyntaxSupport"
-               BuildableName = "SwiftSyntaxSupport.framework"
-               BlueprintName = "SwiftSyntaxSupport"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::Analysis"
-               BuildableName = "Analysis.framework"
-               BlueprintName = "Analysis"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SwiftRewriter::TestCommons"
                BuildableName = "TestCommons.framework"
                BlueprintName = "TestCommons"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::ObjcParserAntlr"
-               BuildableName = "ObjcParserAntlr.framework"
-               BlueprintName = "ObjcParserAntlr"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::IntentionPasses"
-               BuildableName = "IntentionPasses.framework"
-               BlueprintName = "IntentionPasses"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::SourcePreprocessors"
-               BuildableName = "SourcePreprocessors.framework"
-               BlueprintName = "SourcePreprocessors"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::SwiftRewriter"
-               BuildableName = "SwiftRewriter"
-               BlueprintName = "SwiftRewriter"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::Intentions"
-               BuildableName = "Intentions.framework"
-               BlueprintName = "Intentions"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -168,6 +42,62 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::GlobalsProviders"
+               BuildableName = "GlobalsProviders.framework"
+               BlueprintName = "GlobalsProviders"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::ObjcParserAntlr"
+               BuildableName = "ObjcParserAntlr.framework"
+               BlueprintName = "ObjcParserAntlr"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::ExpressionPasses"
+               BuildableName = "ExpressionPasses.framework"
+               BlueprintName = "ExpressionPasses"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::SwiftRewriter"
+               BuildableName = "SwiftRewriter"
+               BlueprintName = "SwiftRewriter"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SwiftRewriter::WriterTargetOutput"
                BuildableName = "WriterTargetOutput.framework"
                BlueprintName = "WriterTargetOutput"
@@ -182,9 +112,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::SwiftAST"
-               BuildableName = "SwiftAST.framework"
-               BlueprintName = "SwiftAST"
+               BlueprintIdentifier = "SwiftRewriter::SwiftSyntaxSupport"
+               BuildableName = "SwiftSyntaxSupport.framework"
+               BlueprintName = "SwiftSyntaxSupport"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -196,9 +126,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::TypeSystem"
-               BuildableName = "TypeSystem.framework"
-               BlueprintName = "TypeSystem"
+               BlueprintIdentifier = "SwiftRewriter::Intentions"
+               BuildableName = "Intentions.framework"
+               BlueprintName = "Intentions"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -210,9 +140,23 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::GlobalsProviders"
-               BuildableName = "GlobalsProviders.framework"
-               BlueprintName = "GlobalsProviders"
+               BlueprintIdentifier = "SwiftRewriter::SourcePreprocessors"
+               BuildableName = "SourcePreprocessors.framework"
+               BlueprintName = "SourcePreprocessors"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::Analysis"
+               BuildableName = "Analysis.framework"
+               BlueprintName = "Analysis"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -238,9 +182,37 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::SwiftRewriterLib"
-               BuildableName = "SwiftRewriterLib.framework"
-               BlueprintName = "SwiftRewriterLib"
+               BlueprintIdentifier = "SwiftRewriter::Commons"
+               BuildableName = "Commons.framework"
+               BlueprintName = "Commons"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::GrammarModels"
+               BuildableName = "GrammarModels.framework"
+               BlueprintName = "GrammarModels"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::SwiftSyntaxRewriterPasses"
+               BuildableName = "SwiftSyntaxRewriterPasses.framework"
+               BlueprintName = "SwiftSyntaxRewriterPasses"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -266,6 +238,34 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::TypeSystem"
+               BuildableName = "TypeSystem.framework"
+               BlueprintName = "TypeSystem"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::SwiftRewriterLib"
+               BuildableName = "SwiftRewriterLib.framework"
+               BlueprintName = "SwiftRewriterLib"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SwiftRewriter::TypeDefinitions"
                BuildableName = "TypeDefinitions.framework"
                BlueprintName = "TypeDefinitions"
@@ -280,9 +280,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::Commons"
-               BuildableName = "Commons.framework"
-               BlueprintName = "Commons"
+               BlueprintIdentifier = "SwiftRewriter::IntentionPasses"
+               BuildableName = "IntentionPasses.framework"
+               BlueprintName = "IntentionPasses"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -294,9 +294,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::SwiftSyntaxRewriterPasses"
-               BuildableName = "SwiftSyntaxRewriterPasses.framework"
-               BlueprintName = "SwiftSyntaxRewriterPasses"
+               BlueprintIdentifier = "SwiftRewriter::SwiftAST"
+               BuildableName = "SwiftAST.framework"
+               BlueprintName = "SwiftAST"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -313,9 +313,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::SwiftASTTests"
-               BuildableName = "SwiftASTTests.xctest"
-               BlueprintName = "SwiftASTTests"
+               BlueprintIdentifier = "SwiftRewriter::SwiftSyntaxSupportTests"
+               BuildableName = "SwiftSyntaxSupportTests.xctest"
+               BlueprintName = "SwiftSyntaxSupportTests"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -333,69 +333,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::SourcePreprocessorsTests"
-               BuildableName = "SourcePreprocessorsTests.xctest"
-               BlueprintName = "SourcePreprocessorsTests"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::UtilsTests"
-               BuildableName = "UtilsTests.xctest"
-               BlueprintName = "UtilsTests"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::ExpressionPassesTests"
-               BuildableName = "ExpressionPassesTests.xctest"
-               BlueprintName = "ExpressionPassesTests"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::AnalysisTests"
-               BuildableName = "AnalysisTests.xctest"
-               BlueprintName = "AnalysisTests"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::SwiftSyntaxSupportTests"
-               BuildableName = "SwiftSyntaxSupportTests.xctest"
-               BlueprintName = "SwiftSyntaxSupportTests"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::SwiftSyntaxRewriterPassesTests"
-               BuildableName = "SwiftSyntaxRewriterPassesTests.xctest"
-               BlueprintName = "SwiftSyntaxRewriterPassesTests"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::ObjcParserTests"
-               BuildableName = "ObjcParserTests.xctest"
-               BlueprintName = "ObjcParserTests"
+               BlueprintIdentifier = "SwiftRewriter::CommonsTests"
+               BuildableName = "CommonsTests.xctest"
+               BlueprintName = "CommonsTests"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -413,9 +353,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::SwiftRewriterLibTests"
-               BuildableName = "SwiftRewriterLibTests.xctest"
-               BlueprintName = "SwiftRewriterLibTests"
+               BlueprintIdentifier = "SwiftRewriter::SwiftRewriterTests"
+               BuildableName = "SwiftRewriterTests.xctest"
+               BlueprintName = "SwiftRewriterTests"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -433,9 +373,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::GlobalsProvidersTests"
-               BuildableName = "GlobalsProvidersTests.xctest"
-               BlueprintName = "GlobalsProvidersTests"
+               BlueprintIdentifier = "SwiftRewriter::SwiftASTTests"
+               BuildableName = "SwiftASTTests.xctest"
+               BlueprintName = "SwiftASTTests"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -443,9 +383,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::SwiftRewriterTests"
-               BuildableName = "SwiftRewriterTests.xctest"
-               BlueprintName = "SwiftRewriterTests"
+               BlueprintIdentifier = "SwiftRewriter::UtilsTests"
+               BuildableName = "UtilsTests.xctest"
+               BlueprintName = "UtilsTests"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -453,9 +393,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::TypeSystemTests"
-               BuildableName = "TypeSystemTests.xctest"
-               BlueprintName = "TypeSystemTests"
+               BlueprintIdentifier = "SwiftRewriter::KnownTypeTests"
+               BuildableName = "KnownTypeTests.xctest"
+               BlueprintName = "KnownTypeTests"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -463,19 +403,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::TestCommonsTests"
-               BuildableName = "TestCommonsTests.xctest"
-               BlueprintName = "TestCommonsTests"
-               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::CommonsTests"
-               BuildableName = "CommonsTests.xctest"
-               BlueprintName = "CommonsTests"
+               BlueprintIdentifier = "SwiftRewriter::SourcePreprocessorsTests"
+               BuildableName = "SourcePreprocessorsTests.xctest"
+               BlueprintName = "SourcePreprocessorsTests"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -493,9 +423,79 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::KnownTypeTests"
-               BuildableName = "KnownTypeTests.xctest"
-               BlueprintName = "KnownTypeTests"
+               BlueprintIdentifier = "SwiftRewriter::AnalysisTests"
+               BuildableName = "AnalysisTests.xctest"
+               BlueprintName = "AnalysisTests"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::TestCommonsTests"
+               BuildableName = "TestCommonsTests.xctest"
+               BlueprintName = "TestCommonsTests"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::TypeSystemTests"
+               BuildableName = "TypeSystemTests.xctest"
+               BlueprintName = "TypeSystemTests"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::GlobalsProvidersTests"
+               BuildableName = "GlobalsProvidersTests.xctest"
+               BlueprintName = "GlobalsProvidersTests"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::ExpressionPassesTests"
+               BuildableName = "ExpressionPassesTests.xctest"
+               BlueprintName = "ExpressionPassesTests"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::SwiftSyntaxRewriterPassesTests"
+               BuildableName = "SwiftSyntaxRewriterPassesTests.xctest"
+               BlueprintName = "SwiftSyntaxRewriterPassesTests"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::SwiftRewriterLibTests"
+               BuildableName = "SwiftRewriterLibTests.xctest"
+               BlueprintName = "SwiftRewriterLibTests"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::ObjcParserTests"
+               BuildableName = "ObjcParserTests.xctest"
+               BlueprintName = "ObjcParserTests"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </TestableReference>
