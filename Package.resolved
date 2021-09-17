@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/LuizZak/antlr4-swift.git",
         "state": {
           "branch": null,
-          "revision": "9b9f17a1fa60e6b6acf20f0d7ce67b50ec7432ee",
-          "version": "4.0.32"
+          "revision": "5110fe9167f5210573493473cf8fb819d9dd102f",
+          "version": "4.0.33"
         }
       },
       {
@@ -41,8 +41,8 @@
         "package": "SwiftSyntax",
         "repositoryURL": "https://github.com/apple/swift-syntax.git",
         "state": {
-          "branch": "release/5.5",
-          "revision": "9a8d3d8b9fb42bdd9cffc18219b5efb584b5b998",
+          "branch": "release/5.5-08092021",
+          "revision": "593d01f4017cf8b71ec28689629f7b9a6739df0b",
           "version": null
         }
       }

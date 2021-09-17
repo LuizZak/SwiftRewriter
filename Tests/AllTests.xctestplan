@@ -20,6 +20,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::CommonsTests",
@@ -27,6 +28,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::ExpressionPassesTests",
@@ -34,6 +36,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::GlobalsProvidersTests",
@@ -41,6 +44,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::GrammarModelsTests",
@@ -48,6 +52,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::IntentionPassesTests",
@@ -55,6 +60,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::IntentionsTests",
@@ -62,6 +68,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::KnownTypeTests",
@@ -77,6 +84,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::SourcePreprocessorsTests",
@@ -100,6 +108,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::SwiftSyntaxRewriterPassesTests",
@@ -107,6 +116,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::SwiftSyntaxSupportTests",
@@ -114,6 +124,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::TestCommonsTests",
@@ -121,6 +132,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::TypeSystemTests",
@@ -128,6 +140,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::UtilsTests",
@@ -135,6 +148,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::WriterTargetOutputTests",
@@ -142,6 +156,7 @@
       }
     },
     {
+      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:SwiftRewriter.xcodeproj",
         "identifier" : "SwiftRewriter::SwiftRewriterTests",

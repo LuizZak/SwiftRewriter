@@ -240,7 +240,23 @@ public class DiffingTest {
 
 // MARK: - XCTestCase: TestCaseFailureReporter
 extension XCTestCase: DiffTestCaseFailureReporter {
-    public func _recordFailure(withDescription description: String, inFile filePath: StaticString, atLine lineNumber: UInt, expected: Bool) {
-        XCTFail(description, file: filePath, line: lineNumber)
+    public func _recordFailure(withDescription description: String,
+                               inFile filePath: StaticString,
+                               atLine lineNumber: UInt,
+                               expected: Bool) {
+        
+        let location = XCTSourceCodeLocation(filePath: filePath.description,
+                                             lineNumber: Int(lineNumber))
+        
+        self.record(
+            XCTIssueReference(
+                type: .assertionFailure,
+                compactDescription: description,
+                detailedDescription: nil,
+                sourceCodeContext: XCTSourceCodeContext(location: location),
+                associatedError: nil,
+                attachments: []
+            )
+        )
     }
 }
