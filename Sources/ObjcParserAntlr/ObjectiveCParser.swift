@@ -1,4 +1,4 @@
-// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/ObjectiveCParser.g4 by ANTLR 4.8
+// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/ObjectiveCParser.g4 by ANTLR 4.9.1
 import Antlr4
 
 open class ObjectiveCParser: Parser {
@@ -302,8 +302,7 @@ open class ObjectiveCParser: Parser {
     public
     init(_ input: TokenStream, _ state: State) throws {
         self.state = state
-        
-        RuntimeMetaData.checkVersion("4.8", RuntimeMetaData.VERSION)
+        RuntimeMetaData.checkVersion("4.9.1", RuntimeMetaData.VERSION)
         try super.init(input)
         _interp = ParserATNSimulator(self,
                                      _ATN,
@@ -608,7 +607,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func importDeclaration() throws -> ImportDeclarationContext {
-        let _localctx: ImportDeclarationContext = ImportDeclarationContext(_ctx, getState())
+		let _localctx: ImportDeclarationContext = ImportDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 4, ObjectiveCParser.RULE_importDeclaration)
 		defer {
 	    		try! exitRule()
@@ -688,7 +687,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func classInterface() throws -> ClassInterfaceContext {
-        let _localctx: ClassInterfaceContext = ClassInterfaceContext(_ctx, getState())
+		let _localctx: ClassInterfaceContext = ClassInterfaceContext(_ctx, getState())
 		try enterRule(_localctx, 6, ObjectiveCParser.RULE_classInterface)
 		var _la: Int = 0
 		defer {
@@ -820,7 +819,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func classInterfaceName() throws -> ClassInterfaceNameContext {
-        let _localctx: ClassInterfaceNameContext = ClassInterfaceNameContext(_ctx, getState())
+		let _localctx: ClassInterfaceNameContext = ClassInterfaceNameContext(_ctx, getState())
 		try enterRule(_localctx, 8, ObjectiveCParser.RULE_classInterfaceName)
 		var _la: Int = 0
 		defer {
@@ -995,7 +994,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func categoryInterface() throws -> CategoryInterfaceContext {
-        let _localctx: CategoryInterfaceContext = CategoryInterfaceContext(_ctx, getState())
+		let _localctx: CategoryInterfaceContext = CategoryInterfaceContext(_ctx, getState())
 		try enterRule(_localctx, 10, ObjectiveCParser.RULE_categoryInterface)
 		var _la: Int = 0
 		defer {
@@ -1151,7 +1150,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func classImplementation() throws -> ClassImplementationContext {
-        let _localctx: ClassImplementationContext = ClassImplementationContext(_ctx, getState())
+		let _localctx: ClassImplementationContext = ClassImplementationContext(_ctx, getState())
 		try enterRule(_localctx, 12, ObjectiveCParser.RULE_classImplementation)
 		var _la: Int = 0
 		defer {
@@ -1258,7 +1257,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func classImplementatioName() throws -> ClassImplementatioNameContext {
-        let _localctx: ClassImplementatioNameContext = ClassImplementatioNameContext(_ctx, getState())
+		let _localctx: ClassImplementatioNameContext = ClassImplementatioNameContext(_ctx, getState())
 		try enterRule(_localctx, 14, ObjectiveCParser.RULE_classImplementatioName)
 		var _la: Int = 0
 		defer {
@@ -1383,7 +1382,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func categoryImplementation() throws -> CategoryImplementationContext {
-        let _localctx: CategoryImplementationContext = CategoryImplementationContext(_ctx, getState())
+		let _localctx: CategoryImplementationContext = CategoryImplementationContext(_ctx, getState())
 		try enterRule(_localctx, 16, ObjectiveCParser.RULE_categoryImplementation)
 		var _la: Int = 0
 		defer {
@@ -1491,7 +1490,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func className() throws -> ClassNameContext {
-        let _localctx: ClassNameContext = ClassNameContext(_ctx, getState())
+		let _localctx: ClassNameContext = ClassNameContext(_ctx, getState())
 		try enterRule(_localctx, 18, ObjectiveCParser.RULE_className)
 		defer {
 	    		try! exitRule()
@@ -1567,7 +1566,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func superclassName() throws -> SuperclassNameContext {
-        let _localctx: SuperclassNameContext = SuperclassNameContext(_ctx, getState())
+		let _localctx: SuperclassNameContext = SuperclassNameContext(_ctx, getState())
 		try enterRule(_localctx, 20, ObjectiveCParser.RULE_superclassName)
 		defer {
 	    		try! exitRule()
@@ -1627,7 +1626,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func genericSuperclassName() throws -> GenericSuperclassNameContext {
-        let _localctx: GenericSuperclassNameContext = GenericSuperclassNameContext(_ctx, getState())
+		let _localctx: GenericSuperclassNameContext = GenericSuperclassNameContext(_ctx, getState())
 		try enterRule(_localctx, 22, ObjectiveCParser.RULE_genericSuperclassName)
 		defer {
 	    		try! exitRule()
@@ -1701,7 +1700,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func genericTypeSpecifier() throws -> GenericTypeSpecifierContext {
-        let _localctx: GenericTypeSpecifierContext = GenericTypeSpecifierContext(_ctx, getState())
+		let _localctx: GenericTypeSpecifierContext = GenericTypeSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 24, ObjectiveCParser.RULE_genericTypeSpecifier)
 		defer {
 	    		try! exitRule()
@@ -1797,7 +1796,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func genericSuperclassSpecifier() throws -> GenericSuperclassSpecifierContext {
-        let _localctx: GenericSuperclassSpecifierContext = GenericSuperclassSpecifierContext(_ctx, getState())
+		let _localctx: GenericSuperclassSpecifierContext = GenericSuperclassSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 26, ObjectiveCParser.RULE_genericSuperclassSpecifier)
 		var _la: Int = 0
 		defer {
@@ -1906,7 +1905,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func superclassTypeSpecifierWithPrefixes() throws -> SuperclassTypeSpecifierWithPrefixesContext {
-        let _localctx: SuperclassTypeSpecifierWithPrefixesContext = SuperclassTypeSpecifierWithPrefixesContext(_ctx, getState())
+		let _localctx: SuperclassTypeSpecifierWithPrefixesContext = SuperclassTypeSpecifierWithPrefixesContext(_ctx, getState())
 		try enterRule(_localctx, 28, ObjectiveCParser.RULE_superclassTypeSpecifierWithPrefixes)
 		var _la: Int = 0
 		defer {
@@ -2019,7 +2018,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func protocolDeclaration() throws -> ProtocolDeclarationContext {
-        let _localctx: ProtocolDeclarationContext = ProtocolDeclarationContext(_ctx, getState())
+		let _localctx: ProtocolDeclarationContext = ProtocolDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 30, ObjectiveCParser.RULE_protocolDeclaration)
 		var _la: Int = 0
 		defer {
@@ -2134,7 +2133,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func protocolDeclarationSection() throws -> ProtocolDeclarationSectionContext {
-        let _localctx: ProtocolDeclarationSectionContext = ProtocolDeclarationSectionContext(_ctx, getState())
+		let _localctx: ProtocolDeclarationSectionContext = ProtocolDeclarationSectionContext(_ctx, getState())
 		try enterRule(_localctx, 32, ObjectiveCParser.RULE_protocolDeclarationSection)
 		var _la: Int = 0
 		defer {
@@ -2333,7 +2332,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func protocolDeclarationList() throws -> ProtocolDeclarationListContext {
-        let _localctx: ProtocolDeclarationListContext = ProtocolDeclarationListContext(_ctx, getState())
+		let _localctx: ProtocolDeclarationListContext = ProtocolDeclarationListContext(_ctx, getState())
 		try enterRule(_localctx, 34, ObjectiveCParser.RULE_protocolDeclarationList)
 		defer {
 	    		try! exitRule()
@@ -2413,7 +2412,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func classDeclarationList() throws -> ClassDeclarationListContext {
-        let _localctx: ClassDeclarationListContext = ClassDeclarationListContext(_ctx, getState())
+		let _localctx: ClassDeclarationListContext = ClassDeclarationListContext(_ctx, getState())
 		try enterRule(_localctx, 36, ObjectiveCParser.RULE_classDeclarationList)
 		var _la: Int = 0
 		defer {
@@ -2504,7 +2503,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func protocolList() throws -> ProtocolListContext {
-        let _localctx: ProtocolListContext = ProtocolListContext(_ctx, getState())
+		let _localctx: ProtocolListContext = ProtocolListContext(_ctx, getState())
 		try enterRule(_localctx, 38, ObjectiveCParser.RULE_protocolList)
 		var _la: Int = 0
 		defer {
@@ -2603,7 +2602,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func propertyDeclaration() throws -> PropertyDeclarationContext {
-        let _localctx: PropertyDeclarationContext = PropertyDeclarationContext(_ctx, getState())
+		let _localctx: PropertyDeclarationContext = PropertyDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 40, ObjectiveCParser.RULE_propertyDeclaration)
 		var _la: Int = 0
 		defer {
@@ -2711,7 +2710,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func propertyAttributesList() throws -> PropertyAttributesListContext {
-        let _localctx: PropertyAttributesListContext = PropertyAttributesListContext(_ctx, getState())
+		let _localctx: PropertyAttributesListContext = PropertyAttributesListContext(_ctx, getState())
 		try enterRule(_localctx, 42, ObjectiveCParser.RULE_propertyAttributesList)
 		var _la: Int = 0
 		defer {
@@ -2846,7 +2845,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func propertyAttribute() throws -> PropertyAttributeContext {
-        let _localctx: PropertyAttributeContext = PropertyAttributeContext(_ctx, getState())
+		let _localctx: PropertyAttributeContext = PropertyAttributeContext(_ctx, getState())
 		try enterRule(_localctx, 44, ObjectiveCParser.RULE_propertyAttribute)
 		defer {
 	    		try! exitRule()
@@ -3017,7 +3016,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func protocolName() throws -> ProtocolNameContext {
-        let _localctx: ProtocolNameContext = ProtocolNameContext(_ctx, getState())
+		let _localctx: ProtocolNameContext = ProtocolNameContext(_ctx, getState())
 		try enterRule(_localctx, 46, ObjectiveCParser.RULE_protocolName)
 		var _la: Int = 0
 		defer {
@@ -3171,7 +3170,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func instanceVariables() throws -> InstanceVariablesContext {
-        let _localctx: InstanceVariablesContext = InstanceVariablesContext(_ctx, getState())
+		let _localctx: InstanceVariablesContext = InstanceVariablesContext(_ctx, getState())
 		try enterRule(_localctx, 48, ObjectiveCParser.RULE_instanceVariables)
 		var _la: Int = 0
 		defer {
@@ -3261,7 +3260,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func visibilitySection() throws -> VisibilitySectionContext {
-        let _localctx: VisibilitySectionContext = VisibilitySectionContext(_ctx, getState())
+		let _localctx: VisibilitySectionContext = VisibilitySectionContext(_ctx, getState())
 		try enterRule(_localctx, 50, ObjectiveCParser.RULE_visibilitySection)
 		defer {
 	    		try! exitRule()
@@ -3449,7 +3448,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func accessModifier() throws -> AccessModifierContext {
-        let _localctx: AccessModifierContext = AccessModifierContext(_ctx, getState())
+		let _localctx: AccessModifierContext = AccessModifierContext(_ctx, getState())
 		try enterRule(_localctx, 52, ObjectiveCParser.RULE_accessModifier)
 		var _la: Int = 0
 		defer {
@@ -3556,7 +3555,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func interfaceDeclarationList() throws -> InterfaceDeclarationListContext {
-        let _localctx: InterfaceDeclarationListContext = InterfaceDeclarationListContext(_ctx, getState())
+		let _localctx: InterfaceDeclarationListContext = InterfaceDeclarationListContext(_ctx, getState())
 		try enterRule(_localctx, 54, ObjectiveCParser.RULE_interfaceDeclarationList)
 		defer {
 	    		try! exitRule()
@@ -3660,7 +3659,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func classMethodDeclaration() throws -> ClassMethodDeclarationContext {
-        let _localctx: ClassMethodDeclarationContext = ClassMethodDeclarationContext(_ctx, getState())
+		let _localctx: ClassMethodDeclarationContext = ClassMethodDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 56, ObjectiveCParser.RULE_classMethodDeclaration)
 		defer {
 	    		try! exitRule()
@@ -3722,7 +3721,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func instanceMethodDeclaration() throws -> InstanceMethodDeclarationContext {
-        let _localctx: InstanceMethodDeclarationContext = InstanceMethodDeclarationContext(_ctx, getState())
+		let _localctx: InstanceMethodDeclarationContext = InstanceMethodDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 58, ObjectiveCParser.RULE_instanceMethodDeclaration)
 		defer {
 	    		try! exitRule()
@@ -3800,7 +3799,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func methodDeclaration() throws -> MethodDeclarationContext {
-        let _localctx: MethodDeclarationContext = MethodDeclarationContext(_ctx, getState())
+		let _localctx: MethodDeclarationContext = MethodDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 60, ObjectiveCParser.RULE_methodDeclaration)
 		var _la: Int = 0
 		defer {
@@ -3944,7 +3943,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func implementationDefinitionList() throws -> ImplementationDefinitionListContext {
-        let _localctx: ImplementationDefinitionListContext = ImplementationDefinitionListContext(_ctx, getState())
+		let _localctx: ImplementationDefinitionListContext = ImplementationDefinitionListContext(_ctx, getState())
 		try enterRule(_localctx, 62, ObjectiveCParser.RULE_implementationDefinitionList)
 		var _la: Int = 0
 		defer {
@@ -4054,7 +4053,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func classMethodDefinition() throws -> ClassMethodDefinitionContext {
-        let _localctx: ClassMethodDefinitionContext = ClassMethodDefinitionContext(_ctx, getState())
+		let _localctx: ClassMethodDefinitionContext = ClassMethodDefinitionContext(_ctx, getState())
 		try enterRule(_localctx, 64, ObjectiveCParser.RULE_classMethodDefinition)
 		defer {
 	    		try! exitRule()
@@ -4116,7 +4115,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func instanceMethodDefinition() throws -> InstanceMethodDefinitionContext {
-        let _localctx: InstanceMethodDefinitionContext = InstanceMethodDefinitionContext(_ctx, getState())
+		let _localctx: InstanceMethodDefinitionContext = InstanceMethodDefinitionContext(_ctx, getState())
 		try enterRule(_localctx, 66, ObjectiveCParser.RULE_instanceMethodDefinition)
 		defer {
 	    		try! exitRule()
@@ -4198,7 +4197,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func methodDefinition() throws -> MethodDefinitionContext {
-        let _localctx: MethodDefinitionContext = MethodDefinitionContext(_ctx, getState())
+		let _localctx: MethodDefinitionContext = MethodDefinitionContext(_ctx, getState())
 		try enterRule(_localctx, 68, ObjectiveCParser.RULE_methodDefinition)
 		var _la: Int = 0
 		defer {
@@ -4345,7 +4344,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func methodSelector() throws -> MethodSelectorContext {
-        let _localctx: MethodSelectorContext = MethodSelectorContext(_ctx, getState())
+		let _localctx: MethodSelectorContext = MethodSelectorContext(_ctx, getState())
 		try enterRule(_localctx, 70, ObjectiveCParser.RULE_methodSelector)
 		var _la: Int = 0
 		defer {
@@ -4467,7 +4466,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func keywordDeclarator() throws -> KeywordDeclaratorContext {
-        let _localctx: KeywordDeclaratorContext = KeywordDeclaratorContext(_ctx, getState())
+		let _localctx: KeywordDeclaratorContext = KeywordDeclaratorContext(_ctx, getState())
 		try enterRule(_localctx, 72, ObjectiveCParser.RULE_keywordDeclarator)
 		var _la: Int = 0
 		defer {
@@ -4592,7 +4591,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func selector() throws -> SelectorContext {
-        let _localctx: SelectorContext = SelectorContext(_ctx, getState())
+		let _localctx: SelectorContext = SelectorContext(_ctx, getState())
 		try enterRule(_localctx, 74, ObjectiveCParser.RULE_selector)
 		defer {
 	    		try! exitRule()
@@ -4745,7 +4744,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func methodType() throws -> MethodTypeContext {
-        let _localctx: MethodTypeContext = MethodTypeContext(_ctx, getState())
+		let _localctx: MethodTypeContext = MethodTypeContext(_ctx, getState())
 		try enterRule(_localctx, 76, ObjectiveCParser.RULE_methodType)
 		defer {
 	    		try! exitRule()
@@ -4817,7 +4816,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func propertyImplementation() throws -> PropertyImplementationContext {
-        let _localctx: PropertyImplementationContext = PropertyImplementationContext(_ctx, getState())
+		let _localctx: PropertyImplementationContext = PropertyImplementationContext(_ctx, getState())
 		try enterRule(_localctx, 78, ObjectiveCParser.RULE_propertyImplementation)
 		defer {
 	    		try! exitRule()
@@ -4908,7 +4907,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func propertySynthesizeList() throws -> PropertySynthesizeListContext {
-        let _localctx: PropertySynthesizeListContext = PropertySynthesizeListContext(_ctx, getState())
+		let _localctx: PropertySynthesizeListContext = PropertySynthesizeListContext(_ctx, getState())
 		try enterRule(_localctx, 80, ObjectiveCParser.RULE_propertySynthesizeList)
 		var _la: Int = 0
 		defer {
@@ -4991,7 +4990,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func propertySynthesizeItem() throws -> PropertySynthesizeItemContext {
-        let _localctx: PropertySynthesizeItemContext = PropertySynthesizeItemContext(_ctx, getState())
+		let _localctx: PropertySynthesizeItemContext = PropertySynthesizeItemContext(_ctx, getState())
 		try enterRule(_localctx, 82, ObjectiveCParser.RULE_propertySynthesizeItem)
 		var _la: Int = 0
 		defer {
@@ -5091,7 +5090,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func blockType() throws -> BlockTypeContext {
-        let _localctx: BlockTypeContext = BlockTypeContext(_ctx, getState())
+		let _localctx: BlockTypeContext = BlockTypeContext(_ctx, getState())
 		try enterRule(_localctx, 84, ObjectiveCParser.RULE_blockType)
 		var _la: Int = 0
 		defer {
@@ -5228,7 +5227,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func genericsSpecifier() throws -> GenericsSpecifierContext {
-        let _localctx: GenericsSpecifierContext = GenericsSpecifierContext(_ctx, getState())
+		let _localctx: GenericsSpecifierContext = GenericsSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 86, ObjectiveCParser.RULE_genericsSpecifier)
 		var _la: Int = 0
 		defer {
@@ -5337,7 +5336,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func typeSpecifierWithPrefixes() throws -> TypeSpecifierWithPrefixesContext {
-        let _localctx: TypeSpecifierWithPrefixesContext = TypeSpecifierWithPrefixesContext(_ctx, getState())
+		let _localctx: TypeSpecifierWithPrefixesContext = TypeSpecifierWithPrefixesContext(_ctx, getState())
 		try enterRule(_localctx, 88, ObjectiveCParser.RULE_typeSpecifierWithPrefixes)
 		var _la: Int = 0
 		defer {
@@ -5446,7 +5445,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func dictionaryExpression() throws -> DictionaryExpressionContext {
-        let _localctx: DictionaryExpressionContext = DictionaryExpressionContext(_ctx, getState())
+		let _localctx: DictionaryExpressionContext = DictionaryExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 90, ObjectiveCParser.RULE_dictionaryExpression)
 		var _la: Int = 0
 		defer {
@@ -5569,7 +5568,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func dictionaryPair() throws -> DictionaryPairContext {
-        let _localctx: DictionaryPairContext = DictionaryPairContext(_ctx, getState())
+		let _localctx: DictionaryPairContext = DictionaryPairContext(_ctx, getState())
 		try enterRule(_localctx, 92, ObjectiveCParser.RULE_dictionaryPair)
 		defer {
 	    		try! exitRule()
@@ -5645,7 +5644,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func arrayExpression() throws -> ArrayExpressionContext {
-        let _localctx: ArrayExpressionContext = ArrayExpressionContext(_ctx, getState())
+		let _localctx: ArrayExpressionContext = ArrayExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 94, ObjectiveCParser.RULE_arrayExpression)
 		var _la: Int = 0
 		defer {
@@ -5763,7 +5762,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func boxExpression() throws -> BoxExpressionContext {
-        let _localctx: BoxExpressionContext = BoxExpressionContext(_ctx, getState())
+		let _localctx: BoxExpressionContext = BoxExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 96, ObjectiveCParser.RULE_boxExpression)
 		defer {
 	    		try! exitRule()
@@ -5937,7 +5936,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func blockParameters() throws -> BlockParametersContext {
-        let _localctx: BlockParametersContext = BlockParametersContext(_ctx, getState())
+		let _localctx: BlockParametersContext = BlockParametersContext(_ctx, getState())
 		try enterRule(_localctx, 98, ObjectiveCParser.RULE_blockParameters)
 		var _la: Int = 0
 		defer {
@@ -6051,7 +6050,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func typeVariableDeclaratorOrName() throws -> TypeVariableDeclaratorOrNameContext {
-        let _localctx: TypeVariableDeclaratorOrNameContext = TypeVariableDeclaratorOrNameContext(_ctx, getState())
+		let _localctx: TypeVariableDeclaratorOrNameContext = TypeVariableDeclaratorOrNameContext(_ctx, getState())
 		try enterRule(_localctx, 100, ObjectiveCParser.RULE_typeVariableDeclaratorOrName)
 		defer {
 	    		try! exitRule()
@@ -6136,7 +6135,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func blockExpression() throws -> BlockExpressionContext {
-        let _localctx: BlockExpressionContext = BlockExpressionContext(_ctx, getState())
+		let _localctx: BlockExpressionContext = BlockExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 102, ObjectiveCParser.RULE_blockExpression)
 		var _la: Int = 0
 		defer {
@@ -6246,7 +6245,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func messageExpression() throws -> MessageExpressionContext {
-        let _localctx: MessageExpressionContext = MessageExpressionContext(_ctx, getState())
+		let _localctx: MessageExpressionContext = MessageExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 104, ObjectiveCParser.RULE_messageExpression)
 		defer {
 	    		try! exitRule()
@@ -6312,7 +6311,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func receiver() throws -> ReceiverContext {
-        let _localctx: ReceiverContext = ReceiverContext(_ctx, getState())
+		let _localctx: ReceiverContext = ReceiverContext(_ctx, getState())
 		try enterRule(_localctx, 106, ObjectiveCParser.RULE_receiver)
 		defer {
 	    		try! exitRule()
@@ -6389,7 +6388,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func messageSelector() throws -> MessageSelectorContext {
-        let _localctx: MessageSelectorContext = MessageSelectorContext(_ctx, getState())
+		let _localctx: MessageSelectorContext = MessageSelectorContext(_ctx, getState())
 		try enterRule(_localctx, 108, ObjectiveCParser.RULE_messageSelector)
 		var _la: Int = 0
 		defer {
@@ -6500,7 +6499,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func keywordArgument() throws -> KeywordArgumentContext {
-        let _localctx: KeywordArgumentContext = KeywordArgumentContext(_ctx, getState())
+		let _localctx: KeywordArgumentContext = KeywordArgumentContext(_ctx, getState())
 		try enterRule(_localctx, 110, ObjectiveCParser.RULE_keywordArgument)
 		var _la: Int = 0
 		defer {
@@ -6613,7 +6612,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func keywordArgumentType() throws -> KeywordArgumentTypeContext {
-        let _localctx: KeywordArgumentTypeContext = KeywordArgumentTypeContext(_ctx, getState())
+		let _localctx: KeywordArgumentTypeContext = KeywordArgumentTypeContext(_ctx, getState())
 		try enterRule(_localctx, 112, ObjectiveCParser.RULE_keywordArgumentType)
 		var _la: Int = 0
 		defer {
@@ -6709,7 +6708,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func selectorExpression() throws -> SelectorExpressionContext {
-        let _localctx: SelectorExpressionContext = SelectorExpressionContext(_ctx, getState())
+		let _localctx: SelectorExpressionContext = SelectorExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 114, ObjectiveCParser.RULE_selectorExpression)
 		defer {
 	    		try! exitRule()
@@ -6783,7 +6782,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func selectorName() throws -> SelectorNameContext {
-        let _localctx: SelectorNameContext = SelectorNameContext(_ctx, getState())
+		let _localctx: SelectorNameContext = SelectorNameContext(_ctx, getState())
 		try enterRule(_localctx, 116, ObjectiveCParser.RULE_selectorName)
 		var _la: Int = 0
 		defer {
@@ -6906,7 +6905,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func protocolExpression() throws -> ProtocolExpressionContext {
-        let _localctx: ProtocolExpressionContext = ProtocolExpressionContext(_ctx, getState())
+		let _localctx: ProtocolExpressionContext = ProtocolExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 118, ObjectiveCParser.RULE_protocolExpression)
 		defer {
 	    		try! exitRule()
@@ -6980,7 +6979,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func encodeExpression() throws -> EncodeExpressionContext {
-        let _localctx: EncodeExpressionContext = EncodeExpressionContext(_ctx, getState())
+		let _localctx: EncodeExpressionContext = EncodeExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 120, ObjectiveCParser.RULE_encodeExpression)
 		defer {
 	    		try! exitRule()
@@ -7046,7 +7045,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func typeVariableDeclarator() throws -> TypeVariableDeclaratorContext {
-        let _localctx: TypeVariableDeclaratorContext = TypeVariableDeclaratorContext(_ctx, getState())
+		let _localctx: TypeVariableDeclaratorContext = TypeVariableDeclaratorContext(_ctx, getState())
 		try enterRule(_localctx, 122, ObjectiveCParser.RULE_typeVariableDeclarator)
 		defer {
 	    		try! exitRule()
@@ -7120,7 +7119,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func throwStatement() throws -> ThrowStatementContext {
-        let _localctx: ThrowStatementContext = ThrowStatementContext(_ctx, getState())
+		let _localctx: ThrowStatementContext = ThrowStatementContext(_ctx, getState())
 		try enterRule(_localctx, 124, ObjectiveCParser.RULE_throwStatement)
 		defer {
 	    		try! exitRule()
@@ -7219,7 +7218,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func tryBlock() throws -> TryBlockContext {
-        let _localctx: TryBlockContext = TryBlockContext(_ctx, getState())
+		let _localctx: TryBlockContext = TryBlockContext(_ctx, getState())
 		try enterRule(_localctx, 126, ObjectiveCParser.RULE_tryBlock)
 		var _la: Int = 0
 		defer {
@@ -7333,7 +7332,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func catchStatement() throws -> CatchStatementContext {
-        let _localctx: CatchStatementContext = CatchStatementContext(_ctx, getState())
+		let _localctx: CatchStatementContext = CatchStatementContext(_ctx, getState())
 		try enterRule(_localctx, 128, ObjectiveCParser.RULE_catchStatement)
 		defer {
 	    		try! exitRule()
@@ -7413,7 +7412,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func synchronizedStatement() throws -> SynchronizedStatementContext {
-        let _localctx: SynchronizedStatementContext = SynchronizedStatementContext(_ctx, getState())
+		let _localctx: SynchronizedStatementContext = SynchronizedStatementContext(_ctx, getState())
 		try enterRule(_localctx, 130, ObjectiveCParser.RULE_synchronizedStatement)
 		defer {
 	    		try! exitRule()
@@ -7481,7 +7480,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func autoreleaseStatement() throws -> AutoreleaseStatementContext {
-        let _localctx: AutoreleaseStatementContext = AutoreleaseStatementContext(_ctx, getState())
+		let _localctx: AutoreleaseStatementContext = AutoreleaseStatementContext(_ctx, getState())
 		try enterRule(_localctx, 132, ObjectiveCParser.RULE_autoreleaseStatement)
 		defer {
 	    		try! exitRule()
@@ -7543,7 +7542,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func functionDeclaration() throws -> FunctionDeclarationContext {
-        let _localctx: FunctionDeclarationContext = FunctionDeclarationContext(_ctx, getState())
+		let _localctx: FunctionDeclarationContext = FunctionDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 134, ObjectiveCParser.RULE_functionDeclaration)
 		defer {
 	    		try! exitRule()
@@ -7605,7 +7604,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func functionDefinition() throws -> FunctionDefinitionContext {
-        let _localctx: FunctionDefinitionContext = FunctionDefinitionContext(_ctx, getState())
+		let _localctx: FunctionDefinitionContext = FunctionDefinitionContext(_ctx, getState())
 		try enterRule(_localctx, 136, ObjectiveCParser.RULE_functionDefinition)
 		defer {
 	    		try! exitRule()
@@ -7683,7 +7682,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func functionSignature() throws -> FunctionSignatureContext {
-        let _localctx: FunctionSignatureContext = FunctionSignatureContext(_ctx, getState())
+		let _localctx: FunctionSignatureContext = FunctionSignatureContext(_ctx, getState())
 		try enterRule(_localctx, 138, ObjectiveCParser.RULE_functionSignature)
 		var _la: Int = 0
 		defer {
@@ -7793,7 +7792,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func attribute() throws -> AttributeContext {
-        let _localctx: AttributeContext = AttributeContext(_ctx, getState())
+		let _localctx: AttributeContext = AttributeContext(_ctx, getState())
 		try enterRule(_localctx, 140, ObjectiveCParser.RULE_attribute)
 		var _la: Int = 0
 		defer {
@@ -7867,7 +7866,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func attributeName() throws -> AttributeNameContext {
-        let _localctx: AttributeNameContext = AttributeNameContext(_ctx, getState())
+		let _localctx: AttributeNameContext = AttributeNameContext(_ctx, getState())
 		try enterRule(_localctx, 142, ObjectiveCParser.RULE_attributeName)
 		defer {
 	    		try! exitRule()
@@ -7991,7 +7990,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func attributeParameters() throws -> AttributeParametersContext {
-        let _localctx: AttributeParametersContext = AttributeParametersContext(_ctx, getState())
+		let _localctx: AttributeParametersContext = AttributeParametersContext(_ctx, getState())
 		try enterRule(_localctx, 144, ObjectiveCParser.RULE_attributeParameters)
 		var _la: Int = 0
 		defer {
@@ -8086,7 +8085,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func attributeParameterList() throws -> AttributeParameterListContext {
-        let _localctx: AttributeParameterListContext = AttributeParameterListContext(_ctx, getState())
+		let _localctx: AttributeParameterListContext = AttributeParameterListContext(_ctx, getState())
 		try enterRule(_localctx, 146, ObjectiveCParser.RULE_attributeParameterList)
 		var _la: Int = 0
 		defer {
@@ -8173,7 +8172,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func attributeParameter() throws -> AttributeParameterContext {
-        let _localctx: AttributeParameterContext = AttributeParameterContext(_ctx, getState())
+		let _localctx: AttributeParameterContext = AttributeParameterContext(_ctx, getState())
 		try enterRule(_localctx, 148, ObjectiveCParser.RULE_attributeParameter)
 		defer {
 	    		try! exitRule()
@@ -8270,7 +8269,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func attributeParameterAssignment() throws -> AttributeParameterAssignmentContext {
-        let _localctx: AttributeParameterAssignmentContext = AttributeParameterAssignmentContext(_ctx, getState())
+		let _localctx: AttributeParameterAssignmentContext = AttributeParameterAssignmentContext(_ctx, getState())
 		try enterRule(_localctx, 150, ObjectiveCParser.RULE_attributeParameterAssignment)
 		defer {
 	    		try! exitRule()
@@ -8430,7 +8429,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func declaration() throws -> DeclarationContext {
-        let _localctx: DeclarationContext = DeclarationContext(_ctx, getState())
+		let _localctx: DeclarationContext = DeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 152, ObjectiveCParser.RULE_declaration)
 		defer {
 	    		try! exitRule()
@@ -8547,7 +8546,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func functionPointer() throws -> FunctionPointerContext {
-        let _localctx: FunctionPointerContext = FunctionPointerContext(_ctx, getState())
+		let _localctx: FunctionPointerContext = FunctionPointerContext(_ctx, getState())
 		try enterRule(_localctx, 154, ObjectiveCParser.RULE_functionPointer)
 		var _la: Int = 0
 		defer {
@@ -8662,7 +8661,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func functionPointerParameterList() throws -> FunctionPointerParameterListContext {
-        let _localctx: FunctionPointerParameterListContext = FunctionPointerParameterListContext(_ctx, getState())
+		let _localctx: FunctionPointerParameterListContext = FunctionPointerParameterListContext(_ctx, getState())
 		try enterRule(_localctx, 156, ObjectiveCParser.RULE_functionPointerParameterList)
 		var _la: Int = 0
 		defer {
@@ -8746,7 +8745,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func functionPointerParameterDeclarationList() throws -> FunctionPointerParameterDeclarationListContext {
-        let _localctx: FunctionPointerParameterDeclarationListContext = FunctionPointerParameterDeclarationListContext(_ctx, getState())
+		let _localctx: FunctionPointerParameterDeclarationListContext = FunctionPointerParameterDeclarationListContext(_ctx, getState())
 		try enterRule(_localctx, 158, ObjectiveCParser.RULE_functionPointerParameterDeclarationList)
 		defer {
 	    		try! exitRule()
@@ -8831,7 +8830,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func functionPointerParameterDeclaration() throws -> FunctionPointerParameterDeclarationContext {
-        let _localctx: FunctionPointerParameterDeclarationContext = FunctionPointerParameterDeclarationContext(_ctx, getState())
+		let _localctx: FunctionPointerParameterDeclarationContext = FunctionPointerParameterDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 160, ObjectiveCParser.RULE_functionPointerParameterDeclaration)
 		var _la: Int = 0
 		defer {
@@ -8958,7 +8957,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func functionCallExpression() throws -> FunctionCallExpressionContext {
-        let _localctx: FunctionCallExpressionContext = FunctionCallExpressionContext(_ctx, getState())
+		let _localctx: FunctionCallExpressionContext = FunctionCallExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 162, ObjectiveCParser.RULE_functionCallExpression)
 		var _la: Int = 0
 		defer {
@@ -9065,7 +9064,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func enumDeclaration() throws -> EnumDeclarationContext {
-        let _localctx: EnumDeclarationContext = EnumDeclarationContext(_ctx, getState())
+		let _localctx: EnumDeclarationContext = EnumDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 164, ObjectiveCParser.RULE_enumDeclaration)
 		var _la: Int = 0
 		defer {
@@ -9178,7 +9177,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func varDeclaration() throws -> VarDeclarationContext {
-        let _localctx: VarDeclarationContext = VarDeclarationContext(_ctx, getState())
+		let _localctx: VarDeclarationContext = VarDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 166, ObjectiveCParser.RULE_varDeclaration)
 		defer {
 	    		try! exitRule()
@@ -9275,7 +9274,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func typedefDeclaration() throws -> TypedefDeclarationContext {
-        let _localctx: TypedefDeclarationContext = TypedefDeclarationContext(_ctx, getState())
+		let _localctx: TypedefDeclarationContext = TypedefDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 168, ObjectiveCParser.RULE_typedefDeclaration)
 		var _la: Int = 0
 		defer {
@@ -9426,7 +9425,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func typeDeclaratorList() throws -> TypeDeclaratorListContext {
-        let _localctx: TypeDeclaratorListContext = TypeDeclaratorListContext(_ctx, getState())
+		let _localctx: TypeDeclaratorListContext = TypeDeclaratorListContext(_ctx, getState())
 		try enterRule(_localctx, 170, ObjectiveCParser.RULE_typeDeclaratorList)
 		var _la: Int = 0
 		defer {
@@ -9561,7 +9560,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func declarationSpecifiers() throws -> DeclarationSpecifiersContext {
-        let _localctx: DeclarationSpecifiersContext = DeclarationSpecifiersContext(_ctx, getState())
+		let _localctx: DeclarationSpecifiersContext = DeclarationSpecifiersContext(_ctx, getState())
 		try enterRule(_localctx, 172, ObjectiveCParser.RULE_declarationSpecifiers)
 		defer {
 	    		try! exitRule()
@@ -9708,7 +9707,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func attributeSpecifier() throws -> AttributeSpecifierContext {
-        let _localctx: AttributeSpecifierContext = AttributeSpecifierContext(_ctx, getState())
+		let _localctx: AttributeSpecifierContext = AttributeSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 174, ObjectiveCParser.RULE_attributeSpecifier)
 		var _la: Int = 0
 		defer {
@@ -9805,7 +9804,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func initDeclaratorList() throws -> InitDeclaratorListContext {
-        let _localctx: InitDeclaratorListContext = InitDeclaratorListContext(_ctx, getState())
+		let _localctx: InitDeclaratorListContext = InitDeclaratorListContext(_ctx, getState())
 		try enterRule(_localctx, 176, ObjectiveCParser.RULE_initDeclaratorList)
 		var _la: Int = 0
 		defer {
@@ -9888,7 +9887,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func initDeclarator() throws -> InitDeclaratorContext {
-        let _localctx: InitDeclaratorContext = InitDeclaratorContext(_ctx, getState())
+		let _localctx: InitDeclaratorContext = InitDeclaratorContext(_ctx, getState())
 		try enterRule(_localctx, 178, ObjectiveCParser.RULE_initDeclarator)
 		var _la: Int = 0
 		defer {
@@ -9992,7 +9991,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func structOrUnionSpecifier() throws -> StructOrUnionSpecifierContext {
-        let _localctx: StructOrUnionSpecifierContext = StructOrUnionSpecifierContext(_ctx, getState())
+		let _localctx: StructOrUnionSpecifierContext = StructOrUnionSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 180, ObjectiveCParser.RULE_structOrUnionSpecifier)
 		var _la: Int = 0
 		defer {
@@ -10152,7 +10151,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func fieldDeclaration() throws -> FieldDeclarationContext {
-        let _localctx: FieldDeclarationContext = FieldDeclarationContext(_ctx, getState())
+		let _localctx: FieldDeclarationContext = FieldDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 182, ObjectiveCParser.RULE_fieldDeclaration)
 		var _la: Int = 0
 		defer {
@@ -10292,7 +10291,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func specifierQualifierList() throws -> SpecifierQualifierListContext {
-        let _localctx: SpecifierQualifierListContext = SpecifierQualifierListContext(_ctx, getState())
+		let _localctx: SpecifierQualifierListContext = SpecifierQualifierListContext(_ctx, getState())
 		try enterRule(_localctx, 184, ObjectiveCParser.RULE_specifierQualifierList)
 		defer {
 	    		try! exitRule()
@@ -10413,7 +10412,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func ibOutletQualifier() throws -> IbOutletQualifierContext {
-        let _localctx: IbOutletQualifierContext = IbOutletQualifierContext(_ctx, getState())
+		let _localctx: IbOutletQualifierContext = IbOutletQualifierContext(_ctx, getState())
 		try enterRule(_localctx, 186, ObjectiveCParser.RULE_ibOutletQualifier)
 		defer {
 	    		try! exitRule()
@@ -10502,7 +10501,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func arcBehaviourSpecifier() throws -> ArcBehaviourSpecifierContext {
-        let _localctx: ArcBehaviourSpecifierContext = ArcBehaviourSpecifierContext(_ctx, getState())
+		let _localctx: ArcBehaviourSpecifierContext = ArcBehaviourSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 188, ObjectiveCParser.RULE_arcBehaviourSpecifier)
 		var _la: Int = 0
 		defer {
@@ -10585,7 +10584,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func nullabilitySpecifier() throws -> NullabilitySpecifierContext {
-        let _localctx: NullabilitySpecifierContext = NullabilitySpecifierContext(_ctx, getState())
+		let _localctx: NullabilitySpecifierContext = NullabilitySpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 190, ObjectiveCParser.RULE_nullabilitySpecifier)
 		var _la: Int = 0
 		defer {
@@ -10668,7 +10667,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func storageClassSpecifier() throws -> StorageClassSpecifierContext {
-        let _localctx: StorageClassSpecifierContext = StorageClassSpecifierContext(_ctx, getState())
+		let _localctx: StorageClassSpecifierContext = StorageClassSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 192, ObjectiveCParser.RULE_storageClassSpecifier)
 		var _la: Int = 0
 		defer {
@@ -10763,7 +10762,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func typePrefix() throws -> TypePrefixContext {
-        let _localctx: TypePrefixContext = TypePrefixContext(_ctx, getState())
+		let _localctx: TypePrefixContext = TypePrefixContext(_ctx, getState())
 		try enterRule(_localctx, 194, ObjectiveCParser.RULE_typePrefix)
 		var _la: Int = 0
 		defer {
@@ -10847,7 +10846,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func typeQualifier() throws -> TypeQualifierContext {
-        let _localctx: TypeQualifierContext = TypeQualifierContext(_ctx, getState())
+		let _localctx: TypeQualifierContext = TypeQualifierContext(_ctx, getState())
 		try enterRule(_localctx, 196, ObjectiveCParser.RULE_typeQualifier)
 		defer {
 	    		try! exitRule()
@@ -10956,7 +10955,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func protocolQualifier() throws -> ProtocolQualifierContext {
-        let _localctx: ProtocolQualifierContext = ProtocolQualifierContext(_ctx, getState())
+		let _localctx: ProtocolQualifierContext = ProtocolQualifierContext(_ctx, getState())
 		try enterRule(_localctx, 198, ObjectiveCParser.RULE_protocolQualifier)
 		var _la: Int = 0
 		defer {
@@ -11055,7 +11054,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func typeSpecifier() throws -> TypeSpecifierContext {
-        let _localctx: TypeSpecifierContext = TypeSpecifierContext(_ctx, getState())
+		let _localctx: TypeSpecifierContext = TypeSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 200, ObjectiveCParser.RULE_typeSpecifier)
 		defer {
 	    		try! exitRule()
@@ -11240,7 +11239,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func scalarTypeSpecifier() throws -> ScalarTypeSpecifierContext {
-        let _localctx: ScalarTypeSpecifierContext = ScalarTypeSpecifierContext(_ctx, getState())
+		let _localctx: ScalarTypeSpecifierContext = ScalarTypeSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 202, ObjectiveCParser.RULE_scalarTypeSpecifier)
 		var _la: Int = 0
 		defer {
@@ -11323,7 +11322,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func typeofExpression() throws -> TypeofExpressionContext {
-        let _localctx: TypeofExpressionContext = TypeofExpressionContext(_ctx, getState())
+		let _localctx: TypeofExpressionContext = TypeofExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 204, ObjectiveCParser.RULE_typeofExpression)
 		defer {
 	    		try! exitRule()
@@ -11399,7 +11398,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func fieldDeclaratorList() throws -> FieldDeclaratorListContext {
-        let _localctx: FieldDeclaratorListContext = FieldDeclaratorListContext(_ctx, getState())
+		let _localctx: FieldDeclaratorListContext = FieldDeclaratorListContext(_ctx, getState())
 		try enterRule(_localctx, 206, ObjectiveCParser.RULE_fieldDeclaratorList)
 		var _la: Int = 0
 		defer {
@@ -11482,7 +11481,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func fieldDeclarator() throws -> FieldDeclaratorContext {
-        let _localctx: FieldDeclaratorContext = FieldDeclaratorContext(_ctx, getState())
+		let _localctx: FieldDeclaratorContext = FieldDeclaratorContext(_ctx, getState())
 		try enterRule(_localctx, 208, ObjectiveCParser.RULE_fieldDeclarator)
 		var _la: Int = 0
 		defer {
@@ -11622,7 +11621,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func enumSpecifier() throws -> EnumSpecifierContext {
-        let _localctx: EnumSpecifierContext = EnumSpecifierContext(_ctx, getState())
+		let _localctx: EnumSpecifierContext = EnumSpecifierContext(_ctx, getState())
 		try enterRule(_localctx, 210, ObjectiveCParser.RULE_enumSpecifier)
 		var _la: Int = 0
 		defer {
@@ -11846,7 +11845,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func enumeratorList() throws -> EnumeratorListContext {
-        let _localctx: EnumeratorListContext = EnumeratorListContext(_ctx, getState())
+		let _localctx: EnumeratorListContext = EnumeratorListContext(_ctx, getState())
 		try enterRule(_localctx, 212, ObjectiveCParser.RULE_enumeratorList)
 		var _la: Int = 0
 		defer {
@@ -11941,7 +11940,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func enumerator() throws -> EnumeratorContext {
-        let _localctx: EnumeratorContext = EnumeratorContext(_ctx, getState())
+		let _localctx: EnumeratorContext = EnumeratorContext(_ctx, getState())
 		try enterRule(_localctx, 214, ObjectiveCParser.RULE_enumerator)
 		var _la: Int = 0
 		defer {
@@ -12013,7 +12012,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func enumeratorIdentifier() throws -> EnumeratorIdentifierContext {
-        let _localctx: EnumeratorIdentifierContext = EnumeratorIdentifierContext(_ctx, getState())
+		let _localctx: EnumeratorIdentifierContext = EnumeratorIdentifierContext(_ctx, getState())
 		try enterRule(_localctx, 216, ObjectiveCParser.RULE_enumeratorIdentifier)
 		defer {
 	    		try! exitRule()
@@ -12109,7 +12108,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func directDeclarator() throws -> DirectDeclaratorContext {
-        let _localctx: DirectDeclaratorContext = DirectDeclaratorContext(_ctx, getState())
+		let _localctx: DirectDeclaratorContext = DirectDeclaratorContext(_ctx, getState())
 		try enterRule(_localctx, 218, ObjectiveCParser.RULE_directDeclarator)
 		var _la: Int = 0
 		defer {
@@ -12356,7 +12355,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func declaratorSuffix() throws -> DeclaratorSuffixContext {
-        let _localctx: DeclaratorSuffixContext = DeclaratorSuffixContext(_ctx, getState())
+		let _localctx: DeclaratorSuffixContext = DeclaratorSuffixContext(_ctx, getState())
 		try enterRule(_localctx, 220, ObjectiveCParser.RULE_declaratorSuffix)
 		var _la: Int = 0
 		defer {
@@ -12447,7 +12446,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func parameterList() throws -> ParameterListContext {
-        let _localctx: ParameterListContext = ParameterListContext(_ctx, getState())
+		let _localctx: ParameterListContext = ParameterListContext(_ctx, getState())
 		try enterRule(_localctx, 222, ObjectiveCParser.RULE_parameterList)
 		var _la: Int = 0
 		defer {
@@ -12527,7 +12526,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func pointer() throws -> PointerContext {
-        let _localctx: PointerContext = PointerContext(_ctx, getState())
+		let _localctx: PointerContext = PointerContext(_ctx, getState())
 		try enterRule(_localctx, 224, ObjectiveCParser.RULE_pointer)
 		defer {
 	    		try! exitRule()
@@ -12627,7 +12626,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func macro() throws -> MacroContext {
-        let _localctx: MacroContext = MacroContext(_ctx, getState())
+		let _localctx: MacroContext = MacroContext(_ctx, getState())
 		try enterRule(_localctx, 226, ObjectiveCParser.RULE_macro)
 		var _la: Int = 0
 		defer {
@@ -12739,7 +12738,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func arrayInitializer() throws -> ArrayInitializerContext {
-        let _localctx: ArrayInitializerContext = ArrayInitializerContext(_ctx, getState())
+		let _localctx: ArrayInitializerContext = ArrayInitializerContext(_ctx, getState())
 		try enterRule(_localctx, 228, ObjectiveCParser.RULE_arrayInitializer)
 		var _la: Int = 0
 		defer {
@@ -12872,7 +12871,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func structInitializer() throws -> StructInitializerContext {
-        let _localctx: StructInitializerContext = StructInitializerContext(_ctx, getState())
+		let _localctx: StructInitializerContext = StructInitializerContext(_ctx, getState())
 		try enterRule(_localctx, 230, ObjectiveCParser.RULE_structInitializer)
 		var _la: Int = 0
 		defer {
@@ -12986,7 +12985,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func structInitializerItem() throws -> StructInitializerItemContext {
-        let _localctx: StructInitializerItemContext = StructInitializerItemContext(_ctx, getState())
+		let _localctx: StructInitializerItemContext = StructInitializerItemContext(_ctx, getState())
 		try enterRule(_localctx, 232, ObjectiveCParser.RULE_structInitializerItem)
 		defer {
 	    		try! exitRule()
@@ -13075,7 +13074,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func initializerList() throws -> InitializerListContext {
-        let _localctx: InitializerListContext = InitializerListContext(_ctx, getState())
+		let _localctx: InitializerListContext = InitializerListContext(_ctx, getState())
 		try enterRule(_localctx, 234, ObjectiveCParser.RULE_initializerList)
 		var _la: Int = 0
 		defer {
@@ -13170,7 +13169,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func typeName() throws -> TypeNameContext {
-        let _localctx: TypeNameContext = TypeNameContext(_ctx, getState())
+		let _localctx: TypeNameContext = TypeNameContext(_ctx, getState())
 		try enterRule(_localctx, 236, ObjectiveCParser.RULE_typeName)
 		var _la: Int = 0
 		defer {
@@ -13300,7 +13299,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func abstractDeclarator() throws -> AbstractDeclaratorContext {
-        let _localctx: AbstractDeclaratorContext = AbstractDeclaratorContext(_ctx, getState())
+		let _localctx: AbstractDeclaratorContext = AbstractDeclaratorContext(_ctx, getState())
 		try enterRule(_localctx, 238, ObjectiveCParser.RULE_abstractDeclarator)
 		var _la: Int = 0
 		defer {
@@ -13489,7 +13488,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func abstractDeclaratorSuffix() throws -> AbstractDeclaratorSuffixContext {
-        let _localctx: AbstractDeclaratorSuffixContext = AbstractDeclaratorSuffixContext(_ctx, getState())
+		let _localctx: AbstractDeclaratorSuffixContext = AbstractDeclaratorSuffixContext(_ctx, getState())
 		try enterRule(_localctx, 240, ObjectiveCParser.RULE_abstractDeclaratorSuffix)
 		var _la: Int = 0
 		defer {
@@ -13621,7 +13620,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func parameterDeclarationList() throws -> ParameterDeclarationListContext {
-        let _localctx: ParameterDeclarationListContext = ParameterDeclarationListContext(_ctx, getState())
+		let _localctx: ParameterDeclarationListContext = ParameterDeclarationListContext(_ctx, getState())
 		try enterRule(_localctx, 242, ObjectiveCParser.RULE_parameterDeclarationList)
 		defer {
 	    		try! exitRule()
@@ -13706,7 +13705,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func parameterDeclaration() throws -> ParameterDeclarationContext {
-        let _localctx: ParameterDeclarationContext = ParameterDeclarationContext(_ctx, getState())
+		let _localctx: ParameterDeclarationContext = ParameterDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 244, ObjectiveCParser.RULE_parameterDeclaration)
 		defer {
 	    		try! exitRule()
@@ -13787,7 +13786,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func declarator() throws -> DeclaratorContext {
-        let _localctx: DeclaratorContext = DeclaratorContext(_ctx, getState())
+		let _localctx: DeclaratorContext = DeclaratorContext(_ctx, getState())
 		try enterRule(_localctx, 246, ObjectiveCParser.RULE_declarator)
 		var _la: Int = 0
 		defer {
@@ -13897,7 +13896,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func statement() throws -> StatementContext {
-        let _localctx: StatementContext = StatementContext(_ctx, getState())
+		let _localctx: StatementContext = StatementContext(_ctx, getState())
 		try enterRule(_localctx, 248, ObjectiveCParser.RULE_statement)
 		defer {
 	    		try! exitRule()
@@ -14104,7 +14103,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func labeledStatement() throws -> LabeledStatementContext {
-        let _localctx: LabeledStatementContext = LabeledStatementContext(_ctx, getState())
+		let _localctx: LabeledStatementContext = LabeledStatementContext(_ctx, getState())
 		try enterRule(_localctx, 250, ObjectiveCParser.RULE_labeledStatement)
 		defer {
 	    		try! exitRule()
@@ -14172,7 +14171,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func rangeExpression() throws -> RangeExpressionContext {
-        let _localctx: RangeExpressionContext = RangeExpressionContext(_ctx, getState())
+		let _localctx: RangeExpressionContext = RangeExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 252, ObjectiveCParser.RULE_rangeExpression)
 		var _la: Int = 0
 		defer {
@@ -14264,7 +14263,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func compoundStatement() throws -> CompoundStatementContext {
-        let _localctx: CompoundStatementContext = CompoundStatementContext(_ctx, getState())
+		let _localctx: CompoundStatementContext = CompoundStatementContext(_ctx, getState())
 		try enterRule(_localctx, 254, ObjectiveCParser.RULE_compoundStatement)
 		var _la: Int = 0
 		defer {
@@ -14392,7 +14391,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func selectionStatement() throws -> SelectionStatementContext {
-        let _localctx: SelectionStatementContext = SelectionStatementContext(_ctx, getState())
+		let _localctx: SelectionStatementContext = SelectionStatementContext(_ctx, getState())
 		try enterRule(_localctx, 256, ObjectiveCParser.RULE_selectionStatement)
 		defer {
 	    		try! exitRule()
@@ -14507,7 +14506,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func switchStatement() throws -> SwitchStatementContext {
-        let _localctx: SwitchStatementContext = SwitchStatementContext(_ctx, getState())
+		let _localctx: SwitchStatementContext = SwitchStatementContext(_ctx, getState())
 		try enterRule(_localctx, 258, ObjectiveCParser.RULE_switchStatement)
 		defer {
 	    		try! exitRule()
@@ -14583,7 +14582,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func switchBlock() throws -> SwitchBlockContext {
-        let _localctx: SwitchBlockContext = SwitchBlockContext(_ctx, getState())
+		let _localctx: SwitchBlockContext = SwitchBlockContext(_ctx, getState())
 		try enterRule(_localctx, 260, ObjectiveCParser.RULE_switchBlock)
 		var _la: Int = 0
 		defer {
@@ -14670,7 +14669,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func switchSection() throws -> SwitchSectionContext {
-        let _localctx: SwitchSectionContext = SwitchSectionContext(_ctx, getState())
+		let _localctx: SwitchSectionContext = SwitchSectionContext(_ctx, getState())
 		try enterRule(_localctx, 262, ObjectiveCParser.RULE_switchSection)
 		var _la: Int = 0
 		defer {
@@ -14788,7 +14787,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func switchLabel() throws -> SwitchLabelContext {
-        let _localctx: SwitchLabelContext = SwitchLabelContext(_ctx, getState())
+		let _localctx: SwitchLabelContext = SwitchLabelContext(_ctx, getState())
 		try enterRule(_localctx, 264, ObjectiveCParser.RULE_switchLabel)
 		defer {
 	    		try! exitRule()
@@ -14894,7 +14893,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func iterationStatement() throws -> IterationStatementContext {
-        let _localctx: IterationStatementContext = IterationStatementContext(_ctx, getState())
+		let _localctx: IterationStatementContext = IterationStatementContext(_ctx, getState())
 		try enterRule(_localctx, 266, ObjectiveCParser.RULE_iterationStatement)
 		defer {
 	    		try! exitRule()
@@ -14991,7 +14990,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func whileStatement() throws -> WhileStatementContext {
-        let _localctx: WhileStatementContext = WhileStatementContext(_ctx, getState())
+		let _localctx: WhileStatementContext = WhileStatementContext(_ctx, getState())
 		try enterRule(_localctx, 268, ObjectiveCParser.RULE_whileStatement)
 		defer {
 	    		try! exitRule()
@@ -15079,7 +15078,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func doStatement() throws -> DoStatementContext {
-        let _localctx: DoStatementContext = DoStatementContext(_ctx, getState())
+		let _localctx: DoStatementContext = DoStatementContext(_ctx, getState())
 		try enterRule(_localctx, 270, ObjectiveCParser.RULE_doStatement)
 		defer {
 	    		try! exitRule()
@@ -15179,7 +15178,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func forStatement() throws -> ForStatementContext {
-        let _localctx: ForStatementContext = ForStatementContext(_ctx, getState())
+		let _localctx: ForStatementContext = ForStatementContext(_ctx, getState())
 		try enterRule(_localctx, 272, ObjectiveCParser.RULE_forStatement)
 		var _la: Int = 0
 		defer {
@@ -15326,7 +15325,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func forLoopInitializer() throws -> ForLoopInitializerContext {
-        let _localctx: ForLoopInitializerContext = ForLoopInitializerContext(_ctx, getState())
+		let _localctx: ForLoopInitializerContext = ForLoopInitializerContext(_ctx, getState())
 		try enterRule(_localctx, 274, ObjectiveCParser.RULE_forLoopInitializer)
 		defer {
 	    		try! exitRule()
@@ -15421,7 +15420,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func forInStatement() throws -> ForInStatementContext {
-        let _localctx: ForInStatementContext = ForInStatementContext(_ctx, getState())
+		let _localctx: ForInStatementContext = ForInStatementContext(_ctx, getState())
 		try enterRule(_localctx, 276, ObjectiveCParser.RULE_forInStatement)
 		var _la: Int = 0
 		defer {
@@ -15532,7 +15531,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func jumpStatement() throws -> JumpStatementContext {
-        let _localctx: JumpStatementContext = JumpStatementContext(_ctx, getState())
+		let _localctx: JumpStatementContext = JumpStatementContext(_ctx, getState())
 		try enterRule(_localctx, 278, ObjectiveCParser.RULE_jumpStatement)
 		var _la: Int = 0
 		defer {
@@ -15656,7 +15655,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func expressions() throws -> ExpressionsContext {
-        let _localctx: ExpressionsContext = ExpressionsContext(_ctx, getState())
+		let _localctx: ExpressionsContext = ExpressionsContext(_ctx, getState())
 		try enterRule(_localctx, 280, ObjectiveCParser.RULE_expressions)
 		defer {
 	    		try! exitRule()
@@ -15847,9 +15846,9 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	private func expression(_ _p: Int) throws -> ExpressionContext   {
 		let _parentctx: ParserRuleContext? = _ctx
-        let _parentState: Int = getState()
+		let _parentState: Int = getState()
 		var _localctx: ExpressionContext = ExpressionContext(_ctx, _parentState)
-        let _startState: Int = 282
+		let _startState: Int = 282
 		try enterRecursionRule(_localctx, 282, ObjectiveCParser.RULE_expression, _p)
 		var _la: Int = 0
 		defer {
@@ -16267,7 +16266,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func assignmentOperator() throws -> AssignmentOperatorContext {
-        let _localctx: AssignmentOperatorContext = AssignmentOperatorContext(_ctx, getState())
+		let _localctx: AssignmentOperatorContext = AssignmentOperatorContext(_ctx, getState())
 		try enterRule(_localctx, 284, ObjectiveCParser.RULE_assignmentOperator)
 		var _la: Int = 0
 		defer {
@@ -16358,7 +16357,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func castExpression() throws -> CastExpressionContext {
-        let _localctx: CastExpressionContext = CastExpressionContext(_ctx, getState())
+		let _localctx: CastExpressionContext = CastExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 286, ObjectiveCParser.RULE_castExpression)
 		defer {
 	    		try! exitRule()
@@ -16455,7 +16454,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func initializer() throws -> InitializerContext {
-        let _localctx: InitializerContext = InitializerContext(_ctx, getState())
+		let _localctx: InitializerContext = InitializerContext(_ctx, getState())
 		try enterRule(_localctx, 288, ObjectiveCParser.RULE_initializer)
 		defer {
 	    		try! exitRule()
@@ -16534,7 +16533,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func constantExpression() throws -> ConstantExpressionContext {
-        let _localctx: ConstantExpressionContext = ConstantExpressionContext(_ctx, getState())
+		let _localctx: ConstantExpressionContext = ConstantExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 290, ObjectiveCParser.RULE_constantExpression)
 		defer {
 	    		try! exitRule()
@@ -16700,7 +16699,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func unaryExpression() throws -> UnaryExpressionContext {
-        let _localctx: UnaryExpressionContext = UnaryExpressionContext(_ctx, getState())
+		let _localctx: UnaryExpressionContext = UnaryExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 292, ObjectiveCParser.RULE_unaryExpression)
 		var _la: Int = 0
 		defer {
@@ -16837,7 +16836,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func unaryOperator() throws -> UnaryOperatorContext {
-        let _localctx: UnaryOperatorContext = UnaryOperatorContext(_ctx, getState())
+		let _localctx: UnaryOperatorContext = UnaryOperatorContext(_ctx, getState())
 		try enterRule(_localctx, 294, ObjectiveCParser.RULE_unaryOperator)
 		var _la: Int = 0
 		defer {
@@ -16938,9 +16937,9 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	private func postfixExpression(_ _p: Int) throws -> PostfixExpressionContext   {
 		let _parentctx: ParserRuleContext? = _ctx
-        let _parentState: Int = getState()
+		let _parentState: Int = getState()
 		var _localctx: PostfixExpressionContext = PostfixExpressionContext(_ctx, _parentState)
-        let _startState: Int = 296
+		let _startState: Int = 296
 		try enterRecursionRule(_localctx, 296, ObjectiveCParser.RULE_postfixExpression, _p)
 		var _la: Int = 0
 		defer {
@@ -17108,7 +17107,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func postfixExpr() throws -> PostfixExprContext {
-        let _localctx: PostfixExprContext = PostfixExprContext(_ctx, getState())
+		let _localctx: PostfixExprContext = PostfixExprContext(_ctx, getState())
 		try enterRule(_localctx, 298, ObjectiveCParser.RULE_postfixExpr)
 		var _la: Int = 0
 		defer {
@@ -17302,7 +17301,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func argumentExpressionList() throws -> ArgumentExpressionListContext {
-        let _localctx: ArgumentExpressionListContext = ArgumentExpressionListContext(_ctx, getState())
+		let _localctx: ArgumentExpressionListContext = ArgumentExpressionListContext(_ctx, getState())
 		try enterRule(_localctx, 300, ObjectiveCParser.RULE_argumentExpressionList)
 		var _la: Int = 0
 		defer {
@@ -17381,7 +17380,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func argumentExpression() throws -> ArgumentExpressionContext {
-        let _localctx: ArgumentExpressionContext = ArgumentExpressionContext(_ctx, getState())
+		let _localctx: ArgumentExpressionContext = ArgumentExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 302, ObjectiveCParser.RULE_argumentExpression)
 		defer {
 	    		try! exitRule()
@@ -17502,7 +17501,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func primaryExpression() throws -> PrimaryExpressionContext {
-        let _localctx: PrimaryExpressionContext = PrimaryExpressionContext(_ctx, getState())
+		let _localctx: PrimaryExpressionContext = PrimaryExpressionContext(_ctx, getState())
 		try enterRule(_localctx, 304, ObjectiveCParser.RULE_primaryExpression)
 		defer {
 	    		try! exitRule()
@@ -17687,7 +17686,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func constant() throws -> ConstantContext {
-        let _localctx: ConstantContext = ConstantContext(_ctx, getState())
+		let _localctx: ConstantContext = ConstantContext(_ctx, getState())
 		try enterRule(_localctx, 306, ObjectiveCParser.RULE_constant)
 		var _la: Int = 0
 		defer {
@@ -17893,7 +17892,7 @@ open class ObjectiveCParser: Parser {
 	}
 	@discardableResult
 	 open func stringLiteral() throws -> StringLiteralContext {
-        let _localctx: StringLiteralContext = StringLiteralContext(_ctx, getState())
+		let _localctx: StringLiteralContext = StringLiteralContext(_ctx, getState())
 		try enterRule(_localctx, 308, ObjectiveCParser.RULE_stringLiteral)
 		var _la: Int = 0
 		defer {
