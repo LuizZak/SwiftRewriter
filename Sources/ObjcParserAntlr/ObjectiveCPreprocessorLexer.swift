@@ -1,4 +1,4 @@
-// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/two-step-processing/ObjectiveCPreprocessorLexer.g4 by ANTLR 4.8
+// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/two-step-processing/ObjectiveCPreprocessorLexer.g4 by ANTLR 4.9.1
 import Antlr4
 
 open class ObjectiveCPreprocessorLexer: Lexer {
@@ -106,7 +106,7 @@ open class ObjectiveCPreprocessorLexer: Lexer {
     init(_ input: CharStream, _ state: State) {
         self.state = state
         
-        RuntimeMetaData.checkVersion("4.8", RuntimeMetaData.VERSION)
+        RuntimeMetaData.checkVersion("4.9.1", RuntimeMetaData.VERSION)
         super.init(input)
         _interp = LexerATNSimulator(self,
                                     _ATN,
