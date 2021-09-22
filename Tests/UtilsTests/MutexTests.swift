@@ -2,6 +2,12 @@ import XCTest
 import Dispatch
 import Utils
 
+#if os(Windows)
+
+import WinSDK
+
+#endif
+
 class MutexTests: XCTestCase {
     func testMutex() {
         let expectation = self.expectation(description: "\(#function)\(#line)")
@@ -46,7 +52,17 @@ class MutexTests: XCTestCase {
                 XCTAssertFalse(mutex.tryLock())
                 expectation.fulfill()
             }
+            
+            #if os(Windows)
+
+            Sleep(25)
+
+            #else
+            
             usleep(25000)
+            
+            #endif
+
             mutex.unlock()
         }
         

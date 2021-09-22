@@ -1,8 +1,7 @@
-#if os(Linux)
-import Glibc
-#endif
+#if os(Windows)
 
 import Foundation
+import WinSDK
 
 /// Filters a file using a given include and exclude pattern.
 ///
@@ -14,25 +13,20 @@ import Foundation
 /// matching the pattern. Takes priority over `includePattern`.
 /// - Returns: Whether the given file URL matches the given include/exclude pattern.
 public func fileMatchesFilter(path: String, includePattern: String?, excludePattern: String?) -> Bool {
-    let fnflags: Int32
-    #if os(macOS)
-    fnflags = FNM_CASEFOLD
-    #else
-    fnflags = 0
-    #endif
-
     // Inclusions
     if let includePattern = includePattern {
-        if fnmatch(includePattern, path, fnflags) != 0 {
+        if !PathMatchSpecA(path, includePattern) {
             return false
         }
     }
     // Exclusions
     if let excludePattern = excludePattern {
-        if fnmatch(excludePattern, path, fnflags) == 0 {
+        if PathMatchSpecA(path, excludePattern) {
             return false
         }
     }
 
     return true
 }
+
+#endif

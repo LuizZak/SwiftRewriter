@@ -466,7 +466,7 @@ extension SwiftSyntaxProducer {
                 builder.addAttribute(attribute().asSyntax)
             }
             
-            builder.useClassKeyword(
+            builder.useClassOrActorKeyword(
                 makeStartToken(SyntaxFactory.makeClassKeyword)
                     .addingTrailingSpace()
             )

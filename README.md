@@ -80,6 +80,22 @@ class MyClass: NSObject {
 
 Xcode 12 & Swift 5.3
 
+#### Building
+
+On Linux and macOS:
+
+```bash
+$ swift build
+```
+
+On Windows 10 (experimental):
+
+(assuming Swift is installed at C:\Library)
+
+```cmd
+swift build -Xswiftc -I -Xswiftc C:\Library\Developer\Toolchains\unknown-Asserts-development.xctoolchain\usr\include\_InternalSwiftSyntaxParser -Xswiftc -lC:\Library\Developer\Toolchains\unknown-Asserts-development.xctoolchain\usr\lib\_InternalSwiftSyntaxParser.lib -Xswiftc -L -Xswiftc C:\Library\Developer\Toolchains\unknown-Asserts-development.xctoolchain\usr\lib
+```
+
 #### Usage
 
 - From the working directory execute as follows:

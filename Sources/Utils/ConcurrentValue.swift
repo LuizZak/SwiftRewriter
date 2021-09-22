@@ -1,13 +1,7 @@
-#if os(Linux)
-import Glibc
-#elseif os(macOS)
-import Darwin
-#endif
-
 @propertyWrapper
 public final class ConcurrentValue<T> {
     @usableFromInline
-    var lock: pthread_rwlock_t
+    var _lock: ReadWriteLock
 
     @usableFromInline
     var _value: T
@@ -17,70 +11,54 @@ public final class ConcurrentValue<T> {
     @inlinable
     public var wrappedValue: T {
         get {
-            pthread_rwlock_rdlock(&lock)
-            defer {
-                pthread_rwlock_unlock(&lock)
-            }
-            return _value
+            _lock.lockingForRead { _value }
         }
         _modify {
-            pthread_rwlock_wrlock(&lock)
+            var l = _lock.lockForWrite()
             yield &_value
-            pthread_rwlock_unlock(&lock)
+            l.unlock()
         }
     }
     
     @inlinable
     public var projectedValue: T {
         get {
-            pthread_rwlock_rdlock(&lock)
-            defer {
-                pthread_rwlock_unlock(&lock)
-            }
-            return _value
+            _lock.lockingForRead { _value }
         }
         _modify {
-            pthread_rwlock_wrlock(&lock)
+            var l = _lock.lockForWrite()
             yield &_value
-            pthread_rwlock_unlock(&lock)
+            l.unlock()
         }
     }
 
     @inlinable
     public init(wrappedValue: T) {
-        lock = pthread_rwlock_t()
-        pthread_rwlock_init(&lock, nil)
+        _lock = ReadWriteLock()
 
         self._value = wrappedValue
     }
 
-    deinit {
-        pthread_rwlock_destroy(&lock)
-    }
-
     @inlinable
     public func modifyingValue<U>(_ block: (inout T) -> U) -> U {
-        pthread_rwlock_wrlock(&lock)
-        defer {
-            pthread_rwlock_unlock(&lock)
+        return _lock.lockingForWrite {
+            block(&_value)
         }
-
-        return block(&_value)
     }
 
     @inlinable
     public func setAsCaching(value: T) {
-        pthread_rwlock_wrlock(&lock)
-        _value = value
-        usingCache = true
-        pthread_rwlock_unlock(&lock)
+        _lock.lockingForWrite {
+            _value = value
+            usingCache = true
+        }
     }
 
     @inlinable
     public func tearDownCaching(resetToValue value: T) {
-        pthread_rwlock_wrlock(&lock)
-        _value = value
-        usingCache = false
-        pthread_rwlock_unlock(&lock)
+        _lock.lockingForWrite {
+            _value = value
+            usingCache = false
+        }
     }
 }

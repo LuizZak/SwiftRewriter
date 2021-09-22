@@ -1,3 +1,5 @@
+#if os(macOS) || os(Linux)
+
 import Foundation
 
 class Stopwatch {
@@ -28,3 +30,5 @@ class Stopwatch {
         Stopwatch()
     }
 }
+
+#endif

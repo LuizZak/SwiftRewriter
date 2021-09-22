@@ -202,7 +202,7 @@ extension SwiftRewriterCommand {
             let service = SwiftRewriterServiceImpl(output: output, settings: settings)
             
             // Detect terminal
-            if isatty(fileno(stdin)) != 0 {
+            if _isatty(_fileno(stdin)) != 0 {
                 let console = Console()
                 let menu = Menu(rewriterService: service, console: console)
                 
