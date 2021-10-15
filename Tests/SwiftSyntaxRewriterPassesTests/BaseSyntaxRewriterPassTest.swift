@@ -24,12 +24,4 @@ class BaseSyntaxRewriterPassTest: XCTestCase {
     func createSyntax(_ content: String) throws -> SourceFileSyntax {
         try SyntaxParser.parse(source: content)
     }
-    
-    func createTemporaryFile(_ contents: String) throws -> URL {
-        let directory = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("___test.swift")
-        
-        try contents.write(to: directory, atomically: true, encoding: .utf8)
-        
-        return directory
-    }
 }
