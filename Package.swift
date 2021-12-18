@@ -61,7 +61,7 @@ let package = Package(
             dependencies: ["SwiftAST", "WriterTargetOutput"]),
         .target(
             name: "Intentions",
-            dependencies: ["SwiftAST", "GrammarModels", "KnownType", "ObjcParser"]),
+            dependencies: ["SwiftAST", "GrammarModels", "KnownType"]),
         .target(
             name: "SwiftSyntaxSupport",
             dependencies: ["SwiftSyntax", "KnownType", "Intentions", "SwiftAST"]),
@@ -134,8 +134,7 @@ let package = Package(
             dependencies: ["SwiftAST", "TestCommons"]),
         .testTarget(
             name: "IntentionsTests",
-            dependencies: ["Intentions",
-                           "TestCommons", "SwiftAST"]),
+            dependencies: ["Intentions", "TestCommons", "SwiftAST"]),
         .testTarget(
             name: "KnownTypeTests",
             dependencies: ["KnownType",

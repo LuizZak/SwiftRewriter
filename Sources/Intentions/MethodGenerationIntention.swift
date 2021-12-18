@@ -1,5 +1,4 @@
 import GrammarModels
-import ObjcParser
 import SwiftAST
 import KnownType
 
