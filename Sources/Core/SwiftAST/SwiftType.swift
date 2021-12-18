@@ -1,5 +1,5 @@
 /// Represents a Swift type structure
-indirect public enum SwiftType: Hashable {
+public indirect enum SwiftType: Hashable {
     case nested(NestedSwiftType)
     case nominal(NominalSwiftType)
     case protocolComposition(ProtocolCompositionSwiftType)
@@ -167,7 +167,7 @@ public extension SwiftType {
     }
     
     /// Returns `true` if this type represents a nominal type.
-    /// Except for blocks, metatypes and tuples, all types are considered nominal
+    /// Except for blocks, meta-types and tuples, all types are considered nominal
     /// types.
     var isNominal: Bool {
         switch self {

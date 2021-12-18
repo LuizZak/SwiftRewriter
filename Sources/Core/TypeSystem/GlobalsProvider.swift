@@ -1,5 +1,4 @@
 import SwiftAST
-import TypeSystem
 
 /// Source for `GlobalsProvider` instances
 public protocol GlobalsProvidersSource {

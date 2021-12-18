@@ -103,6 +103,7 @@
 			"antlr",
 			"autoreleasepool",
 			"mutex",
+			"Nonnull",
 			"swiftpm",
 			"swiftrewriter"
 		],

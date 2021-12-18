@@ -3,15 +3,6 @@ import PackageDescription
 
 let core: [Target] = [
     .target(
-        name: "TypeDefinitions",
-        dependencies: [],
-        path: "Sources/Core/TypeDefinitions",
-        resources: [
-            .copy("ios-framework-classes.json"),
-            .copy("ios-framework-protocols.json"),
-        ]
-    ),
-    .target(
         name: "WriterTargetOutput",
         dependencies: ["Utils"],
         path: "Sources/Core/WriterTargetOutput"
@@ -69,11 +60,6 @@ let core: [Target] = [
         path: "Sources/Core/IntentionPasses"
     ),
     .target(
-        name: "GlobalsProviders",
-        dependencies: ["SwiftAST", "Commons", "TypeSystem"],
-        path: "Sources/Core/GlobalsProviders"
-    ),
-    .target(
         name: "Analysis",
         dependencies: [
             "SwiftAST", "KnownType", "Commons", "Utils",
@@ -118,6 +104,20 @@ let objcFrontend: [Target] = [
             "Utils"
         ],
         path: "Sources/Frontend/Objective-C/ObjcParser"
+    ),
+    .target(
+        name: "TypeDefinitions",
+        dependencies: [],
+        path: "Sources/Frontend/Objective-C/TypeDefinitions",
+        resources: [
+            .copy("ios-framework-classes.json"),
+            .copy("ios-framework-protocols.json"),
+        ]
+    ),
+    .target(
+        name: "GlobalsProviders",
+        dependencies: ["SwiftAST", "Commons", "TypeSystem"],
+        path: "Sources/Frontend/Objective-C/GlobalsProviders"
     ),
 ]
 
@@ -323,7 +323,7 @@ let package = Package(
                 "GlobalsProviders",
                 "SwiftAST", "SwiftRewriterLib", "TestCommons", "TypeSystem"
             ],
-            path: "Tests/Core/GlobalsProvidersTests"
+            path: "Tests/Frontend/Objective-C/GlobalsProvidersTests"
         ),
         .testTarget(
             name: "AnalysisTests",

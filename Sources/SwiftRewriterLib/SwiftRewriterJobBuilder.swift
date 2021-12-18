@@ -3,7 +3,7 @@ import SwiftSyntaxSupport
 import IntentionPasses
 import ExpressionPasses
 import SourcePreprocessors
-import GlobalsProviders
+import TypeSystem
 
 /// Facility for creating `SwiftRewriterJob`s.
 public class SwiftRewriterJobBuilder {
