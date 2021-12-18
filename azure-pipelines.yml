@@ -9,7 +9,7 @@ trigger:
 jobs:
 - job: macOS
   pool:
-    vmImage: 'macOS-11.0'
+    vmImage: 'macOS-11'
   steps:
   - bash: 'sudo xcode-select -s /Applications/Xcode_13.app/Contents/Developer'
   - bash: 'swift package resolve'
