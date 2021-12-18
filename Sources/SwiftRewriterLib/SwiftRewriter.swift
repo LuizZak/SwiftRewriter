@@ -270,7 +270,7 @@ public final class SwiftRewriter {
                         source: nil)
                 
                 varDecl.storage.isConstant = true
-                varDecl.initialValue = declaration.expresion
+                varDecl.initialValue = declaration.expression
                 
                 let sourceName = (file.sourcePath as NSString).lastPathComponent
                 let history = """

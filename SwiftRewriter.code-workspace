@@ -100,7 +100,11 @@
 		"ShortcutMenuBar.userButton01Command": "workbench.action.tasks.runTask|Build (debug)",
 		"ShortcutMenuBar.userButton02Command": "workbench.action.tasks.runTask|Test",
 		"cSpell.words": [
+			"antlr",
+			"autoreleasepool",
+			"mutex",
 			"swiftpm",
+			"swiftrewriter"
 		],
 	},
 	"extensions": {

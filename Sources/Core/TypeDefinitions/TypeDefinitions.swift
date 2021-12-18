@@ -2,14 +2,16 @@ import Foundation
 
 let classes: ClassesList = {
     let decoder = JSONDecoder()
-    let data = iosFrameworkClassesJson.data(using: .utf8)!
+    let path = Bundle.module.path(forResource: "ios-framework-classes", ofType: "json")!
+    let data = try! Data(contentsOf: URL(fileURLWithPath: path))
     
     return try! decoder.decode(ClassesList.self, from: data)
 }()
 
 let protocols: ProtocolsList = {
     let decoder = JSONDecoder()
-    let data = iosFrameworkProtocolsJson.data(using: .utf8)!
+    let path = Bundle.module.path(forResource: "ios-framework-protocols", ofType: "json")!
+    let data = try! Data(contentsOf: URL(fileURLWithPath: path))
     
     return try! decoder.decode(ProtocolsList.self, from: data)
 }()

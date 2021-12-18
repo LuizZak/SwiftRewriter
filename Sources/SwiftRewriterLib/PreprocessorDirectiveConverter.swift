@@ -49,7 +49,7 @@ public class PreprocessorDirectiveConverter {
         
         return DirectiveDeclaration(name: directive.identifier,
                                     type: declaration.type,
-                                    expresion: declaration.expression)
+                                    expression: declaration.expression)
     }
     
     func processDirective(_ directive: String) -> Directive? {
@@ -117,12 +117,12 @@ public class PreprocessorDirectiveConverter {
 public struct DirectiveDeclaration {
     public var name: String
     public var type: SwiftType
-    public var expresion: Expression
+    public var expression: Expression
     
-    public init(name: String, type: SwiftType, expresion: Expression) {
+    public init(name: String, type: SwiftType, expression: Expression) {
         self.name = name
         self.type = type
-        self.expresion = expresion
+        self.expression = expression
     }
 }
 

@@ -35,7 +35,7 @@ class PreprocessorDirectiveConverterTests: XCTestCase {
         
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.type, .int)
-        XCTAssertEqual(result?.expresion, .constant(1))
+        XCTAssertEqual(result?.expression, .constant(1))
     }
     
     func testConvertBoolConstant() {
@@ -43,7 +43,7 @@ class PreprocessorDirectiveConverterTests: XCTestCase {
         
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.type, .bool)
-        XCTAssertEqual(result?.expresion, .constant(true))
+        XCTAssertEqual(result?.expression, .constant(true))
     }
     
     func testConvertStringConstant() {
@@ -51,7 +51,7 @@ class PreprocessorDirectiveConverterTests: XCTestCase {
         
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.type, .string)
-        XCTAssertEqual(result?.expresion, .constant("A constant"))
+        XCTAssertEqual(result?.expression, .constant("A constant"))
     }
     
     func testConvertBinaryExpression() {
@@ -59,7 +59,7 @@ class PreprocessorDirectiveConverterTests: XCTestCase {
         
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.type, .int)
-        XCTAssertEqual(result?.expresion, Expression.constant(1).binary(op: .add, rhs: .constant(1)))
+        XCTAssertEqual(result?.expression, Expression.constant(1).binary(op: .add, rhs: .constant(1)))
     }
     
     func testConvertScalarTypeCasts() {
@@ -67,7 +67,7 @@ class PreprocessorDirectiveConverterTests: XCTestCase {
         
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.type, .optional("CUnsignedInt"))
-        XCTAssertEqual(result?.expresion, Expression.cast(.constant(1), type: "CUnsignedInt"))
+        XCTAssertEqual(result?.expression, Expression.cast(.constant(1), type: "CUnsignedInt"))
     }
     
     func testConvertSymbolReferencingExistingDeclarations() {
@@ -79,7 +79,7 @@ class PreprocessorDirectiveConverterTests: XCTestCase {
         
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.type, .int)
-        XCTAssertEqual(result?.expresion, Expression.identifier("symbol"))
+        XCTAssertEqual(result?.expression, Expression.identifier("symbol"))
     }
     
     func testConvertSizeofExpressions() {
@@ -87,7 +87,7 @@ class PreprocessorDirectiveConverterTests: XCTestCase {
         
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.type, "Int")
-        XCTAssertEqual(result?.expresion, Expression.sizeof(type: "CInt"))
+        XCTAssertEqual(result?.expression, Expression.sizeof(type: "CInt"))
     }
     
     func testConvertNilConstant() {
@@ -95,7 +95,7 @@ class PreprocessorDirectiveConverterTests: XCTestCase {
         
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.type, .optional("AnyObject"))
-        XCTAssertEqual(result?.expresion, .constant(.nil))
+        XCTAssertEqual(result?.expression, .constant(.nil))
     }
     
     func testDontConvertUnevenExpressions() {
