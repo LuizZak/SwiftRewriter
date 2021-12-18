@@ -97,7 +97,7 @@ public class VirtualFileDisk {
     }
 }
 
-private protocol DirectoryEntry: class {
+private protocol DirectoryEntry: AnyObject {
     var parent: DirectoryEntry? { get }
     var name: String { get }
     var fullPath: String { get }

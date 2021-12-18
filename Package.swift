@@ -26,7 +26,7 @@ let package = Package(
         .package(url: "https://github.com/LuizZak/MiniLexer.git", .exact("0.10.0")),
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.34"),
         .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.0")),
-        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50300.0")),
+        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50500.0")),
         .package(url: "https://github.com/apple/swift-argument-parser.git", .exact("0.3.1"))
     ],
     targets: [
@@ -61,7 +61,7 @@ let package = Package(
             dependencies: ["SwiftAST", "WriterTargetOutput"]),
         .target(
             name: "Intentions",
-            dependencies: ["SwiftAST", "GrammarModels", "KnownType", "ObjcParser"]),
+            dependencies: ["SwiftAST", "GrammarModels", "KnownType"]),
         .target(
             name: "SwiftSyntaxSupport",
             dependencies: ["SwiftSyntax", "KnownType", "Intentions", "SwiftAST"]),
@@ -134,8 +134,7 @@ let package = Package(
             dependencies: ["SwiftAST", "TestCommons"]),
         .testTarget(
             name: "IntentionsTests",
-            dependencies: ["Intentions",
-                           "TestCommons", "SwiftAST"]),
+            dependencies: ["Intentions", "TestCommons", "SwiftAST"]),
         .testTarget(
             name: "KnownTypeTests",
             dependencies: ["KnownType",
