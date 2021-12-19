@@ -4,7 +4,8 @@ import KnownType
 import Intentions
 import SwiftRewriterLib
 import TestCommons
-import IntentionPasses
+
+@testable import IntentionPasses
 
 class UIKitCorrectorIntentionPassTests: XCTestCase {
     func testDrawRect() {

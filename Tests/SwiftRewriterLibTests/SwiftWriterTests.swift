@@ -6,6 +6,8 @@ import ObjcParser
 import SwiftSyntaxSupport
 import SwiftAST
 import KnownType
+import TestCommons
+
 @testable import SwiftRewriterLib
 
 class SwiftSyntaxWriterTests: XCTestCase {

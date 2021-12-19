@@ -1,9 +1,10 @@
 import XCTest
-import IntentionPasses
 import TestCommons
 import SwiftAST
 import Intentions
 import SwiftRewriterLib
+
+@testable import IntentionPasses
 
 class InitAnalysisIntentionPassTests: XCTestCase {
     var sut: InitAnalysisIntentionPass!

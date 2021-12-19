@@ -1,7 +1,8 @@
 import XCTest
-import IntentionPasses
 import SwiftRewriterLib
 import TestCommons
+
+@testable import IntentionPasses
 
 class ImportDirectiveIntentionPassTests: XCTestCase {
     func testImportDirectiveIntentionPass() {

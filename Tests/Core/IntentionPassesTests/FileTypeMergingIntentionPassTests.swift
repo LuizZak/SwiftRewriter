@@ -1,9 +1,10 @@
 import XCTest
-import IntentionPasses
 import SwiftRewriterLib
 import SwiftAST
 import TestCommons
 import GrammarModels
+
+@testable import IntentionPasses
 
 class FileTypeMergingIntentionPassTests: XCTestCase {
     

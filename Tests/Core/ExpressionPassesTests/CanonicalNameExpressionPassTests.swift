@@ -1,9 +1,10 @@
 import XCTest
-import ExpressionPasses
 import SwiftAST
 import KnownType
 import SwiftRewriterLib
 import TypeSystem
+
+@testable import ExpressionPasses
 
 class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {

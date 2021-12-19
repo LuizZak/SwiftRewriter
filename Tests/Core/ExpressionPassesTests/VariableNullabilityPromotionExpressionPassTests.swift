@@ -1,10 +1,11 @@
 import XCTest
-import ExpressionPasses
 import SwiftAST
 import Intentions
 import SwiftRewriterLib
 import TypeSystem
 import TestCommons
+
+@testable import ExpressionPasses
 
 class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {

@@ -1,10 +1,11 @@
 import XCTest
-import ExpressionPasses
 import SwiftAST
 import KnownType
 import Intentions
 import SwiftRewriterLib
 import TypeSystem
+
+@testable import ExpressionPasses
 
 class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {

@@ -3,7 +3,8 @@ import SwiftAST
 import KnownType
 import SwiftRewriterLib
 import TestCommons
-import ExpressionPasses
+
+@testable import ExpressionPasses
 
 class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {

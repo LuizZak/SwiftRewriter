@@ -1,7 +1,8 @@
 import XCTest
 import SwiftRewriterLib
 import SwiftAST
-import ExpressionPasses
+
+@testable import ExpressionPasses
 
 class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {

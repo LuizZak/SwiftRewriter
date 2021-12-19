@@ -1,7 +1,8 @@
 import XCTest
 import SwiftAST
 import SwiftRewriterLib
-import ExpressionPasses
+
+@testable import ExpressionPasses
 
 class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {

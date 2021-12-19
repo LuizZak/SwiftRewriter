@@ -7,10 +7,12 @@ import SwiftAST
 import Intentions
 import WriterTargetOutput
 import SwiftSyntaxSupport
-import ExpressionPasses
-@testable import SwiftRewriterLib
+import SwiftRewriterLib
 import TypeSystem
 import SwiftAST
+import ObjectiveCFrontend
+
+@testable import ExpressionPasses
 
 class ExpressionPassTestCase: XCTestCase {
     static var _state: ObjcParserState = ObjcParserState()

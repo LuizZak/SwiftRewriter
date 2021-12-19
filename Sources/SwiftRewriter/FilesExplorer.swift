@@ -1,7 +1,7 @@
 import Foundation
 import Console
 import Utils
-import SwiftRewriterLib
+import ObjectiveCFrontend
 
 func showSearchPathUi(in menu: MenuController) -> String? {
     let console = menu.console

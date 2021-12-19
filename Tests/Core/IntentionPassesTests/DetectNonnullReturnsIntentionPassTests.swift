@@ -1,8 +1,9 @@
 import XCTest
 import SwiftRewriterLib
 import SwiftAST
-import IntentionPasses
 import TestCommons
+
+@testable import IntentionPasses
 
 class DetectNonnullReturnsIntentionPassTests: XCTestCase {
     func testApplyOnMethod() {

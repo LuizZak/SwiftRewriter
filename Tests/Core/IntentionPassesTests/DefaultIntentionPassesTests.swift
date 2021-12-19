@@ -1,8 +1,9 @@
 import XCTest
-import IntentionPasses
 import Intentions
 import SwiftRewriterLib
 import TypeSystem
+
+@testable import IntentionPasses
 
 class DefaultIntentionPassesTests: XCTestCase {
     func testDefaultIntentionPasses() {

@@ -2,7 +2,8 @@ import XCTest
 import SwiftAST
 import SwiftRewriterLib
 import TestCommons
-import IntentionPasses
+
+@testable import IntentionPasses
 
 class ProtocolNullabilityPropagationToConformersIntentionPassTests: XCTestCase {
     var sut: ProtocolNullabilityPropagationToConformersIntentionPass!

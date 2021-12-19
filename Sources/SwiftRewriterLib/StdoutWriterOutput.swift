@@ -59,7 +59,7 @@ public final class TerminalStringRewriterOutput: RewriterOutputTarget {
     
     var colorize: Bool = true
     
-    /// Called everytime the buffer changes due to an output request
+    /// Called every time the buffer changes due to an output request
     public var onChangeBuffer: ((String) -> Void)?
     
     required public init(settings: RewriterOutputSettings = .defaults) {

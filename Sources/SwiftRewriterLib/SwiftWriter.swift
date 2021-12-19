@@ -20,7 +20,6 @@ public protocol SwiftWriterProgressListener: AnyObject {
 /// Gets as inputs a series of intentions and outputs actual files and script
 /// contents.
 public final class SwiftWriter {
-    weak var progressListener: SwiftWriterProgressListener?
     var intentions: IntentionCollection
     var output: WriterOutput
     var diagnostics: Diagnostics
@@ -28,6 +27,8 @@ public final class SwiftWriter {
     let numThreads: Int
     let typeSystem: TypeSystem
     let syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier
+    
+    public weak var progressListener: SwiftWriterProgressListener?
     
     public init(intentions: IntentionCollection,
                 options: SwiftSyntaxOptions,

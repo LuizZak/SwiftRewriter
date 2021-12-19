@@ -1,8 +1,9 @@
 import XCTest
-import ExpressionPasses
 import SwiftRewriterLib
 import SwiftAST
 import TestCommons
+
+@testable import ExpressionPasses
 
 class ASTSimplifierTests: ExpressionPassTestCase {
     override func setUp() {

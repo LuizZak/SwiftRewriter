@@ -1,5 +1,6 @@
 import XCTest
-import ExpressionPasses
+
+@testable import ExpressionPasses
 
 class DefaultExpressionPassesTests: XCTestCase {
     func testDefaultExpressionPasses() {

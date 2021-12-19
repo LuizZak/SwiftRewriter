@@ -1,6 +1,6 @@
 import Foundation
-import SwiftRewriterLib
 import Console
+import ObjectiveCFrontend
 
 class StdoutFileCollectionStepListener: ObjectiveCFileCollectionStepListener {
     func objectiveCFileCollectionStep(_ collectionStep: ObjectiveCFileCollectionStep,

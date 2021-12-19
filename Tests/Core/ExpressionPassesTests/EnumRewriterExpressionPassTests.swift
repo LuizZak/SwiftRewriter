@@ -3,8 +3,9 @@ import TestCommons
 import SwiftAST
 import KnownType
 import SwiftRewriterLib
-import ExpressionPasses
 import TypeSystem
+
+@testable import ExpressionPasses
 
 class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {

@@ -1,9 +1,10 @@
 import XCTest
-import IntentionPasses
 import SwiftAST
 import Intentions
 import SwiftRewriterLib
 import TestCommons
+
+@testable import IntentionPasses
 
 class StoredPropertyToNominalTypesIntentionPassTests: XCTestCase {
     

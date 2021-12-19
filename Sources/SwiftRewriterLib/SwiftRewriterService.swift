@@ -11,8 +11,3 @@ public protocol SwiftRewriterService {
     /// Performs a rewrite of the given inputs
     func rewrite(inputs: [InputSource]) throws
 }
-
-public protocol ObjectiveCSwiftRewriterService: SwiftRewriterService {
-    /// Gets the shared parser cache.
-    var parserCache: ObjectiveCParserCache { get }
-}

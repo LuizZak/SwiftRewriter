@@ -1,7 +1,8 @@
 import XCTest
 import Intentions
-import IntentionPasses
 import TestCommons
+
+@testable import IntentionPasses
 
 class RemoveEmptyExtensionsIntentionPassTests: XCTestCase {
     func testRemoveEmptyExtensions() {

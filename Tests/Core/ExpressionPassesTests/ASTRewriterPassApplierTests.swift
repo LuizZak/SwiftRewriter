@@ -1,8 +1,9 @@
 import XCTest
-import ExpressionPasses
 import SwiftAST
 import TypeSystem
 import TestCommons
+
+@testable import ExpressionPasses
 
 class ASTRewriterPassApplierTests: XCTestCase {
     func testIgnoresApplicationOnNonPrimaryFiles() {

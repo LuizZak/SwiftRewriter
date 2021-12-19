@@ -1,10 +1,11 @@
 import XCTest
-import ExpressionPasses
 import SwiftAST
 import KnownType
 import Intentions
 import SwiftRewriterLib
 import TestCommons
+
+@testable import ExpressionPasses
 
 class InitRewriterExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {

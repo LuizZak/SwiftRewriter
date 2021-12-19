@@ -1,6 +1,7 @@
-import ExpressionPasses
 import SwiftAST
 import TestCommons
+
+@testable import ExpressionPasses
 
 class NilValueTransformationsPassTests: ExpressionPassTestCase {
     override func setUp() {

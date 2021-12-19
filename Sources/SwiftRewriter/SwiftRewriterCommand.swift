@@ -1,7 +1,7 @@
 import ArgumentParser
 import Foundation
 import Console
-import SwiftRewriterLib
+import ObjectiveCFrontend
 
 struct SwiftRewriterCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
@@ -216,7 +216,7 @@ extension SwiftRewriterCommand {
                 let inputData = FileHandle.standardInput.availableData
                 let inputString = String(decoding: inputData, as: UTF8.self)
 
-                let input = SingleInputProvider(code: inputString, isPrimary: true)
+                let input = SingleInputProvider(code: inputString, isPrimary: true, fileName: "input.m")
 
                 try service.rewrite(inputs: [input])
             }

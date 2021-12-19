@@ -1,6 +1,6 @@
 import Foundation
 import Console
-import SwiftRewriterLib
+import ObjectiveCFrontend
 
 /// Main menu for the application, when the user does not provide initial inputs
 /// for processing.

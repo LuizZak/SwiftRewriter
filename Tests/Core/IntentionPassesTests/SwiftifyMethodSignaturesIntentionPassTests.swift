@@ -2,12 +2,14 @@ import XCTest
 import GrammarModels
 import ObjcParser
 import ObjcParserAntlr
-import IntentionPasses
 import SwiftAST
 import KnownType
 import Intentions
 import SwiftRewriterLib
 import TypeSystem
+import ObjectiveCFrontend
+
+@testable import IntentionPasses
 
 class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
     func testConvertWith() {

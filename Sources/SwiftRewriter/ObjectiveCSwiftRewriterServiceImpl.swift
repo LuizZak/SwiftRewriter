@@ -1,18 +1,12 @@
 import Foundation
-import SwiftRewriterLib
-import ExpressionPasses
-import SourcePreprocessors
-import IntentionPasses
-import GlobalsProviders
-import SwiftSyntaxRewriterPasses
-import ObjcParser
+import ObjectiveCFrontend
 
 public struct Settings {
     /// Settings for the AST writer
     public var astWriter: SwiftSyntaxOptions = .default
     
-    /// General settings for `SwiftRewriter` instances
-    public var rewriter: SwiftRewriter.Settings = .default
+    /// General settings for `ObjectiveC2SwiftRewriter` instances
+    public var rewriter: ObjectiveC2SwiftRewriter.Settings = .default
 }
 
 public final class ObjectiveCSwiftRewriterServiceImpl: ObjectiveCSwiftRewriterService {
