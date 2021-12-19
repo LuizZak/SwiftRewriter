@@ -1,3 +1,9 @@
+### NOTE:
+
+Since the frontend-related refactoring work this document is out of date, and should be updated once the frontend changes have stabilized.
+
+---
+
 ## Architectural description
 
 The tool splits the conversion process into six discrete steps, which are, whenever possible, divided into separate project targets.
