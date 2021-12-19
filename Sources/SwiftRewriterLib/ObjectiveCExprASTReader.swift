@@ -7,14 +7,14 @@ import TypeSystem
 
 /// A visitor that reads simple Objective-C expressions and emits as Expression
 /// enum cases.
-public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
+public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     public var typeMapper: TypeMapper
     public var typeParser: TypeParsing
-    public var context: SwiftASTReaderContext
-    public var delegate: SwiftStatementASTReaderDelegate?
+    public var context: ObjectiveCASTReaderContext
+    public var delegate: ObjectiveCStatementASTReaderDelegate?
     
-    public init(typeMapper: TypeMapper, typeParser: TypeParsing, context: SwiftASTReaderContext,
-                delegate: SwiftStatementASTReaderDelegate?) {
+    public init(typeMapper: TypeMapper, typeParser: TypeParsing, context: ObjectiveCASTReaderContext,
+                delegate: ObjectiveCStatementASTReaderDelegate?) {
 
         self.typeMapper = typeMapper
         self.typeParser = typeParser
@@ -472,17 +472,17 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         return nil
     }
     
-    private func compoundStatementVisitor() -> SwiftStatementASTReader.CompoundStatementVisitor {
-        SwiftStatementASTReader
+    private func compoundStatementVisitor() -> ObjectiveCStatementASTReader.CompoundStatementVisitor {
+        ObjectiveCStatementASTReader
                 .CompoundStatementVisitor(expressionReader: self,
                                           context: context,
                                           delegate: delegate)
     }
     
     private class FunctionArgumentVisitor: ObjectiveCParserBaseVisitor<FunctionArgument> {
-        var expressionReader: SwiftExprASTReader
+        var expressionReader: ObjectiveCExprASTReader
         
-        init(expressionReader: SwiftExprASTReader) {
+        init(expressionReader: ObjectiveCExprASTReader) {
             self.expressionReader = expressionReader
         }
         

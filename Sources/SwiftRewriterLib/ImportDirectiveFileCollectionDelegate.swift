@@ -2,18 +2,18 @@ import Foundation
 import ObjcParser
 
 public class ImportDirectiveFileCollectionDelegate {
-    var parserCache: ParserCache
+    var parserCache: ObjectiveCParserCache
     let fileProvider: FileProvider
     
-    public init(parserCache: ParserCache, fileProvider: FileProvider) {
+    public init(parserCache: ObjectiveCParserCache, fileProvider: FileProvider) {
         self.parserCache = parserCache
         self.fileProvider = fileProvider
     }
 }
 
-extension ImportDirectiveFileCollectionDelegate: FileCollectionStepDelegate {
-    public func fileCollectionStep(_ fileCollectionStep: FileCollectionStep,
-                                   referencedFilesForFile file: InputSource) throws -> [URL] {
+extension ImportDirectiveFileCollectionDelegate: ObjectiveCFileCollectionStepDelegate {
+    public func objectiveCFileCollectionStep(_ fileCollectionStep: ObjectiveCFileCollectionStep,
+                                             referencedFilesForFile file: InputSource) throws -> [URL] {
 
         let parserTree = try parserCache.loadParsedTree(input: file)
         let fileReferences =

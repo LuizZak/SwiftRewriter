@@ -15,30 +15,19 @@ public struct Settings {
     public var rewriter: SwiftRewriter.Settings = .default
 }
 
-/// Protocol for enabling Swift rewriting service from CLI
-public protocol SwiftRewriterService {
-    /// Gets the input parser cache to be used during rewriting
-    var parserCache: ParserCache { get }
-    
-    /// Performs a rewrite of the given files
-    func rewrite(files: [URL]) throws
-
-    /// Performs a rewrite of the given files
-    func rewrite(files: [DiskInputFile]) throws
-    
-    /// Performs a rewrite of the given inputs
-    func rewrite(inputs: [InputSource]) throws
-}
-
-public class SwiftRewriterServiceImpl: SwiftRewriterService {
-    public static func fileDisk(settings: Settings) -> SwiftRewriterService {
-        SwiftRewriterServiceImpl(output: FileDiskWriterOutput(),
-                                 settings: settings)
+public final class ObjectiveCSwiftRewriterServiceImpl: ObjectiveCSwiftRewriterService {
+    public static func fileDisk(settings: Settings) -> ObjectiveCSwiftRewriterService {
+        Self(
+            output: FileDiskWriterOutput(),
+            settings: settings
+        )
     }
     
-    public static func terminal(settings: Settings, colorize: Bool) -> SwiftRewriterService {
-        SwiftRewriterServiceImpl(output: StdoutWriterOutput(colorize: colorize),
-                                 settings: settings)
+    public static func terminal(settings: Settings, colorize: Bool) -> ObjectiveCSwiftRewriterService {
+        Self(
+            output: StdoutWriterOutput(colorize: colorize),
+            settings: settings
+        )
     }
     
     let output: WriterOutput
@@ -46,13 +35,13 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
     let preprocessors: [SourcePreprocessor] = [QuickSpecPreprocessor()]
     let parserStatePool: ObjcParserStatePool
     
-    public var parserCache: ParserCache
+    public var parserCache: ObjectiveCParserCache
     
     public init(output: WriterOutput, settings: Settings) {
         let antlrSettings = AntlrSettings(forceUseLLPrediction: settings.rewriter.forceUseLLPrediction)
         
         parserStatePool = ObjcParserStatePool()
-        parserCache = ParserCache(fileProvider: FileDiskProvider(),
+        parserCache = ObjectiveCParserCache(fileProvider: FileDiskProvider(),
                                   parserStatePool: parserStatePool,
                                   sourcePreprocessors: preprocessors,
                                   antlrSettings: antlrSettings)

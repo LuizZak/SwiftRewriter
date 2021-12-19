@@ -84,9 +84,9 @@ private func presentFileSelection(in menu: MenuController, list: [String], promp
 
 /// Main CLI interface entry point for file exploring services
 public class FilesExplorerService {
-    var rewriterService: SwiftRewriterService
+    var rewriterService: ObjectiveCSwiftRewriterService
 
-    init(rewriterService: SwiftRewriterService) {
+    init(rewriterService: ObjectiveCSwiftRewriterService) {
         self.rewriterService = rewriterService
     }
 
@@ -135,9 +135,9 @@ class SuggestConversionInterface {
         var verbose: Bool
     }
     
-    var rewriterService: SwiftRewriterService
+    var rewriterService: ObjectiveCSwiftRewriterService
     
-    init(rewriterService: SwiftRewriterService) {
+    init(rewriterService: ObjectiveCSwiftRewriterService) {
         self.rewriterService = rewriterService
     }
     
@@ -160,10 +160,12 @@ class SuggestConversionInterface {
         var overwriteCount = 0
 
         let fileProvider = FileDiskProvider()
-        let fileCollectionStep = FileCollectionStep(fileProvider: fileProvider)
+        let fileCollectionStep = ObjectiveCFileCollectionStep(fileProvider: fileProvider)
         let importFileDelegate
-            = ImportDirectiveFileCollectionDelegate(parserCache: rewriterService.parserCache,
-                                                    fileProvider: fileProvider)
+            = ImportDirectiveFileCollectionDelegate(
+                parserCache: rewriterService.parserCache,
+                fileProvider: fileProvider
+            )
         if options.followImports {
             fileCollectionStep.delegate = importFileDelegate
         }
@@ -172,10 +174,12 @@ class SuggestConversionInterface {
         }
         do {
             try withExtendedLifetime(importFileDelegate) {
-                try fileCollectionStep.addFromDirectory(URL(fileURLWithPath: directoryPath),
-                                                        recursive: true,
-                                                        includePattern: options.includePattern,
-                                                        excludePattern: options.excludePattern)
+                try fileCollectionStep.addFromDirectory(
+                    URL(fileURLWithPath: directoryPath),
+                    recursive: true,
+                    includePattern: options.includePattern,
+                    excludePattern: options.excludePattern
+                )
             }
         } catch {
             console.printLine("Error finding files: \(error).")

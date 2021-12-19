@@ -4,21 +4,21 @@ import ObjcParser
 import Antlr4
 import SwiftAST
 
-public protocol SwiftStatementASTReaderDelegate: AnyObject {
+public protocol ObjectiveCStatementASTReaderDelegate: AnyObject {
     func swiftStatementASTReader(reportAutoTypeDeclaration varDecl: VariableDeclarationsStatement,
                                  declarationAtIndex index: Int)
 }
 
-public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
+public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     public typealias Parser = ObjectiveCParser
     
-    var expressionReader: SwiftExprASTReader
-    var context: SwiftASTReaderContext
-    public weak var delegate: SwiftStatementASTReaderDelegate?
+    var expressionReader: ObjectiveCExprASTReader
+    var context: ObjectiveCASTReaderContext
+    public weak var delegate: ObjectiveCStatementASTReaderDelegate?
     
-    public init(expressionReader: SwiftExprASTReader,
-                context: SwiftASTReaderContext,
-                delegate: SwiftStatementASTReaderDelegate?) {
+    public init(expressionReader: ObjectiveCExprASTReader,
+                context: ObjectiveCASTReaderContext,
+                delegate: ObjectiveCStatementASTReaderDelegate?) {
 
         self.expressionReader = expressionReader
         self.context = context
@@ -355,13 +355,13 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
     
     // MARK: - Compound statement visitor
     class CompoundStatementVisitor: ObjectiveCParserBaseVisitor<CompoundStatement> {
-        var expressionReader: SwiftExprASTReader
-        var context: SwiftASTReaderContext
-        weak var delegate: SwiftStatementASTReaderDelegate?
+        var expressionReader: ObjectiveCExprASTReader
+        var context: ObjectiveCASTReaderContext
+        weak var delegate: ObjectiveCStatementASTReaderDelegate?
         
-        init(expressionReader: SwiftExprASTReader,
-             context: SwiftASTReaderContext,
-             delegate: SwiftStatementASTReaderDelegate?) {
+        init(expressionReader: ObjectiveCExprASTReader,
+             context: ObjectiveCASTReaderContext,
+             delegate: ObjectiveCStatementASTReaderDelegate?) {
 
             self.expressionReader = expressionReader
             self.context = context
@@ -374,7 +374,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             }
             
             let reader =
-                SwiftStatementASTReader(expressionReader: expressionReader,
+                ObjectiveCStatementASTReader(expressionReader: expressionReader,
                                         context: context,
                                         delegate: delegate)
             
@@ -392,7 +392,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             defer { context.popDefinitionContext() }
             
             let reader =
-                SwiftStatementASTReader(expressionReader: expressionReader,
+                ObjectiveCStatementASTReader(expressionReader: expressionReader,
                                         context: context,
                                         delegate: delegate)
             
@@ -430,13 +430,13 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
     
     // MARK: - Variable declaration extractor visitor
     fileprivate class VarDeclarationExtractor: ObjectiveCParserBaseVisitor<Statement> {
-        var expressionReader: SwiftExprASTReader
-        var context: SwiftASTReaderContext
-        weak var delegate: SwiftStatementASTReaderDelegate?
+        var expressionReader: ObjectiveCExprASTReader
+        var context: ObjectiveCASTReaderContext
+        weak var delegate: ObjectiveCStatementASTReaderDelegate?
         
-        init(expressionReader: SwiftExprASTReader,
-             context: SwiftASTReaderContext,
-             delegate: SwiftStatementASTReaderDelegate?) {
+        init(expressionReader: ObjectiveCExprASTReader,
+             context: ObjectiveCASTReaderContext,
+             delegate: ObjectiveCStatementASTReaderDelegate?) {
 
             self.expressionReader = expressionReader
             self.context = context
@@ -567,10 +567,10 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
 private class ForStatementGenerator {
     typealias Parser = ObjectiveCParser
     
-    var reader: SwiftStatementASTReader
-    var context: SwiftASTReaderContext
+    var reader: ObjectiveCStatementASTReader
+    var context: ObjectiveCASTReaderContext
     
-    init(reader: SwiftStatementASTReader, context: SwiftASTReaderContext) {
+    init(reader: ObjectiveCStatementASTReader, context: ObjectiveCASTReaderContext) {
         self.reader = reader
         self.context = context
     }
@@ -586,7 +586,7 @@ private class ForStatementGenerator {
         
         // for(<initExprs>; <condition>; <iteration>)
         let varDeclExtractor =
-            SwiftStatementASTReader
+            ObjectiveCStatementASTReader
                 .VarDeclarationExtractor(expressionReader: reader.expressionReader,
                                          context: context,
                                          delegate: reader.delegate)
@@ -777,8 +777,8 @@ private class ForStatementGenerator {
     
     enum LoopCounter {
         case literal(Int, Constant.IntegerType)
-        case local(SwiftASTReaderContext.Local)
-        case propertyAccess(SwiftASTReaderContext.Local, property: String)
+        case local(ObjectiveCASTReaderContext.Local)
+        case propertyAccess(ObjectiveCASTReaderContext.Local, property: String)
     }
 }
 

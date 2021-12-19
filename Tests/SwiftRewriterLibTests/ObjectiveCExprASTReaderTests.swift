@@ -6,7 +6,7 @@ import ObjcParserAntlr
 import TypeSystem
 import SwiftAST
 
-class SwiftExprASTReaderTests: XCTestCase {
+class ObjectiveCExprASTReaderTests: XCTestCase {
     var tokens: CommonTokenStream!
     
     func testConstants() {
@@ -266,7 +266,7 @@ class SwiftExprASTReaderTests: XCTestCase {
     }
 }
 
-extension SwiftExprASTReaderTests {
+extension ObjectiveCExprASTReaderTests {
     
     func assert(objcExpr: String,
                 parseWith: (ObjectiveCParser) throws -> ParserRuleContext = { parser in try parser.expression() },
@@ -276,19 +276,19 @@ extension SwiftExprASTReaderTests {
         
         let typeSystem = TypeSystem()
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
-        let typeParser = TypeParsing(state: SwiftExprASTReaderTests._state)
+        let typeParser = TypeParsing(state: ObjectiveCExprASTReaderTests._state)
         
         let sut =
-            SwiftExprASTReader(
+            ObjectiveCExprASTReader(
                 typeMapper: typeMapper,
                 typeParser: typeParser,
-                context: SwiftASTReaderContext(typeSystem: typeSystem,
+                context: ObjectiveCASTReaderContext(typeSystem: typeSystem,
                                                typeContext: nil,
                                                comments: []),
                 delegate: nil)
         
         do {
-            let state = try SwiftExprASTReaderTests._state.makeMainParser(input: objcExpr)
+            let state = try ObjectiveCExprASTReaderTests._state.makeMainParser(input: objcExpr)
             tokens = state.tokens
             
             let expr = try parseWith(state.parser)
@@ -326,7 +326,7 @@ extension SwiftExprASTReaderTests {
                 line: UInt = #line) {
         
         do {
-            let state = try SwiftExprASTReaderTests._state.makeMainParser(input: objcSelector)
+            let state = try ObjectiveCExprASTReaderTests._state.makeMainParser(input: objcSelector)
             tokens = state.tokens
             
             let expr = try state.parser.selectorName()

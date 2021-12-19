@@ -1,12 +1,13 @@
 import Foundation
 import Console
+import SwiftRewriterLib
 
 /// Main menu for the application, when the user does not provide initial inputs
 /// for processing.
 public class Menu: MenuController {
-    var rewriterService: SwiftRewriterService
+    var rewriterService: ObjectiveCSwiftRewriterService
     
-    public init(rewriterService: SwiftRewriterService, console: ConsoleClient) {
+    public init(rewriterService: ObjectiveCSwiftRewriterService, console: ConsoleClient) {
         self.rewriterService = rewriterService
         super.init(console: console)
     }

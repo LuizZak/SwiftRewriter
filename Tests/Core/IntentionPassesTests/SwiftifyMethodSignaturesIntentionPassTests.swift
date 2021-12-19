@@ -218,10 +218,10 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
         return Asserter(testCase: testCase, intentions: intentions, type: type)
     }
     
-    private func createSwiftMethodSignatureGen() -> SwiftMethodSignatureGen {
+    private func createSwiftMethodSignatureGen() -> ObjectiveCMethodSignatureConverter {
         let mapper = DefaultTypeMapper(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
         
-        return SwiftMethodSignatureGen(typeMapper: mapper, inNonnullContext: false)
+        return ObjectiveCMethodSignatureConverter(typeMapper: mapper, inNonnullContext: false)
     }
     
     private func parseMethodSign(_ source: String) -> MethodDefinition {

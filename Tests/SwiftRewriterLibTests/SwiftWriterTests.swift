@@ -1,4 +1,5 @@
 import XCTest
+import Utils
 import Intentions
 import TypeSystem
 import ObjcParser

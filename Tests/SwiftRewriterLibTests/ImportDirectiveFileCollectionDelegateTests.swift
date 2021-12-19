@@ -5,13 +5,13 @@ import TestCommons
 
 class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
     var fileDisk: VirtualFileDisk!
-    var parserCache: ParserCache!
+    var parserCache: ObjectiveCParserCache!
     
     override func setUp() {
         super.setUp()
 
         fileDisk = VirtualFileDisk()
-        parserCache = ParserCache(fileProvider: fileDisk,
+        parserCache = ObjectiveCParserCache(fileProvider: fileDisk,
                                   parserStatePool: ObjcParserStatePool(),
                                   antlrSettings: .default)
     }
@@ -29,8 +29,8 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
                                                         fileProvider: fileDisk)
         
         let result =
-            try sut.fileCollectionStep(FileCollectionStep(fileProvider: fileDisk),
-                                       referencedFilesForFile: inputFile)
+            try sut.objectiveCFileCollectionStep(ObjectiveCFileCollectionStep(fileProvider: fileDisk),
+                                                 referencedFilesForFile: inputFile)
         
         XCTAssertEqual(result.map { $0.path }, ["/a_file.h"])
     }
@@ -49,8 +49,8 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
                                                         fileProvider: fileDisk)
         
         let result =
-            try sut.fileCollectionStep(FileCollectionStep(fileProvider: fileDisk),
-                                       referencedFilesForFile: inputFile)
+            try sut.objectiveCFileCollectionStep(ObjectiveCFileCollectionStep(fileProvider: fileDisk),
+                                                 referencedFilesForFile: inputFile)
         
         XCTAssertEqual(result.map { $0.path }, ["/a_file.h"])
     }
@@ -67,8 +67,8 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
                                                         fileProvider: fileDisk)
         
         let result =
-            try sut.fileCollectionStep(FileCollectionStep(fileProvider: fileDisk),
-                                       referencedFilesForFile: inputFile)
+            try sut.objectiveCFileCollectionStep(ObjectiveCFileCollectionStep(fileProvider: fileDisk),
+                                                 referencedFilesForFile: inputFile)
         
         XCTAssert(result.isEmpty)
     }

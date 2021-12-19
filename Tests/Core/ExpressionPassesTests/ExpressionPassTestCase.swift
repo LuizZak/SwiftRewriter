@@ -1,5 +1,6 @@
 import XCTest
 import Antlr4
+import Utils
 import ObjcParser
 import ObjcParserAntlr
 import SwiftAST
@@ -179,11 +180,11 @@ class ExpressionPassTestCase: XCTestCase {
         
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
         
-        let context = SwiftASTReaderContext(typeSystem: typeSystem,
+        let context = ObjectiveCASTReaderContext(typeSystem: typeSystem,
                                             typeContext: nil,
                                             comments: [])
         
-        let reader = SwiftExprASTReader(typeMapper: typeMapper,
+        let reader = ObjectiveCExprASTReader(typeMapper: typeMapper,
                                         typeParser: TypeParsing(state: ExpressionPassTestCase._state),
                                         context: context,
                                         delegate: nil)
@@ -212,15 +213,15 @@ class ExpressionPassTestCase: XCTestCase {
         let typeParser = TypeParsing(state: ExpressionPassTestCase._state)
         
         let expReader =
-            SwiftExprASTReader(
+            ObjectiveCExprASTReader(
                 typeMapper: typeMapper,
                 typeParser: typeParser,
-                context: SwiftASTReaderContext(typeSystem: typeSystem,
+                context: ObjectiveCASTReaderContext(typeSystem: typeSystem,
                                                typeContext: nil,
                                                comments: []),
                 delegate: nil)
         
-        let reader = SwiftStatementASTReader(expressionReader: expReader,
+        let reader = ObjectiveCStatementASTReader(expressionReader: expReader,
                                              context: expReader.context,
                                              delegate: nil)
         

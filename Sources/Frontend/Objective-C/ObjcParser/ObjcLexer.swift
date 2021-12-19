@@ -1,4 +1,5 @@
 import MiniLexer
+import Utils
 import GrammarModels
 
 public class ObjcLexer: TokenizerLexer<FullToken<TokenType>> {

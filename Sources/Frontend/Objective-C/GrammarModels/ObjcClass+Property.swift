@@ -1,3 +1,5 @@
+import Utils
+
 public class PropertyDefinition: ASTNode, InitializableNode {
     /// Type identifier
     public var type: TypeNameNode? {

@@ -5,56 +5,56 @@ import KnownType
 import Intentions
 import TypeSystem
 
-public protocol IntentionCollectorDelegate: AnyObject {
+public protocol ObjectiveCIntentionCollectorDelegate: AnyObject {
     func isNodeInNonnullContext(_ node: ASTNode) -> Bool
     func reportForLazyParsing(intention: Intention)
     func reportForLazyResolving(intention: Intention)
-    func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper
-    func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing
-}
-
-/// Represents a local context for constructing types with.
-public class IntentionBuildingContext {
-    var contexts: [Intention] = []
-    var inNonnullContext: Bool = false
-    var ivarAccessLevel: AccessLevel = .private
-    
-    public init() {
-        
-    }
-    
-    public func pushContext(_ intention: Intention) {
-        contexts.append(intention)
-    }
-    
-    /// Returns the latest context on the contexts stack that matches a given type.
-    ///
-    /// Searches from top-to-bottom, so the last context `T` that was pushed is
-    /// returned first.
-    public func findContext<T: Intention>(ofType type: T.Type = T.self) -> T? {
-        contexts.reversed().first { $0 is T } as? T
-    }
-    
-    /// Returns the topmost context on the contexts stack casted to a specific type.
-    ///
-    /// If the topmost context is not T, nil is returned instead.
-    public func currentContext<T: Intention>(as type: T.Type = T.self) -> T? {
-        contexts.last as? T
-    }
-    
-    public func popContext() {
-        contexts.removeLast()
-    }
+    func typeMapper(for intentionCollector: ObjectiveCIntentionCollector) -> TypeMapper
+    func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> TypeParsing
 }
 
 /// Traverses a provided AST node, and produces intentions that are recorded by
 /// pushing and popping them as contexts on a delegate's context object.
-public class IntentionCollector {
-    public weak var delegate: IntentionCollectorDelegate?
+public class ObjectiveCIntentionCollector {
+    /// Represents a local context for constructing types with.
+    public class Context {
+        var contexts: [Intention] = []
+        var inNonnullContext: Bool = false
+        var ivarAccessLevel: AccessLevel = .private
+        
+        public init() {
+            
+        }
+        
+        public func pushContext(_ intention: Intention) {
+            contexts.append(intention)
+        }
+        
+        /// Returns the latest context on the contexts stack that matches a given type.
+        ///
+        /// Searches from top-to-bottom, so the last context `T` that was pushed is
+        /// returned first.
+        public func findContext<T: Intention>(ofType type: T.Type = T.self) -> T? {
+            contexts.reversed().first { $0 is T } as? T
+        }
+        
+        /// Returns the topmost context on the contexts stack casted to a specific type.
+        ///
+        /// If the topmost context is not T, nil is returned instead.
+        public func currentContext<T: Intention>(as type: T.Type = T.self) -> T? {
+            contexts.last as? T
+        }
+        
+        public func popContext() {
+            contexts.removeLast()
+        }
+    }
+
+    public weak var delegate: ObjectiveCIntentionCollectorDelegate?
     
-    var context: IntentionBuildingContext
+    var context: Context
     
-    public init(delegate: IntentionCollectorDelegate, context: IntentionBuildingContext) {
+    public init(delegate: ObjectiveCIntentionCollectorDelegate, context: Context) {
         self.delegate = delegate
         self.context = context
     }
@@ -497,8 +497,10 @@ public class IntentionCollector {
             return
         }
         
-        let signGen = SwiftMethodSignatureGen(typeMapper: mapper,
-                                              inNonnullContext: context.inNonnullContext)
+        let signGen = ObjectiveCMethodSignatureConverter(
+            typeMapper: mapper,
+            inNonnullContext: context.inNonnullContext
+        )
         let sign = signGen.generateDefinitionSignature(from: node)
         
         if sign == FunctionSignature(name: "dealloc") {
@@ -675,9 +677,11 @@ public class IntentionCollector {
             return
         }
         
-        let gen = SwiftMethodSignatureGen(typeMapper: mapper,
-                                          inNonnullContext: context.inNonnullContext,
-                                          instanceTypeAlias: nil)
+        let gen = ObjectiveCMethodSignatureConverter(
+            typeMapper: mapper,
+            inNonnullContext: context.inNonnullContext,
+            instanceTypeAlias: nil
+        )
         let signature = gen.generateDefinitionSignature(from: node)
         
         let globalFunc = GlobalFunctionGenerationIntention(signature: signature, source: node)
@@ -861,16 +865,13 @@ public class IntentionCollector {
     }
 }
 
-extension IntentionCollector {
-    
+extension ObjectiveCIntentionCollector {
     private func recordSourceHistory(intention: FromSourceIntention, node: ASTNode) {
         intention.history.recordSourceHistory(node: node)
     }
-    
 }
 
-extension IntentionCollector {
-    
+extension ObjectiveCIntentionCollector {
     private func mapComments(_ node: ASTNode, _ intention: FromSourceIntention) {
         intention.precedingComments.append(contentsOf: convertComments(node.precedingComments))
     }
@@ -878,5 +879,4 @@ extension IntentionCollector {
     private func convertComments(_ comments: [ObjcComment]) -> [String] {
         return comments.map { $0.string.trimmingWhitespaces() }
     }
-    
 }

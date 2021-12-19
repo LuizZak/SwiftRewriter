@@ -7,7 +7,7 @@ import TypeSystem
 
 /// Converts preprocessor directives into global variable declarations, in case
 /// they represent simple constants.
-public class PreprocessorDirectiveConverter {
+public class CPreprocessorDirectiveConverter {
     let parserStatePool: ObjcParserStatePool
     let typeSystem: TypeSystem
     let typeResolverInvoker: TypeResolverInvoker
@@ -79,7 +79,7 @@ public class PreprocessorDirectiveConverter {
         let state = parserStatePool.pull()
         defer { parserStatePool.repool(state) }
         
-        let astReader = SwiftASTReader(typeMapper: DefaultTypeMapper(typeSystem: typeSystem),
+        let astReader = ObjectiveCASTReader(typeMapper: DefaultTypeMapper(typeSystem: typeSystem),
                                        typeParser: TypeParsing(state: state))
         
         return astReader.parseExpression(expression: ctx)

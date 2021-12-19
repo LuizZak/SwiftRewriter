@@ -4,7 +4,7 @@ import TypeSystem
 
 /// A helper class that can be used to generate a proper swift method signature
 /// from an Objective-C method signature.
-public class SwiftMethodSignatureGen {
+public class ObjectiveCMethodSignatureConverter {
     private let typeMapper: TypeMapper
     private let inNonnullContext: Bool
     private let instanceTypeAlias: SwiftType?

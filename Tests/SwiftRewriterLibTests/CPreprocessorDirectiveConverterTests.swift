@@ -4,9 +4,9 @@ import TypeSystem
 import SwiftAST
 import SwiftRewriterLib
 
-class PreprocessorDirectiveConverterTests: XCTestCase {
+class CPreprocessorDirectiveConverterTests: XCTestCase {
     var file: FileGenerationIntention!
-    var sut: PreprocessorDirectiveConverter!
+    var sut: CPreprocessorDirectiveConverter!
     var typeSystem: IntentionCollectionTypeSystem!
     var typeResolverInvoker: DefaultTypeResolverInvoker!
     
@@ -25,7 +25,7 @@ class PreprocessorDirectiveConverterTests: XCTestCase {
                                        typeSystem: typeSystem,
                                        numThreads: 1)
         
-        sut = PreprocessorDirectiveConverter(parserStatePool: ObjcParserStatePool(),
+        sut = CPreprocessorDirectiveConverter(parserStatePool: ObjcParserStatePool(),
                                              typeSystem: typeSystem,
                                              typeResolverInvoker: typeResolverInvoker)
     }

@@ -1,3 +1,5 @@
+import Utils
+
 /// An Objective-C comment from an input file
 public struct ObjcComment {
     public var string: String

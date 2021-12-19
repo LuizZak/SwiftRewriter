@@ -6,21 +6,21 @@ import TypeSystem
 import ObjcParser
 import GrammarModels
 
-class IntentionCollectorTests: XCTestCase {
+class ObjectiveCIntentionCollectorTests: XCTestCase {
     private var file: FileGenerationIntention!
     private var delegate: TestCollectorDelegate!
-    private var sut: IntentionCollector!
+    private var sut: ObjectiveCIntentionCollector!
     
     override func setUp() {
         super.setUp()
         
         file = FileGenerationIntention(sourcePath: "A.m", targetPath: "A.swift")
         
-        let context = IntentionBuildingContext()
+        let context = ObjectiveCIntentionCollector.Context()
         context.pushContext(file)
         
         delegate = TestCollectorDelegate(file: file)
-        sut = IntentionCollector(delegate: delegate, context: context)
+        sut = ObjectiveCIntentionCollector(delegate: delegate, context: context)
     }
     
     func testCollectFunctionDefinition() {
@@ -257,14 +257,14 @@ class IntentionCollectorTests: XCTestCase {
     }
 }
 
-private class TestCollectorDelegate: IntentionCollectorDelegate {
-    var context: IntentionBuildingContext
+private class TestCollectorDelegate: ObjectiveCIntentionCollectorDelegate {
+    var context: ObjectiveCIntentionCollector.Context
     var intentions: IntentionCollection
     
     var reportedForLazyParsing: [Intention] = []
     
     init(file: FileGenerationIntention) {
-        context = IntentionBuildingContext()
+        context = ObjectiveCIntentionCollector.Context()
         intentions = IntentionCollection()
         intentions.addIntention(file)
         
@@ -285,11 +285,11 @@ private class TestCollectorDelegate: IntentionCollectorDelegate {
         
     }
     
-    func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
+    func typeMapper(for intentionCollector: ObjectiveCIntentionCollector) -> TypeMapper {
         return DefaultTypeMapper(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
     }
     
-    func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing {
+    func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> TypeParsing {
         return TypeParsing(state: ObjcParserState())
     }
 }

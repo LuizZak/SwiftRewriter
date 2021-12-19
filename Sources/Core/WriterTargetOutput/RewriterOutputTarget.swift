@@ -79,7 +79,6 @@ public enum TextStyle {
 }
 
 public extension RewriterOutputTarget {
-    
     func output(line: String) {
         output(line: line, style: .plain)
     }

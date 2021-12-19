@@ -25,7 +25,7 @@ public struct TypeMappingContext {
     /// Gets a type mapping context that always maps to a non-null type
     public static let alwaysNonnull = TypeMappingContext(modifiers: nil, qualifiers: [], alwaysNonnull: true)
     
-    /// Modifiers fetched from a @property declaraion
+    /// Modifiers fetched from a @property declaration
     public var modifiers: PropertyAttributesList?
     /// Nullability specifiers from a method definition's type decl
     public var nullabilitySpecifiers: [NullabilitySpecifier] = []
@@ -55,7 +55,7 @@ public struct TypeMappingContext {
     /// If non-nil, this explicit nullability specifier is used for all requests
     /// for nullability.
     ///
-    /// Is overriden by `alwaysNonnull`.
+    /// Is overridden by `alwaysNonnull`.
     public var explicitNullability: TypeNullability?
     
     /// When mapping Objective-C's `instancetype` special type, this type is used
@@ -444,7 +444,7 @@ public class DefaultTypeMapper: TypeMapper {
         if name == "NSArray" && parameters.count == 1 {
             let inner =
                 swiftType(forObjcType: parameters[0],
-                          // We pass a non-null context because it's not appliable
+                          // We pass a non-null context because it's not applicable
                           // to generic types in Objective-C (they always map to non-null).
                           context: context.asAlwaysNonNull().asAlwaysClass())
             

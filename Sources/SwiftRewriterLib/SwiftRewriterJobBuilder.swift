@@ -15,7 +15,7 @@ public class SwiftRewriterJobBuilder {
     public var preprocessors: [SourcePreprocessor] = []
     public var settings: SwiftRewriter.Settings = .default
     public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
-    public var parserCache: ParserCache?
+    public var parserCache: ObjectiveCParserCache?
     
     public init() {
         

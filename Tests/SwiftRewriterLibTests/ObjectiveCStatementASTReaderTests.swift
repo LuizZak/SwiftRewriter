@@ -1,5 +1,6 @@
 import XCTest
 import Antlr4
+import Utils
 import ObjcParser
 import ObjcParserAntlr
 import SwiftSyntaxSupport
@@ -10,7 +11,7 @@ import GrammarModels
 
 @testable import SwiftRewriterLib
 
-class SwiftStatementASTReaderTests: XCTestCase {
+class ObjectiveCStatementASTReaderTests: XCTestCase {
     var tokens: CommonTokenStream!
     private var delegate: TestSwiftStatementASTReaderDelegate?
 
@@ -456,7 +457,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
     }
 }
 
-extension SwiftStatementASTReaderTests {
+extension ObjectiveCStatementASTReaderTests {
     @discardableResult
     func assert(objcStmt: String,
                 comments: [ObjcComment] = [],
@@ -467,23 +468,23 @@ extension SwiftStatementASTReaderTests {
         
         let typeSystem = TypeSystem()
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
-        let typeParser = TypeParsing(state: SwiftStatementASTReaderTests._state)
+        let typeParser = TypeParsing(state: ObjectiveCStatementASTReaderTests._state)
         
         let expReader =
-            SwiftExprASTReader(
+            ObjectiveCExprASTReader(
                 typeMapper: typeMapper,
                 typeParser: typeParser,
-                context: SwiftASTReaderContext(typeSystem: typeSystem,
+                context: ObjectiveCASTReaderContext(typeSystem: typeSystem,
                                                typeContext: nil,
                                                comments: comments),
                 delegate: delegate)
         
-        let sut = SwiftStatementASTReader(expressionReader: expReader,
+        let sut = ObjectiveCStatementASTReader(expressionReader: expReader,
                                           context: expReader.context,
                                           delegate: delegate)
         
         do {
-            let parser = try SwiftStatementASTReaderTests._state.makeMainParser(input: objcStmt).parser
+            let parser = try ObjectiveCStatementASTReaderTests._state.makeMainParser(input: objcStmt).parser
             let expr = try parseBlock(parser)
             
             let result = expr.accept(sut)
@@ -534,7 +535,7 @@ extension SwiftStatementASTReaderTests {
     private static var _state = ObjcParserState()
 }
 
-private class TestSwiftStatementASTReaderDelegate: SwiftStatementASTReaderDelegate {
+private class TestSwiftStatementASTReaderDelegate: ObjectiveCStatementASTReaderDelegate {
 
     var reportAutoTypeDeclaration: VariableDeclarationsStatement?
     var declarationAtIndex: Int?

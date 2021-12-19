@@ -1,18 +1,22 @@
 import Foundation
-import SwiftRewriterLib
 import WriterTargetOutput
 
-class FileDiskWriterOutput: WriterOutput {
-    func createFile(path: String) throws -> FileOutput {
+/// Writer implementation that saves output to disk.
+public class FileDiskWriterOutput: WriterOutput {
+    public init() {
+        
+    }
+
+    public func createFile(path: String) throws -> FileOutput {
         try FileOutputImpl(path: path)
     }
 }
 
-class FileOutputImpl: FileOutput {
+public class FileOutputImpl: FileOutput {
     let path: String
     let file: FileOutputTarget
     
-    init(path: String) throws {
+    public init(path: String) throws {
         let url = URL(fileURLWithPath: path)
         
         if !FileManager.default.fileExists(atPath: path) {
@@ -30,20 +34,20 @@ class FileOutputImpl: FileOutput {
         file = FileOutputTarget(fileHandle: handle)
     }
     
-    func close() {
+    public func close() {
         file.close()
     }
     
-    func outputTarget() -> RewriterOutputTarget {
+    public func outputTarget() -> RewriterOutputTarget {
         file
     }
     
-    enum Error: Swift.Error {
+    public enum Error: Swift.Error {
         case cannotCreateFile(path: String)
     }
 }
 
-class FileOutputTarget: RewriterOutputTarget {
+public class FileOutputTarget: RewriterOutputTarget {
     private var indentDepth: Int = 0
     private var settings: RewriterOutputSettings
     var fileHandle: FileHandle
@@ -56,7 +60,7 @@ class FileOutputTarget: RewriterOutputTarget {
         self.settings = settings
     }
     
-    func close() {
+    public func close() {
         if let data = buffer.data(using: .utf8) {
             fileHandle.write(data)
         }
@@ -64,7 +68,7 @@ class FileOutputTarget: RewriterOutputTarget {
         fileHandle.closeFile()
     }
     
-    func writeBufferFile(_ buffer: String) {
+    public func writeBufferFile(_ buffer: String) {
         self.buffer += buffer
     }
     

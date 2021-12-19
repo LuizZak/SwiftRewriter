@@ -5,7 +5,7 @@ import TypeSystem
 import ObjcParser
 import GrammarModels
 
-class SwiftMethodSignatureGenTests: XCTestCase {
+class ObjectiveCMethodSignatureConverterTests: XCTestCase {
     func testInitializer() throws {
         let sign = genSignature("""
             - (instancetype)initWithValue:(NSInteger)value;
@@ -180,10 +180,10 @@ class SwiftMethodSignatureGenTests: XCTestCase {
         return gen.generateDefinitionSignature(from: node)
     }
     
-    private func createSwiftMethodSignatureGen() -> SwiftMethodSignatureGen {
+    private func createSwiftMethodSignatureGen() -> ObjectiveCMethodSignatureConverter {
         let mapper = DefaultTypeMapper(typeSystem: TypeSystem())
         
-        return SwiftMethodSignatureGen(typeMapper: mapper,
+        return ObjectiveCMethodSignatureConverter(typeMapper: mapper,
                                        inNonnullContext: false,
                                        instanceTypeAlias: nil)
     }

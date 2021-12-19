@@ -4,22 +4,30 @@ import PackageDescription
 let core: [Target] = [
     .target(
         name: "WriterTargetOutput",
-        dependencies: ["Utils"],
+        dependencies: [
+            "Utils"
+        ],
         path: "Sources/Core/WriterTargetOutput"
     ),
     .target(
         name: "SwiftAST",
-        dependencies: ["MiniLexer", "Utils", "WriterTargetOutput"],
+        dependencies: [
+            "MiniLexer", "Utils", "WriterTargetOutput"
+        ],
         path: "Sources/Core/SwiftAST"
     ),
     .target(
         name: "KnownType",
-        dependencies: ["SwiftAST", "WriterTargetOutput"],
+        dependencies: [
+            "SwiftAST", "WriterTargetOutput"
+        ],
         path: "Sources/Core/KnownType"
     ),
     .target(
         name: "Intentions",
-        dependencies: ["SwiftAST", "GrammarModels", "KnownType"],
+        dependencies: [
+            "SwiftAST", "GrammarModels", "KnownType"
+        ],
         path: "Sources/Core/Intentions"
     ),
     .target(
@@ -48,7 +56,9 @@ let core: [Target] = [
     ),
     .target(
         name: "Commons",
-        dependencies: ["SwiftAST", "Utils", "TypeSystem", "KnownType"],
+        dependencies: [
+            "SwiftAST", "Utils", "TypeSystem", "KnownType"
+        ],
         path: "Sources/Core/Commons"
     ),
     .target(
@@ -77,7 +87,9 @@ let core: [Target] = [
     ),
     .target(
         name: "SourcePreprocessors",
-        dependencies: ["Utils", "MiniLexer"],
+        dependencies: [
+            "Utils", "MiniLexer"
+        ],
         path: "Sources/Core/SourcePreprocessors"
     ),
 ]
@@ -92,7 +104,9 @@ let objcFrontend: [Target] = [
     ),
     .target(
         name: "GrammarModels",
-        dependencies: ["ObjcParserAntlr"],
+        dependencies: [
+            "ObjcParserAntlr", "Utils"
+        ],
         path: "Sources/Frontend/Objective-C/GrammarModels"
     ),
     .target(
@@ -107,7 +121,6 @@ let objcFrontend: [Target] = [
     ),
     .target(
         name: "TypeDefinitions",
-        dependencies: [],
         path: "Sources/Frontend/Objective-C/TypeDefinitions",
         resources: [
             .copy("ios-framework-classes.json"),
@@ -116,8 +129,17 @@ let objcFrontend: [Target] = [
     ),
     .target(
         name: "GlobalsProviders",
-        dependencies: ["SwiftAST", "Commons", "TypeSystem"],
+        dependencies: [
+            "SwiftAST", "Commons", "TypeSystem"
+        ],
         path: "Sources/Frontend/Objective-C/GlobalsProviders"
+    ),
+    .target(
+        name: "ObjectiveCFrontend",
+        dependencies: [
+            "SwiftRewriterLib"
+        ],
+        path: "Sources/Frontend/Objective-C/ObjectiveCFrontend"
     ),
 ]
 
@@ -341,6 +363,13 @@ let package = Package(
                 "Utils", "TypeSystem"
             ],
             path: "Tests/TestCommonsTests"
+        ),
+        .testTarget(
+            name: "ObjectiveCFrontendTests",
+            dependencies: [
+                "ObjectiveCFrontend"
+            ],
+            path: "Tests/Frontend/Objective-C/ObjectiveCFrontendTests"
         ),
         .testTarget(
             name: "SwiftRewriterTests",

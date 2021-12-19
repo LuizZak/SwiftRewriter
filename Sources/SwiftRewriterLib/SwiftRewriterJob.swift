@@ -1,3 +1,4 @@
+import Utils
 import ObjcParser
 import SwiftSyntaxSupport
 import IntentionPasses
@@ -16,7 +17,7 @@ public class SwiftRewriterJob {
     public var preprocessors: [SourcePreprocessor]
     public var settings: SwiftRewriter.Settings = .default
     public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
-    public var parserCache: ParserCache?
+    public var parserCache: ObjectiveCParserCache?
     
     public init(input: InputSourcesProvider,
                 intentionPassesSource: IntentionPassSource?,
@@ -26,7 +27,7 @@ public class SwiftRewriterJob {
                 preprocessors: [SourcePreprocessor],
                 settings: SwiftRewriter.Settings,
                 swiftSyntaxOptions: SwiftSyntaxOptions,
-                parserCache: ParserCache?) {
+                parserCache: ObjectiveCParserCache?) {
         
         self.intentionPassesSource = intentionPassesSource
         self.astRewriterPassSources = astRewriterPassSources

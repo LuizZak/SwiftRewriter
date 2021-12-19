@@ -1,10 +1,11 @@
-import SwiftAST
-import TypeSystem
-import KnownType
-import GrammarModels
 import Antlr4
+import Utils
+import SwiftAST
+import GrammarModels
+import KnownType
+import TypeSystem
 
-public final class SwiftASTReaderContext {
+public final class ObjectiveCASTReaderContext {
     private var localsStack: [[Local]] = [[]]
     private var typeSystem: TypeSystem?
     private var typeContext: KnownType?

@@ -4,7 +4,6 @@ import ExpressionPasses
 import SwiftAST
 
 class ASTRewriterPassTests: XCTestCase {
-    
     func testTraverseThroughPostfixFunctionArgument() {
         let exp =
             Expression

@@ -1,7 +1,3 @@
-import MiniLexer
-import GrammarModels
-import Utils
-
 /// Container for diagnostic messages during parsing
 public class Diagnostics {
     @ConcurrentValue private var _diagnostics: [DiagnosticMessage] = []
@@ -91,7 +87,7 @@ public class Diagnostics {
         }
     }
     
-    internal func removeAll() {
+    public func removeAll() {
         _diagnostics.removeAll()
     }
 }

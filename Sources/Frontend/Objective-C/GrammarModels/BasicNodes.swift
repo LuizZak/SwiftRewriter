@@ -1,3 +1,5 @@
+import Utils
+
 /// A node that represents the global namespace
 public final class GlobalContextNode: ASTNode, InitializableNode {
     public var functionDefinitions: [FunctionDefinition] {

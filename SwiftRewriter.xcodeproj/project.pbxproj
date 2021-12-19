@@ -906,23 +906,23 @@
 		OBJ_2351 /* FileCollectionStepDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_315 /* FileCollectionStepDelegate.swift */; };
 		OBJ_2352 /* ImportDirectiveFileCollectionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_316 /* ImportDirectiveFileCollectionDelegate.swift */; };
 		OBJ_2353 /* InputSourcesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_317 /* InputSourcesProvider.swift */; };
-		OBJ_2354 /* IntentionCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_318 /* IntentionCollector.swift */; };
+		OBJ_2354 /* ObjectiveCIntentionCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_318 /* ObjectiveCIntentionCollector.swift */; };
 		OBJ_2355 /* MandatoryIntentionPass.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_319 /* MandatoryIntentionPass.swift */; };
 		OBJ_2356 /* MandatorySyntaxNodePass.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_320 /* MandatorySyntaxNodePass.swift */; };
 		OBJ_2357 /* NullWriterOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_321 /* NullWriterOutput.swift */; };
 		OBJ_2358 /* ObjcParserStatePool.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_322 /* ObjcParserStatePool.swift */; };
-		OBJ_2359 /* ParserCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_323 /* ParserCache.swift */; };
+		OBJ_2359 /* ObjectiveCParserCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_323 /* ObjectiveCParserCache.swift */; };
 		OBJ_2360 /* PathFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_324 /* PathFilter.swift */; };
-		OBJ_2361 /* PreprocessorDirectiveConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_325 /* PreprocessorDirectiveConverter.swift */; };
+		OBJ_2361 /* CPreprocessorDirectiveConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_325 /* CPreprocessorDirectiveConverter.swift */; };
 		OBJ_2362 /* SingleInputProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_326 /* SingleInputProvider.swift */; };
-		OBJ_2363 /* SwiftASTReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_327 /* SwiftASTReader.swift */; };
-		OBJ_2364 /* SwiftASTReaderContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_328 /* SwiftASTReaderContext.swift */; };
-		OBJ_2365 /* SwiftExprASTReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_329 /* SwiftExprASTReader.swift */; };
-		OBJ_2366 /* SwiftMethodSignatureGen.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_330 /* SwiftMethodSignatureGen.swift */; };
+		OBJ_2363 /* ObjectiveCASTReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_327 /* ObjectiveCASTReader.swift */; };
+		OBJ_2364 /* ObjectiveCASTReaderContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_328 /* ObjectiveCASTReaderContext.swift */; };
+		OBJ_2365 /* ObjectiveCExprASTReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_329 /* ObjectiveCExprASTReader.swift */; };
+		OBJ_2366 /* ObjectiveCMethodSignatureConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_330 /* ObjectiveCMethodSignatureConverter.swift */; };
 		OBJ_2367 /* SwiftRewriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_331 /* SwiftRewriter.swift */; };
 		OBJ_2368 /* SwiftRewriterJob.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_332 /* SwiftRewriterJob.swift */; };
 		OBJ_2369 /* SwiftRewriterJobBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_333 /* SwiftRewriterJobBuilder.swift */; };
-		OBJ_2370 /* SwiftStatementASTReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_334 /* SwiftStatementASTReader.swift */; };
+		OBJ_2370 /* ObjectiveCStatementASTReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_334 /* ObjectiveCStatementASTReader.swift */; };
 		OBJ_2371 /* SwiftSyntaxOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_335 /* SwiftSyntaxOptions.swift */; };
 		OBJ_2372 /* SwiftWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_336 /* SwiftWriter.swift */; };
 		OBJ_2373 /* WriterOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_337 /* WriterOutput.swift */; };
@@ -1612,25 +1612,25 @@
 		OBJ_315 /* FileCollectionStepDelegate.swift */ = {isa = PBXFileReference; path = FileCollectionStepDelegate.swift; sourceTree = "<group>"; };
 		OBJ_316 /* ImportDirectiveFileCollectionDelegate.swift */ = {isa = PBXFileReference; path = ImportDirectiveFileCollectionDelegate.swift; sourceTree = "<group>"; };
 		OBJ_317 /* InputSourcesProvider.swift */ = {isa = PBXFileReference; path = InputSourcesProvider.swift; sourceTree = "<group>"; };
-		OBJ_318 /* IntentionCollector.swift */ = {isa = PBXFileReference; path = IntentionCollector.swift; sourceTree = "<group>"; };
+		OBJ_318 /* ObjectiveCIntentionCollector.swift */ = {isa = PBXFileReference; path = ObjectiveCIntentionCollector.swift; sourceTree = "<group>"; };
 		OBJ_319 /* MandatoryIntentionPass.swift */ = {isa = PBXFileReference; path = MandatoryIntentionPass.swift; sourceTree = "<group>"; };
 		OBJ_32 /* UILabelCompoundType.swift */ = {isa = PBXFileReference; path = UILabelCompoundType.swift; sourceTree = "<group>"; };
 		OBJ_320 /* MandatorySyntaxNodePass.swift */ = {isa = PBXFileReference; path = MandatorySyntaxNodePass.swift; sourceTree = "<group>"; };
 		OBJ_321 /* NullWriterOutput.swift */ = {isa = PBXFileReference; path = NullWriterOutput.swift; sourceTree = "<group>"; };
 		OBJ_322 /* ObjcParserStatePool.swift */ = {isa = PBXFileReference; path = ObjcParserStatePool.swift; sourceTree = "<group>"; };
-		OBJ_323 /* ParserCache.swift */ = {isa = PBXFileReference; path = ParserCache.swift; sourceTree = "<group>"; };
+		OBJ_323 /* ObjectiveCParserCache.swift */ = {isa = PBXFileReference; path = ObjectiveCParserCache.swift; sourceTree = "<group>"; };
 		OBJ_324 /* PathFilter.swift */ = {isa = PBXFileReference; path = PathFilter.swift; sourceTree = "<group>"; };
-		OBJ_325 /* PreprocessorDirectiveConverter.swift */ = {isa = PBXFileReference; path = PreprocessorDirectiveConverter.swift; sourceTree = "<group>"; };
+		OBJ_325 /* CPreprocessorDirectiveConverter.swift */ = {isa = PBXFileReference; path = CPreprocessorDirectiveConverter.swift; sourceTree = "<group>"; };
 		OBJ_326 /* SingleInputProvider.swift */ = {isa = PBXFileReference; path = SingleInputProvider.swift; sourceTree = "<group>"; };
-		OBJ_327 /* SwiftASTReader.swift */ = {isa = PBXFileReference; path = SwiftASTReader.swift; sourceTree = "<group>"; };
-		OBJ_328 /* SwiftASTReaderContext.swift */ = {isa = PBXFileReference; path = SwiftASTReaderContext.swift; sourceTree = "<group>"; };
-		OBJ_329 /* SwiftExprASTReader.swift */ = {isa = PBXFileReference; path = SwiftExprASTReader.swift; sourceTree = "<group>"; };
+		OBJ_327 /* ObjectiveCASTReader.swift */ = {isa = PBXFileReference; path = ObjectiveCASTReader.swift; sourceTree = "<group>"; };
+		OBJ_328 /* ObjectiveCASTReaderContext.swift */ = {isa = PBXFileReference; path = ObjectiveCASTReaderContext.swift; sourceTree = "<group>"; };
+		OBJ_329 /* ObjectiveCExprASTReader.swift */ = {isa = PBXFileReference; path = ObjectiveCExprASTReader.swift; sourceTree = "<group>"; };
 		OBJ_33 /* UIResponderCompoundType.swift */ = {isa = PBXFileReference; path = UIResponderCompoundType.swift; sourceTree = "<group>"; };
-		OBJ_330 /* SwiftMethodSignatureGen.swift */ = {isa = PBXFileReference; path = SwiftMethodSignatureGen.swift; sourceTree = "<group>"; };
+		OBJ_330 /* ObjectiveCMethodSignatureConverter.swift */ = {isa = PBXFileReference; path = ObjectiveCMethodSignatureConverter.swift; sourceTree = "<group>"; };
 		OBJ_331 /* SwiftRewriter.swift */ = {isa = PBXFileReference; path = SwiftRewriter.swift; sourceTree = "<group>"; };
 		OBJ_332 /* SwiftRewriterJob.swift */ = {isa = PBXFileReference; path = SwiftRewriterJob.swift; sourceTree = "<group>"; };
 		OBJ_333 /* SwiftRewriterJobBuilder.swift */ = {isa = PBXFileReference; path = SwiftRewriterJobBuilder.swift; sourceTree = "<group>"; };
-		OBJ_334 /* SwiftStatementASTReader.swift */ = {isa = PBXFileReference; path = SwiftStatementASTReader.swift; sourceTree = "<group>"; };
+		OBJ_334 /* ObjectiveCStatementASTReader.swift */ = {isa = PBXFileReference; path = ObjectiveCStatementASTReader.swift; sourceTree = "<group>"; };
 		OBJ_335 /* SwiftSyntaxOptions.swift */ = {isa = PBXFileReference; path = SwiftSyntaxOptions.swift; sourceTree = "<group>"; };
 		OBJ_336 /* SwiftWriter.swift */ = {isa = PBXFileReference; path = SwiftWriter.swift; sourceTree = "<group>"; };
 		OBJ_337 /* WriterOutput.swift */ = {isa = PBXFileReference; path = WriterOutput.swift; sourceTree = "<group>"; };
@@ -3363,23 +3363,23 @@
 				OBJ_315 /* FileCollectionStepDelegate.swift */,
 				OBJ_316 /* ImportDirectiveFileCollectionDelegate.swift */,
 				OBJ_317 /* InputSourcesProvider.swift */,
-				OBJ_318 /* IntentionCollector.swift */,
+				OBJ_318 /* ObjectiveCIntentionCollector.swift */,
 				OBJ_319 /* MandatoryIntentionPass.swift */,
 				OBJ_320 /* MandatorySyntaxNodePass.swift */,
 				OBJ_321 /* NullWriterOutput.swift */,
 				OBJ_322 /* ObjcParserStatePool.swift */,
-				OBJ_323 /* ParserCache.swift */,
+				OBJ_323 /* ObjectiveCParserCache.swift */,
 				OBJ_324 /* PathFilter.swift */,
-				OBJ_325 /* PreprocessorDirectiveConverter.swift */,
+				OBJ_325 /* CPreprocessorDirectiveConverter.swift */,
 				OBJ_326 /* SingleInputProvider.swift */,
-				OBJ_327 /* SwiftASTReader.swift */,
-				OBJ_328 /* SwiftASTReaderContext.swift */,
-				OBJ_329 /* SwiftExprASTReader.swift */,
-				OBJ_330 /* SwiftMethodSignatureGen.swift */,
+				OBJ_327 /* ObjectiveCASTReader.swift */,
+				OBJ_328 /* ObjectiveCASTReaderContext.swift */,
+				OBJ_329 /* ObjectiveCExprASTReader.swift */,
+				OBJ_330 /* ObjectiveCMethodSignatureConverter.swift */,
 				OBJ_331 /* SwiftRewriter.swift */,
 				OBJ_332 /* SwiftRewriterJob.swift */,
 				OBJ_333 /* SwiftRewriterJobBuilder.swift */,
-				OBJ_334 /* SwiftStatementASTReader.swift */,
+				OBJ_334 /* ObjectiveCStatementASTReader.swift */,
 				OBJ_335 /* SwiftSyntaxOptions.swift */,
 				OBJ_336 /* SwiftWriter.swift */,
 				OBJ_337 /* WriterOutput.swift */,
@@ -6882,23 +6882,23 @@
 				OBJ_2351 /* FileCollectionStepDelegate.swift in Sources */,
 				OBJ_2352 /* ImportDirectiveFileCollectionDelegate.swift in Sources */,
 				OBJ_2353 /* InputSourcesProvider.swift in Sources */,
-				OBJ_2354 /* IntentionCollector.swift in Sources */,
+				OBJ_2354 /* ObjectiveCIntentionCollector.swift in Sources */,
 				OBJ_2355 /* MandatoryIntentionPass.swift in Sources */,
 				OBJ_2356 /* MandatorySyntaxNodePass.swift in Sources */,
 				OBJ_2357 /* NullWriterOutput.swift in Sources */,
 				OBJ_2358 /* ObjcParserStatePool.swift in Sources */,
-				OBJ_2359 /* ParserCache.swift in Sources */,
+				OBJ_2359 /* ObjectiveCParserCache.swift in Sources */,
 				OBJ_2360 /* PathFilter.swift in Sources */,
-				OBJ_2361 /* PreprocessorDirectiveConverter.swift in Sources */,
+				OBJ_2361 /* CPreprocessorDirectiveConverter.swift in Sources */,
 				OBJ_2362 /* SingleInputProvider.swift in Sources */,
-				OBJ_2363 /* SwiftASTReader.swift in Sources */,
-				OBJ_2364 /* SwiftASTReaderContext.swift in Sources */,
-				OBJ_2365 /* SwiftExprASTReader.swift in Sources */,
-				OBJ_2366 /* SwiftMethodSignatureGen.swift in Sources */,
+				OBJ_2363 /* ObjectiveCASTReader.swift in Sources */,
+				OBJ_2364 /* ObjectiveCASTReaderContext.swift in Sources */,
+				OBJ_2365 /* ObjectiveCExprASTReader.swift in Sources */,
+				OBJ_2366 /* ObjectiveCMethodSignatureConverter.swift in Sources */,
 				OBJ_2367 /* SwiftRewriter.swift in Sources */,
 				OBJ_2368 /* SwiftRewriterJob.swift in Sources */,
 				OBJ_2369 /* SwiftRewriterJobBuilder.swift in Sources */,
-				OBJ_2370 /* SwiftStatementASTReader.swift in Sources */,
+				OBJ_2370 /* ObjectiveCStatementASTReader.swift in Sources */,
 				OBJ_2371 /* SwiftSyntaxOptions.swift in Sources */,
 				OBJ_2372 /* SwiftWriter.swift in Sources */,
 				OBJ_2373 /* WriterOutput.swift in Sources */,

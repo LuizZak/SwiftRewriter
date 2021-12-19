@@ -6,12 +6,12 @@ import ObjcParser
 import KnownType
 
 /// Reader that reads Objective-C AST and outputs equivalent a Swift AST
-public class SwiftASTReader {
+public class ObjectiveCASTReader {
     let typeMapper: TypeMapper
     let typeParser: TypeParsing
     let typeSystem: TypeSystem?
 
-    weak var delegate: SwiftStatementASTReaderDelegate?
+    weak var delegate: ObjectiveCStatementASTReaderDelegate?
     
     public init(typeMapper: TypeMapper,
                 typeParser: TypeParsing,
@@ -27,18 +27,18 @@ public class SwiftASTReader {
                                 typeContext: KnownType? = nil) -> CompoundStatement {
         
         let context =
-            SwiftASTReaderContext(typeSystem: typeSystem,
+            ObjectiveCASTReaderContext(typeSystem: typeSystem,
                                   typeContext: typeContext,
                                   comments: comments)
         
         let expressionReader =
-            SwiftExprASTReader(typeMapper: typeMapper,
+            ObjectiveCExprASTReader(typeMapper: typeMapper,
                                typeParser: typeParser,
                                context: context,
                                delegate: delegate)
         
         let parser =
-            SwiftStatementASTReader
+            ObjectiveCStatementASTReader
                 .CompoundStatementVisitor(expressionReader: expressionReader,
                                           context: context,
                                           delegate: delegate)
@@ -53,12 +53,12 @@ public class SwiftASTReader {
     public func parseExpression(expression: ObjectiveCParser.ExpressionContext,
                                 comments: [ObjcComment] = []) -> Expression {
         
-        let context = SwiftASTReaderContext(typeSystem: typeSystem,
+        let context = ObjectiveCASTReaderContext(typeSystem: typeSystem,
                                             typeContext: nil,
                                             comments: comments)
         
         let parser =
-            SwiftExprASTReader(typeMapper: typeMapper,
+            ObjectiveCExprASTReader(typeMapper: typeMapper,
                                typeParser: typeParser,
                                context: context,
                                delegate: delegate)

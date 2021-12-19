@@ -1,10 +1,10 @@
 import Foundation
 
-public class FileCollectionStep {
+public class ObjectiveCFileCollectionStep {
     var fileProvider: FileProvider
     public private(set) var files: [DiskInputFile] = []
-    public weak var delegate: FileCollectionStepDelegate?
-    public var listener: FileCollectionStepListener?
+    public weak var delegate: ObjectiveCFileCollectionStepDelegate?
+    public var listener: ObjectiveCFileCollectionStepListener?
 
     public init(fileProvider: FileProvider = FileDiskProvider()) {
         self.fileProvider = fileProvider
@@ -85,12 +85,12 @@ public class FileCollectionStep {
             return
         }
 
-        let references = try delegate.fileCollectionStep(self, referencedFilesForFile: file)
+        let references = try delegate.objectiveCFileCollectionStep(self, referencedFilesForFile: file)
 
         for url in references {
             if !hasFile(url) && fileProvider.fileExists(atPath: url.path) {
-                listener?.fileCollectionStep(self, didAddReferencedFile: url,
-                                             forInputFile: file)
+                listener?.objectiveCFileCollectionStep(self, didAddReferencedFile: url,
+                                                       forInputFile: file)
                 
                 try addFile(fromUrl: url, isPrimary: false)
             }
@@ -109,7 +109,7 @@ public class FileCollectionStep {
     }
 }
 
-public extension FileCollectionStep {
+public extension ObjectiveCFileCollectionStep {
     func makeInputSourcesProvider() -> InputSourcesProvider {
         return InternalSourcesProvider(files: files)
     }
@@ -161,8 +161,8 @@ public class FileDiskProvider: FileProvider {
 }
 
 // TODO: Maybe merge with FileCollectionStepDelegate?
-public protocol FileCollectionStepListener {
-    func fileCollectionStep(_ collectionStep: FileCollectionStep,
-                            didAddReferencedFile referencedUrl: URL,
-                            forInputFile inputFile: DiskInputFile)
+public protocol ObjectiveCFileCollectionStepListener {
+    func objectiveCFileCollectionStep(_ collectionStep: ObjectiveCFileCollectionStep,
+                                      didAddReferencedFile referencedUrl: URL,
+                                      forInputFile inputFile: DiskInputFile)
 }

@@ -2,15 +2,15 @@ import XCTest
 import TestCommons
 import SwiftRewriterLib
 
-class FileCollectionStepTests: XCTestCase {
-    var sut: FileCollectionStep!
+class ObjectiveCFileCollectionStepTests: XCTestCase {
+    var sut: ObjectiveCFileCollectionStep!
     var fileDisk: VirtualFileDisk!
 
     override func setUp() {
         super.setUp()
 
         fileDisk = VirtualFileDisk()
-        sut = FileCollectionStep(fileProvider: fileDisk)
+        sut = ObjectiveCFileCollectionStep(fileProvider: fileDisk)
     }
 
     func testAddFileFromUrl() throws {
@@ -112,11 +112,12 @@ class FileCollectionStepTests: XCTestCase {
     }
 }
 
-private class MockFileCollectionStepDelegate: FileCollectionStepDelegate {
-    var fileCollectionStepReferencedFilesForFile: [(fileCollectionStep: FileCollectionStep, file: InputSource)] = []
+private class MockFileCollectionStepDelegate: ObjectiveCFileCollectionStepDelegate {
+    var fileCollectionStepReferencedFilesForFile: [(fileCollectionStep: ObjectiveCFileCollectionStep, file: InputSource)] = []
     var fileReferences: [URL] = []
-    func fileCollectionStep(_ fileCollectionStep: FileCollectionStep,
-                            referencedFilesForFile file: InputSource) throws -> [URL] {
+
+    func objectiveCFileCollectionStep(_ fileCollectionStep: ObjectiveCFileCollectionStep,
+                                      referencedFilesForFile file: InputSource) throws -> [URL] {
         fileCollectionStepReferencedFilesForFile.append((fileCollectionStep, file))
         return fileReferences
     }

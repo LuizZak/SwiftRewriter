@@ -105,7 +105,8 @@
 			"mutex",
 			"Nonnull",
 			"swiftpm",
-			"swiftrewriter"
+			"swiftrewriter",
+			"swiftwriter"
 		],
 	},
 	"extensions": {

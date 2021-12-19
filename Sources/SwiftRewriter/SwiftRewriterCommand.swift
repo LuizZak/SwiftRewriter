@@ -110,7 +110,7 @@ extension SwiftRewriterCommand {
             let rewriter = makeRewriterService(options)
             
             let fileProvider = FileDiskProvider()
-            let fileCollectionStep = FileCollectionStep(fileProvider: fileProvider)
+            let fileCollectionStep = ObjectiveCFileCollectionStep(fileProvider: fileProvider)
             let delegate = ImportDirectiveFileCollectionDelegate(parserCache: rewriter.parserCache,
                                                                  fileProvider: fileProvider)
             if options.followImports {
@@ -199,7 +199,7 @@ extension SwiftRewriterCommand {
             let settings = makeSettings(options)
             
             let output = StdoutWriterOutput(colorize: colorize)
-            let service = SwiftRewriterServiceImpl(output: output, settings: settings)
+            let service = ObjectiveCSwiftRewriterServiceImpl(output: output, settings: settings)
             
             // Detect terminal
             if isatty(fileno(stdin)) != 0 {
@@ -228,19 +228,19 @@ extension SwiftRewriterCommand {
     }
 }
 
-private func makeRewriterService(_ options: SwiftRewriterCommand.Options) -> SwiftRewriterService {
+private func makeRewriterService(_ options: SwiftRewriterCommand.Options) -> ObjectiveCSwiftRewriterService {
     let colorize = options.colorize
     let target = options.target ?? .filedisk
     let settings = makeSettings(options)
     
-    let rewriter: SwiftRewriterService
+    let rewriter: ObjectiveCSwiftRewriterService
     
     switch target {
     case .filedisk:
-        rewriter = SwiftRewriterServiceImpl.fileDisk(settings: settings)
+        rewriter = ObjectiveCSwiftRewriterServiceImpl.fileDisk(settings: settings)
     case .stdout:
-        rewriter = SwiftRewriterServiceImpl.terminal(settings: settings,
-                                                     colorize: colorize)
+        rewriter = ObjectiveCSwiftRewriterServiceImpl.terminal(settings: settings,
+                                                               colorize: colorize)
     }
     
     return rewriter

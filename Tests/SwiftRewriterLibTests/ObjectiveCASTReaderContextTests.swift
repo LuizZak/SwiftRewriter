@@ -4,17 +4,17 @@ import KnownType
 import SwiftRewriterLib
 import TypeSystem
 
-class SwiftASTReaderContextTests: XCTestCase {
+class ObjectiveCASTReaderContextTests: XCTestCase {
     var typeSystem: TypeSystem!
     var typeContext: KnownType!
-    var sut: SwiftASTReaderContext!
+    var sut: ObjectiveCASTReaderContext!
     
     override func setUp() {
         super.setUp()
         
         typeSystem = TypeSystem()
         typeContext = KnownTypeBuilder(typeName: "TestType").build()
-        sut = SwiftASTReaderContext(typeSystem: typeSystem,
+        sut = ObjectiveCASTReaderContext(typeSystem: typeSystem,
                                     typeContext: typeContext,
                                     comments: [])
     }
@@ -24,7 +24,7 @@ class SwiftASTReaderContextTests: XCTestCase {
             KnownTypeBuilder(typeName: "TestType")
                 .property(named: "test", type: .int)
                 .build()
-        sut = SwiftASTReaderContext(typeSystem: typeSystem,
+        sut = ObjectiveCASTReaderContext(typeSystem: typeSystem,
                                     typeContext: typeContext,
                                     comments: [])
         
@@ -38,7 +38,7 @@ class SwiftASTReaderContextTests: XCTestCase {
             KnownTypeBuilder(typeName: "TestType")
                 .field(named: "test", type: .int)
                 .build()
-        sut = SwiftASTReaderContext(typeSystem: typeSystem,
+        sut = ObjectiveCASTReaderContext(typeSystem: typeSystem,
                                     typeContext: typeContext,
                                     comments: [])
         

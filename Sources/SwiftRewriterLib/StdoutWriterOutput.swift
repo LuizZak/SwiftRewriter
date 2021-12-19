@@ -1,14 +1,16 @@
 import Foundation
-import SwiftRewriterLib
 import WriterTargetOutput
 import Console
 
+/// Writer implementation that prints output to `stdout`.
 public class StdoutWriterOutput: WriterOutput {
     var buffer: String = ""
     var colorize: Bool
-    var signalEndOfFiles: Bool = true
     
-    init(colorize: Bool = true) {
+    /// If `true`, emits a comment at the end of each file.
+    public var signalEndOfFiles: Bool = true
+    
+    public init(colorize: Bool = true) {
         self.colorize = colorize
     }
     

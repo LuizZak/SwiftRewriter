@@ -4,6 +4,7 @@ import ObjectiveC
 
 import Foundation
 import Dispatch
+import Utils
 import GrammarModels
 import ObjcParser
 import SwiftAST
@@ -13,7 +14,6 @@ import Intentions
 import IntentionPasses
 import ExpressionPasses
 import SourcePreprocessors
-import GlobalsProviders
 import SwiftSyntaxSupport
 import Utils
 
@@ -45,7 +45,7 @@ public final class SwiftRewriter {
     private var parsers: [ObjcParser] = []
     
     /// An optional instance of a parser cache with pre-parsed input files.
-    public var parserCache: ParserCache?
+    public var parserCache: ObjectiveCParserCache?
     
     /// A diagnostics instance that collects all diagnostic errors during input
     /// source processing.
@@ -196,7 +196,7 @@ public final class SwiftRewriter {
                         SwiftRewriter._parserStatePool.repool(state)
                     }
                     
-                    let reader = SwiftASTReader(typeMapper: typeMapper,
+                    let reader = ObjectiveCASTReader(typeMapper: typeMapper,
                                                 typeParser: typeParser,
                                                 typeSystem: self.typeSystem)
                     reader.delegate = delegate
@@ -250,7 +250,7 @@ public final class SwiftRewriter {
         for file in intentionCollection.fileIntentions() {
             for directive in file.preprocessorDirectives {
                 let converter =
-                    PreprocessorDirectiveConverter(
+                    CPreprocessorDirectiveConverter(
                         parserStatePool: parserStatePool,
                         typeSystem: typeSystem,
                         typeResolverInvoker: resolver)
@@ -363,7 +363,7 @@ public final class SwiftRewriter {
                         
                         let instancetype = (method.type?.typeName).map { SwiftType.typeName($0) }
                         
-                        let signGen = SwiftMethodSignatureGen(typeMapper: typeMapper,
+                        let signGen = ObjectiveCMethodSignatureConverter(typeMapper: typeMapper,
                                                               inNonnullContext: method.inNonnullContext,
                                                               instanceTypeAlias: instancetype)
                         method.signature = signGen.generateDefinitionSignature(from: node)
@@ -392,7 +392,7 @@ public final class SwiftRewriter {
                     case .globalFunc(let fn):
                         guard let node = fn.typedSource else { return }
                         
-                        let signGen = SwiftMethodSignatureGen(typeMapper: typeMapper,
+                        let signGen = ObjectiveCMethodSignatureConverter(typeMapper: typeMapper,
                                                               inNonnullContext: fn.inNonnullContext,
                                                               instanceTypeAlias: nil)
                         fn.signature = signGen.generateDefinitionSignature(from: node)
@@ -594,7 +594,7 @@ public final class SwiftRewriter {
         if let parserCache = parserCache {
             parser = try parserCache.loadParsedTree(input: source)
         } else {
-            // TODO: Reduce duplication with ParserCache.applyPreprocessors
+            // TODO: Reduce duplication with ObjectiveCParserCache.applyPreprocessors
             let src = try source.loadSource()
             
             let processedSrc = applyPreprocessors(source: src)
@@ -614,7 +614,7 @@ public final class SwiftRewriter {
             parser.rootNode.printNode({ print($0) })
         }
         
-        let ctx = IntentionBuildingContext()
+        let ctx = ObjectiveCIntentionCollector.Context()
         
         let fileIntent = FileGenerationIntention(sourcePath: source.sourcePath(), targetPath: path)
         fileIntent.preprocessorDirectives = parser.preprocessorDirectives
@@ -622,7 +622,7 @@ public final class SwiftRewriter {
         fileIntent.isPrimary = source.isPrimary
         ctx.pushContext(fileIntent)
         
-        let intentionCollector = IntentionCollector(delegate: collectorDelegate, context: ctx)
+        let intentionCollector = ObjectiveCIntentionCollector(delegate: collectorDelegate, context: ctx)
         intentionCollector.collectIntentions(parser.rootNode)
         
         ctx.popContext() // FileGenerationIntention
@@ -791,9 +791,9 @@ private extension SwiftRewriter {
     }
 }
 
-// MARK: - IntentionCollectorDelegate
+// MARK: - ObjectiveCIntentionCollectorDelegate
 fileprivate extension SwiftRewriter {
-    class CollectorDelegate: IntentionCollectorDelegate {
+    class CollectorDelegate: ObjectiveCIntentionCollectorDelegate {
         var typeMapper: TypeMapper
         var typeParser: TypeParsing
         
@@ -859,16 +859,16 @@ fileprivate extension SwiftRewriter {
             }
         }
         
-        func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
+        func typeMapper(for intentionCollector: ObjectiveCIntentionCollector) -> TypeMapper {
             typeMapper
         }
         
-        func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing {
+        func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> TypeParsing {
             typeParser
         }
     }
 
-    private class InnerStatementASTReaderDelegate: SwiftStatementASTReaderDelegate {
+    private class InnerStatementASTReaderDelegate: ObjectiveCStatementASTReaderDelegate {
         var parseItem: LazyParseItem
         var autotypeDeclarations: [LazyAutotypeVarDeclResolve] = []
 

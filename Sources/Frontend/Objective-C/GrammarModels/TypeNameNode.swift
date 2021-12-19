@@ -1,3 +1,5 @@
+import Utils
+
 public class TypeNameNode: ASTNode {
     /// Full type name
     public var type: ObjcType
