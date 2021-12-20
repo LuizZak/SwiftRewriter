@@ -1,5 +1,5 @@
 /// A syntax node for an Objective-C protocol (`@protocol`) declaration.
-public class ObjcProtocolDeclaration: ASTNode, InitializableNode {
+public class ObjcProtocolDeclaration: ObjcASTNode, ObjcInitializableNode {
     public var identifier: Identifier? {
         firstChild()
     }

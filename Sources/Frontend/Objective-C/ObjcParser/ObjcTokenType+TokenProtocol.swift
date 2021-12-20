@@ -1,5 +1,5 @@
 import MiniLexer
-import GrammarModels
+import ObjcGrammarModels
 
 let operators: [(string: String, op: Operator)] = [
     // It is important to leave the operators in order, because since the first
@@ -37,8 +37,8 @@ let operators: [(string: String, op: Operator)] = [
     (">", .greaterThan)
 ]
 
-extension TokenType: TokenProtocol {
-    public static var eofToken: TokenType {
+extension ObjcTokenType: TokenProtocol {
+    public static var eofToken: ObjcTokenType {
         .eof
     }
     
@@ -78,7 +78,7 @@ extension TokenType: TokenProtocol {
         try lexer.advanceLength(l)
     }
     
-    public static func tokenType(at lexer: Lexer) -> TokenType? {
+    public static func tokenType(at lexer: Lexer) -> ObjcTokenType? {
         // Lex identifiers
         do {
             let p = try lexer.peek()
@@ -106,7 +106,7 @@ extension TokenType: TokenProtocol {
         }
     }
     
-    private static func readIdentifierToken(lexer: Lexer) -> TokenType? {
+    private static func readIdentifierToken(lexer: Lexer) -> ObjcTokenType? {
         let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         do {
@@ -122,7 +122,7 @@ extension TokenType: TokenProtocol {
         }
     }
     
-    private static func attemptReadOperator(lexer: Lexer) -> TokenType? {
+    private static func attemptReadOperator(lexer: Lexer) -> ObjcTokenType? {
         let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         // Lex operators first
@@ -135,7 +135,7 @@ extension TokenType: TokenProtocol {
         return nil
     }
     
-    private static func attemptReadQualifierToken(lexer: Lexer) -> TokenType? {
+    private static func attemptReadQualifierToken(lexer: Lexer) -> ObjcTokenType? {
         let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         do {
@@ -147,7 +147,7 @@ extension TokenType: TokenProtocol {
         }
     }
     
-    private static func attemptReadKeywordToken(lexer: Lexer) -> TokenType? {
+    private static func attemptReadKeywordToken(lexer: Lexer) -> ObjcTokenType? {
         let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         do {
@@ -162,7 +162,7 @@ extension TokenType: TokenProtocol {
             
             let keyword = try (isAt ? "@" : "") + lexer.lexIdentifier()
             
-            guard let kw = Keyword(rawValue: String(keyword)) else {
+            guard let kw = ObjcKeyword(rawValue: String(keyword)) else {
                 return nil
             }
             
@@ -172,11 +172,11 @@ extension TokenType: TokenProtocol {
         }
     }
     
-    private static func attemptReadSpecialChar(lexer: Lexer) -> TokenType? {
+    private static func attemptReadSpecialChar(lexer: Lexer) -> ObjcTokenType? {
         let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         do {
-            let type: TokenType
+            let type: ObjcTokenType
             
             switch try lexer.peek() {
             case "@":

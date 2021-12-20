@@ -1,21 +1,22 @@
 import ObjcParserAntlr
+import GrammarModelBase
 
-public final class ExpressionNode: ASTNode {
+public final class ExpressionNode: ObjcASTNode {
     public var expression: ObjectiveCParser.ExpressionContext?
 }
 
-public final class MethodBody: ASTNode {
+public final class MethodBody: ObjcASTNode {
     public var statements: ObjectiveCParser.CompoundStatementContext?
     
     /// List of comments found within the range of this method body
-    public var comments: [ObjcComment] = []
+    public var comments: [CodeComment] = []
     
     public override var shortDescription: String {
         statements?.getText() ?? ""
     }
 }
 
-public class MethodDefinition: ASTNode, InitializableNode {
+public class MethodDefinition: ObjcASTNode, ObjcInitializableNode {
     public var returnType: MethodType? {
         firstChild()
     }
@@ -32,13 +33,9 @@ public class MethodDefinition: ASTNode, InitializableNode {
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)
     }
-    
-    public override func addChild(_ node: ASTNode) {
-        super.addChild(node)
-    }
 }
 
-public class MethodSelector: ASTNode, InitializableNode {
+public class MethodSelector: ObjcASTNode, ObjcInitializableNode {
     public var selector: SelectorKind {
         let sel = childrenMatching(type: Identifier.self)
         let kw = childrenMatching(type: KeywordDeclarator.self)
@@ -60,7 +57,7 @@ public class MethodSelector: ASTNode, InitializableNode {
     }
 }
 
-public final class KeywordDeclarator: ASTNode, InitializableNode {
+public final class KeywordDeclarator: ObjcASTNode, ObjcInitializableNode {
     public var selector: Identifier? {
         let children = childrenMatching(type: Identifier.self)
         if children.count == 1 {
@@ -81,11 +78,11 @@ public final class KeywordDeclarator: ASTNode, InitializableNode {
     }
 }
 
-public final class MethodType: ASTNode, InitializableNode {
+public final class MethodType: ObjcASTNode, ObjcInitializableNode {
     public var nullabilitySpecifiers: [NullabilitySpecifier] {
         childrenMatching()
     }
-    public var type: TypeNameNode? {
+    public var type: ObjcTypeNameNode? {
         firstChild()
     }
     

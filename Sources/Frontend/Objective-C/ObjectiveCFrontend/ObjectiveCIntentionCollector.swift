@@ -1,4 +1,5 @@
-import GrammarModels
+import GrammarModelBase
+import ObjcGrammarModels
 import ObjcParser
 import SwiftAST
 import KnownType
@@ -6,11 +7,11 @@ import Intentions
 import TypeSystem
 
 public protocol ObjectiveCIntentionCollectorDelegate: AnyObject {
-    func isNodeInNonnullContext(_ node: ASTNode) -> Bool
+    func isNodeInNonnullContext(_ node: ObjcASTNode) -> Bool
     func reportForLazyParsing(intention: Intention)
     func reportForLazyResolving(intention: Intention)
     func typeMapper(for intentionCollector: ObjectiveCIntentionCollector) -> TypeMapper
-    func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> TypeParsing
+    func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> ObjcTypeParser
 }
 
 /// Traverses a provided AST node, and produces intentions that are recorded by
@@ -59,17 +60,19 @@ public class ObjectiveCIntentionCollector {
         self.context = context
     }
     
-    public func collectIntentions(_ node: ASTNode) {
+    public func collectIntentions(_ node: ObjcASTNode) {
         startNodeVisit(node)
     }
     
-    private func startNodeVisit(_ node: ASTNode) {
+    private func startNodeVisit(_ node: ObjcASTNode) {
         let visitor = AnyASTVisitor()
         let traverser = ASTTraverser(node: node, visitor: visitor)
         
         visitor.onEnterClosure = { node in
-            self.context.inNonnullContext
-                = self.delegate?.isNodeInNonnullContext(node) ?? false
+            if let objcNode = node as? ObjcASTNode {
+                self.context.inNonnullContext
+                    = self.delegate?.isNodeInNonnullContext(objcNode) ?? false
+            }
             
             switch node {
             case let n as ObjcClassInterface:
@@ -88,7 +91,7 @@ public class ObjectiveCIntentionCollector {
                 self.enterObjcClassIVarsListNode(n)
             case let n as ObjcEnumDeclaration:
                 self.enterObjcEnumDeclarationNode(n)
-            case let n as FunctionDefinition:
+            case let n as ObjcFunctionDefinition:
                 self.enterFunctionDefinitionNode(n)
             default:
                 return
@@ -97,7 +100,7 @@ public class ObjectiveCIntentionCollector {
         
         visitor.visitClosure = { node in
             switch node {
-            case let n as TypedefNode:
+            case let n as ObjcTypedefNode:
                 self.visitTypedefNode(n)
                 
             case let n as KeywordNode:
@@ -109,7 +112,7 @@ public class ObjectiveCIntentionCollector {
             case let n as PropertyDefinition:
                 self.visitPropertyDefinitionNode(n)
                 
-            case let n as PropertySynthesizeItem:
+            case let n as ObjcPropertySynthesizeItem:
                 self.visitPropertySynthesizeItemNode(n)
                 
             case let n as ProtocolReferenceList:
@@ -124,7 +127,7 @@ public class ObjectiveCIntentionCollector {
             case let n as IVarDeclaration:
                 self.visitObjcClassIVarDeclarationNode(n)
                 
-            case let n as VariableDeclaration:
+            case let n as ObjcVariableDeclaration:
                 self.visitVariableDeclarationNode(n)
                 
             case let n as ObjcEnumCase:
@@ -158,7 +161,7 @@ public class ObjectiveCIntentionCollector {
                 self.exitProtocolDeclarationNode(n)
             case let n as ObjcEnumDeclaration:
                 self.exitObjcEnumDeclarationNode(n)
-            case let n as FunctionDefinition:
+            case let n as ObjcFunctionDefinition:
                 self.exitFunctionDefinitionNode(n)
             default:
                 return
@@ -185,7 +188,7 @@ public class ObjectiveCIntentionCollector {
     
     // MARK: - Typedef
     
-    private func visitTypedefNode(_ node: TypedefNode) {
+    private func visitTypedefNode(_ node: ObjcTypedefNode) {
         guard let ctx = context.findContext(ofType: FileGenerationIntention.self) else {
             return
         }
@@ -230,7 +233,7 @@ public class ObjectiveCIntentionCollector {
     
     // MARK: - Global Variable
     
-    private func visitVariableDeclarationNode(_ node: VariableDeclaration) {
+    private func visitVariableDeclarationNode(_ node: ObjcVariableDeclaration) {
         guard let ctx = context.findContext(ofType: FileGenerationIntention.self) else {
             return
         }
@@ -461,7 +464,7 @@ public class ObjectiveCIntentionCollector {
     }
     
     // MARK: - Property Implementation
-    private func visitPropertySynthesizeItemNode(_ node: PropertySynthesizeItem) {
+    private func visitPropertySynthesizeItemNode(_ node: ObjcPropertySynthesizeItem) {
         if node.isDynamic { // Dynamic property implementations are not yet supported
             return
         }
@@ -668,7 +671,7 @@ public class ObjectiveCIntentionCollector {
     }
     
     // MARK: - Function Definition
-    private func enterFunctionDefinitionNode(_ node: FunctionDefinition) {
+    private func enterFunctionDefinitionNode(_ node: ObjcFunctionDefinition) {
         guard node.identifier != nil else {
             return
         }
@@ -707,7 +710,7 @@ public class ObjectiveCIntentionCollector {
         delegate?.reportForLazyResolving(intention: globalFunc)
     }
     
-    private func exitFunctionDefinitionNode(_ node: FunctionDefinition) {
+    private func exitFunctionDefinitionNode(_ node: ObjcFunctionDefinition) {
         guard node.identifier != nil else {
             return
         }
@@ -717,14 +720,14 @@ public class ObjectiveCIntentionCollector {
     
     // MARK: - Struct declaration
     private func enterStructDeclarationNode(_ node: ObjcStructDeclaration) {
-        var declarators: [TypeDeclaratorNode] = []
+        var declarators: [ObjcTypeDeclaratorNode] = []
         var nodeIdentifiers: [Identifier] = []
         if let identifier = node.identifier {
             nodeIdentifiers = [identifier]
         }
-        if let parentNode = node.parent as? TypedefNode {
+        if let parentNode = node.parent as? ObjcTypedefNode {
             nodeIdentifiers.append(contentsOf: parentNode.childrenMatching(type: Identifier.self))
-            declarators.append(contentsOf: parentNode.childrenMatching(type: TypeDeclaratorNode.self))
+            declarators.append(contentsOf: parentNode.childrenMatching(type: ObjcTypeDeclaratorNode.self))
         }
         
         guard let identifier = nodeIdentifiers.first ?? declarators.first?.identifier else {
@@ -738,7 +741,7 @@ public class ObjectiveCIntentionCollector {
         mapComments(node, structIntent)
         recordSourceHistory(intention: structIntent, node: node)
         
-        if let parentNode = node.parent as? TypedefNode {
+        if let parentNode = node.parent as? ObjcTypedefNode {
             mapComments(parentNode, structIntent)
         }
         
@@ -866,17 +869,17 @@ public class ObjectiveCIntentionCollector {
 }
 
 extension ObjectiveCIntentionCollector {
-    private func recordSourceHistory(intention: FromSourceIntention, node: ASTNode) {
+    private func recordSourceHistory(intention: FromSourceIntention, node: ObjcASTNode) {
         intention.history.recordSourceHistory(node: node)
     }
 }
 
 extension ObjectiveCIntentionCollector {
-    private func mapComments(_ node: ASTNode, _ intention: FromSourceIntention) {
+    private func mapComments(_ node: ObjcASTNode, _ intention: FromSourceIntention) {
         intention.precedingComments.append(contentsOf: convertComments(node.precedingComments))
     }
     
-    private func convertComments(_ comments: [ObjcComment]) -> [String] {
+    private func convertComments(_ comments: [CodeComment]) -> [String] {
         return comments.map { $0.string.trimmingWhitespaces() }
     }
 }

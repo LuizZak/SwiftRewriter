@@ -1,5 +1,5 @@
 import Utils
-import GrammarModels
+import ObjcGrammarModels
 
 /// An intention represents the intent of the code transpiler to generate a
 /// file/class/struct/property/etc. with Swift code.
@@ -18,7 +18,7 @@ public class Intention: IntentionProtocol, Codable {
     
     /// Reference to an AST node that originated this source-code generation
     /// intention
-    public var source: ASTNode? {
+    public var source: ObjcASTNode? {
         didSet {
             if let source = source {
                 originLocation = source.location
@@ -38,7 +38,7 @@ public class Intention: IntentionProtocol, Codable {
         
     }
     
-    public init(source: ASTNode?) {
+    public init(source: ObjcASTNode?) {
         self.source = source
         self.originLocation = source?.location
     }

@@ -1,4 +1,4 @@
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 
 /// An intention to generate a class extension from an existing class
@@ -12,7 +12,7 @@ public final class ClassExtensionGenerationIntention: BaseClassIntention {
     
     public override init(typeName: String,
                          accessLevel: AccessLevel = .internal,
-                         source: ASTNode? = nil) {
+                         source: ObjcASTNode? = nil) {
         
         super.init(typeName: typeName,
                    accessLevel: accessLevel,

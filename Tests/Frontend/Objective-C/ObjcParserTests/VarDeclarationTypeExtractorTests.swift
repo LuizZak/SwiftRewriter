@@ -1,5 +1,5 @@
 import XCTest
-import GrammarModels
+import ObjcGrammarModels
 import Antlr4
 import ObjcParser
 import ObjcParserAntlr

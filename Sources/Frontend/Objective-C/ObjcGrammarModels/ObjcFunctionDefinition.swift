@@ -1,6 +1,6 @@
 /// Represents a global function definition
-public class FunctionDefinition: ASTNode, InitializableNode {
-    public var returnType: TypeNameNode? {
+public class ObjcFunctionDefinition: ObjcASTNode, ObjcInitializableNode {
+    public var returnType: ObjcTypeNameNode? {
         firstChild()
     }
     
@@ -8,7 +8,7 @@ public class FunctionDefinition: ASTNode, InitializableNode {
         firstChild()
     }
     
-    public var parameterList: ParameterList? {
+    public var parameterList: ObjcParameterList? {
         firstChild()
     }
     
@@ -22,12 +22,12 @@ public class FunctionDefinition: ASTNode, InitializableNode {
 }
 
 /// Represents the parameters list for a function definition
-public class ParameterList: ASTNode, InitializableNode {
-    public var parameters: [FunctionParameter] {
+public class ObjcParameterList: ObjcASTNode, ObjcInitializableNode {
+    public var parameters: [ObjcFunctionParameter] {
         childrenMatching()
     }
     
-    public var variadicParameter: VariadicParameter? {
+    public var variadicParameter: ObjcVariadicParameter? {
         firstChild()
     }
     
@@ -37,12 +37,12 @@ public class ParameterList: ASTNode, InitializableNode {
 }
 
 /// Represents a parameter for a parameters list for a function definition
-public class FunctionParameter: ASTNode, InitializableNode {
+public class ObjcFunctionParameter: ObjcASTNode, ObjcInitializableNode {
     public var identifier: Identifier? {
         firstChild()
     }
     
-    public var type: TypeNameNode? {
+    public var type: ObjcTypeNameNode? {
         firstChild()
     }
     
@@ -53,7 +53,7 @@ public class FunctionParameter: ASTNode, InitializableNode {
 
 /// A variadic parameter which is specified as a (', ...') after at least one
 /// function parameter.
-public class VariadicParameter: ASTNode, InitializableNode {
+public class ObjcVariadicParameter: ObjcASTNode, ObjcInitializableNode {
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)
     }

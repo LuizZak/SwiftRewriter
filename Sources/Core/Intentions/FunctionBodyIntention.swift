@@ -1,4 +1,4 @@
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 import KnownType
 
@@ -12,7 +12,7 @@ public class FunctionBodyIntention: FromSourceIntention, KnownMethodBody {
     /// Original source code body to generate
     public var body: CompoundStatement
     
-    public init(body: CompoundStatement, source: ASTNode? = nil) {
+    public init(body: CompoundStatement, source: ObjcASTNode? = nil) {
         self.body = body
         
         super.init(accessLevel: .public, source: source)

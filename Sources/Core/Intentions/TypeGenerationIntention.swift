@@ -1,4 +1,4 @@
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 import KnownType
 
@@ -44,7 +44,7 @@ public class TypeGenerationIntention: FromSourceIntention {
     
     public init(typeName: String,
                 accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+                source: ObjcASTNode? = nil) {
         
         self.typeName = typeName
         
@@ -182,7 +182,7 @@ public class TypeGenerationIntention: FromSourceIntention {
     ///
     /// - Parameter knownMethod: A known method with an available signature.
     @discardableResult
-    public func generateMethod(from knownMethod: KnownMethod, source: ASTNode? = nil) -> MethodGenerationIntention {
+    public func generateMethod(from knownMethod: KnownMethod, source: ObjcASTNode? = nil) -> MethodGenerationIntention {
         let method =
             MethodGenerationIntention(signature: knownMethod.signature,
                                       accessLevel: .internal, source: source)

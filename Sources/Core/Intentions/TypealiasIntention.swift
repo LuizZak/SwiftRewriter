@@ -1,4 +1,4 @@
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 
 /// An intention of generating a Swift `typealias` clause.
@@ -12,7 +12,7 @@ public final class TypealiasIntention: FromSourceIntention {
                 fromType: SwiftType,
                 named name: String,
                 accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+                source: ObjcASTNode? = nil) {
         
         self.originalObjcType = originalObjcType
         self.fromType = fromType

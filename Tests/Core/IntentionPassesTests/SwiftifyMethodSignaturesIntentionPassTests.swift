@@ -1,5 +1,5 @@
 import XCTest
-import GrammarModels
+import ObjcGrammarModels
 import ObjcParser
 import ObjcParserAntlr
 import SwiftAST

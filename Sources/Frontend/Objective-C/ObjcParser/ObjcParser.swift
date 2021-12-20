@@ -7,7 +7,7 @@ import class Antlr4.ParseTreeWalker
 import class Antlr4.ParserRuleContext
 import class Antlr4.Parser
 import Utils
-import GrammarModels
+import ObjcGrammarModels
 import GrammarModelBase
 import ObjcParserAntlr
 
@@ -56,7 +56,7 @@ public class ObjcParser {
     
     /// Contains information about all C-style comments found while parsing the
     /// input file.
-    public var comments: [ObjcComment] = []
+    public var comments: [CodeComment] = []
     
     /// Preprocessor directives found on this file
     public var preprocessorDirectives: [ObjcPreprocessorDirective] = []
@@ -104,7 +104,7 @@ public class ObjcParser {
         lexer.location()
     }
     
-    func withTemporaryContext<T: InitializableNode>(
+    func withTemporaryContext<T: ObjcInitializableNode>(
         nodeType: T.Type = T.self, do action: () throws -> Void) rethrows -> T {
         
         let node = context.pushContext(nodeType: nodeType)
@@ -353,7 +353,7 @@ public class ObjcParser {
                                       utf8Length: utf8Length)
             }
             
-            let comment = ObjcComment(string: String(input[range]),
+            let comment = CodeComment(string: String(input[range]),
                                       range: range,
                                       location: location,
                                       length: length)
@@ -443,7 +443,7 @@ public class ObjcParser {
         return type
     }
     
-    func parseTokenNode(_ tokenType: TokenType) throws {
+    func parseTokenNode(_ tokenType: ObjcTokenType) throws {
         try lexer.advance(overTokenType: tokenType)
     }
     
@@ -472,8 +472,8 @@ public class ObjcParser {
     /// of errors as diagnostics must be made by this closure.
     /// - Returns: An array of items returned by `itemParser` for each successful
     /// parse performed.
-    internal func _parseCommaSeparatedList<T>(braces openBrace: TokenType,
-                                              _ closeBrace: TokenType,
+    internal func _parseCommaSeparatedList<T>(braces openBrace: ObjcTokenType,
+                                              _ closeBrace: ObjcTokenType,
                                               itemParser: () throws -> T) -> [T] {
         
         do {
@@ -510,7 +510,7 @@ public class ObjcParser {
                 }
             } catch {
                 // Panic!
-                diagnostics.error("Expected \(TokenType.comma) or \(closeBrace) after an item",
+                diagnostics.error("Expected \(ObjcTokenType.comma) or \(closeBrace) after an item",
                                  origin: source.filePath,
                                  location: location())
             }

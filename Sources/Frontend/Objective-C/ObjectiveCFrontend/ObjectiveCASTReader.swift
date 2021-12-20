@@ -1,20 +1,21 @@
 import SwiftAST
 import TypeSystem
-import GrammarModels
 import ObjcParserAntlr
+import GrammarModelBase
+import ObjcGrammarModels
 import ObjcParser
 import KnownType
 
 /// Reader that reads Objective-C AST and outputs equivalent a Swift AST
 public class ObjectiveCASTReader {
     let typeMapper: TypeMapper
-    let typeParser: TypeParsing
+    let typeParser: ObjcTypeParser
     let typeSystem: TypeSystem?
 
     weak var delegate: ObjectiveCStatementASTReaderDelegate?
     
     public init(typeMapper: TypeMapper,
-                typeParser: TypeParsing,
+                typeParser: ObjcTypeParser,
                 typeSystem: TypeSystem? = nil) {
         
         self.typeMapper = typeMapper
@@ -23,7 +24,7 @@ public class ObjectiveCASTReader {
     }
     
     public func parseStatements(compoundStatement: ObjectiveCParser.CompoundStatementContext,
-                                comments: [ObjcComment] = [],
+                                comments: [CodeComment] = [],
                                 typeContext: KnownType? = nil) -> CompoundStatement {
         
         let context =
@@ -51,7 +52,7 @@ public class ObjectiveCASTReader {
     }
     
     public func parseExpression(expression: ObjectiveCParser.ExpressionContext,
-                                comments: [ObjcComment] = []) -> Expression {
+                                comments: [CodeComment] = []) -> Expression {
         
         let context = ObjectiveCASTReaderContext(typeSystem: typeSystem,
                                             typeContext: nil,

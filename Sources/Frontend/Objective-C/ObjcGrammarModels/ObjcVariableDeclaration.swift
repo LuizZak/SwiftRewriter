@@ -1,6 +1,6 @@
 /// A global variable declaration.
-public class VariableDeclaration: ASTNode, InitializableNode {
-    public var type: TypeNameNode? {
+public class ObjcVariableDeclaration: ObjcASTNode, ObjcInitializableNode {
+    public var type: ObjcTypeNameNode? {
         firstChild()
     }
     
@@ -8,7 +8,7 @@ public class VariableDeclaration: ASTNode, InitializableNode {
         firstChild()
     }
     
-    public var initialExpression: InitialExpression? {
+    public var initialExpression: ObjcInitialExpression? {
         firstChild()
     }
     
@@ -18,8 +18,8 @@ public class VariableDeclaration: ASTNode, InitializableNode {
 }
 
 /// Represents the initial expression for a global variable definition.
-public class InitialExpression: ASTNode, InitializableNode {
-    public var constantExpression: ConstantExpressionNode? {
+public class ObjcInitialExpression: ObjcASTNode, ObjcInitializableNode {
+    public var constantExpression: ObjcConstantExpressionNode? {
         firstChild()
     }
     
@@ -30,7 +30,7 @@ public class InitialExpression: ASTNode, InitializableNode {
 
 /// Represents a constant expression used as the initial value to global variables
 /// parsed from a source file.
-public class ConstantExpressionNode: ASTNode, InitializableNode {
+public class ObjcConstantExpressionNode: ObjcASTNode, ObjcInitializableNode {
     public var expression: ExpressionNode? {
         firstChild()
     }

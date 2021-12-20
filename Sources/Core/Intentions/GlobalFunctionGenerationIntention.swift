@@ -1,11 +1,11 @@
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 import KnownType
 
 /// An intention to generate a global function.
 public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIntention, MutableSignatureFunctionIntention, MutableFunctionIntention, ParameterizedFunctionIntention, AttributeTaggeableObject {
-    public var typedSource: FunctionDefinition? {
-        source as? FunctionDefinition
+    public var typedSource: ObjcFunctionDefinition? {
+        source as? ObjcFunctionDefinition
     }
     
     public var signature: FunctionSignature
@@ -37,7 +37,7 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIn
     
     public init(signature: FunctionSignature,
                 accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+                source: ObjcASTNode? = nil) {
         
         self.signature = signature
         super.init(accessLevel: accessLevel, source: source)

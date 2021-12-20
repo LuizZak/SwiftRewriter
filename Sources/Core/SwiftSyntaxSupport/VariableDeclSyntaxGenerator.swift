@@ -70,7 +70,7 @@ class VariableDeclSyntaxGenerator {
         }
     }
     
-    func generate(_ variableDecl: VariableDeclaration) -> VariableDeclSyntax {
+    func generate(_ variableDecl: ObjcVariableDeclaration) -> VariableDeclSyntax {
         VariableDeclSyntax { builder in
             for attribute in variableDecl.attributes {
                 builder.addAttribute(attribute().asSyntax)
@@ -325,7 +325,7 @@ private extension VariableDeclSyntaxGenerator {
 }
 
 private extension VariableDeclSyntaxGenerator {
-    func makeDeclaration(_ stmtDecl: StatementVariableDeclaration) -> VariableDeclaration {
+    func makeDeclaration(_ stmtDecl: StatementVariableDeclaration) -> ObjcVariableDeclaration {
         let decl =
             makeDeclaration(name: stmtDecl.identifier,
                             storage: stmtDecl.storage,
@@ -337,7 +337,7 @@ private extension VariableDeclSyntaxGenerator {
         return decl
     }
     
-    func makeDeclaration(_ intention: ValueStorageIntention) -> VariableDeclaration {
+    func makeDeclaration(_ intention: ValueStorageIntention) -> ObjcVariableDeclaration {
         var accessors: (() -> Syntax)?
         if let intention = intention as? PropertyGenerationIntention {
             accessors = VariableDeclSyntaxGenerator.makeAccessorBlockCreator(intention, producer)
@@ -359,7 +359,7 @@ private extension VariableDeclSyntaxGenerator {
                          intention: IntentionProtocol?,
                          modifiers: [ModifiersDecoratorResult],
                          accessors: (() -> Syntax)? = nil,
-                         initialization: Expression? = nil) -> VariableDeclaration {
+                         initialization: Expression? = nil) -> ObjcVariableDeclaration {
         
         var patternBinding = makePatternBinding(name: name,
                                                 type: storage.type,
@@ -373,7 +373,7 @@ private extension VariableDeclSyntaxGenerator {
         }
         
         return
-            VariableDeclaration(
+            ObjcVariableDeclaration(
                 constant: storage.isConstant,
                 attributes: attributes,
                 modifiers: modifiers,
@@ -403,12 +403,12 @@ private extension VariableDeclSyntaxGenerator {
     }
 }
 
-private func group(_ declarations: [VariableDeclaration]) -> [VariableDeclaration] {
+private func group(_ declarations: [ObjcVariableDeclaration]) -> [ObjcVariableDeclaration] {
     guard let first = declarations.first else {
         return declarations
     }
     
-    var result: [VariableDeclaration] = [first]
+    var result: [ObjcVariableDeclaration] = [first]
     
     for decl in declarations.dropFirst() {
         let last = result[result.count - 1]
@@ -423,8 +423,8 @@ private func group(_ declarations: [VariableDeclaration]) -> [VariableDeclaratio
     return result
 }
 
-private func groupDeclarations(_ decl1: VariableDeclaration,
-                               _ decl2: VariableDeclaration) -> VariableDeclaration? {
+private func groupDeclarations(_ decl1: ObjcVariableDeclaration,
+                               _ decl2: ObjcVariableDeclaration) -> ObjcVariableDeclaration? {
     
     // Attributed or modified declarations cannot be merged
     guard decl1.attributes.isEmpty && decl2.attributes.isEmpty else {

@@ -1,8 +1,7 @@
 import Utils
-import GrammarModelBase
 
-/// An Objective-C comment from an input file
-public struct ObjcComment {
+/// A language-agnostic reference to a comment from an input file
+public struct CodeComment {
     public var string: String
     public var range: Range<String.Index>
     public var location: SourceLocation

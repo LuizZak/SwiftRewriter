@@ -2,11 +2,11 @@ import Utils
 import GrammarModelBase
 
 /// A node that represents the global namespace
-public final class GlobalContextNode: ASTNode, InitializableNode {
-    public var functionDefinitions: [FunctionDefinition] {
+public final class GlobalContextNode: ObjcASTNode, ObjcInitializableNode {
+    public var functionDefinitions: [ObjcFunctionDefinition] {
         childrenMatching()
     }
-    public var variableDeclarations: [VariableDeclaration] {
+    public var variableDeclarations: [ObjcVariableDeclaration] {
         childrenMatching()
     }
     public var classInterfaces: [ObjcClassInterface] {
@@ -24,7 +24,7 @@ public final class GlobalContextNode: ASTNode, InitializableNode {
     public var protocolDeclarations: [ObjcProtocolDeclaration] {
         childrenMatching()
     }
-    public var typedefNodes: [TypedefNode] {
+    public var typedefNodes: [ObjcTypedefNode] {
         childrenMatching()
     }
     public var enumDeclarations: [ObjcEnumDeclaration] {
@@ -37,12 +37,12 @@ public final class GlobalContextNode: ASTNode, InitializableNode {
 }
 
 /// A node with no proper type.
-public class UnknownNode: ASTNode {
+public class UnknownNode: ObjcASTNode {
     
 }
 
 /// An identifier node
-public class Identifier: ASTNode {
+public class Identifier: ObjcASTNode {
     /// String identifier
     public var name: String
     
@@ -64,14 +64,14 @@ public class Identifier: ASTNode {
 }
 
 /// A node that represents a special keyword-type token
-public class KeywordNode: ASTNode {
-    public var keyword: Keyword
+public class KeywordNode: ObjcASTNode {
+    public var keyword: ObjcKeyword
     
     public override var shortDescription: String {
         keyword.rawValue
     }
     
-    public init(keyword: Keyword,
+    public init(keyword: ObjcKeyword,
                 isInNonnullContext: Bool,
                 location: SourceLocation = .invalid,
                 length: SourceLength = .zero) {

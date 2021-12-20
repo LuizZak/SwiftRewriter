@@ -1,4 +1,4 @@
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 
 /// An intention to generate a backing field for a property
@@ -19,7 +19,7 @@ public class PropertySynthesizationIntention: FromSourceIntention {
                 ivarName: String,
                 isExplicit: Bool,
                 type: SynthesizeType,
-                source: ASTNode? = nil) {
+                source: ObjcASTNode? = nil) {
         
         self.propertyName = propertyName
         self.ivarName = ivarName

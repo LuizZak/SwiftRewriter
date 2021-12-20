@@ -2,7 +2,7 @@ import XCTest
 import SwiftAST
 import ObjcParser
 import Intentions
-import GrammarModels
+import ObjcGrammarModels
 import TypeSystem
 import SwiftRewriterLib
 
@@ -29,18 +29,18 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
         // Arrange
         let root = GlobalContextNode(isInNonnullContext: false)
         
-        let function = FunctionDefinition(isInNonnullContext: false)
+        let function = ObjcFunctionDefinition(isInNonnullContext: false)
         root.addChild(function)
         
         function.addChild(Identifier(name: "global", isInNonnullContext: false))
-        function.addChild(TypeNameNode(type: .void, isInNonnullContext: false))
+        function.addChild(ObjcTypeNameNode(type: .void, isInNonnullContext: false))
         
-        let parameters = ParameterList(isInNonnullContext: false)
+        let parameters = ObjcParameterList(isInNonnullContext: false)
         function.addChild(parameters)
         
-        let param1 = FunctionParameter(isInNonnullContext: false)
+        let param1 = ObjcFunctionParameter(isInNonnullContext: false)
         param1.addChild(Identifier(name: "a", isInNonnullContext: false))
-        param1.addChild(TypeNameNode(type: .struct("NSInteger"), isInNonnullContext: false))
+        param1.addChild(ObjcTypeNameNode(type: .struct("NSInteger"), isInNonnullContext: false))
         parameters.addChild(param1)
         
         // Act
@@ -275,7 +275,7 @@ private class TestCollectorDelegate: ObjectiveCIntentionCollectorDelegate {
     
     // MARK: -
     
-    func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
+    func isNodeInNonnullContext(_ node: ObjcASTNode) -> Bool {
         return false
     }
     
@@ -291,7 +291,7 @@ private class TestCollectorDelegate: ObjectiveCIntentionCollectorDelegate {
         return DefaultTypeMapper(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
     }
     
-    func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> TypeParsing {
-        return TypeParsing(state: ObjcParserState())
+    func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> ObjcTypeParser {
+        return ObjcTypeParser(state: ObjcParserState())
     }
 }

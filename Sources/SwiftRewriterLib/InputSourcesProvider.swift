@@ -1,4 +1,5 @@
-import GrammarModels
+import GrammarModelBase
+import ObjcGrammarModels
 import ObjcParser
 
 /// Protocol to implement in order to feed input files to a `ObjectiveC2SwiftRewriter` instance.

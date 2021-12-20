@@ -1,5 +1,8 @@
 import XCTest
+import SwiftSyntax
 import SwiftAST
+import GrammarModelBase
+import ObjcParser
 import Intentions
 import TestCommons
 import IntentionPasses
@@ -10,8 +13,6 @@ import TypeSystem
 import WriterTargetOutput
 import SwiftSyntaxSupport
 import SwiftSyntaxRewriterPasses
-import SwiftSyntax
-import ObjcParser
 import Utils
 
 @testable import ObjectiveCFrontend

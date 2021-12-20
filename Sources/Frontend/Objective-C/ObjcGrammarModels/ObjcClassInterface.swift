@@ -1,7 +1,7 @@
 import ObjcParserAntlr
 
 /// A syntax node for an Objective-C class interface (`@interface`) declaration.
-public class ObjcClassInterface: ASTNode, InitializableNode {
+public class ObjcClassInterface: ObjcASTNode, ObjcInitializableNode {
     public var identifier: Identifier? {
         firstChild()
     }
@@ -39,7 +39,7 @@ public class SuperclassName: Identifier {
     
 }
 
-public class IVarsList: ASTNode, InitializableNode {
+public class IVarsList: ObjcASTNode, ObjcInitializableNode {
     public var ivarDeclarations: [IVarDeclaration] {
         childrenMatching()
     }
@@ -49,8 +49,8 @@ public class IVarsList: ASTNode, InitializableNode {
     }
 }
 
-public class IVarDeclaration: ASTNode, InitializableNode {
-    public var type: TypeNameNode? {
+public class IVarDeclaration: ObjcASTNode, ObjcInitializableNode {
+    public var type: ObjcTypeNameNode? {
         firstChild()
     }
     public var identifier: Identifier? {
@@ -62,7 +62,7 @@ public class IVarDeclaration: ASTNode, InitializableNode {
     }
 }
 
-public class ProtocolReferenceList: ASTNode, InitializableNode {
+public class ProtocolReferenceList: ObjcASTNode, ObjcInitializableNode {
     public var protocols: [ProtocolName] {
         childrenMatching()
     }

@@ -1,5 +1,7 @@
 import XCTest
-import GrammarModels
+import GrammarModelBase
+import ObjcGrammarModels
+
 @testable import ObjcParser
 
 class ObjcLexer_TokenizerTests: XCTestCase {
@@ -116,7 +118,7 @@ class ObjcLexer_TokenizerTests: XCTestCase {
 
 extension ObjcLexer_TokenizerTests {
     
-    private func expect(sequence string: String, toTokenizeAs expectedTypes: [TokenType],
+    private func expect(sequence string: String, toTokenizeAs expectedTypes: [ObjcTokenType],
                         file: StaticString = #filePath, line: UInt = #line) {
         
         let lexer = makeLexer(string)
@@ -137,7 +139,7 @@ extension ObjcLexer_TokenizerTests {
         }
     }
     
-    private func expect(_ string: String, toTokenizeAs expectedType: TokenType,
+    private func expect(_ string: String, toTokenizeAs expectedType: ObjcTokenType,
                         _ expectedString: String? = nil,
                         file: StaticString = #filePath, line: UInt = #line) {
         

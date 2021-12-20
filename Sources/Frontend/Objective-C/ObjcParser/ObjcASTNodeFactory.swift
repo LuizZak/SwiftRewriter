@@ -1,10 +1,10 @@
 import Antlr4
 import Utils
 import ObjcParserAntlr
-import GrammarModels
+import ObjcGrammarModels
 import GrammarModelBase
 
-class ASTNodeFactory {
+class ObjcASTNodeFactory {
     typealias Parser = ObjectiveCParser
     
     let source: Source
@@ -24,11 +24,11 @@ class ASTNodeFactory {
         nonnullContextQuerier.isInNonnullContext(context)
     }
     
-    func comments(preceeding context: ParserRuleContext) -> [ObjcComment] {
+    func comments(preceeding context: ParserRuleContext) -> [CodeComment] {
         commentQuerier.popClosestCommentsBefore(node: context)
     }
     
-    func comments(overlapping context: ParserRuleContext) -> [ObjcComment] {
+    func comments(overlapping context: ParserRuleContext) -> [CodeComment] {
         commentQuerier.popCommentsOverlapping(node: context)
     }
     
@@ -74,8 +74,8 @@ class ASTNodeFactory {
         return protocolListNode
     }
     
-    func makePointer(from context: ObjectiveCParser.PointerContext) -> PointerNode {
-        let node = PointerNode(isInNonnullContext: isInNonnullContext(context))
+    func makePointer(from context: ObjectiveCParser.PointerContext) -> ObjcPointerNode {
+        let node = ObjcPointerNode(isInNonnullContext: isInNonnullContext(context))
         updateSourceLocation(for: node, with: context)
         if let pointer = context.pointer() {
             node.addChild(makePointer(from: pointer))
@@ -83,8 +83,8 @@ class ASTNodeFactory {
         return node
     }
     
-    func makeTypeDeclarator(from context: ObjectiveCParser.DeclaratorContext) -> TypeDeclaratorNode {
-        let node = TypeDeclaratorNode(isInNonnullContext: isInNonnullContext(context))
+    func makeTypeDeclarator(from context: ObjectiveCParser.DeclaratorContext) -> ObjcTypeDeclaratorNode {
+        let node = ObjcTypeDeclaratorNode(isInNonnullContext: isInNonnullContext(context))
         updateSourceLocation(for: node, with: context)
         if let identifierNode = context.directDeclarator()?.identifier().map(makeIdentifier) {
             node.addChild(identifierNode)
@@ -144,7 +144,7 @@ class ASTNodeFactory {
         return enumCase
     }
     
-    func updateSourceLocation(for node: ASTNode, with rule: ParserRuleContext) {
+    func updateSourceLocation(for node: ObjcASTNode, with rule: ParserRuleContext) {
         (node.location, node.length) = sourceLocationAndLength(for: rule)
     }
     
@@ -173,5 +173,4 @@ class ASTNodeFactory {
         
         return (location, length)
     }
-    
 }

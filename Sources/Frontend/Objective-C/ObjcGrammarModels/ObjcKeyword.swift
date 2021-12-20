@@ -1,5 +1,5 @@
 /// A known-keyword type
-public enum Keyword: String {
+public enum ObjcKeyword: String {
     case `if`
     case `else`
     case `for`

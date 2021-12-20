@@ -1,5 +1,5 @@
 /// An Objective-C `struct` typedef declaration.
-public final class ObjcStructDeclaration: ASTNode, InitializableNode {
+public final class ObjcStructDeclaration: ObjcASTNode, ObjcInitializableNode {
     public var body: ObjcStructDeclarationBody? {
         firstChild()
     }
@@ -14,7 +14,7 @@ public final class ObjcStructDeclaration: ASTNode, InitializableNode {
 }
 
 /// The body of a C struct declaration
-public final class ObjcStructDeclarationBody: ASTNode, InitializableNode {
+public final class ObjcStructDeclarationBody: ObjcASTNode, ObjcInitializableNode {
     public var fields: [ObjcStructField] {
         childrenMatching()
     }

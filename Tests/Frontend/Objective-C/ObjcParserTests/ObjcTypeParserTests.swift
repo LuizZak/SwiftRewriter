@@ -1,10 +1,10 @@
 import XCTest
-import GrammarModels
+import ObjcGrammarModels
 import ObjcParser
 import ObjcParserAntlr
 import Antlr4
 
-class TypeParsingTests: XCTestCase {
+class ObjcTypeParserTests: XCTestCase {
     func testParseObjcTypeInFieldDeclarationContext() {
         prepareTester(ObjectiveCParser.fieldDeclaration, { $0.parseObjcType(in: $1) }) { tester in
             tester.assert("int a;", parsesAs: .struct("int"))
@@ -77,9 +77,9 @@ class TypeParsingTests: XCTestCase {
     }
 }
 
-private extension TypeParsingTests {
+private extension ObjcTypeParserTests {
     func prepareTester<T: ParserRuleContext>(_ ruleDeriver: (ObjectiveCParser) -> () throws -> T,
-                                             _ parseMethod: (TypeParsing, T) -> ObjcType?,
+                                             _ parseMethod: (ObjcTypeParser, T) -> ObjcType?,
                                              _ test: (Tester<T>) -> Void) {
         
         withoutActuallyEscaping(ruleDeriver) { ruleDeriver in
@@ -115,20 +115,20 @@ private extension TypeParsingTests {
         }
     }
     
-    func makeSut() -> TypeParsing {
+    func makeSut() -> ObjcTypeParser {
         let state = ObjcParserState()
-        return TypeParsing(state: state)
+        return ObjcTypeParser(state: state)
     }
     
     struct Tester<T: ParserRuleContext> {
         let parserState = ObjcParserState()
         let ruleDeriver: (ObjectiveCParser) -> () throws -> T
-        let parseMethod: (TypeParsing, T) -> ObjcType?
-        let typeParsing: TypeParsing
+        let parseMethod: (ObjcTypeParser, T) -> ObjcType?
+        let typeParsing: ObjcTypeParser
         
         init(ruleDeriver: @escaping (ObjectiveCParser) -> () throws -> T,
-             parseMethod: @escaping (TypeParsing, T) -> ObjcType?,
-             typeParsing: TypeParsing) {
+             parseMethod: @escaping (ObjcTypeParser, T) -> ObjcType?,
+             typeParsing: ObjcTypeParser) {
             
             self.ruleDeriver = ruleDeriver
             self.parseMethod = parseMethod

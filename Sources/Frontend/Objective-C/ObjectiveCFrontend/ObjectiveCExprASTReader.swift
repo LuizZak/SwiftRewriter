@@ -1,7 +1,7 @@
 import Antlr4
 import ObjcParserAntlr
 import ObjcParser
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 import TypeSystem
 
@@ -9,11 +9,11 @@ import TypeSystem
 /// enum cases.
 public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     public var typeMapper: TypeMapper
-    public var typeParser: TypeParsing
+    public var typeParser: ObjcTypeParser
     public var context: ObjectiveCASTReaderContext
     public var delegate: ObjectiveCStatementASTReaderDelegate?
     
-    public init(typeMapper: TypeMapper, typeParser: TypeParsing, context: ObjectiveCASTReaderContext,
+    public init(typeMapper: TypeMapper, typeParser: ObjcTypeParser, context: ObjectiveCASTReaderContext,
                 delegate: ObjectiveCStatementASTReaderDelegate?) {
 
         self.typeMapper = typeMapper

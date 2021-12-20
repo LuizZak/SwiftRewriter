@@ -1,5 +1,5 @@
 import Utils
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 import KnownType
 import Intentions

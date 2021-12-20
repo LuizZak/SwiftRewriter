@@ -277,7 +277,7 @@ extension ObjectiveCExprASTReaderTests {
         
         let typeSystem = TypeSystem()
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
-        let typeParser = TypeParsing(state: ObjectiveCExprASTReaderTests._state)
+        let typeParser = ObjcTypeParser(state: ObjectiveCExprASTReaderTests._state)
         
         let sut =
             ObjectiveCExprASTReader(

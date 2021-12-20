@@ -1,11 +1,11 @@
-import GrammarModels
+import ObjcGrammarModels
 import KnownType
 import SwiftAST
 
 /// An intention to generate a global variable.
 public final class GlobalVariableGenerationIntention: FromSourceIntention, FileLevelIntention, MutableValueStorageIntention {
-    public var variableSource: VariableDeclaration? {
-        source as? VariableDeclaration
+    public var variableSource: ObjcVariableDeclaration? {
+        source as? ObjcVariableDeclaration
     }
     
     public var name: String
@@ -24,7 +24,7 @@ public final class GlobalVariableGenerationIntention: FromSourceIntention, FileL
     public init(name: String,
                 storage: ValueStorage,
                 accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+                source: ObjcASTNode? = nil) {
         
         self.name = name
         self.storage = storage
@@ -34,7 +34,7 @@ public final class GlobalVariableGenerationIntention: FromSourceIntention, FileL
     public convenience init(name: String,
                             type: SwiftType,
                             accessLevel: AccessLevel = .internal,
-                            source: ASTNode? = nil) {
+                            source: ObjcASTNode? = nil) {
         
         self.init(name: name,
                   storage: ValueStorage(type: type, ownership: .strong, isConstant: false),

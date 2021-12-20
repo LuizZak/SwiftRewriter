@@ -1,4 +1,4 @@
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 import KnownType
 
@@ -19,7 +19,7 @@ public class MemberGenerationIntention: FromSourceIntention {
         fatalError("Must be overriden by subtypes")
     }
     
-    public override init(accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
+    public override init(accessLevel: AccessLevel = .internal, source: ObjcASTNode? = nil) {
         super.init(accessLevel: accessLevel, source: source)
     }
     
