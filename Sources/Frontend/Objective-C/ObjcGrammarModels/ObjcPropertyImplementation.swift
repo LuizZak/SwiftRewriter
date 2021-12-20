@@ -4,7 +4,7 @@ public class ObjcPropertyImplementation: ObjcASTNode, ObjcInitializableNode {
     /// Returns the kind of this property implementation node.
     /// Defaults to `@synthesize`, if it's missing the required keyword nodes.
     public var kind: Kind {
-        let kws = childrenMatching(type: KeywordNode.self)
+        let kws = childrenMatching(type: ObjcKeywordNode.self)
         
         if kws.contains(where: { $0.keyword == ObjcKeyword.atDynamic }) {
             return .dynamic

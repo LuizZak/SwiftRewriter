@@ -281,17 +281,17 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     // MARK: - Instance Variables
     override func enterVisibilitySection(_ ctx: ObjectiveCParser.VisibilitySectionContext) {
         if let accessModifier = ctx.accessModifier() {
-            var accessNode: KeywordNode?
+            var accessNode: ObjcKeywordNode?
             let nonnull = isInNonnullContext(accessModifier)
             
             if accessModifier.PRIVATE() != nil {
-                accessNode = KeywordNode(keyword: .atPrivate, isInNonnullContext: nonnull)
+                accessNode = ObjcKeywordNode(keyword: .atPrivate, isInNonnullContext: nonnull)
             } else if accessModifier.PACKAGE() != nil {
-                accessNode = KeywordNode(keyword: .atPackage, isInNonnullContext: nonnull)
+                accessNode = ObjcKeywordNode(keyword: .atPackage, isInNonnullContext: nonnull)
             } else if accessModifier.PROTECTED() != nil {
-                accessNode = KeywordNode(keyword: .atProtected, isInNonnullContext: nonnull)
+                accessNode = ObjcKeywordNode(keyword: .atProtected, isInNonnullContext: nonnull)
             } else if accessModifier.PUBLIC() != nil {
-                accessNode = KeywordNode(keyword: .atPublic, isInNonnullContext: nonnull)
+                accessNode = ObjcKeywordNode(keyword: .atPublic, isInNonnullContext: nonnull)
             }
             
             if let accessNode = accessNode {
@@ -939,7 +939,7 @@ private class PropertyListener: ObjectiveCParserBaseListener {
     override func enterPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
         
         let node =
-            KeywordNode(keyword: .atProperty,
+            ObjcKeywordNode(keyword: .atProperty,
                         isInNonnullContext: nonnullContextQuerier.isInNonnullContext(ctx))
         updateSourceLocation(node, ctx)
         property.addChild(node)

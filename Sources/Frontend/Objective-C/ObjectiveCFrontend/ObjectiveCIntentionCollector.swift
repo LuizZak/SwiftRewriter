@@ -103,7 +103,7 @@ public class ObjectiveCIntentionCollector {
             case let n as ObjcTypedefNode:
                 self.visitTypedefNode(n)
                 
-            case let n as KeywordNode:
+            case let n as ObjcKeywordNode:
                 self.visitKeywordNode(n)
                 
             case let n as MethodDefinition:
@@ -171,7 +171,7 @@ public class ObjectiveCIntentionCollector {
         traverser.traverse()
     }
     
-    private func visitKeywordNode(_ node: KeywordNode) {
+    private func visitKeywordNode(_ node: ObjcKeywordNode) {
         switch node.keyword {
         case .atPrivate:
             context.ivarAccessLevel = .private
