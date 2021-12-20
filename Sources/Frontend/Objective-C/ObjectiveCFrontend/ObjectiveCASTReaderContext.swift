@@ -1,6 +1,7 @@
 import Antlr4
 import Utils
 import SwiftAST
+import GrammarModelBase
 import ObjcGrammarModels
 import KnownType
 import TypeSystem
@@ -9,9 +10,9 @@ public final class ObjectiveCASTReaderContext {
     private var localsStack: [[Local]] = [[]]
     private var typeSystem: TypeSystem?
     private var typeContext: KnownType?
-    private var comments: [ObjcComment]
+    private var comments: [CodeComment]
     
-    public init(typeSystem: TypeSystem?, typeContext: KnownType?, comments: [ObjcComment]) {
+    public init(typeSystem: TypeSystem?, typeContext: KnownType?, comments: [CodeComment]) {
         self.typeSystem = typeSystem
         self.typeContext = typeContext
         self.comments = comments
@@ -60,7 +61,7 @@ public final class ObjectiveCASTReaderContext {
         localsStack.removeLast()
     }
     
-    public func popClosestCommentBefore(node: ParserRuleContext) -> ObjcComment? {
+    public func popClosestCommentBefore(node: ParserRuleContext) -> CodeComment? {
         guard let start = node.getStart() else {
             return nil
         }
@@ -75,8 +76,8 @@ public final class ObjectiveCASTReaderContext {
         return nil
     }
     
-    public func popClosestCommentsBefore(node: ParserRuleContext) -> [ObjcComment] {
-        var comments: [ObjcComment] = []
+    public func popClosestCommentsBefore(node: ParserRuleContext) -> [CodeComment] {
+        var comments: [CodeComment] = []
         while let comment = popClosestCommentBefore(node: node) {
             comments.append(comment)
         }
@@ -84,7 +85,7 @@ public final class ObjectiveCASTReaderContext {
         return comments.reversed()
     }
     
-    public func popClosestCommentAtTrailingLine(node: ParserRuleContext) -> ObjcComment? {
+    public func popClosestCommentAtTrailingLine(node: ParserRuleContext) -> CodeComment? {
         guard let stop = node.getStop() else {
             return nil
         }

@@ -1,4 +1,5 @@
 import ObjcParserAntlr
+import GrammarModelBase
 
 public final class ExpressionNode: ObjcASTNode {
     public var expression: ObjectiveCParser.ExpressionContext?
@@ -8,7 +9,7 @@ public final class MethodBody: ObjcASTNode {
     public var statements: ObjectiveCParser.CompoundStatementContext?
     
     /// List of comments found within the range of this method body
-    public var comments: [ObjcComment] = []
+    public var comments: [CodeComment] = []
     
     public override var shortDescription: String {
         statements?.getText() ?? ""

@@ -1,7 +1,8 @@
 import SwiftAST
 import TypeSystem
-import ObjcGrammarModels
 import ObjcParserAntlr
+import GrammarModelBase
+import ObjcGrammarModels
 import ObjcParser
 import KnownType
 
@@ -23,7 +24,7 @@ public class ObjectiveCASTReader {
     }
     
     public func parseStatements(compoundStatement: ObjectiveCParser.CompoundStatementContext,
-                                comments: [ObjcComment] = [],
+                                comments: [CodeComment] = [],
                                 typeContext: KnownType? = nil) -> CompoundStatement {
         
         let context =
@@ -51,7 +52,7 @@ public class ObjectiveCASTReader {
     }
     
     public func parseExpression(expression: ObjectiveCParser.ExpressionContext,
-                                comments: [ObjcComment] = []) -> Expression {
+                                comments: [CodeComment] = []) -> Expression {
         
         let context = ObjectiveCASTReaderContext(typeSystem: typeSystem,
                                             typeContext: nil,

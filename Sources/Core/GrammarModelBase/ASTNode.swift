@@ -27,6 +27,9 @@ open class ASTNode {
     /// (for syntax error correction etc.)
     public var existsInSource: Bool
     
+    /// Array of comments that precede this declaration
+    public var precedingComments: [CodeComment] = []
+    
     /// Instantiates a bare ASTNode with a given range.
     /// Defaults to an invalid range
     public init(location: SourceLocation = .invalid,

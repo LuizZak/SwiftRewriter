@@ -430,7 +430,7 @@
 		OBJ_1577 /* ObjcClassCategoryInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_78 /* ObjcClassCategoryInterface.swift */; };
 		OBJ_1578 /* ObjcClassImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_79 /* ObjcClassImplementation.swift */; };
 		OBJ_1579 /* ObjcClassInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_80 /* ObjcClassInterface.swift */; };
-		OBJ_1580 /* ObjcComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_81 /* ObjcComment.swift */; };
+		OBJ_1580 /* CodeComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_81 /* CodeComment.swift */; };
 		OBJ_1581 /* ObjcEnumDeclaration.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_82 /* ObjcEnumDeclaration.swift */; };
 		OBJ_1582 /* ObjcPreprocessorDirective.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_83 /* ObjcPreprocessorDirective.swift */; };
 		OBJ_1583 /* ObjcProtocolDeclaration.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_84 /* ObjcProtocolDeclaration.swift */; };
@@ -2086,7 +2086,7 @@
 		OBJ_807 /* ParseTreePattern.swift */ = {isa = PBXFileReference; path = ParseTreePattern.swift; sourceTree = "<group>"; };
 		OBJ_808 /* ParseTreePatternMatcher.swift */ = {isa = PBXFileReference; path = ParseTreePatternMatcher.swift; sourceTree = "<group>"; };
 		OBJ_809 /* RuleTagToken.swift */ = {isa = PBXFileReference; path = RuleTagToken.swift; sourceTree = "<group>"; };
-		OBJ_81 /* ObjcComment.swift */ = {isa = PBXFileReference; path = ObjcComment.swift; sourceTree = "<group>"; };
+		OBJ_81 /* CodeComment.swift */ = {isa = PBXFileReference; path = CodeComment.swift; sourceTree = "<group>"; };
 		OBJ_810 /* TagChunk.swift */ = {isa = PBXFileReference; path = TagChunk.swift; sourceTree = "<group>"; };
 		OBJ_811 /* TextChunk.swift */ = {isa = PBXFileReference; path = TextChunk.swift; sourceTree = "<group>"; };
 		OBJ_812 /* TokenTagToken.swift */ = {isa = PBXFileReference; path = TokenTagToken.swift; sourceTree = "<group>"; };
@@ -4298,7 +4298,7 @@
 				OBJ_78 /* ObjcClassCategoryInterface.swift */,
 				OBJ_79 /* ObjcClassImplementation.swift */,
 				OBJ_80 /* ObjcClassInterface.swift */,
-				OBJ_81 /* ObjcComment.swift */,
+				OBJ_81 /* CodeComment.swift */,
 				OBJ_82 /* ObjcEnumDeclaration.swift */,
 				OBJ_83 /* ObjcPreprocessorDirective.swift */,
 				OBJ_84 /* ObjcProtocolDeclaration.swift */,
@@ -6516,7 +6516,7 @@
 				OBJ_1577 /* ObjcClassCategoryInterface.swift in Sources */,
 				OBJ_1578 /* ObjcClassImplementation.swift in Sources */,
 				OBJ_1579 /* ObjcClassInterface.swift in Sources */,
-				OBJ_1580 /* ObjcComment.swift in Sources */,
+				OBJ_1580 /* CodeComment.swift in Sources */,
 				OBJ_1581 /* ObjcEnumDeclaration.swift in Sources */,
 				OBJ_1582 /* ObjcPreprocessorDirective.swift in Sources */,
 				OBJ_1583 /* ObjcProtocolDeclaration.swift in Sources */,

@@ -56,7 +56,7 @@ public class ObjcParser {
     
     /// Contains information about all C-style comments found while parsing the
     /// input file.
-    public var comments: [ObjcComment] = []
+    public var comments: [CodeComment] = []
     
     /// Preprocessor directives found on this file
     public var preprocessorDirectives: [ObjcPreprocessorDirective] = []
@@ -353,7 +353,7 @@ public class ObjcParser {
                                       utf8Length: utf8Length)
             }
             
-            let comment = ObjcComment(string: String(input[range]),
+            let comment = CodeComment(string: String(input[range]),
                                       range: range,
                                       location: location,
                                       length: length)

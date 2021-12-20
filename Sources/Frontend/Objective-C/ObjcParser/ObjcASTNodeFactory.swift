@@ -24,11 +24,11 @@ class ObjcASTNodeFactory {
         nonnullContextQuerier.isInNonnullContext(context)
     }
     
-    func comments(preceeding context: ParserRuleContext) -> [ObjcComment] {
+    func comments(preceeding context: ParserRuleContext) -> [CodeComment] {
         commentQuerier.popClosestCommentsBefore(node: context)
     }
     
-    func comments(overlapping context: ParserRuleContext) -> [ObjcComment] {
+    func comments(overlapping context: ParserRuleContext) -> [CodeComment] {
         commentQuerier.popCommentsOverlapping(node: context)
     }
     

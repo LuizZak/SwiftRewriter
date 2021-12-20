@@ -879,7 +879,7 @@ extension ObjectiveCIntentionCollector {
         intention.precedingComments.append(contentsOf: convertComments(node.precedingComments))
     }
     
-    private func convertComments(_ comments: [ObjcComment]) -> [String] {
+    private func convertComments(_ comments: [CodeComment]) -> [String] {
         return comments.map { $0.string.trimmingWhitespaces() }
     }
 }
