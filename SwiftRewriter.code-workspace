@@ -12,8 +12,8 @@
 					"line": 2,
 					"column": 3,
 					"severity": 4,
-					"message": 5
-				}
+					"message": 5,
+				},
 			},
 			// Fix to detect unit test executions, which do not feature a column during reporting
 			{
@@ -24,9 +24,9 @@
 					"file": 1,
 					"line": 2,
 					"severity": 3,
-					"message": 4
-				}
-			}
+					"message": 4,
+				},
+			},
 		],
 		"tasks": [
             {
@@ -34,32 +34,41 @@
 				"type": "shell",
 				"command": "swift",
 				"args": [
-					"build"
-				]
+					"build",
+				],
 			},
             {
 				"label": "Test",
 				"type": "shell",
 				"command": "swift",
 				"args": [
-					"test"
-				]
-			}
-		]
+					"test",
+				],
+			},
+            {
+				"label": "Test (release)",
+				"type": "shell",
+				"command": "swift",
+				"args": [
+					"test",
+					"-c", "release",
+				],
+			},
+		],
 	},
 	"folders": [
 		{
 			"path": ".",
-            "name": "SwiftRewriter"
+            "name": "SwiftRewriter",
 		},
 		{
 			"name": "Swift Package Dependencies",
-			"path": ".build/checkouts"
+			"path": ".build/checkouts",
 		},
 		{
 			"name": "Build",
-			"path": ".build/x86_64-unknown-windows-msvc"
-		}
+			"path": ".build/x86_64-unknown-windows-msvc",
+		},
 	],
 	"settings": {
 		"files.eol": "\n",
@@ -68,7 +77,7 @@
 			".git": true,
 			".build": true,
 			".*.sw?": true,
-			"**/.DS_Store": true
+			"**/.DS_Store": true,
 		},
 		"commentAnchors.workspace.excludeFiles": "**/{node_modules,.git,.idea,target,out,build,vendor,.build,.swiftpm}/**/*",
 		"commentAnchors.tags.list": [
@@ -99,6 +108,7 @@
 		],
 		"ShortcutMenuBar.userButton01Command": "workbench.action.tasks.runTask|Build (debug)",
 		"ShortcutMenuBar.userButton02Command": "workbench.action.tasks.runTask|Test",
+		"ShortcutMenuBar.userButton03Command": "workbench.action.tasks.runTask|Test (release)",
 		"cSpell.words": [
 			"antlr",
 			"autoreleasepool",
@@ -106,12 +116,12 @@
 			"Nonnull",
 			"swiftpm",
 			"swiftrewriter",
-			"swiftwriter"
+			"swiftwriter",
 		],
 	},
 	"extensions": {
 		"recommendations": [
 			"exodiusstudios.comment-anchors"
-		]
-	}
+		],
+	},
 }

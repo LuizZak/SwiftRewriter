@@ -1,5 +1,5 @@
 import Foundation
-import ObjcParser
+import GrammarModelBase
 
 public struct DiskInputFile: Equatable {
     public var url: URL

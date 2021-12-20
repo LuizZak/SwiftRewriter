@@ -275,7 +275,7 @@ private class TestCollectorDelegate: ObjectiveCIntentionCollectorDelegate {
     
     // MARK: -
     
-    func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
+    func isNodeInNonnullContext(_ node: ObjcASTNode) -> Bool {
         return false
     }
     
@@ -291,7 +291,7 @@ private class TestCollectorDelegate: ObjectiveCIntentionCollectorDelegate {
         return DefaultTypeMapper(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
     }
     
-    func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> TypeParsing {
-        return TypeParsing(state: ObjcParserState())
+    func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> ObjcTypeParser {
+        return ObjcTypeParser(state: ObjcParserState())
     }
 }

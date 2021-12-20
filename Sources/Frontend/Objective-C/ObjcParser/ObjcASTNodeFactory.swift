@@ -4,7 +4,7 @@ import ObjcParserAntlr
 import ObjcGrammarModels
 import GrammarModelBase
 
-class ASTNodeFactory {
+class ObjcASTNodeFactory {
     typealias Parser = ObjectiveCParser
     
     let source: Source
@@ -144,7 +144,7 @@ class ASTNodeFactory {
         return enumCase
     }
     
-    func updateSourceLocation(for node: ASTNode, with rule: ParserRuleContext) {
+    func updateSourceLocation(for node: ObjcASTNode, with rule: ParserRuleContext) {
         (node.location, node.length) = sourceLocationAndLength(for: rule)
     }
     
@@ -173,5 +173,4 @@ class ASTNodeFactory {
         
         return (location, length)
     }
-    
 }

@@ -21,7 +21,7 @@ public final class StructGenerationIntention: TypeGenerationIntention, InstanceV
     
     public override init(typeName: String,
                          accessLevel: AccessLevel = .internal,
-                         source: ASTNode? = nil) {
+                         source: ObjcASTNode? = nil) {
         
         super.init(typeName: typeName, accessLevel: accessLevel, source: source)
     }

@@ -1,4 +1,5 @@
 import XCTest
+import GrammarModelBase
 import ObjcParser
 import ExpressionPasses
 import IntentionPasses

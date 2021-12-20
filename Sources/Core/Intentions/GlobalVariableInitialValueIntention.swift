@@ -9,7 +9,7 @@ public final class GlobalVariableInitialValueIntention: FromSourceIntention {
     
     public var expression: Expression
     
-    public init(expression: Expression, source: ASTNode?) {
+    public init(expression: Expression, source: ObjcASTNode?) {
         self.expression = expression
         
         super.init(accessLevel: .public, source: source)

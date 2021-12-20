@@ -8,13 +8,13 @@ import KnownType
 /// Reader that reads Objective-C AST and outputs equivalent a Swift AST
 public class ObjectiveCASTReader {
     let typeMapper: TypeMapper
-    let typeParser: TypeParsing
+    let typeParser: ObjcTypeParser
     let typeSystem: TypeSystem?
 
     weak var delegate: ObjectiveCStatementASTReaderDelegate?
     
     public init(typeMapper: TypeMapper,
-                typeParser: TypeParsing,
+                typeParser: ObjcTypeParser,
                 typeSystem: TypeSystem? = nil) {
         
         self.typeMapper = typeMapper

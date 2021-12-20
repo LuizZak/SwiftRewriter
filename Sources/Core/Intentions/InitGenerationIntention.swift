@@ -14,7 +14,7 @@ public final class InitGenerationIntention: MemberGenerationIntention, MutableFu
     
     public init(parameters: [ParameterSignature],
                 accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+                source: ObjcASTNode? = nil) {
         
         self.parameters = parameters
         super.init(accessLevel: accessLevel, source: source)

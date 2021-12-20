@@ -37,7 +37,7 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIn
     
     public init(signature: FunctionSignature,
                 accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+                source: ObjcASTNode? = nil) {
         
         self.signature = signature
         super.init(accessLevel: accessLevel, source: source)

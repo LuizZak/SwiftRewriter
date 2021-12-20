@@ -5,6 +5,7 @@ import ObjectiveC
 import Foundation
 import Dispatch
 import Utils
+import GrammarModelBase
 import ObjcGrammarModels
 import ObjcParser
 import SwiftAST
@@ -192,7 +193,7 @@ public final class ObjectiveC2SwiftRewriter {
 
                     let typeMapper = DefaultTypeMapper(typeSystem: self.typeSystem)
                     let state = ObjectiveC2SwiftRewriter._parserStatePool.pull()
-                    let typeParser = TypeParsing(state: state, antlrSettings: antlrSettings)
+                    let typeParser = ObjcTypeParser(state: state, antlrSettings: antlrSettings)
                     defer {
                         ObjectiveC2SwiftRewriter._parserStatePool.repool(state)
                     }
@@ -606,7 +607,7 @@ public final class ObjectiveC2SwiftRewriter {
         }
         
         let typeMapper = DefaultTypeMapper(typeSystem: TypeSystem.defaultTypeSystem)
-        let typeParser = TypeParsing(state: state, antlrSettings: parser.antlrSettings)
+        let typeParser = ObjcTypeParser(state: state, antlrSettings: parser.antlrSettings)
         
         let collectorDelegate =
             CollectorDelegate(typeMapper: typeMapper, typeParser: typeParser)
@@ -796,17 +797,17 @@ private extension ObjectiveC2SwiftRewriter {
 fileprivate extension ObjectiveC2SwiftRewriter {
     class CollectorDelegate: ObjectiveCIntentionCollectorDelegate {
         var typeMapper: TypeMapper
-        var typeParser: TypeParsing
+        var typeParser: ObjcTypeParser
         
         var lazyParse: [LazyParseItem] = []
         var lazyResolve: [LazyTypeResolveItem] = []
         
-        init(typeMapper: TypeMapper, typeParser: TypeParsing) {
+        init(typeMapper: TypeMapper, typeParser: ObjcTypeParser) {
             self.typeMapper = typeMapper
             self.typeParser = typeParser
         }
         
-        func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
+        func isNodeInNonnullContext(_ node: ObjcASTNode) -> Bool {
             node.isInNonnullContext
         }
         
@@ -864,7 +865,7 @@ fileprivate extension ObjectiveC2SwiftRewriter {
             typeMapper
         }
         
-        func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> TypeParsing {
+        func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> ObjcTypeParser {
             typeParser
         }
     }

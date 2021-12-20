@@ -81,7 +81,7 @@ public class CPreprocessorDirectiveConverter {
         defer { parserStatePool.repool(state) }
         
         let astReader = ObjectiveCASTReader(typeMapper: DefaultTypeMapper(typeSystem: typeSystem),
-                                       typeParser: TypeParsing(state: state))
+                                       typeParser: ObjcTypeParser(state: state))
         
         return astReader.parseExpression(expression: ctx)
     }

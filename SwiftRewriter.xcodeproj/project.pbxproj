@@ -658,7 +658,7 @@
 		OBJ_1955 /* TokenProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_822 /* TokenProtocol.swift */; };
 		OBJ_1956 /* TokenizerLexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_823 /* TokenizerLexer.swift */; };
 		OBJ_1963 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_827 /* Package.swift */; };
-		OBJ_1968 /* ASTNodeFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_178 /* ASTNodeFactory.swift */; };
+		OBJ_1968 /* ObjcASTNodeFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_178 /* ObjcASTNodeFactory.swift */; };
 		OBJ_1969 /* CodeSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_179 /* CodeSource.swift */; };
 		OBJ_1970 /* CommentQuerier.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_180 /* CommentQuerier.swift */; };
 		OBJ_1971 /* Diagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_181 /* Diagnostics.swift */; };
@@ -675,7 +675,7 @@
 		OBJ_1982 /* ObjectiveCPreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_192 /* ObjectiveCPreprocessor.swift */; };
 		OBJ_1983 /* StringCodeSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_193 /* StringCodeSource.swift */; };
 		OBJ_1984 /* TokenType+TokenProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_194 /* TokenType+TokenProtocol.swift */; };
-		OBJ_1985 /* TypeParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_195 /* TypeParsing.swift */; };
+		OBJ_1985 /* ObjcTypeParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_195 /* ObjcTypeParser.swift */; };
 		OBJ_1986 /* VarDeclarationIdentifierNameExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_196 /* VarDeclarationIdentifierNameExtractor.swift */; };
 		OBJ_1987 /* VarDeclarationTypeStringExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_197 /* VarDeclarationTypeStringExtractor.swift */; };
 		OBJ_1989 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
@@ -1467,7 +1467,7 @@
 		OBJ_174 /* SemanticalObject.swift */ = {isa = PBXFileReference; path = SemanticalObject.swift; sourceTree = "<group>"; };
 		OBJ_175 /* Semantics.swift */ = {isa = PBXFileReference; path = Semantics.swift; sourceTree = "<group>"; };
 		OBJ_176 /* TypeFormatter+Ext.swift */ = {isa = PBXFileReference; path = "TypeFormatter+Ext.swift"; sourceTree = "<group>"; };
-		OBJ_178 /* ASTNodeFactory.swift */ = {isa = PBXFileReference; path = ASTNodeFactory.swift; sourceTree = "<group>"; };
+		OBJ_178 /* ObjcASTNodeFactory.swift */ = {isa = PBXFileReference; path = ObjcASTNodeFactory.swift; sourceTree = "<group>"; };
 		OBJ_179 /* CodeSource.swift */ = {isa = PBXFileReference; path = CodeSource.swift; sourceTree = "<group>"; };
 		OBJ_18 /* CoreGraphicsCompoundTypes.swift */ = {isa = PBXFileReference; path = CoreGraphicsCompoundTypes.swift; sourceTree = "<group>"; };
 		OBJ_180 /* CommentQuerier.swift */ = {isa = PBXFileReference; path = CommentQuerier.swift; sourceTree = "<group>"; };
@@ -1486,7 +1486,7 @@
 		OBJ_192 /* ObjectiveCPreprocessor.swift */ = {isa = PBXFileReference; path = ObjectiveCPreprocessor.swift; sourceTree = "<group>"; };
 		OBJ_193 /* StringCodeSource.swift */ = {isa = PBXFileReference; path = StringCodeSource.swift; sourceTree = "<group>"; };
 		OBJ_194 /* TokenType+TokenProtocol.swift */ = {isa = PBXFileReference; path = "TokenType+TokenProtocol.swift"; sourceTree = "<group>"; };
-		OBJ_195 /* TypeParsing.swift */ = {isa = PBXFileReference; path = TypeParsing.swift; sourceTree = "<group>"; };
+		OBJ_195 /* ObjcTypeParser.swift */ = {isa = PBXFileReference; path = ObjcTypeParser.swift; sourceTree = "<group>"; };
 		OBJ_196 /* VarDeclarationIdentifierNameExtractor.swift */ = {isa = PBXFileReference; path = VarDeclarationIdentifierNameExtractor.swift; sourceTree = "<group>"; };
 		OBJ_197 /* VarDeclarationTypeStringExtractor.swift */ = {isa = PBXFileReference; path = VarDeclarationTypeStringExtractor.swift; sourceTree = "<group>"; };
 		OBJ_199 /* ObjectiveCPreprocessorParser.tokens */ = {isa = PBXFileReference; path = ObjectiveCPreprocessorParser.tokens; sourceTree = "<group>"; };
@@ -3156,7 +3156,7 @@
 		OBJ_177 /* ObjcParser */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_178 /* ASTNodeFactory.swift */,
+				OBJ_178 /* ObjcASTNodeFactory.swift */,
 				OBJ_179 /* CodeSource.swift */,
 				OBJ_180 /* CommentQuerier.swift */,
 				OBJ_181 /* Diagnostics.swift */,
@@ -3173,7 +3173,7 @@
 				OBJ_192 /* ObjectiveCPreprocessor.swift */,
 				OBJ_193 /* StringCodeSource.swift */,
 				OBJ_194 /* TokenType+TokenProtocol.swift */,
-				OBJ_195 /* TypeParsing.swift */,
+				OBJ_195 /* ObjcTypeParser.swift */,
 				OBJ_196 /* VarDeclarationIdentifierNameExtractor.swift */,
 				OBJ_197 /* VarDeclarationTypeStringExtractor.swift */,
 			);
@@ -6688,7 +6688,7 @@
 		OBJ_1967 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			files = (
-				OBJ_1968 /* ASTNodeFactory.swift in Sources */,
+				OBJ_1968 /* ObjcASTNodeFactory.swift in Sources */,
 				OBJ_1969 /* CodeSource.swift in Sources */,
 				OBJ_1970 /* CommentQuerier.swift in Sources */,
 				OBJ_1971 /* Diagnostics.swift in Sources */,
@@ -6705,7 +6705,7 @@
 				OBJ_1982 /* ObjectiveCPreprocessor.swift in Sources */,
 				OBJ_1983 /* StringCodeSource.swift in Sources */,
 				OBJ_1984 /* TokenType+TokenProtocol.swift in Sources */,
-				OBJ_1985 /* TypeParsing.swift in Sources */,
+				OBJ_1985 /* ObjcTypeParser.swift in Sources */,
 				OBJ_1986 /* VarDeclarationIdentifierNameExtractor.swift in Sources */,
 				OBJ_1987 /* VarDeclarationTypeStringExtractor.swift in Sources */,
 			);

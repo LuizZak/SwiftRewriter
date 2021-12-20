@@ -1,9 +1,10 @@
-import ObjcGrammarModels
 import Antlr4
 import ObjcParserAntlr
+import GrammarModelBase
+import ObjcGrammarModels
 
 // TODO: Add tests for this class
-public class TypeParsing {
+public class ObjcTypeParser {
     public typealias Parser = ObjectiveCParser
     
     public let state: ObjcParserState
@@ -101,7 +102,7 @@ public class TypeParsing {
         
         // Block type
         if let blockType = manageBlock(baseType: type,
-                                       qualifiers: TypeParsing.qualifiers(from: specifierQualifierList),
+                                       qualifiers: ObjcTypeParser.qualifiers(from: specifierQualifierList),
                                        declarator: declarator) {
             return blockType
         }
@@ -134,7 +135,7 @@ public class TypeParsing {
         
         // Block type
         if let blockType = manageBlock(baseType: type,
-                                       qualifiers: TypeParsing.qualifiers(from: declarationSpecifiers),
+                                       qualifiers: ObjcTypeParser.qualifiers(from: declarationSpecifiers),
                                        declarator: declarator) {
             return blockType
         }
@@ -391,7 +392,7 @@ public class TypeParsing {
     }
 }
 
-extension TypeParsing {
+extension ObjcTypeParser {
     static func qualifiers(from spec: Parser.SpecifierQualifierListContext) -> [Parser.TypeQualifierContext] {
         spec.typeQualifier()
     }

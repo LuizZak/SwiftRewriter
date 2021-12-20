@@ -1,5 +1,5 @@
 /// Represents a global function definition
-public class FunctionDefinition: ASTNode, InitializableNode {
+public class FunctionDefinition: ObjcASTNode, ObjcInitializableNode {
     public var returnType: TypeNameNode? {
         firstChild()
     }
@@ -22,7 +22,7 @@ public class FunctionDefinition: ASTNode, InitializableNode {
 }
 
 /// Represents the parameters list for a function definition
-public class ParameterList: ASTNode, InitializableNode {
+public class ParameterList: ObjcASTNode, ObjcInitializableNode {
     public var parameters: [FunctionParameter] {
         childrenMatching()
     }
@@ -37,7 +37,7 @@ public class ParameterList: ASTNode, InitializableNode {
 }
 
 /// Represents a parameter for a parameters list for a function definition
-public class FunctionParameter: ASTNode, InitializableNode {
+public class FunctionParameter: ObjcASTNode, ObjcInitializableNode {
     public var identifier: Identifier? {
         firstChild()
     }
@@ -53,7 +53,7 @@ public class FunctionParameter: ASTNode, InitializableNode {
 
 /// A variadic parameter which is specified as a (', ...') after at least one
 /// function parameter.
-public class VariadicParameter: ASTNode, InitializableNode {
+public class VariadicParameter: ObjcASTNode, ObjcInitializableNode {
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)
     }

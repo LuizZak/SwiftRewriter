@@ -1,4 +1,4 @@
-// TODO: Implement ASTNode serialization support
+// TODO: Implement ObjcASTNode serialization support
 class ASTNodeSerialization {
     
 }

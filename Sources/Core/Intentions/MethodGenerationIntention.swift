@@ -42,7 +42,7 @@ public class MethodGenerationIntention: MemberGenerationIntention, Parameterized
                             returnType: SwiftType,
                             parameters: [ParameterSignature],
                             accessLevel: AccessLevel = .internal,
-                            source: ASTNode? = nil) {
+                            source: ObjcASTNode? = nil) {
         
         let signature =
             FunctionSignature(name: name,
@@ -58,7 +58,7 @@ public class MethodGenerationIntention: MemberGenerationIntention, Parameterized
     
     public init(signature: FunctionSignature,
                 accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+                source: ObjcASTNode? = nil) {
         
         self.signature = signature
         super.init(accessLevel: accessLevel, source: source)

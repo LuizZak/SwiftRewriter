@@ -469,7 +469,7 @@ extension ObjectiveCStatementASTReaderTests {
         
         let typeSystem = TypeSystem()
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
-        let typeParser = TypeParsing(state: ObjectiveCStatementASTReaderTests._state)
+        let typeParser = ObjcTypeParser(state: ObjectiveCStatementASTReaderTests._state)
         
         let expReader =
             ObjectiveCExprASTReader(

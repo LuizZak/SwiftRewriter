@@ -100,7 +100,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
                             type: SwiftType,
                             objcAttributes: [ObjcPropertyAttribute],
                             accessLevel: AccessLevel = .internal,
-                            source: ASTNode? = nil) {
+                            source: ObjcASTNode? = nil) {
         
         let storage =
             ValueStorage(
@@ -119,7 +119,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
                 storage: ValueStorage,
                 objcAttributes: [ObjcPropertyAttribute],
                 accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+                source: ObjcASTNode? = nil) {
         
         self.name = name
         self.storage = storage

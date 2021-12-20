@@ -12,7 +12,7 @@ public final class ClassExtensionGenerationIntention: BaseClassIntention {
     
     public override init(typeName: String,
                          accessLevel: AccessLevel = .internal,
-                         source: ASTNode? = nil) {
+                         source: ObjcASTNode? = nil) {
         
         super.init(typeName: typeName,
                    accessLevel: accessLevel,

@@ -26,7 +26,7 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
                 returnType: SwiftType,
                 mode: Mode,
                 accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+                source: ObjcASTNode? = nil) {
         
         self.parameters = parameters
         self.returnType = returnType

@@ -32,7 +32,7 @@ public class FromSourceIntention: Intention, NonNullScopedIntention {
     /// macros.
     public var inNonnullContext: Bool = false
     
-    public init(accessLevel: AccessLevel, source: ASTNode?) {
+    public init(accessLevel: AccessLevel, source: ObjcASTNode?) {
         self.accessLevel = accessLevel
         
         super.init(source: source)

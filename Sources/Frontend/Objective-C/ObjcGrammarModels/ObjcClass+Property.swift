@@ -1,7 +1,7 @@
 import Utils
 import GrammarModelBase
 
-public class PropertyDefinition: ASTNode, InitializableNode {
+public class PropertyDefinition: ObjcASTNode, ObjcInitializableNode {
     /// Type identifier
     public var type: TypeNameNode? {
         firstChild()
@@ -27,7 +27,7 @@ public class PropertyDefinition: ASTNode, InitializableNode {
     }
 }
 
-public class PropertyAttributesList: ASTNode, InitializableNode {
+public class PropertyAttributesList: ObjcASTNode, ObjcInitializableNode {
     public var attributes: [PropertyAttributeNode] {
         childrenMatching()
     }
@@ -48,7 +48,7 @@ public class PropertyAttributesList: ASTNode, InitializableNode {
     }
 }
 
-public class PropertyAttributeNode: ASTNode {
+public class PropertyAttributeNode: ObjcASTNode {
     public var attribute: Attribute
     
     public convenience init(name: String,

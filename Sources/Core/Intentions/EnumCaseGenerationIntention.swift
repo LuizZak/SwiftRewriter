@@ -17,7 +17,7 @@ public class EnumCaseGenerationIntention: PropertyGenerationIntention {
     public init(name: String,
                 expression: Expression?,
                 accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+                source: ObjcASTNode? = nil) {
         
         let storage = ValueStorage(type: .any, ownership: .strong, isConstant: true)
         

@@ -25,7 +25,7 @@ public final class EnumGenerationIntention: TypeGenerationIntention {
     public init(typeName: String,
                 rawValueType: SwiftType,
                 accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+                source: ObjcASTNode? = nil) {
         
         self.rawValueType = rawValueType
         super.init(typeName: typeName, accessLevel: accessLevel, source: source)

@@ -1,3 +1,4 @@
+import GrammarModelBase
 import ObjcParser
 import SwiftSyntaxSupport
 import IntentionPasses

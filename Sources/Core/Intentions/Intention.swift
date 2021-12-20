@@ -18,7 +18,7 @@ public class Intention: IntentionProtocol, Codable {
     
     /// Reference to an AST node that originated this source-code generation
     /// intention
-    public var source: ASTNode? {
+    public var source: ObjcASTNode? {
         didSet {
             if let source = source {
                 originLocation = source.location
@@ -38,7 +38,7 @@ public class Intention: IntentionProtocol, Codable {
         
     }
     
-    public init(source: ASTNode?) {
+    public init(source: ObjcASTNode?) {
         self.source = source
         self.originLocation = source?.location
     }

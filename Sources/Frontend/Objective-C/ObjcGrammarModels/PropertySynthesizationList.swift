@@ -1,5 +1,5 @@
 /// Node for a @synthesize/@dynamic declaration in a class implementation.
-public class PropertyImplementation: ASTNode, InitializableNode {
+public class PropertyImplementation: ObjcASTNode, ObjcInitializableNode {
     
     /// Returns the kind of this property implementation node.
     /// Defaults to `@synthesize`, if it's missing the required keyword nodes.
@@ -20,10 +20,6 @@ public class PropertyImplementation: ASTNode, InitializableNode {
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)
     }
-    
-    public override func addChild(_ node: ASTNode) {
-        super.addChild(node)
-    }
 }
 
 public enum PropertyImplementationKind {
@@ -32,7 +28,7 @@ public enum PropertyImplementationKind {
 }
 
 /// List of synthesizes in a @synthesize property implementation.
-public class PropertySynthesizeList: ASTNode, InitializableNode {
+public class PropertySynthesizeList: ObjcASTNode, ObjcInitializableNode {
     public var synthesizations: [PropertySynthesizeItem] {
         childrenMatching()
     }
@@ -43,7 +39,7 @@ public class PropertySynthesizeList: ASTNode, InitializableNode {
 }
 
 /// Single item of a @synthesize property implementation list.
-public class PropertySynthesizeItem: ASTNode, InitializableNode {
+public class PropertySynthesizeItem: ObjcASTNode, ObjcInitializableNode {
     public var propertyName: Identifier? {
         firstChild()
     }

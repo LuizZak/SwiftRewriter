@@ -97,7 +97,7 @@ public extension IntentionHistory {
 public extension IntentionHistory {
     
     @discardableResult
-    func recordSourceHistory(node: ASTNode) -> IntentionHistoryEntryEcho {
+    func recordSourceHistory(node: ObjcASTNode) -> IntentionHistoryEntryEcho {
         guard let file = node.originalSource?.filePath else {
             return recordCreation(description: "from non-file node \(type(of: node))")
         }

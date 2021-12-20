@@ -19,7 +19,7 @@ public class PropertySynthesizationIntention: FromSourceIntention {
                 ivarName: String,
                 isExplicit: Bool,
                 type: SynthesizeType,
-                source: ASTNode? = nil) {
+                source: ObjcASTNode? = nil) {
         
         self.propertyName = propertyName
         self.ivarName = ivarName

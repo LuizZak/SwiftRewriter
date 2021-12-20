@@ -1,6 +1,6 @@
 /// A syntax node for an Objective-C class implementation (`@implementation`)
 /// declaration.
-public class ObjcClassImplementation: ASTNode, InitializableNode {
+public class ObjcClassImplementation: ObjcASTNode, ObjcInitializableNode {
     public var identifier: Identifier? {
         firstChild()
     }

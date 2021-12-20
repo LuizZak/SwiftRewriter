@@ -1,3 +1,4 @@
+import GrammarModelBase
 import ObjcGrammarModels
 import ObjcParser
 import SwiftAST
@@ -6,11 +7,11 @@ import Intentions
 import TypeSystem
 
 public protocol ObjectiveCIntentionCollectorDelegate: AnyObject {
-    func isNodeInNonnullContext(_ node: ASTNode) -> Bool
+    func isNodeInNonnullContext(_ node: ObjcASTNode) -> Bool
     func reportForLazyParsing(intention: Intention)
     func reportForLazyResolving(intention: Intention)
     func typeMapper(for intentionCollector: ObjectiveCIntentionCollector) -> TypeMapper
-    func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> TypeParsing
+    func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> ObjcTypeParser
 }
 
 /// Traverses a provided AST node, and produces intentions that are recorded by
@@ -59,17 +60,19 @@ public class ObjectiveCIntentionCollector {
         self.context = context
     }
     
-    public func collectIntentions(_ node: ASTNode) {
+    public func collectIntentions(_ node: ObjcASTNode) {
         startNodeVisit(node)
     }
     
-    private func startNodeVisit(_ node: ASTNode) {
+    private func startNodeVisit(_ node: ObjcASTNode) {
         let visitor = AnyASTVisitor()
         let traverser = ASTTraverser(node: node, visitor: visitor)
         
         visitor.onEnterClosure = { node in
-            self.context.inNonnullContext
-                = self.delegate?.isNodeInNonnullContext(node) ?? false
+            if let objcNode = node as? ObjcASTNode {
+                self.context.inNonnullContext
+                    = self.delegate?.isNodeInNonnullContext(objcNode) ?? false
+            }
             
             switch node {
             case let n as ObjcClassInterface:
@@ -866,13 +869,13 @@ public class ObjectiveCIntentionCollector {
 }
 
 extension ObjectiveCIntentionCollector {
-    private func recordSourceHistory(intention: FromSourceIntention, node: ASTNode) {
+    private func recordSourceHistory(intention: FromSourceIntention, node: ObjcASTNode) {
         intention.history.recordSourceHistory(node: node)
     }
 }
 
 extension ObjectiveCIntentionCollector {
-    private func mapComments(_ node: ASTNode, _ intention: FromSourceIntention) {
+    private func mapComments(_ node: ObjcASTNode, _ intention: FromSourceIntention) {
         intention.precedingComments.append(contentsOf: convertComments(node.precedingComments))
     }
     

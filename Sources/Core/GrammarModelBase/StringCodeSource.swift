@@ -1,6 +1,4 @@
 import Utils
-import ObjcGrammarModels
-import GrammarModelBase
 
 public struct StringCodeSource: CodeSource {
     private var _lineOffsets: [Range<String.Index>] = []

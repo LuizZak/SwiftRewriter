@@ -733,7 +733,7 @@ class ObjcParserTests: XCTestCase {
 
 extension ObjcParserTests {
     
-    private func testParseComments<T: ASTNode>(
+    private func testParseComments<T: ObjcASTNode>(
         _ source: String,
         _ keyPath: KeyPath<GlobalContextNode, T>,
         line: UInt = #line) {
@@ -748,7 +748,7 @@ extension ObjcParserTests {
         testParseCommentsRaw(string, keyPath, line: line)
     }
     
-    private func testParseCommentsRaw<T: ASTNode>(
+    private func testParseCommentsRaw<T: ObjcASTNode>(
         _ source: String,
         _ keyPath: KeyPath<GlobalContextNode, T>,
         line: UInt = #line) {

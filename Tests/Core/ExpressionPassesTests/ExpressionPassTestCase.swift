@@ -3,6 +3,7 @@ import Antlr4
 import Utils
 import ObjcParser
 import ObjcParserAntlr
+import GrammarModelBase
 import SwiftAST
 import Intentions
 import WriterTargetOutput
@@ -187,7 +188,7 @@ class ExpressionPassTestCase: XCTestCase {
                                             comments: [])
         
         let reader = ObjectiveCExprASTReader(typeMapper: typeMapper,
-                                        typeParser: TypeParsing(state: ExpressionPassTestCase._state),
+                                        typeParser: ObjcTypeParser(state: ExpressionPassTestCase._state),
                                         context: context,
                                         delegate: nil)
         
@@ -212,7 +213,7 @@ class ExpressionPassTestCase: XCTestCase {
         }
         
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
-        let typeParser = TypeParsing(state: ExpressionPassTestCase._state)
+        let typeParser = ObjcTypeParser(state: ExpressionPassTestCase._state)
         
         let expReader =
             ObjectiveCExprASTReader(

@@ -1,5 +1,5 @@
 /// A type definition node
-public class TypedefNode: ASTNode, InitializableNode {
+public class TypedefNode: ObjcASTNode, ObjcInitializableNode {
     public var identifier: Identifier? {
         firstChild()
     }
@@ -22,7 +22,7 @@ public class TypedefNode: ASTNode, InitializableNode {
 }
 
 /// Block parameters for a block typedef
-public class BlockParametersNode: ASTNode, InitializableNode {
+public class BlockParametersNode: ObjcASTNode, ObjcInitializableNode {
     public var parameters: [TypeNameNode] {
         childrenMatching()
     }
@@ -32,7 +32,7 @@ public class BlockParametersNode: ASTNode, InitializableNode {
     }
 }
 
-public class TypeDeclaratorNode: ASTNode {
+public class TypeDeclaratorNode: ObjcASTNode {
     public var pointerNode: PointerNode? {
         firstChild()
     }
@@ -42,7 +42,7 @@ public class TypeDeclaratorNode: ASTNode {
     }
 }
 
-public class PointerNode: ASTNode {
+public class PointerNode: ObjcASTNode {
     public var pointerNode: PointerNode? {
         firstChild()
     }

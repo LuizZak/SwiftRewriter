@@ -1,5 +1,5 @@
 /// A C / Objective-C enumeration
-public class ObjcEnumDeclaration: ASTNode, InitializableNode {
+public class ObjcEnumDeclaration: ObjcASTNode, ObjcInitializableNode {
     public var isOptionSet: Bool = false
     
     public var identifier: Identifier? {
@@ -19,7 +19,7 @@ public class ObjcEnumDeclaration: ASTNode, InitializableNode {
     }
 }
 
-public class ObjcEnumCase: ASTNode {
+public class ObjcEnumCase: ObjcASTNode {
     public var identifier: Identifier? {
         firstChild()
     }

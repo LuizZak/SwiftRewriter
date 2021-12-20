@@ -20,7 +20,7 @@ public final class InstanceVariableGenerationIntention: MemberGenerationIntentio
     public init(name: String,
                 storage: ValueStorage,
                 accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+                source: ObjcASTNode? = nil) {
         
         self.name = name
         self.storage = storage
