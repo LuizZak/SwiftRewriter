@@ -1,4 +1,5 @@
 import Utils
+import GrammarModelBase
 
 public class PropertyDefinition: ASTNode, InitializableNode {
     /// Type identifier

@@ -1,4 +1,5 @@
 import Utils
+import GrammarModelBase
 
 public class TypeNameNode: ASTNode {
     /// Full type name

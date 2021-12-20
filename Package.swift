@@ -10,6 +10,13 @@ let core: [Target] = [
         path: "Sources/Core/WriterTargetOutput"
     ),
     .target(
+        name: "GrammarModelBase",
+        dependencies: [
+            "Utils",
+        ],
+        path: "Sources/Core/GrammarModelBase"
+    ),
+    .target(
         name: "SwiftAST",
         dependencies: [
             "MiniLexer", "Utils", "WriterTargetOutput",
@@ -105,7 +112,7 @@ let objcFrontend: [Target] = [
     .target(
         name: "GrammarModels",
         dependencies: [
-            "ObjcParserAntlr", "Utils",
+            "ObjcParserAntlr", "GrammarModelBase", "Utils",
         ],
         path: "Sources/Frontend/Objective-C/GrammarModels"
     ),
@@ -237,6 +244,13 @@ let package = Package(
                 "GrammarModels",
             ],
             path: "Tests/Frontend/Objective-C/GrammarModelsTests"
+        ),
+        .testTarget(
+            name: "GrammarModelBaseTests",
+            dependencies: [
+                "GrammarModelBase",
+            ],
+            path: "Tests/Core/GrammarModelBaseTests"
         ),
         .testTarget(
             name: "SwiftASTTests",

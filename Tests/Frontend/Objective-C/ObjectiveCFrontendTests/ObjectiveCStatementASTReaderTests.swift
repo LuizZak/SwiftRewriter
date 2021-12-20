@@ -8,6 +8,7 @@ import TypeSystem
 import SwiftAST
 import WriterTargetOutput
 import GrammarModels
+import GrammarModelBase
 
 @testable import ObjectiveCFrontend
 

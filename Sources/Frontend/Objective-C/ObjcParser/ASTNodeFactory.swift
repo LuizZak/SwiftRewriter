@@ -2,6 +2,7 @@ import Antlr4
 import Utils
 import ObjcParserAntlr
 import GrammarModels
+import GrammarModelBase
 
 class ASTNodeFactory {
     typealias Parser = ObjectiveCParser

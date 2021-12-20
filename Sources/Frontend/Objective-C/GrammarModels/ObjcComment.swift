@@ -1,4 +1,5 @@
 import Utils
+import GrammarModelBase
 
 /// An Objective-C comment from an input file
 public struct ObjcComment {

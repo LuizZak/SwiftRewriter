@@ -1,6 +1,7 @@
-import GrammarModels
 import Antlr4
 import ObjcParserAntlr
+import GrammarModels
+import GrammarModelBase
 
 internal class ObjcParserListener: ObjectiveCParserBaseListener {
     let context: NodeCreationContext
