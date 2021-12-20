@@ -41,28 +41,6 @@ public class UnknownNode: ObjcASTNode {
     
 }
 
-/// An identifier node
-public class Identifier: ObjcASTNode {
-    /// String identifier
-    public var name: String
-    
-    public override var shortDescription: String {
-        name
-    }
-    
-    public init(name: String,
-                isInNonnullContext: Bool,
-                location: SourceLocation = .invalid,
-                length: SourceLength = .zero) {
-        
-        self.name = name
-        
-        super.init(isInNonnullContext: isInNonnullContext,
-                   location: location,
-                   length: length)
-    }
-}
-
 /// A node that represents a special keyword-type token
 public class KeywordNode: ObjcASTNode {
     public var keyword: ObjcKeyword

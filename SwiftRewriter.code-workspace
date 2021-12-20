@@ -112,11 +112,12 @@
 		"cSpell.words": [
 			"antlr",
 			"autoreleasepool",
+			"Initializable",
 			"mutex",
 			"Nonnull",
 			"swiftpm",
 			"swiftrewriter",
-			"swiftwriter",
+			"swiftwriter"
 		],
 	},
 	"extensions": {

@@ -133,11 +133,11 @@ public class ObjectiveCIntentionCollector {
             case let n as ObjcEnumCase:
                 self.visitObjcEnumCaseNode(n)
                 
-            case let n as Identifier
+            case let n as ObjcIdentifierNode
                 where n.name == "NS_ASSUME_NONNULL_BEGIN":
                 self.context.inNonnullContext = true
                 
-            case let n as Identifier
+            case let n as ObjcIdentifierNode
                 where n.name == "NS_ASSUME_NONNULL_END":
                 self.context.inNonnullContext = false
             default:
@@ -721,12 +721,12 @@ public class ObjectiveCIntentionCollector {
     // MARK: - Struct declaration
     private func enterStructDeclarationNode(_ node: ObjcStructDeclaration) {
         var declarators: [ObjcTypeDeclaratorNode] = []
-        var nodeIdentifiers: [Identifier] = []
+        var nodeIdentifiers: [ObjcIdentifierNode] = []
         if let identifier = node.identifier {
             nodeIdentifiers = [identifier]
         }
         if let parentNode = node.parent as? ObjcTypedefNode {
-            nodeIdentifiers.append(contentsOf: parentNode.childrenMatching(type: Identifier.self))
+            nodeIdentifiers.append(contentsOf: parentNode.childrenMatching(type: ObjcIdentifierNode.self))
             declarators.append(contentsOf: parentNode.childrenMatching(type: ObjcTypeDeclaratorNode.self))
         }
         

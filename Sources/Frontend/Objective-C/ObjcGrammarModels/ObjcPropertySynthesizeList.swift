@@ -11,10 +11,10 @@ public class ObjcPropertySynthesizeList: ObjcASTNode, ObjcInitializableNode {
 
 /// Single item of a @synthesize property implementation list.
 public class ObjcPropertySynthesizeItem: ObjcASTNode, ObjcInitializableNode {
-    public var propertyName: Identifier? {
+    public var propertyName: ObjcIdentifierNode? {
         firstChild()
     }
-    public var instanceVarName: Identifier? {
+    public var instanceVarName: ObjcIdentifierNode? {
         child(atIndex: 1)
     }
     public var isDynamic: Bool = false

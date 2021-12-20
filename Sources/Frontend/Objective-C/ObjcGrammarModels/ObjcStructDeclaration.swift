@@ -4,7 +4,7 @@ public final class ObjcStructDeclaration: ObjcASTNode, ObjcInitializableNode {
         firstChild()
     }
     
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
     
@@ -19,7 +19,7 @@ public final class ObjcStructDeclarationBody: ObjcASTNode, ObjcInitializableNode
         childrenMatching()
     }
     
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
     

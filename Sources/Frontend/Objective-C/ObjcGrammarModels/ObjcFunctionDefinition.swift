@@ -4,7 +4,7 @@ public class ObjcFunctionDefinition: ObjcASTNode, ObjcInitializableNode {
         firstChild()
     }
     
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
     
@@ -38,7 +38,7 @@ public class ObjcParameterList: ObjcASTNode, ObjcInitializableNode {
 
 /// Represents a parameter for a parameters list for a function definition
 public class ObjcFunctionParameter: ObjcASTNode, ObjcInitializableNode {
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
     

@@ -37,7 +37,7 @@ public class MethodDefinition: ObjcASTNode, ObjcInitializableNode {
 
 public class MethodSelector: ObjcASTNode, ObjcInitializableNode {
     public var selector: SelectorKind {
-        let sel = childrenMatching(type: Identifier.self)
+        let sel = childrenMatching(type: ObjcIdentifierNode.self)
         let kw = childrenMatching(type: KeywordDeclarator.self)
         
         if sel.count == 1 {
@@ -52,14 +52,14 @@ public class MethodSelector: ObjcASTNode, ObjcInitializableNode {
     }
     
     public enum SelectorKind {
-        case selector(Identifier)
+        case selector(ObjcIdentifierNode)
         case keywords([KeywordDeclarator])
     }
 }
 
 public final class KeywordDeclarator: ObjcASTNode, ObjcInitializableNode {
-    public var selector: Identifier? {
-        let children = childrenMatching(type: Identifier.self)
+    public var selector: ObjcIdentifierNode? {
+        let children = childrenMatching(type: ObjcIdentifierNode.self)
         if children.count == 1 {
             return nil
         }
@@ -69,7 +69,7 @@ public final class KeywordDeclarator: ObjcASTNode, ObjcInitializableNode {
     public var type: MethodType? {
         firstChild()
     }
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         childrenMatching().last
     }
     
@@ -91,6 +91,6 @@ public final class MethodType: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public final class NullabilitySpecifier: Identifier {
+public final class NullabilitySpecifier: ObjcIdentifierNode {
     
 }

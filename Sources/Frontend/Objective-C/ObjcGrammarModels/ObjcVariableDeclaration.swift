@@ -4,7 +4,7 @@ public class ObjcVariableDeclaration: ObjcASTNode, ObjcInitializableNode {
         firstChild()
     }
     
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
     

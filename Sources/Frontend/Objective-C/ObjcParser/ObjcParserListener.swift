@@ -962,8 +962,10 @@ private class PropertyListener: ObjectiveCParserBaseListener {
             
             let inNonnull = nonnullContextQuerier.isInNonnullContext(ident)
             
-            let node = Identifier(name: ident.getText(),
-                                  isInNonnullContext: inNonnull)
+            let node = ObjcIdentifierNode(
+                name: ident.getText(),
+                isInNonnullContext: inNonnull
+            )
             updateSourceLocation(node, ident)
             
             property.addChild(node)

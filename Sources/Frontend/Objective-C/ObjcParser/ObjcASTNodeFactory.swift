@@ -32,9 +32,9 @@ class ObjcASTNodeFactory {
         commentQuerier.popCommentsOverlapping(node: context)
     }
     
-    func makeIdentifier(from context: Parser.IdentifierContext) -> Identifier {
+    func makeIdentifier(from context: Parser.IdentifierContext) -> ObjcIdentifierNode {
         let nonnull = isInNonnullContext(context)
-        let node = Identifier(name: context.getText(), isInNonnullContext: nonnull)
+        let node = ObjcIdentifierNode(name: context.getText(), isInNonnullContext: nonnull)
         updateSourceLocation(for: node, with: context)
         return node
     }

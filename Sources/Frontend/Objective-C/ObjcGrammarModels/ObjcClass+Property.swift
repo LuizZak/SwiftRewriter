@@ -12,7 +12,7 @@ public class PropertyDefinition: ObjcASTNode, ObjcInitializableNode {
     }
     
     /// Identifier for this property
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
     

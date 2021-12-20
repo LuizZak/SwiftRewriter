@@ -1,10 +1,10 @@
 /// A class category that extends a class with additional properties/methods/ivars/protocols.
 public class ObjcClassCategoryInterface: ObjcASTNode, ObjcInitializableNode {
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
-    public var categoryName: Identifier? {
-        child(ofType: Identifier.self, atIndex: 1)
+    public var categoryName: ObjcIdentifierNode? {
+        child(ofType: ObjcIdentifierNode.self, atIndex: 1)
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -33,11 +33,11 @@ public extension ObjcClassCategoryInterface {
 /// A syntax node for an Objective-C class implementation (`@implementation`)
 /// declaration for a category.
 public class ObjcClassCategoryImplementation: ObjcASTNode, ObjcInitializableNode {
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
-    public var categoryName: Identifier? {
-        child(ofType: Identifier.self, atIndex: 1)
+    public var categoryName: ObjcIdentifierNode? {
+        child(ofType: ObjcIdentifierNode.self, atIndex: 1)
     }
     
     public required init(isInNonnullContext: Bool) {
