@@ -2,7 +2,7 @@ import SwiftSyntax
 import Intentions
 import SwiftAST
 
-struct VariableDeclaration {
+struct ObjcVariableDeclaration {
     var constant: Bool
     var attributes: [() -> AttributeSyntax]
     var modifiers: [ModifiersDecoratorResult]

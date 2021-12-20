@@ -3,7 +3,7 @@ import GrammarModelBase
 
 public class PropertyDefinition: ObjcASTNode, ObjcInitializableNode {
     /// Type identifier
-    public var type: TypeNameNode? {
+    public var type: ObjcTypeNameNode? {
         firstChild()
     }
     

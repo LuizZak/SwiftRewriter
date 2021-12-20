@@ -74,8 +74,8 @@ class ObjcASTNodeFactory {
         return protocolListNode
     }
     
-    func makePointer(from context: ObjectiveCParser.PointerContext) -> PointerNode {
-        let node = PointerNode(isInNonnullContext: isInNonnullContext(context))
+    func makePointer(from context: ObjectiveCParser.PointerContext) -> ObjcPointerNode {
+        let node = ObjcPointerNode(isInNonnullContext: isInNonnullContext(context))
         updateSourceLocation(for: node, with: context)
         if let pointer = context.pointer() {
             node.addChild(makePointer(from: pointer))
@@ -83,8 +83,8 @@ class ObjcASTNodeFactory {
         return node
     }
     
-    func makeTypeDeclarator(from context: ObjectiveCParser.DeclaratorContext) -> TypeDeclaratorNode {
-        let node = TypeDeclaratorNode(isInNonnullContext: isInNonnullContext(context))
+    func makeTypeDeclarator(from context: ObjectiveCParser.DeclaratorContext) -> ObjcTypeDeclaratorNode {
+        let node = ObjcTypeDeclaratorNode(isInNonnullContext: isInNonnullContext(context))
         updateSourceLocation(for: node, with: context)
         if let identifierNode = context.directDeclarator()?.identifier().map(makeIdentifier) {
             node.addChild(identifierNode)

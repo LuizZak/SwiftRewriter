@@ -3,10 +3,10 @@ import GrammarModelBase
 
 /// A node that represents the global namespace
 public final class GlobalContextNode: ObjcASTNode, ObjcInitializableNode {
-    public var functionDefinitions: [FunctionDefinition] {
+    public var functionDefinitions: [ObjcFunctionDefinition] {
         childrenMatching()
     }
-    public var variableDeclarations: [VariableDeclaration] {
+    public var variableDeclarations: [ObjcVariableDeclaration] {
         childrenMatching()
     }
     public var classInterfaces: [ObjcClassInterface] {
@@ -24,7 +24,7 @@ public final class GlobalContextNode: ObjcASTNode, ObjcInitializableNode {
     public var protocolDeclarations: [ObjcProtocolDeclaration] {
         childrenMatching()
     }
-    public var typedefNodes: [TypedefNode] {
+    public var typedefNodes: [ObjcTypedefNode] {
         childrenMatching()
     }
     public var enumDeclarations: [ObjcEnumDeclaration] {

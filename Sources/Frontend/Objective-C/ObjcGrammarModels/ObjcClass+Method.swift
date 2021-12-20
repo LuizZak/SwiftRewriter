@@ -82,7 +82,7 @@ public final class MethodType: ObjcASTNode, ObjcInitializableNode {
     public var nullabilitySpecifiers: [NullabilitySpecifier] {
         childrenMatching()
     }
-    public var type: TypeNameNode? {
+    public var type: ObjcTypeNameNode? {
         firstChild()
     }
     

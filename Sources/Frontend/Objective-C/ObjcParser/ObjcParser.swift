@@ -443,7 +443,7 @@ public class ObjcParser {
         return type
     }
     
-    func parseTokenNode(_ tokenType: TokenType) throws {
+    func parseTokenNode(_ tokenType: ObjcTokenType) throws {
         try lexer.advance(overTokenType: tokenType)
     }
     
@@ -472,8 +472,8 @@ public class ObjcParser {
     /// of errors as diagnostics must be made by this closure.
     /// - Returns: An array of items returned by `itemParser` for each successful
     /// parse performed.
-    internal func _parseCommaSeparatedList<T>(braces openBrace: TokenType,
-                                              _ closeBrace: TokenType,
+    internal func _parseCommaSeparatedList<T>(braces openBrace: ObjcTokenType,
+                                              _ closeBrace: ObjcTokenType,
                                               itemParser: () throws -> T) -> [T] {
         
         do {
@@ -510,7 +510,7 @@ public class ObjcParser {
                 }
             } catch {
                 // Panic!
-                diagnostics.error("Expected \(TokenType.comma) or \(closeBrace) after an item",
+                diagnostics.error("Expected \(ObjcTokenType.comma) or \(closeBrace) after an item",
                                  origin: source.filePath,
                                  location: location())
             }

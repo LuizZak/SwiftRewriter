@@ -3,7 +3,7 @@ import Utils
 import ObjcGrammarModels
 import GrammarModelBase
 
-public class ObjcLexer: TokenizerLexer<FullToken<TokenType>> {
+public class ObjcLexer: TokenizerLexer<FullToken<ObjcTokenType>> {
     var source: CodeSource
     
     public init(source: CodeSource) {

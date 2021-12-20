@@ -23,7 +23,7 @@ public extension ObjcClassImplementation {
         childrenMatching()
     }
     
-    var propertyImplementations: [PropertyImplementation] {
+    var propertyImplementations: [ObjcPropertyImplementation] {
         childrenMatching()
     }
 }

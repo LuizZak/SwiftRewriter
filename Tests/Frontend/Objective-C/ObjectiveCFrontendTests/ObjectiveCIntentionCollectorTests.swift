@@ -29,18 +29,18 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
         // Arrange
         let root = GlobalContextNode(isInNonnullContext: false)
         
-        let function = FunctionDefinition(isInNonnullContext: false)
+        let function = ObjcFunctionDefinition(isInNonnullContext: false)
         root.addChild(function)
         
         function.addChild(Identifier(name: "global", isInNonnullContext: false))
-        function.addChild(TypeNameNode(type: .void, isInNonnullContext: false))
+        function.addChild(ObjcTypeNameNode(type: .void, isInNonnullContext: false))
         
-        let parameters = ParameterList(isInNonnullContext: false)
+        let parameters = ObjcParameterList(isInNonnullContext: false)
         function.addChild(parameters)
         
-        let param1 = FunctionParameter(isInNonnullContext: false)
+        let param1 = ObjcFunctionParameter(isInNonnullContext: false)
         param1.addChild(Identifier(name: "a", isInNonnullContext: false))
-        param1.addChild(TypeNameNode(type: .struct("NSInteger"), isInNonnullContext: false))
+        param1.addChild(ObjcTypeNameNode(type: .struct("NSInteger"), isInNonnullContext: false))
         parameters.addChild(param1)
         
         // Act

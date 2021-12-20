@@ -6,7 +6,7 @@ public class ObjcEnumDeclaration: ObjcASTNode, ObjcInitializableNode {
         firstChild()
     }
     
-    public var type: TypeNameNode? {
+    public var type: ObjcTypeNameNode? {
         firstChild()
     }
     

@@ -56,7 +56,7 @@ public class ObjectiveCMethodSignatureConverter {
     
     /// Generates a function definition from a C signature to use as a global
     /// function signature.
-    public func generateDefinitionSignature(from function: FunctionDefinition) -> FunctionSignature {
+    public func generateDefinitionSignature(from function: ObjcFunctionDefinition) -> FunctionSignature {
         var sign =
             FunctionSignature(name: function.identifier?.name ?? "__",
                               parameters: [],

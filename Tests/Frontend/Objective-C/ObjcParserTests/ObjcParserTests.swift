@@ -82,7 +82,7 @@ class ObjcParserTests: XCTestCase {
             void global(int a);
             """)
         
-        let funcDecl: FunctionDefinition? = node.firstChild()
+        let funcDecl: ObjcFunctionDefinition? = node.firstChild()
         
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
@@ -101,7 +101,7 @@ class ObjcParserTests: XCTestCase {
             void global();
             """)
         
-        let funcDecl: FunctionDefinition? = node.firstChild()
+        let funcDecl: ObjcFunctionDefinition? = node.firstChild()
         
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
@@ -118,7 +118,7 @@ class ObjcParserTests: XCTestCase {
             global(int a);
             """)
         
-        let funcDecl: FunctionDefinition? = node.firstChild()
+        let funcDecl: ObjcFunctionDefinition? = node.firstChild()
         
         XCTAssertNotNil(funcDecl)
         XCTAssertNil(funcDecl?.returnType)
@@ -136,7 +136,7 @@ class ObjcParserTests: XCTestCase {
             NSArray<NSArray<NSString*>*> *_Nonnull global();
             """)
         
-        let funcDecl: FunctionDefinition? = node.firstChild()
+        let funcDecl: ObjcFunctionDefinition? = node.firstChild()
         
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
@@ -162,7 +162,7 @@ class ObjcParserTests: XCTestCase {
             void global(NSArray<NSArray<NSString*>*> *_Nonnull value);
             """)
         
-        let funcDecl: FunctionDefinition? = node.firstChild()
+        let funcDecl: ObjcFunctionDefinition? = node.firstChild()
         
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
@@ -190,7 +190,7 @@ class ObjcParserTests: XCTestCase {
             void global(NSString *format, ...);
             """)
         
-        let funcDecl: FunctionDefinition? = node.firstChild()
+        let funcDecl: ObjcFunctionDefinition? = node.firstChild()
         
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
@@ -210,7 +210,7 @@ class ObjcParserTests: XCTestCase {
             }
             """)
         
-        let funcDecl: FunctionDefinition? = node.firstChild()
+        let funcDecl: ObjcFunctionDefinition? = node.firstChild()
         
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
@@ -276,7 +276,7 @@ class ObjcParserTests: XCTestCase {
             } A;
             """)
         
-        let defNode: TypedefNode? = node.firstChild()
+        let defNode: ObjcTypedefNode? = node.firstChild()
         let structNode: ObjcStructDeclaration? = defNode?.firstChild()
         let fields = structNode?.body?.fields
         

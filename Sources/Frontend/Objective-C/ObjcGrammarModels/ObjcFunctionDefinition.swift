@@ -1,6 +1,6 @@
 /// Represents a global function definition
-public class FunctionDefinition: ObjcASTNode, ObjcInitializableNode {
-    public var returnType: TypeNameNode? {
+public class ObjcFunctionDefinition: ObjcASTNode, ObjcInitializableNode {
+    public var returnType: ObjcTypeNameNode? {
         firstChild()
     }
     
@@ -8,7 +8,7 @@ public class FunctionDefinition: ObjcASTNode, ObjcInitializableNode {
         firstChild()
     }
     
-    public var parameterList: ParameterList? {
+    public var parameterList: ObjcParameterList? {
         firstChild()
     }
     
@@ -22,12 +22,12 @@ public class FunctionDefinition: ObjcASTNode, ObjcInitializableNode {
 }
 
 /// Represents the parameters list for a function definition
-public class ParameterList: ObjcASTNode, ObjcInitializableNode {
-    public var parameters: [FunctionParameter] {
+public class ObjcParameterList: ObjcASTNode, ObjcInitializableNode {
+    public var parameters: [ObjcFunctionParameter] {
         childrenMatching()
     }
     
-    public var variadicParameter: VariadicParameter? {
+    public var variadicParameter: ObjcVariadicParameter? {
         firstChild()
     }
     
@@ -37,12 +37,12 @@ public class ParameterList: ObjcASTNode, ObjcInitializableNode {
 }
 
 /// Represents a parameter for a parameters list for a function definition
-public class FunctionParameter: ObjcASTNode, ObjcInitializableNode {
+public class ObjcFunctionParameter: ObjcASTNode, ObjcInitializableNode {
     public var identifier: Identifier? {
         firstChild()
     }
     
-    public var type: TypeNameNode? {
+    public var type: ObjcTypeNameNode? {
         firstChild()
     }
     
@@ -53,7 +53,7 @@ public class FunctionParameter: ObjcASTNode, ObjcInitializableNode {
 
 /// A variadic parameter which is specified as a (', ...') after at least one
 /// function parameter.
-public class VariadicParameter: ObjcASTNode, ObjcInitializableNode {
+public class ObjcVariadicParameter: ObjcASTNode, ObjcInitializableNode {
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)
     }

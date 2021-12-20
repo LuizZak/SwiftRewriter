@@ -1,5 +1,5 @@
 /// The type for a Token read by the lexer
-public enum TokenType: Equatable {
+public enum ObjcTokenType: Equatable {
     /// End-of-file token
     case eof
     case unknown
@@ -36,7 +36,7 @@ public enum TokenType: Equatable {
     case `operator`(Operator)
 }
 
-public extension TokenType {
+public extension ObjcTokenType {
     var isTypeQualifier: Bool {
         switch self {
         case .typeQualifier:
@@ -96,7 +96,7 @@ public enum Operator: String {
     case unequals = "!="
 }
 
-extension TokenType: CustomStringConvertible {
+extension ObjcTokenType: CustomStringConvertible {
     public var description: String {
         switch self {
         case .eof, .unknown:

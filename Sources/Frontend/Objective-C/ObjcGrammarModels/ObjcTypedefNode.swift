@@ -1,18 +1,18 @@
 /// A type definition node
-public class TypedefNode: ObjcASTNode, ObjcInitializableNode {
+public class ObjcTypedefNode: ObjcASTNode, ObjcInitializableNode {
     public var identifier: Identifier? {
         firstChild()
     }
     public var structDeclaration: ObjcStructDeclaration? {
         firstChild()
     }
-    public var type: TypeNameNode? {
+    public var type: ObjcTypeNameNode? {
         firstChild()
     }
-    public var blockParameters: BlockParametersNode? {
+    public var blockParameters: ObjcBlockParametersNode? {
         firstChild()
     }
-    public var typeDeclarators: [TypeDeclaratorNode] {
+    public var typeDeclarators: [ObjcTypeDeclaratorNode] {
         childrenMatching()
     }
     
@@ -22,8 +22,8 @@ public class TypedefNode: ObjcASTNode, ObjcInitializableNode {
 }
 
 /// Block parameters for a block typedef
-public class BlockParametersNode: ObjcASTNode, ObjcInitializableNode {
-    public var parameters: [TypeNameNode] {
+public class ObjcBlockParametersNode: ObjcASTNode, ObjcInitializableNode {
+    public var parameters: [ObjcTypeNameNode] {
         childrenMatching()
     }
     
@@ -32,8 +32,8 @@ public class BlockParametersNode: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public class TypeDeclaratorNode: ObjcASTNode {
-    public var pointerNode: PointerNode? {
+public class ObjcTypeDeclaratorNode: ObjcASTNode {
+    public var pointerNode: ObjcPointerNode? {
         firstChild()
     }
     
@@ -42,12 +42,12 @@ public class TypeDeclaratorNode: ObjcASTNode {
     }
 }
 
-public class PointerNode: ObjcASTNode {
-    public var pointerNode: PointerNode? {
+public class ObjcPointerNode: ObjcASTNode {
+    public var pointerNode: ObjcPointerNode? {
         firstChild()
     }
     
-    public var asPointerList: [PointerNode] {
+    public var asPointerList: [ObjcPointerNode] {
         if let child = pointerNode {
             return [self] + child.asPointerList
         }

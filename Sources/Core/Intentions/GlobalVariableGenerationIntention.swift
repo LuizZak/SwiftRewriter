@@ -4,8 +4,8 @@ import SwiftAST
 
 /// An intention to generate a global variable.
 public final class GlobalVariableGenerationIntention: FromSourceIntention, FileLevelIntention, MutableValueStorageIntention {
-    public var variableSource: VariableDeclaration? {
-        source as? VariableDeclaration
+    public var variableSource: ObjcVariableDeclaration? {
+        source as? ObjcVariableDeclaration
     }
     
     public var name: String

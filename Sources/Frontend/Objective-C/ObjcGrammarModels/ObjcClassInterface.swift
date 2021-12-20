@@ -50,7 +50,7 @@ public class IVarsList: ObjcASTNode, ObjcInitializableNode {
 }
 
 public class IVarDeclaration: ObjcASTNode, ObjcInitializableNode {
-    public var type: TypeNameNode? {
+    public var type: ObjcTypeNameNode? {
         firstChild()
     }
     public var identifier: Identifier? {

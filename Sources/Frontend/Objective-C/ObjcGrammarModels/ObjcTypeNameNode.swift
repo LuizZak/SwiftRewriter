@@ -1,7 +1,7 @@
 import Utils
 import GrammarModelBase
 
-public class TypeNameNode: ObjcASTNode {
+public class ObjcTypeNameNode: ObjcASTNode {
     /// Full type name
     public var type: ObjcType
     
