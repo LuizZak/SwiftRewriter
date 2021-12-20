@@ -1,6 +1,6 @@
 import Antlr4
 import ObjcParserAntlr
-import GrammarModels
+import ObjcGrammarModels
 import GrammarModelBase
 
 internal class ObjcParserListener: ObjectiveCParserBaseListener {

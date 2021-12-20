@@ -1,7 +1,7 @@
 import Antlr4
 import Utils
 import ObjcParserAntlr
-import GrammarModels
+import ObjcGrammarModels
 import GrammarModelBase
 
 class ASTNodeFactory {

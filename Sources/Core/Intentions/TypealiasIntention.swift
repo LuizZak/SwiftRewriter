@@ -1,4 +1,4 @@
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 
 /// An intention of generating a Swift `typealias` clause.

@@ -1,5 +1,5 @@
 import MiniLexer
-import GrammarModels
+import ObjcGrammarModels
 
 let operators: [(string: String, op: Operator)] = [
     // It is important to leave the operators in order, because since the first

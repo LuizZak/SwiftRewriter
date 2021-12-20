@@ -1,4 +1,4 @@
-import GrammarModels
+import ObjcGrammarModels
 import Utils
 import Intentions
 import TypeSystem

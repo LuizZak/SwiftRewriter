@@ -1,5 +1,5 @@
 import Utils
-import GrammarModels
+import ObjcGrammarModels
 import GrammarModelBase
 
 public struct StringCodeSource: CodeSource {

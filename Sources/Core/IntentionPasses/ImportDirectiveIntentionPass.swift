@@ -3,7 +3,7 @@ import SwiftAST
 import Intentions
 import MiniLexer
 import Utils
-import GrammarModels
+import ObjcGrammarModels
 
 /// Verifies the #import directives on every file and convert them to the appropriate
 /// Swift lib import declaration.

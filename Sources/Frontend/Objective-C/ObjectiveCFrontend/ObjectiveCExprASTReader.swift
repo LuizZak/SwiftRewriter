@@ -1,7 +1,7 @@
 import Antlr4
 import ObjcParserAntlr
 import ObjcParser
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 import TypeSystem
 

@@ -1,4 +1,4 @@
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 
 /// An intention to generate a backing field for a property

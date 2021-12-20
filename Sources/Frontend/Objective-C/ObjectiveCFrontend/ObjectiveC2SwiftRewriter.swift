@@ -5,7 +5,7 @@ import ObjectiveC
 import Foundation
 import Dispatch
 import Utils
-import GrammarModels
+import ObjcGrammarModels
 import ObjcParser
 import SwiftAST
 import TypeSystem

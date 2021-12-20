@@ -1,7 +1,7 @@
 import Antlr4
 import Utils
 import SwiftAST
-import GrammarModels
+import ObjcGrammarModels
 import KnownType
 import TypeSystem
 

@@ -1,4 +1,4 @@
-import GrammarModels
+import ObjcGrammarModels
 import ObjcParserAntlr
 import ObjcParser
 import Antlr4

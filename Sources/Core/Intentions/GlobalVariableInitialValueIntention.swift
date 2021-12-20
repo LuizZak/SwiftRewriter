@@ -1,4 +1,4 @@
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 
 /// An intention to generate the initial value for a global variable.

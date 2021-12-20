@@ -7,7 +7,7 @@ import class Antlr4.ParseTreeWalker
 import class Antlr4.ParserRuleContext
 import class Antlr4.Parser
 import Utils
-import GrammarModels
+import ObjcGrammarModels
 import GrammarModelBase
 import ObjcParserAntlr
 

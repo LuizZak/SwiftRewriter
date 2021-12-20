@@ -1,5 +1,5 @@
 import SwiftAST
-import GrammarModels
+import ObjcGrammarModels
 
 /// Provides type-transforming support for a Swift rewriter
 public protocol TypeMapper {

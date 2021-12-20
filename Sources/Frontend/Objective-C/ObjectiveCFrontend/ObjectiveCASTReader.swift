@@ -1,6 +1,6 @@
 import SwiftAST
 import TypeSystem
-import GrammarModels
+import ObjcGrammarModels
 import ObjcParserAntlr
 import ObjcParser
 import KnownType

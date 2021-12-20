@@ -1,4 +1,4 @@
-import GrammarModels
+import ObjcGrammarModels
 import GrammarModelBase
 
 /// Protocol for sourcing code strings from

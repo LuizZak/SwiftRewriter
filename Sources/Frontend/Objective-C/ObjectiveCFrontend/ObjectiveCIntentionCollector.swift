@@ -1,4 +1,4 @@
-import GrammarModels
+import ObjcGrammarModels
 import ObjcParser
 import SwiftAST
 import KnownType

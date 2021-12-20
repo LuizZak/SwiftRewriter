@@ -1,5 +1,5 @@
 import Utils
-import GrammarModels
+import ObjcGrammarModels
 
 /// An intention represents the intent of the code transpiler to generate a
 /// file/class/struct/property/etc. with Swift code.

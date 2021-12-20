@@ -33,7 +33,7 @@ let core: [Target] = [
     .target(
         name: "Intentions",
         dependencies: [
-            "SwiftAST", "GrammarModels", "KnownType",
+            "SwiftAST", "ObjcGrammarModels", "KnownType",
         ],
         path: "Sources/Core/Intentions"
     ),
@@ -57,7 +57,7 @@ let core: [Target] = [
         name: "TypeSystem",
         dependencies: [
             "SwiftAST", "ObjcParser", "TypeDefinitions", "Utils",
-            "Intentions", "KnownType", "GrammarModels",
+            "Intentions", "KnownType", "ObjcGrammarModels",
         ],
         path: "Sources/Core/TypeSystem"
     ),
@@ -72,7 +72,7 @@ let core: [Target] = [
         name: "IntentionPasses",
         dependencies: [
             "SwiftAST", "Commons", "Utils", "MiniLexer",
-            "Intentions", "GrammarModels",
+            "Intentions", "ObjcGrammarModels",
         ],
         path: "Sources/Core/IntentionPasses"
     ),
@@ -110,18 +110,18 @@ let objcFrontend: [Target] = [
         path: "Sources/Frontend/Objective-C/ObjcParserAntlr"
     ),
     .target(
-        name: "GrammarModels",
+        name: "ObjcGrammarModels",
         dependencies: [
             "ObjcParserAntlr", "GrammarModelBase", "Utils",
         ],
-        path: "Sources/Frontend/Objective-C/GrammarModels"
+        path: "Sources/Frontend/Objective-C/ObjcGrammarModels"
     ),
     .target(
         name: "ObjcParser",
         dependencies: [
             .product(name: "Antlr4", package: "antlr4-swift"),
             .product(name: "TypeLexing", package: "MiniLexer"),
-            "ObjcParserAntlr", "GrammarModels", "MiniLexer",
+            "ObjcParserAntlr", "ObjcGrammarModels", "MiniLexer",
             "Utils",
         ],
         path: "Sources/Frontend/Objective-C/ObjcParser"
@@ -186,7 +186,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Antlr4", package: "antlr4-swift"),
                 .product(name: "Console", package: "console"),
-                "GrammarModels", "SwiftAST", "ObjcParser",
+                "ObjcGrammarModels", "SwiftAST", "ObjcParser",
                 "Analysis", "TypeDefinitions", "Utils", "Intentions",
                 "TypeSystem", "IntentionPasses", "KnownType",
                 "WriterTargetOutput", "SwiftSyntaxSupport",
@@ -200,7 +200,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Console", package: "console"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                "ObjectiveCFrontend", "SwiftRewriterLib", "ObjcParser", "GrammarModels",
+                "ObjectiveCFrontend", "SwiftRewriterLib", "ObjcParser", "ObjcGrammarModels",
                 "ExpressionPasses", "Utils", "SourcePreprocessors", "SwiftAST",
                 "IntentionPasses", "MiniLexer", "GlobalsProviders", "Commons",
             ],
@@ -210,7 +210,7 @@ let package = Package(
             name: "TestCommons",
             dependencies: [
                 "SwiftAST", "SwiftSyntaxSupport", "SwiftRewriterLib", "Intentions",
-                "KnownType", "GrammarModels", "Utils", "TypeSystem",
+                "KnownType", "ObjcGrammarModels", "Utils", "TypeSystem",
             ],
             path: "Sources/TestCommons"
         ),
@@ -233,17 +233,17 @@ let package = Package(
         .testTarget(
             name: "ObjcParserTests",
             dependencies: [
-                "GrammarModels",
+                "ObjcGrammarModels",
                 "ObjcParser",
             ],
             path: "Tests/Frontend/Objective-C/ObjcParserTests"
         ),
         .testTarget(
-            name: "GrammarModelsTests",
+            name: "ObjcGrammarModelsTests",
             dependencies: [
-                "GrammarModels",
+                "ObjcGrammarModels",
             ],
-            path: "Tests/Frontend/Objective-C/GrammarModelsTests"
+            path: "Tests/Frontend/Objective-C/ObjcGrammarModelsTests"
         ),
         .testTarget(
             name: "GrammarModelBaseTests",
@@ -291,7 +291,7 @@ let package = Package(
             dependencies: [
                 "TypeSystem",
                 "SwiftAST", "ObjcParser", "TypeDefinitions", "Utils",
-                "Intentions", "GrammarModels", "KnownType", "TestCommons",
+                "Intentions", "ObjcGrammarModels", "KnownType", "TestCommons",
                 "GlobalsProviders",
             ],
             path: "Tests/Core/TypeSystemTests"
@@ -309,7 +309,7 @@ let package = Package(
             name: "SwiftRewriterLibTests",
             dependencies: [
                 "SwiftRewriterLib",
-                "SwiftAST", "GrammarModels", "ObjcParser", "ExpressionPasses",
+                "SwiftAST", "ObjcGrammarModels", "ObjcParser", "ExpressionPasses",
                 "IntentionPasses", "TestCommons", "GlobalsProviders",
                 "Intentions", "TypeSystem", "WriterTargetOutput",
                 "SwiftSyntaxSupport", "SwiftSyntaxRewriterPasses",
@@ -351,7 +351,7 @@ let package = Package(
             dependencies: [
                 "IntentionPasses",
                 "ObjectiveCFrontend",
-                "SwiftAST", "GrammarModels", "SwiftRewriterLib",
+                "SwiftAST", "ObjcGrammarModels", "SwiftRewriterLib",
                 "TestCommons", "GlobalsProviders", "TypeSystem",
             ],
             path: "Tests/Core/IntentionPassesTests"

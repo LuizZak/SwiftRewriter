@@ -1,4 +1,4 @@
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 
 /// An intention to generate a class extension from an existing class

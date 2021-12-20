@@ -1,6 +1,6 @@
 import Antlr4
 import Utils
-import GrammarModels
+import ObjcGrammarModels
 
 class CommentQuerier {
     var allComments: [ObjcComment]
