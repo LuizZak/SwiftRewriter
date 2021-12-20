@@ -1,6 +1,5 @@
 /// Node for a @synthesize/@dynamic declaration in a class implementation.
-public class ObjcPropertyImplementation: ObjcASTNode, ObjcInitializableNode {
-    
+public class ObjcPropertyImplementationNode: ObjcASTNode, ObjcInitializableNode {
     /// Returns the kind of this property implementation node.
     /// Defaults to `@synthesize`, if it's missing the required keyword nodes.
     public var kind: Kind {
@@ -13,7 +12,7 @@ public class ObjcPropertyImplementation: ObjcASTNode, ObjcInitializableNode {
         }
     }
     
-    public var list: ObjcPropertySynthesizeList? {
+    public var list: ObjcPropertySynthesizeListNode? {
         firstChild()
     }
     

@@ -75,23 +75,23 @@ public class ObjectiveCIntentionCollector {
             }
             
             switch node {
-            case let n as ObjcClassInterface:
+            case let n as ObjcClassInterfaceNode:
                 self.enterObjcClassInterfaceNode(n)
-            case let n as ObjcClassCategoryInterface:
+            case let n as ObjcClassCategoryInterfaceNode:
                 self.enterObjcClassCategoryNode(n)
-            case let n as ObjcClassImplementation:
+            case let n as ObjcClassImplementationNode:
                 self.enterObjcClassImplementationNode(n)
-            case let n as ObjcClassCategoryImplementation:
+            case let n as ObjcClassCategoryImplementationNode:
                 self.enterObjcClassCategoryImplementationNode(n)
-            case let n as ObjcStructDeclaration:
+            case let n as ObjcStructDeclarationNode:
                 self.enterStructDeclarationNode(n)
-            case let n as ObjcProtocolDeclaration:
+            case let n as ObjcProtocolDeclarationNode:
                 self.enterProtocolDeclarationNode(n)
-            case let n as IVarsList:
+            case let n as ObjcIVarsListNode:
                 self.enterObjcClassIVarsListNode(n)
-            case let n as ObjcEnumDeclaration:
+            case let n as ObjcEnumDeclarationNode:
                 self.enterObjcEnumDeclarationNode(n)
-            case let n as ObjcFunctionDefinition:
+            case let n as ObjcFunctionDefinitionNode:
                 self.enterFunctionDefinitionNode(n)
             default:
                 return
@@ -106,31 +106,31 @@ public class ObjectiveCIntentionCollector {
             case let n as ObjcKeywordNode:
                 self.visitKeywordNode(n)
                 
-            case let n as MethodDefinition:
+            case let n as ObjcMethodDefinitionNode:
                 self.visitObjcClassMethodNode(n)
                 
-            case let n as PropertyDefinition:
+            case let n as ObjcPropertyDefinitionNode:
                 self.visitPropertyDefinitionNode(n)
                 
-            case let n as ObjcPropertySynthesizeItem:
+            case let n as ObjcPropertySynthesizeItemNode:
                 self.visitPropertySynthesizeItemNode(n)
                 
-            case let n as ProtocolReferenceList:
+            case let n as ObjcProtocolReferenceListNode:
                 self.visitObjcClassProtocolReferenceListNode(n)
                 
-            case let n as SuperclassName:
+            case let n as ObjcSuperclassNameNode:
                 self.visitObjcClassSuperclassName(n)
                 
-            case let n as ObjcStructField:
+            case let n as ObjcStructFieldNode:
                 self.visitStructFieldNode(n)
                 
-            case let n as IVarDeclaration:
+            case let n as ObjcIVarDeclarationNode:
                 self.visitObjcClassIVarDeclarationNode(n)
                 
-            case let n as ObjcVariableDeclaration:
+            case let n as ObjcVariableDeclarationNode:
                 self.visitVariableDeclarationNode(n)
                 
-            case let n as ObjcEnumCase:
+            case let n as ObjcEnumCaseNode:
                 self.visitObjcEnumCaseNode(n)
                 
             case let n as ObjcIdentifierNode
@@ -147,21 +147,21 @@ public class ObjectiveCIntentionCollector {
         
         visitor.onExitClosure = { node in
             switch node {
-            case let n as ObjcClassInterface:
+            case let n as ObjcClassInterfaceNode:
                 self.exitObjcClassInterfaceNode(n)
-            case let n as ObjcClassCategoryInterface:
+            case let n as ObjcClassCategoryInterfaceNode:
                 self.exitObjcClassCategoryNode(n)
-            case let n as ObjcClassImplementation:
+            case let n as ObjcClassImplementationNode:
                 self.exitObjcClassImplementationNode(n)
-            case let n as ObjcClassCategoryImplementation:
+            case let n as ObjcClassCategoryImplementationNode:
                 self.exitObjcClassCategoryImplementationNode(n)
-            case let n as ObjcStructDeclaration:
+            case let n as ObjcStructDeclarationNode:
                 self.exitStructDeclarationNode(n)
-            case let n as ObjcProtocolDeclaration:
+            case let n as ObjcProtocolDeclarationNode:
                 self.exitProtocolDeclarationNode(n)
-            case let n as ObjcEnumDeclaration:
+            case let n as ObjcEnumDeclarationNode:
                 self.exitObjcEnumDeclarationNode(n)
-            case let n as ObjcFunctionDefinition:
+            case let n as ObjcFunctionDefinitionNode:
                 self.exitFunctionDefinitionNode(n)
             default:
                 return
@@ -233,7 +233,7 @@ public class ObjectiveCIntentionCollector {
     
     // MARK: - Global Variable
     
-    private func visitVariableDeclarationNode(_ node: ObjcVariableDeclaration) {
+    private func visitVariableDeclarationNode(_ node: ObjcVariableDeclarationNode) {
         guard let ctx = context.findContext(ofType: FileGenerationIntention.self) else {
             return
         }
@@ -268,8 +268,8 @@ public class ObjectiveCIntentionCollector {
         delegate?.reportForLazyResolving(intention: intent)
     }
     
-    // MARK: - ObjcClassInterface
-    private func enterObjcClassInterfaceNode(_ node: ObjcClassInterface) {
+    // MARK: - ObjcClassInterfaceNode
+    private func enterObjcClassInterfaceNode(_ node: ObjcClassInterfaceNode) {
         guard let name = node.identifier?.name else {
             return
         }
@@ -287,14 +287,14 @@ public class ObjectiveCIntentionCollector {
         context.pushContext(intent)
     }
     
-    private func exitObjcClassInterfaceNode(_ node: ObjcClassInterface) {
+    private func exitObjcClassInterfaceNode(_ node: ObjcClassInterfaceNode) {
         if node.identifier?.name != nil {
             context.popContext() // ClassGenerationIntention
         }
     }
     
     // MARK: - ObjcClassCategory
-    private func enterObjcClassCategoryNode(_ node: ObjcClassCategoryInterface) {
+    private func enterObjcClassCategoryNode(_ node: ObjcClassCategoryInterfaceNode) {
         guard let name = node.identifier?.name else {
             return
         }
@@ -314,14 +314,14 @@ public class ObjectiveCIntentionCollector {
         context.pushContext(intent)
     }
     
-    private func exitObjcClassCategoryNode(_ node: ObjcClassCategoryInterface) {
+    private func exitObjcClassCategoryNode(_ node: ObjcClassCategoryInterfaceNode) {
         if node.identifier?.name != nil {
             context.popContext() // ClassExtensionGenerationIntention
         }
     }
     
-    // MARK: - ObjcClassImplementation
-    private func enterObjcClassImplementationNode(_ node: ObjcClassImplementation) {
+    // MARK: - ObjcClassImplementationNode
+    private func enterObjcClassImplementationNode(_ node: ObjcClassImplementationNode) {
         guard let name = node.identifier?.name else {
             return
         }
@@ -338,12 +338,12 @@ public class ObjectiveCIntentionCollector {
         context.pushContext(intent)
     }
     
-    private func exitObjcClassImplementationNode(_ node: ObjcClassImplementation) {
+    private func exitObjcClassImplementationNode(_ node: ObjcClassImplementationNode) {
         context.popContext() // ClassGenerationIntention
     }
     
-    // MARK: - ObjcClassCategoryImplementation
-    private func enterObjcClassCategoryImplementationNode(_ node: ObjcClassCategoryImplementation) {
+    // MARK: - ObjcClassCategoryImplementationNode
+    private func enterObjcClassCategoryImplementationNode(_ node: ObjcClassCategoryImplementationNode) {
         guard let name = node.identifier?.name else {
             return
         }
@@ -362,12 +362,12 @@ public class ObjectiveCIntentionCollector {
         context.pushContext(intent)
     }
     
-    private func exitObjcClassCategoryImplementationNode(_ node: ObjcClassCategoryImplementation) {
+    private func exitObjcClassCategoryImplementationNode(_ node: ObjcClassCategoryImplementationNode) {
         context.popContext() // ClassExtensionGenerationIntention
     }
     
     // MARK: - ProtocolDeclaration
-    private func enterProtocolDeclarationNode(_ node: ObjcProtocolDeclaration) {
+    private func enterProtocolDeclarationNode(_ node: ObjcProtocolDeclarationNode) {
         guard let name = node.identifier?.name else {
             return
         }
@@ -384,14 +384,14 @@ public class ObjectiveCIntentionCollector {
         context.pushContext(intent)
     }
     
-    private func exitProtocolDeclarationNode(_ node: ObjcProtocolDeclaration) {
+    private func exitProtocolDeclarationNode(_ node: ObjcProtocolDeclarationNode) {
         if node.identifier?.name != nil {
             context.popContext() // ProtocolGenerationIntention
         }
     }
     
     // MARK: - Property definition
-    private func visitPropertyDefinitionNode(_ node: PropertyDefinition) {
+    private func visitPropertyDefinitionNode(_ node: ObjcPropertyDefinitionNode) {
         guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
             return
         }
@@ -464,7 +464,7 @@ public class ObjectiveCIntentionCollector {
     }
     
     // MARK: - Property Implementation
-    private func visitPropertySynthesizeItemNode(_ node: ObjcPropertySynthesizeItem) {
+    private func visitPropertySynthesizeItemNode(_ node: ObjcPropertySynthesizeItemNode) {
         if node.isDynamic { // Dynamic property implementations are not yet supported
             return
         }
@@ -491,7 +491,7 @@ public class ObjectiveCIntentionCollector {
     }
     
     // MARK: - Method Declaration
-    private func visitObjcClassMethodNode(_ node: MethodDefinition) {
+    private func visitObjcClassMethodNode(_ node: ObjcMethodDefinitionNode) {
         guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
             return
         }
@@ -557,7 +557,7 @@ public class ObjectiveCIntentionCollector {
         }
     }
     
-    private func visitObjcClassSuperclassName(_ node: SuperclassName) {
+    private func visitObjcClassSuperclassName(_ node: ObjcSuperclassNameNode) {
         guard let ctx = context.findContext(ofType: ClassGenerationIntention.self) else {
             return
         }
@@ -565,7 +565,7 @@ public class ObjectiveCIntentionCollector {
         ctx.superclassName = node.name
     }
     
-    private func visitObjcClassProtocolReferenceListNode(_ node: ProtocolReferenceList) {
+    private func visitObjcClassProtocolReferenceListNode(_ node: ObjcProtocolReferenceListNode) {
         guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
             return
         }
@@ -582,11 +582,11 @@ public class ObjectiveCIntentionCollector {
     }
     
     // MARK: - IVar Section
-    private func enterObjcClassIVarsListNode(_ node: IVarsList) {
+    private func enterObjcClassIVarsListNode(_ node: ObjcIVarsListNode) {
         context.ivarAccessLevel = .private
     }
     
-    private func visitObjcClassIVarDeclarationNode(_ node: IVarDeclaration) {
+    private func visitObjcClassIVarDeclarationNode(_ node: ObjcIVarDeclarationNode) {
         guard let classCtx = context.findContext(ofType: BaseClassIntention.self) else {
             return
         }
@@ -619,7 +619,7 @@ public class ObjectiveCIntentionCollector {
     }
     
     // MARK: - Enum Declaration
-    private func enterObjcEnumDeclarationNode(_ node: ObjcEnumDeclaration) {
+    private func enterObjcEnumDeclarationNode(_ node: ObjcEnumDeclarationNode) {
         guard let identifier = node.identifier else {
             return
         }
@@ -642,7 +642,7 @@ public class ObjectiveCIntentionCollector {
         delegate?.reportForLazyResolving(intention: enumIntention)
     }
     
-    private func visitObjcEnumCaseNode(_ node: ObjcEnumCase) {
+    private func visitObjcEnumCaseNode(_ node: ObjcEnumCaseNode) {
         guard let ctx = context.currentContext(as: EnumGenerationIntention.self) else {
             return
         }
@@ -662,7 +662,7 @@ public class ObjectiveCIntentionCollector {
         ctx.addCase(enumCase)
     }
     
-    private func exitObjcEnumDeclarationNode(_ node: ObjcEnumDeclaration) {
+    private func exitObjcEnumDeclarationNode(_ node: ObjcEnumDeclarationNode) {
         guard node.identifier != nil && node.type != nil else {
             return
         }
@@ -671,7 +671,7 @@ public class ObjectiveCIntentionCollector {
     }
     
     // MARK: - Function Definition
-    private func enterFunctionDefinitionNode(_ node: ObjcFunctionDefinition) {
+    private func enterFunctionDefinitionNode(_ node: ObjcFunctionDefinitionNode) {
         guard node.identifier != nil else {
             return
         }
@@ -710,7 +710,7 @@ public class ObjectiveCIntentionCollector {
         delegate?.reportForLazyResolving(intention: globalFunc)
     }
     
-    private func exitFunctionDefinitionNode(_ node: ObjcFunctionDefinition) {
+    private func exitFunctionDefinitionNode(_ node: ObjcFunctionDefinitionNode) {
         guard node.identifier != nil else {
             return
         }
@@ -719,7 +719,7 @@ public class ObjectiveCIntentionCollector {
     }
     
     // MARK: - Struct declaration
-    private func enterStructDeclarationNode(_ node: ObjcStructDeclaration) {
+    private func enterStructDeclarationNode(_ node: ObjcStructDeclarationNode) {
         var declarators: [ObjcTypeDeclaratorNode] = []
         var nodeIdentifiers: [ObjcIdentifierNode] = []
         if let identifier = node.identifier {
@@ -837,7 +837,7 @@ public class ObjectiveCIntentionCollector {
         }
     }
     
-    private func visitStructFieldNode(_ node: ObjcStructField) {
+    private func visitStructFieldNode(_ node: ObjcStructFieldNode) {
         guard let ctx = context.currentContext(as: StructGenerationIntention.self) else {
             return
         }
@@ -859,12 +859,12 @@ public class ObjectiveCIntentionCollector {
         delegate?.reportForLazyResolving(intention: ivar)
     }
     
-    private func exitStructDeclarationNode(_ node: ObjcStructDeclaration) {
+    private func exitStructDeclarationNode(_ node: ObjcStructDeclarationNode) {
         guard node.identifier != nil else {
             return
         }
         
-        context.popContext() // ObjcStructDeclaration
+        context.popContext() // ObjcStructDeclarationNode
     }
 }
 

@@ -113,6 +113,8 @@
 			"antlr",
 			"autoreleasepool",
 			"Initializable",
+			"ivar",
+			"ivars",
 			"mutex",
 			"Nonnull",
 			"swiftpm",

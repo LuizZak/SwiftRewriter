@@ -2,8 +2,8 @@ import ObjcGrammarModels
 import SwiftAST
 
 public class EnumCaseGenerationIntention: PropertyGenerationIntention {
-    public var typedSource: ObjcEnumCase? {
-        return source as? ObjcEnumCase
+    public var typedSource: ObjcEnumCaseNode? {
+        return source as? ObjcEnumCaseNode
     }
     
     public override var isStatic: Bool {

@@ -1,5 +1,5 @@
 /// A syntax node for an Objective-C protocol (`@protocol`) declaration.
-public class ObjcProtocolDeclaration: ObjcASTNode, ObjcInitializableNode {
+public class ObjcProtocolDeclarationNode: ObjcASTNode, ObjcInitializableNode {
     public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
@@ -9,16 +9,16 @@ public class ObjcProtocolDeclaration: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public extension ObjcProtocolDeclaration {
-    var properties: [PropertyDefinition] {
+public extension ObjcProtocolDeclarationNode {
+    var properties: [ObjcPropertyDefinitionNode] {
         childrenMatching()
     }
     
-    var protocolList: ProtocolReferenceList? {
+    var protocolList: ObjcProtocolReferenceListNode? {
         firstChild()
     }
     
-    var methods: [MethodDefinition] {
+    var methods: [ObjcMethodDefinitionNode] {
         childrenMatching()
     }
 }

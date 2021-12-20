@@ -4,8 +4,8 @@ import KnownType
 
 /// An intention to create an instance variable (Objective-C's 'ivar').
 public final class InstanceVariableGenerationIntention: MemberGenerationIntention, MutableValueStorageIntention {
-    public var typedSource: IVarDeclaration? {
-        source as? IVarDeclaration
+    public var typedSource: ObjcIVarDeclarationNode? {
+        source as? ObjcIVarDeclarationNode
     }
     
     public var name: String

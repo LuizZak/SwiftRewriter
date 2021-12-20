@@ -17,7 +17,7 @@ public class ObjectiveCMethodSignatureConverter {
     
     /// Generates a function definition from an objective-c signature to use as
     /// a class-type function definition.
-    public func generateDefinitionSignature(from objcMethod: MethodDefinition) -> FunctionSignature {
+    public func generateDefinitionSignature(from objcMethod: ObjcMethodDefinitionNode) -> FunctionSignature {
         var sign =
             FunctionSignature(name: "__",
                               parameters: [],
@@ -56,7 +56,7 @@ public class ObjectiveCMethodSignatureConverter {
     
     /// Generates a function definition from a C signature to use as a global
     /// function signature.
-    public func generateDefinitionSignature(from function: ObjcFunctionDefinition) -> FunctionSignature {
+    public func generateDefinitionSignature(from function: ObjcFunctionDefinitionNode) -> FunctionSignature {
         var sign =
             FunctionSignature(name: function.identifier?.name ?? "__",
                               parameters: [],
@@ -93,7 +93,7 @@ public class ObjectiveCMethodSignatureConverter {
     
     // MARK: - Private Members
     
-    private func processKeywords(_ keywords: [KeywordDeclarator],
+    private func processKeywords(_ keywords: [ObjcKeywordDeclaratorNode],
                                  _ target: inout FunctionSignature) {
         
         guard !keywords.isEmpty else {
@@ -133,7 +133,7 @@ public class ObjectiveCMethodSignatureConverter {
         }
     }
     
-    private func nullabilityFrom(specifiers: [NullabilitySpecifier]) -> TypeNullability? {
+    private func nullabilityFrom(specifiers: [ObjcNullabilitySpecifierNode]) -> TypeNullability? {
         guard let last = specifiers.last else {
             return inNonnullContext ? .nonnull : nil
         }

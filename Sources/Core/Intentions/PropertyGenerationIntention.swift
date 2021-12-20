@@ -5,8 +5,8 @@ import KnownType
 /// An intention to generate a property, either static/instance, computed/stored
 /// for a type definition.
 public class PropertyGenerationIntention: MemberGenerationIntention, MutableValueStorageIntention {
-    public var propertySource: PropertyDefinition? {
-        source as? PropertyDefinition
+    public var propertySource: ObjcPropertyDefinitionNode? {
+        source as? ObjcPropertyDefinitionNode
     }
     
     public var isOverride: Bool = false

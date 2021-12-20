@@ -44,7 +44,7 @@ public class ObjcParser {
     public var diagnostics: Diagnostics
     
     /// The root global context note after parsing.
-    public var rootNode: GlobalContextNode
+    public var rootNode: ObjcGlobalContextNode
     
     // NOTE: This is mostly a hack to work around issues related to using primarily
     // ANTLR for parsing. This should be done in a smoother way later on, if possible.
@@ -86,7 +86,7 @@ public class ObjcParser {
         lexer = ObjcLexer(source: source)
         context = NodeCreationContext()
         diagnostics = Diagnostics()
-        rootNode = GlobalContextNode(isInNonnullContext: false)
+        rootNode = ObjcGlobalContextNode(isInNonnullContext: false)
     }
     
     func startRange() -> RangeMarker {

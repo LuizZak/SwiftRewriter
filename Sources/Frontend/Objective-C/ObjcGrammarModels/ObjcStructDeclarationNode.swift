@@ -1,6 +1,6 @@
 /// An Objective-C `struct` typedef declaration.
-public final class ObjcStructDeclaration: ObjcASTNode, ObjcInitializableNode {
-    public var body: ObjcStructDeclarationBody? {
+public final class ObjcStructDeclarationNode: ObjcASTNode, ObjcInitializableNode {
+    public var body: ObjcStructDeclarationBodyNode? {
         firstChild()
     }
     
@@ -14,8 +14,8 @@ public final class ObjcStructDeclaration: ObjcASTNode, ObjcInitializableNode {
 }
 
 /// The body of a C struct declaration
-public final class ObjcStructDeclarationBody: ObjcASTNode, ObjcInitializableNode {
-    public var fields: [ObjcStructField] {
+public final class ObjcStructDeclarationBodyNode: ObjcASTNode, ObjcInitializableNode {
+    public var fields: [ObjcStructFieldNode] {
         childrenMatching()
     }
     
@@ -28,7 +28,7 @@ public final class ObjcStructDeclarationBody: ObjcASTNode, ObjcInitializableNode
     }
 }
 
-public final class ObjcStructField: IVarDeclaration {
+public final class ObjcStructFieldNode: ObjcIVarDeclarationNode {
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)
     }

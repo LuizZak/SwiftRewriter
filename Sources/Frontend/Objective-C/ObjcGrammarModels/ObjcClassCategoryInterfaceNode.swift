@@ -1,5 +1,5 @@
 /// A class category that extends a class with additional properties/methods/ivars/protocols.
-public class ObjcClassCategoryInterface: ObjcASTNode, ObjcInitializableNode {
+public class ObjcClassCategoryInterfaceNode: ObjcASTNode, ObjcInitializableNode {
     public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
@@ -12,27 +12,27 @@ public class ObjcClassCategoryInterface: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public extension ObjcClassCategoryInterface {
-    var properties: [PropertyDefinition] {
+public extension ObjcClassCategoryInterfaceNode {
+    var properties: [ObjcPropertyDefinitionNode] {
         childrenMatching()
     }
     
-    var protocolList: ProtocolReferenceList? {
+    var protocolList: ObjcProtocolReferenceListNode? {
         firstChild()
     }
     
-    var ivarsList: IVarsList? {
+    var ivarsList: ObjcIVarsListNode? {
         firstChild()
     }
     
-    var methods: [MethodDefinition] {
+    var methods: [ObjcMethodDefinitionNode] {
         childrenMatching()
     }
 }
 
 /// A syntax node for an Objective-C class implementation (`@implementation`)
 /// declaration for a category.
-public class ObjcClassCategoryImplementation: ObjcASTNode, ObjcInitializableNode {
+public class ObjcClassCategoryImplementationNode: ObjcASTNode, ObjcInitializableNode {
     public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
@@ -45,12 +45,12 @@ public class ObjcClassCategoryImplementation: ObjcASTNode, ObjcInitializableNode
     }
 }
 
-public extension ObjcClassCategoryImplementation {
-    var ivarsList: IVarsList? {
+public extension ObjcClassCategoryImplementationNode {
+    var ivarsList: ObjcIVarsListNode? {
         firstChild()
     }
     
-    var methods: [MethodDefinition] {
+    var methods: [ObjcMethodDefinitionNode] {
         childrenMatching()
     }
 }

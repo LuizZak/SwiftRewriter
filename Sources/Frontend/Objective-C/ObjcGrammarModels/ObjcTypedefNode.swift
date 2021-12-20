@@ -3,7 +3,7 @@ public class ObjcTypedefNode: ObjcASTNode, ObjcInitializableNode {
     public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
-    public var structDeclaration: ObjcStructDeclaration? {
+    public var structDeclaration: ObjcStructDeclarationNode? {
         firstChild()
     }
     public var type: ObjcTypeNameNode? {

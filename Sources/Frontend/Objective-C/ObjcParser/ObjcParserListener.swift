@@ -5,7 +5,7 @@ import GrammarModelBase
 
 internal class ObjcParserListener: ObjectiveCParserBaseListener {
     let context: NodeCreationContext
-    let rootNode: GlobalContextNode
+    let rootNode: ObjcGlobalContextNode
     let typeParser: ObjcTypeParser
     private var nonnullContextQuerier: NonnullContextQuerier
     private var commentQuerier: CommentQuerier
@@ -36,7 +36,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         
         typeParser = ObjcTypeParser(state: state, antlrSettings: antlrSettings)
         context = NodeCreationContext()
-        rootNode = GlobalContextNode(isInNonnullContext: false)
+        rootNode = ObjcGlobalContextNode(isInNonnullContext: false)
         mapper = GenericParseTreeContextMapper(
             source: source,
             nonnullContextQuerier: nonnullContextQuerier,
@@ -62,49 +62,49 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         )
         mapper.addRuleMap(
             rule: O.ClassInterfaceContext.self,
-            nodeType: ObjcClassInterface.self,
+            nodeType: ObjcClassInterfaceNode.self,
             collectComments: true
         )
         mapper.addRuleMap(
             rule: O.ClassImplementationContext.self,
-            nodeType: ObjcClassImplementation.self,
+            nodeType: ObjcClassImplementationNode.self,
             collectComments: true
         )
         mapper.addRuleMap(
             rule: O.CategoryInterfaceContext.self,
-            nodeType: ObjcClassCategoryInterface.self,
+            nodeType: ObjcClassCategoryInterfaceNode.self,
             collectComments: true
         )
         mapper.addRuleMap(
             rule: O.CategoryImplementationContext.self,
-            nodeType: ObjcClassCategoryImplementation.self,
+            nodeType: ObjcClassCategoryImplementationNode.self,
             collectComments: true
         )
         mapper.addRuleMap(
             rule: O.MethodDeclarationContext.self,
-            nodeType: MethodDefinition.self,
+            nodeType: ObjcMethodDefinitionNode.self,
             collectComments: true
         )
         mapper.addRuleMap(
             rule: O.MethodDefinitionContext.self,
-            nodeType: MethodDefinition.self,
+            nodeType: ObjcMethodDefinitionNode.self,
             collectComments: true
         )
         mapper.addRuleMap(
             rule: O.KeywordDeclaratorContext.self,
-            nodeType: KeywordDeclarator.self
+            nodeType: ObjcKeywordDeclaratorNode.self
         )
         mapper.addRuleMap(
             rule: O.MethodSelectorContext.self,
-            nodeType: MethodSelector.self
+            nodeType: ObjcMethodSelectorNide.self
         )
         mapper.addRuleMap(
             rule: O.MethodTypeContext.self,
-            nodeType: MethodType.self
+            nodeType: ObjcMethodTypeNode.self
         )
         mapper.addRuleMap(
             rule: O.InstanceVariablesContext.self,
-            nodeType: IVarsList.self
+            nodeType: ObjcIVarsListNode.self
         )
         mapper.addRuleMap(
             rule: O.TypedefDeclarationContext.self,
@@ -117,35 +117,35 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         )
         mapper.addRuleMap(
             rule: O.ProtocolDeclarationContext.self,
-            nodeType: ObjcProtocolDeclaration.self,
+            nodeType: ObjcProtocolDeclarationNode.self,
             collectComments: true
         )
         mapper.addRuleMap(
             rule: O.EnumDeclarationContext.self,
-            nodeType: ObjcEnumDeclaration.self,
+            nodeType: ObjcEnumDeclarationNode.self,
             collectComments: true
         )
         mapper.addRuleMap(
             rule: O.FunctionDeclarationContext.self,
-            nodeType: ObjcFunctionDefinition.self,
+            nodeType: ObjcFunctionDefinitionNode.self,
             collectComments: true
         )
         mapper.addRuleMap(
             rule: O.FunctionDefinitionContext.self,
-            nodeType: ObjcFunctionDefinition.self,
+            nodeType: ObjcFunctionDefinitionNode.self,
             collectComments: true
         )
         mapper.addRuleMap(
             rule: O.PropertyImplementationContext.self,
-            nodeType: ObjcPropertyImplementation.self
+            nodeType: ObjcPropertyImplementationNode.self
         )
         mapper.addRuleMap(
             rule: O.PropertySynthesizeListContext.self,
-            nodeType: ObjcPropertySynthesizeList.self
+            nodeType: ObjcPropertySynthesizeListNode.self
         )
         mapper.addRuleMap(
             rule: O.PropertySynthesizeItemContext.self,
-            nodeType: ObjcPropertySynthesizeItem.self
+            nodeType: ObjcPropertySynthesizeItemNode.self
         )
         
     }
@@ -177,7 +177,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     // MARK: - Class Interface
     override func enterClassInterface(_ ctx: ObjectiveCParser.ClassInterfaceContext) {
-        guard let classNode = context.currentContextNode(as: ObjcClassInterface.self) else {
+        guard let classNode = context.currentContextNode(as: ObjcClassInterfaceNode.self) else {
             return
         }
         guard let classInterfaceName = ctx.classInterfaceName() else {
@@ -211,7 +211,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     // MARK: - Class Category
     override func enterCategoryInterface(_ ctx: ObjectiveCParser.CategoryInterfaceContext) {
-        guard let classNode = context.currentContextNode(as: ObjcClassCategoryInterface.self) else {
+        guard let classNode = context.currentContextNode(as: ObjcClassCategoryInterfaceNode.self) else {
             return
         }
         
@@ -240,7 +240,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     // MARK: - Class Implementation
     override func enterClassImplementation(_ ctx: ObjectiveCParser.ClassImplementationContext) {
-        guard let classNode = context.currentContextNode(as: ObjcClassImplementation.self) else {
+        guard let classNode = context.currentContextNode(as: ObjcClassImplementationNode.self) else {
             return
         }
         guard let classImplementationName = ctx.classImplementatioName() else {
@@ -261,7 +261,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     override func enterCategoryImplementation(_ ctx: ObjectiveCParser.CategoryImplementationContext) {
-        guard let classNode = context.currentContextNode(as: ObjcClassCategoryImplementation.self) else {
+        guard let classNode = context.currentContextNode(as: ObjcClassCategoryImplementationNode.self) else {
             return
         }
         
@@ -327,7 +327,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 let ident = nodeFactory.makeIdentifier(from: identifier)
                 nodeFactory.updateSourceLocation(for: typeNode, with: fieldDeclarator)
                 
-                let ivar = IVarDeclaration(isInNonnullContext: nonnull)
+                let ivar = ObjcIVarDeclarationNode(isInNonnullContext: nonnull)
                 ivar.precedingComments = commentQuerier.popClosestCommentsBefore(node: decl)
                 ivar.addChild(typeNode)
                 ivar.addChild(ident)
@@ -340,7 +340,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     // MARK: - Protocol Declaration
     override func enterProtocolDeclaration(_ ctx: ObjectiveCParser.ProtocolDeclarationContext) {
-        guard context.currentContextNode(as: ObjcProtocolDeclaration.self) != nil else {
+        guard context.currentContextNode(as: ObjcProtocolDeclarationNode.self) != nil else {
             return
         }
         
@@ -414,7 +414,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     // MARM: - Property implementaiton
     override func exitPropertyImplementation(_ ctx: ObjectiveCParser.PropertyImplementationContext) {
-        guard let node = context.currentContextNode(as: ObjcPropertyImplementation.self) else {
+        guard let node = context.currentContextNode(as: ObjcPropertyImplementationNode.self) else {
             return
         }
         guard let list = node.list else {
@@ -427,7 +427,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     override func enterPropertySynthesizeItem(_ ctx: ObjectiveCParser.PropertySynthesizeItemContext) {
-        guard let node = context.currentContextNode(as: ObjcPropertySynthesizeItem.self) else {
+        guard let node = context.currentContextNode(as: ObjcPropertySynthesizeItemNode.self) else {
             return
         }
         
@@ -441,7 +441,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     // MARK: - Method Declaration
     override func enterMethodDeclaration(_ ctx: ObjectiveCParser.MethodDeclarationContext) {
-        guard let node = context.currentContextNode(as: MethodDefinition.self) else {
+        guard let node = context.currentContextNode(as: ObjcMethodDefinitionNode.self) else {
             return
         }
         
@@ -450,7 +450,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     override func enterMethodDefinition(_ ctx: ObjectiveCParser.MethodDefinitionContext) {
-        guard let node = context.currentContextNode(as: MethodDefinition.self) else {
+        guard let node = context.currentContextNode(as: ObjcMethodDefinitionNode.self) else {
             return
         }
         
@@ -469,7 +469,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     override func enterKeywordDeclarator(_ ctx: ObjectiveCParser.KeywordDeclaratorContext) {
-        guard let node = context.currentContextNode(as: KeywordDeclarator.self) else {
+        guard let node = context.currentContextNode(as: ObjcKeywordDeclaratorNode.self) else {
             return
         }
         
@@ -574,7 +574,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             return
         }
         
-        guard let enumNode = context.currentContextNode(as: ObjcEnumDeclaration.self) else {
+        guard let enumNode = context.currentContextNode(as: ObjcEnumDeclarationNode.self) else {
             return
         }
         
@@ -614,7 +614,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     // MARK: - Function Declaration/Definition
     override func enterFunctionDefinition(_ ctx: ObjectiveCParser.FunctionDefinitionContext) {
-        guard let function = context.currentContextNode(as: ObjcFunctionDefinition.self) else {
+        guard let function = context.currentContextNode(as: ObjcFunctionDefinitionNode.self) else {
             return
         }
         guard let compoundStatement = ctx.compoundStatement() else {
@@ -627,7 +627,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     override func enterFunctionSignature(_ ctx: ObjectiveCParser.FunctionSignatureContext) {
-        guard let function = context.currentContextNode(as: ObjcFunctionDefinition.self) else {
+        guard let function = context.currentContextNode(as: ObjcFunctionDefinitionNode.self) else {
             return
         }
         
@@ -648,14 +648,14 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Parameter list
-        context.pushContext(nodeType: ObjcParameterList.self)
+        context.pushContext(nodeType: ObjcParameterListNode.self)
         defer {
             context.popContext()
         }
         
         if let params = ctx.parameterList(), let paramDecl = params.parameterDeclarationList() {
             for param in paramDecl.parameterDeclaration() {
-                context.pushContext(nodeType: ObjcFunctionParameter.self)
+                context.pushContext(nodeType: ObjcFunctionParameterNode.self)
                 defer {
                     context.popContext()
                 }
@@ -685,7 +685,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             
             if params.ELIPSIS() != nil {
                 let variadicParameter =
-                    ObjcVariadicParameter(isInNonnullContext: isInNonnullContext(ctx))
+                    ObjcVariadicParameterNode(isInNonnullContext: isInNonnullContext(ctx))
                 nodeFactory.updateSourceLocation(for: variadicParameter, with: params)
                 context.addChildNode(variadicParameter)
             }
@@ -794,7 +794,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                 
                 let inNonnull = nonnullContextQuerier.isInNonnullContext(initDeclarator)
                 
-                let varDecl = ObjcVariableDeclaration(isInNonnullContext: inNonnull)
+                let varDecl = ObjcVariableDeclarationNode(isInNonnullContext: inNonnull)
                 varDecl.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
                 
                 let identifierNode = nodeFactory.makeIdentifier(from: identifier)
@@ -805,7 +805,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                 varDecl.addChild(typeNameNode)
                 
                 if let initializer = initDeclarator.initializer() {
-                    let expression = ExpressionNode(isInNonnullContext: inNonnull)
+                    let expression = ObjcExpressionNode(isInNonnullContext: inNonnull)
                     expression.expression = initializer.expression()
                     if let exp = initializer.expression() {
                         nodeFactory.updateSourceLocation(for: expression, with: exp)
@@ -813,7 +813,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                     let constantExpression = ObjcConstantExpressionNode(isInNonnullContext: inNonnull)
                     constantExpression.addChild(expression)
                     constantExpression.updateSourceRange()
-                    let initialExpression = ObjcInitialExpression(isInNonnullContext: inNonnull)
+                    let initialExpression = ObjcInitialExpressionNode(isInNonnullContext: inNonnull)
                     initialExpression.addChild(constantExpression)
                     initialExpression.updateSourceRange()
                     
@@ -848,7 +848,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
 }
 
 private class StructListener: ObjectiveCParserBaseListener {
-    var structs: [ObjcStructDeclaration] = []
+    var structs: [ObjcStructDeclarationNode] = []
     var typeParser: ObjcTypeParser
     var nonnullContextQuerier: NonnullContextQuerier
     var nodeFactory: ObjcASTNodeFactory
@@ -869,7 +869,7 @@ private class StructListener: ObjectiveCParserBaseListener {
         
         let inNonnull = nonnullContextQuerier.isInNonnullContext(ctx)
         
-        let str = ObjcStructDeclaration(isInNonnullContext: inNonnull)
+        let str = ObjcStructDeclarationNode(isInNonnullContext: inNonnull)
         nodeFactory.updateSourceLocation(for: str, with: ctx)
         
         if let identifier = ctx.identifier() {
@@ -880,7 +880,7 @@ private class StructListener: ObjectiveCParserBaseListener {
         
         // Declaration body
         if ctx.LBRACE() != nil {
-            let body = ObjcStructDeclarationBody(isInNonnullContext: inNonnull)
+            let body = ObjcStructDeclarationBodyNode(isInNonnullContext: inNonnull)
             
             str.addChild(body)
             
@@ -893,7 +893,7 @@ private class StructListener: ObjectiveCParserBaseListener {
                     = typeParser.parseObjcTypes(in: fieldDeclaration)
                 
                 for (type, identifier) in zip(types, names) {
-                    let field = ObjcStructField(isInNonnullContext: inNonnull)
+                    let field = ObjcStructFieldNode(isInNonnullContext: inNonnull)
                     
                     let identifierNode = nodeFactory.makeIdentifier(from: identifier)
                     
@@ -914,7 +914,7 @@ private class StructListener: ObjectiveCParserBaseListener {
 }
 
 private class PropertyListener: ObjectiveCParserBaseListener {
-    var property: PropertyDefinition
+    var property: ObjcPropertyDefinitionNode
     var typeParser: ObjcTypeParser
     var nonnullContextQuerier: NonnullContextQuerier
     var commentQuerier: CommentQuerier
@@ -928,7 +928,7 @@ private class PropertyListener: ObjectiveCParserBaseListener {
          inOptionalContext: Bool,
          updateSourceLocation: @escaping (ObjcASTNode, ParserRuleContext) -> Void) {
         
-        self.property = PropertyDefinition(isInNonnullContext: isInNonnullContext)
+        self.property = ObjcPropertyDefinitionNode(isInNonnullContext: isInNonnullContext)
         self.typeParser = typeParser
         self.nonnullContextQuerier = nonnullContextQuerier
         self.commentQuerier = commentQuerier
@@ -993,13 +993,13 @@ private class PropertyListener: ObjectiveCParserBaseListener {
     override func enterPropertyAttributesList(_ ctx: ObjectiveCParser.PropertyAttributesListContext) {
         let inNonnull = nonnullContextQuerier.isInNonnullContext(ctx)
         
-        let node = PropertyAttributesList(isInNonnullContext: inNonnull)
+        let node = ObjcPropertyAttributesListNode(isInNonnullContext: inNonnull)
         updateSourceLocation(node, ctx)
         property.addChild(node)
     }
     
     override func enterPropertyAttribute(_ ctx: ObjectiveCParser.PropertyAttributeContext) {
-        let modifier: PropertyAttributeNode.Attribute
+        let modifier: ObjcPropertyAttributeNode.Attribute
         
         if let ident = ctx.identifier()?.getText() {
             if ctx.GETTER() != nil {
@@ -1015,7 +1015,7 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         
         let inNonnull = nonnullContextQuerier.isInNonnullContext(ctx)
         
-        let node = PropertyAttributeNode(modifier: modifier,
+        let node = ObjcPropertyAttributeNode(modifier: modifier,
                                          isInNonnullContext: inNonnull)
         updateSourceLocation(node, ctx)
         property.attributesList?.addChild(node)

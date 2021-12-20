@@ -226,7 +226,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
         return ObjectiveCMethodSignatureConverter(typeMapper: mapper, inNonnullContext: false)
     }
     
-    private func parseMethodSign(_ source: String) -> MethodDefinition {
+    private func parseMethodSign(_ source: String) -> ObjcMethodDefinitionNode {
         let finalSrc = """
         @interface myClass
         \(source)
@@ -239,8 +239,8 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
         
         let node =
             parser.rootNode
-                .firstChild(ofType: ObjcClassInterface.self)?
-                .firstChild(ofType: MethodDefinition.self)
+                .firstChild(ofType: ObjcClassInterfaceNode.self)?
+                .firstChild(ofType: ObjcMethodDefinitionNode.self)
         return node!
     }
     
