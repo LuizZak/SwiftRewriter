@@ -316,6 +316,7 @@ let package = Package(
             dependencies: [
                 "ExpressionPasses",
                 .product(name: "Antlr4", package: "antlr4-swift"),
+                "ObjectiveCFrontend",
                 "SwiftAST", "SwiftRewriterLib", "ObjcParser",
                 "ObjcParserAntlr", "IntentionPasses", "GlobalsProviders",
                 "TypeSystem", "TestCommons",
@@ -335,6 +336,7 @@ let package = Package(
             name: "IntentionPassesTests",
             dependencies: [
                 "IntentionPasses",
+                "ObjectiveCFrontend",
                 "SwiftAST", "GrammarModels", "SwiftRewriterLib",
                 "TestCommons", "GlobalsProviders", "TypeSystem",
             ],
@@ -369,6 +371,7 @@ let package = Package(
             name: "ObjectiveCFrontendTests",
             dependencies: [
                 "ObjectiveCFrontend",
+                "TestCommons",
             ],
             path: "Tests/Frontend/Objective-C/ObjectiveCFrontendTests"
         ),
