@@ -3,6 +3,13 @@ import PackageDescription
 
 let core: [Target] = [
     .target(
+        name: "AntlrCommons",
+        dependencies: [
+            .product(name: "Antlr4", package: "antlr4-swift"),
+        ],
+        path: "Sources/Core/AntlrCommons"
+    ),
+    .target(
         name: "WriterTargetOutput",
         dependencies: [
             "Utils",
@@ -121,7 +128,7 @@ let objcFrontend: [Target] = [
         dependencies: [
             .product(name: "Antlr4", package: "antlr4-swift"),
             .product(name: "TypeLexing", package: "MiniLexer"),
-            "ObjcParserAntlr", "ObjcGrammarModels", "MiniLexer",
+            "ObjcParserAntlr", "AntlrCommons", "ObjcGrammarModels", "MiniLexer",
             "Utils",
         ],
         path: "Sources/Frontend/Objective-C/ObjcParser"
@@ -159,11 +166,20 @@ let jsFrontend: [Target] = [
         path: "Sources/Frontend/JavaScript/JsParserAntlr"
     ),
     .target(
+        name: "JsGrammarModels",
+        dependencies: [
+            "JsParserAntlr", "GrammarModelBase", "Utils"
+        ],
+        path: "Sources/Frontend/JavaScript/JsGrammarModels"
+    ),
+    .target(
         name: "JsParser",
         dependencies: [
             .product(name: "Antlr4", package: "antlr4-swift"),
             .product(name: "TypeLexing", package: "MiniLexer"),
             "JsParserAntlr",
+            "JsGrammarModels",
+            "AntlrCommons",
             "MiniLexer",
             "Utils",
         ],

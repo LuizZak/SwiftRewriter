@@ -1,4 +1,5 @@
 import Foundation
+import AntlrCommons
 import ObjectiveCFrontend
 
 public struct Settings {

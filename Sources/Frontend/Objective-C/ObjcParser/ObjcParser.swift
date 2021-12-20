@@ -6,21 +6,11 @@ import class Antlr4.ATNSimulator
 import class Antlr4.ParseTreeWalker
 import class Antlr4.ParserRuleContext
 import class Antlr4.Parser
+import AntlrCommons
 import Utils
 import ObjcGrammarModels
 import GrammarModelBase
 import ObjcParserAntlr
-
-/// Describes settings for ANTLR parsing for an `ObjcParser` instance.
-public struct AntlrSettings {
-    public static let `default` = AntlrSettings(forceUseLLPrediction: false)
-    
-    public var forceUseLLPrediction: Bool
-    
-    public init(forceUseLLPrediction: Bool) {
-        self.forceUseLLPrediction = forceUseLLPrediction
-    }
-}
 
 public class ObjcParser {
     /// A state used to instance single threaded parsers.

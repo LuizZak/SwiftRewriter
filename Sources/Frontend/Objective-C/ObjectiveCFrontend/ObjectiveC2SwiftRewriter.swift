@@ -5,6 +5,7 @@ import ObjectiveC
 import Foundation
 import Dispatch
 import Utils
+import AntlrCommons
 import GrammarModelBase
 import ObjcGrammarModels
 import ObjcParser
