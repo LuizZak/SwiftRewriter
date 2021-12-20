@@ -1,4 +1,5 @@
 import Utils
+import GrammarModelBase
 
 /// An Objective-C preprocessor from an input file
 public struct ObjcPreprocessorDirective: Codable {

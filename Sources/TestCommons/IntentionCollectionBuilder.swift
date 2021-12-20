@@ -4,6 +4,7 @@ import SwiftAST
 import KnownType
 import Intentions
 import TypeSystem
+import GrammarModelBase
 
 /// An empty initializer used as default argument of initializer closure parameters
 /// for `IntentionCollectionBuilder` and related classes.

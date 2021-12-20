@@ -1,6 +1,7 @@
 import Antlr4
 import ObjcParserAntlr
 import Utils
+import GrammarModelBase
 
 /// Base node type
 open class ASTNode {
@@ -12,7 +13,7 @@ open class ASTNode {
     /// Original source for this node.
     public var originalSource: Source?
     
-    /// Overriden by subclasses to provide custom short descriptions to be used
+    /// Overridden by subclasses to provide custom short descriptions to be used
     /// when printing AST nodes for diagnostics
     public var shortDescription: String {
         ""

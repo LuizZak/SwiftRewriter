@@ -1,4 +1,5 @@
 import Utils
+import GrammarModelBase
 
 /// A node that represents the global namespace
 public final class GlobalContextNode: ASTNode, InitializableNode {

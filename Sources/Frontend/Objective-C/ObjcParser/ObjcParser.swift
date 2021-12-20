@@ -8,6 +8,7 @@ import class Antlr4.ParserRuleContext
 import class Antlr4.Parser
 import Utils
 import GrammarModels
+import GrammarModelBase
 import ObjcParserAntlr
 
 /// Describes settings for ANTLR parsing for an `ObjcParser` instance.
