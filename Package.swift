@@ -150,6 +150,27 @@ let objcFrontend: [Target] = [
     ),
 ]
 
+let jsFrontend: [Target] = [
+    .target(
+        name: "JsParserAntlr",
+        dependencies: [
+            .product(name: "Antlr4", package: "antlr4-swift"),
+        ],
+        path: "Sources/Frontend/JavaScript/JsParserAntlr"
+    ),
+    .target(
+        name: "JsParser",
+        dependencies: [
+            .product(name: "Antlr4", package: "antlr4-swift"),
+            .product(name: "TypeLexing", package: "MiniLexer"),
+            "JsParserAntlr",
+            "MiniLexer",
+            "Utils",
+        ],
+        path: "Sources/Frontend/JavaScript/JsParser"
+    ),
+]
+
 //
 
 let package = Package(
