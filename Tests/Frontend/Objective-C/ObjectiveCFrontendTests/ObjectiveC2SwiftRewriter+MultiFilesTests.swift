@@ -1,6 +1,6 @@
 import XCTest
 import ObjcParser
-import GrammarModels
+import ObjcGrammarModels
 
 @testable import ObjectiveCFrontend
 

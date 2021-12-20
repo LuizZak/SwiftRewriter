@@ -1,5 +1,5 @@
 import XCTest
-import GrammarModels
+import ObjcGrammarModels
 @testable import ObjcParser
 
 class ObjcLexer_TokenizerTests: XCTestCase {

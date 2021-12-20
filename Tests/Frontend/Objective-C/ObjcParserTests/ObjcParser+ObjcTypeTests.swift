@@ -1,6 +1,6 @@
 import XCTest
 @testable import ObjcParser
-import GrammarModels
+import ObjcGrammarModels
 
 class ObjcParser_ObjcTypeTests: XCTestCase {
     

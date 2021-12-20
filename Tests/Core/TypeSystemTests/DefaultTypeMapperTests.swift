@@ -1,7 +1,7 @@
 import XCTest
 import TypeSystem
 import ObjcParser
-import GrammarModels
+import ObjcGrammarModels
 import SwiftAST
 
 class DefaultTypeMapperTests: XCTestCase {

@@ -6,7 +6,7 @@ public class PropertyImplementation: ASTNode, InitializableNode {
     public var kind: PropertyImplementationKind {
         let kws = childrenMatching(type: KeywordNode.self)
         
-        if kws.contains(where: { $0.keyword == Keyword.atDynamic }) {
+        if kws.contains(where: { $0.keyword == ObjcKeyword.atDynamic }) {
             return .dynamic
         } else {
             return .synthesize

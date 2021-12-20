@@ -34,7 +34,7 @@ All input parsing for a single file can be done with just an `ObjcParser` instan
 
 Since trees produced by ANTLR are too heavyweight and reflect a lot of the complexity of Objective-C's grammar (which itself is complex due to the necessity to parse virtually any valid Objective-C source code), the produced AST is converted into a customized AST representation that is more useful for manipulation, rooted into a base `ASTNode` class.
 
-The source code for the AST class structure used is found inside the `GrammarModels` target, and is used throughout the rest of the process to inspect the input AST.
+The source code for the AST class structure used is found inside the `ObjcGrammarModels` target, and is used throughout the rest of the process to inspect the input AST.
 
 #### 2. Statements parsing
 

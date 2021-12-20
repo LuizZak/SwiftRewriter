@@ -1,5 +1,4 @@
 import Antlr4
-import ObjcParserAntlr
 import Utils
 import GrammarModelBase
 

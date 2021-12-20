@@ -2,7 +2,7 @@ import XCTest
 import SwiftAST
 import ObjcParser
 import Intentions
-import GrammarModels
+import ObjcGrammarModels
 import TypeSystem
 import SwiftRewriterLib
 

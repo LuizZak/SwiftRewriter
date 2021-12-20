@@ -7,7 +7,7 @@ import SwiftSyntaxSupport
 import TypeSystem
 import SwiftAST
 import WriterTargetOutput
-import GrammarModels
+import ObjcGrammarModels
 import GrammarModelBase
 
 @testable import ObjectiveCFrontend

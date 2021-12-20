@@ -70,9 +70,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::GrammarModels"
-               BuildableName = "GrammarModels.framework"
-               BlueprintName = "GrammarModels"
+               BlueprintIdentifier = "SwiftRewriter::ObjcGrammarModels"
+               BuildableName = "ObjcGrammarModels.framework"
+               BlueprintName = "ObjcGrammarModels"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

@@ -14,7 +14,7 @@ public enum TokenType: Equatable {
     
     case identifier(String)
     case typeQualifier(String)
-    case keyword(Keyword)
+    case keyword(ObjcKeyword)
     
     case at
     

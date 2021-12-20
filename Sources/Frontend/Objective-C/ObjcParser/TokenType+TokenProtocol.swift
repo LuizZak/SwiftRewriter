@@ -162,7 +162,7 @@ extension TokenType: TokenProtocol {
             
             let keyword = try (isAt ? "@" : "") + lexer.lexIdentifier()
             
-            guard let kw = Keyword(rawValue: String(keyword)) else {
+            guard let kw = ObjcKeyword(rawValue: String(keyword)) else {
                 return nil
             }
             

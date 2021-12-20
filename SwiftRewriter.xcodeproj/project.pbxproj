@@ -236,7 +236,7 @@
 		OBJ_1224 /* TypeDefinitions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::TypeDefinitions::Product /* TypeDefinitions.framework */; };
 		OBJ_1225 /* ObjcParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParser::Product /* ObjcParser.framework */; };
 		OBJ_1226 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
-		OBJ_1227 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_1227 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_1228 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_1229 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_1230 /* SwiftAST.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::SwiftAST::Product /* SwiftAST.framework */; };
@@ -271,7 +271,7 @@
 		OBJ_1278 /* TypeDefinitions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::TypeDefinitions::Product /* TypeDefinitions.framework */; };
 		OBJ_1279 /* ObjcParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParser::Product /* ObjcParser.framework */; };
 		OBJ_1280 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
-		OBJ_1281 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_1281 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_1282 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_1283 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_1284 /* SwiftAST.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::SwiftAST::Product /* SwiftAST.framework */; };
@@ -318,7 +318,7 @@
 		OBJ_1365 /* TypeDefinitions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::TypeDefinitions::Product /* TypeDefinitions.framework */; };
 		OBJ_1366 /* ObjcParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParser::Product /* ObjcParser.framework */; };
 		OBJ_1367 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
-		OBJ_1368 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_1368 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_1369 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_1370 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_1371 /* SwiftAST.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::SwiftAST::Product /* SwiftAST.framework */; };
@@ -361,7 +361,7 @@
 		OBJ_1429 /* TypeDefinitions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::TypeDefinitions::Product /* TypeDefinitions.framework */; };
 		OBJ_1430 /* ObjcParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParser::Product /* ObjcParser.framework */; };
 		OBJ_1431 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
-		OBJ_1432 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_1432 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_1433 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_1434 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_1435 /* SwiftAST.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::SwiftAST::Product /* SwiftAST.framework */; };
@@ -382,7 +382,7 @@
 		OBJ_1480 /* TypeDefinitions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::TypeDefinitions::Product /* TypeDefinitions.framework */; };
 		OBJ_1481 /* ObjcParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParser::Product /* ObjcParser.framework */; };
 		OBJ_1482 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
-		OBJ_1483 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_1483 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_1484 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_1485 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_1486 /* SwiftAST.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::SwiftAST::Product /* SwiftAST.framework */; };
@@ -412,7 +412,7 @@
 		OBJ_1530 /* TypeDefinitions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::TypeDefinitions::Product /* TypeDefinitions.framework */; };
 		OBJ_1531 /* ObjcParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParser::Product /* ObjcParser.framework */; };
 		OBJ_1532 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
-		OBJ_1533 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_1533 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_1534 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_1535 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_1536 /* SwiftAST.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::SwiftAST::Product /* SwiftAST.framework */; };
@@ -424,7 +424,7 @@
 		OBJ_1571 /* ASTVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_72 /* ASTVisitor.swift */; };
 		OBJ_1572 /* BasicNodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_73 /* BasicNodes.swift */; };
 		OBJ_1573 /* FunctionDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_74 /* FunctionDefinition.swift */; };
-		OBJ_1574 /* Keyword.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_75 /* Keyword.swift */; };
+		OBJ_1574 /* ObjcKeyword.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_75 /* ObjcKeyword.swift */; };
 		OBJ_1575 /* ObjcClass+Method.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_76 /* ObjcClass+Method.swift */; };
 		OBJ_1576 /* ObjcClass+Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_77 /* ObjcClass+Property.swift */; };
 		OBJ_1577 /* ObjcClassCategoryInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_78 /* ObjcClassCategoryInterface.swift */; };
@@ -449,7 +449,7 @@
 		OBJ_1597 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_1605 /* SourceRangeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_443 /* SourceRangeTests.swift */; };
 		OBJ_1606 /* SourceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_444 /* SourceTests.swift */; };
-		OBJ_1608 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_1608 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_1609 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_1610 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_1618 /* AnonymousIntentionVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_97 /* AnonymousIntentionVisitor.swift */; };
@@ -476,7 +476,7 @@
 		OBJ_1640 /* TypeDefinitions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::TypeDefinitions::Product /* TypeDefinitions.framework */; };
 		OBJ_1641 /* ObjcParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParser::Product /* ObjcParser.framework */; };
 		OBJ_1642 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
-		OBJ_1643 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_1643 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_1644 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_1645 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_1646 /* SwiftAST.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::SwiftAST::Product /* SwiftAST.framework */; };
@@ -514,7 +514,7 @@
 		OBJ_1698 /* TypeDefinitions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::TypeDefinitions::Product /* TypeDefinitions.framework */; };
 		OBJ_1699 /* ObjcParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParser::Product /* ObjcParser.framework */; };
 		OBJ_1700 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
-		OBJ_1701 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_1701 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_1702 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_1703 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_1704 /* SwiftAST.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::SwiftAST::Product /* SwiftAST.framework */; };
@@ -569,7 +569,7 @@
 		OBJ_1782 /* TypealiasIntention.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_162 /* TypealiasIntention.swift */; };
 		OBJ_1783 /* ValueStorageIntention.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_163 /* ValueStorageIntention.swift */; };
 		OBJ_1785 /* KnownType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::KnownType::Product /* KnownType.framework */; };
-		OBJ_1786 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_1786 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_1787 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_1788 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_1789 /* SwiftAST.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::SwiftAST::Product /* SwiftAST.framework */; };
@@ -598,7 +598,7 @@
 		OBJ_1826 /* _CSwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::_CSwiftSyntax::Product /* _CSwiftSyntax.framework */; };
 		OBJ_1827 /* Intentions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Intentions::Product /* Intentions.framework */; };
 		OBJ_1828 /* KnownType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::KnownType::Product /* KnownType.framework */; };
-		OBJ_1829 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_1829 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_1830 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_1831 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_1832 /* SwiftAST.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::SwiftAST::Product /* SwiftAST.framework */; };
@@ -641,7 +641,7 @@
 		OBJ_1909 /* SwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::SwiftSyntax::Product /* SwiftSyntax.framework */; };
 		OBJ_1910 /* _CSwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::_CSwiftSyntax::Product /* _CSwiftSyntax.framework */; };
 		OBJ_1911 /* Intentions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Intentions::Product /* Intentions.framework */; };
-		OBJ_1912 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_1912 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_1913 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_1914 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_1915 /* KnownType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::KnownType::Product /* KnownType.framework */; };
@@ -681,7 +681,7 @@
 		OBJ_1989 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
 		OBJ_1990 /* MiniLexer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::MiniLexer::Product /* MiniLexer.framework */; };
 		OBJ_1991 /* Utils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Utils::Product /* Utils.framework */; };
-		OBJ_1992 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_1992 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_1993 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_1994 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_2005 /* ObjectiveCLexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_203 /* ObjectiveCLexer.swift */; };
@@ -711,7 +711,7 @@
 		OBJ_2037 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
 		OBJ_2038 /* MiniLexer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::MiniLexer::Product /* MiniLexer.framework */; };
 		OBJ_2039 /* Utils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Utils::Product /* Utils.framework */; };
-		OBJ_2040 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_2040 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_2041 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_2042 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_2054 /* QuickSpecPreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_220 /* QuickSpecPreprocessor.swift */; };
@@ -737,7 +737,7 @@
 		OBJ_2083 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
 		OBJ_2084 /* SwiftAST.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::SwiftAST::Product /* SwiftAST.framework */; };
 		OBJ_2085 /* WriterTargetOutput.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::WriterTargetOutput::Product /* WriterTargetOutput.framework */; };
-		OBJ_2086 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_2086 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_2087 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_2088 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_2089 /* SourcePreprocessors.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::SourcePreprocessors::Product /* SourcePreprocessors.framework */; };
@@ -856,7 +856,7 @@
 		OBJ_2240 /* SwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::SwiftSyntax::Product /* SwiftSyntax.framework */; };
 		OBJ_2241 /* _CSwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::_CSwiftSyntax::Product /* _CSwiftSyntax.framework */; };
 		OBJ_2242 /* Intentions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Intentions::Product /* Intentions.framework */; };
-		OBJ_2243 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_2243 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_2244 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_2245 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_2246 /* KnownType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::KnownType::Product /* KnownType.framework */; };
@@ -898,7 +898,7 @@
 		OBJ_2313 /* MiniLexer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::MiniLexer::Product /* MiniLexer.framework */; };
 		OBJ_2314 /* WriterTargetOutput.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::WriterTargetOutput::Product /* WriterTargetOutput.framework */; };
 		OBJ_2315 /* Utils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Utils::Product /* Utils.framework */; };
-		OBJ_2316 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_2316 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_2317 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_2318 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_2349 /* DiskInputFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_313 /* DiskInputFile.swift */; };
@@ -946,7 +946,7 @@
 		OBJ_2392 /* MiniLexer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::MiniLexer::Product /* MiniLexer.framework */; };
 		OBJ_2393 /* WriterTargetOutput.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::WriterTargetOutput::Product /* WriterTargetOutput.framework */; };
 		OBJ_2394 /* Utils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Utils::Product /* Utils.framework */; };
-		OBJ_2395 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_2395 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_2396 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_2397 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_2426 /* FileCollectionStepTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_502 /* FileCollectionStepTests.swift */; };
@@ -997,7 +997,7 @@
 		OBJ_2472 /* MiniLexer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::MiniLexer::Product /* MiniLexer.framework */; };
 		OBJ_2473 /* WriterTargetOutput.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::WriterTargetOutput::Product /* WriterTargetOutput.framework */; };
 		OBJ_2474 /* Utils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Utils::Product /* Utils.framework */; };
-		OBJ_2475 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_2475 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_2476 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_2477 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_2508 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
@@ -1025,7 +1025,7 @@
 		OBJ_2565 /* MiniLexer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::MiniLexer::Product /* MiniLexer.framework */; };
 		OBJ_2566 /* WriterTargetOutput.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::WriterTargetOutput::Product /* WriterTargetOutput.framework */; };
 		OBJ_2567 /* Utils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Utils::Product /* Utils.framework */; };
-		OBJ_2568 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_2568 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_2569 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_2570 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_2602 /* AbsolutePosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_609 /* AbsolutePosition.swift */; };
@@ -1076,7 +1076,7 @@
 		OBJ_2659 /* SwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::SwiftSyntax::Product /* SwiftSyntax.framework */; };
 		OBJ_2660 /* _CSwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::_CSwiftSyntax::Product /* _CSwiftSyntax.framework */; };
 		OBJ_2661 /* Intentions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Intentions::Product /* Intentions.framework */; };
-		OBJ_2662 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_2662 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_2663 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_2664 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_2665 /* KnownType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::KnownType::Product /* KnownType.framework */; };
@@ -1104,7 +1104,7 @@
 		OBJ_2704 /* SwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::SwiftSyntax::Product /* SwiftSyntax.framework */; };
 		OBJ_2705 /* _CSwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::_CSwiftSyntax::Product /* _CSwiftSyntax.framework */; };
 		OBJ_2706 /* Intentions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Intentions::Product /* Intentions.framework */; };
-		OBJ_2707 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_2707 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_2708 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_2709 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_2710 /* KnownType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::KnownType::Product /* KnownType.framework */; };
@@ -1129,7 +1129,7 @@
 		OBJ_2759 /* SwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::SwiftSyntax::Product /* SwiftSyntax.framework */; };
 		OBJ_2760 /* _CSwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::_CSwiftSyntax::Product /* _CSwiftSyntax.framework */; };
 		OBJ_2761 /* Intentions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Intentions::Product /* Intentions.framework */; };
-		OBJ_2762 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_2762 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_2763 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_2764 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_2765 /* KnownType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::KnownType::Product /* KnownType.framework */; };
@@ -1160,7 +1160,7 @@
 		OBJ_2806 /* SwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::SwiftSyntax::Product /* SwiftSyntax.framework */; };
 		OBJ_2807 /* _CSwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::_CSwiftSyntax::Product /* _CSwiftSyntax.framework */; };
 		OBJ_2808 /* Intentions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Intentions::Product /* Intentions.framework */; };
-		OBJ_2809 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_2809 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_2810 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_2811 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_2812 /* KnownType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::KnownType::Product /* KnownType.framework */; };
@@ -1193,7 +1193,7 @@
 		OBJ_2869 /* SwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::SwiftSyntax::Product /* SwiftSyntax.framework */; };
 		OBJ_2870 /* _CSwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::_CSwiftSyntax::Product /* _CSwiftSyntax.framework */; };
 		OBJ_2871 /* Intentions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Intentions::Product /* Intentions.framework */; };
-		OBJ_2872 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_2872 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_2873 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_2874 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_2875 /* KnownType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::KnownType::Product /* KnownType.framework */; };
@@ -1220,7 +1220,7 @@
 		OBJ_2925 /* SwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::SwiftSyntax::Product /* SwiftSyntax.framework */; };
 		OBJ_2926 /* _CSwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::_CSwiftSyntax::Product /* _CSwiftSyntax.framework */; };
 		OBJ_2927 /* Intentions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Intentions::Product /* Intentions.framework */; };
-		OBJ_2928 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_2928 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_2929 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_2930 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_2931 /* KnownType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::KnownType::Product /* KnownType.framework */; };
@@ -1252,7 +1252,7 @@
 		OBJ_2998 /* TypeDefinitions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::TypeDefinitions::Product /* TypeDefinitions.framework */; };
 		OBJ_2999 /* ObjcParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParser::Product /* ObjcParser.framework */; };
 		OBJ_3000 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
-		OBJ_3001 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_3001 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_3002 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_3003 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_3004 /* SwiftAST.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::SwiftAST::Product /* SwiftAST.framework */; };
@@ -1284,7 +1284,7 @@
 		OBJ_3047 /* TypeDefinitions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::TypeDefinitions::Product /* TypeDefinitions.framework */; };
 		OBJ_3048 /* ObjcParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParser::Product /* ObjcParser.framework */; };
 		OBJ_3049 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
-		OBJ_3050 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_3050 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_3051 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_3052 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_3053 /* SwiftAST.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::SwiftAST::Product /* SwiftAST.framework */; };
@@ -1323,7 +1323,7 @@
 		OBJ_3133 /* SwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::SwiftSyntax::Product /* SwiftSyntax.framework */; };
 		OBJ_3134 /* _CSwiftSyntax.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftSyntax::_CSwiftSyntax::Product /* _CSwiftSyntax.framework */; };
 		OBJ_3135 /* Intentions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::Intentions::Product /* Intentions.framework */; };
-		OBJ_3136 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_3136 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_3137 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_3138 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_3139 /* KnownType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::KnownType::Product /* KnownType.framework */; };
@@ -1344,7 +1344,7 @@
 		OBJ_901 /* TypeDefinitions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::TypeDefinitions::Product /* TypeDefinitions.framework */; };
 		OBJ_902 /* ObjcParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParser::Product /* ObjcParser.framework */; };
 		OBJ_903 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
-		OBJ_904 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_904 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_905 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_906 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_907 /* KnownType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::KnownType::Product /* KnownType.framework */; };
@@ -1372,7 +1372,7 @@
 		OBJ_963 /* TypeDefinitions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::TypeDefinitions::Product /* TypeDefinitions.framework */; };
 		OBJ_964 /* ObjcParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParser::Product /* ObjcParser.framework */; };
 		OBJ_965 /* TypeLexing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = MiniLexer::TypeLexing::Product /* TypeLexing.framework */; };
-		OBJ_966 /* GrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */; };
+		OBJ_966 /* ObjcGrammarModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */; };
 		OBJ_967 /* ObjcParserAntlr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::ObjcParserAntlr::Product /* ObjcParserAntlr.framework */; };
 		OBJ_968 /* Antlr4.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Antlr4::Antlr4::Product /* Antlr4.framework */; };
 		OBJ_969 /* KnownType.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SwiftRewriter::KnownType::Product /* KnownType.framework */; };
@@ -2027,7 +2027,7 @@
 		OBJ_747 /* PredicateEvalInfo.swift */ = {isa = PBXFileReference; path = PredicateEvalInfo.swift; sourceTree = "<group>"; };
 		OBJ_748 /* PredictionContext.swift */ = {isa = PBXFileReference; path = PredictionContext.swift; sourceTree = "<group>"; };
 		OBJ_749 /* PredictionContextCache.swift */ = {isa = PBXFileReference; path = PredictionContextCache.swift; sourceTree = "<group>"; };
-		OBJ_75 /* Keyword.swift */ = {isa = PBXFileReference; path = Keyword.swift; sourceTree = "<group>"; };
+		OBJ_75 /* ObjcKeyword.swift */ = {isa = PBXFileReference; path = ObjcKeyword.swift; sourceTree = "<group>"; };
 		OBJ_750 /* PredictionMode.swift */ = {isa = PBXFileReference; path = PredictionMode.swift; sourceTree = "<group>"; };
 		OBJ_751 /* ProfilingATNSimulator.swift */ = {isa = PBXFileReference; path = ProfilingATNSimulator.swift; sourceTree = "<group>"; };
 		OBJ_752 /* RuleStartState.swift */ = {isa = PBXFileReference; path = RuleStartState.swift; sourceTree = "<group>"; };
@@ -2138,7 +2138,7 @@
 		SwiftRewriter::ExpressionPassesTests::Product /* ExpressionPassesTests.xctest */ = {isa = PBXFileReference; path = ExpressionPassesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		SwiftRewriter::GlobalsProviders::Product /* GlobalsProviders.framework */ = {isa = PBXFileReference; path = GlobalsProviders.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		SwiftRewriter::GlobalsProvidersTests::Product /* GlobalsProvidersTests.xctest */ = {isa = PBXFileReference; path = GlobalsProvidersTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */ = {isa = PBXFileReference; path = GrammarModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */ = {isa = PBXFileReference; path = ObjcGrammarModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		SwiftRewriter::GrammarModelsTests::Product /* GrammarModelsTests.xctest */ = {isa = PBXFileReference; path = GrammarModelsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		SwiftRewriter::IntentionPasses::Product /* IntentionPasses.framework */ = {isa = PBXFileReference; path = IntentionPasses.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		SwiftRewriter::IntentionPassesTests::Product /* IntentionPassesTests.xctest */ = {isa = PBXFileReference; path = IntentionPassesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2195,7 +2195,7 @@
 				OBJ_1224 /* TypeDefinitions.framework in Frameworks */,
 				OBJ_1225 /* ObjcParser.framework in Frameworks */,
 				OBJ_1226 /* TypeLexing.framework in Frameworks */,
-				OBJ_1227 /* GrammarModels.framework in Frameworks */,
+				OBJ_1227 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_1228 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_1229 /* Antlr4.framework in Frameworks */,
 				OBJ_1230 /* SwiftAST.framework in Frameworks */,
@@ -2224,7 +2224,7 @@
 				OBJ_1278 /* TypeDefinitions.framework in Frameworks */,
 				OBJ_1279 /* ObjcParser.framework in Frameworks */,
 				OBJ_1280 /* TypeLexing.framework in Frameworks */,
-				OBJ_1281 /* GrammarModels.framework in Frameworks */,
+				OBJ_1281 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_1282 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_1283 /* Antlr4.framework in Frameworks */,
 				OBJ_1284 /* SwiftAST.framework in Frameworks */,
@@ -2249,7 +2249,7 @@
 				OBJ_1365 /* TypeDefinitions.framework in Frameworks */,
 				OBJ_1366 /* ObjcParser.framework in Frameworks */,
 				OBJ_1367 /* TypeLexing.framework in Frameworks */,
-				OBJ_1368 /* GrammarModels.framework in Frameworks */,
+				OBJ_1368 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_1369 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_1370 /* Antlr4.framework in Frameworks */,
 				OBJ_1371 /* SwiftAST.framework in Frameworks */,
@@ -2279,7 +2279,7 @@
 				OBJ_1429 /* TypeDefinitions.framework in Frameworks */,
 				OBJ_1430 /* ObjcParser.framework in Frameworks */,
 				OBJ_1431 /* TypeLexing.framework in Frameworks */,
-				OBJ_1432 /* GrammarModels.framework in Frameworks */,
+				OBJ_1432 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_1433 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_1434 /* Antlr4.framework in Frameworks */,
 				OBJ_1435 /* SwiftAST.framework in Frameworks */,
@@ -2298,7 +2298,7 @@
 				OBJ_1480 /* TypeDefinitions.framework in Frameworks */,
 				OBJ_1481 /* ObjcParser.framework in Frameworks */,
 				OBJ_1482 /* TypeLexing.framework in Frameworks */,
-				OBJ_1483 /* GrammarModels.framework in Frameworks */,
+				OBJ_1483 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_1484 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_1485 /* Antlr4.framework in Frameworks */,
 				OBJ_1486 /* SwiftAST.framework in Frameworks */,
@@ -2328,7 +2328,7 @@
 				OBJ_1530 /* TypeDefinitions.framework in Frameworks */,
 				OBJ_1531 /* ObjcParser.framework in Frameworks */,
 				OBJ_1532 /* TypeLexing.framework in Frameworks */,
-				OBJ_1533 /* GrammarModels.framework in Frameworks */,
+				OBJ_1533 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_1534 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_1535 /* Antlr4.framework in Frameworks */,
 				OBJ_1536 /* SwiftAST.framework in Frameworks */,
@@ -2347,7 +2347,7 @@
 		OBJ_1607 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
-				OBJ_1608 /* GrammarModels.framework in Frameworks */,
+				OBJ_1608 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_1609 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_1610 /* Antlr4.framework in Frameworks */,
 			);
@@ -2362,7 +2362,7 @@
 				OBJ_1640 /* TypeDefinitions.framework in Frameworks */,
 				OBJ_1641 /* ObjcParser.framework in Frameworks */,
 				OBJ_1642 /* TypeLexing.framework in Frameworks */,
-				OBJ_1643 /* GrammarModels.framework in Frameworks */,
+				OBJ_1643 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_1644 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_1645 /* Antlr4.framework in Frameworks */,
 				OBJ_1646 /* SwiftAST.framework in Frameworks */,
@@ -2392,7 +2392,7 @@
 				OBJ_1698 /* TypeDefinitions.framework in Frameworks */,
 				OBJ_1699 /* ObjcParser.framework in Frameworks */,
 				OBJ_1700 /* TypeLexing.framework in Frameworks */,
-				OBJ_1701 /* GrammarModels.framework in Frameworks */,
+				OBJ_1701 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_1702 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_1703 /* Antlr4.framework in Frameworks */,
 				OBJ_1704 /* SwiftAST.framework in Frameworks */,
@@ -2405,7 +2405,7 @@
 			isa = PBXFrameworksBuildPhase;
 			files = (
 				OBJ_1785 /* KnownType.framework in Frameworks */,
-				OBJ_1786 /* GrammarModels.framework in Frameworks */,
+				OBJ_1786 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_1787 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_1788 /* Antlr4.framework in Frameworks */,
 				OBJ_1789 /* SwiftAST.framework in Frameworks */,
@@ -2435,7 +2435,7 @@
 				OBJ_1826 /* _CSwiftSyntax.framework in Frameworks */,
 				OBJ_1827 /* Intentions.framework in Frameworks */,
 				OBJ_1828 /* KnownType.framework in Frameworks */,
-				OBJ_1829 /* GrammarModels.framework in Frameworks */,
+				OBJ_1829 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_1830 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_1831 /* Antlr4.framework in Frameworks */,
 				OBJ_1832 /* SwiftAST.framework in Frameworks */,
@@ -2473,7 +2473,7 @@
 				OBJ_1909 /* SwiftSyntax.framework in Frameworks */,
 				OBJ_1910 /* _CSwiftSyntax.framework in Frameworks */,
 				OBJ_1911 /* Intentions.framework in Frameworks */,
-				OBJ_1912 /* GrammarModels.framework in Frameworks */,
+				OBJ_1912 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_1913 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_1914 /* Antlr4.framework in Frameworks */,
 				OBJ_1915 /* KnownType.framework in Frameworks */,
@@ -2494,7 +2494,7 @@
 				OBJ_1989 /* TypeLexing.framework in Frameworks */,
 				OBJ_1990 /* MiniLexer.framework in Frameworks */,
 				OBJ_1991 /* Utils.framework in Frameworks */,
-				OBJ_1992 /* GrammarModels.framework in Frameworks */,
+				OBJ_1992 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_1993 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_1994 /* Antlr4.framework in Frameworks */,
 			);
@@ -2512,7 +2512,7 @@
 				OBJ_2037 /* TypeLexing.framework in Frameworks */,
 				OBJ_2038 /* MiniLexer.framework in Frameworks */,
 				OBJ_2039 /* Utils.framework in Frameworks */,
-				OBJ_2040 /* GrammarModels.framework in Frameworks */,
+				OBJ_2040 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_2041 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_2042 /* Antlr4.framework in Frameworks */,
 			);
@@ -2545,7 +2545,7 @@
 				OBJ_2083 /* TypeLexing.framework in Frameworks */,
 				OBJ_2084 /* SwiftAST.framework in Frameworks */,
 				OBJ_2085 /* WriterTargetOutput.framework in Frameworks */,
-				OBJ_2086 /* GrammarModels.framework in Frameworks */,
+				OBJ_2086 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_2087 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_2088 /* Antlr4.framework in Frameworks */,
 				OBJ_2089 /* SourcePreprocessors.framework in Frameworks */,
@@ -2581,7 +2581,7 @@
 				OBJ_2240 /* SwiftSyntax.framework in Frameworks */,
 				OBJ_2241 /* _CSwiftSyntax.framework in Frameworks */,
 				OBJ_2242 /* Intentions.framework in Frameworks */,
-				OBJ_2243 /* GrammarModels.framework in Frameworks */,
+				OBJ_2243 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_2244 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_2245 /* Antlr4.framework in Frameworks */,
 				OBJ_2246 /* KnownType.framework in Frameworks */,
@@ -2617,7 +2617,7 @@
 				OBJ_2313 /* MiniLexer.framework in Frameworks */,
 				OBJ_2314 /* WriterTargetOutput.framework in Frameworks */,
 				OBJ_2315 /* Utils.framework in Frameworks */,
-				OBJ_2316 /* GrammarModels.framework in Frameworks */,
+				OBJ_2316 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_2317 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_2318 /* Antlr4.framework in Frameworks */,
 			);
@@ -2645,7 +2645,7 @@
 				OBJ_2392 /* MiniLexer.framework in Frameworks */,
 				OBJ_2393 /* WriterTargetOutput.framework in Frameworks */,
 				OBJ_2394 /* Utils.framework in Frameworks */,
-				OBJ_2395 /* GrammarModels.framework in Frameworks */,
+				OBJ_2395 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_2396 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_2397 /* Antlr4.framework in Frameworks */,
 			);
@@ -2675,7 +2675,7 @@
 				OBJ_2472 /* MiniLexer.framework in Frameworks */,
 				OBJ_2473 /* WriterTargetOutput.framework in Frameworks */,
 				OBJ_2474 /* Utils.framework in Frameworks */,
-				OBJ_2475 /* GrammarModels.framework in Frameworks */,
+				OBJ_2475 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_2476 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_2477 /* Antlr4.framework in Frameworks */,
 			);
@@ -2706,7 +2706,7 @@
 				OBJ_2565 /* MiniLexer.framework in Frameworks */,
 				OBJ_2566 /* WriterTargetOutput.framework in Frameworks */,
 				OBJ_2567 /* Utils.framework in Frameworks */,
-				OBJ_2568 /* GrammarModels.framework in Frameworks */,
+				OBJ_2568 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_2569 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_2570 /* Antlr4.framework in Frameworks */,
 			);
@@ -2724,7 +2724,7 @@
 				OBJ_2659 /* SwiftSyntax.framework in Frameworks */,
 				OBJ_2660 /* _CSwiftSyntax.framework in Frameworks */,
 				OBJ_2661 /* Intentions.framework in Frameworks */,
-				OBJ_2662 /* GrammarModels.framework in Frameworks */,
+				OBJ_2662 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_2663 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_2664 /* Antlr4.framework in Frameworks */,
 				OBJ_2665 /* KnownType.framework in Frameworks */,
@@ -2754,7 +2754,7 @@
 				OBJ_2704 /* SwiftSyntax.framework in Frameworks */,
 				OBJ_2705 /* _CSwiftSyntax.framework in Frameworks */,
 				OBJ_2706 /* Intentions.framework in Frameworks */,
-				OBJ_2707 /* GrammarModels.framework in Frameworks */,
+				OBJ_2707 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_2708 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_2709 /* Antlr4.framework in Frameworks */,
 				OBJ_2710 /* KnownType.framework in Frameworks */,
@@ -2770,7 +2770,7 @@
 				OBJ_2759 /* SwiftSyntax.framework in Frameworks */,
 				OBJ_2760 /* _CSwiftSyntax.framework in Frameworks */,
 				OBJ_2761 /* Intentions.framework in Frameworks */,
-				OBJ_2762 /* GrammarModels.framework in Frameworks */,
+				OBJ_2762 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_2763 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_2764 /* Antlr4.framework in Frameworks */,
 				OBJ_2765 /* KnownType.framework in Frameworks */,
@@ -2800,7 +2800,7 @@
 				OBJ_2806 /* SwiftSyntax.framework in Frameworks */,
 				OBJ_2807 /* _CSwiftSyntax.framework in Frameworks */,
 				OBJ_2808 /* Intentions.framework in Frameworks */,
-				OBJ_2809 /* GrammarModels.framework in Frameworks */,
+				OBJ_2809 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_2810 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_2811 /* Antlr4.framework in Frameworks */,
 				OBJ_2812 /* KnownType.framework in Frameworks */,
@@ -2829,7 +2829,7 @@
 				OBJ_2869 /* SwiftSyntax.framework in Frameworks */,
 				OBJ_2870 /* _CSwiftSyntax.framework in Frameworks */,
 				OBJ_2871 /* Intentions.framework in Frameworks */,
-				OBJ_2872 /* GrammarModels.framework in Frameworks */,
+				OBJ_2872 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_2873 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_2874 /* Antlr4.framework in Frameworks */,
 				OBJ_2875 /* KnownType.framework in Frameworks */,
@@ -2859,7 +2859,7 @@
 				OBJ_2925 /* SwiftSyntax.framework in Frameworks */,
 				OBJ_2926 /* _CSwiftSyntax.framework in Frameworks */,
 				OBJ_2927 /* Intentions.framework in Frameworks */,
-				OBJ_2928 /* GrammarModels.framework in Frameworks */,
+				OBJ_2928 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_2929 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_2930 /* Antlr4.framework in Frameworks */,
 				OBJ_2931 /* KnownType.framework in Frameworks */,
@@ -2888,7 +2888,7 @@
 				OBJ_2998 /* TypeDefinitions.framework in Frameworks */,
 				OBJ_2999 /* ObjcParser.framework in Frameworks */,
 				OBJ_3000 /* TypeLexing.framework in Frameworks */,
-				OBJ_3001 /* GrammarModels.framework in Frameworks */,
+				OBJ_3001 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_3002 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_3003 /* Antlr4.framework in Frameworks */,
 				OBJ_3004 /* SwiftAST.framework in Frameworks */,
@@ -2918,7 +2918,7 @@
 				OBJ_3047 /* TypeDefinitions.framework in Frameworks */,
 				OBJ_3048 /* ObjcParser.framework in Frameworks */,
 				OBJ_3049 /* TypeLexing.framework in Frameworks */,
-				OBJ_3050 /* GrammarModels.framework in Frameworks */,
+				OBJ_3050 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_3051 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_3052 /* Antlr4.framework in Frameworks */,
 				OBJ_3053 /* SwiftAST.framework in Frameworks */,
@@ -2964,7 +2964,7 @@
 				OBJ_3133 /* SwiftSyntax.framework in Frameworks */,
 				OBJ_3134 /* _CSwiftSyntax.framework in Frameworks */,
 				OBJ_3135 /* Intentions.framework in Frameworks */,
-				OBJ_3136 /* GrammarModels.framework in Frameworks */,
+				OBJ_3136 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_3137 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_3138 /* Antlr4.framework in Frameworks */,
 				OBJ_3139 /* KnownType.framework in Frameworks */,
@@ -2988,7 +2988,7 @@
 				OBJ_901 /* TypeDefinitions.framework in Frameworks */,
 				OBJ_902 /* ObjcParser.framework in Frameworks */,
 				OBJ_903 /* TypeLexing.framework in Frameworks */,
-				OBJ_904 /* GrammarModels.framework in Frameworks */,
+				OBJ_904 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_905 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_906 /* Antlr4.framework in Frameworks */,
 				OBJ_907 /* KnownType.framework in Frameworks */,
@@ -3018,7 +3018,7 @@
 				OBJ_963 /* TypeDefinitions.framework in Frameworks */,
 				OBJ_964 /* ObjcParser.framework in Frameworks */,
 				OBJ_965 /* TypeLexing.framework in Frameworks */,
-				OBJ_966 /* GrammarModels.framework in Frameworks */,
+				OBJ_966 /* ObjcGrammarModels.framework in Frameworks */,
 				OBJ_967 /* ObjcParserAntlr.framework in Frameworks */,
 				OBJ_968 /* Antlr4.framework in Frameworks */,
 				OBJ_969 /* KnownType.framework in Frameworks */,
@@ -4284,7 +4284,7 @@
 			path = ".build/checkouts/antlr4-swift/Sources/Antlr4";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_69 /* GrammarModels */ = {
+		OBJ_69 /* ObjcGrammarModels */ = {
 			isa = PBXGroup;
 			children = (
 				OBJ_70 /* ASTNode.swift */,
@@ -4292,7 +4292,7 @@
 				OBJ_72 /* ASTVisitor.swift */,
 				OBJ_73 /* BasicNodes.swift */,
 				OBJ_74 /* FunctionDefinition.swift */,
-				OBJ_75 /* Keyword.swift */,
+				OBJ_75 /* ObjcKeyword.swift */,
 				OBJ_76 /* ObjcClass+Method.swift */,
 				OBJ_77 /* ObjcClass+Property.swift */,
 				OBJ_78 /* ObjcClassCategoryInterface.swift */,
@@ -4314,8 +4314,8 @@
 				OBJ_94 /* TypedefNode.swift */,
 				OBJ_95 /* VariableDeclaration.swift */,
 			);
-			name = GrammarModels;
-			path = Sources/GrammarModels;
+			name = ObjcGrammarModels;
+			path = Sources/ObjcGrammarModels;
 			sourceTree = SOURCE_ROOT;
 		};
 		OBJ_7 /* Sources */ = {
@@ -4325,7 +4325,7 @@
 				OBJ_14 /* Commons */,
 				OBJ_36 /* ExpressionPasses */,
 				OBJ_61 /* GlobalsProviders */,
-				OBJ_69 /* GrammarModels */,
+				OBJ_69 /* ObjcGrammarModels */,
 				OBJ_96 /* IntentionPasses */,
 				OBJ_114 /* Intentions */,
 				OBJ_164 /* KnownType */,
@@ -4581,7 +4581,7 @@
 				SwiftRewriter::ExpressionPassesTests::Product /* ExpressionPassesTests.xctest */,
 				SwiftRewriter::GlobalsProviders::Product /* GlobalsProviders.framework */,
 				SwiftRewriter::GlobalsProvidersTests::Product /* GlobalsProvidersTests.xctest */,
-				SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */,
+				SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */,
 				SwiftRewriter::GrammarModelsTests::Product /* GrammarModelsTests.xctest */,
 				SwiftRewriter::IntentionPasses::Product /* IntentionPasses.framework */,
 				SwiftRewriter::IntentionPassesTests::Product /* IntentionPassesTests.xctest */,
@@ -5040,9 +5040,9 @@
 			productReference = SwiftRewriter::GlobalsProvidersTests::Product /* GlobalsProvidersTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		SwiftRewriter::GrammarModels /* GrammarModels */ = {
+		SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_1565 /* Build configuration list for PBXNativeTarget "GrammarModels" */;
+			buildConfigurationList = OBJ_1565 /* Build configuration list for PBXNativeTarget "ObjcGrammarModels" */;
 			buildPhases = (
 				OBJ_1568 /* Sources */,
 				OBJ_1595 /* Frameworks */,
@@ -5053,9 +5053,9 @@
 				OBJ_1598 /* PBXTargetDependency */,
 				OBJ_1599 /* PBXTargetDependency */,
 			);
-			name = GrammarModels;
-			productName = GrammarModels;
-			productReference = SwiftRewriter::GrammarModels::Product /* GrammarModels.framework */;
+			name = ObjcGrammarModels;
+			productName = ObjcGrammarModels;
+			productReference = SwiftRewriter::ObjcGrammarModels::Product /* ObjcGrammarModels.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		SwiftRewriter::GrammarModelsTests /* GrammarModelsTests */ = {
@@ -6137,7 +6137,7 @@
 				SwiftRewriter::ExpressionPassesTests /* ExpressionPassesTests */,
 				SwiftRewriter::GlobalsProviders /* GlobalsProviders */,
 				SwiftRewriter::GlobalsProvidersTests /* GlobalsProvidersTests */,
-				SwiftRewriter::GrammarModels /* GrammarModels */,
+				SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */,
 				SwiftRewriter::GrammarModelsTests /* GrammarModelsTests */,
 				SwiftRewriter::IntentionPasses /* IntentionPasses */,
 				SwiftRewriter::IntentionPassesTests /* IntentionPassesTests */,
@@ -6510,7 +6510,7 @@
 				OBJ_1571 /* ASTVisitor.swift in Sources */,
 				OBJ_1572 /* BasicNodes.swift in Sources */,
 				OBJ_1573 /* FunctionDefinition.swift in Sources */,
-				OBJ_1574 /* Keyword.swift in Sources */,
+				OBJ_1574 /* ObjcKeyword.swift in Sources */,
 				OBJ_1575 /* ObjcClass+Method.swift in Sources */,
 				OBJ_1576 /* ObjcClass+Property.swift in Sources */,
 				OBJ_1577 /* ObjcClassCategoryInterface.swift in Sources */,
@@ -7181,7 +7181,7 @@
 		};
 		OBJ_1001 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_1002 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -7237,7 +7237,7 @@
 		};
 		OBJ_1240 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_1241 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -7333,7 +7333,7 @@
 		};
 		OBJ_1305 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_1306 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -7393,7 +7393,7 @@
 		};
 		OBJ_1383 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_1384 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -7493,7 +7493,7 @@
 		};
 		OBJ_1457 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_1458 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -7549,7 +7549,7 @@
 		};
 		OBJ_1497 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_1498 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -7649,7 +7649,7 @@
 		};
 		OBJ_1558 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_1559 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -7685,7 +7685,7 @@
 		};
 		OBJ_1611 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_1612 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -7725,7 +7725,7 @@
 		};
 		OBJ_1657 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_1658 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -7825,7 +7825,7 @@
 		};
 		OBJ_1726 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_1727 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -7857,7 +7857,7 @@
 		};
 		OBJ_1794 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_1795 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -7957,7 +7957,7 @@
 		};
 		OBJ_1854 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_1855 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -8069,7 +8069,7 @@
 		};
 		OBJ_1937 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_1938 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -8113,7 +8113,7 @@
 		};
 		OBJ_1998 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_1999 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -8145,7 +8145,7 @@
 		};
 		OBJ_2047 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_2048 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -8237,7 +8237,7 @@
 		};
 		OBJ_2110 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_2111 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -8341,7 +8341,7 @@
 		};
 		OBJ_2268 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_2269 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -8465,7 +8465,7 @@
 		};
 		OBJ_2342 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_2343 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -8557,7 +8557,7 @@
 		};
 		OBJ_2418 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_2419 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -8657,7 +8657,7 @@
 		};
 		OBJ_2500 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_2501 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -8841,7 +8841,7 @@
 		};
 		OBJ_2595 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_2596 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -8873,7 +8873,7 @@
 		};
 		OBJ_2674 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_2675 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -8973,7 +8973,7 @@
 		};
 		OBJ_2732 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_2733 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -9017,7 +9017,7 @@
 		};
 		OBJ_2773 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_2774 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -9117,7 +9117,7 @@
 		};
 		OBJ_2834 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_2835 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -9213,7 +9213,7 @@
 		};
 		OBJ_2896 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_2897 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -9313,7 +9313,7 @@
 		};
 		OBJ_2953 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_2954 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -9369,7 +9369,7 @@
 		};
 		OBJ_3013 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_3014 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -9469,7 +9469,7 @@
 		};
 		OBJ_3075 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_3076 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -9573,7 +9573,7 @@
 		};
 		OBJ_3161 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_3162 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -9629,7 +9629,7 @@
 		};
 		OBJ_924 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = SwiftRewriter::GrammarModels /* GrammarModels */;
+			target = SwiftRewriter::ObjcGrammarModels /* ObjcGrammarModels */;
 		};
 		OBJ_926 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -10328,13 +10328,13 @@
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = GrammarModels;
+				PRODUCT_BUNDLE_IDENTIFIER = ObjcGrammarModels;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
-				TARGET_NAME = GrammarModels;
+				TARGET_NAME = ObjcGrammarModels;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
@@ -10358,13 +10358,13 @@
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = GrammarModels;
+				PRODUCT_BUNDLE_IDENTIFIER = ObjcGrammarModels;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 5.0;
-				TARGET_NAME = GrammarModels;
+				TARGET_NAME = ObjcGrammarModels;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
@@ -12889,7 +12889,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		OBJ_1565 /* Build configuration list for PBXNativeTarget "GrammarModels" */ = {
+		OBJ_1565 /* Build configuration list for PBXNativeTarget "ObjcGrammarModels" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				OBJ_1566 /* Debug */,

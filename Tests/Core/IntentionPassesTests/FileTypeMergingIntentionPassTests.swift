@@ -2,7 +2,7 @@ import XCTest
 import SwiftRewriterLib
 import SwiftAST
 import TestCommons
-import GrammarModels
+import ObjcGrammarModels
 
 @testable import IntentionPasses
 
