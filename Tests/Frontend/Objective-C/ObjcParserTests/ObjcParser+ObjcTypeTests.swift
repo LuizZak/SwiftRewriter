@@ -101,7 +101,7 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
         do {
             var type: ObjcType!
             
-            _=try sut.withTemporaryContext(nodeType: GlobalContextNode.self, do: {
+            _=try sut.withTemporaryContext(nodeType: ObjcGlobalContextNode.self, do: {
                 type = try sut.parseObjcType()
             })
             

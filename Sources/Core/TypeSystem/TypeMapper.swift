@@ -26,9 +26,9 @@ public struct TypeMappingContext {
     public static let alwaysNonnull = TypeMappingContext(modifiers: nil, qualifiers: [], alwaysNonnull: true)
     
     /// Modifiers fetched from a @property declaration
-    public var modifiers: PropertyAttributesList?
+    public var modifiers: ObjcPropertyAttributesListNode?
     /// Nullability specifiers from a method definition's type decl
-    public var nullabilitySpecifiers: [NullabilitySpecifier] = []
+    public var nullabilitySpecifiers: [ObjcNullabilitySpecifierNode] = []
     
     /// If true, every struct pointer found is considered to be an Objective-C
     /// class instance.
@@ -67,7 +67,7 @@ public struct TypeMappingContext {
     /// Defaults to `.unspecified`.
     public var unspecifiedNullability: TypeNullability = .unspecified
     
-    public init(modifiers: PropertyAttributesList?,
+    public init(modifiers: ObjcPropertyAttributesListNode?,
                 specifiers: [String] = [],
                 qualifiers: [String] = [],
                 alwaysNonnull: Bool = false,
@@ -85,7 +85,7 @@ public struct TypeMappingContext {
         self.inNonnullContext = inNonnull
     }
     
-    public init(nullabilitySpecs: [NullabilitySpecifier],
+    public init(nullabilitySpecs: [ObjcNullabilitySpecifierNode],
                 alwaysNonnull: Bool = false,
                 inNonnull: Bool = false) {
         

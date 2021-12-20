@@ -1,18 +1,18 @@
 import Utils
 import GrammarModelBase
 
-public class PropertyDefinition: ObjcASTNode, ObjcInitializableNode {
+public class ObjcPropertyDefinitionNode: ObjcASTNode, ObjcInitializableNode {
     /// Type identifier
     public var type: ObjcTypeNameNode? {
         firstChild()
     }
     
-    public var attributesList: PropertyAttributesList? {
+    public var attributesList: ObjcPropertyAttributesListNode? {
         firstChild()
     }
     
     /// Identifier for this property
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
     
@@ -27,8 +27,8 @@ public class PropertyDefinition: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public class PropertyAttributesList: ObjcASTNode, ObjcInitializableNode {
-    public var attributes: [PropertyAttributeNode] {
+public class ObjcPropertyAttributesListNode: ObjcASTNode, ObjcInitializableNode {
+    public var attributes: [ObjcPropertyAttributeNode] {
         childrenMatching()
     }
     
@@ -48,7 +48,7 @@ public class PropertyAttributesList: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public class PropertyAttributeNode: ObjcASTNode {
+public class ObjcPropertyAttributeNode: ObjcASTNode {
     public var attribute: Attribute
     
     public convenience init(name: String,

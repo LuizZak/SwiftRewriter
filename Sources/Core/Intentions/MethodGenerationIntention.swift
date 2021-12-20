@@ -4,8 +4,8 @@ import KnownType
 
 /// An intention to generate a static/instance function for a type.
 public class MethodGenerationIntention: MemberGenerationIntention, ParameterizedFunctionIntention, MutableFunctionIntention, MutableSignatureFunctionIntention {
-    public var typedSource: MethodDefinition? {
-        source as? MethodDefinition
+    public var typedSource: ObjcMethodDefinitionNode? {
+        source as? ObjcMethodDefinitionNode
     }
     
     public var isOverride: Bool = false

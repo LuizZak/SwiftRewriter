@@ -5,8 +5,8 @@ import KnownType
 /// An intention to generate a body of Swift code from an equivalent Objective-C
 /// source.
 public class FunctionBodyIntention: FromSourceIntention, KnownMethodBody {
-    public var typedSource: MethodBody? {
-        source as? MethodBody
+    public var typedSource: ObjcMethodBodyNode? {
+        source as? ObjcMethodBodyNode
     }
     
     /// Original source code body to generate

@@ -1,11 +1,7 @@
 import ObjcParserAntlr
 import GrammarModelBase
 
-public final class ExpressionNode: ObjcASTNode {
-    public var expression: ObjectiveCParser.ExpressionContext?
-}
-
-public final class MethodBody: ObjcASTNode {
+public final class ObjcMethodBodyNode: ObjcASTNode {
     public var statements: ObjectiveCParser.CompoundStatementContext?
     
     /// List of comments found within the range of this method body
@@ -16,14 +12,14 @@ public final class MethodBody: ObjcASTNode {
     }
 }
 
-public class MethodDefinition: ObjcASTNode, ObjcInitializableNode {
-    public var returnType: MethodType? {
+public class ObjcMethodDefinitionNode: ObjcASTNode, ObjcInitializableNode {
+    public var returnType: ObjcMethodTypeNode? {
         firstChild()
     }
-    public var methodSelector: MethodSelector? {
+    public var methodSelector: ObjcMethodSelectorNide? {
         firstChild()
     }
-    public var body: MethodBody?
+    public var body: ObjcMethodBodyNode?
     
     public var isClassMethod: Bool = false
     
@@ -35,10 +31,10 @@ public class MethodDefinition: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public class MethodSelector: ObjcASTNode, ObjcInitializableNode {
+public class ObjcMethodSelectorNide: ObjcASTNode, ObjcInitializableNode {
     public var selector: SelectorKind {
-        let sel = childrenMatching(type: Identifier.self)
-        let kw = childrenMatching(type: KeywordDeclarator.self)
+        let sel = childrenMatching(type: ObjcIdentifierNode.self)
+        let kw = childrenMatching(type: ObjcKeywordDeclaratorNode.self)
         
         if sel.count == 1 {
             return .selector(sel[0])
@@ -52,24 +48,24 @@ public class MethodSelector: ObjcASTNode, ObjcInitializableNode {
     }
     
     public enum SelectorKind {
-        case selector(Identifier)
-        case keywords([KeywordDeclarator])
+        case selector(ObjcIdentifierNode)
+        case keywords([ObjcKeywordDeclaratorNode])
     }
 }
 
-public final class KeywordDeclarator: ObjcASTNode, ObjcInitializableNode {
-    public var selector: Identifier? {
-        let children = childrenMatching(type: Identifier.self)
+public final class ObjcKeywordDeclaratorNode: ObjcASTNode, ObjcInitializableNode {
+    public var selector: ObjcIdentifierNode? {
+        let children = childrenMatching(type: ObjcIdentifierNode.self)
         if children.count == 1 {
             return nil
         }
         
         return children.first
     }
-    public var type: MethodType? {
+    public var type: ObjcMethodTypeNode? {
         firstChild()
     }
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         childrenMatching().last
     }
     
@@ -78,8 +74,8 @@ public final class KeywordDeclarator: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public final class MethodType: ObjcASTNode, ObjcInitializableNode {
-    public var nullabilitySpecifiers: [NullabilitySpecifier] {
+public final class ObjcMethodTypeNode: ObjcASTNode, ObjcInitializableNode {
+    public var nullabilitySpecifiers: [ObjcNullabilitySpecifierNode] {
         childrenMatching()
     }
     public var type: ObjcTypeNameNode? {
@@ -91,6 +87,6 @@ public final class MethodType: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public final class NullabilitySpecifier: Identifier {
+public final class ObjcNullabilitySpecifierNode: ObjcIdentifierNode {
     
 }

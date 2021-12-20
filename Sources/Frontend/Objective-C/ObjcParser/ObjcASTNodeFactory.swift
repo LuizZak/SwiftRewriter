@@ -32,32 +32,32 @@ class ObjcASTNodeFactory {
         commentQuerier.popCommentsOverlapping(node: context)
     }
     
-    func makeIdentifier(from context: Parser.IdentifierContext) -> Identifier {
+    func makeIdentifier(from context: Parser.IdentifierContext) -> ObjcIdentifierNode {
         let nonnull = isInNonnullContext(context)
-        let node = Identifier(name: context.getText(), isInNonnullContext: nonnull)
+        let node = ObjcIdentifierNode(name: context.getText(), isInNonnullContext: nonnull)
         updateSourceLocation(for: node, with: context)
         return node
     }
     
-    func makeSuperclassName(from context: Parser.SuperclassNameContext) -> SuperclassName {
+    func makeSuperclassName(from context: Parser.SuperclassNameContext) -> ObjcSuperclassNameNode {
         let nonnull = isInNonnullContext(context)
-        let node = SuperclassName(name: context.getText(), isInNonnullContext: nonnull)
+        let node = ObjcSuperclassNameNode(name: context.getText(), isInNonnullContext: nonnull)
         updateSourceLocation(for: node, with: context)
         return node
     }
     
     func makeSuperclassName(from context: Parser.GenericSuperclassNameContext,
-                            identifier: Parser.IdentifierContext) -> SuperclassName {
+                            identifier: Parser.IdentifierContext) -> ObjcSuperclassNameNode {
         
         let nonnull = isInNonnullContext(context)
-        let node = SuperclassName(name: identifier.getText(), isInNonnullContext: nonnull)
+        let node = ObjcSuperclassNameNode(name: identifier.getText(), isInNonnullContext: nonnull)
         updateSourceLocation(for: node, with: context)
         return node
     }
     
-    func makeProtocolReferenceList(from context: Parser.ProtocolListContext) -> ProtocolReferenceList {
+    func makeProtocolReferenceList(from context: Parser.ProtocolListContext) -> ObjcProtocolReferenceListNode {
         let protocolListNode =
-            ProtocolReferenceList(isInNonnullContext: isInNonnullContext(context))
+            ObjcProtocolReferenceListNode(isInNonnullContext: isInNonnullContext(context))
         
         for prot in context.protocolName() {
             guard let identifier = prot.identifier() else {
@@ -65,7 +65,7 @@ class ObjcASTNodeFactory {
             }
             
             let protNameNode =
-                ProtocolName(name: identifier.getText(),
+                ObjcProtocolNameNode(name: identifier.getText(),
                              isInNonnullContext: isInNonnullContext(identifier))
             updateSourceLocation(for: protocolListNode, with: identifier)
             protocolListNode.addChild(protNameNode)
@@ -95,16 +95,16 @@ class ObjcASTNodeFactory {
         return node
     }
     
-    func makeNullabilitySpecifier(from rule: Parser.NullabilitySpecifierContext) -> NullabilitySpecifier {
-        let spec = NullabilitySpecifier(name: rule.getText(),
+    func makeNullabilitySpecifier(from rule: Parser.NullabilitySpecifierContext) -> ObjcNullabilitySpecifierNode {
+        let spec = ObjcNullabilitySpecifierNode(name: rule.getText(),
                                         isInNonnullContext: isInNonnullContext(rule))
         updateSourceLocation(for: spec, with: rule)
         
         return spec
     }
     
-    func makeMethodBody(from rule: Parser.MethodDefinitionContext) -> MethodBody {
-        let methodBody = MethodBody(isInNonnullContext: isInNonnullContext(rule))
+    func makeMethodBody(from rule: Parser.MethodDefinitionContext) -> ObjcMethodBodyNode {
+        let methodBody = ObjcMethodBodyNode(isInNonnullContext: isInNonnullContext(rule))
         updateSourceLocation(for: methodBody, with: rule)
         methodBody.statements = rule.compoundStatement()
         methodBody.comments = comments(overlapping: rule)
@@ -112,11 +112,11 @@ class ObjcASTNodeFactory {
         return methodBody
     }
     
-    func makeMethodBody(from rule: Parser.CompoundStatementContext) -> MethodBody {
+    func makeMethodBody(from rule: Parser.CompoundStatementContext) -> ObjcMethodBodyNode {
         
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
         
-        let body = MethodBody(isInNonnullContext: nonnull)
+        let body = ObjcMethodBodyNode(isInNonnullContext: nonnull)
         body.statements = rule
         updateSourceLocation(for: body, with: rule)
         body.comments = comments(overlapping: rule)
@@ -124,10 +124,10 @@ class ObjcASTNodeFactory {
         return body
     }
     
-    func makeEnumCase(from rule: Parser.EnumeratorContext, identifier: Parser.IdentifierContext) -> ObjcEnumCase {
+    func makeEnumCase(from rule: Parser.EnumeratorContext, identifier: Parser.IdentifierContext) -> ObjcEnumCaseNode {
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
         
-        let enumCase = ObjcEnumCase(isInNonnullContext: nonnull)
+        let enumCase = ObjcEnumCaseNode(isInNonnullContext: nonnull)
         enumCase.precedingComments = comments(preceeding: rule)
         updateSourceLocation(for: enumCase, with: rule)
         
@@ -135,7 +135,7 @@ class ObjcASTNodeFactory {
         enumCase.addChild(identifierNode)
         
         if let expression = rule.expression() {
-            let expressionNode = ExpressionNode(isInNonnullContext: nonnull)
+            let expressionNode = ObjcExpressionNode(isInNonnullContext: nonnull)
             expressionNode.expression = expression
             updateSourceLocation(for: expressionNode, with: expression)
             enumCase.addChild(expressionNode)

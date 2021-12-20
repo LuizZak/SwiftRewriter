@@ -1,18 +1,18 @@
 /// Represents a global function definition
-public class ObjcFunctionDefinition: ObjcASTNode, ObjcInitializableNode {
+public class ObjcFunctionDefinitionNode: ObjcASTNode, ObjcInitializableNode {
     public var returnType: ObjcTypeNameNode? {
         firstChild()
     }
     
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
     
-    public var parameterList: ObjcParameterList? {
+    public var parameterList: ObjcParameterListNode? {
         firstChild()
     }
     
-    public var methodBody: MethodBody? {
+    public var methodBody: ObjcMethodBodyNode? {
         firstChild()
     }
     
@@ -22,12 +22,12 @@ public class ObjcFunctionDefinition: ObjcASTNode, ObjcInitializableNode {
 }
 
 /// Represents the parameters list for a function definition
-public class ObjcParameterList: ObjcASTNode, ObjcInitializableNode {
-    public var parameters: [ObjcFunctionParameter] {
+public class ObjcParameterListNode: ObjcASTNode, ObjcInitializableNode {
+    public var parameters: [ObjcFunctionParameterNode] {
         childrenMatching()
     }
     
-    public var variadicParameter: ObjcVariadicParameter? {
+    public var variadicParameter: ObjcVariadicParameterNode? {
         firstChild()
     }
     
@@ -37,8 +37,8 @@ public class ObjcParameterList: ObjcASTNode, ObjcInitializableNode {
 }
 
 /// Represents a parameter for a parameters list for a function definition
-public class ObjcFunctionParameter: ObjcASTNode, ObjcInitializableNode {
-    public var identifier: Identifier? {
+public class ObjcFunctionParameterNode: ObjcASTNode, ObjcInitializableNode {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
     
@@ -53,7 +53,7 @@ public class ObjcFunctionParameter: ObjcASTNode, ObjcInitializableNode {
 
 /// A variadic parameter which is specified as a (', ...') after at least one
 /// function parameter.
-public class ObjcVariadicParameter: ObjcASTNode, ObjcInitializableNode {
+public class ObjcVariadicParameterNode: ObjcASTNode, ObjcInitializableNode {
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)
     }

@@ -1,7 +1,7 @@
 /// A syntax node for an Objective-C class implementation (`@implementation`)
 /// declaration.
-public class ObjcClassImplementation: ObjcASTNode, ObjcInitializableNode {
-    public var identifier: Identifier? {
+public class ObjcClassImplementationNode: ObjcASTNode, ObjcInitializableNode {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
     
@@ -10,20 +10,20 @@ public class ObjcClassImplementation: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public extension ObjcClassImplementation {
-    var superclass: SuperclassName? {
+public extension ObjcClassImplementationNode {
+    var superclass: ObjcSuperclassNameNode? {
         firstChild()
     }
     
-    var ivarsList: IVarsList? {
+    var ivarsList: ObjcIVarsListNode? {
         firstChild()
     }
     
-    var methods: [MethodDefinition] {
+    var methods: [ObjcMethodDefinitionNode] {
         childrenMatching()
     }
     
-    var propertyImplementations: [ObjcPropertyImplementation] {
+    var propertyImplementations: [ObjcPropertyImplementationNode] {
         childrenMatching()
     }
 }

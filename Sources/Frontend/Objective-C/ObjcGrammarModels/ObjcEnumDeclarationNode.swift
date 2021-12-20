@@ -1,8 +1,8 @@
 /// A C / Objective-C enumeration
-public class ObjcEnumDeclaration: ObjcASTNode, ObjcInitializableNode {
+public class ObjcEnumDeclarationNode: ObjcASTNode, ObjcInitializableNode {
     public var isOptionSet: Bool = false
     
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
     
@@ -10,7 +10,7 @@ public class ObjcEnumDeclaration: ObjcASTNode, ObjcInitializableNode {
         firstChild()
     }
     
-    public var cases: [ObjcEnumCase] {
+    public var cases: [ObjcEnumCaseNode] {
         childrenMatching()
     }
     
@@ -19,11 +19,11 @@ public class ObjcEnumDeclaration: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public class ObjcEnumCase: ObjcASTNode {
-    public var identifier: Identifier? {
+public class ObjcEnumCaseNode: ObjcASTNode {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
-    public var expression: ExpressionNode? {
+    public var expression: ObjcExpressionNode? {
         firstChild()
     }
 }

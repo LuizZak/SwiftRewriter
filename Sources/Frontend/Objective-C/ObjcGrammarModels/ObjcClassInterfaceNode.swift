@@ -1,8 +1,8 @@
 import ObjcParserAntlr
 
 /// A syntax node for an Objective-C class interface (`@interface`) declaration.
-public class ObjcClassInterface: ObjcASTNode, ObjcInitializableNode {
-    public var identifier: Identifier? {
+public class ObjcClassInterfaceNode: ObjcASTNode, ObjcInitializableNode {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
     
@@ -11,36 +11,36 @@ public class ObjcClassInterface: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public extension ObjcClassInterface {
-    var properties: [PropertyDefinition] {
+public extension ObjcClassInterfaceNode {
+    var properties: [ObjcPropertyDefinitionNode] {
         childrenMatching()
     }
     
-    var superclass: SuperclassName? {
+    var superclass: ObjcSuperclassNameNode? {
         firstChild()
     }
     
-    var protocolList: ProtocolReferenceList? {
+    var protocolList: ObjcProtocolReferenceListNode? {
         firstChild()
     }
     
-    var ivarsList: IVarsList? {
+    var ivarsList: ObjcIVarsListNode? {
         firstChild()
     }
     
-    var methods: [MethodDefinition] {
+    var methods: [ObjcMethodDefinitionNode] {
         childrenMatching()
     }
 }
 
 // MARK: - Subnodes
 
-public class SuperclassName: Identifier {
+public class ObjcSuperclassNameNode: ObjcIdentifierNode {
     
 }
 
-public class IVarsList: ObjcASTNode, ObjcInitializableNode {
-    public var ivarDeclarations: [IVarDeclaration] {
+public class ObjcIVarsListNode: ObjcASTNode, ObjcInitializableNode {
+    public var ivarDeclarations: [ObjcIVarDeclarationNode] {
         childrenMatching()
     }
     
@@ -49,11 +49,11 @@ public class IVarsList: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public class IVarDeclaration: ObjcASTNode, ObjcInitializableNode {
+public class ObjcIVarDeclarationNode: ObjcASTNode, ObjcInitializableNode {
     public var type: ObjcTypeNameNode? {
         firstChild()
     }
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
     
@@ -62,8 +62,8 @@ public class IVarDeclaration: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public class ProtocolReferenceList: ObjcASTNode, ObjcInitializableNode {
-    public var protocols: [ProtocolName] {
+public class ObjcProtocolReferenceListNode: ObjcASTNode, ObjcInitializableNode {
+    public var protocols: [ObjcProtocolNameNode] {
         childrenMatching()
     }
     
@@ -72,6 +72,6 @@ public class ProtocolReferenceList: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public class ProtocolName: Identifier {
+public class ObjcProtocolNameNode: ObjcIdentifierNode {
     
 }

@@ -4,8 +4,8 @@ import KnownType
 
 /// An intention to generate a Swift enumeration type
 public final class EnumGenerationIntention: TypeGenerationIntention {
-    public var typedSource: ObjcEnumDeclaration? {
-        source as? ObjcEnumDeclaration
+    public var typedSource: ObjcEnumDeclarationNode? {
+        source as? ObjcEnumDeclarationNode
     }
     
     public override var kind: KnownTypeKind {

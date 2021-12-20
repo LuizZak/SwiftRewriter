@@ -4,8 +4,8 @@ import KnownType
 
 /// An intention to generate a global function.
 public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIntention, MutableSignatureFunctionIntention, MutableFunctionIntention, ParameterizedFunctionIntention, AttributeTaggeableObject {
-    public var typedSource: ObjcFunctionDefinition? {
-        source as? ObjcFunctionDefinition
+    public var typedSource: ObjcFunctionDefinitionNode? {
+        source as? ObjcFunctionDefinitionNode
     }
     
     public var signature: FunctionSignature

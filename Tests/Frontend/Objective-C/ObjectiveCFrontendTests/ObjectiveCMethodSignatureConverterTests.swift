@@ -190,7 +190,7 @@ class ObjectiveCMethodSignatureConverterTests: XCTestCase {
                                        instanceTypeAlias: nil)
     }
     
-    private func parseMethodSign(_ source: String, file: StaticString = #filePath, line: UInt = #line) -> MethodDefinition {
+    private func parseMethodSign(_ source: String, file: StaticString = #filePath, line: UInt = #line) -> ObjcMethodDefinitionNode {
         let finalSrc = """
             @interface myClass
             \(source)
@@ -204,8 +204,8 @@ class ObjectiveCMethodSignatureConverterTests: XCTestCase {
             
             let node =
                 parser.rootNode
-                    .firstChild(ofType: ObjcClassInterface.self)?
-                    .firstChild(ofType: MethodDefinition.self)
+                    .firstChild(ofType: ObjcClassInterfaceNode.self)?
+                    .firstChild(ofType: ObjcMethodDefinitionNode.self)
             return node!
         } catch {
             XCTFail("Failed to parse test '\(source)': \(error)", file: file, line: line)

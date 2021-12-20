@@ -82,7 +82,7 @@ class ObjcParserTests: XCTestCase {
             void global(int a);
             """)
         
-        let funcDecl: ObjcFunctionDefinition? = node.firstChild()
+        let funcDecl: ObjcFunctionDefinitionNode? = node.firstChild()
         
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
@@ -101,7 +101,7 @@ class ObjcParserTests: XCTestCase {
             void global();
             """)
         
-        let funcDecl: ObjcFunctionDefinition? = node.firstChild()
+        let funcDecl: ObjcFunctionDefinitionNode? = node.firstChild()
         
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
@@ -118,7 +118,7 @@ class ObjcParserTests: XCTestCase {
             global(int a);
             """)
         
-        let funcDecl: ObjcFunctionDefinition? = node.firstChild()
+        let funcDecl: ObjcFunctionDefinitionNode? = node.firstChild()
         
         XCTAssertNotNil(funcDecl)
         XCTAssertNil(funcDecl?.returnType)
@@ -136,7 +136,7 @@ class ObjcParserTests: XCTestCase {
             NSArray<NSArray<NSString*>*> *_Nonnull global();
             """)
         
-        let funcDecl: ObjcFunctionDefinition? = node.firstChild()
+        let funcDecl: ObjcFunctionDefinitionNode? = node.firstChild()
         
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
@@ -162,7 +162,7 @@ class ObjcParserTests: XCTestCase {
             void global(NSArray<NSArray<NSString*>*> *_Nonnull value);
             """)
         
-        let funcDecl: ObjcFunctionDefinition? = node.firstChild()
+        let funcDecl: ObjcFunctionDefinitionNode? = node.firstChild()
         
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
@@ -190,7 +190,7 @@ class ObjcParserTests: XCTestCase {
             void global(NSString *format, ...);
             """)
         
-        let funcDecl: ObjcFunctionDefinition? = node.firstChild()
+        let funcDecl: ObjcFunctionDefinitionNode? = node.firstChild()
         
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
@@ -210,7 +210,7 @@ class ObjcParserTests: XCTestCase {
             }
             """)
         
-        let funcDecl: ObjcFunctionDefinition? = node.firstChild()
+        let funcDecl: ObjcFunctionDefinitionNode? = node.firstChild()
         
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
@@ -235,8 +235,8 @@ class ObjcParserTests: XCTestCase {
             @end
             """)
         
-        let interface: ObjcClassInterface? = node.firstChild()
-        let implementation: ObjcClassImplementation? = node.firstChild()
+        let interface: ObjcClassInterfaceNode? = node.firstChild()
+        let implementation: ObjcClassImplementationNode? = node.firstChild()
         XCTAssert(interface!.methods[0].isClassMethod)
         XCTAssert(implementation!.methods[0].isClassMethod)
     }
@@ -247,7 +247,7 @@ class ObjcParserTests: XCTestCase {
             @end
             """)
         
-        let prot: ObjcProtocolDeclaration? = node.firstChild()
+        let prot: ObjcProtocolDeclarationNode? = node.firstChild()
         XCTAssertNotNil(prot?.protocolList)
         XCTAssertEqual(prot?.protocolList?.protocols.first?.name, "B")
     }
@@ -259,7 +259,7 @@ class ObjcParserTests: XCTestCase {
             @end
             """)
         
-        let implementation: ObjcClassImplementation? = node.firstChild()
+        let implementation: ObjcClassImplementationNode? = node.firstChild()
         let synth = implementation?.propertyImplementations.first?.list?.synthesizations
         XCTAssertNotNil(implementation?.propertyImplementations)
         XCTAssertNotNil(synth?.first)
@@ -277,7 +277,7 @@ class ObjcParserTests: XCTestCase {
             """)
         
         let defNode: ObjcTypedefNode? = node.firstChild()
-        let structNode: ObjcStructDeclaration? = defNode?.firstChild()
+        let structNode: ObjcStructDeclarationNode? = defNode?.firstChild()
         let fields = structNode?.body?.fields
         
         XCTAssertNotNil(structNode)
@@ -293,7 +293,7 @@ class ObjcParserTests: XCTestCase {
             @end
             """)
         
-        let implementation: ObjcClassInterface? = node.firstChild()
+        let implementation: ObjcClassInterfaceNode? = node.firstChild()
         XCTAssertEqual(implementation?.properties[0].hasIbOutletSpecifier, true)
     }
     
@@ -304,7 +304,7 @@ class ObjcParserTests: XCTestCase {
             @end
             """)
         
-        let implementation: ObjcClassInterface? = node.firstChild()
+        let implementation: ObjcClassInterfaceNode? = node.firstChild()
         XCTAssertEqual(implementation?.properties[0].hasIbInspectableSpecifier, true)
     }
     
@@ -641,7 +641,7 @@ class ObjcParserTests: XCTestCase {
             - (void)method;
             // Trailing comment
             @end
-            """, \GlobalContextNode.classInterfaces[0].methods[0])
+            """, \ObjcGlobalContextNode.classInterfaces[0].methods[0])
     }
     
     func testCollectCommentsPrecedingPropertyDefinition() {
@@ -653,7 +653,7 @@ class ObjcParserTests: XCTestCase {
             @property NSInteger a;
             // Trailing comment
             @end
-            """, \GlobalContextNode.classInterfaces[0].properties[0])
+            """, \ObjcGlobalContextNode.classInterfaces[0].properties[0])
     }
     
     func testCollectCommentsPrecedingMethodDeclaration() {
@@ -666,7 +666,7 @@ class ObjcParserTests: XCTestCase {
             }
             // Trailing comment
             @end
-            """, \GlobalContextNode.classImplementations[0].methods[0])
+            """, \ObjcGlobalContextNode.classImplementations[0].methods[0])
     }
     
     func testCollectCommentsPrecedingEnumDeclaration() {
@@ -678,7 +678,7 @@ class ObjcParserTests: XCTestCase {
                 MyEnumCase
             };
             // Trailing comment
-            """, \GlobalContextNode.enumDeclarations[0])
+            """, \ObjcGlobalContextNode.enumDeclarations[0])
     }
     
     func testCollectCommentsPrecedingEnumCase() {
@@ -690,7 +690,7 @@ class ObjcParserTests: XCTestCase {
                 MyEnumCase
                 // Trailing comment
             };
-            """, \GlobalContextNode.enumDeclarations[0].cases[0])
+            """, \ObjcGlobalContextNode.enumDeclarations[0].cases[0])
     }
     
     func testCollectCommentsPrecedingInstanceVariable() {
@@ -704,7 +704,7 @@ class ObjcParserTests: XCTestCase {
                 // Trailing comment
             }
             @end
-            """, \GlobalContextNode.classInterfaces[0].ivarsList!.ivarDeclarations[0])
+            """, \ObjcGlobalContextNode.classInterfaces[0].ivarsList!.ivarDeclarations[0])
     }
     
     func testCommentCollectionIgnoresMethodImplementationComments() throws {
@@ -735,7 +735,7 @@ extension ObjcParserTests {
     
     private func testParseComments<T: ObjcASTNode>(
         _ source: String,
-        _ keyPath: KeyPath<GlobalContextNode, T>,
+        _ keyPath: KeyPath<ObjcGlobalContextNode, T>,
         line: UInt = #line) {
         
         let string = """
@@ -750,7 +750,7 @@ extension ObjcParserTests {
     
     private func testParseCommentsRaw<T: ObjcASTNode>(
         _ source: String,
-        _ keyPath: KeyPath<GlobalContextNode, T>,
+        _ keyPath: KeyPath<ObjcGlobalContextNode, T>,
         line: UInt = #line) {
         
         do {
@@ -769,13 +769,13 @@ extension ObjcParserTests {
         }
     }
     
-    private func parserTest(_ source: String, file: StaticString = #filePath, line: UInt = #line) -> GlobalContextNode {
+    private func parserTest(_ source: String, file: StaticString = #filePath, line: UInt = #line) -> ObjcGlobalContextNode {
         let sut = ObjcParser(string: source)
         
         return _parseTestGlobalContextNode(source: source, parser: sut, file: file, line: line)
     }
     
-    private func _parseTestGlobalContextNode(source: String, parser: ObjcParser, file: StaticString = #filePath, line: UInt = #line) -> GlobalContextNode {
+    private func _parseTestGlobalContextNode(source: String, parser: ObjcParser, file: StaticString = #filePath, line: UInt = #line) -> ObjcGlobalContextNode {
         do {
             try parser.parse()
             

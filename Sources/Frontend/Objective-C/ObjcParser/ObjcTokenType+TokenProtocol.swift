@@ -1,7 +1,7 @@
 import MiniLexer
 import ObjcGrammarModels
 
-let operators: [(string: String, op: Operator)] = [
+let operators: [(string: String, op: ObjcOperator)] = [
     // It is important to leave the operators in order, because since the first
     // match is used, an operator like "+" might be returned instead of the full
     // operator "+=".

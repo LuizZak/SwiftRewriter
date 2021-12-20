@@ -1,9 +1,9 @@
 /// A type definition node
 public class ObjcTypedefNode: ObjcASTNode, ObjcInitializableNode {
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
-    public var structDeclaration: ObjcStructDeclaration? {
+    public var structDeclaration: ObjcStructDeclarationNode? {
         firstChild()
     }
     public var type: ObjcTypeNameNode? {
@@ -37,7 +37,7 @@ public class ObjcTypeDeclaratorNode: ObjcASTNode {
         firstChild()
     }
     
-    public var identifier: Identifier? {
+    public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
 }

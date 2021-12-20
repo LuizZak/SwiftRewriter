@@ -844,7 +844,7 @@ internal func _isConstant(fromType type: ObjcType) -> Bool {
 }
 
 internal func evaluateOwnershipPrefix(inType type: ObjcType,
-                                      property: PropertyDefinition? = nil) -> Ownership {
+                                      property: ObjcPropertyDefinitionNode? = nil) -> Ownership {
     
     var ownership: Ownership = .strong
     if !type.isPointer {
