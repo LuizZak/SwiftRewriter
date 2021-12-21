@@ -1,5 +1,7 @@
 import Utils
 
+// TODO: Move to Utils along with SourceLocation
+
 // Based on SwiftSyntax's own `SourceLength` structure
 public struct SourceLength: Codable {
     /// A zero-length source length

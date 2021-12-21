@@ -212,7 +212,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50500.0")),
         .package(url: "https://github.com/apple/swift-argument-parser.git", .exact("0.3.1")),
     ],
-    targets: core + objcFrontend + [
+    targets: core + objcFrontend + jsFrontend + [
         .target(
             name: "Utils",
             dependencies: [],
@@ -425,6 +425,16 @@ let package = Package(
                 "TestCommons",
             ],
             path: "Tests/Frontend/Objective-C/ObjectiveCFrontendTests"
+        ),
+        .testTarget(
+            name: "JsParserTests",
+            dependencies: [
+                "JsParser",
+            ],
+            path: "Tests/Frontend/JavaScript/JsParserTests",
+            resources: [
+                .copy("Fixtures/bezier.js")
+            ]
         ),
         .testTarget(
             name: "SwiftRewriterTests",

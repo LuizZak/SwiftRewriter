@@ -28,6 +28,8 @@ open class JavaScriptLexer: JavaScriptLexerBase {
     internal var _sharedContextCache: PredictionContextCache {
         return state._sharedContextCache
     }
+    
+    public var state: State
 
 	public
 	static let HashBangLine=1, MultiLineComment=2, SingleLineComment=3, RegularExpressionLiteral=4, 
@@ -163,7 +165,7 @@ open class JavaScriptLexer: JavaScriptLexerBase {
     }
 
 	public
-	required init(_ input: CharStream) {
+	required init(_ input: CharStream, _ state: State) {
         self.state = state
         
 	    RuntimeMetaData.checkVersion("4.9.3", RuntimeMetaData.VERSION)
@@ -217,7 +219,7 @@ open class JavaScriptLexer: JavaScriptLexerBase {
 	private func OpenBrace_action(_ _localctx: RuleContext?,  _ actionIndex: Int) {
 		switch (actionIndex) {
 		case 0:
-			this.ProcessOpenBrace();
+			self.processOpenBrace();
 
 		 default: break
 		}
@@ -225,7 +227,7 @@ open class JavaScriptLexer: JavaScriptLexerBase {
 	private func CloseBrace_action(_ _localctx: RuleContext?,  _ actionIndex: Int) {
 		switch (actionIndex) {
 		case 1:
-			this.ProcessCloseBrace();
+			self.processCloseBrace();
 
 		 default: break
 		}
@@ -233,7 +235,7 @@ open class JavaScriptLexer: JavaScriptLexerBase {
 	private func StringLiteral_action(_ _localctx: RuleContext?,  _ actionIndex: Int) {
 		switch (actionIndex) {
 		case 2:
-			this.ProcessStringLiteral();
+			self.processStringLiteral();
 
 		 default: break
 		}
@@ -241,7 +243,7 @@ open class JavaScriptLexer: JavaScriptLexerBase {
 	private func BackTick_action(_ _localctx: RuleContext?,  _ actionIndex: Int) {
 		switch (actionIndex) {
 		case 3:
-			this.IncreaseTemplateDepth();
+			self.increaseTemplateDepth();
 
 		 default: break
 		}
@@ -249,7 +251,7 @@ open class JavaScriptLexer: JavaScriptLexerBase {
 	private func BackTickInside_action(_ _localctx: RuleContext?,  _ actionIndex: Int) {
 		switch (actionIndex) {
 		case 4:
-			this.DecreaseTemplateDepth();
+			self.decreaseTemplateDepth();
 
 		 default: break
 		}
@@ -290,85 +292,85 @@ open class JavaScriptLexer: JavaScriptLexerBase {
 	}
 	private func HashBangLine_sempred(_ _localctx: RuleContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 0:return  this.IsStartOfFile()
+		    case 0:return self.isStartOfFile()
 		    default: return true
 		}
 	}
 	private func RegularExpressionLiteral_sempred(_ _localctx: RuleContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 1:return this.IsRegexPossible()
+		    case 1:return self.isRegexPossible()
 		    default: return true
 		}
 	}
 	private func TemplateCloseBrace_sempred(_ _localctx: RuleContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 2:return this.IsInTemplateString()
+		    case 2:return self.isInTemplateString()
 		    default: return true
 		}
 	}
 	private func OctalIntegerLiteral_sempred(_ _localctx: RuleContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 3:return !this.IsStrictMode()
+		    case 3:return !self.isStrictMode()
 		    default: return true
 		}
 	}
 	private func Implements_sempred(_ _localctx: RuleContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 4:return this.IsStrictMode()
+		    case 4:return self.isStrictMode()
 		    default: return true
 		}
 	}
 	private func StrictLet_sempred(_ _localctx: RuleContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 5:return this.IsStrictMode()
+		    case 5:return self.isStrictMode()
 		    default: return true
 		}
 	}
 	private func NonStrictLet_sempred(_ _localctx: RuleContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 6:return !this.IsStrictMode()
+		    case 6:return !self.isStrictMode()
 		    default: return true
 		}
 	}
 	private func Private_sempred(_ _localctx: RuleContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 7:return this.IsStrictMode()
+		    case 7:return self.isStrictMode()
 		    default: return true
 		}
 	}
 	private func Public_sempred(_ _localctx: RuleContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 8:return this.IsStrictMode()
+		    case 8:return self.isStrictMode()
 		    default: return true
 		}
 	}
 	private func Interface_sempred(_ _localctx: RuleContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 9:return this.IsStrictMode()
+		    case 9:return self.isStrictMode()
 		    default: return true
 		}
 	}
 	private func Package_sempred(_ _localctx: RuleContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 10:return this.IsStrictMode()
+		    case 10:return self.isStrictMode()
 		    default: return true
 		}
 	}
 	private func Protected_sempred(_ _localctx: RuleContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 11:return this.IsStrictMode()
+		    case 11:return self.isStrictMode()
 		    default: return true
 		}
 	}
 	private func Static_sempred(_ _localctx: RuleContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 12:return this.IsStrictMode()
+		    case 12:return self.isStrictMode()
 		    default: return true
 		}
 	}
 	private func Yield_sempred(_ _localctx: RuleContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 13:return this.IsStrictMode()
+		    case 13:return self.isStrictMode()
 		    default: return true
 		}
 	}

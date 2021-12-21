@@ -6,7 +6,6 @@ import AntlrCommons
 import JsParserAntlr
 
 public typealias JavaScriptParserAntlr = AntlrParser<JavaScriptLexer, JavaScriptParser>
-public typealias JavaScriptPreprocessorAntlr = AntlrParser<JavaScriptPreprocessorLexer, JavaScriptPreprocessorParser>
 
 /// Describes a parser state for a single `JsParser` instance, with internal
 /// fields that are used by the parser.

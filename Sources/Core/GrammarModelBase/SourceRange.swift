@@ -1,3 +1,5 @@
+// TODO: Move to Utils along with SourceLocation
+
 /// Range in source code a node spans
 public enum SourceRange: Equatable {
     case location(String.Index)

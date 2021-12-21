@@ -176,7 +176,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	func getSerializedATN() -> String { return JavaScriptParser._serializedATN }
 
 	override open
-	func getATN() -> ATN { return JavaScriptParser._ATN }
+	func getATN() -> ATN { return _ATN }
 
 
 	override open
@@ -246,7 +246,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func program() throws -> ProgramContext {
-		var _localctx: ProgramContext = ProgramContext(_ctx, getState())
+		let _localctx: ProgramContext = ProgramContext(_ctx, getState())
 		try enterRule(_localctx, 0, JavaScriptParser.RULE_program)
 		defer {
 	    		try! exitRule()
@@ -322,7 +322,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func sourceElement() throws -> SourceElementContext {
-		var _localctx: SourceElementContext = SourceElementContext(_ctx, getState())
+		let _localctx: SourceElementContext = SourceElementContext(_ctx, getState())
 		try enterRule(_localctx, 2, JavaScriptParser.RULE_sourceElement)
 		defer {
 	    		try! exitRule()
@@ -454,7 +454,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func statement() throws -> StatementContext {
-		var _localctx: StatementContext = StatementContext(_ctx, getState())
+		let _localctx: StatementContext = StatementContext(_ctx, getState())
 		try enterRule(_localctx, 4, JavaScriptParser.RULE_statement)
 		defer {
 	    		try! exitRule()
@@ -639,7 +639,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func block() throws -> BlockContext {
-		var _localctx: BlockContext = BlockContext(_ctx, getState())
+		let _localctx: BlockContext = BlockContext(_ctx, getState())
 		try enterRule(_localctx, 6, JavaScriptParser.RULE_block)
 		defer {
 	    		try! exitRule()
@@ -711,7 +711,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func statementList() throws -> StatementListContext {
-		var _localctx: StatementListContext = StatementListContext(_ctx, getState())
+		let _localctx: StatementListContext = StatementListContext(_ctx, getState())
 		try enterRule(_localctx, 8, JavaScriptParser.RULE_statementList)
 		defer {
 	    		try! exitRule()
@@ -788,7 +788,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func importStatement() throws -> ImportStatementContext {
-		var _localctx: ImportStatementContext = ImportStatementContext(_ctx, getState())
+		let _localctx: ImportStatementContext = ImportStatementContext(_ctx, getState())
 		try enterRule(_localctx, 10, JavaScriptParser.RULE_importStatement)
 		defer {
 	    		try! exitRule()
@@ -866,7 +866,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func importFromBlock() throws -> ImportFromBlockContext {
-		var _localctx: ImportFromBlockContext = ImportFromBlockContext(_ctx, getState())
+		let _localctx: ImportFromBlockContext = ImportFromBlockContext(_ctx, getState())
 		try enterRule(_localctx, 12, JavaScriptParser.RULE_importFromBlock)
 		defer {
 	    		try! exitRule()
@@ -1089,7 +1089,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func moduleItems() throws -> ModuleItemsContext {
-		var _localctx: ModuleItemsContext = ModuleItemsContext(_ctx, getState())
+		let _localctx: ModuleItemsContext = ModuleItemsContext(_ctx, getState())
 		try enterRule(_localctx, 14, JavaScriptParser.RULE_moduleItems)
 		var _la: Int = 0
 		defer {
@@ -1198,7 +1198,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func importDefault() throws -> ImportDefaultContext {
-		var _localctx: ImportDefaultContext = ImportDefaultContext(_ctx, getState())
+		let _localctx: ImportDefaultContext = ImportDefaultContext(_ctx, getState())
 		try enterRule(_localctx, 16, JavaScriptParser.RULE_importDefault)
 		defer {
 	    		try! exitRule()
@@ -1268,7 +1268,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func importNamespace() throws -> ImportNamespaceContext {
-		var _localctx: ImportNamespaceContext = ImportNamespaceContext(_ctx, getState())
+		let _localctx: ImportNamespaceContext = ImportNamespaceContext(_ctx, getState())
 		try enterRule(_localctx, 18, JavaScriptParser.RULE_importNamespace)
 		var _la: Int = 0
 		defer {
@@ -1407,7 +1407,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func importFrom() throws -> ImportFromContext {
-		var _localctx: ImportFromContext = ImportFromContext(_ctx, getState())
+		let _localctx: ImportFromContext = ImportFromContext(_ctx, getState())
 		try enterRule(_localctx, 20, JavaScriptParser.RULE_importFrom)
 		defer {
 	    		try! exitRule()
@@ -1473,7 +1473,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func aliasName() throws -> AliasNameContext {
-		var _localctx: AliasNameContext = AliasNameContext(_ctx, getState())
+		let _localctx: AliasNameContext = AliasNameContext(_ctx, getState())
 		try enterRule(_localctx, 22, JavaScriptParser.RULE_aliasName)
 		var _la: Int = 0
 		defer {
@@ -1719,7 +1719,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func exportFromBlock() throws -> ExportFromBlockContext {
-		var _localctx: ExportFromBlockContext = ExportFromBlockContext(_ctx, getState())
+		let _localctx: ExportFromBlockContext = ExportFromBlockContext(_ctx, getState())
 		try enterRule(_localctx, 26, JavaScriptParser.RULE_exportFromBlock)
 		defer {
 	    		try! exitRule()
@@ -1864,7 +1864,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func declaration() throws -> DeclarationContext {
-		var _localctx: DeclarationContext = DeclarationContext(_ctx, getState())
+		let _localctx: DeclarationContext = DeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 28, JavaScriptParser.RULE_declaration)
 		defer {
 	    		try! exitRule()
@@ -1949,7 +1949,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func variableStatement() throws -> VariableStatementContext {
-		var _localctx: VariableStatementContext = VariableStatementContext(_ctx, getState())
+		let _localctx: VariableStatementContext = VariableStatementContext(_ctx, getState())
 		try enterRule(_localctx, 30, JavaScriptParser.RULE_variableStatement)
 		defer {
 	    		try! exitRule()
@@ -2023,7 +2023,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func variableDeclarationList() throws -> VariableDeclarationListContext {
-		var _localctx: VariableDeclarationListContext = VariableDeclarationListContext(_ctx, getState())
+		let _localctx: VariableDeclarationListContext = VariableDeclarationListContext(_ctx, getState())
 		try enterRule(_localctx, 32, JavaScriptParser.RULE_variableDeclarationList)
 		defer {
 	    		try! exitRule()
@@ -2106,7 +2106,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func variableDeclaration() throws -> VariableDeclarationContext {
-		var _localctx: VariableDeclarationContext = VariableDeclarationContext(_ctx, getState())
+		let _localctx: VariableDeclarationContext = VariableDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 34, JavaScriptParser.RULE_variableDeclaration)
 		defer {
 	    		try! exitRule()
@@ -2174,7 +2174,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func emptyStatement_() throws -> EmptyStatement_Context {
-		var _localctx: EmptyStatement_Context = EmptyStatement_Context(_ctx, getState())
+		let _localctx: EmptyStatement_Context = EmptyStatement_Context(_ctx, getState())
 		try enterRule(_localctx, 36, JavaScriptParser.RULE_emptyStatement_)
 		defer {
 	    		try! exitRule()
@@ -2234,7 +2234,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func expressionStatement() throws -> ExpressionStatementContext {
-		var _localctx: ExpressionStatementContext = ExpressionStatementContext(_ctx, getState())
+		let _localctx: ExpressionStatementContext = ExpressionStatementContext(_ctx, getState())
 		try enterRule(_localctx, 38, JavaScriptParser.RULE_expressionStatement)
 		defer {
 	    		try! exitRule()
@@ -2242,8 +2242,8 @@ open class JavaScriptParser: JavaScriptParserBase {
 		do {
 		 	try enterOuterAlt(_localctx, 1)
 		 	setState(300)
-		 	if (!(this.notOpenBraceAndNotFunction())) {
-		 	    throw ANTLRException.recognition(e:FailedPredicateException(self, "this.notOpenBraceAndNotFunction()"))
+		 	if (!(try self.notOpenBraceAndNotFunction())) {
+		 	    throw ANTLRException.recognition(e:FailedPredicateException(self, "self.notOpenBraceAndNotFunction()"))
 		 	}
 		 	setState(301)
 		 	try expressionSequence()
@@ -2320,7 +2320,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func ifStatement() throws -> IfStatementContext {
-		var _localctx: IfStatementContext = IfStatementContext(_ctx, getState())
+		let _localctx: IfStatementContext = IfStatementContext(_ctx, getState())
 		try enterRule(_localctx, 40, JavaScriptParser.RULE_ifStatement)
 		defer {
 	    		try! exitRule()
@@ -2866,8 +2866,8 @@ open class JavaScriptParser: JavaScriptParserBase {
 		 		setState(363)
 		 		try identifier()
 		 		setState(364)
-		 		if (!(this.p("of"))) {
-		 		    throw ANTLRException.recognition(e:FailedPredicateException(self, "this.p(\"of\")"))
+		 		if (!(try self.p("of"))) {
+		 		    throw ANTLRException.recognition(e:FailedPredicateException(self, "self.p(\"of\")"))
 		 		}
 		 		setState(365)
 		 		try expressionSequence()
@@ -2933,7 +2933,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func varModifier() throws -> VarModifierContext {
-		var _localctx: VarModifierContext = VarModifierContext(_ctx, getState())
+		let _localctx: VarModifierContext = VarModifierContext(_ctx, getState())
 		try enterRule(_localctx, 44, JavaScriptParser.RULE_varModifier)
 		defer {
 	    		try! exitRule()
@@ -3019,7 +3019,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func continueStatement() throws -> ContinueStatementContext {
-		var _localctx: ContinueStatementContext = ContinueStatementContext(_ctx, getState())
+		let _localctx: ContinueStatementContext = ContinueStatementContext(_ctx, getState())
 		try enterRule(_localctx, 46, JavaScriptParser.RULE_continueStatement)
 		defer {
 	    		try! exitRule()
@@ -3033,8 +3033,8 @@ open class JavaScriptParser: JavaScriptParserBase {
 		 	switch (try getInterpreter().adaptivePredict(_input,30,_ctx)) {
 		 	case 1:
 		 		setState(377)
-		 		if (!(this.notLineTerminator())) {
-		 		    throw ANTLRException.recognition(e:FailedPredicateException(self, "this.notLineTerminator()"))
+		 		if (!(try self.notLineTerminator())) {
+		 		    throw ANTLRException.recognition(e:FailedPredicateException(self, "self.notLineTerminator()"))
 		 		}
 		 		setState(378)
 		 		try identifier()
@@ -3099,7 +3099,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func breakStatement() throws -> BreakStatementContext {
-		var _localctx: BreakStatementContext = BreakStatementContext(_ctx, getState())
+		let _localctx: BreakStatementContext = BreakStatementContext(_ctx, getState())
 		try enterRule(_localctx, 48, JavaScriptParser.RULE_breakStatement)
 		defer {
 	    		try! exitRule()
@@ -3113,8 +3113,8 @@ open class JavaScriptParser: JavaScriptParserBase {
 		 	switch (try getInterpreter().adaptivePredict(_input,31,_ctx)) {
 		 	case 1:
 		 		setState(384)
-		 		if (!(this.notLineTerminator())) {
-		 		    throw ANTLRException.recognition(e:FailedPredicateException(self, "this.notLineTerminator()"))
+		 		if (!(try self.notLineTerminator())) {
+		 		    throw ANTLRException.recognition(e:FailedPredicateException(self, "self.notLineTerminator()"))
 		 		}
 		 		setState(385)
 		 		try identifier()
@@ -3179,7 +3179,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func returnStatement() throws -> ReturnStatementContext {
-		var _localctx: ReturnStatementContext = ReturnStatementContext(_ctx, getState())
+		let _localctx: ReturnStatementContext = ReturnStatementContext(_ctx, getState())
 		try enterRule(_localctx, 50, JavaScriptParser.RULE_returnStatement)
 		defer {
 	    		try! exitRule()
@@ -3193,8 +3193,8 @@ open class JavaScriptParser: JavaScriptParserBase {
 		 	switch (try getInterpreter().adaptivePredict(_input,32,_ctx)) {
 		 	case 1:
 		 		setState(391)
-		 		if (!(this.notLineTerminator())) {
-		 		    throw ANTLRException.recognition(e:FailedPredicateException(self, "this.notLineTerminator()"))
+		 		if (!(try self.notLineTerminator())) {
+		 		    throw ANTLRException.recognition(e:FailedPredicateException(self, "self.notLineTerminator()"))
 		 		}
 		 		setState(392)
 		 		try expressionSequence()
@@ -3259,7 +3259,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func yieldStatement() throws -> YieldStatementContext {
-		var _localctx: YieldStatementContext = YieldStatementContext(_ctx, getState())
+		let _localctx: YieldStatementContext = YieldStatementContext(_ctx, getState())
 		try enterRule(_localctx, 52, JavaScriptParser.RULE_yieldStatement)
 		defer {
 	    		try! exitRule()
@@ -3273,8 +3273,8 @@ open class JavaScriptParser: JavaScriptParserBase {
 		 	switch (try getInterpreter().adaptivePredict(_input,33,_ctx)) {
 		 	case 1:
 		 		setState(398)
-		 		if (!(this.notLineTerminator())) {
-		 		    throw ANTLRException.recognition(e:FailedPredicateException(self, "this.notLineTerminator()"))
+		 		if (!(try self.notLineTerminator())) {
+		 		    throw ANTLRException.recognition(e:FailedPredicateException(self, "self.notLineTerminator()"))
 		 		}
 		 		setState(399)
 		 		try expressionSequence()
@@ -3347,7 +3347,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func withStatement() throws -> WithStatementContext {
-		var _localctx: WithStatementContext = WithStatementContext(_ctx, getState())
+		let _localctx: WithStatementContext = WithStatementContext(_ctx, getState())
 		try enterRule(_localctx, 54, JavaScriptParser.RULE_withStatement)
 		defer {
 	    		try! exitRule()
@@ -3427,7 +3427,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func switchStatement() throws -> SwitchStatementContext {
-		var _localctx: SwitchStatementContext = SwitchStatementContext(_ctx, getState())
+		let _localctx: SwitchStatementContext = SwitchStatementContext(_ctx, getState())
 		try enterRule(_localctx, 56, JavaScriptParser.RULE_switchStatement)
 		defer {
 	    		try! exitRule()
@@ -3507,7 +3507,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func caseBlock() throws -> CaseBlockContext {
-		var _localctx: CaseBlockContext = CaseBlockContext(_ctx, getState())
+		let _localctx: CaseBlockContext = CaseBlockContext(_ctx, getState())
 		try enterRule(_localctx, 58, JavaScriptParser.RULE_caseBlock)
 		var _la: Int = 0
 		defer {
@@ -3609,7 +3609,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func caseClauses() throws -> CaseClausesContext {
-		var _localctx: CaseClausesContext = CaseClausesContext(_ctx, getState())
+		let _localctx: CaseClausesContext = CaseClausesContext(_ctx, getState())
 		try enterRule(_localctx, 60, JavaScriptParser.RULE_caseClauses)
 		var _la: Int = 0
 		defer {
@@ -3692,7 +3692,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func caseClause() throws -> CaseClauseContext {
-		var _localctx: CaseClauseContext = CaseClauseContext(_ctx, getState())
+		let _localctx: CaseClauseContext = CaseClauseContext(_ctx, getState())
 		try enterRule(_localctx, 62, JavaScriptParser.RULE_caseClause)
 		defer {
 	    		try! exitRule()
@@ -3770,7 +3770,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func defaultClause() throws -> DefaultClauseContext {
-		var _localctx: DefaultClauseContext = DefaultClauseContext(_ctx, getState())
+		let _localctx: DefaultClauseContext = DefaultClauseContext(_ctx, getState())
 		try enterRule(_localctx, 64, JavaScriptParser.RULE_defaultClause)
 		defer {
 	    		try! exitRule()
@@ -3846,7 +3846,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func labelledStatement() throws -> LabelledStatementContext {
-		var _localctx: LabelledStatementContext = LabelledStatementContext(_ctx, getState())
+		let _localctx: LabelledStatementContext = LabelledStatementContext(_ctx, getState())
 		try enterRule(_localctx, 66, JavaScriptParser.RULE_labelledStatement)
 		defer {
 	    		try! exitRule()
@@ -3914,7 +3914,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func throwStatement() throws -> ThrowStatementContext {
-		var _localctx: ThrowStatementContext = ThrowStatementContext(_ctx, getState())
+		let _localctx: ThrowStatementContext = ThrowStatementContext(_ctx, getState())
 		try enterRule(_localctx, 68, JavaScriptParser.RULE_throwStatement)
 		defer {
 	    		try! exitRule()
@@ -3924,8 +3924,8 @@ open class JavaScriptParser: JavaScriptParserBase {
 		 	setState(448)
 		 	try match(JavaScriptParser.Tokens.Throw.rawValue)
 		 	setState(449)
-		 	if (!(this.notLineTerminator())) {
-		 	    throw ANTLRException.recognition(e:FailedPredicateException(self, "this.notLineTerminator()"))
+		 	if (!(try self.notLineTerminator())) {
+		 	    throw ANTLRException.recognition(e:FailedPredicateException(self, "self.notLineTerminator()"))
 		 	}
 		 	setState(450)
 		 	try expressionSequence()
@@ -3990,7 +3990,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func tryStatement() throws -> TryStatementContext {
-		var _localctx: TryStatementContext = TryStatementContext(_ctx, getState())
+		let _localctx: TryStatementContext = TryStatementContext(_ctx, getState())
 		try enterRule(_localctx, 70, JavaScriptParser.RULE_tryStatement)
 		defer {
 	    		try! exitRule()
@@ -4091,7 +4091,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func catchProduction() throws -> CatchProductionContext {
-		var _localctx: CatchProductionContext = CatchProductionContext(_ctx, getState())
+		let _localctx: CatchProductionContext = CatchProductionContext(_ctx, getState())
 		try enterRule(_localctx, 72, JavaScriptParser.RULE_catchProduction)
 		var _la: Int = 0
 		defer {
@@ -4186,7 +4186,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func finallyProduction() throws -> FinallyProductionContext {
-		var _localctx: FinallyProductionContext = FinallyProductionContext(_ctx, getState())
+		let _localctx: FinallyProductionContext = FinallyProductionContext(_ctx, getState())
 		try enterRule(_localctx, 74, JavaScriptParser.RULE_finallyProduction)
 		defer {
 	    		try! exitRule()
@@ -4248,7 +4248,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func debuggerStatement() throws -> DebuggerStatementContext {
-		var _localctx: DebuggerStatementContext = DebuggerStatementContext(_ctx, getState())
+		let _localctx: DebuggerStatementContext = DebuggerStatementContext(_ctx, getState())
 		try enterRule(_localctx, 76, JavaScriptParser.RULE_debuggerStatement)
 		defer {
 	    		try! exitRule()
@@ -4334,7 +4334,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func functionDeclaration() throws -> FunctionDeclarationContext {
-		var _localctx: FunctionDeclarationContext = FunctionDeclarationContext(_ctx, getState())
+		let _localctx: FunctionDeclarationContext = FunctionDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 78, JavaScriptParser.RULE_functionDeclaration)
 		var _la: Int = 0
 		defer {
@@ -4453,7 +4453,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func classDeclaration() throws -> ClassDeclarationContext {
-		var _localctx: ClassDeclarationContext = ClassDeclarationContext(_ctx, getState())
+		let _localctx: ClassDeclarationContext = ClassDeclarationContext(_ctx, getState())
 		try enterRule(_localctx, 80, JavaScriptParser.RULE_classDeclaration)
 		defer {
 	    		try! exitRule()
@@ -4533,7 +4533,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func classTail() throws -> ClassTailContext {
-		var _localctx: ClassTailContext = ClassTailContext(_ctx, getState())
+		let _localctx: ClassTailContext = ClassTailContext(_ctx, getState())
 		try enterRule(_localctx, 82, JavaScriptParser.RULE_classTail)
 		var _la: Int = 0
 		defer {
@@ -4678,7 +4678,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func classElement() throws -> ClassElementContext {
-		var _localctx: ClassElementContext = ClassElementContext(_ctx, getState())
+		let _localctx: ClassElementContext = ClassElementContext(_ctx, getState())
 		try enterRule(_localctx, 84, JavaScriptParser.RULE_classElement)
 		var _la: Int = 0
 		defer {
@@ -4706,8 +4706,8 @@ open class JavaScriptParser: JavaScriptParserBase {
 		 					break
 		 				case 2:
 		 					setState(511)
-		 					if (!(this.n("static"))) {
-		 					    throw ANTLRException.recognition(e:FailedPredicateException(self, "this.n(\"static\")"))
+		 					if (!(try self.n("static"))) {
+		 					    throw ANTLRException.recognition(e:FailedPredicateException(self, "self.n(\"static\")"))
 		 					}
 		 					setState(512)
 		 					try identifier()
@@ -4858,7 +4858,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func methodDefinition() throws -> MethodDefinitionContext {
-		var _localctx: MethodDefinitionContext = MethodDefinitionContext(_ctx, getState())
+		let _localctx: MethodDefinitionContext = MethodDefinitionContext(_ctx, getState())
 		try enterRule(_localctx, 86, JavaScriptParser.RULE_methodDefinition)
 		var _la: Int = 0
 		defer {
@@ -5074,7 +5074,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func formalParameterList() throws -> FormalParameterListContext {
-		var _localctx: FormalParameterListContext = FormalParameterListContext(_ctx, getState())
+		let _localctx: FormalParameterListContext = FormalParameterListContext(_ctx, getState())
 		try enterRule(_localctx, 88, JavaScriptParser.RULE_formalParameterList)
 		var _la: Int = 0
 		defer {
@@ -5190,7 +5190,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func formalParameterArg() throws -> FormalParameterArgContext {
-		var _localctx: FormalParameterArgContext = FormalParameterArgContext(_ctx, getState())
+		let _localctx: FormalParameterArgContext = FormalParameterArgContext(_ctx, getState())
 		try enterRule(_localctx, 90, JavaScriptParser.RULE_formalParameterArg)
 		var _la: Int = 0
 		defer {
@@ -5266,7 +5266,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func lastFormalParameterArg() throws -> LastFormalParameterArgContext {
-		var _localctx: LastFormalParameterArgContext = LastFormalParameterArgContext(_ctx, getState())
+		let _localctx: LastFormalParameterArgContext = LastFormalParameterArgContext(_ctx, getState())
 		try enterRule(_localctx, 92, JavaScriptParser.RULE_lastFormalParameterArg)
 		defer {
 	    		try! exitRule()
@@ -5332,7 +5332,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func functionBody() throws -> FunctionBodyContext {
-		var _localctx: FunctionBodyContext = FunctionBodyContext(_ctx, getState())
+		let _localctx: FunctionBodyContext = FunctionBodyContext(_ctx, getState())
 		try enterRule(_localctx, 94, JavaScriptParser.RULE_functionBody)
 		defer {
 	    		try! exitRule()
@@ -5404,7 +5404,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func sourceElements() throws -> SourceElementsContext {
-		var _localctx: SourceElementsContext = SourceElementsContext(_ctx, getState())
+		let _localctx: SourceElementsContext = SourceElementsContext(_ctx, getState())
 		try enterRule(_localctx, 96, JavaScriptParser.RULE_sourceElements)
 		defer {
 	    		try! exitRule()
@@ -5485,7 +5485,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func arrayLiteral() throws -> ArrayLiteralContext {
-		var _localctx: ArrayLiteralContext = ArrayLiteralContext(_ctx, getState())
+		let _localctx: ArrayLiteralContext = ArrayLiteralContext(_ctx, getState())
 		try enterRule(_localctx, 98, JavaScriptParser.RULE_arrayLiteral)
 		defer {
 	    		try! exitRule()
@@ -5558,7 +5558,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func elementList() throws -> ElementListContext {
-		var _localctx: ElementListContext = ElementListContext(_ctx, getState())
+		let _localctx: ElementListContext = ElementListContext(_ctx, getState())
 		try enterRule(_localctx, 100, JavaScriptParser.RULE_elementList)
 		var _la: Int = 0
 		defer {
@@ -5698,7 +5698,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func arrayElement() throws -> ArrayElementContext {
-		var _localctx: ArrayElementContext = ArrayElementContext(_ctx, getState())
+		let _localctx: ArrayElementContext = ArrayElementContext(_ctx, getState())
 		try enterRule(_localctx, 102, JavaScriptParser.RULE_arrayElement)
 		var _la: Int = 0
 		defer {
@@ -6244,7 +6244,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func propertyName() throws -> PropertyNameContext {
-		var _localctx: PropertyNameContext = PropertyNameContext(_ctx, getState())
+		let _localctx: PropertyNameContext = PropertyNameContext(_ctx, getState())
 		try enterRule(_localctx, 106, JavaScriptParser.RULE_propertyName)
 		defer {
 	    		try! exitRule()
@@ -6405,7 +6405,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func arguments() throws -> ArgumentsContext {
-		var _localctx: ArgumentsContext = ArgumentsContext(_ctx, getState())
+		let _localctx: ArgumentsContext = ArgumentsContext(_ctx, getState())
 		try enterRule(_localctx, 108, JavaScriptParser.RULE_arguments)
 		var _la: Int = 0
 		defer {
@@ -6522,7 +6522,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func argument() throws -> ArgumentContext {
-		var _localctx: ArgumentContext = ArgumentContext(_ctx, getState())
+		let _localctx: ArgumentContext = ArgumentContext(_ctx, getState())
 		try enterRule(_localctx, 110, JavaScriptParser.RULE_argument)
 		var _la: Int = 0
 		defer {
@@ -6617,7 +6617,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func expressionSequence() throws -> ExpressionSequenceContext {
-		var _localctx: ExpressionSequenceContext = ExpressionSequenceContext(_ctx, getState())
+		let _localctx: ExpressionSequenceContext = ExpressionSequenceContext(_ctx, getState())
 		try enterRule(_localctx, 112, JavaScriptParser.RULE_expressionSequence)
 		defer {
 	    		try! exitRule()
@@ -8638,7 +8638,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 		let _parentctx: ParserRuleContext? = _ctx
 		let _parentState: Int = getState()
 		var _localctx: SingleExpressionContext = SingleExpressionContext(_ctx, _parentState)
-		var _prevctx: SingleExpressionContext = _localctx
 		let _startState: Int = 114
 		try enterRecursionRule(_localctx, 114, JavaScriptParser.RULE_singleExpression, _p)
 		var _la: Int = 0
@@ -8654,7 +8653,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 1:
 				_localctx = FunctionExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 
 				setState(729)
 				try anonymousFunction()
@@ -8663,7 +8661,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 2:
 				_localctx = ClassExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(730)
 				try match(JavaScriptParser.Tokens.Class.rawValue)
 				setState(732)
@@ -8689,7 +8686,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 3:
 				_localctx = NewExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(735)
 				try match(JavaScriptParser.Tokens.New.rawValue)
 				setState(736)
@@ -8701,7 +8697,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 4:
 				_localctx = NewExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(739)
 				try match(JavaScriptParser.Tokens.New.rawValue)
 				setState(740)
@@ -8711,7 +8706,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 5:
 				_localctx = MetaExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(741)
 				try match(JavaScriptParser.Tokens.New.rawValue)
 				setState(742)
@@ -8723,7 +8717,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 6:
 				_localctx = DeleteExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(744)
 				try match(JavaScriptParser.Tokens.Delete.rawValue)
 				setState(745)
@@ -8733,7 +8726,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 7:
 				_localctx = VoidExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(746)
 				try match(JavaScriptParser.Tokens.Void.rawValue)
 				setState(747)
@@ -8743,7 +8735,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 8:
 				_localctx = TypeofExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(748)
 				try match(JavaScriptParser.Tokens.Typeof.rawValue)
 				setState(749)
@@ -8753,7 +8744,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 9:
 				_localctx = PreIncrementExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(750)
 				try match(JavaScriptParser.Tokens.PlusPlus.rawValue)
 				setState(751)
@@ -8763,7 +8753,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 10:
 				_localctx = PreDecreaseExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(752)
 				try match(JavaScriptParser.Tokens.MinusMinus.rawValue)
 				setState(753)
@@ -8773,7 +8762,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 11:
 				_localctx = UnaryPlusExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(754)
 				try match(JavaScriptParser.Tokens.Plus.rawValue)
 				setState(755)
@@ -8783,7 +8771,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 12:
 				_localctx = UnaryMinusExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(756)
 				try match(JavaScriptParser.Tokens.Minus.rawValue)
 				setState(757)
@@ -8793,7 +8780,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 13:
 				_localctx = BitNotExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(758)
 				try match(JavaScriptParser.Tokens.BitNot.rawValue)
 				setState(759)
@@ -8803,7 +8789,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 14:
 				_localctx = NotExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(760)
 				try match(JavaScriptParser.Tokens.Not.rawValue)
 				setState(761)
@@ -8813,7 +8798,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 15:
 				_localctx = AwaitExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(762)
 				try match(JavaScriptParser.Tokens.Await.rawValue)
 				setState(763)
@@ -8823,7 +8807,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 16:
 				_localctx = ImportExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(764)
 				try match(JavaScriptParser.Tokens.Import.rawValue)
 				setState(765)
@@ -8837,7 +8820,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 17:
 				_localctx = YieldExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(769)
 				try yieldStatement()
 
@@ -8845,7 +8827,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 18:
 				_localctx = ThisExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(770)
 				try match(JavaScriptParser.Tokens.This.rawValue)
 
@@ -8853,7 +8834,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 19:
 				_localctx = IdentifierExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(771)
 				try identifier()
 
@@ -8861,7 +8841,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 20:
 				_localctx = SuperExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(772)
 				try match(JavaScriptParser.Tokens.Super.rawValue)
 
@@ -8869,7 +8848,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 21:
 				_localctx = LiteralExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(773)
 				try literal()
 
@@ -8877,7 +8855,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 22:
 				_localctx = ArrayLiteralExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(774)
 				try arrayLiteral()
 
@@ -8885,7 +8862,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 23:
 				_localctx = ObjectLiteralExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(775)
 				try objectLiteral()
 
@@ -8893,7 +8869,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 			case 24:
 				_localctx = ParenthesizedExpressionContext(_localctx)
 				_ctx = _localctx
-				_prevctx = _localctx
 				setState(776)
 				try match(JavaScriptParser.Tokens.OpenParen.rawValue)
 				setState(777)
@@ -8913,7 +8888,6 @@ open class JavaScriptParser: JavaScriptParserBase {
 					if _parseListeners != nil {
 					   try triggerExitRuleEvent()
 					}
-					_prevctx = _localctx
 					setState(861)
 					try _errHandler.sync(self)
 					switch(try getInterpreter().adaptivePredict(_input,91, _ctx)) {
@@ -9282,8 +9256,8 @@ open class JavaScriptParser: JavaScriptParserBase {
 						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 39)"))
 						}
 						setState(854)
-						if (!(this.notLineTerminator())) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "this.notLineTerminator()"))
+						if (!(try self.notLineTerminator())) {
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "self.notLineTerminator()"))
 						}
 						setState(855)
 						try match(JavaScriptParser.Tokens.PlusPlus.rawValue)
@@ -9297,8 +9271,8 @@ open class JavaScriptParser: JavaScriptParserBase {
 						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 38)"))
 						}
 						setState(857)
-						if (!(this.notLineTerminator())) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "this.notLineTerminator()"))
+						if (!(try self.notLineTerminator())) {
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "self.notLineTerminator()"))
 						}
 						setState(858)
 						try match(JavaScriptParser.Tokens.MinusMinus.rawValue)
@@ -9378,7 +9352,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func assignable() throws -> AssignableContext {
-		var _localctx: AssignableContext = AssignableContext(_ctx, getState())
+		let _localctx: AssignableContext = AssignableContext(_ctx, getState())
 		try enterRule(_localctx, 116, JavaScriptParser.RULE_assignable)
 		defer {
 	    		try! exitRule()
@@ -9478,7 +9452,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func objectLiteral() throws -> ObjectLiteralContext {
-		var _localctx: ObjectLiteralContext = ObjectLiteralContext(_ctx, getState())
+		let _localctx: ObjectLiteralContext = ObjectLiteralContext(_ctx, getState())
 		try enterRule(_localctx, 118, JavaScriptParser.RULE_objectLiteral)
 		var _la: Int = 0
 		defer {
@@ -9850,7 +9824,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func arrowFunctionParameters() throws -> ArrowFunctionParametersContext {
-		var _localctx: ArrowFunctionParametersContext = ArrowFunctionParametersContext(_ctx, getState())
+		let _localctx: ArrowFunctionParametersContext = ArrowFunctionParametersContext(_ctx, getState())
 		try enterRule(_localctx, 122, JavaScriptParser.RULE_arrowFunctionParameters)
 		var _la: Int = 0
 		defer {
@@ -9950,7 +9924,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func arrowFunctionBody() throws -> ArrowFunctionBodyContext {
-		var _localctx: ArrowFunctionBodyContext = ArrowFunctionBodyContext(_ctx, getState())
+		let _localctx: ArrowFunctionBodyContext = ArrowFunctionBodyContext(_ctx, getState())
 		try enterRule(_localctx, 124, JavaScriptParser.RULE_arrowFunctionBody)
 		defer {
 	    		try! exitRule()
@@ -10063,7 +10037,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func assignmentOperator() throws -> AssignmentOperatorContext {
-		var _localctx: AssignmentOperatorContext = AssignmentOperatorContext(_ctx, getState())
+		let _localctx: AssignmentOperatorContext = AssignmentOperatorContext(_ctx, getState())
 		try enterRule(_localctx, 126, JavaScriptParser.RULE_assignmentOperator)
 		var _la: Int = 0
 		defer {
@@ -10158,7 +10132,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func literal() throws -> LiteralContext {
-		var _localctx: LiteralContext = LiteralContext(_ctx, getState())
+		let _localctx: LiteralContext = LiteralContext(_ctx, getState())
 		try enterRule(_localctx, 128, JavaScriptParser.RULE_literal)
 		defer {
 	    		try! exitRule()
@@ -10281,7 +10255,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func templateStringLiteral() throws -> TemplateStringLiteralContext {
-		var _localctx: TemplateStringLiteralContext = TemplateStringLiteralContext(_ctx, getState())
+		let _localctx: TemplateStringLiteralContext = TemplateStringLiteralContext(_ctx, getState())
 		try enterRule(_localctx, 130, JavaScriptParser.RULE_templateStringLiteral)
 		var _la: Int = 0
 		defer {
@@ -10368,7 +10342,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func templateStringAtom() throws -> TemplateStringAtomContext {
-		var _localctx: TemplateStringAtomContext = TemplateStringAtomContext(_ctx, getState())
+		let _localctx: TemplateStringAtomContext = TemplateStringAtomContext(_ctx, getState())
 		try enterRule(_localctx, 132, JavaScriptParser.RULE_templateStringAtom)
 		defer {
 	    		try! exitRule()
@@ -10459,7 +10433,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func numericLiteral() throws -> NumericLiteralContext {
-		var _localctx: NumericLiteralContext = NumericLiteralContext(_ctx, getState())
+		let _localctx: NumericLiteralContext = NumericLiteralContext(_ctx, getState())
 		try enterRule(_localctx, 134, JavaScriptParser.RULE_numericLiteral)
 		var _la: Int = 0
 		defer {
@@ -10542,7 +10516,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func bigintLiteral() throws -> BigintLiteralContext {
-		var _localctx: BigintLiteralContext = BigintLiteralContext(_ctx, getState())
+		let _localctx: BigintLiteralContext = BigintLiteralContext(_ctx, getState())
 		try enterRule(_localctx, 136, JavaScriptParser.RULE_bigintLiteral)
 		var _la: Int = 0
 		defer {
@@ -10617,7 +10591,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func getter() throws -> GetterContext {
-		var _localctx: GetterContext = GetterContext(_ctx, getState())
+		let _localctx: GetterContext = GetterContext(_ctx, getState())
 		try enterRule(_localctx, 138, JavaScriptParser.RULE_getter)
 		defer {
 	    		try! exitRule()
@@ -10625,8 +10599,8 @@ open class JavaScriptParser: JavaScriptParserBase {
 		do {
 		 	try enterOuterAlt(_localctx, 1)
 		 	setState(953)
-		 	if (!(this.n("get"))) {
-		 	    throw ANTLRException.recognition(e:FailedPredicateException(self, "this.n(\"get\")"))
+		 	if (!(try self.n("get"))) {
+		 	    throw ANTLRException.recognition(e:FailedPredicateException(self, "self.n(\"get\")"))
 		 	}
 		 	setState(954)
 		 	try identifier()
@@ -10683,7 +10657,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func setter() throws -> SetterContext {
-		var _localctx: SetterContext = SetterContext(_ctx, getState())
+		let _localctx: SetterContext = SetterContext(_ctx, getState())
 		try enterRule(_localctx, 140, JavaScriptParser.RULE_setter)
 		defer {
 	    		try! exitRule()
@@ -10691,8 +10665,8 @@ open class JavaScriptParser: JavaScriptParserBase {
 		do {
 		 	try enterOuterAlt(_localctx, 1)
 		 	setState(957)
-		 	if (!(this.n("set"))) {
-		 	    throw ANTLRException.recognition(e:FailedPredicateException(self, "this.n(\"set\")"))
+		 	if (!(try self.n("set"))) {
+		 	    throw ANTLRException.recognition(e:FailedPredicateException(self, "self.n(\"set\")"))
 		 	}
 		 	setState(958)
 		 	try identifier()
@@ -10749,7 +10723,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func identifierName() throws -> IdentifierNameContext {
-		var _localctx: IdentifierNameContext = IdentifierNameContext(_ctx, getState())
+		let _localctx: IdentifierNameContext = IdentifierNameContext(_ctx, getState())
 		try enterRule(_localctx, 142, JavaScriptParser.RULE_identifierName)
 		defer {
 	    		try! exitRule()
@@ -10826,7 +10800,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func identifier() throws -> IdentifierContext {
-		var _localctx: IdentifierContext = IdentifierContext(_ctx, getState())
+		let _localctx: IdentifierContext = IdentifierContext(_ctx, getState())
 		try enterRule(_localctx, 144, JavaScriptParser.RULE_identifier)
 		var _la: Int = 0
 		defer {
@@ -10905,7 +10879,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func reservedWord() throws -> ReservedWordContext {
-		var _localctx: ReservedWordContext = ReservedWordContext(_ctx, getState())
+		let _localctx: ReservedWordContext = ReservedWordContext(_ctx, getState())
 		try enterRule(_localctx, 146, JavaScriptParser.RULE_reservedWord)
 		defer {
 	    		try! exitRule()
@@ -11209,7 +11183,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func keyword() throws -> KeywordContext {
-		var _localctx: KeywordContext = KeywordContext(_ctx, getState())
+		let _localctx: KeywordContext = KeywordContext(_ctx, getState())
 		try enterRule(_localctx, 148, JavaScriptParser.RULE_keyword)
 		defer {
 	    		try! exitRule()
@@ -11592,7 +11566,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func let_() throws -> Let_Context {
-		var _localctx: Let_Context = Let_Context(_ctx, getState())
+		let _localctx: Let_Context = Let_Context(_ctx, getState())
 		try enterRule(_localctx, 150, JavaScriptParser.RULE_let_)
 		var _la: Int = 0
 		defer {
@@ -11664,7 +11638,7 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	@discardableResult
 	 open func eos() throws -> EosContext {
-		var _localctx: EosContext = EosContext(_ctx, getState())
+		let _localctx: EosContext = EosContext(_ctx, getState())
 		try enterRule(_localctx, 152, JavaScriptParser.RULE_eos)
 		defer {
 	    		try! exitRule()
@@ -11688,16 +11662,16 @@ open class JavaScriptParser: JavaScriptParserBase {
 		 	case 3:
 		 		try enterOuterAlt(_localctx, 3)
 		 		setState(1024)
-		 		if (!(this.lineTerminatorAhead())) {
-		 		    throw ANTLRException.recognition(e:FailedPredicateException(self, "this.lineTerminatorAhead()"))
+		 		if (!(try self.lineTerminatorAhead())) {
+		 		    throw ANTLRException.recognition(e:FailedPredicateException(self, "self.lineTerminatorAhead()"))
 		 		}
 
 		 		break
 		 	case 4:
 		 		try enterOuterAlt(_localctx, 4)
 		 		setState(1025)
-		 		if (!(this.closeBrace())) {
-		 		    throw ANTLRException.recognition(e:FailedPredicateException(self, "this.closeBrace()"))
+		 		if (!(try self.closeBrace())) {
+		 		    throw ANTLRException.recognition(e:FailedPredicateException(self, "self.closeBrace()"))
 		 		}
 
 		 		break
@@ -11745,49 +11719,49 @@ open class JavaScriptParser: JavaScriptParserBase {
 	}
 	private func expressionStatement_sempred(_ _localctx: ExpressionStatementContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 0:return this.notOpenBraceAndNotFunction()
+		    case 0:return try self.notOpenBraceAndNotFunction()
 		    default: return true
 		}
 	}
 	private func iterationStatement_sempred(_ _localctx: IterationStatementContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 1:return this.p("of")
+		    case 1:return try self.p("of")
 		    default: return true
 		}
 	}
 	private func continueStatement_sempred(_ _localctx: ContinueStatementContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 2:return this.notLineTerminator()
+		    case 2:return try self.notLineTerminator()
 		    default: return true
 		}
 	}
 	private func breakStatement_sempred(_ _localctx: BreakStatementContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 3:return this.notLineTerminator()
+		    case 3:return try self.notLineTerminator()
 		    default: return true
 		}
 	}
 	private func returnStatement_sempred(_ _localctx: ReturnStatementContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 4:return this.notLineTerminator()
+		    case 4:return try self.notLineTerminator()
 		    default: return true
 		}
 	}
 	private func yieldStatement_sempred(_ _localctx: YieldStatementContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 5:return this.notLineTerminator()
+		    case 5:return try self.notLineTerminator()
 		    default: return true
 		}
 	}
 	private func throwStatement_sempred(_ _localctx: ThrowStatementContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 6:return this.notLineTerminator()
+		    case 6:return try self.notLineTerminator()
 		    default: return true
 		}
 	}
 	private func classElement_sempred(_ _localctx: ClassElementContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 7:return this.n("static")
+		    case 7:return try self.n("static")
 		    default: return true
 		}
 	}
@@ -11814,29 +11788,29 @@ open class JavaScriptParser: JavaScriptParserBase {
 		    case 26:return precpred(_ctx, 44)
 		    case 27:return precpred(_ctx, 41)
 		    case 28:return precpred(_ctx, 39)
-		    case 29:return this.notLineTerminator()
+		    case 29:return try self.notLineTerminator()
 		    case 30:return precpred(_ctx, 38)
-		    case 31:return this.notLineTerminator()
+		    case 31:return try self.notLineTerminator()
 		    case 32:return precpred(_ctx, 9)
 		    default: return true
 		}
 	}
 	private func getter_sempred(_ _localctx: GetterContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 33:return this.n("get")
+		    case 33:return try self.n("get")
 		    default: return true
 		}
 	}
 	private func setter_sempred(_ _localctx: SetterContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 34:return this.n("set")
+		    case 34:return try self.n("set")
 		    default: return true
 		}
 	}
 	private func eos_sempred(_ _localctx: EosContext!,  _ predIndex: Int) throws -> Bool {
 		switch (predIndex) {
-		    case 35:return this.lineTerminatorAhead()
-		    case 36:return this.closeBrace()
+		    case 35:return try self.lineTerminatorAhead()
+		    case 36:return try self.closeBrace()
 		    default: return true
 		}
 	}
