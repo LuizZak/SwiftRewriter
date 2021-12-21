@@ -18,6 +18,46 @@ class JsParserTests: XCTestCase {
 
         _=parserTest(source)
     }
+
+    #if JS_PARSER_TESTS_FULL_FIXTURES
+
+    func testParse_allFixtures() throws {
+        let fixtures = try XCTUnwrap(Bundle.module.urls(forResourcesWithExtension: "js", subdirectory: nil))
+
+        let exp = expectation(description: "JsParser fixture tests")
+
+        let queue = OperationQueue()
+
+        for fixture in fixtures {
+            let fixture = fixture as URL
+
+            queue.addOperation {
+                do {
+                    let source = try String(contentsOf: fixture, encoding: .utf8)
+                    let sut = JsParser(string: source, state: JsParserState())
+                    
+                    try sut.parse()
+
+                    if !sut.diagnostics.errors.isEmpty {
+                        var diag = ""
+                        sut.diagnostics.printDiagnostics(to: &diag)
+                        
+                        XCTFail("Unexpected error diagnostics while parsing \(fixture.lastPathComponent):\n\(diag)")
+                    }
+                } catch {
+
+                }
+            }
+        }
+
+        queue.addBarrierBlock {
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 60.0)
+    }
+
+    #endif
 }
 
 extension JsParserTests {

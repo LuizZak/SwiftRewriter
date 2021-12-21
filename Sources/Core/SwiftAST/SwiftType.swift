@@ -22,7 +22,7 @@ extension SwiftType: ExpressibleByStringLiteral {
 /// A nominal Swift type, which is either a plain typename or a generic type.
 public enum NominalSwiftType: Hashable {
     case typeName(String)
-    case generic(String, parameters: GenericArgumentSwiftType)
+    indirect case generic(String, parameters: GenericArgumentSwiftType)
 }
 
 extension NominalSwiftType: ExpressibleByStringLiteral {
@@ -32,7 +32,7 @@ extension NominalSwiftType: ExpressibleByStringLiteral {
 }
 
 /// A component for a protocol composition
-public enum ProtocolCompositionComponent: Hashable {
+public indirect enum ProtocolCompositionComponent: Hashable {
     case nominal(NominalSwiftType)
     case nested(NestedSwiftType)
 }
@@ -40,7 +40,7 @@ public enum ProtocolCompositionComponent: Hashable {
 /// A tuple swift type, which either represents an empty tuple or two or more
 /// Swift types.
 public enum TupleSwiftType: Hashable {
-    case types(TwoOrMore<SwiftType>)
+    indirect case types(TwoOrMore<SwiftType>)
     case empty
 }
 

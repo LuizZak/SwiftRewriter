@@ -5,9 +5,6 @@ import class Antlr4.ParseTreeWalker
 import class Antlr4.ParserRuleContext
 import class Antlr4.Parser
 import class Antlr4.DFA
-import class Antlr4.ParserATNConfig
-import struct Antlr4.BitSet
-import struct Antlr4.ATNConfigSet
 import JsParserAntlr
 import AntlrCommons
 import Utils
