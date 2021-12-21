@@ -1,4 +1,4 @@
-import GrammarModelBase
+import Utils
 
 /// A class that stands both as an input provider and as a input to a single
 /// input of a static code string.

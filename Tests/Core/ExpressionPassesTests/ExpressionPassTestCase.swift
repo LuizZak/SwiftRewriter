@@ -1,6 +1,7 @@
 import XCTest
 import Antlr4
 import Utils
+import AntlrCommons
 import ObjcParser
 import ObjcParserAntlr
 import GrammarModelBase
@@ -169,8 +170,8 @@ class ExpressionPassTestCase: XCTestCase {
         defer {
             _=stream // Keep alive!
         }
-        let diag = DiagnosticsErrorListener(source: StringCodeSource(source: exp),
-                                            diagnostics: Diagnostics())
+        let diag = AntlrDiagnosticsErrorListener(source: StringCodeSource(source: exp),
+                                                 diagnostics: Diagnostics())
         parser.addErrorListener(diag)
         
         let expression = try! parser.expression()
@@ -200,8 +201,8 @@ class ExpressionPassTestCase: XCTestCase {
         defer {
             _=stream // Keep alive!
         }
-        let diag = DiagnosticsErrorListener(source: StringCodeSource(source: stmtString),
-                                            diagnostics: Diagnostics())
+        let diag = AntlrDiagnosticsErrorListener(source: StringCodeSource(source: stmtString),
+                                                 diagnostics: Diagnostics())
         parser.addErrorListener(diag)
         
         let stmt = try! parser.statement()

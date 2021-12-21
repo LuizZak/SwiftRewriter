@@ -1,5 +1,3 @@
-import Utils
-
 public struct StringCodeSource: CodeSource {
     private var _lineOffsets: [Range<String.Index>] = []
     private var _indices: [String.Index]

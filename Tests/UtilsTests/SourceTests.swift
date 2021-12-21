@@ -1,6 +1,6 @@
 import XCTest
 
-@testable import GrammarModelBase
+@testable import Utils
 
 class SourceTests: XCTestCase {
     

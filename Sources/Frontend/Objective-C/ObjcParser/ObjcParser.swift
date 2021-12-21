@@ -6,6 +6,10 @@ import class Antlr4.ATNSimulator
 import class Antlr4.ParseTreeWalker
 import class Antlr4.ParserRuleContext
 import class Antlr4.Parser
+import class Antlr4.DFA
+import class Antlr4.ParserATNConfig
+import struct Antlr4.BitSet
+import struct Antlr4.ATNConfigSet
 import AntlrCommons
 import Utils
 import ObjcGrammarModels
@@ -147,7 +151,7 @@ public class ObjcParser {
         
         let diag = Diagnostics()
         parser.addErrorListener(
-            DiagnosticsErrorListener(source: source, diagnostics: diag)
+            AntlrDiagnosticsErrorListener(source: source, diagnostics: diag)
         )
         
         try parser.reset()
@@ -557,30 +561,6 @@ public class ObjcParser {
         }
 
         return imports
-    }
-}
-
-public class DiagnosticsErrorListener: BaseErrorListener {
-    public let source: Source
-    public let diagnostics: Diagnostics
-    
-    public init(source: Source, diagnostics: Diagnostics) {
-        self.source = source
-        self.diagnostics = diagnostics
-        super.init()
-    }
-    
-    public override func syntaxError<T>(_ recognizer: Recognizer<T>,
-                                        _ offendingSymbol: AnyObject?,
-                                        _ line: Int,
-                                        _ charPositionInLine: Int,
-                                        _ msg: String,
-                                        _ e: AnyObject?) where T : ATNSimulator {
-        
-        diagnostics.error(
-            msg,
-            origin: source.filePath,
-            location: SourceLocation(line: line, column: charPositionInLine, utf8Offset: 0))
     }
 }
 

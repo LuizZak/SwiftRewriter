@@ -1,7 +1,8 @@
 import Antlr4
+import Utils
 import AntlrCommons
-import ObjcParserAntlr
 import GrammarModelBase
+import ObjcParserAntlr
 import ObjcGrammarModels
 
 // TODO: Add tests for this class

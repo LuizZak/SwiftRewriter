@@ -1,6 +1,7 @@
 import XCTest
 import Dispatch
-import Utils
+
+@testable import Utils
 
 class ConcurrentValueTests: XCTestCase {
     @ConcurrentValue var value: Set<Int> = []

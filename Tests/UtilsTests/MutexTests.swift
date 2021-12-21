@@ -1,6 +1,7 @@
 import XCTest
 import Dispatch
-import Utils
+
+@testable import Utils
 
 class MutexTests: XCTestCase {
     func testMutex() {

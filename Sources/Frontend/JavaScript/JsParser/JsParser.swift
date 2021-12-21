@@ -4,6 +4,10 @@ import class Antlr4.ATNSimulator
 import class Antlr4.ParseTreeWalker
 import class Antlr4.ParserRuleContext
 import class Antlr4.Parser
+import class Antlr4.DFA
+import class Antlr4.ParserATNConfig
+import struct Antlr4.BitSet
+import struct Antlr4.ATNConfigSet
 import JsParserAntlr
 import AntlrCommons
 import Utils
@@ -51,6 +55,7 @@ public class JsParser {
     public init(source: CodeSource, state: JsParserState) {
         self.source = source
         self.state = state
+        antlrSettings.forceUseLLPrediction = true
         diagnostics = Diagnostics()
     }
     
@@ -83,8 +88,10 @@ public class JsParser {
     private func tryParse<T: ParserRuleContext, P: Parser>(from parser: P, _ operation: (P) throws -> T) throws -> T {
         
         let diag = Diagnostics()
+        let errorListener = AntlrDiagnosticsErrorListener(source: source, diagnostics: diag)
+        errorListener.debugDiagnostics = true
         parser.addErrorListener(
-            DiagnosticsErrorListener(source: source, diagnostics: diag)
+            errorListener
         )
         
         try parser.reset()
@@ -113,30 +120,5 @@ public class JsParser {
         diagnostics.merge(with: diag)
         
         return root
-    }
-}
-
-public class DiagnosticsErrorListener: BaseErrorListener {
-    public let source: Source
-    public let diagnostics: Diagnostics
-    
-    public init(source: Source, diagnostics: Diagnostics) {
-        self.source = source
-        self.diagnostics = diagnostics
-        super.init()
-    }
-    
-    public override func syntaxError<T>(_ recognizer: Recognizer<T>,
-                                        _ offendingSymbol: AnyObject?,
-                                        _ line: Int,
-                                        _ charPositionInLine: Int,
-                                        _ msg: String,
-                                        _ e: AnyObject?) where T : ATNSimulator {
-        
-        diagnostics.error(
-            msg,
-            origin: source.filePath,
-            location: SourceLocation(line: line, column: charPositionInLine, utf8Offset: 0)
-        )
     }
 }
