@@ -73,9 +73,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::GrammarModelsTests"
-               BuildableName = "GrammarModelsTests.xctest"
-               BlueprintName = "GrammarModelsTests"
+               BlueprintIdentifier = "SwiftRewriter::GrammarModelBaseTests"
+               BuildableName = "GrammarModelBaseTests.xctest"
+               BlueprintName = "GrammarModelBaseTests"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -113,9 +113,29 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::ObjcGrammarModelsTests"
+               BuildableName = "ObjcGrammarModelsTests.xctest"
+               BlueprintName = "ObjcGrammarModelsTests"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SwiftRewriter::ObjcParserTests"
                BuildableName = "ObjcParserTests.xctest"
                BlueprintName = "ObjcParserTests"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::ObjectiveCFrontendTests"
+               BuildableName = "ObjectiveCFrontendTests.xctest"
+               BlueprintName = "ObjectiveCFrontendTests"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </TestableReference>

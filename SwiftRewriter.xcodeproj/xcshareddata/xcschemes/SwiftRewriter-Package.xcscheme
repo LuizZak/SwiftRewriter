@@ -28,6 +28,20 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::AntlrCommons"
+               BuildableName = "AntlrCommons.framework"
+               BlueprintName = "AntlrCommons"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SwiftRewriter::Commons"
                BuildableName = "Commons.framework"
                BlueprintName = "Commons"
@@ -70,9 +84,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::ObjcGrammarModels"
-               BuildableName = "ObjcGrammarModels.framework"
-               BlueprintName = "ObjcGrammarModels"
+               BlueprintIdentifier = "SwiftRewriter::GrammarModelBase"
+               BuildableName = "GrammarModelBase.framework"
+               BlueprintName = "GrammarModelBase"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -112,9 +126,65 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::JsGrammarModels"
+               BuildableName = "JsGrammarModels.framework"
+               BlueprintName = "JsGrammarModels"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::JsParser"
+               BuildableName = "JsParser.framework"
+               BlueprintName = "JsParser"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::JsParserAntlr"
+               BuildableName = "JsParserAntlr.framework"
+               BlueprintName = "JsParserAntlr"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SwiftRewriter::KnownType"
                BuildableName = "KnownType.framework"
                BlueprintName = "KnownType"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::ObjcGrammarModels"
+               BuildableName = "ObjcGrammarModels.framework"
+               BlueprintName = "ObjcGrammarModels"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -143,6 +213,20 @@
                BlueprintIdentifier = "SwiftRewriter::ObjcParserAntlr"
                BuildableName = "ObjcParserAntlr.framework"
                BlueprintName = "ObjcParserAntlr"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::ObjectiveCFrontend"
+               BuildableName = "ObjectiveCFrontend.framework"
+               BlueprintName = "ObjectiveCFrontend"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -353,9 +437,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SwiftRewriter::GrammarModelsTests"
-               BuildableName = "GrammarModelsTests.xctest"
-               BlueprintName = "GrammarModelsTests"
+               BlueprintIdentifier = "SwiftRewriter::GrammarModelBaseTests"
+               BuildableName = "GrammarModelBaseTests.xctest"
+               BlueprintName = "GrammarModelBaseTests"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -383,6 +467,16 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::JsParserTests"
+               BuildableName = "JsParserTests.xctest"
+               BlueprintName = "JsParserTests"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SwiftRewriter::KnownTypeTests"
                BuildableName = "KnownTypeTests.xctest"
                BlueprintName = "KnownTypeTests"
@@ -393,9 +487,29 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::ObjcGrammarModelsTests"
+               BuildableName = "ObjcGrammarModelsTests.xctest"
+               BlueprintName = "ObjcGrammarModelsTests"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SwiftRewriter::ObjcParserTests"
                BuildableName = "ObjcParserTests.xctest"
                BlueprintName = "ObjcParserTests"
+               ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftRewriter::ObjectiveCFrontendTests"
+               BuildableName = "ObjectiveCFrontendTests.xctest"
+               BlueprintName = "ObjectiveCFrontendTests"
                ReferencedContainer = "container:SwiftRewriter.xcodeproj">
             </BuildableReference>
          </TestableReference>
