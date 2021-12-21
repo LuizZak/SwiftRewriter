@@ -86,7 +86,7 @@ public class JsParser {
         
         let diag = Diagnostics()
         let errorListener = AntlrDiagnosticsErrorListener(source: source, diagnostics: diag)
-        errorListener.debugDiagnostics = true
+        
         parser.addErrorListener(
             errorListener
         )

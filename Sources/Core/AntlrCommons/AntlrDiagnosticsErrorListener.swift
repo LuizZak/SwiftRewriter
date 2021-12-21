@@ -26,12 +26,12 @@ public class AntlrDiagnosticsErrorListener: BaseErrorListener {
     }
 
     public override func reportAmbiguity(_ recognizer: Parser,
-                                         _ dfa: DFA<ParserATNConfig>,
+                                         _ dfa: DFAParser,
                                          _ startIndex: Int,
                                          _ stopIndex: Int,
                                          _ exact: Bool,
                                          _ ambiguousAlts: BitSet,
-                                         _ configs: ATNConfigSet<ParserATNConfig>) {
+                                         _ configs: ATNConfigSetParser) {
 
         guard debugDiagnostics else { return }
 
@@ -44,11 +44,11 @@ public class AntlrDiagnosticsErrorListener: BaseErrorListener {
     }
 
     public override func reportAttemptingFullContext(_ recognizer: Parser,
-                                                     _ dfa: DFA<ParserATNConfig>,
+                                                     _ dfa: DFAParser,
                                                      _ startIndex: Int,
                                                      _ stopIndex: Int,
                                                      _ conflictingAlts: BitSet?,
-                                                     _ configs: ATNConfigSet<ParserATNConfig>) {
+                                                     _ configs: ATNConfigSetParser) {
 
         guard debugDiagnostics else { return }
 
@@ -61,11 +61,11 @@ public class AntlrDiagnosticsErrorListener: BaseErrorListener {
     }
 
     public override func reportContextSensitivity(_ recognizer: Parser,
-                                                  _ dfa: DFA<ParserATNConfig>,
+                                                  _ dfa: DFAParser,
                                                   _ startIndex: Int,
                                                   _ stopIndex: Int,
                                                   _ prediction: Int,
-                                                  _ configs: ATNConfigSet<ParserATNConfig>) {
+                                                  _ configs: ATNConfigSetParser) {
 
         guard debugDiagnostics else { return }
         

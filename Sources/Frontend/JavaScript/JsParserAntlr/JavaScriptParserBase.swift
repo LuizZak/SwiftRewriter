@@ -39,7 +39,7 @@ open class JavaScriptParserBase: Parser {
     func here(_ tokenType: Int) throws -> Bool {
         // Get the token ahead of the current index.
         let possibleIndexEosToken = try getCurrentToken().getTokenIndex() - 1
-        let ahead = _input.get(possibleIndexEosToken)
+        let ahead = try _input.get(possibleIndexEosToken)
 
         // Check if the token resides on the HIDDEN channel and if it's of the
         // provided type.
@@ -58,7 +58,7 @@ open class JavaScriptParserBase: Parser {
     func lineTerminatorAhead() throws -> Bool {
         // Get the token ahead of the current index.
         var possibleIndexEosToken: Int = try getCurrentToken().getTokenIndex() - 1
-        var ahead: Token = _input.get(possibleIndexEosToken)
+        var ahead: Token = try _input.get(possibleIndexEosToken)
 
         if ahead.getChannel() != Lexer.HIDDEN {
             // We're only interested in tokens on the HIDDEN channel.
@@ -73,7 +73,7 @@ open class JavaScriptParserBase: Parser {
         if ahead.getType() == JavaScriptParser.Tokens.WhiteSpaces.rawValue {
             // Get the token ahead of the current whitespaces.
             possibleIndexEosToken = try getCurrentToken().getTokenIndex() - 2
-            ahead = _input.get(possibleIndexEosToken)
+            ahead = try _input.get(possibleIndexEosToken)
         }
 
         // Get the token's text and type.

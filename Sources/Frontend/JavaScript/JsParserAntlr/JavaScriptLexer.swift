@@ -5,12 +5,12 @@ open class JavaScriptLexer: JavaScriptLexerBase {
     public class State {
         public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
         
-        internal var _decisionToDFA: [DFA<LexerATNConfig>]
+        internal var _decisionToDFA: [DFALexer]
         internal let _sharedContextCache: PredictionContextCache = PredictionContextCache()
-        let atnConfigPool: LexerATNConfigPool = LexerATNConfigPool()
+        // let atnConfigPool: LexerATNConfigPool = LexerATNConfigPool()
         
         public init() {
-            var decisionToDFA = [DFA<LexerATNConfig>]()
+            var decisionToDFA = [DFALexer]()
             let length = _ATN.getNumberOfDecisions()
             for i in 0..<length {
                 decisionToDFA.append(DFA(_ATN.getDecisionState(i)!, i))
@@ -22,7 +22,7 @@ open class JavaScriptLexer: JavaScriptLexerBase {
     public var _ATN: ATN {
         return state._ATN
     }
-    internal var _decisionToDFA: [DFA<LexerATNConfig>] {
+    internal var _decisionToDFA: [DFALexer] {
         return state._decisionToDFA
     }
     internal var _sharedContextCache: PredictionContextCache {
@@ -170,11 +170,12 @@ open class JavaScriptLexer: JavaScriptLexerBase {
         
 	    RuntimeMetaData.checkVersion("4.9.3", RuntimeMetaData.VERSION)
 		super.init(input)
-		_interp = LexerATNSimulator(self,
-                                    _ATN,
-                                    _decisionToDFA,
-                                    _sharedContextCache,
-                                    lexerAtnConfigPool: state.atnConfigPool)
+		_interp = LexerATNSimulator(
+			self,
+			_ATN,
+			_decisionToDFA,
+			_sharedContextCache //, lexerAtnConfigPool: state.atnConfigPool
+		)
 	}
 
 	override open

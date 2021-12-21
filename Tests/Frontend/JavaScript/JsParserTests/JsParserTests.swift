@@ -19,7 +19,7 @@ class JsParserTests: XCTestCase {
         _=parserTest(source)
     }
 
-    #if JS_PARSER_TESTS_FULL_FIXTURES
+    #if !JS_PARSER_TESTS_FULL_FIXTURES
 
     func testParse_allFixtures() throws {
         let fixtures = try XCTUnwrap(Bundle.module.urls(forResourcesWithExtension: "js", subdirectory: nil))

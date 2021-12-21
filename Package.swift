@@ -114,6 +114,7 @@ let objcFrontend: [Target] = [
         name: "ObjcParserAntlr",
         dependencies: [
             .product(name: "Antlr4", package: "antlr4-swift"),
+            "AntlrCommons",
         ],
         path: "Sources/Frontend/Objective-C/ObjcParserAntlr"
     ),
@@ -163,6 +164,7 @@ let jsFrontend: [Target] = [
         name: "JsParserAntlr",
         dependencies: [
             .product(name: "Antlr4", package: "antlr4-swift"),
+            "AntlrCommons",
         ],
         path: "Sources/Frontend/JavaScript/JsParserAntlr"
     ),

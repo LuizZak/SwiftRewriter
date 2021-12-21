@@ -5,12 +5,12 @@ open class ObjectiveCPreprocessorParser: Parser {
     public class State {
         public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
         
-        internal var _decisionToDFA: [DFA<ParserATNConfig>]
+        internal var _decisionToDFA: [DFAParser]
         internal let _sharedContextCache: PredictionContextCache = PredictionContextCache()
-        let atnConfigPool = ParserATNConfigPool()
+        // let atnConfigPool = ParserATNConfigPool()
         
         public init() {
-            var decisionToDFA = [DFA<ParserATNConfig>]()
+            var decisionToDFA = [DFAParser]()
             let length = _ATN.getNumberOfDecisions()
             for i in 0..<length {
                 decisionToDFA.append(DFA(_ATN.getDecisionState(i)!, i))
@@ -22,7 +22,7 @@ open class ObjectiveCPreprocessorParser: Parser {
     public var _ATN: ATN {
         return state._ATN
     }
-    internal var _decisionToDFA: [DFA<ParserATNConfig>] {
+    internal var _decisionToDFA: [DFAParser] {
         return state._decisionToDFA
     }
     internal var _sharedContextCache: PredictionContextCache {
@@ -102,11 +102,12 @@ open class ObjectiveCPreprocessorParser: Parser {
         
         RuntimeMetaData.checkVersion("4.9.1", RuntimeMetaData.VERSION)
         try super.init(input)
-        _interp = ParserATNSimulator(self,
-                                     _ATN,
-                                     _decisionToDFA,
-                                     _sharedContextCache,
-                                     atnConfigPool: state.atnConfigPool)
+        _interp = ParserATNSimulator(
+			self,
+			_ATN,
+			_decisionToDFA,
+			_sharedContextCache //, atnConfigPool: state.atnConfigPool
+		)
     }
 
 
