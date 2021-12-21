@@ -11,6 +11,47 @@ class JsParserTests: XCTestCase {
             """)
     }
 
+    func testParseClass() throws {
+        let node = parserTest(
+            """
+            class AClass {
+                constructor(args) {
+
+                }
+                static method() {
+                }
+                getProperty() {
+                    return 0;
+                }
+            }
+            """
+        )
+
+        let classDecl: JsClassNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(classDecl.identifier?.name, "AClass")
+        XCTAssertEqual(classDecl.methods.count, 3)
+        XCTAssertEqual(classDecl.methods[0].identifier?.name, "constructor")
+        XCTAssertEqual(classDecl.methods[1].identifier?.name, "method")
+        XCTAssertEqual(classDecl.methods[2].identifier?.name, "getProperty")
+    }
+
+    func testParseFunction() throws {
+        let node = parserTest(
+            """
+            function test() {
+
+            }
+            """
+        )
+
+        let functionDecl: JsFunctionDeclarationNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(functionDecl.identifier?.name, "test")
+    }
+
+    #if JS_PARSER_TESTS_FULL_FIXTURES
+
     func testParse_bezierFixture() throws {
         let fixtureUrl = try XCTUnwrap(Bundle.module.url(forResource: "bezier", withExtension: "js"))
 
@@ -18,8 +59,6 @@ class JsParserTests: XCTestCase {
 
         _=parserTest(source)
     }
-
-    #if !JS_PARSER_TESTS_FULL_FIXTURES
 
     func testParse_allFixtures() throws {
         let fixtures = try XCTUnwrap(Bundle.module.urls(forResourcesWithExtension: "js", subdirectory: nil))

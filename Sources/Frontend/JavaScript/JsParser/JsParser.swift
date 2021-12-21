@@ -72,7 +72,7 @@ public class JsParser {
         let root = try tryParse(from: parser, { try $0.program() })
         // print(root.toStringTree(parser))
 
-        let listener = JsParserListener()
+        let listener = JsParserListener(sourceString: src, source: source)
         
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)
