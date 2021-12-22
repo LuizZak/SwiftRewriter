@@ -8,7 +8,7 @@ import Commons
 /// StaticConstructorTransformer(
 ///     typeName: "NSTimeZone",
 ///     kind: .property("systemTimeZone"),
-///     conversion: Expression.identifier("TimeZone").dot("current"))
+///     conversion: .identifier("TimeZone").dot("current"))
 /// ```
 ///
 /// would perform conversions of the form:
@@ -32,7 +32,7 @@ import Commons
 /// StaticConstructorTransformer(
 ///     typeName: "NSLocale",
 ///     kind: .method("localeWithLocaleIdentifier", .labeled("identifier")),
-///     conversion: Expression.identifier("Locale"))
+///     conversion: .identifier("Locale"))
 /// ```
 ///
 /// which would transform into (method call is appended to `conversion` expression
@@ -88,7 +88,8 @@ final class StaticConstructorTransformer {
                     objcFunctionName: "",
                     toSwiftFunction: "",
                     firstArgumentBecomesInstance: false,
-                    arguments: args)
+                    arguments: args
+                )
             
             guard let call = postfix.functionCall,
                 let result = transformer.attemptApply(on: call, name: "", firstArgIsInstance: false, args: args) else {

@@ -18,7 +18,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     func testNullCoalesceOnArithmeticOperators() {
         let expMaker = { Expression.identifier("a") }
         
-        let exp = expMaker().binary(op: .add, rhs: Expression.identifier("b"))
+        let exp = expMaker().binary(op: .add, rhs: .identifier("b"))
         exp.lhs.resolvedType = .optional(.int)
         
         assertTransform(
@@ -28,7 +28,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             into:
             Expression
                 .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0)))
-                .binary(op: .add, rhs: Expression.identifier("b"))
+                .binary(op: .add, rhs: .identifier("b"))
         ); assertNotifiedChange()
     }
     
@@ -37,7 +37,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         let lhsLhsMaker = { Expression.identifier("a") }
         let lhsMaker = { Expression.identifier("b") }
         
-        let exp = (lhsLhsMaker().binary(op: .add, rhs: lhsMaker())).binary(op: .add, rhs: Expression.identifier("c"))
+        let exp = (lhsLhsMaker().binary(op: .add, rhs: lhsMaker())).binary(op: .add, rhs: .identifier("c"))
         exp.lhs.asBinary?.lhs.resolvedType = .optional(.int)
         exp.lhs.asBinary?.rhs.resolvedType = .optional(.int)
         
@@ -52,7 +52,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                         .binary(op: .nullCoalesce, rhs: .constant(0))
                 )
                 .binary(op: .add, rhs: .parens(lhsMaker().binary(op: .nullCoalesce, rhs: .constant(0))))
-                .binary(op: .add, rhs: Expression.identifier("c"))
+                .binary(op: .add, rhs: .identifier("c"))
         ); assertNotifiedChange()
     }
     
@@ -61,7 +61,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     func testNullCoalesceOnArithmeticComparison() {
         let expMaker = { Expression.identifier("a") }
 
-        let exp = expMaker().binary(op: .lessThan, rhs: Expression.identifier("b"))
+        let exp = expMaker().binary(op: .lessThan, rhs: .identifier("b"))
         exp.lhs.resolvedType = .optional(.int)
         exp.rhs.resolvedType = .int
         
@@ -70,9 +70,8 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             expression: exp,
             // (a ?? 0) < b
             into:
-            Expression
                 .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0)))
-                .binary(op: .lessThan, rhs: Expression.identifier("b"))
+                .binary(op: .lessThan, rhs: .identifier("b"))
         ); assertNotifiedChange()
     }
     
@@ -212,7 +211,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             expression: exp,
             // -(a ?? 0)
             into:
-            Expression.unary(
+            .unary(
                 op: .subtract,
                 Expression
                     .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0)))
@@ -237,7 +236,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // a
             expression: exp,
             // (a ?? A())
-            into: .parens(expMaker().binary(op: .nullCoalesce, rhs: Expression.identifier("A").call()))
+            into: .parens(expMaker().binary(op: .nullCoalesce, rhs: .identifier("A").call()))
         ); assertNotifiedChange()
     }
     
@@ -275,7 +274,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             statement: .expression(funcMaker(exp)),
             // { f(a ?? 0) }
             into: .expression(
-                funcMaker(Expression.parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0))))
+                funcMaker(.parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0))))
             )
         ); assertNotifiedChange()
     }
@@ -303,9 +302,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // { a((b ?? 0)) }
             into:
             .expression(
-                Expression
-                    .identifier("a")
-                    .call([.parens(Expression.identifier("b").binary(op: .nullCoalesce, rhs: .constant(0)))])
+                .identifier("a")
+                .call([
+                    .parens(.identifier("b").binary(op: .nullCoalesce, rhs: .constant(0)))
+                ])
             )
         ); assertNotifiedChange()
     }
@@ -384,8 +384,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                 .call([], callableSignature: .swiftBlock(returnType: .int, parameters: [])).typed(.optional(.int)),
             // (a?.b ?? B()).c()
             into:
-            Expression
-                .parens(expMaker().binary(op: .nullCoalesce, rhs: Expression.identifier("B").call()))
+                .parens(expMaker().binary(op: .nullCoalesce, rhs: .identifier("B").call()))
                 .dot("c").call()
         ); assertNotifiedChange()
         
@@ -498,8 +497,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // if (num) { }
             statement: stmt,
             // if (num != 0) { }
-            into: Statement.if(expMaker().binary(op: .unequals, rhs: .constant(0)),
-                               body: [])
+            into: .if(
+                expMaker().binary(op: .unequals, rhs: .constant(0)),
+                body: []
+            )
         ); assertNotifiedChange()
     }
     
@@ -517,8 +518,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // if !num { }
             statement: stmt,
             // if (num == 0) { }
-            into: Statement.if(.parens(Expression.identifier("num").binary(op: .equals, rhs: .constant(0))),
-                               body: [])
+            into: .if(
+                .parens(.identifier("num").binary(op: .equals, rhs: .constant(0))),
+                body: []
+            )
         ); assertNotifiedChange()
     }
     
@@ -536,8 +539,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // if (num) { }
             statement: stmt,
             // if (num != 0) { }
-            into: Statement.if(expMaker().binary(op: .unequals, rhs: .constant(0)),
-                               body: [])
+            into: .if(
+                expMaker().binary(op: .unequals, rhs: .constant(0)),
+                body: []
+            )
         ); assertNotifiedChange()
     }
     
@@ -556,8 +561,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // if (obj) { }
             statement: stmt,
             // if (obj != nil) { }
-            into: Statement.if(expMaker().binary(op: .unequals, rhs: .constant(.nil)),
-                               body: [])
+            into: .if(
+                expMaker().binary(op: .unequals, rhs: .constant(.nil)),
+                body: []
+            )
         ); assertNotifiedChange()
     }
     
@@ -577,8 +584,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // if !obj { }
             statement: stmt,
             // if (obj == nil) { }
-            into: Statement.if(.parens(expMaker().binary(op: .equals, rhs: .constant(.nil))),
-                               body: [])
+            into: .if(
+                .parens(expMaker().binary(op: .equals, rhs: .constant(.nil))),
+                body: []
+            )
         ); assertNotifiedChange()
     }
     
@@ -595,8 +604,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // if (a.b) { }
             statement: stmt,
             // if (a.b == true) { }
-            into: Statement.if(expMaker(),
-                               body: [])
+            into: .if(
+                expMaker(),
+                body: []
+            )
         ); assertDidNotNotifyChange()
     }
     
@@ -617,8 +628,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // while (a.b) { }
             statement: stmt,
             // while (a.b == true) { }
-            into: Statement.while(expMaker().binary(op: .equals, rhs: .constant(true)),
-                                  body: [])
+            into: .while(
+                expMaker().binary(op: .equals, rhs: .constant(true)),
+                body: []
+            )
         ); assertNotifiedChange()
     }
     
@@ -637,8 +650,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // while (num) { }
             statement: stmt,
             // while (num != 0) { }
-            into: Statement.while(expMaker().binary(op: .unequals, rhs: .constant(0)),
-                                  body: [])
+            into: .while(
+                expMaker().binary(op: .unequals, rhs: .constant(0)),
+                body: []
+            )
         ); assertNotifiedChange()
     }
     
@@ -656,8 +671,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // while (num) { }
             statement: stmt,
             // while (num != 0) { }
-            into: Statement.while(expMaker().binary(op: .unequals, rhs: .constant(0)),
-                                  body: [])
+            into: .while(
+                expMaker().binary(op: .unequals, rhs: .constant(0)),
+                body: []
+            )
         ); assertNotifiedChange()
     }
     
@@ -676,8 +693,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // while (obj) { }
             statement: stmt,
             // while (obj != nil) { }
-            into: Statement.while(expMaker().binary(op: .unequals, rhs: .constant(.nil)),
-                                  body: [])
+            into: .while(
+                expMaker().binary(op: .unequals, rhs: .constant(.nil)),
+                body: []
+            )
         ); assertNotifiedChange()
     }
     
@@ -694,8 +713,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // while (a.b) { }
             statement: stmt,
             // while (a.b == true) { }
-            into: Statement.while(expMaker(),
-                                  body: [])
+            into: .while(
+                expMaker(),
+                body: []
+            )
         ); assertDidNotNotifyChange()
     }
     
@@ -705,21 +726,23 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     func testCorrectSimpleNullableValueInNonnullParameterToIfLet() {
         let funcType = SwiftType.swiftBlock(returnType: .void, parameters: [.typeName("A")])
         
-        let exp =
-            Expression
-                .identifier("a").typed(funcType)
-                .call([Expression.identifier("b").typed(.optional(.typeName("A")))],
-                      callableSignature: funcType)
+        let exp = Expression
+            .identifier("a").typed(funcType)
+            .call(
+                [.identifier("b").typed(.optional(.typeName("A")))],
+                callableSignature: funcType
+            )
         
         assertTransform(
             // a(b)
             statement: Statement.expression(exp),
             // if let b = b { a(b) }
-            into: Statement.ifLet(
-                Pattern.identifier("b"), .identifier("b"),
+            into: .ifLet(
+                .identifier("b"), .identifier("b"),
                 body: [
-                    .expression(Expression.identifier("a").call([Expression.identifier("b")]))
-                ])
+                    .expression(.identifier("a").call([.identifier("b")]))
+                ]
+            )
         ); assertNotifiedChange()
     }
     
@@ -727,21 +750,23 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     func testCorrectMemberAccessNullableValueInNonnullParameterToIfLet() {
         let funcType = SwiftType.swiftBlock(returnType: .void, parameters: [.typeName("A")])
         
-        let exp =
-            Expression
-                .identifier("a").typed(funcType)
-                .call([Expression.identifier("b").dot("c").typed(.optional(.typeName("A")))],
-                      callableSignature: funcType)
+        let exp = Expression
+            .identifier("a").typed(funcType)
+            .call(
+                [.identifier("b").dot("c").typed(.optional(.typeName("A")))],
+                callableSignature: funcType
+            )
         
         assertTransform(
             // a(b.c)
             statement: Statement.expression(exp),
             // if let c = b.c { a(c) }
-            into: Statement.ifLet(
-                Pattern.identifier("c"), Expression.identifier("b").dot("c"),
+            into: .ifLet(
+                .identifier("c"), .identifier("b").dot("c"),
                 body: [
-                    .expression(Expression.identifier("a").call([Expression.identifier("c")]))
-                ])
+                    .expression(.identifier("a").call([.identifier("c")]))
+                ]
+            )
         ); assertNotifiedChange()
     }
     
@@ -750,21 +775,23 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     func testCorrectMethodInvocationNullableValueInNonnullParameterToIfLet() {
         let funcType = SwiftType.swiftBlock(returnType: .void, parameters: [.typeName("A")])
         
-        let exp =
-            Expression
-                .identifier("a").typed(funcType)
-                .call([Expression.identifier("b").dot("c").call().typed(.optional(.typeName("A")))],
-                      callableSignature: funcType)
+        let exp = Expression
+            .identifier("a").typed(funcType)
+            .call(
+                [.identifier("b").dot("c").call().typed(.optional(.typeName("A")))],
+                callableSignature: funcType
+            )
         
         assertTransform(
             // a(b.c())
             statement: Statement.expression(exp),
             // if let c = b.c() { a(c) }
-            into: Statement.ifLet(
-                Pattern.identifier("c"), Expression.identifier("b").dot("c").call(),
+            into: .ifLet(
+                .identifier("c"), .identifier("b").dot("c").call(),
                 body: [
-                    .expression(Expression.identifier("a").call([Expression.identifier("c")]))
-                ])
+                    .expression(.identifier("a").call([.identifier("c")]))
+                ]
+            )
         ); assertNotifiedChange()
     }
     
@@ -774,21 +801,23 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         let funcTypeA = SwiftType.swiftBlock(returnType: .void, parameters: ["A"])
         let funcTypeB = SwiftType.swiftBlock(returnType: .optional("A"), parameters: [])
         
-        let exp =
-            Expression
-                .identifier("a").typed(funcTypeA)
-                .call([Expression.identifier("b").typed(funcTypeB).call().typed(.optional("A"))],
-                      callableSignature: funcTypeA)
+        let exp = Expression
+            .identifier("a").typed(funcTypeA)
+            .call(
+                [Expression.identifier("b").typed(funcTypeB).call().typed(.optional("A"))],
+                callableSignature: funcTypeA
+            )
         
         assertTransform(
             // a(b())
             statement: Statement.expression(exp),
             // if let value = b() { a(value) }
-            into: Statement.ifLet(
-                Pattern.identifier("value"), Expression.identifier("b").call(),
+            into: .ifLet(
+                .identifier("value"), .identifier("b").call(),
                 body: [
-                    .expression(Expression.identifier("a").call([Expression.identifier("value")]))
-                ])
+                    .expression(.identifier("a").call([.identifier("value")]))
+                ]
+            )
         ); assertNotifiedChange()
     }
     
@@ -797,31 +826,36 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     func testDontCorrectSimpleNullableValueInNonnullParameterToIfLetIfArgumentIsNullableScalarType() {
         let funcType = SwiftType.swiftBlock(returnType: .void, parameters: [.int])
         
-        let exp =
-            Expression
-                .identifier("a").typed(funcType)
-                .call([Expression.identifier("b").dot("c").typed(.optional(.int))],
-                      callableSignature: funcType)
+        let exp = Expression
+            .identifier("a").typed(funcType)
+            .call(
+                [.identifier("b").dot("c").typed(.optional(.int))],
+                callableSignature: funcType
+            )
         
         assertTransform(
             // a(b.c)
             statement: Statement.expression(exp),
             // a((b.c ?? 0))
-            into: Statement.expression(Expression
+            into: .expression(
                 .identifier("a").typed(funcType)
-                .call([Expression.parens(Expression.identifier("b").dot("c").binary(op: .nullCoalesce, rhs: .constant(0)))],
-                      callableSignature: funcType))
+                .call(
+                    [.parens(.identifier("b").dot("c").binary(op: .nullCoalesce, rhs: .constant(0)))],
+                    callableSignature: funcType
+                )
+            )
         ); assertNotifiedChange()
     }
     
     /// Make sure we don't correct passing a nullable value to a nullable parameter
     func testDontCorrectNullableValuesPassedToNullableParameters() {
         let funcType = SwiftType.swiftBlock(returnType: .void, parameters: [.optional(.typeName("A"))])
-        let expMaker = {
-            Expression
-                .identifier("a").typed(funcType)
-                .call([Expression.identifier("b").typed(.optional(.typeName("A")))],
-                      callableSignature: funcType)
+        let expMaker: () -> Expression = {
+            .identifier("a").typed(funcType)
+            .call(
+                [.identifier("b").typed(.optional(.typeName("A")))],
+                callableSignature: funcType
+            )
         }
         
         let exp = expMaker()
@@ -843,20 +877,23 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                 .build()
         typeSystem.addType(type)
         let rhsMaker: () -> Expression = {
-            let e = Expression.identifier("self")
+            let e = Expression
+                .identifier("self")
                 .dot("value", type: .nullabilityUnspecified("Value"))
+            
             e.resolvedType = .nullabilityUnspecified("Value")
             e.expectedType = "Value"
+
             return e
         }
-        let exp =
-            Expression.identifier("a").typed("Value").assignment(op: .assign, rhs: rhsMaker())
+        let exp = Expression
+            .identifier("a").typed("Value").assignment(op: .assign, rhs: rhsMaker())
         
         assertTransform(
             // a = self.value
-            statement: Statement.expression(exp),
+            statement: .expression(exp),
             // a = self.value
-            into: Statement.expression(Expression.identifier("a").assignment(op: .assign, rhs: rhsMaker()))
+            into: .expression(.identifier("a").assignment(op: .assign, rhs: rhsMaker()))
         ); assertDidNotNotifyChange()
     }
     
@@ -879,114 +916,146 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // a
             expression: exp,
             // (a ?? Value())
-            into: Expression.parens(expMaker().binary(op: .nullCoalesce, rhs: Expression.identifier("Value").call()))
+            into: .parens(expMaker().binary(op: .nullCoalesce, rhs: .identifier("Value").call()))
         ); assertNotifiedChange()
     }
     
     func testDontRemoveNullableAccessFromCastExpressions() {
         assertTransform(
-            expression: Expression.identifier("exp").casted(to: .string).optional().dot("count"),
-            into: Expression.identifier("exp").casted(to: .string).optional().dot("count")
+            expression: .identifier("exp").casted(to: .string).optional().dot("count"),
+            into: .identifier("exp").casted(to: .string).optional().dot("count")
         ); assertDidNotNotifyChange()
     }
     
     func testCastDifferentNumericTypesInArithmeticOperations() {
         // CGFloat, Int -> CGFloat, CGFloat(Int)
         assertTransform(
-            expression: Expression
-                .binary(lhs: Expression.identifier("a").typed(.cgFloat),
-                        op: .add,
-                        rhs: Expression.identifier("b").typed(.int)),
-            into: Expression
-                .binary(lhs: Expression.identifier("a"),
-                        op: .add,
-                        rhs: Expression.identifier("CGFloat").call([.identifier("b")]))
+            expression:
+                .binary(
+                    lhs:.identifier("a").typed(.cgFloat),
+                    op: .add,
+                    rhs:.identifier("b").typed(.int)
+                ),
+            into:
+                .binary(
+                    lhs: .identifier("a"),
+                    op: .add,
+                    rhs: .identifier("CGFloat").call([.identifier("b")])
+                )
         ); assertNotifiedChange()
         
         // Int, CGFloat -> CGFloat(Int), CGFloat
         assertTransform(
-            expression: Expression
-                .binary(lhs: Expression.identifier("a").typed(.int),
-                        op: .add,
-                        rhs: Expression.identifier("b").typed(.cgFloat)),
-            into: Expression
-                .binary(lhs: Expression.identifier("CGFloat").call([.identifier("a")]),
-                        op: .add,
-                        rhs: Expression.identifier("b"))
+            expression:
+                .binary(
+                    lhs: .identifier("a").typed(.int),
+                    op: .add,
+                    rhs: .identifier("b").typed(.cgFloat)
+                ),
+            into:
+                .binary(
+                    lhs: .identifier("CGFloat").call([.identifier("a")]),
+                    op: .add,
+                    rhs: .identifier("b")
+                )
         ); assertNotifiedChange()
         
         // Int64, Int32 -> Int64, Int64(Int32)
         assertTransform(
-            expression: Expression
-                .binary(lhs: Expression.identifier("a").typed("Int64"),
-                        op: .add,
-                        rhs: Expression.identifier("b").typed("Int32")),
-            into: Expression
-                .binary(lhs: Expression.identifier("a"),
-                        op: .add,
-                        rhs: Expression.identifier("Int64").call([.identifier("b")]))
+            expression:
+                .binary(
+                    lhs: .identifier("a").typed("Int64"),
+                    op: .add,
+                    rhs: .identifier("b").typed("Int32")
+                ),
+            into:
+                .binary(
+                    lhs: .identifier("a"),
+                    op: .add,
+                    rhs: .identifier("Int64").call([.identifier("b")])
+                )
         ); assertNotifiedChange()
         
         // Int32, Int64 -> Int64(Int32), Int64
         assertTransform(
-            expression: Expression
-                .binary(lhs: Expression.identifier("a").typed("Int32"),
-                        op: .add,
-                        rhs: Expression.identifier("b").typed("Int64")),
-            into: Expression
-                .binary(lhs: Expression.identifier("Int64").call([.identifier("a")]),
-                        op: .add,
-                        rhs: Expression.identifier("b"))
+            expression:
+                .binary(
+                    lhs: .identifier("a").typed("Int32"),
+                    op: .add,
+                    rhs: .identifier("b").typed("Int64")
+                ),
+            into:
+                .binary(
+                    lhs: .identifier("Int64").call([.identifier("a")]),
+                    op: .add,
+                    rhs: .identifier("b")
+                )
         ); assertNotifiedChange()
     }
     
     func testNoCastForSameBitWidthNumerics() {
         // CGFloat, Double -> CGFloat, Double
         assertTransform(
-            expression: Expression
-                .binary(lhs: Expression.identifier("a").typed(.cgFloat),
-                        op: .add,
-                        rhs: Expression.identifier("b").typed(.double)),
-            into: Expression
-                .binary(lhs: Expression.identifier("a"),
-                        op: .add,
-                        rhs: Expression.identifier("b"))
+            expression:
+                .binary(
+                    lhs: .identifier("a").typed(.cgFloat),
+                    op: .add,
+                    rhs: .identifier("b").typed(.double)
+                ),
+            into:
+                .binary(
+                    lhs: .identifier("a"),
+                    op: .add,
+                    rhs: .identifier("b")
+                )
         ); assertDidNotNotifyChange()
         
         // CGFloat, Double -> Double, CGFloat
         assertTransform(
-            expression: Expression
-                .binary(lhs: Expression.identifier("a").typed(.double),
-                        op: .add,
-                        rhs: Expression.identifier("b").typed(.cgFloat)),
-            into: Expression
-                .binary(lhs: Expression.identifier("a"),
-                        op: .add,
-                        rhs: Expression.identifier("b"))
+            expression:
+                .binary(
+                    lhs: .identifier("a").typed(.double),
+                    op: .add,
+                    rhs: .identifier("b").typed(.cgFloat)
+                ),
+            into:
+                .binary(
+                    lhs: .identifier("a"),
+                    op: .add,
+                    rhs: .identifier("b")
+                )
         ); assertDidNotNotifyChange()
         
         // Int64, UInt64 -> Int64, UInt64
         assertTransform(
-            expression: Expression
-                .binary(lhs: Expression.identifier("a").typed("Int64"),
-                        op: .add,
-                        rhs: Expression.identifier("b").typed("UInt64")),
-            into: Expression
-                .binary(lhs: Expression.identifier("a"),
-                        op: .add,
-                        rhs: Expression.identifier("b"))
+            expression:
+                .binary(
+                    lhs: .identifier("a").typed("Int64"),
+                    op: .add,
+                    rhs: .identifier("b").typed("UInt64")
+                ),
+            into:
+                .binary(
+                    lhs: .identifier("a"),
+                    op: .add,
+                    rhs: .identifier("b")
+                )
         ); assertDidNotNotifyChange()
         
         // UInt64, Int64 -> UInt64, Int64
         assertTransform(
-            expression: Expression
-                .binary(lhs: Expression.identifier("a").typed("UInt64"),
-                        op: .add,
-                        rhs: Expression.identifier("b").typed("Int64")),
-            into: Expression
-                .binary(lhs: Expression.identifier("a"),
-                        op: .add,
-                        rhs: Expression.identifier("b"))
+            expression:
+                .binary(
+                    lhs: .identifier("a").typed("UInt64"),
+                    op: .add,
+                    rhs: .identifier("b").typed("Int64")
+                ),
+            into:
+                .binary(
+                    lhs: .identifier("a"),
+                    op: .add,
+                    rhs: .identifier("b")
+                )
         ); assertDidNotNotifyChange()
     }
 }

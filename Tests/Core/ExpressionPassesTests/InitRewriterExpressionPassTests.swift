@@ -33,12 +33,11 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
         assertTransform(
             statement: .compound([
                 .expression(
-                    Expression
-                        .identifier("self")
-                        .assignment(
-                            op: .assign,
-                            rhs: Expression
-                                .identifier("super").dot("init").call())
+                    .identifier("self")
+                    .assignment(
+                        op: .assign,
+                        rhs: .identifier("super").dot("init").call()
+                    )
                 ),
                 
                 .if(.identifier("self"), body: []),
@@ -46,7 +45,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                 .return(.identifier("self"))
             ]),
             into: .compound([
-                .expression(Expression.identifier("super").dot("init").call())
+                .expression(.identifier("super").dot("init").call())
             ])
         ); assertNotifiedChange()
     }
@@ -70,12 +69,11 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
         assertTransform(
             statement: .compound([
                 .expression(
-                    Expression
-                        .identifier("self")
-                        .assignment(
-                            op: .assign,
-                            rhs: Expression
-                                .identifier("self").dot("init").call())
+                    .identifier("self")
+                    .assignment(
+                        op: .assign,
+                        rhs: .identifier("self").dot("init").call()
+                    )
                 ),
                 
                 .if(.identifier("self"), body: []),
@@ -83,7 +81,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                 .return(.identifier("self"))
             ]),
             into: .compound([
-                .expression(Expression.identifier("self").dot("init").call())
+                .expression(.identifier("self").dot("init").call())
             ])
         ); assertNotifiedChange()
     }
@@ -108,19 +106,17 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
         assertTransform(
             statement: .compound([
                 .expression(
-                    Expression
-                        .identifier("self")
-                        .assignment(
-                            op: .assign,
-                            rhs: Expression
-                                .identifier("super").dot("init").call())
+                    .identifier("self")
+                    .assignment(
+                        op: .assign,
+                        rhs: .identifier("super").dot("init").call()
+                    )
                 ),
                 
                 .if(.identifier("self"), body: [
                     .expression(
-                        Expression
-                            .identifier("self").dot("init")
-                            .assignment(op: .assign, rhs: .identifier("property"))
+                        .identifier("self").dot("init")
+                        .assignment(op: .assign, rhs: .identifier("property"))
                     )
                 ]),
                 
@@ -128,11 +124,10 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
             ]),
             into: .compound([
                 .expression(
-                    Expression
-                        .identifier("self").dot("init")
-                        .assignment(op: .assign, rhs: .identifier("property"))
-                    ),
-                .expression(Expression.identifier("super").dot("init").call())
+                    .identifier("self").dot("init")
+                    .assignment(op: .assign, rhs: .identifier("property"))
+                ),
+                .expression(.identifier("super").dot("init").call())
             ])
         ); assertNotifiedChange()
     }
@@ -158,23 +153,22 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                     .if(Expression
                         .unary(
                             op: .negate,
-                            Expression.parens(
-                                Expression.identifier("self")
-                                    .assignment(
-                                        op: .assign,
-                                        rhs: Expression
-                                            .identifier("super").dot("init").call()
-                                    )
+                            .parens(
+                                .identifier("self")
+                                .assignment(
+                                    op: .assign,
+                                    rhs: .identifier("super").dot("init").call()
+                                )
                             )
                         ),
                         body: [
                             .return(.constant(.nil))
-                        ]),
-                    
+                        ]
+                    ),
                     .return(.identifier("self"))
                 ]),
             into: .compound([
-                .expression(Expression.identifier("super").dot("init").call())
+                .expression(.identifier("super").dot("init").call())
             ])
         ); assertNotifiedChange()
     }
@@ -202,12 +196,11 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                 .if(Expression
                     .unary(
                         op: .negate,
-                        Expression.parens(
-                            Expression.identifier("self")
-                                .assignment(
-                                    op: .assign,
-                                    rhs: Expression
-                                        .identifier("super").dot("init").call()
+                        .parens(
+                            .identifier("self")
+                            .assignment(
+                                op: .assign,
+                                rhs: .identifier("super").dot("init").call()
                             )
                         )
                     ),
@@ -216,19 +209,18 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                     ]),
                 
                 .expression(
-                    Expression
-                        .identifier("self").dot("init")
-                        .assignment(op: .assign, rhs: .identifier("property"))
+                    .identifier("self").dot("init")
+                    .assignment(op: .assign, rhs: .identifier("property"))
                 ),
                 
                 .return(.identifier("self"))
             ]),
             into: .compound([
-                .expression(Expression
+                .expression(
                     .identifier("self").dot("init")
                     .assignment(op: .assign, rhs: .identifier("property"))
                 ),
-                .expression(Expression.identifier("super").dot("init").call())
+                .expression(.identifier("super").dot("init").call())
             ])
         ); assertNotifiedChange()
     }
@@ -263,22 +255,20 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
             statement:
             .compound([
                 .expression(
-                    Expression
-                        .identifier("self")
-                        .assignment(
-                            op: .assign,
-                            rhs: Expression
-                                .identifier("super").dot("init").call([.constant(0)]))
+                    .identifier("self")
+                    .assignment(
+                        op: .assign,
+                        rhs: .identifier("super").dot("init").call([.constant(0)])
                     )
+                )
                 ]),
             into: .compound([
                 .expression(
-                    Expression
-                        .identifier("self")
-                        .assignment(
-                            op: .assign,
-                            rhs: Expression
-                                .identifier("super").dot("init").optional().call([.constant(0)]))
+                    .identifier("self")
+                    .assignment(
+                        op: .assign,
+                        rhs: .identifier("super").dot("init").optional().call([.constant(0)])
+                    )
                 )
             ])
         ); assertNotifiedChange()

@@ -22,7 +22,7 @@ class MandatorySyntaxNodePass: ASTRewriterPass {
         // [Type new]
         let typeName = ValueMatcherExtractor("")
         if exp.matches(ident(.any ->> typeName).call("new")) {
-            var result: Expression = Expression.identifier(typeName.value)
+            var result: Expression = .identifier(typeName.value)
                 
             if typeName.value == "self" {
                 result = result.dot("init").call()
@@ -39,9 +39,9 @@ class MandatorySyntaxNodePass: ASTRewriterPass {
         if exp.matches(ident(.any ->> typeName).dot("new")) {
             let result: Expression
             if typeName.value == "self" {
-                result = Expression.identifier(typeName.value).dot("init").call()
+                result = .identifier(typeName.value).dot("init").call()
             } else {
-                result = Expression.identifier(typeName.value).call()
+                result = .identifier(typeName.value).call()
             }
             
             result.resolvedType = exp.resolvedType

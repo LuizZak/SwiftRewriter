@@ -34,7 +34,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                                     .addComment("// Implementation comment")
                                     .setBody([
                                         .expression(
-                                            Expression.identifier("stmt").call()
+                                            .identifier("stmt").call()
                                         )
                                     ])
                             }
@@ -80,7 +80,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                         builder.createVoidMethod(named: "fromImplementation") { method in
                             method.setBody([
                                 .expression(
-                                    Expression.identifier("stmt").call()
+                                    .identifier("stmt").call()
                                 )
                             ])
                         }
@@ -128,7 +128,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                         builder.createVoidMethod(named: "fromImplementation") { method in
                             method.setBody([
                                 .expression(
-                                    Expression.identifier("stmt").call()
+                                    .identifier("stmt").call()
                                 )
                             ])
                         }
@@ -161,7 +161,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                         builder.createVoidMethod(named: "amImplementation") { method in
                             method.setBody([
                                 .expression(
-                                    Expression.identifier("stmt").call()
+                                    .identifier("stmt").call()
                                 )
                             ])
                         }
@@ -208,7 +208,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                         builder.createVoidMethod(named: "fromImplementation") { method in
                             method.setBody([
                                 .expression(
-                                    Expression.identifier("stmt").call()
+                                    .identifier("stmt").call()
                                 )
                             ])
                         }
@@ -256,14 +256,15 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                     file.createGlobalFunction(withName: "a", returnType: .typeName("A"))
                 }
                 .createFile(named: "A.m") { file in
-                    file.createGlobalFunction(withName: "a",
-                                              returnType: .nullabilityUnspecified(.typeName("A")),
-                                              body: [
-                                                .expression(
-                                                    Expression
-                                                        .identifier("a")
-                                                        .call()
-                                                )])
+                    file.createGlobalFunction(
+                        withName: "a",
+                        returnType: .nullabilityUnspecified(.typeName("A")),
+                        body: [
+                        .expression(
+                            .identifier("a")
+                            .call()
+                        )]
+                    )
                 }.build()
         intentions.fileIntentions()[0].globalFunctionIntentions[0].precedingComments = ["// Header comments"]
         intentions.fileIntentions()[1].globalFunctionIntentions[0].precedingComments = ["// Implementation comments"]
@@ -281,7 +282,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                                          isStatic: false)
                        )
         XCTAssertEqual(files[0].globalFunctionIntentions.first?.functionBody?.body,
-                       [.expression(Expression.identifier("a").call())])
+                       [.expression(.identifier("a").call())])
         XCTAssertEqual(files[0].globalFunctionIntentions.first?.precedingComments, [
             "// Header comments",
             "// Implementation comments"
@@ -292,19 +293,22 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
                 .createFile(named: "A.h") { file in
-                    file.createGlobalFunction(withName: "a",
-                                              parameters: [
-                                                ParameterSignature(label: nil, name: "a", type: .int)
-                                              ])
+                    file.createGlobalFunction(
+                        withName: "a",
+                        parameters: [
+                            ParameterSignature(label: nil, name: "a", type: .int)
+                        ]
+                    )
                 }
                 .createFile(named: "A.m") { file in
-                    file.createGlobalFunction(withName: "a",
-                                              body: [
-                                                .expression(
-                                                    Expression
-                                                        .identifier("a")
-                                                        .call()
-                                                )])
+                    file.createGlobalFunction(
+                        withName: "a",
+                        body: [
+                            .expression(
+                            .identifier("a")
+                            .call()
+                        )]
+                    )
                 }.build()
         let sut = FileTypeMergingIntentionPass()
         
@@ -318,7 +322,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         // a()
         XCTAssertEqual(functions[0].functionBody?.body,
-                       [.expression(Expression.identifier("a").call())])
+                       [.expression(.identifier("a").call())])
         
         // a(int)
         XCTAssertNil(functions[1].functionBody?.body)

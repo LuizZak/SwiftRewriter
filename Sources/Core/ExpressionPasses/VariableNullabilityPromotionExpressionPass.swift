@@ -85,7 +85,7 @@ public class VariableNullabilityPromotionExpressionPass: ASTRewriterPass {
         } else if !decl.isConstant && decl.type.isOptional {
             // Initializing a non-constant optional declaration results in an
             // implicit `nil` initial value
-            assignments.append(Expression.constant(.nil))
+            assignments.append(.constant(.nil))
         }
         
         for usage in usages where !usage.isReadOnlyUsage {

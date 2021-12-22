@@ -14,7 +14,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testIsEqualToString() {
         let res = assertTransformParsed(
             expression: "[self.aString isEqualToString:@\"abc\"]",
-            into: Expression
+            into:
                 .identifier("self")
                 .dot("aString")
                 .binary(op: .equals, rhs: .constant("abc"))
@@ -26,7 +26,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNegatedIsEqualToString() {
         let res = assertTransformParsed(
             expression: "![self.aString isEqualToString:@\"abc\"]",
-            into: Expression
+            into:
                 .identifier("self")
                 .dot("aString")
                 .binary(op: .unequals, rhs: .constant("abc"))
@@ -44,7 +44,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         
         let res = assertTransform(
             expression: exp,
-            into: Expression
+            into:
                 .identifier("aString")
                 .binary(op: .equals, rhs: .constant("abc"))
         ); assertNotifiedChange()
@@ -55,7 +55,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSStringWithFormat() {
         var res = assertTransformParsed(
             expression: "[NSString stringWithFormat:@\"%@\", self]",
-            into: Expression
+            into:
                 .identifier("String")
                 .call([
                     .labeled("format", .constant("%@")),
@@ -67,7 +67,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         
         res = assertTransformParsed(
             expression: "[NSString stringWithFormat:@\"%@\"]",
-            into: Expression
+            into:
                 .identifier("String")
                 .call([.labeled("format", .constant("%@"))])
         ); assertNotifiedChange()
@@ -78,7 +78,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSMutableStringWithFormat() {
         let res = assertTransformParsed(
             expression: "[NSMutableString stringWithFormat:@\"%@\", self]",
-            into: Expression
+            into:
                 .identifier("NSMutableString")
                 .call([
                     .labeled("format", .constant("%@")),
@@ -92,7 +92,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testAddObjectsFromArray() {
         let res = assertTransformParsed(
             expression: "[array addObjectsFromArray:@[]]",
-            into: Expression
+            into:
                 .identifier("array")
                 .dot("addObjects")
                 .call([.labeled("from", .arrayLiteral([]))])
@@ -111,7 +111,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         
         let res = assertTransform(
             expression: exp,
-            into: Expression
+            into:
                 .identifier("array")
                 .optional()
                 .dot("addObjects")
@@ -124,7 +124,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSArrayArrayCreator() {
         let res = assertTransformParsed(
             expression: "[NSArray array]",
-            into: Expression.identifier("NSArray").call()
+            into: .identifier("NSArray").call()
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .typeName("NSArray"))
@@ -139,7 +139,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSMutableArrayArrayCreator() {
         let res = assertTransformParsed(
             expression: "[NSMutableArray array]",
-            into: Expression.identifier("NSMutableArray").call()
+            into: .identifier("NSMutableArray").call()
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .typeName("NSMutableArray"))
@@ -154,7 +154,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSDictionaryDictionaryCreator() {
         let res = assertTransformParsed(
             expression: "[NSDictionary dictionary]",
-            into: Expression.identifier("NSDictionary").call()
+            into: .identifier("NSDictionary").call()
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .typeName("NSDictionary"))
@@ -169,7 +169,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSMutableDictionaryDictionaryCreator() {
         let res = assertTransformParsed(
             expression: "[NSMutableDictionary dictionary]",
-            into: Expression.identifier("NSMutableDictionary").call()
+            into: .identifier("NSMutableDictionary").call()
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .typeName("NSMutableDictionary"))
@@ -184,7 +184,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSSetSetCreator() {
         let res = assertTransformParsed(
             expression: "[NSSet set]",
-            into: Expression.identifier("NSSet").call()
+            into: .identifier("NSSet").call()
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .typeName("NSSet"))
@@ -199,7 +199,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSMutableSetSetCreator() {
         let res = assertTransformParsed(
             expression: "[NSMutableSet set]",
-            into: Expression.identifier("NSMutableSet").call()
+            into: .identifier("NSMutableSet").call()
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .typeName("NSMutableSet"))
@@ -214,7 +214,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSDateDateCreator() {
         let res = assertTransformParsed(
             expression: "[NSDate date]",
-            into: Expression.identifier("Date").call()
+            into: .identifier("Date").call()
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .typeName("NSDate"))
@@ -229,7 +229,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSMutableStringCreator() {
         let res = assertTransformParsed(
             expression: "[NSMutableString string]",
-            into: Expression.identifier("NSMutableString").call()
+            into: .identifier("NSMutableString").call()
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .typeName("NSMutableString"))
@@ -244,14 +244,14 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSTimeZoneSystemTimeZone() {
         let res = assertTransformParsed(
             expression: "[NSTimeZone systemTimeZone]",
-            into: Expression.identifier("TimeZone").dot("current")
+            into: .identifier("TimeZone").dot("current")
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .typeName("TimeZone"))
         
         assertTransformParsed(
             expression: "NSTimeZone.systemTimeZone",
-            into: Expression.identifier("TimeZone").dot("current")
+            into: .identifier("TimeZone").dot("current")
         ); assertNotifiedChange()
         
         // Test unrecognized members are left alone
@@ -264,64 +264,64 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSTimeZoneTransformers() {
         assertTransformParsed(
             expression: "NSTimeZone.localTimeZone",
-            into: Expression.identifier("TimeZone").dot("autoupdatingCurrent")
+            into: .identifier("TimeZone").dot("autoupdatingCurrent")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "NSTimeZone.defaultTimeZone",
-            into: Expression.identifier("TimeZone").dot("current")
+            into: .identifier("TimeZone").dot("current")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "NSTimeZone.systemTimeZone",
-            into: Expression.identifier("TimeZone").dot("current")
+            into: .identifier("TimeZone").dot("current")
         ); assertNotifiedChange()
     }
     
     func testNSLocaleTransformers() {
         assertTransformParsed(
             expression: "NSLocale.currentLocale",
-            into: Expression.identifier("Locale").dot("current")
+            into: .identifier("Locale").dot("current")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "NSLocale.systemLocale",
-            into: Expression.identifier("Locale").dot("current")
+            into: .identifier("Locale").dot("current")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "NSLocale.autoupdatingCurrentLocale",
-            into: Expression.identifier("Locale").dot("autoupdatingCurrent")
+            into: .identifier("Locale").dot("autoupdatingCurrent")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "[NSLocale localeWithLocaleIdentifier:@\"locale\"]",
-            into: Expression.identifier("Locale").call([.labeled("identifier", .constant("locale"))])
+            into: .identifier("Locale").call([.labeled("identifier", .constant("locale"))])
         ); assertNotifiedChange()
         
         // Test unrecognized members are left alone
         assertTransformParsed(
             expression: "NSNotALocale.currentLocale",
-            into: Expression.identifier("NSNotALocale").dot("currentLocale")
+            into: .identifier("NSNotALocale").dot("currentLocale")
         ); assertDidNotNotifyChange()
         
         assertTransformParsed(
             expression: "[NSNotALocale currentLocale]",
-            into: Expression.identifier("NSNotALocale").dot("currentLocale").call()
+            into: .identifier("NSNotALocale").dot("currentLocale").call()
         ); assertDidNotNotifyChange()
     }
     
     func testNSNotificationCenterTransform() {
         let res = assertTransformParsed(
             expression: "NSNotificationCenter",
-            into: Expression.identifier("NotificationCenter")
+            into: .identifier("NotificationCenter")
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .metatype(for: .typeName("NotificationCenter")))
         
         assertTransformParsed(
             expression: "[NSNotificationCenter defaultCenter]",
-            into: Expression.identifier("NotificationCenter").dot("default")
+            into: .identifier("NotificationCenter").dot("default")
         ); assertNotifiedChange()
     }
     
@@ -329,29 +329,29 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         // Uppercase -> <Type>.self
          assertTransformParsed(
             expression: "[NSObject class]",
-            into: Expression.identifier("NSObject").dot("self")
+            into: .identifier("NSObject").dot("self")
         ); assertNotifiedChange()
         
         // lowercase -> type(of: <object>)
         assertTransformParsed(
             expression: "[object class]",
-            into: Expression
+            into:
                 .identifier("type")
                 .call([.labeled("of", .identifier("object"))])
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "[[an expression] class]",
-            into: Expression
+            into:
                 .identifier("type")
-                .call([.labeled("of", Expression.identifier("an").dot("expression").call())])
+                .call([.labeled("of", .identifier("an").dot("expression").call())])
         ); assertNotifiedChange()
         
         // Test we don't accidentally convert things that do not match [<exp> class]
         // by mistake.
         assertTransformParsed(
             expression: "[NSObject class:aThing]",
-            into: Expression
+            into:
                 .identifier("NSObject")
                 .dot("class")
                 .call([.unlabeled(.identifier("aThing"))])
@@ -359,7 +359,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         
         assertTransformParsed(
             expression: "[object class:aThing]",
-            into: Expression
+            into:
                 .identifier("object")
                 .dot("class")
                 .call([.unlabeled(.identifier("aThing"))])
@@ -369,7 +369,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSDateFormatter() {
         let res = assertTransformParsed(
             expression: "NSDateFormatter",
-            into: Expression.identifier("DateFormatter")
+            into: .identifier("DateFormatter")
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .metatype(for: .typeName("DateFormatter")))
@@ -378,7 +378,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSNumberFormatter() {
         let res = assertTransformParsed(
             expression: "NSNumberFormatter",
-            into: Expression.identifier("NumberFormatter")
+            into: .identifier("NumberFormatter")
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .metatype(for: .typeName("NumberFormatter")))
@@ -405,7 +405,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: valueExp.copy().dot("class").call(),
-            into: Expression.identifier("type").call([.labeled("of", valueExp.copy())])
+            into: .identifier("type").call([.labeled("of", valueExp.copy())])
         ); assertNotifiedChange()
     }
     
@@ -413,15 +413,15 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         // Tests conversion of 'respondsToSelector' methods
         
         let res = assertTransform(
-            expression: Expression
+            expression:
                 .identifier("a")
                 .dot("respondsToSelector")
-                .call([Expression.identifier("Selector").call([.constant("selector:")])]),
-            into: Expression
+                .call([.identifier("Selector").call([.constant("selector:")])]),
+            into:
                 .identifier("a")
                 .dot("responds")
                 .call([
-                    .labeled("to", Expression
+                    .labeled("to",
                         .identifier("Selector").call([
                             .constant("selector:")
                             ]))
@@ -435,20 +435,20 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         // Tests conversion of 'respondsToSelector' methods over nullable types
         
         let res = assertTransform(
-            expression: Expression
+            expression:
                 .identifier("a")
                 .optional()
                 .dot("respondsToSelector")
-                .call([Expression.identifier("Selector").call([.constant("selector:")])]),
-            into: Expression
+                .call([.identifier("Selector").call([.constant("selector:")])]),
+            into:
                 .identifier("a")
                 .optional()
                 .dot("responds")
                 .call([
-                    .labeled("to", Expression
+                    .labeled("to",
                         .identifier("Selector").call([
                             .constant("selector:")
-                            ]))
+                        ]))
                     ])
         ); assertNotifiedChange()
         
@@ -458,181 +458,181 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSCompareResultConversions() {
         assertTransform(
             expression: .identifier("NSOrderedAscending"),
-            into: Expression.identifier("ComparisonResult").dot("orderedAscending")
+            into: .identifier("ComparisonResult").dot("orderedAscending")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSOrderedDescending"),
-            into: Expression.identifier("ComparisonResult").dot("orderedDescending")
+            into: .identifier("ComparisonResult").dot("orderedDescending")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSOrderedSame"),
-            into: Expression.identifier("ComparisonResult").dot("orderedSame")
+            into: .identifier("ComparisonResult").dot("orderedSame")
         ); assertNotifiedChange()
     }
     
     func testNSCalendarUnitConversions() {
         assertTransform(
             expression: .identifier("NSCalendarUnitEra"),
-            into: Expression.identifier("Calendar").dot("Component").dot("era")
+            into: .identifier("Calendar").dot("Component").dot("era")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitYear"),
-            into: Expression.identifier("Calendar").dot("Component").dot("year")
+            into: .identifier("Calendar").dot("Component").dot("year")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitMonth"),
-            into: Expression.identifier("Calendar").dot("Component").dot("month")
+            into: .identifier("Calendar").dot("Component").dot("month")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitDay"),
-            into: Expression.identifier("Calendar").dot("Component").dot("day")
+            into: .identifier("Calendar").dot("Component").dot("day")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitHour"),
-            into: Expression.identifier("Calendar").dot("Component").dot("hour")
+            into: .identifier("Calendar").dot("Component").dot("hour")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitMinute"),
-            into: Expression.identifier("Calendar").dot("Component").dot("minute")
+            into: .identifier("Calendar").dot("Component").dot("minute")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitSecond"),
-            into: Expression.identifier("Calendar").dot("Component").dot("second")
+            into: .identifier("Calendar").dot("Component").dot("second")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitWeekday"),
-            into: Expression.identifier("Calendar").dot("Component").dot("weekday")
+            into: .identifier("Calendar").dot("Component").dot("weekday")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitWeekdayOrdinal"),
-            into: Expression.identifier("Calendar").dot("Component").dot("weekdayOrdinal")
+            into: .identifier("Calendar").dot("Component").dot("weekdayOrdinal")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitQuarter"),
-            into: Expression.identifier("Calendar").dot("Component").dot("quarter")
+            into: .identifier("Calendar").dot("Component").dot("quarter")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitWeekOfMonth"),
-            into: Expression.identifier("Calendar").dot("Component").dot("weekOfMonth")
+            into: .identifier("Calendar").dot("Component").dot("weekOfMonth")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitWeekOfYear"),
-            into: Expression.identifier("Calendar").dot("Component").dot("weekOfYear")
+            into: .identifier("Calendar").dot("Component").dot("weekOfYear")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitYearForWeekOfYear"),
-            into: Expression.identifier("Calendar").dot("Component").dot("yearForWeekOfYear")
+            into: .identifier("Calendar").dot("Component").dot("yearForWeekOfYear")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitNanosecond"),
-            into: Expression.identifier("Calendar").dot("Component").dot("nanosecond")
+            into: .identifier("Calendar").dot("Component").dot("nanosecond")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitCalendar"),
-            into: Expression.identifier("Calendar").dot("Component").dot("calendar")
+            into: .identifier("Calendar").dot("Component").dot("calendar")
         ); assertNotifiedChange()
         
         assertTransform(
             expression: .identifier("NSCalendarUnitTimeZone"),
-            into: Expression.identifier("Calendar").dot("Component").dot("timeZone")
+            into: .identifier("Calendar").dot("Component").dot("timeZone")
         ); assertNotifiedChange()
     }
     
     func testNSCalendarIdentifierConversions() {
          assertTransform(
             expression: .identifier("NSCalendarIdentifierGregorian"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("gregorian")
+            into: .identifier("Calendar").dot("Identifier").dot("gregorian")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierBuddhist"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("buddhist")
+            into: .identifier("Calendar").dot("Identifier").dot("buddhist")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierChinese"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("chinese")
+            into: .identifier("Calendar").dot("Identifier").dot("chinese")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierCoptic"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("coptic")
+            into: .identifier("Calendar").dot("Identifier").dot("coptic")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierEthiopicAmeteMihret"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("ethiopicAmeteMihret")
+            into: .identifier("Calendar").dot("Identifier").dot("ethiopicAmeteMihret")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierEthiopicAmeteAlem"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("ethiopicAmeteAlem")
+            into: .identifier("Calendar").dot("Identifier").dot("ethiopicAmeteAlem")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierHebrew"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("hebrew")
+            into: .identifier("Calendar").dot("Identifier").dot("hebrew")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierISO8601"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("ISO8601")
+            into: .identifier("Calendar").dot("Identifier").dot("ISO8601")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierIndian"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("indian")
+            into: .identifier("Calendar").dot("Identifier").dot("indian")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierIslamic"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("islamic")
+            into: .identifier("Calendar").dot("Identifier").dot("islamic")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierIslamicCivil"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("islamicCivil")
+            into: .identifier("Calendar").dot("Identifier").dot("islamicCivil")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierJapanese"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("japanese")
+            into: .identifier("Calendar").dot("Identifier").dot("japanese")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierPersian"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("persian")
+            into: .identifier("Calendar").dot("Identifier").dot("persian")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierRepublicOfChina"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("republicOfChina")
+            into: .identifier("Calendar").dot("Identifier").dot("republicOfChina")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierIslamicTabular"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("islamicTabular")
+            into: .identifier("Calendar").dot("Identifier").dot("islamicTabular")
          ); assertNotifiedChange()
         
          assertTransform(
             expression: .identifier("NSCalendarIdentifierIslamicUmmAlQura"),
-            into: Expression.identifier("Calendar").dot("Identifier").dot("islamicUmmAlQura")
+            into: .identifier("Calendar").dot("Identifier").dot("islamicUmmAlQura")
          ); assertNotifiedChange()
     }
 }

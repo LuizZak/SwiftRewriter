@@ -9,88 +9,87 @@ class SwiftASTSerializerTests: XCTestCase {
     
     func testEncodeDecodeRoundtrip() throws {
         let stmt: CompoundStatement = [
-            Statement.expression(
-                Expression
-                    .identifier("self")
-                    .dot("member")
-                    .assignment(op: .assign, rhs: .constant(0))
+            .expression(
+                .identifier("self")
+                .dot("member")
+                .assignment(op: .assign, rhs: .constant(0))
             ).labeled("exp"),
-            Statement.expression(
-                Expression.unknown(UnknownASTContext(context: "Context"))
+            .expression(
+                .unknown(UnknownASTContext(context: "Context"))
             ),
-            Statement.expression(
-                Expression.ternary(
-                    Expression.constant(true),
-                    true: Expression.unary(op: .add, .constant("This")),
+            .expression(
+                .ternary(
+                    .constant(true),
+                    true: .unary(op: .add, .constant("This")),
                     false: .constant("That")
                 )
             ),
-            Statement.unknown(UnknownASTContext(context: "Context")),
-            Statement.do([
-                Statement.expression(
-                    Expression.dictionaryLiteral([
-                        Expression.prefix(op: .subtract, .constant(.nil)):
-                            Expression.sizeof(Expression.identifier("Int"))
-                        ])
+            .unknown(UnknownASTContext(context: "Context")),
+            .do([
+                .expression(
+                    .dictionaryLiteral([
+                            .prefix(op: .subtract, .constant(.nil)): .sizeof(.identifier("Int"))
+                        ]
+                    )
                 )
             ]),
-            Statement.if(
-                Expression.constant(true),
+            .if(
+                .constant(true),
                 body: [
-                    Statement.return(Expression.constant(1.0))
+                    .return(.constant(1.0))
                 ],
                 else: [
-                    Statement.return(Expression.constant(1))
+                    .return(.constant(1))
                 ]
             ),
-            Statement.switch(
-                Expression.parens(.constant("abc")).dot("def").sub(.constant(1)).call([Expression.constant(1)]),
+            .switch(
+                .parens(.constant("abc")).dot("def").sub(.constant(1)).call([.constant(1)]),
                 cases: [
                     SwitchCase(
                         patterns: [.expression(.constant("abc"))],
                         statements: [
-                            Statement.return(Expression.constant(.rawConstant("raw_constant")))
+                            .return(.constant(.rawConstant("raw_constant")))
                         ]
                     )
                 ],
                 default: nil
             ),
-            Statement.while(
-                Expression.arrayLiteral([.constant(0)]).sub(.constant(0)),
+            .while(
+                .arrayLiteral([.constant(0)]).sub(.constant(0)),
                 body: [
-                    Statement.for(
-                        SwiftAST.Pattern.identifier("i"),
-                        Expression.constant(0).binary(op: .openRange, rhs: .constant(100)),
+                    .for(
+                        .identifier("i"),
+                        .constant(0).binary(op: .openRange, rhs: .constant(100)),
                         body: [
-                            Statement.continue(targetLabel: "label")
+                            .continue(targetLabel: "label")
                         ]),
-                    Statement.continue()
+                    .continue()
                 ]),
-            Statement.defer([
-                Statement.fallthrough,
-                Statement.variableDeclaration(identifier: "abc", type: .int, initialization: nil)
+            .defer([
+                .fallthrough,
+                .variableDeclaration(identifier: "abc", type: .int, initialization: nil)
             ]),
-            Statement.doWhile(
-                Expression.cast(.constant(0), type: .int),
+            .doWhile(
+                .cast(.constant(0), type: .int),
                 body: [
-                    Statement.expressions([
-                        Expression.block(body: [
-                                Statement.break(targetLabel: "label")
-                            ])
-                        ]),
-                    Statement.break()
+                    .expressions([
+                        .block(body: [
+                            .break(targetLabel: "label")
+                        ])
+                    ]),
+                    .break()
                 ]
             ),
-            Statement.expression(
-                Expression.tuple([.constant(0), .constant(1)])
+            .expression(
+                .tuple([.constant(0), .constant(1)])
             ),
-            Statement.expressions([
-                Expression.selector(FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])),
-                Expression.selector("T", FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])),
-                Expression.selector(getter: "p"),
-                Expression.selector("T", getter: "p"),
-                Expression.selector(setter: "p"),
-                Expression.selector("T", setter: "p"),
+            .expressions([
+                .selector(FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])),
+                .selector("T", FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])),
+                .selector(getter: "p"),
+                .selector("T", getter: "p"),
+                .selector(setter: "p"),
+                .selector("T", setter: "p"),
             ])
         ]
         
@@ -151,7 +150,7 @@ class SwiftASTSerializerTests: XCTestCase {
     }
     
     public func testEncodeExpressionTypeOnEncodeStatements() throws {
-        let stmt = Statement.expression(Expression.identifier("a").typed(.int))
+        let stmt = Statement.expression(.identifier("a").typed(.int))
         
         let encoded =
             try SwiftASTSerializer

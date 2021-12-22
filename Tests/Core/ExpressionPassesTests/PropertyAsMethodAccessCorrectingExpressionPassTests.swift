@@ -21,8 +21,8 @@ class PropertyAsMethodAccessCorrectingExpressionPassTests: ExpressionPassTestCas
         typeSystem.addType(type)
         
         assertTransform(
-            expression: Expression.identifier("a").typed("A").dot("property").call(),
-            into: Expression.identifier("a").typed("A").dot("property")
+            expression: .identifier("a").typed("A").dot("property").call(),
+            into: .identifier("a").typed("A").dot("property")
         ); assertNotifiedChange()
     }
     
@@ -33,8 +33,8 @@ class PropertyAsMethodAccessCorrectingExpressionPassTests: ExpressionPassTestCas
         typeSystem.addType(type)
         
         assertTransform(
-            expression: Expression.identifier("A").typed(.metatype(for: "A")).dot("property").call(),
-            into: Expression.identifier("A").typed(.metatype(for: "A")).dot("property")
+            expression: .identifier("A").typed(.metatype(for: "A")).dot("property").call(),
+            into: .identifier("A").typed(.metatype(for: "A")).dot("property")
         ); assertNotifiedChange()
     }
     
@@ -46,12 +46,12 @@ class PropertyAsMethodAccessCorrectingExpressionPassTests: ExpressionPassTestCas
         typeSystem.addType(type)
         
         assertTransform(
-            expression: Expression
+            expression:
                 .identifier("a").typed("A")
                 .dot("property").call()
                 .dot("property").call()
                 .dot("otherProperty"),
-            into: Expression
+            into:
                 .identifier("a").typed("A")
                 .dot("property")
                 .dot("property")
@@ -70,19 +70,19 @@ class PropertyAsMethodAccessCorrectingExpressionPassTests: ExpressionPassTestCas
         typeSystem.addType(type)
         
         assertTransform(
-            expression: Expression
+            expression:
                 .identifier("a").typed("A")
                 .dot("aClosure").call(),
-            into: Expression
+            into:
                 .identifier("a").typed("A")
                 .dot("aClosure").call()
         ); assertDidNotNotifyChange()
         
         assertTransform(
-            expression: Expression
+            expression:
                 .identifier("a").typed("A")
                 .dot("anOptionalClosure").optional().call(),
-            into: Expression
+            into:
                 .identifier("a").typed("A")
                 .dot("anOptionalClosure").optional().call()
         ); assertDidNotNotifyChange()
@@ -103,19 +103,19 @@ class PropertyAsMethodAccessCorrectingExpressionPassTests: ExpressionPassTestCas
                                 originalType: .optional(.swiftBlock(returnType: .void, parameters: [])))
         
         assertTransform(
-            expression: Expression
+            expression:
                 .identifier("a").typed("A")
                 .dot("aClosure").call(),
-            into: Expression
+            into:
                 .identifier("a").typed("A")
                 .dot("aClosure").call()
         ); assertDidNotNotifyChange()
         
         assertTransform(
-            expression: Expression
+            expression:
                 .identifier("a").typed("A")
                 .dot("anOptionalClosure").optional().call(),
-            into: Expression
+            into:
                 .identifier("a").typed("A")
                 .dot("anOptionalClosure").optional().call()
         ); assertDidNotNotifyChange()

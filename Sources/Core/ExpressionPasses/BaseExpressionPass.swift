@@ -187,10 +187,12 @@ private extension BaseExpressionPass {
         
         var transformers: [PostfixInvocationTransformer] = []
         
-        transformers.append(FunctionInvocationTransformer(
-            objcFunctionName: getterName,
-            toSwiftPropertyGetter: property
-        ))
+        transformers.append(
+            FunctionInvocationTransformer(
+                objcFunctionName: getterName,
+                toSwiftPropertyGetter: property
+            )
+        )
         
         if let setterName = setterName {
             transformers.append(
@@ -250,15 +252,16 @@ public extension BaseExpressionPass {
                   convertInto: @autoclosure @escaping () -> Expression,
                   andTypeAs type: SwiftType? = nil) {
         
-        let transformer
-            = StaticConstructorTransformer(
+        let transformer =
+            StaticConstructorTransformer(
                 typeName: typeName,
                 kind: .property(property),
                 leading: {
                     let exp = convertInto()
                     exp.resolvedType = type
                     return exp
-                })
+                }
+            )
         
         staticConstructorTransformers.append(transformer)
     }
@@ -269,15 +272,16 @@ public extension BaseExpressionPass {
                   andCallWithArguments args: [ArgumentRewritingStrategy],
                   andTypeAs type: SwiftType? = nil) {
         
-        let transformer
-            = StaticConstructorTransformer(
+        let transformer =
+            StaticConstructorTransformer(
                 typeName: typeName,
                 kind: .method(method, args),
                 leading: {
                     let exp = convertInto()
                     exp.resolvedType = type
                     return exp
-                })
+                }
+            )
         
         staticConstructorTransformers.append(transformer)
     }
@@ -288,27 +292,34 @@ public extension BaseExpressionPass {
                            firstArgIsInstance: Bool = false) {
         
         let transformer =
-            FunctionInvocationTransformer(objcFunctionName: name,
-                                          toSwiftFunction: swiftName,
-                                          firstArgumentBecomesInstance: firstArgIsInstance,
-                                          arguments: arguments)
+            FunctionInvocationTransformer(
+                objcFunctionName: name,
+                toSwiftFunction: swiftName,
+                firstArgumentBecomesInstance: firstArgIsInstance,
+                arguments: arguments
+            )
         
         transformers.append(transformer)
     }
     
     func makeFuncTransform(_ name: String, getterName: String) {
         let transformer =
-            FunctionInvocationTransformer(objcFunctionName: name,
-                                          toSwiftPropertyGetter: getterName)
+            FunctionInvocationTransformer(
+                objcFunctionName: name,
+                toSwiftPropertyGetter: getterName
+            )
         
         transformers.append(transformer)
     }
     
     func makeFuncTransform(_ name: String, setterName: String,
                            argumentTransformer: ArgumentRewritingStrategy) {
+        
         let transformer =
-            FunctionInvocationTransformer(objcFunctionName: name,
-                                          toSwiftPropertyGetter: setterName)
+            FunctionInvocationTransformer(
+                objcFunctionName: name,
+                toSwiftPropertyGetter: setterName
+            )
         
         transformers.append(transformer)
     }
@@ -316,6 +327,7 @@ public extension BaseExpressionPass {
     func makeFuncTransform(getter: String, setter: String,
                            intoPropertyNamed swiftName: String,
                            setterTransformer: ArgumentRewritingStrategy = .asIs) {
+        
         makeFuncTransform(getter, getterName: swiftName)
         makeFuncTransform(setter, setterName: swiftName, argumentTransformer: setterTransformer)
     }

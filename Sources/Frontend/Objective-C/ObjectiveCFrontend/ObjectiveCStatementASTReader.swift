@@ -50,9 +50,10 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
         
         return
             .expression(
-                .postfix(.identifier(ident.getText()),
-                         .functionCall(arguments: [.unlabeled(.identifier(param.getText()))]
-                    ))
+                .postfix(
+                    .identifier(ident.getText()),
+                    .functionCall(arguments: [.unlabeled(.identifier(param.getText()))])
+                )
             )
     }
     
@@ -85,14 +86,15 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
         context.pushDefinitionContext()
         defer { context.popDefinitionContext() }
         
-        let stmt = acceptFirst(from: ctx.selectionStatement(),
-                               ctx.iterationStatement(),
-                               ctx.expressions(),
-                               ctx.jumpStatement(),
-                               ctx.synchronizedStatement(),
-                               ctx.autoreleaseStatement(),
-                               ctx.labeledStatement())
-            ?? .unknown(UnknownASTContext(context: ctx.getText()))
+        let stmt = acceptFirst(from:
+            ctx.selectionStatement(),
+            ctx.iterationStatement(),
+            ctx.expressions(),
+            ctx.jumpStatement(),
+            ctx.synchronizedStatement(),
+            ctx.autoreleaseStatement(),
+            ctx.labeledStatement()
+        ) ?? .unknown(UnknownASTContext(context: ctx.getText()))
         
         stmt.comments = comments
         stmt.trailingComment = context.popClosestCommentAtTrailingLine(node: ctx)?.string.trimmingWhitespaces()
@@ -138,24 +140,26 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
         
         let lockIdent = "_lockTarget"
         doBody.statements.append(
-            .variableDeclaration(identifier: lockIdent, type: .any,
-                                 ownership: .strong, isConstant: true,
-                                 initialization: expression)
+            .variableDeclaration(
+                identifier: lockIdent,
+                type: .any,
+                ownership: .strong,
+                isConstant: true,
+                initialization: expression
+            )
         )
         
         doBody.statements.append(
-            Statement.expression(
-                Expression
-                    .identifier("objc_sync_enter")
-                    .call([.unlabeled(.identifier(lockIdent))])
+            .expression(
+                .identifier("objc_sync_enter")
+                .call([.unlabeled(.identifier(lockIdent))])
             )
         )
         doBody.statements.append(
             .defer([
-                Statement.expression(
-                    Expression
-                        .identifier("objc_sync_exit")
-                        .call([.unlabeled(.identifier(lockIdent))])
+                .expression(
+                    .identifier("objc_sync_exit")
+                    .call([.unlabeled(.identifier(lockIdent))])
                 )
             ])
         )
@@ -287,11 +291,12 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
     
     // MARK: - while / do-while / for / for-in
     public override func visitIterationStatement(_ ctx: Parser.IterationStatementContext) -> Statement? {
-        acceptFirst(from: ctx.whileStatement(),
-                    ctx.doStatement(),
-                    ctx.forStatement(),
-                    ctx.forInStatement())
-            ?? .unknown(UnknownASTContext(context: ctx.getText()))
+        acceptFirst(from:
+            ctx.whileStatement(),
+            ctx.doStatement(),
+            ctx.forStatement(),
+            ctx.forInStatement()
+        ) ?? .unknown(UnknownASTContext(context: ctx.getText()))
     }
     
     public override func visitWhileStatement(_ ctx: Parser.WhileStatementContext) -> Statement? {
@@ -338,9 +343,11 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
     
     // MARK: - Helper methods
     func compoundStatementVisitor() -> CompoundStatementVisitor {
-        CompoundStatementVisitor(expressionReader: expressionReader,
-                                 context: context,
-                                 delegate: delegate)
+        CompoundStatementVisitor(
+            expressionReader: expressionReader,
+            context: context,
+            delegate: delegate
+        )
     }
     
     private func acceptFirst(from rules: ParserRuleContext?...) -> Statement? {
@@ -374,9 +381,11 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
             }
             
             let reader =
-                ObjectiveCStatementASTReader(expressionReader: expressionReader,
-                                        context: context,
-                                        delegate: delegate)
+                ObjectiveCStatementASTReader(
+                    expressionReader: expressionReader,
+                    context: context,
+                    delegate: delegate
+                )
             
             reader.expressionReader = expressionReader
             
@@ -392,9 +401,11 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
             defer { context.popDefinitionContext() }
             
             let reader =
-                ObjectiveCStatementASTReader(expressionReader: expressionReader,
-                                        context: context,
-                                        delegate: delegate)
+                ObjectiveCStatementASTReader(
+                    expressionReader: expressionReader,
+                    context: context,
+                    delegate: delegate
+                )
             
             reader.expressionReader = expressionReader
             
@@ -524,11 +535,13 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
                 let isConstant = _isConstant(fromType: type)
                 
                 let declaration =
-                    StatementVariableDeclaration(identifier: identifier,
-                                                 type: swiftType,
-                                                 ownership: ownership,
-                                                 isConstant: isConstant,
-                                                 initialization: expr)
+                    StatementVariableDeclaration(
+                        identifier: identifier,
+                        type: swiftType,
+                        ownership: ownership,
+                        isConstant: isConstant,
+                        initialization: expr
+                    )
                 declarations.append(declaration)
 
                 context.define(localNamed: identifier, storage: declaration.storage)
@@ -557,8 +570,10 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
             for (i, decl) in declarationStatement.decl.enumerated()
                 where decl.type == .typeName("__auto_type") {
                     
-                delegate.swiftStatementASTReader(reportAutoTypeDeclaration: declarationStatement,
-                                                 declarationAtIndex: i)
+                delegate.swiftStatementASTReader(
+                    reportAutoTypeDeclaration: declarationStatement,
+                    declarationAtIndex: i
+                )
             }
         }
     }
@@ -585,11 +600,12 @@ private class ForStatementGenerator {
         // loop that is compatible with the original for-loop's behavior
         
         // for(<initExprs>; <condition>; <iteration>)
-        let varDeclExtractor =
-            ObjectiveCStatementASTReader
-                .VarDeclarationExtractor(expressionReader: reader.expressionReader,
-                                         context: context,
-                                         delegate: reader.delegate)
+        let varDeclExtractor = ObjectiveCStatementASTReader
+            .VarDeclarationExtractor(
+                expressionReader: reader.expressionReader,
+                context: context,
+                delegate: reader.delegate
+            )
         
         let initExpr =
             ctx.forLoopInitializer()?
@@ -602,11 +618,12 @@ private class ForStatementGenerator {
         
         // Try to come up with a clean for-in loop with a range
         if let initExpr = initExpr, let condition = condition, let iteration = iteration {
-            let result =
-                genSimplifiedFor(initExpr: initExpr,
-                                 condition: condition,
-                                 iteration: iteration,
-                                 body: compoundStatement)
+            let result = genSimplifiedFor(initExpr:
+                initExpr,
+                condition: condition,
+                iteration: iteration,
+                body: compoundStatement
+            )
             
             if let result = result {
                 return result
@@ -724,7 +741,7 @@ private class ForStatementGenerator {
                 return nil
             }
             
-            loopEnd = Expression.identifier(local.name).dot(member)
+            loopEnd = .identifier(local.name).dot(member)
             
         case nil:
             return nil
@@ -733,11 +750,13 @@ private class ForStatementGenerator {
         // All good! Simplify now.
         let rangeOp: SwiftOperator = op == .lessThan ? .openRange : .closedRange
         
-        return .for(.identifier(loopVar.identifier),
-                    .binary(lhs: .constant(loopStart),
-                            op: rangeOp,
-                            rhs: loopEnd),
-                    body: compoundStatement)
+        return .for(
+            .identifier(loopVar.identifier),
+            .binary(lhs: .constant(loopStart),
+                    op: rangeOp,
+                    rhs: loopEnd),
+            body: compoundStatement
+        )
     }
     
     func loopCounter(in expression: Expression) -> LoopCounter? {

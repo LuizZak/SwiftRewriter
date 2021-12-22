@@ -82,9 +82,9 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                 block();
             }
             """,
-            into: Statement
+            into:
                 .expression(
-                    Expression.identifier("block").optional().call()
+                    .identifier("block").optional().call()
                 )
         ); assertNotifiedChange()
         
@@ -94,9 +94,9 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             if (block != nil)
                 block();
             """,
-            into: Statement
+            into:
                 .expression(
-                    Expression.identifier("block").optional().call()
+                    .identifier("block").optional().call()
                 )
         ); assertNotifiedChange()
     }
@@ -111,11 +111,13 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                 value.member();
             }
             """,
-            into: Statement
-                .if(Expression.identifier("value").dot("member").binary(op: .unequals, rhs: .constant(.nil)),
+            into:
+                .if(
+                    .identifier("value").dot("member").binary(op: .unequals, rhs: .constant(.nil)),
                     body: [
-                        .expression(Expression.identifier("value").dot("member").call())
-                    ])
+                        .expression(.identifier("value").dot("member").call())
+                    ]
+                )
         ); assertDidNotNotifyChange()
     }
     
@@ -129,13 +131,15 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                 stmt();
             }
             """,
-            into: Statement
-                .if(Expression.identifier("block").binary(op: .unequals, rhs: .constant(.nil)),
+            into:
+                .if(
+                    .identifier("block").binary(op: .unequals, rhs: .constant(.nil)),
                     body: [
-                        .expression(Expression.identifier("block").call())
+                        .expression(.identifier("block").call())
                     ], else: [
-                        .expression(Expression.identifier("stmt").call())
-                    ])
+                        .expression(.identifier("stmt").call())
+                    ]
+                )
         ); assertDidNotNotifyChange()
     }
     
@@ -163,63 +167,63 @@ class ASTSimplifierTests: ExpressionPassTestCase {
     func testSimplifyParenthesisInFunctionArguments() {
         assertTransform(
             // a((0))
-            expression: Expression.identifier("a").call([.parens(.constant(0))]),
+            expression: .identifier("a").call([.parens(.constant(0))]),
             // a(0)
-            into: Expression.identifier("a").call([.constant(0)])
+            into: .identifier("a").call([.constant(0)])
         ); assertNotifiedChange()
     }
     
     func testSimplifyParenthesisInSubscriptionExpression() {
         assertTransform(
             // a[(0)]
-            expression: Expression.identifier("a").sub(.parens(.constant(0))),
+            expression: .identifier("a").sub(.parens(.constant(0))),
             // a[0]
-            into: Expression.identifier("a").sub(.constant(0))
+            into: .identifier("a").sub(.constant(0))
         ); assertNotifiedChange()
     }
     
     func testSimplifyParenthesisInTopLevelExpression() {
         assertTransform(
             // { (a) }
-            statement: Statement.expression(.parens(.constant(0))),
+            statement: .expression(.parens(.constant(0))),
             // { a }
-            into: Statement.expression(.constant(0))
+            into: .expression(.constant(0))
         ); assertNotifiedChange()
     }
     
     func testSimplifyParenthesisInIfExpression() {
         assertTransform(
             // if (a) { }
-            statement: Statement.if(.parens(.constant(0)), body: []),
+            statement: .if(.parens(.constant(0)), body: []),
             // if a { }
-            into: Statement.if(.constant(0), body: [])
+            into: .if(.constant(0), body: [])
         ); assertNotifiedChange()
     }
     
     func testSimplifyParenthesisInWhileExpression() {
         assertTransform(
             // while (a) { }
-            statement: Statement.while(.parens(.constant(0)), body: []),
+            statement: .while(.parens(.constant(0)), body: []),
             // while a { }
-            into: Statement.while(.constant(0), body: [])
+            into: .while(.constant(0), body: [])
         ); assertNotifiedChange()
     }
     
     func testSimplifyParenthesisInForExpression() {
         assertTransform(
             // for a in (0) { }
-            statement: Statement.for(.identifier("a"), .parens(.constant(0)), body: []),
+            statement: .for(.identifier("a"), .parens(.constant(0)), body: []),
             // for a in 0 { }
-            into: Statement.for(.identifier("a"), .constant(0), body: [])
+            into: .for(.identifier("a"), .constant(0), body: [])
         ); assertNotifiedChange()
     }
     
     func testSimplifyParenthesisInSwitchExpression() {
         assertTransform(
             // switch (0) { }
-            statement: Statement.switch(.parens(.constant(0)), cases: [], default: nil),
+            statement: .switch(.parens(.constant(0)), cases: [], default: nil),
             // switch 0 { }
-            into: Statement.switch(.constant(0), cases: [], default: nil)
+            into: .switch(.constant(0), cases: [], default: nil)
         ); assertNotifiedChange()
     }
     
@@ -227,23 +231,27 @@ class ASTSimplifierTests: ExpressionPassTestCase {
         assertTransform(
             // switch 0 { case (0): }
             statement: Statement
-                .switch(.constant(0),
-                        cases: [SwitchCase(patterns: [.expression(.parens(.constant(0)))], statements: [])],
-                        default: nil),
+                .switch(
+                    .constant(0),
+                    cases: [SwitchCase(patterns: [.expression(.parens(.constant(0)))], statements: [])],
+                    default: nil
+                ),
             // switch 0 { case 0: }
-            into: Statement
-                .switch(.constant(0),
-                        cases: [SwitchCase(patterns: [.expression(.constant(0))], statements: [])],
-                        default: nil)
+            into:
+                .switch(
+                    .constant(0),
+                    cases: [SwitchCase(patterns: [.expression(.constant(0))], statements: [])],
+                    default: nil
+                )
         ); assertNotifiedChange()
     }
     
     func testDontSimplifyParenthesisInBinaryExpression() {
         assertTransform(
             // (0) + 1
-            expression: Expression.parens(.constant(0)).binary(op: .add, rhs: .constant(1)),
+            expression: .parens(.constant(0)).binary(op: .add, rhs: .constant(1)),
             // (0) + 1
-            into: Expression.parens(.constant(0)).binary(op: .add, rhs: .constant(1))
+            into: .parens(.constant(0)).binary(op: .add, rhs: .constant(1))
         ); assertDidNotNotifyChange()
     }
     
@@ -264,8 +272,9 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     default: [
                         Statement.expression(.identifier("stmt")),
                         Statement.break()
-                    ]),
-            into: Statement
+                    ]
+                ),
+            into:
                 .switch(
                     .constant(0),
                     cases: [
@@ -275,7 +284,8 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     ],
                     default: [
                         Statement.expression(.identifier("stmt")),
-                    ])
+                    ]
+                )
         ); assertNotifiedChange()
     }
     
@@ -292,8 +302,9 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     ],
                     default: [
                         Statement.break()
-                    ]),
-            into: Statement
+                    ]
+                ),
+            into:
                 .switch(
                     .constant(0),
                     cases: [
@@ -303,7 +314,8 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     ],
                     default: [
                         Statement.break()
-                    ])
+                    ]
+                )
         ); assertDidNotNotifyChange()
     }
 }

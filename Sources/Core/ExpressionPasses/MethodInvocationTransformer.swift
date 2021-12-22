@@ -2,7 +2,6 @@ import SwiftAST
 import Commons
 
 public final class MethodInvocationTransformer: PostfixInvocationTransformer {
-    
     let baseExpressionMatcher: ValueMatcher<Expression>
     let invocationMatcher: MethodInvocationTransformerMatcher
     

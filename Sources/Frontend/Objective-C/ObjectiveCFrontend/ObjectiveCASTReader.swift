@@ -28,21 +28,27 @@ public class ObjectiveCASTReader {
                                 typeContext: KnownType? = nil) -> CompoundStatement {
         
         let context =
-            ObjectiveCASTReaderContext(typeSystem: typeSystem,
-                                  typeContext: typeContext,
-                                  comments: comments)
+            ObjectiveCASTReaderContext(
+                typeSystem: typeSystem,
+                typeContext: typeContext,
+                comments: comments
+            )
         
         let expressionReader =
-            ObjectiveCExprASTReader(typeMapper: typeMapper,
-                               typeParser: typeParser,
-                               context: context,
-                               delegate: delegate)
+            ObjectiveCExprASTReader(
+                typeMapper: typeMapper,
+                typeParser: typeParser,
+                context: context,
+                delegate: delegate
+            )
         
         let parser =
             ObjectiveCStatementASTReader
-                .CompoundStatementVisitor(expressionReader: expressionReader,
-                                          context: context,
-                                          delegate: delegate)
+                .CompoundStatementVisitor(
+                    expressionReader: expressionReader,
+                    context: context,
+                    delegate: delegate
+                )
         
         guard let result = compoundStatement.accept(parser) else {
             return [.unknown(UnknownASTContext(context: compoundStatement))]
@@ -54,15 +60,20 @@ public class ObjectiveCASTReader {
     public func parseExpression(expression: ObjectiveCParser.ExpressionContext,
                                 comments: [CodeComment] = []) -> Expression {
         
-        let context = ObjectiveCASTReaderContext(typeSystem: typeSystem,
-                                            typeContext: nil,
-                                            comments: comments)
+        let context =
+            ObjectiveCASTReaderContext(
+                typeSystem: typeSystem,
+                typeContext: nil,
+                comments: comments
+            )
         
         let parser =
-            ObjectiveCExprASTReader(typeMapper: typeMapper,
-                               typeParser: typeParser,
-                               context: context,
-                               delegate: delegate)
+            ObjectiveCExprASTReader(
+                typeMapper: typeMapper,
+                typeParser: typeParser,
+                context: context,
+                delegate: delegate
+            )
         
         guard let result = expression.accept(parser) else {
             return .unknown(UnknownASTContext(context: expression))

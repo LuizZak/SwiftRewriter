@@ -33,11 +33,11 @@ public final class ASTRewriterPassApplier {
     public init(passes: [ASTRewriterPass.Type],
                 typeSystem: TypeSystem,
                 globals: DefinitionsSource,
-                numThreds: Int = 8) {
+                numThreads: Int = 8) {
         
         self.passes = passes
         self.typeSystem = typeSystem
-        self.numThreads = numThreds
+        self.numThreads = numThreads
         self.globals = globals
     }
     
@@ -59,14 +59,20 @@ public final class ASTRewriterPassApplier {
         for (fileIndex, file) in files.enumerated() {
             for (passIndex, passType) in passes.enumerated() {
                 progress.current = fileIndex * passes.count + passIndex + 1
-                progressDelegate?.astWriterPassApplier(self,
-                                                       applyingPassType: passType,
-                                                       toFile: file)
+
+                progressDelegate?
+                    .astWriterPassApplier(
+                        self,
+                        applyingPassType: passType,
+                        toFile: file
+                    )
                 
-                self.internalApply(on: file,
-                                   intentions: intentions,
-                                   passType: passType,
-                                   operationQueue: queue)
+                self.internalApply(
+                    on: file,
+                    intentions: intentions,
+                    passType: passType,
+                    operationQueue: queue
+                )
             }
         }
         
@@ -125,11 +131,13 @@ public final class ASTRewriterPassApplier {
         }
         
         let expContext =
-            ASTRewriterPassContext(typeSystem: typeSystem,
-                                   typeResolver: item.context.typeResolver,
-                                   notifyChangedTree: notifyChangedTree,
-                                   source: item.intention,
-                                   functionBodyIntention: item.body)
+            ASTRewriterPassContext(
+                typeSystem: typeSystem,
+                typeResolver: item.context.typeResolver,
+                notifyChangedTree: notifyChangedTree,
+                source: item.intention,
+                functionBodyIntention: item.body
+            )
         
         let pass = passType.init(context: expContext)
         let result = pass.apply(on: item.body.body, context: expContext)

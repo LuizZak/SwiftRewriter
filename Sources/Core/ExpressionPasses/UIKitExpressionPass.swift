@@ -16,35 +16,35 @@ public class UIKitExpressionPass: BaseExpressionPass {
         // 'enumifications'
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UIControlEvent",
-                             swiftEnumName: Expression.identifier("UIControl").dot("Event")) {
+                             swiftEnumName: .identifier("UIControl").dot("Event")) {
             notifyChange()
             
             return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UIGestureRecognizerState",
-                             swiftEnumName: Expression.identifier("UIGestureRecognizer").dot("State")) {
+                             swiftEnumName: .identifier("UIGestureRecognizer").dot("State")) {
             notifyChange()
             
             return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UITableViewCellSeparatorStyle",
-                             swiftEnumName: Expression.identifier("UITableViewCell").dot("SeparatorStyle")) {
+                             swiftEnumName: .identifier("UITableViewCell").dot("SeparatorStyle")) {
             notifyChange()
             
             return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UITableViewCellSelectionStyle",
-                             swiftEnumName: Expression.identifier("UITableViewCell").dot("SelectionStyle")) {
+                             swiftEnumName: .identifier("UITableViewCell").dot("SelectionStyle")) {
             notifyChange()
             
             return visitExpression(exp)
         }
         if let exp = enumify(ident: exp.identifier,
                              enumPrefix: "UIViewAnimationOption",
-                             swiftEnumName: Expression.identifier("UIView").dot("AnimationOptions")) {
+                             swiftEnumName: .identifier("UIView").dot("AnimationOptions")) {
             notifyChange()
             
             return visitExpression(exp)
@@ -127,43 +127,43 @@ extension UIKitExpressionPass {
 extension UIKitExpressionPass {
     func makeNSTextAlignmentTransformers() {
         enumMappings["NSTextAlignmentLeft"] = {
-            Expression.identifier("NSTextAlignment").dot("left")
+            .identifier("NSTextAlignment").dot("left")
         }
         enumMappings["NSTextAlignmentRight"] = {
-            Expression.identifier("NSTextAlignment").dot("right")
+            .identifier("NSTextAlignment").dot("right")
         }
         enumMappings["NSTextAlignmentCenter"] = {
-            Expression.identifier("NSTextAlignment").dot("center")
+            .identifier("NSTextAlignment").dot("center")
         }
     }
     
     func makeUIFontEnumTransformers() {
         enumMappings["UIFontWeightUltraLight"] = {
-            Expression.identifier("UIFont").dot("Weight").dot("ultraLight")
+            .identifier("UIFont").dot("Weight").dot("ultraLight")
         }
         enumMappings["UIFontWeightLight"] = {
-            Expression.identifier("UIFont").dot("Weight").dot("light")
+            .identifier("UIFont").dot("Weight").dot("light")
         }
         enumMappings["UIFontWeightThin"] = {
-            Expression.identifier("UIFont").dot("Weight").dot("thin")
+            .identifier("UIFont").dot("Weight").dot("thin")
         }
         enumMappings["UIFontWeightRegular"] = {
-            Expression.identifier("UIFont").dot("Weight").dot("regular")
+            .identifier("UIFont").dot("Weight").dot("regular")
         }
         enumMappings["UIFontWeightMedium"] = {
-            Expression.identifier("UIFont").dot("Weight").dot("medium")
+            .identifier("UIFont").dot("Weight").dot("medium")
         }
         enumMappings["UIFontWeightSemibold"] = {
-            Expression.identifier("UIFont").dot("Weight").dot("semibold")
+            .identifier("UIFont").dot("Weight").dot("semibold")
         }
         enumMappings["UIFontWeightBold"] = {
-            Expression.identifier("UIFont").dot("Weight").dot("bold")
+            .identifier("UIFont").dot("Weight").dot("bold")
         }
         enumMappings["UIFontWeightHeavy"] = {
-            Expression.identifier("UIFont").dot("Weight").dot("heavy")
+            .identifier("UIFont").dot("Weight").dot("heavy")
         }
         enumMappings["UIFontWeightBlack"] = {
-            Expression.identifier("UIFont").dot("Weight").dot("black")
+            .identifier("UIFont").dot("Weight").dot("black")
         }
     }
     
@@ -190,7 +190,7 @@ extension UIKitExpressionPass {
         // UIFont.systemFontOfSize() -> UIFont.systemFont(ofSize:)
         makeInit(
             typeName: "UIFont", method: "systemFontOfSize",
-            convertInto: Expression.identifier("UIFont").dot("systemFont"),
+            convertInto: .identifier("UIFont").dot("systemFont"),
             andCallWithArguments: [.labeled("ofSize")],
             andTypeAs: .typeName("UIFont")
         )
@@ -198,7 +198,7 @@ extension UIKitExpressionPass {
         // UIFont.boldSystemFontOfSize() -> UIFont.boldSystemFont(ofSize:)
         makeInit(
             typeName: "UIFont", method: "boldSystemFontOfSize",
-            convertInto: Expression.identifier("UIFont").dot("boldSystemFont"),
+            convertInto: .identifier("UIFont").dot("boldSystemFont"),
             andCallWithArguments: [.labeled("ofSize")],
             andTypeAs: .typeName("UIFont")
         )
@@ -206,7 +206,7 @@ extension UIKitExpressionPass {
         // UIFont.italicSystemFontOfFont() -> UIFont.italicSystemFont(ofSize:)
         makeInit(
             typeName: "UIFont", method: "italicSystemFontOfFont",
-            convertInto: Expression.identifier("UIFont").dot("italicSystemFont"),
+            convertInto: .identifier("UIFont").dot("italicSystemFont"),
             andCallWithArguments: [.labeled("ofSize")],
             andTypeAs: .typeName("UIFont")
         )
@@ -214,7 +214,7 @@ extension UIKitExpressionPass {
         // UIFont.systemFontOfFont(_:weight:) -> UIFont.systemFont(ofSize:weight:)
         makeInit(
             typeName: "UIFont", method: "systemFontOfFont",
-            convertInto: Expression.identifier("UIFont").dot("systemFont"),
+            convertInto: .identifier("UIFont").dot("systemFont"),
             andCallWithArguments: [.labeled("ofSize"), .labeled("weight")],
             andTypeAs: .typeName("UIFont")
         )
@@ -222,7 +222,7 @@ extension UIKitExpressionPass {
         // UIFont.monospacedDigitSystemFontOfSize(_:weight:) -> UIFont.monospacedDigitSystemFont(ofSize:weight:)
         makeInit(
             typeName: "UIFont", method: "monospacedDigitSystemFontOfSize",
-            convertInto: Expression.identifier("UIFont").dot("monospacedDigitSystemFont"),
+            convertInto: .identifier("UIFont").dot("monospacedDigitSystemFont"),
             andCallWithArguments: [.labeled("ofSize"), .labeled("weight")],
             andTypeAs: .typeName("UIFont")
         )

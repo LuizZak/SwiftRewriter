@@ -125,7 +125,7 @@ class UsageAnalysisTests: XCTestCase {
         let body: CompoundStatement = [
             // B.B_a
             .expression(
-                Expression.identifier("B").dot("B_a")
+                .identifier("B").dot("B_a")
             )
         ]
         
@@ -539,7 +539,7 @@ class UsageAnalysisTests: XCTestCase {
         let typeSystem = TypeSystem()
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
         
-        XCTAssertTrue(sut.isReadOnlyContext(Expression.identifier("a")))
+        XCTAssertTrue(sut.isReadOnlyContext(.identifier("a")))
     }
     
     func testIsReadOnlyContextWriteToVariable() {
@@ -549,7 +549,7 @@ class UsageAnalysisTests: XCTestCase {
                 .constructor()
                 .build()
         )
-        let exp = Expression.identifier("a").assignment(op: .assign, rhs: Expression.identifier("A").call())
+        let exp = Expression.identifier("a").assignment(op: .assign, rhs: .identifier("A").call())
         let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
         typeResolver.intrinsicVariables = ArrayDefinitionsSource(definitions: [.forLocalIdentifier("a", type: "A", isConstant: false, location: .parameter(index: 0))])
         _=typeResolver.resolveTypes(in: .expression(exp))

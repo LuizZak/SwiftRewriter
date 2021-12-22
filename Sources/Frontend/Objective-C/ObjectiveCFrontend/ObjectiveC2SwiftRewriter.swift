@@ -517,7 +517,7 @@ public final class ObjectiveC2SwiftRewriter {
             ASTRewriterPassApplier(passes: syntaxPasses,
                                    typeSystem: typeSystem,
                                    globals: globals,
-                                   numThreds: settings.numThreads)
+                                   numThreads: settings.numThreads)
         
         let progressDelegate = ASTRewriterDelegate()
         if settings.verbose {

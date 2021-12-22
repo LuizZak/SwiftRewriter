@@ -192,21 +192,25 @@ public class FoundationExpressionPass: BaseExpressionPass {
             
             return exp
         } else if !classMember.exp.isErrorTyped && classMember.exp.resolvedType != nil {
-            return Expression.postfix(.identifier("type"),
-                                      .functionCall(arguments: [
-                                        .labeled("of", classMember.exp.copy())
-                                        ]))
+            return .postfix(
+                .identifier("type"),
+                .functionCall(arguments: [
+                    .labeled("of", classMember.exp.copy())
+                ])
+            )
         }
         
         // Deduce using identifier or expression capitalization
         switch classMember.exp {
         case let ident as IdentifierExpression where ident.identifier.startsUppercased:
-            return Expression.postfix(classMember.exp.copy(), .member("self"))
+            return .postfix(classMember.exp.copy(), .member("self"))
         default:
-            return Expression.postfix(.identifier("type"),
-                                      .functionCall(arguments: [
-                                        .labeled("of", classMember.exp.copy())
-                                        ]))
+            return .postfix(
+                .identifier("type"),
+                .functionCall(arguments: [
+                    .labeled("of", classMember.exp.copy())
+                ])
+            )
         }
     }
     
@@ -231,6 +235,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
              ("NSMutableSet", "set"),
              ("NSDate", "date"),
              ("NSMutableString", "string"):
+            
             let res = Expression.identifier(typeName).call()
             res.resolvedType = .typeName(typeName)
             
@@ -262,8 +267,10 @@ public class FoundationExpressionPass: BaseExpressionPass {
         let mapper = DefaultTypeMapper(typeSystem: typeSystem)
         
         let newType =
-            mapper.swiftType(forObjcType: .pointer(.struct(ident)),
-                             context: .alwaysNonnull)
+            mapper.swiftType(
+                forObjcType: .pointer(.struct(ident)),
+                context: .alwaysNonnull
+            )
         
         let typeName = mapper.typeNameString(for: newType)
         
@@ -308,46 +315,46 @@ extension FoundationExpressionPass {
         
         makeInit(typeName: "NSTimeZone",
                  property: "localTimeZone",
-                 convertInto: Expression.identifier("TimeZone").dot("autoupdatingCurrent"),
+                 convertInto: .identifier("TimeZone").dot("autoupdatingCurrent"),
                  andTypeAs: .typeName("TimeZone"))
         
         makeInit(typeName: "NSTimeZone",
                  property: "defaultTimeZone",
-                 convertInto: Expression.identifier("TimeZone").dot("current"),
+                 convertInto: .identifier("TimeZone").dot("current"),
                  andTypeAs: .typeName("TimeZone"))
         
         makeInit(typeName: "NSTimeZone",
                  property: "systemTimeZone",
-                 convertInto: Expression.identifier("TimeZone").dot("current"),
+                 convertInto: .identifier("TimeZone").dot("current"),
                  andTypeAs: .typeName("TimeZone"))
         
         // MARK: NSLocale
         
         makeInit(typeName: "NSLocale",
                  method: "localeWithLocaleIdentifier",
-                 convertInto: Expression.identifier("Locale"),
+                 convertInto: .identifier("Locale"),
                  andCallWithArguments: [.labeled("identifier")],
                  andTypeAs: .typeName("Locale"))
         
         makeInit(typeName: "NSLocale",
                  property: "currentLocale",
-                 convertInto: Expression.identifier("Locale").dot("current"),
+                 convertInto: .identifier("Locale").dot("current"),
                  andTypeAs: .typeName("Locale"))
         
         makeInit(typeName: "NSLocale",
                  property: "systemLocale",
-                 convertInto: Expression.identifier("Locale").dot("current"),
+                 convertInto: .identifier("Locale").dot("current"),
                  andTypeAs: .typeName("Locale"))
         
         makeInit(typeName: "NSLocale",
                  property: "autoupdatingCurrentLocale",
-                 convertInto: Expression.identifier("Locale").dot("autoupdatingCurrent"),
+                 convertInto: .identifier("Locale").dot("autoupdatingCurrent"),
                  andTypeAs: .typeName("Locale"))
         
         // MARK: NSNotificationCenter
         makeInit(typeName: "NSNotificationCenter",
                  property: "defaultCenter",
-                 convertInto: Expression.identifier("NotificationCenter").dot("default"),
+                 convertInto: .identifier("NotificationCenter").dot("default"),
                  andTypeAs: .typeName("NotificationCenter"))
     }
     
@@ -356,118 +363,118 @@ extension FoundationExpressionPass {
         makeCalendarIdentifierTransformers()
         
         enumMappings["NSOrderedAscending"] = {
-            Expression.identifier("ComparisonResult").dot("orderedAscending")
+            .identifier("ComparisonResult").dot("orderedAscending")
         }
         enumMappings["NSOrderedDescending"] = {
-            Expression.identifier("ComparisonResult").dot("orderedDescending")
+            .identifier("ComparisonResult").dot("orderedDescending")
         }
         enumMappings["NSOrderedSame"] = {
-            Expression.identifier("ComparisonResult").dot("orderedSame")
+            .identifier("ComparisonResult").dot("orderedSame")
         }
     }
     
     func makeCalendarIdentifierTransformers() {
         enumMappings["NSCalendarIdentifierGregorian"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("gregorian")
+            .identifier("Calendar").dot("Identifier").dot("gregorian")
         }
         enumMappings["NSCalendarIdentifierBuddhist"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("buddhist")
+            .identifier("Calendar").dot("Identifier").dot("buddhist")
         }
         enumMappings["NSCalendarIdentifierChinese"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("chinese")
+            .identifier("Calendar").dot("Identifier").dot("chinese")
         }
         enumMappings["NSCalendarIdentifierCoptic"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("coptic")
+            .identifier("Calendar").dot("Identifier").dot("coptic")
         }
         enumMappings["NSCalendarIdentifierEthiopicAmeteMihret"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("ethiopicAmeteMihret")
+            .identifier("Calendar").dot("Identifier").dot("ethiopicAmeteMihret")
         }
         enumMappings["NSCalendarIdentifierEthiopicAmeteAlem"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("ethiopicAmeteAlem")
+            .identifier("Calendar").dot("Identifier").dot("ethiopicAmeteAlem")
         }
         enumMappings["NSCalendarIdentifierHebrew"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("hebrew")
+            .identifier("Calendar").dot("Identifier").dot("hebrew")
         }
         enumMappings["NSCalendarIdentifierISO8601"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("ISO8601")
+            .identifier("Calendar").dot("Identifier").dot("ISO8601")
         }
         enumMappings["NSCalendarIdentifierIndian"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("indian")
+            .identifier("Calendar").dot("Identifier").dot("indian")
         }
         enumMappings["NSCalendarIdentifierIslamic"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("islamic")
+            .identifier("Calendar").dot("Identifier").dot("islamic")
         }
         enumMappings["NSCalendarIdentifierIslamicCivil"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("islamicCivil")
+            .identifier("Calendar").dot("Identifier").dot("islamicCivil")
         }
         enumMappings["NSCalendarIdentifierJapanese"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("japanese")
+            .identifier("Calendar").dot("Identifier").dot("japanese")
         }
         enumMappings["NSCalendarIdentifierPersian"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("persian")
+            .identifier("Calendar").dot("Identifier").dot("persian")
         }
         enumMappings["NSCalendarIdentifierRepublicOfChina"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("republicOfChina")
+            .identifier("Calendar").dot("Identifier").dot("republicOfChina")
         }
         enumMappings["NSCalendarIdentifierIslamicTabular"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("islamicTabular")
+            .identifier("Calendar").dot("Identifier").dot("islamicTabular")
         }
         enumMappings["NSCalendarIdentifierIslamicUmmAlQura"] = {
-            Expression.identifier("Calendar").dot("Identifier").dot("islamicUmmAlQura")
+            .identifier("Calendar").dot("Identifier").dot("islamicUmmAlQura")
         }
     }
     
     func makeCalendarUnitTransformers() {
         enumMappings["NSCalendarUnitEra"] = {
-            Expression.identifier("Calendar").dot("Component").dot("era")
+            .identifier("Calendar").dot("Component").dot("era")
         }
         enumMappings["NSCalendarUnitYear"] = {
-            Expression.identifier("Calendar").dot("Component").dot("year")
+            .identifier("Calendar").dot("Component").dot("year")
         }
         enumMappings["NSCalendarUnitMonth"] = {
-            Expression.identifier("Calendar").dot("Component").dot("month")
+            .identifier("Calendar").dot("Component").dot("month")
         }
         enumMappings["NSCalendarUnitDay"] = {
-            Expression.identifier("Calendar").dot("Component").dot("day")
+            .identifier("Calendar").dot("Component").dot("day")
         }
         enumMappings["NSCalendarUnitHour"] = {
-            Expression.identifier("Calendar").dot("Component").dot("hour")
+            .identifier("Calendar").dot("Component").dot("hour")
         }
         enumMappings["NSCalendarUnitMinute"] = {
-            Expression.identifier("Calendar").dot("Component").dot("minute")
+            .identifier("Calendar").dot("Component").dot("minute")
         }
         enumMappings["NSCalendarUnitSecond"] = {
-            Expression.identifier("Calendar").dot("Component").dot("second")
+            .identifier("Calendar").dot("Component").dot("second")
         }
         enumMappings["NSCalendarUnitWeekday"] = {
-            Expression.identifier("Calendar").dot("Component").dot("weekday")
+            .identifier("Calendar").dot("Component").dot("weekday")
         }
         enumMappings["NSCalendarUnitWeekdayOrdinal"] = {
-            Expression.identifier("Calendar").dot("Component").dot("weekdayOrdinal")
+            .identifier("Calendar").dot("Component").dot("weekdayOrdinal")
         }
         enumMappings["NSCalendarUnitQuarter"] = {
-            Expression.identifier("Calendar").dot("Component").dot("quarter")
+            .identifier("Calendar").dot("Component").dot("quarter")
         }
         enumMappings["NSCalendarUnitWeekOfMonth"] = {
-            Expression.identifier("Calendar").dot("Component").dot("weekOfMonth")
+            .identifier("Calendar").dot("Component").dot("weekOfMonth")
         }
         enumMappings["NSCalendarUnitWeekOfYear"] = {
-            Expression.identifier("Calendar").dot("Component").dot("weekOfYear")
+            .identifier("Calendar").dot("Component").dot("weekOfYear")
         }
         enumMappings["NSCalendarUnitYearForWeekOfYear"] = {
-            Expression.identifier("Calendar").dot("Component").dot("weekOfYear")
+            .identifier("Calendar").dot("Component").dot("weekOfYear")
         }
         enumMappings["NSCalendarUnitYearForWeekOfYear"] = {
-            Expression.identifier("Calendar").dot("Component").dot("yearForWeekOfYear")
+            .identifier("Calendar").dot("Component").dot("yearForWeekOfYear")
         }
         enumMappings["NSCalendarUnitNanosecond"] = {
-            Expression.identifier("Calendar").dot("Component").dot("nanosecond")
+            .identifier("Calendar").dot("Component").dot("nanosecond")
         }
         enumMappings["NSCalendarUnitCalendar"] = {
-            Expression.identifier("Calendar").dot("Component").dot("calendar")
+            .identifier("Calendar").dot("Component").dot("calendar")
         }
         enumMappings["NSCalendarUnitTimeZone"] = {
-            Expression.identifier("Calendar").dot("Component").dot("timeZone")
+            .identifier("Calendar").dot("Component").dot("timeZone")
         }
     }
 }

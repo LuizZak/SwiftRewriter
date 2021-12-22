@@ -111,7 +111,7 @@ class SwiftAttributeTransformationsExtractor {
                             .identifierWith(methodName: ident.identifier) == identifier
                 }
                 .decompose()
-                .replacing(index: 0, with: Expression.identifier(type.typeName))
+                .replacing(index: 0, with: .identifier(type.typeName))
                 .asFunctionCall(labels: ctor.parameters.argumentLabels())
                 .typed(.typeName(type.typeName))
             

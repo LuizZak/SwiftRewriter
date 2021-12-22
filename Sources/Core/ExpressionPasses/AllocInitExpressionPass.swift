@@ -86,7 +86,7 @@ public class AllocInitExpressionPass: ASTRewriterPass {
             return alloc.exp.copy().dot("init").call(newArgs)
         }
         
-        return Expression.identifier(typeName).call(newArgs)
+        return .identifier(typeName).call(newArgs)
     }
     
     /// Convert [<exp> initWithThing:[...]] -> <exp>.init(thing: [...])

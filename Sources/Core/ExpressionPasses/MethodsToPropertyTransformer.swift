@@ -3,7 +3,6 @@ import Commons
 
 /// Allows transforming method invocations to property accessors.
 public final class MethodsToPropertyTransformer: PostfixInvocationTransformer {
-    
     let baseExpressionMatcher: ValueMatcher<Expression>
     let getterName: String
     let setterName: String?
@@ -76,12 +75,13 @@ public final class MethodsToPropertyTransformer: PostfixInvocationTransformer {
         if functionCall.arguments.isEmpty {
             return memberNameAccess.exp.copy().dot(propertyName).typed(resultType)
         } else if functionCall.arguments.count == 1 && setterName != nil {
-            return
-                memberNameAccess
-                    .exp.copy()
-                    .dot(propertyName)
-                    .assignment(op: .assign,
-                                rhs: functionCall.arguments[0].expression.copy())
+            return memberNameAccess
+                .exp.copy()
+                .dot(propertyName)
+                .assignment(
+                    op: .assign,
+                    rhs: functionCall.arguments[0].expression.copy()
+                )
         }
         
         return nil

@@ -12,7 +12,7 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
                 .createFileWithClass(named: "A.m") { type in
                     type.createMethod(named: "a", returnType: .nullabilityUnspecified(.typeName("A"))) { method in
                         method.setBody([
-                            Statement.return(Expression.identifier("self").typed(.typeName("A")))
+                            .return(.identifier("self").typed(.typeName("A")))
                         ])
                     }
                 }.build()
@@ -34,7 +34,7 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
                     type.createProperty(named: "b", type: "B")
                         .createMethod(named: "a", returnType: .nullabilityUnspecified(.typeName("A"))) { method in
                         method.setBody([
-                            Statement.return(Expression.identifier("self").dot("b").typed(.typeName("B")))
+                            .return(.identifier("self").dot("b").typed(.typeName("B")))
                         ])
                     }
                 }.build()
@@ -52,7 +52,7 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
                 .createFileWithClass(named: "A.m") { type in
                     type.createMethod(named: "a", returnType: .optional(.typeName("A"))) { method in
                         method.setBody([
-                            Statement.return(Expression.identifier("self").typed(.typeName("A")))
+                            .return(.identifier("self").typed(.typeName("A")))
                         ])
                     }
                 }.build()
@@ -70,7 +70,7 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
                 .createFileWithClass(named: "A.m") { type in
                     type.createMethod(named: "a", returnType: .nullabilityUnspecified(.typeName("A"))) { method in
                         method.setBody([
-                            Statement.return(Expression.identifier("self").typed(.errorType))
+                            .return(.identifier("self").typed(.errorType))
                         ])
                     }
                 }.build()
@@ -89,7 +89,7 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
                     type.createMethod(named: "a", returnType: .nullabilityUnspecified(.typeName("A"))) { method in
                         method.setIsOverride(true)
                         method.setBody([
-                            Statement.return(Expression.identifier("self").typed(.typeName("A")))
+                            .return(.identifier("self").typed(.typeName("A")))
                         ])
                     }
                 }.build()

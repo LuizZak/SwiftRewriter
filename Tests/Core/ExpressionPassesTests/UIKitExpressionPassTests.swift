@@ -14,30 +14,30 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
     func testNSTextAlignment() {
         assertTransformParsed(
             expression: "NSTextAlignmentLeft",
-            into: Expression.identifier("NSTextAlignment").dot("left")
+            into: .identifier("NSTextAlignment").dot("left")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "NSTextAlignmentRight",
-            into: Expression.identifier("NSTextAlignment").dot("right")
+            into: .identifier("NSTextAlignment").dot("right")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "NSTextAlignmentCenter",
-            into: Expression.identifier("NSTextAlignment").dot("center")
+            into: .identifier("NSTextAlignment").dot("center")
         ); assertNotifiedChange()
     }
     
     func testAddTarget() {
         assertTransformParsed(
             expression: "[self.button addTarget:self action:@selector(didTapButton:) forControlEvents: UIControlEventTouchUpInside]",
-            into: Expression
+            into:
                 .identifier("self").dot("button")
                 .dot("addTarget")
                 .call([
                     .unlabeled(.identifier("self")),
-                    .labeled("action", Expression.selector(FunctionIdentifier(name: "didTapButton", argumentLabels: [nil]))),
-                    .labeled("for", Expression.identifier("UIControl").dot("Event").dot("touchUpInside"))
+                    .labeled("action", .selector(FunctionIdentifier(name: "didTapButton", argumentLabels: [nil]))),
+                    .labeled("for", .identifier("UIControl").dot("Event").dot("touchUpInside"))
                 ])
         ); assertNotifiedChange()
     }
@@ -45,39 +45,39 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
     func testEnumifyUIGestureRecognizerState() {
         assertTransform(
             expression: .identifier("UIGestureRecognizerStateEnded"),
-            into: Expression.identifier("UIGestureRecognizer").dot("State").dot("ended")
+            into: .identifier("UIGestureRecognizer").dot("State").dot("ended")
         ); assertNotifiedChange()
     }
     
     func testUIFontInitializers() {
         assertTransformParsed(
             expression: "[UIFont systemFontOfSize:12]",
-            into: Expression.identifier("UIFont").dot("systemFont").call([.labeled("ofSize", .constant(12))])
+            into: .identifier("UIFont").dot("systemFont").call([.labeled("ofSize", .constant(12))])
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "[UIFont boldSystemFontOfSize:12]",
-            into: Expression.identifier("UIFont").dot("boldSystemFont").call([.labeled("ofSize", .constant(12))])
+            into: .identifier("UIFont").dot("boldSystemFont").call([.labeled("ofSize", .constant(12))])
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "[UIFont italicSystemFontOfFont:12]",
-            into: Expression.identifier("UIFont").dot("italicSystemFont").call([.labeled("ofSize", .constant(12))])
+            into: .identifier("UIFont").dot("italicSystemFont").call([.labeled("ofSize", .constant(12))])
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "[UIFont systemFontOfFont:12 weight:UIFontWeightBold]",
-            into: Expression.identifier("UIFont").dot("systemFont").call([
+            into: .identifier("UIFont").dot("systemFont").call([
                 .labeled("ofSize", .constant(12)),
-                .labeled("weight", Expression.identifier("UIFont").dot("Weight").dot("bold"))
+                .labeled("weight", .identifier("UIFont").dot("Weight").dot("bold"))
                 ])
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "[UIFont monospacedDigitSystemFontOfSize:12 weight:UIFontWeightBold]",
-            into: Expression.identifier("UIFont").dot("monospacedDigitSystemFont").call([
+            into: .identifier("UIFont").dot("monospacedDigitSystemFont").call([
                 .labeled("ofSize", .constant(12)),
-                .labeled("weight", Expression.identifier("UIFont").dot("Weight").dot("bold"))
+                .labeled("weight", .identifier("UIFont").dot("Weight").dot("bold"))
                 ])
         ); assertNotifiedChange()
     }
@@ -85,53 +85,53 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
     func testUIFontWeight() {
         assertTransformParsed(
             expression: "UIFontWeightUltraLight",
-            into: Expression.identifier("UIFont").dot("Weight").dot("ultraLight")
+            into: .identifier("UIFont").dot("Weight").dot("ultraLight")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UIFontWeightLight",
-            into: Expression.identifier("UIFont").dot("Weight").dot("light")
+            into: .identifier("UIFont").dot("Weight").dot("light")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UIFontWeightThin",
-            into: Expression.identifier("UIFont").dot("Weight").dot("thin")
+            into: .identifier("UIFont").dot("Weight").dot("thin")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UIFontWeightRegular",
-            into: Expression.identifier("UIFont").dot("Weight").dot("regular")
+            into: .identifier("UIFont").dot("Weight").dot("regular")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UIFontWeightMedium",
-            into: Expression.identifier("UIFont").dot("Weight").dot("medium")
+            into: .identifier("UIFont").dot("Weight").dot("medium")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UIFontWeightSemibold",
-            into: Expression.identifier("UIFont").dot("Weight").dot("semibold")
+            into: .identifier("UIFont").dot("Weight").dot("semibold")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UIFontWeightBold",
-            into: Expression.identifier("UIFont").dot("Weight").dot("bold")
+            into: .identifier("UIFont").dot("Weight").dot("bold")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UIFontWeightHeavy",
-            into: Expression.identifier("UIFont").dot("Weight").dot("heavy")
+            into: .identifier("UIFont").dot("Weight").dot("heavy")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UIFontWeightBlack",
-            into: Expression.identifier("UIFont").dot("Weight").dot("black")
+            into: .identifier("UIFont").dot("Weight").dot("black")
         ); assertNotifiedChange()
     }
     
     func testUIColorStaticInitializers() {
         assertTransform(
-            expression: Expression
+            expression:
                 .identifier("UIColor")
                 .dot("colorWithRed")
                 .call([
@@ -140,7 +140,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
                     FunctionArgument(label: "blue", expression: .constant(1)),
                     FunctionArgument(label: "alpha", expression: .constant(1))
                 ]),
-            into: Expression.identifier("UIColor").call([
+            into: .identifier("UIColor").call([
                 FunctionArgument(label: "red", expression: .constant(1)),
                 FunctionArgument(label: "green", expression: .constant(1)),
                 FunctionArgument(label: "blue", expression: .constant(1)),
@@ -149,14 +149,14 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         )
         
         assertTransform(
-            expression: Expression
+            expression:
                 .identifier("UIColor")
                 .dot("colorWithWhite")
                 .call([
                     FunctionArgument(label: nil, expression: .constant(1)),
                     FunctionArgument(label: "alpha", expression: .constant(0.5))
                 ]),
-            into: Expression.identifier("UIColor").call([
+            into: .identifier("UIColor").call([
                 FunctionArgument(label: "white", expression: .constant(1)),
                 FunctionArgument(label: "alpha", expression: .constant(0.5))
             ])
@@ -166,46 +166,46 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
     func testUITableViewCellSeparatorStyle() {
         assertTransformParsed(
             expression: "UITableViewCellSeparatorStyleNone",
-            into: Expression.identifier("UITableViewCell").dot("SeparatorStyle").dot("none")
+            into: .identifier("UITableViewCell").dot("SeparatorStyle").dot("none")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UITableViewCellSeparatorStyleSingleEtched",
-            into: Expression.identifier("UITableViewCell").dot("SeparatorStyle").dot("singleEtched")
+            into: .identifier("UITableViewCell").dot("SeparatorStyle").dot("singleEtched")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UITableViewCellSeparatorStyleSingleLineEtched",
-            into: Expression.identifier("UITableViewCell").dot("SeparatorStyle").dot("singleLineEtched")
+            into: .identifier("UITableViewCell").dot("SeparatorStyle").dot("singleLineEtched")
         ); assertNotifiedChange()
     }
     
     func testUITableViewCellSelectionStyle() {
         assertTransformParsed(
             expression: "UITableViewCellSelectionStyleNone",
-            into: Expression.identifier("UITableViewCell").dot("SelectionStyle").dot("none")
+            into: .identifier("UITableViewCell").dot("SelectionStyle").dot("none")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UITableViewCellSelectionStyleBlue",
-            into: Expression.identifier("UITableViewCell").dot("SelectionStyle").dot("blue")
+            into: .identifier("UITableViewCell").dot("SelectionStyle").dot("blue")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UITableViewCellSelectionStyleGray",
-            into: Expression.identifier("UITableViewCell").dot("SelectionStyle").dot("gray")
+            into: .identifier("UITableViewCell").dot("SelectionStyle").dot("gray")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "UITableViewCellSelectionStyleDefault",
-            into: Expression.identifier("UITableViewCell").dot("SelectionStyle").dot("default")
+            into: .identifier("UITableViewCell").dot("SelectionStyle").dot("default")
         ); assertNotifiedChange()
     }
     
     func testEnumifyUIViewAnimationOptions() {
         assertTransform(
             expression: .identifier("UIViewAnimationOptionLayoutSubviews"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("layoutSubviews")
@@ -213,7 +213,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionAllowUserInteraction"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("allowUserInteraction")
@@ -221,7 +221,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionBeginFromCurrentState"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("beginFromCurrentState")
@@ -229,7 +229,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionRepeat"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("repeat")
@@ -237,7 +237,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionAutoreverse"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("autoreverse")
@@ -245,7 +245,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionOverrideInheritedDuration"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("overrideInheritedDuration")
@@ -253,7 +253,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionOverrideInheritedCurve"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("overrideInheritedCurve")
@@ -261,7 +261,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionAllowAnimatedContent"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("allowAnimatedContent")
@@ -269,7 +269,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionShowHideTransitionViews"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("showHideTransitionViews")
@@ -277,7 +277,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionOverrideInheritedOptions"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("overrideInheritedOptions")
@@ -285,7 +285,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionCurveEaseInOut"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("curveEaseInOut")
@@ -293,7 +293,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionCurveEaseIn"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("curveEaseIn")
@@ -301,7 +301,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionCurveEaseOut"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("curveEaseOut")
@@ -309,7 +309,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionCurveLinear"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("curveLinear")
@@ -317,7 +317,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionNone"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("transitionNone")
@@ -325,7 +325,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionFlipFromLeft"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("transitionFlipFromLeft")
@@ -333,7 +333,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionFlipFromRight"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("transitionFlipFromRight")
@@ -341,7 +341,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionCurlUp"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("transitionCurlUp")
@@ -349,7 +349,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionCurlDown"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("transitionCurlDown")
@@ -357,7 +357,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionCrossDissolve"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("transitionCrossDissolve")
@@ -365,7 +365,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionFlipFromTop"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("transitionFlipFromTop")
@@ -373,7 +373,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionTransitionFlipFromBottom"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("transitionFlipFromBottom")
@@ -381,7 +381,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionPreferredFramesPerSecondDefault"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("preferredFramesPerSecondDefault")
@@ -389,7 +389,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionPreferredFramesPerSecond60"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("preferredFramesPerSecond60")
@@ -397,7 +397,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: .identifier("UIViewAnimationOptionPreferredFramesPerSecond30"),
-            into: Expression
+            into:
                 .identifier("UIView")
                 .dot("AnimationOptions")
                 .dot("preferredFramesPerSecond30")

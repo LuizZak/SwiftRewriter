@@ -34,7 +34,7 @@ import SwiftAST
 ///     arguments: [
 ///         .labeled("to",
 ///                  .mergingArguments(arg0: 1, arg1: 2, { x, y in
-///                                       Expression.identifier("CGPoint")
+///                                       .identifier("CGPoint")
 ///                                       .call([.labeled("x", x), .labeled("y", y)])
 ///                                    }))
 ///     ])
@@ -49,7 +49,7 @@ import SwiftAST
 /// ```
 ///
 /// Note that the `<transform>` parameter from the original call was discarded:
-/// it is not neccessary to map all arguments of the original call into the target
+/// it is not necessary to map all arguments of the original call into the target
 /// call, as long as the number of arguments needed to match exactly can be inferred
 /// from the supplied argument transformers.
 public final class FunctionInvocationTransformer: PostfixInvocationTransformer {

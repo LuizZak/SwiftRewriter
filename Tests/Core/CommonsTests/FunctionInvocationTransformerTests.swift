@@ -38,9 +38,10 @@ class FunctionInvocationTransformerTests: XCTestCase {
         
         XCTAssertEqual(
             // objc(a)
-            sut.attemptApply(on: Expression.identifier("objc").call([.identifier("a")])),
+            sut.attemptApply(on: .identifier("objc").call([.identifier("a")])),
             // a.swift()
-            Expression.identifier("a").dot("swift").call())
+            .identifier("a").dot("swift").call()
+        )
     }
     
     /// Tests that the required argument count value also takes into consideration
@@ -116,8 +117,10 @@ class FunctionInvocationTransformerTests: XCTestCase {
         
         let exp = Expression.identifier("objc").call([.identifier("argA"), .identifier("argB")])
         
-        XCTAssertEqual(sut.attemptApply(on: exp),
-                       Expression.identifier("swift").call([.identifier("argA"), .identifier("argB")]))
+        XCTAssertEqual(
+            sut.attemptApply(on: exp),
+            .identifier("swift").call([.identifier("argA"), .identifier("argB")])
+        )
     }
     
     func testFromArgIndex() {
@@ -132,8 +135,10 @@ class FunctionInvocationTransformerTests: XCTestCase {
         
         let exp = Expression.identifier("objc").call([.identifier("argA"), .identifier("argB")])
         
-        XCTAssertEqual(sut.attemptApply(on: exp),
-                       Expression.identifier("swift").call([.identifier("argB"), .identifier("argA")]))
+        XCTAssertEqual(
+            sut.attemptApply(on: exp),
+            .identifier("swift").call([.identifier("argB"), .identifier("argA")])
+        )
     }
     
     func testOmitIf() {
@@ -154,8 +159,8 @@ class FunctionInvocationTransformerTests: XCTestCase {
             .identifier("B")
         ])
         
-        XCTAssertEqual(sut.attemptApply(on: exp1), Expression.identifier("swift").call())
-        XCTAssertEqual(sut.attemptApply(on: exp2), Expression.identifier("swift").call([.identifier("B")]))
+        XCTAssertEqual(sut.attemptApply(on: exp1), .identifier("swift").call())
+        XCTAssertEqual(sut.attemptApply(on: exp2), .identifier("swift").call([.identifier("B")]))
     }
     
     /// The function invocation transformer should not apply any changes if the
@@ -187,8 +192,10 @@ class FunctionInvocationTransformerTests: XCTestCase {
         XCTAssertFalse(sut.canApply(to: tooFew))
         XCTAssertNil(sut.attemptApply(on: tooFew))
         XCTAssert(sut.canApply(to: justRight))
-        XCTAssertEqual(sut.attemptApply(on: justRight),
-                       Expression.identifier("swift").call([.identifier("argA"), .identifier("argB")]))
+        XCTAssertEqual(
+            sut.attemptApply(on: justRight),
+            .identifier("swift").call([.identifier("argA"), .identifier("argB")])
+        )
         XCTAssertFalse(sut.canApply(to: tooMany))
         XCTAssertNil(sut.attemptApply(on: tooMany))
     }
@@ -204,17 +211,17 @@ class FunctionInvocationTransformerTests: XCTestCase {
         let exp =
             Expression
                 .identifier("CGPointMake")
-                .call([Expression.constant(1), Expression.constant(2)])
+                .call([.constant(1), .constant(2)])
         
         let result = sut.attemptApply(on: exp)
         
-        XCTAssertEqual(result,
-            Expression
-                .identifier("CGPoint")
-                .call([
-                    .labeled("x", .constant(1)),
-                    .labeled("y", .constant(2))
-                ])
+        XCTAssertEqual(
+            result,
+            .identifier("CGPoint")
+            .call([
+                .labeled("x", .constant(1)),
+                .labeled("y", .constant(2))
+            ])
         )
     }
     
@@ -229,15 +236,15 @@ class FunctionInvocationTransformerTests: XCTestCase {
         let exp =
             Expression
                 .identifier("CGRectContainsRect")
-                .call([Expression.identifier("a"), Expression.identifier("b")])
+                .call([.identifier("a"), .identifier("b")])
         
         let result = sut.attemptApply(on: exp)
         
-        XCTAssertEqual(result,
-                       Expression
-                        .identifier("a")
-                        .dot("contains")
-                        .call([.identifier("b")])
+        XCTAssertEqual(
+            result,
+            .identifier("a")
+            .dot("contains")
+            .call([.identifier("b")])
         )
     }
     
@@ -250,9 +257,10 @@ class FunctionInvocationTransformerTests: XCTestCase {
         
         XCTAssertEqual(
             // objc(a)
-            sut.attemptApply(on: Expression.identifier("objc").call([.identifier("a")])),
+            sut.attemptApply(on: .identifier("objc").call([.identifier("a")])),
             // a.swift
-            Expression.identifier("a").dot("swift"))
+            .identifier("a").dot("swift")
+        )
     }
     
     func testTransformToPropertySetter() {
@@ -260,9 +268,10 @@ class FunctionInvocationTransformerTests: XCTestCase {
         
         XCTAssertEqual(
             // objc(a, b)
-            sut.attemptApply(on: Expression.identifier("objc").call([.identifier("a"), .identifier("b")])),
+            sut.attemptApply(on: .identifier("objc").call([.identifier("a"), .identifier("b")])),
             // a.swift = b
-            Expression.identifier("a").dot("swift").assignment(op: .assign, rhs: .identifier("b")))
+            .identifier("a").dot("swift").assignment(op: .assign, rhs: .identifier("b"))
+        )
     }
     
     func testTransformToPropertySetterTransformerBailsIfNotTwoArguments() {
@@ -271,9 +280,10 @@ class FunctionInvocationTransformerTests: XCTestCase {
         XCTAssertNil(
             // objc(a, b, c)
             sut.attemptApply(on:
-                Expression
-                    .identifier("objc")
-                    .call([.identifier("a"), .identifier("b"), .identifier("c")])))
+                .identifier("objc")
+                .call([.identifier("a"), .identifier("b"), .identifier("c")])
+            )
+        )
     }
     
     func testIgnoreFunctionWithExpectedLabeling() {
@@ -286,19 +296,18 @@ class FunctionInvocationTransformerTests: XCTestCase {
         
         XCTAssertEqual(
             // function(0, 1)
-            sut.attemptApply(on: Expression
+            sut.attemptApply(on:
                 .identifier("function")
                 .call([.constant(0), .constant(1)])
             ),
             // function(0, label: 1)
-            Expression
-                .identifier("function")
-                .call([.unlabeled(.constant(0)), .labeled("label", .constant(1))])
+            .identifier("function")
+            .call([.unlabeled(.constant(0)), .labeled("label", .constant(1))])
         )
         
         XCTAssertNil(
             // function(0, label: 1)
-            sut.attemptApply(on: Expression
+            sut.attemptApply(on:
                 .identifier("function")
                 .call([.unlabeled(.constant(0)), .labeled("label", .constant(1))])
             )

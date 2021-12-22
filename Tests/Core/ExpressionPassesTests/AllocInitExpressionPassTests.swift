@@ -14,7 +14,7 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
     func testPlainInit() {
         assertTransformParsed(
             expression: "[[ClassName alloc] init]",
-            into: Expression.identifier("ClassName").call()
+            into: .identifier("ClassName").call()
         )
         
         assertNotifiedChange()
@@ -23,7 +23,7 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
     func testInitWith() {
         assertTransformParsed(
             expression: "[[ClassName alloc] initWithName:@\"abc\"]",
-            into: Expression.identifier("ClassName").call([.labeled("name", .constant("abc"))])
+            into: .identifier("ClassName").call([.labeled("name", .constant("abc"))])
         )
         
         assertNotifiedChange()

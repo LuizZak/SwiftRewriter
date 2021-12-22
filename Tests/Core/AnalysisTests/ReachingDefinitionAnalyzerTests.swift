@@ -19,7 +19,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
     func testVarDecl() {
         let body: CompoundStatement = [
             .variableDeclaration(identifier: "a", type: .int, initialization: .constant(0)),
-            .expression(Expression.identifier("a"))
+            .expression(.identifier("a"))
         ]
         setupTest(with: body)
         
@@ -33,8 +33,8 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
     func testVarDeclReplace() {
         let body: CompoundStatement = [
             .variableDeclaration(identifier: "a", type: .int, initialization: .constant(0)),
-            .expression(Expression.assignment(lhs: .identifier("a"), op: .assign, rhs: .constant(1))),
-            .expression(Expression.identifier("a"))
+            .expression(.assignment(lhs: .identifier("a"), op: .assign, rhs: .constant(1))),
+            .expression(.identifier("a"))
         ]
         setupTest(with: body)
         
@@ -48,7 +48,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
     func testVarDeclWithNoInitialization() {
         let body: CompoundStatement = [
             .variableDeclaration(identifier: "a", type: .int, initialization: nil),
-            .expression(Expression.identifier("a"))
+            .expression(.identifier("a"))
         ]
         setupTest(with: body)
         
@@ -127,10 +127,10 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
                 .identifier("a"),
                 .constant(.nil),
                 body: [
-                    .expression(Expression.identifier("a"))
+                    .expression(.identifier("a"))
                 ],
                 else: [
-                    .expression(Expression.identifier("a"))
+                    .expression(.identifier("a"))
                 ]
             )
         ]

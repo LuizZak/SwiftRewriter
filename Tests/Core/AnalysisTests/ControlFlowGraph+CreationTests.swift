@@ -153,12 +153,12 @@ class ControlFlowGraphCreationTests: XCTestCase {
     func testIf() {
         let stmt: CompoundStatement = [
             Statement.variableDeclaration(identifier: "v", type: .int, initialization: nil),
-            Statement.expression(Expression.identifier("v").call()),
+            Statement.expression(.identifier("v").call()),
             Statement.if(
-                Expression.identifier("v").dot("didWork"),
+                .identifier("v").dot("didWork"),
                 body: [
                     .expression(
-                        Expression.identifier("print").call([.constant("Did work!")])
+                        .identifier("print").call([.constant("Did work!")])
                     )
                 ])
         ]
@@ -194,10 +194,10 @@ class ControlFlowGraphCreationTests: XCTestCase {
     func testDoStatement() {
         let stmt: CompoundStatement = [
             Statement.variableDeclaration(identifier: "v", type: .int, initialization: nil),
-            Statement.expression(Expression.identifier("v").call()),
+            Statement.expression(.identifier("v").call()),
             Statement.do([
                 .expression(
-                    Expression.identifier("exp")
+                    .identifier("exp")
                 )
             ])
         ]
@@ -314,17 +314,17 @@ class ControlFlowGraphCreationTests: XCTestCase {
     func testIfElse() {
         let stmt: CompoundStatement = [
             Statement.variableDeclaration(identifier: "v", type: .int, initialization: nil),
-            Statement.expression(Expression.identifier("v").call()),
+            Statement.expression(.identifier("v").call()),
             Statement.if(
-                Expression.identifier("v").dot("didWork"),
+                .identifier("v").dot("didWork"),
                 body: [
                     .expression(
-                        Expression.identifier("print").call([.constant("Did work!")])
+                        .identifier("print").call([.constant("Did work!")])
                     )
                 ],
                 else: [
                     .expression(
-                        Expression.identifier("print").call([.constant("Did no work")])
+                        .identifier("print").call([.constant("Did no work")])
                     )
                 ])
         ]
@@ -362,25 +362,25 @@ class ControlFlowGraphCreationTests: XCTestCase {
     func testIfElseIf() {
         let stmt: CompoundStatement = [
             Statement.variableDeclaration(identifier: "v", type: .int, initialization: nil),
-            Statement.expression(Expression.identifier("v").call()),
+            Statement.expression(.identifier("v").call()),
             Statement.if(
-                Expression.identifier("v").dot("didWork"),
+                .identifier("v").dot("didWork"),
                 body: [
                     .expression(
-                        Expression.identifier("print").call([.constant("Did work!")])
+                        .identifier("print").call([.constant("Did work!")])
                     )
                 ],
                 else: [
                     .if(
-                        Expression.identifier("v").dot("didWork2"),
+                        .identifier("v").dot("didWork2"),
                         body: [
                             .expression(
-                                Expression.identifier("print").call([.constant("Did work twice!")])
+                                .identifier("print").call([.constant("Did work twice!")])
                             )
                         ],
                         else: [
                             .expression(
-                                Expression.identifier("print").call([.constant("Did no work twice")])
+                                .identifier("print").call([.constant("Did no work twice")])
                             )
                         ])
                 ])
@@ -861,7 +861,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
     
     func testWhileLoop() {
         let stmt: CompoundStatement = [
-            Statement.expression(Expression.identifier("v").call()),
+            Statement.expression(.identifier("v").call()),
             Statement.while(
                 .identifier("v"),
                 body: [
@@ -895,7 +895,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
     
     func testEmptyWhileLoop() {
         let stmt: CompoundStatement = [
-            Statement.expression(Expression.identifier("v").call()),
+            Statement.expression(.identifier("v").call()),
             Statement.while(
                 .identifier("v"),
                 body: []
@@ -926,7 +926,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
     
     func testDoWhileLoop() {
         let stmt: CompoundStatement = [
-            Statement.expression(Expression.identifier("v").call()),
+            Statement.expression(.identifier("v").call()),
             Statement.doWhile(
                 .identifier("v"),
                 body: [
@@ -961,7 +961,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
     
     func testEmptyDoWhileLoop() {
         let stmt: CompoundStatement = [
-            Statement.expression(Expression.identifier("v").call()),
+            Statement.expression(.identifier("v").call()),
             Statement.doWhile(
                 .identifier("v"),
                 body: []
@@ -992,7 +992,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
     
     func testBreakInDoWhileLoop() {
         let stmt: CompoundStatement = [
-            Statement.expression(Expression.identifier("v").call()),
+            Statement.expression(.identifier("v").call()),
             Statement.doWhile(
                 .identifier("v"),
                 body: [
@@ -1087,7 +1087,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
     
     func testWhileLoopWithBreak() {
         let stmt: CompoundStatement = [
-            Statement.expression(Expression.identifier("v").call()),
+            Statement.expression(.identifier("v").call()),
             Statement.while(
                 .identifier("v"),
                 body: [
@@ -1477,7 +1477,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
     
     func testDeferStatementInDoWhileLoop() {
         let stmt: CompoundStatement = [
-            Statement.expression(Expression.identifier("v").call()),
+            Statement.expression(.identifier("v").call()),
             Statement.doWhile(
                 .identifier("v"),
                 body: [

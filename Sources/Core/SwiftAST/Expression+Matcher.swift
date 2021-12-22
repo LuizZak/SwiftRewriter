@@ -270,7 +270,7 @@ public extension ValueMatcher where T: Expression {
     static func nilCheck(against value: Expression) -> ValueMatcher<Expression> {
         ValueMatcher<Expression>().match { exp in
             // <exp> != nil
-            if exp.asMatchable() == .binary(lhs: value, op: SwiftOperator.unequals, rhs: Expression.constant(.nil)) {
+            if exp.asMatchable() == .binary(lhs: value, op: SwiftOperator.unequals, rhs: .constant(.nil)) {
                 return true
             }
             // nil != <exp>

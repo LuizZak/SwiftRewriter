@@ -87,23 +87,23 @@ class MandatoryIntentionPass: IntentionPass {
         let fields = type.instanceVariables
         
         // Create empty constructor
-        let plainInitBody
-            = FunctionBodyIntention(body:
-                CompoundStatement(statements:
-                    fields.compactMap { field in
-                        guard let rhs = context.typeSystem.defaultValue(for: field.type) else {
-                            return nil
-                        }
-                        
-                        return .expression(
-                            .assignment(
-                                lhs: .identifier(field.name),
-                                op: .assign,
-                                rhs: rhs
-                            )
-                        )
+        let plainInitBody = FunctionBodyIntention(body:
+            CompoundStatement(statements:
+                fields.compactMap { field in
+                    guard let rhs = context.typeSystem.defaultValue(for: field.type) else {
+                        return nil
                     }
-                ))
+                    
+                    return .expression(
+                        .assignment(
+                            lhs: .identifier(field.name),
+                            op: .assign,
+                            rhs: rhs
+                        )
+                    )
+                }
+            )
+        )
         
         let plainInit = InitGenerationIntention(parameters: [])
         plainInit.functionBody = plainInitBody
@@ -123,13 +123,13 @@ class MandatoryIntentionPass: IntentionPass {
                 ParameterSignature(label: param.name, name: param.name, type: param.type)
             }
         
-        let parameteredInitBody
+        let parameterizedInitBody
             = FunctionBodyIntention(body:
                 CompoundStatement(statements:
                     fields.map { field in
                         .expression(
                             .assignment(
-                                lhs: Expression.identifier("self").dot(field.name),
+                                lhs: .identifier("self").dot(field.name),
                                 op: .assign,
                                 rhs: .identifier(field.name)
                             )
@@ -137,17 +137,17 @@ class MandatoryIntentionPass: IntentionPass {
                     }
                 ))
         
-        let parameteredInit = InitGenerationIntention(parameters: parameters)
-        parameteredInit.functionBody = parameteredInitBody
-        parameteredInit
+        let parameterizedInit = InitGenerationIntention(parameters: parameters)
+        parameterizedInit.functionBody = parameterizedInitBody
+        parameterizedInit
             .history
             .recordCreation(
                 description: """
                 Synthesizing parameterized constructor for struct
                 """)
-            .echoRecord(to: parameteredInitBody)
+            .echoRecord(to: parameterizedInitBody)
         
-        type.addConstructor(parameteredInit)
+        type.addConstructor(parameterizedInit)
     }
     
     private func applyOverrideDetection(_ type: TypeGenerationIntention) {
@@ -162,10 +162,13 @@ class MandatoryIntentionPass: IntentionPass {
             
             if let initMethod = initMethod as? OverridableMemberGenerationIntention {
                 initMethod.isOverride = true
-                initMethod.history.recordChange(tag: tag, description: """
+                initMethod.history.recordChange(
+                    tag: tag,
+                    description: """
                     Marking as override due to super initializer declaration of \
                     same selector
-                    """)
+                    """
+                )
             }
         }
         
@@ -174,19 +177,24 @@ class MandatoryIntentionPass: IntentionPass {
             for method in type.methods {
                 let parameterTypes = method.parameters.map(\.type)
                 
-                let superMethod
-                    = context.typeSystem.method(withIdentifier: method.signature.asIdentifier,
-                                                invocationTypeHints: parameterTypes,
-                                                static: method.isStatic,
-                                                includeOptional: false,
-                                                in: supertype)
+                let superMethod = context
+                    .typeSystem.method(
+                        withIdentifier: method.signature.asIdentifier,
+                        invocationTypeHints: parameterTypes,
+                        static: method.isStatic,
+                        includeOptional: false,
+                        in: supertype
+                    )
                 
                 if superMethod != nil {
                     method.isOverride = true
-                    method.history.recordChange(tag: tag, description: """
+                    method.history.recordChange(
+                        tag: tag,
+                        description: """
                         Marking as override due to super method declaration of \
                         same selector
-                        """)
+                        """
+                    )
                 }
             }
         }
@@ -222,10 +230,13 @@ class MandatoryIntentionPass: IntentionPass {
                 
                 if methodCall.selectorWith(methodName: member.name) == selector {
                     method.isOverride = true
-                    method.history.recordChange(tag: tag, description: """
+                    method.history.recordChange(
+                        tag: tag,
+                        description: """
                         Marking as override due to super method invocation detected \
                         within body
-                        """)
+                        """
+                    )
                     
                     break
                 }
@@ -267,13 +278,14 @@ class MandatoryIntentionPass: IntentionPass {
                                                         accessLevel: .private)
                 intent.history.recordCreation(description: """
                     Synthesized backing field for \(prop.name) due to @synthesize
-                    """)
+                    """
+                )
                 type.addInstanceVariable(intent)
             }
             
             // Apply computed property field getter and setter
             let getterBody = FunctionBodyIntention(body: [
-                .return(Expression.identifier(synth.ivarName).typed(prop.type))
+                .return(.identifier(synth.ivarName).typed(prop.type))
             ])
             
             if prop.isReadOnly && prop.getter == nil {
@@ -281,19 +293,22 @@ class MandatoryIntentionPass: IntentionPass {
             } else if prop.getter == nil && prop.setter == nil {
                 let setterBody = FunctionBodyIntention(body: [
                     .expression(
-                        Expression
-                            .identifier(synth.ivarName).typed(prop.type)
-                            .assignment(op: .assign, rhs: Expression.identifier("newValue").typed(prop.type)))
+                        .identifier(synth.ivarName).typed(prop.type)
+                        .assignment(op: .assign, rhs: .identifier("newValue").typed(prop.type))
+                    )
                 ])
                 
-                prop.mode =
-                    .property(get: getterBody,
-                              set: .init(valueIdentifier: "newValue",
-                                         body: setterBody))
+                prop.mode = .property(
+                    get: getterBody,
+                    set: .init(valueIdentifier: "newValue", body: setterBody)
+                )
                 
-                prop.history.recordChange(tag: tag, description: """
+                prop.history.recordChange(
+                    tag: tag,
+                    description: """
                     Synthesized getter and setter for property due to @synthesize
-                    """)
+                    """
+                )
             }
         }
     }
@@ -310,7 +325,8 @@ class MandatoryIntentionPass: IntentionPass {
         
         property.history.recordMerge(with: [field], tag: tag, description: """
             Collapsed with backing field property of same name.
-            """)
+            """
+        )
     }
     
     enum IntentionPassPhase {
