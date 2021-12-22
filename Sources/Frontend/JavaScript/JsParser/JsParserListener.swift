@@ -104,6 +104,60 @@ internal class JsParserListener: JavaScriptParserBaseListener {
         
         let identifierNode = nodeFactory.makeIdentifier(from: functionName)
         functionNode.addChild(identifierNode)
+
+        guard let bodyContext = ctx.functionBody() else {
+            return
+        }
+
+        let bodyNode = nodeFactory.makeFunctionBodyNode(from: bodyContext)
+        context.pushContext(node: bodyNode)
+    }
+
+    override func exitFunctionDeclaration(_ ctx: JavaScriptParser.FunctionDeclarationContext) {
+        if context.currentContextNode(as: JsFunctionBodyNode.self) != nil {
+            context.popContext()
+        }
+    }
+
+    override func enterVariableStatement(_ ctx: JavaScriptParser.VariableStatementContext) {
+        guard let contextNode = context.currentContextNode() else {
+            return
+        }
+        guard let variableDeclarationList = ctx.variableDeclarationList() else {
+            return
+        }
+        guard let varModifier = variableDeclarationList.varModifier() else {
+            return
+        }
+
+        let variableDeclarationListNode =
+            nodeFactory.makeVariableDeclarationList(
+                from: variableDeclarationList, 
+                varModifier: varModifier
+            )
+        
+        for variableDeclaration in variableDeclarationList.variableDeclaration() {
+            // TODO: Support different assignable types?
+            guard let identifier = variableDeclaration.assignable()?.identifier() else {
+                continue
+            }
+
+            let variableDeclNode = nodeFactory.makeVariableDeclaration(
+                from: variableDeclaration,
+                identifier: identifier,
+                initialExpression: variableDeclaration.singleExpression()
+            )
+
+            variableDeclarationListNode.addChild(variableDeclNode)
+        }
+
+        switch contextNode {
+        case is JsGlobalContextNode:
+            contextNode.addChild(variableDeclarationListNode)
+            break
+        default:
+            break
+        }
     }
 }
 

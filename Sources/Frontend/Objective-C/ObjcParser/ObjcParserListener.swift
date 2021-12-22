@@ -5,6 +5,8 @@ import GrammarModelBase
 import ObjcParserAntlr
 import ObjcGrammarModels
 
+// TODO: Create a base implementation to cover this file and with JsParser.JsParserListener.
+
 internal class ObjcParserListener: ObjectiveCParserBaseListener {
     let context: NodeCreationContext
     let rootNode: ObjcGlobalContextNode
@@ -149,7 +151,6 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             rule: O.PropertySynthesizeItemContext.self,
             nodeType: ObjcPropertySynthesizeItemNode.self
         )
-        
     }
     
     override func enterEveryRule(_ ctx: ParserRuleContext) {
@@ -414,7 +415,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         context.addChildNode(spec)
     }
     
-    // MARM: - Property implementaiton
+    // MARK: - Property implementation
     override func exitPropertyImplementation(_ ctx: ObjectiveCParser.PropertyImplementationContext) {
         guard let node = context.currentContextNode(as: ObjcPropertyImplementationNode.self) else {
             return

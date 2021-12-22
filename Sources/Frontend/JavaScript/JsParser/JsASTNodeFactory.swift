@@ -18,6 +18,59 @@ class JsASTNodeFactory {
         updateSourceLocation(for: node, with: context)
         return node
     }
+
+    func makeVariableDeclarationList(from context: Parser.VariableDeclarationListContext,
+                                     varModifier: Parser.VarModifierContext) -> JsVariableDeclarationListNode {
+        
+        let varModifier = makeVarModifier(from: varModifier)
+        let node = JsVariableDeclarationListNode(varModifier: varModifier)
+
+        return node
+    }
+
+    func makeVarModifier(from context: Parser.VarModifierContext) -> JsVariableDeclarationListNode.VarModifier {
+        if context.Var() != nil {
+            return .var
+        }
+        if context.let_() != nil {
+            return .let
+        }
+        if context.Const() != nil {
+            return .const
+        }
+
+        return .var
+    }
+
+    func makeVariableDeclaration(from context: Parser.VariableDeclarationContext,
+                                 identifier: Parser.IdentifierContext,
+                                 initialExpression: Parser.SingleExpressionContext?) -> JsVariableDeclarationNode {
+        
+        let node = JsVariableDeclarationNode()
+        node.addChild(makeIdentifier(from: identifier))
+
+        if let initialExpression = initialExpression {
+            node.addChild(makeExpressionNode(from: initialExpression))
+        }
+
+        return node
+    }
+
+    func makeExpressionNode(from context: Parser.SingleExpressionContext) -> JsExpressionNode {
+        let node = JsExpressionNode()
+        node.expression = context
+        updateSourceLocation(for: node, with: context)
+        return node
+    }
+
+    func makeFunctionBodyNode(from context: Parser.FunctionBodyContext) -> JsFunctionBodyNode {
+        let node = JsFunctionBodyNode()
+        node.body = context
+        updateSourceLocation(for: node, with: context)
+        return node
+    }
+
+    // MARK: - Source location update
     
     func updateSourceLocation(for node: JsASTNode, with rule: ParserRuleContext) {
         (node.location, node.length) = sourceLocationAndLength(for: rule)

@@ -5,6 +5,11 @@ public class JsFunctionDeclarationNode: JsASTNode, JsInitializableNode {
         firstChild()
     }
 
+    /// Gets the function body for this function declaration.
+    public var body: JsFunctionBodyNode? {
+        firstChild()
+    }
+
     public required init() {
         super.init()
     }

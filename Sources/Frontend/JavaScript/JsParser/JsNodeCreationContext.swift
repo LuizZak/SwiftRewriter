@@ -1,5 +1,7 @@
 import JsGrammarModels
 
+// TODO: Create a base implementation to cover this file and with ObjcParser.ObjcParserListener.
+
 /// A class used to nest up hierarchic node creations
 public class NodeCreationContext {
     /// Current top-most node
