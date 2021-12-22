@@ -1,5 +1,5 @@
-import Utils
 import GrammarModelBase
+import Utils
 import XCTest
 
 @testable import ObjcParser

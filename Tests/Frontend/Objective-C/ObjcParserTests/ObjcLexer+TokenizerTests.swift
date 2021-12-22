@@ -1,6 +1,6 @@
-import Utils
 import GrammarModelBase
 import ObjcGrammarModels
+import Utils
 import XCTest
 
 @testable import ObjcParser

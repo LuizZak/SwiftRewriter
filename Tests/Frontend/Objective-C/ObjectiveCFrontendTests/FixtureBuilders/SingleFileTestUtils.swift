@@ -1,6 +1,3 @@
-import Utils
-import GrammarModelBase
-import ObjcParser
 import ExpressionPasses
 import GlobalsProviders
 import GrammarModelBase
@@ -8,6 +5,7 @@ import IntentionPasses
 import ObjcParser
 import SwiftSyntaxRewriterPasses
 import TestCommons
+import Utils
 import WriterTargetOutput
 import XCTest
 

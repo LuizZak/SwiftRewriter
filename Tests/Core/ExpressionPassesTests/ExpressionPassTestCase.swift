@@ -1,5 +1,4 @@
 import Antlr4
-import Utils
 import AntlrCommons
 import GrammarModelBase
 import Intentions
@@ -197,8 +196,10 @@ class ExpressionPassTestCase: XCTestCase {
         defer {
             _ = stream  // Keep alive!
         }
-        let diag = AntlrDiagnosticsErrorListener(source: StringCodeSource(source: exp),
-                                                 diagnostics: Diagnostics())
+        let diag = AntlrDiagnosticsErrorListener(
+            source: StringCodeSource(source: exp),
+            diagnostics: Diagnostics()
+        )
         parser.addErrorListener(diag)
 
         let expression = try! parser.expression()
@@ -237,8 +238,10 @@ class ExpressionPassTestCase: XCTestCase {
         defer {
             _ = stream  // Keep alive!
         }
-        let diag = AntlrDiagnosticsErrorListener(source: StringCodeSource(source: stmtString),
-                                                 diagnostics: Diagnostics())
+        let diag = AntlrDiagnosticsErrorListener(
+            source: StringCodeSource(source: stmtString),
+            diagnostics: Diagnostics()
+        )
         parser.addErrorListener(diag)
 
         let stmt = try! parser.statement()

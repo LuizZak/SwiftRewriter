@@ -1,10 +1,10 @@
-import XCTest
-import Foundation
 import Antlr4
+import AntlrCommons
+import Foundation
+import JsGrammarModels
 import JsParserAntlr
 import Utils
-import JsGrammarModels
-import AntlrCommons
+import XCTest
 
 @testable import JsParser
 
@@ -78,12 +78,18 @@ class JsParserListenerTests: XCTestCase {
         XCTAssertEqual(variableDecls[1].varModifier, .let)
         XCTAssertEqual(variableDecls[1].variableDeclarations.count, 1)
         XCTAssertEqual(variableDecls[1].variableDeclarations[0].identifier?.name, "b")
-        XCTAssertEqual(getText(variableDecls[1].variableDeclarations[0].expression?.expression), "0")
+        XCTAssertEqual(
+            getText(variableDecls[1].variableDeclarations[0].expression?.expression),
+            "0"
+        )
         // const c = a + b;
         XCTAssertEqual(variableDecls[2].varModifier, .const)
         XCTAssertEqual(variableDecls[2].variableDeclarations.count, 1)
         XCTAssertEqual(variableDecls[2].variableDeclarations[0].identifier?.name, "c")
-        XCTAssertEqual(getText(variableDecls[2].variableDeclarations[0].expression?.expression), "a + b")
+        XCTAssertEqual(
+            getText(variableDecls[2].variableDeclarations[0].expression?.expression),
+            "a + b"
+        )
     }
 
     private func getText(_ rule: ParserRuleContext?) -> String? {
@@ -106,46 +112,57 @@ class JsParserListenerTests: XCTestCase {
 }
 
 extension JsParserListenerTests {
-    private func parserTest(_ source: String, file: StaticString = #filePath, line: UInt = #line) -> JsGlobalContextNode {
+    private func parserTest(_ source: String, file: StaticString = #filePath, line: UInt = #line)
+        -> JsGlobalContextNode
+    {
         let sut = JsParser(string: source)
-        
+
         return _parseTestGlobalContextNode(source: source, parser: sut, file: file, line: line)
     }
-    
-    private func _parseTestGlobalContextNode(source: String, parser: JsParser, file: StaticString = #filePath, line: UInt = #line) -> JsGlobalContextNode {
+
+    private func _parseTestGlobalContextNode(
+        source: String,
+        parser: JsParser,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> JsGlobalContextNode {
         do {
             let parserState = try JsParserState().makeMainParser(input: source)
             let parser = parserState.parser
-            _parser = parser // Keep object alive long enough for ParserRuleContext.getText() calls
+            _parser = parser  // Keep object alive long enough for ParserRuleContext.getText() calls
 
             let codeSource = StringCodeSource(source: source, fileName: "test.js")
             let diagnostics = Diagnostics()
-            
-            let errorListener = AntlrDiagnosticsErrorListener(source: codeSource, diagnostics: diagnostics)
+
+            let errorListener = AntlrDiagnosticsErrorListener(
+                source: codeSource,
+                diagnostics: diagnostics
+            )
             parser.removeErrorListeners()
-            
+
             parser.addErrorListener(
                 errorListener
             )
-        
+
             parser.getInterpreter().setPredictionMode(.LL)
-                
+
             let root = try parser.program()
-            
+
             if !diagnostics.diagnostics.isEmpty {
                 var diag = ""
                 diagnostics.printDiagnostics(to: &diag)
-                
+
                 XCTFail("Unexpected diagnostics while parsing:\n\(diag)", file: file, line: line)
             }
-            
+
             let listener = JsParserListener(sourceString: source, source: codeSource)
-            
+
             let walker = ParseTreeWalker()
             try walker.walk(listener, root)
 
             return listener.rootNode
-        } catch {
+        }
+        catch {
             XCTFail("Failed to parse test '\(source)': \(error)", file: file, line: line)
             fatalError()
         }

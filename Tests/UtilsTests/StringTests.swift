@@ -1,5 +1,6 @@
-@testable import Utils
 import XCTest
+
+@testable import Utils
 
 class StringTests: XCTestCase {
     func testStartsUppercased() {
