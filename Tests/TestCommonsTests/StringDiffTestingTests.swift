@@ -1,31 +1,35 @@
-import XCTest
 import TestCommons
+import XCTest
 
 class StringDiffTestingTests: XCTestCase {
     var testReporter: TestDiffReporter!
-    
+
     override func setUp() {
         super.setUp()
-        
+
         testReporter = TestDiffReporter()
     }
-    
+
     func testDiffSimpleString() {
-        #sourceLocation(file: "test.swift", line: 1)
+        #sourceLocation(file:"test.swift",line:1)
         testReporter
-            .diffTest(expected: """
-                abc
-                def
-                """).diff("""
+            .diffTest(
+                expected: """
+                    abc
+                    def
+                    """
+            ).diff(
+                """
                 abc
                 df
-                """)
+                """
+            )
         #sourceLocation()
-        
+
         XCTAssertEqual(
             testReporter.messages[0],
             """
-            test.swift:5: Strings don't match:
+            test.swift:7: Strings don't match:
 
             Expected (between ---):
 
@@ -50,7 +54,7 @@ class StringDiffTestingTests: XCTestCase {
             ---
             """
         )
-        
+
         XCTAssertEqual(
             testReporter.messages[1],
             """
@@ -58,89 +62,99 @@ class StringDiffTestingTests: XCTestCase {
             """
         )
     }
-    
+
     func testDiffEmptyStrings() {
-        #sourceLocation(file: "test.swift", line: 1)
+        #sourceLocation(file:"test.swift",line:1)
         testReporter.diffTest(expected: "").diff("")
         #sourceLocation()
-        
+
         XCTAssertEqual(testReporter.messages.count, 0)
     }
-    
+
     func testDiffEqualStrings() {
-        #sourceLocation(file: "test.swift", line: 1)
+        #sourceLocation(file:"test.swift",line:1)
         testReporter
-            .diffTest(expected: """
+            .diffTest(
+                expected: """
+                    abc
+                    def
+                    """
+            ).diff(
+                """
                 abc
                 def
-                """).diff("""
-                abc
-                def
-                """)
+                """
+            )
         #sourceLocation()
-        
+
         XCTAssertEqual(testReporter.messages.count, 0)
     }
-    
+
     func testDiffWhitespaceString() {
-           #sourceLocation(file: "test.swift", line: 1)
-           testReporter
-               .diffTest(expected: """
-                
-                """).diff("test")
-           #sourceLocation()
-           
-           XCTAssertEqual(
-               testReporter.messages[0],
-               """
-               test.swift:4: Strings don't match:
-
-               Expected (between ---):
-
-               ---
-
-               ---
-
-               Actual result (between ---):
-
-               ---
-               test
-               ---
-
-               Diff (between ---):
-
-               ---
-               test
-               ^ Difference starts here
-               ---
-               """
-           )
-           
-           XCTAssertEqual(
-               testReporter.messages[1],
-               """
-               test.swift:3: Difference starts here: Actual line reads 'test'
-               """
-           )
-       }
-    
-    func testDiffLargerExpectedString() {
-        #sourceLocation(file: "test.swift", line: 1)
+        #sourceLocation(file:"test.swift",line:1)
         testReporter
-            .diffTest(expected: """
-                abc
-                def
-                ghi
-                """).diff("""
-                abc
-                def
-                """)
+            .diffTest(
+                expected: """
+
+                    """
+            ).diff("test")
         #sourceLocation()
-        
+
         XCTAssertEqual(
             testReporter.messages[0],
             """
             test.swift:6: Strings don't match:
+
+            Expected (between ---):
+
+            ---
+
+            ---
+
+            Actual result (between ---):
+
+            ---
+            test
+            ---
+
+            Diff (between ---):
+
+            ---
+            test
+            ^ Difference starts here
+            ---
+            """
+        )
+
+        XCTAssertEqual(
+            testReporter.messages[1],
+            """
+            test.swift:3: Difference starts here: Actual line reads 'test'
+            """
+        )
+    }
+
+    func testDiffLargerExpectedString() {
+        #sourceLocation(file:"test.swift",line:1)
+        testReporter
+            .diffTest(
+                expected: """
+                    abc
+                    def
+                    ghi
+                    """
+            ).diff(
+                """
+                abc
+                def
+                """
+            )
+        #sourceLocation()
+
+        XCTAssertEqual(
+            testReporter.messages[0],
+            """
+            test.swift:8: Strings don't match:
 
             Expected (between ---):
 
@@ -166,7 +180,7 @@ class StringDiffTestingTests: XCTestCase {
             ---
             """
         )
-        
+
         XCTAssertEqual(
             testReporter.messages[1],
             """
@@ -174,24 +188,28 @@ class StringDiffTestingTests: XCTestCase {
             """
         )
     }
-    
+
     func testDiffLargerExpectedStringWithMismatchInMiddle() {
-        #sourceLocation(file: "test.swift", line: 1)
+        #sourceLocation(file:"test.swift",line:1)
         testReporter
-            .diffTest(expected: """
-                abc
-                def
-                ghi
-                """).diff("""
+            .diffTest(
+                expected: """
+                    abc
+                    def
+                    ghi
+                    """
+            ).diff(
+                """
                 abc
                 xyz
-                """)
+                """
+            )
         #sourceLocation()
-        
+
         XCTAssertEqual(
             testReporter.messages[0],
             """
-            test.swift:6: Strings don't match:
+            test.swift:8: Strings don't match:
 
             Expected (between ---):
 
@@ -217,7 +235,7 @@ class StringDiffTestingTests: XCTestCase {
             ---
             """
         )
-        
+
         XCTAssertEqual(
             testReporter.messages[1],
             """
@@ -225,24 +243,28 @@ class StringDiffTestingTests: XCTestCase {
             """
         )
     }
-    
+
     func testDiffLargerResultString() {
-        #sourceLocation(file: "test.swift", line: 1)
+        #sourceLocation(file:"test.swift",line:1)
         testReporter
-            .diffTest(expected: """
-                abc
-                def
-                """).diff("""
+            .diffTest(
+                expected: """
+                    abc
+                    def
+                    """
+            ).diff(
+                """
                 abc
                 def
                 ghi
-                """)
+                """
+            )
         #sourceLocation()
-        
+
         XCTAssertEqual(
             testReporter.messages[0],
             """
-            test.swift:5: Strings don't match:
+            test.swift:7: Strings don't match:
 
             Expected (between ---):
 
@@ -269,7 +291,7 @@ class StringDiffTestingTests: XCTestCase {
             ---
             """
         )
-        
+
         XCTAssertEqual(
             testReporter.messages[1],
             """
@@ -277,24 +299,28 @@ class StringDiffTestingTests: XCTestCase {
             """
         )
     }
-    
+
     func testDiffLargerExpectedStringWithChangeAtFirstLine() {
-        #sourceLocation(file: "test.swift", line: 1)
+        #sourceLocation(file:"test.swift",line:1)
         testReporter
-            .diffTest(expected: """
-                label:
-                if true {
-                }
-                """).diff("""
+            .diffTest(
+                expected: """
+                    label:
+                    if true {
+                    }
+                    """
+            ).diff(
+                """
                 if true {
                     }
-                """)
+                """
+            )
         #sourceLocation()
-        
+
         XCTAssertEqual(
             testReporter.messages[0],
             """
-            test.swift:6: Strings don't match:
+            test.swift:8: Strings don't match:
 
             Expected (between ---):
 
@@ -320,7 +346,7 @@ class StringDiffTestingTests: XCTestCase {
             ---
             """
         )
-        
+
         XCTAssertEqual(
             testReporter.messages[1],
             """
@@ -328,22 +354,25 @@ class StringDiffTestingTests: XCTestCase {
             """
         )
     }
-    
+
     func testDiffLargeMultiLineStrings() {
-        #sourceLocation(file: "test.swift", line: 1)
+        #sourceLocation(file:"test.swift",line:1)
         testReporter
-            .diffTest(expected: """
-                line 1
-                line 2
-                line 3
-                line 4
-                line 5
-                line 6
-                line 7
-                line 8
-                line 9
-                line 10
-                """).diff("""
+            .diffTest(
+                expected: """
+                    line 1
+                    line 2
+                    line 3
+                    line 4
+                    line 5
+                    line 6
+                    line 7
+                    line 8
+                    line 9
+                    line 10
+                    """
+            ).diff(
+                """
                 line 1
                 line 2
                 line 3
@@ -354,13 +383,14 @@ class StringDiffTestingTests: XCTestCase {
                 line 8
                 line 9
                 line 10
-                """)
+                """
+            )
         #sourceLocation()
-        
+
         XCTAssertEqual(
             testReporter.messages[0],
             """
-            test.swift:13: Strings don't match:
+            test.swift:15: Strings don't match:
 
             Expected (between ---):
 
@@ -404,7 +434,7 @@ class StringDiffTestingTests: XCTestCase {
             --- [3 lines omitted]
             """
         )
-        
+
         XCTAssertEqual(
             testReporter.messages[1],
             """
@@ -412,29 +442,33 @@ class StringDiffTestingTests: XCTestCase {
             """
         )
     }
-    
+
     func testDiffLargeMultiLineStringsNoLinesOmittedBefore() {
-        #sourceLocation(file: "test.swift", line: 1)
+        #sourceLocation(file:"test.swift",line:1)
         testReporter
-            .diffTest(expected: """
-                line 1
-                line 2
-                line 3
-                line 4
-                line 5
-                """).diff("""
+            .diffTest(
+                expected: """
+                    line 1
+                    line 2
+                    line 3
+                    line 4
+                    line 5
+                    """
+            ).diff(
+                """
                 DIFFERENCE
                 line 2
                 line 3
                 line 4
                 line 5
-                """)
+                """
+            )
         #sourceLocation()
-        
+
         XCTAssertEqual(
             testReporter.messages[0],
             """
-            test.swift:8: Strings don't match:
+            test.swift:10: Strings don't match:
 
             Expected (between ---):
 
@@ -466,7 +500,7 @@ class StringDiffTestingTests: XCTestCase {
             --- [2 lines omitted]
             """
         )
-        
+
         XCTAssertEqual(
             testReporter.messages[1],
             """
@@ -474,29 +508,33 @@ class StringDiffTestingTests: XCTestCase {
             """
         )
     }
-    
+
     func testDiffLargeMultiLineStringsNoLinesOmittedAfter() {
-        #sourceLocation(file: "test.swift", line: 1)
+        #sourceLocation(file:"test.swift",line:1)
         testReporter
-            .diffTest(expected: """
-                line 1
-                line 2
-                line 3
-                line 4
-                line 5
-                """).diff("""
+            .diffTest(
+                expected: """
+                    line 1
+                    line 2
+                    line 3
+                    line 4
+                    line 5
+                    """
+            ).diff(
+                """
                 line 1
                 line 2
                 line 3
                 line 4
                 DIFFERENCE
-                """)
+                """
+            )
         #sourceLocation()
-        
+
         XCTAssertEqual(
             testReporter.messages[0],
             """
-            test.swift:8: Strings don't match:
+            test.swift:10: Strings don't match:
 
             Expected (between ---):
 
@@ -528,7 +566,7 @@ class StringDiffTestingTests: XCTestCase {
             ---
             """
         )
-        
+
         XCTAssertEqual(
             testReporter.messages[1],
             """
@@ -536,23 +574,28 @@ class StringDiffTestingTests: XCTestCase {
             """
         )
     }
-    
+
     func testDiffOnly() {
-        #sourceLocation(file: "test.swift", line: 1)
+        #sourceLocation(file:"test.swift",line:1)
         testReporter
-            .diffTest(expected: """
-                abc
-                def
-                """, diffOnly: true).diff("""
+            .diffTest(
+                expected: """
+                    abc
+                    def
+                    """,
+                diffOnly: true
+            ).diff(
+                """
                 abc
                 df
-                """)
+                """
+            )
         #sourceLocation()
-        
+
         XCTAssertEqual(
             testReporter.messages[0],
             """
-            test.swift:5: Strings don't match:
+            test.swift:8: Strings don't match:
 
             Diff (between ---):
 
@@ -563,7 +606,7 @@ class StringDiffTestingTests: XCTestCase {
             ---
             """
         )
-        
+
         XCTAssertEqual(
             testReporter.messages[1],
             """
@@ -574,29 +617,35 @@ class StringDiffTestingTests: XCTestCase {
 }
 
 extension StringDiffTestingTests {
-    public func diffTest(expected input: String,
-                         diffOnly: Bool = false,
-                         file: StaticString = #filePath,
-                         line: UInt = #line) -> DiffingTest {
-        
+    public func diffTest(
+        expected input: String,
+        diffOnly: Bool = false,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> DiffingTest {
+
         let location = DiffLocation(file: file, line: line)
         let diffable = DiffableString(string: input, location: location)
-        
-        return DiffingTest(expected: diffable,
-                           testCase: testReporter,
-                           highlightLineInEditor: true,
-                           diffOnly: diffOnly)
+
+        return DiffingTest(
+            expected: diffable,
+            testCase: testReporter,
+            highlightLineInEditor: true,
+            diffOnly: diffOnly
+        )
     }
 }
 
 class TestDiffReporter: DiffTestCaseFailureReporter {
     var messages: [String] = []
-    
-    func _recordFailure(withDescription description: String,
-                        inFile filePath: StaticString,
-                        atLine lineNumber: UInt,
-                        expected: Bool) {
-        
+
+    func _recordFailure(
+        withDescription description: String,
+        inFile filePath: StaticString,
+        atLine lineNumber: UInt,
+        expected: Bool
+    ) {
+
         messages.append("\(filePath):\(lineNumber): " + description)
     }
 }

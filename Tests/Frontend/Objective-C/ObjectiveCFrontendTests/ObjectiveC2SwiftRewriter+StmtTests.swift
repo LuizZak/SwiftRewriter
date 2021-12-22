@@ -9,73 +9,73 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
             swift: "self.thing()"
         )
     }
-    
+
     func testTranslateTwoSelectorMessage() {
         assertSingleStatement(
             objc: "[self thing:a b:c];",
             swift: "self.thing(a, b: c)"
         )
     }
-    
+
     func testTranslateBinaryExpression() {
         assertSingleStatement(
             objc: "10 + 26;",
             swift: "10 + 26"
         )
     }
-    
+
     func testTranslateChainedBinaryExpression() {
         assertSingleStatement(
             objc: "10 + 26 + 42;",
             swift: "10 + 26 + 42"
         )
     }
-    
+
     func testTranslateParenthesizedExpression() {
         assertSingleStatement(
             objc: "((10 + 26) * (15 + 15));",
             swift: "(10 + 26) * (15 + 15)"
         )
     }
-    
+
     func testTernaryExpression() {
         assertSingleStatement(
             objc: "aValue ? 123 : 456;",
             swift: "aValue ? 123 : 456"
         )
-        
+
         assertSingleStatement(
             objc: "aNullableValue ?: anotherValue;",
             swift: "aNullableValue ?? anotherValue"
         )
     }
-    
+
     func testMemberAccess() {
         assertSingleStatement(
             objc: "self.member.subMember;",
             swift: "self.member.subMember"
         )
     }
-    
+
     func testStringLiteral() {
         assertSingleStatement(
             objc: "@\"literal abc\";",
             swift: "\"literal abc\""
         )
-        
+
         assertSingleStatement(
             objc: "@\"literal \\n abc\";",
             swift: "\"literal \\n abc\""
         )
     }
-    
+
     func testFloatLiteral() {
         assertSingleStatement(
             objc: "123.456e+20f;",
             swift: "1.23456e+22"
         )
     }
-    
+
     func testFreeFunctionCall() {
         assertSingleStatement(
             objc: "aFunction();",
@@ -90,7 +90,7 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
             swift: "aFunction(123, 456)"
         )
     }
-    
+
     func testSubscription() {
         assertSingleStatement(
             objc: "aSubscriptable[1];",
@@ -101,7 +101,7 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
             swift: "aDictionary[\"key\"]"
         )
     }
-    
+
     func testPrefixAndPostfixIncrementAndDecrement() {
         assertSingleStatement(
             objc: "value++;",
@@ -120,7 +120,7 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
             swift: "value -= 1"
         )
     }
-    
+
     func testUnaryOperator() {
         assertSingleStatement(
             objc: "-value;",
@@ -151,7 +151,7 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
             swift: "*value"
         )
     }
-    
+
     func testVarDeclaration() {
         assertRewrite(
             objc: "NSInteger myInt = 5;",
@@ -166,7 +166,7 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
             swift: "let x: CGFloat = self.offsetForDate(cell.startDate)"
         )
     }
-    
+
     func testMultipleVarDeclarationInSameStatement() {
         assertRewrite(
             objc: "NSInteger a = 5, b, c = 6;",
@@ -174,19 +174,21 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
                 var a: Int = 5
                 var b: Int
                 var c: Int = 6
-                """)
+                """
+        )
     }
-    
+
     func testWeakModifier() {
         assertSingleStatement(
             objc: """
-            __weak id value;
-            """,
+                __weak id value;
+                """,
             swift: """
-            weak var value: AnyObject?
-            """)
+                weak var value: AnyObject?
+                """
+        )
     }
-    
+
     /// Tests __block specifier on local variable declaration
     func testParseBlockVarDeclaration() {
         assertSingleStatement(
@@ -194,7 +196,7 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
             swift: "let value: AnyObject!"
         )
     }
-    
+
     /// Tests __unused specifier on local variable declaration
     func testParseUnusedVarDeclaration() {
         assertSingleStatement(
@@ -202,7 +204,7 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
             swift: "let value: AnyObject!"
         )
     }
-    
+
     /// Leaving Swift to infer the proper type of numeric types can be troublesome
     /// sometimes, as it may not get the correct Float/Integer types while inferring
     /// initial expressions.
@@ -231,7 +233,7 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
             objc: "NSString *x = nil;",
             swift: "let x: String! = nil"
         )
-        
+
         // Keep inferring on for literal-based expressions as well
         assertSingleStatement(
             objc: "NSInteger x = 10 + 5;",
@@ -249,13 +251,13 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
             objc: "double x = 10 + 5.0;",
             swift: "let x: CDouble = 10 + 5.0"
         )
-        
+
         // Don't remove type signature from error-typed initializer expressions
         assertSingleStatement(
             objc: "NSInteger x = nonExistent;",
             swift: "let x: Int = nonExistent"
         )
-        
+
         // Type expressions from non-literal sources are not needed as they can
         // be inferred
         assertSingleStatement(
@@ -280,7 +282,7 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
             swift: "let x = \"A string\""
         )
     }
-    
+
     // An extension of the test above (testKeepVarTypePatternsOnNumericTypes)
     func testKeepVarTypePatternsOnUpcastings() {
         // Should emit types for upcasts
@@ -296,43 +298,43 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
             swift: "let x = self"
         )
     }
-    
+
     func testArrayLiterals() {
         assertSingleStatement(
             objc: "@[];",
             swift: "[]"
         )
-        
+
         assertSingleStatement(
             objc: "@[@\"a\", @\"b\"];",
             swift: "[\"a\", \"b\"]"
         )
     }
-    
+
     func testDictionaryLiterals() {
         assertSingleStatement(
             objc: "@{};",
             swift: "[:]"
         )
-        
+
         assertSingleStatement(
             objc: "@{@\"a\": @\"b\", @\"c\": @\"d\"};",
             swift: "[\"a\": \"b\", \"c\": \"d\"]"
         )
     }
-    
+
     func testEmitTypeCast() {
-//        assertSingleStatement(
-//            objc: "((UIButtonType)aThing);",
-//            swift: "aThing as? UIButtonType"
-//        )
-        
+        //        assertSingleStatement(
+        //            objc: "((UIButtonType)aThing);",
+        //            swift: "aThing as? UIButtonType"
+        //        )
+
         assertSingleStatement(
             objc: "(NSDictionary*)aThing;",
             swift: "aThing as? NSDictionary"
         )
     }
-    
+
     func testEmitSizeOf() {
         assertSingleStatement(
             objc: "sizeof(int);",
@@ -343,682 +345,736 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
             swift: "MemoryLayout.size(ofValue: abc)"
         )
     }
-    
+
     func testEmitSizeOfForKnownTypes() {
         assertRewrite(
             objc: """
-            typedef struct {
-                int field;
-            } VertexObject;
-            
-            @implementation MyClass
-            - (void)myMethod {
-                sizeof(VertexObject);
-            }
-            @end
-            """,
+                typedef struct {
+                    int field;
+                } VertexObject;
+
+                @implementation MyClass
+                - (void)myMethod {
+                    sizeof(VertexObject);
+                }
+                @end
+                """,
             swift: """
-            struct VertexObject {
-                var field: CInt
+                struct VertexObject {
+                    var field: CInt
 
-                init() {
-                    field = 0
+                    init() {
+                        field = 0
+                    }
+                    init(field: CInt) {
+                        self.field = field
+                    }
                 }
-                init(field: CInt) {
-                    self.field = field
-                }
-            }
 
-            class MyClass {
-                func myMethod() {
-                    MemoryLayout<VertexObject>.size
+                class MyClass {
+                    func myMethod() {
+                        MemoryLayout<VertexObject>.size
+                    }
                 }
-            }
-            """)
+                """
+        )
     }
-    
+
     func testSingleBlockArgument() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                [self doThing:a b:^{
-                }];
-                [self doThing:^{
-                }];
-            }
-            @end
-            """,
+                @implementation MyClass
+                - (void)myMethod {
+                    [self doThing:a b:^{
+                    }];
+                    [self doThing:^{
+                    }];
+                }
+                @end
+                """,
             swift: """
-            class MyClass {
-                func myMethod() {
-                    self.doThing(a) { () -> Void in
-                    }
-                    self.doThing { () -> Void in
+                class MyClass {
+                    func myMethod() {
+                        self.doThing(a) { () -> Void in
+                        }
+                        self.doThing { () -> Void in
+                        }
                     }
                 }
-            }
-            """)
+                """
+        )
     }
-    
+
     func testBlockLiteral() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                ^{ };
-            }
-            @end
-            """,
+                @implementation MyClass
+                - (void)myMethod {
+                    ^{ };
+                }
+                @end
+                """,
             swift: """
-            class MyClass {
-                func myMethod() {
-                    { () -> Void in
+                class MyClass {
+                    func myMethod() {
+                        { () -> Void in
+                        }
                     }
                 }
-            }
-            """)
+                """
+        )
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                const void(^myBlock)() = ^{ };
-            }
-            @end
-            """,
+                @implementation MyClass
+                - (void)myMethod {
+                    const void(^myBlock)() = ^{ };
+                }
+                @end
+                """,
             swift: """
-            class MyClass {
-                func myMethod() {
-                    let myBlock: () -> Void = {
+                class MyClass {
+                    func myMethod() {
+                        let myBlock: () -> Void = {
+                        }
                     }
                 }
-            }
-            """)
+                """
+        )
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                const void(^myBlock)() = ^{
-                    [self doThing];
-                };
-            }
-            @end
-            """,
+                @implementation MyClass
+                - (void)myMethod {
+                    const void(^myBlock)() = ^{
+                        [self doThing];
+                    };
+                }
+                @end
+                """,
             swift: """
-            class MyClass {
-                func myMethod() {
-                    let myBlock: () -> Void = {
-                        self.doThing()
+                class MyClass {
+                    func myMethod() {
+                        let myBlock: () -> Void = {
+                            self.doThing()
+                        }
                     }
                 }
-            }
-            """)
+                """
+        )
     }
-    
+
     func testVarDeclarationOmitsTypeOnLocalWithInitialValueMatchingLiteralType() {
         assertRewrite(
             objc: """
-            NSInteger myInt;
-            NSInteger myInt2 = 5;
-            @implementation MyClass
-            - (void)myMethod {
-                NSInteger local = 5;
-                const NSInteger constLocal = 5;
-                NSInteger local2;
-                NSInteger localS1 = 5, localS2;
-            }
-            @end
-            """,
-            swift: """
-            var myInt: Int
-            var myInt2: Int = 5
-            
-            class MyClass {
-                func myMethod() {
-                    let local = 5
-                    let constLocal = 5
-                    let local2: Int
-                    let localS1 = 5, localS2: Int
+                NSInteger myInt;
+                NSInteger myInt2 = 5;
+                @implementation MyClass
+                - (void)myMethod {
+                    NSInteger local = 5;
+                    const NSInteger constLocal = 5;
+                    NSInteger local2;
+                    NSInteger localS1 = 5, localS2;
                 }
-            }
-            """)
+                @end
+                """,
+            swift: """
+                var myInt: Int
+                var myInt2: Int = 5
+
+                class MyClass {
+                    func myMethod() {
+                        let local = 5
+                        let constLocal = 5
+                        let local2: Int
+                        let localS1 = 5, localS2: Int
+                    }
+                }
+                """
+        )
     }
-    
+
     func testAssignmentOperation() {
         assertSingleStatement(
-            objc: "a = 5;", swift: "a = 5"
+            objc: "a = 5;",
+            swift: "a = 5"
         )
         assertSingleStatement(
-            objc: "a += 5;", swift: "a += 5"
+            objc: "a += 5;",
+            swift: "a += 5"
         )
         assertSingleStatement(
-            objc: "a -= 5;", swift: "a -= 5"
+            objc: "a -= 5;",
+            swift: "a -= 5"
         )
         assertSingleStatement(
-            objc: "a /= 5;", swift: "a /= 5"
+            objc: "a /= 5;",
+            swift: "a /= 5"
         )
         assertSingleStatement(
-            objc: "a *= 5;", swift: "a *= 5"
+            objc: "a *= 5;",
+            swift: "a *= 5"
         )
     }
-    
+
     func testIfStatement() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                if(true) {
-                    stmt(abc);
+                @implementation MyClass
+                - (void)myMethod {
+                    if(true) {
+                        stmt(abc);
+                    }
+                    if(true)
+                        stmt();
                 }
-                if(true)
-                    stmt();
-            }
-            @end
-            """,
+                @end
+                """,
             swift: """
-            class MyClass {
-                func myMethod() {
-                    if true {
-                        stmt(abc)
-                    }
-            
-                    if true {
-                        stmt()
+                class MyClass {
+                    func myMethod() {
+                        if true {
+                            stmt(abc)
+                        }
+
+                        if true {
+                            stmt()
+                        }
                     }
                 }
-            }
-            """)
+                """
+        )
     }
-    
+
     func testElseStatement() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                if(true) {
-                    stmt1();
-                } else {
-                    stmt2();
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    if true {
-                        stmt1()
+                @implementation MyClass
+                - (void)myMethod {
+                    if(true) {
+                        stmt1();
                     } else {
-                        stmt2()
+                        stmt2();
                     }
                 }
-            }
-            """)
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        if true {
+                            stmt1()
+                        } else {
+                            stmt2()
+                        }
+                    }
+                }
+                """
+        )
     }
-    
+
     func testIfElseStatement() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                if(true) {
-                    stmt1();
-                } else if(true) {
-                    stmt2();
-                } else {
-                    stmt3();
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    if true {
-                        stmt1()
-                    } else if true {
-                        stmt2()
+                @implementation MyClass
+                - (void)myMethod {
+                    if(true) {
+                        stmt1();
+                    } else if(true) {
+                        stmt2();
                     } else {
-                        stmt3()
+                        stmt3();
                     }
                 }
-            }
-            """)
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        if true {
+                            stmt1()
+                        } else if true {
+                            stmt2()
+                        } else {
+                            stmt3()
+                        }
+                    }
+                }
+                """
+        )
     }
-    
+
     func testBracelessIfElseStatement() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                if(true)
-                    stmt1();
-                else if(true)
-                    stmt2();
-                else
-                    stmt3();
-            }
-            @end
-            """,
+                @implementation MyClass
+                - (void)myMethod {
+                    if(true)
+                        stmt1();
+                    else if(true)
+                        stmt2();
+                    else
+                        stmt3();
+                }
+                @end
+                """,
             swift: """
-            class MyClass {
-                func myMethod() {
-                    if true {
-                        stmt1()
-                    } else if true {
-                        stmt2()
-                    } else {
-                        stmt3()
+                class MyClass {
+                    func myMethod() {
+                        if true {
+                            stmt1()
+                        } else if true {
+                            stmt2()
+                        } else {
+                            stmt3()
+                        }
                     }
                 }
-            }
-            """)
+                """
+        )
     }
-    
+
     func testBracelessIfWithinIf() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                if(true) {
-                    if(true)
-                        print(10);
+                @implementation MyClass
+                - (void)myMethod {
+                    if(true) {
+                        if(true)
+                            print(10);
+                    }
                 }
-            }
-            @end
-            """,
+                @end
+                """,
             swift: """
-            class MyClass {
-                func myMethod() {
-                    if true {
+                class MyClass {
+                    func myMethod() {
                         if true {
+                            if true {
+                                print(10)
+                            }
+                        }
+                    }
+                }
+                """
+        )
+    }
+
+    func testIfStatementWithExpressions() {
+        assertRewrite(
+            objc: """
+                @implementation MyClass
+                - (void)myMethod {
+                    if (a -= 10, true) {
+                        print(10);
+                    }
+                }
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        if ({
+                            a -= 10
+
+                            return true
+                        })() {
                             print(10)
                         }
                     }
                 }
-            }
-            """)
+                """
+        )
     }
-    
-    func testIfStatementWithExpressions() {
-        assertRewrite(
-            objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                if (a -= 10, true) {
-                    print(10);
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    if ({
-                        a -= 10
 
-                        return true
-                    })() {
-                        print(10)
-                    }
-                }
-            }
-            """)
-    }
-    
     func testSwitchStatement() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                switch(value) {
-                case 0:
-                    stmt();
-                    break;
-                case 1:
-                    break;
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    switch value {
+                @implementation MyClass
+                - (void)myMethod {
+                    switch(value) {
                     case 0:
-                        stmt()
+                        stmt();
+                        break;
                     case 1:
-                        break
-                    default:
-                        break
+                        break;
                     }
                 }
-            }
-            """)
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        switch value {
+                        case 0:
+                            stmt()
+                        case 1:
+                            break
+                        default:
+                            break
+                        }
+                    }
+                }
+                """
+        )
     }
-    
+
     func testSwitchStatementWithFallthroughCases() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                switch(value) {
-                case 0:
-                    stmt();
-                case 1:
-                    otherStmt();
-                    break;
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    switch value {
+                @implementation MyClass
+                - (void)myMethod {
+                    switch(value) {
                     case 0:
-                        stmt()
-
-                        fallthrough
+                        stmt();
                     case 1:
-                        otherStmt()
-                    default:
-                        break
+                        otherStmt();
+                        break;
                     }
                 }
-            }
-            """)
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        switch value {
+                        case 0:
+                            stmt()
+
+                            fallthrough
+                        case 1:
+                            otherStmt()
+                        default:
+                            break
+                        }
+                    }
+                }
+                """
+        )
     }
-    
+
     func testSwitchStatementAvoidFallthroghIfLastStatementIsUnconditionalJump() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                switch(value) {
-                case 0:
-                    return stmt();
-                case 1:
-                    continue;
-                case 2:
-                    otherStmt();
-                    break;
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    switch value {
+                @implementation MyClass
+                - (void)myMethod {
+                    switch(value) {
                     case 0:
-                        return stmt()
+                        return stmt();
                     case 1:
-                        continue
+                        continue;
                     case 2:
-                        otherStmt()
-                    default:
-                        break
+                        otherStmt();
+                        break;
                     }
                 }
-            }
-            """)
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        switch value {
+                        case 0:
+                            return stmt()
+                        case 1:
+                            continue
+                        case 2:
+                            otherStmt()
+                        default:
+                            break
+                        }
+                    }
+                }
+                """
+        )
     }
-    
+
     func testSwitchStatementWithCompoundStatementCases() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                switch(value) {
-                case 0: {
-                    stmt();
-                    break;
-                }
-                case 1:
-                    otherStmt();
-                    break;
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    switch value {
-                    case 0:
-                        stmt()
+                @implementation MyClass
+                - (void)myMethod {
+                    switch(value) {
+                    case 0: {
+                        stmt();
+                        break;
+                    }
                     case 1:
-                        otherStmt()
-                    default:
-                        break
+                        otherStmt();
+                        break;
                     }
                 }
-            }
-            """)
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        switch value {
+                        case 0:
+                            stmt()
+                        case 1:
+                            otherStmt()
+                        default:
+                            break
+                        }
+                    }
+                }
+                """
+        )
     }
-    
+
     func testWhileStatement() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                while(true) {
-                    stmt();
+                @implementation MyClass
+                - (void)myMethod {
+                    while(true) {
+                        stmt();
+                    }
+                    while(true)
+                        stmt();
                 }
-                while(true)
-                    stmt();
-            }
-            @end
-            """,
+                @end
+                """,
             swift: """
-            class MyClass {
-                func myMethod() {
-                    while true {
-                        stmt()
-                    }
+                class MyClass {
+                    func myMethod() {
+                        while true {
+                            stmt()
+                        }
 
-                    while true {
-                        stmt()
+                        while true {
+                            stmt()
+                        }
                     }
                 }
-            }
-            """)
+                """
+        )
     }
-    
+
     func testForStatement() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                for(NSInteger i = 0; i < 10; i++) {
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    for i in 0..<10 {
+                @implementation MyClass
+                - (void)myMethod {
+                    for(NSInteger i = 0; i < 10; i++) {
                     }
                 }
-            }
-            """
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        for i in 0..<10 {
+                        }
+                    }
+                }
+                """
         )
     }
-    
+
     func testForStatementWithNonLiteralCount() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                const NSInteger count = 5;
-                for(NSInteger i = 0; i < count; i++) {
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    let count = 5
-
-                    for i in 0..<count {
+                @implementation MyClass
+                - (void)myMethod {
+                    const NSInteger count = 5;
+                    for(NSInteger i = 0; i < count; i++) {
                     }
                 }
-            }
-            """
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        let count = 5
+
+                        for i in 0..<count {
+                        }
+                    }
+                }
+                """
         )
     }
-    
+
     func testForStatementWithNonConstantCount() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                NSInteger count = 5;
-                for(NSInteger i = 0; i < count; i++) {
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    let count = 5
-
-                    for i in 0..<count {
+                @implementation MyClass
+                - (void)myMethod {
+                    NSInteger count = 5;
+                    for(NSInteger i = 0; i < count; i++) {
                     }
                 }
-            }
-            """
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        let count = 5
+
+                        for i in 0..<count {
+                        }
+                    }
+                }
+                """
         )
     }
-    
+
     func testForStatementWithArrayCount() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                NSArray *array = @[];
-                for(NSInteger i = 0; i < array.count; i++) {
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    let array = []
-
-                    for i in 0..<array.count {
+                @implementation MyClass
+                - (void)myMethod {
+                    NSArray *array = @[];
+                    for(NSInteger i = 0; i < array.count; i++) {
                     }
                 }
-            }
-            """
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        let array = []
+
+                        for i in 0..<array.count {
+                        }
+                    }
+                }
+                """
         )
     }
-    
+
     func testForStatementWithNonConstantCountModifiedWithinLoop() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                NSInteger count = 5;
-                for(NSInteger i = 0; i < count; i++) {
-                    count = 0;
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    var count = 5
-                    var i = 0
-
-                    while i < count {
-                        defer {
-                            i += 1
-                        }
-
-                        count = 0
+                @implementation MyClass
+                - (void)myMethod {
+                    NSInteger count = 5;
+                    for(NSInteger i = 0; i < count; i++) {
+                        count = 0;
                     }
                 }
-            }
-            """
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        var count = 5
+                        var i = 0
+
+                        while i < count {
+                            defer {
+                                i += 1
+                            }
+
+                            count = 0
+                        }
+                    }
+                }
+                """
         )
     }
-    
+
     func testForStatementWithNonInitializerStatement() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                NSInteger count = 5;
-                for(i = 0; i < count; i++) {
+                @implementation MyClass
+                - (void)myMethod {
+                    NSInteger count = 5;
+                    for(i = 0; i < count; i++) {
+                    }
                 }
-            }
-            @end
-            """,
+                @end
+                """,
             swift: """
-            class MyClass {
-                func myMethod() {
-                    let count = 5
+                class MyClass {
+                    func myMethod() {
+                        let count = 5
 
-                    i = 0
+                        i = 0
 
-                    while i < count {
-                        defer {
-                            i += 1
+                        while i < count {
+                            defer {
+                                i += 1
+                            }
                         }
                     }
                 }
-            }
-            """
+                """
         )
     }
-    
+
     func testDoWhileStatement() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                do {
-                    stmt();
-                } while(true);
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    repeat {
-                        stmt()
-                    } while true
+                @implementation MyClass
+                - (void)myMethod {
+                    do {
+                        stmt();
+                    } while(true);
                 }
-            }
-            """
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        repeat {
+                            stmt()
+                        } while true
+                    }
+                }
+                """
         )
     }
-    
+
     func testSynchronizedStatement() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                @synchronized(self) {
-                    stuff();
+                @implementation MyClass
+                - (void)myMethod {
+                    @synchronized(self) {
+                        stuff();
+                    }
+                    
+                    otherStuff();
                 }
-                
-                otherStuff();
-            }
-            @end
-            """,
+                @end
+                """,
             swift: """
-            class MyClass {
-                func myMethod() {
-                    do {
+                class MyClass {
+                    func myMethod() {
+                        do {
+                            let _lockTarget = self
+
+                            objc_sync_enter(_lockTarget)
+
+                            defer {
+                                objc_sync_exit(_lockTarget)
+                            }
+
+                            stuff()
+                        }
+
+                        otherStuff()
+                    }
+                }
+                """
+        )
+    }
+
+    func testSingleSynchronizedStatement() {
+        assertRewrite(
+            objc: """
+                @implementation MyClass
+                - (void)myMethod {
+                    @synchronized(self) {
+                        stuff();
+                    }
+                }
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
                         let _lockTarget = self
 
                         objc_sync_enter(_lockTarget)
@@ -1029,160 +1085,143 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
 
                         stuff()
                     }
-
-                    otherStuff()
                 }
-            }
-            """)
+                """
+        )
     }
-    
-    func testSingleSynchronizedStatement() {
-        assertRewrite(
-            objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                @synchronized(self) {
-                    stuff();
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    let _lockTarget = self
 
-                    objc_sync_enter(_lockTarget)
-
-                    defer {
-                        objc_sync_exit(_lockTarget)
-                    }
-
-                    stuff()
-                }
-            }
-            """)
-    }
-    
     func testAutoreleasePoolStatement() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                @autoreleasepool {
-                    stuff();
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    autoreleasepool { () -> Void in
-                        stuff()
+                @implementation MyClass
+                - (void)myMethod {
+                    @autoreleasepool {
+                        stuff();
                     }
                 }
-            }
-            """)
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        autoreleasepool { () -> Void in
+                            stuff()
+                        }
+                    }
+                }
+                """
+        )
     }
-    
+
     func testForInStatement() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                for(NSObject *obj in anArray) {
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
-                    for obj in anArray {
+                @implementation MyClass
+                - (void)myMethod {
+                    for(NSObject *obj in anArray) {
                     }
                 }
-            }
-            """)
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        for obj in anArray {
+                        }
+                    }
+                }
+                """
+        )
     }
-    
+
     func testReturnStatement() {
         assertSingleStatement(
-            objc: "return;", swift: "return"
+            objc: "return;",
+            swift: "return"
         )
         assertSingleStatement(
-            objc: "return 10;", swift: "return 10"
+            objc: "return 10;",
+            swift: "return 10"
         )
     }
-    
+
     func testContinueBreakStatements() {
         assertSingleStatement(
-            objc: "continue;", swift: "continue"
+            objc: "continue;",
+            swift: "continue"
         )
         assertSingleStatement(
-            objc: "break;", swift: "break"
+            objc: "break;",
+            swift: "break"
         )
     }
-    
+
     func testLabeledStatement() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                label:
-                if (true) {
-                }
-                label2:
-                if (true) {
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
+                @implementation MyClass
+                - (void)myMethod {
                     label:
-                    if true {
+                    if (true) {
                     }
-
                     label2:
-                    if true {
+                    if (true) {
                     }
                 }
-            }
-            """)
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        label:
+                        if true {
+                        }
+
+                        label2:
+                        if true {
+                        }
+                    }
+                }
+                """
+        )
     }
-    
+
     func testLabeledStatementNested() {
         assertRewrite(
             objc: """
-            @implementation MyClass
-            - (void)myMethod {
-                label:
-                {
-                    if (true) {
-                    }
-                    return;
-                }
-            }
-            @end
-            """,
-            swift: """
-            class MyClass {
-                func myMethod() {
+                @implementation MyClass
+                - (void)myMethod {
                     label:
-                    if true {
+                    {
+                        if (true) {
+                        }
+                        return;
                     }
-
-                    return
                 }
-            }
-            """)
+                @end
+                """,
+            swift: """
+                class MyClass {
+                    func myMethod() {
+                        label:
+                        if true {
+                        }
+
+                        return
+                    }
+                }
+                """
+        )
     }
 }
 
-private extension ObjectiveC2SwiftRewriter_StmtTests {
-    func assertSingleStatement(objc: String, swift: String, file: StaticString = #filePath, line: UInt = #line) {
+extension ObjectiveC2SwiftRewriter_StmtTests {
+    fileprivate func assertSingleStatement(
+        objc: String,
+        swift: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
         let objc = """
             @implementation MyClass: UIView
             - (void)myMethod {
@@ -1197,7 +1236,7 @@ private extension ObjectiveC2SwiftRewriter_StmtTests {
                 }
             }
             """
-        
+
         assertRewrite(objc: objc, swift: swift, file: file, line: line)
     }
 }

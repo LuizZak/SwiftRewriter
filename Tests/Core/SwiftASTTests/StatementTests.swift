@@ -1,5 +1,5 @@
-import XCTest
 import SwiftAST
+import XCTest
 
 class StatementTests: XCTestCase {
     func testCreatingCompoundStatementWithLiteralProperlySetsParents() {
@@ -7,10 +7,10 @@ class StatementTests: XCTestCase {
         let stmt: CompoundStatement = [
             brk
         ]
-        
+
         XCTAssert(brk.parent === stmt)
     }
-    
+
     func testIsLabelableStatementType() {
         XCTAssertFalse(Statement.break().isLabelableStatementType)
         XCTAssertFalse(Statement.continue().isLabelableStatementType)
@@ -21,12 +21,17 @@ class StatementTests: XCTestCase {
         XCTAssertFalse(Statement.return(.constant(.nil)).isLabelableStatementType)
         XCTAssertFalse(Statement.unknown(UnknownASTContext(context: "")).isLabelableStatementType)
         XCTAssertFalse(Statement.variableDeclarations([]).isLabelableStatementType)
-        
+
         XCTAssertTrue(Statement.do([]).isLabelableStatementType)
         XCTAssertTrue(Statement.doWhile(.constant(true), body: []).isLabelableStatementType)
-        XCTAssertTrue(Statement.for(.expression(.constant(true)), .constant(true), body: []).isLabelableStatementType)
+        XCTAssertTrue(
+            Statement.for(.expression(.constant(true)), .constant(true), body: [])
+                .isLabelableStatementType
+        )
         XCTAssertTrue(Statement.if(.constant(true), body: [], else: nil).isLabelableStatementType)
-        XCTAssertTrue(Statement.switch(.constant(true), cases: [], default: nil).isLabelableStatementType)
+        XCTAssertTrue(
+            Statement.switch(.constant(true), cases: [], default: nil).isLabelableStatementType
+        )
         XCTAssertTrue(Statement.while(.constant(true), body: []).isLabelableStatementType)
     }
 }

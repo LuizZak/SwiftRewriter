@@ -57,8 +57,10 @@ public class CPreprocessorDirectiveConverter {
         do {
             let lexer = Lexer(input: directive)
             lexer.skipWhitespace()
+            
             try lexer.advance(expectingCurrent: "#")
             lexer.skipWhitespace()
+            
             try lexer.consume(match: "define")
             lexer.skipWhitespace()
             

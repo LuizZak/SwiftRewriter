@@ -100,27 +100,27 @@ public class CoreGraphicsExpressionPass: BaseExpressionPass {
         switch exp.identifier {
         case "CGRectZero":
             notifyChange()
-            return Expression.identifier("CGRect").dot("zero")
+            return .identifier("CGRect").dot("zero")
             
         case "CGPointZero":
             notifyChange()
-            return Expression.identifier("CGPoint").dot("zero")
+            return .identifier("CGPoint").dot("zero")
             
         case "CGVectorZero":
             notifyChange()
-            return Expression.identifier("CGVector").dot("zero")
+            return .identifier("CGVector").dot("zero")
             
         case "CGSizeZero":
             notifyChange()
-            return Expression.identifier("CGSize").dot("zero")
+            return .identifier("CGSize").dot("zero")
             
         case "CGRectNull":
             notifyChange()
-            return Expression.identifier("CGRect").dot("null")
+            return .identifier("CGRect").dot("null")
             
         case "CGRectInfinite":
             notifyChange()
-            return Expression.identifier("CGRect").dot("infinite")
+            return .identifier("CGRect").dot("infinite")
             
         default:
             return super.visitIdentifier(exp)
@@ -242,7 +242,7 @@ extension CoreGraphicsExpressionPass {
     func createCGPathTransformers() {
         /// Converts two expressions into a CGPoint initializer
         let toCGPoint: (Expression, Expression) -> Expression = { x, y in
-            Expression.identifier("CGPoint").call([.labeled("x", x), .labeled("y", y)])
+            .identifier("CGPoint").call([.labeled("x", x), .labeled("y", y)])
         }
         
         makeInstanceCall("CGPathAddRoundedRect", swiftName: "addRoundedRect",
@@ -323,7 +323,7 @@ extension CoreGraphicsExpressionPass {
     func createCGContextTransformers() {
         /// Converts two expressions into a CGPoint initializer
         let toCGPoint: (Expression, Expression) -> Expression = { x, y in
-            Expression.identifier("CGPoint").call([.labeled("x", x), .labeled("y", y)])
+            .identifier("CGPoint").call([.labeled("x", x), .labeled("y", y)])
         }
         
         // Methods

@@ -110,8 +110,10 @@ open class ASTRewriterPass: SyntaxNodeRewriter {
     
     open override func visitDictionary(_ exp: DictionaryLiteralExpression) -> Expression {
         exp.pairs = exp.pairs.map { pair in
-            ExpressionDictionaryPair(key: visitBaseExpression(pair.key),
-                                     value: visitBaseExpression(pair.value))
+            ExpressionDictionaryPair(
+                key: visitBaseExpression(pair.key),
+                value: visitBaseExpression(pair.value)
+            )
         }
         
         return exp

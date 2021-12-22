@@ -93,7 +93,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         //   func(<name>)
         // }
         let newOp = functionCall.value.replacingArguments([
-            Expression.identifier(name).typed(resolvedType.deepUnwrapped)
+            .identifier(name).typed(resolvedType.deepUnwrapped)
         ])
         let newPostfix = postfix.copy()
         newPostfix.op = newOp
@@ -289,13 +289,13 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
                             .binary(op: .nullCoalesce, rhs: initValue)
                     ).typed(memberType.deepUnwrapped)
             
-            res = Expression.postfix(res, memberPostfix.op.copy().withOptionalAccess(kind: .none))
+            res = .postfix(res, memberPostfix.op.copy().withOptionalAccess(kind: .none))
             
             res.resolvedType = memberPostfix.resolvedType
             
             res.asPostfix?.op.returnType = res.asPostfix?.op.returnType?.unwrapped
             
-            res = Expression.postfix(res, exp.op.copy())
+            res = .postfix(res, exp.op.copy())
             
             res.resolvedType = exp.resolvedType?.unwrapped
             res.asPostfix?.exp.resolvedType = res.asPostfix?.exp.resolvedType?.unwrapped
@@ -335,7 +335,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         let converted: Expression
         
         if newExp.requiresParens {
-            converted = Expression.parens(newExp).binary(op: .nullCoalesce, rhs: defValue)
+            converted = .parens(newExp).binary(op: .nullCoalesce, rhs: defValue)
         } else {
             converted = newExp.binary(op: .nullCoalesce, rhs: defValue)
         }
@@ -343,7 +343,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         converted.resolvedType = defValue.resolvedType
         converted.expectedType = converted.resolvedType
         
-        return Expression.parens(converted).typed(defValue.resolvedType?.deepUnwrapped)
+        return .parens(converted).typed(defValue.resolvedType?.deepUnwrapped)
     }
     
     func correctToNumeric(_ exp: Expression) -> Expression? {

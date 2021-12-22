@@ -7,7 +7,8 @@
 /// myClass.removeMethod(method[0])
 /// myClass.addMethod(newMethod)
 ///
-/// myClass.recordChange(tag: "MergePass", description: "Merging two methods into a single default method")
+/// myClass
+///     .recordChange(tag: "MergePass", description: "Merging two methods into a single default method")
 ///     .echoRecord(to: newMethod.history)
 /// ```
 public struct IntentionHistoryEntryEcho {

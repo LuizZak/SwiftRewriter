@@ -1,69 +1,86 @@
-import XCTest
-import SwiftAST
 import KnownType
+import SwiftAST
 import SwiftRewriterLib
 import TypeSystem
+import XCTest
 
 @testable import ExpressionPasses
 
 class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
-        
+
         sutType = CanonicalNameExpressionPass.self
-        
+
         let typeProvider = CollectionKnownTypeProvider()
-        typeProvider.addCanonicalMapping(nonCanonical: "NonCanon",
-                                         canonical: "Canon")
-        
+        typeProvider.addCanonicalMapping(
+            nonCanonical: "NonCanon",
+            canonical: "Canon"
+        )
+
         typeSystem.addKnownTypeProvider(typeProvider)
     }
-    
+
     func testTransformCanonicalTypeName() {
         assertTransform(
             expression: .identifier("NonCanon"),
             into: .identifier("Canon")
-        ); assertNotifiedChange()
-        
+        )
+        assertNotifiedChange()
+
         assertTransform(
-            expression: Expression.identifier("NonCanon").settingDefinition(.forType(named: "NonCanon")),
+            expression: Expression.identifier("NonCanon").settingDefinition(
+                .forType(named: "NonCanon")
+            ),
             into: .identifier("Canon")
-        ); assertNotifiedChange()
+        )
+        assertNotifiedChange()
     }
-    
+
     func testTransformCanonicalTypeNameWithMetatypeResolvedType() {
         assertTransform(
             expression: Expression.identifier("NonCanon").typed(.metatype(for: "NonCanon")),
             into: .identifier("Canon")
-        ); assertNotifiedChange()
+        )
+        assertNotifiedChange()
     }
-    
+
     func testDontTransformUnknownTypeName() {
         assertTransform(
             expression: .identifier("Unexisting"),
             into: .identifier("Unexisting")
-        ); assertDidNotNotifyChange()
+        )
+        assertDidNotNotifyChange()
     }
-    
+
     func testDontTransformIdentifiersWhichFeaturesNonTypeDefinitions() {
         assertTransform(
-            expression: Expression
+            expression:
+                Expression
                 .identifier("NonCanon")
                 .settingDefinition(CodeDefinition.forSetterValue(named: "setter", type: .int)),
-            into: Expression
+            into:
+                Expression
                 .identifier("NonCanon")
-        ); assertDidNotNotifyChange()
-        
+        )
+        assertDidNotNotifyChange()
+
         assertTransform(
-            expression: Expression
+            expression:
+                Expression
                 .identifier("NonCanon")
-                .settingDefinition(.forGlobalVariable(name: "global", isConstant: false, type: .int)),
-            into: Expression
+                .settingDefinition(
+                    .forGlobalVariable(name: "global", isConstant: false, type: .int)
+                ),
+            into:
+                Expression
                 .identifier("NonCanon")
-        ); assertDidNotNotifyChange()
-        
+        )
+        assertDidNotNotifyChange()
+
         assertTransform(
-            expression: Expression
+            expression:
+                Expression
                 .identifier("NonCanon")
                 .settingDefinition(
                     .forKnownMember(
@@ -73,34 +90,45 @@ class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
                             .knownProperties[0]
                     )
                 ),
-            into: Expression
+            into:
+                Expression
                 .identifier("NonCanon")
-        ); assertDidNotNotifyChange()
+        )
+        assertDidNotNotifyChange()
     }
-    
+
     func testDontTransformIdentifiersWhichFeaturesNonMetatypeResolvedType() {
         assertTransform(
-            expression: Expression
+            expression:
+                Expression
                 .identifier("NonCanon")
                 .typed(.int),
-            into: Expression
+            into:
+                Expression
                 .identifier("NonCanon")
-        ); assertDidNotNotifyChange()
-        
+        )
+        assertDidNotNotifyChange()
+
         assertTransform(
-            expression: Expression
+            expression:
+                Expression
                 .identifier("NonCanon")
                 .typed(.string),
-            into: Expression
+            into:
+                Expression
                 .identifier("NonCanon")
-        ); assertDidNotNotifyChange()
-        
+        )
+        assertDidNotNotifyChange()
+
         assertTransform(
-            expression: Expression
+            expression:
+                Expression
                 .identifier("NonCanon")
                 .typed(.optional(.metatype(for: "NonCanon"))),
-            into: Expression
+            into:
+                Expression
                 .identifier("NonCanon")
-        ); assertDidNotNotifyChange()
+        )
+        assertDidNotNotifyChange()
     }
 }

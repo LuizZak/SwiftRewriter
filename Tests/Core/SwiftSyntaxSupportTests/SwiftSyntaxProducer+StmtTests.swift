@@ -1,78 +1,96 @@
-import XCTest
-import SwiftSyntax
-import SwiftAST
-@testable import SwiftSyntaxSupport
 import Intentions
+import SwiftAST
+import SwiftSyntax
 import TestCommons
 import Utils
+import XCTest
+
+@testable import SwiftSyntaxSupport
 
 class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
-    
+
     func testExpressions() {
         let stmt = Statement.expressions([.identifier("foo"), .identifier("bar")])
         let sut = SwiftSyntaxProducer()
         let syntax = sut.generateExpressions(stmt)
-        
-        assert(syntax[0](sut),
-               matches: """
+
+        assert(
+            syntax[0](sut),
+            matches: """
                 foo
-                """)
-        
-        assert(syntax[1](sut),
-               matches: """
+                """
+        )
+
+        assert(
+            syntax[1](sut),
+            matches: """
                 bar
-                """)
+                """
+        )
     }
-    
+
     func testExpressionsInCompound() {
-        let stmt: CompoundStatement = [Statement.expressions([.identifier("foo"), .identifier("bar")])]
+        let stmt: CompoundStatement = [
+            Statement.expressions([.identifier("foo"), .identifier("bar")])
+        ]
         let syntax = SwiftSyntaxProducer().generateCompound(stmt)
-        
-        assert(syntax,
-               matches: """
+
+        assert(
+            syntax,
+            matches: """
                  {
                     foo
                     bar
                 }
-                """)
+                """
+        )
     }
-    
+
     func testVariableDeclarationsStatement() {
-        let stmt = Statement
+        let stmt =
+            Statement
             .variableDeclarations([
-                StatementVariableDeclaration(identifier: "foo",
-                                             type: .int,
-                                             initialization: .constant(0))
+                StatementVariableDeclaration(
+                    identifier: "foo",
+                    type: .int,
+                    initialization: .constant(0)
+                )
             ])
         let sut = SwiftSyntaxProducer()
         let syntax = sut.generateVariableDeclarations(stmt)
-        
-        assert(syntax[0](sut),
-               matches: """
+
+        assert(
+            syntax[0](sut),
+            matches: """
                 var foo: Int = 0
-                """)
+                """
+        )
     }
-    
+
     func testVariableDeclarationsInCompound() {
         let stmt: CompoundStatement = [
             Statement
                 .variableDeclarations([
                     StatementVariableDeclaration(identifier: "foo", type: .int),
-                    StatementVariableDeclaration(identifier: "bar",
-                                                 type: .float,
-                                                 initialization: .constant(0.0))
+                    StatementVariableDeclaration(
+                        identifier: "bar",
+                        type: .float,
+                        initialization: .constant(0.0)
+                    ),
                 ])
         ]
         let syntax = SwiftSyntaxProducer().generateCompound(stmt)
-        
-        assert(syntax,
-               matches: """
+
+        assert(
+            syntax,
+            matches: """
                  {
                     var foo: Int, bar: Float = 0.0
                 }
-                """)
+                """
+        )
     }
-    
+
     // If we have a single variable declaration statement with variables that
     // alternate between 'let' and 'var', make sure we split these declarations
     // across multiple statements, since var-decl statements cannot have both 'let'
@@ -82,91 +100,106 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             Statement
                 .variableDeclarations([
                     StatementVariableDeclaration(identifier: "foo", type: .int),
-                    StatementVariableDeclaration(identifier: "bar",
-                                                 type: .float,
-                                                 initialization: .constant(0.0)),
-                    StatementVariableDeclaration(identifier: "baz",
-                                                 type: .int,
-                                                 isConstant: true),
-                    StatementVariableDeclaration(identifier: "zaz",
-                                                 type: .string,
-                                                 isConstant: true)
-                    ])
+                    StatementVariableDeclaration(
+                        identifier: "bar",
+                        type: .float,
+                        initialization: .constant(0.0)
+                    ),
+                    StatementVariableDeclaration(
+                        identifier: "baz",
+                        type: .int,
+                        isConstant: true
+                    ),
+                    StatementVariableDeclaration(
+                        identifier: "zaz",
+                        type: .string,
+                        isConstant: true
+                    ),
+                ])
         ]
         let syntax = SwiftSyntaxProducer().generateCompound(stmt)
-        
-        assert(syntax,
-               matches: """
+
+        assert(
+            syntax,
+            matches: """
                  {
                     var foo: Int, bar: Float = 0.0
                     let baz: Int, zaz: String
                 }
-                """)
+                """
+        )
     }
-    
+
     func testContinueStatement() {
         assert(
             Statement.continue(),
             producer: SwiftSyntaxProducer.generateContinue,
             matches: """
                 continue
-                """)
+                """
+        )
     }
-    
+
     func testContinueStatementWithLabel() {
         assert(
             Statement.continue(targetLabel: "label"),
             producer: SwiftSyntaxProducer.generateContinue,
             matches: """
                 continue label
-                """)
+                """
+        )
     }
-    
+
     func testBreakStatement() {
         assert(
             Statement.break(),
             producer: SwiftSyntaxProducer.generateBreak,
             matches: """
                 break
-                """)
+                """
+        )
     }
-    
+
     func testBreakStatementWithLabel() {
         assert(
             Statement.break(targetLabel: "label"),
             producer: SwiftSyntaxProducer.generateBreak,
             matches: """
                 break label
-                """)
+                """
+        )
     }
-    
+
     func testFallthroughStatement() {
         assert(
             Statement.fallthrough,
             producer: SwiftSyntaxProducer.generateFallthrough,
             matches: """
                 fallthrough
-                """)
+                """
+        )
     }
-    
+
     func testReturnStatement() {
         assert(
             Statement.return(nil),
             producer: SwiftSyntaxProducer.generateReturn,
             matches: """
                 return
-                """)
+                """
+        )
     }
-    
+
     func testReturnStatementWithExpression() {
         assert(
             Statement.return(.constant(123)),
             producer: SwiftSyntaxProducer.generateReturn,
             matches: """
                 return 123
-                """)
+                """
+        )
     }
-    
+
     func testIfStatement() {
         assert(
             Statement.if(.constant(true), body: []),
@@ -174,9 +207,10 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             matches: """
                 if true {
                 }
-                """)
+                """
+        )
     }
-    
+
     func testIfElseStatement() {
         assert(
             Statement.if(.constant(true), body: [], else: []),
@@ -185,18 +219,21 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 if true {
                 } else {
                 }
-                """)
+                """
+        )
     }
-    
+
     func testIfElseIfElseStatement() {
         assert(
             Statement.if(
                 .constant(true),
                 body: [],
                 else: [
-                    .if(.constant(true),
+                    .if(
+                        .constant(true),
                         body: [],
-                        else: [])
+                        else: []
+                    )
                 ]
             ),
             producer: SwiftSyntaxProducer.generateIfStmt,
@@ -205,9 +242,10 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 } else if true {
                 } else {
                 }
-                """)
+                """
+        )
     }
-    
+
     func testIfLetStatement() {
         assert(
             Statement.ifLet(.identifier("value"), .identifier("exp"), body: []),
@@ -215,9 +253,10 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             matches: """
                 if let value = exp {
                 }
-                """)
+                """
+        )
     }
-    
+
     func testIfLetElseStatement() {
         assert(
             Statement.ifLet(.identifier("value"), .identifier("exp"), body: [], else: []),
@@ -226,28 +265,32 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 if let value = exp {
                 } else {
                 }
-                """)
+                """
+        )
     }
-    
+
     func testSwitchStatementEmpty() {
-        let stmt = Statement
+        let stmt =
+            Statement
             .switch(
                 .identifier("value"),
-                cases: [
-                ],
-                default: nil)
-        
+                cases: [],
+                default: nil
+            )
+
         assert(
             stmt,
             producer: SwiftSyntaxProducer.generateSwitchStmt,
             matches: """
                 switch value {
                 }
-                """)
+                """
+        )
     }
-    
+
     func testSwitchStatementOneCase() {
-        let stmt = Statement
+        let stmt =
+            Statement
             .switch(
                 .identifier("value"),
                 cases: [
@@ -260,8 +303,9 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                         ]
                     )
                 ],
-                default: nil)
-        
+                default: nil
+            )
+
         assert(
             stmt,
             producer: SwiftSyntaxProducer.generateSwitchStmt,
@@ -270,26 +314,29 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 case 0:
                     break
                 }
-                """)
+                """
+        )
     }
-    
+
     func testSwitchStatementMultiplePatterns() {
-        let stmt = Statement
+        let stmt =
+            Statement
             .switch(
                 .identifier("value"),
                 cases: [
                     SwitchCase(
                         patterns: [
                             .expression(.constant(0)),
-                            .expression(.constant(1))
+                            .expression(.constant(1)),
                         ],
                         statements: [
                             .break()
                         ]
                     )
                 ],
-                default: nil)
-        
+                default: nil
+            )
+
         assert(
             stmt,
             producer: SwiftSyntaxProducer.generateSwitchStmt,
@@ -298,26 +345,31 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 case 0, 1:
                     break
                 }
-                """)
+                """
+        )
     }
-    
+
     func testSwitchStatementTuplePattern() {
-        let stmt = Statement
+        let stmt =
+            Statement
             .switch(
                 .identifier("value"),
                 cases: [
                     SwitchCase(
                         patterns: [
-                            .tuple([.expression(.constant(0)),
-                                    .expression(.constant(1))])
+                            .tuple([
+                                .expression(.constant(0)),
+                                .expression(.constant(1)),
+                            ])
                         ],
                         statements: [
                             .break()
                         ]
                     )
                 ],
-                default: nil)
-        
+                default: nil
+            )
+
         assert(
             stmt,
             producer: SwiftSyntaxProducer.generateSwitchStmt,
@@ -326,11 +378,13 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 case (0, 1):
                     break
                 }
-                """)
+                """
+        )
     }
-    
+
     func testSwitchStatementTwoCases() {
-        let stmt = Statement
+        let stmt =
+            Statement
             .switch(
                 .identifier("value"),
                 cases: [
@@ -349,10 +403,11 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                         statements: [
                             .break()
                         ]
-                    )
+                    ),
                 ],
-                default: nil)
-        
+                default: nil
+            )
+
         assert(
             stmt,
             producer: SwiftSyntaxProducer.generateSwitchStmt,
@@ -363,18 +418,21 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 case 1:
                     break
                 }
-                """)
+                """
+        )
     }
-    
+
     func testSwitchStatementDefaultOnly() {
-        let stmt = Statement
+        let stmt =
+            Statement
             .switch(
                 .identifier("value"),
                 cases: [],
                 default: [
                     .break()
-                ])
-        
+                ]
+            )
+
         assert(
             stmt,
             producer: SwiftSyntaxProducer.generateSwitchStmt,
@@ -383,11 +441,13 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 default:
                     break
                 }
-                """)
+                """
+        )
     }
-    
+
     func testSwitchStatementOneCaseWithDefault() {
-        let stmt = Statement
+        let stmt =
+            Statement
             .switch(
                 .identifier("value"),
                 cases: [
@@ -402,8 +462,9 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 ],
                 default: [
                     .break()
-                ])
-        
+                ]
+            )
+
         assert(
             stmt,
             producer: SwiftSyntaxProducer.generateSwitchStmt,
@@ -414,11 +475,13 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 default:
                     break
                 }
-                """)
+                """
+        )
     }
-    
+
     func testSwitchStatementTwoCasesWithDefault() {
-        let stmt = Statement
+        let stmt =
+            Statement
             .switch(
                 .identifier("value"),
                 cases: [
@@ -436,14 +499,15 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                         ],
                         statements: [
                             .expression(Expression.identifier("foo").call()),
-                            .expression(Expression.identifier("bar").call())
+                            .expression(Expression.identifier("bar").call()),
                         ]
-                    )
+                    ),
                 ],
                 default: [
                     .break()
-                ])
-        
+                ]
+            )
+
         assert(
             stmt,
             producer: SwiftSyntaxProducer.generateSwitchStmt,
@@ -457,9 +521,10 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 default:
                     break
                 }
-                """)
+                """
+        )
     }
-    
+
     func testWhileStatement() {
         assert(
             Statement.while(.constant(true), body: []),
@@ -467,9 +532,10 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             matches: """
                 while true {
                 }
-                """)
+                """
+        )
     }
-    
+
     func testRepeatWhileStatement() {
         assert(
             Statement.doWhile(.constant(true), body: []),
@@ -477,9 +543,10 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             matches: """
                 repeat {
                 } while true
-                """)
+                """
+        )
     }
-    
+
     func testForStatement() {
         assert(
             Statement.for(.identifier("test"), .identifier("array"), body: []),
@@ -487,9 +554,10 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             matches: """
                 for test in array {
                 }
-                """)
+                """
+        )
     }
-    
+
     func testDoStatement() {
         assert(
             Statement.do([]),
@@ -497,9 +565,10 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             matches: """
                 do {
                 }
-                """)
+                """
+        )
     }
-    
+
     func testDeferStatement() {
         assert(
             Statement.defer([]),
@@ -507,101 +576,127 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             matches: """
                 defer {
                 }
-                """)
+                """
+        )
     }
-    
+
     func testUnknownStatement() {
         let stmt = Statement.unknown(UnknownASTContext(context: "abc"))
         let syntaxes = SwiftSyntaxProducer().generateUnknown(stmt)
-        
-        assert(syntaxes, matches: """
-            /*
-            abc
-            */
-            """)
+
+        assert(
+            syntaxes,
+            matches: """
+                /*
+                abc
+                */
+                """
+        )
     }
-    
+
     func testLabeledExpressionStatement() {
         let stmt = Statement.expression(.identifier("value")).labeled("label")
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
-        
-        assert(syntaxes, matches: """
-            // label:
-                value
-            """)
+
+        assert(
+            syntaxes,
+            matches: """
+                // label:
+                    value
+                """
+        )
     }
-    
+
     func testLabeledIfStatement() {
         let stmt = Statement.if(.constant(true), body: []).labeled("label")
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
-        
-        assert(syntaxes, matches: """
-            label:
-                if true {
-                }
-            """)
+
+        assert(
+            syntaxes,
+            matches: """
+                label:
+                    if true {
+                    }
+                """
+        )
     }
-    
+
     func testLabeledWhileStatement() {
         let stmt = Statement.while(.constant(true), body: []).labeled("label")
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
-        
-        assert(syntaxes, matches: """
-            label:
-                while true {
-                }
-            """)
+
+        assert(
+            syntaxes,
+            matches: """
+                label:
+                    while true {
+                    }
+                """
+        )
     }
-    
+
     func testLabeledRepeatWhileStatement() {
         let stmt = Statement.doWhile(.constant(true), body: []).labeled("label")
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
-        
-        assert(syntaxes, matches: """
-            label:
-                repeat {
-                } while true
-            """)
+
+        assert(
+            syntaxes,
+            matches: """
+                label:
+                    repeat {
+                    } while true
+                """
+        )
     }
-    
+
     func testLabeledSwitchStatement() {
-        let stmt = Statement
+        let stmt =
+            Statement
             .switch(
                 .identifier("value"),
-                cases: [
-                ],
-                default: nil).labeled("label")
+                cases: [],
+                default: nil
+            ).labeled("label")
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
-        
-        assert(syntaxes, matches: """
-            label:
-                switch value {
-                }
-            """)
+
+        assert(
+            syntaxes,
+            matches: """
+                label:
+                    switch value {
+                    }
+                """
+        )
     }
-    
+
     func testLabeledForInStatement() {
         let stmt = Statement.for(.identifier("v"), .identifier("value"), body: []).labeled("label")
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
-        
-        assert(syntaxes, matches: """
-            label:
-                for v in value {
-                }
-            """)
+
+        assert(
+            syntaxes,
+            matches: """
+                label:
+                    for v in value {
+                    }
+                """
+        )
     }
-    
+
     func testLabeledDoStatement() {
         let stmt = Statement.do([]).labeled("label")
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
-        
-        assert(syntaxes, matches: """
-            label:
-                do {
-                }
-            """)
+
+        assert(
+            syntaxes,
+            matches: """
+                label:
+                    do {
+                    }
+                """
+        )
     }
-    
+
     func testComment() {
         let stmt: CompoundStatement = [
             Statement
@@ -609,16 +704,19 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 .withComments(["// A Comment", "// Another Comment"])
         ]
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
-        
-        assert(syntaxes, matches: """
-             {
-                // A Comment
-                // Another Comment
-                value
-            }
-            """)
+
+        assert(
+            syntaxes,
+            matches: """
+                 {
+                    // A Comment
+                    // Another Comment
+                    value
+                }
+                """
+        )
     }
-    
+
     func testCommentAndLabel() {
         let stmt: CompoundStatement = [
             Statement
@@ -627,17 +725,20 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 .labeled("label")
         ]
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
-        
-        assert(syntaxes, matches: """
-             {
-                // A Comment
-                // Another Comment
-                // label:
-                value
-            }
-            """)
+
+        assert(
+            syntaxes,
+            matches: """
+                 {
+                    // A Comment
+                    // Another Comment
+                    // label:
+                    value
+                }
+                """
+        )
     }
-    
+
     func testCommentAndLabelInLabelableStatement() {
         let stmt: CompoundStatement = [
             Statement
@@ -646,18 +747,21 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 .labeled("label")
         ]
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
-        
-        assert(syntaxes, matches: """
-             {
-                // A Comment
-                // Another Comment
-                label:
-                if value {
+
+        assert(
+            syntaxes,
+            matches: """
+                 {
+                    // A Comment
+                    // Another Comment
+                    label:
+                    if value {
+                    }
                 }
-            }
-            """)
+                """
+        )
     }
-    
+
     func testTrailingComment() {
         let stmt: CompoundStatement = [
             Statement
@@ -665,14 +769,17 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 .withTrailingComment("// A trailing comment")
         ]
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
-        
-        assert(syntaxes, matches: """
-             {
-                var value: Int // A trailing comment
-            }
-            """)
+
+        assert(
+            syntaxes,
+            matches: """
+                 {
+                    var value: Int // A trailing comment
+                }
+                """
+        )
     }
-    
+
     func testTrailingCommentInStatement() {
         let stmt: CompoundStatement = [
             Statement
@@ -680,15 +787,18 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 .withTrailingComment("// A trailing comment")
         ]
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
-        
-        assert(syntaxes, matches: """
-             {
-                if value {
-                } // A trailing comment
-            }
-            """)
+
+        assert(
+            syntaxes,
+            matches: """
+                 {
+                    if value {
+                    } // A trailing comment
+                }
+                """
+        )
     }
-    
+
     func testTrailingCommentInSplitExpressionsStatement() {
         let stmt: CompoundStatement = [
             Statement
@@ -699,12 +809,15 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 .withTrailingComment("// A trailing comment")
         ]
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
-        
-        assert(syntaxes, matches: """
-             {
-                stmt1()
-                stmt2() // A trailing comment
-            }
-            """)
+
+        assert(
+            syntaxes,
+            matches: """
+                 {
+                    stmt1()
+                    stmt2() // A trailing comment
+                }
+                """
+        )
     }
 }

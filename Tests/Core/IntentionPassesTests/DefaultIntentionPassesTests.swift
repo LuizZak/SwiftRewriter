@@ -1,18 +1,18 @@
-import XCTest
 import Intentions
 import SwiftRewriterLib
 import TypeSystem
+import XCTest
 
 @testable import IntentionPasses
 
 class DefaultIntentionPassesTests: XCTestCase {
     func testDefaultIntentionPasses() {
         let intents = DefaultIntentionPasses().intentionPasses
-        
+
         // Using iterator so we can test ordering without indexing into array
         // (could crash and abort tests halfway through)
         var intentsIterator = intents.makeIterator()
-        
+
         XCTAssert(intentsIterator.next() is FileTypeMergingIntentionPass)
         XCTAssert(intentsIterator.next() is SubscriptDeclarationIntentionPass)
         XCTAssert(intentsIterator.next() is PromoteProtocolPropertyConformanceIntentionPass)
@@ -33,13 +33,17 @@ class DefaultIntentionPassesTests: XCTestCase {
 // Helper method for constructing intention pass contexts for tests
 func makeContext(intentions: IntentionCollection) -> IntentionPassContext {
     let system = IntentionCollectionTypeSystem(intentions: intentions)
-    let invoker = DefaultTypeResolverInvoker(globals: ArrayDefinitionsSource(),
-                                             typeSystem: system,
-                                             numThreads: 8)
+    let invoker = DefaultTypeResolverInvoker(
+        globals: ArrayDefinitionsSource(),
+        typeSystem: system,
+        numThreads: 8
+    )
     let typeMapper = DefaultTypeMapper(typeSystem: system)
-    
-    return IntentionPassContext(typeSystem: system,
-                                typeMapper: typeMapper,
-                                typeResolverInvoker: invoker,
-                                numThreads: 8)
+
+    return IntentionPassContext(
+        typeSystem: system,
+        typeMapper: typeMapper,
+        typeResolverInvoker: invoker,
+        numThreads: 8
+    )
 }

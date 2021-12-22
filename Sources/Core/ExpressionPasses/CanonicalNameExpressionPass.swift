@@ -27,10 +27,9 @@ public class CanonicalNameExpressionPass: ASTRewriterPass {
         if let canonical = typeSystem.canonicalName(forTypeName: exp.identifier) {
             notifyChange()
             
-            return
-                IdentifierExpression(identifier: canonical)
-                    .copyTypeAndMetadata(from: exp)
-                    .typed(.metatype(for: .typeName(canonical)))
+            return IdentifierExpression(identifier: canonical)
+                .copyTypeAndMetadata(from: exp)
+                .typed(.metatype(for: .typeName(canonical)))
         }
         
         return super.visitIdentifier(exp)

@@ -1,8 +1,8 @@
-import XCTest
 import SwiftAST
+import XCTest
 
 class FunctionIdentifierTests: XCTestCase {
-    
+
     func testIdentifierDescription() {
         XCTAssertEqual(
             FunctionIdentifier(name: "function", argumentLabels: []).description,
@@ -21,5 +21,5 @@ class FunctionIdentifierTests: XCTestCase {
             "function(a:_:b:)"
         )
     }
-    
+
 }

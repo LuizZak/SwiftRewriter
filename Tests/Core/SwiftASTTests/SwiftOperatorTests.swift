@@ -1,5 +1,5 @@
-import XCTest
 import SwiftAST
+import XCTest
 
 class SwiftOperatorTests: XCTestCase {
     func testOperatorCategoryArithmetic() {
@@ -9,13 +9,13 @@ class SwiftOperatorTests: XCTestCase {
         assert(.divide, is: .arithmetic)
         assert(.mod, is: .arithmetic)
     }
-    
+
     func testOperatorCategoryLogical() {
         assert(.and, is: .logical)
         assert(.or, is: .logical)
         assert(.negate, is: .logical)
     }
-    
+
     func testOperatorCategoryAssignment() {
         assert(.assign, is: .assignment)
         assert(.addAssign, is: .assignment)
@@ -29,7 +29,7 @@ class SwiftOperatorTests: XCTestCase {
         assert(.bitwiseShiftLeftAssign, is: .assignment)
         assert(.bitwiseShiftRightAssign, is: .assignment)
     }
-    
+
     func testOperatorCategoryComparison() {
         assert(.lessThan, is: .comparison)
         assert(.lessThanOrEqual, is: .comparison)
@@ -38,22 +38,26 @@ class SwiftOperatorTests: XCTestCase {
         assert(.equals, is: .comparison)
         assert(.unequals, is: .comparison)
     }
-    
+
     func testOperatorCategoryNullCoalesce() {
         assert(.nullCoalesce, is: .nullCoalesce)
     }
-    
+
     func testOperatorCategoryRangeMaking() {
         assert(.openRange, is: .range)
         assert(.closedRange, is: .range)
     }
-    
-    private func assert(_ op: SwiftOperator, is category: SwiftOperatorCategory, line: UInt = #line) {
+
+    private func assert(_ op: SwiftOperator, is category: SwiftOperatorCategory, line: UInt = #line)
+    {
         if op.category == category {
             return
         }
-        
-        XCTFail("Assertion failure: Expected '\(op)' to be '\(category)', received '\(op.category)'",
-                file: #filePath, line: line)
+
+        XCTFail(
+            "Assertion failure: Expected '\(op)' to be '\(category)', received '\(op.category)'",
+            file: #filePath,
+            line: line
+        )
     }
 }

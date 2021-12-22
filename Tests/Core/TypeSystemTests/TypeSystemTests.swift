@@ -1,99 +1,155 @@
-import XCTest
-import SwiftAST
 import KnownType
+import SwiftAST
 import TypeSystem
+import XCTest
 
 class TypeSystemTests: XCTestCase {
     var sut: TypeSystem!
-    
+
     override func setUp() {
         sut = TypeSystem()
     }
-    
+
     // MARK: - typesMatch
-    
+
     func testTypesMatchSameStructure() {
-        XCTAssert(sut.typesMatch(.typeName("A"),
-                                 .typeName("A"),
-                                 ignoreNullability: false))
-        
-        XCTAssert(sut.typesMatch(.nested([.typeName("A"), .typeName("B")]),
-                                 .nested([.typeName("A"), .typeName("B")]),
-                                 ignoreNullability: false))
+        XCTAssert(
+            sut.typesMatch(
+                .typeName("A"),
+                .typeName("A"),
+                ignoreNullability: false
+            )
+        )
+
+        XCTAssert(
+            sut.typesMatch(
+                .nested([.typeName("A"), .typeName("B")]),
+                .nested([.typeName("A"), .typeName("B")]),
+                ignoreNullability: false
+            )
+        )
     }
-    
+
     func testTypesMatchSameStructureDifferentTypes() {
-        XCTAssertFalse(sut.typesMatch(.typeName("A"),
-                                      .typeName("DIFFER"),
-                                      ignoreNullability: false))
-        
-        XCTAssertFalse(sut.typesMatch(.nested([.typeName("A"), .typeName("B")]),
-                                      .nested([.typeName("A"), .typeName("DIFFER")]),
-                                      ignoreNullability: false))
+        XCTAssertFalse(
+            sut.typesMatch(
+                .typeName("A"),
+                .typeName("DIFFER"),
+                ignoreNullability: false
+            )
+        )
+
+        XCTAssertFalse(
+            sut.typesMatch(
+                .nested([.typeName("A"), .typeName("B")]),
+                .nested([.typeName("A"), .typeName("DIFFER")]),
+                ignoreNullability: false
+            )
+        )
     }
-    
+
     func testTypesMatchIgnoringNullability() {
-        XCTAssert(sut.typesMatch(.optional(.typeName("A")),
-                                 .typeName("A"),
-                                 ignoreNullability: true))
-        
-        XCTAssert(sut.typesMatch(.optional(.nested([.typeName("A"), .typeName("B")])),
-                                 .nested([.typeName("A"), .typeName("B")]),
-                                 ignoreNullability: true))
+        XCTAssert(
+            sut.typesMatch(
+                .optional(.typeName("A")),
+                .typeName("A"),
+                ignoreNullability: true
+            )
+        )
+
+        XCTAssert(
+            sut.typesMatch(
+                .optional(.nested([.typeName("A"), .typeName("B")])),
+                .nested([.typeName("A"), .typeName("B")]),
+                ignoreNullability: true
+            )
+        )
     }
-    
+
     func testTypesMatchExpandingTypeAliases() {
         sut.addTypealias(aliasName: "A", originalType: "B")
-        
-        XCTAssert(sut.typesMatch(.typeName("A"),
-                                 .typeName("B"),
-                                 ignoreNullability: false))
+
+        XCTAssert(
+            sut.typesMatch(
+                .typeName("A"),
+                .typeName("B"),
+                ignoreNullability: false
+            )
+        )
     }
-    
+
     func testTypesMatchExpandingTypeAliasesDeep() {
         sut.addTypealias(aliasName: "A", originalType: "B")
-        sut.addTypealias(aliasName: "C", originalType: .generic("D", parameters: .one(.typeName("A"))))
-        
-        XCTAssert(sut.typesMatch(.typeName("C"),
-                                 .generic("D", parameters: .one(.typeName("A"))),
-                                 ignoreNullability: false))
-        XCTAssert(sut.typesMatch(.typeName("C"),
-                                 .generic("D", parameters: .one(.typeName("B"))),
-                                 ignoreNullability: false))
+        sut.addTypealias(
+            aliasName: "C",
+            originalType: .generic("D", parameters: .one(.typeName("A")))
+        )
+
+        XCTAssert(
+            sut.typesMatch(
+                .typeName("C"),
+                .generic("D", parameters: .one(.typeName("A"))),
+                ignoreNullability: false
+            )
+        )
+        XCTAssert(
+            sut.typesMatch(
+                .typeName("C"),
+                .generic("D", parameters: .one(.typeName("B"))),
+                ignoreNullability: false
+            )
+        )
     }
-    
+
     func testTypesMatchExpandingAliasesInBlockType() {
         sut.addTypealias(aliasName: "A", originalType: "B")
-        
-        XCTAssert(sut.typesMatch(.swiftBlock(returnType: "A", parameters: []),
-                                 .swiftBlock(returnType: "B", parameters: []),
-                                 ignoreNullability: false))
+
+        XCTAssert(
+            sut.typesMatch(
+                .swiftBlock(returnType: "A", parameters: []),
+                .swiftBlock(returnType: "B", parameters: []),
+                ignoreNullability: false
+            )
+        )
     }
-    
+
     func testTypesMatchExpandBlockTypeAliases() {
         sut.addTypealias(
             aliasName: "A",
-            originalType: .swiftBlock(returnType: .void, parameters: []))
-        
-        XCTAssert(sut.typesMatch(.typeName("A"),
-                                 .swiftBlock(returnType: .void, parameters: []),
-                                 ignoreNullability: false))
+            originalType: .swiftBlock(returnType: .void, parameters: [])
+        )
+
+        XCTAssert(
+            sut.typesMatch(
+                .typeName("A"),
+                .swiftBlock(returnType: .void, parameters: []),
+                ignoreNullability: false
+            )
+        )
     }
-    
+
     func testTypesMatchExpandBlockTypeAliasesDeep() {
-        sut.addTypealias(aliasName: "A",
-                         originalType: .swiftBlock(returnType: "B", parameters: []))
-        
-        sut.addTypealias(aliasName: "B",
-                         originalType: .typeName("C"))
-        
-        XCTAssert(sut.typesMatch(.typeName("A"),
-                                 .swiftBlock(returnType: .typeName("C"), parameters: []),
-                                 ignoreNullability: false))
+        sut.addTypealias(
+            aliasName: "A",
+            originalType: .swiftBlock(returnType: "B", parameters: [])
+        )
+
+        sut.addTypealias(
+            aliasName: "B",
+            originalType: .typeName("C")
+        )
+
+        XCTAssert(
+            sut.typesMatch(
+                .typeName("A"),
+                .swiftBlock(returnType: .typeName("C"), parameters: []),
+                ignoreNullability: false
+            )
+        )
     }
-    
+
     // MARK: - defaultValue
-    
+
     func testDefaultValueForNumerics() {
         XCTAssertEqual(sut.defaultValue(for: .int), .constant(0))
         XCTAssertEqual(sut.defaultValue(for: .int)?.resolvedType, .int)
@@ -104,22 +160,22 @@ class TypeSystemTests: XCTestCase {
         XCTAssertEqual(sut.defaultValue(for: .double), .constant(0.0))
         XCTAssertEqual(sut.defaultValue(for: .double)?.resolvedType, .double)
     }
-    
+
     func testDefaultValueForNumericTypealiases() {
         sut.addTypealias(aliasName: "MyInt", originalType: .int)
         sut.addTypealias(aliasName: "MyFloat", originalType: .float)
-        
+
         XCTAssertEqual(sut.defaultValue(for: "MyInt"), .constant(0))
         XCTAssertEqual(sut.defaultValue(for: "MyInt")?.resolvedType, "MyInt")
         XCTAssertEqual(sut.defaultValue(for: "MyFloat"), .constant(0.0))
         XCTAssertEqual(sut.defaultValue(for: "MyFloat")?.resolvedType, "MyFloat")
     }
-    
+
     func testDefaultValueForBool() {
         XCTAssertEqual(sut.defaultValue(for: .bool), .constant(false))
         XCTAssertEqual(sut.defaultValue(for: .bool)?.resolvedType, .bool)
     }
-    
+
     func testDefaultValueForOptionals() {
         XCTAssertEqual(sut.defaultValue(for: .optional(.int)), .constant(.nil))
         XCTAssertEqual(sut.defaultValue(for: .optional(.int))?.resolvedType, .optional(.int))
@@ -128,88 +184,95 @@ class TypeSystemTests: XCTestCase {
         XCTAssertEqual(sut.defaultValue(for: .optional(.double)), .constant(.nil))
         XCTAssertEqual(sut.defaultValue(for: .optional(.double))?.resolvedType, .optional(.double))
     }
-    
+
     func testDefaultValueForOptionalOfArrayOfIntegers() {
         XCTAssertEqual(sut.defaultValue(for: .optional(.array(.int))), .constant(.nil))
-        XCTAssertEqual(sut.defaultValue(for: .optional(.array(.int)))?.resolvedType, .optional(.array(.int)))
+        XCTAssertEqual(
+            sut.defaultValue(for: .optional(.array(.int)))?.resolvedType,
+            .optional(.array(.int))
+        )
     }
-    
+
     func testDefaultValueForVoid() {
         XCTAssertEqual(sut.defaultValue(for: .void), .tuple([]))
         XCTAssertEqual(sut.defaultValue(for: .void)?.resolvedType, .void)
     }
-    
+
     func testDefaultValueForTuple() {
-        XCTAssertEqual(sut.defaultValue(for: .tuple(.types([.int, .int]))),
-                       .tuple([.constant(0), .constant(0)]))
-        
-        XCTAssertEqual(sut.defaultValue(for: .tuple(.types([.int, .int])))?.resolvedType,
-                       .tuple(.types([.int, .int])))
+        XCTAssertEqual(
+            sut.defaultValue(for: .tuple(.types([.int, .int]))),
+            .tuple([.constant(0), .constant(0)])
+        )
+
+        XCTAssertEqual(
+            sut.defaultValue(for: .tuple(.types([.int, .int])))?.resolvedType,
+            .tuple(.types([.int, .int]))
+        )
     }
-    
+
     func testDefaultValueForTupleWithNonRepresentableDefaultValue() {
         XCTAssertNil(sut.defaultValue(for: .tuple(.types([.int, .typeName("UnknownType")]))))
     }
-    
+
     func testDefaultValueOfUnknownType() {
         XCTAssertNil(sut.defaultValue(for: .typeName("UnknownType")))
     }
-    
+
     func testDefaultValueForClassTypeIsAlwaysNil() {
         let str =
             KnownTypeBuilder(typeName: "A", kind: .class)
-                .constructor()
-                .build()
+            .constructor()
+            .build()
         sut.addType(str)
-        
+
         XCTAssertNil(sut.defaultValue(for: .typeName("A")))
     }
-    
+
     func testDefaultValueForProtocolTypeIsAlwaysNil() {
         let str =
             KnownTypeBuilder(typeName: "A", kind: .protocol)
-                .constructor()
-                .build()
+            .constructor()
+            .build()
         sut.addType(str)
-        
+
         XCTAssertNil(sut.defaultValue(for: .typeName("A")))
     }
-    
+
     func testDefaultValueForStructWithNoEmptyConstructorEvaluatesToNil() {
         let str =
             KnownTypeBuilder(typeName: "A", kind: .struct)
-                .build()
+            .build()
         sut.addType(str)
-        
+
         XCTAssertNil(sut.defaultValue(for: .typeName("A")))
     }
-    
+
     func testDefaultValueForStructWithEmptyConstructor() {
         let str =
             KnownTypeBuilder(typeName: "A", kind: .struct)
-                .constructor()
-                .build()
+            .constructor()
+            .build()
         sut.addType(str)
-        
+
         let result = sut.defaultValue(for: .typeName("A"))
-        
+
         XCTAssertEqual(result, Expression.identifier("A").call())
         XCTAssertEqual(result?.resolvedType, .typeName("A"))
     }
-    
+
     func testDefaultValueForEnum() {
         let en = KnownTypeBuilder(typeName: "E", kind: .enum)
             .addingTrait(KnownTypeTraits.enumRawValue, value: .swiftType(SwiftType.int))
             .enumCase(named: "case1")
             .build()
         sut.addType(en)
-        
+
         let result = sut.defaultValue(for: "E")
-        
+
         XCTAssertEqual(result, Expression.identifier("E").dot("case1"))
         XCTAssertEqual(result?.resolvedType, "E")
     }
-    
+
     func testDefaultValueForEnumWithNonIntegerType() {
         let en1 = KnownTypeBuilder(typeName: "E1", kind: .enum)
             .enumCase(named: "case1")
@@ -220,24 +283,24 @@ class TypeSystemTests: XCTestCase {
             .build()
         sut.addType(en1)
         sut.addType(en2)
-        
+
         XCTAssertNil(sut.defaultValue(for: "E1"))
         XCTAssertNil(sut.defaultValue(for: "E2"))
     }
-    
+
     func testDefaultValueForEnumExplicitZero() {
         let en = KnownTypeBuilder(typeName: "E", kind: .enum)
             .addingTrait(KnownTypeTraits.enumRawValue, value: .swiftType(SwiftType.int))
             .enumCase(named: "case1", rawValue: Expression.constant(0))
             .build()
         sut.addType(en)
-        
+
         let result = sut.defaultValue(for: "E")
-        
+
         XCTAssertEqual(result, Expression.identifier("E").dot("case1"))
         XCTAssertEqual(result?.resolvedType, "E")
     }
-    
+
     func testDefaultValueForEnumIncrementedZero() {
         let en = KnownTypeBuilder(typeName: "E", kind: .enum)
             .addingTrait(KnownTypeTraits.enumRawValue, value: .swiftType(SwiftType.int))
@@ -245,27 +308,29 @@ class TypeSystemTests: XCTestCase {
             .enumCase(named: "case2")
             .build()
         sut.addType(en)
-        
+
         let result = sut.defaultValue(for: "E")
-        
+
         XCTAssertEqual(result, Expression.identifier("E").dot("case2"))
         XCTAssertEqual(result?.resolvedType, "E")
     }
-    
+
     // MARK: -
-    
+
     func testResolveTypeAliasesInOptionalArrayOfInts() {
-        XCTAssertEqual(sut.resolveAlias(in: .optional(.array(.int))),
-                       .optional(.array(.int)))
+        XCTAssertEqual(
+            sut.resolveAlias(in: .optional(.array(.int))),
+            .optional(.array(.int))
+        )
     }
-    
+
     func testIsNumeric() {
         // 64-bits
         XCTAssert(sut.isNumeric(.typeName("Int64")))
         XCTAssert(sut.isNumeric(.typeName("UInt64")))
         XCTAssert(sut.isNumeric(.typeName("CLongLong")))
         XCTAssert(sut.isNumeric(.typeName("CUnsignedLongLong")))
-        
+
         // 32-bits
         XCTAssert(sut.isNumeric(.typeName("Int")))
         XCTAssert(sut.isNumeric(.typeName("UInt")))
@@ -274,20 +339,20 @@ class TypeSystemTests: XCTestCase {
         XCTAssert(sut.isNumeric(.typeName("CInt")))
         XCTAssert(sut.isNumeric(.typeName("CUnsignedInt")))
         XCTAssert(sut.isNumeric(.typeName("CChar32")))
-        
+
         // 16-bits
         XCTAssert(sut.isNumeric(.typeName("Int16")))
         XCTAssert(sut.isNumeric(.typeName("UInt16")))
         XCTAssert(sut.isNumeric(.typeName("CShort")))
         XCTAssert(sut.isNumeric(.typeName("CUnsignedShort")))
         XCTAssert(sut.isNumeric(.typeName("CChar16")))
-        
+
         // 8-bits
         XCTAssert(sut.isNumeric(.typeName("Int8")))
         XCTAssert(sut.isNumeric(.typeName("UInt8")))
         XCTAssert(sut.isNumeric(.typeName("CChar")))
         XCTAssert(sut.isNumeric(.typeName("CUnsignedChar")))
-        
+
         // Floating-point
         XCTAssert(sut.isNumeric(.typeName("Float")))
         XCTAssert(sut.isNumeric(.typeName("Float80")))
@@ -295,14 +360,14 @@ class TypeSystemTests: XCTestCase {
         XCTAssert(sut.isNumeric(.typeName("CFloat")))
         XCTAssert(sut.isNumeric(.typeName("CDouble")))
     }
-    
+
     func testIsInteger() {
         // 64-bits
         XCTAssert(sut.isInteger(.typeName("Int64")))
         XCTAssert(sut.isInteger(.typeName("UInt64")))
         XCTAssert(sut.isInteger(.typeName("CLongLong")))
         XCTAssert(sut.isInteger(.typeName("CUnsignedLongLong")))
-        
+
         // 32-bits
         XCTAssert(sut.isInteger(.typeName("Int")))
         XCTAssert(sut.isInteger(.typeName("UInt")))
@@ -311,20 +376,20 @@ class TypeSystemTests: XCTestCase {
         XCTAssert(sut.isInteger(.typeName("CInt")))
         XCTAssert(sut.isInteger(.typeName("CUnsignedInt")))
         XCTAssert(sut.isInteger(.typeName("CChar32")))
-        
+
         // 16-bits
         XCTAssert(sut.isInteger(.typeName("Int16")))
         XCTAssert(sut.isInteger(.typeName("UInt16")))
         XCTAssert(sut.isInteger(.typeName("CShort")))
         XCTAssert(sut.isInteger(.typeName("CUnsignedShort")))
         XCTAssert(sut.isInteger(.typeName("CChar16")))
-        
+
         // 8-bits
         XCTAssert(sut.isInteger(.typeName("Int8")))
         XCTAssert(sut.isInteger(.typeName("UInt8")))
         XCTAssert(sut.isInteger(.typeName("CChar")))
         XCTAssert(sut.isInteger(.typeName("CUnsignedChar")))
-        
+
         // Floating-point
         XCTAssertFalse(sut.isInteger(.typeName("Float")))
         XCTAssertFalse(sut.isInteger(.typeName("Float80")))
@@ -332,14 +397,14 @@ class TypeSystemTests: XCTestCase {
         XCTAssertFalse(sut.isInteger(.typeName("CFloat")))
         XCTAssertFalse(sut.isInteger(.typeName("CDouble")))
     }
-    
+
     func testIsFloat() {
         // 64-bits
         XCTAssertFalse(sut.isFloat(.typeName("Int64")))
         XCTAssertFalse(sut.isFloat(.typeName("UInt64")))
         XCTAssertFalse(sut.isFloat(.typeName("CLongLong")))
         XCTAssertFalse(sut.isFloat(.typeName("CUnsignedLongLong")))
-        
+
         // 32-bits
         XCTAssertFalse(sut.isFloat(.typeName("Int")))
         XCTAssertFalse(sut.isFloat(.typeName("UInt")))
@@ -348,20 +413,20 @@ class TypeSystemTests: XCTestCase {
         XCTAssertFalse(sut.isFloat(.typeName("CInt")))
         XCTAssertFalse(sut.isFloat(.typeName("CUnsignedInt")))
         XCTAssertFalse(sut.isFloat(.typeName("CChar32")))
-        
+
         // 16-bits
         XCTAssertFalse(sut.isFloat(.typeName("Int16")))
         XCTAssertFalse(sut.isFloat(.typeName("UInt16")))
         XCTAssertFalse(sut.isFloat(.typeName("CShort")))
         XCTAssertFalse(sut.isFloat(.typeName("CUnsignedShort")))
         XCTAssertFalse(sut.isFloat(.typeName("CChar16")))
-        
+
         // 8-bits
         XCTAssertFalse(sut.isFloat(.typeName("Int8")))
         XCTAssertFalse(sut.isFloat(.typeName("UInt8")))
         XCTAssertFalse(sut.isFloat(.typeName("CChar")))
         XCTAssertFalse(sut.isFloat(.typeName("CUnsignedChar")))
-        
+
         // Floating-point
         XCTAssert(sut.isFloat(.typeName("Float")))
         XCTAssert(sut.isFloat(.typeName("Float80")))
@@ -369,168 +434,186 @@ class TypeSystemTests: XCTestCase {
         XCTAssert(sut.isFloat(.typeName("CFloat")))
         XCTAssert(sut.isFloat(.typeName("CDouble")))
     }
-    
+
     func testIsIntegerTypealiased() {
         sut.addTypealias(aliasName: "Alias", originalType: .int)
         sut.addTypealias(aliasName: "NonIntegerAlias", originalType: .float)
-        
+
         XCTAssert(sut.isInteger("Alias"))
         XCTAssertFalse(sut.isInteger("NonIntegerAlias"))
     }
-    
+
     func testIsNumericTypealiased() {
         sut.addTypealias(aliasName: "Alias", originalType: .float)
-        
+
         XCTAssert(sut.isNumeric("Alias"))
     }
-    
+
     func testIsFloatTypealiased() {
         sut.addTypealias(aliasName: "Alias", originalType: .float)
-        
+
         XCTAssert(sut.isFloat("Alias"))
     }
-    
+
     func testIsTypeSubtypeOf() {
         let typeA = KnownTypeBuilder(typeName: "A").build()
         let typeB = KnownTypeBuilder(typeName: "B", supertype: typeA).build()
         let typeC = KnownTypeBuilder(typeName: "C", supertype: typeB).build()
-        
+
         sut.addType(typeA)
         sut.addType(typeB)
         sut.addType(typeC)
-        
+
         XCTAssertTrue(sut.isType("A", subtypeOf: "A"))
         XCTAssertTrue(sut.isType("B", subtypeOf: "A"))
         XCTAssertTrue(sut.isType("C", subtypeOf: "A"))
         XCTAssertFalse(sut.isType("A", subtypeOf: "B"))
         XCTAssertFalse(sut.isType("A", subtypeOf: "C"))
     }
-    
+
     func testIsTypeSubtypeOf_SwiftType() {
         let typeA = KnownTypeBuilder(typeName: "A").build()
         let typeB = KnownTypeBuilder(typeName: "B", supertype: typeA).build()
         let typeC = KnownTypeBuilder(typeName: "C", supertype: typeB).build()
-        
+
         sut.addType(typeA)
         sut.addType(typeB)
         sut.addType(typeC)
-        
+
         XCTAssertTrue(sut.isType("A" as SwiftType, subtypeOf: "A"))
         XCTAssertTrue(sut.isType("B" as SwiftType, subtypeOf: "A"))
         XCTAssertTrue(sut.isType("C" as SwiftType, subtypeOf: "A"))
         XCTAssertFalse(sut.isType("A" as SwiftType, subtypeOf: "B"))
         XCTAssertFalse(sut.isType("A" as SwiftType, subtypeOf: "C"))
     }
-    
+
     func testNSObjectDefinition() {
         guard let type = sut.knownTypeWithName("NSObject") else {
             XCTFail("Expected NSObject to be present")
             return
         }
-        
-        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
-                        "Missing NSObject's default parameterless constructor")
+
+        XCTAssertNotNil(
+            sut.constructor(withArgumentLabels: [], in: type),
+            "Missing NSObject's default parameterless constructor"
+        )
         XCTAssertNotNil(sut.conformance(toProtocolName: "NSObjectProtocol", in: type))
-        
+
         // NSObjectProtocol methods
         XCTAssertNotNil(
-            sut.method(withIdentifier: FunctionIdentifier(name: "responds", argumentLabels: ["to"]),
-                       invocationTypeHints: nil,
-                       static: false,
-                       includeOptional: true,
-                       in: type)
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "responds", argumentLabels: ["to"]),
+                invocationTypeHints: nil,
+                static: false,
+                includeOptional: true,
+                in: type
+            )
         )
         XCTAssertNotNil(
-            sut.method(withIdentifier:
-                FunctionIdentifier(name: "isEqual", argumentLabels: [nil]),
-                       invocationTypeHints: nil,
-                       static: false,
-                       includeOptional: true,
-                       in: type)
+            sut.method(
+                withIdentifier:
+                    FunctionIdentifier(name: "isEqual", argumentLabels: [nil]),
+                invocationTypeHints: nil,
+                static: false,
+                includeOptional: true,
+                in: type
+            )
         )
     }
-    
+
     func testNSSetDefinition() {
         guard let type = sut.knownTypeWithName("NSSet") else {
             XCTFail("Expected NSSet to be present")
             return
         }
-        
+
         XCTAssertEqual(type.supertype?.asTypeName, "NSObject")
-        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
-                        "Missing NSSet's default parameterless constructor")
+        XCTAssertNotNil(
+            sut.constructor(withArgumentLabels: [], in: type),
+            "Missing NSSet's default parameterless constructor"
+        )
     }
-    
+
     func testNSMutableSetDefinition() {
         guard let type = sut.knownTypeWithName("NSMutableSet") else {
             XCTFail("Expected NSMutableSet to be present")
             return
         }
-        
+
         XCTAssertEqual(type.supertype?.asTypeName, "NSSet")
-        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
-                        "Missing NSMutableSet's default parameterless constructor")
+        XCTAssertNotNil(
+            sut.constructor(withArgumentLabels: [], in: type),
+            "Missing NSMutableSet's default parameterless constructor"
+        )
     }
-    
+
     func testNSDateDefinition() {
         guard let type = sut.knownTypeWithName("NSDate") else {
             XCTFail("Expected NSDate to be present")
             return
         }
-        
+
         XCTAssertEqual(type.supertype?.asTypeName, "NSObject")
-        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
-                        "Missing NSDate's default parameterless constructor")
+        XCTAssertNotNil(
+            sut.constructor(withArgumentLabels: [], in: type),
+            "Missing NSDate's default parameterless constructor"
+        )
     }
-    
+
     func testNSDataDefinition() {
         guard let type = sut.knownTypeWithName("NSData") else {
             XCTFail("Expected NSData to be present")
             return
         }
-        
+
         XCTAssertEqual(type.supertype?.asTypeName, "NSObject")
-        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
-                        "Missing NSData's default parameterless constructor")
+        XCTAssertNotNil(
+            sut.constructor(withArgumentLabels: [], in: type),
+            "Missing NSData's default parameterless constructor"
+        )
     }
-    
+
     func testNSMutableDataDefinition() {
         guard let type = sut.knownTypeWithName("NSMutableData") else {
             XCTFail("Expected NSMutableData to be present")
             return
         }
-        
+
         XCTAssertEqual(type.supertype?.asTypeName, "NSData")
-        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
-                        "Missing NSMutableData's default parameterless constructor")
+        XCTAssertNotNil(
+            sut.constructor(withArgumentLabels: [], in: type),
+            "Missing NSMutableData's default parameterless constructor"
+        )
     }
-    
+
     func testNSMutableStringDefinition() {
         guard let type = sut.knownTypeWithName("NSMutableString") else {
             XCTFail("Expected NSMutableString to be present")
             return
         }
-        
+
         XCTAssertEqual(type.supertype?.asTypeName, "NSString")
-        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
-                        "Missing NSMutableString's default parameterless constructor")
+        XCTAssertNotNil(
+            sut.constructor(withArgumentLabels: [], in: type),
+            "Missing NSMutableString's default parameterless constructor"
+        )
     }
-    
+
     func testNSObjectProtocolDefinition() {
         guard let type = sut.knownTypeWithName("NSObjectProtocol") else {
             XCTFail("Expected NSObjectProtocol to be present")
             return
         }
-        
+
         XCTAssertEqual(type.kind, .protocol)
     }
-    
+
     func testNSFormatterDefinition() {
         guard let type = sut.knownTypeWithName("NSFormatter") else {
             XCTFail("Expected NSFormatter to be present")
             return
         }
-        
+
         XCTAssertEqual(type.kind, .class)
         XCTAssertEqual(type.supertype?.asTypeName, "NSObject")
     }
@@ -539,100 +622,133 @@ class TypeSystemTests: XCTestCase {
             XCTFail("Expected NSDateFormatter to be present")
             return
         }
-        
+
         XCTAssertEqual(type.kind, .class)
         XCTAssertEqual(type.supertype?.asTypeName, "NSFormatter")
     }
-    
+
     func testConstructorSearchesThroughSupertypes() {
         let type1 = KnownTypeBuilder(typeName: "A").constructor().build()
         let type2 = KnownTypeBuilder(typeName: "B", supertype: type1).build()
         let type3 = KnownTypeBuilder(typeName: "C", supertype: type2).build()
-        
+
         sut.addType(type1)
         sut.addType(type2)
         sut.addType(type3)
-        
+
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type1))
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type2))
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type3))
     }
-    
+
     func testConstructorSearchesTypeNamedSupertypes() {
         let type1 = KnownTypeBuilder(typeName: "A").constructor().build()
         let type2 = KnownTypeBuilder(typeName: "B", supertype: type1).build()
         let type3 = KnownTypeBuilder(typeName: "C", supertype: "B").build()
-        
+
         sut.addType(type1)
         sut.addType(type2)
         sut.addType(type3)
-        
+
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type1))
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type2))
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type3))
     }
-    
+
     func testMethodLookupIgnoresOptionalProtocolMethodsNotImplemented() {
         let prot =
             KnownTypeBuilder(typeName: "A", kind: .protocol)
-                .method(named: "nonOptional", returning: .void)
-                .method(named: "optional", returning: .void, optional: true)
-                .method(named: "optionalImplemented", returning: .void, optional: true)
-                .build()
+            .method(named: "nonOptional", returning: .void)
+            .method(named: "optional", returning: .void, optional: true)
+            .method(named: "optionalImplemented", returning: .void, optional: true)
+            .build()
         let cls =
             KnownTypeBuilder(typeName: "B")
-                .protocolConformance(protocolName: "A")
-                .method(named: "optionalImplemented", returning: .void)
-                .build()
+            .protocolConformance(protocolName: "A")
+            .method(named: "optionalImplemented", returning: .void)
+            .build()
         sut.addType(prot)
         sut.addType(cls)
-        
-        XCTAssertNotNil(sut.method(withIdentifier: FunctionIdentifier(name: "nonOptional", argumentLabels: []),
-                                   invocationTypeHints: nil,
-                                   static: false,
-                                   includeOptional: false,
-                                   in: cls))
-        
-        XCTAssertNil(sut.method(withIdentifier: FunctionIdentifier(name: "optional", argumentLabels: []),
-                                invocationTypeHints: nil,
-                                static: false,
-                                includeOptional: false,
-                                in: cls))
-        
-        XCTAssertNotNil(sut.method(withIdentifier: FunctionIdentifier(name: "optional", argumentLabels: []),
-                                   invocationTypeHints: nil,
-                                   static: false,
-                                   includeOptional: true,
-                                   in: cls))
-        
-        XCTAssertNotNil(sut.method(withIdentifier: FunctionIdentifier(name: "optionalImplemented", argumentLabels: []),
-                                   invocationTypeHints: nil,
-                                   static: false,
-                                   includeOptional: false,
-                                   in: cls))
+
+        XCTAssertNotNil(
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "nonOptional", argumentLabels: []),
+                invocationTypeHints: nil,
+                static: false,
+                includeOptional: false,
+                in: cls
+            )
+        )
+
+        XCTAssertNil(
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "optional", argumentLabels: []),
+                invocationTypeHints: nil,
+                static: false,
+                includeOptional: false,
+                in: cls
+            )
+        )
+
+        XCTAssertNotNil(
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "optional", argumentLabels: []),
+                invocationTypeHints: nil,
+                static: false,
+                includeOptional: true,
+                in: cls
+            )
+        )
+
+        XCTAssertNotNil(
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "optionalImplemented", argumentLabels: []),
+                invocationTypeHints: nil,
+                static: false,
+                includeOptional: false,
+                in: cls
+            )
+        )
     }
-    
+
     func testAddTypeAlias() {
-        sut.addTypealias(aliasName: "A", originalType: .swiftBlock(returnType: .void, parameters: []))
-        
+        sut.addTypealias(
+            aliasName: "A",
+            originalType: .swiftBlock(returnType: .void, parameters: [])
+        )
+
         XCTAssertEqual(sut.resolveAlias(in: "A"), .swiftBlock(returnType: .void, parameters: []))
     }
-    
+
     func testResolveAliasRecursive() {
         sut.addTypealias(aliasName: "B", originalType: .int)
-        sut.addTypealias(aliasName: "A", originalType: .swiftBlock(returnType: .void, parameters: [.typeName("B")]))
-        
-        XCTAssertEqual(sut.resolveAlias(in: "A"), .swiftBlock(returnType: .void, parameters: [.int]))
+        sut.addTypealias(
+            aliasName: "A",
+            originalType: .swiftBlock(returnType: .void, parameters: [.typeName("B")])
+        )
+
+        XCTAssertEqual(
+            sut.resolveAlias(in: "A"),
+            .swiftBlock(returnType: .void, parameters: [.int])
+        )
     }
-    
+
     func testResolveAliasSwiftType() {
         sut.addTypealias(aliasName: "B", originalType: .int)
-        sut.addTypealias(aliasName: "A", originalType: .swiftBlock(returnType: .void, parameters: [.typeName("B")]))
-        
-        XCTAssertEqual(sut.resolveAlias(in: .swiftBlock(returnType: .void, parameters: [.typeName("A")])),
-                       .swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [.int])]))
+        sut.addTypealias(
+            aliasName: "A",
+            originalType: .swiftBlock(returnType: .void, parameters: [.typeName("B")])
+        )
+
+        XCTAssertEqual(
+            sut.resolveAlias(in: .swiftBlock(returnType: .void, parameters: [.typeName("A")])),
+            .swiftBlock(
+                returnType: .void,
+                parameters: [.swiftBlock(returnType: .void, parameters: [.int])]
+            )
+        )
     }
-    
+
     func testIsTypeConformingToProtocol() {
         let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
         let q = KnownTypeBuilder(typeName: "Q").protocolConformance(protocolName: "P").build()
@@ -640,11 +756,11 @@ class TypeSystemTests: XCTestCase {
         sut.addType(p)
         sut.addType(q)
         sut.addType(z)
-        
+
         XCTAssert(sut.isType("Q", conformingTo: "P"))
         XCTAssertFalse(sut.isType("Z", conformingTo: "P"))
     }
-    
+
     func testIsTypeConformingToProtocolSupertypeLookup() {
         let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
         let q = KnownTypeBuilder(typeName: "Q").protocolConformance(protocolName: "P").build()
@@ -652,21 +768,23 @@ class TypeSystemTests: XCTestCase {
         sut.addType(p)
         sut.addType(q)
         sut.addType(z)
-        
+
         XCTAssert(sut.isType("Z", conformingTo: "P"))
     }
-    
+
     func testIsTypeConformingToProtocolIndirectProtocolLookup() {
         let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
-        let q = KnownTypeBuilder(typeName: "Q", kind: .protocol).protocolConformance(protocolName: "P").build()
+        let q = KnownTypeBuilder(typeName: "Q", kind: .protocol).protocolConformance(
+            protocolName: "P"
+        ).build()
         let z = KnownTypeBuilder(typeName: "Z").protocolConformance(protocolName: "Q").build()
         sut.addType(p)
         sut.addType(q)
         sut.addType(z)
-        
+
         XCTAssert(sut.isType("Z", conformingTo: "P"))
     }
-    
+
     func testIsTypeConformingToProtocol_SwiftType() {
         let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
         let q = KnownTypeBuilder(typeName: "Q").protocolConformance(protocolName: "P").build()
@@ -674,11 +792,11 @@ class TypeSystemTests: XCTestCase {
         sut.addType(p)
         sut.addType(q)
         sut.addType(z)
-        
+
         XCTAssert(sut.isType("Q" as SwiftType, conformingTo: "P"))
         XCTAssertFalse(sut.isType("Z" as SwiftType, conformingTo: "P"))
     }
-    
+
     func testIsTypeConformingToProtocolSupertypeLookup_SwiftType() {
         let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
         let q = KnownTypeBuilder(typeName: "Q").protocolConformance(protocolName: "P").build()
@@ -686,21 +804,23 @@ class TypeSystemTests: XCTestCase {
         sut.addType(p)
         sut.addType(q)
         sut.addType(z)
-        
+
         XCTAssert(sut.isType("Z" as SwiftType, conformingTo: "P"))
     }
-    
+
     func testIsTypeConformingToProtocolIndirectProtocolLookup_SwiftType() {
         let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
-        let q = KnownTypeBuilder(typeName: "Q", kind: .protocol).protocolConformance(protocolName: "P").build()
+        let q = KnownTypeBuilder(typeName: "Q", kind: .protocol).protocolConformance(
+            protocolName: "P"
+        ).build()
         let z = KnownTypeBuilder(typeName: "Z").protocolConformance(protocolName: "Q").build()
         sut.addType(p)
         sut.addType(q)
         sut.addType(z)
-        
+
         XCTAssert(sut.isType("Z" as SwiftType, conformingTo: "P"))
     }
-    
+
     func testIsTypeAssignableToChecksSubclassTyping() {
         let a = KnownTypeBuilder(typeName: "A").build()
         let b = KnownTypeBuilder(typeName: "B", supertype: "A").build()
@@ -710,7 +830,7 @@ class TypeSystemTests: XCTestCase {
         sut.addType(b)
         sut.addType(c)
         sut.addType(d)
-        
+
         XCTAssert(sut.isType("B", assignableTo: "A"))
         XCTAssert(sut.isType("C", assignableTo: "A"))
         XCTAssert(sut.isType("C", assignableTo: "B"))
@@ -719,7 +839,7 @@ class TypeSystemTests: XCTestCase {
         XCTAssertFalse(sut.isType("D", assignableTo: "B"))
         XCTAssertFalse(sut.isType("D", assignableTo: "C"))
     }
-    
+
     func testIsTypeAssignableToChecksProtocolConformance() {
         let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
         let q = KnownTypeBuilder(typeName: "Q", kind: .protocol).build()
@@ -727,19 +847,21 @@ class TypeSystemTests: XCTestCase {
         sut.addType(p)
         sut.addType(a)
         sut.addType(q)
-        
+
         XCTAssert(sut.isType("A", assignableTo: "P"))
         XCTAssertFalse(sut.isType("A", assignableTo: "Q"))
     }
-    
+
     func testIsTypeAssignableToChecksProtocolConformanceChain() {
         let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
-        let q = KnownTypeBuilder(typeName: "Q", kind: .protocol).protocolConformance(protocolName: "P").build()
+        let q = KnownTypeBuilder(typeName: "Q", kind: .protocol).protocolConformance(
+            protocolName: "P"
+        ).build()
         let z = KnownTypeBuilder(typeName: "Z").protocolConformance(protocolName: "Q").build()
         sut.addType(p)
         sut.addType(q)
         sut.addType(z)
-        
+
         XCTAssert(sut.isType("Z", assignableTo: "Z"))
         XCTAssert(sut.isType("Z", assignableTo: "P"))
         XCTAssert(sut.isType("Z", assignableTo: "Q"))
@@ -747,32 +869,32 @@ class TypeSystemTests: XCTestCase {
         XCTAssertFalse(sut.isType("P", assignableTo: "Q"))
         XCTAssertFalse(sut.isType("Q", assignableTo: "Z"))
     }
-    
+
     func testIsTypeAssignableToLooksThroughOptionalityWhenCheckingSubtyping() {
         let a = KnownTypeBuilder(typeName: "A").build()
         let b = KnownTypeBuilder(typeName: "B").settingSupertype("A").build()
         sut.addType(a)
         sut.addType(b)
-        
+
         XCTAssert(sut.isType(.optional("B"), assignableTo: .optional("A")))
         XCTAssert(sut.isType("B", assignableTo: .optional("A")))
         // Optionality depth from the left side must be less than or equal to
         // optionality depth from the right side
         XCTAssertFalse(sut.isType(.optional("B"), assignableTo: "A"))
     }
-    
+
     func testTypeCategoryPrimitives() {
         XCTAssertEqual(sut.category(forType: "Bool"), .boolean)
         XCTAssertEqual(sut.category(forType: "ObjCBool"), .boolean)
         XCTAssertEqual(sut.category(forType: "CBool"), .boolean)
-        
+
         XCTAssertEqual(sut.category(forType: "Float"), .float)
         XCTAssertEqual(sut.category(forType: "CFloat"), .float)
         XCTAssertEqual(sut.category(forType: "Double"), .float)
         XCTAssertEqual(sut.category(forType: "CDouble"), .float)
         XCTAssertEqual(sut.category(forType: "CGFloat"), .float)
         XCTAssertEqual(sut.category(forType: "Float80"), .float)
-        
+
         XCTAssertEqual(sut.category(forType: "Int64"), .integer)
         XCTAssertEqual(sut.category(forType: "UInt64"), .integer)
         XCTAssertEqual(sut.category(forType: "CLongLong"), .integer)
@@ -794,7 +916,7 @@ class TypeSystemTests: XCTestCase {
         XCTAssertEqual(sut.category(forType: "CChar"), .integer)
         XCTAssertEqual(sut.category(forType: "CUnsignedChar"), .integer)
     }
-    
+
     func testTypeCategoryNonPrimitives() {
         let structType = KnownTypeBuilder(typeName: "A", kind: .struct).build()
         let classType = KnownTypeBuilder(typeName: "B", kind: .class).build()
@@ -804,13 +926,13 @@ class TypeSystemTests: XCTestCase {
         sut.addType(classType)
         sut.addType(protocolType)
         sut.addType(enumType)
-        
+
         XCTAssertEqual(sut.category(forType: structType.typeName), .struct)
         XCTAssertEqual(sut.category(forType: classType.typeName), .class)
         XCTAssertEqual(sut.category(forType: protocolType.typeName), .protocol)
         XCTAssertEqual(sut.category(forType: enumType.typeName), .enum)
     }
-    
+
     func testIsClassInstanceType() {
         let classType = KnownTypeBuilder(typeName: "A", kind: .class).build()
         let protocolType = KnownTypeBuilder(typeName: "B", kind: .protocol).build()
@@ -820,7 +942,7 @@ class TypeSystemTests: XCTestCase {
         sut.addType(protocolType)
         sut.addType(structType)
         sut.addType(enumType)
-        
+
         XCTAssert(sut.isClassInstanceType(.typeName("NSObject")))
         XCTAssert(sut.isClassInstanceType(.typeName("NSSet")))
         XCTAssert(sut.isClassInstanceType(classType.typeName))
@@ -828,186 +950,207 @@ class TypeSystemTests: XCTestCase {
         XCTAssertFalse(sut.isClassInstanceType(structType.typeName))
         XCTAssertFalse(sut.isClassInstanceType(enumType.typeName))
     }
-    
+
     func testCategoryForTypeWithTypealias() {
         sut.addTypealias(aliasName: "GLenum", originalType: "UInt32")
-        
+
         XCTAssertEqual(sut.category(forType: "GLenum"), .integer)
     }
-    
+
     func testNominalTypeExists() {
         let type = KnownTypeBuilder(typeName: "A").build()
         sut.addType(type)
-        
+
         XCTAssert(sut.nominalTypeExists("A"))
         XCTAssertFalse(sut.nominalTypeExists("Unknown"))
     }
-    
+
     func testNominalTypeExistsQueriesTypeProviders() {
         let type = KnownTypeBuilder(typeName: "A").build()
         let provider = CollectionKnownTypeProvider(knownTypes: [type])
         sut.addKnownTypeProvider(provider)
-        
+
         XCTAssert(sut.nominalTypeExists("A"))
         XCTAssertFalse(sut.nominalTypeExists("Unknown"))
     }
-    
+
     func testExtensionTypesDontOvershadowOriginalImplementation() {
         let ext =
             KnownTypeBuilder(typeName: "UIView")
-                .settingIsExtension(true)
-                .method(named: "fromExtension")
-                .build()
+            .settingIsExtension(true)
+            .method(named: "fromExtension")
+            .build()
         let viewType =
             KnownTypeBuilder(typeName: "UIView")
-                .property(named: "window", type: .optional("UIWindow"))
-                .build()
+            .property(named: "window", type: .optional("UIWindow"))
+            .build()
         let source = CollectionKnownTypeProvider(knownTypes: [viewType])
         sut.addType(ext)
         sut.addKnownTypeProvider(source)
-        
+
         let type = sut.knownTypeWithName("UIView")!
-        
+
         XCTAssert(type.knownMethods.contains(where: { $0.signature.name == "fromExtension" }))
         XCTAssertNotNil(
-            sut.method(withIdentifier: FunctionIdentifier(name: "fromExtension", argumentLabels: []),
-                       invocationTypeHints: nil,
-                       static: false,
-                       includeOptional: false,
-                       in: .typeName("UIView")
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "fromExtension", argumentLabels: []),
+                invocationTypeHints: nil,
+                static: false,
+                includeOptional: false,
+                in: .typeName("UIView")
             )
         )
-        
+
         XCTAssert(type.knownProperties.contains(where: { $0.name == "window" }))
-        XCTAssertNotNil(sut.property(named: "window", static: false,
-                                     includeOptional: false, in: .typeName("UIView")))
+        XCTAssertNotNil(
+            sut.property(
+                named: "window",
+                static: false,
+                includeOptional: false,
+                in: .typeName("UIView")
+            )
+        )
     }
-    
+
     func testDeepLookupProtocolConformanceInTypeDefinitions() {
         // These protocols are defined within TypeDefinitions
         let type =
             KnownTypeBuilder(typeName: "Test", kind: .class)
-                .protocolConformance(protocolName: "UIViewControllerTransitionCoordinator")
-                .build()
+            .protocolConformance(protocolName: "UIViewControllerTransitionCoordinator")
+            .build()
         sut.addType(type)
-        
+
         XCTAssert(sut.isType("Test", conformingTo: "UIViewControllerTransitionCoordinatorContext"))
     }
-    
+
     func testTypeLookupInClassesList() {
         // This type is defined within TypeDefinitions.classesList
         XCTAssert(sut.isType("UILabel", subtypeOf: "UIView"))
     }
-    
+
     func testMethodArgumentTypeBasedOverloadResolution() {
         let type =
             KnownTypeBuilder(typeName: "Test")
-                .settingUseSwiftSignatureMatching(true)
-                .method(named: "method", parsingSignature: "(value: Int)")
-                .method(named: "method", parsingSignature: "(value: String)")
-                .build()
+            .settingUseSwiftSignatureMatching(true)
+            .method(named: "method", parsingSignature: "(value: Int)")
+            .method(named: "method", parsingSignature: "(value: String)")
+            .build()
         sut.addType(type)
-        
+
         // No type hinting: Return first method found
         XCTAssertEqual(
-            sut.method(withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
-                       invocationTypeHints: nil,
-                       static: false,
-                       includeOptional: false,
-                       in: type)?.signature.parameters[0].type,
-            
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
+                invocationTypeHints: nil,
+                static: false,
+                includeOptional: false,
+                in: type
+            )?.signature.parameters[0].type,
+
             SwiftType.int
         )
-        
+
         // With type hinting
         XCTAssertEqual(
-            sut.method(withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
-                       invocationTypeHints: [.int],
-                       static: false,
-                       includeOptional: false,
-                       in: type)?.signature.parameters[0].type,
-            
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
+                invocationTypeHints: [.int],
+                static: false,
+                includeOptional: false,
+                in: type
+            )?.signature.parameters[0].type,
+
             SwiftType.int
         )
         XCTAssertEqual(
-            sut.method(withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
-                       invocationTypeHints: [.string],
-                       static: false,
-                       includeOptional: false,
-                       in: type)?.signature.parameters[0].type,
-            
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
+                invocationTypeHints: [.string],
+                static: false,
+                includeOptional: false,
+                in: type
+            )?.signature.parameters[0].type,
+
             SwiftType.string
         )
     }
-    
+
     func testMethodArgumentTypeBasedOverloadResolutionWithOptionalArgumentType() {
         let type =
             KnownTypeBuilder(typeName: "Test")
-                .settingUseSwiftSignatureMatching(true)
-                .method(named: "method", parsingSignature: "(value: Int)")
-                .method(named: "method", parsingSignature: "(value: String)")
-                .build()
+            .settingUseSwiftSignatureMatching(true)
+            .method(named: "method", parsingSignature: "(value: Int)")
+            .method(named: "method", parsingSignature: "(value: String)")
+            .build()
         sut.addType(type)
-        
+
         // No type hinting: Return first method found
         XCTAssertEqual(
-            sut.method(withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
-                       invocationTypeHints: nil,
-                       static: false,
-                       includeOptional: false,
-                       in: type)?.signature.parameters[0].type,
-            
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
+                invocationTypeHints: nil,
+                static: false,
+                includeOptional: false,
+                in: type
+            )?.signature.parameters[0].type,
+
             SwiftType.int
         )
-        
+
         // With type hinting
         XCTAssertEqual(
-            sut.method(withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
-                       invocationTypeHints: [.optional(.int)],
-                       static: false,
-                       includeOptional: false,
-                       in: type)?.signature.parameters[0].type,
-            
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
+                invocationTypeHints: [.optional(.int)],
+                static: false,
+                includeOptional: false,
+                in: type
+            )?.signature.parameters[0].type,
+
             SwiftType.int
         )
         XCTAssertEqual(
-            sut.method(withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
-                       invocationTypeHints: [.optional(.string)],
-                       static: false,
-                       includeOptional: false,
-                       in: type)?.signature.parameters[0].type,
-            
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
+                invocationTypeHints: [.optional(.string)],
+                static: false,
+                includeOptional: false,
+                in: type
+            )?.signature.parameters[0].type,
+
             SwiftType.string
         )
     }
-    
+
     func testDetectMethodWithDefaultArgumentValue() {
         let type =
             KnownTypeBuilder(typeName: "Test")
-                .settingUseSwiftSignatureMatching(true)
-                .method(named: "method", parsingSignature: "(value: Int, flags: Int = default)")
-                .build()
+            .settingUseSwiftSignatureMatching(true)
+            .method(named: "method", parsingSignature: "(value: Int, flags: Int = default)")
+            .build()
         sut.addType(type)
-        
+
         XCTAssertNotNil(
-            sut.method(withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
-                       invocationTypeHints: [.int],
-                       static: false,
-                       includeOptional: false,
-                       in: type)
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "method", argumentLabels: ["value"]),
+                invocationTypeHints: [.int],
+                static: false,
+                includeOptional: false,
+                in: type
+            )
         )
     }
-    
+
     func testCanonicalTypeName() {
         let provider = CollectionKnownTypeProvider()
         provider.addCanonicalMapping(nonCanonical: "NSLocale", canonical: "Locale")
         sut.addKnownTypeProvider(provider)
-        
+
         XCTAssertEqual(sut.canonicalName(forTypeName: "NSLocale"), "Locale")
         XCTAssertNil(sut.canonicalName(forTypeName: "Locale"))
         XCTAssertNil(sut.canonicalName(forTypeName: "SomeOtherUnexistingTypeName"))
     }
-    
+
     func testCanonicalTypeNameIsResolvedAfterTypealiasExpansion() {
         let knownTypeProvider = CollectionKnownTypeProvider()
         let typealiasProvider = CollectionTypealiasProvider()
@@ -1015,10 +1158,10 @@ class TypeSystemTests: XCTestCase {
         typealiasProvider.addTypealias("NonCanonAlias", "NonCanon")
         sut.addKnownTypeProvider(knownTypeProvider)
         sut.addTypealiasProvider(typealiasProvider)
-        
+
         XCTAssertEqual(sut.canonicalName(forTypeName: "NonCanonAlias"), "Canon")
     }
-    
+
     func testImplicitCoercedNumericTypeWithIntegers() {
         assertCoerce(between: "Int8", "Int16", resultsIn: "Int16")
         assertCoerce(between: "Int16", "Int32", resultsIn: "Int32")
@@ -1030,7 +1173,7 @@ class TypeSystemTests: XCTestCase {
         assertCoerce(between: "CUnsignedLong", "Int32", resultsIn: "CUnsignedLong")
         assertCoerce(between: "CLongLong", "Int32", resultsIn: "CLongLong")
         assertCoerce(between: "CUnsignedLongLong", "Int32", resultsIn: "CUnsignedLongLong")
-        
+
         // No coercion cases (same bit-width)
         assertNoCoerce(between: "Int", "UInt")
         assertNoCoerce(between: "CLong", "Int")
@@ -1043,18 +1186,18 @@ class TypeSystemTests: XCTestCase {
         assertNoCoerce(between: "CLongLong", "Int64")
         assertNoCoerce(between: "CUnsignedLongLong", "Int64")
     }
-    
+
     func testImplicitCoercedNumericTypeWithFloats() {
         assertCoerce(between: "Float", "CGFloat", resultsIn: "CGFloat")
         assertCoerce(between: "Float", "Float80", resultsIn: "Float80")
         assertCoerce(between: "Float80", "Double", resultsIn: "Float80")
-        
+
         // No coercion cases (same bit-width)
         assertNoCoerce(between: "Double", "CGFloat")
         assertNoCoerce(between: "CFloat", "Float")
         assertNoCoerce(between: "CDouble", "Double")
     }
-    
+
     func testImplicitCoercedNumericTypesFavorsCoercingToFloatingPointValues() {
         assertCoerce(between: "Int8", "Float", resultsIn: "Float")
         assertCoerce(between: "Int16", "Float", resultsIn: "Float")
@@ -1064,7 +1207,7 @@ class TypeSystemTests: XCTestCase {
         assertCoerce(between: "UInt16", "Float", resultsIn: "Float")
         assertCoerce(between: "UInt32", "Float", resultsIn: "Float")
         assertCoerce(between: "UInt64", "Float", resultsIn: "Float")
-        
+
         assertCoerce(between: "Int8", "Double", resultsIn: "Double")
         assertCoerce(between: "Int16", "Double", resultsIn: "Double")
         assertCoerce(between: "Int32", "Double", resultsIn: "Double")
@@ -1074,31 +1217,35 @@ class TypeSystemTests: XCTestCase {
         assertCoerce(between: "UInt32", "Double", resultsIn: "Double")
         assertCoerce(between: "UInt64", "Double", resultsIn: "Double")
     }
-    
+
     func testLookupMethodInCyclicProtocolType() {
         let prot = KnownTypeBuilder(typeName: "A", kind: .protocol)
             .protocolConformance(protocolName: "A")
             .method(named: "test")
             .build()
         sut.addType(prot)
-        
+
         let notFound =
-            sut.method(withIdentifier: FunctionIdentifier(name: "nonexisting", argumentLabels: []),
-                       invocationTypeHints: nil,
-                       static: false,
-                       includeOptional: false,
-                       in: prot)
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "nonexisting", argumentLabels: []),
+                invocationTypeHints: nil,
+                static: false,
+                includeOptional: false,
+                in: prot
+            )
         let found =
-            sut.method(withIdentifier: FunctionIdentifier(name: "test", argumentLabels: []),
-                       invocationTypeHints: nil,
-                       static: false,
-                       includeOptional: false,
-                       in: prot)
-        
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "test", argumentLabels: []),
+                invocationTypeHints: nil,
+                static: false,
+                includeOptional: false,
+                in: prot
+            )
+
         XCTAssertNil(notFound)
         XCTAssertNotNil(found)
     }
-    
+
     func testLookupMethodInCyclicProtocolTypeIndirect() {
         let protA = KnownTypeBuilder(typeName: "A", kind: .protocol)
             .protocolConformance(protocolName: "B")
@@ -1109,24 +1256,28 @@ class TypeSystemTests: XCTestCase {
             .build()
         sut.addType(protA)
         sut.addType(protB)
-        
+
         let notFound =
-            sut.method(withIdentifier: FunctionIdentifier(name: "nonexisting", argumentLabels: []),
-                       invocationTypeHints: nil,
-                       static: false,
-                       includeOptional: false,
-                       in: protA)
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "nonexisting", argumentLabels: []),
+                invocationTypeHints: nil,
+                static: false,
+                includeOptional: false,
+                in: protA
+            )
         let found =
-            sut.method(withIdentifier: FunctionIdentifier(name: "test", argumentLabels: []),
-                       invocationTypeHints: nil,
-                       static: false,
-                       includeOptional: false,
-                       in: protA)
-        
+            sut.method(
+                withIdentifier: FunctionIdentifier(name: "test", argumentLabels: []),
+                invocationTypeHints: nil,
+                static: false,
+                includeOptional: false,
+                in: protA
+            )
+
         XCTAssertNil(notFound)
         XCTAssertNotNil(found)
     }
-    
+
     func testAllConformancesOf() {
         let typeA = KnownTypeBuilder(typeName: "A")
             .protocolConformance(protocolName: "Z")
@@ -1145,21 +1296,23 @@ class TypeSystemTests: XCTestCase {
         sut.addType(typeB)
         sut.addType(protP)
         sut.addType(protZ)
-        
-        XCTAssertEqual(Set(sut.allConformances(of: typeB).map(\.protocolName)),
-                       ["P", "Q", "Z", "W"])
+
+        XCTAssertEqual(
+            Set(sut.allConformances(of: typeB).map(\.protocolName)),
+            ["P", "Q", "Z", "W"]
+        )
     }
-    
+
     func testAllConformancesOfInCyclicProtocolType() {
         let prot = KnownTypeBuilder(typeName: "A", kind: .protocol)
             .protocolConformance(protocolName: "A")
             .method(named: "test")
             .build()
         sut.addType(prot)
-        
+
         XCTAssertEqual(sut.allConformances(of: prot).count, 0)
     }
-    
+
     func testAllConformancesOfInProtocolTypeIndirect() {
         let protA = KnownTypeBuilder(typeName: "A", kind: .protocol)
             .protocolConformance(protocolName: "B")
@@ -1169,21 +1322,23 @@ class TypeSystemTests: XCTestCase {
             .build()
         sut.addType(protA)
         sut.addType(protB)
-        
-        XCTAssertEqual(Set(sut.allConformances(of: protA).map(\.protocolName)),
-                       ["B"])
+
+        XCTAssertEqual(
+            Set(sut.allConformances(of: protA).map(\.protocolName)),
+            ["B"]
+        )
     }
-    
+
     func testConformanceToProtocolNameInCyclicProtocolType() {
         let prot = KnownTypeBuilder(typeName: "A", kind: .protocol)
             .protocolConformance(protocolName: "A")
             .method(named: "test")
             .build()
         sut.addType(prot)
-        
+
         XCTAssertNil(sut.conformance(toProtocolName: "B", in: prot))
     }
-    
+
     func testConformanceToProtocolNameInCyclicProtocolTypeIndirect() {
         let protA = KnownTypeBuilder(typeName: "A", kind: .protocol)
             .protocolConformance(protocolName: "B")
@@ -1193,135 +1348,179 @@ class TypeSystemTests: XCTestCase {
             .build()
         sut.addType(protA)
         sut.addType(protB)
-        
+
         XCTAssertNil(sut.conformance(toProtocolName: "C", in: protA))
     }
-    
+
     func testSubscriptLookupKnownType() {
         let type = KnownTypeBuilder(typeName: "A")
             .subscription(indexType: .int, type: .int)
             .subscription(indexType: .string, type: .string)
             .build()
         sut.addType(type)
-        
-        XCTAssertNotNil(sut.subscription(withParameterLabels: [nil],
-                                         invocationTypeHints: [.int],
-                                         static: false,
-                                         in: type))
-        XCTAssertNotNil(sut.subscription(withParameterLabels: [nil],
-                                         invocationTypeHints: [.string],
-                                         static: false,
-                                         in: type))
-        XCTAssertNotNil(sut.subscription(withParameterLabels: [nil],
-                                         invocationTypeHints: [.double],
-                                         static: false,
-                                         in: type))
+
+        XCTAssertNotNil(
+            sut.subscription(
+                withParameterLabels: [nil],
+                invocationTypeHints: [.int],
+                static: false,
+                in: type
+            )
+        )
+        XCTAssertNotNil(
+            sut.subscription(
+                withParameterLabels: [nil],
+                invocationTypeHints: [.string],
+                static: false,
+                in: type
+            )
+        )
+        XCTAssertNotNil(
+            sut.subscription(
+                withParameterLabels: [nil],
+                invocationTypeHints: [.double],
+                static: false,
+                in: type
+            )
+        )
     }
-    
+
     func testSubscriptLookupSwiftType() {
         let type = KnownTypeBuilder(typeName: "A")
             .subscription(indexType: .int, type: .int)
             .subscription(indexType: .string, type: .string)
             .build()
         sut.addType(type)
-        
-        XCTAssertNotNil(sut.subscription(withParameterLabels: [nil],
-                                         invocationTypeHints: [.int],
-                                         static: false,
-                                         in: .typeName("A")))
-        XCTAssertNotNil(sut.subscription(withParameterLabels: [nil],
-                                         invocationTypeHints: [.string],
-                                         static: false,
-                                         in: .typeName("A")))
-        XCTAssertNotNil(sut.subscription(withParameterLabels: [nil],
-                                         invocationTypeHints: [.double],
-                                         static: false,
-                                         in: .typeName("A")))
+
+        XCTAssertNotNil(
+            sut.subscription(
+                withParameterLabels: [nil],
+                invocationTypeHints: [.int],
+                static: false,
+                in: .typeName("A")
+            )
+        )
+        XCTAssertNotNil(
+            sut.subscription(
+                withParameterLabels: [nil],
+                invocationTypeHints: [.string],
+                static: false,
+                in: .typeName("A")
+            )
+        )
+        XCTAssertNotNil(
+            sut.subscription(
+                withParameterLabels: [nil],
+                invocationTypeHints: [.double],
+                static: false,
+                in: .typeName("A")
+            )
+        )
     }
-    
+
     func testStaticSubscriptLookup() {
         let type = KnownTypeBuilder(typeName: "A")
             .subscription(indexType: .int, type: .int, isStatic: false)
             .subscription(indexType: .string, type: .string, isStatic: true)
             .build()
-        
-        XCTAssertEqual(sut.subscription(withParameterLabels: [nil],
-                                        invocationTypeHints: [.int],
-                                        static: false,
-                                        in: type)?.returnType,
-                       .int)
-        XCTAssertEqual(sut.subscription(withParameterLabels: [nil],
-                                        invocationTypeHints: [.int],
-                                        static: true,
-                                        in: type)?.returnType,
-                       .string)
-        XCTAssertEqual(sut.subscription(withParameterLabels: [nil],
-                                        invocationTypeHints: [.string],
-                                        static: false,
-                                        in: type)?.returnType,
-                       .int)
-        XCTAssertEqual(sut.subscription(withParameterLabels: [nil],
-                                        invocationTypeHints: [.string],
-                                        static: true,
-                                        in: type)?.returnType,
-                       .string)
+
+        XCTAssertEqual(
+            sut.subscription(
+                withParameterLabels: [nil],
+                invocationTypeHints: [.int],
+                static: false,
+                in: type
+            )?.returnType,
+            .int
+        )
+        XCTAssertEqual(
+            sut.subscription(
+                withParameterLabels: [nil],
+                invocationTypeHints: [.int],
+                static: true,
+                in: type
+            )?.returnType,
+            .string
+        )
+        XCTAssertEqual(
+            sut.subscription(
+                withParameterLabels: [nil],
+                invocationTypeHints: [.string],
+                static: false,
+                in: type
+            )?.returnType,
+            .int
+        )
+        XCTAssertEqual(
+            sut.subscription(
+                withParameterLabels: [nil],
+                invocationTypeHints: [.string],
+                static: true,
+                in: type
+            )?.returnType,
+            .string
+        )
     }
-    
+
     func testFindTypeNestedType() {
         let type = KnownTypeBuilder(typeName: "A")
             .nestedType(named: "B")
             .build()
         sut.addType(type)
-        
+
         let result = sut.findType(for: .nested(["A", "B"]))
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.typeName, "B")
     }
-    
+
     func testFindTypeMetatypeOfNestedType() {
         let type = KnownTypeBuilder(typeName: "A")
             .nestedType(named: "B")
             .build()
         sut.addType(type)
-        
+
         let result = sut.findType(for: .metatype(for: .nested(["A", "B"])))
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.typeName, "B")
     }
-    
+
     func testKnownTypeFromNestedTypes() {
         let type = KnownTypeBuilder(typeName: "A")
             .nestedType(named: "B")
             .build()
         sut.addType(type)
-        
+
         let result = sut.knownTypeFromNested(["A", "B"])
         XCTAssertEqual(result?.parentType, .typeName("A"))
     }
 }
 
-private extension TypeSystemTests {
-    
-    func assertIsNumeric(_ type: SwiftType, line: UInt) {
+extension TypeSystemTests {
+
+    fileprivate func assertIsNumeric(_ type: SwiftType, line: UInt) {
         if !sut.isNumeric(type) {
             XCTFail(
                 """
                 Provided type \(type) is not recognized as a numeric type by the \
                 tested TypeSystem
                 """,
-                file: #filePath, line: line)
+                file: #filePath,
+                line: line
+            )
             return
         }
     }
-    
-    func assertCoerce(between type1: SwiftType,
-                      _ type2: SwiftType,
-                      resultsIn result: SwiftType,
-                      line: UInt = #line) {
-        
+
+    fileprivate func assertCoerce(
+        between type1: SwiftType,
+        _ type2: SwiftType,
+        resultsIn result: SwiftType,
+        line: UInt = #line
+    ) {
+
         assertIsNumeric(type1, line: line)
         assertIsNumeric(type2, line: line)
-        
+
         let r1 = sut.implicitCoercedNumericType(for: type1, type2)
         if r1 != result {
             XCTFail(
@@ -1329,9 +1528,11 @@ private extension TypeSystemTests {
                 Expected coercion between \(type1) and \(type2) to result in \
                 \(result), but received \(r1?.description ?? "<nil>")
                 """,
-                file: #filePath, line: line)
+                file: #filePath,
+                line: line
+            )
         }
-        
+
         let r2 = sut.implicitCoercedNumericType(for: type2, type1)
         if r2 != result {
             XCTFail(
@@ -1339,33 +1540,41 @@ private extension TypeSystemTests {
                 Expected coercion between \(type2) and \(type1) to result in \
                 \(result), but received \(r2?.description ?? "<nil>")
                 """,
-                file: #filePath, line: line)
+                file: #filePath,
+                line: line
+            )
         }
     }
-    
-    func assertNoCoerce(between type1: SwiftType,
-                        _ type2: SwiftType,
-                        line: UInt = #line) {
-        
+
+    fileprivate func assertNoCoerce(
+        between type1: SwiftType,
+        _ type2: SwiftType,
+        line: UInt = #line
+    ) {
+
         assertIsNumeric(type1, line: line)
         assertIsNumeric(type2, line: line)
-        
+
         if let r1 = sut.implicitCoercedNumericType(for: type1, type2) {
             XCTFail(
                 """
                 Expected coercion between \(type1) and \(type2) to result in nil, \
                 but received \(r1)
                 """,
-                file: #filePath, line: line)
+                file: #filePath,
+                line: line
+            )
         }
-        
+
         if let r2 = sut.implicitCoercedNumericType(for: type2, type1) {
             XCTFail(
                 """
                 Expected coercion between \(type2) and \(type1) to result in nil, \
                 but received \(r2)
                 """,
-                file: #filePath, line: line)
+                file: #filePath,
+                line: line
+            )
         }
     }
 }

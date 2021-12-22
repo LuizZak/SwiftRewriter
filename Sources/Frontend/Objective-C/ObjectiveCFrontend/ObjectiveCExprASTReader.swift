@@ -93,7 +93,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
                 return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             
-            return Expression.block(body: statement).call()
+            return .block(body: statement).call()
         }
         
         return .unknown(UnknownASTContext(context: ctx.getText()))
@@ -451,7 +451,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
             return .unknown(UnknownASTContext(context: ctx.getText()))
         }
         
-        return Expression.selector(sel)
+        return .selector(sel)
     }
     
     public override func visitSelectorName(_ ctx: ObjectiveCParser.SelectorNameContext) -> Expression? {
@@ -474,9 +474,11 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
     
     private func compoundStatementVisitor() -> ObjectiveCStatementASTReader.CompoundStatementVisitor {
         ObjectiveCStatementASTReader
-                .CompoundStatementVisitor(expressionReader: self,
-                                          context: context,
-                                          delegate: delegate)
+            .CompoundStatementVisitor(
+                expressionReader: self,
+                context: context,
+                delegate: delegate
+            )
     }
     
     private class FunctionArgumentVisitor: ObjectiveCParserBaseVisitor<FunctionArgument> {

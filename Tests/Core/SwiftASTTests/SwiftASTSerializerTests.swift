@@ -1,182 +1,202 @@
-import XCTest
-
 import SwiftAST
 import WriterTargetOutput
-@testable import SwiftSyntaxSupport
+import XCTest
+
 @testable import SwiftRewriterLib
+@testable import SwiftSyntaxSupport
 
 class SwiftASTSerializerTests: XCTestCase {
-    
+
     func testEncodeDecodeRoundtrip() throws {
         let stmt: CompoundStatement = [
-            Statement.expression(
-                Expression
-                    .identifier("self")
+            .expression(
+                .identifier("self")
                     .dot("member")
                     .assignment(op: .assign, rhs: .constant(0))
             ).labeled("exp"),
-            Statement.expression(
-                Expression.unknown(UnknownASTContext(context: "Context"))
+            .expression(
+                .unknown(UnknownASTContext(context: "Context"))
             ),
-            Statement.expression(
-                Expression.ternary(
-                    Expression.constant(true),
-                    true: Expression.unary(op: .add, .constant("This")),
+            .expression(
+                .ternary(
+                    .constant(true),
+                    true: .unary(op: .add, .constant("This")),
                     false: .constant("That")
                 )
             ),
-            Statement.unknown(UnknownASTContext(context: "Context")),
-            Statement.do([
-                Statement.expression(
-                    Expression.dictionaryLiteral([
-                        Expression.prefix(op: .subtract, .constant(.nil)):
-                            Expression.sizeof(Expression.identifier("Int"))
-                        ])
+            .unknown(UnknownASTContext(context: "Context")),
+            .do([
+                .expression(
+                    .dictionaryLiteral([
+                        .prefix(op: .subtract, .constant(.nil)): .sizeof(.identifier("Int"))
+                    ]
+                    )
                 )
             ]),
-            Statement.if(
-                Expression.constant(true),
+            .if(
+                .constant(true),
                 body: [
-                    Statement.return(Expression.constant(1.0))
+                    .return(.constant(1.0))
                 ],
                 else: [
-                    Statement.return(Expression.constant(1))
+                    .return(.constant(1))
                 ]
             ),
-            Statement.switch(
-                Expression.parens(.constant("abc")).dot("def").sub(.constant(1)).call([Expression.constant(1)]),
+            .switch(
+                .parens(.constant("abc")).dot("def").sub(.constant(1)).call([.constant(1)]),
                 cases: [
                     SwitchCase(
                         patterns: [.expression(.constant("abc"))],
                         statements: [
-                            Statement.return(Expression.constant(.rawConstant("raw_constant")))
+                            .return(.constant(.rawConstant("raw_constant")))
                         ]
                     )
                 ],
                 default: nil
             ),
-            Statement.while(
-                Expression.arrayLiteral([.constant(0)]).sub(.constant(0)),
+            .while(
+                .arrayLiteral([.constant(0)]).sub(.constant(0)),
                 body: [
-                    Statement.for(
-                        SwiftAST.Pattern.identifier("i"),
-                        Expression.constant(0).binary(op: .openRange, rhs: .constant(100)),
+                    .for(
+                        .identifier("i"),
+                        .constant(0).binary(op: .openRange, rhs: .constant(100)),
                         body: [
-                            Statement.continue(targetLabel: "label")
-                        ]),
-                    Statement.continue()
-                ]),
-            Statement.defer([
-                Statement.fallthrough,
-                Statement.variableDeclaration(identifier: "abc", type: .int, initialization: nil)
-            ]),
-            Statement.doWhile(
-                Expression.cast(.constant(0), type: .int),
-                body: [
-                    Statement.expressions([
-                        Expression.block(body: [
-                                Statement.break(targetLabel: "label")
-                            ])
-                        ]),
-                    Statement.break()
+                            .continue(targetLabel: "label")
+                        ]
+                    ),
+                    .continue(),
                 ]
             ),
-            Statement.expression(
-                Expression.tuple([.constant(0), .constant(1)])
+            .defer([
+                .fallthrough,
+                .variableDeclaration(identifier: "abc", type: .int, initialization: nil),
+            ]),
+            .doWhile(
+                .cast(.constant(0), type: .int),
+                body: [
+                    .expressions([
+                        .block(body: [
+                            .break(targetLabel: "label")
+                        ])
+                    ]),
+                    .break(),
+                ]
             ),
-            Statement.expressions([
-                Expression.selector(FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])),
-                Expression.selector("T", FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])),
-                Expression.selector(getter: "p"),
-                Expression.selector("T", getter: "p"),
-                Expression.selector(setter: "p"),
-                Expression.selector("T", setter: "p"),
-            ])
+            .expression(
+                .tuple([.constant(0), .constant(1)])
+            ),
+            .expressions([
+                .selector(FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])),
+                .selector("T", FunctionIdentifier(name: "f", argumentLabels: [nil, "b"])),
+                .selector(getter: "p"),
+                .selector("T", getter: "p"),
+                .selector(setter: "p"),
+                .selector("T", setter: "p"),
+            ]),
         ]
-        
+
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         let data = try SwiftASTSerializer.encode(statement: stmt, encoder: encoder)
         let decoder = JSONDecoder()
-        
+
         let decoded = try SwiftASTSerializer.decodeStatement(decoder: decoder, data: data)
-        
+
         let writer = SwiftSyntaxProducer()
-        
+
         let expBuffer = writer.generateStatement(stmt).description
-        let resBuffer = writer.generateStatement((decoded as? CompoundStatement) ?? [decoded]).description
-        
+        let resBuffer = writer.generateStatement((decoded as? CompoundStatement) ?? [decoded])
+            .description
+
         XCTAssertEqual(
             stmt,
             decoded,
             """
             Expected:
-            
+
             \(expBuffer)
-            
+
             but received:
-            
+
             \(resBuffer)
             """
-            )
+        )
     }
-    
+
     public func testEncodeExpressionType() throws {
         let exp = Expression.identifier("a").typed(.int)
-        
+
         let encoded =
             try SwiftASTSerializer
-                .encode(expression: exp,
-                        encoder: JSONEncoder(),
-                        options: [])
-        
+            .encode(
+                expression: exp,
+                encoder: JSONEncoder(),
+                options: []
+            )
+
         let encodedWithType =
             try SwiftASTSerializer
-                .encode(expression: exp,
-                        encoder: JSONEncoder(),
-                        options: .encodeExpressionTypes)
-        
+            .encode(
+                expression: exp,
+                encoder: JSONEncoder(),
+                options: .encodeExpressionTypes
+            )
+
         let decoded =
             try SwiftASTSerializer
-                .decodeExpression(decoder: JSONDecoder(),
-                                  data: encoded)
-        
+            .decodeExpression(
+                decoder: JSONDecoder(),
+                data: encoded
+            )
+
         let decodedWithType =
             try SwiftASTSerializer
-                .decodeExpression(decoder: JSONDecoder(),
-                                  data: encodedWithType)
-        
+            .decodeExpression(
+                decoder: JSONDecoder(),
+                data: encodedWithType
+            )
+
         XCTAssertNil(decoded.resolvedType)
         XCTAssertEqual(decodedWithType.resolvedType, exp.resolvedType)
     }
-    
+
     public func testEncodeExpressionTypeOnEncodeStatements() throws {
-        let stmt = Statement.expression(Expression.identifier("a").typed(.int))
-        
+        let stmt = Statement.expression(.identifier("a").typed(.int))
+
         let encoded =
             try SwiftASTSerializer
-                .encode(statement: stmt,
-                        encoder: JSONEncoder(),
-                        options: [])
-        
+            .encode(
+                statement: stmt,
+                encoder: JSONEncoder(),
+                options: []
+            )
+
         let encodedWithType =
             try SwiftASTSerializer
-                .encode(statement: stmt,
-                        encoder: JSONEncoder(),
-                        options: .encodeExpressionTypes)
-        
+            .encode(
+                statement: stmt,
+                encoder: JSONEncoder(),
+                options: .encodeExpressionTypes
+            )
+
         let decoded =
             try SwiftASTSerializer
-                .decodeStatement(decoder: JSONDecoder(),
-                                  data: encoded)
-        
+            .decodeStatement(
+                decoder: JSONDecoder(),
+                data: encoded
+            )
+
         let decodedWithType =
             try SwiftASTSerializer
-                .decodeStatement(decoder: JSONDecoder(),
-                                  data: encodedWithType)
-        
+            .decodeStatement(
+                decoder: JSONDecoder(),
+                data: encodedWithType
+            )
+
         XCTAssertNil(decoded.asExpressions!.expressions[0].resolvedType)
-        XCTAssertEqual(decodedWithType.asExpressions!.expressions[0].resolvedType,
-                       stmt.asExpressions!.expressions[0].resolvedType)
+        XCTAssertEqual(
+            decodedWithType.asExpressions!.expressions[0].resolvedType,
+            stmt.asExpressions!.expressions[0].resolvedType
+        )
     }
 }
