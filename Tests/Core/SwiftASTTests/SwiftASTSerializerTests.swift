@@ -1,18 +1,18 @@
-import XCTest
-
 import SwiftAST
 import WriterTargetOutput
-@testable import SwiftSyntaxSupport
+import XCTest
+
 @testable import SwiftRewriterLib
+@testable import SwiftSyntaxSupport
 
 class SwiftASTSerializerTests: XCTestCase {
-    
+
     func testEncodeDecodeRoundtrip() throws {
         let stmt: CompoundStatement = [
             .expression(
                 .identifier("self")
-                .dot("member")
-                .assignment(op: .assign, rhs: .constant(0))
+                    .dot("member")
+                    .assignment(op: .assign, rhs: .constant(0))
             ).labeled("exp"),
             .expression(
                 .unknown(UnknownASTContext(context: "Context"))
@@ -28,8 +28,8 @@ class SwiftASTSerializerTests: XCTestCase {
             .do([
                 .expression(
                     .dictionaryLiteral([
-                            .prefix(op: .subtract, .constant(.nil)): .sizeof(.identifier("Int"))
-                        ]
+                        .prefix(op: .subtract, .constant(.nil)): .sizeof(.identifier("Int"))
+                    ]
                     )
                 )
             ]),
@@ -62,12 +62,14 @@ class SwiftASTSerializerTests: XCTestCase {
                         .constant(0).binary(op: .openRange, rhs: .constant(100)),
                         body: [
                             .continue(targetLabel: "label")
-                        ]),
-                    .continue()
-                ]),
+                        ]
+                    ),
+                    .continue(),
+                ]
+            ),
             .defer([
                 .fallthrough,
-                .variableDeclaration(identifier: "abc", type: .int, initialization: nil)
+                .variableDeclaration(identifier: "abc", type: .int, initialization: nil),
             ]),
             .doWhile(
                 .cast(.constant(0), type: .int),
@@ -77,7 +79,7 @@ class SwiftASTSerializerTests: XCTestCase {
                             .break(targetLabel: "label")
                         ])
                     ]),
-                    .break()
+                    .break(),
                 ]
             ),
             .expression(
@@ -90,92 +92,111 @@ class SwiftASTSerializerTests: XCTestCase {
                 .selector("T", getter: "p"),
                 .selector(setter: "p"),
                 .selector("T", setter: "p"),
-            ])
+            ]),
         ]
-        
+
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         let data = try SwiftASTSerializer.encode(statement: stmt, encoder: encoder)
         let decoder = JSONDecoder()
-        
+
         let decoded = try SwiftASTSerializer.decodeStatement(decoder: decoder, data: data)
-        
+
         let writer = SwiftSyntaxProducer()
-        
+
         let expBuffer = writer.generateStatement(stmt).description
-        let resBuffer = writer.generateStatement((decoded as? CompoundStatement) ?? [decoded]).description
-        
+        let resBuffer = writer.generateStatement((decoded as? CompoundStatement) ?? [decoded])
+            .description
+
         XCTAssertEqual(
             stmt,
             decoded,
             """
             Expected:
-            
+
             \(expBuffer)
-            
+
             but received:
-            
+
             \(resBuffer)
             """
-            )
+        )
     }
-    
+
     public func testEncodeExpressionType() throws {
         let exp = Expression.identifier("a").typed(.int)
-        
+
         let encoded =
             try SwiftASTSerializer
-                .encode(expression: exp,
-                        encoder: JSONEncoder(),
-                        options: [])
-        
+            .encode(
+                expression: exp,
+                encoder: JSONEncoder(),
+                options: []
+            )
+
         let encodedWithType =
             try SwiftASTSerializer
-                .encode(expression: exp,
-                        encoder: JSONEncoder(),
-                        options: .encodeExpressionTypes)
-        
+            .encode(
+                expression: exp,
+                encoder: JSONEncoder(),
+                options: .encodeExpressionTypes
+            )
+
         let decoded =
             try SwiftASTSerializer
-                .decodeExpression(decoder: JSONDecoder(),
-                                  data: encoded)
-        
+            .decodeExpression(
+                decoder: JSONDecoder(),
+                data: encoded
+            )
+
         let decodedWithType =
             try SwiftASTSerializer
-                .decodeExpression(decoder: JSONDecoder(),
-                                  data: encodedWithType)
-        
+            .decodeExpression(
+                decoder: JSONDecoder(),
+                data: encodedWithType
+            )
+
         XCTAssertNil(decoded.resolvedType)
         XCTAssertEqual(decodedWithType.resolvedType, exp.resolvedType)
     }
-    
+
     public func testEncodeExpressionTypeOnEncodeStatements() throws {
         let stmt = Statement.expression(.identifier("a").typed(.int))
-        
+
         let encoded =
             try SwiftASTSerializer
-                .encode(statement: stmt,
-                        encoder: JSONEncoder(),
-                        options: [])
-        
+            .encode(
+                statement: stmt,
+                encoder: JSONEncoder(),
+                options: []
+            )
+
         let encodedWithType =
             try SwiftASTSerializer
-                .encode(statement: stmt,
-                        encoder: JSONEncoder(),
-                        options: .encodeExpressionTypes)
-        
+            .encode(
+                statement: stmt,
+                encoder: JSONEncoder(),
+                options: .encodeExpressionTypes
+            )
+
         let decoded =
             try SwiftASTSerializer
-                .decodeStatement(decoder: JSONDecoder(),
-                                  data: encoded)
-        
+            .decodeStatement(
+                decoder: JSONDecoder(),
+                data: encoded
+            )
+
         let decodedWithType =
             try SwiftASTSerializer
-                .decodeStatement(decoder: JSONDecoder(),
-                                  data: encodedWithType)
-        
+            .decodeStatement(
+                decoder: JSONDecoder(),
+                data: encodedWithType
+            )
+
         XCTAssertNil(decoded.asExpressions!.expressions[0].resolvedType)
-        XCTAssertEqual(decodedWithType.asExpressions!.expressions[0].resolvedType,
-                       stmt.asExpressions!.expressions[0].resolvedType)
+        XCTAssertEqual(
+            decodedWithType.asExpressions!.expressions[0].resolvedType,
+            stmt.asExpressions!.expressions[0].resolvedType
+        )
     }
 }

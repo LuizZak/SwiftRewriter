@@ -1,16 +1,17 @@
-import XCTest
-@testable import ObjcParser
 import ObjcGrammarModels
+import XCTest
+
+@testable import ObjcParser
 
 class ObjcParserTests: XCTestCase {
     static var allTests = [
-        ("testInit", testInit),
+        ("testInit", testInit)
     ]
-    
+
     func testInit() {
-        _=ObjcParser(string: "abc")
+        _ = ObjcParser(string: "abc")
     }
-    
+
     func testParseComments() {
         let source = """
             // Test comment
@@ -18,9 +19,9 @@ class ObjcParserTests: XCTestCase {
                 Test multi-line comment
             */
             """
-        _=parserTest(source)
+        _ = parserTest(source)
     }
-    
+
     func testParseDeclarationAfterComments() {
         let source = """
             // Test comment
@@ -30,202 +31,237 @@ class ObjcParserTests: XCTestCase {
             @interface MyClass
             @end
             """
-        _=parserTest(source)
+        _ = parserTest(source)
     }
-    
+
     func testParseDirectives() {
         let source = """
-        #error An error!
-        #warning A warning!
-        """
-        _=parserTest(source)
+            #error An error!
+            #warning A warning!
+            """
+        _ = parserTest(source)
     }
-    
+
     func testParseReturnTypeAnnotationInBlock() {
         let source = """
-        @implementation A
-        - (void)method {
-            [self block:^__kindof NSArray*{
-                return 0;
-            }];
-            [self block:^__kindof NSArray<NSString*>* {
-            }];
-        }
-        @end
-        """
-        _=parserTest(source)
+            @implementation A
+            - (void)method {
+                [self block:^__kindof NSArray*{
+                    return 0;
+                }];
+                [self block:^__kindof NSArray<NSString*>* {
+                }];
+            }
+            @end
+            """
+        _ = parserTest(source)
     }
-    
+
     func testConcreteSubclassOfGenericType() {
         let source = """
-        @interface A: B<NSString*>
-        @end
-        """
-        _=parserTest(source)
+            @interface A: B<NSString*>
+            @end
+            """
+        _ = parserTest(source)
     }
-    
+
     func testParseNestedGenericTypes() {
         let source = """
-        @interface B: NSObject
-        @end
-        @interface A: NSObject
-        {
-            RACSubject<NSArray<B*>*> *_u; // Should not produce errors here!
-        }
-        @end
-        """
-        _=parserTest(source)
+            @interface B: NSObject
+            @end
+            @interface A: NSObject
+            {
+                RACSubject<NSArray<B*>*> *_u; // Should not produce errors here!
+            }
+            @end
+            """
+        _ = parserTest(source)
     }
-    
+
     func testParseFunctionDefinition() {
-        let node = parserTest("""
+        let node = parserTest(
+            """
             void global(int a);
-            """)
-        
+            """
+        )
+
         let funcDecl: ObjcFunctionDefinitionNode? = node.firstChild()
-        
+
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
         XCTAssertNotNil(funcDecl?.identifier)
         XCTAssertNotNil(funcDecl?.parameterList)
-        
+
         XCTAssertEqual(funcDecl?.identifier?.name, "global")
         XCTAssertEqual(funcDecl?.returnType?.type, .void)
         XCTAssertEqual(funcDecl?.parameterList?.parameters.count, 1)
         XCTAssertEqual(funcDecl?.parameterList?.parameters.first?.type?.type, .struct("int"))
         XCTAssertEqual(funcDecl?.parameterList?.parameters.first?.identifier?.name, "a")
     }
-    
+
     func testParseParameterlessFunctionDefinition() {
-        let node = parserTest("""
+        let node = parserTest(
+            """
             void global();
-            """)
-        
+            """
+        )
+
         let funcDecl: ObjcFunctionDefinitionNode? = node.firstChild()
-        
+
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
         XCTAssertNotNil(funcDecl?.identifier)
         XCTAssertNotNil(funcDecl?.parameterList)
-        
+
         XCTAssertEqual(funcDecl?.identifier?.name, "global")
         XCTAssertEqual(funcDecl?.returnType?.type, .void)
         XCTAssertEqual(funcDecl?.parameterList?.parameters.count, 0)
     }
-    
+
     func testParseReturnlessFunctionDefinition() {
-        let node = parserTest("""
+        let node = parserTest(
+            """
             global(int a);
-            """)
-        
+            """
+        )
+
         let funcDecl: ObjcFunctionDefinitionNode? = node.firstChild()
-        
+
         XCTAssertNotNil(funcDecl)
         XCTAssertNil(funcDecl?.returnType)
         XCTAssertNotNil(funcDecl?.identifier)
         XCTAssertNotNil(funcDecl?.parameterList)
-        
+
         XCTAssertEqual(funcDecl?.identifier?.name, "global")
         XCTAssertEqual(funcDecl?.parameterList?.parameters.count, 1)
         XCTAssertEqual(funcDecl?.parameterList?.parameters.first?.type?.type, .struct("int"))
         XCTAssertEqual(funcDecl?.parameterList?.parameters.first?.identifier?.name, "a")
     }
-    
+
     func testParseComplexReturnTypeFunctionDefinition() {
-        let node = parserTest("""
+        let node = parserTest(
+            """
             NSArray<NSArray<NSString*>*> *_Nonnull global();
-            """)
-        
+            """
+        )
+
         let funcDecl: ObjcFunctionDefinitionNode? = node.firstChild()
-        
+
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
         XCTAssertNotNil(funcDecl?.identifier)
         XCTAssertNotNil(funcDecl?.parameterList)
-        
+
         XCTAssertEqual(funcDecl?.identifier?.name, "global")
-        XCTAssertEqual(funcDecl?.returnType?.type,
-                       .qualified(
-                        .pointer(
-                            .generic("NSArray",
-                                     parameters: [
-                                        .pointer(.generic("NSArray", parameters: [
-                                            .pointer(.struct("NSString"))
-                                            ]))
-                                ])),
-                        qualifiers: ["_Nonnull"])
+        XCTAssertEqual(
+            funcDecl?.returnType?.type,
+            .qualified(
+                .pointer(
+                    .generic(
+                        "NSArray",
+                        parameters: [
+                            .pointer(
+                                .generic(
+                                    "NSArray",
+                                    parameters: [
+                                        .pointer(.struct("NSString"))
+                                    ]
+                                )
+                            )
+                        ]
+                    )
+                ),
+                qualifiers: ["_Nonnull"]
+            )
         )
     }
-    
+
     func testParseComplexParameterTypeFunctionDefinition() {
-        let node = parserTest("""
+        let node = parserTest(
+            """
             void global(NSArray<NSArray<NSString*>*> *_Nonnull value);
-            """)
-        
+            """
+        )
+
         let funcDecl: ObjcFunctionDefinitionNode? = node.firstChild()
-        
+
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
         XCTAssertNotNil(funcDecl?.identifier)
         XCTAssertNotNil(funcDecl?.parameterList)
-        
+
         XCTAssertEqual(funcDecl?.identifier?.name, "global")
         XCTAssertEqual(funcDecl?.returnType?.type, .void)
         XCTAssertEqual(funcDecl?.parameterList?.parameters.count, 1)
-        XCTAssertEqual(funcDecl?.parameterList?.parameters.first?.type?.type,
-                       .qualified(
-                        .pointer(
-                            .generic("NSArray",
-                                     parameters: [
-                                        .pointer(.generic("NSArray", parameters: [
-                                            .pointer(.struct("NSString"))
-                                            ]))
-                                ])),
-                        qualifiers: ["_Nonnull"])
+        XCTAssertEqual(
+            funcDecl?.parameterList?.parameters.first?.type?.type,
+            .qualified(
+                .pointer(
+                    .generic(
+                        "NSArray",
+                        parameters: [
+                            .pointer(
+                                .generic(
+                                    "NSArray",
+                                    parameters: [
+                                        .pointer(.struct("NSString"))
+                                    ]
+                                )
+                            )
+                        ]
+                    )
+                ),
+                qualifiers: ["_Nonnull"]
+            )
         )
     }
-    
+
     func testParseVariadicParameterInFunctionDefinition() {
-        let node = parserTest("""
+        let node = parserTest(
+            """
             void global(NSString *format, ...);
-            """)
-        
+            """
+        )
+
         let funcDecl: ObjcFunctionDefinitionNode? = node.firstChild()
-        
+
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
         XCTAssertNotNil(funcDecl?.identifier)
         XCTAssertNotNil(funcDecl?.parameterList)
         XCTAssertNotNil(funcDecl?.parameterList?.variadicParameter)
-        
+
         XCTAssertEqual(funcDecl?.identifier?.name, "global")
         XCTAssertEqual(funcDecl?.returnType?.type, .void)
         XCTAssertEqual(funcDecl?.parameterList?.parameters.count, 1)
     }
-    
+
     func testParseFunctionDefinitionWithBody() {
-        let node = parserTest("""
+        let node = parserTest(
+            """
             void global() {
                 stmt();
             }
-            """)
-        
+            """
+        )
+
         let funcDecl: ObjcFunctionDefinitionNode? = node.firstChild()
-        
+
         XCTAssertNotNil(funcDecl)
         XCTAssertNotNil(funcDecl?.returnType)
         XCTAssertNotNil(funcDecl?.identifier)
         XCTAssertNotNil(funcDecl?.parameterList)
-        
+
         XCTAssertEqual(funcDecl?.identifier?.name, "global")
         XCTAssertEqual(funcDecl?.returnType?.type, .void)
         XCTAssertEqual(funcDecl?.parameterList?.parameters.count, 0)
         XCTAssertNotNil(funcDecl?.methodBody)
         XCTAssertNotNil(funcDecl?.methodBody?.statements)
     }
-    
+
     func testParseClassMethodDeclaration() {
-        let node = parserTest("""
+        let node = parserTest(
+            """
             @interface A
             + (void)method;
             @end
@@ -233,32 +269,37 @@ class ObjcParserTests: XCTestCase {
             + (void)method {
             }
             @end
-            """)
-        
+            """
+        )
+
         let interface: ObjcClassInterfaceNode? = node.firstChild()
         let implementation: ObjcClassImplementationNode? = node.firstChild()
         XCTAssert(interface!.methods[0].isClassMethod)
         XCTAssert(implementation!.methods[0].isClassMethod)
     }
-    
+
     func testParseProtocolReferenceListInProtocol() {
-        let node = parserTest("""
+        let node = parserTest(
+            """
             @protocol A <B>
             @end
-            """)
-        
+            """
+        )
+
         let prot: ObjcProtocolDeclarationNode? = node.firstChild()
         XCTAssertNotNil(prot?.protocolList)
         XCTAssertEqual(prot?.protocolList?.protocols.first?.name, "B")
     }
-    
+
     func testParseSynthesizeDeclaration() {
-        let node = parserTest("""
+        let node = parserTest(
+            """
             @implementation A
             @synthesize a, b = c;
             @end
-            """)
-        
+            """
+        )
+
         let implementation: ObjcClassImplementationNode? = node.firstChild()
         let synth = implementation?.propertyImplementations.first?.list?.synthesizations
         XCTAssertNotNil(implementation?.propertyImplementations)
@@ -268,70 +309,77 @@ class ObjcParserTests: XCTestCase {
         XCTAssertEqual(synth?.last?.propertyName?.name, "b")
         XCTAssertEqual(synth?.last?.instanceVarName?.name, "c")
     }
-    
+
     func testParseStructDeclaration() {
-        let node = parserTest("""
+        let node = parserTest(
+            """
             typedef struct {
                 int field;
             } A;
-            """)
-        
+            """
+        )
+
         let defNode: ObjcTypedefNode? = node.firstChild()
         let structNode: ObjcStructDeclarationNode? = defNode?.firstChild()
         let fields = structNode?.body?.fields
-        
+
         XCTAssertNotNil(structNode)
         XCTAssertNotNil(fields?[0])
         XCTAssertEqual(fields?[0].identifier?.name, "field")
         XCTAssertEqual(fields?[0].type?.type, ObjcType.struct("int"))
     }
-    
+
     func testParseIBOutletProperty() {
-        let node = parserTest("""
+        let node = parserTest(
+            """
             @interface Foo
             @property (weak, nonatomic) IBOutlet UILabel *label;
             @end
-            """)
-        
+            """
+        )
+
         let implementation: ObjcClassInterfaceNode? = node.firstChild()
         XCTAssertEqual(implementation?.properties[0].hasIbOutletSpecifier, true)
     }
-    
+
     func testParseIBInspectableProperty() {
-        let node = parserTest("""
+        let node = parserTest(
+            """
             @interface Foo
             @property (weak, nonatomic) IBInspectable UILabel *label;
             @end
-            """)
-        
+            """
+        )
+
         let implementation: ObjcClassInterfaceNode? = node.firstChild()
         XCTAssertEqual(implementation?.properties[0].hasIbInspectableSpecifier, true)
     }
-    
+
     func testParseNestedBlocks() {
-        _=parserTest("""
+        _ = parserTest(
+            """
             @interface ViewController (Private)
-            
+
             @property (strong, nonatomic) ViewControllerDataSource *dataSource;
-            
+
             @end
-            
+
             @interface ViewControllerSpec : QuickSpec
             @end
             @implementation ViewControllerSpec
             - (void)spec {
-            
+
             describe(@"ViewControllerSpec", ^{
-            
+
                 __block ViewController *baseViewController;
                 beforeEach(^{
                     baseViewController =
                     [ViewController controllerInstanceFromStoryboard];
                     [baseViewController view];
                 });
-            
+
                 describe(@"Verifica comportamentos iniciais", ^{
-            
+
                     it(@"title deve ser saldo detalhado", ^{
                         expect(baseViewController.title).equal(@"saldo detalhado");
                     });
@@ -341,25 +389,27 @@ class ObjcParserTests: XCTestCase {
                         expect(baseViewController.collectionView.dataSource).toNot.beNil();
                         expect(baseViewController.collectionView.delegate).toNot.beNil();
                     });
-            
+
                 });
-            
+
                 describe(@"Verifica carregamento do xib", ^{
                     expect([ViewController controllerInstanceFromStoryboard]).beAKindOf([ViewController class]);
                 });
-            
+
                 describe(@"Verifica ação de alterar limite", ^{
                     #warning TODO
                 });
-            
+
             });
             }
             @end
-            """)
+            """
+        )
     }
-    
+
     func testParseAnnotations() {
-        _=parserTest("""
+        _ = parserTest(
+            """
             @interface A
             + (void)func __attribute__((no_return));
             @end
@@ -367,28 +417,34 @@ class ObjcParserTests: XCTestCase {
             + (void)func __attribute__((annotate("oclint:suppress[high cyclomatic complexity]"), annotate("oclint:suppress[long line]"), annotate("oclint:suppress[collapsible if statements]"))) {
             }
             @end
-            """)
+            """
+        )
     }
-    
+
     func testParseSemicolonAfterMethodDefinition() {
-        _=parserTest("""
+        _ = parserTest(
+            """
             @implementation A
             - (void)noSemicolon {
             }
             - (void)withSemicolon {
             };
             @end
-            """)
+            """
+        )
     }
-    
+
     func testParseGlobalFunctionPointer() {
-        _=parserTest("""
+        _ = parserTest(
+            """
             void (*myFunc)(char *a, int);
-            """)
+            """
+        )
     }
-    
+
     func testParseArrayWithStructInit() {
-        _=parserTest("""
+        _ = parserTest(
+            """
             static const struct game_params mines_presets[] = {
               {9, 9, 10, TRUE},
               {9, 9, 35, TRUE},
@@ -399,97 +455,115 @@ class ObjcParserTests: XCTestCase {
               {30, 16, 170, TRUE},
             #endif
             };
-            """)
+            """
+        )
     }
-    
+
     func testParseIfWithExpressionList() {
-        _=parserTest("""
+        _ = parserTest(
+            """
             void main() {
                 if (a[10] -= 20, true) {
                     
                 }
             }
-            """)
+            """
+        )
     }
-    
+
     func testParseFunctionPointerTypes() {
-        _=parserTest("""
+        _ = parserTest(
+            """
             typedef int (*cmpfn234)(void *, void *);
             typedef int (*cmpfn234_2)(void (*)(), void *);
             typedef int (*cmpfn234_2)(void (*)(void), void *);
             typedef int (*cmpfn234_2)(void (*v)(void), void *);
             typedef int (*cmpfn234_3)(void (^)(), void *);
-            """)
+            """
+        )
     }
-    
+
     func testParseAttributesInStructDeclaration() {
-        _=parserTest("""
+        _ = parserTest(
+            """
             struct __attribute__((__packed__)) AStruct {
                 UInt8  aField;
                 UInt16 anotherField;
                 UInt32 thirdField;
             };
-            """)
+            """
+        )
     }
-    
+
     func testParseGenericArgumentsInAtClassDeclaration() {
-        _=parserTest("""
+        _ = parserTest(
+            """
             @class NSArray<__covariant ObjectType>;
             @class NSDictionary<KeyType, __contravariant ValueType>;
-            """)
+            """
+        )
     }
-    
+
     func testParseVariableDeclarationOfPointerToFunction() {
-        _=parserTest("""
+        _ = parserTest(
+            """
             void test() {
                 void (*msgSend)(struct objc_super *, SEL) = (__typeof__(msgSend))objc_msgSendSuper;
             }
-            """)
+            """
+        )
     }
-    
+
     func testParseCompoundStatementInExpression() {
-        _=parserTest("""
+        _ = parserTest(
+            """
             void test() {
                 self.value=({
                     1 + 1;
                 });
             }
-            """)
+            """
+        )
     }
-    
+
     func testParseKeywordsInSelectors() {
-        _=parserTest(
+        _ = parserTest(
             """
             @interface A
             - (void)switch:(NSInteger)a default:(NSInteger)b;
             - (void)if:(NSInteger)a else:(NSInteger)b;
             @end
-            """)
+            """
+        )
     }
-    
+
     func testParseAttributesInDirectDeclarators() {
-        _=parserTest(
+        _ = parserTest(
             """
             void test() {
                 __strong NSObject *object __attribute__((objc_precise_lifetime)) = (__bridge __strong id)objectPtr;
             }
-            """)
+            """
+        )
     }
-    
+
     func testParseHasIncludeDirective() {
-        _=parserTest(
+        _ = parserTest(
             """
             #if (defined(USE_UIKIT_PUBLIC_HEADERS) && USE_UIKIT_PUBLIC_HEADERS) || !__has_include(<UIKitCore/UIDynamicBehavior.h>)
             #endif
-            """)
+            """
+        )
     }
 
     func testParseImportDirectives() throws {
-        let sut = ObjcParser(string: """
-            #define aDefine
-            #import <dir/file.h>
-            #import "file.h"
-            """)
+        let sut = ObjcParser(
+            string: """
+                #define aDefine
+                #import <dir/file.h>
+                #import "file.h"
+                """
+        )
 
         try sut.parse()
 
@@ -497,7 +571,7 @@ class ObjcParserTests: XCTestCase {
         XCTAssert(sut.importDirectives[0].isSystemImport)
         XCTAssertFalse(sut.importDirectives[1].isSystemImport)
     }
-    
+
     func testCommentRanges() throws {
         let string = """
             // A comment
@@ -506,11 +580,11 @@ class ObjcParserTests: XCTestCase {
                 Another comment
             */
             """
-        
+
         let sut = ObjcParser(string: string)
-        
+
         try sut.parse()
-        
+
         XCTAssertEqual(sut.comments.count, 2)
         // Single line
         XCTAssertEqual(sut.comments[0].string, "// A comment\n")
@@ -529,16 +603,16 @@ class ObjcParserTests: XCTestCase {
         XCTAssertEqual(sut.comments[1].length.newlines, 2)
         XCTAssertEqual(sut.comments[1].length.columnsAtLastLine, 2)
     }
-    
+
     func testCommentRangeInlinedMultiLineComment() throws {
         let string = """
             void /* A comment */ func() {
             }
             """
         let sut = ObjcParser(string: string)
-        
+
         try sut.parse()
-        
+
         XCTAssertEqual(sut.comments.count, 1)
         XCTAssertEqual(sut.comments[0].string, "/* A comment */")
         XCTAssertEqual(sut.comments[0].range.lowerBound, string.range(of: "/*")?.lowerBound)
@@ -548,7 +622,7 @@ class ObjcParserTests: XCTestCase {
         XCTAssertEqual(sut.comments[0].length.newlines, 0)
         XCTAssertEqual(sut.comments[0].length.columnsAtLastLine, 15)
     }
-    
+
     func testCollectCommentsInMethodBody() throws {
         let string = """
             void func() {
@@ -559,79 +633,95 @@ class ObjcParserTests: XCTestCase {
             }
             """
         let sut = ObjcParser(string: string)
-        
+
         try sut.parse()
-        
+
         let global = sut.rootNode
         let f = global.functionDefinitions[0]
         let body = f.methodBody!
         XCTAssertEqual(body.comments.count, 2)
     }
-    
+
     func testCollectCommentsPrecedingFunction() {
         testParseComments(
             """
             void func() {
             }
-            """, \.functionDefinitions[0])
+            """,
+            \.functionDefinitions[0]
+        )
     }
-    
+
     func testCollectCommentsPrecedingClassInterface() {
         testParseComments(
             """
             @interface A
             @end
-            """, \.classInterfaces[0])
+            """,
+            \.classInterfaces[0]
+        )
     }
-    
+
     func testCollectCommentsPrecedingClassImplementations() {
         testParseComments(
             """
             @implementation A
             @end
-            """, \.classImplementations[0])
+            """,
+            \.classImplementations[0]
+        )
     }
-    
+
     func testCollectCommentsPrecedingCategoryInterface() {
-           testParseComments(
-               """
-               @interface A ()
-               @end
-               """, \.categoryInterfaces[0])
-       }
-       
-       func testCollectCommentsPrecedingCategoryImplementation() {
-           testParseComments(
-               """
-               @implementation A ()
-               @end
-               """, \.categoryImplementations[0])
-       }
-    
+        testParseComments(
+            """
+            @interface A ()
+            @end
+            """,
+            \.categoryInterfaces[0]
+        )
+    }
+
+    func testCollectCommentsPrecedingCategoryImplementation() {
+        testParseComments(
+            """
+            @implementation A ()
+            @end
+            """,
+            \.categoryImplementations[0]
+        )
+    }
+
     func testCollectCommentsPrecedingProtocolDeclaration() {
         testParseComments(
             """
             @protocol A
             @end
-            """, \.protocolDeclarations[0])
+            """,
+            \.protocolDeclarations[0]
+        )
     }
-    
+
     func testCollectCommentsPrecedingGlobalVariable() {
         testParseComments(
             """
             int global;
-            """, \.variableDeclarations[0])
+            """,
+            \.variableDeclarations[0]
+        )
     }
-    
+
     func testCollectCommentsPrecedingTypedefNode() {
         testParseComments(
             """
             typedef struct {
                 int a;
             } A;
-            """, \.typedefNodes[0])
+            """,
+            \.typedefNodes[0]
+        )
     }
-    
+
     func testCollectCommentsPrecedingMethodDefinition() {
         testParseCommentsRaw(
             """
@@ -641,9 +731,11 @@ class ObjcParserTests: XCTestCase {
             - (void)method;
             // Trailing comment
             @end
-            """, \ObjcGlobalContextNode.classInterfaces[0].methods[0])
+            """,
+            \ObjcGlobalContextNode.classInterfaces[0].methods[0]
+        )
     }
-    
+
     func testCollectCommentsPrecedingPropertyDefinition() {
         testParseCommentsRaw(
             """
@@ -653,9 +745,11 @@ class ObjcParserTests: XCTestCase {
             @property NSInteger a;
             // Trailing comment
             @end
-            """, \ObjcGlobalContextNode.classInterfaces[0].properties[0])
+            """,
+            \ObjcGlobalContextNode.classInterfaces[0].properties[0]
+        )
     }
-    
+
     func testCollectCommentsPrecedingMethodDeclaration() {
         testParseCommentsRaw(
             """
@@ -666,9 +760,11 @@ class ObjcParserTests: XCTestCase {
             }
             // Trailing comment
             @end
-            """, \ObjcGlobalContextNode.classImplementations[0].methods[0])
+            """,
+            \ObjcGlobalContextNode.classImplementations[0].methods[0]
+        )
     }
-    
+
     func testCollectCommentsPrecedingEnumDeclaration() {
         testParseCommentsRaw(
             """
@@ -678,9 +774,11 @@ class ObjcParserTests: XCTestCase {
                 MyEnumCase
             };
             // Trailing comment
-            """, \ObjcGlobalContextNode.enumDeclarations[0])
+            """,
+            \ObjcGlobalContextNode.enumDeclarations[0]
+        )
     }
-    
+
     func testCollectCommentsPrecedingEnumCase() {
         testParseCommentsRaw(
             """
@@ -690,9 +788,11 @@ class ObjcParserTests: XCTestCase {
                 MyEnumCase
                 // Trailing comment
             };
-            """, \ObjcGlobalContextNode.enumDeclarations[0].cases[0])
+            """,
+            \ObjcGlobalContextNode.enumDeclarations[0].cases[0]
+        )
     }
-    
+
     func testCollectCommentsPrecedingInstanceVariable() {
         testParseCommentsRaw(
             """
@@ -704,22 +804,26 @@ class ObjcParserTests: XCTestCase {
                 // Trailing comment
             }
             @end
-            """, \ObjcGlobalContextNode.classInterfaces[0].ivarsList!.ivarDeclarations[0])
+            """,
+            \ObjcGlobalContextNode.classInterfaces[0].ivarsList!.ivarDeclarations[0]
+        )
     }
-    
+
     func testCommentCollectionIgnoresMethodImplementationComments() throws {
-        let sut = ObjcParser(string: """
-            @implementation A
-            - (void)test {
-                // Preceding comment
-                // Another preceding comment
-                NSInteger i;
-                // Trailing comment
-            }
-            - (void)anotherMethod {
-            }
-            @end
-            """)
+        let sut = ObjcParser(
+            string: """
+                @implementation A
+                - (void)test {
+                    // Preceding comment
+                    // Another preceding comment
+                    NSInteger i;
+                    // Trailing comment
+                }
+                - (void)anotherMethod {
+                }
+                @end
+                """
+        )
 
         try sut.parse()
 
@@ -732,27 +836,29 @@ class ObjcParserTests: XCTestCase {
 }
 
 extension ObjcParserTests {
-    
+
     private func testParseComments<T: ObjcASTNode>(
         _ source: String,
         _ keyPath: KeyPath<ObjcGlobalContextNode, T>,
-        line: UInt = #line) {
-        
+        line: UInt = #line
+    ) {
+
         let string = """
             // Preceding comment
             // Another preceding comment
             \(source)
             // Trailing comment
             """
-        
+
         testParseCommentsRaw(string, keyPath, line: line)
     }
-    
+
     private func testParseCommentsRaw<T: ObjcASTNode>(
         _ source: String,
         _ keyPath: KeyPath<ObjcGlobalContextNode, T>,
-        line: UInt = #line) {
-        
+        line: UInt = #line
+    ) {
+
         do {
             let sut = ObjcParser(string: source)
 
@@ -764,30 +870,39 @@ extension ObjcParserTests {
             XCTAssertEqual(comments.next()?.string, "// Preceding comment\n", line: line)
             XCTAssertEqual(comments.next()?.string, "// Another preceding comment\n", line: line)
             XCTAssertNil(comments.next())
-        } catch {
+        }
+        catch {
             XCTFail("Error while parsing test code: \(error)", line: line)
         }
     }
-    
-    private func parserTest(_ source: String, file: StaticString = #filePath, line: UInt = #line) -> ObjcGlobalContextNode {
+
+    private func parserTest(_ source: String, file: StaticString = #filePath, line: UInt = #line)
+        -> ObjcGlobalContextNode
+    {
         let sut = ObjcParser(string: source)
-        
+
         return _parseTestGlobalContextNode(source: source, parser: sut, file: file, line: line)
     }
-    
-    private func _parseTestGlobalContextNode(source: String, parser: ObjcParser, file: StaticString = #filePath, line: UInt = #line) -> ObjcGlobalContextNode {
+
+    private func _parseTestGlobalContextNode(
+        source: String,
+        parser: ObjcParser,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> ObjcGlobalContextNode {
         do {
             try parser.parse()
-            
+
             if !parser.diagnostics.diagnostics.isEmpty {
                 var diag = ""
                 parser.diagnostics.printDiagnostics(to: &diag)
-                
+
                 XCTFail("Unexpected diagnostics while parsing:\n\(diag)", file: file, line: line)
             }
-            
+
             return parser.rootNode
-        } catch {
+        }
+        catch {
             XCTFail("Failed to parse test '\(source)': \(error)", file: file, line: line)
             fatalError()
         }

@@ -6,7 +6,7 @@ class DefaultExpressionPassesTests: XCTestCase {
     func testDefaultExpressionPasses() {
         let source = DefaultExpressionPasses()
         var passes = source.syntaxNodePasses.makeIterator()
-        
+
         XCTAssert(passes.next() == CanonicalNameExpressionPass.self)
         XCTAssert(passes.next() == AllocInitExpressionPass.self)
         XCTAssert(passes.next() == InitRewriterExpressionPass.self)

@@ -1,5 +1,5 @@
-import XCTest
 import TestCommons
+import XCTest
 
 class VirtualFileDiskTests: XCTestCase {
     func testInit() throws {
@@ -70,12 +70,22 @@ class VirtualFileDiskTests: XCTestCase {
 
         let contentsDirectory = try sut.contentsOfDirectory(atPath: "/directory")
         let contentsSubpath = try sut.contentsOfDirectory(atPath: "/directory/subPath")
-        XCTAssertEqual(contentsDirectory, ["/directory/subPath",
-                                           "/directory/file.h",
-                                           "/directory/file.m"])
-        XCTAssertEqual(contentsSubpath, ["/directory/subPath/subPath",
-                                         "/directory/subPath/file.h",
-                                         "/directory/subPath/file.m"])
+        XCTAssertEqual(
+            contentsDirectory,
+            [
+                "/directory/subPath",
+                "/directory/file.h",
+                "/directory/file.m",
+            ]
+        )
+        XCTAssertEqual(
+            contentsSubpath,
+            [
+                "/directory/subPath/subPath",
+                "/directory/subPath/file.h",
+                "/directory/subPath/file.m",
+            ]
+        )
     }
 
     func testDeleteFile() throws {
@@ -134,6 +144,9 @@ class VirtualFileDiskTests: XCTestCase {
         let contentsRecursive = try sut.filesInDirectory(atPath: "/", recursive: true)
 
         XCTAssertEqual(contents, ["/file1.txt", "/file2.txt"])
-        XCTAssertEqual(contentsRecursive, ["/file1.txt", "/file2.txt", "/directory/file1.txt", "/directory/file2.txt"])
+        XCTAssertEqual(
+            contentsRecursive,
+            ["/file1.txt", "/file2.txt", "/directory/file1.txt", "/directory/file2.txt"]
+        )
     }
 }

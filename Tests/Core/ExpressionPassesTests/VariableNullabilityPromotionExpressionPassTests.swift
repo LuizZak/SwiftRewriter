@@ -1,16 +1,16 @@
-import XCTest
-import SwiftAST
 import Intentions
+import SwiftAST
 import SwiftRewriterLib
-import TypeSystem
 import TestCommons
+import TypeSystem
+import XCTest
 
 @testable import ExpressionPasses
 
 class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
-        
+
         sutType = VariableNullabilityPromotionExpressionPass.self
         intentionContext = .global(
             GlobalFunctionGenerationIntention(
@@ -18,9 +18,10 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
             )
         )
     }
-    
+
     func testNonNilPromotion() {
-        let statement = Statement
+        let statement =
+            Statement
             .compound([
                 .variableDeclaration(
                     identifier: "a",
@@ -29,7 +30,7 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                 )
             ])
         functionBodyContext = FunctionBodyIntention(body: statement)
-        
+
         assertTransform(
             statement: statement,
             into: .compound([
@@ -39,20 +40,24 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                     initialization: .identifier("_a").typed("A")
                 )
             ])
-        ); assertNotifiedChange()
+        )
+        assertNotifiedChange()
     }
-    
+
     func testDontPromoteUninitializedConstants() {
-        let statement = Statement
+        let statement =
+            Statement
             .compound([
-                .variableDeclaration(identifier: "a",
-                                     type: SwiftType.nullabilityUnspecified("A"),
-                                     initialization: nil)
+                .variableDeclaration(
+                    identifier: "a",
+                    type: SwiftType.nullabilityUnspecified("A"),
+                    initialization: nil
+                )
             ])
         functionBodyContext = FunctionBodyIntention(body: statement)
         let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
-        _=resolver.resolveTypes(in: statement)
-        
+        _ = resolver.resolveTypes(in: statement)
+
         assertTransform(
             statement: statement,
             into: .compound([
@@ -62,11 +67,13 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                     initialization: nil
                 )
             ])
-        ); assertDidNotNotifyChange()
+        )
+        assertDidNotNotifyChange()
     }
-    
+
     func testDontPromoteNilInitializedVariables() {
-        let statement = Statement
+        let statement =
+            Statement
             .compound([
                 .variableDeclaration(
                     identifier: "a",
@@ -76,8 +83,8 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
             ])
         functionBodyContext = FunctionBodyIntention(body: statement)
         let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
-        _=resolver.resolveTypes(in: statement)
-        
+        _ = resolver.resolveTypes(in: statement)
+
         assertTransform(
             statement: statement,
             into: .compound([
@@ -87,11 +94,13 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                     initialization: .constant(.nil)
                 )
             ])
-        ); assertDidNotNotifyChange()
+        )
+        assertDidNotNotifyChange()
     }
-    
+
     func testDontPromoteWeakVariables() {
-        let statement = Statement
+        let statement =
+            Statement
             .compound([
                 .variableDeclaration(
                     identifier: "a",
@@ -101,7 +110,7 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                 )
             ])
         functionBodyContext = FunctionBodyIntention(body: statement)
-        
+
         assertTransform(
             statement: statement,
             into: .compound([
@@ -112,11 +121,13 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                     initialization: .identifier("_a").typed("A")
                 )
             ])
-        ); assertDidNotNotifyChange()
+        )
+        assertDidNotNotifyChange()
     }
-    
+
     func testDontPromoteErrorTypedInitializedVariables() {
-        let statement = Statement
+        let statement =
+            Statement
             .compound([
                 .variableDeclaration(
                     identifier: "a",
@@ -126,8 +137,8 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
             ])
         functionBodyContext = FunctionBodyIntention(body: statement)
         let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
-        _=resolver.resolveTypes(in: statement)
-        
+        _ = resolver.resolveTypes(in: statement)
+
         assertTransform(
             statement: statement,
             into: .compound([
@@ -137,11 +148,13 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                     initialization: .identifier("_a").makeErrorTyped()
                 )
             ])
-        ); assertDidNotNotifyChange()
+        )
+        assertDidNotNotifyChange()
     }
-    
+
     func testAvoidPromotingVariableLaterAssignedAsNil() {
-        let statement = Statement
+        let statement =
+            Statement
             .compound([
                 .variableDeclaration(
                     identifier: "a",
@@ -150,13 +163,13 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                 ),
                 .expression(
                     .identifier("a")
-                    .assignment(op: .assign, rhs: .constant(.nil))
-                )
+                        .assignment(op: .assign, rhs: .constant(.nil))
+                ),
             ])
         functionBodyContext = FunctionBodyIntention(body: statement)
         let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
-        _=resolver.resolveTypes(in: statement)
-        
+        _ = resolver.resolveTypes(in: statement)
+
         assertTransform(
             statement: statement,
             into: .compound([
@@ -167,14 +180,16 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                 ),
                 .expression(
                     .identifier("a")
-                    .assignment(op: .assign, rhs: .constant(.nil))
-                )
+                        .assignment(op: .assign, rhs: .constant(.nil))
+                ),
             ])
-        ); assertDidNotNotifyChange()
+        )
+        assertDidNotNotifyChange()
     }
-    
+
     func testAvoidPromotingVariableInitializedAsNilAndLaterAssignedAsNonNil() {
-        let statement = Statement
+        let statement =
+            Statement
             .compound([
                 .variableDeclaration(
                     identifier: "a",
@@ -183,13 +198,13 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                 ),
                 .expression(
                     .identifier("a")
-                    .assignment(op: .assign, rhs: .identifier("_a").typed("A"))
-                )
+                        .assignment(op: .assign, rhs: .identifier("_a").typed("A"))
+                ),
             ])
         functionBodyContext = FunctionBodyIntention(body: statement)
         let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
-        _=resolver.resolveTypes(in: statement)
-        
+        _ = resolver.resolveTypes(in: statement)
+
         assertTransform(
             statement: statement,
             into: .compound([
@@ -200,9 +215,10 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                 ),
                 .expression(
                     .identifier("a")
-                    .assignment(op: .assign, rhs: .identifier("_a").typed("A"))
-                )
+                        .assignment(op: .assign, rhs: .identifier("_a").typed("A"))
+                ),
             ])
-        ); assertDidNotNotifyChange()
+        )
+        assertDidNotNotifyChange()
     }
 }

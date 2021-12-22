@@ -1,5 +1,5 @@
-import XCTest
 import TestCommons
+import XCTest
 
 @testable import ObjectiveCFrontend
 
@@ -21,49 +21,51 @@ class ObjectiveCFileCollectionStepTests: XCTestCase {
 
         XCTAssertEqual(sut.files.map { $0.url.path }, ["/directory/file.h"])
     }
-    
+
     func testAddFileFromUrlThrowsErrorOnInvalidFile() throws {
-        XCTAssertThrowsError(try sut.addFile(fromUrl: URL(string: "/directory/file.m")!, isPrimary: true))
+        XCTAssertThrowsError(
+            try sut.addFile(fromUrl: URL(string: "/directory/file.m")!, isPrimary: true)
+        )
     }
-    
+
     func testAddFileFromUrlIgnoresDuplicates() throws {
         try fileDisk.createFile(atPath: "/directory/file.h")
-        
+
         try sut.addFile(fromUrl: URL(string: "/directory/file.h")!, isPrimary: true)
         try sut.addFile(fromUrl: URL(string: "/directory/file.h")!, isPrimary: true)
-        
+
         XCTAssertEqual(sut.files.map { $0.url.path }, ["/directory/file.h"])
     }
-    
+
     func testAddFileFromUrlPromotesNonPrimariesToPrimaries() throws {
         try fileDisk.createFile(atPath: "/directory/file1.h")
         try fileDisk.createFile(atPath: "/directory/file2.h")
-        
+
         // Test both orders of 'isPrimary' flag: false -> true, true -> false
         try sut.addFile(fromUrl: URL(string: "/directory/file1.h")!, isPrimary: false)
         try sut.addFile(fromUrl: URL(string: "/directory/file1.h")!, isPrimary: true)
         try sut.addFile(fromUrl: URL(string: "/directory/file2.h")!, isPrimary: true)
         try sut.addFile(fromUrl: URL(string: "/directory/file2.h")!, isPrimary: false)
-        
+
         XCTAssertEqual(sut.files.map { $0.url.path }, ["/directory/file1.h", "/directory/file2.h"])
         XCTAssert(sut.files[0].isPrimary)
         XCTAssert(sut.files[1].isPrimary)
     }
-    
+
     func testAddFileIgnoresDuplicates() throws {
         try sut.addFile(DiskInputFile(url: URL(string: "/directory/file.h")!, isPrimary: true))
         try sut.addFile(DiskInputFile(url: URL(string: "/directory/file.h")!, isPrimary: true))
-        
+
         XCTAssertEqual(sut.files.map { $0.url.path }, ["/directory/file.h"])
     }
-    
+
     func testAddFilePromotesNonPrimariesToPrimaries() throws {
         // Test both orders of 'isPrimary' flag: false -> true, true -> false
         try sut.addFile(DiskInputFile(url: URL(string: "/directory/file1.h")!, isPrimary: false))
         try sut.addFile(DiskInputFile(url: URL(string: "/directory/file1.h")!, isPrimary: true))
         try sut.addFile(DiskInputFile(url: URL(string: "/directory/file2.h")!, isPrimary: true))
         try sut.addFile(DiskInputFile(url: URL(string: "/directory/file2.h")!, isPrimary: false))
-        
+
         XCTAssertEqual(sut.files.map { $0.url.path }, ["/directory/file1.h", "/directory/file2.h"])
         XCTAssert(sut.files[0].isPrimary)
         XCTAssert(sut.files[1].isPrimary)
@@ -79,11 +81,15 @@ class ObjectiveCFileCollectionStepTests: XCTestCase {
 
         try sut.addFromDirectory(URL(string: "/directory")!, recursive: true)
 
-        XCTAssertEqual(Set(sut.files.map { $0.url.path }),
-                       ["/directory/file.h",
-                        "/directory/file.m",
-                        "/directory/subPath/file.h",
-                        "/directory/subPath/file.m"])
+        XCTAssertEqual(
+            Set(sut.files.map { $0.url.path }),
+            [
+                "/directory/file.h",
+                "/directory/file.m",
+                "/directory/subPath/file.h",
+                "/directory/subPath/file.m",
+            ]
+        )
     }
 
     func testDelegateFileCollectionStepReferencedFilesForFile() throws {
@@ -114,11 +120,14 @@ class ObjectiveCFileCollectionStepTests: XCTestCase {
 }
 
 private class MockFileCollectionStepDelegate: ObjectiveCFileCollectionStepDelegate {
-    var fileCollectionStepReferencedFilesForFile: [(fileCollectionStep: ObjectiveCFileCollectionStep, file: InputSource)] = []
+    var fileCollectionStepReferencedFilesForFile:
+        [(fileCollectionStep: ObjectiveCFileCollectionStep, file: InputSource)] = []
     var fileReferences: [URL] = []
 
-    func objectiveCFileCollectionStep(_ fileCollectionStep: ObjectiveCFileCollectionStep,
-                                      referencedFilesForFile file: InputSource) throws -> [URL] {
+    func objectiveCFileCollectionStep(
+        _ fileCollectionStep: ObjectiveCFileCollectionStep,
+        referencedFilesForFile file: InputSource
+    ) throws -> [URL] {
         fileCollectionStepReferencedFilesForFile.append((fileCollectionStep, file))
         return fileReferences
     }

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import SwiftAST
 
 class SyntaxNodeTests: XCTestCase {
@@ -10,14 +11,14 @@ class SyntaxNodeTests: XCTestCase {
         root.addChild(child)
         child.addChild(grandchild)
         root.addChild(unrelatedChild)
-        
+
         XCTAssert(root.isDescendent(of: root))
         XCTAssert(grandchild.isDescendent(of: root))
         XCTAssert(grandchild.isDescendent(of: child))
         XCTAssert(unrelatedChild.isDescendent(of: root))
         XCTAssertFalse(grandchild.isDescendent(of: unrelatedChild))
     }
-    
+
     func testFirstAncestor() {
         let root = TestSyntaxNode()
         let child = OtherTestSyntaxNode()
@@ -26,7 +27,7 @@ class SyntaxNodeTests: XCTestCase {
         root.addChild(child)
         child.addChild(grandChild)
         grandChild.addChild(grandGrandChild)
-        
+
         XCTAssert(grandGrandChild.firstAncestor(ofType: SyntaxNode.self) === grandChild)
         XCTAssert(grandGrandChild.firstAncestor(ofType: OtherTestSyntaxNode.self) === child)
         XCTAssert(grandGrandChild.firstAncestor(ofType: TestSyntaxNode.self) === grandChild)
@@ -37,11 +38,11 @@ class SyntaxNodeTests: XCTestCase {
 
 class TestSyntaxNode: SyntaxNode {
     private var _children: [SyntaxNode] = []
-    
+
     override var children: [SyntaxNode] {
         return _children
     }
-    
+
     func addChild(_ child: SyntaxNode) {
         child.parent = self
         _children.append(child)
@@ -50,11 +51,11 @@ class TestSyntaxNode: SyntaxNode {
 
 class OtherTestSyntaxNode: SyntaxNode {
     private var _children: [SyntaxNode] = []
-    
+
     override var children: [SyntaxNode] {
         return _children
     }
-    
+
     func addChild(_ child: SyntaxNode) {
         child.parent = self
         _children.append(child)

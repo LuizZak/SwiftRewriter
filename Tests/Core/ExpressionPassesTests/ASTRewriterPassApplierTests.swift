@@ -1,7 +1,7 @@
-import XCTest
 import SwiftAST
-import TypeSystem
 import TestCommons
+import TypeSystem
+import XCTest
 
 @testable import ExpressionPasses
 
@@ -28,13 +28,15 @@ class ASTRewriterPassApplierTests: XCTestCase {
                         }
                     }
             }.build(typeChecked: true)
-        
-        let sut = ASTRewriterPassApplier(passes: [TestExpressionPass.self],
-                                         typeSystem: TypeSystem(),
-                                         globals: ArrayDefinitionsSource())
-        
+
+        let sut = ASTRewriterPassApplier(
+            passes: [TestExpressionPass.self],
+            typeSystem: TypeSystem(),
+            globals: ArrayDefinitionsSource()
+        )
+
         sut.apply(on: intentions)
-        
+
         let clsA = intentions.classIntentions()[0]
         let clsB = intentions.classIntentions()[1]
         XCTAssertEqual(clsA.methods[0].functionBody!.body, [.expression(.identifier("replaced"))])
@@ -43,8 +45,10 @@ class ASTRewriterPassApplierTests: XCTestCase {
 }
 
 private class TestExpressionPass: ASTRewriterPass {
-    override func apply(on statement: Statement,
-                        context: ASTRewriterPassContext) -> Statement {
+    override func apply(
+        on statement: Statement,
+        context: ASTRewriterPassContext
+    ) -> Statement {
         return .expression(.identifier("replaced"))
     }
 }

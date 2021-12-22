@@ -1,13 +1,13 @@
-import XCTest
-import SwiftAST
-import KnownType
 import Intentions
+import KnownType
+import SwiftAST
 import TestCommons
+import XCTest
 
 class IntentionSerializerTests: XCTestCase {
-    
+
     func testIntentionCollectionSerializationRoundtrip() throws {
-        
+
         let intentions = IntentionCollectionBuilder()
             .createFile(named: "A.swift") { file in
                 file.addPreprocessorDirective("#preprocessor", line: 1)
@@ -16,14 +16,16 @@ class IntentionSerializerTests: XCTestCase {
                             .createConstructor()
                             .createDeinit()
                             .createInstanceVariable(named: "a", type: .int)
-                            .createProperty(named: "b",
-                                            type: .float,
-                                            objcAttributes: [
-                                                .getterName("getterName"),
-                                                .readonly,
-                                                .attribute("attribute1"),
-                                                .setterName("attribute1")
-                                            ])
+                            .createProperty(
+                                named: "b",
+                                type: .float,
+                                objcAttributes: [
+                                    .getterName("getterName"),
+                                    .readonly,
+                                    .attribute("attribute1"),
+                                    .setterName("attribute1"),
+                                ]
+                            )
                             .createProperty(named: "c", type: .int) { prop in
                                 prop.setAsComputedProperty(body: [
                                     .return(.constant(0))
@@ -31,30 +33,38 @@ class IntentionSerializerTests: XCTestCase {
                             }
                             .createProperty(named: "d", type: .int) { prop in
                                 let setterBody: CompoundStatement = [
-                                    .expression(Expression
-                                        .identifier("print")
-                                        .call([.identifier("newValue")])
+                                    .expression(
+                                        Expression
+                                            .identifier("print")
+                                            .call([.identifier("newValue")])
                                     )
                                 ]
-                                
+
                                 prop.setAsGetterSetter(
                                     getter: [.return(.constant(0))],
-                                    setter: .init(valueIdentifier: "newValue",
-                                                  body: setterBody))
+                                    setter: .init(
+                                        valueIdentifier: "newValue",
+                                        body: setterBody
+                                    )
+                                )
                             }
                             .createSubscript("(index: Int)", returnType: .int)
                             .createSubscript("(index: String)", returnType: .string) { sub in
                                 let setterBody: CompoundStatement = [
-                                    .expression(Expression
-                                        .identifier("print")
-                                        .call([.identifier("newValue")])
+                                    .expression(
+                                        Expression
+                                            .identifier("print")
+                                            .call([.identifier("newValue")])
                                     )
                                 ]
-                                
+
                                 sub.setAsGetterSetter(
                                     getter: [.return(.constant(0))],
-                                    setter: .init(valueIdentifier: "newValue",
-                                                  body: setterBody))
+                                    setter: .init(
+                                        valueIdentifier: "newValue",
+                                        body: setterBody
+                                    )
+                                )
                             }
                             .createMethod("method(_ a: Int, b: Float)") { method in
                                 method
@@ -63,12 +73,12 @@ class IntentionSerializerTests: XCTestCase {
                                     .addAttributes([KnownAttribute(name: "attr", parameters: nil)])
                                     .addAnnotations(["annotation"])
                                     .setBody([
-                                    Statement.expression(
-                                        Expression
-                                            .identifier("hello")
-                                            .dot("world").call()
-                                    )
-                                ])
+                                        Statement.expression(
+                                            Expression
+                                                .identifier("hello")
+                                                .dot("world").call()
+                                        )
+                                    ])
                             }
                             .inherit(from: "BaseClass")
                     }
@@ -84,8 +94,10 @@ class IntentionSerializerTests: XCTestCase {
                     .createTypealias(withName: "Typealias", type: .struct("NSInteger"))
                     .createEnum(withName: "Enum", rawValue: .int) { type in
                         type.createCase(name: "first")
-                        type.createCase(name: "second",
-                                        expression: .identifier("test"))
+                        type.createCase(
+                            name: "second",
+                            expression: .identifier("test")
+                        )
                     }
                     .createExtension(forClassNamed: "Class", categoryName: "Test") { type in
                         type.createSynthesize(propertyName: "b", variableName: "_b")
@@ -93,17 +105,19 @@ class IntentionSerializerTests: XCTestCase {
             }
             .createFile(named: "C.swift") { file in
                 file.createGlobalFunction(withName: "test")
-                    .createGlobalVariable(withName: "globalVar",
-                                          type: .int,
-                                          initialExpression: Expression.constant(0))
+                    .createGlobalVariable(
+                        withName: "globalVar",
+                        type: .int,
+                        initialExpression: Expression.constant(0)
+                    )
             }
             .build()
-        
+
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
-        
+
         let data = try IntentionSerializer.encode(intentions: intentions, encoder: encoder)
-        
+
         XCTAssertNoThrow(
             try IntentionSerializer.decodeIntentions(decoder: JSONDecoder(), data: data)
         )
