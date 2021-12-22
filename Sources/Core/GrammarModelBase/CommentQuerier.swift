@@ -1,16 +1,14 @@
 import Antlr4
 import Utils
-import GrammarModelBase
-import ObjcGrammarModels
 
-class CommentQuerier {
+open class CommentQuerier {
     var allComments: [CodeComment]
     
-    init(allComments: [CodeComment]) {
+    public init(allComments: [CodeComment]) {
         self.allComments = allComments
     }
     
-    func popClosestCommentBefore(node: ParserRuleContext) -> CodeComment? {
+    public func popClosestCommentBefore(node: ParserRuleContext) -> CodeComment? {
         guard let start = node.getStart() else {
             return nil
         }
@@ -34,7 +32,7 @@ class CommentQuerier {
         return comments.reversed()
     }
     
-    func popCommentsOverlapping(node: ParserRuleContext) -> [CodeComment] {
+    public func popCommentsOverlapping(node: ParserRuleContext) -> [CodeComment] {
         guard let startToken = node.getStart(), let stopToken = node.getStop() else {
             return []
         }
