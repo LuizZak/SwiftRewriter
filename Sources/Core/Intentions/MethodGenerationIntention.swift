@@ -1,12 +1,14 @@
-import ObjcGrammarModels
+import GrammarModelBase
 import SwiftAST
 import KnownType
 
 /// An intention to generate a static/instance function for a type.
 public class MethodGenerationIntention: MemberGenerationIntention, ParameterizedFunctionIntention, MutableFunctionIntention, MutableSignatureFunctionIntention {
+    /*
     public var typedSource: ObjcMethodDefinitionNode? {
         source as? ObjcMethodDefinitionNode
     }
+    */
     
     public var isOverride: Bool = false
     
@@ -42,7 +44,7 @@ public class MethodGenerationIntention: MemberGenerationIntention, Parameterized
                             returnType: SwiftType,
                             parameters: [ParameterSignature],
                             accessLevel: AccessLevel = .internal,
-                            source: ObjcASTNode? = nil) {
+                            source: ASTNode? = nil) {
         
         let signature =
             FunctionSignature(name: name,
@@ -58,7 +60,7 @@ public class MethodGenerationIntention: MemberGenerationIntention, Parameterized
     
     public init(signature: FunctionSignature,
                 accessLevel: AccessLevel = .internal,
-                source: ObjcASTNode? = nil) {
+                source: ASTNode? = nil) {
         
         self.signature = signature
         super.init(accessLevel: accessLevel, source: source)

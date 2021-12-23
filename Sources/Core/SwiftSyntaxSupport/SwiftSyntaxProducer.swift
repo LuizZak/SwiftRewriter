@@ -192,7 +192,7 @@ extension SwiftSyntaxProducer {
             }
             
             var hasHeaderTrivia = false
-            if let headerTrivia = generatePreprocessorDirectivesTrivia(file) {
+            if let headerTrivia = generateHeaderCommentsTrivia(file) {
                 hasHeaderTrivia = true
                 addExtraLeading(headerTrivia)
                 addExtraLeading(.newlines(1))
@@ -248,7 +248,7 @@ extension SwiftSyntaxProducer {
                 builder.addStatement(syntax.inCodeBlock())
             }
             
-            // Noone consumed the leading trivia - emit a dummy token just so we
+            // No one consumed the leading trivia - emit a dummy token just so we
             // can have a file with preprocessor directives in place
             if !didModifyExtraLeading && hasHeaderTrivia {
                 extraLeading = extraLeading.map { Trivia(pieces: $0.dropLast()) }
@@ -266,15 +266,15 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generatePreprocessorDirectivesTrivia(_ file: FileGenerationIntention) -> Trivia? {
-        if file.preprocessorDirectives.isEmpty {
+    func generateHeaderCommentsTrivia(_ file: FileGenerationIntention) -> Trivia? {
+        if file.headerComments.isEmpty {
             return nil
         }
         
-        var trivia: Trivia = .lineComment("// Preprocessor directives found in file:")
+        var trivia: Trivia = .lineComment("// \(file.headerComments[0])")
         
-        for directive in file.preprocessorDirectives {
-            trivia = trivia + .newlines(1) + .lineComment("// \(directive.string)")
+        for comment in file.headerComments.dropFirst() {
+            trivia = trivia + .newlines(1) + .lineComment("// \(comment)")
         }
         
         return trivia

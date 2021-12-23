@@ -5,6 +5,7 @@ import KnownType
 import Intentions
 import TypeSystem
 import GrammarModelBase
+import ObjectiveCFrontend
 
 /// An empty initializer used as default argument of initializer closure parameters
 /// for `IntentionCollectionBuilder` and related classes.
@@ -83,6 +84,10 @@ public class FileIntentionBuilder {
     
     public init(fileNamed name: String) {
         intention = FileGenerationIntention(sourcePath: name, targetPath: name)
+    }
+
+    public func addMetadata(forKey key: String, value: Any, type: String) {
+        intention.metadata.updateValue(value, type: type, forKey: key)
     }
     
     @discardableResult
@@ -196,9 +201,11 @@ public class FileIntentionBuilder {
                                 swiftType: SwiftType,
                                 type: ObjcType) -> FileIntentionBuilder {
         
-        let intent = TypealiasIntention(originalObjcType: type,
-                                        fromType: swiftType,
-                                        named: name)
+        let intent = TypealiasIntention(
+            originalObjcType: type,
+            fromType: swiftType,
+            named: name
+        )
         
         intent.inNonnullContext = inNonnullContext
         
@@ -289,25 +296,9 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
-    public func addPreprocessorDirective(_ directive: String, line: Int) -> FileIntentionBuilder {
-        let location = SourceLocation(line: line, column: 1, utf8Offset: 0)
-        let lineRanges = directive.lineRanges()
-        
-        let columnsAtLastLine = lineRanges.count == 1
-            ? directive.count
-            : directive.distance(from: lineRanges.last!.lowerBound, to: lineRanges.last!.upperBound)
-        
-        let length = SourceLength(newlines: lineRanges.count - line,
-                                  columnsAtLastLine: columnsAtLastLine,
-                                  utf8Length: directive.count)
-        
-        let directive = ObjcPreprocessorDirective(string: directive,
-                                                  range: 0..<directive.count,
-                                                  location: location,
-                                                  length: length)
-        
-        intention.preprocessorDirectives.append(directive)
-        
+    public func addHeaderComment(_ comment: String) -> FileIntentionBuilder {
+        intention.headerComments.append(comment)
+
         return self
     }
     

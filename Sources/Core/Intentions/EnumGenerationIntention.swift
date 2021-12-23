@@ -1,12 +1,14 @@
-import ObjcGrammarModels
+import GrammarModelBase
 import SwiftAST
 import KnownType
 
 /// An intention to generate a Swift enumeration type
 public final class EnumGenerationIntention: TypeGenerationIntention {
+    /*
     public var typedSource: ObjcEnumDeclarationNode? {
         source as? ObjcEnumDeclarationNode
     }
+    */
     
     public override var kind: KnownTypeKind {
         .enum
@@ -25,7 +27,7 @@ public final class EnumGenerationIntention: TypeGenerationIntention {
     public init(typeName: String,
                 rawValueType: SwiftType,
                 accessLevel: AccessLevel = .internal,
-                source: ObjcASTNode? = nil) {
+                source: ASTNode? = nil) {
         
         self.rawValueType = rawValueType
         super.init(typeName: typeName, accessLevel: accessLevel, source: source)

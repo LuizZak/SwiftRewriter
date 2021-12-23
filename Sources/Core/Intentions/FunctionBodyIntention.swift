@@ -1,18 +1,20 @@
-import ObjcGrammarModels
+import GrammarModelBase
 import SwiftAST
 import KnownType
 
 /// An intention to generate a body of Swift code from an equivalent Objective-C
 /// source.
 public class FunctionBodyIntention: FromSourceIntention, KnownMethodBody {
+    /*
     public var typedSource: ObjcMethodBodyNode? {
         source as? ObjcMethodBodyNode
     }
+    */
     
     /// Original source code body to generate
     public var body: CompoundStatement
     
-    public init(body: CompoundStatement, source: ObjcASTNode? = nil) {
+    public init(body: CompoundStatement, source: ASTNode? = nil) {
         self.body = body
         
         super.init(accessLevel: .public, source: source)

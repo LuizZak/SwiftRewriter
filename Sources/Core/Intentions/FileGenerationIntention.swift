@@ -1,5 +1,5 @@
 import Foundation
-import ObjcGrammarModels
+import GrammarModelBase
 import KnownType
 import SwiftAST
 
@@ -18,8 +18,8 @@ public final class FileGenerationIntention: Intention {
     /// Gets the types to create on this file.
     public private(set) var typeIntentions: [TypeGenerationIntention] = []
     
-    /// All preprocessor directives found on this file.
-    public var preprocessorDirectives: [ObjcPreprocessorDirective] = []
+    /// A list of comments to prepend this file with.
+    public var headerComments: [String] = []
     
     /// Gets the (Swift) import directives should be printed at this file's top
     /// header section.
@@ -36,12 +36,12 @@ public final class FileGenerationIntention: Intention {
     /// Returns `true` if there are no intentions and no preprocessor directives
     /// registered for this file.
     public var isEmpty: Bool {
-        isEmptyExceptDirectives && preprocessorDirectives.isEmpty
+        isEmptyExceptComments && headerComments.isEmpty
     }
     
     /// Returns `true` if there are no intentions registered for this file, not
-    /// counting any recorded preprocessor directive.
-    public var isEmptyExceptDirectives: Bool {
+    /// counting any recorded prepending header comments.
+    public var isEmptyExceptComments: Bool {
         typeIntentions.isEmpty
             && typealiasIntentions.isEmpty
             && globalFunctionIntentions.isEmpty
@@ -92,7 +92,7 @@ public final class FileGenerationIntention: Intention {
         self.sourcePath = sourcePath
         self.targetPath = targetPath
         
-        super.init()
+        super.init(source: nil)
         
         self.history.recordCreation(description: "Created from file \(sourcePath) to file \(targetPath)")
     }
@@ -105,8 +105,8 @@ public final class FileGenerationIntention: Intention {
         sourcePath = try container.decode(String.self, forKey: .sourcePath)
         targetPath = try container.decode(String.self, forKey: .targetPath)
         
-        preprocessorDirectives =
-            try container.decode([ObjcPreprocessorDirective].self, forKey: .preprocessorDirectives)
+        headerComments =
+            try container.decode([String].self, forKey: .headerComments)
         importDirectives =
             try container.decode([String].self, forKey: .importDirectives)
         
@@ -138,7 +138,7 @@ public final class FileGenerationIntention: Intention {
         try container.encode(index, forKey: .index)
         try container.encode(sourcePath, forKey: .sourcePath)
         try container.encode(targetPath, forKey: .targetPath)
-        try container.encode(preprocessorDirectives, forKey: .preprocessorDirectives)
+        try container.encode(headerComments, forKey: .headerComments)
         try container.encode(importDirectives, forKey: .importDirectives)
         try container.encode(isPrimary, forKey: .isPrimary)
         try container.encodeIntentions(typeIntentions, forKey: .typeIntentions)
@@ -234,7 +234,7 @@ public final class FileGenerationIntention: Intention {
         case index
         case sourcePath
         case targetPath
-        case preprocessorDirectives
+        case headerComments
         case importDirectives
         case isPrimary
         case typeIntentions

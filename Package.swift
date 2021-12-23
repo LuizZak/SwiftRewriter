@@ -42,7 +42,7 @@ let core: [Target] = [
     .target(
         name: "Intentions",
         dependencies: [
-            "SwiftAST", "ObjcGrammarModels", "KnownType",
+            "SwiftAST", "GrammarModelBase", "KnownType",
         ],
         path: "Sources/Core/Intentions"
     ),
@@ -189,6 +189,13 @@ let jsFrontend: [Target] = [
         ],
         path: "Sources/Frontend/JavaScript/JsParser"
     ),
+    .target(
+        name: "JavaScriptFrontend",
+        dependencies: [
+            "SwiftRewriterLib",
+        ],
+        path: "Sources/Frontend/JavaScript/JavaScriptFrontend"
+    ),
 ]
 
 //
@@ -227,7 +234,11 @@ let package = Package(
             dependencies: [
                 .product(name: "Antlr4", package: "antlr4-swift"),
                 .product(name: "Console", package: "console"),
-                "ObjcGrammarModels", "SwiftAST", "ObjcParser",
+                // Objective-C
+                "ObjcGrammarModels", "ObjcParser",
+                // JavaScript
+                "JsGrammarModels", "JsParser",
+                "SwiftAST",
                 "Analysis", "TypeDefinitions", "Utils", "Intentions",
                 "TypeSystem", "IntentionPasses", "KnownType",
                 "WriterTargetOutput", "SwiftSyntaxSupport",
@@ -252,6 +263,7 @@ let package = Package(
             dependencies: [
                 "SwiftAST", "SwiftSyntaxSupport", "SwiftRewriterLib", "Intentions",
                 "KnownType", "ObjcGrammarModels", "Utils", "TypeSystem",
+                "ObjectiveCFrontend",
             ],
             path: "Sources/TestCommons"
         ),
@@ -472,6 +484,14 @@ let package = Package(
                 .copy("Fixtures/Meta-Programming.js"),
                 .copy("Fixtures/InternationalizationAndLocalization.js"),
             ]
+        ),
+        .testTarget(
+            name: "JavaScriptFrontendTests",
+            dependencies: [
+                "JavaScriptFrontend",
+                "TestCommons",
+            ],
+            path: "Tests/Frontend/JavaScript/JavaScriptFrontendTests"
         ),
         .testTarget(
             name: "SwiftRewriterTests",

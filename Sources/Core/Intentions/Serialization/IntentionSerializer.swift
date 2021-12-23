@@ -158,7 +158,7 @@ public final class IntentionSerializer {
             }
         }
         
-        public func encode(to encoder: Encoder) throws {
+        func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: IntentionContainerKeys.self)
             
             try container.encode(kind, forKey: .kind)
@@ -203,16 +203,21 @@ public final class IntentionSerializer {
 }
 
 public extension IntentionSerializer {
-    
     static func encode(intentions: IntentionCollection,
+                       metadataSerializer: SerializableMetadataSerializerType,
                        encoder: JSONEncoder) throws -> Data {
         
-        try encoder.encode(intentions)
+        encoder.userInfo[SerializableMetadataSerializerTypeUserInfoKey] = metadataSerializer
+
+        return try encoder.encode(intentions)
     }
     
     static func decodeIntentions(decoder: JSONDecoder,
+                                 metadataSerializer: SerializableMetadataSerializerType,
                                  data: Data) throws -> IntentionCollection {
         
-        try decoder.decode(IntentionCollection.self, from: data)
+        decoder.userInfo[SerializableMetadataSerializerTypeUserInfoKey] = metadataSerializer
+        
+        return try decoder.decode(IntentionCollection.self, from: data)
     }
 }

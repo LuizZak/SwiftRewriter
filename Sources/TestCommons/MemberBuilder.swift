@@ -3,10 +3,17 @@ import Intentions
 import KnownType
 
 public class MemberBuilder<T: MemberGenerationIntention>: DeclarationBuilder<T> {
-    var targetMember: T
+    var targetMember: T {
+        get {
+            declaration
+        }
+        set {
+            declaration = newValue
+        }
+    }
     
     public init(targetMember: T) {
-        self.targetMember = targetMember
+        super.init(declaration: targetMember)
     }
     
     @discardableResult

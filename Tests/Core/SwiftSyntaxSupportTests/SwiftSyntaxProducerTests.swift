@@ -461,14 +461,13 @@ extension SwiftSyntaxProducerTests {
         )
     }
 
-    func testGeneratePreprocessorDirectivesInEmptyFile() {
+    func testGenerateHeaderCommentsInEmptyFile() {
         let file =
             FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
-                builder.addPreprocessorDirective("#import <Abc.h>", line: 1)
-                builder.addPreprocessorDirective(
-                    "#define MAX(a, b) ((a) > (b) ? (a) : (b))",
-                    line: 2
+                builder.addHeaderComment("#import <Abc.h>")
+                builder.addHeaderComment(
+                    "#define MAX(a, b) ((a) > (b) ? (a) : (b))"
                 )
             }
         let sut = SwiftSyntaxProducer()
@@ -478,21 +477,19 @@ extension SwiftSyntaxProducerTests {
         assert(
             result,
             matches: """
-                // Preprocessor directives found in file:
                 // #import <Abc.h>
                 // #define MAX(a, b) ((a) > (b) ? (a) : (b))
                 """
         )
     }
 
-    func testGeneratePreprocessorDirectivesInPopulatedFile() {
+    func testGenerateHeaderCommentsInPopulatedFile() {
         let file =
             FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
-                builder.addPreprocessorDirective("#import <Abc.h>", line: 1)
-                builder.addPreprocessorDirective(
-                    "#define MAX(a, b) ((a) > (b) ? (a) : (b))",
-                    line: 2
+                builder.addHeaderComment("#import <Abc.h>")
+                builder.addHeaderComment(
+                    "#define MAX(a, b) ((a) > (b) ? (a) : (b))"
                 )
                 builder.createClass(withName: "A")
             }
@@ -503,7 +500,6 @@ extension SwiftSyntaxProducerTests {
         assert(
             result,
             matches: """
-                // Preprocessor directives found in file:
                 // #import <Abc.h>
                 // #define MAX(a, b) ((a) > (b) ? (a) : (b))
                 class A {

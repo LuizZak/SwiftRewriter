@@ -1,15 +1,17 @@
-import ObjcGrammarModels
+import GrammarModelBase
 import SwiftAST
 
 /// An intention to generate the initial value for a global variable.
 public final class GlobalVariableInitialValueIntention: FromSourceIntention {
+    /*
     public var typedSource: ObjcInitialExpressionNode? {
         source as? ObjcInitialExpressionNode
     }
+    */
     
     public var expression: Expression
     
-    public init(expression: Expression, source: ObjcASTNode?) {
+    public init(expression: Expression, source: ASTNode?) {
         self.expression = expression
         
         super.init(accessLevel: .public, source: source)

@@ -3,10 +3,17 @@ import Intentions
 import KnownType
 
 public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
-    var targetType: T
+    var targetType: T {
+        get {
+            declaration
+        }
+        set {
+            declaration = newValue
+        }
+    }
     
     public init(targetType: T) {
-        self.targetType = targetType
+        super.init(declaration: targetType)
     }
     
     @discardableResult

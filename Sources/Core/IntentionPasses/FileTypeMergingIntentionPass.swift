@@ -115,16 +115,26 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             }
         }
         
-        // Move all directives from .h to matching .m files
-        for header in headers where header.isEmptyExceptDirectives {
+        // Move all comments from .h to matching .m files
+        for header in headers where header.isEmptyExceptComments {
             let path = strippingPathExtension(header.sourcePath)
             guard let impl = implByName[path] else {
                 continue
             }
             
             // Move all directives into implementation file
-            impl.preprocessorDirectives.insert(contentsOf: header.preprocessorDirectives, at: 0)
-            header.preprocessorDirectives.removeAll()
+            impl.headerComments.insert(contentsOf: header.headerComments, at: 0)
+            header.headerComments.removeAll()
+
+            // FIXME: This used to be emitted by syntax producers downstream,
+            // FIXME: but now it's produced by Objective-C intention collectors.
+            // FIXME: For now, hack out way into avoiding emitting this comment
+            // FIXME: line twice here.
+            let preprocessorDirectiveComment = "Preprocessor directives found in file:"
+            if impl.headerComments.contains(preprocessorDirectiveComment) {
+                impl.headerComments.removeAll(where: { $0 == preprocessorDirectiveComment })
+                impl.headerComments.insert(preprocessorDirectiveComment, at: 0)
+            }
         }
         
         // Remove all empty header files

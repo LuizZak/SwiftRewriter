@@ -192,7 +192,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
     func testMergeKeepsEmptyFilesWithPreprocessorDirectives() {
         let intentions = IntentionCollectionBuilder()
             .createFile(named: "A.h") { file in
-                file.addPreprocessorDirective("#define Abcde", line: 1)
+                file.addHeaderComment("#define Abcde")
             }
             .build()
         let sut = FileTypeMergingIntentionPass()
@@ -240,10 +240,10 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
             .createFile(named: "A.h") { file in
-                file.addPreprocessorDirective("#directive1", line: 1)
+                file.addHeaderComment("#directive1")
             }
             .createFile(named: "A.m") { file in
-                file.addPreprocessorDirective("#directive2", line: 1)
+                file.addHeaderComment("#directive2")
                 file.createClass(withName: "A")
             }
             .build()
@@ -255,7 +255,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         XCTAssertEqual(files.count, 1)
         XCTAssertEqual(files[0].sourcePath, "A.m")
         XCTAssertEqual(
-            files[0].preprocessorDirectives.map(\.string),
+            files[0].headerComments,
             ["#directive1", "#directive2"]
         )
         XCTAssertEqual(files[0].classIntentions.count, 1)

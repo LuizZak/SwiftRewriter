@@ -193,7 +193,7 @@ class ObjectiveC2SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
             swift: """
                 // Preprocessor directives found in file:
                 // #define CONSTANT 1
-                // [Creation] Converted from compiler directive from test.m line 1: #define CONSTANT 1
+                // [Creation] Converted from compiler directive from test.m: #define CONSTANT 1
                 private let CONSTANT: Int = 1
                 """,
             options: SwiftSyntaxOptions.default.with(\.printIntentionHistory, true)

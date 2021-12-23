@@ -1,5 +1,5 @@
 import Utils
-import ObjcGrammarModels
+import GrammarModelBase
 
 /// An intention represents the intent of the code transpiler to generate a
 /// file/class/struct/property/etc. with Swift code.
@@ -18,7 +18,7 @@ public class Intention: IntentionProtocol, Codable {
     
     /// Reference to an AST node that originated this source-code generation
     /// intention
-    public var source: ObjcASTNode? {
+    public var source: ASTNode? {
         didSet {
             if let source = source {
                 originLocation = source.location
@@ -33,18 +33,23 @@ public class Intention: IntentionProtocol, Codable {
     public var history: IntentionHistory {
         _history
     }
+
+    /// Accesses custom run-time metadata for this intention object.
+    public var metadata: SerializableMetadata
     
-    public init() {
-        
-    }
-    
-    public init(source: ObjcASTNode?) {
+    public init(source: ASTNode?) {
         self.source = source
         self.originLocation = source?.location
+        self.metadata = .init()
+    }
+
+    public convenience init() {
+        self.init(source: nil)
     }
     
     private enum CodingKeys: String, CodingKey {
         case _history = "history"
+        case metadata
     }
 }
 

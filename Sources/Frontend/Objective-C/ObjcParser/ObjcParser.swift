@@ -343,10 +343,13 @@ public class ObjcParser {
                                       utf8Length: utf8Length)
             }
             
-            let comment = CodeComment(string: String(input[range]),
-                                      range: range,
-                                      location: location,
-                                      length: length)
+            let commentString = String(input[range])
+            let comment = CodeComment(
+                string: commentString,
+                range: utf8Offset..<(utf8Offset + utf8Length),
+                location: location,
+                length: length
+            )
             
             comments.append(comment)
         }

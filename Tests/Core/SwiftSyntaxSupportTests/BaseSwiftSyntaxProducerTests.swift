@@ -27,7 +27,7 @@ class BaseSwiftSyntaxProducerTests: XCTestCase {
         line: UInt = #line
     ) {
 
-        diffTest(expected: expected, file: file, line: line)
+        diffTest(expected: expected, file: file, line: line + 2)
             .diff(node.description, file: file, line: line)
     }
 }

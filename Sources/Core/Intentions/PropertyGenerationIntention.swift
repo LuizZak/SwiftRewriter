@@ -1,13 +1,15 @@
-import ObjcGrammarModels
+import GrammarModelBase
 import SwiftAST
 import KnownType
 
 /// An intention to generate a property, either static/instance, computed/stored
 /// for a type definition.
 public class PropertyGenerationIntention: MemberGenerationIntention, MutableValueStorageIntention {
+    /*
     public var propertySource: ObjcPropertyDefinitionNode? {
         source as? ObjcPropertyDefinitionNode
     }
+    */
     
     public var isOverride: Bool = false
     
@@ -100,7 +102,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
                             type: SwiftType,
                             objcAttributes: [ObjcPropertyAttribute],
                             accessLevel: AccessLevel = .internal,
-                            source: ObjcASTNode? = nil) {
+                            source: ASTNode? = nil) {
         
         let storage =
             ValueStorage(
@@ -119,7 +121,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
                 storage: ValueStorage,
                 objcAttributes: [ObjcPropertyAttribute],
                 accessLevel: AccessLevel = .internal,
-                source: ObjcASTNode? = nil) {
+                source: ASTNode? = nil) {
         
         self.name = name
         self.storage = storage

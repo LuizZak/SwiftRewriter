@@ -1,4 +1,4 @@
-import ObjcGrammarModels
+import GrammarModelBase
 
 /// Tracks changes made to an intention as it is read by AST readers and modified
 /// by intention passes so it can be sourced
@@ -97,7 +97,7 @@ public extension IntentionHistory {
 public extension IntentionHistory {
     
     @discardableResult
-    func recordSourceHistory(node: ObjcASTNode) -> IntentionHistoryEntryEcho {
+    func recordSourceHistory(node: ASTNode) -> IntentionHistoryEntryEcho {
         guard let file = node.originalSource?.filePath else {
             return recordCreation(description: "from non-file node \(type(of: node))")
         }

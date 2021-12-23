@@ -1,4 +1,4 @@
-import ObjcGrammarModels
+import GrammarModelBase
 import SwiftAST
 import KnownType
 
@@ -21,7 +21,7 @@ public final class StructGenerationIntention: TypeGenerationIntention, InstanceV
     
     public override init(typeName: String,
                          accessLevel: AccessLevel = .internal,
-                         source: ObjcASTNode? = nil) {
+                         source: ASTNode? = nil) {
         
         super.init(typeName: typeName, accessLevel: accessLevel, source: source)
     }

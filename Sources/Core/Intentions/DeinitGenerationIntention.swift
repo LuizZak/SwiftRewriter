@@ -1,4 +1,4 @@
-import ObjcGrammarModels
+import GrammarModelBase
 import SwiftAST
 
 /// An intention to generate a `deinit` method for a reference type.
@@ -6,7 +6,7 @@ public class DeinitGenerationIntention: MemberGenerationIntention, MutableFuncti
     public var functionBody: FunctionBodyIntention?
     
     public override init(accessLevel: AccessLevel = .internal,
-                         source: ObjcASTNode? = nil) {
+                         source: ASTNode? = nil) {
         
         super.init(accessLevel: accessLevel, source: source)
     }

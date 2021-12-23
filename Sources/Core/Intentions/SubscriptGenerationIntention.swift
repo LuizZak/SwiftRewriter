@@ -1,4 +1,4 @@
-import ObjcGrammarModels
+import GrammarModelBase
 import SwiftAST
 import KnownType
 
@@ -26,7 +26,7 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
                 returnType: SwiftType,
                 mode: Mode,
                 accessLevel: AccessLevel = .internal,
-                source: ObjcASTNode? = nil) {
+                source: ASTNode? = nil) {
         
         self.parameters = parameters
         self.returnType = returnType

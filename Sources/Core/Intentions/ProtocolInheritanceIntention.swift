@@ -1,4 +1,4 @@
-import ObjcGrammarModels
+import GrammarModelBase
 import SwiftAST
 import KnownType
 
@@ -6,7 +6,7 @@ import KnownType
 public final class ProtocolInheritanceIntention: FromSourceIntention, KnownProtocolConformance {
     public var protocolName: String
     
-    public init(protocolName: String, accessLevel: AccessLevel = .internal, source: ObjcASTNode? = nil) {
+    public init(protocolName: String, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.protocolName = protocolName
         
         super.init(accessLevel: accessLevel, source: source)

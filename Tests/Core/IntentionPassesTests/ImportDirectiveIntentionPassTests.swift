@@ -9,9 +9,9 @@ class ImportDirectiveIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
             .createFile(named: "file") { file in
-                file.addPreprocessorDirective("#import <UIKit/UIKit.h>", line: 1)
-                    .addPreprocessorDirective("#import <Foundation/Foundation.h>", line: 2)
-                    .addPreprocessorDirective("#import <Framework.h>", line: 3)
+                file.addHeaderComment("#import <UIKit/UIKit.h>")
+                    .addHeaderComment("#import <Foundation/Foundation.h>")
+                    .addHeaderComment("#import <Framework.h>")
             }.build()
         let sut = ImportDirectiveIntentionPass()
 

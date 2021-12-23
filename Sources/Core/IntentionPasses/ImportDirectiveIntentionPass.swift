@@ -3,9 +3,10 @@ import SwiftAST
 import Intentions
 import MiniLexer
 import Utils
+import GrammarModelBase
 import ObjcGrammarModels
 
-/// Verifies the #import directives on every file and convert them to the appropriate
+/// Verifies the #import comments on every file and convert them to the appropriate
 /// Swift lib import declaration.
 public class ImportDirectiveIntentionPass: IntentionPass {
     private var context: IntentionPassContext!
@@ -24,7 +25,8 @@ public class ImportDirectiveIntentionPass: IntentionPass {
     
     private func applyOnFile(file: FileGenerationIntention) {
         // Filter out imports
-        let objcImports = parseObjcImports(in: file.preprocessorDirectives)
+        // TODO: Create dedicated Intention.metadata entry to store recorded #import declarations.
+        let objcImports = parseObjcImports(in: file.headerComments)
         
         let imports: [String] = mapImports(objcImports)
         
@@ -49,12 +51,12 @@ public class ImportDirectiveIntentionPass: IntentionPass {
         return modules
     }
     
-    private func parseObjcImports(in directives: [ObjcPreprocessorDirective]) -> [ObjcImportDecl] {
+    private func parseObjcImports(in comments: [String]) -> [ObjcImportDecl] {
         var imports: [ObjcImportDecl] = []
         
-        for directive in directives {
+        for comment in comments {
             do {
-                let lexer = Lexer(input: directive.string)
+                let lexer = Lexer(input: comment)
                 
                 // "#import <[PATH]>"
                 try lexer.advance(expectingCurrent: "#"); lexer.skipWhitespace()

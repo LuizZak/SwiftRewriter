@@ -1,8 +1,10 @@
-import Intentions
 import KnownType
 import SwiftAST
 import TestCommons
 import XCTest
+import ObjcGrammarModels
+
+@testable import Intentions
 
 class IntentionSerializerTests: XCTestCase {
 
@@ -10,7 +12,7 @@ class IntentionSerializerTests: XCTestCase {
 
         let intentions = IntentionCollectionBuilder()
             .createFile(named: "A.swift") { file in
-                file.addPreprocessorDirective("#preprocessor", line: 1)
+                file.addHeaderComment("#preprocessor")
                     .createClass(withName: "Class") { type in
                         type.createConformance(protocolName: "Protocol")
                             .createConstructor()
@@ -115,11 +117,60 @@ class IntentionSerializerTests: XCTestCase {
 
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
+        let metadataSerializer = DefaultMetadataSerializer()
 
-        let data = try IntentionSerializer.encode(intentions: intentions, encoder: encoder)
+        let data = try IntentionSerializer.encode(intentions: intentions, metadataSerializer: metadataSerializer, encoder: encoder)
 
         XCTAssertNoThrow(
-            try IntentionSerializer.decodeIntentions(decoder: JSONDecoder(), data: data)
+            try IntentionSerializer.decodeIntentions(decoder: JSONDecoder(), metadataSerializer: metadataSerializer, data: data)
         )
+    }
+
+    func testSerializeMetadata() throws {
+        let intentions = IntentionCollectionBuilder()
+            .createFile(named: "file.h") { file in
+                file.addMetadata(forKey: "key", value: 123, type: "Int")
+            }
+            .build()
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        let metadataSerializer = DefaultMetadataSerializer()
+
+        let data = try IntentionSerializer.encode(intentions: intentions, metadataSerializer: metadataSerializer, encoder: encoder)
+        let decoded = try IntentionSerializer.decodeIntentions(decoder: JSONDecoder(), metadataSerializer: metadataSerializer, data: data)
+
+        XCTAssertEqual(decoded.fileIntentions()[0].metadata.getValue(forKey: "key"), 123)
+    }
+}
+
+private class DefaultMetadataSerializer: SerializableMetadataSerializerType {
+    func serialize(type: String, value: Any, encoder: Encoder) throws {
+        switch (type, value) {
+        case ("ObjcType", let value as ObjcType):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case ("Int", let value as Int):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        default:
+            throw Error.mismatchedType
+        }
+    }
+
+    func deserialize(type: String, decoder: Decoder) throws -> Any {
+        if type == "Int" {
+            return try decoder.singleValueContainer().decode(Int.self)
+        }
+        if type == "ObjcType" {
+            return try decoder.singleValueContainer().decode(ObjcType.self)
+        }
+
+        throw Error.unknownType(type)
+    }
+
+    enum Error: Swift.Error {
+        case mismatchedType
+        case unknownType(String)
     }
 }

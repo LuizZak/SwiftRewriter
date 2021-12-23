@@ -1,4 +1,4 @@
-import ObjcGrammarModels
+import GrammarModelBase
 import SwiftAST
 import KnownType
 
@@ -14,7 +14,7 @@ public final class InitGenerationIntention: MemberGenerationIntention, MutableFu
     
     public init(parameters: [ParameterSignature],
                 accessLevel: AccessLevel = .internal,
-                source: ObjcASTNode? = nil) {
+                source: ASTNode? = nil) {
         
         self.parameters = parameters
         super.init(accessLevel: accessLevel, source: source)

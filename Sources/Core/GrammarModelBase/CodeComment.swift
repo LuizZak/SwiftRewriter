@@ -1,14 +1,14 @@
 import Utils
 
 /// A language-agnostic reference to a comment from an input file
-public struct CodeComment {
+public struct CodeComment: Codable {
     public var string: String
-    public var range: Range<String.Index>
+    public var range: Range<Int>
     public var location: SourceLocation
     public var length: SourceLength
     
     public init(string: String,
-                range: Range<String.Index>,
+                range: Range<Int>,
                 location: SourceLocation,
                 length: SourceLength) {
         

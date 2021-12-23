@@ -476,7 +476,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
     func testReadWithComments() {
         let comment = CodeComment(
             string: "// A Comment",
-            range: "// A Comment".cStyleCommentSectionRanges()[0],
+            range: 0..<"// A Comment".count,
             location: SourceLocation(line: 1, column: 1, utf8Offset: 0),
             length: SourceLength(
                 newlines: 0,

@@ -248,17 +248,18 @@ public final class ObjectiveC2SwiftRewriter {
     /// Analyzes and converts #define directives and converts them into global
     /// variables when suitable
     private func parseDefinePreprocessorDirectives() {
+        // TODO: Use a dedicated metadata value for representing preprocessor directives.
         let resolver = makeTypeResolverInvoker()
         
         for file in intentionCollection.fileIntentions() {
-            for directive in file.preprocessorDirectives {
+            for comment in file.headerComments {
                 let converter =
                     CPreprocessorDirectiveConverter(
                         parserStatePool: parserStatePool,
                         typeSystem: typeSystem,
                         typeResolverInvoker: resolver)
                 
-                guard let declaration = converter.convert(directive: directive.string, inFile: file) else {
+                guard let declaration = converter.convert(directive: comment, inFile: file) else {
                     continue
                 }
                 
@@ -277,8 +278,7 @@ public final class ObjectiveC2SwiftRewriter {
                 
                 let sourceName = (file.sourcePath as NSString).lastPathComponent
                 let history = """
-                    Converted from compiler directive from \(sourceName) \
-                    line \(directive.location.line): \(directive.string)
+                    Converted from compiler directive from \(sourceName): \(comment)
                     """
                 
                 varDecl.history.recordCreation(description: history)
@@ -316,18 +316,22 @@ public final class ObjectiveC2SwiftRewriter {
                         
                         ext.typeName = typeName
                         
-                    case .typealias(let typeali):
+                    case .typealias(let ta):
+                        guard let originalObjcType = ta.metadata.originalObjcType else {
+                            break
+                        }
+
                         let nullability =
-                            _typeNullability(inType: typeali.originalObjcType)
+                            _typeNullability(inType: originalObjcType)
                         
                         let ctx =
                             TypeMappingContext(explicitNullability: nullability,
-                                               inNonnull: typeali.inNonnullContext)
+                                               inNonnull: ta.inNonnullContext)
                         
-                        typeali.fromType =
-                            typeMapper.swiftType(forObjcType: typeali.originalObjcType,
+                        ta.fromType =
+                            typeMapper.swiftType(forObjcType: originalObjcType,
                                                  context: ctx.withExplicitNullability(.nonnull))
-                        _=typeali.fromType
+                        _ = ta.fromType
                     default:
                         break
                     }
@@ -620,7 +624,14 @@ public final class ObjectiveC2SwiftRewriter {
         let ctx = ObjectiveCIntentionCollector.Context()
         
         let fileIntent = FileGenerationIntention(sourcePath: source.sourcePath(), targetPath: path)
-        fileIntent.preprocessorDirectives = parser.preprocessorDirectives
+        if !parser.preprocessorDirectives.isEmpty {
+            fileIntent.headerComments.append(
+                "Preprocessor directives found in file:"
+            )
+            fileIntent.headerComments.append(contentsOf:
+                parser.preprocessorDirectives.map(\.string)
+            )
+        }
         fileIntent.index = index
         fileIntent.isPrimary = source.isPrimary
         ctx.pushContext(fileIntent)

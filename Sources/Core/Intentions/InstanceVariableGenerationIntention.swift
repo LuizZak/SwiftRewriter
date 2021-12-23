@@ -1,12 +1,14 @@
-import ObjcGrammarModels
+import GrammarModelBase
 import SwiftAST
 import KnownType
 
 /// An intention to create an instance variable (Objective-C's 'ivar').
 public final class InstanceVariableGenerationIntention: MemberGenerationIntention, MutableValueStorageIntention {
+    /*
     public var typedSource: ObjcIVarDeclarationNode? {
         source as? ObjcIVarDeclarationNode
     }
+    */
     
     public var name: String
     public var storage: ValueStorage
@@ -20,7 +22,7 @@ public final class InstanceVariableGenerationIntention: MemberGenerationIntentio
     public init(name: String,
                 storage: ValueStorage,
                 accessLevel: AccessLevel = .internal,
-                source: ObjcASTNode? = nil) {
+                source: ASTNode? = nil) {
         
         self.name = name
         self.storage = storage

@@ -1,11 +1,13 @@
-import ObjcGrammarModels
+import GrammarModelBase
 import SwiftAST
 
 public class EnumCaseGenerationIntention: PropertyGenerationIntention {
+    /*
     public var typedSource: ObjcEnumCaseNode? {
         return source as? ObjcEnumCaseNode
     }
-    
+    */
+
     public override var isStatic: Bool {
         true // Enum cases are always static
     }
@@ -17,7 +19,7 @@ public class EnumCaseGenerationIntention: PropertyGenerationIntention {
     public init(name: String,
                 expression: Expression?,
                 accessLevel: AccessLevel = .internal,
-                source: ObjcASTNode? = nil) {
+                source: ASTNode? = nil) {
         
         let storage = ValueStorage(type: .any, ownership: .strong, isConstant: true)
         

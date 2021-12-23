@@ -1,20 +1,20 @@
-import ObjcGrammarModels
+import GrammarModelBase
 import SwiftAST
 
 /// An intention of generating a Swift `typealias` clause.
 public final class TypealiasIntention: FromSourceIntention {
+    /*
     public var originalObjcType: ObjcType
+    */
     
     public var fromType: SwiftType
     public var name: String
     
-    public init(originalObjcType: ObjcType,
-                fromType: SwiftType,
+    public init(fromType: SwiftType,
                 named name: String,
                 accessLevel: AccessLevel = .internal,
-                source: ObjcASTNode? = nil) {
+                source: ASTNode? = nil) {
         
-        self.originalObjcType = originalObjcType
         self.fromType = fromType
         self.name = name
         
@@ -24,7 +24,7 @@ public final class TypealiasIntention: FromSourceIntention {
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        originalObjcType = try container.decode(ObjcType.self, forKey: .originalObjcType)
+        // originalObjcType = try container.decode(ObjcType.self, forKey: .originalObjcType)
         fromType = try container.decode(SwiftType.self, forKey: .fromType)
         name = try container.decode(String.self, forKey: .name)
         
@@ -34,7 +34,7 @@ public final class TypealiasIntention: FromSourceIntention {
     public override func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
-        try container.encode(originalObjcType, forKey: .originalObjcType)
+        // try container.encode(originalObjcType, forKey: .originalObjcType)
         try container.encode(fromType, forKey: .fromType)
         try container.encode(name, forKey: .name)
         
@@ -42,7 +42,7 @@ public final class TypealiasIntention: FromSourceIntention {
     }
     
     private enum CodingKeys: String, CodingKey {
-        case originalObjcType
+        // case originalObjcType
         case fromType
         case name
     }
