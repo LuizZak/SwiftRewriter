@@ -136,6 +136,9 @@ public final class SwiftASTSerializer {
                 
             case is CastExpression:
                 kind = .cast
+
+            case is TypeCheckExpression:
+                kind = .typeCheck
                 
             case is ConstantExpression:
                 kind = .constant
@@ -202,6 +205,9 @@ public final class SwiftASTSerializer {
                 
             case .cast:
                 expression = try container.decode(CastExpression.self, forKey: .expression)
+
+            case .typeCheck:
+                expression = try container.decode(TypeCheckExpression.self, forKey: .expression)
                 
             case .constant:
                 expression = try container.decode(ConstantExpression.self, forKey: .expression)
@@ -260,6 +266,7 @@ public final class SwiftASTSerializer {
         case binary
         case block
         case cast
+        case typeCheck
         case constant
         case dictionaryLiteral
         case identifier
