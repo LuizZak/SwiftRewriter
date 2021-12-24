@@ -119,7 +119,48 @@ public class JsParser {
         return root
     }
 
-    // TODO: Deduplicate this method that is also copied in JsParserListener.
+    // MARK: - Global context-free parsing functions
+
+    public static func varModifier(from ctx: JavaScriptParser.VarModifierContext) -> JsVariableDeclarationListNode.VarModifier {
+        JsASTNodeFactory.makeVarModifier(from: ctx)
+    }
+
+    public static func anonymousFunction(from ctx: JavaScriptParser.AnonymousFunctionContext) -> JsAnonymousFunction? {
+        var identifier: JavaScriptParser.IdentifierContext?
+        var signature: JsFunctionSignature?
+        var body: JsAnonymousFunction.Body?
+
+        switch ctx {
+        case let ctx as JavaScriptParser.FunctionDeclContext:
+            let functionDeclaration = ctx.functionDeclaration()
+
+            identifier = functionDeclaration?.identifier()
+            signature = functionSignature(from: functionDeclaration?.formalParameterList())
+            body = (functionDeclaration?.functionBody()).map(JsAnonymousFunction.Body.functionBody)
+        
+        case let ctx as JavaScriptParser.AnonymousFunctionDeclContext:
+            signature = functionSignature(from: ctx.formalParameterList())
+            body = ctx.functionBody().map(JsAnonymousFunction.Body.functionBody)
+
+        case let ctx as JavaScriptParser.ArrowFunctionContext:
+            signature = functionSignature(from: ctx.arrowFunctionParameters())
+            if let singleExpression = ctx.arrowFunctionBody()?.singleExpression() {
+                body = .singleExpression(singleExpression)
+            } else if let functionBody = ctx.arrowFunctionBody()?.functionBody() {
+                body = .functionBody(functionBody)
+            }
+
+        default:
+            break
+        }
+
+        guard let signature = signature, let body = body else {
+            return nil
+        }
+
+        return JsAnonymousFunction(identifier: identifier?.getText(), signature: signature, body: body)
+    }
+
     /// Reads a function signature from a formal parameter list context.
     public static func functionSignature(from ctx: JavaScriptParser.FormalParameterListContext?) -> JsFunctionSignature {
         func _identifier(from singleExpression: JavaScriptParser.SingleExpressionContext?) -> JavaScriptParser.IdentifierContext? {
@@ -155,5 +196,20 @@ public class JsParser {
         }
 
         return JsFunctionSignature(arguments: arguments)
+    }
+
+    /// Reads a function signature from an arrow function parameter context.
+    public static func functionSignature(from ctx: JavaScriptParser.ArrowFunctionParametersContext?) -> JsFunctionSignature? {
+        guard let ctx = ctx else {
+            return nil
+        }
+
+        if let identifier = ctx.identifier() {
+            return JsFunctionSignature(arguments: [
+                .init(identifier: identifier.getText(), isVariadic: false)
+            ])
+        }
+        
+        return functionSignature(from: ctx.formalParameterList())
     }
 }

@@ -10,64 +10,47 @@ import XCTest
 class JavaScriptExprASTReaderTests: XCTestCase {
     var tokens: CommonTokenStream!
 
-    func testConstants() {
-        assert(jsExpr: "1", readsAs: .constant(.int(1, .decimal)))
-        assert(jsExpr: "1ulL", readsAs: .constant(.int(1, .decimal)))
-        assert(jsExpr: "1.0e2", readsAs: .constant(.float(1e2)))
-        assert(jsExpr: "1f", readsAs: .constant(.float(1)))
-        assert(jsExpr: "1F", readsAs: .constant(.float(1)))
-        assert(jsExpr: "1d", readsAs: .constant(.float(1)))
-        assert(jsExpr: "1D", readsAs: .constant(.float(1)))
-        assert(jsExpr: "true", readsAs: .constant(.boolean(true)))
-        assert(jsExpr: "YES", readsAs: .constant(.boolean(true)))
-        assert(jsExpr: "false", readsAs: .constant(.boolean(false)))
-        assert(jsExpr: "NO", readsAs: .constant(.boolean(false)))
-        assert(jsExpr: "0123", readsAs: .constant(.octal(0o123)))
-        assert(jsExpr: "0x123", readsAs: .constant(.hexadecimal(0x123)))
-        assert(jsExpr: "\"abc\"", readsAs: .constant(.string("abc")))
-        assert(jsExpr: "123.456e+20f", readsAs: .constant(.float(123.456e+20)))
-    }
-
-    func testTernaryExpression() {
+    func testAnonymousFunction() {
         assert(
-            jsExpr: "value ? ifTrue : ifFalse",
-            readsAs: .ternary(
-                .identifier("value"),
-                true: .identifier("ifTrue"),
-                false: .identifier("ifFalse")
+            jsExpr: """
+                function (param) {
+                    return param + 10;
+                }
+                """,
+            readsAs: .block(
+                parameters: [.init(name: "param", type: .any)],
+                return: SwiftType.any,
+                body: [
+                    .return(.identifier("param").binary(op: .add, rhs: .constant(10)))
+                ]
             )
-        )
-    }
-
-    func testFunctionCall() {
-        assert(
-            jsExpr: "print()",
-            readsAs: Expression.identifier("print").call()
-        )
-
-        assert(
-            jsExpr: "a.method()",
-            readsAs: Expression.identifier("a").dot("method").call()
-        )
-
-        assert(
-            jsExpr: "print(123, 456)",
-            readsAs: Expression.identifier("print").call([
-                .constant(123),
-                .constant(456),
-            ])
         )
     }
 
     func testSubscript() {
         assert(
             jsExpr: "aSubscript[1]",
-            readsAs: Expression.identifier("aSubscript").sub(.constant(1))
+            readsAs: .identifier("aSubscript").sub(.constant(1))
         )
     }
 
     func testMemberAccess() {
-        assert(jsExpr: "aValue.member", readsAs: Expression.identifier("aValue").dot("member"))
+        assert(jsExpr: "aValue.member", readsAs: .identifier("aValue").dot("member"))
+    }
+
+    func testFunctionCall() {
+        assert(
+            jsExpr: "print()",
+            readsAs: .identifier("print").call()
+        )
+
+        assert(
+            jsExpr: "print(123, 456)",
+            readsAs: .identifier("print").call([
+                .constant(123),
+                .constant(456),
+            ])
+        )
     }
 
     func testMethodCall() {
@@ -100,8 +83,8 @@ class JavaScriptExprASTReaderTests: XCTestCase {
                         .call([
                             .constant(0),
                             .identifier("kCPDefaultTimelineRowHeight"),
-                            Expression.identifier("self").dot("ganttWidth"),
-                            Expression.identifier("self").dot("ganttHeight"),
+                            .identifier("self").dot("ganttWidth"),
+                            .identifier("self").dot("ganttHeight"),
                         ])
                 )
             ])
@@ -179,6 +162,41 @@ class JavaScriptExprASTReaderTests: XCTestCase {
         )
     }
 
+    func testTernaryExpression() {
+        assert(
+            jsExpr: "value ? ifTrue : ifFalse",
+            readsAs: .ternary(
+                .identifier("value"),
+                true: .identifier("ifTrue"),
+                false: .identifier("ifFalse")
+            )
+        )
+    }
+
+    func testThisExpression() {
+        assert(jsExpr: "this", readsAs: .identifier("self"))
+        assert(jsExpr: "this.a", readsAs: .identifier("self").dot("a"))
+    }
+
+    func testLiterals() {
+        assert(jsExpr: "1", readsAs: .constant(.decimal(1)))
+        assert(jsExpr: "1.0e2", readsAs: .constant(.double(1e2)))
+        assert(jsExpr: "1.0", readsAs: .constant(.double(1)))
+        assert(jsExpr: "true", readsAs: .constant(.boolean(true)))
+        assert(jsExpr: "false", readsAs: .constant(.boolean(false)))
+        assert(jsExpr: "0123", readsAs: .constant(.octal(0o123)))
+        assert(jsExpr: "0o123", readsAs: .constant(.octal(0o123)))
+        assert(jsExpr: "0x123", readsAs: .constant(.hexadecimal(0x123)))
+        assert(jsExpr: "0b1001", readsAs: .constant(.binary(0b1001)))
+        assert(jsExpr: "\"abc\"", readsAs: .constant(.string("abc")))
+        assert(jsExpr: "123.456e+20", readsAs: .constant(.double(123.456e+20)))
+    }
+
+    func testSuperExpression() {
+        assert(jsExpr: "super", readsAs: .identifier("super"))
+        assert(jsExpr: "super.a", readsAs: .identifier("super").dot("a"))
+    }
+
     func testArrayLiteral() {
         assert(jsExpr: "[]", readsAs: .arrayLiteral([]))
         assert(jsExpr: "[\"abc\"]", readsAs: .arrayLiteral([.constant("abc")]))
@@ -205,100 +223,24 @@ class JavaScriptExprASTReaderTests: XCTestCase {
         )
     }
 
-    /*
-    func testBlockExpression() {
-        assert(
-            jsExpr: "^{ thing(); }",
-            readsAs: .block(
-                parameters: [],
-                return: .void,
-                body: [
-                    .expression(Expression.identifier("thing").call())
-                ]
-            )
-        )
-        assert(
-            jsExpr: "^NSString*{ return thing(); }",
-            readsAs: .block(
-                parameters: [],
-                return: SwiftType.string.asNullabilityUnspecified,
-                body: [
-                    .return(Expression.identifier("thing").call())
-                ]
-            )
-        )
-        assert(
-            jsExpr: "^NSString*(NSInteger inty){ return thing(); }",
-            readsAs: .block(
-                parameters: [BlockParameter(name: "inty", type: .int)],
-                return: SwiftType.string.asNullabilityUnspecified,
-                body: [
-                    .return(Expression.identifier("thing").call())
-                ]
-            )
-        )
-        assert(
-            jsExpr: "^(NSInteger inty){ return thing(); }",
-            readsAs: .block(
-                parameters: [BlockParameter(name: "inty", type: .int)],
-                return: .void,
-                body: [
-                    .return(Expression.identifier("thing").call())
-                ]
-            )
-        )
-    }
-
-    func testBlockMultiExpression() {
-        assert(
-            jsExpr: "^{ thing(); thing2(); }",
-            readsAs: .block(
-                parameters: [],
-                return: .void,
-                body: [
-                    .expression(
-                        Expression.identifier("thing").call()
-                    ),
-                    .expression(
-                        Expression.identifier("thing2").call()
-                    ),
-                ]
-            )
-        )
-    }
-    */
-
-    /*
-    func testRangeExpression() {
-        assert(
-            jsExpr: "0",
-            parseWith: { try $0.rangeExpression() },
-            readsAs: .constant(0)
-        )
-        assert(
-            jsExpr: "0 ... 20",
-            parseWith: { try $0.rangeExpression() },
-            readsAs: .binary(lhs: .constant(0), op: .closedRange, rhs: .constant(20))
-        )
-        assert(
-            jsExpr: "ident ... 20",
-            parseWith: { try $0.rangeExpression() },
-            readsAs: .binary(lhs: .identifier("ident"), op: .closedRange, rhs: .constant(20))
-        )
-    }
-    */
-
-    func testNestedCompoundStatementInExpression() {
+    func testDictionaryLiteralFunction() {
         assert(
             jsExpr: """
-                ({ 1 + 1; })
-                """,
-            readsAs:
-                Expression
-                .block(body: [
-                    .expression(Expression.constant(1).binary(op: .add, rhs: .constant(1)))
-                ])
-                .call()
+            {
+                arcfn: function (t, derivativeFn) {
+                    const d = derivativeFn(t);
+                    let l = d.x * d.x + d.y * d.y;
+                    if (typeof d.z !== "undefined") {
+                    l += d.z * d.z;
+                    }
+                    return sqrt(l);
+                }
+            }
+            """,
+            readsAs: .dictionaryLiteral([
+                ExpressionDictionaryPair(key: .constant(1), value: .constant(2)),
+                ExpressionDictionaryPair(key: .constant(3), value: .constant(4)),
+            ])
         )
     }
 
@@ -384,46 +326,6 @@ extension JavaScriptExprASTReaderTests {
             )
         }
     }
-
-    /*
-    func assert(
-        objcSelector: String,
-        readsAsIdentifier expected: FunctionIdentifier,
-        line: UInt = #line
-    ) {
-
-        do {
-            let state = try JavaScriptExprASTReaderTests._state.makeMainParser(input: objcSelector)
-            tokens = state.tokens
-
-            let expr = try state.parser.selectorName()
-
-            let result = convertSelectorToIdentifier(expr)
-
-            if result != expected {
-                XCTFail(
-                    """
-                    Failed: Expected to read JavaScript selector
-                    \(objcSelector)
-                    as
-                    \(expected)
-                    but read as
-                    \(result?.description ?? "<nil>")
-                    """,
-                    file: #file,
-                    line: line
-                )
-            }
-        }
-        catch {
-            XCTFail(
-                "Unexpected error(s) parsing JavaScript: \(error)",
-                file: #file,
-                line: line
-            )
-        }
-    }
-    */
 
     private static var _state = JsParserState()
 }

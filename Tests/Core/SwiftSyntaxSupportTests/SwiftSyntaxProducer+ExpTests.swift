@@ -43,6 +43,14 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
         )
     }
 
+    func testConstantDouble() {
+        assert(
+            Expression.constant(.double(123.456)),
+            producer: SwiftSyntaxProducer.generateConstant,
+            matches: "123.456"
+        )
+    }
+
     func testConstantBoolean() {
         assert(
             Expression.constant(.boolean(true)),

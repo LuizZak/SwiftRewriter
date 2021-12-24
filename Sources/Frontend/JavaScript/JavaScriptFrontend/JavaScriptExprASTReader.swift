@@ -10,17 +10,37 @@ import TypeSystem
 /// enum cases.
 public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expression> {
     public var context: JavaScriptASTReaderContext
-    public var delegate: JavaScriptStatementASTReaderDelegate?
+    public var delegate: JavaScriptASTReaderDelegate?
     
     public init(
         context: JavaScriptASTReaderContext,
-        delegate: JavaScriptStatementASTReaderDelegate?
+        delegate: JavaScriptASTReaderDelegate?
     ) {
         self.context = context
         self.delegate = delegate
     }
 
+    public override func visitFunctionExpression(_ ctx: JavaScriptParser.FunctionExpressionContext) -> Expression? {
+        guard let anonymousFunction = ctx.anonymousFunction() else {
+            return nil
+        }
+        guard let function = JsParser.anonymousFunction(from: anonymousFunction) else {
+            return nil
+        }
+        guard let blockExpression = self.blockLiteralExpression(from: function) else {
+            return nil
+        }
+
+        // Function declaration - create variable assignment.
+        if let identifier = function.identifier {
+            return .assignment(lhs: .identifier(identifier), op: .equals, rhs: blockExpression)
+        }
+
+        return blockExpression
+    }
+
     public override func visitClassExpression(_ ctx: JavaScriptParser.ClassExpressionContext) -> Expression? {
+        // TODO: Handle inline class declaration expressions.
         unknown(ctx)
     }
 
@@ -399,6 +419,12 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
     }
 
     public override func visitNumericLiteral(_ ctx: JavaScriptParser.NumericLiteralContext) -> Expression? {
+        func toDouble<S: StringProtocol>(_ str: S) -> Double? {
+            let str = str.replacingOccurrences(of: "_", with: "")
+
+            return Double(str)
+        }
+
         func toInt<S: StringProtocol>(_ str: S, radix: Int = 10) -> Int? {
             let str = str.replacingOccurrences(of: "_", with: "")
 
@@ -407,19 +433,18 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
 
         var constant: Constant?
 
+        // Attempt integer coercion first
         if let decimal = ctx.DecimalLiteral(), let int = toInt(decimal.getText()) {
-            constant = .decimal(int)
-        }
-        if let hex = ctx.HexIntegerLiteral(), let int = toInt(hex.getText().dropFirst(2), radix: 16) {
+            constant = .int(int, .decimal)
+        } else if let decimal = ctx.DecimalLiteral(), let double = toDouble(decimal.getText()) {
+            constant = .double(double)
+        } else if let hex = ctx.HexIntegerLiteral(), let int = toInt(hex.getText().dropFirst(2), radix: 16) {
             constant = .hexadecimal(int)
-        }
-        if let octal = ctx.OctalIntegerLiteral(), let int = toInt(octal.getText()) {
+        } else if let octal = ctx.OctalIntegerLiteral(), let int = toInt(octal.getText(), radix: 8) {
             constant = .octal(int)
-        }
-        if let octal = ctx.OctalIntegerLiteral2(), let int = toInt(octal.getText().dropFirst(2)) {
+        } else if let octal = ctx.OctalIntegerLiteral2(), let int = toInt(octal.getText().dropFirst(2), radix: 8) {
             constant = .octal(int)
-        }
-        if let binary = ctx.BinaryIntegerLiteral(), let int = toInt(binary.getText().dropFirst(2), radix: 2) {
+        } else if let binary = ctx.BinaryIntegerLiteral(), let int = toInt(binary.getText().dropFirst(2), radix: 2) {
             constant = .binary(int)
         }
 
@@ -449,7 +474,53 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
         return nil
     }
 
+    public override func visitParenthesizedExpression(_ ctx: JavaScriptParser.ParenthesizedExpressionContext) -> Expression? {
+        ctx.expressionSequence()?.accept(self)
+    }
+
+    public override func visitExpressionSequence(_ ctx: JavaScriptParser.ExpressionSequenceContext) -> Expression? {
+        let expressions = ctx.singleExpression().compactMap {
+            $0.accept(self)
+        }
+
+        if expressions.count == 1 {
+            return .parens(expressions[0])
+        }
+
+        return .tuple(expressions)
+    }
+
     // MARK: - Internal conversion helpers
+
+    private func blockLiteralExpression(from anonymousFunction: JsAnonymousFunction) -> BlockLiteralExpression? {
+        let parameters = blockParameters(from: anonymousFunction.signature)
+        let blockBody: CompoundStatement?
+
+        let stmtReader = compoundStatementReader()
+        switch anonymousFunction.body {
+        case .functionBody(let body):
+            blockBody = stmtReader.visitFunctionBody(body)
+
+        case .singleExpression(let expression):
+            guard let exp = expression.accept(self) else {
+                return nil
+            }
+
+            blockBody = [
+                .expression(exp)
+            ]
+        }
+
+        guard let blockBody = blockBody else {
+            return nil
+        }
+
+        return .block(
+            parameters: parameters,
+            return: .any,
+            body: blockBody
+        )
+    }
 
     private func stringLiteral(_ ctx: TerminalNode) -> Expression? {
         let string = ctx.getText().trimmingCharacters(in: CharacterSet(charactersIn: "\"\'"))
@@ -518,8 +589,32 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
         return exps
     }
 
+    private func blockParameters(from signature: JsFunctionSignature) -> [BlockParameter] {
+        signature.arguments.map {
+            .init(name: $0.identifier, type: .any)
+        }
+    }
+
     private func unknown(_ ctx: ParserRuleContext) -> Expression {
         .unknown(UnknownASTContext(context: ctx.getText()))
+    }
+
+    // MARK: - AST reader factories
+
+    private func statementASTReader() -> JavaScriptStatementASTReader {
+        JavaScriptStatementASTReader(
+            expressionReader: self,
+            context: context,
+            delegate: delegate
+        )
+    }
+
+    private func compoundStatementReader() -> JavaScriptStatementASTReader.CompoundStatementVisitor {
+        JavaScriptStatementASTReader.CompoundStatementVisitor(
+            expressionReader: self,
+            context: context,
+            delegate: delegate
+        )
     }
 
     private class DictionaryPairVisitor: JavaScriptParserBaseVisitor<ExpressionDictionaryPair> {
@@ -554,9 +649,7 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
             return .init(
                 key: .identifier(name),
                 value: Expression.block(
-                    parameters: signature.arguments.map {
-                        .init(name: $0.identifier, type: .any)
-                    },
+                    parameters: expReader.blockParameters(from: signature),
                     return: .any,
                     body: body
                 )

@@ -28,20 +28,6 @@ class JsASTNodeFactory {
         return node
     }
 
-    func makeVarModifier(from context: Parser.VarModifierContext) -> JsVariableDeclarationListNode.VarModifier {
-        if context.Var() != nil {
-            return .var
-        }
-        if context.let_() != nil {
-            return .let
-        }
-        if context.Const() != nil {
-            return .const
-        }
-
-        return .var
-    }
-
     func makeVariableDeclaration(from context: Parser.VariableDeclarationContext,
                                  identifier: Parser.IdentifierContext,
                                  initialExpression: Parser.SingleExpressionContext?) -> JsVariableDeclarationNode {
@@ -68,6 +54,24 @@ class JsASTNodeFactory {
         node.body = context
         updateSourceLocation(for: node, with: context)
         return node
+    }
+
+    func makeVarModifier(from context: Parser.VarModifierContext) -> JsVariableDeclarationListNode.VarModifier {
+        Self.makeVarModifier(from: context)
+    }
+
+    static func makeVarModifier(from context: Parser.VarModifierContext) -> JsVariableDeclarationListNode.VarModifier {
+        if context.Var() != nil {
+            return .var
+        }
+        if context.let_() != nil {
+            return .let
+        }
+        if context.Const() != nil {
+            return .const
+        }
+
+        return .var
     }
 
     // MARK: - Source location update

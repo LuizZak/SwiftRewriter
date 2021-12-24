@@ -12,6 +12,10 @@ public struct ValueStorage: Hashable, Codable {
         self.isConstant = isConstant
     }
     
+    public static func variable(ofType type: SwiftType) -> ValueStorage {
+        ValueStorage(type: type, ownership: .strong, isConstant: false)
+    }
+    
     public static func constant(ofType type: SwiftType) -> ValueStorage {
         ValueStorage(type: type, ownership: .strong, isConstant: true)
     }

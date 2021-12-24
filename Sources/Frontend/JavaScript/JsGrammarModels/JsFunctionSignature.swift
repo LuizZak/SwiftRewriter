@@ -1,7 +1,7 @@
 public struct JsFunctionSignature: Equatable {
     public var arguments: [JsFunctionArgument]
 
-    public init(arguments: [JsFunctionArgument]) {
+    public init(arguments: [JsFunctionArgument] = []) {
         self.arguments = arguments
     }
 }

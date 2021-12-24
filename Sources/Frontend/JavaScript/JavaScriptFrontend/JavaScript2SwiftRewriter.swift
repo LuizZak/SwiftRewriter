@@ -176,7 +176,7 @@ public final class JavaScript2SwiftRewriter {
         for item in items {
             queue.addOperation {
                 autoreleasepool {
-                    let delegate = InnerStatementASTReaderDelegate(parseItem: item)
+                    let delegate = InnerASTReaderDelegate(parseItem: item)
 
                     let state = JavaScript2SwiftRewriter._parserStatePool.pull()
                     defer {
@@ -590,7 +590,7 @@ fileprivate extension JavaScript2SwiftRewriter {
         }
     }
 
-    private class InnerStatementASTReaderDelegate: JavaScriptStatementASTReaderDelegate {
+    private class InnerASTReaderDelegate: JavaScriptASTReaderDelegate {
         var parseItem: LazyParseItem
 
         init(parseItem: LazyParseItem) {

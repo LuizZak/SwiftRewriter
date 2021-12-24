@@ -12,7 +12,7 @@ public protocol ExpressionComponent {
 }
 
 public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable,
-                         CustomStringConvertible, CustomReflectable {
+                         CustomStringConvertible {
     
     /// `true` if this expression sub-tree contains only literal-based sub-expressions.
     /// Literal based sub-expressions include: `.constant`, as well as `.binary`,
@@ -43,10 +43,6 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable,
     
     open var description: String {
         "\(type(of: self))"
-    }
-    
-    open var customMirror: Mirror {
-        Mirror(reflecting: "")
     }
     
     /// Returns an array of sub-expressions contained within this expression, in

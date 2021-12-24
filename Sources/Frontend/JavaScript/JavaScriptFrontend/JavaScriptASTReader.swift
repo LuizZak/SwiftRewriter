@@ -6,11 +6,15 @@ import JsGrammarModels
 import JsParser
 import KnownType
 
+public protocol JavaScriptASTReaderDelegate: AnyObject {
+    
+}
+
 /// Reader that reads JavaScript AST and outputs equivalent a Swift AST
 public class JavaScriptASTReader {
     let typeSystem: TypeSystem?
 
-    weak var delegate: JavaScriptStatementASTReaderDelegate?
+    weak var delegate: JavaScriptASTReaderDelegate?
     
     public init(typeSystem: TypeSystem? = nil) {
         self.typeSystem = typeSystem

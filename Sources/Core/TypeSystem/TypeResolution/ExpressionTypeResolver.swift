@@ -228,7 +228,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         case .string:
             exp.resolvedType = .string
             
-        case .float:
+        case .float, .double:
             if let expected = exp.expectedType, typeSystem.category(forType: expected) == .float {
                 exp.resolvedType = expected
             } else {

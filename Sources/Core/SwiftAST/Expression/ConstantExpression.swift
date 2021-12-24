@@ -115,6 +115,7 @@ public extension Expression {
 /// Represents one of the recognized compile-time constant value types.
 public enum Constant: Codable, Equatable {
     case float(Float)
+    case double(Double)
     case boolean(Bool)
     case int(Int, IntegerType)
     case string(String)
@@ -150,6 +151,9 @@ public enum Constant: Codable, Equatable {
         switch discriminator {
         case .float:
             try self = .float(container.decode(Float.self, forKey: .payload0))
+        
+        case .double:
+            try self = .double(container.decode(Double.self, forKey: .payload0))
             
         case .boolean:
             try self = .boolean(container.decode(Bool.self, forKey: .payload0))
@@ -175,6 +179,10 @@ public enum Constant: Codable, Equatable {
         switch self {
         case .float(let value):
             try container.encode(Discriminator.float, forKey: .discriminator)
+            try container.encode(value, forKey: .payload0)
+        
+        case .double(let value):
+            try container.encode(Discriminator.double, forKey: .discriminator)
             try container.encode(value, forKey: .payload0)
             
         case .boolean(let value):
@@ -224,6 +232,7 @@ public enum Constant: Codable, Equatable {
     
     private enum Discriminator: String, Codable {
         case float
+        case double
         case boolean
         case int
         case string
@@ -252,6 +261,9 @@ extension Constant: CustomStringConvertible {
         switch self {
         case .float(let fl):
             return fl.description
+        
+        case .double(let dbl):
+            return dbl.description
             
         case .boolean(let bool):
             return bool.description

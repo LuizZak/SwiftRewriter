@@ -641,6 +641,16 @@ extension SwiftSyntaxProducer {
                 .makeFloatLiteralExpr(floatingDigits: digits)
                 .asExprSyntax
             
+        case .double(let value):
+            let digits = prepareStartToken(
+                SyntaxFactory
+                    .makeFloatingLiteral(value.description)
+            )
+            
+            return SyntaxFactory
+                .makeFloatLiteralExpr(floatingDigits: digits)
+                .asExprSyntax
+            
         case .string(let string):
             return StringLiteralExprSyntax { builder in
                 builder.useOpenQuote(

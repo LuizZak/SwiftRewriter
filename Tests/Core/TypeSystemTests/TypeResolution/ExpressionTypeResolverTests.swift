@@ -45,7 +45,8 @@ class ExpressionTypeResolverTests: XCTestCase {
 
     func testConstant() {
         assertResolve(.constant(1), expect: .int)
-        assertResolve(.constant(1.1), expect: .double)
+        assertResolve(.constant(.float(1.1)), expect: .double)
+        assertResolve(.constant(.double(1.1)), expect: .double)
         assertResolve(.constant(false), expect: .bool)
         assertResolve(.constant("abc"), expect: .string)
         assertResolve(.constant(.nil), expect: .optional(.anyObject))
