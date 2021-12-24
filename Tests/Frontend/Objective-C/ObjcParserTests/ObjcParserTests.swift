@@ -596,8 +596,8 @@ class ObjcParserTests: XCTestCase {
         XCTAssertEqual(sut.comments[0].length.columnsAtLastLine, 0)
         // Multi-line
         XCTAssertEqual(sut.comments[1].string, "/*\n    Another comment\n*/")
-        XCTAssertEqual(sut.comments[1].range.lowerBound, string.range(of: "/*").lowerBound)
-        XCTAssertEqual(sut.comments[1].range.upperBound, string.range(of: "*/").upperBound)
+        XCTAssertEqual(sut.comments[1].range.lowerBound, (string as NSString).range(of: "/*").lowerBound)
+        XCTAssertEqual(sut.comments[1].range.upperBound, (string as NSString).range(of: "*/").upperBound)
         XCTAssertEqual(sut.comments[1].location.line, 3)
         XCTAssertEqual(sut.comments[1].location.column, 1)
         XCTAssertEqual(sut.comments[1].length.newlines, 2)
@@ -615,8 +615,8 @@ class ObjcParserTests: XCTestCase {
 
         XCTAssertEqual(sut.comments.count, 1)
         XCTAssertEqual(sut.comments[0].string, "/* A comment */")
-        XCTAssertEqual(sut.comments[0].range.lowerBound, string.range(of: "/*").lowerBound)
-        XCTAssertEqual(sut.comments[0].range.upperBound, string.range(of: "*/").upperBound)
+        XCTAssertEqual(sut.comments[0].range.lowerBound, (string as NSString).range(of: "/*").lowerBound)
+        XCTAssertEqual(sut.comments[0].range.upperBound, (string as NSString).range(of: "*/").upperBound)
         XCTAssertEqual(sut.comments[0].location.line, 1)
         XCTAssertEqual(sut.comments[0].location.column, 6)
         XCTAssertEqual(sut.comments[0].length.newlines, 0)

@@ -1,4 +1,5 @@
 import Foundation
+import Dispatch
 
 /// An abstraction atop Foundation's `OperationQueue`.
 public class ConcurrentOperationQueue {
@@ -162,8 +163,19 @@ public class ConcurrentOperationQueue {
                 opBlock(block)
             }
         case .barrier(let block):
-            _queue.addBarrierBlock {
-                opBlock(block)
+            if #available(macOS 10.15, *) {
+                _queue.addBarrierBlock {
+                    opBlock(block)
+                }
+            } else {
+                // TODO: Improve support for fallback addBarrierBlock implementation
+                _queue.addOperation {
+                    let operation = BlockOperation(block: {
+                        opBlock(block)
+                    })
+                    
+                    self._queue.addOperations([operation], waitUntilFinished: true)
+                }
             }
         }
     }
