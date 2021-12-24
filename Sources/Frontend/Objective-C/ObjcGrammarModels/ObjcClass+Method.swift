@@ -16,7 +16,7 @@ public class ObjcMethodDefinitionNode: ObjcASTNode, ObjcInitializableNode {
     public var returnType: ObjcMethodTypeNode? {
         firstChild()
     }
-    public var methodSelector: ObjcMethodSelectorNide? {
+    public var methodSelector: ObjcMethodSelectorNode? {
         firstChild()
     }
     public var body: ObjcMethodBodyNode?
@@ -31,7 +31,7 @@ public class ObjcMethodDefinitionNode: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public class ObjcMethodSelectorNide: ObjcASTNode, ObjcInitializableNode {
+public class ObjcMethodSelectorNode: ObjcASTNode, ObjcInitializableNode {
     public var selector: SelectorKind {
         let sel = childrenMatching(type: ObjcIdentifierNode.self)
         let kw = childrenMatching(type: ObjcKeywordDeclaratorNode.self)

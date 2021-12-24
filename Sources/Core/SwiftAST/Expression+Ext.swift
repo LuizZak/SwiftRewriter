@@ -16,6 +16,9 @@ public protocol ExpressionPostfixBuildable {
     
     /// Creates a subscript access postfix expression with this expression buildable
     func sub(_ exp: Expression, type: SwiftType?) -> PostfixExpression
+
+    /// Creates a subscript access postfix expression with this expression buildable
+    func sub(expressions: [Expression], type: SwiftType?) -> PostfixExpression
     
     /// Creates a subscript access postfix expression with this expression buildable
     func sub(_ arguments: [FunctionArgument], type: SwiftType?) -> PostfixExpression
@@ -46,6 +49,10 @@ extension ExpressionPostfixBuildable {
     
     public func sub(_ exp: Expression) -> PostfixExpression {
         sub(exp, type: nil)
+    }
+    
+    public func sub(expressions: [Expression]) -> PostfixExpression {
+        sub(expressions: expressions, type: nil)
     }
     
     public func sub(_ arguments: [FunctionArgument]) -> PostfixExpression {
@@ -93,6 +100,13 @@ public extension ExpressionPostfixBuildable {
         return .postfix(expressionToBuild, op)
     }
     
+    func sub(expressions: [Expression], type: SwiftType?) -> PostfixExpression {
+        let op = Postfix.subscript(expressions: expressions)
+        op.returnType = type
+        
+        return .postfix(expressionToBuild, op)
+    }
+    
     func sub(_ arguments: [FunctionArgument], type: SwiftType?) -> PostfixExpression {
         let op = Postfix.subscript(arguments: arguments)
         op.returnType = type
@@ -120,9 +134,11 @@ extension Expression {
     
     /// Creates a type-cast expression with this expression
     public func casted(to type: SwiftType, optional: Bool = true) -> CastExpression {
-        let exp = Expression.cast(expressionToBuild, type: type, isOptionalCast: optional)
-        
-        return exp
+        .cast(expressionToBuild, type: type, isOptionalCast: optional)
+    }
+
+    public func typeCheck(as type: SwiftType) -> TypeCheckExpression {
+        .typeCheck(self, type: type)
     }
     
     /// Begins an optional postfix creation from this expression.
@@ -196,6 +212,13 @@ public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
         let op = Postfix.subscript(exp)
         op.returnType = type
         op.optionalAccessKind = isForceUnwrap ? .forceUnwrap : .safeUnwrap
+        
+        return .postfix(expressionToBuild, op)
+    }
+    
+    public func sub(expressions: [Expression], type: SwiftType?) -> PostfixExpression {
+        let op = Postfix.subscript(expressions: expressions)
+        op.returnType = type
         
         return .postfix(expressionToBuild, op)
     }

@@ -13,20 +13,20 @@ import XCTest
 
 class SingleFileTestBuilder {
     var test: XCTestCase
-    var objc: String
+    var js: String
     var options: SwiftSyntaxOptions
     var settings: JavaScript2SwiftRewriter.Settings
     var diagnosticsStream: String = ""
 
     init(
         test: XCTestCase,
-        objc: String,
+        js: String,
         options: SwiftSyntaxOptions,
         settings: JavaScript2SwiftRewriter.Settings
     ) {
 
         self.test = test
-        self.objc = objc
+        self.js = js
         self.options = options
         self.settings = settings
     }
@@ -42,7 +42,7 @@ class SingleFileTestBuilder {
         let output = TestSingleFileWriterOutput()
         let input = TestSingleInputProvider(
             fileName: fileName,
-            code: objc,
+            code: js,
             isPrimary: true
         )
 
@@ -60,22 +60,27 @@ class SingleFileTestBuilder {
             if output.buffer != expectedSwift {
                 XCTFail(
                     """
-                    Failed: Expected to translate Objective-C
-                    \(formatCodeForDisplay(objc))
+                    Failed: Expected to translate JavaScript
+                    \(formatCodeForDisplay(js))
 
                     as
-
+                    --
                     \(formatCodeForDisplay(expectedSwift))
+                    --
 
                     but translated as
 
+                    --
                     \(formatCodeForDisplay(output.buffer))
+                    --
 
                     Diff:
 
+                    --
                     \(formatCodeForDisplay(output.buffer)
                         .makeDifferenceMarkString(against:
                             formatCodeForDisplay(expectedSwift)))
+                    --
                     """,
                     file: file,
                     line: line
@@ -172,7 +177,7 @@ extension XCTestCase {
 
     @discardableResult
     func assertRewrite(
-        objc: String,
+        js: String,
         swift expectedSwift: String,
         inputFileName: String = "test.m",
         options: SwiftSyntaxOptions = .default,
@@ -184,7 +189,7 @@ extension XCTestCase {
 
         let test = SingleFileTestBuilder(
             test: self,
-            objc: objc,
+            js: js,
             options: options,
             settings: rewriterSettings
         )

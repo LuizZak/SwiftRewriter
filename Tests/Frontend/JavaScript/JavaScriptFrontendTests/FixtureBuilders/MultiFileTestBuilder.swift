@@ -121,7 +121,7 @@ class MultiFileTestBuilder {
             if buffer != expectedSwift {
                 XCTFail(
                     """
-                    Failed: Expected to translate Objective-C inputs as:
+                    Failed: Expected to translate JavaScript inputs as:
 
                     \(expectedSwift)
                     but translated as:

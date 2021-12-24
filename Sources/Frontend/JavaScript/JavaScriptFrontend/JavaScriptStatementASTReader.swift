@@ -23,6 +23,96 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
         self.context = context
         self.delegate = delegate
     }
+
+    // MARK: - Compound statement visitor
+    class CompoundStatementVisitor: JavaScriptParserBaseVisitor<CompoundStatement> {
+        var expressionReader: JavaScriptExprASTReader
+        var context: JavaScriptASTReaderContext
+        weak var delegate: JavaScriptStatementASTReaderDelegate?
+        
+        init(expressionReader: JavaScriptExprASTReader,
+             context: JavaScriptASTReaderContext,
+             delegate: JavaScriptStatementASTReaderDelegate?) {
+
+            self.expressionReader = expressionReader
+            self.context = context
+            self.delegate = delegate
+        }
+        
+        override func visitStatement(_ ctx: Parser.StatementContext) -> CompoundStatement? {
+            if let block = ctx.block() {
+                return block.accept(self)
+            }
+            
+            let reader = statementReader()
+            
+            if let stmt = reader.visitStatement(ctx) {
+                return CompoundStatement(statements: [stmt])
+            }
+            
+            return nil
+        }
+
+        override func visitSourceElements(_ ctx: JavaScriptParser.SourceElementsContext) -> CompoundStatement? {
+            context.pushDefinitionContext()
+            defer { context.popDefinitionContext() }
+            
+            let reader = statementReader()
+
+            let statements: [Statement] = ctx.sourceElement().map { element in
+                let unknown = UnknownStatement.unknown(UnknownASTContext(context: element.getText()))
+
+                return element.statement().flatMap(reader.visitStatement) ?? unknown
+            }
+            
+            return CompoundStatement(statements: statements.flatMap { stmt -> [Statement] in
+                // Free compound blocks cannot be declared in Swift
+                if let inner = stmt.asCompound {
+                    // Label the first statement with the compound's label, as
+                    // well
+                    inner.statements.first?.label = stmt.label
+                    
+                    return inner.statements
+                }
+                
+                return [stmt]
+            })
+        }
+        
+        override func visitBlock(_ ctx: Parser.BlockContext) -> CompoundStatement? {
+            context.pushDefinitionContext()
+            defer { context.popDefinitionContext() }
+            
+            let reader = statementReader()
+
+            let statements: [Statement] = ctx.statementList()?.statement().map { stmt in
+                let unknown = UnknownStatement.unknown(UnknownASTContext(context: stmt.getText()))
+
+                return reader.visitStatement(stmt) ?? unknown
+            } ?? []
+            
+            return CompoundStatement(statements: statements.flatMap { stmt -> [Statement] in
+                // Free compound blocks cannot be declared in Swift
+                if let inner = stmt.asCompound {
+                    // Label the first statement with the compound's label, as
+                    // well
+                    inner.statements.first?.label = stmt.label
+                    
+                    return inner.statements
+                }
+                
+                return [stmt]
+            })
+        }
+
+        private func statementReader() -> JavaScriptStatementASTReader {
+            JavaScriptStatementASTReader(
+                expressionReader: expressionReader,
+                context: context,
+                delegate: delegate
+            )
+        }
+    }
 }
 
 private class ASTAnalyzer {

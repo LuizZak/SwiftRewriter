@@ -40,6 +40,9 @@ extension SwiftSyntaxProducer {
             
         case let exp as CastExpression:
             return generateCast(exp).asExprSyntax
+        
+        case let exp as TypeCheckExpression:
+            return generateTypeCheck(exp).asExprSyntax
             
         case let exp as TernaryExpression:
             return generateTernary(exp)
@@ -158,6 +161,22 @@ extension SwiftSyntaxProducer {
                             .addingSurroundingSpaces()
                     )
                 }
+                
+                builder.useTypeName(SwiftTypeConverter.makeTypeSyntax(exp.type, startTokenHandler: self))
+            }.asExprSyntax)
+        }
+    }
+    
+    func generateTypeCheck(_ exp: TypeCheckExpression) -> SequenceExprSyntax {
+        SequenceExprSyntax { builder in
+            builder.addElement(generateExpression(exp.exp))
+            
+            builder.addElement(IsExprSyntax { builder in
+                builder.useIsTok(
+                    SyntaxFactory
+                        .makeIsKeyword()
+                        .addingSurroundingSpaces()
+                )
                 
                 builder.useTypeName(SwiftTypeConverter.makeTypeSyntax(exp.type, startTokenHandler: self))
             }.asExprSyntax)

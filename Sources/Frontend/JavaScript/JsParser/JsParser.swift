@@ -118,4 +118,42 @@ public class JsParser {
         
         return root
     }
+
+    // TODO: Deduplicate this method that is also copied in JsParserListener.
+    /// Reads a function signature from a formal parameter list context.
+    public static func functionSignature(from ctx: JavaScriptParser.FormalParameterListContext?) -> JsFunctionSignature {
+        func _identifier(from singleExpression: JavaScriptParser.SingleExpressionContext?) -> JavaScriptParser.IdentifierContext? {
+            if let result = singleExpression as? JavaScriptParser.IdentifierExpressionContext {
+                return result.identifier()
+            }
+
+            return nil
+        }
+        func _argument(from ctx: JavaScriptParser.FormalParameterArgContext) -> JsFunctionArgument? {
+            guard let identifier = ctx.assignable()?.identifier()?.getText() else {
+                return nil
+            }
+
+            return .init(identifier: identifier, isVariadic: false)
+        }
+        func _argument(from ctx: JavaScriptParser.LastFormalParameterArgContext) -> JsFunctionArgument? {
+            guard let identifier = _identifier(from: ctx.singleExpression())?.getText() else {
+                return nil
+            }
+
+            return .init(identifier: identifier, isVariadic: ctx.Ellipsis() != nil)
+        }
+
+        var arguments: [JsFunctionArgument] = []
+
+        if let ctx = ctx {
+            arguments = ctx.formalParameterArg().compactMap(_argument(from:))
+            
+            if let last = ctx.lastFormalParameterArg(), let argument = _argument(from: last) {
+                arguments.append(argument)
+            }
+        }
+
+        return JsFunctionSignature(arguments: arguments)
+    }
 }

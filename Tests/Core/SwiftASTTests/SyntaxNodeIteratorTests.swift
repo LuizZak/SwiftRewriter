@@ -120,6 +120,16 @@ class SyntaxNodeIteratorTests: XCTestCase {
         )
     }
 
+    func testTypeCheck() {
+        assertExpression(
+            .identifier("a").typeCheck(as: .typeName("B")),
+            iteratesAs: [
+                Expression.identifier("a").typeCheck(as: .typeName("B")),
+                .identifier("a"),
+            ]
+        )
+    }
+
     func testArrayLiteral() {
         assertExpression(
             .arrayLiteral([.identifier("a"), .identifier("b")]),

@@ -5,25 +5,47 @@ import TypeSystem
 /// A helper class that can be used to generate a proper swift method signature
 /// from an JavaScript method signature.
 public class JavaScriptMethodSignatureConverter {
-    private let typeMapper: TypeMapper
-    private let inNonnullContext: Bool
-    private let instanceTypeAlias: SwiftType?
-    
-    public init(typeMapper: TypeMapper, inNonnullContext: Bool, instanceTypeAlias: SwiftType? = nil) {
-        self.typeMapper = typeMapper
-        self.inNonnullContext = inNonnullContext
-        self.instanceTypeAlias = instanceTypeAlias
+    public init() {
+        
     }
     
     /// Generates a function definition from an JavaScript signature to use as
-    /// a class-type function definition.
-    public func generateDefinitionSignature(from method: JsMethodDefinitionNode) -> FunctionSignature {
-        fatalError("Not implemented")
+    /// a function definition.
+    ///
+    /// Returns `nil` if `function.identifier` and/or `function.signature` is `nil`.
+    public func generateDefinitionSignature(from function: JsFunctionNodeType) -> FunctionSignature? {
+        _generate(from: function)
     }
     
-    /// Generates a function definition from a JavaScript function signature to
-    /// use as a global function signature.
-    public func generateDefinitionSignature(from function: JsFunctionDeclarationNode) -> FunctionSignature {
-        fatalError("Not implemented")
+    /// Generates a function definition from an JavaScript signature to use as
+    /// a function definition.
+    ///
+    /// Returns `nil` if `function.identifier` and/or `function.signature` is `nil`.
+    public func generateDefinitionSignature(from method: JsMethodDefinitionNode) -> FunctionSignature? {
+        var signature = _generate(from: method)
+        signature?.isStatic = method.isStatic
+
+        return signature
+    }
+
+    private func _generate(from function: JsFunctionNodeType) -> FunctionSignature? {
+        guard let identifier = function.identifier else {
+            return nil
+        }
+        guard let signature = function.signature else {
+            return nil
+        }
+
+        let parameters: [ParameterSignature] = signature.arguments.map {
+            .init(label: nil, name: $0.identifier, type: .any, isVariadic: $0.isVariadic, hasDefaultValue: false)
+        }
+
+        return FunctionSignature(
+            name: identifier.name,
+            parameters: parameters,
+            returnType: .any,
+            isStatic: false,
+            isMutating: false
+        )
     }
 }

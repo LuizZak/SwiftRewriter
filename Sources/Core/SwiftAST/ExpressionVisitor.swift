@@ -70,6 +70,12 @@ public protocol ExpressionVisitor {
     /// - Returns: Result of visiting this cast node
     func visitCast(_ exp: CastExpression) -> ExprResult
     
+    /// Visits a type-check expression node
+    ///
+    /// - Parameter exp: A type check expression to visit
+    /// - Returns: Result of visiting this type check node
+    func visitTypeCheck(_ exp: TypeCheckExpression) -> ExprResult
+    
     /// Visits an array literal node
     ///
     /// - Parameter exp: An array literal expression to visit

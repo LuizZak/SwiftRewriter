@@ -2,8 +2,8 @@ import Antlr4
 import Utils
 import AntlrCommons
 import JsParserAntlr
-import JsGrammarModels
 import GrammarModelBase
+import JsGrammarModels
 
 internal class JsParserListener: JavaScriptParserBaseListener {
 
@@ -57,6 +57,10 @@ internal class JsParserListener: JavaScriptParserBaseListener {
             rule: P.FunctionDeclarationContext.self,
             nodeType: JsFunctionDeclarationNode.self
         )
+        mapper.addRuleMap(
+            rule: P.FunctionBodyContext.self,
+            nodeType: JsFunctionBodyNode.self
+        )
     }
     
     override func enterEveryRule(_ ctx: ParserRuleContext) throws {
@@ -92,6 +96,7 @@ internal class JsParserListener: JavaScriptParserBaseListener {
         
         let identifierNode = nodeFactory.makeIdentifier(from: methodName)
         methodNode.addChild(identifierNode)
+        methodNode.signature = functionSignature(from: ctx.formalParameterList())
     }
 
     override func enterFunctionDeclaration(_ ctx: JavaScriptParser.FunctionDeclarationContext) {
@@ -104,19 +109,15 @@ internal class JsParserListener: JavaScriptParserBaseListener {
         
         let identifierNode = nodeFactory.makeIdentifier(from: functionName)
         functionNode.addChild(identifierNode)
+        functionNode.signature = functionSignature(from: ctx.formalParameterList())
+    }
 
-        guard let bodyContext = ctx.functionBody() else {
+    override func enterFunctionBody(_ ctx: JavaScriptParser.FunctionBodyContext) {
+        guard let node = context.currentContextNode(as: JsFunctionBodyNode.self) else {
             return
         }
 
-        let bodyNode = nodeFactory.makeFunctionBodyNode(from: bodyContext)
-        context.pushContext(node: bodyNode)
-    }
-
-    override func exitFunctionDeclaration(_ ctx: JavaScriptParser.FunctionDeclarationContext) {
-        if context.currentContextNode(as: JsFunctionBodyNode.self) != nil {
-            context.popContext()
-        }
+        node.body = ctx
     }
 
     override func enterVariableStatement(_ ctx: JavaScriptParser.VariableStatementContext) {
@@ -158,6 +159,47 @@ internal class JsParserListener: JavaScriptParserBaseListener {
         default:
             break
         }
+    }
+
+    func functionSignature(from ctx: JavaScriptParser.FormalParameterListContext?) -> JsFunctionSignature {
+        func _argument(from ctx: JavaScriptParser.FormalParameterArgContext) -> JsFunctionArgument? {
+            guard let identifier = ctx.assignable()?.identifier()?.getText() else {
+                return nil
+            }
+
+            return .init(identifier: identifier, isVariadic: false)
+        }
+        func _argument(from ctx: JavaScriptParser.LastFormalParameterArgContext) -> JsFunctionArgument? {
+            guard let identifier = _identifier(from: ctx.singleExpression())?.getText() else {
+                return nil
+            }
+
+            return .init(identifier: identifier, isVariadic: ctx.Ellipsis() != nil)
+        }
+
+        var arguments: [JsFunctionArgument] = []
+
+        if let ctx = ctx {
+            arguments = ctx.formalParameterArg().compactMap(_argument(from:))
+            
+            if let last = ctx.lastFormalParameterArg(), let argument = _argument(from: last) {
+                arguments.append(argument)
+            }
+        }
+
+        return JsFunctionSignature(arguments: arguments)
+    }
+
+    private func _identifier(from singleExpression: JavaScriptParser.SingleExpressionContext?) -> JavaScriptParser.IdentifierContext? {
+        singleExpression.flatMap(_identifier(from:))
+    }
+
+    private func _identifier(from singleExpression: JavaScriptParser.SingleExpressionContext) -> JavaScriptParser.IdentifierContext? {
+        if let result = singleExpression as? JavaScriptParser.IdentifierExpressionContext {
+            return result.identifier()
+        }
+
+        return nil
     }
 }
 
@@ -254,9 +296,9 @@ private class GenericParseTreeContextMapper {
         if let popped = context.popContext() {
             switch pair {
             case .type(_, let nodeType, _):
-                assert(type(of: popped) == nodeType)
+                assert(type(of: popped) == nodeType, "matchExit() did not match context from popContext: \(nodeType) vs \(type(of: popped))")
             case .instance(_, let node):
-                assert(popped === node)
+                assert(popped === node, "matchExit() did not match context from pop: \(node) vs \(node)")
             }
         }
     }

@@ -100,7 +100,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         )
         mapper.addRuleMap(
             rule: O.MethodSelectorContext.self,
-            nodeType: ObjcMethodSelectorNide.self
+            nodeType: ObjcMethodSelectorNode.self
         )
         mapper.addRuleMap(
             rule: O.MethodTypeContext.self,

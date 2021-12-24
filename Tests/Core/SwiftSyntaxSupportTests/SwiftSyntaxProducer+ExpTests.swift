@@ -300,6 +300,14 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
         )
     }
 
+    func testTypeCheck() {
+        assert(
+            Expression.identifier("foo").typeCheck(as: .int),
+            producer: SwiftSyntaxProducer.generateTypeCheck,
+            matches: "foo is Int"
+        )
+    }
+
     func testAssignment() {
         assert(
             Expression.identifier("foo").assignment(op: .assign, rhs: .constant(1)),

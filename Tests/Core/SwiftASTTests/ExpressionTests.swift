@@ -189,6 +189,18 @@ class ExpressionTests: XCTestCase {
         )
     }
 
+    func testTypeCheckEquality() {
+        XCTAssertEqual(
+            Expression.typeCheck(anExpression(), type: .void),
+            Expression.typeCheck(anExpression(), type: .void)
+        )
+
+        XCTAssertNotEqual(
+            Expression.typeCheck(anExpression(), type: .void),
+            Expression.typeCheck(anExpression(ident: "<DIFFER>"), type: .void)
+        )
+    }
+
     func testArrayLiteralEquality() {
         XCTAssertEqual(
             Expression.arrayLiteral([]),

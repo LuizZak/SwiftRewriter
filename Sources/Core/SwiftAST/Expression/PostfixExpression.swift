@@ -337,6 +337,12 @@ public final class SubscriptPostfix: Postfix {
         super.init()
     }
     
+    public convenience init(expressions: [Expression]) {
+        self.init(arguments: expressions.map {
+            FunctionArgument(label: nil, expression: $0)
+        })
+    }
+    
     public convenience init(expression: Expression) {
         self.init(arguments: [
             FunctionArgument(label: nil, expression: expression)
@@ -412,6 +418,10 @@ public final class SubscriptPostfix: Postfix {
 public extension Postfix {
     static func `subscript`(_ exp: Expression) -> SubscriptPostfix {
         SubscriptPostfix(expression: exp)
+    }
+    
+    static func `subscript`(expressions: [Expression]) -> SubscriptPostfix {
+        SubscriptPostfix(expressions: expressions)
     }
     
     static func `subscript`(arguments: [FunctionArgument]) -> SubscriptPostfix {

@@ -200,6 +200,10 @@ public extension Expression {
         CastExpression(exp: exp, type: type, isOptionalCast: isOptionalCast)
     }
     
+    static func typeCheck(_ exp: Expression, type: SwiftType) -> TypeCheckExpression {
+        TypeCheckExpression(exp: exp, type: type)
+    }
+    
     static func arrayLiteral(_ array: [Expression]) -> ArrayLiteralExpression {
         ArrayLiteralExpression(items: array)
     }

@@ -7,7 +7,7 @@ import Intentions
 import TypeSystem
 
 public protocol JavaScriptIntentionCollectorDelegate: AnyObject {
-    
+    func reportForLazyParsing(intention: Intention)
 }
 
 /// Traverses a provided AST node, and produces intentions that are recorded by
@@ -41,7 +41,8 @@ public class JavaScriptIntentionCollector {
             contexts.last as? T
         }
         
-        public func popContext() {
+        @discardableResult
+        public func popContext() -> Intention {
             contexts.removeLast()
         }
     }
@@ -56,18 +57,163 @@ public class JavaScriptIntentionCollector {
     }
     
     public func collectIntentions(_ node: JsASTNode) {
-        fatalError("Not implemented")
+        startNodeVisit(node)
+    }
+
+    private func startNodeVisit(_ node: JsASTNode) {
+        let visitor = AnyASTVisitor()
+        let traverser = ASTTraverser(node: node, visitor: visitor)
+        
+        visitor.onEnterClosure = { node in
+            switch node {
+            case let n as JsClassNode:
+                self.enterJsClassNode(n)
+
+            case let n as JsFunctionDeclarationNode:
+                self.enterJsFunctionDeclarationNode(n)
+
+            default:
+                return
+            }
+        }
+        
+        visitor.visitClosure = { node in
+            switch node {
+            case let n as JsMethodDefinitionNode:
+                self.visitJsMethodDefinitionNode(n)
+                
+            case let n as JsVariableDeclarationNode:
+                self.visitJsVariableDeclarationNode(n)
+                
+            default:
+                return
+            }
+        }
+        
+        visitor.onExitClosure = { node in
+            switch node {
+            case let n as JsClassNode:
+                self.exitJsClassNode(n)
+
+            case let n as JsFunctionDeclarationNode:
+                self.exitJsFunctionDeclarationNode(n)
+                
+            default:
+                return
+            }
+        }
+        
+        traverser.traverse()
+    }
+
+    private func enterJsClassNode(_ node: JsClassNode) {
+        guard let name = node.identifier?.name else {
+            return
+        }
+
+        let intent = ClassGenerationIntention(typeName: name, source: node)
+        
+        configure(node: node, intention: intent)
+
+        context
+            .findContext(ofType: FileGenerationIntention.self)?
+            .addType(intent)
+        
+        context.pushContext(intent)
+    }
+
+    private func exitJsClassNode(_ node: JsClassNode) {
+        if node.identifier?.name != nil {
+            context.popContext() // ClassGenerationIntention
+        }
+    }
+
+    private func enterJsFunctionDeclarationNode(_ node: JsFunctionDeclarationNode) {
+        guard node.identifier != nil else {
+            return
+        }
+        
+        guard let signature = signatureConverter().generateDefinitionSignature(from: node) else {
+            return
+        }
+
+        let globalFunc = GlobalFunctionGenerationIntention(signature: signature, source: node)
+
+        configure(node: node, intention: globalFunc)
+
+        context
+            .findContext(ofType: FileGenerationIntention.self)?
+            .addGlobalFunction(globalFunc)
+        
+        context.pushContext(globalFunc)
+
+        if let body = node.body {
+            let methodBodyIntention = FunctionBodyIntention(body: [], source: body)
+            globalFunc.functionBody = methodBodyIntention
+
+            configure(node: body, intention: methodBodyIntention)
+
+            delegate?.reportForLazyParsing(intention: methodBodyIntention)
+        }
+    }
+
+    private func exitJsFunctionDeclarationNode(_ node: JsFunctionDeclarationNode) {
+        if context.currentContext(as: GlobalFunctionGenerationIntention.self) != nil {
+            context.popContext() // GlobalFunctionGenerationIntention
+        }
+    }
+
+    private func visitJsMethodDefinitionNode(_ node: JsMethodDefinitionNode) {
+        guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
+            return
+        }
+
+        guard let sign = signatureConverter().generateDefinitionSignature(from: node) else {
+            return
+        }
+
+        let method = MethodGenerationIntention(signature: sign, source: node)
+
+        configure(node: node, intention: method)
+
+        if let body = node.body {
+            let methodBodyIntention = FunctionBodyIntention(body: [], source: body)
+            method.functionBody = methodBodyIntention
+
+            configure(node: body, intention: methodBodyIntention)
+
+            delegate?.reportForLazyParsing(intention: methodBodyIntention)
+        }
+
+        ctx.addMethod(method)
+    }
+
+    private func visitJsVariableDeclarationNode(_ node: JsVariableDeclarationNode) {
+
+    }
+
+    // MARK: - Instance factories
+    
+    private func signatureConverter() -> JavaScriptMethodSignatureConverter {
+        return JavaScriptMethodSignatureConverter()
     }
 }
 
 extension JavaScriptIntentionCollector {
-    private func recordSourceHistory(intention: FromSourceIntention, node: JsASTNode) {
+    
+}
+
+extension JavaScriptIntentionCollector {
+    private func configure(node: JsASTNode, intention: FromSourceIntention) {
+        _recordSourceHistory(node, intention)
+        _mapComments(node, intention)
+    }
+
+    private func _recordSourceHistory(_ node: JsASTNode, _ intention: FromSourceIntention) {
         intention.history.recordSourceHistory(node: node)
     }
-}
 
-extension JavaScriptIntentionCollector {
-    private func mapComments(_ node: JsASTNode, _ intention: FromSourceIntention) {
+    private func _mapComments(_ node: JsASTNode, _ intention: FromSourceIntention) {
         intention.precedingComments.append(contentsOf: convertComments(node.precedingComments))
     }
     

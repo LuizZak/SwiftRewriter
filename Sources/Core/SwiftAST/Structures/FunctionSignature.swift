@@ -25,12 +25,12 @@ public struct FunctionSignature: Hashable {
         _asIdentifier
     }
     
-    /// The cannonical selector signature for this function signature.
+    /// The canonical selector signature for this function signature.
     public var asSelector: SelectorSignature {
         _asSelector
     }
     
-    // TODO: Support suplying type attributes for function signatures
+    // TODO: Support supplying type attributes for function signatures
     /// Returns a `SwiftType.block`-equivalent type for this function signature
     public var swiftClosureType: SwiftType {
         .swiftBlock(returnType: returnType,

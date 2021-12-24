@@ -125,6 +125,16 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
         return exp
     }
     
+    /// Visits a type-check expression node
+    ///
+    /// - Parameter exp: A type check expression to visit
+    /// - Returns: Result of visiting this type check node
+    open func visitTypeCheck(_ exp: TypeCheckExpression) -> Expression {
+        exp.exp = visitExpression(exp.exp)
+
+        return exp
+    }
+    
     /// Visits an array literal node
     ///
     /// - Parameter exp: An ArrayLiteralExpression to visit

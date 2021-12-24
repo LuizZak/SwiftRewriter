@@ -199,6 +199,10 @@ public enum Constant: Codable, Equatable {
         }
     }
     
+    public static func decimal(_ value: Int) -> Constant {
+        .int(value, .decimal)
+    }
+    
     public static func binary(_ value: Int) -> Constant {
         .int(value, .binary)
     }

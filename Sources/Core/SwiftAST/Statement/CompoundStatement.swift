@@ -1,6 +1,8 @@
 /// Encapsulates a compound statement, that is, a series of statements enclosed
 /// within braces.
 public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
+    private var _statements: [Statement] = []
+
     /// An empty compound statement.
     public static var empty: CompoundStatement {
         CompoundStatement()
@@ -10,10 +12,14 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
         statements.isEmpty
     }
     
-    public var statements: [Statement] = [] {
-        didSet {
-            oldValue.forEach { $0.parent = nil }
-            statements.forEach { $0.parent = self }
+    public var statements: [Statement] {
+        get {
+            return _statements
+        }
+        set {
+            _statements.forEach { $0.parent = nil }
+            _statements = newValue
+            _statements.forEach { $0.parent = self }
         }
     }
     
@@ -22,7 +28,7 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
     }
     
     public init(statements: [Statement]) {
-        self.statements = statements
+        self._statements = statements
         
         super.init()
         
@@ -30,7 +36,7 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
     }
     
     public required init(arrayLiteral elements: Statement...) {
-        self.statements = elements
+        self._statements = elements
         
         super.init()
         
@@ -40,11 +46,18 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        statements = try container.decodeStatements(forKey: .statements)
+        _statements = try container.decodeStatements(forKey: .statements)
         
         try super.init(from: container.superDecoder())
         
         statements.forEach { $0.parent = self }
+    }
+
+    /// Appends a new statement at the end of this compound statement's statement
+    /// list.
+    public func appendStatement(_ statement: Statement) {
+        _statements.append(statement)
+        statement.parent = self
     }
     
     @inlinable

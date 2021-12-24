@@ -15,13 +15,13 @@ public enum SwiftOperator: String, Codable {
     case subtract = "-"
     case multiply = "*"
     case divide = "/"
-    
     case mod = "%"
     
     case addAssign = "+="
     case subtractAssign = "-="
     case multiplyAssign = "*="
     case divideAssign = "/="
+    case modAssign = "%="
     
     case negate = "!"
     case and = "&&"
@@ -49,6 +49,8 @@ public enum SwiftOperator: String, Codable {
     case assign = "="
     case equals = "=="
     case unequals = "!="
+    case identityEquals = "==="
+    case identityUnequals = "!=="
     
     case nullCoalesce = "??"
     
@@ -74,12 +76,12 @@ public enum SwiftOperator: String, Codable {
         // Assignment
         case .assign, .addAssign, .subtractAssign, .multiplyAssign, .divideAssign,
              .bitwiseAndAssign, .bitwiseOrAssign, .bitwiseXorAssign, .bitwiseNotAssign,
-             .bitwiseShiftLeftAssign, .bitwiseShiftRightAssign:
+             .bitwiseShiftLeftAssign, .bitwiseShiftRightAssign, .modAssign:
             return .assignment
             
         // Comparison
         case .lessThan, .lessThanOrEqual, .greaterThan, .greaterThanOrEqual,
-             .equals, .unequals:
+             .equals, .unequals, .identityEquals, .identityUnequals:
             return .comparison
             
         // Null-coalesce

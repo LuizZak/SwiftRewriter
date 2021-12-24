@@ -189,6 +189,10 @@ private class ValidatorExpressionVisitor: ExpressionVisitor {
         
         return exp.exp.accept(self)
     }
+
+    func visitTypeCheck(_ exp: TypeCheckExpression) -> Bool {
+        return false
+    }
     
     func visitArray(_ exp: ArrayLiteralExpression) -> Bool {
         return exp.subExpressions.reduce(true, { $0 && $1.accept(self) })

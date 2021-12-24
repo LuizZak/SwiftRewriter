@@ -121,6 +121,16 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
         visitExpression(exp.exp)
     }
     
+    /// Visits a type-check expression node
+    ///
+    /// - Parameter exp: A type check expression to visit
+    /// - Returns: Result of visiting this type check node
+    public func visitTypeCheck(_ exp: TypeCheckExpression) {
+        listener(exp)
+
+        visitExpression(exp.exp)
+    }
+    
     /// Visits an array literal node
     ///
     /// - Parameter exp: An ArrayLiteralExpression to visit

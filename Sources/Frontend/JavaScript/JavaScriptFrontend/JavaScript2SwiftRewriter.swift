@@ -98,10 +98,15 @@ public final class JavaScript2SwiftRewriter {
     }
     
     public func rewrite() throws {
-        
+        try autoreleasepool {
+            let lazyParse = try loadInputSources()
+            parseStatements(lazyParse)
+            performIntentionAndSyntaxPasses(intentionCollection)
+            outputDefinitions(intentionCollection)
+        }
     }
     
-    private func loadInputSources() throws {
+    private func loadInputSources() throws -> [LazyParseItem] {
         // Load input sources
         let sources = sourcesProvider.sources()
         
@@ -110,6 +115,7 @@ public final class JavaScript2SwiftRewriter {
         
         let outError: ConcurrentValue<Error?> = ConcurrentValue(wrappedValue: nil)
         let mutex = Mutex()
+        var lazyParse: [LazyParseItem] = []
         
         for (i, src) in sources.enumerated() {
             queue.addOperation {
@@ -119,7 +125,11 @@ public final class JavaScript2SwiftRewriter {
                 
                 do {
                     try autoreleasepool {
-                        try self.loadJsSource(from: src, index: i, mutex: mutex)
+                        let result = try self.loadJsSource(from: src, index: i, mutex: mutex)
+
+                        mutex.locking {
+                            lazyParse.append(contentsOf: result)
+                        }
                     }
                 } catch {
                     outError.modifyingValue {
@@ -139,10 +149,12 @@ public final class JavaScript2SwiftRewriter {
         
         // Keep file ordering of intentions
         intentionCollection.sortFileIntentions()
+
+        return lazyParse
     }
     
     /// Parses all statements now, with proper type information available.
-    private func parseStatements() {
+    private func parseStatements(_ items: [LazyParseItem]) {
         if settings.verbose {
             print("Parsing function bodies...")
         }
@@ -157,8 +169,51 @@ public final class JavaScript2SwiftRewriter {
         defer {
             typeSystem.tearDownCache()
         }
+        
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = settings.numThreads
+        
+        for item in items {
+            queue.addOperation {
+                autoreleasepool {
+                    let delegate = InnerStatementASTReaderDelegate(parseItem: item)
 
-        fatalError("Not implemented")
+                    let state = JavaScript2SwiftRewriter._parserStatePool.pull()
+                    defer {
+                        JavaScript2SwiftRewriter._parserStatePool.repool(state)
+                    }
+                    
+                    let reader = JavaScriptASTReader(typeSystem: self.typeSystem)
+                    reader.delegate = delegate
+                    
+                    switch item {
+                    case let .functionBody(funcBody, method):
+                        guard let methodBody = funcBody.typedSource else {
+                            return
+                        }
+                        guard let body = methodBody.body else {
+                            return
+                        }
+                        
+                        funcBody.body =
+                            reader.parseStatements(
+                                body: body,
+                                comments: methodBody.comments,
+                                typeContext: method?.type
+                            )
+                        
+                    case .globalVar(let v):
+                        guard let expression = v.typedSource?.expression else {
+                            return
+                        }
+                        
+                        v.expression = reader.parseExpression(expression: expression)
+                    }
+                }
+            }
+        }
+        
+        queue.waitUntilAllOperationsAreFinished()
     }
     
     /// Evaluate all type signatures, now with the knowledge of all types present
@@ -176,7 +231,7 @@ public final class JavaScript2SwiftRewriter {
         fatalError("Not implemented")
     }
     
-    private func performIntentionAndSyntaxPasses() {
+    private func performIntentionAndSyntaxPasses(_ intentionCollection: IntentionCollection) {
         let globals = CompoundDefinitionsSource()
         
         if settings.verbose {
@@ -276,7 +331,7 @@ public final class JavaScript2SwiftRewriter {
         typeSystem.tearDownCache()
     }
     
-    private func outputDefinitions() {
+    private func outputDefinitions(_ intentionCollection: IntentionCollection) {
         if settings.verbose {
             print("Applying Swift syntax passes and saving files...")
         }
@@ -302,7 +357,7 @@ public final class JavaScript2SwiftRewriter {
         }
     }
     
-    private func loadJsSource(from source: InputSource, index: Int, mutex: Mutex) throws {
+    private func loadJsSource(from source: InputSource, index: Int, mutex: Mutex) throws -> [LazyParseItem] {
         let state = parserStatePool.pull()
         defer { parserStatePool.repool(state) }
         
@@ -328,9 +383,6 @@ public final class JavaScript2SwiftRewriter {
             try parser.parse()
         }
         
-        /*
-        let typeMapper = DefaultTypeMapper(typeSystem: TypeSystem.defaultTypeSystem)
-        
         let collectorDelegate = CollectorDelegate()
         
         if settings.stageDiagnostics.contains(.parsedAST) {
@@ -340,7 +392,6 @@ public final class JavaScript2SwiftRewriter {
         let ctx = JavaScriptIntentionCollector.Context()
         
         let fileIntent = FileGenerationIntention(sourcePath: source.sourcePath(), targetPath: path)
-        fileIntent.preprocessorDirectives = parser.preprocessorDirectives
         fileIntent.index = index
         fileIntent.isPrimary = source.isPrimary
         ctx.pushContext(fileIntent)
@@ -348,16 +399,18 @@ public final class JavaScript2SwiftRewriter {
         let intentionCollector = JavaScriptIntentionCollector(delegate: collectorDelegate, context: ctx)
         intentionCollector.collectIntentions(parser.rootNode)
         
-        ctx.popContext() // FileGenerationIntention
+        assert(
+            ctx.popContext() is FileGenerationIntention,
+            "Expected \(FileGenerationIntention.self) to be last element on the stack after intention collection."
+        )
         
         mutex.locking {
             parsers.append(parser)
-            lazyParse.append(contentsOf: collectorDelegate.lazyParse)
-            lazyResolve.append(contentsOf: collectorDelegate.lazyResolve)
             diagnostics.merge(with: parser.diagnostics)
             intentionCollection.addIntention(fileIntent)
         }
-        */
+        
+        return collectorDelegate.lazyParse
     }
     
     private func printDiagnosedFiles(step: String) {
@@ -518,12 +571,37 @@ private extension JavaScript2SwiftRewriter {
 // MARK: - JavaScriptIntentionCollectorDelegate
 fileprivate extension JavaScript2SwiftRewriter {
     class CollectorDelegate: JavaScriptIntentionCollectorDelegate {
-        
+        var lazyParse: [LazyParseItem] = []
+
+        func reportForLazyParsing(intention: Intention) {
+            switch intention {
+            case let intention as GlobalVariableInitialValueIntention:
+                lazyParse.append(.globalVar(intention))
+                
+            case let intention as FunctionBodyIntention:
+                let context =
+                    intention.ancestor(ofType: MethodGenerationIntention.self)
+                
+                lazyParse.append(.functionBody(intention, method: context))
+                
+            default:
+                fatalError("Cannot handle parsing for intention of type \(type(of: intention))")
+            }
+        }
     }
 
     private class InnerStatementASTReaderDelegate: JavaScriptStatementASTReaderDelegate {
-        
+        var parseItem: LazyParseItem
+
+        init(parseItem: LazyParseItem) {
+            self.parseItem = parseItem
+        }
     }
+}
+
+private enum LazyParseItem {
+    case functionBody(FunctionBodyIntention, method: MethodGenerationIntention?)
+    case globalVar(GlobalVariableInitialValueIntention)
 }
 
 private func _terminalClearLine() {

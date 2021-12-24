@@ -894,9 +894,11 @@ fileprivate extension ObjectiveC2SwiftRewriter {
                                      declarationAtIndex index: Int) {
 
             autotypeDeclarations.append(
-                LazyAutotypeVarDeclResolve(parseItem: parseItem,
-                                           statement: varDecl,
-                                           index: index)
+                LazyAutotypeVarDeclResolve(
+                    parseItem: parseItem,
+                    statement: varDecl,
+                    index: index
+                )
             )
         }
     }
