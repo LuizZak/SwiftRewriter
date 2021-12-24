@@ -4,6 +4,7 @@ import JsParser
 import TypeSystem
 import JsParserAntlr
 import SwiftAST
+import SwiftSyntaxSupport
 
 @testable import JavaScriptFrontend
 
@@ -59,6 +60,387 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
             ])
         )
     }
+
+    func testExpressionStatement() {
+        assert(
+            jsStmt: """
+            true;
+            """,
+            readsAs: .expression(
+                .constant(true)
+            )
+        )
+        assert(
+            jsStmt: """
+            true, 1;
+            """,
+            readsAs: .expression(
+                .tuple([.constant(true), .constant(1)])
+            )
+        )
+    }
+
+    func testIfStatement() {
+        assert(
+            jsStmt: """
+            if (a) {
+                true;
+            }
+            """,
+            readsAs: .if(
+                .identifier("a"),
+                body: [
+                    .expression(.constant(true))
+                ],
+                else: nil
+            )
+        )
+    }
+
+    func testDoStatement() {
+        assert(
+            jsStmt: """
+            do {
+                false;
+            } while (true)
+            """,
+            readsAs: .doWhile(
+                .constant(true),
+                body: [
+                    .expression(.constant(false))
+                ]
+            )
+        )
+    }
+
+    func testWhileStatement() {
+        assert(
+            jsStmt: """
+            while (true) {
+                false;
+            }
+            """,
+            readsAs: .while(
+                .constant(true),
+                body: [
+                    .expression(.constant(false))
+                ]
+            )
+        )
+    }
+
+    func testForStatement() {
+        assert(
+            jsStmt: """
+            for (var i = 0; i < 10; i++) {
+
+            }
+            """,
+            readsAs: .compound([
+                .variableDeclaration(identifier: "i", type: .any, initialization: .constant(0)),
+                .while(
+                    .identifier("i").binary(op: .lessThan, rhs: .constant(10)),
+                    body: [
+                        .defer([
+                            .expression(.identifier("i").assignment(op: .addAssign, rhs: .constant(1)))
+                        ])
+                    ]
+                )
+            ])
+        )
+    }
+
+    func testForStatement_expressionInitializer() {
+        assert(
+            jsStmt: """
+            for (i = 0; i < 10; i++) {
+                true;
+            }
+            """,
+            readsAs: .compound([
+                .expression(.identifier("i").assignment(op: .assign, rhs: .constant(0))),
+                .while(
+                    .identifier("i").binary(op: .lessThan, rhs: .constant(10)),
+                    body: [
+                        .defer([
+                            .expression(.identifier("i").assignment(op: .addAssign, rhs: .constant(1)))
+                        ]),
+                        .expression(.constant(true))
+                    ]
+                )
+            ])
+        )
+    }
+
+    func testForInStatement() {
+        assert(
+            jsStmt: """
+            for (i in exp) {
+                true;
+            }
+            """,
+            readsAs: .for(
+                .identifier("i"),
+                .identifier("exp"),
+                body: [
+                    .expression(.constant(true))
+                ]
+            )
+        )
+    }
+
+    func testForInStatement_variableDeclarationInitializer() {
+        assert(
+            jsStmt: """
+            for (var i in exp) {
+                true;
+            }
+            """,
+            readsAs: .for(
+                .identifier("i"),
+                .identifier("exp"),
+                body: [
+                    .expression(.constant(true))
+                ]
+            )
+        )
+    }
+
+    func testContinueStatement() {
+        assert(
+            jsStmt: """
+            continue;
+            """,
+            readsAs: .continue()
+        )
+    }
+
+    func testContinueStatement_labeled() {
+        assert(
+            jsStmt: """
+            continue label;
+            """,
+            readsAs: .continue(targetLabel: "label")
+        )
+    }
+
+    func testBreakStatement() {
+        assert(
+            jsStmt: """
+            break;
+            """,
+            readsAs: .break()
+        )
+    }
+
+    func testBreakStatement_labeled() {
+        assert(
+            jsStmt: """
+            break label;
+            """,
+            readsAs: .break(targetLabel: "label")
+        )
+    }
+
+    func testReturnStatement() {
+        assert(
+            jsStmt: """
+            return;
+            """,
+            readsAs: .return(nil)
+        )
+        assert(
+            jsStmt: """
+            return exp;
+            """,
+            readsAs: .return(.identifier("exp"))
+        )
+    }
+
+    func testLabeledStatement() {
+        assert(
+            jsStmt: """
+            label: true;
+            """,
+            readsAs: .expression(.constant(true)).labeled("label")
+        )
+        assert(
+            jsStmt: """
+            label: if (true) {
+            }
+            """,
+            readsAs: .if(.constant(true), body: []).labeled("label")
+        )
+    }
+
+    func testSwitchStatement_empty() {
+        assert(
+            jsStmt: """
+            switch (value) {
+            }
+            """,
+            readsAs: .switch(
+                .identifier("value"),
+                cases: [],
+                default: [
+                    .break()
+                ]
+            )
+        )
+    }
+
+    func testSwitchStatement_singleCase_empty() {
+        assert(
+            jsStmt: """
+            switch (value) {
+            case 10:
+            }
+            """,
+            readsAs: .switch(
+                .identifier("value"),
+                cases: [
+                    .init(
+                        patterns: [.expression(.constant(10))],
+                        statements: [
+                            .fallthrough
+                        ]
+                    )
+                ],
+                default: [
+                    .break()
+                ]
+            )
+        )
+    }
+
+    func testSwitchStatement_mergeEmptyCases() {
+        assert(
+            jsStmt: """
+            switch (value) {
+            case 10:
+            case 20:
+                break
+            }
+            """,
+            readsAs: .switch(
+                .identifier("value"),
+                cases: [
+                    .init(
+                        patterns: [.expression(.constant(10)), .expression(.constant(20))],
+                        statements: [
+                            .break()
+                        ]
+                    )
+                ],
+                default: [
+                    .break()
+                ]
+            )
+        )
+    }
+
+    func testSwitchStatement_mergeEmptyCases_fallthroughOnFinalEmptyCase() {
+        assert(
+            jsStmt: """
+            switch (value) {
+            case 10:
+            case 20:
+            }
+            """,
+            readsAs: .switch(
+                .identifier("value"),
+                cases: [
+                    .init(
+                        patterns: [.expression(.constant(10)), .expression(.constant(20))],
+                        statements: [
+                            .fallthrough
+                        ]
+                    )
+                ],
+                default: [
+                    .break()
+                ]
+            )
+        )
+    }
+
+    func testSwitch() {
+        assert(
+            jsStmt: "switch(value) { case 0: break; }",
+            readsAs: .switch(
+                .identifier("value"),
+                cases: [SwitchCase(patterns: [.expression(.constant(0))], statements: [.break()])],
+                default: [.break()]
+            )
+        )
+
+        assert(
+            jsStmt: "switch(value) { case 0: break; case 1: break; }",
+            readsAs: .switch(
+                .identifier("value"),
+                cases: [
+                    SwitchCase(patterns: [.expression(.constant(0))], statements: [.break()]),
+                    SwitchCase(patterns: [.expression(.constant(1))], statements: [.break()]),
+                ],
+                default: [.break()]
+            )
+        )
+
+        assert(
+            jsStmt: "switch(value) { case 0: case 1: break; }",
+            readsAs: .switch(
+                .identifier("value"),
+                cases: [
+                    SwitchCase(
+                        patterns: [.expression(.constant(0)), .expression(.constant(1))],
+                        statements: [.break()]
+                    )
+                ],
+                default: [.break()]
+            )
+        )
+
+        assert(
+            jsStmt: "switch(value) { case 0: case 1: break; default: stmt(); }",
+            readsAs: .switch(
+                .identifier("value"),
+                cases: [
+                    SwitchCase(
+                        patterns: [
+                            .expression(.constant(0)),
+                            .expression(.constant(1)),
+                        ],
+                        statements: [.break()]
+                    )
+                ],
+                default: [
+                    .expression(
+                        Expression.identifier("stmt").call()
+                    )
+                ]
+            )
+        )
+    }
+
+    func testAutomaticSwitchFallthrough() {
+        assert(
+            jsStmt: "switch(value) { case 0: stmt(); case 1: break; }",
+            readsAs: .switch(
+                .identifier("value"),
+                cases: [
+                    SwitchCase(
+                        patterns: [.expression(.constant(0))],
+                        statements: [
+                            .expression(Expression.identifier("stmt").call()),
+                            .fallthrough,
+                        ]
+                    ),
+                    SwitchCase(patterns: [.expression(.constant(1))], statements: [.break()]),
+                ],
+                default: [.break()]
+            )
+        )
+    }
 }
 
 extension JavaScriptStatementASTReaderTests {
@@ -102,23 +484,29 @@ extension JavaScriptStatementASTReaderTests {
             let result = expr.accept(sut)
 
             if result != expected {
-                var resStr = "nil"
-                var stmtStr = ""
+                var expString = ""
+                var resString = ""
 
-                if let result = result {
-                    resStr = ""
-                    dump(result, to: &resStr)
-                }
-                dump(expected, to: &stmtStr)
+                let producer = SwiftSyntaxProducer()
+
+                expString = producer.generateStatement(expected).description + "\n"
+                resString = (result.map(producer.generateStatement)?.description ?? "") + "\n"
+
+                //dump(expected, to: &expString)
+                //dump(result, to: &resString)
 
                 XCTFail(
                     """
                     Failed: Expected to read JavaScript statement
                     \(jsStmt)
                     as
-                    \(stmtStr)
+
+                    \(expString)
+
                     but read as
-                    \(resStr)
+
+                    \(resString)
+
                     """,
                     file: file,
                     line: line

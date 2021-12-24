@@ -475,7 +475,19 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
     }
 
     public override func visitParenthesizedExpression(_ ctx: JavaScriptParser.ParenthesizedExpressionContext) -> Expression? {
-        ctx.expressionSequence()?.accept(self)
+        guard let expressionSequence = ctx.expressionSequence() else {
+            return nil
+        }
+
+        let expressions = expressionSequence.singleExpression().compactMap {
+            $0.accept(self)
+        }
+
+        if expressions.count == 1 {
+            return .parens(expressions[0])
+        }
+
+        return .tuple(expressions)
     }
 
     public override func visitExpressionSequence(_ ctx: JavaScriptParser.ExpressionSequenceContext) -> Expression? {
@@ -484,7 +496,7 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
         }
 
         if expressions.count == 1 {
-            return .parens(expressions[0])
+            return expressions[0]
         }
 
         return .tuple(expressions)

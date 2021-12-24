@@ -227,19 +227,19 @@ class JavaScriptExprASTReaderTests: XCTestCase {
         assert(
             jsExpr: """
             {
-                arcfn: function (t, derivativeFn) {
-                    const d = derivativeFn(t);
-                    let l = d.x * d.x + d.y * d.y;
-                    if (typeof d.z !== "undefined") {
-                    l += d.z * d.z;
-                    }
-                    return sqrt(l);
+                f: function (a, b) {
+                    return a + b;
                 }
             }
             """,
             readsAs: .dictionaryLiteral([
-                ExpressionDictionaryPair(key: .constant(1), value: .constant(2)),
-                ExpressionDictionaryPair(key: .constant(3), value: .constant(4)),
+                .identifier("f"): .block(
+                    parameters: [.init(name: "a", type: .any), .init(name: "b", type: .any)],
+                    return: .any,
+                    body: [
+                        .return(.identifier("a").binary(op: .add, rhs: .identifier("b")))
+                    ]
+                )
             ])
         )
     }
@@ -258,6 +258,17 @@ class JavaScriptExprASTReaderTests: XCTestCase {
         assert(
             jsExpr: "(1 + 2)",
             readsAs: .parens(.binary(lhs: .constant(1), op: .add, rhs: .constant(2)))
+        )
+    }
+
+    func testParensExpression_tuple() {
+        assert(
+            jsExpr: "(1, 2, 3)",
+            readsAs: .tuple([
+                .constant(1),
+                .constant(2),
+                .constant(3),
+            ])
         )
     }
 }

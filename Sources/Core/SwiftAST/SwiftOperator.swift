@@ -21,24 +21,37 @@ public enum SwiftOperator: String, Codable {
     case subtractAssign = "-="
     case multiplyAssign = "*="
     case divideAssign = "/="
+    /// Modulo assign (%=)
     case modAssign = "%="
     
     case negate = "!"
     case and = "&&"
     case or = "||"
     
+    /// Bitwise And (&)
     case bitwiseAnd = "&"
+    /// Bitwise Or (|)
     case bitwiseOr = "|"
+    /// Bitwise Xor (^)
     case bitwiseXor = "^"
+    /// Bitwise Not (~)
     case bitwiseNot = "~"
+    /// Bitwise Shift left (<<)
     case bitwiseShiftLeft = "<<"
+    /// Bitwise Shift right (>>)
     case bitwiseShiftRight = ">>"
     
+    /// Bitwise And assign (&=)
     case bitwiseAndAssign = "&="
+    /// Bitwise Or assign (|=)
     case bitwiseOrAssign = "|="
+    /// Bitwise Xor assign (^=)
     case bitwiseXorAssign = "^="
+    /// Bitwise Not assign (~=)
     case bitwiseNotAssign = "~="
+    /// Bitwise Shift left assign (<==)
     case bitwiseShiftLeftAssign = "<<="
+    /// Bitwise Shift right assign (>>=)
     case bitwiseShiftRightAssign = ">>="
     
     case lessThan = "<"
@@ -52,9 +65,13 @@ public enum SwiftOperator: String, Codable {
     case identityEquals = "==="
     case identityUnequals = "!=="
     
+    /// Null-coalesce operator (??)
     case nullCoalesce = "??"
     
+    /// Open range (..<)
     case openRange = "..<"
+
+    /// Closed range (...)
     case closedRange = "..."
     
     /// Gets the category for this operator

@@ -674,14 +674,6 @@ extension ObjectiveCStatementASTReaderTests {
             let result = expr.accept(sut)
 
             if result != expected {
-                var resStr = "nil"
-                var expStr = ""
-
-                if let result = result {
-                    resStr = ""
-                    dump(result, to: &resStr)
-                }
-                dump(expected, to: &expStr)
                 var expString = ""
                 var resString = ""
 
