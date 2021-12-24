@@ -3,7 +3,7 @@ import XCTest
 @testable import JavaScriptFrontend
 
 class JavaScript2SwiftRewriterTests: XCTestCase {
-    func xtestRewrite_function() {
+    func testRewrite_function() {
         assertRewrite(
             js: """
             function test() {
@@ -12,13 +12,12 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func test() -> Any {
-                
             }
             """
         )
     }
 
-    func xtestRewrite_functionBody() {
+    func testRewrite_functionBody() {
         assertRewrite(
             js: """
             function test() {

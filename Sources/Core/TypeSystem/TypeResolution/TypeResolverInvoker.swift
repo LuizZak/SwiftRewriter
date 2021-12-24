@@ -87,7 +87,7 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     
     private func resolveFromQueue(_ queue: FunctionBodyQueue<TypeResolvingQueueDelegate>) {
         // Make a file invoker for each file and execute resolving in parallel
-        let opQueue = OperationQueue()
+        let opQueue = ConcurrentOperationQueue()
         opQueue.maxConcurrentOperationCount = numThreads
         
         for item in queue.items {
@@ -100,7 +100,7 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
             }
         }
         
-        opQueue.waitUntilAllOperationsAreFinished()
+        opQueue.runAndWaitConcurrent()
     }
     
     // MARK: - Private methods

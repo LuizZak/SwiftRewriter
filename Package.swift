@@ -490,6 +490,7 @@ let package = Package(
             dependencies: [
                 "JavaScriptFrontend",
                 "TestCommons",
+                "JsParserTests",
             ],
             path: "Tests/Frontend/JavaScript/JavaScriptFrontendTests"
         ),

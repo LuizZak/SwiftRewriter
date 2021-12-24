@@ -94,7 +94,7 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
     }
     
     private func collect(from intentions: IntentionCollection, numThreads: Int) {
-        let queue = OperationQueue()
+        let queue = ConcurrentOperationQueue()
         queue.maxConcurrentOperationCount = numThreads
         
         for file in intentions.fileIntentions() {
@@ -103,7 +103,7 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
             }
         }
         
-        queue.waitUntilAllOperationsAreFinished()
+        queue.runAndWaitConcurrent()
     }
     
     private func collectFromFile(_ file: FileGenerationIntention) {

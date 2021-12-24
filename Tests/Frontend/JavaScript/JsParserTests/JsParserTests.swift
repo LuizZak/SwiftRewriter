@@ -1,5 +1,6 @@
 import Foundation
 import JsGrammarModels
+import Utils
 import XCTest
 
 @testable import JsParser
@@ -71,29 +72,24 @@ class JsParserTests: XCTestCase {
 
             let exp = expectation(description: "JsParser fixture tests")
 
-            let queue = OperationQueue()
+            let queue = ConcurrentOperationQueue()
 
             for fixture in fixtures {
                 let fixture = fixture as URL
 
                 queue.addOperation {
-                    do {
-                        let source = try String(contentsOf: fixture, encoding: .utf8)
-                        let sut = JsParser(string: source, state: JsParserState())
+                    let source = try String(contentsOf: fixture, encoding: .utf8)
+                    let sut = JsParser(string: source, state: JsParserState())
 
-                        try sut.parse()
+                    try sut.parse()
 
-                        if !sut.diagnostics.errors.isEmpty {
-                            var diag = ""
-                            sut.diagnostics.printDiagnostics(to: &diag)
+                    if !sut.diagnostics.errors.isEmpty {
+                        var diag = ""
+                        sut.diagnostics.printDiagnostics(to: &diag)
 
-                            XCTFail(
-                                "Unexpected error diagnostics while parsing \(fixture.lastPathComponent):\n\(diag)"
-                            )
-                        }
-                    }
-                    catch {
-
+                        XCTFail(
+                            "Unexpected error diagnostics while parsing \(fixture.lastPathComponent):\n\(diag)"
+                        )
                     }
                 }
             }
@@ -103,6 +99,8 @@ class JsParserTests: XCTestCase {
             }
 
             wait(for: [exp], timeout: 60.0)
+
+            try queue.throwErrorIfAvailable()
         }
 
     #endif

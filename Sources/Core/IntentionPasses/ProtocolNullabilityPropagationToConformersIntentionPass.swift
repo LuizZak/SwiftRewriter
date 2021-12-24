@@ -37,7 +37,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
         
         var classProtocols: [String: [KnownProtocolConformance]] = [:]
         
-        let queue = OperationQueue()
+        let queue = ConcurrentOperationQueue()
         queue.maxConcurrentOperationCount = context.numThreads
         
         let mutex = Mutex()
@@ -57,7 +57,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
             }
         }
         
-        queue.waitUntilAllOperationsAreFinished()
+        queue.runAndWaitConcurrent()
         
         // Second round-trip: Merge conformers with protocols
         for cls in classes {
@@ -79,7 +79,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
             }
         }
         
-        queue.waitUntilAllOperationsAreFinished()
+        queue.runAndWaitConcurrent()
         
         context.notifyChange()
     }

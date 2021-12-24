@@ -48,7 +48,7 @@ public final class ASTRewriterPassApplier {
     }
     
     private func internalApply(on intentions: IntentionCollection) {
-        let queue = OperationQueue()
+        let queue = ConcurrentOperationQueue()
         queue.maxConcurrentOperationCount = numThreads
         
         let files = intentions.fileIntentions().filter(shouldApply(on:))
@@ -76,7 +76,7 @@ public final class ASTRewriterPassApplier {
             }
         }
         
-        queue.waitUntilAllOperationsAreFinished()
+        queue.runAndWaitConcurrent()
     }
     
     private func shouldApply(on file: FileGenerationIntention) -> Bool {
@@ -86,7 +86,7 @@ public final class ASTRewriterPassApplier {
     private func internalApply(on file: FileGenerationIntention,
                                intentions: IntentionCollection,
                                passType: ASTRewriterPass.Type,
-                               operationQueue: OperationQueue) {
+                               operationQueue: ConcurrentOperationQueue) {
         
         let delegate =
             TypeResolvingQueueDelegate(
@@ -111,7 +111,7 @@ public final class ASTRewriterPassApplier {
             }
         }
         
-        operationQueue.waitUntilAllOperationsAreFinished()
+        operationQueue.runAndWaitConcurrent()
         
         self.afterFile?(file.targetPath, "\(passType)")
     }

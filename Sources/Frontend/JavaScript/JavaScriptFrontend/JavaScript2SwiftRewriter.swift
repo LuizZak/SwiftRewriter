@@ -98,6 +98,9 @@ public final class JavaScript2SwiftRewriter {
     }
     
     public func rewrite() throws {
+        parsers.removeAll()
+        intentionCollection.removeAll()
+
         try autoreleasepool {
             let lazyParse = try loadInputSources()
             parseStatements(lazyParse)
@@ -110,17 +113,17 @@ public final class JavaScript2SwiftRewriter {
         // Load input sources
         let sources = sourcesProvider.sources()
         
-        let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = settings.numThreads
+        //let queue = ConcurrentOperationQueue()
+        //queue.maxConcurrentOperationCount = settings.numThreads
         
         let outError: ConcurrentValue<Error?> = ConcurrentValue(wrappedValue: nil)
         let mutex = Mutex()
         var lazyParse: [LazyParseItem] = []
         
         for (i, src) in sources.enumerated() {
-            queue.addOperation {
+            //queue.addOperation {
                 if outError.wrappedValue != nil {
-                    return
+                    continue
                 }
                 
                 do {
@@ -138,10 +141,10 @@ public final class JavaScript2SwiftRewriter {
                         $0 = error
                     }
                 }
-            }
+            //}
         }
         
-        queue.waitUntilAllOperationsAreFinished()
+        //queue.waitUntilAllOperationsAreFinished()
         
         if let error = outError.wrappedValue {
             throw error
@@ -170,7 +173,7 @@ public final class JavaScript2SwiftRewriter {
             typeSystem.tearDownCache()
         }
         
-        let queue = OperationQueue()
+        let queue = ConcurrentOperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
         for item in items {
@@ -213,7 +216,7 @@ public final class JavaScript2SwiftRewriter {
             }
         }
         
-        queue.waitUntilAllOperationsAreFinished()
+        queue.runAndWaitConcurrent()
     }
     
     /// Evaluate all type signatures, now with the knowledge of all types present

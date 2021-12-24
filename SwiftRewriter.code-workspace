@@ -35,6 +35,10 @@
 				"command": "swift",
 				"args": [
 					"build",
+					"-Xswiftc",
+					"-Xfrontend",
+					"-Xswiftc",
+					"-serialize-debugging-options",
 				],
 			},
             {
@@ -43,6 +47,10 @@
 				"command": "swift",
 				"args": [
 					"test",
+					"-Xswiftc",
+					"-Xfrontend",
+					"-Xswiftc",
+					"-serialize-debugging-options",
 				],
 			},
             {
@@ -52,6 +60,10 @@
 				"args": [
 					"test",
 					"-c", "release",
+					"-Xswiftc",
+					"-Xfrontend",
+					"-Xswiftc",
+					"-serialize-debugging-options",
 				],
 			},
 		],
@@ -124,7 +136,8 @@
 	},
 	"extensions": {
 		"recommendations": [
-			"exodiusstudios.comment-anchors"
+			"exodiusstudios.comment-anchors",
+			"MakeItBetter.vscode-swift-test-adapter",
 		],
 	},
 }

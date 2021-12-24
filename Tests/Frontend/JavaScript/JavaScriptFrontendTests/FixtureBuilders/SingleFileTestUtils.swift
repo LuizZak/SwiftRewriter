@@ -31,7 +31,7 @@ class SingleFileTestBuilder {
         self.settings = settings
     }
 
-    func assertObjcParse(
+    func assertJsParse(
         swift expectedSwift: String,
         fileName: String = "test.m",
         expectsErrors: Bool = false,
@@ -194,7 +194,7 @@ extension XCTestCase {
             settings: rewriterSettings
         )
 
-        test.assertObjcParse(
+        test.assertJsParse(
             swift: expectedSwift,
             fileName: inputFileName,
             expectsErrors: expectsErrors,

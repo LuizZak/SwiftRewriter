@@ -127,7 +127,7 @@ public final class ObjectiveC2SwiftRewriter {
         // Load input sources
         let sources = sourcesProvider.sources()
         
-        let queue = OperationQueue()
+        let queue = ConcurrentOperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
         let outError: ConcurrentValue<Error?> = ConcurrentValue(wrappedValue: nil)
@@ -153,7 +153,7 @@ public final class ObjectiveC2SwiftRewriter {
             }
         }
         
-        queue.waitUntilAllOperationsAreFinished()
+        queue.runAndWaitConcurrent()
         
         if let error = outError.wrappedValue {
             throw error
@@ -184,7 +184,7 @@ public final class ObjectiveC2SwiftRewriter {
         
         let antlrSettings = makeAntlrSettings()
 
-        let queue = OperationQueue()
+        let queue = ConcurrentOperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
         for item in lazyParse {
@@ -240,7 +240,7 @@ public final class ObjectiveC2SwiftRewriter {
             }
         }
         
-        queue.waitUntilAllOperationsAreFinished()
+        queue.runAndWaitConcurrent()
 
         return autotypeDeclarations.wrappedValue
     }
@@ -301,7 +301,7 @@ public final class ObjectiveC2SwiftRewriter {
         
         let typeMapper = self.typeMapper
         
-        let queue = OperationQueue()
+        let queue = ConcurrentOperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
         // Resolve typealiases and extension declarations first
@@ -339,7 +339,7 @@ public final class ObjectiveC2SwiftRewriter {
             }
         }
         
-        queue.waitUntilAllOperationsAreFinished()
+        queue.runAndWaitConcurrent()
         
         typeSystem.tearDownCache()
         
@@ -412,7 +412,7 @@ public final class ObjectiveC2SwiftRewriter {
             }
         }
         
-        queue.waitUntilAllOperationsAreFinished()
+        queue.runAndWaitConcurrent()
     }
 
     private func resolveAutotypeDeclarations(_ declarations: [LazyAutotypeVarDeclResolve]) {

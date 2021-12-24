@@ -58,7 +58,7 @@ class MandatoryIntentionPass: IntentionPass {
             context.typeSystem.tearDownCache()
         }
         
-        let queue = OperationQueue()
+        let queue = ConcurrentOperationQueue()
         queue.maxConcurrentOperationCount = context.numThreads
         
         let visitor = AnonymousIntentionVisitor()
@@ -72,7 +72,7 @@ class MandatoryIntentionPass: IntentionPass {
         
         visitor.visit(intentions: intentions)
         
-        queue.waitUntilAllOperationsAreFinished()
+        queue.runAndWaitConcurrent()
     }
     
     private func applyStructInitializer(_ type: StructGenerationIntention) {

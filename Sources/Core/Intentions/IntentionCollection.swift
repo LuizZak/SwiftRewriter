@@ -66,6 +66,11 @@ public class IntentionCollection: Codable {
         _intentions.append(intention)
         intention.intentionCollection = self
     }
+
+    /// Removes all intentions stored within this intention collection.
+    public func removeAll() {
+        _intentions.removeAll()
+    }
     
     public func removeIntention(where predicate: (FileGenerationIntention) -> Bool) {
         for (i, item) in _intentions.enumerated() {

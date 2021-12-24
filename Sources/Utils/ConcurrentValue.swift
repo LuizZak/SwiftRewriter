@@ -58,6 +58,19 @@ public final class ConcurrentValue<T> {
         pthread_rwlock_destroy(&lock)
     }
 
+    /// Performs a given block with exclusive access to the underlying value,
+    /// awaiting for current read operations to end, and blocking the access of
+    /// the value until the access ends.
+    @inlinable
+    public func withExclusiveAccess<U>(_ block: (T) -> U) -> U {
+        pthread_rwlock_wrlock(&lock)
+        defer {
+            pthread_rwlock_unlock(&lock)
+        }
+
+        return block(_value)
+    }
+
     @inlinable
     public func modifyingValue<U>(_ block: (inout T) -> U) -> U {
         pthread_rwlock_wrlock(&lock)
