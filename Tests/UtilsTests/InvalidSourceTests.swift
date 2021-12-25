@@ -15,6 +15,10 @@ class SourceTests: XCTestCase {
         struct TestSource: Source {
             var filePath: String = ""
 
+            var sourceRange: Range<String.UnicodeScalarView.Index> {
+                InvalidSource.invalid.sourceRange
+            }
+
             func stringIndex(forCharOffset offset: Int) -> String.Index {
                 return "".startIndex
             }
@@ -58,5 +62,13 @@ class SourceTests: XCTestCase {
         XCTAssertEqual(sut.columnNumber(at: str.endIndex), 0)
         XCTAssertEqual(sut.lineNumber(at: str.startIndex), 0)
         XCTAssertEqual(sut.lineNumber(at: str.endIndex), 0)
+    }
+
+    func testInvalidSourceRange_doesNotCrash() {
+        // Sanity check to make sure the range produced by `InvalidSource.sourceRange`
+        // does not result in a runtime crash due to invalid ranges.
+        let sut = InvalidSource.invalid
+
+        _ = sut.sourceRange
     }
 }

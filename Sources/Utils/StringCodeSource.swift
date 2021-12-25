@@ -5,6 +5,10 @@ public struct StringCodeSource: CodeSource {
     public var filePath: String = ""
     public var source: String
     
+    public var sourceRange: Range<String.UnicodeScalarView.Index> {
+        source.unicodeScalars.startIndex..<source.unicodeScalars.endIndex
+    }
+
     public init(source: String, fileName: String = "") {
         self.source = source
         self.filePath = fileName
@@ -17,11 +21,11 @@ public struct StringCodeSource: CodeSource {
         source
     }
     
-    public func stringIndex(forCharOffset offset: Int) -> String.Index {
+    public func stringIndex(forCharOffset offset: Int) -> String.UnicodeScalarView.Index {
         _indices[offset]
     }
     
-    public func charOffset(forStringIndex index: String.Index) -> Int {
+    public func charOffset(forStringIndex index: String.UnicodeScalarView.Index) -> Int {
         _indices.firstIndex(of: index) ?? 0
     }
     
@@ -33,7 +37,7 @@ public struct StringCodeSource: CodeSource {
         filePath == other.filePath
     }
     
-    public func lineNumber(at index: String.Index) -> Int {
+    public func lineNumber(at index: String.UnicodeScalarView.Index) -> Int {
         guard let intIndex = _lineOffsets.enumerated().first(where: { $0.element.contains(index) })?.offset else {
             return 0
         }
@@ -41,7 +45,7 @@ public struct StringCodeSource: CodeSource {
         return intIndex + 1
     }
     
-    public func columnNumber(at index: String.Index) -> Int {
+    public func columnNumber(at index: String.UnicodeScalarView.Index) -> Int {
         guard let offsets = _lineOffsets.first(where: { $0.contains(index) }) else {
             return 0
         }
