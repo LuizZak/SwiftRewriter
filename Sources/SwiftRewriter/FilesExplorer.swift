@@ -1,7 +1,7 @@
 import Foundation
 import Console
 import Utils
-import ObjectiveCFrontend
+import SwiftRewriterLib
 
 func showSearchPathUi(in menu: MenuController) -> String? {
     let console = menu.console
@@ -84,14 +84,14 @@ private func presentFileSelection(in menu: MenuController, list: [String], promp
 
 /// Main CLI interface entry point for file exploring services
 public class FilesExplorerService {
-    var rewriterService: ObjectiveCSwiftRewriterService
+    var rewriterFrontend: SwiftRewriterFrontend
 
-    init(rewriterService: ObjectiveCSwiftRewriterService) {
-        self.rewriterService = rewriterService
+    init(rewriterFrontend: SwiftRewriterFrontend) {
+        self.rewriterFrontend = rewriterFrontend
     }
 
     func runFileFindMenu(in menu: MenuController) {
-        let interface = FileFinderInterface(rewriterService: rewriterService)
+        let interface = FileFinderInterface(rewriterFrontend: rewriterFrontend)
 
         interface.run(in: menu)
     }
@@ -99,7 +99,7 @@ public class FilesExplorerService {
     func runFileExploreMenu(in menu: MenuController, url path: URL) {
         let filesExplorer =
             FilesExplorer(console: menu.console,
-                          rewriterService: rewriterService,
+                          rewriterFrontend: rewriterFrontend,
                           path: path)
         
         let config = Pages.PageDisplayConfiguration(commandHandler: filesExplorer)
@@ -115,7 +115,7 @@ public class FilesExplorerService {
     }
     
     func runSuggestConversionMenu(in menu: MenuController) {
-        let interface = SuggestConversionInterface(rewriterService: rewriterService)
+        let interface = SuggestConversionInterface(rewriterFrontend: rewriterFrontend)
         
         interface.run(in: menu)
     }
@@ -133,12 +133,16 @@ class SuggestConversionInterface {
         var excludePattern: String?
         var includePattern: String?
         var verbose: Bool
+
+        func makeFrontendFileCollectOptions() -> SwiftRewriterFrontendFileCollectionOptions {
+            .init(followImports: followImports, excludePattern: excludePattern, includePattern: includePattern, verbose: verbose)
+        }
     }
     
-    var rewriterService: ObjectiveCSwiftRewriterService
+    var rewriterFrontend: SwiftRewriterFrontend
     
-    init(rewriterService: ObjectiveCSwiftRewriterService) {
-        self.rewriterService = rewriterService
+    init(rewriterFrontend: SwiftRewriterFrontend) {
+        self.rewriterFrontend = rewriterFrontend
     }
     
     func run(in menu: MenuController) {
@@ -160,27 +164,14 @@ class SuggestConversionInterface {
         var overwriteCount = 0
 
         let fileProvider = FileDiskProvider()
-        let fileCollectionStep = ObjectiveCFileCollectionStep(fileProvider: fileProvider)
-        let importFileDelegate
-            = ImportDirectiveFileCollectionDelegate(
-                parserCache: rewriterService.parserCache,
-                fileProvider: fileProvider
-            )
-        if options.followImports {
-            fileCollectionStep.delegate = importFileDelegate
-        }
-        if options.verbose {
-            fileCollectionStep.listener = StdoutFileCollectionStepListener()
-        }
+        let files: [DiskInputFile]
+
         do {
-            try withExtendedLifetime(importFileDelegate) {
-                try fileCollectionStep.addFromDirectory(
-                    URL(fileURLWithPath: directoryPath),
-                    recursive: true,
-                    includePattern: options.includePattern,
-                    excludePattern: options.excludePattern
-                )
-            }
+            files = try rewriterFrontend.collectFiles(
+                from: URL(fileURLWithPath: directoryPath),
+                fileProvider: fileProvider,
+                options: options.makeFrontendFileCollectOptions()
+            )
         } catch {
             console.printLine("Error finding files: \(error).")
             if !options.skipConfirm {
@@ -190,8 +181,7 @@ class SuggestConversionInterface {
             return
         }
         
-        let objcFiles: [URL] = fileCollectionStep
-            .files
+        let objcFiles: [URL] = files
             .filter { $0.isPrimary }
             .map { $0.url }
             // Check a matching .swift file doesn't already exist for the paths
@@ -244,7 +234,7 @@ class SuggestConversionInterface {
             let stopwatch = Stopwatch.start()
             
             try autoreleasepool {
-                try rewriterService.rewrite(files: objcFiles)
+                try rewriterFrontend.makeRewriterService().rewrite(files: objcFiles)
             }
             
             let duration = stopwatch.stop()
@@ -259,10 +249,10 @@ class SuggestConversionInterface {
 }
 
 private class FileFinderInterface {
-    var rewriterService: SwiftRewriterService
+    var rewriterFrontend: SwiftRewriterFrontend
     
-    init(rewriterService: SwiftRewriterService) {
-        self.rewriterService = rewriterService
+    init(rewriterFrontend: SwiftRewriterFrontend) {
+        self.rewriterFrontend = rewriterFrontend
     }
 
     func run(in menu: MenuController) {
@@ -334,11 +324,16 @@ private class FileFinderInterface {
                     let fileUrls = indexes.map {
                         URL(fileURLWithPath: (path as NSString).appendingPathComponent($0))
                     }
+                    let rewriterService = rewriterFrontend.makeRewriterService()
+
                     try rewriterService.rewrite(files: fileUrls)
+
                     _=console.readLineWith(prompt: "\nPress [Enter] to convert another file")
+                    
                 } catch {
                     console.printLine("Error while converting file: \(error)".terminalColorize(.red))
                     _=console.readLineWith(prompt: "Press [Enter] to return")
+
                     return
                 }
             } while true
@@ -359,12 +354,12 @@ private class FilesExplorer: PagesCommandHandler {
     private var fileList: FileListConsoleProvider?
     
     public var console: ConsoleClient
-    public var rewriterService: SwiftRewriterService
+    public var rewriterFrontend: SwiftRewriterFrontend
     public var path: URL
     
-    public init(console: ConsoleClient, rewriterService: SwiftRewriterService, path: URL) {
+    public init(console: ConsoleClient, rewriterFrontend: SwiftRewriterFrontend, path: URL) {
         self.console = console
-        self.rewriterService = rewriterService
+        self.rewriterFrontend = rewriterFrontend
         self.path = path
     }
     
@@ -442,6 +437,8 @@ private class FilesExplorer: PagesCommandHandler {
     }
     
     func verifyFilesNamed(_ file: String, from url: URL) -> Bool {
+        let rewriterService = rewriterFrontend.makeRewriterService()
+
         let newPath = url.appendingPathComponent(file).absoluteURL
         
         var isDirectory = ObjCBool(false)

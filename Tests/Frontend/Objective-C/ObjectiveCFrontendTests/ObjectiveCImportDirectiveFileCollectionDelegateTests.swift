@@ -4,7 +4,7 @@ import XCTest
 
 @testable import ObjectiveCFrontend
 
-class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
+class ObjectiveCImportDirectiveFileCollectionDelegateTests: XCTestCase {
     var fileDisk: VirtualFileDisk!
     var parserCache: ObjectiveCParserCache!
 
@@ -30,7 +30,7 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
         )
         try parser.parse()
         parserCache.replaceCachedParsedTree(file: url, parser: parser)
-        let sut = ImportDirectiveFileCollectionDelegate(
+        let sut = ObjectiveCImportDirectiveFileCollectionDelegate(
             parserCache: parserCache,
             fileProvider: fileDisk
         )
@@ -56,7 +56,7 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
         )
         try parser.parse()
         parserCache.replaceCachedParsedTree(file: url, parser: parser)
-        let sut = ImportDirectiveFileCollectionDelegate(
+        let sut = ObjectiveCImportDirectiveFileCollectionDelegate(
             parserCache: parserCache,
             fileProvider: fileDisk
         )
@@ -80,7 +80,7 @@ class ImportDirectiveFileCollectionDelegateTests: XCTestCase {
         )
         try parser.parse()
         parserCache.replaceCachedParsedTree(file: url, parser: parser)
-        let sut = ImportDirectiveFileCollectionDelegate(
+        let sut = ObjectiveCImportDirectiveFileCollectionDelegate(
             parserCache: parserCache,
             fileProvider: fileDisk
         )

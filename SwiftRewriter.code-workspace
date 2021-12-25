@@ -141,4 +141,34 @@
 			"MakeItBetter.vscode-swift-test-adapter",
 		],
 	},
+	"launch": {
+		"configurations": [
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Debug SwiftRewriter",
+				"program": "${workspaceFolder}/.build/debug/SwiftRewriter",
+				"args": [],
+				"cwd": "${workspaceFolder:SwiftRewriter}",
+				"preLaunchTask": "swift: Build Debug SwiftRewriter"
+			},
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Release SwiftRewriter",
+				"program": "${workspaceFolder}/.build/release/SwiftRewriter",
+				"args": [],
+				"cwd": "${workspaceFolder:SwiftRewriter}",
+				"preLaunchTask": "swift: Build Release SwiftRewriter"
+			},
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Test SwiftRewriter",
+				"program": "./.build/debug/SwiftRewriterPackageTests.xctest",
+				"cwd": "${workspaceFolder:SwiftRewriter}",
+				"preLaunchTask": "swift: Build All"
+			}
+		]
+	},
 }

@@ -31,6 +31,13 @@ public class JsParser {
     
     public var diagnostics: Diagnostics
 
+    /// Contains information about all C-style comments found while parsing the
+    /// input file.
+    public var comments: [CodeComment] = []
+
+    /// Import declarations found in file.
+    public var importDirectives: [JsImportDecl] = []
+
     public var antlrSettings: AntlrSettings = .default
     
     public convenience init(string: String, fileName: String = "") {

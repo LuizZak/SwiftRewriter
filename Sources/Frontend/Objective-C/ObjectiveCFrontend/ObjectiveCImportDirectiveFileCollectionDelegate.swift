@@ -2,7 +2,7 @@ import Foundation
 import ObjcParser
 import SwiftRewriterLib
 
-public class ImportDirectiveFileCollectionDelegate {
+public class ObjectiveCImportDirectiveFileCollectionDelegate {
     var parserCache: ObjectiveCParserCache
     let fileProvider: FileProvider
     
@@ -12,7 +12,7 @@ public class ImportDirectiveFileCollectionDelegate {
     }
 }
 
-extension ImportDirectiveFileCollectionDelegate: ObjectiveCFileCollectionStepDelegate {
+extension ObjectiveCImportDirectiveFileCollectionDelegate: ObjectiveCFileCollectionStepDelegate {
     public func objectiveCFileCollectionStep(_ fileCollectionStep: ObjectiveCFileCollectionStep,
                                              referencedFilesForFile file: InputSource) throws -> [URL] {
 

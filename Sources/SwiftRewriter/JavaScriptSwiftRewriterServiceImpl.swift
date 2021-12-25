@@ -1,16 +1,16 @@
 import Foundation
 import AntlrCommons
-import ObjectiveCFrontend
+import JavaScriptFrontend
 
-public final class ObjectiveCSwiftRewriterServiceImpl: ObjectiveCSwiftRewriterService {
-    public static func fileDisk(settings: Settings) -> ObjectiveCSwiftRewriterService {
+public final class JavaScriptSwiftRewriterServiceImpl: JavaScriptSwiftRewriterService {
+    public static func fileDisk(settings: Settings) -> JavaScriptSwiftRewriterService {
         Self(
             output: FileDiskWriterOutput(),
             settings: settings
         )
     }
     
-    public static func terminal(settings: Settings, colorize: Bool) -> ObjectiveCSwiftRewriterService {
+    public static func terminal(settings: Settings, colorize: Bool) -> JavaScriptSwiftRewriterService {
         Self(
             output: StdoutWriterOutput(colorize: colorize),
             settings: settings
@@ -20,15 +20,15 @@ public final class ObjectiveCSwiftRewriterServiceImpl: ObjectiveCSwiftRewriterSe
     let output: WriterOutput
     let settings: Settings
     let preprocessors: [SourcePreprocessor] = [QuickSpecPreprocessor()]
-    let parserStatePool: ObjcParserStatePool
+    let parserStatePool: JsParserStatePool
     
-    public var parserCache: ObjectiveCParserCache
+    public var parserCache: JavaScriptParserCache
     
     public init(output: WriterOutput, settings: Settings) {
         let antlrSettings = AntlrSettings(forceUseLLPrediction: settings.rewriter.forceUseLLPrediction)
         
-        parserStatePool = ObjcParserStatePool()
-        parserCache = ObjectiveCParserCache(fileProvider: FileDiskProvider(),
+        parserStatePool = JsParserStatePool()
+        parserCache = JavaScriptParserCache(fileProvider: FileDiskProvider(),
                                   parserStatePool: parserStatePool,
                                   sourcePreprocessors: preprocessors,
                                   antlrSettings: antlrSettings)
@@ -86,7 +86,7 @@ public final class ObjectiveCSwiftRewriterServiceImpl: ObjectiveCSwiftRewriterSe
         /// Settings for the AST writer
         public var astWriter: SwiftSyntaxOptions = .default
         
-        /// General settings for `ObjectiveC2SwiftRewriter` instances
-        public var rewriter: ObjectiveC2SwiftRewriter.Settings = .default
+        /// General settings for `JavaScript2SwiftRewriter` instances
+        public var rewriter: JavaScript2SwiftRewriter.Settings = .default
     }
 }

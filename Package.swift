@@ -253,6 +253,7 @@ let package = Package(
                 .product(name: "Console", package: "console"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "ObjectiveCFrontend", "SwiftRewriterLib", "ObjcParser", "ObjcGrammarModels",
+                "JavaScriptFrontend",
                 "ExpressionPasses", "Utils", "SourcePreprocessors", "SwiftAST",
                 "IntentionPasses", "MiniLexer", "GlobalsProviders", "Commons",
             ],
