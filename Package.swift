@@ -219,7 +219,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/LuizZak/MiniLexer.git", .exact("0.10.0")),
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", .exact("4.1.1")),
-        .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.1")),
+        .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.2")),
         .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50500.0")),
         .package(url: "https://github.com/apple/swift-argument-parser.git", .exact("0.3.1")),
     ],
