@@ -78,6 +78,7 @@
 				},
 				"args": [
 					"test",
+					"--enable-code-coverage",
 					"-Xswiftc",
 					"-Xfrontend",
 					"-Xswiftc",
@@ -92,6 +93,7 @@
 				"args": [
 					"test",
 					"-c", "release",
+					"--enable-code-coverage",
 					"-Xswiftc",
 					"-DJS_PARSER_TESTS_FULL_FIXTURES",
 					"-Xswiftc",
@@ -113,7 +115,7 @@
 		},
 		{
 			"name": "Build",
-			"path": ".build/x86_64-unknown-windows-msvc",
+			"path": ".build/debug/..",
 		},
 	],
 	"launch": {
@@ -216,6 +218,9 @@
 			"swiftrewriter",
 			"swiftwriter"
 		],
+		"swiftTest.swift.testParams": [
+			"--enable-code-coverage",
+		]
 	},
 	"extensions": {
 		"recommendations": [
