@@ -11,17 +11,18 @@ jobs:
   pool:
     vmImage: 'macOS-11'
   steps:
-  - bash: 'sudo xcode-select -s /Applications/Xcode_13.2.app/Contents/Developer'
   - bash: 'swift package resolve'
-  # Fix for missing modulemap for _CSwiftSyntax
-  - bash: 'bash gen-_cswiftsyntax-module-map.sh'
-  - bash: 'xcodebuild -scheme SwiftRewriter build test'
+  - bash: 'swift test --enable-code-coverage'
+  - bash: 'llvm-cov show ./.build/debug/SwiftRewriterPackageTests.xctest -instr-profile=./.build/debug/codecov/default.profdata Sources > coverage.txt'
   - bash: 'bash <(curl -s https://codecov.io/bash)'
 
 - job: Linux
   container:
-    image: swift:5.5-focal
+    image: swift:5.5.2-focal
   pool:
     vmImage: ubuntu-20.04
   steps:
-  - bash: 'swift test'
+  - bash: 'swift package resolve'
+  - bash: 'swift test --enable-code-coverage'
+  - bash: 'llvm-cov show ./.build/debug/SwiftRewriterPackageTests.xctest -instr-profile=./.build/debug/codecov/default.profdata Sources > coverage.txt'
+  - bash: 'bash <(curl -s https://codecov.io/bash)'

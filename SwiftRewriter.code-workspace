@@ -67,7 +67,7 @@
 		},
 		{
 			"name": "Build",
-			"path": ".build/x86_64-unknown-windows-msvc",
+			"path": ".build/debug/..",
 		},
 	],
 	"settings": {
@@ -121,6 +121,9 @@
 			"swiftrewriter",
 			"swiftwriter"
 		],
+		"swiftTest.swift.testParams": [
+			"--enable-code-coverage",
+		]
 	},
 	"extensions": {
 		"recommendations": [
