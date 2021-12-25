@@ -17,13 +17,15 @@ public class JsParser {
     /// The default parser state, in case the user did not provide one on init.
     private static var _singleThreadState: JsParserState = JsParserState()
 
-    let source: CodeSource
-
     var parsed: Bool = false
     
     // MARK: ANTLR parser
     var mainParser: AntlrParser<JavaScriptLexer, JavaScriptParser>?
+
+    /// Gets the source that is being parsed.
+    public let source: CodeSource
     
+    /// Gets the parsed global context node.
     public var rootNode: JsGlobalContextNode = JsGlobalContextNode()
     
     /// Gets or sets the underlying parser state for this parser
@@ -78,7 +80,6 @@ public class JsParser {
         parser.removeErrorListeners()
         
         let root = try tryParse(from: parser, { try $0.program() })
-        // print(root.toStringTree(parser))
 
         let listener = JsParserListener(sourceString: src, source: source)
         

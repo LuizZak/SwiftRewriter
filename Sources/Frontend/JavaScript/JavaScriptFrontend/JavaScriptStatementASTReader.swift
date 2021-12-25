@@ -282,7 +282,11 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
     }
 
     fileprivate func unknown(_ ctx: ParserRuleContext) -> Statement {
-        .unknown(UnknownASTContext(context: ctx.getText()))
+        .unknown(UnknownASTContext(context: _sourceText(for: ctx)))
+    }
+    
+    private func _sourceText(for ctx: ParserRuleContext) -> String {
+        return self.context.sourceCode(for: ctx).map(String.init) ?? ""
     }
 
     // MARK: - AST reader factories

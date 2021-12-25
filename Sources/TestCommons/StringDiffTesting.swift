@@ -1,4 +1,3 @@
-import Utils
 import XCTest
 
 public protocol DiffTestCaseFailureReporter {
@@ -65,11 +64,11 @@ public class DiffingTest {
         self.diffOnly = diffOnly
     }
     
-    public func diff(_ res: String,
+    public func diff(_ actual: String,
                      file: StaticString = #filePath,
                      line: UInt = #line) {
         
-        if expectedDiff.string == res {
+        if expectedDiff.string == actual {
             return
         }
         
@@ -80,7 +79,7 @@ public class DiffingTest {
                 
                 Diff (between ---):
                 
-                \(makeDiffStringSection(expected: expectedDiff.string, actual: res))
+                \(makeDiffStringSection(expected: expectedDiff.string, actual: actual))
                 """,
                 inFile: file,
                 atLine: line,
@@ -100,12 +99,12 @@ public class DiffingTest {
                 Actual result (between ---):
                 
                 ---
-                \(res)
+                \(actual)
                 ---
                 
                 Diff (between ---):
                 
-                \(makeDiffStringSection(expected: expectedDiff.string, actual: res))
+                \(makeDiffStringSection(expected: expectedDiff.string, actual: actual))
                 """,
                 inFile: file,
                 atLine: line,
@@ -118,25 +117,25 @@ public class DiffingTest {
         }
         
         // Report inline in Xcode now
-        guard let (diffStartLine, diffStartColumn) = res.firstDifferingLineColumn(against: expectedDiff.string) else {
+        guard let (diffStartLine, diffStartColumn) = actual.firstDifferingLineColumn(against: expectedDiff.string) else {
             return
         }
         
         let expectedLineRanges = expectedDiff.string.lineRanges()
-        let resLineRanges = res.lineRanges()
+        let actualLineRanges = actual.lineRanges()
         
-        if diffStartLine - 1 < expectedLineRanges.count && resLineRanges.count == expectedLineRanges.count {
-            let resLineContent = res[resLineRanges[max(0, diffStartLine - 1)]]
+        if diffStartLine - 1 < expectedLineRanges.count && actualLineRanges.count == expectedLineRanges.count {
+            let actualLineContent = actual[actualLineRanges[max(0, diffStartLine - 1)]]
             
             testCase._recordFailure(
                 withDescription: """
-                Difference starts here: Actual line reads '\(resLineContent)'
+                Difference starts here: Actual line reads '\(actualLineContent)'
                 """,
                 inFile: file,
                 atLine: expectedDiff.location.line + UInt(diffStartLine),
                 expected: true
             )
-        } else if resLineRanges.count < expectedLineRanges.count {
+        } else if actualLineRanges.count < expectedLineRanges.count {
             let isAtLastColumn: Bool = {
                 guard let last = expectedLineRanges.last else {
                     return false
@@ -159,11 +158,11 @@ public class DiffingTest {
                     expected: true
                 )
             } else {
-                let resLineContent = res[resLineRanges[max(0, diffStartLine - 1)]]
+                let actualLineContent = actual[actualLineRanges[max(0, diffStartLine - 1)]]
                 
                 testCase._recordFailure(
                     withDescription: """
-                    Difference starts here: Actual line reads '\(resLineContent)'
+                    Difference starts here: Actual line reads '\(actualLineContent)'
                     """,
                     inFile: file,
                     atLine: expectedDiff.location.line + UInt(diffStartLine),
@@ -228,10 +227,18 @@ public class DiffingTest {
             result.append(lines[lineIndex])
         }
         
-        result.append(lines[line])
+        if line < lines.count {
+            result.append(lines[line])
+        }
         
-        for lineIndex in (line + 1)..<maxLine {
-            result.append(lines[lineIndex])
+        if line + 1 < maxLine {
+            for lineIndex in (line + 1)..<maxLine {
+                guard lineIndex < lines.count else {
+                    break
+                }
+
+                result.append(lines[lineIndex])
+            }
         }
         
         return (result.joined(separator: "\n"), minLine, lines.count - maxLine)

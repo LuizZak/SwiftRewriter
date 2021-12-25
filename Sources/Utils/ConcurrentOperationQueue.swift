@@ -107,14 +107,13 @@ public class ConcurrentOperationQueue {
 
     #endif
 
-    /// Executes the operations queued within this concurrent operation queue,
-    /// and awaits for the operations to end.
-    public func runAndWaitConcurrent() {
+    /// Begins execution of the operations queued within this concurrent operation
+    /// queue, and releases control back to the caller.
+    public func runConcurrent() {
         switch _runMode {
         case .stopped:
             break
-        case .async(let queue):
-            queue.waitUntilAllOperationsAreFinished()
+        case .async:
             return
         case .sync:
             fatalError("Called \(#function) while operation queue is running in synchronous context somewhere else.")
@@ -124,9 +123,26 @@ public class ConcurrentOperationQueue {
 
         _submitBlocksAsync(_blocks)
         _blocks.removeAll()
-        _queue.waitUntilAllOperationsAreFinished()
 
-        _runMode = .stopped
+        _submitBlockAsync(.barrier({
+            self._runMode = .stopped
+        }))
+    }
+
+    /// Executes the operations queued within this concurrent operation queue,
+    /// and awaits for the operations to end.
+    public func runAndWaitConcurrent() {
+        runConcurrent()
+
+        switch _runMode {
+        case .stopped:
+            break
+        case .async(let queue):
+            queue.waitUntilAllOperationsAreFinished()
+            return
+        case .sync:
+            fatalError("Called \(#function) while operation queue is running in synchronous context somewhere else.")
+        }
     }
 
     private func _isRunning() -> Bool {

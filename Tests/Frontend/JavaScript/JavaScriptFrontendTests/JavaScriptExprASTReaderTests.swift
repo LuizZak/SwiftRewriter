@@ -1,4 +1,5 @@
 import Antlr4
+import Utils
 import JsParser
 import JsParserAntlr
 import SwiftAST
@@ -284,12 +285,13 @@ extension JavaScriptExprASTReaderTests {
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-
+        let source = StringCodeSource(source: jsExpr, fileName: "test.js")
         let typeSystem = TypeSystem()
 
         let sut =
             JavaScriptExprASTReader(
                 context: JavaScriptASTReaderContext(
+                    source: source,
                     typeSystem: typeSystem,
                     typeContext: nil,
                     comments: []

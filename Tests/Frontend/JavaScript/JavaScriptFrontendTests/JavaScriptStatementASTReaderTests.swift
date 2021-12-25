@@ -1,5 +1,6 @@
 import XCTest
 import Antlr4
+import Utils
 import JsParser
 import TypeSystem
 import JsParserAntlr
@@ -454,10 +455,11 @@ extension JavaScriptStatementASTReaderTests {
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-
+        let source = StringCodeSource(source: jsStmt, fileName: "test.js")
         let typeSystem = TypeSystem()
 
         let context = JavaScriptASTReaderContext(
+            source: source,
             typeSystem: typeSystem,
             typeContext: nil,
             comments: []

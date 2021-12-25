@@ -1,4 +1,5 @@
 import SwiftAST
+import Utils
 import TypeSystem
 import JsParserAntlr
 import GrammarModelBase
@@ -7,16 +8,18 @@ import JsParser
 import KnownType
 
 public protocol JavaScriptASTReaderDelegate: AnyObject {
-    
+
 }
 
 /// Reader that reads JavaScript AST and outputs equivalent a Swift AST
 public class JavaScriptASTReader {
     let typeSystem: TypeSystem?
+    let source: Source
 
     weak var delegate: JavaScriptASTReaderDelegate?
     
-    public init(typeSystem: TypeSystem? = nil) {
+    public init(source: Source, typeSystem: TypeSystem? = nil) {
+        self.source = source
         self.typeSystem = typeSystem
     }
     
@@ -50,6 +53,7 @@ public class JavaScriptASTReader {
         
         let context =
             JavaScriptASTReaderContext(
+                source: source,
                 typeSystem: typeSystem,
                 typeContext: typeContext,
                 comments: comments
@@ -84,6 +88,7 @@ public class JavaScriptASTReader {
         
         let context =
             JavaScriptASTReaderContext(
+                source: source,
                 typeSystem: typeSystem,
                 typeContext: typeContext,
                 comments: comments
@@ -114,6 +119,7 @@ public class JavaScriptASTReader {
         
         let context =
             JavaScriptASTReaderContext(
+                source: source,
                 typeSystem: typeSystem,
                 typeContext: nil,
                 comments: comments
@@ -137,6 +143,7 @@ public class JavaScriptASTReader {
         
         let context =
             JavaScriptASTReaderContext(
+                source: source,
                 typeSystem: typeSystem,
                 typeContext: nil,
                 comments: comments

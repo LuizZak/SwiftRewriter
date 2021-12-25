@@ -74,29 +74,35 @@ class JsParserTests: XCTestCase {
 
             let queue = ConcurrentOperationQueue()
 
-            for fixture in fixtures {
+            for fixture in fixtures where fixture.path?.contains("Scoping") == true {
                 let fixture = fixture as URL
 
                 queue.addOperation {
-                    let source = try String(contentsOf: fixture, encoding: .utf8)
-                    let sut = JsParser(string: source, state: JsParserState())
+                    print("Starting test \(fixture.lastPathComponent)...")
+                    
+                    try withExtendedLifetime(JsParserState()) { state in
+                        let source = try String(contentsOf: fixture, encoding: .utf8)
+                        let sut = JsParser(string: source, state: state)
 
-                    try sut.parse()
+                        try sut.parse()
 
-                    if !sut.diagnostics.errors.isEmpty {
-                        var diag = ""
-                        sut.diagnostics.printDiagnostics(to: &diag)
+                        if !sut.diagnostics.errors.isEmpty {
+                            var diag = ""
+                            sut.diagnostics.printDiagnostics(to: &diag)
 
-                        XCTFail(
-                            "Unexpected error diagnostics while parsing \(fixture.lastPathComponent):\n\(diag)"
-                        )
+                            XCTFail(
+                                "Unexpected error diagnostics while parsing \(fixture.lastPathComponent):\n\(diag)"
+                            )
+                        }
                     }
                 }
             }
 
-            queue.addBarrierBlock {
+            queue.addBarrierOperation {
                 exp.fulfill()
             }
+
+            queue.runConcurrent()
 
             wait(for: [exp], timeout: 60.0)
 

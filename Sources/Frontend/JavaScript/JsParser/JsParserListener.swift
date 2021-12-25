@@ -64,13 +64,15 @@ internal class JsParserListener: JavaScriptParserBaseListener {
     }
     
     override func enterEveryRule(_ ctx: ParserRuleContext) throws {
-        mapper.matchEnter(rule: ctx, context: context)
+        print("Enter: \(type(of: ctx)) - \(ctx.getText())")
 
-        print("\(type(of: ctx)) - \(ctx.getText())")
+        mapper.matchEnter(rule: ctx, context: context)
     }
     
     override func exitEveryRule(_ ctx: ParserRuleContext) throws {
         mapper.matchExit(rule: ctx, context: context)
+
+        print("Exit: \(type(of: ctx)) - \(ctx.getText())")
     }
 
     override func enterClassDeclaration(_ ctx: JavaScriptParser.ClassDeclarationContext) {

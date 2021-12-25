@@ -607,8 +607,12 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
         }
     }
 
-    private func unknown(_ ctx: ParserRuleContext) -> Expression {
-        .unknown(UnknownASTContext(context: ctx.getText()))
+    fileprivate func unknown(_ ctx: ParserRuleContext) -> Expression {
+        .unknown(UnknownASTContext(context: _sourceText(for: ctx)))
+    }
+    
+    private func _sourceText(for ctx: ParserRuleContext) -> String {
+        return self.context.sourceCode(for: ctx).map(String.init) ?? ""
     }
 
     // MARK: - AST reader factories

@@ -113,17 +113,17 @@ public final class JavaScript2SwiftRewriter {
         // Load input sources
         let sources = sourcesProvider.sources()
         
-        //let queue = ConcurrentOperationQueue()
-        //queue.maxConcurrentOperationCount = settings.numThreads
+        let queue = ConcurrentOperationQueue()
+        queue.maxConcurrentOperationCount = settings.numThreads
         
         let outError: ConcurrentValue<Error?> = ConcurrentValue(wrappedValue: nil)
         let mutex = Mutex()
         var lazyParse: [LazyParseItem] = []
         
         for (i, src) in sources.enumerated() {
-            //queue.addOperation {
+            queue.addOperation {
                 if outError.wrappedValue != nil {
-                    continue
+                    return
                 }
                 
                 do {
@@ -141,10 +141,10 @@ public final class JavaScript2SwiftRewriter {
                         $0 = error
                     }
                 }
-            //}
+            }
         }
         
-        //queue.waitUntilAllOperationsAreFinished()
+        queue.runAndWaitConcurrent()
         
         if let error = outError.wrappedValue {
             throw error
@@ -177,6 +177,12 @@ public final class JavaScript2SwiftRewriter {
         queue.maxConcurrentOperationCount = settings.numThreads
         
         for item in items {
+            let source: Source
+            switch item {
+            case .functionBody(let s, _, _), .globalVar(let s, _):
+                source = s
+            }
+
             queue.addOperation {
                 autoreleasepool {
                     let delegate = InnerASTReaderDelegate(parseItem: item)
@@ -186,11 +192,11 @@ public final class JavaScript2SwiftRewriter {
                         JavaScript2SwiftRewriter._parserStatePool.repool(state)
                     }
                     
-                    let reader = JavaScriptASTReader(typeSystem: self.typeSystem)
+                    let reader = JavaScriptASTReader(source: source, typeSystem: self.typeSystem)
                     reader.delegate = delegate
                     
                     switch item {
-                    case let .functionBody(funcBody, method):
+                    case let .functionBody(_, funcBody, method):
                         guard let methodBody = funcBody.typedSource else {
                             return
                         }
@@ -205,7 +211,7 @@ public final class JavaScript2SwiftRewriter {
                                 typeContext: method?.type
                             )
                         
-                    case .globalVar(let v):
+                    case .globalVar(_, let v):
                         guard let expression = v.typedSource?.expression else {
                             return
                         }
@@ -386,7 +392,7 @@ public final class JavaScript2SwiftRewriter {
             try parser.parse()
         }
         
-        let collectorDelegate = CollectorDelegate()
+        let collectorDelegate = CollectorDelegate(source: parser.source)
         
         if settings.stageDiagnostics.contains(.parsedAST) {
             parser.rootNode.printNode({ print($0) })
@@ -574,18 +580,24 @@ private extension JavaScript2SwiftRewriter {
 // MARK: - JavaScriptIntentionCollectorDelegate
 fileprivate extension JavaScript2SwiftRewriter {
     class CollectorDelegate: JavaScriptIntentionCollectorDelegate {
+        let source: Source
+
         var lazyParse: [LazyParseItem] = []
+
+        init(source: Source) {
+            self.source = source
+        }
 
         func reportForLazyParsing(intention: Intention) {
             switch intention {
             case let intention as GlobalVariableInitialValueIntention:
-                lazyParse.append(.globalVar(intention))
+                lazyParse.append(.globalVar(source, intention))
                 
             case let intention as FunctionBodyIntention:
                 let context =
                     intention.ancestor(ofType: MethodGenerationIntention.self)
                 
-                lazyParse.append(.functionBody(intention, method: context))
+                lazyParse.append(.functionBody(source, intention, method: context))
                 
             default:
                 fatalError("Cannot handle parsing for intention of type \(type(of: intention))")
@@ -603,8 +615,8 @@ fileprivate extension JavaScript2SwiftRewriter {
 }
 
 private enum LazyParseItem {
-    case functionBody(FunctionBodyIntention, method: MethodGenerationIntention?)
-    case globalVar(GlobalVariableInitialValueIntention)
+    case functionBody(Source, FunctionBodyIntention, method: MethodGenerationIntention?)
+    case globalVar(Source, GlobalVariableInitialValueIntention)
 }
 
 private func _terminalClearLine() {

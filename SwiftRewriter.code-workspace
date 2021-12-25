@@ -31,8 +31,12 @@
 		"tasks": [
             {
 				"label": "Build (debug)",
-				"type": "shell",
+				"type": "swift",
 				"command": "swift",
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
 				"args": [
 					"build",
 					"--build-tests",
@@ -41,11 +45,37 @@
 					"-Xswiftc",
 					"-serialize-debugging-options",
 				],
+				"detail": "swift build --build-tests --enable-test-discovery -Xswiftc -Xfrontend -Xswiftc -serialize-debugging-options",
+			},
+            {
+				"label": "Build (release)",
+				"type": "swift",
+				"command": "swift",
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
+				"args": [
+					"build",
+					"-c=release",
+					"--build-tests",
+					"-Xswiftc",
+					"-DJS_PARSER_TESTS_FULL_FIXTURES",
+					"-Xswiftc",
+					"-Xfrontend",
+					"-Xswiftc",
+					"-serialize-debugging-options",
+				],
+				"detail": "swift build --build-tests --enable-test-discovery -Xswiftc -Xfrontend -Xswiftc -serialize-debugging-options",
 			},
             {
 				"label": "Test",
 				"type": "shell",
 				"command": "swift",
+				"group": {
+					"kind": "test",
+					"isDefault": true
+				},
 				"args": [
 					"test",
 					"-Xswiftc",
@@ -58,9 +88,12 @@
 				"label": "Test (release)",
 				"type": "shell",
 				"command": "swift",
+				"group": "test",
 				"args": [
 					"test",
 					"-c", "release",
+					"-Xswiftc",
+					"-DJS_PARSER_TESTS_FULL_FIXTURES",
 					"-Xswiftc",
 					"-Xfrontend",
 					"-Xswiftc",
@@ -83,6 +116,55 @@
 			"path": ".build/x86_64-unknown-windows-msvc",
 		},
 	],
+	"launch": {
+		"inputs": [
+			{
+				"id": "test_filter",
+				"type": "promptString",
+				"description": "Filter to pass to swift test --filter"
+			}
+		],
+		"configurations": [
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Debug SwiftRewriter",
+				"program": "${workspaceFolder:SwiftRewriter}/.build/debug/SwiftRewriter",
+				"args": [],
+				"cwd": "${workspaceFolder:SwiftRewriter}",
+				"preLaunchTask": "Build (debug)"
+			},
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Release SwiftRewriter",
+				"program": "${workspaceFolder:SwiftRewriter}/.build/release/SwiftRewriter",
+				"args": [],
+				"cwd": "${workspaceFolder:SwiftRewriter}",
+				"preLaunchTask": "Build (release)"
+			},
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Test SwiftRewriter",
+				"program": "./.build/debug/SwiftRewriterPackageTests.xctest",
+				"cwd": "${workspaceFolder:SwiftRewriter}",
+				"preLaunchTask": "Build (debug)"
+			},
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Test SwiftRewriter (filtered)",
+				"program": "./.build/debug/SwiftRewriterPackageTests.xctest",
+				"args": [
+					"${input:test_filter}"
+				],
+				"cwd": "${workspaceFolder:SwiftRewriter}",
+				"preLaunchTask": "Build (debug)",
+
+			}
+		]
+	},
 	"settings": {
 		"files.eol": "\n",
 		"files.insertFinalNewline": true,
@@ -140,35 +222,5 @@
 			"exodiusstudios.comment-anchors",
 			"MakeItBetter.vscode-swift-test-adapter",
 		],
-	},
-	"launch": {
-		"configurations": [
-			{
-				"type": "lldb",
-				"request": "launch",
-				"name": "Debug SwiftRewriter",
-				"program": "${workspaceFolder}/.build/debug/SwiftRewriter",
-				"args": [],
-				"cwd": "${workspaceFolder:SwiftRewriter}",
-				"preLaunchTask": "swift: Build Debug SwiftRewriter"
-			},
-			{
-				"type": "lldb",
-				"request": "launch",
-				"name": "Release SwiftRewriter",
-				"program": "${workspaceFolder}/.build/release/SwiftRewriter",
-				"args": [],
-				"cwd": "${workspaceFolder:SwiftRewriter}",
-				"preLaunchTask": "swift: Build Release SwiftRewriter"
-			},
-			{
-				"type": "lldb",
-				"request": "launch",
-				"name": "Test SwiftRewriter",
-				"program": "./.build/debug/SwiftRewriterPackageTests.xctest",
-				"cwd": "${workspaceFolder:SwiftRewriter}",
-				"preLaunchTask": "swift: Build All"
-			}
-		]
 	},
 }

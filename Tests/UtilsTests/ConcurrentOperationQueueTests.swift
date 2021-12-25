@@ -19,6 +19,26 @@ class ConcurrentOperationQueueTests: XCTestCase {
         waitForExpectations(timeout: 1.0)
     }
 
+    func testRunConcurrent_releasesControlImmediately() {
+        let sut = ConcurrentOperationQueue()
+        let exp = expectation(description: "runConcurrent")
+        var didExecuteBarrier = false
+
+        sut.addOperation {
+            Thread.sleep(forTimeInterval: 0.2)
+        }
+        sut.addBarrierOperation {
+            didExecuteBarrier = true
+            exp.fulfill()
+        }
+
+        sut.runConcurrent()
+
+        XCTAssertFalse(didExecuteBarrier, "Expected runConcurrent to waive control immediately.")
+
+        waitForExpectations(timeout: 1.0)
+    }
+
     func testRunAndWaitConcurrent_runsOnDifferentThreads() {
         let sut = ConcurrentOperationQueue()
         let exp = expectation(description: "runAndWaitConcurrent")

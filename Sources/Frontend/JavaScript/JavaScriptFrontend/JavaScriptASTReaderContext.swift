@@ -7,15 +7,28 @@ import KnownType
 import TypeSystem
 
 public final class JavaScriptASTReaderContext {
+    private var source: Source
     private var localsStack: [[Local]] = [[]]
     private var typeSystem: TypeSystem?
     private var typeContext: KnownType?
     private var comments: [CodeComment]
     
-    public init(typeSystem: TypeSystem?, typeContext: KnownType?, comments: [CodeComment]) {
+    public init(source: Source, typeSystem: TypeSystem?, typeContext: KnownType?, comments: [CodeComment]) {
+        self.source = source
         self.typeSystem = typeSystem
         self.typeContext = typeContext
         self.comments = comments
+    }
+
+    public func sourceCode(for rule: ParserRuleContext) -> Substring? {
+        guard let start = rule.getStart()?.getStartIndex() else {
+            return nil
+        }
+        guard let end = rule.getStop()?.getStopIndex() else {
+            return nil
+        }
+
+        return source.substring(inCharRange: start..<end)
     }
     
     public func define(localNamed name: String, storage: ValueStorage) {

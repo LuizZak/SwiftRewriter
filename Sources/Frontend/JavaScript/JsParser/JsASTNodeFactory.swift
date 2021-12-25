@@ -95,13 +95,13 @@ class JsASTNodeFactory {
         
         let location =
             SourceLocation(line: startLine,
-                            column: startColumn,
-                            utf8Offset: startIndex)
+                           column: startColumn,
+                           utf8Offset: startIndex)
         
         let length =
             SourceLength(newlines: endLine - startLine,
-                          columnsAtLastLine: endColumn,
-                          utf8Length: endIndex - startIndex)
+                         columnsAtLastLine: endColumn,
+                         utf8Length: endIndex - startIndex)
         
         return (location, length)
     }

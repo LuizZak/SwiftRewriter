@@ -9,7 +9,7 @@ public struct StringCodeSource: CodeSource {
         self.source = source
         self.filePath = fileName
         
-        _indices = Array(source.indices)
+        _indices = Array(source.unicodeScalars.indices)
         _lineOffsets = source.lineRanges()
     }
     
@@ -47,5 +47,19 @@ public struct StringCodeSource: CodeSource {
         }
         
         return source.distance(from: offsets.lowerBound, to: index) + 1
+    }
+
+    public func substring(inCharRange range: Range<Int>) -> Substring? {
+        guard range.lowerBound >= 0 && range.lowerBound < _indices.count else {
+            return nil
+        }
+        guard range.upperBound >= 0 && range.upperBound <= _indices.count else {
+            return nil
+        }
+
+        let start = stringIndex(forCharOffset: range.lowerBound)
+        let end = stringIndex(forCharOffset: range.upperBound)
+
+        return source[start..<end]
     }
 }

@@ -38,6 +38,10 @@ class SourceTests: XCTestCase {
             func columnNumber(at index: String.Index) -> Int {
                 return 0
             }
+
+            func substring(inCharRange range: Range<Int>) -> Substring? {
+                return nil
+            }
         }
 
         let sut = InvalidSource.invalid

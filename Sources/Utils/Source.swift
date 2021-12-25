@@ -14,6 +14,9 @@ public protocol Source {
     /// Gets the line number at a given source location
     func lineNumber(at index: String.Index) -> Int
     func columnNumber(at index: String.Index) -> Int
+
+    /// Returns a substring within a given range, if the range is valid.
+    func substring(inCharRange range: Range<Int>) -> Substring?
 }
 
 /// Represents an invalid source, which is neither a file nor a string source.
@@ -52,5 +55,9 @@ public struct InvalidSource: Source {
     
     public func columnNumber(at index: String.Index) -> Int {
         0
+    }
+
+    public func substring(inCharRange range: Range<Int>) -> Substring? {
+        nil
     }
 }
