@@ -103,38 +103,6 @@ class ConcurrentOperationQueueTests: XCTestCase {
         waitForExpectations(timeout: 1.0)
     }
 
-    func testRunSynchronously() throws {
-        let sut = ConcurrentOperationQueue()
-        var performedBlock1 = false
-        var performedBlock2 = false
-
-        sut.addOperation {
-            performedBlock1 = true
-        }
-        sut.addBarrierOperation {
-            performedBlock2 = true
-        }
-
-        try sut.runSynchronously()
-
-        XCTAssertTrue(performedBlock1)
-        XCTAssertTrue(performedBlock2)
-    }
-
-    func testRunSynchronously_runsOnCurrentThread() throws {
-        let sut = ConcurrentOperationQueue()
-        let currentThread = Thread.current
-        
-        sut.addOperation {
-            XCTAssertIdentical(currentThread, Thread.current)
-        }
-        sut.addBarrierOperation {
-            XCTAssertIdentical(currentThread, Thread.current)
-        }
-
-        try sut.runSynchronously()
-    }
-
     func testAddOperation_blockThrows_remainingOperationsContinue() {
         let sut = ConcurrentOperationQueue()
         let exp = expectation(description: "runAndWaitConcurrent")
@@ -155,32 +123,6 @@ class ConcurrentOperationQueueTests: XCTestCase {
         }
 
         sut.runAndWaitConcurrent()
-
-        waitForExpectations(timeout: 1.0)
-
-        XCTAssertEqual(blockCounter, 3)
-    }
-
-    func testRunSynchronously_blockThrows_remainingOperationsContinue() {
-        let sut = ConcurrentOperationQueue()
-        let exp = expectation(description: "runAndWaitConcurrent")
-        @ConcurrentValue var blockCounter: Int = 0
-        
-        sut.addOperation {
-            _blockCounter.modifyingValue { $0 += 1 }
-
-            throw TestError.error
-        }
-        sut.addOperation {
-            _blockCounter.modifyingValue { $0 += 1 }
-        }
-        sut.addBarrierOperation {
-            _blockCounter.modifyingValue { $0 += 1 }
-
-            exp.fulfill()
-        }
-
-        try? sut.runSynchronously()
 
         waitForExpectations(timeout: 1.0)
 
@@ -225,6 +167,69 @@ class ConcurrentOperationQueueTests: XCTestCase {
         XCTAssertEqual(sut.firstError as? TestError, TestError.error)
     }
     
+    // MARK: - Synchronous tests
+    #if DEBUG
+
+    func testRunSynchronously() throws {
+        let sut = ConcurrentOperationQueue()
+        var performedBlock1 = false
+        var performedBlock2 = false
+
+        sut.addOperation {
+            performedBlock1 = true
+        }
+        sut.addBarrierOperation {
+            performedBlock2 = true
+        }
+
+        try sut.runSynchronously()
+
+        XCTAssertTrue(performedBlock1)
+        XCTAssertTrue(performedBlock2)
+    }
+
+    func testRunSynchronously_runsOnCurrentThread() throws {
+        let sut = ConcurrentOperationQueue()
+        let currentThread = Thread.current
+        
+        sut.addOperation {
+            XCTAssertIdentical(currentThread, Thread.current)
+        }
+        sut.addBarrierOperation {
+            XCTAssertIdentical(currentThread, Thread.current)
+        }
+
+        try sut.runSynchronously()
+    }
+
+    func testRunSynchronously_blockThrows_remainingOperationsContinue() {
+        let sut = ConcurrentOperationQueue()
+        let exp = expectation(description: "runSynchronously")
+        @ConcurrentValue var blockCounter: Int = 0
+        
+        sut.addOperation {
+            _blockCounter.modifyingValue { $0 += 1 }
+
+            throw TestError.error
+        }
+        sut.addOperation {
+            _blockCounter.modifyingValue { $0 += 1 }
+        }
+        sut.addBarrierOperation {
+            _blockCounter.modifyingValue { $0 += 1 }
+
+            exp.fulfill()
+        }
+
+        try? sut.runSynchronously()
+
+        waitForExpectations(timeout: 1.0)
+
+        XCTAssertEqual(blockCounter, 3)
+    }
+
+    #endif
+
     private enum TestError: Swift.Error, Equatable {
         case error
         case otherError

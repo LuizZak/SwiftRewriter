@@ -27,7 +27,8 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func test() -> Any {
-                var a = 0
+                let a: Any = 0
+
                 return a + 10
             }
             """

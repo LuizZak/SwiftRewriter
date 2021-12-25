@@ -35,6 +35,7 @@
 				"command": "swift",
 				"args": [
 					"build",
+					"--build-tests",
 					"-Xswiftc",
 					"-Xfrontend",
 					"-Xswiftc",

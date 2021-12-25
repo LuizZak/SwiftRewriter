@@ -89,7 +89,7 @@ class SingleFileTestBuilder {
 
             if !expectsErrors && sut.diagnostics.errors.count != 0 {
                 XCTFail(
-                    "Unexpected error(s) converting objective-c: \(sut.diagnostics.errors.description)",
+                    "Unexpected error(s) converting JavaScript: \(sut.diagnostics.errors.description)",
                     file: file,
                     line: line
                 )
@@ -101,7 +101,7 @@ class SingleFileTestBuilder {
         }
         catch {
             XCTFail(
-                "Unexpected error(s) parsing objective-c: \(error)",
+                "Unexpected error(s) parsing JavaScript: \(error)",
                 file: file,
                 line: line
             )

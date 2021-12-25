@@ -66,6 +66,7 @@ public class JsParser {
         let src = source.fetchSource()
         
         let parserState = try state.makeMainParser(input: src)
+        mainParser = parserState
         let parser = parserState.parser
         parser.removeErrorListeners()
         
