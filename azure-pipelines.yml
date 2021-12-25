@@ -13,7 +13,7 @@ jobs:
   steps:
   - bash: 'swift package resolve'
   - bash: 'swift test --enable-code-coverage'
-  - bash: 'llvm-cov show ./.build/debug/SwiftRewriterPackageTests.xctest -instr-profile=./.build/debug/codecov/default.profdata Sources > coverage.txt'
+  - bash: 'xcrun llvm-cov show ./.build/debug/SwiftRewriterPackageTests.xctest -instr-profile=./.build/debug/codecov/default.profdata Sources > coverage.txt'
   - bash: 'bash <(curl -s https://codecov.io/bash)'
 
 - job: Linux
