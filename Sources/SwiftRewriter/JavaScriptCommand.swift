@@ -6,6 +6,7 @@ import JavaScriptFrontend
 struct JavaScriptCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "js",
+        abstract: "JavaScript code conversion frontend [EXPERIMENTAL]",
         discussion: """
         Converts a set of JavaScript (.js) files, or, if not provided, starts an \
         interactive menu to navigate the file system and choose files to convert.

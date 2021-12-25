@@ -6,6 +6,7 @@ import ObjectiveCFrontend
 struct ObjectiveCCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "objc",
+        abstract: "Objective-C code conversion frontend",
         discussion: """
         Converts a set of Objective-C (.h/.m) files, or, if not provided, starts \
         an interactive menu to navigate the file system and choose files to convert.
