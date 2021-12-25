@@ -163,7 +163,6 @@
 				],
 				"cwd": "${workspaceFolder:SwiftRewriter}",
 				"preLaunchTask": "Build (debug)",
-
 			}
 		]
 	},
