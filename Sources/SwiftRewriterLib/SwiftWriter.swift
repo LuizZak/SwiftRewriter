@@ -7,6 +7,8 @@ import KnownType
 import Intentions
 import TypeSystem
 import WriterTargetOutput
+import SwiftSyntax
+import SwiftFormat
 import SwiftSyntaxSupport
 import Utils
 
@@ -152,10 +154,10 @@ class SwiftSyntaxWriter {
     func outputFile(_ fileIntent: FileGenerationIntention) throws {
         let target = try output.createFile(path: fileIntent.targetPath)
         
-        outputFile(fileIntent, targetFile: target)
+        try outputFile(fileIntent, targetFile: target)
     }
     
-    func outputFile(_ fileIntent: FileGenerationIntention, targetFile: FileOutput) {
+    func outputFile(_ fileIntent: FileGenerationIntention, targetFile: FileOutput) throws {
         let out = targetFile.outputTarget()
         
         let settings = SwiftSyntaxProducer
@@ -166,11 +168,31 @@ class SwiftSyntaxWriter {
         let producer = SwiftSyntaxProducer(settings: settings, delegate: self)
         
         var fileSyntax = producer.generateFile(fileIntent)
-        fileSyntax = syntaxRewriterApplier.apply(to: fileSyntax)
+
+        fileSyntax = try formatSyntax(fileSyntax, fileUrl: URL(fileURLWithPath: fileIntent.targetPath), format: options.format)
+        fileSyntax = applySyntaxPasses(fileSyntax)
         
         out.outputFile(fileSyntax)
         
         targetFile.close()
+    }
+
+    func formatSyntax(_ file: SourceFileSyntax, fileUrl: URL, format: SwiftSyntaxOptions.FormatOption) throws -> SourceFileSyntax {
+        switch format {
+        case .noFormatting:
+            return file
+        case .swiftFormat(let configuration):
+            let formatter = SwiftFormatter(configuration: configuration ?? .init(), diagnosticEngine: nil)
+            var intermediary: String = ""
+
+            try formatter.format(syntax: file, assumingFileURL: fileUrl, to: &intermediary)
+
+            return try SyntaxParser.parse(source: intermediary)
+        }
+    }
+
+    func applySyntaxPasses(_ file: SourceFileSyntax) -> SourceFileSyntax {
+        syntaxRewriterApplier.apply(to: file)
     }
 }
 

@@ -1,3 +1,5 @@
+import Foundation
+import SwiftFormatConfiguration
 import SwiftSyntaxSupport
 
 public struct SwiftSyntaxOptions {
@@ -6,7 +8,8 @@ public struct SwiftSyntaxOptions {
         outputExpressionTypes: false,
         printIntentionHistory: false,
         emitObjcCompatibility: false,
-        alwaysEmitVariableTypes: false
+        alwaysEmitVariableTypes: false,
+        format: .noFormatting
     )
 
     /// If `true`, when outputting expression statements, print the resulting
@@ -29,17 +32,22 @@ public struct SwiftSyntaxOptions {
     /// If `true`, the output writers always emit the type of variable initializer
     /// expressions.
     public var alwaysEmitVariableTypes: Bool
+
+    /// Specifies the type of formatting to perform on the output files.
+    public var format: FormatOption
     
     public init(
         outputExpressionTypes: Bool,
         printIntentionHistory: Bool,
         emitObjcCompatibility: Bool,
-        alwaysEmitVariableTypes: Bool
+        alwaysEmitVariableTypes: Bool,
+        format: FormatOption
     ) {
         self.outputExpressionTypes = outputExpressionTypes
         self.printIntentionHistory = printIntentionHistory
         self.emitObjcCompatibility = emitObjcCompatibility
         self.alwaysEmitVariableTypes = alwaysEmitVariableTypes
+        self.format = format
     }
 
     public func toSwiftSyntaxProducerSettings() -> SwiftSyntaxProducer.Settings {
@@ -56,5 +64,15 @@ public struct SwiftSyntaxOptions {
         var copy = self
         copy[keyPath: keyPath] = value
         return copy
+    }
+
+    /// Specifies the type of formatting to perform on the output files.
+    public enum FormatOption {
+        /// No formatting is performed.
+        case noFormatting
+
+        /// Performs SwiftFormat formatting, optionally using a provided configuration
+        /// for the process.
+        case swiftFormat(configuration: Configuration?)
     }
 }

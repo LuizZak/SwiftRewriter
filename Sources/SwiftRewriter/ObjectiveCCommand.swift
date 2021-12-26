@@ -21,42 +21,6 @@ struct ObjectiveCCommand: ParsableCommand {
 
 extension ObjectiveCCommand {
     struct Options: ParsableArguments {
-        @Flag(name: .shortAndLong,
-              help: "Pass this parameter as true to enable terminal colorization during output.")
-        var colorize: Bool = false
-        
-        @Flag(name: [.long, .customShort("e")],
-              help: "Prints the type of each top-level resolved expression statement found in function bodies.")
-        var printExpressionTypes: Bool = false
-        
-        @Flag(name: [.long, .customShort("p")],
-              help: """
-            Prints extra information before each declaration and member about the \
-            inner logical decisions of intention passes as they change the structure \
-            of declarations.
-            """)
-        var printTracingHistory: Bool = false
-        
-        @Flag(name: .shortAndLong,
-              help: "Prints progress information to the console while performing a transpiling job.")
-        var verbose: Bool = false
-        
-        @Option(name: [.long, .customShort("t")],
-                help: """
-            Specifies the number of threads to use when performing parsing, as well \
-            as intention and expression passes. If not specified, thread allocation \
-            is defined by the system depending on usage conditions.
-            """)
-        var numThreads: Int?
-        
-        @Flag(help: """
-            Forces ANTLR parsing to use LL prediction context, instead of making an \
-            attempt at SLL first. \
-            May be more performant in some circumstances depending on complexity of \
-            original source code.
-            """)
-        var forceLl: Bool = false
-        
         @Flag(help: """
             Emits '@objc' attributes on definitions, and emits NSObject subclass \
             and NSObjectProtocol conformance on protocols.
@@ -73,26 +37,15 @@ extension ObjectiveCCommand {
             """)
         var diagnoseFile: String?
         
-        @Option(name: [.long, .customShort("w")],
-                help: """
-            Specifies the output target for the conversion.
-            Defaults to 'filedisk' if not provided.
-            Ihnored when converting from the standard input.
-
-                stdout
-                    Prints the conversion results to the terminal's standard output;
-                
-                filedisk
-                    Saves output of conversion to the filedisk as .swift files on the same folder as the input files.
-            """)
-        var target: Target?
-
         @Flag(name: .shortAndLong,
               help: """
               Follows #import declarations in files in order to parse other relevant files.
               Ignored when converting from standard input.
               """)
         var followImports: Bool = false
+
+        @OptionGroup()
+        var globalOptions: GlobalOptions
     }
 }
 
@@ -108,7 +61,7 @@ extension ObjectiveCCommand {
         var options: Options
         
         func run() throws {
-            let rewriter = makeRewriterService(options)
+            let rewriter = try makeRewriterService(options)
             
             let fileProvider = FileDiskProvider()
             let fileCollectionStep = ObjectiveCFileCollectionStep(fileProvider: fileProvider)
@@ -117,7 +70,7 @@ extension ObjectiveCCommand {
             if options.followImports {
                 fileCollectionStep.delegate = delegate
             }
-            if options.verbose {
+            if options.globalOptions.verbose {
                 fileCollectionStep.listener = StdoutFileCollectionStepListener()
             }
             try withExtendedLifetime(delegate) {
@@ -169,7 +122,7 @@ extension ObjectiveCCommand {
         var options: Options
         
         func run() throws {
-            let rewriter = makeRewriterService(options)
+            let rewriter = try makeRewriterService(options)
             let frontend = ObjectiveCFrontendImpl(rewriterService: rewriter)
             
             let console = Console()
@@ -181,7 +134,7 @@ extension ObjectiveCCommand {
                         followImports: self.options.followImports,
                         excludePattern: excludePattern,
                         includePattern: includePattern,
-                        verbose: self.options.verbose)
+                        verbose: self.options.globalOptions.verbose)
             
             let interface = SuggestConversionInterface(rewriterFrontend: frontend)
             interface.searchAndShowConfirm(in: menu,
@@ -197,8 +150,8 @@ extension ObjectiveCCommand {
         var options: Options
         
         func run() throws {
-            let colorize = options.colorize
-            let settings = makeSettings(options)
+            let colorize = options.globalOptions.colorize
+            let settings = try makeSettings(options)
             
             let output = StdoutWriterOutput(colorize: colorize)
             let service = ObjectiveCSwiftRewriterServiceImpl(output: output, settings: settings)
@@ -231,10 +184,10 @@ extension ObjectiveCCommand {
     }
 }
 
-private func makeRewriterService(_ options: ObjectiveCCommand.Options) -> ObjectiveCSwiftRewriterService {
-    let colorize = options.colorize
-    let target = options.target ?? .filedisk
-    let settings = makeSettings(options)
+private func makeRewriterService(_ options: ObjectiveCCommand.Options) throws -> ObjectiveCSwiftRewriterService {
+    let colorize = options.globalOptions.colorize
+    let target = options.globalOptions.target ?? .filedisk
+    let settings = try makeSettings(options)
     
     let rewriter: ObjectiveCSwiftRewriterService
     
@@ -249,16 +202,17 @@ private func makeRewriterService(_ options: ObjectiveCCommand.Options) -> Object
     return rewriter
 }
 
-private func makeSettings(_ options: ObjectiveCCommand.Options) -> ObjectiveCSwiftRewriterServiceImpl.Settings {
+private func makeSettings(_ options: ObjectiveCCommand.Options) throws -> ObjectiveCSwiftRewriterServiceImpl.Settings {
     var settings = ObjectiveCSwiftRewriterServiceImpl.Settings()
     
-    settings.rewriter.verbose = options.verbose
+    settings.rewriter.verbose = options.globalOptions.verbose
     settings.rewriter.diagnoseFiles = options.diagnoseFile.map { [$0] } ?? []
-    settings.rewriter.numThreads = options.numThreads ?? OperationQueue.defaultMaxConcurrentOperationCount
-    settings.astWriter.outputExpressionTypes = options.printExpressionTypes
-    settings.astWriter.printIntentionHistory = options.printTracingHistory
+    settings.rewriter.numThreads = options.globalOptions.numThreads ?? OperationQueue.defaultMaxConcurrentOperationCount
+    settings.astWriter.outputExpressionTypes = options.globalOptions.printExpressionTypes
+    settings.astWriter.printIntentionHistory = options.globalOptions.printTracingHistory
     settings.astWriter.emitObjcCompatibility = options.emitObjcCompatibility
-    settings.rewriter.forceUseLLPrediction = options.forceLl
+    settings.astWriter.format = try options.globalOptions.computeFormatterMode()
+    settings.rewriter.forceUseLLPrediction = options.globalOptions.forceLl
     
     return settings
 }

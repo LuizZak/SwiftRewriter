@@ -2,6 +2,8 @@ import Intentions
 import KnownType
 import ObjcParser
 import SwiftAST
+import SwiftFormatConfiguration
+import SwiftSyntax
 import SwiftSyntaxSupport
 import TestCommons
 import TypeSystem
@@ -114,5 +116,70 @@ class SwiftSyntaxWriterTests: XCTestCase {
         XCTAssertFalse(lazyResult)
         sut.options.alwaysEmitVariableTypes = true
         XCTAssertTrue(lazyResult)
+    }
+
+    func testFormatOutput_noFormatting() throws {
+        let original = """
+            import      Module
+
+            class   AClass
+            {
+            init() { }
+                }
+            """
+        let fileSyntax = try SyntaxParser.parse(source: original)
+
+        let result = try sut.formatSyntax(fileSyntax, fileUrl: URL(fileURLWithPath: "path.swift"), format: .noFormatting)
+
+        XCTAssertEqual(result.description, original)
+    }
+
+    func testFormatOutput_swiftFormat_defaultConfiguration() throws {
+        let original = """
+            import      Module
+
+            class   AClass
+            {
+            init() { }
+                }
+            """
+        let fileSyntax = try SyntaxParser.parse(source: original)
+
+        let result = try sut.formatSyntax(fileSyntax, fileUrl: URL(fileURLWithPath: "path.swift"), format: .swiftFormat(configuration: nil))
+
+        XCTAssertEqual(result.description, """
+            import Module
+
+            class AClass {
+              init() {}
+            }
+
+            """)
+    }
+
+    func testFormatOutput_swiftFormat_customConfiguration() throws {
+        let original = """
+            import      Module
+
+            class   AClass
+            {
+            init() { }
+                }
+            """
+        let fileSyntax = try SyntaxParser.parse(source: original)
+
+        var configuration = Configuration()
+        configuration.indentation = .spaces(4)
+
+        let result = try sut.formatSyntax(fileSyntax, fileUrl: URL(fileURLWithPath: "path.swift"), format: .swiftFormat(configuration: configuration))
+
+        XCTAssertEqual(result.description, """
+            import Module
+
+            class AClass {
+                init() {}
+            }
+            
+            """)
     }
 }

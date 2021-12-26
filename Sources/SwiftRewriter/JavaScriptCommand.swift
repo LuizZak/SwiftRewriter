@@ -21,42 +21,9 @@ struct JavaScriptCommand: ParsableCommand {
 
 extension JavaScriptCommand {
     struct Options: ParsableArguments {
-        @Flag(name: .shortAndLong,
-              help: "Pass this parameter as true to enable terminal colorization during output.")
-        var colorize: Bool = false
-        
-        @Flag(name: [.long, .customShort("e")],
-              help: "Prints the type of each top-level resolved expression statement found in function bodies.")
-        var printExpressionTypes: Bool = false
-        
-        @Flag(name: [.long, .customShort("p")],
-              help: """
-            Prints extra information before each declaration and member about the \
-            inner logical decisions of intention passes as they change the structure \
-            of declarations.
-            """)
-        var printTracingHistory: Bool = false
-        
-        @Flag(name: .shortAndLong,
-              help: "Prints progress information to the console while performing a transpiling job.")
-        var verbose: Bool = false
-        
-        @Option(name: [.long, .customShort("t")],
-                help: """
-            Specifies the number of threads to use when performing parsing, as well \
-            as intention and expression passes. If not specified, thread allocation \
-            is defined by the system depending on usage conditions.
-            """)
-        var numThreads: Int?
-        
-        @Flag(help: """
-            Forces ANTLR parsing to use LL prediction context, instead of making an \
-            attempt at SLL first. \
-            May be more performant in some circumstances depending on complexity of \
-            original source code.
-            """)
-        var forceLl: Bool = false
-        
+        @OptionGroup()
+        var globalOptions: GlobalOptions
+
         @Option(help: """
             Provides a target file path to diagnose during rewriting.
             After each intention pass and after expression passes, the file is written
@@ -64,20 +31,6 @@ extension JavaScriptCommand {
             """)
         var diagnoseFile: String?
         
-        @Option(name: [.long, .customShort("w")],
-                help: """
-            Specifies the output target for the conversion.
-            Defaults to 'filedisk' if not provided.
-            Ihnored when converting from the standard input.
-
-                stdout
-                    Prints the conversion results to the terminal's standard output;
-                
-                filedisk
-                    Saves output of conversion to the filedisk as .swift files on the same folder as the input files.
-            """)
-        var target: Target?
-
         @Flag(name: .shortAndLong,
               help: """
               Follows #import declarations in files in order to parse other relevant files.
@@ -99,7 +52,7 @@ extension JavaScriptCommand {
         var options: Options
         
         func run() throws {
-            let rewriter = makeRewriterService(options)
+            let rewriter = try makeRewriterService(options)
             
             let fileProvider = FileDiskProvider()
             let fileCollectionStep = JavaScriptFileCollectionStep(fileProvider: fileProvider)
@@ -111,7 +64,7 @@ extension JavaScriptCommand {
             if options.followImports {
                 fileCollectionStep.delegate = delegate
             }
-            if options.verbose {
+            if options.globalOptions.verbose {
                 fileCollectionStep.listener = StdoutFileCollectionStepListener()
             }
             try withExtendedLifetime(delegate) {
@@ -163,7 +116,7 @@ extension JavaScriptCommand {
         var options: Options
         
         func run() throws {
-            let rewriter = makeRewriterService(options)
+            let rewriter = try makeRewriterService(options)
             let frontend = JavaScriptFrontendImpl(rewriterService: rewriter)
             
             let console = Console()
@@ -175,7 +128,7 @@ extension JavaScriptCommand {
                         followImports: self.options.followImports,
                         excludePattern: excludePattern,
                         includePattern: includePattern,
-                        verbose: self.options.verbose)
+                        verbose: self.options.globalOptions.verbose)
             
             let interface = SuggestConversionInterface(rewriterFrontend: frontend)
             interface.searchAndShowConfirm(in: menu,
@@ -191,8 +144,8 @@ extension JavaScriptCommand {
         var options: Options
         
         func run() throws {
-            let colorize = options.colorize
-            let settings = makeSettings(options)
+            let colorize = options.globalOptions.colorize
+            let settings = try makeSettings(options)
             
             let output = StdoutWriterOutput(colorize: colorize)
             let service = JavaScriptSwiftRewriterServiceImpl(output: output, settings: settings)
@@ -225,10 +178,10 @@ extension JavaScriptCommand {
     }
 }
 
-private func makeRewriterService(_ options: JavaScriptCommand.Options) -> JavaScriptSwiftRewriterService {
-    let colorize = options.colorize
-    let target = options.target ?? .filedisk
-    let settings = makeSettings(options)
+private func makeRewriterService(_ options: JavaScriptCommand.Options) throws -> JavaScriptSwiftRewriterService {
+    let colorize = options.globalOptions.colorize
+    let target = options.globalOptions.target ?? .filedisk
+    let settings = try makeSettings(options)
     
     let rewriter: JavaScriptSwiftRewriterService
     
@@ -243,15 +196,16 @@ private func makeRewriterService(_ options: JavaScriptCommand.Options) -> JavaSc
     return rewriter
 }
 
-private func makeSettings(_ options: JavaScriptCommand.Options) -> JavaScriptSwiftRewriterServiceImpl.Settings {
+private func makeSettings(_ options: JavaScriptCommand.Options) throws -> JavaScriptSwiftRewriterServiceImpl.Settings {
     var settings = JavaScriptSwiftRewriterServiceImpl.Settings()
     
-    settings.rewriter.verbose = options.verbose
+    settings.rewriter.verbose = options.globalOptions.verbose
     settings.rewriter.diagnoseFiles = options.diagnoseFile.map { [$0] } ?? []
-    settings.rewriter.numThreads = options.numThreads ?? OperationQueue.defaultMaxConcurrentOperationCount
-    settings.astWriter.outputExpressionTypes = options.printExpressionTypes
-    settings.astWriter.printIntentionHistory = options.printTracingHistory
-    settings.rewriter.forceUseLLPrediction = options.forceLl
+    settings.rewriter.numThreads = options.globalOptions.numThreads ?? OperationQueue.defaultMaxConcurrentOperationCount
+    settings.astWriter.outputExpressionTypes = options.globalOptions.printExpressionTypes
+    settings.astWriter.printIntentionHistory = options.globalOptions.printTracingHistory
+    settings.astWriter.format = try options.globalOptions.computeFormatterMode()
+    settings.rewriter.forceUseLLPrediction = options.globalOptions.forceLl
     
     return settings
 }

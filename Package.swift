@@ -222,7 +222,8 @@ let package = Package(
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", .exact("4.1.1")),
         .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.2")),
         .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50500.0")),
-        .package(url: "https://github.com/apple/swift-argument-parser.git", .exact("0.3.1")),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-format.git", .exact("0.50500.0")),
     ],
     targets: core + objcFrontend + jsFrontend + [
         .target(
@@ -235,6 +236,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Antlr4", package: "antlr4-swift"),
                 .product(name: "Console", package: "console"),
+                .product(name: "SwiftFormat", package: "swift-format"),
                 // Objective-C
                 "ObjcGrammarModels", "ObjcParser",
                 // JavaScript
