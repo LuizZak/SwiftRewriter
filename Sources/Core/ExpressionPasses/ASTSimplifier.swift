@@ -13,23 +13,69 @@ public class ASTSimplifier: ASTRewriterPass {
         return super.visitBaseExpression(exp)
     }
     
-    /// Simplify `do` statements that are the only statement within a compound
-    /// statement context.
     public override func visitCompound(_ stmt: CompoundStatement) -> Statement {
-        guard stmt.statements.count == 1, let doStmt = stmt.statements[0].asDoStatement else {
-            return super.visitCompound(stmt)
+        /// Simplify `do` statements that are the only statement within a compound
+        /// statement context.
+        if stmt.statements.count == 1, let doStmt = stmt.statements[0].asDoStatement {
+            let body = doStmt.body.statements
+            doStmt.body.statements = []
+            stmt.statements = body
+            
+            for def in doStmt.body.allDefinitions() {
+                stmt.definitions.recordDefinition(def)
+            }
+            
+            notifyChange()
         }
-        
-        let body = doStmt.body.statements
-        doStmt.body.statements = []
-        stmt.statements = body
-        
-        for def in doStmt.body.allDefinitions() {
-            stmt.definitions.recordDefinition(def)
+
+        // Flatten tuple base expressions into separate expression statements.
+        var toSplit: [(Int, [Expression])] = []
+        for (i, innerStmt) in stmt.statements.enumerated() {
+            guard let expressions = innerStmt.asExpressions else {
+                continue
+            }
+
+            var split: [Expression] = []
+            for expression in expressions.expressions {
+                if let tuple = expression.asTuple {
+                    split.append(contentsOf: tuple.elements)
+                } else {
+                    split.append(expression)
+                }
+            }
+            
+            if expressions.expressions != split {
+                toSplit.append((i, split))
+            }
         }
-        
-        notifyChange()
-        
+
+        if !toSplit.isEmpty {
+            var newStatements: [Statement] = stmt.statements.map { $0.copy() }
+
+            for (index, exps) in toSplit.reversed() where !exps.isEmpty {
+                let original = stmt.statements[index]
+
+                let label = original.label
+                let leadingComments = original.comments
+                let trailingComments = original.trailingComment
+
+                let expStatements: [Statement] = exps.map {
+                    ExpressionsStatement(expressions: [$0.copy()])
+                }
+
+                expStatements.first?.label = label
+                expStatements.first?.comments = leadingComments
+                expStatements.last?.trailingComment = trailingComments
+                
+                newStatements.remove(at: index)
+                newStatements.insert(contentsOf: expStatements, at: index)
+            }
+
+            stmt.statements = newStatements
+            
+            notifyChange()
+        }
+
         return super.visitCompound(stmt)
     }
     

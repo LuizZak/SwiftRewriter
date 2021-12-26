@@ -361,4 +361,84 @@ class ASTSimplifierTests: ExpressionPassTestCase {
         )
         assertDidNotNotifyChange()
     }
+
+    func testSplitTopLevelTupleExpressions() {
+        assertTransform(
+            statement:
+                .compound([
+                    .expression(
+                        .tuple([
+                            .constant(1),
+                            .constant(2)
+                        ])
+                    )
+                ]),
+            into:
+                .compound([
+                    .expression(.constant(1)),
+                    .expression(.constant(2)),
+                ])
+        )
+        assertNotifiedChange()
+    }
+
+    func testSplitTopLevelTupleExpressions_keepStatementLabel() {
+        assertTransform(
+            statement:
+                .compound([
+                    .expression(
+                        .tuple([
+                            .constant(1),
+                            .constant(2)
+                        ])
+                    ).labeled("label")
+                ]),
+            into:
+                .compound([
+                    .expression(.constant(1)).labeled("label"),
+                    .expression(.constant(2)),
+                ])
+        )
+        assertNotifiedChange()
+    }
+
+    func testSplitTopLevelTupleExpressions_keepLeadingComments() {
+        assertTransform(
+            statement:
+                .compound([
+                    .expression(
+                        .tuple([
+                            .constant(1),
+                            .constant(2)
+                        ])
+                    ).withComments(["A comment"])
+                ]),
+            into:
+                .compound([
+                    .expression(.constant(1)).withComments(["A comment"]),
+                    .expression(.constant(2)),
+                ])
+        )
+        assertNotifiedChange()
+    }
+
+    func testSplitTopLevelTupleExpressions_keepTrailingCommentsOnTrailingStatement() {
+        assertTransform(
+            statement:
+                .compound([
+                    .expression(
+                        .tuple([
+                            .constant(1),
+                            .constant(2)
+                        ])
+                    ).withTrailingComment("A comment")
+                ]),
+            into:
+                .compound([
+                    .expression(.constant(1)),
+                    .expression(.constant(2)).withTrailingComment("A comment"),
+                ])
+        )
+        assertNotifiedChange()
+    }
 }

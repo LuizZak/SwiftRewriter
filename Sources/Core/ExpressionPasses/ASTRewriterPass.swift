@@ -71,6 +71,8 @@ open class ASTRewriterPass: SyntaxNodeRewriter {
         return visitBaseExpression(expression)
     }
     
+    /// Visits an that is the outermost Expression of a SyntaxNode, before the
+    /// next parent up is a Statement-, or other non-Expression- node.
     open func visitBaseExpression(_ exp: Expression) -> Expression {
         visitExpression(exp)
     }

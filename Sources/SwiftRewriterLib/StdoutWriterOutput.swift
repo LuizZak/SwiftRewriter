@@ -24,29 +24,30 @@ public class StdoutWriterOutput: WriterOutput {
         var colorize: Bool
         var path: String
         var signalEndOfFiles: Bool
+        let target = TerminalStringRewriterOutput()
         
         init(path: String, colorize: Bool = true, signalEndOfFiles: Bool) {
             self.colorize = colorize
             self.path = path
             self.signalEndOfFiles = signalEndOfFiles
-        }
-        
-        func close() {
-            print(buffer, terminator: signalEndOfFiles ? "\n" : "")
-            
-            if signalEndOfFiles {
-                print("// End of file \((path as NSString).lastPathComponent)")
-            }
-        }
-        
-        func outputTarget() -> RewriterOutputTarget {
-            let target = TerminalStringRewriterOutput()
+
             target.colorize = colorize
             
             target.onChangeBuffer = { contents in
                 self.buffer = contents
             }
-            
+        }
+        
+        func close() {
+            if signalEndOfFiles {
+                target.outputLineFeed()
+                target.output(line: "// End of file \((path as NSString).lastPathComponent)", style: .comment)
+            }
+
+            print(buffer, terminator: "")
+        }
+        
+        func outputTarget() -> RewriterOutputTarget {
             return target
         }
     }
