@@ -31,7 +31,7 @@ class SwiftSyntaxWriterTests: XCTestCase {
         )
     }
 
-    func testShouldEmitTypeSignatureForOptionalInitializedVar() {
+    func testShouldEmitTypeSignature_optionalInitializedVar_returnsTrue() {
         typeSystem.addType(KnownTypeBuilder(typeName: "A").build())
         let producer = SwiftSyntaxProducer()
         let storage = ValueStorage(
@@ -51,7 +51,7 @@ class SwiftSyntaxWriterTests: XCTestCase {
         XCTAssertTrue(result)
     }
 
-    func testShouldEmitTypeSignatureForWeakInitializedVar() {
+    func testShouldEmitTypeSignature_weakInitializedVar_returnsFalse() {
         typeSystem.addType(KnownTypeBuilder(typeName: "A").build())
         let producer = SwiftSyntaxProducer()
         let storage = ValueStorage(
@@ -71,7 +71,7 @@ class SwiftSyntaxWriterTests: XCTestCase {
         XCTAssertFalse(result)
     }
 
-    func testShouldEmitTypeSignatureForWeakInitializedVarOfBaseType() {
+    func testShouldEmitTypeSignature_weakInitializedVarOfBaseType_returnsTrue() {
         let typeA = KnownTypeBuilder(typeName: "A").build()
         let typeB = KnownTypeBuilder(typeName: "B").settingSupertype(typeA).build()
         typeSystem.addType(typeA)
@@ -92,5 +92,27 @@ class SwiftSyntaxWriterTests: XCTestCase {
             )
 
         XCTAssertTrue(result)
+    }
+
+    func testShouldEmitTypeSignature_alwaysEmitVariableTypesTrue_returnsTrue() {
+        typeSystem.addType(KnownTypeBuilder(typeName: "A").build())
+        let producer = SwiftSyntaxProducer()
+        let storage = ValueStorage(
+            type: .optional("A"),
+            ownership: .weak,
+            isConstant: false
+        )
+        var lazyResult: Bool {
+            sut.swiftSyntaxProducer(
+                producer,
+                shouldEmitTypeFor: storage,
+                intention: nil,
+                initialValue: Expression.identifier("a").typed("A")
+            )
+        }
+
+        XCTAssertFalse(lazyResult)
+        sut.options.alwaysEmitVariableTypes = true
+        XCTAssertTrue(lazyResult)
     }
 }

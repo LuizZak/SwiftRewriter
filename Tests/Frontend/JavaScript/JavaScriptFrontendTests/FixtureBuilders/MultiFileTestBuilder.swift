@@ -87,7 +87,7 @@ class MultiFileTestBuilder {
     func translatesToSwift(
         _ expectedSwift: String,
         expectsErrors: Bool = false,
-        options: SwiftSyntaxOptions = .default,
+        options: SwiftSyntaxOptions = JavaScript2SwiftRewriter.defaultWriterOptions,
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> MultiFileTestBuilder {

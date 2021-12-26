@@ -34,4 +34,21 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testRewrite_alwaysEmitTypeSignaturesByDefault() {
+        assertRewrite(
+            js: """
+            function test() {
+                var a = 0;
+                var b = a;
+            }
+            """,
+            swift: """
+            func test() -> Any {
+                let a: Any = 0
+                let b: Any = a
+            }
+            """
+        )
+    }
 }

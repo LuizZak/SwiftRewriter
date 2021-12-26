@@ -30,14 +30,15 @@ public final class SwiftWriter {
     
     public weak var progressListener: SwiftWriterProgressListener?
     
-    public init(intentions: IntentionCollection,
-                options: SwiftSyntaxOptions,
-                numThreads: Int,
-                diagnostics: Diagnostics,
-                output: WriterOutput,
-                typeSystem: TypeSystem,
-                syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier) {
-        
+    public init(
+        intentions: IntentionCollection,
+        options: SwiftSyntaxOptions,
+        numThreads: Int,
+        diagnostics: Diagnostics,
+        output: WriterOutput,
+        typeSystem: TypeSystem,
+        syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier
+    ) {
         self.intentions = intentions
         self.options = options
         self.numThreads = numThreads
@@ -174,11 +175,12 @@ class SwiftSyntaxWriter {
 }
 
 extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
-    func swiftSyntaxProducer(_ producer: SwiftSyntaxProducer,
-                             shouldEmitTypeFor storage: ValueStorage,
-                             intention: IntentionProtocol?,
-                             initialValue: Expression?) -> Bool {
-        
+    func swiftSyntaxProducer(
+        _ producer: SwiftSyntaxProducer,
+        shouldEmitTypeFor storage: ValueStorage,
+        intention: IntentionProtocol?,
+        initialValue: Expression?
+    ) -> Bool {
         // Intentions (global variables, instance variables and properties) should
         // preferably always be emitted with type annotations.
         if intention != nil {
@@ -189,15 +191,18 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
             return true
         }
         
-        return shouldEmitTypeSignature(forInitVal: initialValue,
-                                       varType: storage.type,
-                                       ownership: storage.ownership,
-                                       isConstant: storage.isConstant)
+        return shouldEmitTypeSignature(
+            forInitVal: initialValue,
+            varType: storage.type,
+            ownership: storage.ownership,
+            isConstant: storage.isConstant
+        )
     }
     
-    func swiftSyntaxProducer(_ producer: SwiftSyntaxProducer,
-                             initialValueFor intention: ValueStorageIntention) -> Expression? {
-        
+    func swiftSyntaxProducer(
+        _ producer: SwiftSyntaxProducer,
+        initialValueFor intention: ValueStorageIntention
+    ) -> Expression? {
         if let intention = intention as? PropertyGenerationIntention {
             switch intention.mode {
             case .asField:
@@ -219,11 +224,16 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
         
     }
     
-    func shouldEmitTypeSignature(forInitVal exp: Expression,
-                                 varType: SwiftType,
-                                 ownership: Ownership,
-                                 isConstant: Bool) -> Bool {
-        
+    func shouldEmitTypeSignature(
+        forInitVal exp: Expression,
+        varType: SwiftType,
+        ownership: Ownership,
+        isConstant: Bool
+    ) -> Bool {
+        if options.alwaysEmitVariableTypes {
+            return true
+        }
+
         if exp.isErrorTyped {
             return true
         }

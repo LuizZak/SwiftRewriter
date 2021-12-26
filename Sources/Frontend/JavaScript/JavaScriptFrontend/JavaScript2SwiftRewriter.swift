@@ -25,6 +25,9 @@ private typealias NonnullTokenRange = (start: Int, end: Int)
 /// Main front-end for Swift Rewriter
 public final class JavaScript2SwiftRewriter {
     private static var _parserStatePool: JsParserStatePool = JsParserStatePool()
+
+    /// The default settings for the underlying syntax writer.
+    public static let defaultWriterOptions: SwiftSyntaxOptions = .default.with(\.alwaysEmitVariableTypes, true)
     
     private let sourcesProvider: InputSourcesProvider
     private var outputTarget: WriterOutput
@@ -68,7 +71,7 @@ public final class JavaScript2SwiftRewriter {
     public var settings: Settings
     
     /// Describes settings to pass to the AST writers when outputting code
-    public var writerOptions: SwiftSyntaxOptions = .default
+    public var writerOptions: SwiftSyntaxOptions = JavaScript2SwiftRewriter.defaultWriterOptions
     
     public init(input: InputSourcesProvider,
                 output: WriterOutput,
@@ -349,13 +352,15 @@ public final class JavaScript2SwiftRewriter {
         let syntaxApplier =
             SwiftSyntaxRewriterPassApplier(provider: syntaxRewriterPassSource)
         
-        let writer = SwiftWriter(intentions: intentionCollection,
-                                 options: writerOptions,
-                                 numThreads: settings.numThreads,
-                                 diagnostics: diagnostics,
-                                 output: outputTarget,
-                                 typeSystem: typeSystem,
-                                 syntaxRewriterApplier: syntaxApplier)
+        let writer = SwiftWriter(
+            intentions: intentionCollection,
+            options: writerOptions,
+            numThreads: settings.numThreads,
+            diagnostics: diagnostics,
+            output: outputTarget,
+            typeSystem: typeSystem,
+            syntaxRewriterApplier: syntaxApplier
+        )
         
         if settings.verbose {
             writer.progressListener = progressListener
@@ -439,7 +444,7 @@ public final class JavaScript2SwiftRewriter {
             return
         }
         
-        let writer = SwiftSyntaxProducer(settings: writerOptions)
+        let writer = SwiftSyntaxProducer(settings: writerOptions.toSwiftSyntaxProducerSettings())
         
         let output = writer.generateFile(match)
         

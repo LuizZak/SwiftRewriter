@@ -84,7 +84,7 @@ public final class JavaScriptSwiftRewriterServiceImpl: JavaScriptSwiftRewriterSe
 
     public struct Settings {
         /// Settings for the AST writer
-        public var astWriter: SwiftSyntaxOptions = .default
+        public var astWriter: SwiftSyntaxOptions = JavaScript2SwiftRewriter.defaultWriterOptions
         
         /// General settings for `JavaScript2SwiftRewriter` instances
         public var rewriter: JavaScript2SwiftRewriter.Settings = .default

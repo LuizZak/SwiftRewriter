@@ -1124,7 +1124,8 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                 options: SwiftSyntaxOptions(
                     outputExpressionTypes: true,
                     printIntentionHistory: false,
-                    emitObjcCompatibility: false
+                    emitObjcCompatibility: false,
+                    alwaysEmitVariableTypes: false
                 )
             )
             .assertExpectedSwiftFiles()

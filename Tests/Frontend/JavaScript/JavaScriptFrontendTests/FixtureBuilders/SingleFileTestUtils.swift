@@ -180,7 +180,7 @@ extension XCTestCase {
         js: String,
         swift expectedSwift: String,
         inputFileName: String = "test.m",
-        options: SwiftSyntaxOptions = .default,
+        options: SwiftSyntaxOptions = JavaScript2SwiftRewriter.defaultWriterOptions,
         rewriterSettings: JavaScript2SwiftRewriter.Settings = .default,
         expectsErrors: Bool = false,
         file: StaticString = #filePath,
