@@ -1,7 +1,13 @@
+import SwiftSyntax
+
 /// A rewriter output target that ignores all incoming data requests and produces
 /// no output.
 public class NullRewriterOutputTarget: RewriterOutputTarget {
     public init() {
+        
+    }
+
+    public func outputFile(_ file: SourceFileSyntax) {
         
     }
     

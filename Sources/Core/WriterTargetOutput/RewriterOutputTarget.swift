@@ -1,3 +1,4 @@
+import SwiftSyntax
 import Utils
 
 /// Defines settings for a rewriter output target to follow when writing code
@@ -19,12 +20,15 @@ public struct RewriterOutputSettings {
 
 /// Protocol for output targets of `SwiftRewriter` instances.
 public protocol RewriterOutputTarget: AnyObject {
+    /// Outputs a source file syntax.
+    func outputFile(_ file: SourceFileSyntax)
+
     /// Outputs a raw series of characters, with no indentation or extra line
     /// feed
     func outputRaw(_ text: String)
     
     /// Outputs the given string with a `.plain` text style and outputs a line
-    /// feed at the end, with padding for indentation at the begginning.
+    /// feed at the end, with padding for indentation at the beginning.
     func output(line: String)
     
     /// Outputs a given string inline with a `.plain` text style without adding
@@ -32,7 +36,7 @@ public protocol RewriterOutputTarget: AnyObject {
     func outputInline(_ content: String)
     
     /// Outputs the given string and outputs a line feed at the end, with padding
-    /// for indentation at the begginning.
+    /// for indentation at the beginning.
     func output(line: String, style: TextStyle)
     
     /// Outputs a given string inline without adding a line feed at the end.

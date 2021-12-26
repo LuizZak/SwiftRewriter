@@ -1,4 +1,5 @@
 import Foundation
+import SwiftSyntax
 import WriterTargetOutput
 
 /// Writer implementation that saves output to disk.
@@ -70,6 +71,10 @@ public class FileOutputTarget: RewriterOutputTarget {
     
     public func writeBufferFile(_ buffer: String) {
         self.buffer += buffer
+    }
+
+    public func outputFile(_ file: SourceFileSyntax) {
+        writeBufferFile(file.description)
     }
     
     public func outputRaw(_ text: String) {

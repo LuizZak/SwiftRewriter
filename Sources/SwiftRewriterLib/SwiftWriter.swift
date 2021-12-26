@@ -167,7 +167,7 @@ class SwiftSyntaxWriter {
         var fileSyntax = producer.generateFile(fileIntent)
         fileSyntax = syntaxRewriterApplier.apply(to: fileSyntax)
         
-        out.outputRaw(fileSyntax.description)
+        out.outputFile(fileSyntax)
         
         targetFile.close()
     }

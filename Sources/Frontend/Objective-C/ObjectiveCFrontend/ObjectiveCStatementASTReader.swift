@@ -431,7 +431,7 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
                     // well
                     inner.statements.first?.label = stmt.label
                     
-                    return inner.statements
+                    return inner.statements.map { $0.copy() }
                 }
                 
                 return [stmt]

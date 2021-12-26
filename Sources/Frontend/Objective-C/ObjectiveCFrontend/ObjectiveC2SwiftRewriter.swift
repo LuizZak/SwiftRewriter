@@ -17,7 +17,6 @@ import IntentionPasses
 import ExpressionPasses
 import SourcePreprocessors
 import SwiftSyntaxSupport
-import Utils
 import SwiftRewriterLib
 
 private typealias NonnullTokenRange = (start: Int, end: Int)

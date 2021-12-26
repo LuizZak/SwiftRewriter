@@ -1,9 +1,31 @@
 import TestCommons
 import XCTest
+import SwiftSyntax
 
 @testable import WriterTargetOutput
 
 class StringRewriterOutputTests: XCTestCase {
+    func testOutputFile() throws {
+        let input = """
+        import Lib
+
+        class AClass: BaseClass {
+            var field: Int
+
+            init() {
+                field = 0
+            }
+        }
+        """
+        let fileSyntax = try SyntaxParser.parse(source: input)
+        let sut = StringRewriterOutput()
+
+        sut.outputFile(fileSyntax)
+
+        diffTest(expected: input, highlightLineInEditor: false)
+            .diff(sut.buffer)
+    }
+
     func testOutputRaw() {
         let sut = StringRewriterOutput()
 

@@ -1,4 +1,5 @@
 import Foundation
+import SwiftSyntax
 import WriterTargetOutput
 import Console
 
@@ -64,6 +65,28 @@ public final class TerminalStringRewriterOutput: RewriterOutputTarget {
     
     required public init(settings: RewriterOutputSettings = .defaults) {
         self.settings = settings
+    }
+
+    public func outputFile(_ file: SourceFileSyntax) {
+        var localBuffer = ""
+
+        if colorize {
+            let visitor = ColorizeSyntaxVisitor(printFunction: { (text, color) in
+                if let color = color {
+                    text.terminalColorize(color).write(to: &localBuffer)
+                } else {
+                    text.write(to: &localBuffer)
+                }
+            })
+
+            visitor.walk(file)
+        } else {
+            file.write(to: &localBuffer)
+        }
+
+        localBuffer.write(to: &buffer)
+
+        callChangeCallback()
     }
     
     public func outputRaw(_ text: String) {

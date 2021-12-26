@@ -13,6 +13,7 @@ let core: [Target] = [
     .target(
         name: "WriterTargetOutput",
         dependencies: [
+            .product(name: "SwiftSyntax", package: "swift-syntax"),
             "Utils",
         ],
         path: "Sources/Core/WriterTargetOutput"

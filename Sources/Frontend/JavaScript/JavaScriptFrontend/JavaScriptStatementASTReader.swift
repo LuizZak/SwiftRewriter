@@ -345,21 +345,10 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
             let statements: [Statement] = ctx.sourceElement().map { element in
                 let unknown = UnknownStatement.unknown(UnknownASTContext(context: element.getText()))
 
-                return element.statement().flatMap(reader.visitStatement) ?? unknown
+                return element.statement().flatMap { $0.accept(reader) } ?? unknown
             }
             
-            return CompoundStatement(statements: statements.flatMap { stmt -> [Statement] in
-                // Free compound blocks cannot be declared in Swift
-                if let inner = stmt.asCompound {
-                    // Label the first statement with the compound's label, as
-                    // well
-                    inner.statements.first?.label = stmt.label
-                    
-                    return inner.statements
-                }
-                
-                return [stmt]
-            })
+            return makeCompoundStatement(statements)
         }
 
         override func visitArrowFunctionBody(_ ctx: JavaScriptParser.ArrowFunctionBodyContext) -> CompoundStatement? {
@@ -384,9 +373,13 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
             let statements: [Statement] = ctx.statementList()?.statement().map { stmt in
                 let unknown = UnknownStatement.unknown(UnknownASTContext(context: stmt.getText()))
 
-                return reader.visitStatement(stmt) ?? unknown
+                return stmt.accept(reader) ?? unknown
             } ?? []
             
+            return makeCompoundStatement(statements)
+        }
+
+        private func makeCompoundStatement(_ statements: [Statement]) -> CompoundStatement {
             return CompoundStatement(statements: statements.flatMap { stmt -> [Statement] in
                 // Free compound blocks cannot be declared in Swift
                 if let inner = stmt.asCompound {
@@ -394,7 +387,7 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
                     // well
                     inner.statements.first?.label = stmt.label
                     
-                    return inner.statements
+                    return inner.statements.map { $0.copy() }
                 }
                 
                 return [stmt]

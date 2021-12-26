@@ -1,3 +1,5 @@
+import SwiftSyntax
+
 /// Outputs to a string buffer
 public final class StringRewriterOutput: RewriterOutputTarget {
     var indentDepth: Int = 0
@@ -5,11 +7,17 @@ public final class StringRewriterOutput: RewriterOutputTarget {
     var ignoreCallChange = false
     private(set) public var buffer: String = ""
     
-    /// Called everytime the buffer changes due to an output request
+    /// Called every time the buffer changes due to an output request
     public var onChangeBuffer: ((String) -> Void)?
     
     public init(settings: RewriterOutputSettings = .defaults) {
         self.settings = settings
+    }
+
+    public func outputFile(_ file: SourceFileSyntax) {
+        file.write(to: &buffer)
+        
+        callChangeCallback()
     }
     
     public func outputRaw(_ text: String) {

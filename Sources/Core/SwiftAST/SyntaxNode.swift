@@ -20,7 +20,7 @@ open class SyntaxNode {
     
     @inlinable
     open func copy() -> SyntaxNode {
-        fatalError("Must be overriden by subclasses")
+        fatalError("Must be overridden by subclasses")
     }
     
     /// Returns `true` if this syntax node is either the same as a given syntax

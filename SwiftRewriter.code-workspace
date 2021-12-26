@@ -40,6 +40,7 @@
 				"args": [
 					"build",
 					"--build-tests",
+					"--enable-code-coverage",
 					"-Xswiftc",
 					"-Xfrontend",
 					"-Xswiftc",
@@ -58,7 +59,6 @@
 				"args": [
 					"build",
 					"-c=release",
-					"--build-tests",
 					"-Xswiftc",
 					"-DJS_PARSER_TESTS_FULL_FIXTURES",
 					"-Xswiftc",
@@ -93,7 +93,6 @@
 				"args": [
 					"test",
 					"-c", "release",
-					"--enable-code-coverage",
 					"-Xswiftc",
 					"-DJS_PARSER_TESTS_FULL_FIXTURES",
 					"-Xswiftc",
@@ -215,16 +214,18 @@
 			"Nonnull",
 			"swiftpm",
 			"swiftrewriter",
-			"swiftwriter"
+			"swiftwriter",
+			"Trivias"
 		],
 		"swiftTest.swift.testParams": [
 			"--enable-code-coverage",
-		]
+		],
 	},
 	"extensions": {
 		"recommendations": [
 			"exodiusstudios.comment-anchors",
-			"MakeItBetter.vscode-swift-test-adapter",
+			"makeitbetter.vscode-swift-test-adapter",
+			"vknabel.swift-coverage",
 		],
 	},
 }
