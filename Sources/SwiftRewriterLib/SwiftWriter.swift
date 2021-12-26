@@ -63,7 +63,7 @@ public final class SwiftWriter {
         let filesEmitted = ConcurrentValue<Int>(wrappedValue: 0)
         
         let listenerQueue = DispatchQueue(label: "com.swiftrewriter.swiftwriter.listener")
-        let queue = OperationQueue()
+        let queue = ConcurrentOperationQueue()
         queue.maxConcurrentOperationCount = numThreads
         
         let mutex = Mutex()
@@ -117,7 +117,7 @@ public final class SwiftWriter {
             }
         }
         
-        queue.waitUntilAllOperationsAreFinished()
+        queue.runAndWaitConcurrent()
         
         for error in errors.wrappedValue {
             diagnostics.error("Error while saving file \(error.0): \(error.1)",
