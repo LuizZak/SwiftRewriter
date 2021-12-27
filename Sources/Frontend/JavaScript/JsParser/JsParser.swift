@@ -74,14 +74,19 @@ public class JsParser {
         // Clear previous state
         let src = source.fetchSource()
         
+        parseComments(input: src)
+        
         let parserState = try state.makeMainParser(input: src)
         mainParser = parserState
         let parser = parserState.parser
         parser.removeErrorListeners()
         
         let root = try tryParse(from: parser, { try $0.program() })
-
-        let listener = JsParserListener(sourceString: src, source: source)
+        
+        let commentQuerier =
+            CommentQuerier(allComments: comments)
+        
+        let listener = JsParserListener(sourceString: src, source: source, commentQuerier: commentQuerier)
         
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)
@@ -127,8 +132,56 @@ public class JsParser {
         
         return root
     }
-
+    
+    private func parseComments(input: String) {
+        comments = JsParser.parseComments(input: input)
+    }
+    
     // MARK: - Global context-free parsing functions
+
+    public static func parseComments(input: String) -> [CodeComment] {
+        var result: [CodeComment] = []
+
+        let ranges = input.cStyleCommentSectionRanges()
+        
+        for range in ranges {
+            let lineStart = input.lineNumber(at: range.lowerBound)
+            let colStart = input.columnOffset(at: range.lowerBound)
+            
+            let lineEnd = input.lineNumber(at: range.upperBound)
+            let colEnd = input.columnOffset(at: range.upperBound)
+            
+            let utf8Offset = input.utf8.distance(from: input.startIndex, to: range.lowerBound)
+            let utf8Length = input.utf8.distance(from: range.lowerBound, to: range.upperBound)
+            
+            let location = SourceLocation(line: lineStart,
+                                          column: colStart,
+                                          utf8Offset: utf8Offset)
+            
+            let length: SourceLength
+            if lineStart == lineEnd {
+                length = SourceLength(newlines: 0,
+                                      columnsAtLastLine: colEnd - colStart,
+                                      utf8Length: utf8Length)
+            } else {
+                length = SourceLength(newlines: lineEnd - lineStart,
+                                      columnsAtLastLine: colEnd - 1,
+                                      utf8Length: utf8Length)
+            }
+            
+            let commentString = String(input[range])
+            let comment = CodeComment(
+                string: commentString,
+                range: utf8Offset..<(utf8Offset + utf8Length),
+                location: location,
+                length: length
+            )
+            
+            result.append(comment)
+        }
+
+        return result
+    }
 
     public static func varModifier(from ctx: JavaScriptParser.VarModifierContext) -> JsVariableDeclarationListNode.VarModifier {
         JsASTNodeFactory.makeVarModifier(from: ctx)

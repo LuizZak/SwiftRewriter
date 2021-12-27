@@ -11,20 +11,26 @@ internal class JsParserListener: JavaScriptParserBaseListener {
 
     let rootNode: JsGlobalContextNode = JsGlobalContextNode()
 
+    private var commentQuerier: CommentQuerier
     private let mapper: GenericParseTreeContextMapper
     private let sourceString: String
     private let source: Source
     private let nodeFactory: JsASTNodeFactory
     
-    init(sourceString: String, source: Source) {
-        
+    init(
+        sourceString: String,
+        source: Source,
+        commentQuerier: CommentQuerier
+    ) {
         self.sourceString = sourceString
         self.source = source
         self.nodeFactory = JsASTNodeFactory(source: source)
+        self.commentQuerier = commentQuerier
         
         context = NodeCreationContext()
         mapper = GenericParseTreeContextMapper(
             source: source,
+            commentQuerier: commentQuerier,
             nodeFactory: nodeFactory
         )
         
@@ -47,15 +53,18 @@ internal class JsParserListener: JavaScriptParserBaseListener {
         )
         mapper.addRuleMap(
             rule: P.ClassDeclarationContext.self,
-            nodeType: JsClassNode.self
+            nodeType: JsClassNode.self,
+            collectComments: true
         )
         mapper.addRuleMap(
             rule: P.MethodDefinitionContext.self,
-            nodeType: JsMethodDefinitionNode.self
+            nodeType: JsMethodDefinitionNode.self,
+            collectComments: true
         )
         mapper.addRuleMap(
             rule: P.FunctionDeclarationContext.self,
-            nodeType: JsFunctionDeclarationNode.self
+            nodeType: JsFunctionDeclarationNode.self,
+            collectComments: true
         )
         mapper.addRuleMap(
             rule: P.FunctionBodyContext.self,
@@ -139,6 +148,8 @@ internal class JsParserListener: JavaScriptParserBaseListener {
                 varModifier: varModifier
             )
         
+        variableDeclarationListNode.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
+
         for variableDeclaration in variableDeclarationList.variableDeclaration() {
             // TODO: Support different assignable types?
             guard let identifier = variableDeclaration.assignable()?.identifier() else {
@@ -157,11 +168,31 @@ internal class JsParserListener: JavaScriptParserBaseListener {
         switch contextNode {
         case is JsGlobalContextNode:
             contextNode.addChild(variableDeclarationListNode)
-            break
         default:
             break
         }
     }
+
+    override func enterClassElement(_ ctx: JavaScriptParser.ClassElementContext) {
+        guard let classNode = context.currentContextNode(as: JsClassNode.self) else {
+            return
+        }
+        // TODO: Add support for different property name declaration types
+        guard let identifier = ctx.propertyName()?.identifierName()?.identifier() else {
+            return
+        }
+        guard let singleExpression = ctx.singleExpression() else {
+            return
+        }
+
+        let node = nodeFactory.makeClassPropertyNode(from: ctx, identifier: identifier, expression: singleExpression)
+
+        node.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
+
+        classNode.addChild(node)
+    }
+
+    // MARK: - Internals
 
     func functionSignature(from ctx: JavaScriptParser.FormalParameterListContext?) -> JsFunctionSignature {
         func _argument(from ctx: JavaScriptParser.FormalParameterArgContext) -> JsFunctionArgument? {
@@ -211,30 +242,36 @@ private class GenericParseTreeContextMapper {
     
     private var source: Source
     
+    private var commentQuerier: CommentQuerier
     private var nodeFactory: JsASTNodeFactory
     
-    init(source: Source,
-         nodeFactory: JsASTNodeFactory) {
-        
+    init(
+        source: Source,
+        commentQuerier: CommentQuerier,
+        nodeFactory: JsASTNodeFactory
+    ) {
         self.source = source
+        self.commentQuerier = commentQuerier
         self.nodeFactory = nodeFactory
     }
     
     func addRuleMap<T: ParserRuleContext, U: JsInitializableNode>(
         rule: T.Type,
-        nodeType: U.Type) {
+        nodeType: U.Type,
+        collectComments: Bool = false) {
         
         assert(match(ruleType: rule) == nil, "Duplicated mapping rule for parser rule context \(rule)")
         
-        pairs.append(.type(rule: rule, nodeType: nodeType, nil))
+        pairs.append(.type(rule: rule, nodeType: nodeType, collectComments: collectComments, nil))
     }
     
     func addRuleMapClosure<T: ParserRuleContext, U: JsInitializableNode>(
-        _ closure: @escaping (T, U) -> Void) {
-        
+        collectComments: Bool = false,
+        _ closure: @escaping (T, U) -> Void
+    ) {
         assert(match(ruleType: T.self) == nil, "Duplicated mapping rule for parser rule context \(T.self)")
         
-        pairs.append(.type(rule: T.self, nodeType: U.self, { rule, node in
+        pairs.append(.type(rule: T.self, nodeType: U.self, collectComments: collectComments, { rule, node in
             guard let rule = rule as? T else {
                 return
             }
@@ -267,16 +304,14 @@ private class GenericParseTreeContextMapper {
         }
         
         switch nodeType {
-        case .type(_, let nodeType, let initializer):
+        case .type(_, let nodeType, let collectComments, let initializer):
             let node = nodeType.init()
             
             nodeFactory.updateSourceLocation(for: node, with: rule)
             
-            /* TODO: Implement JavaScript comment parsing
             if collectComments {
                 node.precedingComments = commentQuerier.popClosestCommentsBefore(node: rule)
             }
-            */
             
             context.pushContext(node: node)
 
@@ -297,7 +332,7 @@ private class GenericParseTreeContextMapper {
         
         if let popped = context.popContext() {
             switch pair {
-            case .type(_, let nodeType, _):
+            case .type(_, let nodeType, _, _):
                 assert(type(of: popped) == nodeType, "matchExit() did not match context from popContext: \(nodeType) vs \(type(of: popped))")
             case .instance(_, let node):
                 assert(popped === node, "matchExit() did not match context from pop: \(node) vs \(node)")
@@ -314,12 +349,12 @@ private class GenericParseTreeContextMapper {
     }
     
     private enum Pair {
-        case type(rule: ParserRuleContext.Type, nodeType: JsInitializableNode.Type, ((ParserRuleContext, JsInitializableNode) -> Void)?)
+        case type(rule: ParserRuleContext.Type, nodeType: JsInitializableNode.Type, collectComments: Bool, ((ParserRuleContext, JsInitializableNode) -> Void)?)
         case instance(rule: ParserRuleContext.Type, node: JsInitializableNode)
         
         var ruleType: ParserRuleContext.Type {
             switch self {
-            case .type(let rule, _, _):
+            case .type(let rule, _, _, _):
                 return rule
             case .instance(let rule, _):
                 return rule

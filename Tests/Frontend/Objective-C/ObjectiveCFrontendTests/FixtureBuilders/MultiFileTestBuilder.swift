@@ -13,7 +13,7 @@ import XCTest
 class MultiFileTestBuilder {
     typealias File = (path: String, source: String)
 
-    private let builder = SwiftRewriterJobBuilder()
+    private let builder = ObjectiveCSwiftRewriterJobBuilder()
     var expectedFiles: [ExpectedFile] = []
     var files: [File] = []
     let test: XCTestCase

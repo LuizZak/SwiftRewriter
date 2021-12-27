@@ -182,7 +182,7 @@ public final class JavaScript2SwiftRewriter {
         for item in items {
             let source: Source
             switch item {
-            case .functionBody(let s, _, _), .globalVar(let s, _):
+            case .functionBody(let s, _, _), .globalVar(let s, _), .classProperty(let s, _):
                 source = s
             }
 
@@ -213,6 +213,13 @@ public final class JavaScript2SwiftRewriter {
                                 comments: methodBody.comments,
                                 typeContext: method?.type
                             )
+                    
+                    case .classProperty(_, let initialValue):
+                        guard let expression = initialValue.typedSource?.expression else {
+                            return
+                        }
+                        
+                        initialValue.expression = reader.parseExpression(expression: expression)
                         
                     case .globalVar(_, let v):
                         guard let expression = v.typedSource?.expression else {
@@ -392,7 +399,9 @@ public final class JavaScript2SwiftRewriter {
             // TODO: Reduce duplication with JavaScriptParserCache.applyPreprocessors
             let src = try source.loadSource()
             
-            parser = JsParser(string: src.fetchSource(), fileName: src.filePath, state: state)
+            let processedSrc = applyPreprocessors(source: src)
+            
+            parser = JsParser(string: processedSrc, fileName: src.filePath, state: state)
             parser.antlrSettings = makeAntlrSettings()
             try parser.parse()
         }
@@ -425,6 +434,16 @@ public final class JavaScript2SwiftRewriter {
         }
         
         return collectorDelegate.lazyParse
+    }
+    
+    private func applyPreprocessors(source: CodeSource) -> String {
+        let src = source.fetchSource()
+        
+        let context = _PreprocessingContext(filePath: source.filePath)
+        
+        return preprocessors.reduce(src) {
+            $1.preprocess(source: $0, context: context)
+        }
     }
     
     private func printDiagnosedFiles(step: String) {
@@ -597,6 +616,9 @@ fileprivate extension JavaScript2SwiftRewriter {
             switch intention {
             case let intention as GlobalVariableInitialValueIntention:
                 lazyParse.append(.globalVar(source, intention))
+            
+            case let intention as PropertyInitialValueGenerationIntention:
+                lazyParse.append(.classProperty(source, intention))
                 
             case let intention as FunctionBodyIntention:
                 let context =
@@ -622,6 +644,11 @@ fileprivate extension JavaScript2SwiftRewriter {
 private enum LazyParseItem {
     case functionBody(Source, FunctionBodyIntention, method: MethodGenerationIntention?)
     case globalVar(Source, GlobalVariableInitialValueIntention)
+    case classProperty(Source, PropertyInitialValueGenerationIntention)
+}
+
+internal struct _PreprocessingContext: PreprocessingContext {
+    var filePath: String
 }
 
 private func _terminalClearLine() {

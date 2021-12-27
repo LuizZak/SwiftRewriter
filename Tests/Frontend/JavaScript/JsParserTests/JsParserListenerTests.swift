@@ -1,6 +1,7 @@
 import Antlr4
 import AntlrCommons
 import Foundation
+import GrammarModelBase
 import JsGrammarModels
 import JsParserAntlr
 import Utils
@@ -18,7 +19,7 @@ class JsParserListenerTests: XCTestCase {
         _parser = nil
     }
 
-    func testParseClass() throws {
+    func testCollectClass() throws {
         let node = parserTest(
             """
             class AClass {
@@ -43,7 +44,7 @@ class JsParserListenerTests: XCTestCase {
         XCTAssertEqual(classDecl.methods[2].identifier?.name, "getProperty")
     }
 
-    func testParseFunction() throws {
+    func testCollectFunction() throws {
         let node = parserTest(
             """
             function test() {
@@ -57,7 +58,7 @@ class JsParserListenerTests: XCTestCase {
         XCTAssertEqual(functionDecl.identifier?.name, "test")
     }
 
-    func testParseVariableDeclaration() throws {
+    func testCollectVariableDeclaration() throws {
         let node = parserTest(
             """
             var a;
@@ -92,6 +93,82 @@ class JsParserListenerTests: XCTestCase {
         )
     }
 
+    func testCollectClassComments() throws {
+        let input = """
+            // A comment
+            // Another comment
+            class A {
+            }
+            """
+        let comments = JsParser.parseComments(input: input)
+        let node = parserTest(input, comments: comments)
+
+        let classNode: JsClassNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(classNode.precedingComments.map(\.string), [
+            "// A comment\n",
+            "// Another comment\n"
+        ])
+    }
+
+    func testCollectClassPropertyComments() throws {
+        let input = """
+            class A {
+                // A comment
+                // Another comment
+                a = 0
+            }
+            """
+        let comments = JsParser.parseComments(input: input)
+        let node = parserTest(input, comments: comments)
+
+        let classNode: JsClassNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(classNode.properties.first?.precedingComments.map(\.string), [
+            "// A comment\n",
+            "// Another comment\n"
+        ])
+    }
+
+    func testCollectClassMethodComments() throws {
+        let input = """
+            class A {
+                // A comment
+                // Another comment
+                f() {
+                }
+            }
+            """
+        let comments = JsParser.parseComments(input: input)
+        let node = parserTest(input, comments: comments)
+
+        let classNode: JsClassNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(classNode.methods.first?.precedingComments.map(\.string), [
+            "// A comment\n",
+            "// Another comment\n"
+        ])
+    }
+
+    func testCollectGlobalVariableComments() throws {
+        let input = """
+            // A comment
+            // Another comment
+            var a = 0;
+            """
+        let comments = JsParser.parseComments(input: input)
+        let node = parserTest(input, comments: comments)
+
+        let variableNode: JsVariableDeclarationListNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(variableNode.precedingComments.map(\.string), [
+            "// A comment\n",
+            "// Another comment\n"
+        ])
+    }
+
+    // MARK: - Test internals
+
     private func getText(_ rule: ParserRuleContext?) -> String? {
         guard let rule = rule else {
             return nil
@@ -112,17 +189,14 @@ class JsParserListenerTests: XCTestCase {
 }
 
 extension JsParserListenerTests {
-    private func parserTest(_ source: String, file: StaticString = #filePath, line: UInt = #line)
-        -> JsGlobalContextNode
+    private func parserTest(_ source: String, comments: [CodeComment] = [], file: StaticString = #filePath, line: UInt = #line) -> JsGlobalContextNode
     {
-        let sut = JsParser(string: source)
-
-        return _parseTestGlobalContextNode(source: source, parser: sut, file: file, line: line)
+        return _parseTestGlobalContextNode(source: source, comments: comments, file: file, line: line)
     }
 
     private func _parseTestGlobalContextNode(
         source: String,
-        parser: JsParser,
+        comments: [CodeComment],
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> JsGlobalContextNode {
@@ -155,7 +229,8 @@ extension JsParserListenerTests {
                 XCTFail("Unexpected diagnostics while parsing:\n\(diag)", file: file, line: line)
             }
 
-            let listener = JsParserListener(sourceString: source, source: codeSource)
+            let commentQuerier = CommentQuerier(allComments: comments)
+            let listener = JsParserListener(sourceString: source, source: codeSource, commentQuerier: commentQuerier)
 
             let walker = ParseTreeWalker()
             try walker.walk(listener, root)

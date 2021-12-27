@@ -174,6 +174,13 @@ public extension MemberBuilder where T: PropertyGenerationIntention {
         
         return self
     }
+
+    @discardableResult
+    func setInitialExpression(_ expression: Expression) -> MemberBuilder {
+        targetMember.initialValue = expression
+
+        return self
+    }
 }
 
 public extension MemberBuilder where T: SubscriptGenerationIntention {

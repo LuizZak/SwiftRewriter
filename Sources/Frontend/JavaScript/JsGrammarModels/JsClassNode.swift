@@ -10,6 +10,13 @@ public class JsClassNode: JsASTNode, JsInitializableNode {
         childrenMatching()
     }
 
+    /// A list of class properties.
+    public var properties: [JsClassPropertyNode] {
+        childrenMatching()
+    }
+
+    /// A list of properties.
+
     public required init() {
         super.init()
     }

@@ -4,10 +4,6 @@ import XCTest
 @testable import ObjcParser
 
 class ObjcParserTests: XCTestCase {
-    static var allTests = [
-        ("testInit", testInit)
-    ]
-
     func testInit() {
         _ = ObjcParser(string: "abc")
     }

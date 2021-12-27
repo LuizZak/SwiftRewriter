@@ -6,6 +6,14 @@ import XCTest
 @testable import JsParser
 
 class JsParserTests: XCTestCase {
+    private var _sut: JsParser? // To hold ANTLR token streams long enough to use .getText()
+
+    override func tearDown() {
+        super.tearDown()
+
+        _sut = nil
+    }
+    
     func testParseSimpleProgram() {
         _ = parserTest(
             """
@@ -51,6 +59,21 @@ class JsParserTests: XCTestCase {
         let functionDecl: JsFunctionDeclarationNode = try XCTUnwrap(node.firstChild())
 
         XCTAssertEqual(functionDecl.identifier?.name, "test")
+    }
+
+    func testParseClassProperty() throws {
+        let node = parserTest(
+            """
+            class A {
+                property = 0
+            }
+            """
+        )
+
+        let classNode: JsClassNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(classNode.properties.first?.identifier?.name, "property")
+        XCTAssertEqual(classNode.properties.first?.expression?.expression?.getText(), "0")
     }
 
     #if JS_PARSER_TESTS_FULL_FIXTURES
@@ -117,6 +140,7 @@ extension JsParserTests {
         -> JsGlobalContextNode
     {
         let sut = JsParser(string: source)
+        _sut = sut
 
         return _parseTestGlobalContextNode(source: source, parser: sut, file: file, line: line)
     }

@@ -34,6 +34,9 @@ public final class IntentionSerializer {
             case is PropertyGenerationIntention:
                 kind = .property
                 
+            case is PropertyInitialValueGenerationIntention:
+                kind = .propertyInitialValue
+            
             case is ProtocolMethodGenerationIntention:
                 kind = .protocolMethod
                 
@@ -114,6 +117,9 @@ public final class IntentionSerializer {
             case .property:
                 intention = try container.decode(PropertyGenerationIntention.self, forKey: .intention)
             
+            case .propertyInitialValue:
+                intention = try container.decode(PropertyInitialValueGenerationIntention.self, forKey: .intention)
+            
             case .method:
                 intention = try container.decode(MethodGenerationIntention.self, forKey: .intention)
             
@@ -180,6 +186,7 @@ public final class IntentionSerializer {
         case classExtension
         case initializer
         case property
+        case propertyInitialValue
         case propertySynthesize
         case method
         case field

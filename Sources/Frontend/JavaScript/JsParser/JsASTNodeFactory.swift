@@ -39,6 +39,7 @@ class JsASTNodeFactory {
             node.addChild(makeExpressionNode(from: initialExpression))
         }
 
+        updateSourceLocation(for: node, with: context)
         return node
     }
 
@@ -52,6 +53,18 @@ class JsASTNodeFactory {
     func makeFunctionBodyNode(from context: Parser.FunctionBodyContext) -> JsFunctionBodyNode {
         let node = JsFunctionBodyNode()
         node.body = context
+        updateSourceLocation(for: node, with: context)
+        return node
+    }
+
+    func makeClassPropertyNode(
+        from context: Parser.ClassElementContext,
+        identifier: Parser.IdentifierContext,
+        expression: Parser.SingleExpressionContext
+    ) -> JsClassPropertyNode {
+        let node = JsClassPropertyNode()
+        node.addChild(makeIdentifier(from: identifier))
+        node.addChild(makeExpressionNode(from: expression))
         updateSourceLocation(for: node, with: context)
         return node
     }

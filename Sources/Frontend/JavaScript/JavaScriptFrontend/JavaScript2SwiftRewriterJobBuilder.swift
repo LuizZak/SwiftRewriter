@@ -8,9 +8,9 @@ import SourcePreprocessors
 import TypeSystem
 import SwiftRewriterLib
 
-/// Facility for creating `SwiftRewriterJob`s.
-public class SwiftRewriterJobBuilder {
-    public let inputs = SwiftRewriterJobInputFiles()
+/// Facility for creating `JavaScriptSwiftRewriterJob`s.
+public class JavaScriptSwiftRewriterJobBuilder {
+    public let inputs = JavaScriptSwiftRewriterJobInputFiles()
     public var intentionPassesSource: IntentionPassSource?
     public var astRewriterPassSources: ASTRewriterPassSource?
     public var globalsProvidersSource: GlobalsProvidersSource?
@@ -24,12 +24,12 @@ public class SwiftRewriterJobBuilder {
         
     }
     
-    /// Returns a new `SwiftRewriterJob` created using the parameters configured
+    /// Returns a new `JavaScriptSwiftRewriterJob` created using the parameters configured
     /// with this builder object.
-    public func createJob() -> SwiftRewriterJob {
+    public func createJob() -> JavaScriptSwiftRewriterJob {
         let provider = inputs.createSourcesProvider()
         
-        return SwiftRewriterJob(
+        return .init(
             input: provider,
             intentionPassesSource: intentionPassesSource,
             astRewriterPassSources: astRewriterPassSources,
@@ -44,7 +44,7 @@ public class SwiftRewriterJobBuilder {
 }
 
 /// Stores input files for a transpilation job
-public class SwiftRewriterJobInputFiles {
+public class JavaScriptSwiftRewriterJobInputFiles {
     fileprivate(set) public var inputs: [InputSource] = []
     
     public func add(_ input: InputSource) {

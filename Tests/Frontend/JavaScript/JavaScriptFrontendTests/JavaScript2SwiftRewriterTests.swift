@@ -51,4 +51,19 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testRewrite_classProperty() {
+        assertRewrite(
+            js: """
+            class A {
+                a = 0
+            }
+            """,
+            swift: """
+            class A {
+                var a: Any = 0
+            }
+            """
+        )
+    }
 }

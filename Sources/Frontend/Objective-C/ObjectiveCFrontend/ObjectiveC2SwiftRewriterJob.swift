@@ -9,7 +9,7 @@ import SwiftRewriterLib
 
 /// Represents a transpilation job, with all required information to start a
 /// transpile job.
-public class SwiftRewriterJob {
+public class ObjectiveCSwiftRewriterJob {
     public var input: InputSourcesProvider
     public var intentionPassesSource: IntentionPassSource?
     public var astRewriterPassSources: ASTRewriterPassSource?
@@ -43,11 +43,11 @@ public class SwiftRewriterJob {
     
     /// Executes a transpilation job, returning the result of the operation.
     @discardableResult
-    public func execute(output: WriterOutput) -> SwiftRewriterJobResult {
+    public func execute(output: WriterOutput) -> ObjectiveCSwiftRewriterJobResult {
         
         let swiftRewriter = makeSwiftRewriter(output: output)
         
-        var jobResult = SwiftRewriterJobResult(succeeded: false, diagnostics: Diagnostics())
+        var jobResult = ObjectiveCSwiftRewriterJobResult(succeeded: false, diagnostics: Diagnostics())
         
         do {
             try swiftRewriter.rewrite()
@@ -82,7 +82,7 @@ public class SwiftRewriterJob {
 }
 
 /// Encapsulates the results of a transpilation job for inspection post-transpile.
-public struct SwiftRewriterJobResult {
+public struct ObjectiveCSwiftRewriterJobResult {
     /// If `true`, the transpilation succeeded with no errors.
     public var succeeded: Bool
     /// Diagnostics engine that collected messages during transpilation.

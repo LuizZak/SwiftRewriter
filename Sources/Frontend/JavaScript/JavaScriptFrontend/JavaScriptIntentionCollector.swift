@@ -84,6 +84,9 @@ public class JavaScriptIntentionCollector {
                 
             case let n as JsVariableDeclarationNode:
                 self.visitJsVariableDeclarationNode(n)
+            
+            case let n as JsClassPropertyNode:
+                self.visitJsClassPropertyNode(n)
                 
             default:
                 return
@@ -188,8 +191,60 @@ public class JavaScriptIntentionCollector {
         ctx.addMethod(method)
     }
 
-    private func visitJsVariableDeclarationNode(_ node: JsVariableDeclarationNode) {
+    private func visitJsClassPropertyNode(_ node: JsClassPropertyNode) {
+        guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
+            return
+        }
+        guard let identifier = node.identifier else {
+            return
+        }
 
+        let property = PropertyGenerationIntention(name: identifier.name, type: .any, objcAttributes: [])
+
+        configure(node: node, intention: property)
+        
+        if let initialExpression = node.expression {
+            let initialExpr =
+                PropertyInitialValueGenerationIntention(
+                    expression: .constant(0),
+                    source: initialExpression
+                )
+            
+            configure(node: initialExpression, intention: initialExpr)
+        
+            delegate?.reportForLazyParsing(intention: initialExpr)
+            
+            property.initialValueExpr = initialExpr
+        }
+
+        ctx.addProperty(property)
+    }
+
+    private func visitJsVariableDeclarationNode(_ node: JsVariableDeclarationNode) {
+        guard let ctx = context.currentContext(as: FileGenerationIntention.self) else {
+            return
+        }
+        guard let identifier = node.identifier else {
+            return
+        }
+
+        let variable = GlobalVariableGenerationIntention(name: identifier.name, type: .any)
+
+        configure(node: node, intention: variable)
+        
+        if let initialExpression = node.expression {
+            let initialExpr =
+                GlobalVariableInitialValueIntention(expression: .constant(0),
+                                                    source: initialExpression)
+            
+            configure(node: initialExpression, intention: initialExpr)
+        
+            delegate?.reportForLazyParsing(intention: initialExpr)
+            
+            variable.initialValueExpr = initialExpr
+        }
+
+        ctx.addGlobalVariable(variable)
     }
 
     // MARK: - Instance factories

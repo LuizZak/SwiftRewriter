@@ -3,7 +3,7 @@ import GlobalsProviders
 import GrammarModelBase
 import IntentionPasses
 import Intentions
-import ObjcParser
+import JsParser
 import SourcePreprocessors
 import SwiftAST
 import SwiftSyntax
@@ -15,14 +15,15 @@ import Utils
 import WriterTargetOutput
 import XCTest
 
-@testable import ObjectiveCFrontend
+@testable import JavaScriptFrontend
 
-class ObjectiveCSwiftRewriterJobTests: XCTestCase {
+class JavaScriptSwiftRewriterJobTests: XCTestCase {
     func testTranspile() {
         let expectedSwift = """
-            class BaseClass: NSObject {
-            }
-            class PreprocessedClass: NSObject {
+            var globalVar: Any = 0
+
+            func aFunction() -> Any {
+                Hello.world()
             }
             // End of file Input.swift
             class Class {
@@ -33,7 +34,7 @@ class ObjectiveCSwiftRewriterJobTests: XCTestCase {
             // End of file Source.swift
             """
         let job =
-            ObjectiveCSwiftRewriterJob(
+            JavaScriptSwiftRewriterJob(
                 input: MockInputSourcesProvider(),
                 intentionPassesSource: MockIntentionPassSource(),
                 astRewriterPassSources: MockExpressionPassesSource(),
@@ -110,10 +111,9 @@ private class MockInputSourcesProvider: InputSourcesProvider {
     var inputs: [MockInputSource] = [
         MockInputSource(
             source: """
-                @interface BaseClass : NSObject
-                @end
+                var globalVar = 0;
                 """,
-            path: "Input.m",
+            path: "Input.js",
             isPrimary: true
         )
     ]
@@ -145,7 +145,7 @@ private class MockIntentionPassSource: IntentionPassSource {
 
 private class MockIntentionPass: IntentionPass {
     func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
-        let file = FileGenerationIntention(sourcePath: "Source.m", targetPath: "Source.swift")
+        let file = FileGenerationIntention(sourcePath: "Source.js", targetPath: "Source.swift")
         let cls = ClassGenerationIntention(typeName: "Class")
         cls.isInterfaceSource = false
         let method = MethodGenerationIntention(signature: FunctionSignature(name: "method"))
@@ -174,11 +174,12 @@ private final class MockExpressionPasses: ASTRewriterPass {
 
 private class MockSourcePreprocessor: SourcePreprocessor {
     func preprocess(source: String, context: PreprocessingContext) -> String {
-        if context.filePath == "Input.m" {
+        if context.filePath == "Input.js" {
             return source + """
 
-                @interface PreprocessedClass : NSObject
-                @end
+                function aFunction() {
+
+                }
                 """
         }
 

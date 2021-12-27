@@ -1,4 +1,3 @@
-//import Antlr4
 import Utils
 
 /// Base node type

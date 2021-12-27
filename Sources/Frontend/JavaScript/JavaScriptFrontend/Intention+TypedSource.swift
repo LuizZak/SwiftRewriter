@@ -26,3 +26,11 @@ extension FunctionBodyIntention {
 extension MethodGenerationIntention {
     var typedSource: JsMethodDefinitionNode? { _typedSource() }
 }
+
+extension PropertyGenerationIntention {
+    var typedSource: JsClassPropertyNode? { _typedSource() }
+}
+
+extension PropertyInitialValueGenerationIntention {
+    var typedSource: JsExpressionNode? { _typedSource() }
+}

@@ -48,7 +48,7 @@ public final class JavaScriptSwiftRewriterServiceImpl: JavaScriptSwiftRewriterSe
     public func rewrite(inputs: [InputSource]) throws {
         let input = ArrayInputSourcesProvider(inputs: inputs)
         
-        let jobBuilder = SwiftRewriterJobBuilder()
+        let jobBuilder = JavaScriptSwiftRewriterJobBuilder()
         
         jobBuilder.inputs.addInputs(from: input)
         jobBuilder.intentionPassesSource = DefaultIntentionPasses()

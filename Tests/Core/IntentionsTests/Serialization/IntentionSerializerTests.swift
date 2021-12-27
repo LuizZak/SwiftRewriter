@@ -29,11 +29,14 @@ class IntentionSerializerTests: XCTestCase {
                                 ]
                             )
                             .createProperty(named: "c", type: .int) { prop in
+                                prop.setInitialValue(.constant(0))
+                            }
+                            .createProperty(named: "d", type: .int) { prop in
                                 prop.setAsComputedProperty(body: [
                                     .return(.constant(0))
                                 ])
                             }
-                            .createProperty(named: "d", type: .int) { prop in
+                            .createProperty(named: "e", type: .int) { prop in
                                 let setterBody: CompoundStatement = [
                                     .expression(
                                         Expression

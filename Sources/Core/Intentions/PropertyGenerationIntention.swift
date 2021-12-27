@@ -96,7 +96,16 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
     }
     public var objcAttributes: [ObjcPropertyAttribute]
     
-    public var initialValue: Expression?
+    public var initialValue: Expression? {
+        get {
+            initialValueExpr?.expression
+        }
+        set {
+            initialValueExpr = newValue.map({ PropertyInitialValueGenerationIntention(expression: $0, source: nil) })
+        }
+    }
+
+    public var initialValueExpr: PropertyInitialValueGenerationIntention?
     
     public convenience init(name: String,
                             type: SwiftType,
@@ -141,10 +150,14 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         name = try container.decode(String.self, forKey: .name)
         storage = try container.decode(ValueStorage.self, forKey: .storage)
         mode = try container.decode(Mode.self, forKey: .mode)
-        objcAttributes = try container.decode([ObjcPropertyAttribute].self,
-                                          forKey: .attributes)
-        initialValue = try container.decodeIfPresent(Expression.self,
-                                                     forKey: .initialValue)
+        objcAttributes = try container.decode(
+            [ObjcPropertyAttribute].self,
+            forKey: .attributes
+        )
+        initialValueExpr = try container.decodeIntentionIfPresent(
+            PropertyInitialValueGenerationIntention.self,
+            forKey: .initialValueExpr
+        )
         
         try super.init(from: container.superDecoder())
     }
@@ -159,7 +172,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         try container.encode(storage, forKey: .storage)
         try container.encode(mode, forKey: .mode)
         try container.encode(objcAttributes, forKey: .attributes)
-        try container.encode(initialValue, forKey: .initialValue)
+        try container.encodeIntentionIfPresent(initialValueExpr, forKey: .initialValueExpr)
         
         try super.encode(to: container.superEncoder())
     }
@@ -288,7 +301,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         case setterAccessLevel
         case attributes
         case mode
-        case initialValue
+        case initialValueExpr
     }
 }
 
