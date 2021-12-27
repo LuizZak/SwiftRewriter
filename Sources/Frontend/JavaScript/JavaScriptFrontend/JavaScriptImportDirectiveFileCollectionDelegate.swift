@@ -13,8 +13,10 @@ public class JavaScriptImportDirectiveFileCollectionDelegate {
 }
 
 extension JavaScriptImportDirectiveFileCollectionDelegate: JavaScriptFileCollectionStepDelegate {
-    public func javaScriptFileCollectionStep(_ fileCollectionStep: JavaScriptFileCollectionStep,
-                                             referencedFilesForFile file: InputSource) throws -> [URL] {
+    public func javaScriptFileCollectionStep(
+        _ fileCollectionStep: JavaScriptFileCollectionStep,
+        referencedFilesForFile file: InputSource
+    ) throws -> [URL] {
 
         let parserTree = try parserCache.loadParsedTree(input: file)
         let fileReferences =
@@ -31,7 +33,7 @@ extension JavaScriptImportDirectiveFileCollectionDelegate: JavaScriptFileCollect
             let fileName = (reference as NSString).lastPathComponent
             let path = basePath.appendingPathComponent(fileName)
 
-            if fileProvider.fileExists(atPath: path.path) {
+            if fileProvider.fileExists(atUrl: path) {
                 urls.append(path)
             }
         }

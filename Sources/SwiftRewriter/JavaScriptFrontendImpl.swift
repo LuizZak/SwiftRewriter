@@ -1,6 +1,7 @@
 import Foundation
 import SwiftRewriterLib
 import JavaScriptFrontend
+import SwiftRewriterCLI
 
 class JavaScriptFrontendImpl: SwiftRewriterFrontend {
     private let rewriterService: JavaScriptSwiftRewriterService

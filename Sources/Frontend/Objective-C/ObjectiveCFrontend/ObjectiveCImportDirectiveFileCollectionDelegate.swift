@@ -31,7 +31,7 @@ extension ObjectiveCImportDirectiveFileCollectionDelegate: ObjectiveCFileCollect
             let fileName = (reference as NSString).lastPathComponent
             let path = basePath.appendingPathComponent(fileName)
 
-            if fileProvider.fileExists(atPath: path.path) {
+            if fileProvider.fileExists(atUrl: path) {
                 urls.append(path)
             }
         }

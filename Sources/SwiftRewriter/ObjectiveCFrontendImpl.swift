@@ -1,6 +1,7 @@
 import Foundation
 import SwiftRewriterLib
 import ObjectiveCFrontend
+import SwiftRewriterCLI
 
 class ObjectiveCFrontendImpl: SwiftRewriterFrontend {
     private let rewriterService: ObjectiveCSwiftRewriterService

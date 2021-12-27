@@ -2,6 +2,7 @@ import ArgumentParser
 import Foundation
 import Console
 import ObjectiveCFrontend
+import SwiftRewriterCLI
 
 struct ObjectiveCCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
@@ -124,22 +125,29 @@ extension ObjectiveCCommand {
         func run() throws {
             let rewriter = try makeRewriterService(options)
             let frontend = ObjectiveCFrontendImpl(rewriterService: rewriter)
+            let fileProvider = FileDiskProvider()
             
             let console = Console()
-            let menu = Menu(rewriterFrontend: frontend, console: console)
+            let menu = Menu(rewriterFrontend: frontend, fileProvider: fileProvider, console: console)
             
-            let options: SuggestConversionInterface.Options
-                = .init(overwrite: overwrite,
-                        skipConfirm: skipConfirm,
-                        followImports: self.options.followImports,
-                        excludePattern: excludePattern,
-                        includePattern: includePattern,
-                        verbose: self.options.globalOptions.verbose)
+            let options: SuggestConversionInterface.Options = .init(
+                overwrite: overwrite,
+                skipConfirm: skipConfirm,
+                followImports: self.options.followImports,
+                excludePattern: excludePattern,
+                includePattern: includePattern,
+                verbose: self.options.globalOptions.verbose
+            )
             
-            let interface = SuggestConversionInterface(rewriterFrontend: frontend)
-            interface.searchAndShowConfirm(in: menu,
-                                           path: (path as NSString).standardizingPath,
-                                           options: options)
+            let interface = SuggestConversionInterface(
+                rewriterFrontend: frontend,
+                fileProvider: fileProvider
+            )
+            interface.searchAndShowConfirm(
+                in: menu,
+                url: URL(fileURLWithPath: path).standardizedFileURL,
+                options: options
+            )
         }
     }
 }
@@ -152,6 +160,7 @@ extension ObjectiveCCommand {
         func run() throws {
             let colorize = options.globalOptions.colorize
             let settings = try makeSettings(options)
+            let fileProvider = FileDiskProvider()
             
             let output = StdoutWriterOutput(colorize: colorize)
             let service = ObjectiveCSwiftRewriterServiceImpl(output: output, settings: settings)
@@ -160,7 +169,7 @@ extension ObjectiveCCommand {
             // Detect terminal
             if isatty(fileno(stdin)) != 0 {
                 let console = Console()
-                let menu = Menu(rewriterFrontend: frontend, console: console)
+                let menu = Menu(rewriterFrontend: frontend, fileProvider: fileProvider, console: console)
                 
                 menu.main()
             } else {

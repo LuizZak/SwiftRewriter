@@ -19,7 +19,7 @@ public class ObjectiveCFileCollectionStep {
             return
         }
         
-        if fileProvider.fileExists(atPath: url.path) {
+        if fileProvider.fileExists(atUrl: url) {
             let file = DiskInputFile(url: url, isPrimary: isPrimary)
             try addFile(file)
         } else {
@@ -39,37 +39,40 @@ public class ObjectiveCFileCollectionStep {
         try resolveReferences(in: file)
     }
 
-    public func addFromDirectory(_ directory: URL,
-                                 recursive: Bool,
-                                 includePattern: String? = nil,
-                                 excludePattern: String? = nil) throws {
-
-        guard let allFiles = fileProvider.enumerator(atPath: directory.path) else {
-            return
-        }
+    public func addFromDirectory(
+        _ directory: URL,
+        recursive: Bool,
+        includePattern: String? = nil,
+        excludePattern: String? = nil
+    ) throws {
+        let allFiles = try fileProvider
+        .contentsOfDirectory(
+            atUrl: directory,
+            shallow: !recursive
+        )
 
         // Inclusions
         let objcFiles =
             allFiles.filter { path in
-                fileMatchesFilter(path: path,
-                                  includePattern: includePattern,
-                                  excludePattern: excludePattern)
+                fileMatchesFilter(
+                    path: path,
+                    includePattern: includePattern,
+                    excludePattern: excludePattern
+                )
             }
             // Sort files, for convenience of better conveying progress to user
-            .sorted { (s1: String, s2: String) -> Bool in
-                let name1 = (s1 as NSString).lastPathComponent
-                let name2 = (s2 as NSString).lastPathComponent
+            .sorted { (s1: URL, s2: URL) -> Bool in
+                let name1 = s1.lastPathComponent
+                let name2 = s2.lastPathComponent
                 
                 return name1.compare(name2, options: .numeric) == .orderedAscending
             }
-            .map(URL.init(fileURLWithPath:))
 
-        let objcFileUrls: [URL] =
-                // Filter down to .h/.m files
-                objcFiles.filter { (path: URL) -> Bool in
-                    ((path.path as NSString).pathExtension == "m"
-                        || (path.path as NSString).pathExtension == "h")
-                }
+        // Filter down to .h/.m files
+        let objcFileUrls =
+            objcFiles.filter { (path: URL) -> Bool in
+                path.pathExtension == "m" || path.pathExtension == "h"
+            }
 
         for fileUrl in objcFileUrls {
             let file = DiskInputFile(url: fileUrl, isPrimary: true)
@@ -89,9 +92,12 @@ public class ObjectiveCFileCollectionStep {
         let references = try delegate.objectiveCFileCollectionStep(self, referencedFilesForFile: file)
 
         for url in references {
-            if !hasFile(url) && fileProvider.fileExists(atPath: url.path) {
-                listener?.objectiveCFileCollectionStep(self, didAddReferencedFile: url,
-                                                       forInputFile: file)
+            if !hasFile(url) && fileProvider.fileExists(atUrl: url) {
+                listener?.objectiveCFileCollectionStep(
+                    self,
+                    didAddReferencedFile: url,
+                    forInputFile: file
+                )
                 
                 try addFile(fromUrl: url, isPrimary: false)
             }
@@ -124,7 +130,7 @@ public extension ObjectiveCFileCollectionStep {
     }
 }
 
-// TODO: Maybe merge with FileCollectionStepDelegate?
+// TODO: Maybe merge with ObjectiveCFileCollectionStepDelegate?
 public protocol ObjectiveCFileCollectionStepListener {
     func objectiveCFileCollectionStep(_ collectionStep: ObjectiveCFileCollectionStep,
                                       didAddReferencedFile referencedUrl: URL,

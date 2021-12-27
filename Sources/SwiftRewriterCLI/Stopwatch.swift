@@ -1,6 +1,7 @@
 import Foundation
 
-class Stopwatch {
+/// Unix-compatible stopwatch system
+public class Stopwatch {
     var start: timespec = timespec()
     
     private init() {
@@ -11,7 +12,7 @@ class Stopwatch {
         }
     }
     
-    func stop() -> TimeInterval {
+    public func stop() -> TimeInterval {
         var end: timespec = timespec()
         if #available(OSX 10.12, *) {
             clock_gettime(CLOCK_MONOTONIC_RAW, &end)
@@ -24,7 +25,7 @@ class Stopwatch {
         return TimeInterval(delta_us) / 1_000_000
     }
     
-    static func start() -> Stopwatch {
+    public static func start() -> Stopwatch {
         Stopwatch()
     }
 }

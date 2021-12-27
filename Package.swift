@@ -237,6 +237,7 @@ let package = Package(
                 .product(name: "Antlr4", package: "antlr4-swift"),
                 .product(name: "Console", package: "console"),
                 .product(name: "SwiftFormat", package: "swift-format"),
+                .product(name: "SwiftFormatConfiguration", package: "swift-format"),
                 // Objective-C
                 "ObjcGrammarModels", "ObjcParser",
                 // JavaScript
@@ -250,11 +251,24 @@ let package = Package(
             ],
             path: "Sources/SwiftRewriterLib"
         ),
+        .target(
+            name: "SwiftRewriterCLI",
+            dependencies: [
+                .product(name: "Console", package: "console"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                "SwiftRewriterLib",
+                "ExpressionPasses", "Utils", "SourcePreprocessors", "SwiftAST",
+                "IntentionPasses", "MiniLexer", "Commons",
+            ],
+            path: "Sources/SwiftRewriterCLI"
+        ),
         .executableTarget(
             name: "SwiftRewriter",
             dependencies: [
                 .product(name: "Console", package: "console"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "SwiftFormatConfiguration", package: "swift-format"),
+                "SwiftRewriterCLI",
                 "ObjectiveCFrontend", "SwiftRewriterLib", "ObjcParser", "ObjcGrammarModels",
                 "JavaScriptFrontend",
                 "ExpressionPasses", "Utils", "SourcePreprocessors", "SwiftAST",

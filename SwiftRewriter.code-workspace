@@ -220,6 +220,7 @@
 		"swiftTest.swift.testParams": [
 			"--enable-code-coverage",
 		],
+		"lldb.library": "/home/luiz/swift-5.5.2-RELEASE-ubuntu20.04/usr/lib/liblldb.so",
 	},
 	"extensions": {
 		"recommendations": [
