@@ -13,7 +13,7 @@ jobs:
   steps:
   - bash: 'swift package resolve'
   - bash: 'swift test --enable-code-coverage'
-  - bash: 'xcrun llvm-profdata merge -sparse default.profraw ./.build/debug/codecov/*.profraw -o coverage.profdata'
+  - bash: 'xcrun llvm-profdata merge -sparse ./.build/debug/codecov/*.profraw -o coverage.profdata'
   - bash: 'xcrun llvm-cov show ./.build/debug/SwiftRewriter/Contents/MacOS/SwiftRewriter -instr-profile=./coverage.profdata Sources > coverage.txt'
   - bash: 'bash <(curl -s https://codecov.io/bash)'
 
