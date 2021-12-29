@@ -1,6 +1,7 @@
 import Utils
 
-/// A language-agnostic reference to a comment from an input file
+/// A reference to a comment from an input file based on its range on the original
+/// file string.
 public struct RawCodeComment: Codable {
     public var string: String
     public var range: Range<Int>
