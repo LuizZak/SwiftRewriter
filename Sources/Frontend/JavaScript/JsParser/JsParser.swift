@@ -35,7 +35,7 @@ public class JsParser {
 
     /// Contains information about all C-style comments found while parsing the
     /// input file.
-    public var comments: [CodeComment] = []
+    public var comments: [RawCodeComment] = []
 
     /// Import declarations found in file.
     public var importDirectives: [JsImportDecl] = []
@@ -139,8 +139,8 @@ public class JsParser {
     
     // MARK: - Global context-free parsing functions
 
-    public static func parseComments(input: String) -> [CodeComment] {
-        var result: [CodeComment] = []
+    public static func parseComments(input: String) -> [RawCodeComment] {
+        var result: [RawCodeComment] = []
 
         let ranges = input.cStyleCommentSectionRanges()
         
@@ -170,7 +170,7 @@ public class JsParser {
             }
             
             let commentString = String(input[range])
-            let comment = CodeComment(
+            let comment = RawCodeComment(
                 string: commentString,
                 range: utf8Offset..<(utf8Offset + utf8Length),
                 location: location,

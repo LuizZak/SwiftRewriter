@@ -24,7 +24,7 @@ public class ObjectiveCASTReader {
     }
     
     public func parseStatements(compoundStatement: ObjectiveCParser.CompoundStatementContext,
-                                comments: [CodeComment] = [],
+                                comments: [RawCodeComment] = [],
                                 typeContext: KnownType? = nil) -> CompoundStatement {
         
         let context =
@@ -58,7 +58,7 @@ public class ObjectiveCASTReader {
     }
     
     public func parseExpression(expression: ObjectiveCParser.ExpressionContext,
-                                comments: [CodeComment] = []) -> Expression {
+                                comments: [RawCodeComment] = []) -> Expression {
         
         let context =
             ObjectiveCASTReaderContext(

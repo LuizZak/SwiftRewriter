@@ -296,7 +296,7 @@ extension JavaScriptIntentionCollector {
         intention.precedingComments.append(contentsOf: comments)
     }
     
-    private func convertComments(_ comments: [CodeComment]) -> [String] {
+    private func convertComments(_ comments: [RawCodeComment]) -> [String] {
         return comments.map { $0.string.trimmingWhitespaces() }
     }
 }

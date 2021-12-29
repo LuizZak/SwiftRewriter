@@ -24,7 +24,7 @@ public class JavaScriptASTReader {
     }
     
     public func parseStatements(body: JavaScriptParser.FunctionBodyContext,
-                                comments: [CodeComment] = [],
+                                comments: [RawCodeComment] = [],
                                 typeContext: KnownType? = nil) -> CompoundStatement {
         
         guard let sourceElements = body.sourceElements() else {
@@ -39,7 +39,7 @@ public class JavaScriptASTReader {
     }
     
     public func parseStatements(compoundStatement: JavaScriptParser.StatementContext,
-                                comments: [CodeComment] = [],
+                                comments: [RawCodeComment] = [],
                                 typeContext: KnownType? = nil) -> CompoundStatement {
         
         fatalError("Not implemented")
@@ -47,7 +47,7 @@ public class JavaScriptASTReader {
     
     private func _parseStatements(
         _ ctx: JavaScriptParser.SourceElementsContext,
-        comments: [CodeComment] = [],
+        comments: [RawCodeComment] = [],
         typeContext: KnownType? = nil
     ) -> CompoundStatement {
         
@@ -82,7 +82,7 @@ public class JavaScriptASTReader {
 
     private func _parseStatement(
         _ ctx: JavaScriptParser.StatementContext,
-        comments: [CodeComment] = [],
+        comments: [RawCodeComment] = [],
         typeContext: KnownType? = nil
     ) -> Statement {
         
@@ -115,7 +115,7 @@ public class JavaScriptASTReader {
     }
     
     public func parseExpression(expression: JavaScriptParser.SingleExpressionContext,
-                                comments: [CodeComment] = []) -> Expression {
+                                comments: [RawCodeComment] = []) -> Expression {
         
         let context =
             JavaScriptASTReaderContext(
@@ -139,7 +139,7 @@ public class JavaScriptASTReader {
     }
     
     public func parseExpression(expression: JavaScriptParser.ExpressionStatementContext,
-                                comments: [CodeComment] = []) -> Expression {
+                                comments: [RawCodeComment] = []) -> Expression {
         
         let context =
             JavaScriptASTReaderContext(

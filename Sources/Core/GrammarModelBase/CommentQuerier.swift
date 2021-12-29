@@ -2,13 +2,13 @@ import Antlr4
 import Utils
 
 open class CommentQuerier {
-    var allComments: [CodeComment]
+    var allComments: [RawCodeComment]
     
-    public init(allComments: [CodeComment]) {
+    public init(allComments: [RawCodeComment]) {
         self.allComments = allComments
     }
     
-    public func popClosestCommentBefore(node: ParserRuleContext) -> CodeComment? {
+    public func popClosestCommentBefore(node: ParserRuleContext) -> RawCodeComment? {
         guard let start = node.getStart() else {
             return nil
         }
@@ -23,8 +23,8 @@ open class CommentQuerier {
         return nil
     }
     
-    public func popClosestCommentsBefore(node: ParserRuleContext) -> [CodeComment] {
-        var comments: [CodeComment] = []
+    public func popClosestCommentsBefore(node: ParserRuleContext) -> [RawCodeComment] {
+        var comments: [RawCodeComment] = []
         while let comment = popClosestCommentBefore(node: node) {
             comments.append(comment)
         }
@@ -32,7 +32,7 @@ open class CommentQuerier {
         return comments.reversed()
     }
     
-    public func popCommentsOverlapping(node: ParserRuleContext) -> [CodeComment] {
+    public func popCommentsOverlapping(node: ParserRuleContext) -> [RawCodeComment] {
         guard let startToken = node.getStart(), let stopToken = node.getStop() else {
             return []
         }
@@ -40,7 +40,7 @@ open class CommentQuerier {
         let start = startToken.sourceLocation()
         let end = stopToken.sourceLocation()
         
-        let test: (CodeComment) -> Bool = {
+        let test: (RawCodeComment) -> Bool = {
             $0.location >= start && $0.location <= end
         }
         

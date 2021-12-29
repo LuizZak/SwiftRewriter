@@ -474,7 +474,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
     }
 
     func testReadWithComments() {
-        let comment = CodeComment(
+        let comment = RawCodeComment(
             string: "// A Comment",
             range: 0..<"// A Comment".count,
             location: SourceLocation(line: 1, column: 1, utf8Offset: 0),
@@ -636,7 +636,7 @@ extension ObjectiveCStatementASTReaderTests {
     @discardableResult
     func assert(
         objcStmt: String,
-        comments: [CodeComment] = [],
+        comments: [RawCodeComment] = [],
         parseBlock: (ObjectiveCParser) throws -> (ParserRuleContext) = { try $0.statement() },
         readsAs expected: Statement,
         file: StaticString = #filePath,

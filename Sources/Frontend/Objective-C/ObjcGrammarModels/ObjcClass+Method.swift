@@ -5,7 +5,7 @@ public final class ObjcMethodBodyNode: ObjcASTNode {
     public var statements: ObjectiveCParser.CompoundStatementContext?
     
     /// List of comments found within the range of this method body
-    public var comments: [CodeComment] = []
+    public var comments: [RawCodeComment] = []
     
     public override var shortDescription: String {
         statements?.getText() ?? ""

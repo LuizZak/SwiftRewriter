@@ -215,14 +215,14 @@ class JsParserListenerTests: XCTestCase {
 }
 
 extension JsParserListenerTests {
-    private func parserTest(_ source: String, comments: [CodeComment] = [], file: StaticString = #filePath, line: UInt = #line) -> JsGlobalContextNode
+    private func parserTest(_ source: String, comments: [RawCodeComment] = [], file: StaticString = #filePath, line: UInt = #line) -> JsGlobalContextNode
     {
         return _parseTestGlobalContextNode(source: source, comments: comments, file: file, line: line)
     }
 
     private func _parseTestGlobalContextNode(
         source: String,
-        comments: [CodeComment],
+        comments: [RawCodeComment],
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> JsGlobalContextNode {
