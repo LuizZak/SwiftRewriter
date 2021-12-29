@@ -1,4 +1,4 @@
-/// A file-scoped variable declaration.
+/// A variable definition contained within a `JsVariableDeclarationListNode`.
 public class JsVariableDeclarationNode: JsASTNode, JsInitializableNode {
     /// The identifier for this variable.
     public var identifier: JsIdentifierNode? {

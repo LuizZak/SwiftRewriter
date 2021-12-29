@@ -76,6 +76,29 @@ class JsParserTests: XCTestCase {
         XCTAssertEqual(classNode.properties.first?.expression?.expression?.getText(), "0")
     }
 
+    func testParseMultilineComments() {
+        let string = """
+            /**
+             * Bezier curve constructor.
+             *
+             * ...docs pending...
+             */
+            """
+        let comments = JsParser.parseComments(input: string)
+
+        XCTAssertEqual(comments.count, 1)
+        XCTAssertEqual(
+            comments.first?.string,
+            """
+            /**
+             * Bezier curve constructor.
+             *
+             * ...docs pending...
+             */
+            """
+        )
+    }
+
     #if JS_PARSER_TESTS_FULL_FIXTURES
 
         func testParse_bezierFixture() throws {
@@ -97,7 +120,7 @@ class JsParserTests: XCTestCase {
 
             let queue = ConcurrentOperationQueue()
 
-            for fixture in fixtures where fixture.path?.contains("Scoping") == true {
+            for fixture in fixtures {
                 let fixture = fixture as URL
 
                 queue.addOperation {

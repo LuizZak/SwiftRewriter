@@ -33,7 +33,7 @@ public struct KnownTypeBuilder {
             self = self.constructor(withParameters: ctor.parameters,
                                     attributes: ctor.knownAttributes,
                                     semantics: ctor.semantics,
-                                    isFailable: ctor.isFailable,
+                                    isFallible: ctor.isFallible,
                                     isConvenience: ctor.isConvenience)
         }
         
@@ -169,21 +169,21 @@ public struct KnownTypeBuilder {
     }
     
     /// Adds a parameter-less constructor to this type
-    public func constructor(isFailable: Bool = false,
+    public func constructor(isFallible: Bool = false,
                             annotations: [String] = []) -> KnownTypeBuilder {
         
         assert(!type.knownConstructors.contains(where: \.parameters.isEmpty),
                "An empty constructor is already provided")
         
         return constructor(withParameters: [],
-                           isFailable: isFailable,
+                           isFallible: isFallible,
                            annotations: annotations)
     }
     
     /// Adds a new constructor to this type
     public func constructor(shortParameters shortParams: [ParameterTuple],
                             semantics: Set<Semantic> = [],
-                            isFailable: Bool = false,
+                            isFallible: Bool = false,
                             isConvenience: Bool = false,
                             annotations: [String] = []) -> KnownTypeBuilder {
         
@@ -194,7 +194,7 @@ public struct KnownTypeBuilder {
         
         return constructor(withParameters: parameters,
                            semantics: semantics,
-                           isFailable: isFailable,
+                           isFallible: isFallible,
                            isConvenience: isConvenience,
                            annotations: annotations)
     }
@@ -203,7 +203,7 @@ public struct KnownTypeBuilder {
     public func constructor(withParameters parameters: [ParameterSignature],
                             attributes: [KnownAttribute] = [],
                             semantics: Set<Semantic> = [],
-                            isFailable: Bool = false,
+                            isFallible: Bool = false,
                             isConvenience: Bool = false,
                             annotations: [String] = []) -> KnownTypeBuilder {
         
@@ -211,7 +211,7 @@ public struct KnownTypeBuilder {
         let ctor = BuildingKnownConstructor(parameters: parameters,
                                             knownAttributes: attributes,
                                             semantics: semantics,
-                                            isFailable: isFailable,
+                                            isFallible: isFallible,
                                             isConvenience: isConvenience,
                                             annotations: annotations)
         
@@ -831,18 +831,18 @@ final class BuildingKnownConstructor: KnownConstructor, Codable {
     var parameters: [ParameterSignature]
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
-    var isFailable: Bool
+    var isFallible: Bool
     var isConvenience: Bool
     var annotations: [String]
     
     init(parameters: [ParameterSignature], knownAttributes: [KnownAttribute],
-         semantics: Set<Semantic>, isFailable: Bool, isConvenience: Bool,
+         semantics: Set<Semantic>, isFallible: Bool, isConvenience: Bool,
          annotations: [String]) {
         
         self.parameters = parameters
         self.knownAttributes = knownAttributes
         self.semantics = semantics
-        self.isFailable = isFailable
+        self.isFallible = isFallible
         self.isConvenience = isConvenience
         self.annotations = annotations
     }

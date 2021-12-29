@@ -2508,7 +2508,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
         )
     }
 
-    func testRewriteExplicitFailableInit() {
+    func testRewriteExplicitFallibleInit() {
         assertRewrite(
             objc: """
                 @interface A
@@ -2530,7 +2530,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
         )
     }
 
-    func testRewriteDetectedFailableInit() {
+    func testRewriteDetectedFallibleInit() {
         assertRewrite(
             objc: """
                 @interface A

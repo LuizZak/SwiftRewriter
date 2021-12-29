@@ -82,8 +82,8 @@ public class JavaScriptIntentionCollector {
             case let n as JsMethodDefinitionNode:
                 self.visitJsMethodDefinitionNode(n)
                 
-            case let n as JsVariableDeclarationNode:
-                self.visitJsVariableDeclarationNode(n)
+            case let n as JsVariableDeclarationListNode:
+                self.visitJsVariableDeclarationListNode(n)
             
             case let n as JsClassPropertyNode:
                 self.visitJsClassPropertyNode(n)
@@ -199,7 +199,12 @@ public class JavaScriptIntentionCollector {
             return
         }
 
-        let property = PropertyGenerationIntention(name: identifier.name, type: .any, objcAttributes: [])
+        let property = PropertyGenerationIntention(
+            name: identifier.name,
+            type: .any,
+            objcAttributes: [],
+            source: node
+        )
 
         configure(node: node, intention: property)
         
@@ -220,31 +225,48 @@ public class JavaScriptIntentionCollector {
         ctx.addProperty(property)
     }
 
-    private func visitJsVariableDeclarationNode(_ node: JsVariableDeclarationNode) {
+    private func visitJsVariableDeclarationListNode(_ node: JsVariableDeclarationListNode) {
         guard let ctx = context.currentContext(as: FileGenerationIntention.self) else {
             return
         }
-        guard let identifier = node.identifier else {
-            return
-        }
-
-        let variable = GlobalVariableGenerationIntention(name: identifier.name, type: .any)
-
-        configure(node: node, intention: variable)
         
-        if let initialExpression = node.expression {
-            let initialExpr =
-                GlobalVariableInitialValueIntention(expression: .constant(0),
-                                                    source: initialExpression)
-            
-            configure(node: initialExpression, intention: initialExpr)
-        
-            delegate?.reportForLazyParsing(intention: initialExpr)
-            
-            variable.initialValueExpr = initialExpr
-        }
+        var attributedComments = false
 
-        ctx.addGlobalVariable(variable)
+        for variableNode in node.variableDeclarations {
+            guard let identifier = variableNode.identifier else {
+                continue
+            }
+
+            let intention = GlobalVariableGenerationIntention(
+                name: identifier.name,
+                type: .any,
+                source: variableNode
+            )
+
+            if !attributedComments {
+                attributedComments = true
+
+                _mapComments(node, intention)
+            }
+
+            configure(node: variableNode, intention: intention)
+            
+            if let initialExpression = variableNode.expression {
+                let initialExpr =
+                    GlobalVariableInitialValueIntention(
+                        expression: .constant(0),
+                        source: initialExpression
+                    )
+                
+                configure(node: initialExpression, intention: initialExpr)
+            
+                delegate?.reportForLazyParsing(intention: initialExpr)
+                
+                intention.initialValueExpr = initialExpr
+            }
+
+            ctx.addGlobalVariable(intention)
+        }
     }
 
     // MARK: - Instance factories
@@ -269,7 +291,9 @@ extension JavaScriptIntentionCollector {
     }
 
     private func _mapComments(_ node: JsASTNode, _ intention: FromSourceIntention) {
-        intention.precedingComments.append(contentsOf: convertComments(node.precedingComments))
+        let comments = convertComments(node.precedingComments)
+
+        intention.precedingComments.append(contentsOf: comments)
     }
     
     private func convertComments(_ comments: [CodeComment]) -> [String] {

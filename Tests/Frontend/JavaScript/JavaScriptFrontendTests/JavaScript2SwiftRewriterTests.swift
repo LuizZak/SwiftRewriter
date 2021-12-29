@@ -66,4 +66,25 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testRewrite_multilineComments() {
+        assertRewrite(
+            js: """
+            /**
+             * Bezier curve constructor.
+             *
+             * ...docs pending...
+             */
+            var a = 0;
+            """,
+            swift: """
+            /**
+             * Bezier curve constructor.
+             *
+             * ...docs pending...
+             */
+            var a: Any = 0
+            """
+        )
+    }
 }

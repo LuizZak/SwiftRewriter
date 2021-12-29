@@ -214,7 +214,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownConstructors[0].parameters.count, 0)
     }
 
-    func testParseFailableInitializer() throws {
+    func testParseFallibleInitializer() throws {
         let type = try parseType(
             """
             class MyClass {
@@ -224,7 +224,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         )
 
         XCTAssertEqual(type.knownConstructors.count, 1)
-        XCTAssert(type.knownConstructors[0].isFailable)
+        XCTAssert(type.knownConstructors[0].isFallible)
     }
 
     func testParseSubscription() throws {

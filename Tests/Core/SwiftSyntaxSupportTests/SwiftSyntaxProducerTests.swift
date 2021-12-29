@@ -19,6 +19,91 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
         assert(result, matches: "")
     }
 
+    func testGenerateEmptyFileWithComments() {
+        let file = FileGenerationIntention(sourcePath: "", targetPath: "")
+        file.headerComments = ["Comment"]
+        let sut = SwiftSyntaxProducer()
+
+        let result = sut.generateFile(file)
+        
+        assert(
+            result,
+            matches: """
+                // Comment
+                """
+        )
+    }
+
+    func testGenerateSingleLineComment() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createGlobalFunction(withName: "f") { builder in
+                    builder.addComment("""
+                        // Comment
+                        """
+                    )
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+
+        let result = sut.generateFile(file)
+
+        assert(
+            result,
+            matches: """
+                // Comment
+                func f() {
+                }
+                """
+        )
+        let syntax = result.children.first
+        XCTAssertEqual(
+            syntax?.leadingTrivia?[0],
+            .lineComment("""
+                // Comment
+                """
+            )
+        )
+    }
+
+    func testGenerateMultilineComment() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createGlobalFunction(withName: "f") { builder in
+                    builder.addComment("""
+                        /**
+                         * Comment
+                         */
+                        """
+                    )
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+
+        let result = sut.generateFile(file)
+
+        assert(
+            result,
+            matches: """
+                /**
+                 * Comment
+                 */
+                func f() {
+                }
+                """
+        )
+        let syntax = result.children.first
+        XCTAssertEqual(
+            syntax?.leadingTrivia?[0],
+            .blockComment("""
+                /**
+                 * Comment
+                 */
+                """
+            )
+        )
+    }
+
     func testGenerateExpressionTypes() {
         let file =
             FileIntentionBuilder
@@ -772,9 +857,9 @@ extension SwiftSyntaxProducerTests {
 // MARK: - Init writing
 extension SwiftSyntaxProducerTests {
 
-    func testWriteFailableInit() {
+    func testWriteFallibleInit() {
         let initMethod = InitGenerationIntention(parameters: [])
-        initMethod.isFailable = true
+        initMethod.isFallible = true
         initMethod.functionBody = FunctionBodyIntention(body: [])
         let sut = SwiftSyntaxProducer()
 
@@ -1295,5 +1380,37 @@ extension SwiftSyntaxProducerTests {
                 }
                 """
         )
+    }
+}
+
+private class SyntaxDebugPrinter: SyntaxAnyVisitor {
+    private var _indent = 0
+
+    override func visitAny(_ node: Syntax) -> SyntaxVisitorContinueKind {
+        _line(node.syntaxNodeType)
+        _indent += 1
+
+        for token in node.tokens {
+            _line(token.leadingTrivia)
+            _line(token.withoutTrivia())
+            _line(token.trailingTrivia)
+        }
+
+        _indent += 1
+        return .skipChildren
+    }
+
+    override func visitAnyPost(_ node: Syntax) {
+        _indent -= 2
+    }
+
+    private func _line<T>(_ message: T) {
+        print(String(repeating: " ", count: _indent) + "\(message)")
+    }
+
+    static func debugPrint<S: SyntaxProtocol>(_ syntax: S) {
+        let visitor = SyntaxDebugPrinter()
+
+        visitor.walk(syntax)
     }
 }

@@ -3,7 +3,7 @@ import Intentions
 import SwiftAST
 
 extension SwiftSyntaxProducer {
-    typealias StatementBlockProducer = (SwiftSyntaxProducer) -> CodeBlockItemSyntax
+    typealias StatementBlockProducer = (SwiftSyntaxProducer) -> CodeBlockItemSyntax?
     
     // TODO: Consider reducing code duplication within `generateStatement` and
     // `_generateStatements`
@@ -38,7 +38,9 @@ extension SwiftSyntaxProducer {
                     addExtraLeading(.newlines(1))
                 }
                 
-                builder.addStatement(stmt(self))
+                if let syntax = stmt(self) {
+                    builder.addStatement(syntax)
+                }
             }
         }
     }
@@ -55,8 +57,8 @@ extension SwiftSyntaxProducer {
                         .makeRightBraceToken()
                         .onNewline()
                         .addingLeadingTrivia(indentation())
+                        .withExtraLeading(consuming: &extraLeading)
                 )
-                extraLeading = nil
             }
             
             let stmts = _generateStatements(compoundStmt.statements)
@@ -75,7 +77,10 @@ extension SwiftSyntaxProducer {
             
             for item in stmtSyntax {
                 addExtraLeading(.newlines(1) + indentation())
-                items.append(item(self))
+
+                if let syntax = item(self) {
+                    items.append(syntax)
+                }
             }
             
             if i < stmtList.count - 1
@@ -151,7 +156,7 @@ extension SwiftSyntaxProducer {
             genList = stmt.statements.flatMap(generateStatementBlockItems)
             
         case let stmt as UnknownStatement:
-            genList = [{ $0.generateUnknown(stmt).inCodeBlock() }]
+            genList = [self.generateUnknown(stmt)]
             
         default:
             assertionFailure("Found unknown statement syntax node type \(type(of: stmt))")
@@ -171,32 +176,17 @@ extension SwiftSyntaxProducer {
     
     private func applyingLeadingComments(
         _ comments: [String],
-        toList list: [StatementBlockProducer]) -> [StatementBlockProducer] {
+        toList list: [StatementBlockProducer]
+    ) -> [StatementBlockProducer] {
         
-        guard let first = list.first else {
+        guard !comments.isEmpty, let first = list.first else {
             return list
         }
         
         var list = list
         
         list[0] = {
-            for comment in comments {
-                // TODO: Perhaps Statement.comments should be an enum describing
-                // these cases, instead of performing this detection here?
-                if comment.hasPrefix("//") {
-                    $0.addExtraLeading(.lineComment(comment))
-                } else if comment.hasPrefix("///") {
-                    $0.addExtraLeading(.docLineComment(comment))
-                } else if comment.hasPrefix("/*") {
-                    $0.addExtraLeading(.blockComment(comment))
-                } else if comment.hasPrefix("/**") {
-                    $0.addExtraLeading(.docBlockComment(comment))
-                } else {
-                    $0.addExtraLeading(.lineComment(comment))
-                }
-                
-                $0.addExtraLeading(.newlines(1) + $0.indentation())
-            }
+            $0.addComments(comments)
             
             return first($0)
         }
@@ -206,8 +196,9 @@ extension SwiftSyntaxProducer {
     
     private func applyingTrailingComment(
         _ comment: String?,
-        toList list: [StatementBlockProducer]) -> [StatementBlockProducer] {
-        
+        toList list: [StatementBlockProducer]
+    ) -> [StatementBlockProducer] {
+
         guard let comment = comment, let last = list.last else {
             return list
         }
@@ -215,10 +206,28 @@ extension SwiftSyntaxProducer {
         var list = list
         
         list[list.count - 1] = {
-            return last($0).withTrailingTrivia(.spaces(1) + .lineComment(comment))
+            return last($0)?.withTrailingTrivia(.spaces(1) + .lineComment(comment))
         }
         
         return list
+    }
+    
+    /// Processes an unknown statement, adding the 
+    func generateUnknown(_ unknown: UnknownStatement) -> StatementBlockProducer {
+        return {
+            let indent = $0.indentationString()
+        
+            $0.addExtraLeading(
+                .blockComment("""
+                    /*
+                    \(indent)\(unknown.context.description)
+                    \(indent)*/
+                    """
+                )
+            )
+
+            return nil
+        }
     }
     
     func generateExpressions(_ stmt: ExpressionsStatement) -> [StatementBlockProducer] {
@@ -580,22 +589,6 @@ extension SwiftSyntaxProducer {
             builder.useDeferKeyword(makeStartToken(SyntaxFactory.makeDeferKeyword))
             builder.useBody(generateCompound(stmt.body))
         }
-    }
-    
-    func generateUnknown(_ unknown: UnknownStatement) -> ExprSyntax {
-        var trivia = extraLeading ?? []
-        let indent = indentationString()
-        
-        trivia = trivia + Trivia.blockComment("""
-            /*
-            \(indent)\(unknown.context.description)
-            \(indent)*/
-            """)
-        
-        return SyntaxFactory
-            .makeBlankIdentifierExpr()
-            .withIdentifier(makeIdentifier("").withLeadingTrivia(trivia))
-            .asExprSyntax
     }
     
     func generatePattern(_ pattern: Pattern) -> PatternSyntax {

@@ -167,6 +167,32 @@ class JsParserListenerTests: XCTestCase {
         ])
     }
 
+    func testCollectMultilineComments() throws {
+        let input = """
+            /**
+             * Bezier curve constructor.
+             *
+             * ...docs pending...
+             */
+            var a = 0;
+            """
+        let comments = JsParser.parseComments(input: input)
+        let node = parserTest(input, comments: comments)
+
+        let variableNode: JsVariableDeclarationListNode = try XCTUnwrap(node.firstChild())
+        let mappedComment = try XCTUnwrap(variableNode.precedingComments.map(\.string).first)
+
+        XCTAssertEqual(mappedComment,
+            """
+            /**
+             * Bezier curve constructor.
+             *
+             * ...docs pending...
+             */
+            """
+        )
+    }
+
     // MARK: - Test internals
 
     private func getText(_ rule: ParserRuleContext?) -> String? {

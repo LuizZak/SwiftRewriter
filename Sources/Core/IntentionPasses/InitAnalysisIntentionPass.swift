@@ -1,10 +1,10 @@
 import SwiftAST
 import Intentions
 
-// TODO: Also support failable init detection by inspecting `nullable` in the
+// TODO: Also support fallible init detection by inspecting `nullable` in the
 // return type of intializers in Objective-C.
 
-/// An intention pass that searches for failable and convenience initializers
+/// An intention pass that searches for fallible and convenience initializers
 /// based on statement AST analysis and flags them appropriately.
 public class InitAnalysisIntentionPass: IntentionPass {
     private let tag = "\(InitAnalysisIntentionPass.self)"
@@ -44,17 +44,17 @@ public class InitAnalysisIntentionPass: IntentionPass {
         }
         
         // Search for `return nil` within the constructor which indicates this is
-        // a failable initializer
+        // a fallible initializer
         // (make sure we don't look into closures and match those by accident,
         // as well).
         
         let nodes = SyntaxNodeSequence(node: body, inspectBlocks: false)
         
         for node in nodes.compactMap({ $0 as? ReturnStatement }) {
-            if analyzeIsReturnStatementFailable(node) {
-                initializer.isFailable = true
+            if analyzeIsReturnStatementFallible(node) {
+                initializer.isFallible = true
                 initializer.history.recordChange(tag: tag, description: """
-                    Marked as failable since an explicit nil return was detected \
+                    Marked as fallible since an explicit nil return was detected \
                     within initializer body
                     """)
                 
@@ -72,13 +72,13 @@ public class InitAnalysisIntentionPass: IntentionPass {
         }
     }
     
-    private func analyzeIsReturnStatementFailable(_ stmt: ReturnStatement) -> Bool {
+    private func analyzeIsReturnStatementFallible(_ stmt: ReturnStatement) -> Bool {
         guard stmt.exp?.matches(.nil) == true else {
             return false
         }
         
         // Check if we're not in one of the following patterns, which indicate
-        // an early exit that is not neccessarily from a failable initializer
+        // an early exit that is not neccessarily from a fallible initializer
         
         // 1.:
         // if(self == nil) {

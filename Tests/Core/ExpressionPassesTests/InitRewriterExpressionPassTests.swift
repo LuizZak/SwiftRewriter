@@ -237,8 +237,8 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
     }
 
     func testAddOptionalToOptionalSuperInit() {
-        // Test that when we find a call to a base constructor that is failable,
-        // we properly convert that call to a failable initializer invocation
+        // Test that when we find a call to a base constructor that is fallible,
+        // we properly convert that call to a fallible initializer invocation
         // (i.e. `super.init?()`)
 
         let typeA =
@@ -247,7 +247,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                 withParameters: [
                     ParameterSignature(label: nil, name: "value", type: .int)
                 ],
-                isFailable: true
+                isFallible: true
             )
             .build()
         let typeB =

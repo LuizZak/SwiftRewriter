@@ -155,12 +155,28 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
         
         return false
     }
-    
-    func addCommentsIfAvailable(_ intention: FromSourceIntention) {
-        for comment in intention.precedingComments {
-            addExtraLeading(.lineComment(comment))
+
+    // TODO: Map comments from frontends into an enum
+    func addComments(_ comments: [String]) {
+        for comment in comments {
+            if comment.hasPrefix("//") {
+                addExtraLeading(.lineComment(comment))
+            } else if comment.hasPrefix("///") {
+                addExtraLeading(.docLineComment(comment))
+            } else if comment.hasPrefix("/*") {
+                addExtraLeading(.blockComment(comment))
+            } else if comment.hasPrefix("/**") {
+                addExtraLeading(.docBlockComment(comment))
+            } else {
+                addExtraLeading(.lineComment(comment))
+            }
+
             addExtraLeading(.newlines(1) + indentation())
         }
+    }
+    
+    func addCommentsIfAvailable(_ intention: FromSourceIntention) {
+        addComments(intention.precedingComments)
     }
     
     func addHistoryTrackingLeadingIfEnabled(_ intention: IntentionProtocol) {
@@ -766,7 +782,7 @@ extension SwiftSyntaxProducer {
             
             builder.useInitKeyword(makeStartToken(SyntaxFactory.makeInitKeyword))
             
-            if intention.isFailable {
+            if intention.isFallible {
                 builder.useOptionalMark(SyntaxFactory.makeInfixQuestionMarkToken())
             }
             
@@ -958,6 +974,7 @@ extension TokenSyntax {
         
         return self
     }
+    
     func withLeadingSpace(count: Int = 1) -> TokenSyntax {
         withLeadingTrivia(.spaces(count))
     }

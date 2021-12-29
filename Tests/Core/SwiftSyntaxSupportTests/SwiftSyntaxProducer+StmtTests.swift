@@ -9,20 +9,20 @@ import XCTest
 
 class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
 
-    func testExpressions() {
+    func testExpressions() throws {
         let stmt = Statement.expressions([.identifier("foo"), .identifier("bar")])
         let sut = SwiftSyntaxProducer()
         let syntax = sut.generateExpressions(stmt)
 
         assert(
-            syntax[0](sut),
+            try XCTUnwrap(syntax[0](sut)),
             matches: """
                 foo
                 """
         )
 
         assert(
-            syntax[1](sut),
+            try XCTUnwrap(syntax[1](sut)),
             matches: """
                 bar
                 """
@@ -46,7 +46,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         )
     }
 
-    func testVariableDeclarationsStatement() {
+    func testVariableDeclarationsStatement() throws {
         let stmt =
             Statement
             .variableDeclarations([
@@ -60,7 +60,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         let syntax = sut.generateVariableDeclarations(stmt)
 
         assert(
-            syntax[0](sut),
+            try XCTUnwrap(syntax[0](sut)),
             matches: """
                 var foo: Int = 0
                 """
@@ -582,14 +582,33 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
 
     func testUnknownStatement() {
         let stmt = Statement.unknown(UnknownASTContext(context: "abc"))
-        let syntaxes = SwiftSyntaxProducer().generateUnknown(stmt)
+        let sut = SwiftSyntaxProducer()
 
-        assert(
-            syntaxes,
-            matches: """
+        _=sut.generateUnknown(stmt)(sut)
+
+        XCTAssertEqual(
+            sut.extraLeading,
+            .blockComment("""
                 /*
                 abc
                 */
+                """
+            )
+        )
+    }
+
+    func testUnknownStatementNested() {
+        assert(
+            Statement.do([
+                .unknown(.init(context: "abc"))
+            ]),
+            producer: SwiftSyntaxProducer.generateDo,
+            matches: """
+                do {
+                    /*
+                    abc
+                    */
+                }
                 """
         )
     }

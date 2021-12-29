@@ -9,7 +9,7 @@ public final class InitGenerationIntention: MemberGenerationIntention, MutableFu
     public var functionBody: FunctionBodyIntention?
     
     public var isOverride: Bool = false
-    public var isFailable: Bool = false
+    public var isFallible: Bool = false
     public var isConvenience: Bool = false
     
     public init(parameters: [ParameterSignature],
@@ -26,7 +26,7 @@ public final class InitGenerationIntention: MemberGenerationIntention, MutableFu
         parameters = try container.decode([ParameterSignature].self, forKey: .parameters)
         functionBody = try container.decodeIntentionIfPresent(forKey: .functionBody)
         isOverride = try container.decode(Bool.self, forKey: .isOverride)
-        isFailable = try container.decode(Bool.self, forKey: .isFailable)
+        isFallible = try container.decode(Bool.self, forKey: .isFallible)
         isConvenience = try container.decode(Bool.self, forKey: .isConvenience)
         
         try super.init(from: container.superDecoder())
@@ -38,7 +38,7 @@ public final class InitGenerationIntention: MemberGenerationIntention, MutableFu
         try container.encode(parameters, forKey: .parameters)
         try container.encodeIntentionIfPresent(functionBody, forKey: .functionBody)
         try container.encode(isOverride, forKey: .isOverride)
-        try container.encode(isFailable, forKey: .isFailable)
+        try container.encode(isFallible, forKey: .isFallible)
         try container.encode(isConvenience, forKey: .isConvenience)
         
         try super.encode(to: container.superEncoder())
@@ -48,7 +48,7 @@ public final class InitGenerationIntention: MemberGenerationIntention, MutableFu
         case parameters
         case functionBody
         case isOverride
-        case isFailable
+        case isFallible
         case isConvenience
     }
 }

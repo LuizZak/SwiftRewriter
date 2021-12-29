@@ -52,6 +52,7 @@ class JavaScriptIntentionCollectorTests: XCTestCase {
                 isStatic: false
             )
         )
+        XCTAssertTrue(file.globalFunctionIntentions.first?.source is JsFunctionDeclarationNode)
     }
 
     func testCollectFunctionDefinitionBody() throws {
@@ -68,6 +69,90 @@ class JavaScriptIntentionCollectorTests: XCTestCase {
                     === file.globalFunctionIntentions.first?.functionBody
             )
         }
+    }
+
+    func testCollectGlobalVariable() throws {
+        let parserState = JsParserState()
+
+        try withExtendedLifetime(parserState.makeMainParser(input: "1")) { parser in
+            //// Arrange
+            let root = JsGlobalContextNode()
+
+            let node = JsVariableDeclarationListNode(varModifier: .var)
+
+            // a;
+            node.addChild({ 
+                let decl = JsVariableDeclarationNode()
+                decl.addChild(JsIdentifierNode(name: "a"))
+                return decl
+            }())
+            // b = 1;
+            try node.addChild({ 
+                let decl = JsVariableDeclarationNode()
+                decl.addChild(JsIdentifierNode(name: "b"))
+
+                try decl.addChild({
+                    let node = JsExpressionNode()
+                    node.expression = try parser.parser.singleExpression()
+                    return node
+                }())
+
+                return decl
+            }())
+
+            root.addChild(node)
+
+            //// Act
+            sut.collectIntentions(root)
+
+            //// Assert
+            XCTAssertEqual(file.globalVariableIntentions.count, 2)
+            // a;
+            try XCTAssertEqual(file.globalVariableIntentions[try: 0].name, "a")
+            try XCTAssertEqual(
+                file.globalVariableIntentions[try: 0].storage,
+                ValueStorage(
+                    type: .any,
+                    ownership: .strong,
+                    isConstant: false
+                )
+            )
+            try XCTAssertNil(file.globalVariableIntentions[try: 0].initialValueExpr)
+            try XCTAssertTrue(file.globalVariableIntentions[try: 0].source is JsVariableDeclarationNode)
+            // b = 1;
+            try XCTAssertEqual(file.globalVariableIntentions[try: 1].name, "b")
+            try XCTAssertEqual(
+                file.globalVariableIntentions[try: 1].storage,
+                ValueStorage(
+                    type: .any,
+                    ownership: .strong,
+                    isConstant: false
+                )
+            )
+            try XCTAssertEqual(file.globalVariableIntentions[try: 1].initialValueExpr?.typedSource?.expression?.getText(), "1")
+            try XCTAssertTrue(file.globalVariableIntentions[try: 1].source is JsVariableDeclarationNode)
+        }
+    }
+
+    func testCollectClass() throws {
+        // Arrange
+        let root = JsGlobalContextNode()
+
+        let classNode = JsClassNode()
+        classNode.addChild(JsIdentifierNode(name: "A"))
+        
+        root.addChild(classNode)
+
+        // Act
+        sut.collectIntentions(root)
+
+        // Assert
+        XCTAssertEqual(file.classIntentions.count, 1)
+        XCTAssertEqual(
+            file.classIntentions.first?.typeName,
+            "A"
+        )
+        XCTAssertTrue(file.classIntentions.first?.source is JsClassNode)
     }
 
     func testCollectClassProperty() throws {
@@ -101,6 +186,7 @@ class JavaScriptIntentionCollectorTests: XCTestCase {
             file.classIntentions.first?.properties.first?.initialValue,
             .constant(0)
         )
+        XCTAssertTrue(file.classIntentions.first?.properties.first?.source is JsClassPropertyNode)
     }
     
     func testCollectClassComments() throws {
@@ -140,6 +226,59 @@ class JavaScriptIntentionCollectorTests: XCTestCase {
             """,
             \FileGenerationIntention.classIntentions[0].properties[0]
         )
+    }
+
+    func testCollectGlobalVariableComments() throws {
+        testCommentCollection(
+            """
+            // A comment
+            // Another comment
+            var a = 0;
+            """,
+            \FileGenerationIntention.globalVariableIntentions[0]
+        )
+    }
+
+    func testCollectGlobalVariableComments_prependCommentsToFirstVariableDeclarationOnly() throws {
+        //// Arrange
+        let root = JsGlobalContextNode()
+
+        let node = JsVariableDeclarationListNode(varModifier: .var)
+
+        node.precedingComments =
+            JsParser.parseComments(input: """
+            // A comment
+            // Another comment
+            """)
+
+        // a;
+        node.addChild({ 
+            let decl = JsVariableDeclarationNode()
+            decl.addChild(JsIdentifierNode(name: "a"))
+            return decl
+        }())
+        // b;
+        node.addChild({ 
+            let decl = JsVariableDeclarationNode()
+            decl.addChild(JsIdentifierNode(name: "b"))
+            return decl
+        }())
+
+        root.addChild(node)
+
+        //// Act
+        sut.collectIntentions(root)
+
+        //// Assert
+        // a;
+        try XCTAssertEqual(
+            file.globalVariableIntentions[try: 0].precedingComments, [
+                "// A comment",
+                "// Another comment",
+            ]
+        )
+        // b = 1;
+        try XCTAssertTrue(file.globalVariableIntentions[try: 1].precedingComments.isEmpty)
     }
 
     // MARK: - Test internals

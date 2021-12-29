@@ -38,7 +38,7 @@ func areEquivalent(_ ctor1: KnownConstructor, _ ctor2: KnownConstructor) -> Bool
         && ctor1.knownAttributes == ctor2.knownAttributes
         && ctor1.parameters == ctor2.parameters
         && ctor1.isConvenience == ctor2.isConvenience
-        && ctor1.isFailable == ctor2.isFailable
+        && ctor1.isFallible == ctor2.isFallible
         && ctor1.semantics == ctor2.semantics
 }
 

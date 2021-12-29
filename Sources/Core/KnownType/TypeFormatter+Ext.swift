@@ -312,7 +312,7 @@ public extension TypeFormatter {
         
         result += "init"
         
-        if initializer.isFailable {
+        if initializer.isFallible {
             result += "?"
         }
         

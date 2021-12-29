@@ -42,7 +42,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
                 compound.statements = analyzeStatementBody(compound)
             }
             
-            // Next step is recursive failable super.init analysis- if we lack the
+            // Next step is recursive fallible super.init analysis- if we lack the
             // context needed to figure out the superclass, quit now
             if initializer.ownerType != nil {
                 ownerType = initializer.ownerType
@@ -56,7 +56,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
     }
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
-        if let newExp = validateFailableSuperInit(exp) {
+        if let newExp = validateFallibleSuperInit(exp) {
             notifyChange()
             return newExp
         }
@@ -172,10 +172,10 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
         return nil
     }
     
-    /// In case a given `super.init` invocation is a failable initializer invocation,
-    /// return a transformed, failable init invocation (`super.init?()`) matching
+    /// In case a given `super.init` invocation is a fallible initializer invocation,
+    /// return a transformed, fallible init invocation (`super.init?()`) matching
     /// the original invocation.
-    private func validateFailableSuperInit(_ exp: Expression) -> Expression? {
+    private func validateFallibleSuperInit(_ exp: Expression) -> Expression? {
         guard let ownerType = ownerType else {
             return nil
         }
@@ -211,7 +211,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
             return nil
         }
         
-        if constructor.isFailable {
+        if constructor.isFallible {
             let newExp =
                 Expression
                     .identifier("super")
