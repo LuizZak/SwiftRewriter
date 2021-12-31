@@ -190,7 +190,7 @@ class ExpressionPassTestCase: XCTestCase {
             let producer = SwiftSyntaxProducer()
 
             expString = producer.generateStatement(expected).description + "\n"
-            resString = producer.generateStatement(statement).description + "\n"
+            resString = producer.generateStatement(result).description + "\n"
 
             dump(expected, to: &expString)
             dump(result, to: &resString)

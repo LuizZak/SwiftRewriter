@@ -1149,10 +1149,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                 .expressions([
                     .identifier("a")
                     .assignment(
-                        op: .equals,
+                        op: .assign,
                         rhs: .identifier("b")
                         .assignment(
-                            op: .equals,
+                            op: .assign,
                             rhs: .identifier("c")
                                 .sub(.constant(0))
                         )
@@ -1164,11 +1164,57 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                 .expressions([
                     .identifier("b")
                     .assignment(
-                        op: .equals,
+                        op: .assign,
                         rhs: .identifier("c")
                             .sub(.constant(0))
                     ),
-                    .identifier("a").assignment(op: .equals, rhs: .identifier("b")),
+                    .identifier("a")
+                    .assignment(
+                        op: .assign,
+                        rhs: .identifier("b")
+                    ),
+                ])
+        )
+        assertNotifiedChange()
+    }
+
+    func testBreakSequentialAssignments_chainedMemberAccess() {
+        assertTransform(
+            statement:
+                // a = b.c.d = e
+                .expressions([
+                    .identifier("a")
+                    .assignment(
+                        op: .assign,
+                        rhs: .identifier("b")
+                        .dot("c")
+                        .dot("d")
+                        .assignment(
+                            op: .assign,
+                            rhs: .identifier("e")
+                                .sub(.constant(0))
+                        )
+                    )
+                ]),
+            into:
+                // b.c.d = e[0]
+                // a = b.c.d
+                .expressions([
+                    .identifier("b")
+                    .dot("c")
+                    .dot("d")
+                    .assignment(
+                        op: .assign,
+                        rhs: .identifier("e")
+                            .sub(.constant(0))
+                    ),
+                    .identifier("a")
+                    .assignment(
+                        op: .assign,
+                        rhs: .identifier("b")
+                        .dot("c")
+                        .dot("d")
+                    ),
                 ])
         )
         assertNotifiedChange()
@@ -1187,7 +1233,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                         initialization:
                             .identifier("b")
                             .assignment(
-                                op: .equals,
+                                op: .assign,
                                 rhs: .identifier("c").sub(.constant(0))
                             )
                     )
@@ -1201,7 +1247,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                     .expressions([
                         .identifier("b")
                         .assignment(
-                            op: .equals,
+                            op: .assign,
                             rhs: .identifier("c")
                                 .sub(.constant(0))
                         ),
@@ -1216,18 +1262,67 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         assertNotifiedChange()
     }
 
+    func testBreakSequentialAssignmentsInVariableDeclaration_chainedMemberAccess() {
+        assertTransform(
+            statement:
+                // {
+                //     var a = b.c.d = e[0]
+                // }
+                .compound([
+                    .variableDeclaration(
+                        identifier: "a",
+                        type: .any,
+                        initialization:
+                            .identifier("b")
+                            .dot("c")
+                            .dot("d")
+                            .assignment(
+                                op: .assign,
+                                rhs: .identifier("e").sub(.constant(0))
+                            )
+                    )
+                ]),
+            into:
+                // {
+                //     b.c.d = e[0]
+                //     var a = b.c.d
+                // }
+                .compound([
+                    .expressions([
+                        .identifier("b")
+                        .dot("c")
+                        .dot("d")
+                        .assignment(
+                            op: .assign,
+                            rhs: .identifier("e")
+                                .sub(.constant(0))
+                        ),
+                    ]),
+                    .variableDeclaration(
+                        identifier: "a",
+                        type: .any,
+                        initialization: 
+                            .identifier("b")
+                            .dot("c")
+                            .dot("d")
+                    )
+                ])
+        )
+        assertNotifiedChange()
+    }
+
     func testDontBreakSequentialAssignmentsWithNonIdentifierLhs() {
         assertNoTransform(
             statement:
-                // a[0] = b = c
+                // a = b[0] = c
                 .expressions([
                     .identifier("a")
-                    .sub(.constant(0))
                     .assignment(
-                        op: .equals,
+                        op: .assign,
                         rhs: .identifier("b")
+                        .sub(.constant(0))
                         .assignment(
-                            op: .equals,
+                            op: .assign,
                             rhs: .identifier("c")
                         )
                     )
@@ -1236,17 +1331,41 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
 
         assertNoTransform(
             statement:
-                // a = b[0] = c
+                // a = b().c = d
                 .expressions([
                     .identifier("a")
                     .assignment(
-                        op: .equals,
+                        op: .assign,
                         rhs: .identifier("b")
-                        .sub(.constant(0))
+                        .call()
+                        .dot("c")
                         .assignment(
-                            op: .equals,
-                            rhs: .identifier("c")
+                            op: .assign,
+                            rhs: .identifier("d")
                         )
+                    )
+                ])
+        )
+    }
+
+    func testDontBreakSequentialAssignmentsInVariableDeclarationWithNonIdentifiers() {
+        assertNoTransform(
+            statement:
+                // {
+                //     var a = b().c = d[0]
+                // }
+                .compound([
+                    .variableDeclaration(
+                        identifier: "a",
+                        type: .any,
+                        initialization:
+                            .identifier("b")
+                            .call()
+                            .dot("c")
+                            .assignment(
+                                op: .assign,
+                                rhs: .identifier("d").sub(.constant(0))
+                            )
                     )
                 ])
         )

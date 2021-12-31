@@ -283,16 +283,21 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
     /// Suggests a split to chained assignment variable declarations like,
     /// `var a = b = c`.
     func suggestSplit(_ stmt: VariableDeclarationsStatement) -> [Statement]? {
-        var splitCandidates: [Int: (Expression, IdentifierExpression)] = [:]
+        var splitCandidates: [Int: (assignment: Expression, lhs: Expression)] = [:]
         for (i, decl) in stmt.decl.enumerated() {
             guard let rhsAssignment = decl.initialization?.asAssignment else {
                 continue
             }
-            guard let identifier = rhsAssignment.lhs.asIdentifier else {
+
+            let lhs = rhsAssignment.lhs
+            guard canSplitChainedAssignmentLhs(lhs) else {
                 continue
             }
 
-            splitCandidates[i] = (rhsAssignment, identifier)
+            splitCandidates[i] = (
+                assignment: rhsAssignment,
+                lhs: lhs
+            )
         }
 
         guard !splitCandidates.isEmpty else {
@@ -303,12 +308,12 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
 
         for (i, decl) in stmt.decl.enumerated() {
             if let assignment = splitCandidates[i] {
-                stmts.append(.expression(assignment.0.copy()))
+                stmts.append(.expression(assignment.assignment.copy()))
                 stmts.append(
                     .variableDeclaration(
                         identifier: decl.identifier,
                         type: decl.type,
-                        initialization: assignment.1.copy()
+                        initialization: assignment.lhs.copy()
                     )
                 )
             } else {
@@ -347,14 +352,14 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
     func suggestSplit(_ exp: Expression) -> [Expression]? {
         assignmentSplit:
         if let assignment = exp.asAssignment {
-            // Can only split assignments that happen at identifiers.
-            guard let lhs = assignment.lhs.asIdentifier else {
-                break assignmentSplit
-            }
+            let lhs = assignment.lhs
+
             guard let rhsAssignment = assignment.rhs.asAssignment else {
                 break assignmentSplit
             }
-            guard let rhsLhs = rhsAssignment.asAssignment?.lhs.asIdentifier else {
+
+            let rhsLhs = rhsAssignment.lhs
+            guard canSplitChainedAssignmentLhs(rhsLhs) else {
                 break assignmentSplit
             }
 
@@ -378,6 +383,32 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         }
 
         return nil
+    }
+
+    /// Checks if the lhs of a chained assignment is more or less safe to split
+    /// into a separate expression.
+    func canSplitChainedAssignmentLhs(_ lhs: Expression) -> Bool {
+        if lhs.isIdentifier {
+            return true
+        }
+        guard let postfixExp = lhs.asPostfix else {
+            return false
+        }
+
+        for access in PostfixChainInverter(expression: postfixExp).invert() {
+            switch access {
+            case .root(let exp):
+                if !canSplitChainedAssignmentLhs(exp) {
+                    return false
+                }
+            case .member:
+                break
+            case .subscript, .call:
+                return false
+            }
+        }
+
+        return true
     }
 
     func suggestIfLetPattern(_ stmt: ExpressionsStatement) -> IfStatement? {
