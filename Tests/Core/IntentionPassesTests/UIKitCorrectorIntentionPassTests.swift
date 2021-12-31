@@ -203,7 +203,7 @@ extension UIKitCorrectorIntentionPassTests {
         into expected: FunctionSignature,
         markAsOverride: Bool,
         onSubclassesOf subclassOf: String,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) {
 
@@ -223,7 +223,7 @@ extension UIKitCorrectorIntentionPassTests {
         convertsSignature signature: FunctionSignature,
         into expected: FunctionSignature,
         onImplementersOfProtocol protocolName: String,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) {
 

@@ -12,6 +12,23 @@ public class NodeCreationContext {
     public var autoUpdatesSourceRange = true
     
     private var _nodeStack: [JsASTNode] = []
+    private var _staticContext: [Bool] = []
+
+    /// Returns `true` if the topmost static context is true.
+    ///
+    /// Returns `false` if there is no static context appended.
+    public var isStaticContext: Bool {
+        _staticContext.last ?? false
+    }
+
+    public func pushStaticContext(isStatic: Bool) {
+        _staticContext.append(isStatic)
+    }
+
+    @discardableResult
+    public func popStaticContext() -> Bool {
+        _staticContext.removeLast()
+    }
     
     /// Pushes a new node context
     @discardableResult

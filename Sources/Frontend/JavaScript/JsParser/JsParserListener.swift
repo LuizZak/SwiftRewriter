@@ -97,6 +97,46 @@ internal class JsParserListener: JavaScriptParserBaseListener {
         classNode.addChild(identifierNode)
     }
 
+    override func enterClassElement(_ ctx: JavaScriptParser.ClassElementContext) {
+        guard let classNode = context.currentContextNode(as: JsClassNode.self) else {
+            return
+        }
+
+        if ctx.methodDefinition() != nil {
+            // TODO: Figure out a better way to read the 'static' keyword here;
+            // TODO: Antlr doesn't generate this getter properly.
+            var isStatic = !ctx.Static().isEmpty
+            if !isStatic, let children = ctx.children {
+                isStatic = children.contains(where: { $0.getText() == "static" })
+            }
+
+            context.pushStaticContext(isStatic: isStatic)
+        }
+
+        // TODO: Add support for different property name declaration types
+        if let identifier = ctx.propertyName()?.identifierName()?.identifier() {
+            guard let singleExpression = ctx.singleExpression() else {
+                return
+            }
+
+            let node = nodeFactory.makeClassPropertyNode(from: ctx, identifier: identifier, expression: singleExpression)
+
+            node.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
+
+            classNode.addChild(node)
+        }
+    }
+
+    override func exitClassElement(_ ctx: JavaScriptParser.ClassElementContext) {
+        guard context.currentContextNode(as: JsClassNode.self) != nil else {
+            return
+        }
+
+        if ctx.methodDefinition() != nil {
+            context.popStaticContext()
+        }
+    }
+
     override func enterMethodDefinition(_ ctx: JavaScriptParser.MethodDefinitionContext) {
         guard let methodNode = context.currentContextNode(as: JsMethodDefinitionNode.self) else {
             return
@@ -108,6 +148,7 @@ internal class JsParserListener: JavaScriptParserBaseListener {
         let identifierNode = nodeFactory.makeIdentifier(from: methodName)
         methodNode.addChild(identifierNode)
         methodNode.signature = functionSignature(from: ctx.formalParameterList())
+        methodNode.isStatic = context.isStaticContext
     }
 
     override func enterFunctionDeclaration(_ ctx: JavaScriptParser.FunctionDeclarationContext) {
@@ -178,25 +219,6 @@ internal class JsParserListener: JavaScriptParserBaseListener {
         default:
             break
         }
-    }
-
-    override func enterClassElement(_ ctx: JavaScriptParser.ClassElementContext) {
-        guard let classNode = context.currentContextNode(as: JsClassNode.self) else {
-            return
-        }
-        // TODO: Add support for different property name declaration types
-        guard let identifier = ctx.propertyName()?.identifierName()?.identifier() else {
-            return
-        }
-        guard let singleExpression = ctx.singleExpression() else {
-            return
-        }
-
-        let node = nodeFactory.makeClassPropertyNode(from: ctx, identifier: identifier, expression: singleExpression)
-
-        node.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
-
-        classNode.addChild(node)
     }
 
     // MARK: - Internals

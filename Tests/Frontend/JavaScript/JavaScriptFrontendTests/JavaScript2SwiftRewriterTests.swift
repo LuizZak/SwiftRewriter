@@ -67,6 +67,24 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
         )
     }
 
+    func testRewrite_classStaticMethod() {
+        assertRewrite(
+            js: """
+            class A {
+                static method() {
+
+                }
+            }
+            """,
+            swift: """
+            class A {
+                static func method() -> Any {
+                }
+            }
+            """
+        )
+    }
+
     func testRewrite_multilineComments() {
         assertRewrite(
             js: """

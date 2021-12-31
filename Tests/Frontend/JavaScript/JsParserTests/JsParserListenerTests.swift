@@ -41,6 +41,7 @@ class JsParserListenerTests: XCTestCase {
         XCTAssertEqual(classDecl.methods.count, 3)
         XCTAssertEqual(classDecl.methods[0].identifier?.name, "constructor")
         XCTAssertEqual(classDecl.methods[1].identifier?.name, "method")
+        XCTAssertTrue(classDecl.methods[1].isStatic)
         XCTAssertEqual(classDecl.methods[2].identifier?.name, "getProperty")
     }
 

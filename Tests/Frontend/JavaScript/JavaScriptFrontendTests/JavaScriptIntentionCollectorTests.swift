@@ -188,6 +188,28 @@ class JavaScriptIntentionCollectorTests: XCTestCase {
         )
         XCTAssertTrue(file.classIntentions.first?.properties.first?.source is JsClassPropertyNode)
     }
+
+    func testCollectStaticMethod() throws {
+        // Arrange
+        let root = JsGlobalContextNode()
+
+        let classNode = JsClassNode()
+        classNode.addChild(JsIdentifierNode(name: "AClass"))
+        
+        let methodNode = JsMethodDefinitionNode()
+        methodNode.addChild(JsIdentifierNode(name: "method"))
+        methodNode.signature = JsFunctionSignature()
+        methodNode.isStatic = true
+
+        classNode.addChild(methodNode)
+        root.addChild(classNode)
+
+        // Act
+        sut.collectIntentions(root)
+
+        // Assert
+        XCTAssertTrue(try file.classIntentions[try: 0].methods[try: 0].isStatic)
+    }
     
     func testCollectClassComments() throws {
         testCommentCollection(
