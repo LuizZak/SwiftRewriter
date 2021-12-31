@@ -37,9 +37,10 @@ class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
             .enumCase(named: "Enum_Case1")
             .build()
         typeSystem.addType(en)
+        let exp: Expression = .identifier("Enum_Case1")
 
-        let sut = makeSut()
-        let res = sut.apply(on: .identifier("Enum_Case1").makeErrorTyped(), context: makeContext())
+        let sut = makeSut(container: .expression(exp))
+        let res = sut.apply(on: exp.makeErrorTyped(), context: makeContext(container: .expression(exp)))
 
         XCTAssertEqual(
             res.asPostfix?.member?

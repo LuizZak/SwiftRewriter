@@ -234,7 +234,7 @@ class UsageAnalysisTests: XCTestCase {
 
         let sut = LocalUsageAnalyzer(typeSystem: TypeSystem())
 
-        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
+        let usages = sut.findUsagesOf(localNamed: "a", in: .statement(body), intention: nil)
 
         XCTAssertEqual(usages.count, 1)
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)
@@ -265,7 +265,7 @@ class UsageAnalysisTests: XCTestCase {
 
         let sut = LocalUsageAnalyzer(typeSystem: TypeSystem())
 
-        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
+        let usages = sut.findUsagesOf(localNamed: "a", in: .statement(body), intention: nil)
 
         XCTAssertEqual(usages.count, 2)
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)
@@ -335,7 +335,7 @@ class UsageAnalysisTests: XCTestCase {
 
         let sut = LocalUsageAnalyzer(typeSystem: TypeSystem())
 
-        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
+        let usages = sut.findUsagesOf(localNamed: "a", in: .statement(body), intention: nil)
 
         XCTAssertEqual(usages.count, 5)
         XCTAssertEqual(usages[0].isReadOnlyUsage, false)
@@ -379,7 +379,7 @@ class UsageAnalysisTests: XCTestCase {
 
         let sut = LocalUsageAnalyzer(typeSystem: TypeSystem())
 
-        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
+        let usages = sut.findUsagesOf(localNamed: "a", in: .statement(body), intention: nil)
 
         XCTAssertEqual(usages.count, 2)
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)
@@ -430,7 +430,7 @@ class UsageAnalysisTests: XCTestCase {
 
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
 
-        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
+        let usages = sut.findUsagesOf(localNamed: "a", in: .statement(body), intention: nil)
 
         XCTAssertEqual(usages.count, 2)
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)
@@ -468,7 +468,7 @@ class UsageAnalysisTests: XCTestCase {
 
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
 
-        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
+        let usages = sut.findUsagesOf(localNamed: "a", in: .statement(body), intention: nil)
 
         XCTAssertEqual(usages.count, 1)
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)
@@ -511,7 +511,7 @@ class UsageAnalysisTests: XCTestCase {
 
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
 
-        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
+        let usages = sut.findUsagesOf(localNamed: "a", in: .statement(body), intention: nil)
 
         XCTAssertEqual(usages.count, 2)
         XCTAssertEqual(usages[0].isReadOnlyUsage, false)
@@ -556,7 +556,7 @@ class UsageAnalysisTests: XCTestCase {
 
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
 
-        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
+        let usages = sut.findUsagesOf(localNamed: "a", in: .statement(body), intention: nil)
 
         XCTAssertEqual(usages.count, 2)
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)

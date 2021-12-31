@@ -5,15 +5,16 @@ import Analysis
 /// constant `let` declarations.
 public class LocalConstantPromotionExpressionPass: ASTRewriterPass {
     public override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
-        guard let functionBody = context.functionBodyIntention else {
-            return super.visitVariableDeclarations(stmt)
-        }
+        let container = context.container
         
         let usage = LocalUsageAnalyzer(typeSystem: typeSystem)
         
         for (i, decl) in stmt.decl.enumerated() where !decl.isConstant && decl.ownership != .weak {
-            let usages = usage.findUsagesOf(localNamed: decl.identifier,
-                                            in: functionBody)
+            let usages = usage.findUsagesOf(
+                localNamed: decl.identifier,
+                in: container,
+                intention: context.source
+            )
             
             // Look for read-only usages
             if usages.contains(where: { !$0.isReadOnlyUsage }) {

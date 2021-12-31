@@ -111,7 +111,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
         )
     }
 
-    func testRewriteSequentialAssignmentExpressions() {
+    func testRewrite_sequentialAssignmentExpressions() {
         assertRewrite(
             js: """
             function foo() {
@@ -127,6 +127,64 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
                 b = c
                 a = b
             }
+            """
+        )
+    }
+
+    func testRewrite_visitGlobalVariableExpression() {
+        assertRewrite(
+            js: """
+            const utils = {
+                foo: function () {
+                    for (let p = 0, d = 0, c = d - 1; d > 1; d--, c--) {
+                        const list = [];
+                        for (let j = 0, dpt; j < c; j++) {
+                            dpt = {
+                                x: c * (p[j + 1].x - p[j].x),
+                                y: c * (p[j + 1].y - p[j].y),
+                            };
+                            if (_3d) {
+                                dpt.z = c * (p[j + 1].z - p[j].z);
+                            }
+                            list.push(dpt);
+                        }
+                        dpoints.push(list);
+                        p = list;
+                    }
+                }
+            }
+            """,
+            swift: """
+            var utils: Any = [foo: { () -> Any in
+                var p: Any = 0, d: Any = 0, c: Any = d - 1
+
+                while d > 1 {
+                    defer {
+                        d -= 1
+                        c -= 1
+                    }
+
+                    let list: Any = []
+                    var j: Any = 0, dpt: Any
+
+                    while j < c {
+                        defer {
+                            j += 1
+                        }
+
+                        dpt = [x: c * (p[j + 1].x - p[j].x), y: c * (p[j + 1].y - p[j].y)]
+
+                        if _3d {
+                            dpt.z = c * (p[j + 1].z - p[j].z)
+                        }
+
+                        list.push(dpt)
+                    }
+
+                    dpoints.push(list)
+                    p = list
+                }
+            }]
             """
         )
     }

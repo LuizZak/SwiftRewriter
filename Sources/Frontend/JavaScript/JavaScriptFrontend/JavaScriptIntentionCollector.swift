@@ -219,7 +219,7 @@ public class JavaScriptIntentionCollector {
         
             delegate?.reportForLazyParsing(intention: initialExpr)
             
-            property.initialValueExpr = initialExpr
+            property.initialValueIntention = initialExpr
         }
 
         ctx.addProperty(property)
@@ -262,7 +262,7 @@ public class JavaScriptIntentionCollector {
             
                 delegate?.reportForLazyParsing(intention: initialExpr)
                 
-                intention.initialValueExpr = initialExpr
+                intention.initialValueIntention = initialExpr
             }
 
             ctx.addGlobalVariable(intention)

@@ -94,7 +94,16 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
             opQueue.addOperation {
                 autoreleasepool {
                     item.context.intrinsicsBuilder.makeCache()
-                    _=item.context.typeResolver.resolveTypes(in: item.body.body)
+
+                    switch item.container {
+                    case .function(let body):
+                        _ = item.context.typeResolver.resolveTypes(in: body.body)
+                    case .statement(let stmt):
+                        _ = item.context.typeResolver.resolveTypes(in: stmt)
+                    case .expression(let exp):
+                        _ = item.context.typeResolver.resolveType(exp)
+                    }
+
                     item.context.intrinsicsBuilder.tearDownCache()
                 }
             }
@@ -182,8 +191,10 @@ public class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
         return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
     }
     
-    public func makeContext(forPropertyGetter property: PropertyGenerationIntention,
-                            getter: FunctionBodyIntention) -> Context {
+    public func makeContext(
+        forPropertyGetter property: PropertyGenerationIntention,
+        getter: FunctionBodyIntention
+    ) -> Context {
         
         let resolver = ExpressionTypeResolver(
             typeSystem: typeSystem, contextFunctionReturnType: property.type)
@@ -194,8 +205,10 @@ public class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
         return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
     }
     
-    public func makeContext(forPropertySetter property: PropertyGenerationIntention,
-                            setter: PropertyGenerationIntention.Setter) -> Context {
+    public func makeContext(
+        forPropertySetter property: PropertyGenerationIntention,
+        setter: PropertyGenerationIntention.Setter
+    ) -> Context {
         
         let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
 
@@ -205,9 +218,24 @@ public class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
         
         return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
     }
+
+    public func makeContext(
+        forProperty property: PropertyGenerationIntention,
+        initializer: PropertyInitialValueGenerationIntention
+    ) -> Context {
+
+        let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
+
+        let intrinsics = makeIntrinsics(typeResolver: resolver)
+        intrinsics.setupIntrinsics(forMember: property, intentions: intentions)
+        
+        return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
+    }
     
-    public func makeContext(forSubscriptGetter subscriptIntent: SubscriptGenerationIntention,
-                            getter: FunctionBodyIntention) -> Context {
+    public func makeContext(
+        forSubscriptGetter subscriptIntent: SubscriptGenerationIntention,
+        getter: FunctionBodyIntention
+    ) -> Context {
         
         let resolver = ExpressionTypeResolver(
             typeSystem: typeSystem, contextFunctionReturnType: subscriptIntent.returnType)
@@ -218,13 +246,28 @@ public class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
         return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
     }
     
-    public func makeContext(forSubscriptSetter subscriptIntent: SubscriptGenerationIntention,
-                            setter: PropertyGenerationIntention.Setter) -> Context {
+    public func makeContext(
+        forSubscriptSetter subscriptIntent: SubscriptGenerationIntention,
+        setter: PropertyGenerationIntention.Setter
+    ) -> Context {
         
         let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
 
         let intrinsics = makeIntrinsics(typeResolver: resolver)
         intrinsics.setupIntrinsics(forMember: subscriptIntent, intentions: intentions)
+        
+        return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
+    }
+
+    public func makeContext(
+        forGlobalVariable variable: GlobalVariableGenerationIntention,
+        initializer: GlobalVariableInitialValueIntention
+    ) -> Context {
+
+        let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
+
+        let intrinsics = makeIntrinsics(typeResolver: resolver)
+        intrinsics.setupIntrinsics(forVariable: variable, intentions: intentions)
         
         return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
     }
@@ -235,7 +278,8 @@ public class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
                 typeResolver: typeResolver,
                 globals: globals,
                 typeSystem: typeSystem,
-                intentionGlobals: intentionGlobals)
+                intentionGlobals: intentionGlobals
+            )
         
         return intrinsics
     }

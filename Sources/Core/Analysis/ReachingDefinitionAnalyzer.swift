@@ -4,19 +4,24 @@ import TypeSystem
 
 public class ReachingDefinitionAnalyzer {
     let controlFlowGraph: ControlFlowGraph
-    let functionBody: FunctionBodyIntention
+    let container: StatementContainer
+    let intention: FunctionBodyCarryingIntention?
     let typeSystem: TypeSystem
     private var inreaching: [ControlFlowGraphNode: Set<Definition>] = [:]
     private var outreaching: [ControlFlowGraphNode: Set<Definition>] = [:]
     
     private var didCalculate = false
     
-    public init(controlFlowGraph: ControlFlowGraph,
-                functionBody: FunctionBodyIntention,
-                typeSystem: TypeSystem) {
+    public init(
+        controlFlowGraph: ControlFlowGraph,
+        container: StatementContainer,
+        intention: FunctionBodyCarryingIntention?,
+        typeSystem: TypeSystem
+    ) {
         
         self.controlFlowGraph = controlFlowGraph
-        self.functionBody = functionBody
+        self.container = container
+        self.intention = intention
         self.typeSystem = typeSystem
     }
     
@@ -103,7 +108,11 @@ public class ReachingDefinitionAnalyzer {
             for exp in stmt.expressions {
                 let usages =
                     LocalUsageAnalyzer(typeSystem: typeSystem)
-                        .findAllUsages(in: exp, functionBody: functionBody)
+                        .findAllUsages(
+                            in: exp,
+                            container: container,
+                            intention: intention
+                        )
                 
                 let localsKilled =
                     usages.filter { usage in
@@ -138,8 +147,10 @@ public class ReachingDefinitionAnalyzer {
                         case .variableDeclaration(_, let index)
                             where stmt.decl[index].initialization != nil:
                             
-                            return Definition(definitionSite: node.node,
-                                              definition: def)
+                            return Definition(
+                                definitionSite: node.node,
+                                definition: def
+                            )
                         default:
                             return nil
                         }
@@ -152,7 +163,11 @@ public class ReachingDefinitionAnalyzer {
             for exp in stmt.expressions {
                 let usages =
                     LocalUsageAnalyzer(typeSystem: typeSystem)
-                        .findAllUsages(in: exp, functionBody: functionBody)
+                        .findAllUsages(
+                            in: exp,
+                            container: container,
+                            intention: intention
+                        )
                 
                 let localsGenerated =
                     usages.filter { usage in

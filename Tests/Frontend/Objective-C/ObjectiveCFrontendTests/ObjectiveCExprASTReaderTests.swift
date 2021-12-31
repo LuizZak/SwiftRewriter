@@ -482,7 +482,7 @@ extension ObjectiveCExprASTReaderTests {
                     but read as
                     \(result?.description ?? "<nil>")
                     """,
-                    file: #file,
+                    file: #filePath,
                     line: line
                 )
             }
@@ -490,7 +490,7 @@ extension ObjectiveCExprASTReaderTests {
         catch {
             XCTFail(
                 "Unexpected error(s) parsing objective-c: \(error)",
-                file: #file,
+                file: #filePath,
                 line: line
             )
         }

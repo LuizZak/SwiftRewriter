@@ -117,7 +117,7 @@ class JavaScriptIntentionCollectorTests: XCTestCase {
                     isConstant: false
                 )
             )
-            try XCTAssertNil(file.globalVariableIntentions[try: 0].initialValueExpr)
+            try XCTAssertNil(file.globalVariableIntentions[try: 0].initialValueIntention)
             try XCTAssertTrue(file.globalVariableIntentions[try: 0].source is JsVariableDeclarationNode)
             // b = 1;
             try XCTAssertEqual(file.globalVariableIntentions[try: 1].name, "b")
@@ -129,7 +129,7 @@ class JavaScriptIntentionCollectorTests: XCTestCase {
                     isConstant: false
                 )
             )
-            try XCTAssertEqual(file.globalVariableIntentions[try: 1].initialValueExpr?.typedSource?.expression?.getText(), "1")
+            try XCTAssertEqual(file.globalVariableIntentions[try: 1].initialValueIntention?.typedSource?.expression?.getText(), "1")
             try XCTAssertTrue(file.globalVariableIntentions[try: 1].source is JsVariableDeclarationNode)
         }
     }

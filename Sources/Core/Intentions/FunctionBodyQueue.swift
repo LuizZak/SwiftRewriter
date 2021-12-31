@@ -1,5 +1,9 @@
 import Foundation
 import Utils
+import SwiftAST
+
+// TODO: Rename to `StatementContainerQueue` to reflect the fact that function
+// TODO: bodies are no longer the only top-level statement containers.
 
 public protocol FunctionBodyQueueDelegate: AnyObject {
     associatedtype Context
@@ -12,17 +16,35 @@ public protocol FunctionBodyQueueDelegate: AnyObject {
     
     func makeContext(forMethod method: MethodGenerationIntention) -> Context
     
-    func makeContext(forPropertyGetter property: PropertyGenerationIntention,
-                     getter: FunctionBodyIntention) -> Context
+    func makeContext(
+        forPropertyGetter property: PropertyGenerationIntention,
+        getter: FunctionBodyIntention
+    ) -> Context
     
-    func makeContext(forPropertySetter property: PropertyGenerationIntention,
-                     setter: PropertyGenerationIntention.Setter) -> Context
+    func makeContext(
+        forPropertySetter property: PropertyGenerationIntention,
+        setter: PropertyGenerationIntention.Setter
+    ) -> Context
     
-    func makeContext(forSubscriptGetter subscriptIntent: SubscriptGenerationIntention,
-                     getter: FunctionBodyIntention) -> Context
+    func makeContext(
+        forProperty property: PropertyGenerationIntention,
+        initializer: PropertyInitialValueGenerationIntention
+    ) -> Context
     
-    func makeContext(forSubscriptSetter subscriptIntent: SubscriptGenerationIntention,
-                     setter: PropertyGenerationIntention.Setter) -> Context
+    func makeContext(
+        forSubscriptGetter subscriptIntent: SubscriptGenerationIntention,
+        getter: FunctionBodyIntention
+    ) -> Context
+    
+    func makeContext(
+        forSubscriptSetter subscriptIntent: SubscriptGenerationIntention,
+        setter: PropertyGenerationIntention.Setter
+    ) -> Context
+    
+    func makeContext(
+        forGlobalVariable variable: GlobalVariableGenerationIntention,
+        initializer: GlobalVariableInitialValueIntention
+    ) -> Context
 }
 
 /// Allows collecting function bodies across intention collections from functions,
@@ -32,9 +54,11 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
     
     public typealias Context = Delegate.Context
     
-    public static func fromFile(_ intentionCollection: IntentionCollection,
-                                file: FileGenerationIntention,
-                                delegate: Delegate) -> FunctionBodyQueue {
+    public static func fromFile(
+        _ intentionCollection: IntentionCollection,
+        file: FileGenerationIntention,
+        delegate: Delegate
+    ) -> FunctionBodyQueue {
         
         let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
         queue.collectFromFile(file)
@@ -42,9 +66,11 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         return queue
     }
     
-    public static func fromIntentionCollection(_ intentionCollection: IntentionCollection,
-                                               delegate: Delegate,
-                                               numThreads: Int) -> FunctionBodyQueue {
+    public static func fromIntentionCollection(
+        _ intentionCollection: IntentionCollection,
+        delegate: Delegate,
+        numThreads: Int
+    ) -> FunctionBodyQueue {
         
         let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
         queue.collect(from: intentionCollection, numThreads: numThreads)
@@ -52,9 +78,11 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         return queue
     }
     
-    public static func fromDeinit(_ intentionCollection: IntentionCollection,
-                                  deinitIntent: DeinitGenerationIntention,
-                                  delegate: Delegate) -> FunctionBodyQueue {
+    public static func fromDeinit(
+        _ intentionCollection: IntentionCollection,
+        deinitIntent: DeinitGenerationIntention,
+        delegate: Delegate
+    ) -> FunctionBodyQueue {
         
         let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
         queue.collectDeinit(deinitIntent)
@@ -62,9 +90,11 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         return queue
     }
     
-    public static func fromMethod(_ intentionCollection: IntentionCollection,
-                                  method: MethodGenerationIntention,
-                                  delegate: Delegate) -> FunctionBodyQueue {
+    public static func fromMethod(
+        _ intentionCollection: IntentionCollection,
+        method: MethodGenerationIntention,
+        delegate: Delegate
+    ) -> FunctionBodyQueue {
         
         let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
         queue.collectMethod(method)
@@ -72,12 +102,26 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         return queue
     }
     
-    public static func fromProperty(_ intentionCollection: IntentionCollection,
-                                    property: PropertyGenerationIntention,
-                                    delegate: Delegate) -> FunctionBodyQueue {
+    public static func fromProperty(
+        _ intentionCollection: IntentionCollection,
+        property: PropertyGenerationIntention,
+        delegate: Delegate
+    ) -> FunctionBodyQueue {
         
         let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
         queue.collectProperty(property)
+        
+        return queue
+    }
+
+    public static func fromGlobalVariable(
+        _ intentionCollection: IntentionCollection,
+        variable: GlobalVariableGenerationIntention,
+        delegate: Delegate
+    ) -> FunctionBodyQueue {
+
+        let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
+        queue.collectFromGlobalVariable(variable)
         
         return queue
     }
@@ -110,6 +154,10 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         for function in file.globalFunctionIntentions {
             collectFromFunction(function)
         }
+
+        for glob in file.globalVariableIntentions {
+            collectFromGlobalVariable(glob)
+        }
         
         for type in file.typeIntentions {
             collectFromType(type)
@@ -122,6 +170,26 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         for cls in file.extensionIntentions {
             collectFromClass(cls)
         }
+    }
+
+    private func collectFromGlobalVariable(_ intention: GlobalVariableGenerationIntention) {
+        guard let delegate = delegate else {
+            return
+        }
+        guard let initialValue = intention.initialValueIntention else {
+            return
+        }
+
+        let context = delegate.makeContext(
+            forGlobalVariable: intention,
+            initializer: initialValue
+        )
+
+        collectExpression(
+            initialValue.expression,
+            .globalVariable(intention, initialValue),
+            context: context
+        )
     }
     
     private func collectFromType(_ typeIntent: TypeGenerationIntention) {
@@ -217,7 +285,20 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
             collectFunctionBody(set.body, .property(property, isSetter: true), context: setterContext)
             
         case .asField:
-            break
+            guard let initializer = property.initialValueIntention else {
+                break
+            }
+
+            let context = delegate.makeContext(
+                forProperty: property,
+                initializer: initializer
+            )
+            
+            collectExpression(
+                initializer.expression,
+                .propertyInitializer(property, initializer),
+                context: context
+            )
         }
     }
     
@@ -246,35 +327,129 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         }
     }
     
-    private func collectFunctionBody(_ functionBody: FunctionBodyIntention,
-                                     _ intention: FunctionBodyCarryingIntention,
-                                     context: Context) {
+    private func collectFunctionBody(
+        _ functionBody: FunctionBodyIntention,
+        _ intention: FunctionBodyCarryingIntention,
+        context: Context
+    ) {
         
         mutex.locking {
             items.append(
-                FunctionBodyQueueItem(body: functionBody,
-                                      intention: intention,
-                                      context: context))
+                FunctionBodyQueueItem(
+                    container: .function(functionBody),
+                    intention: intention,
+                    context: context
+                )
+            )
+        }
+    }
+    
+    private func collectStatement(
+        _ statement: Statement,
+        _ intention: FunctionBodyCarryingIntention,
+        context: Context
+    ) {
+        
+        mutex.locking {
+            items.append(
+                FunctionBodyQueueItem(
+                    container: .statement(statement),
+                    intention: intention,
+                    context: context
+                )
+            )
+        }
+    }
+    
+    private func collectExpression(
+        _ expression: Expression,
+        _ intention: FunctionBodyCarryingIntention,
+        context: Context
+    ) {
+        
+        mutex.locking {
+            items.append(
+                FunctionBodyQueueItem(
+                    container: .expression(expression),
+                    intention: intention,
+                    context: context
+                )
+            )
         }
     }
     
     public struct FunctionBodyQueueItem {
-        public var body: FunctionBodyIntention
+        public var container: StatementContainer
         public var intention: FunctionBodyCarryingIntention?
         public var context: Context
         
-        public init(body: FunctionBodyIntention,
-                    intention: FunctionBodyCarryingIntention?,
-                    context: Context) {
+        public init(
+            container: StatementContainer,
+            intention: FunctionBodyCarryingIntention?,
+            context: Context
+        ) {
             
-            self.body = body
+            self.container = container
             self.intention = intention
             self.context = context
         }
     }
 }
 
-/// Describes an intention that is a carrier of a function body.
+/// Describes a top level function body, statement, or expression that an intention
+/// carries.
+public enum StatementContainer {
+    case function(FunctionBodyIntention)
+    case statement(Statement)
+    case expression(Expression)
+
+    /// Convenience for applying an AST visitor on the contents of this container
+    /// value.
+    public func accept<Visitor>(_ visitor: Visitor) -> Visitor.ExprResult where Visitor: StatementVisitor & ExpressionVisitor, Visitor.ExprResult == Visitor.StmtResult {
+        switch self {
+        case .function(let body):
+            return visitor.visitStatement(body.body)
+        case .statement(let stmt):
+            return visitor.visitStatement(stmt)
+        case .expression(let exp):
+            return visitor.visitExpression(exp)
+        }
+    }
+
+    /// Gets the function body, if this statement container is a function body
+    /// case.
+    public var functionBody: FunctionBodyIntention? {
+        switch self {
+        case .function(let body):
+            return body
+        default:
+            return nil
+        }
+    }
+
+    /// Gets the statement, if this statement container is a statement case.
+    public var statement: Statement? {
+        switch self {
+        case .statement(let stmt):
+            return stmt
+        default:
+            return nil
+        }
+    }
+
+    /// Gets the expression, if this statement container is a expression case.
+    public var expression: Expression? {
+        switch self {
+        case .expression(let exp):
+            return exp
+        default:
+            return nil
+        }
+    }
+}
+
+/// Describes an intention that is a carrier of a function body or a top-level
+/// expression.
 public enum FunctionBodyCarryingIntention {
     case method(MethodGenerationIntention)
     case initializer(InitGenerationIntention)
@@ -282,9 +457,11 @@ public enum FunctionBodyCarryingIntention {
     case global(GlobalFunctionGenerationIntention)
     case property(PropertyGenerationIntention, isSetter: Bool)
     case `subscript`(SubscriptGenerationIntention, isSetter: Bool)
+    case propertyInitializer(PropertyGenerationIntention, PropertyInitialValueGenerationIntention)
+    case globalVariable(GlobalVariableGenerationIntention, GlobalVariableInitialValueIntention)
 }
 
-/// An empty funtion body queue implementation which always return an empty
+/// An empty function body queue implementation which always return an empty
 /// context object.
 public class EmptyFunctionBodyQueueDelegate: FunctionBodyQueueDelegate {
     public typealias Context = Void
@@ -293,33 +470,61 @@ public class EmptyFunctionBodyQueueDelegate: FunctionBodyQueueDelegate {
         
     }
     
-    public func makeContext(forFunction function: GlobalFunctionGenerationIntention) {
+    public func makeContext(forFunction function: GlobalFunctionGenerationIntention) -> Void {
         
     }
-    public func makeContext(forMethod method: MethodGenerationIntention) {
+
+    public func makeContext(forMethod method: MethodGenerationIntention) -> Void {
         
     }
-    public func makeContext(forInit ctor: InitGenerationIntention) {
-        
-    }
-    public func makeContext(forDeinit deinitIntent: DeinitGenerationIntention) -> Void {
-        
-    }
-    public func makeContext(forPropertyGetter property: PropertyGenerationIntention,
-                            getter: FunctionBodyIntention) {
-        
-    }
-    public func makeContext(forPropertySetter property: PropertyGenerationIntention,
-                            setter: PropertyGenerationIntention.Setter) {
-        
-    }
-    public func makeContext(forSubscriptGetter subscriptIntent: SubscriptGenerationIntention,
-                            getter: FunctionBodyIntention) -> Void {
+
+    public func makeContext(forInit ctor: InitGenerationIntention) -> Void {
         
     }
     
-    public func makeContext(forSubscriptSetter subscriptIntent: SubscriptGenerationIntention,
-                            setter: PropertyGenerationIntention.Setter) -> Void {
+    public func makeContext(forDeinit deinitIntent: DeinitGenerationIntention) -> Void {
         
+    }
+
+    public func makeContext(
+        forPropertyGetter property: PropertyGenerationIntention,
+        getter: FunctionBodyIntention
+    ) -> Void {
+        
+    }
+
+    public func makeContext(
+        forPropertySetter property: PropertyGenerationIntention,
+        setter: PropertyGenerationIntention.Setter
+    ) -> Void {
+        
+    }
+
+    public func makeContext(
+        forProperty property: PropertyGenerationIntention,
+        initializer: PropertyInitialValueGenerationIntention
+    ) -> Void {
+    
+    }
+
+    public func makeContext(
+        forSubscriptGetter subscriptIntent: SubscriptGenerationIntention,
+        getter: FunctionBodyIntention
+    ) -> Void {
+        
+    }
+    
+    public func makeContext(
+        forSubscriptSetter subscriptIntent: SubscriptGenerationIntention,
+        setter: PropertyGenerationIntention.Setter
+    ) -> Void {
+        
+    }
+
+    public func makeContext(
+        forGlobalVariable variable: GlobalVariableGenerationIntention,
+        initializer: GlobalVariableInitialValueIntention
+    ) -> Void {
+    
     }
 }

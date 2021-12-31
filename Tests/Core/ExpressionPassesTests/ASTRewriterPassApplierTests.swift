@@ -42,6 +42,46 @@ class ASTRewriterPassApplierTests: XCTestCase {
         XCTAssertEqual(clsA.methods[0].functionBody!.body, [.expression(.identifier("replaced"))])
         XCTAssertEqual(clsB.methods[0].functionBody!.body, [.expression(.identifier("original"))])
     }
+
+    func testApplyGlobalVariableInitializers() {
+        let intentions = IntentionCollectionBuilder()
+            .createFile(named: "A.h") { file in
+                file.createGlobalVariable(withName: "a", storage: .constant(ofType: .any), initialExpression: .identifier("original"))
+            }.build(typeChecked: true)
+        
+
+        let sut = ASTRewriterPassApplier(
+            passes: [TestExpressionPass.self],
+            typeSystem: TypeSystem(),
+            globals: ArrayDefinitionsSource()
+        )
+
+        sut.apply(on: intentions)
+        let globalVar = intentions.globalVariables()[0]
+        XCTAssertEqual(globalVar.initialValue, .identifier("replaced"))
+    }
+
+    func testApplyPropertyInitializers() {
+        let intentions = IntentionCollectionBuilder()
+            .createFile(named: "A.h") { file in
+                file.createClass(withName: "AClass") { cls in
+                    cls.createProperty(named: "String", type: .any) { prop in
+                        prop.setInitialExpression(.identifier("replaced"))
+                    }
+                }
+            }.build(typeChecked: true)
+        
+
+        let sut = ASTRewriterPassApplier(
+            passes: [TestExpressionPass.self],
+            typeSystem: TypeSystem(),
+            globals: ArrayDefinitionsSource()
+        )
+
+        sut.apply(on: intentions)
+        let clsA = intentions.classIntentions()[0]
+        XCTAssertEqual(clsA.properties[0].initialValueIntention?.expression, .identifier("replaced"))
+    }
 }
 
 private class TestExpressionPass: ASTRewriterPass {
@@ -50,5 +90,12 @@ private class TestExpressionPass: ASTRewriterPass {
         context: ASTRewriterPassContext
     ) -> Statement {
         return .expression(.identifier("replaced"))
+    }
+
+    override func apply(
+        on expression: Expression, 
+        context: ASTRewriterPassContext
+    ) -> Expression {
+        return .identifier("replaced")
     }
 }

@@ -382,6 +382,72 @@ class ASTSimplifierTests: ExpressionPassTestCase {
         assertNotifiedChange()
     }
 
+    func testSplitTopLevelTupleExpressions_inDeferStatement() {
+        assertTransform(
+            statement:
+                .defer([
+                    .expression(
+                        .tuple([
+                            .identifier("a").assignment(op: .subtractAssign, rhs: .constant(1)),
+                            .identifier("b").assignment(op: .subtractAssign, rhs: .constant(1)),
+                        ])
+                    )
+                ]),
+            into:
+                .defer([
+                    .expression(
+                        .identifier("a").assignment(op: .subtractAssign, rhs: .constant(1))
+                    ),
+                    .expression(
+                        .identifier("b").assignment(op: .subtractAssign, rhs: .constant(1))
+                    ),
+                ])
+        )
+        assertNotifiedChange()
+    }
+
+    func testSplitTopLevelTupleExpressions_inNestedDictionaryBlockExpression() {
+        assertTransform(
+            statement:
+                .expression(
+                    .dictionaryLiteral([
+                        .init(
+                            key: .identifier("a"), 
+                            value: .block(body: [
+                                .defer([
+                                    .expression(
+                                        .tuple([
+                                            .identifier("a").assignment(op: .subtractAssign, rhs: .constant(1)),
+                                            .identifier("b").assignment(op: .subtractAssign, rhs: .constant(1)),
+                                        ])
+                                    )
+                                ])
+                            ])
+                        )
+                    ])
+                ),
+            into:
+                .expression(
+                    .dictionaryLiteral([
+                        .init(
+                            key: .identifier("a"), 
+                            value: .block(body: [
+                                .defer([
+                                    .expression(
+                                        .identifier("a").assignment(op: .subtractAssign, rhs: .constant(1))
+                                    ),
+                                    .expression(
+                                        .identifier("b").assignment(op: .subtractAssign, rhs: .constant(1))
+                                    ),
+                                ])
+                            ])
+                        )
+                    ])
+                )
+        )
+        assertNotifiedChange()
+    }
+
     func testSplitTopLevelTupleExpressions_keepStatementLabel() {
         assertTransform(
             statement:

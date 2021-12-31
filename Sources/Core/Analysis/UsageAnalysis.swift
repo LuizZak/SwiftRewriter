@@ -18,16 +18,22 @@ public protocol LocalsUsageAnalyzer: UsageAnalyzer {
     /// Finds all usages of a local with a given name.
     /// Returns all usages of any local named `local`, even those which are shadowed
     /// by other, deeper scoped definitions.
-    func findUsagesOf(localNamed local: String,
-                      in functionBody: FunctionBodyIntention) -> [DefinitionUsage]
+    func findUsagesOf(
+        localNamed local: String,
+        in container: StatementContainer,
+        intention: FunctionBodyCarryingIntention?
+    ) -> [DefinitionUsage]
     
     /// Finds all usages of a local with a given name in the scope of a given
     /// `SyntaxNode`.
     /// `syntaxNode` must either be a `Statement` node, or any node which is a
     /// descendent of a `Statement` node, otherwise a fatal error is raised.
-    func findUsagesOf(localNamed local: String,
-                      inScopeOf syntaxNode: SyntaxNode,
-                      in functionBody: FunctionBodyIntention) -> [DefinitionUsage]
+    func findUsagesOf(
+        localNamed local: String,
+        inScopeOf syntaxNode: SyntaxNode,
+        in container: StatementContainer,
+        intention: FunctionBodyCarryingIntention?
+    ) -> [DefinitionUsage]
     
     /// Finds the definition of a local with a given name within the scope of a
     /// given `SyntaxNode`.
@@ -35,9 +41,12 @@ public protocol LocalsUsageAnalyzer: UsageAnalyzer {
     /// descendent of a `Statement` node, otherwise a fatal error is raised.
     /// Returns `nil`, in case no definition with the given name could be found
     /// within scope of `syntaxNode`
-    func findDefinitionOf(localNamed local: String,
-                          inScopeOf syntaxNode: SyntaxNode,
-                          in functionBody: FunctionBodyIntention) -> LocalCodeDefinition?
+    func findDefinitionOf(
+        localNamed local: String,
+        inScopeOf syntaxNode: SyntaxNode,
+        in container: StatementContainer,
+        intention: FunctionBodyCarryingIntention?
+    ) -> LocalCodeDefinition?
 }
 
 public class BaseUsageAnalyzer: UsageAnalyzer {
@@ -48,13 +57,11 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
     }
     
     public func findUsagesOf(method: KnownMethod) -> [DefinitionUsage] {
-        let bodies = functionBodies()
+        let containers = statementContainers()
         
         var usages: [DefinitionUsage] = []
         
-        for functionBody in bodies {
-            let body = functionBody.body
-            
+        for (container, intention) in containers {
             let visitor = AnonymousSyntaxNodeVisitor { node in
                 guard let exp = node as? PostfixExpression else {
                     return
@@ -69,7 +76,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                 if expMethod.ownerType?.asTypeName == method.ownerType?.asTypeName {
                     let usage =
                         DefinitionUsage(
-                            intention: functionBody,
+                            intention: intention,
                             definition: .forKnownMember(method),
                             expression: exp,
                             isReadOnlyUsage: true
@@ -79,20 +86,25 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                 }
             }
             
-            visitor.visitStatement(body)
+            switch container {
+            case .function(let body):
+                visitor.visitStatement(body.body)
+            case .expression(let exp):
+                visitor.visitExpression(exp)
+            case .statement(let stmt):
+                visitor.visitStatement(stmt)
+            }
         }
         
         return usages
     }
     
     public func findUsagesOf(property: KnownProperty) -> [DefinitionUsage] {
-        let bodies = functionBodies()
+        let containers = statementContainers()
         
         var usages: [DefinitionUsage] = []
         
-        for functionBody in bodies {
-            let body = functionBody.body
-            
+        for (container, intention) in containers {
             let visitor = AnonymousSyntaxNodeVisitor { node in
                 guard let exp = node as? PostfixExpression else {
                     return
@@ -109,7 +121,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                     
                     let usage =
                         DefinitionUsage(
-                            intention: functionBody,
+                            intention: intention,
                             definition: .forKnownMember(property),
                             expression: exp,
                             isReadOnlyUsage: readOnly
@@ -119,7 +131,14 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                 }
             }
             
-            visitor.visitStatement(body)
+            switch container {
+            case .function(let body):
+                visitor.visitStatement(body.body)
+            case .expression(let exp):
+                visitor.visitExpression(exp)
+            case .statement(let stmt):
+                visitor.visitStatement(stmt)
+            }
         }
         
         return usages
@@ -171,13 +190,13 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
         return true
     }
     
-    func functionBodies() -> [FunctionBodyIntention] {
+    func statementContainers() -> [(StatementContainer, FunctionBodyCarryingIntention)] {
         []
     }
 }
 
 /// Default implementation of UsageAnalyzer which searches for definitions in all
-/// method bodies.
+/// function bodies, top-level statements and expressions.
 public class IntentionCollectionUsageAnalyzer: BaseUsageAnalyzer {
     public var intentions: IntentionCollection
     private let numThreads: Int
@@ -193,14 +212,21 @@ public class IntentionCollectionUsageAnalyzer: BaseUsageAnalyzer {
         
         super.init(typeSystem: typeSystem)
     }
-    
-    override func functionBodies() -> [FunctionBodyIntention] {
+
+    override func statementContainers() -> [(StatementContainer, FunctionBodyCarryingIntention)] {
         let queue =
             FunctionBodyQueue.fromIntentionCollection(
                 intentions, delegate: EmptyFunctionBodyQueueDelegate(),
-                numThreads: numThreads)
-        
-        return queue.items.map(\.body)
+                numThreads: numThreads
+            )
+
+        return queue.items.compactMap { item in
+            if let intention = item.intention {
+                return (item.container, intention)
+            }
+
+            return nil
+        }
     }
 }
 
@@ -212,12 +238,13 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
         super.init(typeSystem: typeSystem)
     }
     
-    public func findUsagesOf(localNamed local: String,
-                             in functionBody: FunctionBodyIntention) -> [DefinitionUsage] {
+    public func findUsagesOf(
+        localNamed local: String,
+        in container: StatementContainer,
+        intention: FunctionBodyCarryingIntention?
+    ) -> [DefinitionUsage] {
         
         var usages: [DefinitionUsage] = []
-        
-        let body = functionBody.body
         
         let visitor =
             AnonymousSyntaxNodeVisitor { node in
@@ -233,7 +260,7 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
                     
                     let usage =
                         DefinitionUsage(
-                            intention: functionBody,
+                            intention: intention,
                             definition: def,
                             expression: identifier,
                             isReadOnlyUsage: readOnly
@@ -243,29 +270,33 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
                 }
             }
         
-        visitor.visitStatement(body)
+        container.accept(visitor)
         
         return usages
     }
     
-    public func findUsagesOf(localNamed local: String,
-                             inScopeOf syntaxNode: SyntaxNode,
-                             in functionBody: FunctionBodyIntention) -> [DefinitionUsage] {
+    public func findUsagesOf(
+        localNamed local: String,
+        inScopeOf syntaxNode: SyntaxNode,
+        in container: StatementContainer,
+        intention: FunctionBodyCarryingIntention?
+    ) -> [DefinitionUsage] {
         
         guard let definition = findDefinitionOf(localNamed: local, inScopeOf: syntaxNode) else {
             return []
         }
         
-        return findUsagesOf(definition: definition, inScopeOf: syntaxNode, in: functionBody)
+        return findUsagesOf(definition: definition, inScopeOf: syntaxNode, in: container, intention: intention)
     }
     
-    public func findUsagesOf(definition: LocalCodeDefinition,
-                             inScopeOf syntaxNode: SyntaxNode,
-                             in functionBody: FunctionBodyIntention) -> [DefinitionUsage] {
+    public func findUsagesOf(
+        definition: LocalCodeDefinition,
+        inScopeOf syntaxNode: SyntaxNode,
+        in container: StatementContainer,
+        intention: FunctionBodyCarryingIntention?
+    ) -> [DefinitionUsage] {
         
         var usages: [DefinitionUsage] = []
-        
-        let body = functionBody.body
         
         let visitor =
             AnonymousSyntaxNodeVisitor { node in
@@ -282,7 +313,7 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
                     
                     let usage =
                         DefinitionUsage(
-                            intention: functionBody,
+                            intention: intention,
                             definition: def,
                             expression: identifier,
                             isReadOnlyUsage: readOnly
@@ -292,13 +323,16 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
                 }
         }
         
-        visitor.visitStatement(body)
+        container.accept(visitor)
         
         return usages
     }
     
-    public func findAllUsages(in syntaxNode: SyntaxNode,
-                              functionBody: FunctionBodyIntention) -> [DefinitionUsage] {
+    public func findAllUsages(
+        in syntaxNode: SyntaxNode,
+        container: StatementContainer,
+        intention: FunctionBodyCarryingIntention?
+    ) -> [DefinitionUsage] {
         
         var usages: [DefinitionUsage] = []
         
@@ -315,7 +349,7 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
                 
                 let usage =
                     DefinitionUsage(
-                        intention: functionBody,
+                        intention: intention,
                         definition: definition,
                         expression: identifier,
                         isReadOnlyUsage: readOnly
@@ -338,7 +372,11 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
         return usages
     }
     
-    public func findDefinitionOf(localNamed local: String, inScopeOf syntaxNode: SyntaxNode) -> LocalCodeDefinition? {
+    public func findDefinitionOf(
+        localNamed local: String,
+        inScopeOf syntaxNode: SyntaxNode
+    ) -> LocalCodeDefinition? {
+
         let scope = scopeFor(syntaxNode: syntaxNode)
         
         return scope?.firstDefinition(named: local) as? LocalCodeDefinition
@@ -358,8 +396,11 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
 
 /// Reports the usage of a type member or global declaration
 public struct DefinitionUsage {
-    /// Intention for function body which this member usage is contained wihin.
-    public var intention: FunctionBodyIntention
+    /// Intention for function body or statement/expression which this member
+    /// usage is contained within.
+    ///
+    /// Can be nil, if no contextual intention was provided during analysis.
+    public var intention: FunctionBodyCarryingIntention?
     
     /// The definition that was effectively used
     public var definition: CodeDefinition

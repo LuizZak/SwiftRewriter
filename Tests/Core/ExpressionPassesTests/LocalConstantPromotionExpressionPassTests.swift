@@ -27,7 +27,6 @@ class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
                 initialization: .constant(0)
             )
         ]
-        functionBodyContext = FunctionBodyIntention(body: body)
 
         assertTransform(
             statement: body,
@@ -56,7 +55,7 @@ class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
                     .assignment(op: .equals, rhs: .constant(1))
             ),
         ]
-        functionBodyContext = FunctionBodyIntention(body: body)
+        
         let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
         _ = resolver.resolveTypes(in: body)
 
@@ -91,7 +90,7 @@ class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
                 initialization: .constant(0)
             )
         ]
-        functionBodyContext = FunctionBodyIntention(body: body)
+        
         let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
         _ = resolver.resolveTypes(in: body)
 

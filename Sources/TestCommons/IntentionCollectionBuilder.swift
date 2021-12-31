@@ -119,7 +119,7 @@ public class FileIntentionBuilder {
         varIntention.inNonnullContext = inNonnullContext
         
         if let initialExpression = initialExpression {
-            varIntention.initialValueExpr =
+            varIntention.initialValueIntention =
                 GlobalVariableInitialValueIntention(expression: initialExpression,
                                                     source: nil)
         }

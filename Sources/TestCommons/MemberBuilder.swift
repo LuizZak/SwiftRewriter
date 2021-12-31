@@ -156,7 +156,7 @@ public extension MemberBuilder where T: PropertyGenerationIntention {
     }
     
     @discardableResult
-    func setInitialValue(expression: Expression?) -> MemberBuilder {
+    func setComputedValue(expression: Expression?) -> MemberBuilder {
         targetMember.mode = .computed(FunctionBodyIntention(body: []))
         
         return self

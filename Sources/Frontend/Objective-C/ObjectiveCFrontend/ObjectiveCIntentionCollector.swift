@@ -260,7 +260,7 @@ public class ObjectiveCIntentionCollector {
             
             delegate?.reportForLazyParsing(intention: initialExpr)
             
-            intent.initialValueExpr = initialExpr
+            intent.initialValueIntention = initialExpr
         }
         
         ctx.addGlobalVariable(intent)

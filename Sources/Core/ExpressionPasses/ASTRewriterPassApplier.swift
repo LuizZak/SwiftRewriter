@@ -83,10 +83,12 @@ public final class ASTRewriterPassApplier {
         return file.isPrimary
     }
     
-    private func internalApply(on file: FileGenerationIntention,
-                               intentions: IntentionCollection,
-                               passType: ASTRewriterPass.Type,
-                               operationQueue: ConcurrentOperationQueue) {
+    private func internalApply(
+        on file: FileGenerationIntention,
+        intentions: IntentionCollection,
+        passType: ASTRewriterPass.Type,
+        operationQueue: ConcurrentOperationQueue
+    ) {
         
         let delegate =
             TypeResolvingQueueDelegate(
@@ -116,18 +118,19 @@ public final class ASTRewriterPassApplier {
         self.afterFile?(file.targetPath, "\(passType)")
     }
     
-    private func applyPassOnBody(_ item: FunctionBodyQueue<TypeResolvingQueueDelegate>.FunctionBodyQueueItem,
-                                 passType: ASTRewriterPass.Type) {
-        
-        let functionBody = item.body
-        
-        // Resolve types before feeding into passes
-        if dirtyFunctions.isDirty(functionBody) {
-            _=item.context.typeResolver.resolveTypes(in: functionBody.body)
+    private func applyPassOnBody(
+        _ item: FunctionBodyQueue<TypeResolvingQueueDelegate>.FunctionBodyQueueItem,
+        passType: ASTRewriterPass.Type
+    ) {
+        guard let intention = item.intention else {
+            return
         }
         
+        // Resolve types before feeding into passes
+        resolveTypes(in: item)
+        
         let notifyChangedTree: () -> Void = {
-            self.dirtyFunctions.markDirty(functionBody)
+            self.dirtyFunctions.markDirty(intention)
         }
         
         let expContext =
@@ -136,28 +139,112 @@ public final class ASTRewriterPassApplier {
                 typeResolver: item.context.typeResolver,
                 notifyChangedTree: notifyChangedTree,
                 source: item.intention,
-                functionBodyIntention: item.body
+                container: item.container
             )
         
         let pass = passType.init(context: expContext)
-        let result = pass.apply(on: item.body.body, context: expContext)
+
+        switch item.container {
+        case .function(let body):
+            let result = pass.apply(on: body.body, context: expContext)
+            
+            if let compound = result.asCompound {
+                body.body = compound
+            } else {
+                body.body = [result]
+            }
+
+        case .statement(_):
+            // TODO: Handle top-level statements
+            // let result = pass.apply(on: stmt, context: expContext)
+            break
         
-        if let compound = result.asCompound {
-            item.body.body = compound
-        } else {
-            item.body.body = [result]
+        case .expression(let exp):
+            let result = pass.apply(on: exp, context: expContext)
+
+            switch intention {
+            case .globalVariable(_, let intention):
+                intention.expression = result
+            case .propertyInitializer(_, let intention):
+                intention.expression = result
+            default:
+                break
+            }
+        }
+    }
+
+    private func resolveTypes(in item: FunctionBodyQueue<TypeResolvingQueueDelegate>.FunctionBodyQueueItem) {
+        guard let intention = item.intention else {
+            return
+        }
+
+        if dirtyFunctions.isDirty(intention) {
+            switch item.container {
+            case .function(let body):
+                _ = item.context.typeResolver.resolveTypes(in: body.body)
+            case .statement(let stmt):
+                _ = item.context.typeResolver.resolveTypes(in: stmt)
+            case .expression(let exp):
+                _ = item.context.typeResolver.resolveType(exp)
+            }
         }
     }
     
     private class DirtyFunctionBodyMap {
-        @ConcurrentValue var dirty: Set<FunctionBodyIntention> = []
+        @ConcurrentValue var dirty: Set<FunctionBodyCarryingIntention> = []
         
-        func markDirty(_ body: FunctionBodyIntention) {
+        func markDirty(_ body: FunctionBodyCarryingIntention) {
             dirty.insert(body)
         }
         
-        func isDirty(_ body: FunctionBodyIntention) -> Bool {
+        func isDirty(_ body: FunctionBodyCarryingIntention) -> Bool {
             dirty.contains(body)
+        }
+    }
+}
+
+extension FunctionBodyCarryingIntention: Hashable {
+    public static func == (lhs: FunctionBodyCarryingIntention, rhs: FunctionBodyCarryingIntention) -> Bool {
+        switch (lhs, rhs) {
+        case (.method(let l), .method(let r)):
+            return l === r
+        case (.initializer(let l), .initializer(let r)):
+            return l === r
+        case (.`deinit`(let l), .`deinit`(let r)):
+            return l === r
+        case (.global(let l), .global(let r)):
+            return l === r
+        case (.property(let l, _), .property(let r, _)):
+            return l === r
+        case (.`subscript`(let l, _), .`subscript`(let r, _)):
+            return l === r
+        case (.propertyInitializer(let l, _), .propertyInitializer(let r, _)):
+            return l === r
+        case (.globalVariable(let l, _), .globalVariable(let r, _)):
+            return l === r
+        default:
+            return false
+        }
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        switch self {
+            case .method(let o):
+                hasher.combine(ObjectIdentifier(o))
+            case .initializer(let o):
+                hasher.combine(ObjectIdentifier(o))
+            case .`deinit`(let o):
+                hasher.combine(ObjectIdentifier(o))
+            case .global(let o):
+                hasher.combine(ObjectIdentifier(o))
+            case .property(let o, _):
+                hasher.combine(ObjectIdentifier(o))
+            case .`subscript`(let o, _):
+                hasher.combine(ObjectIdentifier(o))
+            case .propertyInitializer(let o, _):
+                hasher.combine(ObjectIdentifier(o))
+            case .globalVariable(let o, _):
+                hasher.combine(ObjectIdentifier(o))
         }
     }
 }
@@ -173,7 +260,9 @@ extension FunctionBodyIntention: Hashable {
 }
 
 public protocol ASTRewriterPassApplierProgressDelegate: AnyObject {
-    func astWriterPassApplier(_ passApplier: ASTRewriterPassApplier,
-                              applyingPassType passType: ASTRewriterPass.Type,
-                              toFile file: FileGenerationIntention)
+    func astWriterPassApplier(
+        _ passApplier: ASTRewriterPassApplier,
+        applyingPassType passType: ASTRewriterPass.Type,
+        toFile file: FileGenerationIntention
+    )
 }

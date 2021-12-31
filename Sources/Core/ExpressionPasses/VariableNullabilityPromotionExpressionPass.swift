@@ -7,11 +7,9 @@ import Utils
 /// are detected to be non-nil as well.
 public class VariableNullabilityPromotionExpressionPass: ASTRewriterPass {
     let localsAnalyzer: LocalUsageAnalyzer
-    let body: FunctionBodyIntention?
     
     public required init(context: ASTRewriterPassContext) {
         self.localsAnalyzer = LocalUsageAnalyzer(typeSystem: context.typeSystem)
-        body = context.functionBodyIntention
         
         super.init(context: context)
     }
@@ -19,9 +17,6 @@ public class VariableNullabilityPromotionExpressionPass: ASTRewriterPass {
     public override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
         let stmt = super.visitVariableDeclarations(stmt)
         
-        guard let body = body else {
-            return stmt
-        }
         guard let varDeclStmt = stmt.asVariableDeclaration else {
             return stmt
         }
@@ -29,7 +24,11 @@ public class VariableNullabilityPromotionExpressionPass: ASTRewriterPass {
         for (i, decl) in varDeclStmt.decl.enumerated() {
             let usages =
                 localsAnalyzer
-                    .findUsagesOf(localNamed: decl.identifier, in: body)
+                    .findUsagesOf(
+                        localNamed: decl.identifier,
+                        in: context.container,
+                        intention: context.source
+                    )
             
             if usages.isEmpty && decl.initialization == nil {
                 continue
@@ -70,15 +69,15 @@ public class VariableNullabilityPromotionExpressionPass: ASTRewriterPass {
     }
     
     private func collectAssignments(for decl: StatementVariableDeclaration) -> [Expression] {
-        guard let body = body else {
-            return []
-        }
-        
         var assignments: [Expression] = []
         
         let usages =
             localsAnalyzer
-                .findUsagesOf(localNamed: decl.identifier, in: body)
+                .findUsagesOf(
+                    localNamed: decl.identifier,
+                    in: context.container,
+                    intention: context.source
+                )
         
         if let exp = decl.initialization {
             assignments.append(exp)

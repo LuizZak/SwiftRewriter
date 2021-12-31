@@ -215,7 +215,8 @@ extension ReachingDefinitionAnalyzerTests {
         controlFlowGraph = ControlFlowGraph.forCompoundStatement(body)
         sut = ReachingDefinitionAnalyzer(
             controlFlowGraph: controlFlowGraph,
-            functionBody: FunctionBodyIntention(body: body),
+            container: .statement(body),
+            intention: nil,
             typeSystem: typeSystem
         )
     }

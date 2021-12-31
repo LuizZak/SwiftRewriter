@@ -42,15 +42,19 @@ class TypeResolverIntrinsicsBuilder {
         typeResolver.ignoreResolvedExpressions = !force
     }
     
-    func setupIntrinsics(forFile file: FileGenerationIntention,
-                         intentions: IntentionCollection) {
+    func setupIntrinsics(
+        forFile file: FileGenerationIntention,
+        intentions: IntentionCollection
+    ) {
         
         let intrinsics = createIntrinsics(forFile: file, intentions: intentions)
         typeResolver.intrinsicVariables = intrinsics
     }
     
-    func setupIntrinsics(forFunction function: GlobalFunctionGenerationIntention,
-                         intentions: IntentionCollection) {
+    func setupIntrinsics(
+        forFunction function: GlobalFunctionGenerationIntention,
+        intentions: IntentionCollection
+    ) {
         
         let intrinsics = createIntrinsics(forFunction: function, intentions: intentions)
         typeResolver.pushContainingFunctionReturnType(function.signature.returnType)
@@ -59,8 +63,22 @@ class TypeResolverIntrinsicsBuilder {
         pushedReturnType = true
     }
     
-    func setupIntrinsics(forMember member: MemberGenerationIntention,
-                         intentions: IntentionCollection) {
+    func setupIntrinsics(
+        forVariable variable: GlobalVariableGenerationIntention,
+        intentions: IntentionCollection
+    ) {
+        
+        let intrinsics = createIntrinsics(forVariable: variable, intentions: intentions)
+        typeResolver.pushContainingFunctionReturnType(variable.type)
+        typeResolver.intrinsicVariables = intrinsics
+        
+        pushedReturnType = true
+    }
+    
+    func setupIntrinsics(
+        forMember member: MemberGenerationIntention,
+        intentions: IntentionCollection
+    ) {
         
         let intrinsics = createIntrinsics(forMember: member, intentions: intentions)
         
@@ -85,8 +103,10 @@ class TypeResolverIntrinsicsBuilder {
     func addSetterIntrinsics(setter: PropertyGenerationIntention.Setter, type: SwiftType) {
         miscellaneousDefinitions
             .recordDefinition(
-                CodeDefinition.forSetterValue(named: setter.valueIdentifier,
-                                              type: type)
+                CodeDefinition.forSetterValue(
+                    named: setter.valueIdentifier,
+                    type: type
+                )
             )
     }
     
@@ -100,8 +120,10 @@ class TypeResolverIntrinsicsBuilder {
         knownTypeDefinitionsSource = nil
     }
     
-    private func createIntrinsics(forFile file: FileGenerationIntention,
-                                  intentions: IntentionCollection) -> DefinitionsSource {
+    private func createIntrinsics(
+        forFile file: FileGenerationIntention,
+        intentions: IntentionCollection
+    ) -> DefinitionsSource {
         
         // Push file-level global definitions (variables and functions)
         let intentionGlobals =
@@ -118,8 +140,10 @@ class TypeResolverIntrinsicsBuilder {
         return compoundIntrinsics
     }
     
-    private func createIntrinsics(forFunction function: GlobalFunctionGenerationIntention,
-                                  intentions: IntentionCollection) -> DefinitionsSource {
+    private func createIntrinsics(
+        forFunction function: GlobalFunctionGenerationIntention,
+        intentions: IntentionCollection
+    ) -> DefinitionsSource {
         
         let intrinsics = DefaultCodeScope()
         
@@ -143,8 +167,35 @@ class TypeResolverIntrinsicsBuilder {
         return compoundIntrinsics
     }
     
-    private func createIntrinsics(forMember member: MemberGenerationIntention,
-                                  intentions: IntentionCollection) -> DefinitionsSource {
+    private func createIntrinsics(
+        forVariable variable: GlobalVariableGenerationIntention,
+        intentions: IntentionCollection
+    ) -> DefinitionsSource {
+        
+        let intrinsics = DefaultCodeScope()
+        
+        // Push file-level global definitions (variables and functions)
+        let intentionGlobals =
+            IntentionCollectionGlobalsDefinitionsSource(
+                globals: self.intentionGlobals,
+                symbol: variable
+            )
+        
+        // Push global definitions
+        let compoundIntrinsics = CompoundDefinitionsSource()
+        
+        compoundIntrinsics.addSource(intrinsics)
+        compoundIntrinsics.addSource(intentionGlobals)
+        compoundIntrinsics.addSource(miscellaneousDefinitions)
+        compoundIntrinsics.addSource(globals)
+        
+        return compoundIntrinsics
+    }
+    
+    private func createIntrinsics(
+        forMember member: MemberGenerationIntention,
+        intentions: IntentionCollection
+    ) -> DefinitionsSource {
         
         var propertyIntrinsics: DefinitionsSource?
         var functionArgumentsIntrinsics: DefinitionsSource?

@@ -29,7 +29,7 @@ class FunctionBodyQueueTests: XCTestCase {
         let items = sut.items
 
         XCTAssertEqual(items.count, 1)
-        XCTAssert(items.first?.body === global.functionBody)
+        XCTAssert(items.first?.container.functionBody === global.functionBody)
     }
 
     func testQueueMethodBody() {
@@ -52,7 +52,7 @@ class FunctionBodyQueueTests: XCTestCase {
         let items = sut.items
 
         XCTAssertEqual(items.count, 1)
-        XCTAssert(items.first?.body === body)
+        XCTAssert(items.first?.container.functionBody === body)
     }
 
     func testQueueStructMethodBody() {
@@ -75,7 +75,7 @@ class FunctionBodyQueueTests: XCTestCase {
         let items = sut.items
 
         XCTAssertEqual(items.count, 1)
-        XCTAssert(items.first?.body === body)
+        XCTAssert(items.first?.container.functionBody === body)
     }
 
     func testQueuePropertyGetter() {
@@ -100,7 +100,7 @@ class FunctionBodyQueueTests: XCTestCase {
         let items = sut.items
 
         XCTAssertEqual(items.count, 1)
-        XCTAssert(items.first?.body === body)
+        XCTAssert(items.first?.container.functionBody === body)
     }
 
     func testQueuePropertyGetterAndSetter() {
@@ -132,8 +132,8 @@ class FunctionBodyQueueTests: XCTestCase {
         let items = sut.items
 
         XCTAssertEqual(items.count, 2)
-        XCTAssert(items.contains(where: { $0.body === bodyGetter }))
-        XCTAssert(items.contains(where: { $0.body === bodySetter }))
+        XCTAssert(items.contains(where: { $0.container.functionBody === bodyGetter }))
+        XCTAssert(items.contains(where: { $0.container.functionBody === bodySetter }))
     }
 
     func testQueueDeinit() {
@@ -152,7 +152,7 @@ class FunctionBodyQueueTests: XCTestCase {
         let items = sut.items
 
         XCTAssertEqual(items.count, 1)
-        XCTAssert(items.first?.body === body)
+        XCTAssert(items.first?.container.functionBody === body)
     }
 
     func testFromDeinit() {
@@ -171,7 +171,7 @@ class FunctionBodyQueueTests: XCTestCase {
         let items = sut.items
 
         XCTAssertEqual(items.count, 1)
-        XCTAssert(items.first?.body === deinitIntent?.functionBody)
+        XCTAssert(items.first?.container.functionBody === deinitIntent?.functionBody)
     }
 
     func testQueueSubscript() {
@@ -197,8 +197,8 @@ class FunctionBodyQueueTests: XCTestCase {
         let items = sut.items
 
         XCTAssertEqual(items.count, 2)
-        XCTAssert(items.contains(where: { $0.body === bodyGetter }))
-        XCTAssert(items.contains(where: { $0.body === bodySetter }))
+        XCTAssert(items.contains(where: { $0.container.functionBody === bodyGetter }))
+        XCTAssert(items.contains(where: { $0.container.functionBody === bodySetter }))
     }
 
     func testQueueAllBodiesFound() {
@@ -244,10 +244,62 @@ class FunctionBodyQueueTests: XCTestCase {
         let items = sut.items
 
         XCTAssertEqual(items.count, 5)
-        XCTAssert(items.contains(where: { $0.body === global }))
-        XCTAssert(items.contains(where: { $0.body === deinitBody }))
-        XCTAssert(items.contains(where: { $0.body === bodyGetter1 }))
-        XCTAssert(items.contains(where: { $0.body === bodyGetter2 }))
-        XCTAssert(items.contains(where: { $0.body === bodySetter }))
+        XCTAssert(items.contains(where: { $0.container.functionBody === global }))
+        XCTAssert(items.contains(where: { $0.container.functionBody === deinitBody }))
+        XCTAssert(items.contains(where: { $0.container.functionBody === bodyGetter1 }))
+        XCTAssert(items.contains(where: { $0.container.functionBody === bodyGetter2 }))
+        XCTAssert(items.contains(where: { $0.container.functionBody === bodySetter }))
+    }
+
+    func testQueuePropertyInitialValue() throws {
+        let intentions =
+            IntentionCollectionBuilder()
+            .createFile(named: "A") { file in
+                file.createClass(withName: "A") { type in
+                    type.createProperty(named: "a", type: .int) { prop in
+                        prop.setInitialExpression(.identifier("a"))
+                    }
+                }
+            }.build()
+        let prop = intentions.fileIntentions()[0].typeIntentions[0].properties[0]
+        let initialValue = try XCTUnwrap(prop.initialValueIntention)
+
+        sut = FunctionBodyQueue.fromIntentionCollection(
+            intentions,
+            delegate: delegate,
+            numThreads: 8
+        )
+        let items = sut.items
+
+        XCTAssertEqual(items.count, 1)
+        XCTAssert(items.contains(where: { 
+            ($0.container.expression == initialValue.expression) && ($0.intention == .propertyInitializer(prop, initialValue))
+        }))
+    }
+
+    func testQueueGlobalVariableInitialValue() throws {
+        let intentions =
+            IntentionCollectionBuilder()
+            .createFile(named: "A") { file in
+                file.createGlobalVariable(
+                    withName: "a",
+                    type: .int,
+                    initialExpression: .identifier("a")
+                )
+            }.build()
+        let variable = intentions.fileIntentions()[0].globalVariableIntentions[0]
+        let initialValue = try XCTUnwrap(variable.initialValueIntention)
+
+        sut = FunctionBodyQueue.fromIntentionCollection(
+            intentions,
+            delegate: delegate,
+            numThreads: 8
+        )
+        let items = sut.items
+
+        XCTAssertEqual(items.count, 1)
+        XCTAssert(items.contains(where: { 
+            ($0.container.expression == initialValue.expression) && ($0.intention == .globalVariable(variable, initialValue))
+        }))
     }
 }

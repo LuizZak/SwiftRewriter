@@ -22,7 +22,7 @@ class ExpressionPassTestCase: XCTestCase {
     var sutType: ASTRewriterPass.Type!
     var typeSystem: TypeSystem!
     var intentionContext: FunctionBodyCarryingIntention?
-    var functionBodyContext: FunctionBodyIntention?
+    var container: StatementContainer?
 
     override func setUp() {
         super.setUp()
@@ -30,7 +30,7 @@ class ExpressionPassTestCase: XCTestCase {
         typeSystem = TypeSystem()
         notified = false
         intentionContext = nil
-        functionBodyContext = nil
+        container = nil
     }
 
     func assertNotifiedChange(file: StaticString = #filePath, line: UInt = #line) {
@@ -69,8 +69,8 @@ class ExpressionPassTestCase: XCTestCase {
         notified = false
         let exp = parse(original, file: file, line: line)
 
-        let sut = makeSut()
-        let result = sut.apply(on: exp, context: makeContext())
+        let sut = makeSut(container: .expression(exp))
+        let result = sut.apply(on: exp, context: makeContext(container: .expression(exp)))
 
         if expected != result.description {
             XCTFail(
@@ -124,8 +124,8 @@ class ExpressionPassTestCase: XCTestCase {
     ) -> Expression {
 
         notified = false
-        let sut = makeSut()
-        let result = sut.apply(on: expression, context: makeContext())
+        let sut = makeSut(container: .expression(expression))
+        let result = sut.apply(on: expression, context: makeContext(container: .expression(expression)))
 
         if expected != result {
             var expString = ""
@@ -180,8 +180,8 @@ class ExpressionPassTestCase: XCTestCase {
     ) -> Statement {
 
         notified = false
-        let sut = makeSut()
-        let result = sut.apply(on: statement, context: makeContext())
+        let sut = makeSut(container: .statement(statement))
+        let result = sut.apply(on: statement, context: makeContext(container: .statement(statement)))
 
         if expected != result {
             var expString = ""
@@ -306,11 +306,11 @@ class ExpressionPassTestCase: XCTestCase {
         return (parser.tokens, parser.parser)
     }
 
-    func makeSut() -> ASTRewriterPass {
-        return sutType.init(context: makeContext())
+    func makeSut(container: StatementContainer) -> ASTRewriterPass {
+        return sutType.init(context: makeContext(container: container))
     }
 
-    func makeContext(functionBody: CompoundStatement? = nil) -> ASTRewriterPassContext {
+    func makeContext(container: StatementContainer) -> ASTRewriterPassContext {
         let block: () -> Void = { [weak self] in
             self?.notified = true
         }
@@ -319,7 +319,7 @@ class ExpressionPassTestCase: XCTestCase {
             typeSystem: typeSystem,
             notifyChangedTree: block,
             source: intentionContext,
-            functionBodyIntention: functionBodyContext
+            container: container
         )
     }
 }

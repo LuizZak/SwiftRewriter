@@ -12,14 +12,14 @@ public final class GlobalVariableGenerationIntention: FromSourceIntention, FileL
     
     public var name: String
     public var storage: ValueStorage
-    public var initialValueExpr: GlobalVariableInitialValueIntention?
+    public var initialValueIntention: GlobalVariableInitialValueIntention?
     
     public var initialValue: Expression? {
         get {
-            initialValueExpr?.expression
+            initialValueIntention?.expression
         }
         set {
-            initialValueExpr = newValue.map({ GlobalVariableInitialValueIntention(expression: $0, source: nil) })
+            initialValueIntention = newValue.map({ GlobalVariableInitialValueIntention(expression: $0, source: nil) })
         }
     }
     
@@ -49,7 +49,7 @@ public final class GlobalVariableGenerationIntention: FromSourceIntention, FileL
         
         name = try container.decode(String.self, forKey: .name)
         storage = try container.decode(ValueStorage.self, forKey: .storage)
-        initialValueExpr = try container.decodeIntentionIfPresent(GlobalVariableInitialValueIntention.self, forKey: .initialValueExpr)
+        initialValueIntention = try container.decodeIntentionIfPresent(GlobalVariableInitialValueIntention.self, forKey: .initialValueIntention)
         
         try super.init(from: container.superDecoder())
     }
@@ -59,7 +59,7 @@ public final class GlobalVariableGenerationIntention: FromSourceIntention, FileL
         
         try container.encode(name, forKey: .name)
         try container.encode(storage, forKey: .storage)
-        try container.encodeIntentionIfPresent(initialValueExpr, forKey: .initialValueExpr)
+        try container.encodeIntentionIfPresent(initialValueIntention, forKey: .initialValueIntention)
         
         try super.encode(to: container.superEncoder())
     }
@@ -67,7 +67,7 @@ public final class GlobalVariableGenerationIntention: FromSourceIntention, FileL
     private enum CodingKeys: String, CodingKey {
         case name
         case storage
-        case initialValueExpr
+        case initialValueIntention
     }
 }
 

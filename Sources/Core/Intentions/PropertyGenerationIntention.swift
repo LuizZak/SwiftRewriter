@@ -95,17 +95,16 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         }
     }
     public var objcAttributes: [ObjcPropertyAttribute]
+    public var initialValueIntention: PropertyInitialValueGenerationIntention?
     
     public var initialValue: Expression? {
         get {
-            initialValueExpr?.expression
+            initialValueIntention?.expression
         }
         set {
-            initialValueExpr = newValue.map({ PropertyInitialValueGenerationIntention(expression: $0, source: nil) })
+            initialValueIntention = newValue.map({ PropertyInitialValueGenerationIntention(expression: $0, source: nil) })
         }
     }
-
-    public var initialValueExpr: PropertyInitialValueGenerationIntention?
     
     public convenience init(name: String,
                             type: SwiftType,
@@ -154,9 +153,9 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
             [ObjcPropertyAttribute].self,
             forKey: .attributes
         )
-        initialValueExpr = try container.decodeIntentionIfPresent(
+        initialValueIntention = try container.decodeIntentionIfPresent(
             PropertyInitialValueGenerationIntention.self,
-            forKey: .initialValueExpr
+            forKey: .initialValueIntention
         )
         
         try super.init(from: container.superDecoder())
@@ -172,7 +171,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         try container.encode(storage, forKey: .storage)
         try container.encode(mode, forKey: .mode)
         try container.encode(objcAttributes, forKey: .attributes)
-        try container.encodeIntentionIfPresent(initialValueExpr, forKey: .initialValueExpr)
+        try container.encodeIntentionIfPresent(initialValueIntention, forKey: .initialValueIntention)
         
         try super.encode(to: container.superEncoder())
     }
@@ -301,7 +300,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         case setterAccessLevel
         case attributes
         case mode
-        case initialValueExpr
+        case initialValueIntention
     }
 }
 
