@@ -828,6 +828,36 @@ class SyntaxNodeIteratorTests: XCTestCase {
             ]
         )
     }
+
+    func testLocalFunctionStatement() {
+        assertStatement(
+            .localFunction(
+                signature: FunctionSignature(name: "f"),
+                body: [
+                    .expression(.identifier("a")),
+                    .expression(.identifier("b")),
+                ]
+            ),
+            inspectingBlocks: false,
+            iteratesAs: [
+                Statement.localFunction(
+                    signature: FunctionSignature(name: "f"),
+                    body: [
+                        .expression(.identifier("a")),
+                        .expression(.identifier("b")),
+                    ]
+                ),
+                Statement.compound([
+                    .expression(.identifier("a")),
+                    .expression(.identifier("b")),
+                ]),
+                Statement.expression(.identifier("a")),
+                Statement.expression(.identifier("b")),
+                Expression.identifier("a"),
+                Expression.identifier("b"),
+            ]
+        )
+    }
 }
 
 extension SyntaxNodeIteratorTests {

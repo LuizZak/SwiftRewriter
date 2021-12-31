@@ -178,6 +178,37 @@ public extension Statement {
                                          initialization: initialization)
         ])
     }
+
+    static func localFunction(
+        _ localFunction: LocalFunction
+    ) -> LocalFunctionStatement {
+        LocalFunctionStatement(function: localFunction)
+    }
+
+    static func localFunction(
+        identifier: String,
+        parameters: [ParameterSignature],
+        returnType: SwiftType,
+        body: CompoundStatement
+    ) -> LocalFunctionStatement {
+
+        LocalFunctionStatement(function: 
+            .init(
+                identifier: identifier,
+                parameters: parameters,
+                returnType: returnType,
+                body: body
+            )
+        )
+    }
+
+    static func localFunction(
+        signature: FunctionSignature,
+        body: CompoundStatement
+    ) -> LocalFunctionStatement {
+        
+        LocalFunctionStatement(function: LocalFunction(signature: signature, body: body))
+    }
 }
 
 public extension Statement {

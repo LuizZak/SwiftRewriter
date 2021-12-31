@@ -58,6 +58,44 @@ class JsParserListenerTests: XCTestCase {
         XCTAssertEqual(functionDecl.identifier?.name, "test")
     }
 
+    func testDontCollectNestedFunctions() throws {
+        let node = parserTest(
+            """
+            function test() {
+                function foo() {
+
+                }
+            }
+            """
+        )
+
+        let functionDecl: JsFunctionDeclarationNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(functionDecl.identifier?.name, "test")
+        XCTAssertEqual(node.childrenMatching(type: JsFunctionDeclarationNode.self).count, 1)
+    }
+
+    func testDontCollectNestedFunctions_classMethod() throws {
+        let node = parserTest(
+            """
+            class AClass {
+                method() {
+                    function foo() {
+
+                    }
+                }
+            }
+            """
+        )
+
+        let classDecl: JsClassNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(classDecl.identifier?.name, "AClass")
+        XCTAssertEqual(classDecl.methods.count, 1)
+        XCTAssertEqual(classDecl.methods[0].identifier?.name, "method")
+        XCTAssertEqual(node.childrenMatching(type: JsFunctionDeclarationNode.self).count, 0)
+    }
+
     func testCollectVariableDeclaration() throws {
         let node = parserTest(
             """

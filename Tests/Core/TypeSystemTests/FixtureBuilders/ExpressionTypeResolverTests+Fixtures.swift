@@ -195,6 +195,80 @@ extension ExpressionTypeResolverTests {
                 line: line
             )
         }
+        
+        /// Asserts a local function definition was created on the given scope.
+        @discardableResult
+        func thenAssertDefined(
+            localFunction: FunctionSignature,
+            file: StaticString = #filePath,
+            line: UInt = #line
+        ) -> StatementTypeTestBuilder {
+
+            return thenAssertDefined(
+                in: scope,
+                localFunction: localFunction,
+                file: file,
+                line: line
+            )
+        }
+
+        /// Asserts a local function definition was created on the given scope.
+        @discardableResult
+        func thenAssertDefined(
+            in scope: CodeScopeNode,
+            localFunction: FunctionSignature,
+            file: StaticString = #filePath,
+            line: UInt = #line
+        ) -> StatementTypeTestBuilder {
+
+            // Make sure to apply definitions just before starting assertions
+            if !applied {
+                sut.typeSystem = typeSystem
+                sut.intrinsicVariables = intrinsics
+                sut.ignoreResolvedExpressions = true
+
+                _ = statement.accept(sut)
+                applied = true
+            }
+
+            guard let defined = scope.definitions.firstDefinition(named: localFunction.name) else {
+                XCTFail(
+                    """
+                    Failed to find expected local function '\(localFunction.name)' on scope.
+                    """,
+                    file: file,
+                    line: line
+                )
+
+                return self
+            }
+
+            guard case .function(let signature) = defined.kind else {
+                XCTFail(
+                    """
+                    Expected to find a function definition, but found \(defined.kind) \
+                    instead.
+                    """,
+                    file: file,
+                    line: line
+                )
+
+                return self
+            }
+
+            if localFunction != signature {
+                XCTFail(
+                    """
+                    Definition '\(localFunction.name)' has different signature \(signature) \
+                    than expected signature \(localFunction)
+                    """,
+                    file: file,
+                    line: line
+                )
+            }
+
+            return self
+        }
 
         /// Asserts a definition was created on the given scope.
         @discardableResult
@@ -259,7 +333,7 @@ extension ExpressionTypeResolverTests {
         /// set to expect a given type
         @discardableResult
         func thenAssertExpression(
-            at keyPath: KeyPath<Statement, Expression?>,
+            at keyPath: KeyPath<T, Expression?>,
             expectsType type: SwiftType?,
             file: StaticString = #filePath,
             line: UInt = #line
@@ -304,7 +378,7 @@ extension ExpressionTypeResolverTests {
         /// resolved to a specified type
         @discardableResult
         func thenAssertExpression(
-            at keyPath: KeyPath<Statement, Expression?>,
+            at keyPath: KeyPath<T, Expression?>,
             resolvedAs type: SwiftType?,
             file: StaticString = #filePath,
             line: UInt = #line

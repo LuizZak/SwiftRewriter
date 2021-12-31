@@ -169,10 +169,12 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             iteratorType = .errorType
         }
         
-        collectInPattern(stmt.pattern,
-                         type: iteratorType,
-                         location: .forLoop(stmt, .`self`),
-                         to: stmt.body)
+        collectInPattern(
+            stmt.pattern,
+            type: iteratorType,
+            location: .forLoop(stmt, .`self`),
+            to: stmt.body
+        )
         
         _=super.visitFor(stmt)
         
@@ -198,7 +200,67 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         }
     }
     
+    public override func visitIf(_ stmt: IfStatement) -> Statement {
+        if let pattern = stmt.pattern {
+            let result = super.visitIf(stmt)
+            
+            collectInPattern(
+                pattern,
+                type: stmt.exp.resolvedType ?? .errorType,
+                location: .ifLet(stmt, .`self`),
+                to: stmt.body
+            )
+            
+            return result
+        }
+        
+        stmt.exp.expectedType = .bool
+        
+        return super.visitIf(stmt)
+    }
+    
+    public override func visitWhile(_ stmt: WhileStatement) -> Statement {
+        stmt.exp.expectedType = .bool
+        
+        return super.visitWhile(stmt)
+    }
+    
+    public override func visitDoWhile(_ stmt: DoWhileStatement) -> Statement {
+        stmt.exp.expectedType = .bool
+        
+        return super.visitDoWhile(stmt)
+    }
+
+    public override func visitLocalFunction(_ stmt: LocalFunctionStatement) -> Statement {
+        // Apply definitions for function parameters
+        stmt.function.body.recordDefinitions(
+            CodeDefinition.forParameters(stmt.function.parameters)
+        )
+        
+        // Apply definition for function itself before processing its contents
+        // This allows for recursion to occur if the function calls itself.
+        let definition = CodeDefinition.forLocalFunctionStatement(stmt)
+        nearestScope(for: stmt)?.recordDefinition(definition)
+        
+        // Push context of return type during expression resolving
+        pushContainingFunctionReturnType(stmt.function.returnType)
+        defer {
+            popContainingFunctionReturnType()
+        }
+        
+        return super.visitLocalFunction(stmt)
+    }
+    
+    public override func visitReturn(_ stmt: ReturnStatement) -> Statement {
+        if let lastType = contextFunctionReturnTypeStack.last {
+            stmt.exp?.expectedType = lastType
+        }
+        
+        return super.visitReturn(stmt)
+    }
+    
     // MARK: - Expression Resolving
+
     public override func visitExpression(_ exp: Expression) -> Expression {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
@@ -611,43 +673,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         exp.resolvedType = .selector
         
         return super.visitSelector(exp)
-    }
-    
-    public override func visitIf(_ stmt: IfStatement) -> Statement {
-        if let pattern = stmt.pattern {
-            let result = super.visitIf(stmt)
-            
-            collectInPattern(pattern,
-                             type: stmt.exp.resolvedType ?? .errorType,
-                             location: .ifLet(stmt, .`self`),
-                             to: stmt.body)
-            
-            return result
-        }
-        
-        stmt.exp.expectedType = .bool
-        
-        return super.visitIf(stmt)
-    }
-    
-    public override func visitWhile(_ stmt: WhileStatement) -> Statement {
-        stmt.exp.expectedType = .bool
-        
-        return super.visitWhile(stmt)
-    }
-    
-    public override func visitDoWhile(_ stmt: DoWhileStatement) -> Statement {
-        stmt.exp.expectedType = .bool
-        
-        return super.visitDoWhile(stmt)
-    }
-    
-    public override func visitReturn(_ stmt: ReturnStatement) -> Statement {
-        if let lastType = contextFunctionReturnTypeStack.last {
-            stmt.exp?.expectedType = lastType
-        }
-        
-        return super.visitReturn(stmt)
     }
 }
 

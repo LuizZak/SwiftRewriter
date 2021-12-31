@@ -182,8 +182,23 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
     }
 
     public override func visitFunctionDeclaration(_ ctx: JavaScriptParser.FunctionDeclarationContext) -> Statement? {
-        // TODO: Support inline function declaration.
-        unknown(ctx)
+        guard let identifier = ctx.identifier()?.getText() else {
+            return unknown(ctx)
+        }
+        guard let body = ctx.functionBody()?.accept(compoundVisitor()) else {
+            return unknown(ctx)
+        }
+
+        let parameters = self.parameterSignatures(from: ctx.formalParameterList())
+
+        let function = LocalFunction(
+            identifier: identifier,
+            parameters: parameters,
+            returnType: .any,
+            body: body
+        )
+
+        return .localFunction(function)
     }
 
     // MARK: - Helper generators
@@ -243,6 +258,14 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
 
     private func defaultClause(_ ctx: JavaScriptParser.DefaultClauseContext) -> [Statement]? {
         ctx.statementList()?.accept(compoundVisitor())?.statements
+    }
+
+    private func parameterSignatures(from ctx: JavaScriptParser.FormalParameterListContext?) -> [ParameterSignature] {
+        let signature = JsParser.functionSignature(from: ctx)
+
+        return signature.arguments.map {
+            .init(label: nil, name: $0.identifier, type: .any)
+        }
     }
 
     fileprivate func variableDeclarations(from ctx: JavaScriptParser.VariableDeclarationListContext) -> [StatementVariableDeclaration]? {

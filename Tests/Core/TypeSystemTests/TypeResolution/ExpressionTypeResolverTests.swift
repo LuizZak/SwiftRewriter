@@ -1610,6 +1610,71 @@ class ExpressionTypeResolverTests: XCTestCase {
         .resolve()
         .thenAssertExpression(resolvedAs: .nested(["A", "Nested"]))
     }
+
+    func testLocalFunctionIsCollected() {
+        let stmt = Statement.localFunction(
+            identifier: "f",
+            parameters: [.init(label: nil, name: "a", type: .int)], returnType: .bool,
+            body: [
+                .return(.identifier("a").binary(op: .lessThan, rhs: .constant(10)))
+            ]
+        )
+
+        _ = startScopedTest(
+            with: stmt,
+            sut: ExpressionTypeResolver()
+        ) 
+        .thenAssertDefined(
+            localFunction: .init(
+                name: "f",
+                parameters: [.init(label: nil, name: "a", type: .int)],
+                returnType: .bool,
+                isStatic: false,
+                isMutating: false
+            )
+        )
+    }
+
+    func testLocalFunction() {
+        _ = startScopedTest(
+            with: Statement.compound([
+                .localFunction(
+                    identifier: "f",
+                    parameters: [.init(label: nil, name: "a", type: .int)], returnType: .bool,
+                    body: [
+                        .return(.identifier("a").binary(op: .lessThan, rhs: .constant(10)))
+                    ]
+                ),
+                .variableDeclaration(
+                    identifier: "b",
+                    type: .int,
+                    initialization: .identifier("f").call([.init(label: nil, expression: .constant(1))])
+                )
+            ]),
+            sut: ExpressionTypeResolver()
+        )
+        .thenAssertExpression(
+            at: \CompoundStatement.statements[1].asVariableDeclaration?.decl[0].initialization,
+            resolvedAs: .bool
+        )
+    }
+
+    func testLocalFunction_resolvesFunctionBody() {
+        _ = startScopedTest(
+            with: Statement.localFunction(
+                identifier: "f",
+                parameters: [.init(name: "a", type: .int)], returnType: .bool,
+                body: [
+                    .return(.identifier("a").binary(op: .lessThan, rhs: .constant(10)))
+                ]
+            ),
+            sut: ExpressionTypeResolver()
+        )
+        .thenAssertExpression(
+            at: \LocalFunctionStatement.function.body.statements[0].asReturn?.exp,
+            resolvedAs: .bool
+        )
+    }
 }
 
 // MARK: - Test Building Helpers

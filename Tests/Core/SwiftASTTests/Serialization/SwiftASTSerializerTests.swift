@@ -92,6 +92,14 @@ class SwiftASTSerializerTests: XCTestCase {
                 .selector(setter: "p"),
                 .selector("T", setter: "p"),
             ]),
+            .localFunction(
+                identifier: "localFunction",
+                parameters: [.init(name: "a", type: .float)],
+                returnType: .bool,
+                body: [
+                    .expression(.binary(lhs: .identifier("a"), op: .lessThan, rhs: .constant(2)))
+                ]
+            )
         ]
 
         let encoder = JSONEncoder()
@@ -104,8 +112,7 @@ class SwiftASTSerializerTests: XCTestCase {
         let writer = SwiftSyntaxProducer()
 
         let expBuffer = writer.generateStatement(stmt).description
-        let resBuffer = writer.generateStatement((decoded as? CompoundStatement) ?? [decoded])
-            .description
+        let resBuffer = writer.generateStatement((decoded as? CompoundStatement) ?? [decoded]).description
 
         XCTAssertEqual(
             stmt,

@@ -839,4 +839,61 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 """
         )
     }
+
+    func testLocalFunction() {
+        let stmt = LocalFunctionStatement(
+            function: LocalFunction(
+                identifier: "localFunction",
+                parameters: [
+                    .init(name: "a", type: .float)
+                ],
+                returnType: .float,
+                body: [
+                    .return(.identifier("a").binary(op: .add, rhs: .constant(2)))
+                ]
+            )
+        )
+        let syntaxes = SwiftSyntaxProducer().generateLocalFunction(stmt)
+
+        assert(
+            syntaxes,
+            matches: """
+                func localFunction(a: Float) -> Float {
+                    return a + 2
+                }
+                """
+        )
+    }
+
+    func testLocalFunctionInCompoundStatement() {
+        let stmt: CompoundStatement = [
+            .variableDeclaration(identifier: "b", type: .float, initialization: .constant(1)),
+            LocalFunctionStatement(
+                function: LocalFunction(
+                    identifier: "localFunction",
+                    parameters: [
+                        .init(name: "a", type: .float)
+                    ],
+                    returnType: .float,
+                    body: [
+                        .return(.identifier("a").binary(op: .add, rhs: .identifier("b")))
+                    ]
+                )
+            )
+        ]
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+
+        assert(
+            syntaxes,
+            matches: """
+                 {
+                    var b: Float = 1
+
+                    func localFunction(a: Float) -> Float {
+                        return a + b
+                    }
+                }
+                """
+        )
+    }
 }

@@ -442,6 +442,27 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
             )
         )
     }
+
+    func testLocalFunctionStatement() {
+        assert(
+            jsStmt: """
+            function f(a, b) {
+                return 0;
+            }
+            """,
+            readsAs: .localFunction(
+                identifier: "f",
+                parameters: [
+                    .init(label: nil, name: "a", type: .any),
+                    .init(label: nil, name: "b", type: .any),
+                ],
+                returnType: .any,
+                body: [
+                    .return(.constant(0))
+                ]
+            )
+        )
+    }
 }
 
 extension JavaScriptStatementASTReaderTests {

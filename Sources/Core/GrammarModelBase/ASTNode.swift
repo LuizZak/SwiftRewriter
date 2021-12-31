@@ -89,6 +89,13 @@ open class ASTNode {
             children.remove(at: index)
         }
     }
+
+    /// Removes this node from its current parent.
+    ///
+    /// If this node has no parent, nothing is done.
+    open func removeFromParentNode() {
+        parent?.removeChild(self)
+    }
     
     /// Gets a child of a given type at a given index.
     ///

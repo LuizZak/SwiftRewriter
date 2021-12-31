@@ -114,6 +114,13 @@ internal class JsParserListener: JavaScriptParserBaseListener {
         guard let functionNode = context.currentContextNode(as: JsFunctionDeclarationNode.self) else {
             return
         }
+
+        // If we are within a nested function context, keep the node in the context
+        // but don't add it; this should be done by AST readers downpipe.
+        if context.findContextNodeBellow(node: functionNode, as: JsFunctionBodyNode.self) != nil {
+            functionNode.removeFromParentNode()
+        }
+
         guard let functionName = ctx.identifier() else {
             return
         }
@@ -293,7 +300,8 @@ private class GenericParseTreeContextMapper {
         exceptions.append(ruleType)
     }
     
-    func popTemporaryException() {
+    @discardableResult
+    func popTemporaryException() -> ParserRuleContext.Type {
         exceptions.removeLast()
     }
     

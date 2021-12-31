@@ -13,8 +13,6 @@ public class NodeCreationContext {
     
     private var _nodeStack: [JsASTNode] = []
     
-    public var isInNonnullContext: Bool = false
-    
     /// Pushes a new node context
     @discardableResult
     public func pushContext<T: JsInitializableNode>(nodeType type: T.Type = T.self) -> T {
@@ -44,10 +42,31 @@ public class NodeCreationContext {
     public func currentContextNode<T: JsASTNode>(as node: T.Type = T.self) -> T? {
         topmostNode as? T
     }
+
+    /// Gets the topmost context node of a specified type that sits bellow the
+    /// given node.
+    ///
+    /// If the node is not within the context stack, `nil` is returned.
+    public func findContextNodeBellow<T: JsASTNode>(node: JsASTNode, as nodeType: T.Type = T.self) -> T? {
+        guard let index = _nodeStack.firstIndex(where: { $0 === node }) else {
+            return nil
+        }
+
+        for node in _nodeStack[..<index].reversed() {
+            if let node = node as? T {
+                return node
+            }
+        }
+
+        return nil
+    }
     
     /// Pushes a new node context using a given node
-    public func pushContext(node: JsASTNode) {
-        topmostNode?.addChild(node)
+    public func pushContext(node: JsASTNode, addToTopNode: Bool = true) {
+        if addToTopNode {
+            topmostNode?.addChild(node)
+        }
+
         _nodeStack.append(node)
     }
     

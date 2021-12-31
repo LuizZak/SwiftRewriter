@@ -1,4 +1,5 @@
-/// A class for iterating over Statement and Expression trees.
+/// A class for iterating over Statement and Expression trees in first-in-first-out
+/// order (i.e. depth-first).
 public final class SyntaxNodeIterator: IteratorProtocol {
     private var queue: [SyntaxNode] = []
     
@@ -84,6 +85,9 @@ public final class SyntaxNodeIterator: IteratorProtocol {
             case let stmt as WhileStatement:
                 enqueue(stmt.exp)
                 enqueue(stmt.body)
+            
+            case let stmt as LocalFunctionStatement:
+                enqueue(stmt.function.body)
                 
             default:
                 break

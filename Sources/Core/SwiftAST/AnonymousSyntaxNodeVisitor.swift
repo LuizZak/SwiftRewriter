@@ -356,6 +356,15 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
         }
     }
     
+    /// Visits a local function statement
+    ///
+    /// - Parameter stmt: A local function statement to visit
+    public func visitLocalFunction(_ stmt: LocalFunctionStatement) {
+        listener(stmt)
+
+        stmt.function.body.accept(self)
+    }
+    
     /// Visits an unknown statement node
     ///
     /// - Parameter stmt: An UnknownStatement to visit

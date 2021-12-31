@@ -99,6 +99,8 @@ class EmptyCodeScope: CodeScope {
 
 /// An object that can provide definitions for a type resolver
 public protocol DefinitionsSource {
+    /// Searches for the first definition matching a given name, recursively
+    /// through all scopes, from innermost to outermost
     func firstDefinition(named name: String) -> CodeDefinition?
     
     /// Returns all function definitions that match a given function identifier

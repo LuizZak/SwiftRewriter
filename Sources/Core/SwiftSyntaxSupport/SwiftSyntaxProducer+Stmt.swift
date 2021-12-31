@@ -154,6 +154,9 @@ extension SwiftSyntaxProducer {
             
         case let stmt as CompoundStatement:
             genList = stmt.statements.flatMap(generateStatementBlockItems)
+
+        case let stmt as LocalFunctionStatement:
+            genList = [{ $0.generateLocalFunction(stmt).inCodeBlock() }]
             
         case let stmt as UnknownStatement:
             genList = [self.generateUnknown(stmt)]
@@ -588,6 +591,15 @@ extension SwiftSyntaxProducer {
         DeferStmtSyntax { builder in
             builder.useDeferKeyword(makeStartToken(SyntaxFactory.makeDeferKeyword))
             builder.useBody(generateCompound(stmt.body))
+        }
+    }
+
+    func generateLocalFunction(_ stmt: LocalFunctionStatement) -> FunctionDeclSyntax {
+        FunctionDeclSyntax { builder in
+            builder.useFuncKeyword(makeStartToken(SyntaxFactory.makeFuncKeyword))
+            builder.useIdentifier(makeIdentifier(stmt.function.identifier).withLeadingSpace())
+            builder.useSignature(generateSignature(stmt.function.signature))
+            builder.useBody(generateCompound(stmt.function.body))
         }
     }
     

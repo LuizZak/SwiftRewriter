@@ -16,7 +16,7 @@ public protocol StatementVisitor {
     
     /// Visits an `if` statement with this visitor
     ///
-    /// - Parameter stmt: An if expression statement to visit
+    /// - Parameter stmt: An `if` statement to visit
     /// - Returns: Result of visiting the `if` statement node
     func visitIf(_ stmt: IfStatement) -> StmtResult
     
@@ -91,6 +91,12 @@ public protocol StatementVisitor {
     /// - Parameter stmt: A variable declaration statement to visit
     /// - Returns: Result of visiting the variables statement
     func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> StmtResult
+    
+    /// Visits a local function statement
+    ///
+    /// - Parameter stmt: A local function statement to visit
+    /// - Returns: Result of visiting the local function statement node
+    func visitLocalFunction(_ stmt: LocalFunctionStatement) -> StmtResult
     
     /// Visits an unknown statement node
     ///

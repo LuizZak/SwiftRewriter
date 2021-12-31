@@ -1,3 +1,8 @@
+// TODO: Make nested visits call `<node>.accept(self)` instead of `visit<Node>(<node>)`.
+// TODO: This change right now as is affects ASTCorrectorExpressionPass and other
+// TODO: constructs that rely on `visitExpression`/`visitStatement` to be the entry
+// TODO: point for nested nodes.
+
 /// Base class for `SyntaxNode` rewriters
 open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     public init() {
@@ -151,8 +156,10 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Returns: Result of visiting this dictionary literal node
     open func visitDictionary(_ exp: DictionaryLiteralExpression) -> Expression {
         exp.pairs = exp.pairs.map { pair in
-            ExpressionDictionaryPair(key: visitExpression(pair.key),
-                                     value: visitExpression(pair.value))
+            ExpressionDictionaryPair(
+                key: visitExpression(pair.key),
+                value: visitExpression(pair.value)
+            )
         }
         
         return exp
@@ -163,7 +170,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter exp: A BlockLiteralExpression to visit
     /// - Returns: Result of visiting this block expression node
     open func visitBlock(_ exp: BlockLiteralExpression) -> Expression {
-        _=visitStatement(exp.body)
+        exp.body = _visitCompound(exp.body)
         
         return exp
     }
@@ -249,8 +256,8 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Returns: Result of visiting the `if` statement node
     open func visitIf(_ stmt: IfStatement) -> Statement {
         stmt.exp = visitExpression(stmt.exp)
-        _=visitStatement(stmt.body)
-        _=stmt.elseBody.map(visitStatement)
+        stmt.body = _visitCompound(stmt.body)
+        stmt.elseBody = stmt.elseBody.map { _visitCompound($0) }
         
         return stmt
     }
@@ -263,8 +270,10 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
         stmt.exp = visitExpression(stmt.exp)
         
         stmt.cases = stmt.cases.map {
-            return SwitchCase(patterns: $0.patterns.map(visitPattern),
-                              statements: $0.statements.map(visitStatement))
+            SwitchCase(
+                patterns: $0.patterns.map(visitPattern),
+                statements: $0.statements.map(visitStatement)
+            )
         }
         if let def = stmt.defaultCase {
             stmt.defaultCase = def.map(visitStatement)
@@ -279,7 +288,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Returns: Result of visiting the `while` statement node
     open func visitWhile(_ stmt: WhileStatement) -> Statement {
         stmt.exp = visitExpression(stmt.exp)
-        _=visitStatement(stmt.body)
+        stmt.body = _visitCompound(stmt.body)
         
         return stmt
     }
@@ -290,7 +299,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Returns: Result of visiting the `do/while` statement node
     open func visitDoWhile(_ stmt: DoWhileStatement) -> Statement {
         stmt.exp = visitExpression(stmt.exp)
-        _=visitStatement(stmt.body)
+        stmt.body = _visitCompound(stmt.body)
         
         return stmt
     }
@@ -302,7 +311,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     open func visitFor(_ stmt: ForStatement) -> Statement {
         stmt.pattern = visitPattern(stmt.pattern)
         stmt.exp = visitExpression(stmt.exp)
-        _=visitStatement(stmt.body)
+        stmt.body = _visitCompound(stmt.body)
         
         return stmt
     }
@@ -384,6 +393,26 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
         }
         
         return stmt
+    }
+    
+    /// Visits a local function statement
+    ///
+    /// - Parameter stmt: A local function statement to visit
+    /// - Returns: Result of visiting the local function statement node
+    open func visitLocalFunction(_ stmt: LocalFunctionStatement) -> Statement {
+        stmt.function.body = _visitCompound(stmt.function.body)
+
+        return stmt
+    }
+
+    private func _visitCompound(_ stmt: CompoundStatement) -> CompoundStatement {
+        let result = visitStatement(stmt)
+
+        if let result = result as? CompoundStatement {
+            return result
+        }
+
+        return CompoundStatement(statements: [result])
     }
     
     /// Visits an unknown statement node

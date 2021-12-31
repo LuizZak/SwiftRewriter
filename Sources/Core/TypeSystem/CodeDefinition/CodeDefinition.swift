@@ -170,6 +170,10 @@ public extension CodeDefinition {
         GlobalCodeDefinition(functionSignature: signature)
     }
     
+    static func forLocalFunctionStatement(_ stmt: LocalFunctionStatement) -> CodeDefinition {
+        LocalCodeDefinition(functionSignature: stmt.function.signature, location: .localFunction(stmt))
+    }
+    
     static func forGlobalVariable(name: String, isConstant: Bool, type: SwiftType) -> CodeDefinition {
         if isConstant {
             return GlobalCodeDefinition(constantNamed: name, type: type)
@@ -258,10 +262,12 @@ public class GlobalIntentionCodeDefinition: GlobalCodeDefinition {
 public class LocalCodeDefinition: CodeDefinition {
     public var location: DefinitionLocation
     
-    fileprivate convenience init(variableNamed name: String,
-                                 type: SwiftType,
-                                 ownership: Ownership = .strong,
-                                 location: DefinitionLocation) {
+    fileprivate convenience init(
+        variableNamed name: String,
+        type: SwiftType,
+        ownership: Ownership = .strong,
+        location: DefinitionLocation
+    ) {
         
         self.init(variableNamed: name,
                   storage: ValueStorage(type: type,
@@ -270,10 +276,12 @@ public class LocalCodeDefinition: CodeDefinition {
                   location: location)
     }
     
-    fileprivate convenience init(constantNamed name: String,
-                                 type: SwiftType,
-                                 ownership: Ownership = .strong,
-                                 location: DefinitionLocation) {
+    fileprivate convenience init(
+        constantNamed name: String,
+        type: SwiftType,
+        ownership: Ownership = .strong,
+        location: DefinitionLocation
+    ) {
         
         self.init(variableNamed: name,
                   storage: ValueStorage(type: type,
@@ -302,6 +310,7 @@ public class LocalCodeDefinition: CodeDefinition {
         case variableDeclaration(VariableDeclarationsStatement, index: Int)
         case forLoop(ForStatement, PatternLocation)
         case ifLet(IfStatement, PatternLocation)
+        case localFunction(LocalFunctionStatement)
         
         public func hash(into hasher: inout Hasher) {
             switch self {
@@ -332,6 +341,10 @@ public class LocalCodeDefinition: CodeDefinition {
                 hasher.combine(7)
                 hasher.combine(ObjectIdentifier(stmt))
                 hasher.combine(loc)
+
+            case let .localFunction(stmt):
+                hasher.combine(8)
+                hasher.combine(ObjectIdentifier(stmt))
             }
         }
     }
@@ -342,6 +355,7 @@ extension LocalCodeDefinition: Equatable {
         lhs === rhs || (lhs.kind == rhs.kind && lhs.location == rhs.location)
     }
 }
+
 extension LocalCodeDefinition: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(kind)

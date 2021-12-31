@@ -87,4 +87,27 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testRewrite_nestedFunctions() {
+        assertRewrite(
+            js: """
+            function foo() {
+                function bar() {
+                    return 0
+                }
+
+                var baz = bar()
+            }
+            """,
+            swift: """
+            func foo() -> Any {
+                func bar() -> Any {
+                    return 0
+                }
+
+                let baz: Any = bar()
+            }
+            """
+        )
+    }
 }
