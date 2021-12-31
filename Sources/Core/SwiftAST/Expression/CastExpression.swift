@@ -89,6 +89,11 @@ public extension Expression {
     var asCast: CastExpression? {
         cast()
     }
+
+    @inlinable
+    var isCast: Bool {
+        asCast != nil
+    }
 }
 
 extension CastExpression {

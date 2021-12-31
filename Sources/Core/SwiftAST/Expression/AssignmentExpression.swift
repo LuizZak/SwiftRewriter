@@ -101,4 +101,9 @@ public extension Expression {
     var asAssignment: AssignmentExpression? {
         cast()
     }
+
+    @inlinable
+    var isAssignment: Bool {
+        asAssignment != nil
+    }
 }

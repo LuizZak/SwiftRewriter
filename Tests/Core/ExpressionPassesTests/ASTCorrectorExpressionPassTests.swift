@@ -1141,4 +1141,114 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         )
         assertDidNotNotifyChange()
     }
+
+    func testBreakSequentialAssignments() {
+        assertTransform(
+            statement:
+                // a = b = c[0]
+                .expressions([
+                    .identifier("a")
+                    .assignment(
+                        op: .equals,
+                        rhs: .identifier("b")
+                        .assignment(
+                            op: .equals,
+                            rhs: .identifier("c")
+                                .sub(.constant(0))
+                        )
+                    )
+                ]),
+            into:
+                // b = c[0]
+                // a = b
+                .expressions([
+                    .identifier("b")
+                    .assignment(
+                        op: .equals,
+                        rhs: .identifier("c")
+                            .sub(.constant(0))
+                    ),
+                    .identifier("a").assignment(op: .equals, rhs: .identifier("b")),
+                ])
+        )
+        assertNotifiedChange()
+    }
+
+    func testBreakSequentialAssignmentsInVariableDeclaration() {
+        assertTransform(
+            statement:
+                // {
+                //     var a = b = c[0]
+                // }
+                .compound([
+                    .variableDeclaration(
+                        identifier: "a",
+                        type: .any,
+                        initialization:
+                            .identifier("b")
+                            .assignment(
+                                op: .equals,
+                                rhs: .identifier("c").sub(.constant(0))
+                            )
+                    )
+                ]),
+            into:
+                // {
+                //     b = c[0]
+                //     var a = b
+                // }
+                .compound([
+                    .expressions([
+                        .identifier("b")
+                        .assignment(
+                            op: .equals,
+                            rhs: .identifier("c")
+                                .sub(.constant(0))
+                        ),
+                    ]),
+                    .variableDeclaration(
+                        identifier: "a",
+                        type: .any,
+                        initialization: .identifier("b")
+                    )
+                ])
+        )
+        assertNotifiedChange()
+    }
+
+    func testDontBreakSequentialAssignmentsWithNonIdentifierLhs() {
+        assertNoTransform(
+            statement:
+                // a[0] = b = c
+                .expressions([
+                    .identifier("a")
+                    .sub(.constant(0))
+                    .assignment(
+                        op: .equals,
+                        rhs: .identifier("b")
+                        .assignment(
+                            op: .equals,
+                            rhs: .identifier("c")
+                        )
+                    )
+                ])
+        )
+
+        assertNoTransform(
+            statement:
+                // a = b[0] = c
+                .expressions([
+                    .identifier("a")
+                    .assignment(
+                        op: .equals,
+                        rhs: .identifier("b")
+                        .sub(.constant(0))
+                        .assignment(
+                            op: .equals,
+                            rhs: .identifier("c")
+                        )
+                    )
+                ])
+        )
+    }
 }

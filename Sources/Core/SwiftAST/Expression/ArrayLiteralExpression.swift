@@ -76,4 +76,9 @@ public extension Expression {
     var asArray: ArrayLiteralExpression? {
         cast()
     }
+
+    @inlinable
+    var isArray: Bool {
+        asArray != nil
+    }
 }

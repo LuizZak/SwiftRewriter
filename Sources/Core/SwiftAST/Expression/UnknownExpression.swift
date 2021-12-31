@@ -56,4 +56,9 @@ public extension Expression {
     var asUnknown: UnknownExpression? {
         cast()
     }
+
+    @inlinable
+    var isUnknown: Bool {
+        asUnknown != nil
+    }
 }

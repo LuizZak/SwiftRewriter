@@ -65,4 +65,9 @@ public extension Statement {
     var asExpressions: ExpressionsStatement? {
         cast()
     }
+
+    @inlinable
+    var isExpressions: Bool? {
+        asExpressions != nil
+    }
 }

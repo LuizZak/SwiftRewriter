@@ -147,6 +147,11 @@ public extension Statement {
     var asSwitch: SwitchStatement? {
         cast()
     }
+
+    @inlinable
+    var isSwitch: Bool? {
+        asSwitch != nil
+    }
 }
 
 public struct SwitchCase: Codable, Equatable {

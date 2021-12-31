@@ -150,6 +150,28 @@ class ExpressionPassTestCase: XCTestCase {
     }
 
     @discardableResult
+    func assertNoTransform(
+        statement: Statement,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> Statement {
+        
+        defer { 
+            assertDidNotNotifyChange(
+                file: file,
+                line: line
+            )
+        }
+
+        return assertTransform(
+            statement: statement,
+            into: statement,
+            file: file,
+            line: line
+        )
+    }
+
+    @discardableResult
     func assertTransform(
         statement: Statement,
         into expected: Statement,

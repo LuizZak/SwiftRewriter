@@ -159,4 +159,9 @@ public extension Expression {
     var asSelector: SelectorExpression? {
         cast()
     }
+
+    @inlinable
+    var isSelector: Bool {
+        asSelector != nil
+    }
 }

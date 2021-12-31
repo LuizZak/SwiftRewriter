@@ -111,4 +111,9 @@ public extension Statement {
     var asIf: IfStatement? {
         cast()
     }
+
+    @inlinable
+    var isIf: Bool? {
+        asIf != nil
+    }
 }

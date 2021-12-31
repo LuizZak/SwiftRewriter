@@ -72,6 +72,11 @@ public extension Statement {
     var asVariableDeclaration: VariableDeclarationsStatement? {
         cast()
     }
+
+    @inlinable
+    var isVariableDeclaration: Bool? {
+        asVariableDeclaration != nil
+    }
 }
 
 /// A variable declaration statement

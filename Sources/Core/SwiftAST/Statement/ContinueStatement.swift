@@ -59,4 +59,9 @@ public extension Statement {
     var asContinue: ContinueStatement? {
         cast()
     }
+
+    @inlinable
+    var isContinue: Bool? {
+        asContinue != nil
+    }
 }

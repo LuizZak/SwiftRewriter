@@ -105,4 +105,9 @@ extension Expression {
     public var asBinary: BinaryExpression? {
         cast()
     }
+
+    @inlinable
+    var isBinary: Bool {
+        asBinary != nil
+    }
 }

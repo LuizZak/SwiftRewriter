@@ -91,4 +91,9 @@ extension Expression {
     public var asUnary: UnaryExpression? {
         cast()
     }
+
+    @inlinable
+    var isUnary: Bool {
+        asUnary != nil
+    }
 }

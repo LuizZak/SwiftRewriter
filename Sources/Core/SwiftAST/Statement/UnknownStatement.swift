@@ -38,4 +38,9 @@ public extension Statement {
     var asUnknown: UnknownStatement? {
         cast()
     }
+
+    @inlinable
+    var isUnknown: Bool? {
+        asUnknown != nil
+    }
 }

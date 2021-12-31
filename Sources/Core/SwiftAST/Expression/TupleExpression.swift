@@ -76,4 +76,9 @@ public extension Expression {
     var asTuple: TupleExpression? {
         cast()
     }
+
+    @inlinable
+    var isTuple: Bool {
+        asTuple != nil
+    }
 }

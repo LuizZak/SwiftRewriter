@@ -157,4 +157,9 @@ extension Expression {
     public var asSizeOf: SizeOfExpression? {
         cast()
     }
+
+    @inlinable
+    var isSizeOf: Bool {
+        asSizeOf != nil
+    }
 }

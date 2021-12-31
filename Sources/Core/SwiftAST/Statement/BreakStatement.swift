@@ -59,4 +59,9 @@ public extension Statement {
     var asBreak: BreakStatement? {
         cast()
     }
+
+    @inlinable
+    var isBreak: Bool? {
+        asBreak != nil
+    }
 }

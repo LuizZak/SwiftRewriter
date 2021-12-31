@@ -80,4 +80,9 @@ public extension Statement {
     var asDoWhile: DoWhileStatement? {
         cast()
     }
+
+    @inlinable
+    var isDoWhile: Bool? {
+        asDoWhile != nil
+    }
 }

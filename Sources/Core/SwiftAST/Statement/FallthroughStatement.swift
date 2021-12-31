@@ -21,4 +21,9 @@ public extension Statement {
     var asFallthrough: FallthroughStatement? {
         cast()
     }
+
+    @inlinable
+    var isFallthrough: Bool? {
+        asFallthrough != nil
+    }
 }

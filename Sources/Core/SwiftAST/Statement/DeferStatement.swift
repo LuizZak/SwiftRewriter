@@ -64,4 +64,9 @@ public extension Statement {
     var asDefer: DeferStatement? {
         cast()
     }
+
+    @inlinable
+    var isDefer: Bool? {
+        asDefer != nil
+    }
 }

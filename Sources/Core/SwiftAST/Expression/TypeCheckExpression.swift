@@ -83,4 +83,9 @@ public extension Expression {
     var asTypeCheck: TypeCheckExpression? {
         cast()
     }
+
+    @inlinable
+    var isTypeCheck: Bool {
+        asTypeCheck != nil
+    }
 }

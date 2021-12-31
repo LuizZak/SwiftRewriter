@@ -171,6 +171,11 @@ extension Expression {
     public var asPostfix: PostfixExpression? {
         cast()
     }
+
+    @inlinable
+    var isPostfix: Bool {
+        asPostfix != nil
+    }
 }
 
 /// A postfix operation of a PostfixExpression
@@ -304,12 +309,22 @@ public extension Postfix {
     var asMember: MemberPostfix? {
         self as? MemberPostfix
     }
+
+    @inlinable
+    var isMember: Bool {
+        asMember != nil
+    }
 }
 // Helper casting getter extensions to postfix expression
 public extension PostfixExpression {
     @inlinable
     var member: MemberPostfix? {
         op as? MemberPostfix
+    }
+
+    @inlinable
+    var isMember: Bool {
+        member != nil
     }
 }
 
@@ -432,12 +447,22 @@ public extension Postfix {
     var asSubscription: SubscriptPostfix? {
         self as? SubscriptPostfix
     }
+
+    @inlinable
+    var isSubscription: Bool {
+        asSubscription != nil
+    }
 }
 // Helper casting getter extensions to postfix expression
 public extension PostfixExpression {
     @inlinable
     var subscription: SubscriptPostfix? {
         op as? SubscriptPostfix
+    }
+
+    @inlinable
+    var isSubscription: Bool {
+        subscription != nil
     }
 }
 
@@ -547,12 +572,22 @@ public extension Postfix {
     var asFunctionCall: FunctionCallPostfix? {
         self as? FunctionCallPostfix
     }
+
+    @inlinable
+    var isFunctionCall: Bool {
+        asFunctionCall != nil
+    }
 }
 // Helper casting getter extensions to postfix expression
 public extension PostfixExpression {
     @inlinable
     var functionCall: FunctionCallPostfix? {
         op as? FunctionCallPostfix
+    }
+
+    @inlinable
+    var isFunctionCall: Bool {
+        functionCall != nil
     }
 }
 

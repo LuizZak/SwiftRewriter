@@ -86,6 +86,11 @@ public extension Expression {
     var asDictionary: DictionaryLiteralExpression? {
         cast()
     }
+
+    @inlinable
+    var isDictionary: Bool {
+        asDictionary != nil
+    }
 }
 
 public struct ExpressionDictionaryPair: Codable, Equatable {

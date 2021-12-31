@@ -99,6 +99,11 @@ public extension Expression {
     var asBlock: BlockLiteralExpression? {
         cast()
     }
+
+    @inlinable
+    var isBlock: Bool {
+        asBlock != nil
+    }
 }
 
 public struct BlockParameter: Codable, Equatable {

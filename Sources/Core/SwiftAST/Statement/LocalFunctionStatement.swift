@@ -65,4 +65,9 @@ public extension Statement {
     var asLocalFunction: LocalFunctionStatement? {
         cast()
     }
+
+    @inlinable
+    var isLocalFunction: Bool? {
+        asLocalFunction != nil
+    }
 }

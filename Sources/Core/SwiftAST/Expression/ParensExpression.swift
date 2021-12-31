@@ -81,6 +81,11 @@ public extension Expression {
     var asParens: ParensExpression? {
         cast()
     }
+
+    @inlinable
+    var isParens: Bool {
+        asParens != nil
+    }
     
     /// Returns the first non-`ParensExpression` child expression of this syntax
     /// node.

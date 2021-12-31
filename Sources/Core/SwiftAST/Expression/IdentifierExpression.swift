@@ -70,4 +70,9 @@ public extension Expression {
     var asIdentifier: IdentifierExpression? {
         cast()
     }
+
+    @inlinable
+    var isIdentifier: Bool {
+        asIdentifier != nil
+    }
 }

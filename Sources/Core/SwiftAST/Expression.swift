@@ -117,7 +117,7 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable,
     
     @inlinable
     open override func copy() -> Expression {
-        fatalError("Must be overriden by subclasses")
+        fatalError("Must be overridden by subclasses")
     }
     
     open func isEqual(to other: Expression) -> Bool {

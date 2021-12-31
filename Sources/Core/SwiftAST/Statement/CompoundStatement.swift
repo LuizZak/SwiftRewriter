@@ -103,4 +103,9 @@ public extension Statement {
     var asCompound: CompoundStatement? {
         cast()
     }
+
+    @inlinable
+    var isCompound: Bool? {
+        asCompound != nil
+    }
 }

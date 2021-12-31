@@ -1,19 +1,32 @@
 import SwiftAST
 
 public class ASTCorrectorExpressionPass: ASTRewriterPass {
-    private func varNameForExpression(_ exp: Expression) -> String {
-        if let identifier = exp.asIdentifier {
-            return identifier.identifier
+    public override func visitCompound(_ stmt: CompoundStatement) -> Statement {
+        if let stmt = suggestSplit(stmt) {
+            notifyChange()
+
+            return visitStatement(stmt)
         }
-        if let member = exp.asPostfix?.member {
-            return member.name
+
+        return super.visitCompound(stmt)
+    }
+
+    public override func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
+        // Attempt to apply if-let pattern to expressions
+        if let ifLetStmt = suggestIfLetPattern(stmt) {
+            notifyChange()
+            
+            return visitStatement(ifLetStmt)
         }
-        if let callPostfix = exp.asPostfix, callPostfix.functionCall != nil,
-            let memberPostfix = callPostfix.exp.asPostfix, let member = memberPostfix.member {
-            return member.name
+
+        // Check if any expression needs to be broken down
+        if let split = suggestSplit(stmt) {
+            notifyChange()
+
+            return visitStatement(split)
         }
-        
-        return "value"
+
+        return super.visitExpressions(stmt)
     }
     
     public override func visitBaseExpression(_ exp: Expression) -> Expression {
@@ -45,69 +58,6 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         }
         
         return exp
-    }
-    
-    public override func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
-        // TODO: Deal with multiple expressions on a single line, maybe.
-        
-        let pf = ValueMatcherExtractor<PostfixExpression?>()
-        let functionCall = ValueMatcherExtractor(FunctionCallPostfix(arguments: []))
-        let matcher =
-            ExpressionsStatement.matcher()
-                .keyPath(\.expressions, hasCount(1))
-                .keyPath(\.expressions[0].asPostfix) { postfix in
-                    postfix
-                        .bind(to: pf)
-                        .keyPath(\.functionCall, !isNil() ->> functionCall)
-                        .keyPath(\.functionCall?.arguments, hasCount(1))
-                }
-        
-        guard matcher.matches(stmt), let postfix = pf.value else {
-            return super.visitExpressions(stmt)
-        }
-        
-        // Apply potential if-let patterns to simple 1-parameter function calls
-        guard case .block(_, let params, _)? = functionCall.value.callableSignature else {
-            return super.visitExpressions(stmt)
-        }
-        
-        let argument = functionCall.value.arguments[0].expression
-        
-        // Check the receiving argument is non-optional, but the argument's type
-        // in the expression is an optional (but not an implicitly unwrapped, since
-        // Swift takes care of unwrapping that automatically)
-        guard let resolvedType = argument.resolvedType, !params[0].isOptional
-            && resolvedType.isOptional == true
-            && argument.resolvedType?.canBeImplicitlyUnwrapped == false else {
-            return super.visitExpressions(stmt)
-        }
-        
-        // Scalars are dealt directly in another portion of the AST corrector.
-        guard !typeSystem.isScalarType(resolvedType.deepUnwrapped) else {
-            return super.visitExpressions(stmt)
-        }
-        
-        let name = varNameForExpression(argument)
-        
-        // if let <name> = <arg0> {
-        //   func(<name>)
-        // }
-        let newOp = functionCall.value.replacingArguments([
-            .identifier(name).typed(resolvedType.deepUnwrapped)
-        ])
-        let newPostfix = postfix.copy()
-        newPostfix.op = newOp
-        
-        let stmt =
-            Statement.ifLet(
-                .identifier(name), argument.copy(),
-                body: [
-                    .expression(newPostfix)
-                ])
-        
-        notifyChange()
-        
-        return visitStatement(stmt)
     }
     
     public override func visitExpression(_ exp: Expression) -> Expression {
@@ -155,14 +105,6 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         }
         
         return super.visitExpression(exp)
-    }
-    
-    public override func visitIf(_ stmt: IfStatement) -> Statement {
-        super.visitIf(stmt)
-    }
-    
-    public override func visitWhile(_ stmt: WhileStatement) -> Statement {
-        super.visitWhile(stmt)
     }
     
     public override func visitUnary(_ exp: UnaryExpression) -> Expression {
@@ -308,7 +250,212 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         
         return super.visitPostfix(exp)
     }
-    
+
+    // MARK: - Internals
+
+    /// Suggests a split to a sequence of statements that could be potentially
+    /// invalid in Swift (like chained assignment variable declaration, `var a = b = c`)
+    func suggestSplit(_ stmt: CompoundStatement) -> CompoundStatement? {
+        var stmts: [Statement] = []
+
+        for stmt in stmt.statements {
+            guard let varDecl = stmt.asVariableDeclaration else {
+                stmts.append(stmt)
+                continue
+            }
+
+            if let split = suggestSplit(varDecl) {
+                stmts.append(contentsOf: split)
+            } else {
+                stmts.append(varDecl)
+            }
+        }
+
+        guard stmts.count != stmt.statements.count else {
+            return nil
+        }
+
+        let copy = stmt.copy()
+        copy.statements = stmts
+        return copy
+    }
+
+    /// Suggests a split to chained assignment variable declarations like,
+    /// `var a = b = c`.
+    func suggestSplit(_ stmt: VariableDeclarationsStatement) -> [Statement]? {
+        var splitCandidates: [Int: (Expression, IdentifierExpression)] = [:]
+        for (i, decl) in stmt.decl.enumerated() {
+            guard let rhsAssignment = decl.initialization?.asAssignment else {
+                continue
+            }
+            guard let identifier = rhsAssignment.lhs.asIdentifier else {
+                continue
+            }
+
+            splitCandidates[i] = (rhsAssignment, identifier)
+        }
+
+        guard !splitCandidates.isEmpty else {
+            return nil
+        }
+
+        var stmts: [Statement] = []
+
+        for (i, decl) in stmt.decl.enumerated() {
+            if let assignment = splitCandidates[i] {
+                stmts.append(.expression(assignment.0.copy()))
+                stmts.append(
+                    .variableDeclaration(
+                        identifier: decl.identifier,
+                        type: decl.type,
+                        initialization: assignment.1.copy()
+                    )
+                )
+            } else {
+                stmts.append(.variableDeclarations([decl.copy()]))
+            }
+        }
+
+        // Copy metadata to the first statement
+        stmts[0] = stmts[0].copyMetadata(from: stmt)
+
+        return stmts
+    }
+
+    /// Suggests a split to an expression that could be potentially invalid in
+    /// Swift (like chained assignments, `a = b = c`)
+    func suggestSplit(_ stmt: ExpressionsStatement) -> ExpressionsStatement? {
+        // Break sequential expressions
+        var sequence: [Expression] = []
+        for exp in stmt.expressions {
+            if let split = suggestSplit(exp) {
+                sequence.append(contentsOf: split)
+            } else {
+                sequence.append(exp.copy())
+            }
+        }
+
+        if sequence.count != stmt.expressions.count {
+            return .expressions(sequence).copyMetadata(from: stmt)
+        }
+
+        return nil
+    }
+
+    /// Suggests a split to an expression that could be potentially invalid in
+    /// Swift (like chained assignments, `a = b = c`)
+    func suggestSplit(_ exp: Expression) -> [Expression]? {
+        assignmentSplit:
+        if let assignment = exp.asAssignment {
+            // Can only split assignments that happen at identifiers.
+            guard let lhs = assignment.lhs.asIdentifier else {
+                break assignmentSplit
+            }
+            guard let rhsAssignment = assignment.rhs.asAssignment else {
+                break assignmentSplit
+            }
+            guard let rhsLhs = rhsAssignment.asAssignment?.lhs.asIdentifier else {
+                break assignmentSplit
+            }
+
+            let exp1 = rhsLhs.copy()
+                .assignment(
+                    op: rhsAssignment.op,
+                    rhs: rhsAssignment.rhs.copy()
+                )
+            let exp2 = lhs.copy()
+                .assignment(
+                    op: assignment.op,
+                    rhs: rhsLhs.copy()
+                )
+            
+            // Attempt to further split the expressions recursively
+            let exp1Sequence = suggestSplit(exp1) ?? [exp1]
+
+            return exp1Sequence + [
+                exp2,
+            ]
+        }
+
+        return nil
+    }
+
+    func suggestIfLetPattern(_ stmt: ExpressionsStatement) -> IfStatement? {
+        // TODO: Deal with multiple expressions on a single line, maybe.
+        
+        let pf = ValueMatcherExtractor<PostfixExpression?>()
+        let functionCall = ValueMatcherExtractor(FunctionCallPostfix(arguments: []))
+        let matcher =
+            ExpressionsStatement.matcher()
+                .keyPath(\.expressions, hasCount(1))
+                .keyPath(\.expressions[0].asPostfix) { postfix in
+                    postfix
+                        .bind(to: pf)
+                        .keyPath(\.functionCall, !isNil() ->> functionCall)
+                        .keyPath(\.functionCall?.arguments, hasCount(1))
+                }
+        
+        guard matcher.matches(stmt), let postfix = pf.value else {
+            return nil
+        }
+        
+        // Apply potential if-let patterns to simple 1-parameter function calls
+        guard case .block(_, let params, _)? = functionCall.value.callableSignature else {
+            return nil
+        }
+        
+        let argument = functionCall.value.arguments[0].expression
+        
+        // Check the receiving argument is non-optional, but the argument's type
+        // in the expression is an optional (but not an implicitly unwrapped, since
+        // Swift takes care of unwrapping that automatically)
+        guard let resolvedType = argument.resolvedType, !params[0].isOptional
+            && resolvedType.isOptional == true
+            && argument.resolvedType?.canBeImplicitlyUnwrapped == false else {
+            return nil
+        }
+        
+        // Scalars are dealt directly in another portion of the AST corrector.
+        guard !typeSystem.isScalarType(resolvedType.deepUnwrapped) else {
+            return nil
+        }
+        
+        let name = varNameForExpression(argument)
+        
+        // if let <name> = <arg0> {
+        //   func(<name>)
+        // }
+        let newOp = functionCall.value.replacingArguments([
+            .identifier(name).typed(resolvedType.deepUnwrapped)
+        ])
+        let newPostfix = postfix.copy()
+        newPostfix.op = newOp
+        
+        let stmt =
+            Statement.ifLet(
+                .identifier(name), argument.copy(),
+                body: [
+                    .expression(newPostfix)
+                ])
+        
+        return stmt
+    }
+
+    private func varNameForExpression(_ exp: Expression) -> String {
+        if let identifier = exp.asIdentifier {
+            return identifier.identifier
+        }
+        if let member = exp.asPostfix?.member {
+            return member.name
+        }
+        if let callPostfix = exp.asPostfix, callPostfix.functionCall != nil,
+            let memberPostfix = callPostfix.exp.asPostfix, let member = memberPostfix.member {
+            return member.name
+        }
+        
+        return "value"
+    }
+
     func correctToDefaultValue(_ exp: Expression,
                                targetType: SwiftType? = nil) -> Expression? {
         

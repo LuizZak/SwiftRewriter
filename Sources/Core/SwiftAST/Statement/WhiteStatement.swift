@@ -80,4 +80,9 @@ public extension Statement {
     var asWhile: WhileStatement? {
         cast()
     }
+
+    @inlinable
+    var isWhile: Bool? {
+        asWhile != nil
+    }
 }

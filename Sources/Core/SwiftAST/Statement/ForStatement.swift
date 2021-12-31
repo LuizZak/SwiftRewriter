@@ -110,4 +110,9 @@ public extension Statement {
     var asFor: ForStatement? {
         cast()
     }
+
+    @inlinable
+    var isFor: Bool? {
+        asFor != nil
+    }
 }

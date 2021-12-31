@@ -105,4 +105,9 @@ public extension Expression {
     var asTernary: TernaryExpression? {
         cast()
     }
+
+    @inlinable
+    var isTernary: Bool {
+        asTernary != nil
+    }
 }

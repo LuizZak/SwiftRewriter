@@ -72,4 +72,9 @@ public extension Statement {
     var asReturn: ReturnStatement? {
         cast()
     }
+
+    @inlinable
+    var isReturn: Bool? {
+        asReturn != nil
+    }
 }

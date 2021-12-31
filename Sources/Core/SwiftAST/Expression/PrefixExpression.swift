@@ -91,4 +91,9 @@ extension Expression {
     public var asPrefix: PrefixExpression? {
         cast()
     }
+
+    @inlinable
+    var isPrefix: Bool {
+        asPrefix != nil
+    }
 }

@@ -110,4 +110,24 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testRewriteSequentialAssignmentExpressions() {
+        assertRewrite(
+            js: """
+            function foo() {
+                var a, b, c = 1;
+
+                a = b = c;
+            }
+            """,
+            swift: """
+            func foo() -> Any {
+                var a: Any, b: Any, c: Any = 1
+
+                b = c
+                a = b
+            }
+            """
+        )
+    }
 }

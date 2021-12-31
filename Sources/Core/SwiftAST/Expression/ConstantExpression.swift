@@ -110,6 +110,11 @@ public extension Expression {
     var asConstant: ConstantExpression? {
         cast()
     }
+
+    @inlinable
+    var isConstant: Bool {
+        asConstant != nil
+    }
 }
 
 /// Represents one of the recognized compile-time constant value types.

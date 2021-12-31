@@ -68,4 +68,9 @@ public extension Statement {
     var asDoStatement: DoStatement? {
         cast()
     }
+
+    @inlinable
+    var isDoStatement: Bool? {
+        asDoStatement != nil
+    }
 }
