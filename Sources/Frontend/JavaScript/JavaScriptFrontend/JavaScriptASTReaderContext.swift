@@ -12,12 +12,21 @@ public final class JavaScriptASTReaderContext {
     private var typeSystem: TypeSystem?
     private var typeContext: KnownType?
     private var comments: [RawCodeComment]
+
+    public let options: JavaScriptASTReaderOptions
     
-    public init(source: Source, typeSystem: TypeSystem?, typeContext: KnownType?, comments: [RawCodeComment]) {
+    public init(
+        source: Source,
+        typeSystem: TypeSystem?,
+        typeContext: KnownType?,
+        comments: [RawCodeComment],
+        options: JavaScriptASTReaderOptions
+    ) {
         self.source = source
         self.typeSystem = typeSystem
         self.typeContext = typeContext
         self.comments = comments
+        self.options = options
     }
 
     public func sourceCode(for rule: ParserRuleContext) -> Substring? {

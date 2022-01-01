@@ -469,6 +469,7 @@ extension JavaScriptStatementASTReaderTests {
 
     func assert(
         jsStmt: String,
+        options: JavaScriptASTReaderOptions = .default,
         parseWith: (JavaScriptParser) throws -> ParserRuleContext = { parser in
             try parser.statement()
         },
@@ -483,7 +484,8 @@ extension JavaScriptStatementASTReaderTests {
             source: source,
             typeSystem: typeSystem,
             typeContext: nil,
-            comments: []
+            comments: [],
+            options: options
         )
 
         let expReader = JavaScriptExprASTReader(
@@ -514,9 +516,6 @@ extension JavaScriptStatementASTReaderTests {
 
                 expString = producer.generateStatement(expected).description + "\n"
                 resString = (result.map(producer.generateStatement)?.description ?? "") + "\n"
-
-                //dump(expected, to: &expString)
-                //dump(result, to: &resString)
 
                 XCTFail(
                     """

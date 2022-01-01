@@ -415,7 +415,14 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
             }
         }
 
-        return DictionaryLiteralExpression(pairs: pairs)
+        let expression = DictionaryLiteralExpression(pairs: pairs)
+
+        switch context.options.dictionaryLiteralKind {
+        case .rawDictionary:
+            return expression
+        case .javaScriptObject(let typeName):
+            return .identifier(typeName).call([expression])
+        }
     }
 
     public override func visitNumericLiteral(_ ctx: JavaScriptParser.NumericLiteralContext) -> Expression? {
@@ -644,17 +651,17 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
             guard let lhs = ctx.propertyName()?.accept(expReader) else { return nil }
             guard let rhs = ctx.singleExpression()?.accept(expReader) else { return nil }
 
-            return .init(key: lhs, value: rhs)
+            return .init(key: formatKeyName(lhs), value: rhs)
         }
 
         override func visitComputedPropertyExpressionAssignment(_ ctx: JavaScriptParser.ComputedPropertyExpressionAssignmentContext) -> ExpressionDictionaryPair? {
             guard let lhs = ctx.singleExpression(0)?.accept(expReader) else { return nil }
             guard let rhs = ctx.singleExpression(1)?.accept(expReader) else { return nil }
 
-            return .init(key: lhs, value: rhs)
+            return .init(key: formatKeyName(lhs), value: rhs)
         }
 
-        override func visitFunctionProperty(_ ctx: JavaScriptParser.FunctionPropertyContext) -> ExpressionDictionaryPair? {            
+        override func visitFunctionProperty(_ ctx: JavaScriptParser.FunctionPropertyContext) -> ExpressionDictionaryPair? {
             let closureVisitor = functionBodyVisitor()
 
             guard let name = ctx.propertyName()?.identifierName()?.getText() else { return nil }
@@ -663,13 +670,29 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
             let signature = JsParser.functionSignature(from: ctx.formalParameterList())
 
             return .init(
-                key: .identifier(name),
+                key: formatKeyName(.identifier(name)),
                 value: Expression.block(
                     parameters: expReader.blockParameters(from: signature),
                     return: .any,
                     body: body
                 )
             )
+        }
+        
+        // MARK: -
+
+        private func formatKeyName(_ exp: Expression) -> Expression {
+            switch expReader.context.options.dictionaryLiteralKind {
+            case .rawDictionary:
+                return exp
+            
+            case .javaScriptObject:
+                if let identifier = exp.asIdentifier {
+                    return .constant(.string(identifier.identifier))
+                }
+            }
+
+            return exp
         }
 
         private func functionBodyVisitor() -> JavaScriptStatementASTReader.CompoundStatementVisitor {

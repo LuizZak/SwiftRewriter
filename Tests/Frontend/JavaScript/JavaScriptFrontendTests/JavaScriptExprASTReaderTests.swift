@@ -272,12 +272,35 @@ class JavaScriptExprASTReaderTests: XCTestCase {
             ])
         )
     }
+
+    // MARK: JavaScriptObject emission
+
+    func testDictionaryLiteral_javaScriptObject() {
+        assert(
+            jsExpr: """
+            {
+                x: 1,
+                y: 2
+            }
+            """,
+            options: .init(dictionaryLiteralKind: .javaScriptObject(typeName: "JavaScriptObject")),
+            readsAs:
+            .identifier("JavaScriptObject")
+            .call([
+                .dictionaryLiteral([
+                    .init(key: .constant("x"), value: .constant(1)),
+                    .init(key: .constant("y"), value: .constant(2)),
+                ])
+            ])
+        )
+    }
 }
 
 extension JavaScriptExprASTReaderTests {
 
     func assert(
         jsExpr: String,
+        options: JavaScriptASTReaderOptions = .default,
         parseWith: (JavaScriptParser) throws -> ParserRuleContext = { parser in
             try parser.singleExpression()
         },
@@ -294,7 +317,8 @@ extension JavaScriptExprASTReaderTests {
                     source: source,
                     typeSystem: typeSystem,
                     typeContext: nil,
-                    comments: []
+                    comments: [],
+                    options: options
                 ),
                 delegate: nil
             )
@@ -308,14 +332,23 @@ extension JavaScriptExprASTReaderTests {
             let result = expr.accept(sut)
 
             if result != expected {
-                var resStr = "nil"
-                var expStr = ""
+                var resStr: String
+                var expStr: String
 
-                if let result = result {
-                    resStr = ""
-                    dump(result, to: &resStr)
+                if result?.description == expected.description {
+                    if let result = result {
+                        resStr = ""
+                        dump(result, to: &resStr)
+                    } else {
+                        resStr = "<nil>"
+                    }
+
+                    expStr = ""
+                    dump(expected, to: &expStr)
+                } else {
+                    resStr = result?.description ?? "<nil>"
+                    expStr = expected.description
                 }
-                dump(expected, to: &expStr)
 
                 XCTFail(
                     """

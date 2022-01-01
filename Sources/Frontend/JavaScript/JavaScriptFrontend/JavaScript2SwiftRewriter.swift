@@ -195,7 +195,11 @@ public final class JavaScript2SwiftRewriter {
                         JavaScript2SwiftRewriter._parserStatePool.repool(state)
                     }
                     
-                    let reader = JavaScriptASTReader(source: source, typeSystem: self.typeSystem)
+                    let reader = JavaScriptASTReader(
+                        source: source,
+                        typeSystem: self.typeSystem,
+                        options: .default
+                    )
                     reader.delegate = delegate
                     
                     switch item {
@@ -526,12 +530,13 @@ public final class JavaScript2SwiftRewriter {
         /// Enables printing outputs of stages for diagnostic purposes.
         public var stageDiagnostics: [StageDiagnosticFlag]
 
-        public init(numThreads: Int,
-                    verbose: Bool,
-                    diagnoseFiles: [String],
-                    forceUseLLPrediction: Bool,
-                    stageDiagnostics: [StageDiagnosticFlag]) {
-            
+        public init(
+            numThreads: Int,
+            verbose: Bool,
+            diagnoseFiles: [String],
+            forceUseLLPrediction: Bool,
+            stageDiagnostics: [StageDiagnosticFlag]
+        ) {
             self.numThreads = numThreads
             self.verbose = verbose
             self.diagnoseFiles = []

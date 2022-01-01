@@ -11,16 +11,42 @@ public protocol JavaScriptASTReaderDelegate: AnyObject {
 
 }
 
+public struct JavaScriptASTReaderOptions {
+    public static let `default`: Self = .init(
+        dictionaryLiteralKind: .rawDictionary
+    )
+
+    /// The behavior of reading dictionary literal expressions.
+    public var dictionaryLiteralKind: DictionaryLiteralKind
+
+    public init(dictionaryLiteralKind: DictionaryLiteralKind) {
+        self.dictionaryLiteralKind = dictionaryLiteralKind
+    }
+
+    /// Describes the behavior of dictionary literal reading.
+    public enum DictionaryLiteralKind {
+        /// Reads the dictionary as a raw Swift dictionary, with keys mapping to
+        /// identifiers.
+        case rawDictionary
+
+        /// Reads the dictionary as a `JavaScriptObject` definition, with the
+        /// proper object type name specified.
+        case javaScriptObject(typeName: String = "JavaScriptObject")
+    }
+}
+
 /// Reader that reads JavaScript AST and outputs equivalent a Swift AST
 public class JavaScriptASTReader {
     let typeSystem: TypeSystem?
     let source: Source
+    let options: JavaScriptASTReaderOptions
 
     weak var delegate: JavaScriptASTReaderDelegate?
     
-    public init(source: Source, typeSystem: TypeSystem? = nil) {
+    public init(source: Source, typeSystem: TypeSystem? = nil, options: JavaScriptASTReaderOptions) {
         self.source = source
         self.typeSystem = typeSystem
+        self.options = options
     }
     
     public func parseStatements(body: JavaScriptParser.FunctionBodyContext,
@@ -56,7 +82,8 @@ public class JavaScriptASTReader {
                 source: source,
                 typeSystem: typeSystem,
                 typeContext: typeContext,
-                comments: comments
+                comments: comments,
+                options: options
             )
         
         let expressionReader =
@@ -91,7 +118,8 @@ public class JavaScriptASTReader {
                 source: source,
                 typeSystem: typeSystem,
                 typeContext: typeContext,
-                comments: comments
+                comments: comments,
+                options: options
             )
         
         let expressionReader =
@@ -122,7 +150,8 @@ public class JavaScriptASTReader {
                 source: source,
                 typeSystem: typeSystem,
                 typeContext: nil,
-                comments: comments
+                comments: comments,
+                options: options
             )
         
         let parser = 
@@ -146,7 +175,8 @@ public class JavaScriptASTReader {
                 source: source,
                 typeSystem: typeSystem,
                 typeContext: nil,
-                comments: comments
+                comments: comments,
+                options: options
             )
         
         let parser = 
