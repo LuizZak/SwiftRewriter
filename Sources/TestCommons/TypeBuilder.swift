@@ -281,6 +281,13 @@ public extension TypeBuilder where T: ClassGenerationIntention {
         
         return self
     }
+
+    @discardableResult
+    func setIsFinal(_ isFinal: Bool) -> TypeBuilder {
+        targetType.isFinal = isFinal
+
+        return self
+    }
 }
 
 public extension TypeBuilder where T: ClassExtensionGenerationIntention {

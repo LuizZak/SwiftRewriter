@@ -12,6 +12,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         var decorators = sut.decorators.makeIterator()
 
         XCTAssert(decorators.next() is AccessLevelModifiersDecorator)
+        XCTAssert(decorators.next() is FinalClassModifiersDecorator)
         XCTAssert(decorators.next() is PropertySetterAccessModifiersDecorator)
         XCTAssert(decorators.next() is ProtocolOptionalModifiersDecorator)
         XCTAssert(decorators.next() is StaticModifiersDecorator)
@@ -352,6 +353,19 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
 
             assert(decorator: sut, element: .intention(nonOptionalMethod), producesModifier: nil)
         }
+    }
+
+    func testFinalModifierDecorator() {
+        let intention = ClassGenerationIntention(typeName: "A")
+        intention.isFinal = true
+
+        let sut = FinalClassModifiersDecorator()
+
+        assert(
+            decorator: sut,
+            element: .intention(intention),
+            producesModifier: "final"
+        )
     }
 }
 

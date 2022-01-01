@@ -74,6 +74,7 @@ public class TypeGenerationIntention: FromSourceIntention {
         subscripts = try container.decodeIntentions(forKey: .subscripts)
         knownTraits = try container.decode([String: TraitType].self, forKey: .knownTraits)
         semantics = try container.decode(Set<Semantic>.self, forKey: .semantics)
+        knownAttributes = try container.decode([KnownAttribute].self, forKey: .knownAttributes)
         
         try super.init(from: container.superDecoder())
         
@@ -110,8 +111,24 @@ public class TypeGenerationIntention: FromSourceIntention {
         try container.encodeIntentions(subscripts, forKey: .subscripts)
         try container.encode(knownTraits, forKey: .knownTraits)
         try container.encode(semantics, forKey: .semantics)
+        try container.encode(knownAttributes, forKey: .knownAttributes)
         
         try super.encode(to: container.superEncoder())
+    }
+
+    /// Adds an attribute for this type intention.
+    @discardableResult
+    public func addAttribute(_ name: String, parameters: String? = nil) -> KnownAttribute {
+        let attribute = KnownAttribute(name: name, parameters: parameters)
+
+        addAttribute(attribute)
+
+        return attribute
+    }
+    
+    /// Adds an attribute for this type intention.
+    public func addAttribute(_ attribute: KnownAttribute) {
+        knownAttributes.append(attribute)
     }
     
     /// Generates a new protocol conformance intention from a given known protocol
@@ -120,7 +137,8 @@ public class TypeGenerationIntention: FromSourceIntention {
     /// - Parameter knownProtocol: A known protocol conformance.
     @discardableResult
     public func generateProtocolConformance(
-        from knownProtocol: KnownProtocolConformance) -> ProtocolInheritanceIntention {
+        from knownProtocol: KnownProtocolConformance
+    ) -> ProtocolInheritanceIntention {
         
         let intention =
             ProtocolInheritanceIntention(protocolName: knownProtocol.protocolName)
@@ -129,6 +147,11 @@ public class TypeGenerationIntention: FromSourceIntention {
         
         return intention
     }
+    
+    /// Adds a protocol inheritance intention for this type.
+    ///
+    /// If an index is specified, the inheritance is inserted in the inheritance
+    /// list at the given index.
     public func addProtocol(_ intention: ProtocolInheritanceIntention, at index: Int? = nil) {
         if let index = index {
             self.protocols.insert(intention, at: index)
@@ -138,6 +161,23 @@ public class TypeGenerationIntention: FromSourceIntention {
         
         intention.parent = self
     }
+    
+    /// Adds a protocol conformance for a protocol with a given name.
+    ///
+    /// If an index is specified, the inheritance is inserted in the inheritance
+    /// list at the given index.
+    @discardableResult
+    public func addProtocol(_ name: String, at index: Int? = nil) -> ProtocolInheritanceIntention {
+        let intention = ProtocolInheritanceIntention(protocolName: name)
+
+        addProtocol(intention, at: index)
+
+        return intention
+    }
+
+    /// Removes a specified protocol inheritance intention from this type.
+    ///
+    /// If the protocol inheritance is not present in this type, nothing is done.
     public func removeProtocol(_ intention: ProtocolInheritanceIntention) {
         if let index = protocols.firstIndex(where: { $0 === intention }) {
             intention.parent = nil
@@ -152,9 +192,11 @@ public class TypeGenerationIntention: FromSourceIntention {
     @discardableResult
     public func generateProperty(from knownProperty: KnownProperty) -> PropertyGenerationIntention {
         let intention =
-            PropertyGenerationIntention(name: knownProperty.name,
-                                        storage: knownProperty.storage,
-                                        objcAttributes: knownProperty.objcAttributes)
+            PropertyGenerationIntention(
+                name: knownProperty.name,
+                storage: knownProperty.storage,
+                objcAttributes: knownProperty.objcAttributes
+            )
         
         addProperty(intention)
         
@@ -263,6 +305,7 @@ public class TypeGenerationIntention: FromSourceIntention {
         case constructors
         case subscripts
         case knownTraits
+        case knownAttributes
         case semantics
     }
 }

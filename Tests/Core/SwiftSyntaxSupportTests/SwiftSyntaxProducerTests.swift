@@ -314,6 +314,45 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                 """
         )
     }
+
+    func testGenerateSignature() {
+        let signature = FunctionSignature(
+            name: "f",
+            parameters: [
+                .init(
+                    label: nil,
+                    name: "param1",
+                    type: .any,
+                    isVariadic: false
+                ),
+                .init(
+                    label: "p2",
+                    name: "param2",
+                    type: .string,
+                    isVariadic: false
+                ),
+                .init(
+                    label: "param3",
+                    name: "param3",
+                    type: .int,
+                    isVariadic: true
+                )
+            ],
+            returnType: .anyObject,
+            isStatic: false,
+            isMutating: false
+        )
+        let sut = SwiftSyntaxProducer()
+
+        let result = sut.generateSignature(signature)
+        
+        assert(
+            result,
+            matches: """
+                (_ param1: Any, p2 param2: String, param3: Int...) -> AnyObject
+                """
+        )
+    }
 }
 
 // MARK: - Attribute writing
@@ -1164,6 +1203,27 @@ extension SwiftSyntaxProducerTests {
             result,
             matches: """
                 class A: ProtocolA, ProtocolB {
+                }
+                """
+        )
+    }
+
+    func testGenerateFinalClass() {
+        let file =
+            FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A") { builder in
+                    builder.setIsFinal(true)
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+
+        let result = sut.generateFile(file)
+
+        assert(
+            result,
+            matches: """
+                final class A {
                 }
                 """
         )

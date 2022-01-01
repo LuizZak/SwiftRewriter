@@ -19,11 +19,12 @@ public final class InstanceVariableGenerationIntention: MemberGenerationIntentio
         type
     }
     
-    public init(name: String,
-                storage: ValueStorage,
-                accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
-        
+    public init(
+        name: String,
+        storage: ValueStorage,
+        accessLevel: AccessLevel = .internal,
+        source: ASTNode? = nil
+    ) {
         self.name = name
         self.storage = storage
         super.init(accessLevel: accessLevel, source: source)

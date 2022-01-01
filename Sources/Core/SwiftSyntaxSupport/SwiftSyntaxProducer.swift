@@ -481,6 +481,9 @@ extension SwiftSyntaxProducer {
             for attribute in attributes(for: intention, inline: false) {
                 builder.addAttribute(attribute().asSyntax)
             }
+            for modifier in modifiers(for: intention) {
+                builder.addModifier(modifier(self))
+            }
             
             builder.useClassOrActorKeyword(
                 makeStartToken(SyntaxFactory.makeClassKeyword)
@@ -875,8 +878,10 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateParameter(_ parameter: ParameterSignature,
-                           withTrailingComma: Bool) -> FunctionParameterSyntax {
+    func generateParameter(
+        _ parameter: ParameterSignature,
+        withTrailingComma: Bool
+    ) -> FunctionParameterSyntax {
         
         FunctionParameterSyntax { builder in
             if parameter.label == parameter.name {
@@ -900,6 +905,10 @@ extension SwiftSyntaxProducer {
             builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
             
             builder.useType(SwiftTypeConverter.makeTypeSyntax(parameter.type, startTokenHandler: self))
+
+            if parameter.isVariadic {
+                builder.useEllipsis(SyntaxFactory.makeEllipsisToken())
+            }
             
             if withTrailingComma {
                 builder.useTrailingComma(

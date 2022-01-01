@@ -14,6 +14,7 @@ class ModifiersSyntaxDecoratorApplier {
     static func makeDefaultDecoratorApplier() -> ModifiersSyntaxDecoratorApplier {
         let decorator = ModifiersSyntaxDecoratorApplier()
         decorator.addDecorator(AccessLevelModifiersDecorator())
+        decorator.addDecorator(FinalClassModifiersDecorator())
         decorator.addDecorator(PropertySetterAccessModifiersDecorator())
         decorator.addDecorator(ProtocolOptionalModifiersDecorator())
         decorator.addDecorator(StaticModifiersDecorator())
@@ -328,6 +329,32 @@ class ProtocolOptionalModifiersDecorator: ModifiersSyntaxDecorator {
         }
         
         return false
+    }
+}
+
+/// Modifier that appends `final` declarations to class intentions.
+class FinalClassModifiersDecorator: ModifiersSyntaxDecorator {
+    func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
+        guard let intention = element.intention as? ClassGenerationIntention else {
+            return nil
+        }
+
+        if intention.isFinal {
+            return { producer in
+                DeclModifierSyntax { builder in
+                    // TODO: There's no `final` keyword currently in the
+                    // TODO: SwiftSyntax version we're using;
+                    builder.useName(
+                        SyntaxFactory
+                        .makeIdentifier("final")
+                        .withExtraLeading(from: producer)
+                        .withTrailingSpace()
+                    )
+                }
+            } 
+        }
+
+        return nil
     }
 }
 
