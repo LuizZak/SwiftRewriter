@@ -283,7 +283,7 @@ class JavaScriptExprASTReaderTests: XCTestCase {
                 y: 2
             }
             """,
-            options: .init(dictionaryLiteralKind: .javaScriptObject(typeName: "JavaScriptObject")),
+            options: .init(objectLiteralKind: .javaScriptObject(typeName: "JavaScriptObject")),
             readsAs:
             .identifier("JavaScriptObject")
             .call([

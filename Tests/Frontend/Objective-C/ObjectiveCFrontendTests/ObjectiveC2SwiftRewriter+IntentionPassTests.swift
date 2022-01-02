@@ -3,6 +3,7 @@ import IntentionPasses
 import Intentions
 import TypeSystem
 import XCTest
+import TestCommons
 
 @testable import ObjectiveCFrontend
 
@@ -43,7 +44,7 @@ class ObjectiveC2SwiftRewriter_IntentionPassTests: XCTestCase {
             @end
             """
         let testInput = TestSingleInputProvider(code: code, isPrimary: true)
-        let testOutput = TestSingleFileWriterOutput()
+        let testOutput = TestWriterOutput()
 
         let pass = Pass()
 

@@ -115,7 +115,7 @@ class MultiFileTestBuilder {
             // Compute output
             let buffer = output.outputs
                 .sorted { $0.path < $1.path }
-                .map(\.buffer)
+                .map { $0.getBuffer(withFooter: true) }
                 .joined(separator: "\n")
 
             if buffer != expectedSwift {
@@ -234,9 +234,13 @@ class CompiledMultiFileTestResults {
             return ResultMatch(result: file, expectedFile: expected)
         }
 
-        for match in matches where match.result.buffer != match.expectedFile.source {
+        for match in matches {
             let expectedSwift = match.expectedFile.source
-            let actualSwift = match.result.buffer
+            let actualSwift = match.result.getBuffer(withFooter: true)
+
+            guard expectedSwift != actualSwift else {
+                continue
+            }
 
             XCTFail(
                 """

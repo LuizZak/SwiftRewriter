@@ -69,17 +69,19 @@ public final class JavaScript2SwiftRewriter {
     
     /// Describes settings for the current `JavaScript2SwiftRewriter` invocation
     public var settings: Settings
-    
+
     /// Describes settings to pass to the AST writers when outputting code
     public var writerOptions: SwiftSyntaxOptions = JavaScript2SwiftRewriter.defaultWriterOptions
     
-    public init(input: InputSourcesProvider,
-                output: WriterOutput,
-                intentionPassesSource: IntentionPassSource? = nil,
-                astRewriterPassSources: ASTRewriterPassSource? = nil,
-                globalsProvidersSource: GlobalsProvidersSource? = nil,
-                syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider? = nil,
-                settings: Settings = .default) {
+    public init(
+        input: InputSourcesProvider,
+        output: WriterOutput,
+        intentionPassesSource: IntentionPassSource? = nil,
+        astRewriterPassSources: ASTRewriterPassSource? = nil,
+        globalsProvidersSource: GlobalsProvidersSource? = nil,
+        syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider? = nil,
+        settings: Settings = .default
+    ) {
         
         self.diagnostics = Diagnostics()
         self.sourcesProvider = input
@@ -106,6 +108,11 @@ public final class JavaScript2SwiftRewriter {
 
         try autoreleasepool {
             let lazyParse = try loadInputSources()
+
+            if settings.emitJavaScriptObject {
+                emitJavaScriptObject()
+            }
+
             parseStatements(lazyParse)
             performIntentionAndSyntaxPasses(intentionCollection)
             outputDefinitions(intentionCollection)
@@ -159,6 +166,67 @@ public final class JavaScript2SwiftRewriter {
         return lazyParse
     }
     
+    /// Emits a `JavaScriptObject` type generation intention along with the
+    /// currently parsed intentions.
+    ///
+    /// Must be called with at least one intention parsed, in order to have a
+    /// base path to use for the generated file intention.
+    private func emitJavaScriptObject() {
+        if settings.verbose {
+            print("Emitting JavaScriptObject...")
+        }
+
+        let intention = JavaScriptObjectGenerator().generateTypeIntention()
+        
+        // Find the common path root across all generation intentions for the
+        // synthesized intention
+        var path: [String]?
+        for file in intentionCollection.fileIntentions() {
+            let components = (file.targetPath as NSString).pathComponents
+            if let current = path {
+                path = zip(components, current).split(whereSeparator: { $0 != $1 }).first?.map { $0.0 }
+            } else {
+                path = components.dropLast()
+            }
+        }
+
+        path?.append("JavaScriptObject.swift")
+
+        if let path = path, let first = path.first {
+            let basePath = path.dropFirst().reduce(first) { ($0 as NSString).appendingPathComponent($1) }
+            
+            let file = FileGenerationIntention(
+                sourcePath: "<generated>",
+                targetPath: basePath
+            )
+
+            file.addType(intention)
+
+            intentionCollection.addIntention(file)
+        } else {
+            if settings.verbose {
+                print("Failed to find potential target path for JavaScriptObject.swift. Emitting into first file found instead...")
+            }
+
+            // Failed to find a proper file path: Emit on the first input file,
+            // sorted alphabetically
+            let sorted = intentionCollection.fileIntentions().sorted { 
+                URL(fileURLWithPath: $0.targetPath).lastPathComponent < URL(fileURLWithPath: $1.targetPath).lastPathComponent
+            }
+
+            if let first = sorted.first {
+                first.addType(intention)
+            } else {
+                // Failed - emit error
+                diagnostics.error(
+                    "Error emitting JavaScriptObject type: No file found to insert generated type in.",
+                    origin: "<generated>",
+                    location: .invalid
+                )
+            }
+        }
+    }
+
     /// Parses all statements now, with proper type information available.
     private func parseStatements(_ items: [LazyParseItem]) {
         if settings.verbose {
@@ -198,7 +266,7 @@ public final class JavaScript2SwiftRewriter {
                     let reader = JavaScriptASTReader(
                         source: source,
                         typeSystem: self.typeSystem,
-                        options: .default
+                        options: self.makeASTReaderOptions()
                     )
                     reader.delegate = delegate
                     
@@ -295,9 +363,12 @@ public final class JavaScript2SwiftRewriter {
                     }
                     
                     let totalPadLength = intentionPasses.count.description.count
-                    let progressString = String(format: "[%0\(totalPadLength)d/%d]",
-                                                i + 1,
-                                                intentionPasses.count)
+                    let progressString =
+                        String(
+                            format: "[%0\(totalPadLength)d/%d]",
+                            i + 1,
+                            intentionPasses.count
+                        )
                     
                     print("\(progressString): \(type(of: pass))")
                 }
@@ -326,10 +397,12 @@ public final class JavaScript2SwiftRewriter {
         let syntaxPasses = astRewriterPassSources.syntaxNodePasses
         
         let applier =
-            ASTRewriterPassApplier(passes: syntaxPasses,
-                                   typeSystem: typeSystem,
-                                   globals: globals,
-                                   numThreads: settings.numThreads)
+            ASTRewriterPassApplier(
+                passes: syntaxPasses,
+                typeSystem: typeSystem,
+                globals: globals,
+                numThreads: settings.numThreads
+            )
         
         let progressDelegate = ASTRewriterDelegate()
         if settings.verbose {
@@ -494,15 +567,28 @@ public final class JavaScript2SwiftRewriter {
     private func makeAntlrSettings() -> AntlrSettings {
         AntlrSettings(forceUseLLPrediction: settings.forceUseLLPrediction)
     }
+
+    private func makeASTReaderOptions() -> JavaScriptASTReaderOptions {
+        var options = JavaScriptASTReaderOptions.default
+
+        if settings.emitJavaScriptObject {
+            options.objectLiteralKind = .javaScriptObject()
+        }
+
+        return options
+    }
     
     /// Settings for a `JavaScript2SwiftRewriter` instance
     public struct Settings {
         /// Gets the default settings for a `JavaScript2SwiftRewriter` invocation
-        public static var `default` = Settings(numThreads: 8,
-                                               verbose: false,
-                                               diagnoseFiles: [],
-                                               forceUseLLPrediction: false,
-                                               stageDiagnostics: [])
+        public static var `default`: Self = .init(
+            numThreads: 8,
+            verbose: false,
+            diagnoseFiles: [],
+            forceUseLLPrediction: false,
+            stageDiagnostics: [],
+            emitJavaScriptObject: false
+        )
         
         /// The number of concurrent threads to use when applying intention/syntax
         /// node passes and other multi-threadable operations.
@@ -530,18 +616,34 @@ public final class JavaScript2SwiftRewriter {
         /// Enables printing outputs of stages for diagnostic purposes.
         public var stageDiagnostics: [StageDiagnosticFlag]
 
+        /// Whether to emit JavaScript object declarations wrapped in a JavaScriptObject
+        /// declaration.
+        /// If specified, this will also emit a new file along the output for
+        /// the JavaScriptObject type definition.
+        public var emitJavaScriptObject: Bool
+
         public init(
             numThreads: Int,
             verbose: Bool,
             diagnoseFiles: [String],
             forceUseLLPrediction: Bool,
-            stageDiagnostics: [StageDiagnosticFlag]
+            stageDiagnostics: [StageDiagnosticFlag],
+            emitJavaScriptObject: Bool
         ) {
             self.numThreads = numThreads
             self.verbose = verbose
             self.diagnoseFiles = []
             self.forceUseLLPrediction = forceUseLLPrediction
             self.stageDiagnostics = stageDiagnostics
+            self.emitJavaScriptObject = emitJavaScriptObject
+        }
+        
+        /// To ease modifications of single parameters from default settings
+        /// without having to create a temporary variable first
+        public func with<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: T) -> Self {
+            var copy = self
+            copy[keyPath: keyPath] = value
+            return copy
         }
         
         public enum StageDiagnosticFlag {

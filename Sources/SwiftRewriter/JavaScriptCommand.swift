@@ -13,7 +13,8 @@ struct JavaScriptCommand: ParsableCommand {
         interactive menu to navigate the file system and choose files to convert.
         """,
         subcommands: [Files.self, Path.self, InteractiveMode.self],
-        defaultSubcommand: InteractiveMode.self)
+        defaultSubcommand: InteractiveMode.self
+    )
     
     func run() throws {
         
@@ -25,19 +26,34 @@ extension JavaScriptCommand {
         @OptionGroup()
         var globalOptions: GlobalOptions
 
-        @Option(help: """
+        @Option(
+            help: """
             Provides a target file path to diagnose during rewriting.
             After each intention pass and after expression passes, the file is written
             to the standard output for diagnosing rewriting issues.
-            """)
+            """
+        )
         var diagnoseFile: String?
         
-        @Flag(name: .shortAndLong,
-              help: """
-              Follows #import declarations in files in order to parse other relevant files.
-              Ignored when converting from standard input.
-              """)
+        @Flag(
+            name: .shortAndLong,
+            help: """
+            Follows #import declarations in files in order to parse other relevant files.
+            Ignored when converting from standard input.
+            """
+        )
         var followImports: Bool = false
+
+        @Flag(
+            name: .long,
+            help: """
+            Whether to emit JavaScript object declarations wrapped in a JavaScriptObject \
+            declaration.
+            If specified, this will also emit a new file along the output for \
+            the JavaScriptObject type definition.
+            """
+        )
+        var emitJavaScriptObject: Bool = false
     }
 }
 
@@ -219,6 +235,7 @@ private func makeSettings(_ options: JavaScriptCommand.Options) throws -> JavaSc
     settings.astWriter.printIntentionHistory = options.globalOptions.printTracingHistory
     settings.astWriter.format = try options.globalOptions.computeFormatterMode()
     settings.rewriter.forceUseLLPrediction = options.globalOptions.forceLl
+    settings.rewriter.emitJavaScriptObject = options.emitJavaScriptObject
     
     return settings
 }

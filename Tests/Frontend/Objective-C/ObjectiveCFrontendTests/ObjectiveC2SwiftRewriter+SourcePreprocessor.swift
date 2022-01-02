@@ -1,4 +1,5 @@
 import SourcePreprocessors
+import TestCommons
 import XCTest
 
 @testable import ObjectiveCFrontend
@@ -11,7 +12,7 @@ class ObjectiveC2SwiftRewriter_SourcePreprocessor: XCTestCase {
                 """,
             isPrimary: true
         )
-        let output = TestSingleFileWriterOutput()
+        let output = TestWriterOutput()
         let preprocessor =
             TestSourcePreprocessor(
                 replaceWith: """
@@ -25,7 +26,7 @@ class ObjectiveC2SwiftRewriter_SourcePreprocessor: XCTestCase {
         try rewriter.rewrite()
 
         XCTAssertEqual(
-            output.buffer,
+            try output.outputs[try: 0].getBuffer(withFooter: false),
             """
             class MyClass {
             }

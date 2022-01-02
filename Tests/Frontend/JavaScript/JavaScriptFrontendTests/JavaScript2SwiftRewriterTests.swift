@@ -206,4 +206,40 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testRewrite_emitJavaScriptObject() {
+        assertRewrite(
+            js: """
+            var object = {
+                x: 1,
+                y: 2
+            }
+            """,
+            swift: """
+            @dynamicMemberLookup
+            final class JavaScriptObject: ExpressibleByDictionaryLiteral {
+                private var values: [String: Any]
+
+                subscript(dynamicMember member: String) -> Any? {
+                    return values[member]
+                }
+
+                init() {
+                    self.values = [:]
+                }
+                init(dictionaryLiteral elements: (String, Any)...) {
+                    for (key, value) in elements {
+                        self.values[key] = value
+                    }
+                }
+            }
+            // End of file JavaScriptObject.swift
+            var object: Any = JavaScriptObject(["x": 1, "y": 2])
+            // End of file test.swift
+            """,
+            rewriterSettings:
+                .default
+                .with(\.emitJavaScriptObject, true)
+        )
+    }
 }

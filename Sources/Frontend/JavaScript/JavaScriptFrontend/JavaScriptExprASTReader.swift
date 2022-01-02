@@ -417,7 +417,7 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
 
         let expression = DictionaryLiteralExpression(pairs: pairs)
 
-        switch context.options.dictionaryLiteralKind {
+        switch context.options.objectLiteralKind {
         case .rawDictionary:
             return expression
         case .javaScriptObject(let typeName):
@@ -682,7 +682,7 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
         // MARK: -
 
         private func formatKeyName(_ exp: Expression) -> Expression {
-            switch expReader.context.options.dictionaryLiteralKind {
+            switch expReader.context.options.objectLiteralKind {
             case .rawDictionary:
                 return exp
             

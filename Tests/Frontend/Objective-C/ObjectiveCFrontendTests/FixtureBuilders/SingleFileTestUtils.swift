@@ -39,7 +39,7 @@ class SingleFileTestBuilder {
         line: UInt = #line
     ) {
 
-        let output = TestSingleFileWriterOutput()
+        let output = TestWriterOutput()
         let input = TestSingleInputProvider(
             fileName: fileName,
             code: objc,
@@ -57,7 +57,19 @@ class SingleFileTestBuilder {
         do {
             try sut.rewrite()
 
-            if output.buffer != expectedSwift {
+            let outputBuffer: String
+
+            // Compute output
+            if output.outputs.count == 1 {
+                outputBuffer = output.outputs[0].getBuffer(withFooter: false)
+            } else {
+                outputBuffer = output.outputs
+                    .sorted { $0.path < $1.path }
+                    .map { $0.getBuffer(withFooter: true) }
+                    .joined(separator: "\n")
+            }
+
+            if outputBuffer != expectedSwift {
                 XCTFail(
                     """
                     Failed: Expected to translate Objective-C
@@ -69,11 +81,11 @@ class SingleFileTestBuilder {
 
                     but translated as
 
-                    \(formatCodeForDisplay(output.buffer))
+                    \(formatCodeForDisplay(outputBuffer))
 
                     Diff:
 
-                    \(formatCodeForDisplay(output.buffer)
+                    \(formatCodeForDisplay(outputBuffer)
                         .makeDifferenceMarkString(against:
                             formatCodeForDisplay(expectedSwift)))
                     """,
@@ -143,28 +155,6 @@ class TestSingleInputProvider: InputSourcesProvider, InputSource {
 
     func loadSource() throws -> CodeSource {
         return StringCodeSource(source: code, fileName: sourcePath())
-    }
-}
-
-class TestSingleFileWriterOutput: WriterOutput, FileOutput {
-    var buffer: String = ""
-
-    func createFile(path: String) -> FileOutput {
-        return self
-    }
-
-    func close() {
-
-    }
-
-    func outputTarget() -> RewriterOutputTarget {
-        let target = StringRewriterOutput()
-
-        target.onChangeBuffer = { value in
-            self.buffer = value
-        }
-
-        return target
     }
 }
 

@@ -15,15 +15,24 @@ public class TestMultiInputProvider: InputSourcesProvider {
 }
 
 public class TestFileOutput: FileOutput {
+    private var buffer: String = ""
+
     public var path: String
-    public var buffer: String = ""
     
     public init(path: String) {
         self.path = path
     }
+
+    public func getBuffer(withFooter: Bool) -> String {
+        if !withFooter {
+            return buffer
+        }
+
+        return "\(buffer)\n// End of file \(path)"
+    }
     
     public func close() {
-        buffer += "\n// End of file \(path)"
+        
     }
     
     public func outputTarget() -> RewriterOutputTarget {
@@ -38,8 +47,7 @@ public class TestFileOutput: FileOutput {
 }
 
 public class TestWriterOutput: WriterOutput {
-    let mutex = Mutex()
-    public var outputs: [TestFileOutput] = []
+    @ConcurrentValue public var outputs: [TestFileOutput] = []
 
     public init() {
         
@@ -47,8 +55,8 @@ public class TestWriterOutput: WriterOutput {
     
     public func createFile(path: String) -> FileOutput {
         let output = TestFileOutput(path: path)
-        mutex.locking {
-            outputs.append(output)
+        _outputs.modifyingValue { value in
+            value.append(output)
         }
         return output
     }

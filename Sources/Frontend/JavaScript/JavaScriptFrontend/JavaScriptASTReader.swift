@@ -13,24 +13,24 @@ public protocol JavaScriptASTReaderDelegate: AnyObject {
 
 public struct JavaScriptASTReaderOptions {
     public static let `default`: Self = .init(
-        dictionaryLiteralKind: .rawDictionary
+        objectLiteralKind: .rawDictionary
     )
 
     /// The behavior of reading dictionary literal expressions.
-    public var dictionaryLiteralKind: DictionaryLiteralKind
+    public var objectLiteralKind: ObjectLiteralKind
 
-    public init(dictionaryLiteralKind: DictionaryLiteralKind) {
-        self.dictionaryLiteralKind = dictionaryLiteralKind
+    public init(objectLiteralKind: ObjectLiteralKind) {
+        self.objectLiteralKind = objectLiteralKind
     }
 
-    /// Describes the behavior of dictionary literal reading.
-    public enum DictionaryLiteralKind {
-        /// Reads the dictionary as a raw Swift dictionary, with keys mapping to
+    /// Describes the output of JavaScript object literal reading.
+    public enum ObjectLiteralKind {
+        /// Reads the object as a raw Swift dictionary, with keys mapping to
         /// identifiers.
         case rawDictionary
 
-        /// Reads the dictionary as a `JavaScriptObject` definition, with the
-        /// proper object type name specified.
+        /// Reads the object as a `JavaScriptObject` definition, with the proper
+        /// object type name specified.
         case javaScriptObject(typeName: String = "JavaScriptObject")
     }
 }
