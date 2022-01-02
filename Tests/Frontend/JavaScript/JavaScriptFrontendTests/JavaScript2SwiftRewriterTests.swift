@@ -7,11 +7,12 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
         assertRewrite(
             js: """
             function test() {
-
+                return 0;
             }
             """,
             swift: """
             func test() -> Any {
+                return 0
             }
             """
         )
@@ -44,7 +45,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             }
             """,
             swift: """
-            func test() -> Any {
+            func test() {
                 let a: Any = 0
                 let b: Any = a
             }
@@ -78,7 +79,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class A {
-                static func method() -> Any {
+                static func method() {
                 }
             }
             """
@@ -118,7 +119,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             }
             """,
             swift: """
-            func foo() -> Any {
+            func foo() {
                 func bar() -> Any {
                     return 0
                 }
@@ -139,7 +140,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             }
             """,
             swift: """
-            func foo() -> Any {
+            func foo() {
                 var a: Any, b: Any, c: Any = 1
 
                 b = c

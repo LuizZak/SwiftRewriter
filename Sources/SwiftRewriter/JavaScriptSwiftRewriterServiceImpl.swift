@@ -28,10 +28,13 @@ public final class JavaScriptSwiftRewriterServiceImpl: JavaScriptSwiftRewriterSe
         let antlrSettings = AntlrSettings(forceUseLLPrediction: settings.rewriter.forceUseLLPrediction)
         
         parserStatePool = JsParserStatePool()
-        parserCache = JavaScriptParserCache(fileProvider: FileDiskProvider(),
-                                  parserStatePool: parserStatePool,
-                                  sourcePreprocessors: preprocessors,
-                                  antlrSettings: antlrSettings)
+        parserCache = JavaScriptParserCache(
+            fileProvider: FileDiskProvider(),
+            parserStatePool: parserStatePool,
+            sourcePreprocessors: preprocessors,
+            antlrSettings: antlrSettings
+        )
+        
         self.output = output
         self.settings = settings
     }
@@ -48,16 +51,9 @@ public final class JavaScriptSwiftRewriterServiceImpl: JavaScriptSwiftRewriterSe
     public func rewrite(inputs: [InputSource]) throws {
         let input = ArrayInputSourcesProvider(inputs: inputs)
         
-        let jobBuilder = JavaScriptSwiftRewriterJobBuilder()
+        var jobBuilder = JavaScript2SwiftRewriterJobBuilder()
 
-        var intentionPasses = ArrayIntentionPassSource(source: DefaultIntentionPasses())
-        intentionPasses.intentionPasses.append(DetectNoReturnsIntentionPass())
-        
         jobBuilder.inputs.addInputs(from: input)
-        jobBuilder.intentionPassesSource = intentionPasses
-        jobBuilder.astRewriterPassSources = DefaultExpressionPasses()
-        jobBuilder.globalsProvidersSource = DefaultGlobalsProvidersSource()
-        jobBuilder.syntaxRewriterPassSource = DefaultSyntaxPassProvider()
         jobBuilder.settings = settings.rewriter
         jobBuilder.swiftSyntaxOptions = settings.astWriter
         jobBuilder.preprocessors = preprocessors

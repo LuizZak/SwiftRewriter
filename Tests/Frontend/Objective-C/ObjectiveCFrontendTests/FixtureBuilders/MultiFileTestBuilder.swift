@@ -13,7 +13,7 @@ import XCTest
 class MultiFileTestBuilder {
     typealias File = (path: String, source: String)
 
-    private let builder = ObjectiveCSwiftRewriterJobBuilder()
+    private var builder = ObjectiveC2SwiftRewriterJobBuilder()
     var expectedFiles: [ExpectedFile] = []
     var files: [File] = []
     let test: XCTestCase
@@ -21,11 +21,6 @@ class MultiFileTestBuilder {
 
     init(test: XCTestCase) {
         self.test = test
-
-        builder.astRewriterPassSources = DefaultExpressionPasses()
-        builder.intentionPassesSource = DefaultIntentionPasses()
-        builder.globalsProvidersSource = DefaultGlobalsProvidersSource()
-        builder.syntaxRewriterPassSource = DefaultSyntaxPassProvider()
     }
 
     func file(name: String, _ contents: String, isPrimary: Bool = true) -> MultiFileTestBuilder {

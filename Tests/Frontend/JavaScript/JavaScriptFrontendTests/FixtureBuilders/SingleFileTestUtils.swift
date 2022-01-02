@@ -45,14 +45,15 @@ class SingleFileTestBuilder {
             code: js,
             isPrimary: true
         )
+        
+        var jobBuilder = JavaScript2SwiftRewriterJobBuilder()
+        jobBuilder.swiftSyntaxOptions = options
+        jobBuilder.settings = settings
+        jobBuilder.inputs.addInputs(from: input)
 
-        let sut = JavaScript2SwiftRewriter(input: input, output: output)
-        sut.writerOptions = options
-        sut.settings = settings
-        sut.astRewriterPassSources = DefaultExpressionPasses()
-        sut.intentionPassesSource = DefaultIntentionPasses()
-        sut.globalsProvidersSource = DefaultGlobalsProvidersSource()
-        sut.syntaxRewriterPassSource = DefaultSyntaxPassProvider()
+        let job = jobBuilder.createJob()
+
+        let sut = job.makeSwiftRewriter(output: output)
 
         do {
             try sut.rewrite()

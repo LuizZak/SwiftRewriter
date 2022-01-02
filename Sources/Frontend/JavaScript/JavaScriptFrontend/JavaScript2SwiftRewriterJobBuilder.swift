@@ -8,25 +8,33 @@ import SourcePreprocessors
 import TypeSystem
 import SwiftRewriterLib
 
-/// Facility for creating `JavaScriptSwiftRewriterJob`s.
-public class JavaScriptSwiftRewriterJobBuilder {
-    public let inputs = JavaScriptSwiftRewriterJobInputFiles()
-    public var intentionPassesSource: IntentionPassSource?
-    public var astRewriterPassSources: ASTRewriterPassSource?
+/// Facility for creating `JavaScript2SwiftRewriterJob`s.
+public struct JavaScript2SwiftRewriterJobBuilder {
+    public var inputs = JavaScriptSwiftRewriterJobInputFiles()
+    public var intentionPassesSource: IntentionPassSource
+    public var astRewriterPassSources: ASTRewriterPassSource = DefaultExpressionPasses()
     public var globalsProvidersSource: GlobalsProvidersSource?
-    public var syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider?
+    public var syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider = DefaultSyntaxPassProvider()
     public var preprocessors: [SourcePreprocessor] = []
     public var settings: JavaScript2SwiftRewriter.Settings = .default
     public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
     public var parserCache: JavaScriptParserCache?
     
     public init() {
+        var intentionPasses = ArrayIntentionPassSource(source: DefaultIntentionPasses())
+        intentionPasses.intentionPasses.insert(DetectNoReturnsIntentionPass(), at: 0)
         
+        self.intentionPassesSource = intentionPasses
+    }
+
+    /// Resets this job builder to its default state.
+    public mutating func reset() {
+        self = Self()
     }
     
-    /// Returns a new `JavaScriptSwiftRewriterJob` created using the parameters configured
+    /// Returns a new `JavaScript2SwiftRewriterJob` created using the parameters configured
     /// with this builder object.
-    public func createJob() -> JavaScriptSwiftRewriterJob {
+    public func createJob() -> JavaScript2SwiftRewriterJob {
         let provider = inputs.createSourcesProvider()
         
         return .init(
@@ -44,24 +52,24 @@ public class JavaScriptSwiftRewriterJobBuilder {
 }
 
 /// Stores input files for a transpilation job
-public class JavaScriptSwiftRewriterJobInputFiles {
+public struct JavaScriptSwiftRewriterJobInputFiles {
     fileprivate(set) public var inputs: [InputSource] = []
     
-    public func add(_ input: InputSource) {
+    public mutating func add(_ input: InputSource) {
         inputs.append(input)
     }
     
-    public func add(inputs: [InputSource]) {
+    public mutating func add(inputs: [InputSource]) {
         self.inputs.append(contentsOf: inputs)
     }
     
-    public func add(filePath: String, source: String, isPrimary: Bool = true) {
+    public mutating func add(filePath: String, source: String, isPrimary: Bool = true) {
         add(SwiftRewriterJobInputSource(filePath: filePath,
                                         source: source,
                                         isPrimary: isPrimary))
     }
     
-    public func addInputs(from inputsProvider: InputSourcesProvider) {
+    public mutating func addInputs(from inputsProvider: InputSourcesProvider) {
         add(inputs: inputsProvider.sources())
     }
     

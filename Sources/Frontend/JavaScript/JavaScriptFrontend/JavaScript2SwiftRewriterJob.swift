@@ -9,7 +9,7 @@ import SwiftRewriterLib
 
 /// Represents a transpilation job, with all required information to start a
 /// transpile job.
-public class JavaScriptSwiftRewriterJob {
+public class JavaScript2SwiftRewriterJob {
     public var input: InputSourcesProvider
     public var intentionPassesSource: IntentionPassSource?
     public var astRewriterPassSources: ASTRewriterPassSource?

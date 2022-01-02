@@ -9,7 +9,7 @@ import SwiftRewriterLib
 
 /// Represents a transpilation job, with all required information to start a
 /// transpile job.
-public class ObjectiveCSwiftRewriterJob {
+public class ObjectiveC2SwiftRewriterJob {
     public var input: InputSourcesProvider
     public var intentionPassesSource: IntentionPassSource?
     public var astRewriterPassSources: ASTRewriterPassSource?
@@ -20,16 +20,18 @@ public class ObjectiveCSwiftRewriterJob {
     public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
     public var parserCache: ObjectiveCParserCache?
     
-    public init(input: InputSourcesProvider,
-                intentionPassesSource: IntentionPassSource?,
-                astRewriterPassSources: ASTRewriterPassSource?,
-                globalsProvidersSource: GlobalsProvidersSource?,
-                syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider?,
-                preprocessors: [SourcePreprocessor],
-                settings: ObjectiveC2SwiftRewriter.Settings,
-                swiftSyntaxOptions: SwiftSyntaxOptions,
-                parserCache: ObjectiveCParserCache?) {
-        
+    public init(
+        input: InputSourcesProvider,
+        intentionPassesSource: IntentionPassSource?,
+        astRewriterPassSources: ASTRewriterPassSource?,
+        globalsProvidersSource: GlobalsProvidersSource?,
+        syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider?,
+        preprocessors: [SourcePreprocessor],
+        settings: ObjectiveC2SwiftRewriter.Settings,
+        swiftSyntaxOptions: SwiftSyntaxOptions,
+        parserCache: ObjectiveCParserCache?
+    ) {
+
         self.intentionPassesSource = intentionPassesSource
         self.astRewriterPassSources = astRewriterPassSources
         self.globalsProvidersSource = globalsProvidersSource
@@ -44,7 +46,6 @@ public class ObjectiveCSwiftRewriterJob {
     /// Executes a transpilation job, returning the result of the operation.
     @discardableResult
     public func execute(output: WriterOutput) -> ObjectiveCSwiftRewriterJobResult {
-        
         let swiftRewriter = makeSwiftRewriter(output: output)
         
         var jobResult = ObjectiveCSwiftRewriterJobResult(succeeded: false, diagnostics: Diagnostics())
@@ -65,13 +66,15 @@ public class ObjectiveCSwiftRewriterJob {
     }
     
     func makeSwiftRewriter(output: WriterOutput) -> ObjectiveC2SwiftRewriter {
-        let rewriter = ObjectiveC2SwiftRewriter(input: input,
-                                     output: output,
-                                     intentionPassesSource: intentionPassesSource,
-                                     astRewriterPassSources: astRewriterPassSources,
-                                     globalsProvidersSource: globalsProvidersSource,
-                                     syntaxRewriterPassSource: syntaxRewriterPassSource,
-                                     settings: settings)
+        let rewriter = ObjectiveC2SwiftRewriter(
+            input: input,
+            output: output,
+            intentionPassesSource: intentionPassesSource,
+            astRewriterPassSources: astRewriterPassSources,
+            globalsProvidersSource: globalsProvidersSource,
+            syntaxRewriterPassSource: syntaxRewriterPassSource,
+            settings: settings
+        )
         
         rewriter.writerOptions = swiftSyntaxOptions
         rewriter.preprocessors = preprocessors

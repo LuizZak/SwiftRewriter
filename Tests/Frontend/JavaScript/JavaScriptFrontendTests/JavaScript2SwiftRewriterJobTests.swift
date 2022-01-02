@@ -17,7 +17,7 @@ import XCTest
 
 @testable import JavaScriptFrontend
 
-class JavaScriptSwiftRewriterJobTests: XCTestCase {
+class JavaScript2SwiftRewriterJobTests: XCTestCase {
     func testTranspile() {
         let expectedSwift = """
             var globalVar: Any = 0
@@ -34,7 +34,7 @@ class JavaScriptSwiftRewriterJobTests: XCTestCase {
             // End of file Source.swift
             """
         let job =
-            JavaScriptSwiftRewriterJob(
+            JavaScript2SwiftRewriterJob(
                 input: MockInputSourcesProvider(),
                 intentionPassesSource: MockIntentionPassSource(),
                 astRewriterPassSources: MockExpressionPassesSource(),

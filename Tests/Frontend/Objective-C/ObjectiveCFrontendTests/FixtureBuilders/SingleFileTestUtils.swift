@@ -46,13 +46,14 @@ class SingleFileTestBuilder {
             isPrimary: true
         )
 
-        let sut = ObjectiveC2SwiftRewriter(input: input, output: output)
-        sut.writerOptions = options
-        sut.settings = settings
-        sut.astRewriterPassSources = DefaultExpressionPasses()
-        sut.intentionPassesSource = DefaultIntentionPasses()
-        sut.globalsProvidersSource = DefaultGlobalsProvidersSource()
-        sut.syntaxRewriterPassSource = DefaultSyntaxPassProvider()
+        var jobBuilder = ObjectiveC2SwiftRewriterJobBuilder()
+        jobBuilder.swiftSyntaxOptions = options
+        jobBuilder.settings = settings
+        jobBuilder.inputs.addInputs(from: input)
+
+        let job = jobBuilder.createJob()
+
+        let sut = job.makeSwiftRewriter(output: output)
 
         do {
             try sut.rewrite()

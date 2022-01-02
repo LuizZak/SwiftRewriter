@@ -17,7 +17,7 @@ import XCTest
 
 @testable import ObjectiveCFrontend
 
-class ObjectiveCSwiftRewriterJobTests: XCTestCase {
+class ObjectiveC2SwiftRewriterJobTests: XCTestCase {
     func testTranspile() {
         let expectedSwift = """
             class BaseClass: NSObject {
@@ -33,7 +33,7 @@ class ObjectiveCSwiftRewriterJobTests: XCTestCase {
             // End of file Source.swift
             """
         let job =
-            ObjectiveCSwiftRewriterJob(
+            ObjectiveC2SwiftRewriterJob(
                 input: MockInputSourcesProvider(),
                 intentionPassesSource: MockIntentionPassSource(),
                 astRewriterPassSources: MockExpressionPassesSource(),

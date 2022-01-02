@@ -13,11 +13,12 @@ public class ObjectiveCParserCache {
     let sourcePreprocessors: [SourcePreprocessor]
     let antlrSettings: AntlrSettings
 
-    public init(fileProvider: FileProvider,
-                parserStatePool: ObjcParserStatePool,
-                sourcePreprocessors: [SourcePreprocessor] = [],
-                antlrSettings: AntlrSettings = .default) {
-        
+    public init(
+        fileProvider: FileProvider,
+        parserStatePool: ObjcParserStatePool,
+        sourcePreprocessors: [SourcePreprocessor] = [],
+        antlrSettings: AntlrSettings = .default
+    ) {
         self.fileProvider = fileProvider
         self.parserStatePool = parserStatePool
         self.sourcePreprocessors = sourcePreprocessors

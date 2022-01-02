@@ -51,13 +51,9 @@ public final class ObjectiveCSwiftRewriterServiceImpl: ObjectiveCSwiftRewriterSe
     public func rewrite(inputs: [InputSource]) throws {
         let input = ArrayInputSourcesProvider(inputs: inputs)
         
-        let jobBuilder = ObjectiveCSwiftRewriterJobBuilder()
-        
+        var jobBuilder = ObjectiveC2SwiftRewriterJobBuilder()
+
         jobBuilder.inputs.addInputs(from: input)
-        jobBuilder.intentionPassesSource = DefaultIntentionPasses()
-        jobBuilder.astRewriterPassSources = DefaultExpressionPasses()
-        jobBuilder.globalsProvidersSource = DefaultGlobalsProvidersSource()
-        jobBuilder.syntaxRewriterPassSource = DefaultSyntaxPassProvider()
         jobBuilder.settings = settings.rewriter
         jobBuilder.swiftSyntaxOptions = settings.astWriter
         jobBuilder.preprocessors = preprocessors

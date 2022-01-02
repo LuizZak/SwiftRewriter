@@ -2,20 +2,21 @@ import Utils
 import GrammarModelBase
 import ObjcParser
 import SwiftSyntaxSupport
+import SwiftSyntaxRewriterPasses
 import IntentionPasses
 import ExpressionPasses
 import SourcePreprocessors
 import TypeSystem
 import SwiftRewriterLib
 
-/// Facility for creating `JavaScriptSwiftRewriterJob`s.
-public class ObjectiveCSwiftRewriterJobBuilder {
-    public let inputs = ObjectiveCSwiftRewriterJobInputFiles()
-    public var intentionPassesSource: IntentionPassSource?
-    public var astRewriterPassSources: ASTRewriterPassSource?
-    public var globalsProvidersSource: GlobalsProvidersSource?
-    public var syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider?
-    public var preprocessors: [SourcePreprocessor] = []
+/// Facility for creating `ObjectiveC2SwiftRewriterJobBuilder`s.
+public struct ObjectiveC2SwiftRewriterJobBuilder {
+    public var inputs = ObjectiveCSwiftRewriterJobInputFiles()
+    public var intentionPassesSource: IntentionPassSource = DefaultIntentionPasses()
+    public var astRewriterPassSources: ASTRewriterPassSource = DefaultExpressionPasses()
+    public var globalsProvidersSource: GlobalsProvidersSource = DefaultGlobalsProvidersSource()
+    public var syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider = DefaultSyntaxPassProvider()
+    public var preprocessors: [SourcePreprocessor] = [QuickSpecPreprocessor()]
     public var settings: ObjectiveC2SwiftRewriter.Settings = .default
     public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
     public var parserCache: ObjectiveCParserCache?
@@ -23,10 +24,15 @@ public class ObjectiveCSwiftRewriterJobBuilder {
     public init() {
         
     }
+
+    /// Resets this job builder to its default state.
+    public mutating func reset() {
+        self = Self()
+    }
     
-    /// Returns a new `ObjectiveCSwiftRewriterJob` created using the parameters configured
+    /// Returns a new `ObjectiveC2SwiftRewriterJob` created using the parameters configured
     /// with this builder object.
-    public func createJob() -> ObjectiveCSwiftRewriterJob {
+    public func createJob() -> ObjectiveC2SwiftRewriterJob {
         let provider = inputs.createSourcesProvider()
         
         return .init(
@@ -44,24 +50,26 @@ public class ObjectiveCSwiftRewriterJobBuilder {
 }
 
 /// Stores input files for a transpilation job
-public class ObjectiveCSwiftRewriterJobInputFiles {
+public struct ObjectiveCSwiftRewriterJobInputFiles {
     fileprivate(set) public var inputs: [InputSource] = []
     
-    public func add(_ input: InputSource) {
+    public mutating func add(_ input: InputSource) {
         inputs.append(input)
     }
     
-    public func add(inputs: [InputSource]) {
+    public mutating func add(inputs: [InputSource]) {
         self.inputs.append(contentsOf: inputs)
     }
     
-    public func add(filePath: String, source: String, isPrimary: Bool = true) {
-        add(SwiftRewriterJobInputSource(filePath: filePath,
-                                        source: source,
-                                        isPrimary: isPrimary))
+    public mutating func add(filePath: String, source: String, isPrimary: Bool = true) {
+        add(SwiftRewriterJobInputSource(
+            filePath: filePath,
+            source: source,
+            isPrimary: isPrimary
+        ))
     }
     
-    public func addInputs(from inputsProvider: InputSourcesProvider) {
+    public mutating func addInputs(from inputsProvider: InputSourcesProvider) {
         add(inputs: inputsProvider.sources())
     }
     
