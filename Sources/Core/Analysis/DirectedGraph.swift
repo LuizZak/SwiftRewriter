@@ -2,21 +2,24 @@
 public protocol DirectedGraph {
     associatedtype Edge: DirectedGraphEdge
     associatedtype Node: DirectedGraphNode
+
+    /// Convenience typealias for a visit for visit methods in this directed graph.
+    typealias VisitElement = DirectedGraphVisitElement<Edge, Node>
     
     /// Gets a list of all nodes in this directed graph
     var nodes: [Node] { get }
     /// Gets a list of all edges in this directed graph
     var edges: [Edge] { get }
     
-    /// Returns `true` iff two edges are equivalent (i.e. have the same start/end
-    /// nodes).
-    @inlinable
-    func areEdgesEqual(_ edge1: Edge, _ edge2: Edge) -> Bool
-    
     /// Returns `true` iff two node references represent the same underlying node
     /// in this graph.
     @inlinable
     func areNodesEqual(_ node1: Node, _ node2: Node) -> Bool
+    
+    /// Returns `true` iff two edges are equivalent (i.e. have the same start/end
+    /// nodes).
+    @inlinable
+    func areEdgesEqual(_ edge1: Edge, _ edge2: Edge) -> Bool
     
     /// Returns the starting edge for a given node on this graph.
     @inlinable
@@ -72,26 +75,27 @@ public protocol DirectedGraph {
     @inlinable
     func allNodesConnected(to node: Node) -> [Node]
     
-    /// Performs a depth-first visiting of this directed graph
+    /// Performs a depth-first visit of this directed graph
     @inlinable
-    func depthFirstVisit(start: Node, _ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void)
+    func depthFirstVisit(start: Node, _ visitor: (VisitElement) -> Void)
     
-    /// Performs a breadth-first visiting of this directed graph
+    /// Performs a breadth-first visit of this directed graph
     @inlinable
-    func breadthFirstVisit(start: Node, _ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void)
+    func breadthFirstVisit(start: Node, _ visitor: (VisitElement) -> Void)
 }
 
 /// Element for a graph visiting operation.
 ///
 /// - root: The item represents the root of a directed graph
-/// - edge: The item represents an edge, pointing to a node of the graph
-public enum DirectedGraphVisitElement<E: DirectedGraphEdge, N: DirectedGraphNode> {
+/// - edge: The item represents an edge, pointing to a node of the graph. Also
+/// contains the path leading up to the edge.
+public enum DirectedGraphVisitElement<E: DirectedGraphEdge, N: DirectedGraphNode>: Hashable {
     case root(N)
-    case edge(E, towards: N)
+    indirect case edge(E, from: Self, towards: N)
     
     public var node: N {
         switch self {
-        case .root(let node), .edge(_, let node):
+        case .root(let node), .edge(_, _, let node):
             return node
         }
     }
@@ -124,15 +128,15 @@ public extension DirectedGraph {
         nodesConnected(towards: node) + nodesConnected(from: node)
     }
     
-    /// Performs a depth-first visiting of this directed graph
+    /// Performs a depth-first visit of this directed graph
     @inlinable
-    func depthFirstVisit(start: Node, _ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void) {
+    func depthFirstVisit(start: Node, _ visitor: (VisitElement) -> Void) {
         var visited: Set<Node> = []
-        var queue: [DirectedGraphVisitElement<Edge, Node>] = []
+        var stack: [VisitElement] = []
         
-        queue.append(.root(start))
+        stack.append(.root(start))
         
-        while let next = queue.popLast() {
+        while let next = stack.popLast() {
             visited.insert(next.node)
             
             visitor(next)
@@ -143,16 +147,16 @@ public extension DirectedGraph {
                     continue
                 }
                 
-                queue.append(.edge(nextEdge, towards: node))
+                stack.append(.edge(nextEdge, from: next, towards: node))
             }
         }
     }
     
-    /// Performs a breadth-first visiting of this directed graph
+    /// Performs a breadth-first visit of this directed graph
     @inlinable
-    func breadthFirstVisit(start: Node, _ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void) {
+    func breadthFirstVisit(start: Node, _ visitor: (VisitElement) -> Void) {
         var visited: Set<Node> = []
-        var queue: [DirectedGraphVisitElement<Edge, Node>] = []
+        var queue: [VisitElement] = []
         
         queue.append(.root(start))
         
@@ -168,7 +172,7 @@ public extension DirectedGraph {
                     continue
                 }
                 
-                queue.append(.edge(nextEdge, towards: node))
+                queue.append(.edge(nextEdge, from: next, towards: node))
             }
         }
     }
