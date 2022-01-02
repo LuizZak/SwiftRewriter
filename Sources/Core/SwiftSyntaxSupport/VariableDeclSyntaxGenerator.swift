@@ -105,9 +105,11 @@ class VariableDeclSyntaxGenerator {
         }
     }
     
-    private func generate(_ binding: PatternBindingElement,
-                          hasComma: Bool,
-                          accessors: (() -> Syntax)? = nil) -> PatternBindingSyntax {
+    private func generate(
+        _ binding: PatternBindingElement,
+        hasComma: Bool,
+        accessors: (() -> Syntax)? = nil
+    ) -> PatternBindingSyntax {
         
         PatternBindingSyntax { builder in
             builder.usePattern(IdentifierPatternSyntax { builder in
@@ -146,8 +148,10 @@ class VariableDeclSyntaxGenerator {
         }
     }
     
-    private static func makeAccessorBlockCreator(_ property: PropertyGenerationIntention,
-                                                 _ producer: SwiftSyntaxProducer) -> (() -> Syntax)? {
+    private static func makeAccessorBlockCreator(
+        _ property: PropertyGenerationIntention,
+        _ producer: SwiftSyntaxProducer
+    ) -> (() -> Syntax)? {
         
         // Emit { get } and { get set } accessor blocks for protocols
         if let property = property as? ProtocolPropertyGenerationIntention {
@@ -163,8 +167,10 @@ class VariableDeclSyntaxGenerator {
                     builder.addAccessor(AccessorDeclSyntax { builder in
                         builder.useAccessorKind(
                             SyntaxFactory
-                                .makeToken(.contextualKeyword("get"),
-                                           presence: .present)
+                                .makeToken(
+                                    .contextualKeyword("get"),
+                                    presence: .present
+                                )
                                 .withTrailingSpace()
                         )
                     })
@@ -173,8 +179,10 @@ class VariableDeclSyntaxGenerator {
                         builder.addAccessor(AccessorDeclSyntax { builder in
                             builder.useAccessorKind(
                                 SyntaxFactory
-                                    .makeToken(.contextualKeyword("set"),
-                                               presence: .present)
+                                    .makeToken(
+                                        .contextualKeyword("set"),
+                                        presence: .present
+                                    )
                                     .withTrailingSpace()
                             )
                         })
@@ -202,8 +210,8 @@ class VariableDeclSyntaxGenerator {
         case .getter(let body):
             return generateGetterAccessor(body, producer)
             
-        case let .getterAndSetter(get, set):
-            return generateGetterSetterAccessor(get, set, producer)
+        case let .getterAndSetter(getter, setter):
+            return generateGetterSetterAccessor(getter, setter, producer)
         }
     }
     
@@ -222,9 +230,13 @@ class VariableDeclSyntaxGenerator {
                 producer.deindent()
                 
                 let stmtList = SyntaxFactory.makeCodeBlockItemList(blocks)
-                let codeBlock = SyntaxFactory.makeCodeBlockItem(item: stmtList.asSyntax,
-                                                                semicolon: nil,
-                                                                errorTokens: nil)
+                let codeBlock = 
+                    SyntaxFactory
+                    .makeCodeBlockItem(
+                        item: stmtList.asSyntax,
+                        semicolon: nil,
+                        errorTokens: nil
+                    )
                 
                 builder.addStatement(codeBlock)
                 
@@ -237,10 +249,34 @@ class VariableDeclSyntaxGenerator {
     }
     
     private static func generateGetterSetterAccessor(
-        _ get: FunctionBodyIntention,
-        _ set: PropertyGenerationIntention.Setter,
-        _ producer: SwiftSyntaxProducer) -> () -> Syntax {
-        
+        _ getter: FunctionBodyIntention,
+        _ setter: PropertyGenerationIntention.Setter,
+        _ producer: SwiftSyntaxProducer
+    ) -> () -> Syntax {
+        return generateGetterSetterAccessor(
+            getter,
+            (setter.valueIdentifier, setter.body),
+            producer
+        )
+    }
+    
+    private static func generateGetterSetterAccessor(
+        _ getter: FunctionBodyIntention,
+        _ setter: SubscriptGenerationIntention.Setter,
+        _ producer: SwiftSyntaxProducer
+    ) -> () -> Syntax {
+        return generateGetterSetterAccessor(
+            getter,
+            (setter.valueIdentifier, setter.body),
+            producer
+        )
+    }
+    
+    private static func generateGetterSetterAccessor(
+        _ getter: FunctionBodyIntention,
+        _ setter: (valueIdentifier: String, body: FunctionBodyIntention),
+        _ producer: SwiftSyntaxProducer
+    ) -> () -> Syntax {
         return {
             return AccessorBlockSyntax { builder in
                 builder.useLeftBrace(
@@ -262,7 +298,7 @@ class VariableDeclSyntaxGenerator {
                         )
                     )
                     
-                    builder.useBody(producer.generateFunctionBody(get))
+                    builder.useBody(producer.generateFunctionBody(getter))
                 }
                 
                 producer.addExtraLeading(.newlines(1) + producer.indentation())
@@ -276,18 +312,18 @@ class VariableDeclSyntaxGenerator {
                         )
                     )
                     
-                    if set.valueIdentifier != "newValue" {
+                    if setter.valueIdentifier != "newValue" {
                         builder.useParameter(AccessorParameterSyntax { builder in
                             builder.useLeftParen(
                                 producer
                                     .makeStartToken(SyntaxFactory.makeLeftParenToken)
                             )
-                            builder.useName(makeIdentifier(set.valueIdentifier))
+                            builder.useName(makeIdentifier(setter.valueIdentifier))
                             builder.useRightParen(SyntaxFactory.makeRightParenToken())
                         })
                     }
                     
-                    builder.useBody(producer.generateFunctionBody(set.body))
+                    builder.useBody(producer.generateFunctionBody(setter.body))
                 }
                 
                 producer.deindent()

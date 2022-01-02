@@ -11,6 +11,19 @@ public final class InitGenerationIntention: MemberGenerationIntention, MutableFu
     public var isOverride: Bool = false
     public var isFallible: Bool = false
     public var isConvenience: Bool = false
+
+    /// Returns the function signature that is equivalent to this initializer.
+    public var signature: FunctionSignature {
+        let returnType = type?.asSwiftType ?? .errorType 
+
+        return .init(
+            name: "init",
+            parameters: parameters,
+            returnType: isFallible ? returnType.asOptional : returnType,
+            isStatic: true,
+            isMutating: false
+        )
+    }
     
     public init(parameters: [ParameterSignature],
                 accessLevel: AccessLevel = .internal,

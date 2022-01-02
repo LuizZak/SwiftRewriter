@@ -208,20 +208,30 @@ extension FunctionBodyCarryingIntention: Hashable {
         switch (lhs, rhs) {
         case (.method(let l), .method(let r)):
             return l === r
+
         case (.initializer(let l), .initializer(let r)):
             return l === r
+
         case (.`deinit`(let l), .`deinit`(let r)):
             return l === r
+
         case (.global(let l), .global(let r)):
             return l === r
-        case (.property(let l, _), .property(let r, _)):
+
+        case (.propertyGetter(let l, _), .propertyGetter(let r, _)),
+            (.propertySetter(let l, _), .propertySetter(let r, _)):
             return l === r
-        case (.`subscript`(let l, _), .`subscript`(let r, _)):
+
+        case (.subscriptGetter(let l, _), .subscriptGetter(let r, _)),
+            (.subscriptSetter(let l, _), .subscriptSetter(let r, _)):
             return l === r
+        
         case (.propertyInitializer(let l, _), .propertyInitializer(let r, _)):
             return l === r
+
         case (.globalVariable(let l, _), .globalVariable(let r, _)):
             return l === r
+
         default:
             return false
         }
@@ -231,18 +241,26 @@ extension FunctionBodyCarryingIntention: Hashable {
         switch self {
             case .method(let o):
                 hasher.combine(ObjectIdentifier(o))
+
             case .initializer(let o):
                 hasher.combine(ObjectIdentifier(o))
+
             case .`deinit`(let o):
                 hasher.combine(ObjectIdentifier(o))
+
             case .global(let o):
                 hasher.combine(ObjectIdentifier(o))
-            case .property(let o, _):
+
+            case .propertyGetter(let o, _), 
+                 .propertySetter(let o, _):
                 hasher.combine(ObjectIdentifier(o))
-            case .`subscript`(let o, _):
+
+            case .subscriptGetter(let o, _), .subscriptSetter(let o, _):
                 hasher.combine(ObjectIdentifier(o))
+
             case .propertyInitializer(let o, _):
                 hasher.combine(ObjectIdentifier(o))
+
             case .globalVariable(let o, _):
                 hasher.combine(ObjectIdentifier(o))
         }

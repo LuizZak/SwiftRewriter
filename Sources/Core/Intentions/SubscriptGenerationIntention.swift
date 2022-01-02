@@ -22,12 +22,13 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
         }
     }
     
-    public init(parameters: [ParameterSignature],
-                returnType: SwiftType,
-                mode: Mode,
-                accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
-        
+    public init(
+        parameters: [ParameterSignature],
+        returnType: SwiftType,
+        mode: Mode,
+        accessLevel: AccessLevel = .internal,
+        source: ASTNode? = nil
+    ) {
         self.parameters = parameters
         self.returnType = returnType
         self.mode = mode
@@ -57,9 +58,50 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
         try super.encode(to: container.superEncoder())
     }
     
+    public struct Setter: Codable {
+        /// Identifier for the setter's received value
+        public var valueIdentifier: String
+        /// The body for the setter
+        public var body: FunctionBodyIntention
+        
+        public init(valueIdentifier: String, body: CompoundStatement) {
+            self.init(valueIdentifier: valueIdentifier,
+                      body: FunctionBodyIntention(body: body))
+        }
+        
+        public init(valueIdentifier: String, body: FunctionBodyIntention) {
+            self.valueIdentifier = valueIdentifier
+            self.body = body
+        }
+        
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            
+            valueIdentifier =
+                try container.decode(
+                    String.self,
+                    forKey: .valueIdentifier
+                )
+            
+            body = try container.decodeIntention(forKey: .body)
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            
+            try container.encode(valueIdentifier, forKey: .valueIdentifier)
+            try container.encodeIntention(body, forKey: .body)
+        }
+        
+        private enum CodingKeys: String, CodingKey {
+            case valueIdentifier
+            case body
+        }
+    }
+    
     public enum Mode: Codable {
         case getter(FunctionBodyIntention)
-        case getterAndSetter(get: FunctionBodyIntention, set: PropertyGenerationIntention.Setter)
+        case getterAndSetter(get: FunctionBodyIntention, set: Setter)
         
         public var getter: FunctionBodyIntention {
             switch self {
@@ -68,7 +110,7 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
             }
         }
         
-        public var setter: PropertyGenerationIntention.Setter? {
+        public var setter: Setter? {
             switch self {
             case .getterAndSetter(_, let setter):
                 return setter
@@ -89,11 +131,16 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
                 
             case 1:
                 let getter =
-                    try container.decodeIntention(FunctionBodyIntention.self,
-                                                  forKey: .payload0)
+                    try container.decodeIntention(
+                        FunctionBodyIntention.self,
+                        forKey: .payload0
+                    )
                 
-                let setter = try container.decode(PropertyGenerationIntention.Setter.self,
-                                                  forKey: .payload1)
+                let setter =
+                    try container.decode(
+                        Setter.self,
+                        forKey: .payload1
+                    )
                 
                 self = .getterAndSetter(get: getter, set: setter)
                 

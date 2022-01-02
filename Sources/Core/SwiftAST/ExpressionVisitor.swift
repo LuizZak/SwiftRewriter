@@ -1,4 +1,5 @@
 /// Represents the base protocol for visitors of an expression tree.
+///
 /// Visitors visit nodes while performing operations on each node along the way,
 /// returning the resulting value after done traversing.
 public protocol ExpressionVisitor {

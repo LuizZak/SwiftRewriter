@@ -208,6 +208,8 @@
 		"cSpell.words": [
 			"antlr",
 			"autoreleasepool",
+			"deinitializer",
+			"deinitializers",
 			"Initializable",
 			"ivar",
 			"ivars",

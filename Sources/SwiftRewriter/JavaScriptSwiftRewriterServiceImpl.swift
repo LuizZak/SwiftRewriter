@@ -49,9 +49,12 @@ public final class JavaScriptSwiftRewriterServiceImpl: JavaScriptSwiftRewriterSe
         let input = ArrayInputSourcesProvider(inputs: inputs)
         
         let jobBuilder = JavaScriptSwiftRewriterJobBuilder()
+
+        var intentionPasses = ArrayIntentionPassSource(source: DefaultIntentionPasses())
+        intentionPasses.intentionPasses.append(DetectNoReturnsIntentionPass())
         
         jobBuilder.inputs.addInputs(from: input)
-        jobBuilder.intentionPassesSource = DefaultIntentionPasses()
+        jobBuilder.intentionPassesSource = intentionPasses
         jobBuilder.astRewriterPassSources = DefaultExpressionPasses()
         jobBuilder.globalsProvidersSource = DefaultGlobalsProvidersSource()
         jobBuilder.syntaxRewriterPassSource = DefaultSyntaxPassProvider()

@@ -46,7 +46,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
     
     @inlinable
     open override func copy() -> Statement {
-        fatalError("Must be overriden by subclasses")
+        fatalError("Must be overridden by subclasses")
     }
     
     /// Accepts the given visitor instance, calling the appropriate visiting method
@@ -57,7 +57,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
     /// statement
     @inlinable
     public func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        visitor.visitStatement(self)
+        fatalError("Must be overridden by subclasses")
     }
     
     public func isEqual(to other: Statement) -> Bool {

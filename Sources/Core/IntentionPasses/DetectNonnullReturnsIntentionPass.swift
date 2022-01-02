@@ -1,7 +1,7 @@
 import SwiftAST
 import Intentions
 
-/// Analyzes non-overriden methods that have implicitly unwrapped optional returns,
+/// Analyzes non-overridden methods that have implicitly unwrapped optional returns,
 /// detecting non-null return signature by looking into all return statements
 /// on all exit paths and the values they return.
 public class DetectNonnullReturnsIntentionPass: TypeVisitingIntentionPass {
@@ -35,15 +35,7 @@ public class DetectNonnullReturnsIntentionPass: TypeVisitingIntentionPass {
         }
         
         // Collect all return statements
-        var returns: [ReturnStatement] = []
-        
-        let visitor = AnonymousSyntaxNodeVisitor { node in
-            if let ret = node as? ReturnStatement {
-                returns.append(ret)
-            }
-        }
-        
-        visitor.visitStatement(body.body)
+        let returns = body.body.accept(ReturnStatementVisitor())
         
         // Analyze individual returns, checking if they all return the same non-null
         // type value

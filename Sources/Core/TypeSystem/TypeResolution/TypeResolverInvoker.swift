@@ -248,7 +248,7 @@ public class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
     
     public func makeContext(
         forSubscriptSetter subscriptIntent: SubscriptGenerationIntention,
-        setter: PropertyGenerationIntention.Setter
+        setter: SubscriptGenerationIntention.Setter
     ) -> Context {
         
         let resolver = ExpressionTypeResolver(typeSystem: typeSystem)

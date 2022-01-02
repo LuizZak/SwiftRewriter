@@ -193,10 +193,12 @@ public extension MemberBuilder where T: SubscriptGenerationIntention {
     
     @discardableResult
     func setAsGetterSetter(getter: CompoundStatement,
-                           setter: PropertyGenerationIntention.Setter) -> MemberBuilder {
+                           setter: SubscriptGenerationIntention.Setter) -> MemberBuilder {
         
-        targetMember.mode = .getterAndSetter(get: FunctionBodyIntention(body: getter),
-                                             set: setter)
+        targetMember.mode = .getterAndSetter(
+            get: FunctionBodyIntention(body: getter),
+            set: setter
+        )
         
         return self
     }

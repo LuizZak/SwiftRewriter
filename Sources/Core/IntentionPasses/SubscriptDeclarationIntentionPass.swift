@@ -98,9 +98,11 @@ public class SubscriptDeclarationIntentionPass: TypeVisitingIntentionPass {
             ParameterSignature(name: getter.parameters[0].name, type: getter.parameters[0].type)
         ]
         let getterBody = getter.functionBody ?? FunctionBodyIntention(body: [])
-        let setterMode: PropertyGenerationIntention.Setter =
-            .init(valueIdentifier: setter.parameters[0].name,
-                  body: setter.functionBody ?? FunctionBodyIntention(body: []))
+        let setterMode =
+            SubscriptGenerationIntention.Setter(
+                valueIdentifier: setter.parameters[0].name,
+                body: setter.functionBody ?? FunctionBodyIntention(body: [])
+            )
         
         // TODO: Derive access levels when they differ between getter and setter
         let sub = SubscriptGenerationIntention(
@@ -108,13 +110,16 @@ public class SubscriptDeclarationIntentionPass: TypeVisitingIntentionPass {
             returnType: getter.returnType,
             mode: .getterAndSetter(get: getterBody, set: setterMode),
             accessLevel: getter.accessLevel,
-            source: nil)
+            source: nil
+        )
         
         sub.history.mergeHistories(getter.history)
         sub.history.mergeHistories(setter.history)
-        sub.history.recordMerge(with: [getter, setter],
-                                tag: "Creation",
-                                description: "Creating subscript declaration from objectAtIndexSubscript(_:) and setObject(_:atIndexedSubscript:) pair")
+        sub.history.recordMerge(
+            with: [getter, setter],
+            tag: "Creation",
+            description: "Creating subscript declaration from objectAtIndexSubscript(_:) and setObject(_:atIndexedSubscript:) pair"
+        )
         sub.precedingComments = getter.precedingComments + setter.precedingComments
         
         return sub

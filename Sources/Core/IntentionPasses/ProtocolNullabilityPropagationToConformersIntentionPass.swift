@@ -5,10 +5,10 @@ import Intentions
 import Utils
 
 // TODO: This could be generalized into merging signatures from types such that
-// a child class inherits nullability from the base class, in case the child
-// lacks nullability annotations.
+// TODO: a child class inherits nullability from the base class, in case the child
+// TODO: lacks nullability annotations.
 
-/// Propagates known protocol nullability signautres from protocol intentions into
+/// Propagates known protocol nullability signatures from protocol intentions into
 /// classes that implement them.
 public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionPass {
     public init() {

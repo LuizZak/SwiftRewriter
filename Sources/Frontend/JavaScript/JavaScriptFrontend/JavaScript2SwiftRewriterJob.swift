@@ -20,15 +20,17 @@ public class JavaScriptSwiftRewriterJob {
     public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
     public var parserCache: JavaScriptParserCache?
     
-    public init(input: InputSourcesProvider,
-                intentionPassesSource: IntentionPassSource?,
-                astRewriterPassSources: ASTRewriterPassSource?,
-                globalsProvidersSource: GlobalsProvidersSource?,
-                syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider?,
-                preprocessors: [SourcePreprocessor],
-                settings: JavaScript2SwiftRewriter.Settings,
-                swiftSyntaxOptions: SwiftSyntaxOptions,
-                parserCache: JavaScriptParserCache?) {
+    public init(
+        input: InputSourcesProvider,
+        intentionPassesSource: IntentionPassSource?,
+        astRewriterPassSources: ASTRewriterPassSource?,
+        globalsProvidersSource: GlobalsProvidersSource?,
+        syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider?,
+        preprocessors: [SourcePreprocessor],
+        settings: JavaScript2SwiftRewriter.Settings,
+        swiftSyntaxOptions: SwiftSyntaxOptions,
+        parserCache: JavaScriptParserCache?
+    ) {
         
         self.intentionPassesSource = intentionPassesSource
         self.astRewriterPassSources = astRewriterPassSources
@@ -65,13 +67,15 @@ public class JavaScriptSwiftRewriterJob {
     }
     
     func makeSwiftRewriter(output: WriterOutput) -> JavaScript2SwiftRewriter {
-        let rewriter = JavaScript2SwiftRewriter(input: input,
-                                     output: output,
-                                     intentionPassesSource: intentionPassesSource,
-                                     astRewriterPassSources: astRewriterPassSources,
-                                     globalsProvidersSource: globalsProvidersSource,
-                                     syntaxRewriterPassSource: syntaxRewriterPassSource,
-                                     settings: settings)
+        let rewriter = JavaScript2SwiftRewriter(
+            input: input,
+            output: output,
+            intentionPassesSource: intentionPassesSource,
+            astRewriterPassSources: astRewriterPassSources,
+            globalsProvidersSource: globalsProvidersSource,
+            syntaxRewriterPassSource: syntaxRewriterPassSource,
+            settings: settings
+        )
         
         rewriter.writerOptions = swiftSyntaxOptions
         rewriter.preprocessors = preprocessors

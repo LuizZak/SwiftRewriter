@@ -2,7 +2,7 @@ import SwiftAST
 import Intentions
 
 // TODO: Also support fallible init detection by inspecting `nullable` in the
-// return type of intializers in Objective-C.
+// TODO: return type of initializers in Objective-C.
 
 /// An intention pass that searches for fallible and convenience initializers
 /// based on statement AST analysis and flags them appropriately.

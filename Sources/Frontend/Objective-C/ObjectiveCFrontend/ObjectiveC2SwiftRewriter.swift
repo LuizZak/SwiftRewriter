@@ -77,13 +77,15 @@ public final class ObjectiveC2SwiftRewriter {
     /// Describes settings to pass to the AST writers when outputting code
     public var writerOptions: SwiftSyntaxOptions = .default
     
-    public init(input: InputSourcesProvider,
-                output: WriterOutput,
-                intentionPassesSource: IntentionPassSource? = nil,
-                astRewriterPassSources: ASTRewriterPassSource? = nil,
-                globalsProvidersSource: GlobalsProvidersSource? = nil,
-                syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider? = nil,
-                settings: Settings = .default) {
+    public init(
+        input: InputSourcesProvider,
+        output: WriterOutput,
+        intentionPassesSource: IntentionPassSource? = nil,
+        astRewriterPassSources: ASTRewriterPassSource? = nil,
+        globalsProvidersSource: GlobalsProvidersSource? = nil,
+        syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider? = nil,
+        settings: Settings = .default
+    ) {
         
         self.diagnostics = Diagnostics()
         self.sourcesProvider = input

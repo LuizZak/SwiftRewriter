@@ -28,10 +28,13 @@ public final class ObjectiveCSwiftRewriterServiceImpl: ObjectiveCSwiftRewriterSe
         let antlrSettings = AntlrSettings(forceUseLLPrediction: settings.rewriter.forceUseLLPrediction)
         
         parserStatePool = ObjcParserStatePool()
-        parserCache = ObjectiveCParserCache(fileProvider: FileDiskProvider(),
-                                  parserStatePool: parserStatePool,
-                                  sourcePreprocessors: preprocessors,
-                                  antlrSettings: antlrSettings)
+        parserCache = ObjectiveCParserCache(
+            fileProvider: FileDiskProvider(),
+            parserStatePool: parserStatePool,
+            sourcePreprocessors: preprocessors,
+            antlrSettings: antlrSettings
+        )
+        
         self.output = output
         self.settings = settings
     }

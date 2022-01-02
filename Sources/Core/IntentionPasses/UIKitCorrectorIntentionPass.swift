@@ -3,7 +3,7 @@ import KnownType
 import Intentions
 import Commons
 
-/// Makes correction for signatures of subclasses and conformeds of known UIKit
+/// Makes correction for signatures of subclasses and conformers of known UIKit
 /// classes and protocols
 public class UIKitCorrectorIntentionPass: TypeVisitingIntentionPass {
     private var historyTag = "\(UIKitCorrectorIntentionPass.self)"

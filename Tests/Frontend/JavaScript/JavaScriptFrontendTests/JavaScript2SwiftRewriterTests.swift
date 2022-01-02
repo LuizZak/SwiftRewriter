@@ -242,4 +242,49 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
                 .with(\.emitJavaScriptObject, true)
         )
     }
+
+    func testRewrite_skipReturnOnNonReturningFunctions() {
+        assertRewrite(
+            js: """
+            function f1() {
+                if (true) {
+
+                }
+            }
+            function f2() {
+                if (true) {
+                    return 0;
+                }
+            }
+            """,
+            swift: """
+            func f1() {
+                if true {
+                }
+            }
+            func f2() -> Any {
+                if true {
+                    return 0
+                }
+            }
+            """
+        )
+    }
+
+    func testRewrite_deduceVariableType() {
+        assertRewrite(
+            js: """
+            function f() {
+                var a = 0;
+                var b = a;
+            }
+            """,
+            swift: """
+            func f() {
+                var a: Double = 0
+                var b: Double = a
+            }
+            """
+        )
+    }
 }

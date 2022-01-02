@@ -38,7 +38,7 @@ public protocol FunctionBodyQueueDelegate: AnyObject {
     
     func makeContext(
         forSubscriptSetter subscriptIntent: SubscriptGenerationIntention,
-        setter: PropertyGenerationIntention.Setter
+        setter: SubscriptGenerationIntention.Setter
     ) -> Context
     
     func makeContext(
@@ -271,18 +271,16 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
             let context =
                 delegate.makeContext(forPropertyGetter: property, getter: getter)
             
-            collectFunctionBody(getter, .property(property, isSetter: false), context: context)
+            collectFunctionBody(getter, .propertyGetter(property, getter), context: context)
             
-        case let .property(get, set):
+        case let .property(getter, setter):
             let getterContext =
-                delegate.makeContext(forPropertyGetter: property, getter: get)
-            
-            collectFunctionBody(get, .property(property, isSetter: false), context: getterContext)
-            
+                delegate.makeContext(forPropertyGetter: property, getter: getter)
             let setterContext =
-                delegate.makeContext(forPropertySetter: property, setter: set)
+                delegate.makeContext(forPropertySetter: property, setter: setter)
             
-            collectFunctionBody(set.body, .property(property, isSetter: true), context: setterContext)
+            collectFunctionBody(getter, .propertyGetter(property, getter), context: getterContext)
+            collectFunctionBody(setter.body, .propertySetter(property, setter), context: setterContext)
             
         case .asField:
             guard let initializer = property.initialValueIntention else {
@@ -312,18 +310,16 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
             let context =
                 delegate.makeContext(forSubscriptGetter: subscriptIntent, getter: getter)
             
-            collectFunctionBody(getter, .subscript(subscriptIntent, isSetter: false), context: context)
+            collectFunctionBody(getter, .subscriptGetter(subscriptIntent, getter), context: context)
             
         case let .getterAndSetter(getter, setter):
             let getterContext =
                 delegate.makeContext(forSubscriptGetter: subscriptIntent, getter: getter)
-            
-            collectFunctionBody(getter, .subscript(subscriptIntent, isSetter: false), context: getterContext)
-            
             let setterContext =
                 delegate.makeContext(forSubscriptSetter: subscriptIntent, setter: setter)
             
-            collectFunctionBody(setter.body, .subscript(subscriptIntent, isSetter: true), context: setterContext)
+            collectFunctionBody(getter, .subscriptGetter(subscriptIntent, getter), context: getterContext)
+            collectFunctionBody(setter.body, .subscriptSetter(subscriptIntent, setter), context: setterContext)
         }
     }
     
@@ -396,71 +392,6 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
     }
 }
 
-/// Describes a top level function body, statement, or expression that an intention
-/// carries.
-public enum StatementContainer {
-    case function(FunctionBodyIntention)
-    case statement(Statement)
-    case expression(Expression)
-
-    /// Convenience for applying an AST visitor on the contents of this container
-    /// value.
-    public func accept<Visitor>(_ visitor: Visitor) -> Visitor.ExprResult where Visitor: StatementVisitor & ExpressionVisitor, Visitor.ExprResult == Visitor.StmtResult {
-        switch self {
-        case .function(let body):
-            return visitor.visitStatement(body.body)
-        case .statement(let stmt):
-            return visitor.visitStatement(stmt)
-        case .expression(let exp):
-            return visitor.visitExpression(exp)
-        }
-    }
-
-    /// Gets the function body, if this statement container is a function body
-    /// case.
-    public var functionBody: FunctionBodyIntention? {
-        switch self {
-        case .function(let body):
-            return body
-        default:
-            return nil
-        }
-    }
-
-    /// Gets the statement, if this statement container is a statement case.
-    public var statement: Statement? {
-        switch self {
-        case .statement(let stmt):
-            return stmt
-        default:
-            return nil
-        }
-    }
-
-    /// Gets the expression, if this statement container is a expression case.
-    public var expression: Expression? {
-        switch self {
-        case .expression(let exp):
-            return exp
-        default:
-            return nil
-        }
-    }
-}
-
-/// Describes an intention that is a carrier of a function body or a top-level
-/// expression.
-public enum FunctionBodyCarryingIntention {
-    case method(MethodGenerationIntention)
-    case initializer(InitGenerationIntention)
-    case `deinit`(DeinitGenerationIntention)
-    case global(GlobalFunctionGenerationIntention)
-    case property(PropertyGenerationIntention, isSetter: Bool)
-    case `subscript`(SubscriptGenerationIntention, isSetter: Bool)
-    case propertyInitializer(PropertyGenerationIntention, PropertyInitialValueGenerationIntention)
-    case globalVariable(GlobalVariableGenerationIntention, GlobalVariableInitialValueIntention)
-}
-
 /// An empty function body queue implementation which always return an empty
 /// context object.
 public class EmptyFunctionBodyQueueDelegate: FunctionBodyQueueDelegate {
@@ -516,7 +447,7 @@ public class EmptyFunctionBodyQueueDelegate: FunctionBodyQueueDelegate {
     
     public func makeContext(
         forSubscriptSetter subscriptIntent: SubscriptGenerationIntention,
-        setter: PropertyGenerationIntention.Setter
+        setter: SubscriptGenerationIntention.Setter
     ) -> Void {
         
     }

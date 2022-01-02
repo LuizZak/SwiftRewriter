@@ -1,4 +1,7 @@
 /// Protocol for visitors of `Statement` nodes
+///
+/// Visitors visit nodes while performing operations on each node along the way,
+/// returning the resulting value after done traversing.
 public protocol StatementVisitor {
     associatedtype StmtResult
     

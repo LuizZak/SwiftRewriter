@@ -2,13 +2,20 @@
 public struct LocalFunction: Codable {
     /// The signature of this local function.
     public var signature: FunctionSignature {
-        .init(
-            name: identifier,
-            parameters: parameters,
-            returnType: returnType,
-            isStatic: false,
-            isMutating: false
-        )
+        get {
+            .init(
+                name: identifier,
+                parameters: parameters,
+                returnType: returnType,
+                isStatic: false,
+                isMutating: false
+            )
+        }
+        set {
+            identifier = newValue.name
+            parameters = newValue.parameters
+            returnType = newValue.returnType
+        }
     }
 
     /// This function's identifier name.
