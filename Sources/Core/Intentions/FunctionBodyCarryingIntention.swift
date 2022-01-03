@@ -36,4 +36,29 @@ public enum FunctionBodyCarryingIntention {
             return nil
         }
     }
+
+    public var statementContainer: StatementContainer? {
+        switch self {
+        case .method(let intention):
+            return intention.functionBody.map(StatementContainer.function)
+        case .initializer(let intention):
+            return intention.functionBody.map(StatementContainer.function)
+        case .deinit(let intention):
+            return intention.functionBody.map(StatementContainer.function)
+        case .global(let intention):
+            return intention.functionBody.map(StatementContainer.function)
+        case .propertyGetter(_, let intention):
+            return .function(intention)
+        case .propertySetter(_, let setter):
+            return .function(setter.body)
+        case .subscriptGetter(_, let intention):
+            return .function(intention)
+        case .subscriptSetter(_, let setter):
+            return .function(setter.body)
+        case .propertyInitializer(_, let initializer):
+            return .expression(initializer.expression)
+        case .globalVariable(_, let initializer):
+            return .expression(initializer.expression)
+        }
+    }
 }

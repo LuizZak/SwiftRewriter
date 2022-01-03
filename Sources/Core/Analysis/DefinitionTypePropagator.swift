@@ -58,10 +58,13 @@ public class DefinitionTypePropagator {
     }
 
     private func makeVariableDeclarationPropagator(_ didWork: @escaping () -> Void) -> VariableDeclarationTypePropagationRewriter {
-        VariableDeclarationTypePropagationRewriter(
+        let localUsageAnalyzer = LocalUsageAnalyzer(typeSystem: typeSystem)
+
+        return VariableDeclarationTypePropagationRewriter(
             options: options,
             typeSystem: typeSystem,
             typeResolver: typeResolver,
+            localUsageAnalyzer: localUsageAnalyzer,
             didWork: didWork
         )
     }
@@ -108,17 +111,20 @@ public class DefinitionTypePropagator {
         let options: Options
         let typeSystem: TypeSystem
         let typeResolver: ExpressionTypeResolver
+        let localUsageAnalyzer: LocalUsageAnalyzer
         let didWork: () -> Void
 
         init(
             options: Options,
             typeSystem: TypeSystem,
             typeResolver: ExpressionTypeResolver,
+            localUsageAnalyzer: LocalUsageAnalyzer,
             didWork: @escaping () -> Void
         ) {
             self.options = options
             self.typeSystem = typeSystem
             self.typeResolver = typeResolver
+            self.localUsageAnalyzer = localUsageAnalyzer
             self.didWork = didWork
 
             super.init()
@@ -129,44 +135,88 @@ public class DefinitionTypePropagator {
                 guard decl.type == options.baseType else {
                     continue
                 }
-                guard let initialization = decl.initialization else {
+
+                guard let firstAssignment = self.firstAssignment(for: decl, stmt, index: i) else {
                     continue
                 }
 
-                let resolved = typeResolver.resolveType(initialization)
+                let resolved = typeResolver.resolveType(firstAssignment)
                 guard !resolved.isErrorTyped, let resolvedType = resolved.resolvedType else {
                     continue
                 }
 
-                func assign(exp: Expression, type: SwiftType) {
+                var changed = false
+                func assign(type: SwiftType) {
                     if stmt.decl[i].type == type {
                         return
                     }
 
-                    stmt.decl[i].initialization = exp.typed(type).typed(expected: type)
                     stmt.decl[i].type = type
 
+                    changed = true
                     didWork()
                 }
 
                 if typeSystem.isNumeric(resolvedType) {
-                    assign(exp: resolved, type: options.baseNumericType ?? resolvedType)
+                    assign(type: options.baseNumericType ?? resolvedType)
                 } else if resolvedType == .string {
-                    assign(exp: resolved, type: options.baseStringType ?? resolvedType)
+                    assign(type: options.baseStringType ?? resolvedType)
                 } else {
                     if decl.ownership == .weak && typeSystem.isClassInstanceType(resolvedType) {
-                        assign(exp: resolved, type: .optional(resolvedType))
+                        assign(type: .optional(resolvedType))
                     } else {
-                        assign(exp: resolved, type: resolvedType)
+                        assign(type: resolvedType)
                     }
                 }
 
                 // Quit early so type changes can be propagated before attempting
                 // the next definition in this declaration
-                return stmt
+                if changed {
+                    return stmt
+                }
             }
 
             return stmt
+        }
+
+        private func firstAssignment(
+            for decl: StatementVariableDeclaration,
+            _ stmt: VariableDeclarationsStatement,
+            index: Int
+        ) -> Expression? {
+
+            if let initialization = decl.initialization {
+                return initialization
+            }
+
+            guard let parent = stmt.parent as? Statement else {
+                return nil
+            }
+
+            let definition: LocalCodeDefinition = .forVarDeclElement(decl, stmt, index: index)
+            let usages = localUsageAnalyzer.findUsagesOf(
+                definition: definition,
+                inScopeOf: parent,
+                in: .statement(parent),
+                intention: nil
+            )
+
+            guard let first = usages.first(where: { !$0.isReadOnlyUsage }) else {
+                return nil
+            }
+
+            let expression = first.expression
+
+            guard let parent = expression.parentExpression else {
+                return nil
+            }
+
+            switch parent {
+            case let exp as AssignmentExpression where exp.lhs == expression:
+                return exp.rhs
+            default:
+                return nil
+            }
         }
     }
 }

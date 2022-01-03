@@ -144,7 +144,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
         return usages
     }
     
-    func isReadOnlyContext(_ expression: Expression) -> Bool { 
+    func isReadOnlyContext(_ expression: Expression) -> Bool {
         if let assignment = expression.parentExpression?.asAssignment {
             return expression !== assignment.lhs
         }
@@ -308,19 +308,21 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
                     return
                 }
                 
-                if def != definition {
-                    let readOnly = self.isReadOnlyContext(identifier)
-                    
-                    let usage =
-                        DefinitionUsage(
-                            intention: intention,
-                            definition: def,
-                            expression: identifier,
-                            isReadOnlyUsage: readOnly
-                        )
-                    
-                    usages.append(usage)
+                guard def == definition else {
+                    return
                 }
+                
+                let readOnly = self.isReadOnlyContext(identifier)
+                
+                let usage =
+                    DefinitionUsage(
+                        intention: intention,
+                        definition: def,
+                        expression: identifier,
+                        isReadOnlyUsage: readOnly
+                    )
+                
+                usages.append(usage)
         }
         
         container.accept(visitor)
@@ -330,7 +332,6 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
     
     public func findAllUsages(
         in syntaxNode: SyntaxNode,
-        container: StatementContainer,
         intention: FunctionBodyCarryingIntention?
     ) -> [DefinitionUsage] {
         

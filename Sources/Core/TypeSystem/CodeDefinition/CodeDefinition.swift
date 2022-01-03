@@ -171,15 +171,22 @@ public extension CodeDefinition {
     
     static func forVarDeclStatement(_ stmt: VariableDeclarationsStatement) -> [LocalCodeDefinition] {
         stmt.decl.enumerated().map { (i, decl) in
-            CodeDefinition
-                .forLocalIdentifier(
-                    decl.identifier,
-                    type: decl.type,
-                    ownership: decl.ownership,
-                    isConstant: decl.isConstant,
-                    location: .variableDeclaration(stmt, index: i)
-                )
+            forVarDeclElement(decl, stmt, index: i)
         }
+    }
+
+    static func forVarDeclElement(
+        _ decl: StatementVariableDeclaration,
+        _ stmt: VariableDeclarationsStatement,
+        index: Int
+    ) -> LocalCodeDefinition {
+        CodeDefinition.forLocalIdentifier(
+            decl.identifier,
+            type: decl.type,
+            ownership: decl.ownership,
+            isConstant: decl.isConstant,
+            location: .variableDeclaration(stmt, index: index)
+        )
     }
     
     static func forGlobalFunction(_ function: GlobalFunctionGenerationIntention) -> CodeDefinition {

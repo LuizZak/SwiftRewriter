@@ -110,7 +110,6 @@ public class ReachingDefinitionAnalyzer {
                     LocalUsageAnalyzer(typeSystem: typeSystem)
                         .findAllUsages(
                             in: exp,
-                            container: container,
                             intention: intention
                         )
                 
@@ -165,7 +164,6 @@ public class ReachingDefinitionAnalyzer {
                     LocalUsageAnalyzer(typeSystem: typeSystem)
                         .findAllUsages(
                             in: exp,
-                            container: container,
                             intention: intention
                         )
                 

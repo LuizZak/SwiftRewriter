@@ -114,6 +114,27 @@ class DefinitionTypePropagatorTests: XCTestCase {
         ])
     }
 
+    func testPropagate_sequentialAssignmentsWithDelayedFirstAssignment() {
+        let sut = makeSut()
+        let body: CompoundStatement = [
+            .variableDeclarations([
+                .init(identifier: "a", type: .any, initialization: nil),
+                .init(identifier: "b", type: .any, initialization: .constant(0)),
+            ]),
+            .expression(.identifier("a").assignment(op: .assign, rhs: .identifier("b")))
+        ]
+
+        let result = sut.propagate(body)
+
+        assertEqual(result, [
+            .variableDeclarations([
+                .init(identifier: "a", type: .double, initialization: nil),
+                .init(identifier: "b", type: .double, initialization: .constant(0)),
+            ]),
+            .expression(.identifier("a").assignment(op: .assign, rhs: .identifier("b")))
+        ])
+    }
+
     func testPropagate_weakReferenceType() {
         let intentionCollection = IntentionCollectionBuilder()
             .createFileWithClass(named: "A") { type in
@@ -201,6 +222,21 @@ class DefinitionTypePropagatorTests: XCTestCase {
                 .return(.constant(0))
             ]),
             .variableDeclaration(identifier: "bar", type: .any, initialization: .identifier("foo").call()),
+        ])
+    }
+
+    func testPropagate_delayedAssignment() {
+        let sut = makeSut()
+        let body: CompoundStatement = [
+            .variableDeclaration(identifier: "a", type: .any, initialization: nil),
+            .expression(.identifier("a").assignment(op: .assign, rhs: .constant(0)))
+        ]
+
+        let result = sut.propagate(body)
+
+        assertEqual(result, [
+            .variableDeclaration(identifier: "a", type: .double, initialization: nil),
+            .expression(.identifier("a").assignment(op: .assign, rhs: .constant(0)))
         ])
     }
 

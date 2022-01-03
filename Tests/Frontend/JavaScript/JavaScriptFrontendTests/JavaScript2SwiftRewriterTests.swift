@@ -141,7 +141,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func foo() {
-                var a: Any, b: Any, c: Double = 1
+                var a: Double, b: Double, c: Double = 1
 
                 b = c
                 a = b
@@ -267,6 +267,24 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
                 if true {
                     return 0
                 }
+            }
+            """
+        )
+    }
+
+    func testRewrite_propagateDelayedAssignmentType() {
+        assertRewrite(
+            js: """
+            function f1() {
+                var a;
+                a = 0;
+            }
+            """,
+            swift: """
+            func f1() {
+                var a: Double
+            
+                a = 0
             }
             """
         )
