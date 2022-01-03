@@ -13,8 +13,10 @@ public class OverloadResolver {
     }
     
     /// Returns a matching resolution on a given array of methods.
-    func findBestOverload(in methods: [KnownMethod],
-                          argumentTypes: [SwiftType?]) -> KnownMethod? {
+    func findBestOverload(
+        in methods: [KnownMethod],
+        argumentTypes: [SwiftType?]
+    ) -> KnownMethod? {
         
         let signatures = methods.map(\.signature)
         if let index = findBestOverload(inSignatures: signatures,
@@ -26,12 +28,13 @@ public class OverloadResolver {
     }
     
     /// Returns a matching resolution on a given array of methods.
-    func findBestOverload(in methods: [KnownMethod],
-                          arguments: [Argument]) -> KnownMethod? {
+    func findBestOverload(
+        in methods: [KnownMethod],
+        arguments: [Argument]
+    ) -> KnownMethod? {
         
         let signatures = methods.map(\.signature)
-        if let index = findBestOverload(inSignatures: signatures,
-                                        arguments: arguments) {
+        if let index = findBestOverload(inSignatures: signatures, arguments: arguments) {
             return methods[index]
         }
         
@@ -39,23 +42,31 @@ public class OverloadResolver {
     }
     
     /// Returns a matching resolution by index on a given array of signatures.
-    func findBestOverload(inSignatures signatures: [FunctionSignature],
-                          argumentTypes: [SwiftType?]) -> Int? {
+    func findBestOverload(
+        inSignatures signatures: [FunctionSignature],
+        argumentTypes: [SwiftType?]
+    ) -> Int? {
         
-        findBestOverload(inSignatures: signatures,
-                         arguments: argumentTypes.asOverloadResolverArguments)
+        findBestOverload(
+            inSignatures: signatures,
+            arguments: argumentTypes.asOverloadResolverArguments
+        )
     }
     
     /// Returns a matching resolution on a given array of subscript declarations.
-    public func findBestOverload(inSubscripts subscripts: [KnownSubscript],
-                                 arguments: [Argument]) -> KnownSubscript? {
+    public func findBestOverload(
+        inSubscripts subscripts: [KnownSubscript],
+        arguments: [Argument]
+    ) -> KnownSubscript? {
         
         let asFunctionSignatures = subscripts.map {
-            FunctionSignature(name: "subscript",
-                              parameters: $0.parameters,
-                              returnType: $0.returnType,
-                              isStatic: $0.isStatic,
-                              isMutating: false)
+            FunctionSignature(
+                name: "subscript",
+                parameters: $0.parameters,
+                returnType: $0.returnType,
+                isStatic: $0.isStatic,
+                isMutating: false
+            )
         }
         
         if let index = findBestOverload(inSignatures: asFunctionSignatures,
@@ -67,8 +78,10 @@ public class OverloadResolver {
     }
     
     /// Returns a matching resolution by index on a given array of signatures.
-    public func findBestOverload(inSignatures signatures: [FunctionSignature],
-                                 arguments: [Argument]) -> Int? {
+    public func findBestOverload(
+        inSignatures signatures: [FunctionSignature],
+        arguments: [Argument]
+    ) -> Int? {
         
         if signatures.isEmpty {
             return nil
@@ -85,9 +98,11 @@ public class OverloadResolver {
         if !signatureCandidates.contains(where: { $0.argumentCount == arguments.count })
             || (!arguments.isEmpty && arguments.allSatisfy(\.isMissingType)) {
             
-            state.addCache(forSignatures: signatures,
-                           arguments: arguments,
-                           resolutionIndex: nil)
+            state.addCache(
+                forSignatures: signatures,
+                arguments: arguments,
+                resolutionIndex: nil
+            )
             
             return nil
         }
@@ -145,8 +160,10 @@ public class OverloadResolver {
                         signature.signature.parameters[argIndex].type
                     
                     let isAssignableAsIs =
-                        typeSystem.isType(argumentType,
-                                          assignableTo: parameterType)
+                        typeSystem.isType(
+                            argumentType,
+                            assignableTo: parameterType
+                        )
                     
                     if isAssignableAsIs {
                         remainingCandidates[i].rank += OverloadRankStatics.typeAssignableRankBonus
@@ -154,16 +171,18 @@ public class OverloadResolver {
                     }
                     
                     let isAssignable =
-                        typeSystem.isType(argumentType.deepUnwrapped,
-                                          assignableTo: parameterType.deepUnwrapped)
+                        typeSystem.isType(
+                            argumentType.deepUnwrapped,
+                            assignableTo: parameterType.deepUnwrapped
+                        )
                     
                     if isAssignable {
                         continue
                     }
                     
                     // Integer/float literals must be handled specially: they
-                    // can be implicitly casted to other numeric types (except
-                    // for float-to-integer casts)
+                    // can be implicitly cast to other numeric types (except for
+                    // float-to-integer casts)
                     if argument.isLiteral {
                         switch argument.literalKind {
                         case .integer where typeSystem.isInteger(parameterType.deepUnwrapped):
@@ -191,9 +210,11 @@ public class OverloadResolver {
         // Return first candidate found
         let result = remainingCandidates.first?.inputIndex
         
-        state.addCache(forSignatures: signatures,
-                       arguments: arguments,
-                       resolutionIndex: result)
+        state.addCache(
+            forSignatures: signatures,
+            arguments: arguments,
+            resolutionIndex: result
+        )
         
         return result
     }
@@ -204,11 +225,13 @@ public class OverloadResolver {
         for (i, signature) in signatures.enumerated() {
             for selector in signature.possibleSelectorSignatures() {
                 let candidate =
-                    OverloadCandidate(rank: 0,
-                                      selector: selector,
-                                      signature: signature,
-                                      inputIndex: i,
-                                      argumentCount: selector.keywords.count - 1)
+                    OverloadCandidate(
+                        rank: 0,
+                        selector: selector,
+                        signature: signature,
+                        inputIndex: i,
+                        argumentCount: selector.keywords.count - 1
+                    )
                 
                 overloads.append(candidate)
             }
@@ -258,8 +281,10 @@ class OverloadResolverState {
         _cache.tearDownCaching(resetToValue: [:])
     }
     
-    func cachedEntry(forSignatures signatures: [FunctionSignature],
-                     arguments: [OverloadResolver.Argument]) -> Int?? {
+    func cachedEntry(
+        forSignatures signatures: [FunctionSignature],
+        arguments: [OverloadResolver.Argument]
+    ) -> Int?? {
         
         if !_cache.usingCache {
             return nil
@@ -269,9 +294,11 @@ class OverloadResolverState {
         return cache[entry]
     }
     
-    func addCache(forSignatures signatures: [FunctionSignature],
-                  arguments: [OverloadResolver.Argument],
-                  resolutionIndex: Int?) {
+    func addCache(
+        forSignatures signatures: [FunctionSignature],
+        arguments: [OverloadResolver.Argument],
+        resolutionIndex: Int?
+    ) {
         
         if !_cache.usingCache {
             return
@@ -290,9 +317,11 @@ class OverloadResolverState {
 public extension Sequence where Element == FunctionArgument {
     var asOverloadResolverArguments: [OverloadResolver.Argument] {
         map {
-            OverloadResolver.Argument(type: $0.expression.resolvedType,
-                                      isLiteral: $0.expression.isLiteralExpression,
-                                      literalKind: $0.expression.literalExpressionKind)
+            .init(
+                type: $0.expression.resolvedType,
+                isLiteral: $0.expression.isLiteralExpression,
+                literalKind: $0.expression.literalExpressionKind
+            )
         }
     }
 }
@@ -300,7 +329,7 @@ public extension Sequence where Element == FunctionArgument {
 public extension Sequence where Element == SwiftType? {
     var asOverloadResolverArguments: [OverloadResolver.Argument] {
         map {
-            OverloadResolver.Argument(type: $0, isLiteral: false, literalKind: nil)
+            .init(type: $0, isLiteral: false, literalKind: nil)
         }
     }
 }

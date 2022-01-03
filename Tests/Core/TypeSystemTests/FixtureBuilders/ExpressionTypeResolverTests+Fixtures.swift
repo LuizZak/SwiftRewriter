@@ -52,7 +52,7 @@ extension ExpressionTestResolverTestFixture {
     }
 
     func definingLocal(_ definition: CodeDefinition) -> Self {
-        scope.definitions.recordDefinition(definition)
+        scope.definitions.recordDefinition(definition, overwrite: false)
 
         return self
     }
@@ -66,7 +66,7 @@ extension ExpressionTestResolverTestFixture {
     }
 
     func definingIntrinsic(_ definition: CodeDefinition) -> Self {
-        intrinsics.recordDefinition(definition)
+        intrinsics.recordDefinition(definition, overwrite: false)
 
         return self
     }

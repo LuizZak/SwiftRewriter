@@ -22,7 +22,7 @@ public class ASTSimplifier: ASTRewriterPass {
             stmt.statements = body
             
             for def in doStmt.body.allDefinitions() {
-                stmt.definitions.recordDefinition(def)
+                stmt.definitions.recordDefinition(def, overwrite: false)
             }
             
             notifyChange()

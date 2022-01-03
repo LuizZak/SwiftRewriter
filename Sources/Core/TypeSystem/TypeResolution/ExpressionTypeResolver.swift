@@ -129,13 +129,15 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             
             let definition =
                 CodeDefinition
-                    .forLocalIdentifier(decl.identifier,
-                                        type: type,
-                                        ownership: decl.ownership,
-                                        isConstant: decl.isConstant,
-                                        location: .variableDeclaration(stmt, index: i))
+                    .forLocalIdentifier(
+                        decl.identifier,
+                        type: type,
+                        ownership: decl.ownership,
+                        isConstant: decl.isConstant,
+                        location: .variableDeclaration(stmt, index: i)
+                    )
             
-            nearestScope(for: stmt)?.recordDefinition(definition)
+            nearestScope(for: stmt)?.recordDefinition(definition, overwrite: true)
         }
         
         return stmt
@@ -189,10 +191,13 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         switch pattern {
         case .identifier(let ident):
             scope.recordDefinition(
-                .forLocalIdentifier(ident,
-                                    type: type,
-                                    isConstant: true,
-                                    location: location)
+                .forLocalIdentifier(
+                    ident,
+                    type: type,
+                    isConstant: true,
+                    location: location
+                ),
+                overwrite: true
             )
         default:
             // Other (more complex) patterns are not (yet) supported!
@@ -234,13 +239,14 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public override func visitLocalFunction(_ stmt: LocalFunctionStatement) -> Statement {
         // Apply definitions for function parameters
         stmt.function.body.recordDefinitions(
-            CodeDefinition.forParameters(stmt.function.parameters)
+            CodeDefinition.forParameters(stmt.function.parameters),
+            overwrite: true
         )
         
         // Apply definition for function itself before processing its contents
         // This allows for recursion to occur if the function calls itself.
         let definition = CodeDefinition.forLocalFunctionStatement(stmt)
-        nearestScope(for: stmt)?.recordDefinition(definition)
+        nearestScope(for: stmt)?.recordDefinition(definition, overwrite: true)
         
         // Push context of return type during expression resolving
         pushContainingFunctionReturnType(stmt.function.returnType)
@@ -656,7 +662,10 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         }
         
         // Apply definitions for function parameters
-        exp.recordDefinitions(CodeDefinition.forParameters(exp.parameters))
+        exp.recordDefinitions(
+            CodeDefinition.forParameters(exp.parameters),
+            overwrite: true
+        )
         
         // Push context of return type during expression resolving
         pushContainingFunctionReturnType(blockReturnType)
@@ -956,7 +965,7 @@ private class MemberInvocationResolver {
             
             return postfix
         }
-        // Direct type constuctor `MyClass([params])`
+        // Direct type constructor `MyClass([params])`
         if let metatype = extractMetatype(from: postfix.exp) {
             guard let ctor = typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: metatype) else {
                 return postfix.makeErrorTyped()

@@ -13,6 +13,7 @@ import SwiftAST
 import TypeSystem
 import WriterTargetOutput
 import Intentions
+import Analysis
 import IntentionPasses
 import ExpressionPasses
 import SourcePreprocessors
@@ -37,11 +38,11 @@ public final class ObjectiveC2SwiftRewriter {
     
     /// Items to type-parse after parsing is complete, and all types have been
     /// gathered.
-    private var lazyParse: [LazyParseItem] = []
+    private var lazyParse: [ObjectiveCLazyParseItem] = []
     
     /// Items to type-resolve after parsing is complete, and all types have been
     /// gathered.
-    private var lazyResolve: [LazyTypeResolveItem] = []
+    private var lazyResolve: [ObjectiveCLazyTypeResolveItem] = []
     
     /// To keep token sources alive long enough.
     private var parsers: [ObjcParser] = []
@@ -213,18 +214,38 @@ public final class ObjectiveC2SwiftRewriter {
                         
                         enCase.initialValue = reader.parseExpression(expression: expression)
                         
-                    case let .functionBody(funcBody, method):
-                        guard let methodBody = funcBody.typedSource else {
+                    case .method(let funcBody, let member as MemberGenerationIntention),
+                        .initializer(let funcBody, let member as MemberGenerationIntention),
+                        .deinitializer(let funcBody, let member as MemberGenerationIntention):
+
+                        guard let source = funcBody.typedSource else {
                             return
                         }
-                        guard let body = methodBody.statements else {
+                        guard let body = source.statements else {
                             return
                         }
                         
                         funcBody.body =
-                            reader.parseStatements(compoundStatement: body,
-                                                   comments: methodBody.comments,
-                                                   typeContext: method?.type)
+                            reader.parseStatements(
+                                compoundStatement: body,
+                                comments: source.comments,
+                                typeContext: member.type
+                            )
+                        
+                    case let .globalFunction(funcBody, _):
+                        guard let source = funcBody.typedSource else {
+                            return
+                        }
+                        guard let body = source.statements else {
+                            return
+                        }
+                        
+                        funcBody.body =
+                            reader.parseStatements(
+                                compoundStatement: body,
+                                comments: source.comments,
+                                typeContext: nil
+                            )
                         
                     case .globalVar(let v):
                         guard let expression = v.typedSource?.constantExpression?.expression?.expression else {
@@ -419,27 +440,61 @@ public final class ObjectiveC2SwiftRewriter {
     private func resolveAutotypeDeclarations(_ declarations: [LazyAutotypeVarDeclResolve]) {
         let typeResolverInvoker = makeTypeResolverInvoker()
 
-        // Make a pre-type resolve before applying passes
-        typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection,
-                                                      force: true)
+        // Make a pre-type resolve before propagating types
+        typeResolverInvoker.resolveAllExpressionTypes(
+            in: intentionCollection,
+            force: true
+        )
+
+        let autotype = SwiftType.typeName("__auto_type")
 
         for declaration in declarations {
             let stmt = declaration.statement
             let decl = stmt.decl[declaration.index]
-            
+
             // If this declaration's initializer depends on another auto type,
             // resolve expression types so the actual type can be propagated
-            if decl.initialization?.resolvedType == SwiftType.typeName("__auto_type") {
+            if decl.initialization?.resolvedType == autotype {
                 typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection, force: true)
             }
             
-            if let type = decl.initialization?.resolvedType {
-                if decl.ownership == .weak && typeSystem.isClassInstanceType(type) {
-                    stmt.decl[declaration.index].type = .optional(type)
-                } else {
-                    stmt.decl[declaration.index].type = type
-                }
+            let typeResolverDelegate = typeResolverInvoker.makeQueueDelegate()
+
+            let functionBody: FunctionBodyIntention
+            let typeResolver: ExpressionTypeResolver
+
+            switch declaration.parseItem {
+            case .enumCase, .globalVar:
+                continue
+
+            case .method(let body, let intention):
+                functionBody = body
+                typeResolver = typeResolverDelegate.makeContext(forMethod: intention).typeResolver
+
+            case .initializer(let body, let intention):
+                functionBody = body
+                typeResolver = typeResolverDelegate.makeContext(forInit: intention).typeResolver
+
+            case .deinitializer(let body, let intention):
+                functionBody = body
+                typeResolver = typeResolverDelegate.makeContext(forDeinit: intention).typeResolver
+
+            case .globalFunction(let body, let intention):
+                functionBody = body
+                typeResolver = typeResolverDelegate.makeContext(forFunction: intention).typeResolver
             }
+
+            let typePropagator = DefinitionTypePropagator(
+                options: .init(
+                    baseType: autotype,
+                    baseNumericType: nil,
+                    baseStringType: nil
+                ),
+                typeSystem: typeSystem,
+                typeResolver: typeResolver
+            )
+
+            functionBody.body = typePropagator.propagate(functionBody.body)
         }
     }
     
@@ -463,11 +518,13 @@ public final class ObjectiveC2SwiftRewriter {
         var requiresResolve = false
         
         let context =
-            IntentionPassContext(typeSystem: typeSystem,
-                                 typeMapper: typeMapper,
-                                 typeResolverInvoker: typeResolverInvoker,
-                                 numThreads: settings.numThreads,
-                                 notifyChange: { requiresResolve = true })
+            IntentionPassContext(
+                typeSystem: typeSystem,
+                typeMapper: typeMapper,
+                typeResolverInvoker: typeResolverInvoker,
+                numThreads: settings.numThreads,
+                notifyChange: { requiresResolve = true }
+            )
         
         let intentionPasses =
             [MandatoryIntentionPass(phase: .beforeOtherIntentions)]
@@ -500,8 +557,10 @@ public final class ObjectiveC2SwiftRewriter {
                 
                 if requiresResolve {
                     typeResolverInvoker
-                        .resolveAllExpressionTypes(in: intentionCollection,
-                                                   force: true)
+                        .resolveAllExpressionTypes(
+                            in: intentionCollection,
+                            force: true
+                        )
                 }
             }
         }
@@ -520,10 +579,12 @@ public final class ObjectiveC2SwiftRewriter {
                 + astRewriterPassSources.syntaxNodePasses
         
         let applier =
-            ASTRewriterPassApplier(passes: syntaxPasses,
-                                   typeSystem: typeSystem,
-                                   globals: globals,
-                                   numThreads: settings.numThreads)
+            ASTRewriterPassApplier(
+                passes: syntaxPasses,
+                typeSystem: typeSystem,
+                globals: globals,
+                numThreads: settings.numThreads
+            )
         
         let progressDelegate = ASTRewriterDelegate()
         if settings.verbose {
@@ -557,13 +618,15 @@ public final class ObjectiveC2SwiftRewriter {
         let syntaxApplier =
             SwiftSyntaxRewriterPassApplier(provider: syntaxRewriterPassSource)
         
-        let writer = SwiftWriter(intentions: intentionCollection,
-                                 options: writerOptions,
-                                 numThreads: settings.numThreads,
-                                 diagnostics: diagnostics,
-                                 output: outputTarget,
-                                 typeSystem: typeSystem,
-                                 syntaxRewriterApplier: syntaxApplier)
+        let writer = SwiftWriter(
+            intentions: intentionCollection,
+            options: writerOptions,
+            numThreads: settings.numThreads,
+            diagnostics: diagnostics,
+            output: outputTarget,
+            typeSystem: typeSystem,
+            syntaxRewriterApplier: syntaxApplier
+        )
         
         if settings.verbose {
             writer.progressListener = progressListener
@@ -686,8 +749,11 @@ public final class ObjectiveC2SwiftRewriter {
         }
 
         let typeResolverInvoker =
-            DefaultTypeResolverInvoker(globals: globals, typeSystem: typeSystem,
-                                       numThreads: settings.numThreads)
+            DefaultTypeResolverInvoker(
+                globals: globals,
+                typeSystem: typeSystem,
+                numThreads: settings.numThreads
+            )
         
         return typeResolverInvoker
     }
@@ -699,11 +765,13 @@ public final class ObjectiveC2SwiftRewriter {
     /// Settings for a `ObjectiveC2SwiftRewriter` instance
     public struct Settings {
         /// Gets the default settings for a `ObjectiveC2SwiftRewriter` invocation
-        public static var `default` = Settings(numThreads: 8,
-                                               verbose: false,
-                                               diagnoseFiles: [],
-                                               forceUseLLPrediction: false,
-                                               stageDiagnostics: [])
+        public static var `default`: Self = .init(
+            numThreads: 8,
+            verbose: false,
+            diagnoseFiles: [],
+            forceUseLLPrediction: false,
+            stageDiagnostics: []
+        )
         
         /// The number of concurrent threads to use when applying intention/syntax
         /// node passes and other multi-threadable operations.
@@ -812,8 +880,8 @@ fileprivate extension ObjectiveC2SwiftRewriter {
         var typeMapper: TypeMapper
         var typeParser: ObjcTypeParser
         
-        var lazyParse: [LazyParseItem] = []
-        var lazyResolve: [LazyTypeResolveItem] = []
+        var lazyParse: [ObjectiveCLazyParseItem] = []
+        var lazyResolve: [ObjectiveCLazyTypeResolveItem] = []
         
         init(typeMapper: TypeMapper, typeParser: ObjcTypeParser) {
             self.typeMapper = typeMapper
@@ -824,54 +892,12 @@ fileprivate extension ObjectiveC2SwiftRewriter {
             node.isInNonnullContext
         }
         
-        func reportForLazyResolving(intention: Intention) {
-            switch intention {
-            case let intention as GlobalVariableGenerationIntention:
-                lazyResolve.append(.globalVar(intention))
-                
-            case let intention as GlobalFunctionGenerationIntention:
-                lazyResolve.append(.globalFunc(intention))
-                
-            case let intention as PropertyGenerationIntention:
-                lazyResolve.append(.property(intention))
-                
-            case let intention as MethodGenerationIntention:
-                lazyResolve.append(.method(intention))
-                
-            case let intention as EnumGenerationIntention:
-                lazyResolve.append(.enumDecl(intention))
-                
-            case let intention as InstanceVariableGenerationIntention:
-                lazyResolve.append(.ivar(intention))
-                
-            case let intention as ClassExtensionGenerationIntention:
-                lazyResolve.append(.extensionDecl(intention))
-                
-            case let intention as TypealiasIntention:
-                lazyResolve.append(.typealias(intention))
-                
-            default:
-                fatalError("Cannot handle type resolving for intention of type \(type(of: intention))")
-            }
+        func reportForLazyResolving(_ item: ObjectiveCLazyTypeResolveItem) {
+            lazyResolve.append(item)
         }
         
-        func reportForLazyParsing(intention: Intention) {
-            switch intention {
-            case let intention as GlobalVariableInitialValueIntention:
-                lazyParse.append(.globalVar(intention))
-                
-            case let intention as FunctionBodyIntention:
-                let context =
-                    intention.ancestor(ofType: MethodGenerationIntention.self)
-                
-                lazyParse.append(.functionBody(intention, method: context))
-                
-            case let intention as EnumCaseGenerationIntention:
-                lazyParse.append(.enumCase(intention))
-                
-            default:
-                fatalError("Cannot handle parsing for intention of type \(type(of: intention))")
-            }
+        func reportForLazyParsing(_ item: ObjectiveCLazyParseItem) {
+            lazyParse.append(item)
         }
         
         func typeMapper(for intentionCollector: ObjectiveCIntentionCollector) -> TypeMapper {
@@ -884,15 +910,17 @@ fileprivate extension ObjectiveC2SwiftRewriter {
     }
 
     private class InnerStatementASTReaderDelegate: ObjectiveCStatementASTReaderDelegate {
-        var parseItem: LazyParseItem
+        var parseItem: ObjectiveCLazyParseItem
         var autotypeDeclarations: [LazyAutotypeVarDeclResolve] = []
 
-        init(parseItem: LazyParseItem) {
+        init(parseItem: ObjectiveCLazyParseItem) {
             self.parseItem = parseItem
         }
 
-        func swiftStatementASTReader(reportAutoTypeDeclaration varDecl: VariableDeclarationsStatement,
-                                     declarationAtIndex index: Int) {
+        func swiftStatementASTReader(
+            reportAutoTypeDeclaration varDecl: VariableDeclarationsStatement,
+            declarationAtIndex index: Int
+        ) {
 
             autotypeDeclarations.append(
                 LazyAutotypeVarDeclResolve(
@@ -905,27 +933,10 @@ fileprivate extension ObjectiveC2SwiftRewriter {
     }
 }
 
-private enum LazyParseItem {
-    case enumCase(EnumCaseGenerationIntention)
-    case functionBody(FunctionBodyIntention, method: MethodGenerationIntention?)
-    case globalVar(GlobalVariableInitialValueIntention)
-}
-
-private enum LazyTypeResolveItem {
-    case property(PropertyGenerationIntention)
-    case ivar(InstanceVariableGenerationIntention)
-    case method(MethodGenerationIntention)
-    case globalVar(GlobalVariableGenerationIntention)
-    case globalFunc(GlobalFunctionGenerationIntention)
-    case enumDecl(EnumGenerationIntention)
-    case extensionDecl(ClassExtensionGenerationIntention)
-    case `typealias`(TypealiasIntention)
-}
-
 /// Stored '__auto_type' variable declaration that needs to be resolved after
 /// statement parsing
 private struct LazyAutotypeVarDeclResolve {
-    var parseItem: LazyParseItem
+    var parseItem: ObjectiveCLazyParseItem
     var statement: VariableDeclarationsStatement
     var index: Int
 }

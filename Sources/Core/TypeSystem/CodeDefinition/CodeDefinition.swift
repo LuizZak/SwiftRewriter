@@ -36,17 +36,25 @@ public class CodeDefinition {
     }
     
     fileprivate convenience init(variableNamed name: String, type: SwiftType) {
-        self.init(variableNamed: name,
-                  storage: ValueStorage(type: type,
-                                        ownership: .strong,
-                                        isConstant: false))
+        self.init(
+            variableNamed: name,
+            storage: ValueStorage(
+                type: type,
+                ownership: .strong,
+                isConstant: false
+            )
+        )
     }
     
     fileprivate convenience init(constantNamed name: String, type: SwiftType) {
-        self.init(variableNamed: name,
-                  storage: ValueStorage(type: type,
-                                        ownership: .strong,
-                                        isConstant: true))
+        self.init(
+            variableNamed: name,
+            storage: ValueStorage(
+                type: type,
+                ownership: .strong,
+                isConstant: true
+            )
+        )
     }
     
     fileprivate init(variableNamed name: String, storage: ValueStorage) {
@@ -84,9 +92,11 @@ public extension CodeDefinition {
     /// parameters
     static func forParameters(_ parameters: [ParameterSignature]) -> [CodeDefinition] {
         parameters.enumerated().map { (i, param) in
-            LocalCodeDefinition(variableNamed: param.name,
-                                type: param.type,
-                                location: .parameter(index: i))
+            LocalCodeDefinition(
+                variableNamed: param.name,
+                type: param.type,
+                location: .parameter(index: i)
+            )
         }
     }
     
@@ -94,9 +104,11 @@ public extension CodeDefinition {
     /// block parameters
     static func forParameters(_ parameters: [BlockParameter]) -> [CodeDefinition] {
         parameters.enumerated().map { (i, param) in
-            LocalCodeDefinition(variableNamed: param.name,
-                                type: param.type,
-                                location: .parameter(index: i))
+            LocalCodeDefinition(
+                variableNamed: param.name,
+                type: param.type,
+                location: .parameter(index: i)
+            )
         }
     }
     
@@ -104,45 +116,57 @@ public extension CodeDefinition {
     /// `type`.
     /// Used for creating self intrinsics for member bodies.
     static func forSelf(type: SwiftType, isStatic: Bool) -> CodeDefinition {
-        LocalCodeDefinition(constantNamed: "self",
-                            type: isStatic ? .metatype(for: type) : type,
-                            location: isStatic ? .staticSelf : .instanceSelf)
+        LocalCodeDefinition(
+            constantNamed: "self",
+            type: isStatic ? .metatype(for: type) : type,
+            location: isStatic ? .staticSelf : .instanceSelf
+        )
     }
     
     /// Creates a code definition that matches the instance or static type of
     /// `super`.
     /// Used for creating self intrinsics for member bodies.
     static func forSuper(type: SwiftType, isStatic: Bool) -> CodeDefinition {
-        LocalCodeDefinition(constantNamed: "super",
-                            type: isStatic ? .metatype(for: type) : type,
-                            location: isStatic ? .staticSelf : .instanceSelf)
+        LocalCodeDefinition(
+            constantNamed: "super",
+            type: isStatic ? .metatype(for: type) : type,
+            location: isStatic ? .staticSelf : .instanceSelf
+        )
     }
     
     /// Creates a code definition for the setter of a setter method body.
     static func forSetterValue(named name: String, type: SwiftType) -> CodeDefinition {
-        LocalCodeDefinition(constantNamed: name,
-                            type: type,
-                            location: .setterValue)
+        LocalCodeDefinition(
+            constantNamed: name,
+            type: type,
+            location: .setterValue
+        )
     }
     
     /// Creates a code definition for a local identifier
-    static func forLocalIdentifier(_ identifier: String,
-                                   type: SwiftType,
-                                   ownership: Ownership = .strong,
-                                   isConstant: Bool,
-                                   location: LocalCodeDefinition.DefinitionLocation) -> LocalCodeDefinition {
+    static func forLocalIdentifier(
+        _ identifier: String,
+        type: SwiftType,
+        ownership: Ownership = .strong,
+        isConstant: Bool,
+        location: LocalCodeDefinition.DefinitionLocation
+    ) -> LocalCodeDefinition {
         
         if isConstant {
-            return LocalCodeDefinition(constantNamed: identifier,
-                                       type: type,
-                                       ownership: ownership,
-                                       location: location)
+            return LocalCodeDefinition(
+                constantNamed: identifier,
+                type: type,
+                ownership: ownership,
+                location: location
+            )
         }
         
-        return LocalCodeDefinition(variableNamed: identifier,
-                                   type: type,
-                                   ownership: ownership,
-                                   location: location)
+        return LocalCodeDefinition(
+            variableNamed: identifier,
+            type: type,
+            ownership: ownership,
+            location: location
+        )
     }
     
     static func forVarDeclStatement(_ stmt: VariableDeclarationsStatement) -> [LocalCodeDefinition] {
@@ -171,7 +195,10 @@ public extension CodeDefinition {
     }
     
     static func forLocalFunctionStatement(_ stmt: LocalFunctionStatement) -> CodeDefinition {
-        LocalCodeDefinition(functionSignature: stmt.function.signature, location: .localFunction(stmt))
+        LocalCodeDefinition(
+            functionSignature: stmt.function.signature,
+            location: .localFunction(stmt)
+        )
     }
     
     static func forGlobalVariable(name: String, isConstant: Bool, type: SwiftType) -> CodeDefinition {
@@ -187,8 +214,10 @@ public extension CodeDefinition {
     }
     
     static func forType(named name: String) -> TypeCodeDefinition {
-        TypeCodeDefinition(constantNamed: name,
-                           type: .metatype(for: .typeName(name)))
+        TypeCodeDefinition(
+            constantNamed: name,
+            type: .metatype(for: .typeName(name))
+        )
     }
 }
 
@@ -205,7 +234,7 @@ public class KnownMemberCodeDefinition: CodeDefinition {
             super.init(functionSignature: method.signature)
             
         default:
-            fatalError("Attempting to create a \(KnownMemberCodeDefinition.self) from unkown \(KnownMember.self)-type \(Swift.type(of: knownMember))")
+            fatalError("Attempting to create a \(KnownMemberCodeDefinition.self) from unknown \(KnownMember.self)-type \(Swift.type(of: knownMember))")
         }
     }
 }
@@ -269,11 +298,15 @@ public class LocalCodeDefinition: CodeDefinition {
         location: DefinitionLocation
     ) {
         
-        self.init(variableNamed: name,
-                  storage: ValueStorage(type: type,
-                                        ownership: ownership,
-                                        isConstant: false),
-                  location: location)
+        self.init(
+            variableNamed: name,
+            storage: ValueStorage(
+                type: type,
+                ownership: ownership,
+                isConstant: false
+            ),
+            location: location
+        )
     }
     
     fileprivate convenience init(
@@ -283,11 +316,15 @@ public class LocalCodeDefinition: CodeDefinition {
         location: DefinitionLocation
     ) {
         
-        self.init(variableNamed: name,
-                  storage: ValueStorage(type: type,
-                                        ownership: ownership,
-                                        isConstant: true),
-                  location: location)
+        self.init(
+            variableNamed: name,
+            storage: ValueStorage(
+                type: type,
+                ownership: ownership,
+                isConstant: true
+            ),
+            location: location
+        )
     }
     
     fileprivate init(variableNamed name: String, storage: ValueStorage, location: DefinitionLocation) {

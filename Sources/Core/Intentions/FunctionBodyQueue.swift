@@ -55,12 +55,11 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
     public typealias Context = Delegate.Context
     
     public static func fromFile(
-        _ intentionCollection: IntentionCollection,
         file: FileGenerationIntention,
         delegate: Delegate
     ) -> FunctionBodyQueue {
         
-        let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
+        let queue = FunctionBodyQueue(delegate: delegate)
         queue.collectFromFile(file)
         
         return queue
@@ -72,68 +71,72 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         numThreads: Int
     ) -> FunctionBodyQueue {
         
-        let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
+        let queue = FunctionBodyQueue(delegate: delegate)
         queue.collect(from: intentionCollection, numThreads: numThreads)
         
         return queue
     }
     
     public static func fromDeinit(
-        _ intentionCollection: IntentionCollection,
         deinitIntent: DeinitGenerationIntention,
         delegate: Delegate
     ) -> FunctionBodyQueue {
         
-        let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
+        let queue = FunctionBodyQueue(delegate: delegate)
         queue.collectDeinit(deinitIntent)
         
         return queue
     }
     
     public static func fromMethod(
-        _ intentionCollection: IntentionCollection,
         method: MethodGenerationIntention,
         delegate: Delegate
     ) -> FunctionBodyQueue {
         
-        let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
+        let queue = FunctionBodyQueue(delegate: delegate)
         queue.collectMethod(method)
         
         return queue
     }
     
     public static func fromProperty(
-        _ intentionCollection: IntentionCollection,
         property: PropertyGenerationIntention,
         delegate: Delegate
     ) -> FunctionBodyQueue {
         
-        let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
+        let queue = FunctionBodyQueue(delegate: delegate)
         queue.collectProperty(property)
         
         return queue
     }
 
     public static func fromGlobalVariable(
-        _ intentionCollection: IntentionCollection,
         variable: GlobalVariableGenerationIntention,
         delegate: Delegate
     ) -> FunctionBodyQueue {
 
-        let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
+        let queue = FunctionBodyQueue(delegate: delegate)
         queue.collectFromGlobalVariable(variable)
         
         return queue
     }
+
+    public static func fromFunctionBodyCarryingIntention(
+        _ intention: FunctionBodyCarryingIntention,
+        delegate: Delegate
+    ) -> FunctionBodyQueue {
+
+        let queue = FunctionBodyQueue(delegate: delegate)
+        queue.collect(from: intention)
+        
+        return queue
+    }
     
-    private var intentionCollection: IntentionCollection
     private weak var delegate: Delegate?
     
     public var items: [FunctionBodyQueueItem] = []
     
-    private init(_ intentionCollection: IntentionCollection, delegate: Delegate) {
-        
-        self.intentionCollection = intentionCollection
+    private init(delegate: Delegate) {
         self.delegate = delegate
     }
     
@@ -148,6 +151,25 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         }
         
         queue.runAndWaitConcurrent()
+    }
+
+    private func collect(from intention: FunctionBodyCarryingIntention) {
+        switch intention {
+        case .deinit(let intention):
+            collectDeinit(intention)
+        case .initializer(let intention):
+            collectInit(intention)
+        case .method(let intention):
+            collectMethod(intention)
+        case .global(let intention):
+            collectFromFunction(intention)
+        case .propertyGetter(let intention, _), .propertySetter(let intention, _), .propertyInitializer(let intention, _):
+            collectProperty(intention)
+        case .subscriptGetter(let intention, _), .subscriptSetter(let intention, _):
+            collectSubscript(intention)
+        case .globalVariable(let intention, _):
+            collectFromGlobalVariable(intention)
+        }
     }
     
     private func collectFromFile(_ file: FileGenerationIntention) {

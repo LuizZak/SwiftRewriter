@@ -14,7 +14,12 @@ public class MethodGenerationIntention: MemberGenerationIntention, Parameterized
     
     public var signature: FunctionSignature
     
-    public var functionBody: FunctionBodyIntention?
+    public var functionBody: FunctionBodyIntention? {
+        didSet {
+            oldValue?.parent = nil
+            functionBody?.parent = self
+        }
+    }
     
     public override var isStatic: Bool {
         signature.isStatic

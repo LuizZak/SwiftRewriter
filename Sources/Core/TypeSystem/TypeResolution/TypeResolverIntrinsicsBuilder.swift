@@ -106,7 +106,8 @@ class TypeResolverIntrinsicsBuilder {
                 CodeDefinition.forSetterValue(
                     named: setter.valueIdentifier,
                     type: type
-                )
+                ),
+                overwrite: false
             )
     }
     
@@ -148,7 +149,8 @@ class TypeResolverIntrinsicsBuilder {
         let intrinsics = DefaultCodeScope()
         
         intrinsics.recordDefinitions(
-            CodeDefinition.forParameters(inSignature: function.signature)
+            CodeDefinition.forParameters(inSignature: function.signature),
+            overwrite: false
         )
         
         // Push file-level global definitions (variables and functions)
@@ -207,8 +209,11 @@ class TypeResolverIntrinsicsBuilder {
             let selfType = SwiftType.typeName(type.typeName)
             
             intrinsics.recordDefinition(
-                CodeDefinition.forSelf(type: selfType,
-                                       isStatic: member.isStatic)
+                CodeDefinition.forSelf(
+                    type: selfType,
+                    isStatic: member.isStatic
+                ),
+                overwrite: false
             )
             
             // Record 'super', if available
@@ -216,8 +221,11 @@ class TypeResolverIntrinsicsBuilder {
                 let superType = SwiftType.typeName(supertype.asTypeName)
                 
                 intrinsics.recordDefinition(
-                    CodeDefinition.forSuper(type: superType,
-                                            isStatic: member.isStatic)
+                    CodeDefinition.forSuper(
+                        type: superType,
+                        isStatic: member.isStatic
+                    ),
+                    overwrite: false
                 )
             }
             
@@ -240,7 +248,8 @@ class TypeResolverIntrinsicsBuilder {
             let functionIntrinsics = DefaultCodeScope()
             
             functionIntrinsics.recordDefinitions(
-                CodeDefinition.forParameters(function.parameters)
+                CodeDefinition.forParameters(function.parameters),
+                overwrite: false
             )
             
             functionArgumentsIntrinsics = functionIntrinsics
@@ -250,7 +259,8 @@ class TypeResolverIntrinsicsBuilder {
             let subscriptIntrinsics = DefaultCodeScope()
             
             subscriptIntrinsics.recordDefinitions(
-                CodeDefinition.forParameters(sub.parameters)
+                CodeDefinition.forParameters(sub.parameters),
+                overwrite: false
             )
             
             functionArgumentsIntrinsics = subscriptIntrinsics

@@ -3,7 +3,12 @@ import SwiftAST
 
 /// An intention to generate a `deinit` method for a reference type.
 public class DeinitGenerationIntention: MemberGenerationIntention, MutableFunctionIntention {
-    public var functionBody: FunctionBodyIntention?
+    public var functionBody: FunctionBodyIntention? {
+        didSet {
+            oldValue?.parent = nil
+            functionBody?.parent = self
+        }
+    }
     
     public override init(accessLevel: AccessLevel = .internal,
                          source: ASTNode? = nil) {

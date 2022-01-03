@@ -164,7 +164,6 @@ class FunctionBodyQueueTests: XCTestCase {
         let deinitIntent = intentions.fileIntentions()[0].classIntentions[0].deinitIntention
 
         sut = FunctionBodyQueue.fromDeinit(
-            intentions,
             deinitIntent: deinitIntent!,
             delegate: delegate
         )

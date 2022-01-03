@@ -6,7 +6,12 @@ import KnownType
 public final class InitGenerationIntention: MemberGenerationIntention, MutableFunctionIntention, ParameterizedFunctionIntention {
     public var parameters: [ParameterSignature]
     
-    public var functionBody: FunctionBodyIntention?
+    public var functionBody: FunctionBodyIntention? {
+        didSet {
+            oldValue?.parent = nil
+            functionBody?.parent = self
+        }
+    }
     
     public var isOverride: Bool = false
     public var isFallible: Bool = false

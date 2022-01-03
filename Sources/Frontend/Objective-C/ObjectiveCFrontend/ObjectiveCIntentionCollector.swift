@@ -8,8 +8,8 @@ import TypeSystem
 
 public protocol ObjectiveCIntentionCollectorDelegate: AnyObject {
     func isNodeInNonnullContext(_ node: ObjcASTNode) -> Bool
-    func reportForLazyParsing(intention: Intention)
-    func reportForLazyResolving(intention: Intention)
+    func reportForLazyParsing(_ item: ObjectiveCLazyParseItem)
+    func reportForLazyResolving(_ item: ObjectiveCLazyTypeResolveItem)
     func typeMapper(for intentionCollector: ObjectiveCIntentionCollector) -> TypeMapper
     func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> ObjcTypeParser
 }
@@ -208,7 +208,7 @@ public class ObjectiveCIntentionCollector {
             
             ctx.addTypealias(intent)
             
-            delegate?.reportForLazyResolving(intention: intent)
+            delegate?.reportForLazyResolving(.typealias(intent))
             
             return
         }
@@ -226,7 +226,7 @@ public class ObjectiveCIntentionCollector {
             
             ctx.addTypealias(intent)
             
-            delegate?.reportForLazyResolving(intention: intent)
+            delegate?.reportForLazyResolving(.typealias(intent))
             
         }
     }
@@ -255,17 +255,19 @@ public class ObjectiveCIntentionCollector {
         
         if let initialExpression = node.initialExpression {
             let initialExpr =
-                GlobalVariableInitialValueIntention(expression: .constant(0),
-                                                    source: initialExpression)
+                GlobalVariableInitialValueIntention(
+                    expression: .constant(0),
+                    source: initialExpression
+                )
             
-            delegate?.reportForLazyParsing(intention: initialExpr)
+            delegate?.reportForLazyParsing(.globalVar(initialExpr))
             
             intent.initialValueIntention = initialExpr
         }
         
         ctx.addGlobalVariable(intent)
         
-        delegate?.reportForLazyResolving(intention: intent)
+        delegate?.reportForLazyResolving(.globalVar(intent))
     }
     
     // MARK: - ObjcClassInterfaceNode
@@ -301,7 +303,7 @@ public class ObjectiveCIntentionCollector {
         
         let intent = ClassExtensionGenerationIntention(typeName: name, source: node)
         intent.isInterfaceSource = true
-        delegate?.reportForLazyResolving(intention: intent)
+        delegate?.reportForLazyResolving(.extensionDecl(intent))
         intent.categoryName = node.categoryName?.name
         
         mapComments(node, intent)
@@ -349,7 +351,7 @@ public class ObjectiveCIntentionCollector {
         }
         
         let intent = ClassExtensionGenerationIntention(typeName: name, source: node)
-        delegate?.reportForLazyResolving(intention: intent)
+        delegate?.reportForLazyResolving(.extensionDecl(intent))
         intent.categoryName = node.categoryName?.name
         
         mapComments(node, intent)
@@ -444,7 +446,7 @@ public class ObjectiveCIntentionCollector {
             
             ctx.addProperty(prop)
             
-            delegate?.reportForLazyResolving(intention: prop)
+            delegate?.reportForLazyResolving(.property(prop))
         } else {
             let prop =
                 PropertyGenerationIntention(name: node.identifier?.name ?? "",
@@ -459,7 +461,7 @@ public class ObjectiveCIntentionCollector {
             
             ctx.addProperty(prop)
             
-            delegate?.reportForLazyResolving(intention: prop)
+            delegate?.reportForLazyResolving(.property(prop))
         }
     }
     
@@ -516,10 +518,11 @@ public class ObjectiveCIntentionCollector {
             
             if let body = node.body {
                 let bodyIntention = FunctionBodyIntention(body: [], source: body)
+                deinitIntention.functionBody = bodyIntention
+
                 recordSourceHistory(intention: bodyIntention, node: body)
                 
-                delegate?.reportForLazyParsing(intention: bodyIntention)
-                deinitIntention.functionBody = bodyIntention
+                delegate?.reportForLazyParsing(.deinitializer(bodyIntention, deinitIntention))
             }
             
             if let baseClass = ctx as? BaseClassIntention {
@@ -545,15 +548,16 @@ public class ObjectiveCIntentionCollector {
             
             if let body = node.body {
                 let bodyIntention = FunctionBodyIntention(body: [], source: body)
+                method.functionBody = bodyIntention
+
                 recordSourceHistory(intention: bodyIntention, node: body)
                 
-                delegate?.reportForLazyParsing(intention: bodyIntention)
-                method.functionBody = bodyIntention
+                delegate?.reportForLazyParsing(.method(bodyIntention, method))
             }
             
             ctx.addMethod(method)
             
-            delegate?.reportForLazyResolving(intention: method)
+            delegate?.reportForLazyResolving(.method(method))
         }
     }
     
@@ -615,7 +619,7 @@ public class ObjectiveCIntentionCollector {
         
         classCtx.addInstanceVariable(ivar)
         
-        delegate?.reportForLazyResolving(intention: ivar)
+        delegate?.reportForLazyResolving(.ivar(ivar))
     }
     
     // MARK: - Enum Declaration
@@ -639,7 +643,7 @@ public class ObjectiveCIntentionCollector {
         
         context.pushContext(enumIntention)
         
-        delegate?.reportForLazyResolving(intention: enumIntention)
+        delegate?.reportForLazyResolving(.enumDecl(enumIntention))
     }
     
     private func visitObjcEnumCaseNode(_ node: ObjcEnumCaseNode) {
@@ -657,7 +661,7 @@ public class ObjectiveCIntentionCollector {
         mapComments(node, enumCase)
         recordSourceHistory(intention: enumCase, node: node)
         
-        delegate?.reportForLazyParsing(intention: enumCase)
+        delegate?.reportForLazyParsing(.enumCase(enumCase))
         
         ctx.addCase(enumCase)
     }
@@ -704,10 +708,10 @@ public class ObjectiveCIntentionCollector {
 
             recordSourceHistory(intention: methodBodyIntention, node: body)
 
-            delegate?.reportForLazyParsing(intention: methodBodyIntention)
+            delegate?.reportForLazyParsing(.globalFunction(methodBodyIntention, globalFunc))
         }
         
-        delegate?.reportForLazyResolving(intention: globalFunc)
+        delegate?.reportForLazyResolving(.globalFunc(globalFunc))
     }
     
     private func exitFunctionDefinitionNode(_ node: ObjcFunctionDefinitionNode) {
@@ -749,14 +753,17 @@ public class ObjectiveCIntentionCollector {
         
         // Remaining identifiers are used as typealiases
         for identifier in nodeIdentifiers.dropFirst() {
-            let alias = TypealiasIntention(originalObjcType: .struct(structIntent.typeName),
-                                           fromType: .void, named: identifier.name)
+            let alias = TypealiasIntention(
+                originalObjcType: .struct(structIntent.typeName),
+                fromType: .void,
+                named: identifier.name
+            )
             alias.inNonnullContext = delegate?.isNodeInNonnullContext(identifier) ?? false
             recordSourceHistory(intention: alias, node: identifier)
             
             fileIntent?.addTypealias(alias)
             
-            delegate?.reportForLazyResolving(intention: alias)
+            delegate?.reportForLazyResolving(.typealias(alias))
         }
         
         var shouldRecord = true
@@ -794,16 +801,18 @@ public class ObjectiveCIntentionCollector {
                     
                     let inNonnull = delegate.isNodeInNonnullContext(declarator)
                     
-                    let alias = TypealiasIntention(originalObjcType: objcType,
-                                                   fromType: .void,
-                                                   named: identifier.name)
+                    let alias = TypealiasIntention(
+                        originalObjcType: objcType,
+                        fromType: .void,
+                        named: identifier.name
+                    )
                     recordSourceHistory(intention: alias, node: identifier)
                     
                     alias.inNonnullContext = inNonnull
                     
                     fileIntent?.addTypealias(alias)
                     
-                    delegate.reportForLazyResolving(intention: alias)
+                    delegate.reportForLazyResolving(.typealias(alias))
                 }
             }
             
@@ -817,15 +826,17 @@ public class ObjectiveCIntentionCollector {
                     
                     let inNonnull = delegate.isNodeInNonnullContext(declarator)
                     
-                    let alias = TypealiasIntention(originalObjcType: .struct("OpaquePointer"),
-                                                   fromType: .void,
-                                                   named: identifier.name)
+                    let alias = TypealiasIntention(
+                        originalObjcType: .struct("OpaquePointer"),
+                        fromType: .void,
+                        named: identifier.name
+                    )
                     recordSourceHistory(intention: alias, node: identifier)
                     alias.inNonnullContext = inNonnull
                     
                     fileIntent?.addTypealias(alias)
                     
-                    delegate.reportForLazyResolving(intention: alias)
+                    delegate.reportForLazyResolving(.typealias(alias))
                 }
             }
         } else {
@@ -856,7 +867,7 @@ public class ObjectiveCIntentionCollector {
         
         ctx.addInstanceVariable(ivar)
         
-        delegate?.reportForLazyResolving(intention: ivar)
+        delegate?.reportForLazyResolving(.ivar(ivar))
     }
     
     private func exitStructDeclarationNode(_ node: ObjcStructDeclarationNode) {
@@ -882,4 +893,26 @@ extension ObjectiveCIntentionCollector {
     private func convertComments(_ comments: [RawCodeComment]) -> [String] {
         return comments.map { $0.string.trimmingWhitespaces() }
     }
+}
+
+/// An element that `ObjectiveCIntentionCollector` reports for lazy parsing.
+public enum ObjectiveCLazyParseItem {
+    case enumCase(EnumCaseGenerationIntention)
+    case globalFunction(FunctionBodyIntention, GlobalFunctionGenerationIntention)
+    case initializer(FunctionBodyIntention, InitGenerationIntention)
+    case deinitializer(FunctionBodyIntention, DeinitGenerationIntention)
+    case method(FunctionBodyIntention, MethodGenerationIntention)
+    case globalVar(GlobalVariableInitialValueIntention)
+}
+
+/// An element that `ObjectiveCIntentionCollector` reports for lazy type resolving.
+public enum ObjectiveCLazyTypeResolveItem {
+    case property(PropertyGenerationIntention)
+    case ivar(InstanceVariableGenerationIntention)
+    case method(MethodGenerationIntention)
+    case globalVar(GlobalVariableGenerationIntention)
+    case globalFunc(GlobalFunctionGenerationIntention)
+    case enumDecl(EnumGenerationIntention)
+    case extensionDecl(ClassExtensionGenerationIntention)
+    case `typealias`(TypealiasIntention)
 }

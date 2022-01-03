@@ -49,6 +49,11 @@
 				"detail": "swift build --build-tests --enable-test-discovery -Xswiftc -Xfrontend -Xswiftc -serialize-debugging-options",
 			},
             {
+				"label": "Build (debug) and reload tests",
+				"command": "${command:test-explorer.reload}",
+				"dependsOn": "Build (debug)"
+			},
+            {
 				"label": "Build (release)",
 				"type": "swift",
 				"command": "swift",
@@ -202,7 +207,7 @@
 				"scope": "file"
 			},
 		],
-		"ShortcutMenuBar.userButton01Command": "workbench.action.tasks.runTask|Build (debug)",
+		"ShortcutMenuBar.userButton01Command": "workbench.action.tasks.runTask|Build (debug) and reload tests",
 		"ShortcutMenuBar.userButton02Command": "workbench.action.tasks.runTask|Test",
 		"ShortcutMenuBar.userButton03Command": "workbench.action.tasks.runTask|Test (release)",
 		"cSpell.words": [
@@ -222,6 +227,7 @@
 		],
 		"swiftTest.swift.testParams": [
 			"--enable-code-coverage",
+			"--skip-build",
 		],
 	},
 	"extensions": {

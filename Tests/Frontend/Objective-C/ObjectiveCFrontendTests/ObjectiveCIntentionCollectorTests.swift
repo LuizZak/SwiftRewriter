@@ -67,11 +67,12 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
 
         sut.collectIntentions(rootNode)
 
+        let function = try XCTUnwrap(file.globalFunctionIntentions[0])
+        let body = try XCTUnwrap(function.functionBody)
         XCTAssertEqual(file.globalFunctionIntentions.count, 1)
         XCTAssertEqual(delegate.reportedForLazyParsing.count, 1)
         XCTAssert(
-            delegate.reportedForLazyParsing.first
-                === file.globalFunctionIntentions.first?.functionBody
+            delegate.reportedForLazyParsing.first == .globalFunction(body, function)
         )
     }
 
@@ -282,11 +283,11 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
 
         sut.collectIntentions(rootNode)
 
-        XCTAssertNotNil(file.classTypeIntentions[0].deinitIntention)
-        XCTAssertNotNil(file.classTypeIntentions[0].deinitIntention?.functionBody)
+        let deinitializer = try XCTUnwrap(file.classTypeIntentions[0].deinitIntention)
+        let body = try XCTUnwrap(deinitializer.functionBody)
+
         XCTAssert(
-            delegate.reportedForLazyParsing[0]
-                === file.classTypeIntentions[0].deinitIntention?.functionBody
+            delegate.reportedForLazyParsing.first == .deinitializer(body, deinitializer)
         )
     }
 
@@ -322,7 +323,7 @@ private class TestCollectorDelegate: ObjectiveCIntentionCollectorDelegate {
     var context: ObjectiveCIntentionCollector.Context
     var intentions: IntentionCollection
 
-    var reportedForLazyParsing: [Intention] = []
+    var reportedForLazyParsing: [ObjectiveCLazyParseItem] = []
 
     init(file: FileGenerationIntention) {
         context = ObjectiveCIntentionCollector.Context()
@@ -338,11 +339,11 @@ private class TestCollectorDelegate: ObjectiveCIntentionCollectorDelegate {
         return false
     }
 
-    func reportForLazyParsing(intention: Intention) {
-        reportedForLazyParsing.append(intention)
+    func reportForLazyParsing(_ item: ObjectiveCLazyParseItem) {
+        reportedForLazyParsing.append(item)
     }
 
-    func reportForLazyResolving(intention: Intention) {
+    func reportForLazyResolving(_ item: ObjectiveCLazyTypeResolveItem) {
 
     }
 
@@ -352,5 +353,26 @@ private class TestCollectorDelegate: ObjectiveCIntentionCollectorDelegate {
 
     func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> ObjcTypeParser {
         return ObjcTypeParser(state: ObjcParserState())
+    }
+}
+
+extension ObjectiveCLazyParseItem: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        switch (lhs, rhs) {
+            case (.enumCase(let li), .enumCase(let ri)):
+                return li === ri
+            case (.globalFunction(let lb, let li), .globalFunction(let rb, let ri)):
+                return lb === rb && li === ri
+            case (.initializer(let lb, let li), .initializer(let rb, let ri)):
+                return lb === rb && li === ri
+            case (.deinitializer(let lb, let li), .deinitializer(let rb, let ri)):
+                return lb === rb && li === ri
+            case (.method(let lb, let li), .method(let rb, let ri)):
+                return lb === rb && li === ri
+            case (.globalVar(let li), .globalVar(let ri)):
+                return li === ri
+            default:
+                return false
+        }
     }
 }

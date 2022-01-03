@@ -627,7 +627,7 @@ public class TypeSystem {
     /// Between two scalar numeric types, returns the type that the type system
     /// should favor when cast-converting.
     ///
-    /// In case the types are equivalent, or no casting is prefered between the
+    /// In case the types are equivalent, or no casting is preferred between the
     /// two, nil is returned, instead.
     public func implicitCoercedNumericType(for type1: SwiftType,
                                            _ type2: SwiftType) -> SwiftType? {

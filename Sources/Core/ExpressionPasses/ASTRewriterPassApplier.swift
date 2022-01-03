@@ -99,7 +99,7 @@ public final class ASTRewriterPassApplier {
         
         let bodyQueue =
             FunctionBodyQueue
-                .fromFile(intentions, file: file, delegate: delegate)
+                .fromFile(file: file, delegate: delegate)
         
         for item in bodyQueue.items {
             operationQueue.addOperation {

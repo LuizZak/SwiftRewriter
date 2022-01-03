@@ -11,8 +11,10 @@ public class IntentionCollectionTypeSystem: TypeSystem {
     
     public init(intentions: IntentionCollection) {
         self.intentions = intentions
-        intentionsProvider = IntentionCollectionProvider(intentions: intentions,
-                                                         typeSystem: nil)
+        intentionsProvider = IntentionCollectionProvider(
+            intentions: intentions,
+            typeSystem: nil
+        )
         
         super.init()
         

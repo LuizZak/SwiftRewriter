@@ -6,6 +6,8 @@ import KnownType
 import Intentions
 import TypeSystem
 
+// TODO: Move lazy parse object reporting to use a `JavaScriptLazyParseItem` like
+// TODO: the Objective-C frontend does.
 public protocol JavaScriptIntentionCollectorDelegate: AnyObject {
     func reportForLazyParsing(intention: Intention)
 }

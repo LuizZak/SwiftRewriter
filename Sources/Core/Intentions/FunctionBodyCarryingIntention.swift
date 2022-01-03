@@ -11,4 +11,29 @@ public enum FunctionBodyCarryingIntention {
     case subscriptSetter(SubscriptGenerationIntention, SubscriptGenerationIntention.Setter)
     case propertyInitializer(PropertyGenerationIntention, PropertyInitialValueGenerationIntention)
     case globalVariable(GlobalVariableGenerationIntention, GlobalVariableInitialValueIntention)
+
+    public var functionBody: FunctionBodyIntention? {
+        switch self {
+        case .method(let intention):
+            return intention.functionBody
+        case .initializer(let intention):
+            return intention.functionBody
+        case .deinit(let intention):
+            return intention.functionBody
+        case .global(let intention):
+            return intention.functionBody
+        case .propertyGetter(_, let intention):
+            return intention
+        case .propertySetter(_, let setter):
+            return setter.body
+        case .subscriptGetter(_, let intention):
+            return intention
+        case .subscriptSetter(_, let setter):
+            return setter.body
+        case .propertyInitializer:
+            return nil
+        case .globalVariable(_, _):
+            return nil
+        }
+    }
 }
