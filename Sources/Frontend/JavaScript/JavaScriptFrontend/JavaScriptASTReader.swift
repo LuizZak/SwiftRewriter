@@ -49,9 +49,11 @@ public class JavaScriptASTReader {
         self.options = options
     }
     
-    public func parseStatements(body: JavaScriptParser.FunctionBodyContext,
-                                comments: [RawCodeComment] = [],
-                                typeContext: KnownType? = nil) -> CompoundStatement {
+    public func parseStatements(
+        body: JavaScriptParser.FunctionBodyContext,
+        comments: [RawCodeComment] = [],
+        typeContext: KnownType? = nil
+    ) -> CompoundStatement {
         
         guard let sourceElements = body.sourceElements() else {
             return CompoundStatement()
@@ -64,9 +66,11 @@ public class JavaScriptASTReader {
         )
     }
     
-    public func parseStatements(compoundStatement: JavaScriptParser.StatementContext,
-                                comments: [RawCodeComment] = [],
-                                typeContext: KnownType? = nil) -> CompoundStatement {
+    public func parseStatements(
+        compoundStatement: JavaScriptParser.StatementContext,
+        comments: [RawCodeComment] = [],
+        typeContext: KnownType? = nil
+    ) -> CompoundStatement {
         
         fatalError("Not implemented")
     }

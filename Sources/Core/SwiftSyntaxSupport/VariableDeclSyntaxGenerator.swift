@@ -363,12 +363,14 @@ private extension VariableDeclSyntaxGenerator {
 private extension VariableDeclSyntaxGenerator {
     func makeDeclaration(_ stmtDecl: StatementVariableDeclaration) -> ObjcVariableDeclarationNode {
         let decl =
-            makeDeclaration(name: stmtDecl.identifier,
-                            storage: stmtDecl.storage,
-                            attributes: [],
-                            intention: nil,
-                            modifiers: producer.modifiers(for: stmtDecl),
-                            initialization: stmtDecl.initialization)
+            makeDeclaration(
+                name: stmtDecl.identifier,
+                storage: stmtDecl.storage,
+                attributes: [],
+                intention: nil,
+                modifiers: producer.modifiers(for: stmtDecl),
+                initialization: stmtDecl.initialization
+            )
         
         return decl
     }
@@ -379,14 +381,19 @@ private extension VariableDeclSyntaxGenerator {
             accessors = VariableDeclSyntaxGenerator.makeAccessorBlockCreator(intention, producer)
         }
         
-        return makeDeclaration(name: intention.name,
-                               storage: intention.storage,
-                               attributes: producer.attributes(for: intention,
-                                                               inline: true),
-                               intention: intention,
-                               modifiers: producer.modifiers(for: intention),
-                               accessors: accessors,
-                               initialization: _initialValue(for: intention))
+        return makeDeclaration(
+            name: intention.name,
+            storage: intention.storage,
+            attributes: producer
+                .attributes(
+                    for: intention,
+                    inline: true
+                ),
+            intention: intention,
+            modifiers: producer.modifiers(for: intention),
+            accessors: accessors,
+            initialization: _initialValue(for: intention)
+        )
     }
     
     func makeDeclaration(name: String,
@@ -397,9 +404,11 @@ private extension VariableDeclSyntaxGenerator {
                          accessors: (() -> Syntax)? = nil,
                          initialization: Expression? = nil) -> ObjcVariableDeclarationNode {
         
-        var patternBinding = makePatternBinding(name: name,
-                                                type: storage.type,
-                                                initialization: initialization)
+        var patternBinding = makePatternBinding(
+            name: name,
+            type: storage.type,
+            initialization: initialization
+        )
         
         if producer.delegate?.swiftSyntaxProducer(producer,
                                                   shouldEmitTypeFor: storage,
@@ -423,10 +432,12 @@ private extension VariableDeclSyntaxGenerator {
                                     type: SwiftType?,
                                     initialization: Expression?) -> PatternBindingElement {
         
-        PatternBindingElement(name: name,
-                              type: type,
-                              intention: nil,
-                              initialization: initialization)
+        PatternBindingElement(
+            name: name,
+            type: type,
+            intention: nil,
+            initialization: initialization
+        )
     }
     
     private func makePatternBinding(_ intention: ValueStorageIntention) -> PatternBindingElement {

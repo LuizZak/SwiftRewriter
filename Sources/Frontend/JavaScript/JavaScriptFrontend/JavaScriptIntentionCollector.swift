@@ -9,7 +9,7 @@ import TypeSystem
 // TODO: Move lazy parse object reporting to use a `JavaScriptLazyParseItem` like
 // TODO: the Objective-C frontend does.
 public protocol JavaScriptIntentionCollectorDelegate: AnyObject {
-    func reportForLazyParsing(intention: Intention)
+    func reportForLazyParsing(_ item: JavaScriptLazyParseItem)
 }
 
 /// Traverses a provided AST node, and produces intentions that are recorded by
@@ -158,7 +158,7 @@ public class JavaScriptIntentionCollector {
 
             configure(node: body, intention: methodBodyIntention)
 
-            delegate?.reportForLazyParsing(intention: methodBodyIntention)
+            delegate?.reportForLazyParsing(.globalFunction(methodBodyIntention, globalFunc))
         }
     }
 
@@ -187,7 +187,7 @@ public class JavaScriptIntentionCollector {
 
             configure(node: body, intention: methodBodyIntention)
 
-            delegate?.reportForLazyParsing(intention: methodBodyIntention)
+            delegate?.reportForLazyParsing(.method(methodBodyIntention, method))
         }
 
         ctx.addMethod(method)
@@ -216,12 +216,11 @@ public class JavaScriptIntentionCollector {
                     expression: .constant(0),
                     source: initialExpression
                 )
+            property.initialValueIntention = initialExpr
             
             configure(node: initialExpression, intention: initialExpr)
         
-            delegate?.reportForLazyParsing(intention: initialExpr)
-            
-            property.initialValueIntention = initialExpr
+            delegate?.reportForLazyParsing(.classProperty(initialExpr, property))
         }
 
         ctx.addProperty(property)
@@ -260,11 +259,11 @@ public class JavaScriptIntentionCollector {
                         source: initialExpression
                     )
                 
+                intention.initialValueIntention = initialExpr
+
                 configure(node: initialExpression, intention: initialExpr)
             
-                delegate?.reportForLazyParsing(intention: initialExpr)
-                
-                intention.initialValueIntention = initialExpr
+                delegate?.reportForLazyParsing(.globalVar(initialExpr, intention))
             }
 
             ctx.addGlobalVariable(intention)
@@ -301,4 +300,11 @@ extension JavaScriptIntentionCollector {
     private func convertComments(_ comments: [RawCodeComment]) -> [String] {
         return comments.map { $0.string.trimmingWhitespaces() }
     }
+}
+
+public enum JavaScriptLazyParseItem {
+    case globalFunction(FunctionBodyIntention, GlobalFunctionGenerationIntention)
+    case method(FunctionBodyIntention, MethodGenerationIntention)
+    case classProperty(PropertyInitialValueGenerationIntention, PropertyGenerationIntention)
+    case globalVar(GlobalVariableInitialValueIntention, GlobalVariableGenerationIntention)
 }

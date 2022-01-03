@@ -520,7 +520,7 @@ extension ExpressionTypeResolverTests {
             /// resolved as having a specified type
             @discardableResult
             func thenAssertExpression(
-                at keyPath: KeyPath<Expression, Expression?>,
+                at keyPath: KeyPath<T, Expression?>,
                 resolvedAs type: SwiftType?,
                 file: StaticString = #filePath,
                 line: UInt = #line
@@ -555,7 +555,7 @@ extension ExpressionTypeResolverTests {
             /// set to expect a given type
             @discardableResult
             func thenAssertExpression(
-                at keyPath: KeyPath<Expression, Expression?>,
+                at keyPath: KeyPath<T, Expression?>,
                 expectsType type: SwiftType?,
                 file: StaticString = #filePath,
                 line: UInt = #line

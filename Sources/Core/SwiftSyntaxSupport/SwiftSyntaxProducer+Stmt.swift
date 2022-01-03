@@ -273,9 +273,11 @@ extension SwiftSyntaxProducer {
                         }
                     }
 
-                    return SyntaxFactory.makeCodeBlockItem(item: decl().asSyntax,
-                                                           semicolon: nil,
-                                                           errorTokens: nil)
+                    return SyntaxFactory.makeCodeBlockItem(
+                        item: decl().asSyntax,
+                        semicolon: nil,
+                        errorTokens: nil
+                    )
                 }
             }
     }

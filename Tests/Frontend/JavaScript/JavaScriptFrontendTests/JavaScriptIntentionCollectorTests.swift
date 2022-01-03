@@ -64,9 +64,10 @@ class JavaScriptIntentionCollectorTests: XCTestCase {
 
             XCTAssertEqual(file.globalFunctionIntentions.count, 1)
             XCTAssertEqual(delegate.reportedForLazyParsing.count, 1)
+            let function = try XCTUnwrap(file.globalFunctionIntentions.first)
+            let body = try XCTUnwrap(function.functionBody)
             XCTAssert(
-                delegate.reportedForLazyParsing.first
-                    === file.globalFunctionIntentions.first?.functionBody
+                delegate.reportedForLazyParsing.first == .globalFunction(body, function)
             )
         }
     }
@@ -338,7 +339,7 @@ private class TestCollectorDelegate: JavaScriptIntentionCollectorDelegate {
     var context: JavaScriptIntentionCollector.Context
     var intentions: IntentionCollection
 
-    var reportedForLazyParsing: [Intention] = []
+    var reportedForLazyParsing: [JavaScriptLazyParseItem] = []
 
     init(file: FileGenerationIntention) {
         context = JavaScriptIntentionCollector.Context()
@@ -350,7 +351,24 @@ private class TestCollectorDelegate: JavaScriptIntentionCollectorDelegate {
 
     // MARK: -
 
-    func reportForLazyParsing(intention: Intention) {
-        reportedForLazyParsing.append(intention)
+    func reportForLazyParsing(_ item: JavaScriptLazyParseItem) {
+        reportedForLazyParsing.append(item)
+    }
+}
+
+extension JavaScriptLazyParseItem: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        switch (lhs, rhs) {
+            case (.globalFunction(let lb, let li), .globalFunction(let rb, let ri)):
+                return lb === rb && li === ri
+            case (.method(let lb, let li), .method(let rb, let ri)):
+                return lb === rb && li === ri
+            case (.globalVar(let lb, let li), .globalVar(let rb, let ri)):
+                return lb === rb && li === ri
+            case (.classProperty(let lb, let li), .classProperty(let rb, let ri)):
+                return lb === rb && li === ri
+            default:
+                return false
+        }
     }
 }

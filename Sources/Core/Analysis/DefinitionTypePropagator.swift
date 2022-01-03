@@ -16,71 +16,62 @@ public class DefinitionTypePropagator {
     }
 
     public func propagate(_ statement: CompoundStatement) -> CompoundStatement {
+        typeResolver.ignoreResolvedExpressions = false
+
         var current: CompoundStatement = statement
-        var didWork: Bool
+        var didWork: Bool = false
+
+        let rewriter = makeVariableDeclarationPropagator {
+            didWork = true
+        }
 
         repeat {
-            let resolved = typeResolver.resolveTypes(in: current)
-            if let resolved = resolved.asCompound {
-                current = resolved
-            } else {
-                current = .compound([resolved])
-            }
+            current = toCompound(typeResolver.resolveTypes(in: current))
 
             didWork = false
-            current = propagateDeclarations(current) { didWork = true }
+            
+            current = toCompound(rewriter.visitCompound(current))
         } while didWork
 
         return current
     }
 
-    private func propagateDeclarations(_ compoundStatement: CompoundStatement, didWork: () -> Void) -> CompoundStatement {
-        for (i, stmt) in compoundStatement.statements.enumerated() {
-            switch stmt {
-            case let stmt as VariableDeclarationsStatement:
-                compoundStatement.statements[i] = propagateInDeclaration(stmt, didWork: didWork)
-            default:
-                break
-            }
+    public func propagate(_ expression: Expression) -> Expression {
+        typeResolver.ignoreResolvedExpressions = false
+
+        var current: Expression = expression
+        var didWork: Bool = false
+
+        let rewriter = makeVariableDeclarationPropagator {
+            didWork = true
         }
 
-        return compoundStatement
+        repeat {
+            current = typeResolver.resolveType(expression)
+
+            didWork = false
+            
+            current = rewriter.visitExpression(expression)
+        } while didWork
+
+        return current
     }
 
-    private func propagateInDeclaration(_ stmt: VariableDeclarationsStatement, didWork: () -> Void) -> VariableDeclarationsStatement {
-        for (i, decl) in stmt.decl.enumerated() {
-            guard decl.type == options.baseType else {
-                continue
-            }
-            guard let initialization = decl.initialization else {
-                continue
-            }
+    private func makeVariableDeclarationPropagator(_ didWork: @escaping () -> Void) -> VariableDeclarationTypePropagationRewriter {
+        VariableDeclarationTypePropagationRewriter(
+            options: options,
+            typeSystem: typeSystem,
+            typeResolver: typeResolver,
+            didWork: didWork
+        )
+    }
 
-            let resolved = typeResolver.resolveType(initialization)
-            guard let resolvedType = resolved.resolvedType else {
-                continue
-            }
-
-            if typeSystem.isNumeric(resolvedType) && decl.type != resolvedType && decl.type != options.baseNumericType {
-                stmt.decl[i].type = options.baseNumericType ?? resolvedType
-                stmt.decl[i].initialization = resolved
-
-                didWork()
-            } else if resolvedType == .string && decl.type != resolvedType && decl.type != options.baseStringType {
-                stmt.decl[i].type = options.baseStringType ?? resolvedType
-                stmt.decl[i].initialization = resolved
-
-                didWork()
-            } else {
-                if decl.ownership == .weak && typeSystem.isClassInstanceType(resolvedType) {
-                    stmt.decl[i].type = .optional(resolvedType)
-                } else {
-                    stmt.decl[i].type = resolvedType
-                }
-            }
+    private func toCompound<S: Statement>(_ stmt: S) -> CompoundStatement {
+        if let stmt = stmt.asCompound {
+            return stmt
         }
 
-        return stmt
+        return .compound([stmt])
     }
 
     public struct Options {
@@ -110,6 +101,72 @@ public class DefinitionTypePropagator {
             self.baseType = baseType
             self.baseNumericType = baseNumericType
             self.baseStringType = baseStringType
+        }
+    }
+
+    private class VariableDeclarationTypePropagationRewriter: SyntaxNodeRewriter {
+        let options: Options
+        let typeSystem: TypeSystem
+        let typeResolver: ExpressionTypeResolver
+        let didWork: () -> Void
+
+        init(
+            options: Options,
+            typeSystem: TypeSystem,
+            typeResolver: ExpressionTypeResolver,
+            didWork: @escaping () -> Void
+        ) {
+            self.options = options
+            self.typeSystem = typeSystem
+            self.typeResolver = typeResolver
+            self.didWork = didWork
+
+            super.init()
+        }
+
+        override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
+            for (i, decl) in stmt.decl.enumerated() {
+                guard decl.type == options.baseType else {
+                    continue
+                }
+                guard let initialization = decl.initialization else {
+                    continue
+                }
+
+                let resolved = typeResolver.resolveType(initialization)
+                guard !resolved.isErrorTyped, let resolvedType = resolved.resolvedType else {
+                    continue
+                }
+
+                func assign(exp: Expression, type: SwiftType) {
+                    if stmt.decl[i].type == type {
+                        return
+                    }
+
+                    stmt.decl[i].initialization = exp.typed(type).typed(expected: type)
+                    stmt.decl[i].type = type
+
+                    didWork()
+                }
+
+                if typeSystem.isNumeric(resolvedType) {
+                    assign(exp: resolved, type: options.baseNumericType ?? resolvedType)
+                } else if resolvedType == .string {
+                    assign(exp: resolved, type: options.baseStringType ?? resolvedType)
+                } else {
+                    if decl.ownership == .weak && typeSystem.isClassInstanceType(resolvedType) {
+                        assign(exp: resolved, type: .optional(resolvedType))
+                    } else {
+                        assign(exp: resolved, type: resolvedType)
+                    }
+                }
+
+                // Quit early so type changes can be propagated before attempting
+                // the next definition in this declaration
+                return stmt
+            }
+
+            return stmt
         }
     }
 }

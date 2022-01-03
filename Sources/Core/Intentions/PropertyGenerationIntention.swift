@@ -95,7 +95,12 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         }
     }
     public var objcAttributes: [ObjcPropertyAttribute]
-    public var initialValueIntention: PropertyInitialValueGenerationIntention?
+    public var initialValueIntention: PropertyInitialValueGenerationIntention? {
+        didSet {
+            oldValue?.parent = self
+            initialValueIntention?.parent = self
+        }
+    }
     
     public var initialValue: Expression? {
         get {

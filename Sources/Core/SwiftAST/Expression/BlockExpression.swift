@@ -49,9 +49,11 @@ public class BlockLiteralExpression: Expression {
     
     @inlinable
     public override func copy() -> BlockLiteralExpression {
-        BlockLiteralExpression(parameters: parameters,
-                                      returnType: returnType,
-                                      body: body.copy()).copyTypeAndMetadata(from: self)
+        BlockLiteralExpression(
+            parameters: parameters,
+            returnType: returnType,
+            body: body.copy()
+        ).copyTypeAndMetadata(from: self)
     }
     
     @inlinable

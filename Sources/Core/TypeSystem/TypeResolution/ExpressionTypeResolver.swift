@@ -107,10 +107,11 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     
     // MARK: - Definition Collection
     public override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
-        _=super.visitVariableDeclarations(stmt)
-        
         for (i, decl) in stmt.decl.enumerated() {
             var type = decl.type
+            
+            decl.initialization?.expectedType = type
+            stmt.decl[i].initialization = decl.initialization.map(visitExpression)
             
             // TODO: This optionality promotion should probably be reserved to
             // expression passes only.
@@ -125,8 +126,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
                 }
             }
             
-            decl.initialization?.expectedType = type
-            
             let definition =
                 CodeDefinition
                     .forLocalIdentifier(
@@ -140,7 +139,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             nearestScope(for: stmt)?.recordDefinition(definition, overwrite: true)
         }
         
-        return stmt
+        return super.visitVariableDeclarations(stmt)
     }
     
     public override func visitFor(_ stmt: ForStatement) -> Statement {
@@ -440,15 +439,27 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         }
         
         switch exp.op.category {
-        case .arithmetic where exp.lhs.resolvedType == exp.rhs.resolvedType:
-            guard let type = exp.lhs.resolvedType else {
-                break
-            }
-            if !typeSystem.isNumeric(type) {
+        case .arithmetic:
+            guard let lhsType = exp.lhs.resolvedType else {
                 break
             }
             
-            exp.resolvedType = exp.lhs.resolvedType
+            if !typeSystem.isNumeric(lhsType) {
+                break
+            }
+
+            if exp.lhs.resolvedType == exp.rhs.resolvedType {
+                exp.resolvedType = exp.lhs.resolvedType
+            } else if let rhsType = exp.rhs.resolvedType {
+                // Check coercion
+                if canCoerce(exp.lhs, toType: rhsType) {
+                    exp.lhs.expectedType = rhsType
+                    exp.resolvedType = rhsType
+                } else if canCoerce(exp.rhs, toType: lhsType) {
+                    exp.rhs.expectedType = lhsType
+                    exp.resolvedType = lhsType
+                }
+            }
             
         case .comparison:
             exp.resolvedType = .bool
@@ -654,11 +665,20 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
                 
                 blockReturnType = ret
             }
+
+            exp.resolvedType =
+                .block(
+                    returnType: blockReturnType,
+                    parameters: exp.parameters.map(\.type),
+                    attributes: []
+                )
         } else {
             exp.resolvedType =
-                .block(returnType: exp.returnType,
-                       parameters: exp.parameters.map(\.type),
-                       attributes: [])
+                .block(
+                    returnType: exp.returnType,
+                    parameters: exp.parameters.map(\.type),
+                    attributes: []
+                )
         }
         
         // Apply definitions for function parameters
@@ -682,6 +702,16 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         exp.resolvedType = .selector
         
         return super.visitSelector(exp)
+    }
+
+    // MARK: - Internals
+
+    private func canCoerce(_ exp: Expression, toType type: SwiftType) -> Bool {
+        exp.accept(makeCoercionVerifier(type: type))
+    }
+
+    private func makeCoercionVerifier(type: SwiftType) -> CoercionVerifier {
+        CoercionVerifier(type: type, typeSystem: typeSystem)
     }
 }
 
@@ -1113,5 +1143,125 @@ private class MemberInvocationResolver {
                                  static: isStatic,
                                  includeOptional: true,
                                  in: type)
+    }
+}
+
+/// Verifies that implicit coercions of expression trees are possible.
+private class CoercionVerifier: ExpressionVisitor {
+    typealias ExprResult = Bool
+
+    let type: SwiftType
+    let typeSystem: TypeSystem
+
+    init(type: SwiftType, typeSystem: TypeSystem) {
+        self.type = type
+        self.typeSystem = typeSystem
+    }
+
+    func visitExpression(_ expression: Expression) -> Bool {
+        expression.accept(self)
+    }
+
+    func visitAssignment(_ exp: AssignmentExpression) -> Bool {
+        false
+    }
+
+    func visitBinary(_ exp: BinaryExpression) -> Bool {
+        exp.lhs.accept(self) && exp.rhs.accept(self)
+    }
+
+    func visitUnary(_ exp: UnaryExpression) -> Bool {
+        exp.exp.accept(self)
+    }
+
+    func visitSizeOf(_ exp: SizeOfExpression) -> Bool {
+        type == .int
+    }
+
+    func visitPrefix(_ exp: PrefixExpression) -> Bool {
+        exp.exp.accept(self)
+    }
+
+    func visitPostfix(_ exp: PostfixExpression) -> Bool {
+        false
+    }
+
+    func visitConstant(_ exp: ConstantExpression) -> Bool {
+        switch exp.constant {
+        case .int:
+            return typeSystem.isNumeric(type)
+        case .float:
+            return typeSystem.isFloat(type)
+        case .string:
+            return type == .string
+        case .boolean:
+            return type == .bool
+        default:
+            return false
+        }
+    }
+
+    func visitParens(_ exp: ParensExpression) -> Bool {
+        exp.exp.accept(self)
+    }
+
+    func visitIdentifier(_ exp: IdentifierExpression) -> Bool {
+        false
+    }
+
+    func visitCast(_ exp: CastExpression) -> Bool {
+        typeSystem.isType(exp.type, assignableTo: type)
+    }
+
+    func visitTypeCheck(_ exp: TypeCheckExpression) -> Bool {
+        type == .bool
+    }
+
+    func visitArray(_ exp: ArrayLiteralExpression) -> Bool {
+        // TODO: Analyze array-of-constant expressions
+        false
+    }
+
+    func visitDictionary(_ exp: DictionaryLiteralExpression) -> Bool {
+        // TODO: Analyze dictionary-of-constant expressions
+        false
+    }
+
+    func visitBlock(_ exp: BlockLiteralExpression) -> Bool {
+        type == exp.resolvedType
+    }
+
+    func visitTernary(_ exp: TernaryExpression) -> Bool {
+        exp.ifTrue.accept(self) && exp.ifFalse.accept(self)
+    }
+
+    func visitTuple(_ exp: TupleExpression) -> Bool {
+        switch type {
+        case .tuple(.empty), .void:
+            return exp.elements.isEmpty
+
+        case .tuple(.types(let types)):
+            guard exp.elements.count == types.count else {
+                return false
+            }
+
+            for (expEl, type) in zip(exp.elements, types) {
+                if !expEl.accept(CoercionVerifier(type: type, typeSystem: typeSystem)) {
+                    return false
+                }
+            }
+
+            return true
+        default:
+            return false
+        }
+    }
+
+    func visitSelector(_ exp: SelectorExpression) -> Bool {
+        false
+    }
+
+    func visitUnknown(_ exp: UnknownExpression) -> Bool {
+        false
     }
 }

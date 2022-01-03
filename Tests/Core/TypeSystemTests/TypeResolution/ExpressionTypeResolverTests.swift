@@ -16,6 +16,33 @@ class ExpressionTypeResolverTests: XCTestCase {
         XCTAssertEqual(stmt.asExpressions?.expressions[0].resolvedType, .int)
     }
 
+    func testSequentialVariableDeclarationReferences() {
+        // Tests resolution of types for variable declaration statements where a
+        // later declaration references an earlier declaration in the same statement
+        let sut = ExpressionTypeResolver()
+        let stmt: CompoundStatement = [
+            .variableDeclarations([
+                .init(identifier: "a", type: .int),
+                .init(identifier: "b", type: .int, initialization: .identifier("a").binary(op: .add, rhs: .constant(0))),
+            ])
+        ]
+
+        _ = sut.resolveTypes(in: stmt)
+
+        XCTAssertEqual(
+            stmt.statements[0].asVariableDeclaration?.decl[1].initialization?.resolvedType,
+            .int
+        )
+        XCTAssertEqual(
+            stmt.statements[0].asVariableDeclaration?.decl[1].initialization?.asBinary?.lhs.asIdentifier?.definition?.name,
+            "a"
+        )
+        XCTAssertEqual(
+            stmt.statements[0].asVariableDeclaration?.decl[1].initialization?.asBinary?.lhs.resolvedType,
+            .int
+        )
+    }
+
     func testIntrinsicVariable() {
         startScopedTest(with: .identifier("self"), sut: ExpressionTypeResolver())
             .definingIntrinsic(name: "self", type: .typeName("MyType"))
@@ -272,6 +299,32 @@ class ExpressionTypeResolverTests: XCTestCase {
             .binary(lhs: .constant(1.0), op: .closedRange, rhs: .constant("abc")),
             expect: nil
         )
+    }
+
+    func testBinaryCoercesConstants() {
+        startScopedTest(
+            with: .binary(
+                lhs: Expression.identifier("a"),
+                op: .add,
+                rhs: Expression.constant(0)
+            ),
+            sut: ExpressionTypeResolver()
+        )
+        .definingLocal(name: "a", type: .double)
+        .resolve()
+        .thenAssertExpression(resolvedAs: .double)
+
+        startScopedTest(
+            with: .binary(
+                lhs: Expression.constant(0),
+                op: .add,
+                rhs: Expression.identifier("a")
+            ),
+            sut: ExpressionTypeResolver()
+        )
+        .definingLocal(name: "a", type: .double)
+        .resolve()
+        .thenAssertExpression(resolvedAs: .double)
     }
 
     func testBitwiseBinaryDeducesResultAsOperandTypes() {
@@ -883,6 +936,22 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(resolvedAs: .optional(.int))
     }
 
+    func testVariableDeclaration() {
+        let blockType: SwiftType = .block(returnType: .void, parameters: [], attributes: [])
+
+        _ = startScopedTest(
+            with:
+                Statement.variableDeclaration(
+                    identifier: "a",
+                    type: blockType,
+                    initialization: .block(body: [])
+                ),
+            sut: ExpressionTypeResolver()
+        )
+        .thenAssertDefined(localNamed: "a", type: blockType)
+        .thenAssertExpression(at: \.decl[0].initialization, resolvedAs: blockType)
+    }
+
     func testVariableDeclarationTransmitsOptionalFromInitializerValue() {
         _ = startScopedTest(
             with:
@@ -1011,6 +1080,28 @@ class ExpressionTypeResolverTests: XCTestCase {
             at: \Expression.asPostfix?.functionCall?.arguments[0].expression,
             expectsType: .int
         )
+    }
+
+    func testBlockWithNoExpectedType() {
+        _ = startScopedTest(
+            with:
+                Expression.block(body: []),
+            sut: ExpressionTypeResolver()
+        )
+        .resolve()
+        .thenAssertExpression(resolvedAs: .block(returnType: .void, parameters: [], attributes: []))
+    }
+
+    func testBlockWithExpectedType() {
+        let expectedType: SwiftType = .block(returnType: .void, parameters: [], attributes: [])
+
+        _ = startScopedTest(
+            with:
+                Expression.block(body: []).typed(expected: expectedType),
+            sut: ExpressionTypeResolver()
+        )
+        .resolve()
+        .thenAssertExpression(resolvedAs: .block(returnType: .void, parameters: [], attributes: []))
     }
 
     /// Tests invoking a block sets the parameters to the properly expected

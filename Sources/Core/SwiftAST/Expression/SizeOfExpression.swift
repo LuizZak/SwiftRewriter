@@ -35,6 +35,15 @@ public class SizeOfExpression: Expression {
         }
     }
     
+    public override var description: String {
+        switch value {
+        case .expression(let exp):
+            return "MemoryLayout.size(ofValue: \(exp))"
+        case .type(let type):
+            return "MemoryLayout<\(type)>.size"
+        }
+    }
+    
     public init(value: Value) {
         self.value = value
         

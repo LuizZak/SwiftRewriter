@@ -13,6 +13,7 @@ import SwiftAST
 import TypeSystem
 import WriterTargetOutput
 import Intentions
+import Analysis
 import IntentionPasses
 import ExpressionPasses
 import SourcePreprocessors
@@ -114,6 +115,7 @@ public final class JavaScript2SwiftRewriter {
             }
 
             parseStatements(lazyParse)
+            resolveAutotypeDeclarations(lazyParse)
             performIntentionAndSyntaxPasses(intentionCollection)
             outputDefinitions(intentionCollection)
         }
@@ -250,7 +252,11 @@ public final class JavaScript2SwiftRewriter {
         for item in items {
             let source: Source
             switch item {
-            case .functionBody(let s, _, _), .globalVar(let s, _), .classProperty(let s, _):
+            case .globalFunction(let s, _, _),
+                .method(let s, _, _),
+                .globalVar(let s, _, _),
+                .classProperty(let s, _, _):
+
                 source = s
             }
 
@@ -271,29 +277,44 @@ public final class JavaScript2SwiftRewriter {
                     reader.delegate = delegate
                     
                     switch item {
-                    case let .functionBody(_, funcBody, method):
-                        guard let methodBody = funcBody.typedSource else {
+                    case let .globalFunction(_, funcBody, _):
+                        guard let sourceBody = funcBody.typedSource else {
                             return
                         }
-                        guard let body = methodBody.body else {
+                        guard let body = sourceBody.body else {
                             return
                         }
                         
                         funcBody.body =
                             reader.parseStatements(
                                 body: body,
-                                comments: methodBody.comments,
-                                typeContext: method?.type
+                                comments: sourceBody.comments,
+                                typeContext: nil
                             )
                     
-                    case .classProperty(_, let initialValue):
+                    case let .method(_, funcBody, method):
+                        guard let sourceBody = funcBody.typedSource else {
+                            return
+                        }
+                        guard let body = sourceBody.body else {
+                            return
+                        }
+                        
+                        funcBody.body =
+                            reader.parseStatements(
+                                body: body,
+                                comments: sourceBody.comments,
+                                typeContext: method.type
+                            )
+                    
+                    case .classProperty(_, let initialValue, _):
                         guard let expression = initialValue.typedSource?.expression else {
                             return
                         }
                         
                         initialValue.expression = reader.parseExpression(expression: expression)
                         
-                    case .globalVar(_, let v):
+                    case .globalVar(_, let v, _):
                         guard let expression = v.typedSource?.expression else {
                             return
                         }
@@ -320,6 +341,66 @@ public final class JavaScript2SwiftRewriter {
         }
 
         fatalError("Not implemented")
+    }
+
+    private func resolveAutotypeDeclarations(_ items: [LazyParseItem]) {
+        let typeResolverInvoker = makeTypeResolverInvoker()
+
+        // Make a pre-type resolve before propagating types
+        typeResolverInvoker.resolveAllExpressionTypes(
+            in: intentionCollection,
+            force: true
+        )
+
+        let baseType = SwiftType.any
+
+        let makePropagator: (ExpressionTypeResolver) -> DefinitionTypePropagator = { [typeSystem] in
+            return DefinitionTypePropagator(
+                options: .init(
+                    baseType: baseType,
+                    baseNumericType: .double,
+                    baseStringType: nil
+                ),
+                typeSystem: typeSystem,
+                typeResolver: $0
+            )
+        }
+
+        for item in items {
+            let typeResolverDelegate = typeResolverInvoker.makeQueueDelegate()
+
+            let functionBody: FunctionBodyIntention
+            let typeResolver: ExpressionTypeResolver
+
+            switch item {
+            case .globalVar(_, let value, let intention):
+                typeResolver = typeResolverDelegate.makeContext(forGlobalVariable: intention, initializer: value).typeResolver
+
+                let typePropagator = makePropagator(typeResolver)
+                value.expression = typePropagator.propagate(value.expression)
+                
+                continue
+            
+            case .classProperty(_, let value, let intention):
+                typeResolver = typeResolverDelegate.makeContext(forProperty: intention, initializer: value).typeResolver
+
+                let typePropagator = makePropagator(typeResolver)
+                value.expression = typePropagator.propagate(value.expression)
+
+                continue
+
+            case .method(_, let body, let intention):
+                functionBody = body
+                typeResolver = typeResolverDelegate.makeContext(forMethod: intention).typeResolver
+
+            case .globalFunction(_, let body, let intention):
+                functionBody = body
+                typeResolver = typeResolverDelegate.makeContext(forFunction: intention).typeResolver
+            }
+
+            let typePropagator = makePropagator(typeResolver)
+            functionBody.body = typePropagator.propagate(functionBody.body)
+        }
     }
     
     private func performIntentionAndSyntaxPasses(_ intentionCollection: IntentionCollection) {
@@ -719,22 +800,19 @@ fileprivate extension JavaScript2SwiftRewriter {
             self.source = source
         }
 
-        func reportForLazyParsing(intention: Intention) {
-            switch intention {
-            case let intention as GlobalVariableInitialValueIntention:
-                lazyParse.append(.globalVar(source, intention))
+        func reportForLazyParsing(_ item: JavaScriptLazyParseItem) {
+            switch item {
+            case .globalVar(let value, let intention):
+                lazyParse.append(.globalVar(source, value, intention))
             
-            case let intention as PropertyInitialValueGenerationIntention:
-                lazyParse.append(.classProperty(source, intention))
+            case .classProperty(let value, let intention):
+                lazyParse.append(.classProperty(source, value, intention))
                 
-            case let intention as FunctionBodyIntention:
-                let context =
-                    intention.ancestor(ofType: MethodGenerationIntention.self)
-                
-                lazyParse.append(.functionBody(source, intention, method: context))
-                
-            default:
-                fatalError("Cannot handle parsing for intention of type \(type(of: intention))")
+            case .globalFunction(let body, let intention):
+                lazyParse.append(.globalFunction(source, body, intention))
+            
+            case .method(let body, let intention):
+                lazyParse.append(.method(source, body, intention))
             }
         }
     }
@@ -749,9 +827,10 @@ fileprivate extension JavaScript2SwiftRewriter {
 }
 
 private enum LazyParseItem {
-    case functionBody(Source, FunctionBodyIntention, method: MethodGenerationIntention?)
-    case globalVar(Source, GlobalVariableInitialValueIntention)
-    case classProperty(Source, PropertyInitialValueGenerationIntention)
+    case globalFunction(Source, FunctionBodyIntention, GlobalFunctionGenerationIntention)
+    case method(Source, FunctionBodyIntention, MethodGenerationIntention)
+    case classProperty(Source, PropertyInitialValueGenerationIntention, PropertyGenerationIntention)
+    case globalVar(Source, GlobalVariableInitialValueIntention, GlobalVariableGenerationIntention)
 }
 
 internal struct _PreprocessingContext: PreprocessingContext {

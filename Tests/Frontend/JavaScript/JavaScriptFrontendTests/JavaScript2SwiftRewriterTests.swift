@@ -28,7 +28,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func test() -> Any {
-                let a: Any = 0
+                let a: Double = 0
 
                 return a + 10
             }
@@ -46,8 +46,8 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func test() {
-                let a: Any = 0
-                let b: Any = a
+                let a: Double = 0
+                let b: Double = a
             }
             """
         )
@@ -141,7 +141,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func foo() {
-                var a: Any, b: Any, c: Any = 1
+                var a: Any, b: Any, c: Double = 1
 
                 b = c
                 a = b
@@ -175,7 +175,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             var utils: Any = [foo: { () -> Any in
-                var p: Any = 0, d: Any = 0, c: Any = d - 1
+                var p: Double = 0, d: Double = 0, c: Double = d - 1
 
                 while d > 1 {
                     defer {
@@ -183,8 +183,8 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
                         c -= 1
                     }
 
-                    let list: Any = []
-                    var j: Any = 0, dpt: Any
+                    let list: NSArray = []
+                    var j: Double = 0, dpt: Any
 
                     while j < c {
                         defer {
@@ -267,23 +267,6 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
                 if true {
                     return 0
                 }
-            }
-            """
-        )
-    }
-
-    func testRewrite_deduceVariableType() {
-        assertRewrite(
-            js: """
-            function f() {
-                var a = 0;
-                var b = a;
-            }
-            """,
-            swift: """
-            func f() {
-                var a: Double = 0
-                var b: Double = a
             }
             """
         )

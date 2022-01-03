@@ -160,15 +160,17 @@ public extension Statement {
     static func unknown(_ context: UnknownASTContext) -> UnknownStatement {
         UnknownStatement(context: context)
     }
-    static func expression(_ expr: Expression) -> Statement {
+    static func expression(_ expr: Expression) -> ExpressionsStatement {
         .expressions([expr])
     }
     
-    static func variableDeclaration(identifier: String,
-                                    type: SwiftType,
-                                    ownership: Ownership = .strong,
-                                    isConstant: Bool = false,
-                                    initialization: Expression?) -> Statement {
+    static func variableDeclaration(
+        identifier: String,
+        type: SwiftType,
+        ownership: Ownership = .strong,
+        isConstant: Bool = false,
+        initialization: Expression?
+    ) -> VariableDeclarationsStatement {
         
         .variableDeclarations([
             StatementVariableDeclaration(identifier: identifier,

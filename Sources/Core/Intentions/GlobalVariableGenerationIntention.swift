@@ -12,7 +12,12 @@ public final class GlobalVariableGenerationIntention: FromSourceIntention, FileL
     
     public var name: String
     public var storage: ValueStorage
-    public var initialValueIntention: GlobalVariableInitialValueIntention?
+    public var initialValueIntention: GlobalVariableInitialValueIntention? {
+        didSet {
+            oldValue?.parent = nil
+            initialValueIntention?.parent = self
+        }
+    }
     
     public var initialValue: Expression? {
         get {
