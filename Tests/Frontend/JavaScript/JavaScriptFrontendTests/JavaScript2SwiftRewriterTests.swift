@@ -213,7 +213,8 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             js: """
             var object = {
                 x: 1,
-                y: 2
+                y: 2,
+                z
             }
             """,
             swift: """
@@ -238,7 +239,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
                 }
             }
             // End of file JavaScriptObject.swift
-            var object: Any = JavaScriptObject(["x": 1, "y": 2])
+            var object: Any = JavaScriptObject(["x": 1, "y": 2, "z": z])
             // End of file test.swift
             """,
             rewriterSettings:
@@ -410,6 +411,26 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             rewriterSettings:
                 .default
                 .with(\.emitJavaScriptObject, true)
+        )
+    }
+
+    func testRewrite_propertyShorthandObjectLiterals() {
+        assertRewrite(
+            js: """
+            function f() {
+                var a = 0;
+                var b = {
+                    a,
+                    c: 10
+                };
+            }
+            """,
+            swift: """
+            func f() {
+                let a: Double = 0
+                let b: Any = [a: a, c: 10]
+            }
+            """
         )
     }
 }

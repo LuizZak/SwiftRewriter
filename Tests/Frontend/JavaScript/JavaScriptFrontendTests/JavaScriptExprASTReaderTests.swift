@@ -207,7 +207,7 @@ class JavaScriptExprASTReaderTests: XCTestCase {
         )
     }
 
-    func testDictionaryLiteral() {
+    func testObjectLiteral() {
         assert(jsExpr: "{}", readsAs: .dictionaryLiteral([]))
         assert(
             jsExpr: "{1: 2}",
@@ -224,7 +224,7 @@ class JavaScriptExprASTReaderTests: XCTestCase {
         )
     }
 
-    func testDictionaryLiteralFunction() {
+    func testObjectLiteralFunction() {
         assert(
             jsExpr: """
             {
@@ -255,6 +255,17 @@ class JavaScriptExprASTReaderTests: XCTestCase {
         )
     }
 
+    func testObjectLiteral_propertyShorthand() {
+        assert(
+            jsExpr: "{x, y: 2, z}",
+            readsAs: .dictionaryLiteral([
+                .identifier("x"): .identifier("x"),
+                .identifier("y"): .constant(2),
+                .identifier("z"): .identifier("z"),
+            ])
+        )
+    }
+
     func testParensExpression() {
         assert(
             jsExpr: "(1 + 2)",
@@ -275,7 +286,7 @@ class JavaScriptExprASTReaderTests: XCTestCase {
 
     // MARK: JavaScriptObject emission
 
-    func testDictionaryLiteral_javaScriptObject() {
+    func testObjectLiteral_javaScriptObject() {
         assert(
             jsExpr: """
             {

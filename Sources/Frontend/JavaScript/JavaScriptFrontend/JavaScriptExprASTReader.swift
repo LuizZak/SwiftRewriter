@@ -678,6 +678,12 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
                 )
             )
         }
+
+        override func visitPropertyShorthand(_ ctx: JavaScriptParser.PropertyShorthandContext) -> ExpressionDictionaryPair? {
+            guard let exp = ctx.singleExpression()?.accept(expReader) else { return nil }
+
+            return .init(key: formatKeyName(exp), value: exp)
+        }
         
         // MARK: -
 
