@@ -5,6 +5,11 @@ public class JsClassNode: JsASTNode, JsInitializableNode {
         firstChild()
     }
 
+    /// A list of constructors
+    public var constructors: [JsConstructorDefinitionNode] {
+        childrenMatching()
+    }
+
     /// A list of methods.
     public var methods: [JsMethodDefinitionNode] {
         childrenMatching()

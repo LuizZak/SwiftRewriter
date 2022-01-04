@@ -304,4 +304,25 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testRewrite_constructor() {
+        assertRewrite(
+            js: """
+            class AClass {
+                constructor(a, b) {
+                    self.a = a
+                    self.b = b
+                }
+            }
+            """,
+            swift: """
+            class AClass {
+                init(_ a: Any, _ b: Any) {
+                    self.a = a
+                    self.b = b
+                }
+            }
+            """
+        )
+    }
 }

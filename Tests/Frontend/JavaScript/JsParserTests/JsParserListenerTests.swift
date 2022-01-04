@@ -23,12 +23,42 @@ class JsParserListenerTests: XCTestCase {
         let node = parserTest(
             """
             class AClass {
+            }
+            """
+        )
+
+        let classDecl: JsClassNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(classDecl.identifier?.name, "AClass")
+    }
+
+    func testCollectClassConstructor() throws {
+        let node = parserTest(
+            """
+            class AClass {
                 constructor(args) {
 
                 }
-                static method() {
-                }
-                getProperty() {
+            }
+            """
+        )
+
+        let classDecl: JsClassNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(classDecl.methods.count, 0)
+        XCTAssertEqual(classDecl.constructors.count, 1)
+        XCTAssertEqual(classDecl.constructors[0].identifier?.name, "constructor")
+        XCTAssertEqual(
+            classDecl.constructors[0].signature,
+            JsFunctionSignature(arguments: [.init(identifier: "args", isVariadic: false)])
+        )
+    }
+
+    func testCollectClassMethod() throws {
+        let node = parserTest(
+            """
+            class AClass {
+                method(a, b) {
                     return 0;
                 }
             }
@@ -37,12 +67,37 @@ class JsParserListenerTests: XCTestCase {
 
         let classDecl: JsClassNode = try XCTUnwrap(node.firstChild())
 
-        XCTAssertEqual(classDecl.identifier?.name, "AClass")
-        XCTAssertEqual(classDecl.methods.count, 3)
-        XCTAssertEqual(classDecl.methods[0].identifier?.name, "constructor")
-        XCTAssertEqual(classDecl.methods[1].identifier?.name, "method")
-        XCTAssertTrue(classDecl.methods[1].isStatic)
-        XCTAssertEqual(classDecl.methods[2].identifier?.name, "getProperty")
+        XCTAssertEqual(classDecl.methods.count, 1)
+        XCTAssertEqual(classDecl.methods[0].identifier?.name, "method")
+        XCTAssertFalse(classDecl.methods[0].isStatic)
+        XCTAssertEqual(
+            classDecl.methods[0].signature,
+            JsFunctionSignature(arguments: [
+                .init(identifier: "a", isVariadic: false),
+                .init(identifier: "b", isVariadic: false),
+            ])
+        )
+    }
+
+    func testCollectClassMethod_staticMethod() throws {
+        let node = parserTest(
+            """
+            class AClass {
+                static method() {
+                }
+            }
+            """
+        )
+
+        let classDecl: JsClassNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(classDecl.methods.count, 1)
+        XCTAssertEqual(classDecl.methods[0].identifier?.name, "method")
+        XCTAssertTrue(classDecl.methods[0].isStatic)
+        XCTAssertEqual(
+            classDecl.methods[0].signature,
+            JsFunctionSignature(arguments: [])
+        )
     }
 
     func testCollectFunction() throws {
@@ -57,6 +112,10 @@ class JsParserListenerTests: XCTestCase {
         let functionDecl: JsFunctionDeclarationNode = try XCTUnwrap(node.firstChild())
 
         XCTAssertEqual(functionDecl.identifier?.name, "test")
+        XCTAssertEqual(
+            functionDecl.signature,
+            JsFunctionSignature(arguments: [])
+        )
     }
 
     func testDontCollectNestedFunctions() throws {
@@ -184,6 +243,26 @@ class JsParserListenerTests: XCTestCase {
         let classNode: JsClassNode = try XCTUnwrap(node.firstChild())
 
         XCTAssertEqual(classNode.methods.first?.precedingComments.map(\.string), [
+            "// A comment\n",
+            "// Another comment\n"
+        ])
+    }
+
+    func testCollectClassConstructorComments() throws {
+        let input = """
+            class A {
+                // A comment
+                // Another comment
+                constructor() {
+                }
+            }
+            """
+        let comments = JsParser.parseComments(input: input)
+        let node = parserTest(input, comments: comments)
+
+        let classNode: JsClassNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(classNode.constructors.first?.precedingComments.map(\.string), [
             "// A comment\n",
             "// Another comment\n"
         ])

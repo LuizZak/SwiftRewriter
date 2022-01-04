@@ -2,6 +2,7 @@ import Foundation
 import JsGrammarModels
 import Utils
 import XCTest
+import TestCommons
 
 @testable import JsParser
 
@@ -41,10 +42,9 @@ class JsParserTests: XCTestCase {
         let classDecl: JsClassNode = try XCTUnwrap(node.firstChild())
 
         XCTAssertEqual(classDecl.identifier?.name, "AClass")
-        XCTAssertEqual(classDecl.methods.count, 3)
-        XCTAssertEqual(classDecl.methods[0].identifier?.name, "constructor")
-        XCTAssertEqual(classDecl.methods[1].identifier?.name, "method")
-        XCTAssertEqual(classDecl.methods[2].identifier?.name, "getProperty")
+        XCTAssertEqual(classDecl.methods.count, 2)
+        XCTAssertEqual(try classDecl.methods[try: 0].identifier?.name, "method")
+        XCTAssertEqual(try classDecl.methods[try: 1].identifier?.name, "getProperty")
     }
 
     func testParseFunction() throws {

@@ -463,7 +463,7 @@ let package = Package(
         .testTarget(
             name: "JsParserTests",
             dependencies: [
-                "JsParser",
+                "JsParser", "TestCommons",
             ],
             path: "Tests/Frontend/JavaScript/JsParserTests",
             resources: [

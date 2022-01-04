@@ -56,11 +56,13 @@ internal class JsParserListener: JavaScriptParserBaseListener {
             nodeType: JsClassNode.self,
             collectComments: true
         )
+        /*
         mapper.addRuleMap(
             rule: P.MethodDefinitionContext.self,
             nodeType: JsMethodDefinitionNode.self,
             collectComments: true
         )
+        */
         mapper.addRuleMap(
             rule: P.FunctionDeclarationContext.self,
             nodeType: JsFunctionDeclarationNode.self,
@@ -138,17 +140,43 @@ internal class JsParserListener: JavaScriptParserBaseListener {
     }
 
     override func enterMethodDefinition(_ ctx: JavaScriptParser.MethodDefinitionContext) {
-        guard let methodNode = context.currentContextNode(as: JsMethodDefinitionNode.self) else {
-            return
+        let methodName = ctx.propertyName()?.identifierName()?.identifier()
+
+        // TODO: Reduce duplication of code here
+
+        if methodName?.getText() == "constructor" {
+            let methodNode = JsConstructorDefinitionNode()
+            context.pushContext(node: methodNode)
+
+            nodeFactory.updateSourceLocation(for: methodNode, with: ctx)
+            methodNode.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
+
+            if let methodName = methodName {
+                let identifierNode = nodeFactory.makeIdentifier(from: methodName)
+                methodNode.addChild(identifierNode)
+            }
+            
+            methodNode.signature = functionSignature(from: ctx.formalParameterList())
+            methodNode.isStatic = context.isStaticContext
+        } else {
+            let methodNode = JsMethodDefinitionNode()
+            context.pushContext(node: methodNode)
+
+            nodeFactory.updateSourceLocation(for: methodNode, with: ctx)
+            methodNode.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
+
+            if let methodName = methodName {
+                let identifierNode = nodeFactory.makeIdentifier(from: methodName)
+                methodNode.addChild(identifierNode)
+            }
+            
+            methodNode.signature = functionSignature(from: ctx.formalParameterList())
+            methodNode.isStatic = context.isStaticContext
         }
-        guard let methodName = ctx.propertyName()?.identifierName()?.identifier() else {
-            return
-        }
-        
-        let identifierNode = nodeFactory.makeIdentifier(from: methodName)
-        methodNode.addChild(identifierNode)
-        methodNode.signature = functionSignature(from: ctx.formalParameterList())
-        methodNode.isStatic = context.isStaticContext
+    }
+
+    override func exitMethodDefinition(_ ctx: JavaScriptParser.MethodDefinitionContext) {
+        context.popContext() // JsMethodDefinitionNode | JsConstructorDefinitionNode
     }
 
     override func enterFunctionDeclaration(_ ctx: JavaScriptParser.FunctionDeclarationContext) {

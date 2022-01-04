@@ -81,6 +81,9 @@ public class JavaScriptIntentionCollector {
         
         visitor.visitClosure = { node in
             switch node {
+            case let n as JsConstructorDefinitionNode:
+                self.visitJsConstructorDefinitionNode(n)
+
             case let n as JsMethodDefinitionNode:
                 self.visitJsMethodDefinitionNode(n)
                 
@@ -166,6 +169,31 @@ public class JavaScriptIntentionCollector {
         if context.currentContext(as: GlobalFunctionGenerationIntention.self) != nil {
             context.popContext() // GlobalFunctionGenerationIntention
         }
+    }
+
+    private func visitJsConstructorDefinitionNode(_ node: JsConstructorDefinitionNode) {
+        guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
+            return
+        }
+
+        guard let sign = signatureConverter().generateDefinitionSignature(from: node) else {
+            return
+        }
+
+        let intention = InitGenerationIntention(parameters: sign.parameters, source: node)
+
+        configure(node: node, intention: intention)
+
+        if let body = node.body {
+            let methodBodyIntention = FunctionBodyIntention(body: [], source: body)
+            intention.functionBody = methodBodyIntention
+
+            configure(node: body, intention: methodBodyIntention)
+
+            delegate?.reportForLazyParsing(.initializer(methodBodyIntention, intention))
+        }
+
+        ctx.addConstructor(intention)
     }
 
     private func visitJsMethodDefinitionNode(_ node: JsMethodDefinitionNode) {
@@ -305,6 +333,7 @@ extension JavaScriptIntentionCollector {
 public enum JavaScriptLazyParseItem {
     case globalFunction(FunctionBodyIntention, GlobalFunctionGenerationIntention)
     case method(FunctionBodyIntention, MethodGenerationIntention)
+    case initializer(FunctionBodyIntention, InitGenerationIntention)
     case classProperty(PropertyInitialValueGenerationIntention, PropertyGenerationIntention)
     case globalVar(GlobalVariableInitialValueIntention, GlobalVariableGenerationIntention)
 }

@@ -253,6 +253,7 @@ public final class JavaScript2SwiftRewriter {
             let source: Source
             switch item {
             case .globalFunction(let s, _, _),
+                .initializer(let s, _, _),
                 .method(let s, _, _),
                 .globalVar(let s, _, _),
                 .classProperty(let s, _, _):
@@ -293,6 +294,21 @@ public final class JavaScript2SwiftRewriter {
                             )
                     
                     case let .method(_, funcBody, method):
+                        guard let sourceBody = funcBody.typedSource else {
+                            return
+                        }
+                        guard let body = sourceBody.body else {
+                            return
+                        }
+                        
+                        funcBody.body =
+                            reader.parseStatements(
+                                body: body,
+                                comments: sourceBody.comments,
+                                typeContext: method.type
+                            )
+                    
+                    case let .initializer(_, funcBody, method):
                         guard let sourceBody = funcBody.typedSource else {
                             return
                         }
@@ -388,6 +404,10 @@ public final class JavaScript2SwiftRewriter {
                 value.expression = typePropagator.propagate(value.expression)
 
                 continue
+
+            case .initializer(_, let body, let intention):
+                functionBody = body
+                typeResolver = typeResolverDelegate.makeContext(forInit: intention).typeResolver
 
             case .method(_, let body, let intention):
                 functionBody = body
@@ -811,6 +831,9 @@ fileprivate extension JavaScript2SwiftRewriter {
             case .globalFunction(let body, let intention):
                 lazyParse.append(.globalFunction(source, body, intention))
             
+            case .initializer(let body, let intention):
+                lazyParse.append(.initializer(source, body, intention))
+
             case .method(let body, let intention):
                 lazyParse.append(.method(source, body, intention))
             }
@@ -828,6 +851,7 @@ fileprivate extension JavaScript2SwiftRewriter {
 
 private enum LazyParseItem {
     case globalFunction(Source, FunctionBodyIntention, GlobalFunctionGenerationIntention)
+    case initializer(Source, FunctionBodyIntention, InitGenerationIntention)
     case method(Source, FunctionBodyIntention, MethodGenerationIntention)
     case classProperty(Source, PropertyInitialValueGenerationIntention, PropertyGenerationIntention)
     case globalVar(Source, GlobalVariableInitialValueIntention, GlobalVariableGenerationIntention)
