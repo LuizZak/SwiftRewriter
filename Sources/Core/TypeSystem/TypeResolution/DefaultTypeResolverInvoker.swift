@@ -2,6 +2,10 @@ import SwiftAST
 import Intentions
 import Utils
 
+#if canImport(ObjectiveC)
+import ObjectiveC
+#endif
+
 public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     var globals: DefinitionsSource
     var typeSystem: IntentionCollectionTypeSystem
