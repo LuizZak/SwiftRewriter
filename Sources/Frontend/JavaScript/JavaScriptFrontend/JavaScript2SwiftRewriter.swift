@@ -227,6 +227,9 @@ public final class JavaScript2SwiftRewriter {
                 )
             }
         }
+        
+        // Keep file ordering of intentions
+        intentionCollection.sortFileIntentions()
     }
 
     /// Parses all statements now, with proper type information available.

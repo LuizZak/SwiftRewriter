@@ -89,6 +89,23 @@ public final class JavaScriptObjectGenerator {
             return intention
         }())
 
+        type.addConstructor({
+            let intention = InitGenerationIntention(parameters: [
+                ParameterSignature(
+                    label: nil,
+                    name: "values",
+                    type: .dictionary(key: .string, value: .any)
+                )
+            ])
+            intention.functionBody = FunctionBodyIntention(
+                body: [
+                    .expression(.identifier("self").dot("values").assignment(op: .assign, rhs: .identifier("values")))
+                ]
+            )
+
+            return intention
+        }())
+
         return type
     }
 }

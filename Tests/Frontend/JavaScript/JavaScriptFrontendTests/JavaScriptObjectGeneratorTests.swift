@@ -30,6 +30,9 @@ class JavaScriptObjectGeneratorTests: XCTestCase {
                         self.values[key] = value
                     }
                 }
+                init(_ values: [String: Any]) {
+                    self.values = values
+                }
             }
             """
         )

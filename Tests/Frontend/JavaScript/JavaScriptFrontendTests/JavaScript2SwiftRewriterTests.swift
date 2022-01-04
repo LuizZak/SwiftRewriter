@@ -233,6 +233,9 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
                         self.values[key] = value
                     }
                 }
+                init(_ values: [String: Any]) {
+                    self.values = values
+                }
             }
             // End of file JavaScriptObject.swift
             var object: Any = JavaScriptObject(["x": 1, "y": 2])
@@ -356,6 +359,57 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
                 }
             }
             """
+        )
+    }
+
+    func testRewrite_detectJavaScriptObjectType() {
+        assertRewrite(
+            js: """
+            function f() {
+                var object = {
+                    x: 1,
+                    y: 2
+                }
+            }
+            """,
+            swift: """
+            @dynamicMemberLookup
+            final class JavaScriptObject: ExpressibleByDictionaryLiteral {
+                private var values: [String: Any]
+
+                subscript(dynamicMember member: String) -> Any? {
+                    return values[member]
+                }
+
+                init() {
+                    // type: [String: Any]
+                    self.values = [:]
+                }
+                init(dictionaryLiteral elements: (String, Any)...) {
+                    for (key, value) in elements {
+                        // type: <<error type>>
+                        self.values[key] = value
+                    }
+                }
+                init(_ values: [String: Any]) {
+                    // type: [String: Any]
+                    self.values = values
+                }
+            }
+            // End of file JavaScriptObject.swift
+            func f() {
+                // decl type: JavaScriptObject
+                // init type: JavaScriptObject
+                let object = JavaScriptObject(["x": 1, "y": 2])
+            }
+            // End of file test.swift
+            """,
+            options: 
+                .default
+                .with(\.outputExpressionTypes, true),
+            rewriterSettings:
+                .default
+                .with(\.emitJavaScriptObject, true)
         )
     }
 }
