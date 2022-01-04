@@ -74,25 +74,17 @@ class PropertyAsMethodAccessCorrectingExpressionPassTests: ExpressionPassTestCas
             .build()
         typeSystem.addType(type)
 
-        assertTransform(
+        assertNoTransform(
             expression:
-                .identifier("a").typed("A")
-                .dot("aClosure").call(),
-            into:
                 .identifier("a").typed("A")
                 .dot("aClosure").call()
         )
-        assertDidNotNotifyChange()
 
-        assertTransform(
+        assertNoTransform(
             expression:
-                .identifier("a").typed("A")
-                .dot("anOptionalClosure").optional().call(),
-            into:
                 .identifier("a").typed("A")
                 .dot("anOptionalClosure").optional().call()
         )
-        assertDidNotNotifyChange()
     }
 
     func testDontTransformClosureCallsLookingThroughTypeAliases() {
@@ -113,24 +105,16 @@ class PropertyAsMethodAccessCorrectingExpressionPassTests: ExpressionPassTestCas
             originalType: .optional(.swiftBlock(returnType: .void, parameters: []))
         )
 
-        assertTransform(
+        assertNoTransform(
             expression:
-                .identifier("a").typed("A")
-                .dot("aClosure").call(),
-            into:
                 .identifier("a").typed("A")
                 .dot("aClosure").call()
         )
-        assertDidNotNotifyChange()
 
-        assertTransform(
+        assertNoTransform(
             expression:
-                .identifier("a").typed("A")
-                .dot("anOptionalClosure").optional().call(),
-            into:
                 .identifier("a").typed("A")
                 .dot("anOptionalClosure").optional().call()
         )
-        assertDidNotNotifyChange()
     }
 }

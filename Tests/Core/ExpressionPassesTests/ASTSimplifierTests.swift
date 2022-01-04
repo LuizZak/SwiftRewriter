@@ -47,19 +47,9 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             ]
             )
 
-        assertTransform(
-            statement: statement,
-            into: .compound([
-                .do([
-                    .expression(
-                        .identifier("a")
-                    )
-                ]),
-                .expression(.identifier("b")),
-            ]
-            )
+        assertNoTransform(
+            statement: statement
         )
-        assertDidNotNotifyChange()
     }
 
     func testMaintainStatementLabelWhileSimplifyingSingleStatementDos() {
@@ -273,13 +263,10 @@ class ASTSimplifierTests: ExpressionPassTestCase {
     }
 
     func testDontSimplifyParenthesisInBinaryExpression() {
-        assertTransform(
+        assertNoTransform(
             // (0) + 1
-            expression: .parens(.constant(0)).binary(op: .add, rhs: .constant(1)),
-            // (0) + 1
-            into: .parens(.constant(0)).binary(op: .add, rhs: .constant(1))
+            expression: .parens(.constant(0)).binary(op: .add, rhs: .constant(1))
         )
-        assertDidNotNotifyChange()
     }
 
     /// Tests that spurious break statements as the last statement of a switch
@@ -326,7 +313,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
 
     /// Asserts that we don't remove break statements from empty switch cases
     func testDontRemoveBreakFromEmptyCases() {
-        assertTransform(
+        assertNoTransform(
             statement:
                 Statement
                 .switch(
@@ -342,24 +329,8 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     default: [
                         Statement.break()
                     ]
-                ),
-            into:
-                .switch(
-                    .constant(0),
-                    cases: [
-                        SwitchCase(
-                            patterns: [],
-                            statements: [
-                                Statement.break()
-                            ]
-                        )
-                    ],
-                    default: [
-                        Statement.break()
-                    ]
                 )
         )
-        assertDidNotNotifyChange()
     }
 
     func testSplitTopLevelTupleExpressions() {

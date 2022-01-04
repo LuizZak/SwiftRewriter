@@ -47,6 +47,7 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
     open override func setUp() {
         super.setUp()
 
+        adapter = Adapter()
         typeSystem = TypeSystem()
         notified = false
         intentionContext = nil

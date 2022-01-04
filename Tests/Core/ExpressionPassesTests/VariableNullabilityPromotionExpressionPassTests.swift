@@ -57,17 +57,9 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
         let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
         _ = resolver.resolveTypes(in: statement)
 
-        assertTransform(
-            statement: statement,
-            into: .compound([
-                .variableDeclaration(
-                    identifier: "a",
-                    type: SwiftType.nullabilityUnspecified("A"),
-                    initialization: nil
-                )
-            ])
+        assertNoTransform(
+            statement: statement
         )
-        assertDidNotNotifyChange()
     }
 
     func testDontPromoteNilInitializedVariables() {
@@ -84,17 +76,9 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
         let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
         _ = resolver.resolveTypes(in: statement)
 
-        assertTransform(
-            statement: statement,
-            into: .compound([
-                .variableDeclaration(
-                    identifier: "a",
-                    type: SwiftType.nullabilityUnspecified("A"),
-                    initialization: .constant(.nil)
-                )
-            ])
+        assertNoTransform(
+            statement: statement
         )
-        assertDidNotNotifyChange()
     }
 
     func testDontPromoteWeakVariables() {
@@ -109,18 +93,9 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                 )
             ])
 
-        assertTransform(
-            statement: statement,
-            into: .compound([
-                .variableDeclaration(
-                    identifier: "a",
-                    type: SwiftType.optional("A"),
-                    ownership: .weak,
-                    initialization: .identifier("_a").typed("A")
-                )
-            ])
+        assertNoTransform(
+            statement: statement
         )
-        assertDidNotNotifyChange()
     }
 
     func testDontPromoteErrorTypedInitializedVariables() {
@@ -137,17 +112,9 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
         let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
         _ = resolver.resolveTypes(in: statement)
 
-        assertTransform(
-            statement: statement,
-            into: .compound([
-                .variableDeclaration(
-                    identifier: "a",
-                    type: SwiftType.nullabilityUnspecified("A"),
-                    initialization: .identifier("_a").makeErrorTyped()
-                )
-            ])
+        assertNoTransform(
+            statement: statement
         )
-        assertDidNotNotifyChange()
     }
 
     func testAvoidPromotingVariableLaterAssignedAsNil() {
@@ -168,21 +135,9 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
         let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
         _ = resolver.resolveTypes(in: statement)
 
-        assertTransform(
-            statement: statement,
-            into: .compound([
-                .variableDeclaration(
-                    identifier: "a",
-                    type: .nullabilityUnspecified("A"),
-                    initialization: .identifier("_a").typed("A")
-                ),
-                .expression(
-                    .identifier("a")
-                        .assignment(op: .assign, rhs: .constant(.nil))
-                ),
-            ])
+        assertNoTransform(
+            statement: statement
         )
-        assertDidNotNotifyChange()
     }
 
     func testAvoidPromotingVariableInitializedAsNilAndLaterAssignedAsNonNil() {
@@ -203,20 +158,8 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
         let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
         _ = resolver.resolveTypes(in: statement)
 
-        assertTransform(
-            statement: statement,
-            into: .compound([
-                .variableDeclaration(
-                    identifier: "a",
-                    type: .nullabilityUnspecified("A"),
-                    initialization: .constant(.nil)
-                ),
-                .expression(
-                    .identifier("a")
-                        .assignment(op: .assign, rhs: .identifier("_a").typed("A"))
-                ),
-            ])
+        assertNoTransform(
+            statement: statement
         )
-        assertDidNotNotifyChange()
     }
 }

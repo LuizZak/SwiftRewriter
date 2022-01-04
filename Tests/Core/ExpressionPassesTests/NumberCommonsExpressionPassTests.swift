@@ -29,14 +29,10 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
     func testDoNotConvertNonNumericCasts() {
         let exp = Expression.constant(1).casted(to: .typeName("ffloaty"))
 
-        assertTransform(
+        assertNoTransform(
             // 1 as? ffloaty
-            expression: exp,
-            // 1 as? ffloaty
-            into: .constant(1).casted(to: .typeName("ffloaty"))
+            expression: exp
         )
-
-        assertDidNotNotifyChange()
     }
 
     func testConvertFloatMethods() {
@@ -130,13 +126,10 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
     }
 
     func testDontConvertLiteralExpressions() {
-        assertTransform(
+        assertNoTransform(
             // 1
-            expression: .constant(1).typed(.int).typed(expected: .float),
-            // 1
-            into: .constant(1)
+            expression: .constant(1).typed(.int).typed(expected: .float)
         )
-        assertDidNotNotifyChange()
     }
 
     func testConvertVariableDeclarations() {

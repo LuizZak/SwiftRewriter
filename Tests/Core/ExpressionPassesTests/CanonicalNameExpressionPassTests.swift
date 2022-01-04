@@ -46,39 +46,29 @@ class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
     }
 
     func testDontTransformUnknownTypeName() {
-        assertTransform(
-            expression: .identifier("Unexisting"),
-            into: .identifier("Unexisting")
+        assertNoTransform(
+            expression: .identifier("Unexisting")
         )
-        assertDidNotNotifyChange()
     }
 
     func testDontTransformIdentifiersWhichFeaturesNonTypeDefinitions() {
-        assertTransform(
+        assertNoTransform(
             expression:
                 Expression
                 .identifier("NonCanon")
-                .settingDefinition(CodeDefinition.forSetterValue(named: "setter", type: .int)),
-            into:
-                Expression
-                .identifier("NonCanon")
+                .settingDefinition(CodeDefinition.forSetterValue(named: "setter", type: .int))
         )
-        assertDidNotNotifyChange()
 
-        assertTransform(
+        assertNoTransform(
             expression:
                 Expression
                 .identifier("NonCanon")
                 .settingDefinition(
                     .forGlobalVariable(name: "global", isConstant: false, type: .int)
-                ),
-            into:
-                Expression
-                .identifier("NonCanon")
+                )
         )
-        assertDidNotNotifyChange()
 
-        assertTransform(
+        assertNoTransform(
             expression:
                 Expression
                 .identifier("NonCanon")
@@ -89,46 +79,30 @@ class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
                             .build()
                             .knownProperties[0]
                     )
-                ),
-            into:
-                Expression
-                .identifier("NonCanon")
+                )
         )
-        assertDidNotNotifyChange()
     }
 
     func testDontTransformIdentifiersWhichFeaturesNonMetatypeResolvedType() {
-        assertTransform(
+        assertNoTransform(
             expression:
                 Expression
                 .identifier("NonCanon")
-                .typed(.int),
-            into:
-                Expression
-                .identifier("NonCanon")
+                .typed(.int)
         )
-        assertDidNotNotifyChange()
 
-        assertTransform(
+        assertNoTransform(
             expression:
                 Expression
                 .identifier("NonCanon")
-                .typed(.string),
-            into:
-                Expression
-                .identifier("NonCanon")
+                .typed(.string)
         )
-        assertDidNotNotifyChange()
 
-        assertTransform(
+        assertNoTransform(
             expression:
                 Expression
                 .identifier("NonCanon")
-                .typed(.optional(.metatype(for: "NonCanon"))),
-            into:
-                Expression
-                .identifier("NonCanon")
+                .typed(.optional(.metatype(for: "NonCanon")))
         )
-        assertDidNotNotifyChange()
     }
 }

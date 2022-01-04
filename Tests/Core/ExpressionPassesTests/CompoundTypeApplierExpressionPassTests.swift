@@ -132,14 +132,12 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
         assertNotifiedChange()
 
         // This should not be transformed!
-        assertTransform(
+        assertNoTransform(
             expression:
                 .identifier("Date")
                 .typed(.metatype(for: "Date"))
-                .dot("class").call(),
-            into: .identifier("Date").dot("class").call()
+                .dot("class").call()
         )
-        assertDidNotNotifyChange()
     }
 
     func testCGPointMake() {

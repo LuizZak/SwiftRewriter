@@ -108,13 +108,10 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
         exp.asPostfix?.exp.resolvedType = .implicitUnwrappedOptional(.typeName("A"))
         exp.resolvedType = .optional(.typeName("Int"))
 
-        assertTransform(
+        assertNoTransform(
             // { a.b }
-            statement: .expression(exp),
-            // { a.b }
-            into: .expression(.identifier("a").dot("b"))
+            statement: .expression(exp)
         )
-        assertDidNotNotifyChange()
     }
 
     func testIgnoreNonOptionalValues() {
@@ -125,13 +122,10 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
         exp.subExpressions[0].resolvedType =
             .swiftBlock(returnType: .void, parameters: [])
 
-        assertTransform(
+        assertNoTransform(
             // { a() }
-            statement: .expression(exp),
-            // { a() }
-            into: .expression(.postfix(.identifier("a"), .functionCall()))
+            statement: .expression(exp)
         )
-        assertDidNotNotifyChange()
     }
 
     func testModifyExpressionsInsideOtherExpressions() {

@@ -59,23 +59,9 @@ class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
         let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
         _ = resolver.resolveTypes(in: body)
 
-        assertTransform(
-            statement: body,
-            into: CompoundStatement(statements: [
-                Statement.variableDeclaration(
-                    identifier: "test",
-                    type: .int,
-                    isConstant: false,
-                    initialization: .constant(0)
-                ),
-                Statement.expression(
-                    Expression
-                        .identifier("test")
-                        .assignment(op: .equals, rhs: .constant(1))
-                ),
-            ])
+        assertNoTransform(
+            statement: body
         )
-        assertDidNotNotifyChange()
     }
 
     // Weak variables cannot be 'let' constants; make sure we detect that and skip
@@ -94,18 +80,8 @@ class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
         let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
         _ = resolver.resolveTypes(in: body)
 
-        assertTransform(
-            statement: body,
-            into: CompoundStatement(statements: [
-                Statement.variableDeclaration(
-                    identifier: "test",
-                    type: .int,
-                    ownership: .weak,
-                    isConstant: false,
-                    initialization: .constant(0)
-                )
-            ])
+        assertNoTransform(
+            statement: body
         )
-        assertDidNotNotifyChange()
     }
 }
