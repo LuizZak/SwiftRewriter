@@ -22,8 +22,6 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
                 .identifier("Float")
                 .call([.unlabeled(.constant(1))])
         )
-
-        assertNotifiedChange()
     }
 
     func testDoNotConvertNonNumericCasts() {
@@ -42,7 +40,6 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
             // floor(1)
             into: .identifier("floor").call([.constant(1)])
         )
-        assertNotifiedChange()
 
         XCTAssertEqual(
             res.asPostfix?.functionCall?.subExpressions[0].expectedType,
@@ -55,7 +52,6 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
             // ceil(1)
             into: .identifier("ceil").call([.constant(1)])
         )
-        assertNotifiedChange()
 
         XCTAssertEqual(
             res.asPostfix?.functionCall?.subExpressions[0].expectedType,
@@ -68,7 +64,6 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
             // round(1)
             into: .identifier("round").call([.constant(1)])
         )
-        assertNotifiedChange()
 
         XCTAssertEqual(
             res.asPostfix?.functionCall?.subExpressions[0].expectedType,
@@ -81,7 +76,6 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
             // fabs(1)
             into: .identifier("fabs").call([.constant(1)])
         )
-        assertNotifiedChange()
 
         XCTAssertEqual(
             res.asPostfix?.functionCall?.subExpressions[0].expectedType,
@@ -96,7 +90,6 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
             // min(1, 2)
             into: .identifier("min").call([.constant(1), .constant(2)])
         )
-        assertNotifiedChange()
 
         XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[0].expectedType, .float)
         XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[1].expectedType, .float)
@@ -107,7 +100,6 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
             // max(1, 2)
             into: .identifier("max").call([.constant(1), .constant(2)])
         )
-        assertNotifiedChange()
 
         XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[0].expectedType, .float)
         XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[1].expectedType, .float)
@@ -122,7 +114,6 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
             // Float(a)
             into: .identifier("Float").call([.identifier("a")])
         )
-        assertNotifiedChange()
     }
 
     func testDontConvertLiteralExpressions() {
@@ -147,7 +138,6 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
                 initialization: .identifier("Int").call([.identifier("b")])
             )
         )
-        assertNotifiedChange()
     }
 
     func testLookIntoTypealiasesForNumericalCasts() {
@@ -160,6 +150,5 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
             // GLint(a)
             into: .identifier("GLint").call([.identifier("a")])
         )
-        assertNotifiedChange()
     }
 }

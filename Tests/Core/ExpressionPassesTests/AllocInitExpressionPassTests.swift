@@ -16,8 +16,6 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
             expression: "[[ClassName alloc] init]",
             into: .identifier("ClassName").call()
         )
-
-        assertNotifiedChange()
     }
 
     func testInitWith() {
@@ -25,8 +23,6 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
             expression: "[[ClassName alloc] initWithName:@\"abc\"]",
             into: .identifier("ClassName").call([.labeled("name", .constant("abc"))])
         )
-
-        assertNotifiedChange()
     }
 
     func testInitWithCompoundName() {
@@ -41,8 +37,6 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
                 ])
         )
 
-        assertNotifiedChange()
-
         assertTransformParsed(
             expression: "[[ClassName alloc] initWith:@\"John\" secondName:@\"Doe\"]",
             into:
@@ -53,8 +47,6 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
                     .labeled("secondName", .constant("Doe")),
                 ])
         )
-
-        assertNotifiedChange()
     }
 
     func testSuperInitWith() {
@@ -66,18 +58,10 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
                 .dot("init").call([.labeled("frame", .identifier("frame"))])
         )
 
-        assertNotifiedChange()
-
         // Test we leave simple super.init() calls alone
-        assertTransformParsed(
-            expression: "[super init]",
-            into:
-                Expression
-                .identifier("super")
-                .dot("init").call()
+        assertNoTransformParsed(
+            expression: "[super init]"
         )
-
-        assertDidNotNotifyChange()
     }
 
     /// Tests `[[self alloc] init]` where `self` is a metatype results in a
@@ -92,8 +76,6 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
                 .dot("init").call(),
             into: typeNameExp.dot("init").call()
         )
-
-        assertNotifiedChange()
     }
 
     /// Tests `[[super alloc] init]` where `super` is a metatype results in a
@@ -108,8 +90,6 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
                 .dot("init").call(),
             into: typeNameExp.dot("init").call()
         )
-
-        assertNotifiedChange()
     }
 
     /// Tests `[[[self alloc] initWithThing:[...]]` where `self` is a metatype
@@ -125,8 +105,6 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
                 .call([.unlabeled(.constant(1))]),
             into: typeNameExp.dot("init").call([.labeled("thing", .constant(1))])
         )
-
-        assertNotifiedChange()
     }
 
     /// Tests `[[[super alloc] initWithThing:[...]]` where `super` is a metatype
@@ -142,8 +120,6 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
                 .call([.unlabeled(.constant(1))]),
             into: typeNameExp.dot("init").call([.labeled("thing", .constant(1))])
         )
-
-        assertNotifiedChange()
     }
 
     /// Tests `[<nullable-exp> initWithThing:[...]]` transforms properly into
@@ -159,7 +135,5 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
                 .call([.unlabeled(.constant(1))]),
             into: typeNameExp.optional().dot("init").call([.labeled("thing", .constant(1))])
         )
-
-        assertNotifiedChange()
     }
 }

@@ -40,7 +40,6 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                 )
             ])
         )
-        assertNotifiedChange()
     }
 
     func testDontPromoteUninitializedConstants() {

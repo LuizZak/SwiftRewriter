@@ -99,7 +99,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
             // a ?? 100
             into: expMaker().binary(op: .nullCoalesce, rhs: .constant(0))
         )
-        assertNotifiedChange()
     }
 
     func testNullCoalesceOnLogicalOrExpression_dontConvertOnBooleanOperands() {
@@ -131,7 +130,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0)))
                 .binary(op: .add, rhs: .identifier("b"))
         )
-        assertNotifiedChange()
     }
 
     /// Tests null-coalescing on deep nested binary expressions
@@ -161,7 +159,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 )
                 .binary(op: .add, rhs: .identifier("c"))
         )
-        assertNotifiedChange()
     }
 
     /// Tests that arithmetic comparisons (<=, <, >=, >) where lhs and rhs are
@@ -181,7 +178,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0)))
                 .binary(op: .lessThan, rhs: .identifier("b"))
         )
-        assertNotifiedChange()
     }
 
     /// Tests the corrector applies an integer correction to automatically null-coalesce
@@ -199,7 +195,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
             // (a.b ?? 0)
             into: .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0)))
         )
-        assertNotifiedChange()
     }
 
     /// Tests the corrector applies a floating-point correction to automatically
@@ -234,7 +229,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
             // a.b == true
             into: expMaker().binary(op: .equals, rhs: .constant(true))
         )
-        assertNotifiedChange()
     }
 
     /// On general arbitrary boolean expressions (mostly binary expressions over
@@ -263,7 +257,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                     rhs: rhsMaker()
                 )
         )
-        assertNotifiedChange()
     }
 
     /// Also correct nil-style boolean expressions
@@ -291,7 +284,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                     rhs: .parens(rhsMaker().binary(op: .unequals, rhs: .constant(.nil)))
                 )
         )
-        assertNotifiedChange()
     }
 
     /// Also correct unary boolean checks
@@ -310,7 +302,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
             // (a == nil)
             into: .parens(expMaker().binary(op: .equals, rhs: .constant(.nil)))
         )
-        assertNotifiedChange()
     }
 
     /// Tests inserting null-coalesces on optional types contained in unary
@@ -334,7 +325,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                     .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0)))
                 )
         )
-        assertNotifiedChange()
     }
 
     /// Tests correcting receiving nullable struct on a non-null struct context,
@@ -356,7 +346,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
             // (a ?? A())
             into: .parens(expMaker().binary(op: .nullCoalesce, rhs: .identifier("A").call()))
         )
-        assertNotifiedChange()
     }
 
     func testDontCorrectNonnullStructWithNullabilityUnspecifiedStructValue() {
@@ -394,7 +383,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 funcMaker(.parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0))))
             )
         )
-        assertNotifiedChange()
     }
 
     /// Tests that base expressions (i.e. those that form a complete statement,
@@ -424,7 +412,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                         ])
                 )
         )
-        assertNotifiedChange()
     }
 
     /// Tests we don't correct base expressions for assignment expressions that
@@ -505,7 +492,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 .parens(expMaker().binary(op: .nullCoalesce, rhs: .identifier("B").call()))
                 .dot("c").call()
         )
-        assertNotifiedChange()
 
         XCTAssertEqual(res.resolvedType, .int)
         XCTAssertEqual(
@@ -581,7 +567,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 body: []
             )
         )
-        assertNotifiedChange()
     }
 
     /// On boolean expressions that are unary-reversed ("!<exp>"), we simply drop
@@ -604,7 +589,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 body: []
             )
         )
-        assertNotifiedChange()
     }
 
     /// In Objective-C, numbers can be used in place of an if expression statement,
@@ -627,7 +611,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 body: []
             )
         )
-        assertNotifiedChange()
     }
 
     /// Negated numeric expressions simply compare as equals to zero.
@@ -649,7 +632,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 body: []
             )
         )
-        assertNotifiedChange()
     }
 
     /// Same as above, but testing an optional value instead.
@@ -671,7 +653,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 body: []
             )
         )
-        assertNotifiedChange()
     }
 
     /// For otherwise unknown optional expressions, replace check
@@ -694,7 +675,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 body: []
             )
         )
-        assertNotifiedChange()
     }
 
     /// For otherwise unknown optional expressions, replace check
@@ -718,7 +698,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 body: []
             )
         )
-        assertNotifiedChange()
     }
 
     /// For unknown typed expressions, perform no attempts to correct.
@@ -758,7 +737,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 body: []
             )
         )
-        assertNotifiedChange()
     }
 
     /// In Objective-C, numbers can be used in place of a while expression statement,
@@ -781,7 +759,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 body: []
             )
         )
-        assertNotifiedChange()
     }
 
     /// Same as above, but testing an optional value instead.
@@ -803,7 +780,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 body: []
             )
         )
-        assertNotifiedChange()
     }
 
     /// For otherwise unknown optional expressions, replace check
@@ -826,7 +802,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 body: []
             )
         )
-        assertNotifiedChange()
     }
 
     /// For unknown typed expressions, perform no attempts to correct.
@@ -870,7 +845,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 ]
             )
         )
-        assertNotifiedChange()
     }
 
     /// Same as above, but as a member access.
@@ -897,7 +871,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 ]
             )
         )
-        assertNotifiedChange()
     }
 
     /// Use the member name of a nullable-method invocation as the name of the
@@ -925,7 +898,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 ]
             )
         )
-        assertNotifiedChange()
     }
 
     /// Correct method invocation returns as well by assigning the return value
@@ -954,7 +926,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 ]
             )
         )
-        assertNotifiedChange()
     }
 
     /// Tests non-null arguments with nullable scalar types are not corrected to
@@ -990,7 +961,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                     )
             )
         )
-        assertNotifiedChange()
     }
 
     /// Make sure we don't correct passing a nullable value to a nullable parameter
@@ -1060,7 +1030,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
             // (a ?? Value())
             into: .parens(expMaker().binary(op: .nullCoalesce, rhs: .identifier("Value").call()))
         )
-        assertNotifiedChange()
     }
 
     func testDontRemoveNullableAccessFromCastExpressions() {
@@ -1085,7 +1054,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                     rhs: .identifier("CGFloat").call([.identifier("b")])
                 )
         )
-        assertNotifiedChange()
 
         // Int, CGFloat -> CGFloat(Int), CGFloat
         assertTransform(
@@ -1102,7 +1070,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                     rhs: .identifier("b")
                 )
         )
-        assertNotifiedChange()
 
         // Int64, Int32 -> Int64, Int64(Int32)
         assertTransform(
@@ -1119,7 +1086,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                     rhs: .identifier("Int64").call([.identifier("b")])
                 )
         )
-        assertNotifiedChange()
 
         // Int32, Int64 -> Int64(Int32), Int64
         assertTransform(
@@ -1136,7 +1102,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                     rhs: .identifier("b")
                 )
         )
-        assertNotifiedChange()
     }
 
     func testNoCastForSameBitWidthNumerics() {
@@ -1214,7 +1179,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                     ),
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testBreakSequentialAssignments_chainedMemberAccess() {
@@ -1256,7 +1220,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                     ),
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testBreakSequentialAssignmentsInVariableDeclaration() {
@@ -1298,7 +1261,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                     )
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testBreakSequentialAssignmentsInVariableDeclaration_chainedMemberAccess() {
@@ -1347,7 +1309,6 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                     )
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testDontBreakSequentialAssignmentsWithNonIdentifierLhs() {

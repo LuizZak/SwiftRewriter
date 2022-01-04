@@ -73,11 +73,9 @@ class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
         let exp = Expression.identifier("Enum_Case1")
         exp.resolvedType = .int
 
-        assertTransform(
+        assertNoTransform(
             // Enum_Case1
-            expression: exp,
-            // Enum_Case1
-            into: .identifier("Enum_Case1")
+            expression: exp
         )
     }
 }

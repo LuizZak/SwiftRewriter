@@ -26,7 +26,6 @@ class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
             expression: .identifier("NonCanon"),
             into: .identifier("Canon")
         )
-        assertNotifiedChange()
 
         assertTransform(
             expression: Expression.identifier("NonCanon").settingDefinition(
@@ -34,7 +33,6 @@ class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
             ),
             into: .identifier("Canon")
         )
-        assertNotifiedChange()
     }
 
     func testTransformCanonicalTypeNameWithMetatypeResolvedType() {
@@ -42,7 +40,6 @@ class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
             expression: Expression.identifier("NonCanon").typed(.metatype(for: "NonCanon")),
             into: .identifier("Canon")
         )
-        assertNotifiedChange()
     }
 
     func testDontTransformUnknownTypeName() {

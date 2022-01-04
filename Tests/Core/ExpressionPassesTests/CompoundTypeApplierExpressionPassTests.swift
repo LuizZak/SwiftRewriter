@@ -25,7 +25,6 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                 .dot("orange")
                 .typed("UIColor")
         )
-        assertNotifiedChange()
 
         assertTransform(
             expression:
@@ -40,24 +39,17 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                 .dot("red")
                 .typed("UIColor")
         )
-        assertNotifiedChange()
 
         // Test unrecognized cases are left alone
-        assertTransformParsed(
-            expression: "UIColor->redColor",
-            into: "UIColor.redColor"
+        assertNoTransformParsed(
+            expression: "UIColor->redColor"
         )
-        assertDidNotNotifyChange()
-        assertTransformParsed(
-            expression: "[UIColor redColor:@1]",
-            into: "UIColor.redColor(1)"
+        assertNoTransformParsed(
+            expression: "[UIColor redColor:@1]"
         )
-        assertDidNotNotifyChange()
-        assertTransformParsed(
-            expression: "[UIColor Color:@1]",
-            into: "UIColor.Color(1)"
+        assertNoTransformParsed(
+            expression: "[UIColor Color:@1]"
         )
-        assertDidNotNotifyChange()
     }
 
     func testConvertUIViewBooleanGetters() {
@@ -76,25 +68,21 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
             expression: makeGetter("opaque"),
             into: exp.dot("isOpaque")
         )
-        assertNotifiedChange()
 
         assertTransform(
             expression: makeGetter("hidden"),
             into: exp.dot("isHidden")
         )
-        assertNotifiedChange()
 
         assertTransform(
             expression: makeGetter("userInteractionEnabled"),
             into: exp.dot("isUserInteractionEnabled")
         )
-        assertNotifiedChange()
 
         assertTransform(
             expression: makeGetter("focused"),
             into: exp.dot("isFocused")
         )
-        assertNotifiedChange()
     }
 
     func testUIViewAnimateWithDuration() {
@@ -115,7 +103,6 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                     .labeled("animations", .block(body: [])),
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testStaticToConstructorTransformerLeniency() {
@@ -129,7 +116,6 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                 .dot("date").call(),
             into: .identifier("Date").call()
         )
-        assertNotifiedChange()
 
         // This should not be transformed!
         assertNoTransform(
@@ -149,7 +135,6 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                     .labeled("y", .constant(2)),
                 ])
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "abc = [[UIView alloc] initWithPoint:CGPointMake(1, 2)]",
@@ -170,7 +155,6 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                         ])
                 )
         )
-        assertNotifiedChange()
     }
 
     func testCGRectConversions() {
@@ -178,7 +162,6 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
             expression: "CGRectGetWidth(self.frame)",
             into: .identifier("self").dot("frame").dot("width")
         )
-        assertNotifiedChange()
     }
 
     func testCGRecsGetters() {
@@ -186,113 +169,83 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
             expression: "CGRectGetWidth(self.frame)",
             into: .identifier("self").dot("frame").dot("width")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGRectGetHeight(self.frame)",
             into: .identifier("self").dot("frame").dot("height")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGRectGetMinX(self.frame)",
             into: .identifier("self").dot("frame").dot("minX")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGRectGetMaxX(self.frame)",
             into: .identifier("self").dot("frame").dot("maxX")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGRectGetMinY(self.frame)",
             into: .identifier("self").dot("frame").dot("minY")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGRectGetMaxY(self.frame)",
             into: .identifier("self").dot("frame").dot("maxY")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGRectGetMidX(self.frame)",
             into: .identifier("self").dot("frame").dot("midX")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGRectGetMidY(self.frame)",
             into: .identifier("self").dot("frame").dot("midY")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGRectIsNull(self.frame)",
             into: .identifier("self").dot("frame").dot("isNull")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGRectIsEmpty(self.frame)",
             into: .identifier("self").dot("frame").dot("isEmpty")
         )
-        assertNotifiedChange()
 
         // Test transformations keep unrecognized members alone
-        assertTransformParsed(
-            expression: "CGRectGetWidth(self.frame, self.frame)",
-            into: "CGRectGetWidth(self.frame, self.frame)"
+        assertNoTransformParsed(
+            expression: "CGRectGetWidth(self.frame, self.frame)"
         )
-        assertDidNotNotifyChange()
-        assertTransformParsed(
-            expression: "CGRectGetHeight(self.frame, self.frame)",
-            into: "CGRectGetHeight(self.frame, self.frame)"
+        assertNoTransformParsed(
+            expression: "CGRectGetHeight(self.frame, self.frame)"
         )
-        assertDidNotNotifyChange()
-        assertTransformParsed(
-            expression: "CGRectGetMinX(self.frame, self.frame)",
-            into: "CGRectGetMinX(self.frame, self.frame)"
+        assertNoTransformParsed(
+            expression: "CGRectGetMinX(self.frame, self.frame)"
         )
-        assertDidNotNotifyChange()
-        assertTransformParsed(
-            expression: "CGRectGetMinY(self.frame, self.frame)",
-            into: "CGRectGetMinY(self.frame, self.frame)"
+        assertNoTransformParsed(
+            expression: "CGRectGetMinY(self.frame, self.frame)"
         )
-        assertDidNotNotifyChange()
-        assertTransformParsed(
-            expression: "CGRectGetMaxX(self.frame, self.frame)",
-            into: "CGRectGetMaxX(self.frame, self.frame)"
+        assertNoTransformParsed(
+            expression: "CGRectGetMaxX(self.frame, self.frame)"
         )
-        assertDidNotNotifyChange()
-        assertTransformParsed(
-            expression: "CGRectGetMaxY(self.frame, self.frame)",
-            into: "CGRectGetMaxY(self.frame, self.frame)"
+        assertNoTransformParsed(
+            expression: "CGRectGetMaxY(self.frame, self.frame)"
         )
-        assertDidNotNotifyChange()
-        assertTransformParsed(
-            expression: "CGRectGetMidX(self.frame, self.frame)",
-            into: "CGRectGetMidX(self.frame, self.frame)"
+        assertNoTransformParsed(
+            expression: "CGRectGetMidX(self.frame, self.frame)"
         )
-        assertDidNotNotifyChange()
-        assertTransformParsed(
-            expression: "CGRectGetMidY(self.frame, self.frame)",
-            into: "CGRectGetMidY(self.frame, self.frame)"
+        assertNoTransformParsed(
+            expression: "CGRectGetMidY(self.frame, self.frame)"
         )
-        assertDidNotNotifyChange()
-        assertTransformParsed(
-            expression: "CGRectIsNull(self.frame, self.frame)",
-            into: "CGRectIsNull(self.frame, self.frame)"
+        assertNoTransformParsed(
+            expression: "CGRectIsNull(self.frame, self.frame)"
         )
-        assertDidNotNotifyChange()
-        assertTransformParsed(
-            expression: "CGRectIsEmpty(self.frame, self.frame)",
-            into: "CGRectIsEmpty(self.frame, self.frame)"
+        assertNoTransformParsed(
+            expression: "CGRectIsEmpty(self.frame, self.frame)"
         )
-        assertDidNotNotifyChange()
     }
 
     func testCGRectIsNullWithCGRectMake() {
@@ -307,7 +260,6 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                     .labeled("height", .constant(4)),
                 ]).dot("isNull")
         )
-        assertNotifiedChange()
     }
 
     func testCGRectContainsRectWithCGRectMake() {
@@ -331,7 +283,6 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                         ])
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testCGRectContainsPointWithCGPointMake() {
@@ -353,7 +304,6 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                         ])
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testCGRectIntersection() {
@@ -366,7 +316,6 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                     .identifier("self").dot("frame")
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testCGRectIntersectsRect() {
@@ -379,7 +328,6 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                     .identifier("self").dot("frame")
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testCGRectOffset() {
@@ -393,7 +341,6 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                     .labeled("dy", .constant(2)),
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testCGRectInset() {
@@ -407,7 +354,6 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                     .labeled("dy", .constant(2)),
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testCGRectEqualToRect() {
@@ -420,7 +366,6 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                     .identifier("subview").dot("frame")
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testCGSizeMake() {
@@ -434,6 +379,5 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                     .labeled("height", .constant(2)),
                 ])
         )
-        assertNotifiedChange()
     }
 }

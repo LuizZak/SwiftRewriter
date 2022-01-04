@@ -37,6 +37,8 @@ public class EnumRewriterExpressionPass: ASTRewriterPass {
             
             result.resolvedType = .typeName(_enum.typeName)
             result.member?.memberDefinition = _case
+
+            notifyChange()
             
             return super.visitPostfix(result)
         }

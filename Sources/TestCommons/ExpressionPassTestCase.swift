@@ -54,7 +54,7 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
         container = nil
     }
 
-    public func assertNotifiedChange(file: StaticString = #filePath, line: UInt = #line) {
+    func assertNotifiedChange(file: StaticString = #filePath, line: UInt = #line) {
         if !notified {
             XCTFail(
                 """
@@ -65,9 +65,11 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
                 line: line
             )
         }
+
+        notified = false
     }
 
-    public func assertDidNotNotifyChange(file: StaticString = #filePath, line: UInt = #line) {
+    func assertDidNotNotifyChange(file: StaticString = #filePath, line: UInt = #line) {
         if notified {
             XCTFail(
                 """
@@ -78,38 +80,24 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
                 line: line
             )
         }
+        
+        notified = false
     }
 
     @discardableResult
-    public func assertTransformParsed(
+    public func assertNoTransformParsed(
         expression original: String,
-        into expected: String,
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> Expression {
-        notified = false
+        
         let exp = parse(original, file: file, line: line)
 
-        let sut = makeSut(container: .expression(exp))
-        let result = sut.apply(on: exp, context: makeContext(container: .expression(exp)))
-
-        if expected != result.description {
-            XCTFail(
-                """
-                Failed to convert: Expected to convert expression
-
-                \(expected)
-
-                but received
-
-                \(result.description)
-                """,
-                file: file,
-                line: line
-            )
-        }
-
-        return result
+        return assertNoTransform(
+            expression: exp,
+            file: file,
+            line: line
+        )
     }
 
     @discardableResult
@@ -137,6 +125,17 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
     }
 
     @discardableResult
+    public func assertNoTransformParsed(
+        statement original: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> Statement {
+
+        let stmt = parseStmt(original, file: file, line: line)
+        return assertNoTransform(statement: stmt, file: file, line: line)
+    }
+
+    @discardableResult
     public func assertNoTransform(
         expression: Expression,
         file: StaticString = #filePath,
@@ -150,7 +149,7 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
             )
         }
 
-        return assertTransform(
+        return _assertTransform(
             expression: expression,
             into: expression,
             file: file,
@@ -166,30 +165,19 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
         line: UInt = #line
     ) -> Expression {
 
-        notified = false
-        let sut = makeSut(container: .expression(expression))
-        let result = sut.apply(on: expression, context: makeContext(container: .expression(expression)))
-
-        if expected != result {
-            var expString = ""
-            var resString = ""
-
-            dump(expected, to: &expString)
-            dump(result, to: &resString)
-
-            XCTFail(
-                """
-                Failed to convert: Expected to convert expression into
-                \(expString)
-                but received
-                \(resString)
-                """,
+        defer {
+            assertNotifiedChange(
                 file: file,
                 line: line
             )
         }
 
-        return result
+        return _assertTransform(
+            expression: expression,
+            into: expected,
+            file: file,
+            line: line
+        )
     }
 
     @discardableResult
@@ -206,7 +194,7 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
             )
         }
 
-        return assertTransform(
+        return _assertTransform(
             statement: statement,
             into: statement,
             file: file,
@@ -222,7 +210,29 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
         line: UInt = #line
     ) -> Statement {
 
-        notified = false
+        defer {
+            assertNotifiedChange(
+                file: file,
+                line: line
+            )
+        }
+
+        return _assertTransform(
+            statement: statement,
+            into: expected,
+            file: file,
+            line: line
+        )
+    }
+    
+    @discardableResult
+    private func _assertTransform(
+        statement: Statement,
+        into expected: Statement,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> Statement {
+
         let sut = makeSut(container: .statement(statement))
         let result = sut.apply(on: statement, context: makeContext(container: .statement(statement)))
 
@@ -252,7 +262,40 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
                 line: line
             )
         }
+        
+        return result
+    }
 
+    @discardableResult
+    private func _assertTransform(
+        expression: Expression,
+        into expected: Expression,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> Expression {
+
+        let sut = makeSut(container: .expression(expression))
+        let result = sut.apply(on: expression, context: makeContext(container: .expression(expression)))
+
+        if expected != result {
+            var expString = ""
+            var resString = ""
+
+            dump(expected, to: &expString)
+            dump(result, to: &resString)
+
+            XCTFail(
+                """
+                Failed to convert: Expected to convert expression into
+                \(expString)
+                but received
+                \(resString)
+                """,
+                file: file,
+                line: line
+            )
+        }
+        
         return result
     }
 

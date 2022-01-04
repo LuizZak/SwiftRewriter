@@ -31,21 +31,17 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             ]
             )
         )
-        assertNotifiedChange()
     }
 
     func testDoesNotSimplifyDoWithinCompoundWithExtraStatements() {
-        let statement =
-            Statement
-            .compound([
-                .do([
-                    .expression(
-                        .identifier("a")
-                    )
-                ]),
-                .expression(.identifier("b")),
-            ]
-            )
+        let statement = Statement.compound([
+            .do([
+                .expression(
+                    .identifier("a")
+                )
+            ]),
+            .expression(.identifier("b")),
+        ])   
 
         assertNoTransform(
             statement: statement
@@ -65,7 +61,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             // label: { 0; }
             into: expected
         )
-        assertNotifiedChange()
 
         XCTAssertEqual(res.label, "label")
     }
@@ -85,7 +80,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     .identifier("block").optional().call()
                 )
         )
-        assertNotifiedChange()
 
         // W/out braces
         assertTransformParsed(
@@ -98,11 +92,10 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     .identifier("block").optional().call()
                 )
         )
-        assertNotifiedChange()
     }
 
     func testDoNotSimplifyNonBlockCheckConstructs() {
-        assertTransformParsed(
+        assertNoTransformParsed(
             statement: """
                 // Cannot simplify, since `member.prop` may return different values
                 // after each invocation (i.e. a computed getter).
@@ -110,40 +103,21 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                 if (value.member != nil) {
                     value.member();
                 }
-                """,
-            into:
-                .if(
-                    .identifier("value").dot("member").binary(op: .unequals, rhs: .constant(.nil)),
-                    body: [
-                        .expression(.identifier("value").dot("member").call())
-                    ]
-                )
+                """
         )
-        assertDidNotNotifyChange()
     }
 
     func testDontAlterTestThenInvokeBlockOnIfWithElse() {
         // We can't simplify away if-statements that contain an else
-        assertTransformParsed(
+        assertNoTransformParsed(
             statement: """
                 if (block != nil) {
                     block();
                 } else {
                     stmt();
                 }
-                """,
-            into:
-                .if(
-                    .identifier("block").binary(op: .unequals, rhs: .constant(.nil)),
-                    body: [
-                        .expression(.identifier("block").call())
-                    ],
-                    else: [
-                        .expression(.identifier("stmt").call())
-                    ]
-                )
+                """
         )
-        assertDidNotNotifyChange()
     }
 
     // MARK: - Redundant Parenthesis Removal
@@ -156,7 +130,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             // 0
             into: .constant(0)
         )
-        assertNotifiedChange()
     }
 
     func testSimplifyParenthesisDeep() {
@@ -166,7 +139,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             // 0
             into: .constant(0)
         )
-        assertNotifiedChange()
     }
 
     func testSimplifyParenthesisInFunctionArguments() {
@@ -176,7 +148,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             // a(0)
             into: .identifier("a").call([.constant(0)])
         )
-        assertNotifiedChange()
     }
 
     func testSimplifyParenthesisInSubscriptionExpression() {
@@ -186,7 +157,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             // a[0]
             into: .identifier("a").sub(.constant(0))
         )
-        assertNotifiedChange()
     }
 
     func testSimplifyParenthesisInTopLevelExpression() {
@@ -196,7 +166,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             // { a }
             into: .expression(.constant(0))
         )
-        assertNotifiedChange()
     }
 
     func testSimplifyParenthesisInIfExpression() {
@@ -206,7 +175,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             // if a { }
             into: .if(.constant(0), body: [])
         )
-        assertNotifiedChange()
     }
 
     func testSimplifyParenthesisInWhileExpression() {
@@ -216,7 +184,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             // while a { }
             into: .while(.constant(0), body: [])
         )
-        assertNotifiedChange()
     }
 
     func testSimplifyParenthesisInForExpression() {
@@ -226,7 +193,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             // for a in 0 { }
             into: .for(.identifier("a"), .constant(0), body: [])
         )
-        assertNotifiedChange()
     }
 
     func testSimplifyParenthesisInSwitchExpression() {
@@ -236,7 +202,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             // switch 0 { }
             into: .switch(.constant(0), cases: [], default: nil)
         )
-        assertNotifiedChange()
     }
 
     func testSimplifyParenthesisInSwitchCaseExpressions() {
@@ -259,7 +224,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     default: nil
                 )
         )
-        assertNotifiedChange()
     }
 
     func testDontSimplifyParenthesisInBinaryExpression() {
@@ -308,7 +272,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     ]
                 )
         )
-        assertNotifiedChange()
     }
 
     /// Asserts that we don't remove break statements from empty switch cases
@@ -350,7 +313,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     .expression(.constant(2)),
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testSplitTopLevelTupleExpressions_inDeferStatement() {
@@ -374,7 +336,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     ),
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testSplitTopLevelTupleExpressions_inNestedDictionaryBlockExpression() {
@@ -416,7 +377,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     ])
                 )
         )
-        assertNotifiedChange()
     }
 
     func testSplitTopLevelTupleExpressions_keepStatementLabel() {
@@ -436,7 +396,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     .expression(.constant(2)),
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testSplitTopLevelTupleExpressions_keepLeadingComments() {
@@ -456,7 +415,6 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     .expression(.constant(2)),
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testSplitTopLevelTupleExpressions_keepTrailingCommentsOnTrailingStatement() {
@@ -476,6 +434,5 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     .expression(.constant(2)).withTrailingComment("A comment"),
                 ])
         )
-        assertNotifiedChange()
     }
 }

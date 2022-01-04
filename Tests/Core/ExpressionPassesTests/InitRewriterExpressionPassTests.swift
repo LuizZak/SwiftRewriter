@@ -48,7 +48,6 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                 .expression(.identifier("super").dot("init").call())
             ])
         )
-        assertNotifiedChange()
     }
 
     func testEmptyIfInInitWithDelegatedSelfInit() {
@@ -85,7 +84,6 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                 .expression(.identifier("self").dot("init").call())
             ])
         )
-        assertNotifiedChange()
     }
 
     func testNonEmptyIfInInit() {
@@ -135,7 +133,6 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                 .expression(.identifier("super").dot("init").call()),
             ])
         )
-        assertNotifiedChange()
     }
 
     func testEarlyExitIfSuperInit() {
@@ -178,7 +175,6 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                 .expression(.identifier("super").dot("init").call())
             ])
         )
-        assertNotifiedChange()
     }
 
     func testEarlyExitIfSuperInitNonEmpty() {
@@ -233,7 +229,6 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                 .expression(.identifier("super").dot("init").call()),
             ])
         )
-        assertNotifiedChange()
     }
 
     func testAddOptionalToOptionalSuperInit() {
@@ -284,6 +279,5 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                 )
             ])
         )
-        assertNotifiedChange()
     }
 }

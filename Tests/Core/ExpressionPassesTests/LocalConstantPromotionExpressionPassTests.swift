@@ -39,7 +39,6 @@ class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
                 )
             ])
         )
-        assertNotifiedChange()
     }
 
     func testNonConstantCase() {

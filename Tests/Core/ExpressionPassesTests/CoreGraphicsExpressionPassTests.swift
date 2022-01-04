@@ -23,7 +23,6 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                     .labeled("height", .constant(4)),
                 ])
         )
-        assertNotifiedChange()
 
         assertTransform(
             expression:
@@ -67,7 +66,6 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                         ])
                 )
         )
-        assertNotifiedChange()
     }
 
     func testUIEdgeInsetsMake() {
@@ -83,7 +81,6 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                     .labeled("right", .constant(4)),
                 ])
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "abc = [[UIView alloc] initWithInsets:UIEdgeInsetsMake(1, 2, 3, 4)]",
@@ -111,7 +108,6 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                         ])
                 )
         )
-        assertNotifiedChange()
     }
 
     func testCoreGraphicsGetters() {
@@ -119,13 +115,11 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
             expression: "CGRectGetWidth(rect)",
             into: Expression.identifier("rect").dot("width")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGRectGetHeight(rect)",
             into: Expression.identifier("rect").dot("height")
         )
-        assertNotifiedChange()
     }
 
     func testCoreGraphicsStaticConstants() {
@@ -134,37 +128,31 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
             expression: "CGRectZero",
             into: Expression.identifier("CGRect").dot("zero")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGRectNull",
             into: Expression.identifier("CGRect").dot("null")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGRectInfinite",
             into: Expression.identifier("CGRect").dot("infinite")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGPointZero",
             into: Expression.identifier("CGPoint").dot("zero")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGSizeZero",
             into: Expression.identifier("CGSize").dot("zero")
         )
-        assertNotifiedChange()
 
         assertTransformParsed(
             expression: "CGVectorZero",
             into: Expression.identifier("CGVector").dot("zero")
         )
-        assertNotifiedChange()
 
     }
 
@@ -187,7 +175,6 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                     )
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testConvertCGPathAddPointWithTransform() {
@@ -213,7 +200,6 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                     ),
                 ])
         )
-        assertNotifiedChange()
     }
 
     func testRemovesCGPathRelease() {
@@ -221,7 +207,6 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
             statement: .expression(Expression.identifier("CGPathRelease").call([.identifier("a")])),
             into: .expressions([])
         )
-        assertNotifiedChange()
     }
 
     func testCGContextStrokePath() {
@@ -229,6 +214,5 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
             expression: Expression.identifier("CGContextStrokePath").call([.identifier("context")]),
             into: Expression.identifier("context").dot("strokePath").call()
         )
-        assertNotifiedChange()
     }
 }

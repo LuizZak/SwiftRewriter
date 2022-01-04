@@ -24,7 +24,6 @@ class PropertyAsMethodAccessCorrectingExpressionPassTests: ExpressionPassTestCas
             expression: .identifier("a").typed("A").dot("property").call(),
             into: .identifier("a").typed("A").dot("property")
         )
-        assertNotifiedChange()
     }
 
     func testTransformStaticType() {
@@ -37,7 +36,6 @@ class PropertyAsMethodAccessCorrectingExpressionPassTests: ExpressionPassTestCas
             expression: .identifier("A").typed(.metatype(for: "A")).dot("property").call(),
             into: .identifier("A").typed(.metatype(for: "A")).dot("property")
         )
-        assertNotifiedChange()
     }
 
     func testTransformChained() {
@@ -59,7 +57,6 @@ class PropertyAsMethodAccessCorrectingExpressionPassTests: ExpressionPassTestCas
                 .dot("property")
                 .dot("otherProperty")
         )
-        assertNotifiedChange()
     }
 
     func testDontTransformClosureCalls() {

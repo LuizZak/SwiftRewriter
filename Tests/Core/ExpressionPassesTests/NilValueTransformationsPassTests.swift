@@ -23,7 +23,6 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
             // { a?() }
             into: .expression(.identifier("a").optional().call())
         )
-        assertNotifiedChange()
     }
 
     func testTopLevelBlockInvocationOnImplicitlyUnwrapped() {
@@ -38,7 +37,6 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
             // { a?() }
             into: .expression(.identifier("a").optional().call())
         )
-        assertNotifiedChange()
     }
 
     func testNestedMemberOptionalMethodInvocation() {
@@ -60,7 +58,6 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
             // { a.b?() }
             into: .expression(.identifier("a").dot("b").optional().call())
         )
-        assertNotifiedChange()
     }
 
     func testConditionalMemberAccess() {
@@ -77,7 +74,6 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
             // { a?.b }
             into: .expression(.identifier("a").optional().dot("b"))
         )
-        assertNotifiedChange()
     }
 
     func testConditionalMemberAccessNested() {
@@ -96,7 +92,6 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
             // { a?.b.c }
             into: .expression(.identifier("a").optional().dot("b").dot("c"))
         )
-        assertNotifiedChange()
     }
 
     // Test negative cases where it's not supposed to do anything
@@ -148,7 +143,6 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                     ])
             )
         )
-        assertNotifiedChange()
     }
 
     func testModifyChainedMemberAccessAndMethodCallsWithinParameters() {
@@ -172,7 +166,6 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                     ])
             )
         )
-        assertNotifiedChange()
     }
 
     func testLookIntoBlockExpressionsForPotentialChanges() {
@@ -343,6 +336,5 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
             // { a?.b = c }
             into: .expression(expected)
         )
-        assertNotifiedChange()
     }
 }
