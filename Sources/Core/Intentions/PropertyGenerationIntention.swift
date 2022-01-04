@@ -2,6 +2,8 @@ import GrammarModelBase
 import SwiftAST
 import KnownType
 
+// TODO: Refactor to remove references to Objective-C, like `objcAttributes`.
+
 /// An intention to generate a property, either static/instance, computed/stored
 /// for a type definition.
 public class PropertyGenerationIntention: MemberGenerationIntention, MutableValueStorageIntention {

@@ -317,9 +317,42 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class AClass {
+                var a: Any
+                var b: Any
+            
                 init(_ a: Any, _ b: Any) {
                     self.a = a
                     self.b = b
+                }
+            }
+            """
+        )
+    }
+
+    func testRewrite_createClassFields() {
+        assertRewrite(
+            js: """
+            class AClass {
+                constructor() {
+                    self.field1 = 0
+                }
+
+                method() {
+                    self.field2 = "value"
+                }
+            }
+            """,
+            swift: """
+            class AClass {
+                var field1: Int = 0
+                var field2: String
+
+                init() {
+                    self.field1 = 0
+                }
+
+                func method() {
+                    self.field2 = "value"
                 }
             }
             """

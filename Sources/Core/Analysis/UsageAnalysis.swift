@@ -286,12 +286,11 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
             return []
         }
         
-        return findUsagesOf(definition: definition, inScopeOf: syntaxNode, in: container, intention: intention)
+        return findUsagesOf(definition: definition, in: container, intention: intention)
     }
     
     public func findUsagesOf(
         definition: LocalCodeDefinition,
-        inScopeOf syntaxNode: SyntaxNode,
         in container: StatementContainer,
         intention: FunctionBodyCarryingIntention?
     ) -> [DefinitionUsage] {

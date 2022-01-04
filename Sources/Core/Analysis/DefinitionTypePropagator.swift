@@ -196,7 +196,6 @@ public class DefinitionTypePropagator {
             let definition: LocalCodeDefinition = .forVarDeclElement(decl, stmt, index: index)
             let usages = localUsageAnalyzer.findUsagesOf(
                 definition: definition,
-                inScopeOf: parent,
                 in: .statement(parent),
                 intention: nil
             )

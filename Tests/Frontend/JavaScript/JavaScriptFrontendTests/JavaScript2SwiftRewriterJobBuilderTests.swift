@@ -19,6 +19,7 @@ class JavaScript2SwiftRewriterJobBuilderTests: XCTestCase {
         var intentsIterator = intents.makeIterator()
 
         XCTAssert(intentsIterator.next() is DetectNoReturnsIntentionPass)
+        XCTAssert(intentsIterator.next() is DetectTypePropertiesBySelfAssignmentIntentionPass)
         XCTAssert(intentsIterator.next() is FileTypeMergingIntentionPass)
         XCTAssert(intentsIterator.next() is SubscriptDeclarationIntentionPass)
         XCTAssert(intentsIterator.next() is PromoteProtocolPropertyConformanceIntentionPass)

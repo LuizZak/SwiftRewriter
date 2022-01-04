@@ -21,9 +21,15 @@ public class DetectNoReturnsIntentionPass: FunctionIntentionVisitor {
                 break
             }
 
-            if !hasReturnStatement(body.body) {
-                signature.returnType = .void
+            if !hasReturnStatement(body.body) && signature.returnType != .void {
+                function.history.recordChange(
+                    tag: tag,
+                    description: """
+                    Detected no returns; return type changed from \(signature.returnType) to \(SwiftType.void)
+                    """
+                )
 
+                signature.returnType = .void
                 element.changeSignature(signature)
             }
 

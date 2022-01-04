@@ -64,6 +64,17 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         
         return queue
     }
+
+    public static func fromType(
+        type: TypeGenerationIntention,
+        delegate: Delegate
+    ) -> FunctionBodyQueue {
+        
+        let queue = FunctionBodyQueue(delegate: delegate)
+        queue.collectFromType(type)
+        
+        return queue
+    }
     
     public static func fromIntentionCollection(
         _ intentionCollection: IntentionCollection,
@@ -184,14 +195,6 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         for type in file.typeIntentions {
             collectFromType(type)
         }
-        
-        for cls in file.classIntentions {
-            collectFromClass(cls)
-        }
-        
-        for cls in file.extensionIntentions {
-            collectFromClass(cls)
-        }
     }
 
     private func collectFromGlobalVariable(_ intention: GlobalVariableGenerationIntention) {
@@ -226,6 +229,11 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         for method in typeIntent.methods {
             collectMethod(method)
         }
+        
+        // Collect specialized type declarations
+        if let cls = typeIntent as? BaseClassIntention {
+            collectFromClass(cls)
+        }
     }
     
     private func collectFromClass(_ cls: BaseClassIntention) {
@@ -247,9 +255,11 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         collectFunctionBody(body, .global(function), context: context)
     }
     
-    private func collectFunction(_ f: FunctionIntention,
-                                 _ intention: FunctionBodyCarryingIntention,
-                                 context: Context) {
+    private func collectFunction(
+        _ f: FunctionIntention,
+        _ intention: FunctionBodyCarryingIntention,
+        context: Context
+    ) {
         
         if let method = f.functionBody {
             collectFunctionBody(method, intention, context: context)

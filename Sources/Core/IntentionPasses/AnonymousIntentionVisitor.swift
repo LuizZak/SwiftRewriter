@@ -9,6 +9,7 @@ public class AnonymousIntentionVisitor {
     public var onVisitMethod: ((MethodGenerationIntention) -> Void)?
     public var onVisitInitializer: ((InitGenerationIntention) -> Void)?
     public var onVisitProperty: ((PropertyGenerationIntention) -> Void)?
+    public var onVisitSubscript: ((SubscriptGenerationIntention) -> Void)?
     
     public init() {
         
@@ -65,19 +66,23 @@ public class AnonymousIntentionVisitor {
         }
     }
     
-    func visitInstanceVar(_ ivar: InstanceVariableGenerationIntention) {
-        onVisitInstanceVar?(ivar)
+    func visitInstanceVar(_ intention: InstanceVariableGenerationIntention) {
+        onVisitInstanceVar?(intention)
     }
     
-    func visitMethod(_ method: MethodGenerationIntention) {
-        onVisitMethod?(method)
+    func visitMethod(_ intention: MethodGenerationIntention) {
+        onVisitMethod?(intention)
     }
     
-    func visitInitializer(_ initializer: InitGenerationIntention) {
-        onVisitInitializer?(initializer)
+    func visitInitializer(_ intention: InitGenerationIntention) {
+        onVisitInitializer?(intention)
     }
     
-    func visitProperty(_ property: PropertyGenerationIntention) {
-        onVisitProperty?(property)
+    func visitProperty(_ intention: PropertyGenerationIntention) {
+        onVisitProperty?(intention)
+    }
+
+    func visitSubscript(_ intention: SubscriptGenerationIntention) {
+        onVisitSubscript?(intention)
     }
 }

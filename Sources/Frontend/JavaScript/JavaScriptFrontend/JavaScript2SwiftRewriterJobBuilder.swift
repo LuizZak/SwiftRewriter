@@ -12,26 +12,7 @@ import SwiftRewriterLib
 public struct JavaScript2SwiftRewriterJobBuilder {
     public var inputs = JavaScriptSwiftRewriterJobInputFiles()
     public var intentionPassesSource: IntentionPassSource
-    public var astRewriterPassSources: ASTRewriterPassSource = ArrayASTRewriterPassSource(syntaxNodePasses: [
-        CanonicalNameExpressionPass.self,
-        AllocInitExpressionPass.self,
-        InitRewriterExpressionPass.self,
-        ASTSimplifier.self,
-        PropertyAsMethodAccessCorrectingExpressionPass.self,
-        CompoundTypeApplierExpressionPass.self,
-        CoreGraphicsExpressionPass.self,
-        FoundationExpressionPass.self,
-        UIKitExpressionPass.self,
-        NilValueTransformationsPass.self,
-        NumberCommonsExpressionPass.self,
-        JavaScriptASTCorrectorExpressionPass.self,
-        NumberCommonsExpressionPass.self,
-        EnumRewriterExpressionPass.self,
-        LocalConstantPromotionExpressionPass.self,
-        VariableNullabilityPromotionExpressionPass.self,
-        ASTSimplifier.self,
-    ])
-    
+    public var astRewriterPassSources: ASTRewriterPassSource
     public var globalsProvidersSource: GlobalsProvidersSource?
     public var syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider = DefaultSyntaxPassProvider()
     public var preprocessors: [SourcePreprocessor] = []
@@ -40,10 +21,43 @@ public struct JavaScript2SwiftRewriterJobBuilder {
     public var parserCache: JavaScriptParserCache?
     
     public init() {
-        var intentionPasses = ArrayIntentionPassSource(source: DefaultIntentionPasses())
-        intentionPasses.intentionPasses.insert(DetectNoReturnsIntentionPass(), at: 0)
+        self.intentionPassesSource = ArrayIntentionPassSource(intentionPasses: [
+            DetectNoReturnsIntentionPass(),
+            DetectTypePropertiesBySelfAssignmentIntentionPass(),
+            FileTypeMergingIntentionPass(),
+            SubscriptDeclarationIntentionPass(),
+            PromoteProtocolPropertyConformanceIntentionPass(),
+            ProtocolNullabilityPropagationToConformersIntentionPass(),
+            PropertyMergeIntentionPass(),
+            StoredPropertyToNominalTypesIntentionPass(),
+            SwiftifyMethodSignaturesIntentionPass(),
+            InitAnalysisIntentionPass(),
+            ImportDirectiveIntentionPass(),
+            UIKitCorrectorIntentionPass(),
+            ProtocolNullabilityPropagationToConformersIntentionPass(),
+            DetectNonnullReturnsIntentionPass(),
+            RemoveEmptyExtensionsIntentionPass()
+        ])
         
-        self.intentionPassesSource = intentionPasses
+        self.astRewriterPassSources = ArrayASTRewriterPassSource(syntaxNodePasses: [
+            CanonicalNameExpressionPass.self,
+            AllocInitExpressionPass.self,
+            InitRewriterExpressionPass.self,
+            ASTSimplifier.self,
+            PropertyAsMethodAccessCorrectingExpressionPass.self,
+            CompoundTypeApplierExpressionPass.self,
+            CoreGraphicsExpressionPass.self,
+            FoundationExpressionPass.self,
+            UIKitExpressionPass.self,
+            NilValueTransformationsPass.self,
+            NumberCommonsExpressionPass.self,
+            JavaScriptASTCorrectorExpressionPass.self,
+            NumberCommonsExpressionPass.self,
+            EnumRewriterExpressionPass.self,
+            LocalConstantPromotionExpressionPass.self,
+            VariableNullabilityPromotionExpressionPass.self,
+            ASTSimplifier.self,
+        ])
     }
 
     /// Resets this job builder to its default state.

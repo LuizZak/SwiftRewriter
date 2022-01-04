@@ -84,13 +84,13 @@ public class CodeDefinition {
 public extension CodeDefinition {
     /// Creates a set of code definitions that correspond to the parameters of a
     /// given function signature
-    static func forParameters(inSignature signature: FunctionSignature) -> [CodeDefinition] {
+    static func forParameters(inSignature signature: FunctionSignature) -> [LocalCodeDefinition] {
         forParameters(signature.parameters)
     }
     
     /// Creates a set of code definitions that correspond to the given set of
     /// parameters
-    static func forParameters(_ parameters: [ParameterSignature]) -> [CodeDefinition] {
+    static func forParameters(_ parameters: [ParameterSignature]) -> [LocalCodeDefinition] {
         parameters.enumerated().map { (i, param) in
             LocalCodeDefinition(
                 variableNamed: param.name,
@@ -102,7 +102,7 @@ public extension CodeDefinition {
     
     /// Creates a set of code definitions that correspond to the given set of
     /// block parameters
-    static func forParameters(_ parameters: [BlockParameter]) -> [CodeDefinition] {
+    static func forParameters(_ parameters: [BlockParameter]) -> [LocalCodeDefinition] {
         parameters.enumerated().map { (i, param) in
             LocalCodeDefinition(
                 variableNamed: param.name,
@@ -115,7 +115,14 @@ public extension CodeDefinition {
     /// Creates a code definition that matches the instance or static type of
     /// `type`.
     /// Used for creating self intrinsics for member bodies.
-    static func forSelf(type: SwiftType, isStatic: Bool) -> CodeDefinition {
+    static func forSelf(type: TypeGenerationIntention, isStatic: Bool) -> LocalCodeDefinition {
+        forSelf(type: type.asSwiftType, isStatic: isStatic)
+    }
+    
+    /// Creates a code definition that matches the instance or static type of
+    /// `type`.
+    /// Used for creating self intrinsics for member bodies.
+    static func forSelf(type: SwiftType, isStatic: Bool) -> LocalCodeDefinition {
         LocalCodeDefinition(
             constantNamed: "self",
             type: isStatic ? .metatype(for: type) : type,
@@ -126,7 +133,14 @@ public extension CodeDefinition {
     /// Creates a code definition that matches the instance or static type of
     /// `super`.
     /// Used for creating self intrinsics for member bodies.
-    static func forSuper(type: SwiftType, isStatic: Bool) -> CodeDefinition {
+    static func forSuper(type: TypeGenerationIntention, isStatic: Bool) -> LocalCodeDefinition {
+        forSuper(type: type.asSwiftType, isStatic: isStatic)
+    }
+    
+    /// Creates a code definition that matches the instance or static type of
+    /// `super`.
+    /// Used for creating self intrinsics for member bodies.
+    static func forSuper(type: SwiftType, isStatic: Bool) -> LocalCodeDefinition {
         LocalCodeDefinition(
             constantNamed: "super",
             type: isStatic ? .metatype(for: type) : type,
@@ -135,7 +149,7 @@ public extension CodeDefinition {
     }
     
     /// Creates a code definition for the setter of a setter method body.
-    static func forSetterValue(named name: String, type: SwiftType) -> CodeDefinition {
+    static func forSetterValue(named name: String, type: SwiftType) -> LocalCodeDefinition {
         LocalCodeDefinition(
             constantNamed: name,
             type: type,

@@ -1,4 +1,4 @@
-/// HelWriterTargetOutputper functions for generating friendly textual representations of types,
+/// Helper functions for generating friendly textual representations of types,
 /// methods and other constructs.
 public enum TypeFormatter {
     /// Generates a string representation of a given function signature.

@@ -2,6 +2,9 @@ import GrammarModelBase
 import SwiftAST
 import KnownType
 
+// TODO: Merge `InstanceVariableGenerationIntention` with `PropertyGenerationIntention`,
+// TODO: since they represent the same construct in Swift.
+
 /// An intention to create an instance variable (Objective-C's 'ivar').
 public final class InstanceVariableGenerationIntention: MemberGenerationIntention, MutableValueStorageIntention {
     /*

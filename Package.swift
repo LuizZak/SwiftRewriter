@@ -79,20 +79,20 @@ let core: [Target] = [
         path: "Sources/Core/Commons"
     ),
     .target(
-        name: "IntentionPasses",
-        dependencies: [
-            "SwiftAST", "Commons", "Utils", "MiniLexer",
-            "Intentions", "ObjcGrammarModels",
-        ],
-        path: "Sources/Core/IntentionPasses"
-    ),
-    .target(
         name: "Analysis",
         dependencies: [
             "SwiftAST", "KnownType", "Commons", "Utils",
             "Intentions", "TypeSystem",
         ],
         path: "Sources/Core/Analysis"
+    ),
+    .target(
+        name: "IntentionPasses",
+        dependencies: [
+            "SwiftAST", "Commons", "Utils", "MiniLexer",
+            "Intentions", "ObjcGrammarModels", "Analysis",
+        ],
+        path: "Sources/Core/IntentionPasses"
     ),
     .target(
         name: "ExpressionPasses",
