@@ -13,7 +13,26 @@ import SwiftRewriterLib
 public struct ObjectiveC2SwiftRewriterJobBuilder {
     public var inputs = ObjectiveCSwiftRewriterJobInputFiles()
     public var intentionPassesSource: IntentionPassSource = DefaultIntentionPasses()
-    public var astRewriterPassSources: ASTRewriterPassSource = DefaultExpressionPasses()
+    public var astRewriterPassSources: ASTRewriterPassSource = ArrayASTRewriterPassSource(syntaxNodePasses: [
+        CanonicalNameExpressionPass.self,
+        AllocInitExpressionPass.self,
+        InitRewriterExpressionPass.self,
+        ASTSimplifier.self,
+        PropertyAsMethodAccessCorrectingExpressionPass.self,
+        CompoundTypeApplierExpressionPass.self,
+        CoreGraphicsExpressionPass.self,
+        FoundationExpressionPass.self,
+        UIKitExpressionPass.self,
+        NilValueTransformationsPass.self,
+        NumberCommonsExpressionPass.self,
+        ObjectiveCASTCorrectorExpressionPass.self,
+        NumberCommonsExpressionPass.self,
+        EnumRewriterExpressionPass.self,
+        LocalConstantPromotionExpressionPass.self,
+        VariableNullabilityPromotionExpressionPass.self,
+        ASTSimplifier.self,
+    ])
+    
     public var globalsProvidersSource: GlobalsProvidersSource = DefaultGlobalsProvidersSource()
     public var syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider = DefaultSyntaxPassProvider()
     public var preprocessors: [SourcePreprocessor] = [QuickSpecPreprocessor()]

@@ -1,16 +1,118 @@
+import Utils
 import KnownType
 import SwiftAST
 import SwiftRewriterLib
+import AntlrCommons
+import Intentions
+import TypeSystem
+import JsParserAntlr
 import TestCommons
 import XCTest
 
-@testable import ExpressionPasses
+@testable import JavaScriptFrontend
 
-class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
+final class JavaScriptExpressionPassTestAdapter: ExpressionPassTestCaseAdapter {
+    static var _state: JsParserState = JsParserState()
+
+    typealias Lexer = JavaScriptLexer
+    typealias Parser = JavaScriptParser
+
+    init() {
+
+    }
+
+    func makeParser(for source: String) -> AntlrParser<Lexer, Parser> {
+        return try! Self._state.makeMainParser(input: source)
+    }
+
+    func parseExpression(
+        _ parser: Parser,
+        typeSystem: TypeSystem,
+        intentionContext: FunctionBodyCarryingIntention?,
+        container: StatementContainer?
+    ) throws -> Expression? {
+        let expression = try parser.singleExpression()
+
+        let context = JavaScriptASTReaderContext(
+            source: StringCodeSource(source: "", fileName: ".js"),
+            typeSystem: typeSystem,
+            typeContext: nil,
+            comments: [],
+            options: .default
+        )
+
+        let reader = JavaScriptExprASTReader(
+            context: context,
+            delegate: nil
+        )
+
+        return expression.accept(reader)
+    }
+
+    func parseStatement(
+        _ parser: Parser,
+        typeSystem: TypeSystem,
+        intentionContext: FunctionBodyCarryingIntention?,
+        container: StatementContainer?
+    ) throws -> Statement? {
+        let stmt = try parser.statement()
+
+        let expReader =
+            JavaScriptExprASTReader(
+                context: JavaScriptASTReaderContext(
+                    source: StringCodeSource(source: "", fileName: ".js"),
+                    typeSystem: typeSystem,
+                    typeContext: nil,
+                    comments: [],
+                    options: .default
+                ),
+                delegate: nil
+            )
+
+        let reader = JavaScriptStatementASTReader(
+            expressionReader: expReader,
+            context: expReader.context,
+            delegate: nil
+        )
+
+        return stmt.accept(reader)
+    }
+}
+
+class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScriptExpressionPassTestAdapter> {
     override func setUp() {
         super.setUp()
 
-        sutType = ASTCorrectorExpressionPass.self
+        sutType = JavaScriptASTCorrectorExpressionPass.self
+    }
+
+    func testNullCoalesceOnLogicalOrExpression() {
+        let expMaker = { Expression.identifier("a") }
+
+        let exp = expMaker().binary(op: .or, rhs: .constant(0))
+        exp.lhs.resolvedType = .optional(.int)
+        exp.rhs.resolvedType = .int
+
+        assertTransform(
+            // a || 100
+            expression: exp,
+            // a ?? 100
+            into: expMaker().binary(op: .nullCoalesce, rhs: .constant(0))
+        )
+        assertNotifiedChange()
+    }
+
+    func testNullCoalesceOnLogicalOrExpression_dontConvertOnBooleanOperands() {
+        let expMaker = { Expression.identifier("a") }
+
+        let exp = expMaker().binary(op: .or, rhs: .identifier("b"))
+        exp.lhs.resolvedType = .bool
+        exp.rhs.resolvedType = .bool
+        
+        assertNoTransform(
+            // a || b
+            expression: exp
+        )
     }
 
     /// Tests inserting null-coalesces on optional numeric types on the left
@@ -268,13 +370,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         exp.resolvedType = .nullabilityUnspecified(.typeName("A"))
         exp.expectedType = .typeName("A")
 
-        assertTransform(
+        assertNoTransform(
             // a
-            expression: exp,
-            // a
-            into: expMaker()
+            expression: exp
         )
-        assertDidNotNotifyChange()
     }
 
     /// Tests that base expressions (i.e. those that form a complete statement,
@@ -345,13 +444,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         let exp = expMaker()
         exp.expectedType = .int
 
-        assertTransform(
+        assertNoTransform(
             // { a?.b = 0 }
-            statement: .expression(exp),
-            // { a?.b = 0 }
-            into: .expression(expMaker())
+            statement: .expression(exp)
         )
-        assertDidNotNotifyChange()
     }
 
     /// Tests that base expressions (i.e. those that form a complete statement,
@@ -363,13 +459,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         let exp = expMaker()
         exp.expectedType = .optional(.int)
 
-        assertTransform(
+        assertNoTransform(
             // { 0 }
-            statement: .expression(exp),
-            // { 0 }
-            into: .expression(expMaker())
+            statement: .expression(exp)
         )
-        assertDidNotNotifyChange()
     }
 
     /// Tests that making an access such as `self.superview?.bounds.midX` actually
@@ -435,13 +528,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         exp.op.returnType = .typeName("B")
         exp.resolvedType = .optional(.typeName("B"))
 
-        assertTransform(
+        assertNoTransform(
             // a.b.c
-            expression: exp.dot("c"),
-            // a.b.c
-            into: expMaker().dot("c")
+            expression: exp.dot("c")
         )
-        assertDidNotNotifyChange()
     }
 
     /// Don't correct implicitly-unwrapped optional chains
@@ -458,18 +548,15 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         exp.resolvedType = .implicitUnwrappedOptional(.typeName("B"))
         exp.expectedType = .typeName("B")
 
-        assertTransform(
+        assertNoTransform(
             // a.b.c()
             expression:
                 exp
                 .dot("c", type: .swiftBlock(returnType: .int, parameters: []))
                 .typed(.nullabilityUnspecified(.swiftBlock(returnType: .int, parameters: [])))
                 .call([], callableSignature: .swiftBlock(returnType: .int, parameters: []))
-                .typed(.nullabilityUnspecified(.int)),
-            // a.b.c()
-            into: expMaker().dot("c").call()
+                .typed(.nullabilityUnspecified(.int))
         )
-        assertDidNotNotifyChange()
     }
 
     // MARK: - If statement
@@ -643,16 +730,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
 
         let stmt = Statement.if(exp, body: [])
 
-        assertTransform(
+        assertNoTransform(
             // if (a.b) { }
-            statement: stmt,
-            // if (a.b == true) { }
-            into: .if(
-                expMaker(),
-                body: []
-            )
+            statement: stmt
         )
-        assertDidNotNotifyChange()
     }
 
     // MARK: - While statements
@@ -757,16 +838,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
 
         let stmt = Statement.while(exp, body: [])
 
-        assertTransform(
+        assertNoTransform(
             // while (a.b) { }
-            statement: stmt,
-            // while (a.b == true) { }
-            into: .while(
-                expMaker(),
-                body: []
-            )
+            statement: stmt
         )
-        assertDidNotNotifyChange()
     }
 
     /// Tests that the corrector is capable of doing simple if-let generations
@@ -934,13 +1009,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
 
         let exp = expMaker()
 
-        assertTransform(
+        assertNoTransform(
             // a(b)
-            statement: .expression(exp),
-            // a(b)
-            into: .expression(expMaker())
+            statement: .expression(exp)
         )
-        assertDidNotNotifyChange()
     }
 
     /// Test we don't require correcting implicitly unwrapped optionals on the
@@ -961,13 +1033,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             Expression
             .identifier("a").typed("Value").assignment(op: .assign, rhs: rhsMaker())
 
-        assertTransform(
+        assertNoTransform(
             // a = self.value
-            statement: .expression(exp),
-            // a = self.value
-            into: .expression(.identifier("a").assignment(op: .assign, rhs: rhsMaker()))
+            statement: .expression(exp)
         )
-        assertDidNotNotifyChange()
     }
 
     func testCorrectExpressionsWithExpectedTypeDifferentThanTheirResolvedType() {
@@ -995,11 +1064,9 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     }
 
     func testDontRemoveNullableAccessFromCastExpressions() {
-        assertTransform(
-            expression: .identifier("exp").casted(to: .string).optional().dot("count"),
-            into: .identifier("exp").casted(to: .string).optional().dot("count")
+        assertNoTransform(
+            expression: .identifier("exp").casted(to: .string).optional().dot("count")
         )
-        assertDidNotNotifyChange()
     }
 
     func testCastDifferentNumericTypesInArithmeticOperations() {
@@ -1074,72 +1141,44 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
 
     func testNoCastForSameBitWidthNumerics() {
         // CGFloat, Double -> CGFloat, Double
-        assertTransform(
+        assertNoTransform(
             expression:
                 .binary(
                     lhs: .identifier("a").typed(.cgFloat),
                     op: .add,
                     rhs: .identifier("b").typed(.double)
-                ),
-            into:
-                .binary(
-                    lhs: .identifier("a"),
-                    op: .add,
-                    rhs: .identifier("b")
                 )
         )
-        assertDidNotNotifyChange()
 
         // CGFloat, Double -> Double, CGFloat
-        assertTransform(
+        assertNoTransform(
             expression:
                 .binary(
                     lhs: .identifier("a").typed(.double),
                     op: .add,
                     rhs: .identifier("b").typed(.cgFloat)
-                ),
-            into:
-                .binary(
-                    lhs: .identifier("a"),
-                    op: .add,
-                    rhs: .identifier("b")
                 )
         )
-        assertDidNotNotifyChange()
 
         // Int64, UInt64 -> Int64, UInt64
-        assertTransform(
+        assertNoTransform(
             expression:
                 .binary(
                     lhs: .identifier("a").typed("Int64"),
                     op: .add,
                     rhs: .identifier("b").typed("UInt64")
-                ),
-            into:
-                .binary(
-                    lhs: .identifier("a"),
-                    op: .add,
-                    rhs: .identifier("b")
                 )
         )
-        assertDidNotNotifyChange()
 
         // UInt64, Int64 -> UInt64, Int64
-        assertTransform(
+        assertNoTransform(
             expression:
                 .binary(
                     lhs: .identifier("a").typed("UInt64"),
                     op: .add,
                     rhs: .identifier("b").typed("Int64")
-                ),
-            into:
-                .binary(
-                    lhs: .identifier("a"),
-                    op: .add,
-                    rhs: .identifier("b")
                 )
         )
-        assertDidNotNotifyChange()
     }
 
     func testBreakSequentialAssignments() {

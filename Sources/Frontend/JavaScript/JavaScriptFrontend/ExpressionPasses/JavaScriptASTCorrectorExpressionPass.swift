@@ -1,6 +1,7 @@
 import SwiftAST
+import ExpressionPasses
 
-public class ASTCorrectorExpressionPass: ASTRewriterPass {
+public class JavaScriptASTCorrectorExpressionPass: ASTRewriterPass {
     public override func visitCompound(_ stmt: CompoundStatement) -> Statement {
         if let stmt = suggestSplit(stmt) {
             notifyChange()
@@ -136,7 +137,27 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
     
     public override func visitBinary(_ exp: BinaryExpression) -> Expression {
         switch exp.op.category {
-        
+        case .logical where exp.op == .or:
+            // Convert common JavaScript pattern `<variable> || <defaultValue>`
+            // into a null-coalesce `<variable> ?? <defaultValue>`
+            if exp.lhs.resolvedType == .bool && exp.rhs.resolvedType == .bool {
+                break                
+            }
+
+            exp.op = .nullCoalesce
+            
+            if let lhsType = exp.lhs.resolvedType, lhsType.isOptional == true {
+                exp.rhs.expectedType = lhsType.unwrapped
+                exp.resolvedType = lhsType.unwrapped
+            } else {
+                exp.lhs.expectedType = nil
+                exp.rhs.expectedType = nil
+            }
+
+            notifyChange()
+
+            break
+
         case .comparison where exp.op != .equals && exp.op != .unequals,
              .arithmetic,
              .bitwise:

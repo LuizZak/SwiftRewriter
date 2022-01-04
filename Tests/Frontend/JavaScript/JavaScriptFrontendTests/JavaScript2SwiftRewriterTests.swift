@@ -289,4 +289,19 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testRewrite_parameterNullCoalesce() {
+        assertRewrite(
+            js: """
+            function f1(a) {
+                a = a || 100
+            }
+            """,
+            swift: """
+            func f1(_ a: Any) {
+                a = a ?? 100
+            }
+            """
+        )
+    }
 }

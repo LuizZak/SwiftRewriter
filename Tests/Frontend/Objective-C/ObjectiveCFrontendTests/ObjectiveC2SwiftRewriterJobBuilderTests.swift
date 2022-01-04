@@ -51,7 +51,7 @@ class ObjectiveC2SwiftRewriterJobBuilderTests: XCTestCase {
         XCTAssert(passes.next() == UIKitExpressionPass.self)
         XCTAssert(passes.next() == NilValueTransformationsPass.self)
         XCTAssert(passes.next() == NumberCommonsExpressionPass.self)
-        XCTAssert(passes.next() == ASTCorrectorExpressionPass.self)
+        XCTAssert(passes.next() == ObjectiveCASTCorrectorExpressionPass.self)
         XCTAssert(passes.next() == NumberCommonsExpressionPass.self)
         XCTAssert(passes.next() == EnumRewriterExpressionPass.self)
         XCTAssert(passes.next() == LocalConstantPromotionExpressionPass.self)

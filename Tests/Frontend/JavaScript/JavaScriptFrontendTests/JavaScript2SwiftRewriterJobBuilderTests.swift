@@ -52,7 +52,7 @@ class JavaScript2SwiftRewriterJobBuilderTests: XCTestCase {
         XCTAssert(passes.next() == UIKitExpressionPass.self)
         XCTAssert(passes.next() == NilValueTransformationsPass.self)
         XCTAssert(passes.next() == NumberCommonsExpressionPass.self)
-        XCTAssert(passes.next() == ASTCorrectorExpressionPass.self)
+        XCTAssert(passes.next() == JavaScriptASTCorrectorExpressionPass.self)
         XCTAssert(passes.next() == NumberCommonsExpressionPass.self)
         XCTAssert(passes.next() == EnumRewriterExpressionPass.self)
         XCTAssert(passes.next() == LocalConstantPromotionExpressionPass.self)

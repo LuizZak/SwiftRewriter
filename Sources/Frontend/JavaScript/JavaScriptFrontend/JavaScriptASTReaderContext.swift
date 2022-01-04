@@ -69,10 +69,12 @@ public final class JavaScriptASTReaderContext {
             return field
         }
         
-        return typeSystem?.property(named: name,
-                                    static: false,
-                                    includeOptional: false,
-                                    in: typeContext)
+        return typeSystem?.property(
+            named: name,
+            static: false,
+            includeOptional: false,
+            in: typeContext
+        )
     }
     
     public func pushDefinitionContext() {
