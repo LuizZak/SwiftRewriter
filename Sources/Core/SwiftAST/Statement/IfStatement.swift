@@ -116,4 +116,18 @@ public extension Statement {
     var isIf: Bool? {
         asIf != nil
     }
+    
+    static func `if`(_ exp: Expression,
+                     body: CompoundStatement,
+                     else elseBody: CompoundStatement? = nil) -> IfStatement {
+        
+        IfStatement(exp: exp, body: body, elseBody: elseBody, pattern: nil)
+    }
+    static func ifLet(_ pattern: Pattern,
+                      _ exp: Expression,
+                      body: CompoundStatement,
+                      else elseBody: CompoundStatement? = nil) -> IfStatement {
+        
+        IfStatement(exp: exp, body: body, elseBody: elseBody, pattern: pattern)
+    }
 }

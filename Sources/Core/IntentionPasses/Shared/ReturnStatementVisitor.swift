@@ -79,6 +79,10 @@ struct ReturnStatementVisitor: StatementVisitor {
         return []
     }
 
+    func visitThrow(_ stmt: ThrowStatement) -> [ReturnStatement] {
+        return []
+    }
+
     func visitUnknown(_ stmt: UnknownStatement) -> [ReturnStatement] {
         return []
     }

@@ -64,4 +64,12 @@ public extension Statement {
     var isContinue: Bool? {
         asContinue != nil
     }
+
+    static func `continue`() -> ContinueStatement {
+        ContinueStatement()
+    }
+    
+    static func `continue`(targetLabel: String?) -> ContinueStatement {
+        ContinueStatement(targetLabel: targetLabel)
+    }
 }

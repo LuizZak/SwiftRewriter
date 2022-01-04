@@ -157,6 +157,9 @@ extension SwiftSyntaxProducer {
 
         case let stmt as LocalFunctionStatement:
             genList = [{ $0.generateLocalFunction(stmt).inCodeBlock() }]
+
+        case let stmt as ThrowStatement:
+            genList = [{ $0.generateThrow(stmt).inCodeBlock() }]
             
         case let stmt as UnknownStatement:
             genList = [self.generateUnknown(stmt)]
@@ -602,6 +605,15 @@ extension SwiftSyntaxProducer {
             builder.useIdentifier(makeIdentifier(stmt.function.identifier).withLeadingSpace())
             builder.useSignature(generateSignature(stmt.function.signature))
             builder.useBody(generateCompound(stmt.function.body))
+        }
+    }
+
+    func generateThrow(_ stmt: ThrowStatement) -> ThrowStmtSyntax {
+        ThrowStmtSyntax { builder in
+            var token = makeStartToken(SyntaxFactory.makeThrowKeyword)
+            token = token.addingTrailingSpace()
+            builder.useThrowKeyword(token)
+            builder.useExpression(generateExpression(stmt.exp))
         }
     }
     

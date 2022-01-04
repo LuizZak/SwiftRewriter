@@ -255,6 +255,12 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         return super.visitLocalFunction(stmt)
     }
+
+    public override func visitThrow(_ stmt: ThrowStatement) -> Statement {
+        stmt.exp.expectedType = "Error"
+        
+        return super.visitThrow(stmt)
+    }
     
     public override func visitReturn(_ stmt: ReturnStatement) -> Statement {
         if let lastType = contextFunctionReturnTypeStack.last {

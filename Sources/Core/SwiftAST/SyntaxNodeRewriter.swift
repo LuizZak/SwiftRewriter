@@ -397,7 +397,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a local function statement
     ///
-    /// - Parameter stmt: A local function statement to visit
+    /// - Parameter stmt: A LocalFunctionStatement to visit
     /// - Returns: Result of visiting the local function statement node
     open func visitLocalFunction(_ stmt: LocalFunctionStatement) -> Statement {
         stmt.function.body = _visitCompound(stmt.function.body)
@@ -405,6 +405,16 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
         return stmt
     }
 
+    /// Visits a throw statement
+    ///
+    /// - Parameter stmt: A ThrowStatement to visit
+    /// - Returns: Result of visiting the throw node
+    open func visitThrow(_ stmt: ThrowStatement) -> Statement {
+        stmt.exp = visitExpression(stmt.exp)
+        
+        return stmt
+    }
+    
     private func _visitCompound(_ stmt: CompoundStatement) -> CompoundStatement {
         let result = visitStatement(stmt)
 

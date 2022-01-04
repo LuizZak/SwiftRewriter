@@ -35,7 +35,8 @@ class SwiftASTSerializerTests: XCTestCase {
             .if(
                 .typeCheck(.identifier("exp"), type: .string),
                 body: [
-                    .return(.constant(1.0))
+                    .return(.constant(1.0)),
+                    .throw(.identifier("Error").dot("error")),
                 ],
                 else: [
                     .return(.constant(1))

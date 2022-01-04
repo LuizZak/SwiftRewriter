@@ -152,6 +152,14 @@ public extension Statement {
     var isSwitch: Bool? {
         asSwitch != nil
     }
+
+    static func `switch`(
+        _ exp: Expression,
+        cases: [SwitchCase],
+        default defaultCase: [Statement]?
+    ) -> SwitchStatement {
+        SwitchStatement(exp: exp, cases: cases, defaultCase: defaultCase)
+    }
 }
 
 public struct SwitchCase: Codable, Equatable {

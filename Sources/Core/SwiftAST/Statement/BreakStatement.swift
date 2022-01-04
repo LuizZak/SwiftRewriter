@@ -64,4 +64,12 @@ public extension Statement {
     var isBreak: Bool? {
         asBreak != nil
     }
+
+    static func `break`() -> BreakStatement {
+        BreakStatement()
+    }
+    
+    static func `break`(targetLabel: String?) -> BreakStatement {
+        BreakStatement(targetLabel: targetLabel)
+    }
 }

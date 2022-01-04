@@ -154,6 +154,7 @@ private extension ControlFlowGraph {
         
         previous = _connections(for: statements, start: previous)
             .returnToExits()
+            .throwToExists()
         
         previous.apply(to: graph, endNode: exit)
         
@@ -217,6 +218,12 @@ private extension ControlFlowGraph {
             
             result = _NodeCreationResult(startNode: node)
                 .addingReturnNode(node)
+            
+        case is ThrowStatement:
+            let node = ControlFlowGraphNode(node: statement)
+            
+            result = _NodeCreationResult(startNode: node)
+                .addingThrowNode(node)
             
         // Handled separately in _connections(for:start:) above
         case is DeferStatement:
@@ -427,6 +434,7 @@ private extension ControlFlowGraph {
         var continueNodes: ControlFlowGraphJumpTarget = ControlFlowGraphJumpTarget()
         var fallthroughNodes: ControlFlowGraphJumpTarget = ControlFlowGraphJumpTarget()
         var returnNodes: ControlFlowGraphJumpTarget = ControlFlowGraphJumpTarget()
+        var throwNodes: ControlFlowGraphJumpTarget = ControlFlowGraphJumpTarget()
         
         private var operations: [GraphOperation] = []
         
@@ -481,6 +489,11 @@ private extension ControlFlowGraph {
             result.returnNodes.addNode(node)
             return result
         }
+        func addingThrowNode(_ node: ControlFlowGraphNode) -> _NodeCreationResult {
+            var result = self
+            result.throwNodes.addNode(node)
+            return result
+        }
         
         func satisfyingExits() -> _NodeCreationResult {
             var result = self
@@ -509,6 +522,11 @@ private extension ControlFlowGraph {
             result.returnNodes.clear()
             return result
         }
+        func satisfyingThrows() -> _NodeCreationResult {
+            var result = self
+            result.throwNodes.clear()
+            return result
+        }
         
         func breakToExits(targetLabel: String? = nil) -> _NodeCreationResult {
             var result = self
@@ -521,6 +539,12 @@ private extension ControlFlowGraph {
             var result = self
             result.exitNodes.merge(with: result.returnNodes)
             return result.satisfyingReturns()
+        }
+
+        func throwToExists() -> _NodeCreationResult {
+            var result = self
+            result.exitNodes.merge(with: result.throwNodes)
+            return result.satisfyingThrows()
         }
         
         func appendingDefers(_ defers: [ControlFlowSubgraphNode]) -> _NodeCreationResult {
@@ -543,6 +567,7 @@ private extension ControlFlowGraph {
             result.continueNodes.appendDefer(node)
             result.fallthroughNodes.appendDefer(node)
             result.returnNodes.appendDefer(node)
+            result.throwNodes.appendDefer(node)
             return result
         }
         
@@ -598,6 +623,7 @@ private extension ControlFlowGraph {
             newResult.continueNodes.merge(with: result.continueNodes)
             newResult.fallthroughNodes.merge(with: result.fallthroughNodes)
             newResult.returnNodes.merge(with: result.returnNodes)
+            newResult.throwNodes.merge(with: result.throwNodes)
             
             return newResult
         }
@@ -641,6 +667,7 @@ private extension ControlFlowGraph {
             newResult.continueNodes.merge(with: next.continueNodes)
             newResult.fallthroughNodes.merge(with: next.fallthroughNodes)
             newResult.returnNodes.merge(with: next.returnNodes)
+            newResult.throwNodes.merge(with: next.throwNodes)
             
             return newResult
         }

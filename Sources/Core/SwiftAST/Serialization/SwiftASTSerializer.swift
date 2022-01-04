@@ -56,6 +56,9 @@ public final class SwiftASTSerializer {
 
             case is LocalFunctionStatement:
                 kind = .localFunction
+            
+            case is ThrowStatement:
+                kind = .throw
                 
             default:
                 throw Error.unknownStatementType(type(of: statement))
@@ -101,6 +104,8 @@ public final class SwiftASTSerializer {
                 statement = try container.decode(ContinueStatement.self, forKey: .statement)
             case .localFunction:
                 statement = try container.decode(LocalFunctionStatement.self, forKey: .statement)
+            case .throw:
+                statement = try container.decode(ThrowStatement.self, forKey: .statement)
             case .unknown:
                 statement = try container.decode(UnknownStatement.self, forKey: .statement)
             }
@@ -303,6 +308,7 @@ public final class SwiftASTSerializer {
         case varDecl
         case `while`
         case localFunction
+        case `throw`
     }
     
     public enum Error: Swift.Error {

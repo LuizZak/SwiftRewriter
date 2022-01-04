@@ -93,8 +93,8 @@ public class TypeSystem {
         innerKnownTypes.addType(type)
     }
     
-    /// Returns true if two given Swift types match semmantically after expanding
-    /// all typealises.
+    /// Returns true if two given Swift types match semantically after expanding
+    /// all typealiases.
     public func typesMatch(_ type1: SwiftType, _ type2: SwiftType, ignoreNullability: Bool) -> Bool {
         // Structurally the same
         if !ignoreNullability && type1 == type2 {

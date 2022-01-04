@@ -1766,6 +1766,23 @@ class ExpressionTypeResolverTests: XCTestCase {
             resolvedAs: .bool
         )
     }
+
+    func testThrowsStatement() {
+        _ = startScopedTest(
+            with: Statement.throw(
+                .constant(0)
+            ),
+            sut: ExpressionTypeResolver()
+        )
+        .thenAssertExpression(
+            at: \ThrowStatement.exp,
+            resolvedAs: .int
+        )
+        .thenAssertExpression(
+            at: \ThrowStatement.exp,
+            expectsType: "Error"
+        )
+    }
 }
 
 // MARK: - Test Building Helpers

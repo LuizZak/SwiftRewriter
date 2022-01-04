@@ -73,4 +73,8 @@ public extension Statement {
     var isDoStatement: Bool? {
         asDoStatement != nil
     }
+    
+    static func `do`(_ stmt: CompoundStatement) -> DoStatement {
+        DoStatement(body: stmt)
+    }
 }

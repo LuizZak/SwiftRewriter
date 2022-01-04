@@ -1,4 +1,4 @@
-/// An anomymous syntax visitor that reports visits to `SyntaxNode` objects to
+/// An anonymous syntax visitor that reports visits to `SyntaxNode` objects to
 /// an external listener closure.
 public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisitor {
     public typealias ExprResult = Void
@@ -358,11 +358,20 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     
     /// Visits a local function statement
     ///
-    /// - Parameter stmt: A local function statement to visit
+    /// - Parameter stmt: A LocalFunctionStatement to visit
     public func visitLocalFunction(_ stmt: LocalFunctionStatement) {
         listener(stmt)
 
         stmt.function.body.accept(self)
+    }
+    
+    /// Visits a throw statement
+    ///
+    /// - Parameter stmt: A ThrowStatement to visit
+    public func visitThrow(_ stmt: ThrowStatement) {
+        listener(stmt)
+        
+        visitExpression(stmt.exp)
     }
     
     /// Visits an unknown statement node

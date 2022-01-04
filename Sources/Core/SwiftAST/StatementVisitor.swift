@@ -101,6 +101,12 @@ public protocol StatementVisitor {
     /// - Returns: Result of visiting the local function statement node
     func visitLocalFunction(_ stmt: LocalFunctionStatement) -> StmtResult
     
+    /// Visits a throw statement
+    ///
+    /// - Parameter stmt: A throw statement to visit
+    /// - Returns: Result of visiting the throw statement node
+    func visitThrow(_ stmt: ThrowStatement) -> StmtResult
+    
     /// Visits an unknown statement node
     ///
     /// - Parameter stmt: An unknown statement to visit

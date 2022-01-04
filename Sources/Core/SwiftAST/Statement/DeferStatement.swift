@@ -69,4 +69,8 @@ public extension Statement {
     var isDefer: Bool? {
         asDefer != nil
     }
+    
+    static func `defer`(_ stmt: CompoundStatement) -> DeferStatement {
+        DeferStatement(body: stmt)
+    }
 }

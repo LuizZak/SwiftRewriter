@@ -43,4 +43,8 @@ public extension Statement {
     var isUnknown: Bool? {
         asUnknown != nil
     }
+    
+    static func unknown(_ context: UnknownASTContext) -> UnknownStatement {
+        UnknownStatement(context: context)
+    }
 }

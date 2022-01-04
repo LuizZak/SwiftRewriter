@@ -896,4 +896,28 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 """
         )
     }
+
+    func testThrowStatement() {
+        assert(
+            Statement.throw(.identifier("Error")),
+            producer: SwiftSyntaxProducer.generateThrow,
+            matches: """
+                throw Error
+                """
+        )
+    }
+
+    func testThrowStatementInCompoundStatement() {
+        assert(
+            Statement.compound([
+                .throw(.identifier("Error"))
+            ]),
+            producer: SwiftSyntaxProducer.generateStatement,
+            matches: """
+                 {
+                    throw Error
+                }
+                """
+        )
+    }
 }

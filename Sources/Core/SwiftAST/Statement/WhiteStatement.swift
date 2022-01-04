@@ -85,4 +85,8 @@ public extension Statement {
     var isWhile: Bool? {
         asWhile != nil
     }
+    
+    static func `while`(_ exp: Expression, body: CompoundStatement) -> WhileStatement {
+        WhileStatement(exp: exp, body: body)
+    }
 }

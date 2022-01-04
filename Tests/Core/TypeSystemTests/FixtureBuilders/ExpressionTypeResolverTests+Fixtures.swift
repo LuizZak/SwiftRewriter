@@ -333,6 +333,42 @@ extension ExpressionTypeResolverTests {
         /// set to expect a given type
         @discardableResult
         func thenAssertExpression(
+            at keyPath: KeyPath<T, Expression>,
+            expectsType type: SwiftType?,
+            file: StaticString = #filePath,
+            line: UInt = #line
+        ) -> StatementTypeTestBuilder {
+
+            // Make sure to apply definitions just before starting assertions
+            if !applied {
+                sut.typeSystem = typeSystem
+                sut.intrinsicVariables = intrinsics
+                sut.ignoreResolvedExpressions = true
+
+                _ = statement.accept(sut)
+                applied = true
+            }
+
+            let exp = statement[keyPath: keyPath]
+
+            if exp.expectedType != type {
+                XCTFail(
+                    """
+                    Expected expression to resolve as expecting type \(type?.description ?? "nil"), \
+                    but it expects \(exp.expectedType?.description ?? "nil")"
+                    """,
+                    file: file,
+                    line: line
+                )
+            }
+
+            return self
+        }
+
+        /// Makes an assertion the expression contained at a given keypath was
+        /// set to expect a given type
+        @discardableResult
+        func thenAssertExpression(
             at keyPath: KeyPath<T, Expression?>,
             expectsType type: SwiftType?,
             file: StaticString = #filePath,
@@ -365,6 +401,42 @@ extension ExpressionTypeResolverTests {
                     """
                     Expected expression to resolve as expecting type \(type?.description ?? "nil"), \
                     but it expects \(exp.expectedType?.description ?? "nil")"
+                    """,
+                    file: file,
+                    line: line
+                )
+            }
+
+            return self
+        }
+
+        /// Makes an assertion the expression contained at a given keypath was
+        /// resolved to a specified type
+        @discardableResult
+        func thenAssertExpression(
+            at keyPath: KeyPath<T, Expression>,
+            resolvedAs type: SwiftType?,
+            file: StaticString = #filePath,
+            line: UInt = #line
+        ) -> StatementTypeTestBuilder {
+
+            // Make sure to apply definitions just before starting assertions
+            if !applied {
+                sut.typeSystem = typeSystem
+                sut.intrinsicVariables = intrinsics
+                sut.ignoreResolvedExpressions = true
+
+                _ = statement.accept(sut)
+                applied = true
+            }
+
+            let exp = statement[keyPath: keyPath]
+
+            if exp.resolvedType != type {
+                XCTFail(
+                    """
+                    Expected expression to resolve as type \(type?.description ?? "nil"), \
+                    but it resolved as \(exp.resolvedType?.description ?? "nil")"
                     """,
                     file: file,
                     line: line

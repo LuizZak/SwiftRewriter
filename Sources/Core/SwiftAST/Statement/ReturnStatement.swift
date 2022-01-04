@@ -77,4 +77,8 @@ public extension Statement {
     var isReturn: Bool? {
         asReturn != nil
     }
+    
+    static func `return`(_ exp: Expression?) -> ReturnStatement {
+        ReturnStatement(exp: exp)
+    }
 }

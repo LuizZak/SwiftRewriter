@@ -1214,6 +1214,39 @@ class ControlFlowGraphCreationTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
     }
 
+    func testThrowStatement() {
+        let stmt: CompoundStatement = [
+            Statement.while(
+                .identifier("v"),
+                body: [
+                    .throw(.identifier("Error"))
+                ]
+            )
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{throw Error}"]
+                    n3 [label="{while}"]
+                    n4 [label="exit"]
+                    n1 -> n3
+                    n2 -> n4
+                    n3 -> n2
+                    n3 -> n4
+                }
+                """
+        )
+        XCTAssertEqual(graph.nodes.count, 4)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+    }
+
     func testBreakStatement() {
         let stmt: CompoundStatement = [
             Statement.while(
@@ -1910,10 +1943,12 @@ extension ControlFlowGraphCreationTests {
                 case let ret as ReturnStatement:
                     if let exp = ret.exp {
                         label = "{return \(exp)}"
-                    }
-                    else {
+                    } else {
                         label = "{return}"
                     }
+
+                case let stmt as ThrowStatement:
+                    label = "{throw \(stmt.exp)}"
 
                 case let varDecl as VariableDeclarationsStatement:
                     label = varDecl.decl.map { decl -> String in

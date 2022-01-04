@@ -77,6 +77,29 @@ public extension Statement {
     var isVariableDeclaration: Bool? {
         asVariableDeclaration != nil
     }
+
+    static func variableDeclarations(_ decl: [StatementVariableDeclaration]) -> VariableDeclarationsStatement {
+        VariableDeclarationsStatement(decl: decl)
+    }
+
+    static func variableDeclaration(
+        identifier: String,
+        type: SwiftType,
+        ownership: Ownership = .strong,
+        isConstant: Bool = false,
+        initialization: Expression?
+    ) -> VariableDeclarationsStatement {
+        
+        .variableDeclarations([
+            .init(
+                identifier: identifier,
+                type: type,
+                ownership: ownership,
+                isConstant: isConstant,
+                initialization: initialization
+            )
+        ])
+    }
 }
 
 /// A variable declaration statement

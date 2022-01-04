@@ -26,4 +26,8 @@ public extension Statement {
     var isFallthrough: Bool? {
         asFallthrough != nil
     }
+    
+    static var `fallthrough`: FallthroughStatement {
+        FallthroughStatement()
+    }
 }

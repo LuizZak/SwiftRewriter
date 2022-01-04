@@ -108,4 +108,8 @@ public extension Statement {
     var isCompound: Bool? {
         asCompound != nil
     }
+    
+    static func compound(_ cpd: [Statement]) -> CompoundStatement {
+        CompoundStatement(statements: cpd)
+    }
 }

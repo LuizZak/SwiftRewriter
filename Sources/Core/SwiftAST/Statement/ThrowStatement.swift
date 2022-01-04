@@ -1,61 +1,51 @@
-public class DoWhileStatement: Statement {
+public class ThrowStatement: Statement {
+    public override var isUnconditionalJump: Bool {
+        true
+    }
+    
     public var exp: Expression {
         didSet {
             oldValue.parent = nil
             exp.parent = self
         }
     }
-    public var body: CompoundStatement {
-        didSet {
-            oldValue.parent = nil
-            body.parent = self
-        }
-    }
     
     public override var children: [SyntaxNode] {
-        [exp, body]
+        return [exp]
     }
     
-    public override var isLabelableStatementType: Bool {
-        return true
-    }
-    
-    public init(exp: Expression, body: CompoundStatement) {
+    public init(exp: Expression) {
         self.exp = exp
-        self.body = body
         
         super.init()
         
         exp.parent = self
-        body.parent = self
     }
     
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         exp = try container.decodeExpression(forKey: .exp)
-        body = try container.decodeStatement(CompoundStatement.self, forKey: .body)
         
         try super.init(from: container.superDecoder())
         
         exp.parent = self
-        body.parent = self
     }
     
     @inlinable
-    public override func copy() -> DoWhileStatement {
-        DoWhileStatement(exp: exp.copy(), body: body.copy()).copyMetadata(from: self)
+    public override func copy() -> ThrowStatement {
+        ThrowStatement(exp: exp.copy()).copyMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        visitor.visitDoWhile(self)
+        visitor.visitThrow(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
         switch other {
-        case let rhs as DoWhileStatement:
-            return exp == rhs.exp && body == rhs.body
+        case let rhs as ThrowStatement:
+            return exp == rhs.exp
         default:
             return false
         }
@@ -65,28 +55,26 @@ public class DoWhileStatement: Statement {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
         try container.encodeExpression(exp, forKey: .exp)
-        try container.encodeStatement(body, forKey: .body)
         
         try super.encode(to: container.superEncoder())
     }
     
     private enum CodingKeys: String, CodingKey {
         case exp
-        case body
     }
 }
 public extension Statement {
     @inlinable
-    var asDoWhile: DoWhileStatement? {
+    var asThrow: ThrowStatement? {
         cast()
     }
 
     @inlinable
-    var isDoWhile: Bool? {
-        asDoWhile != nil
+    var isThrow: Bool? {
+        asThrow != nil
     }
-    
-    static func doWhile(_ exp: Expression, body: CompoundStatement) -> DoWhileStatement {
-        DoWhileStatement(exp: exp, body: body)
+
+    static func `throw`(_ exp: Expression) -> ThrowStatement {
+        .init(exp: exp)
     }
 }

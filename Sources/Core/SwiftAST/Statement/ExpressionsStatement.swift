@@ -70,4 +70,12 @@ public extension Statement {
     var isExpressions: Bool? {
         asExpressions != nil
     }
+
+    static func expressions(_ exp: [Expression]) -> ExpressionsStatement {
+        ExpressionsStatement(expressions: exp)
+    }
+
+    static func expression(_ expr: Expression) -> ExpressionsStatement {
+        .expressions([expr])
+    }
 }

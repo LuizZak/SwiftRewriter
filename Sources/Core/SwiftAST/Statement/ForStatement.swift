@@ -115,4 +115,8 @@ public extension Statement {
     var isFor: Bool? {
         asFor != nil
     }
+    
+    static func `for`(_ pattern: Pattern, _ exp: Expression, body: CompoundStatement) -> ForStatement {
+        ForStatement(pattern: pattern, exp: exp, body: body)
+    }
 }
