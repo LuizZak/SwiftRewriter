@@ -16,8 +16,8 @@ class BaseSwiftSyntaxProducerTests: XCTestCase {
 
         let syntax = producer(SwiftSyntaxProducer())(node)
 
-        diffTest(expected: expected, file: file, line: line)
-            .diff(syntax.description, file: file, line: line + 2)
+        diffTest(expected: expected, file: file, line: line + 3)
+            .diff(syntax.description, file: file, line: line)
     }
 
     func assert<T: SyntaxProtocol>(

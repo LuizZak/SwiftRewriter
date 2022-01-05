@@ -197,24 +197,24 @@ extension SwiftSyntaxProducer {
             builder.useLeftBrace(makeStartToken(SyntaxFactory.makeLeftBraceToken))
             
             let hasParameters = !exp.parameters.isEmpty
-            let requiresTypeSignatuer =
+            let requiresTypeSignature =
                 exp.resolvedType == nil || exp.resolvedType != exp.expectedType
             
             let signature = ClosureSignatureSyntax { builder in
-                if hasParameters || requiresTypeSignatuer {
+                if hasParameters || requiresTypeSignature {
                     builder.useInTok(
                         SyntaxFactory.makeInKeyword().addingLeadingSpace()
                     )
                 }
                 
-                if requiresTypeSignatuer {
-                    builder.useOutput(generateReturn(exp.returnType))
+                if requiresTypeSignature {
+                    builder.useOutput(generateReturnType(exp.returnType))
                 }
                 
                 let parameters = ParameterClauseSyntax { builder in
                     addExtraLeading(.spaces(1))
                     
-                    if requiresTypeSignatuer {
+                    if requiresTypeSignature {
                         builder.useLeftParen(
                             SyntaxFactory
                                 .makeLeftParenToken()
@@ -230,7 +230,7 @@ extension SwiftSyntaxProducer {
                                 makeIdentifier(arg.name)
                                     .withExtraLeading(from: self))
                             
-                            if requiresTypeSignatuer {
+                            if requiresTypeSignature {
                                 builder.useColon(
                                     SyntaxFactory
                                         .makeColonToken()

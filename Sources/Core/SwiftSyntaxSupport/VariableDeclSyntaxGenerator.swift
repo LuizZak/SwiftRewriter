@@ -35,7 +35,7 @@ class VariableDeclSyntaxGenerator {
                 producer.makeStartToken(SyntaxFactory.makeSubscriptKeyword)
             )
             builder.useIndices(producer.generateParameterClause(intention.parameters))
-            builder.useResult(producer.generateReturn(intention.returnType))
+            builder.useResult(producer.generateReturnType(intention.returnType))
             
             if let accessors = VariableDeclSyntaxGenerator.makeAccessorBlockCreator(intention, producer) {
                 builder.useAccessor(accessors())
@@ -293,8 +293,8 @@ class VariableDeclSyntaxGenerator {
                     builder.useAccessorKind(
                         producer.prepareStartToken(
                             SyntaxFactory
-                                .makeToken(.contextualKeyword("get"),
-                                           presence: .present)
+                                .makeToken(.contextualKeyword("get"), presence: .present)
+                                .withTrailingSpace()
                         )
                     )
                     
@@ -304,15 +304,13 @@ class VariableDeclSyntaxGenerator {
                 producer.addExtraLeading(.newlines(1) + producer.indentation())
                 
                 let setter = AccessorDeclSyntax { builder in
-                    builder.useAccessorKind(
-                        producer.prepareStartToken(
-                            SyntaxFactory
-                                .makeToken(.contextualKeyword("set"),
-                                           presence: .present)
-                        )
+                    let setToken = producer.prepareStartToken(
+                        SyntaxFactory
+                            .makeToken(.contextualKeyword("set"), presence: .present)
                     )
                     
                     if setter.valueIdentifier != "newValue" {
+                        builder.useAccessorKind(setToken)
                         builder.useParameter(AccessorParameterSyntax { builder in
                             builder.useLeftParen(
                                 producer
@@ -320,7 +318,9 @@ class VariableDeclSyntaxGenerator {
                             )
                             builder.useName(makeIdentifier(setter.valueIdentifier))
                             builder.useRightParen(SyntaxFactory.makeRightParenToken())
-                        })
+                        }.withTrailingSpace())
+                    } else {
+                        builder.useAccessorKind(setToken.withTrailingSpace())
                     }
                     
                     builder.useBody(producer.generateFunctionBody(setter.body))

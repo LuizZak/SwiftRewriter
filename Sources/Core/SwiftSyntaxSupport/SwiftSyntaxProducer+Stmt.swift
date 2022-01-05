@@ -47,7 +47,7 @@ extension SwiftSyntaxProducer {
     
     func generateCompound(_ compoundStmt: CompoundStatement) -> CodeBlockSyntax {
         CodeBlockSyntax { builder in
-            builder.useLeftBrace(SyntaxFactory.makeLeftBraceToken().withLeadingSpace())
+            builder.useLeftBrace(makeStartToken(SyntaxFactory.makeLeftBraceToken))
             
             indent()
             defer {
@@ -373,10 +373,14 @@ extension SwiftSyntaxProducer {
                             builder.useValue(generateExpression(stmt.exp))
                         })
                     }.asSyntax)
-                })
+                }.withTrailingSpace())
             } else {
                 builder.addCondition(ConditionElementSyntax { builder in
-                    builder.useCondition(generateExpression(stmt.exp).asSyntax)
+                    builder.useCondition(
+                        generateExpression(stmt.exp)
+                        .asSyntax
+                        .withTrailingSpace()
+                    )
                 })
             }
             
@@ -385,13 +389,10 @@ extension SwiftSyntaxProducer {
             if let _else = stmt.elseBody {
                 builder.useElseKeyword(
                     makeStartToken(SyntaxFactory.makeElseKeyword)
-                        .addingLeadingSpace()
+                        .addingSurroundingSpaces()
                 )
                 
-                if _else.statements.count == 1,
-                    let elseIfStmt = _else.statements[0] as? IfStatement {
-                    
-                    addExtraLeading(.spaces(1))
+                if _else.statements.count == 1, let elseIfStmt = _else.statements[0] as? IfStatement {
                     builder.useElseBody(generateIfStmt(elseIfStmt).asSyntax)
                 } else {
                     builder.useElseBody(generateCompound(_else).asSyntax)
@@ -523,7 +524,11 @@ extension SwiftSyntaxProducer {
             )
             
             builder.addCondition(ConditionElementSyntax { builder in
-                builder.useCondition(generateExpression(stmt.exp).asSyntax)
+                builder.useCondition(
+                    generateExpression(stmt.exp)
+                    .asSyntax
+                    .withTrailingSpace()
+                )
             })
             
             builder.useBody(generateCompound(stmt.body))
@@ -542,15 +547,17 @@ extension SwiftSyntaxProducer {
             }
             
             builder.useRepeatKeyword(
-                makeStartToken(SyntaxFactory.makeRepeatKeyword))
+                makeStartToken(SyntaxFactory.makeRepeatKeyword)
+                    .withTrailingSpace()
+            )
             
+            builder.useBody(generateCompound(stmt.body))
             builder.useWhileKeyword(
                 SyntaxFactory
                     .makeWhileKeyword()
                     .addingSurroundingSpaces()
             )
             
-            builder.useBody(generateCompound(stmt.body))
             builder.useCondition(generateExpression(stmt.exp))
         }
     }
@@ -577,9 +584,9 @@ extension SwiftSyntaxProducer {
                     .addingSurroundingSpaces()
             )
             
-            builder.useBody(generateCompound(stmt.body))
             builder.usePattern(generatePattern(stmt.pattern))
-            builder.useSequenceExpr(generateExpression(stmt.exp))
+            builder.useSequenceExpr(generateExpression(stmt.exp).withTrailingSpace())
+            builder.useBody(generateCompound(stmt.body))
         }
     }
     
@@ -594,32 +601,77 @@ extension SwiftSyntaxProducer {
                 addExtraLeading(.newlines(1) + indentation())
             }
             
-            builder.useDoKeyword(makeStartToken(SyntaxFactory.makeDoKeyword))
+            builder.useDoKeyword(
+                makeStartToken(SyntaxFactory.makeDoKeyword)
+                .withTrailingSpace()
+            )
             builder.useBody(generateCompound(stmt.body))
+
+            for catchBlock in stmt.catchBlocks {
+                builder.addCatchClause(
+                    generateCatchBlock(catchBlock)
+                    .withLeadingSpace()
+                )
+            }
+        }
+    }
+
+    func generateCatchBlock(_ catchBlock: CatchBlock) -> CatchClauseSyntax {
+        CatchClauseSyntax { builder in
+            builder.useCatchKeyword(
+                SyntaxFactory.makeCatchKeyword()
+                .withTrailingSpace()
+            )
+            
+            if let pattern = catchBlock.pattern {
+                builder.addCatchItem(
+                    generateCatchItem(from: pattern)
+                    .withTrailingSpace()
+                )
+            }
+
+            builder.useBody(generateCompound(catchBlock.body))
+        }
+    }
+
+    func generateCatchItem(from pattern: Pattern, hasComma: Bool = false) -> CatchItemSyntax {
+        CatchItemSyntax { builder in
+            builder.usePattern(
+                generateValueBindingPattern(pattern)
+                .asPatternSyntax
+            )
+
+            if hasComma {
+                builder.useTrailingComma(SyntaxFactory.makeCommaToken())
+            }
         }
     }
     
     func generateDefer(_ stmt: DeferStatement) -> DeferStmtSyntax {
         DeferStmtSyntax { builder in
-            builder.useDeferKeyword(makeStartToken(SyntaxFactory.makeDeferKeyword))
+            builder.useDeferKeyword(
+                makeStartToken(SyntaxFactory.makeDeferKeyword)
+                .withTrailingSpace()
+            )
             builder.useBody(generateCompound(stmt.body))
         }
     }
 
     func generateLocalFunction(_ stmt: LocalFunctionStatement) -> FunctionDeclSyntax {
         FunctionDeclSyntax { builder in
-            builder.useFuncKeyword(makeStartToken(SyntaxFactory.makeFuncKeyword))
-            builder.useIdentifier(makeIdentifier(stmt.function.identifier).withLeadingSpace())
-            builder.useSignature(generateSignature(stmt.function.signature))
+            builder.useFuncKeyword(makeStartToken(SyntaxFactory.makeFuncKeyword).withTrailingSpace())
+            builder.useIdentifier(makeIdentifier(stmt.function.identifier))
+            builder.useSignature(generateSignature(stmt.function.signature).withTrailingSpace())
             builder.useBody(generateCompound(stmt.function.body))
         }
     }
 
     func generateThrow(_ stmt: ThrowStatement) -> ThrowStmtSyntax {
         ThrowStmtSyntax { builder in
-            var token = makeStartToken(SyntaxFactory.makeThrowKeyword)
-            token = token.addingTrailingSpace()
-            builder.useThrowKeyword(token)
+            builder.useThrowKeyword(
+                makeStartToken(SyntaxFactory.makeThrowKeyword)
+                .addingTrailingSpace()
+            )
             builder.useExpression(generateExpression(stmt.exp))
         }
     }
@@ -649,12 +701,31 @@ extension SwiftSyntaxProducer {
                             if hasComma {
                                 builder.useTrailingComma(SyntaxFactory
                                     .makeCommaToken()
-                                    .withTrailingSpace())
+                                    .withTrailingSpace()
+                                )
                             }
                         }
                     )
                 }
             }.asPatternSyntax
+        }
+    }
+    
+    func generateValueBindingPattern(_ pattern: Pattern, isConstant: Bool = true) -> ValueBindingPatternSyntax {
+        ValueBindingPatternSyntax { builder in
+            if isConstant {
+                builder.useLetOrVarKeyword(
+                    SyntaxFactory.makeLetKeyword()
+                        .withTrailingSpace()
+                )
+            } else {
+                builder.useLetOrVarKeyword(
+                    SyntaxFactory.makeVarKeyword()
+                        .withTrailingSpace()
+                )
+            }
+            
+            builder.useValuePattern(generatePattern(pattern))
         }
     }
 }

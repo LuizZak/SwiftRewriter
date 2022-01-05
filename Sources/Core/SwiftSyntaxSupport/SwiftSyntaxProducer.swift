@@ -769,8 +769,10 @@ extension SwiftSyntaxProducer {
 // MARK: - Function syntax
 extension SwiftSyntaxProducer {
     
-    func generateInitializer(_ intention: InitGenerationIntention,
-                             alwaysEmitBody: Bool) -> InitializerDeclSyntax {
+    func generateInitializer(
+        _ intention: InitGenerationIntention,
+        alwaysEmitBody: Bool
+    ) -> InitializerDeclSyntax {
         
         addHistoryTrackingLeadingIfEnabled(intention)
         addCommentsIfAvailable(intention)
@@ -792,8 +794,10 @@ extension SwiftSyntaxProducer {
             builder.useParameters(generateParameterClause(intention.parameters))
             
             if let body = intention.functionBody {
+                addExtraLeading(.spaces(1))
                 builder.useBody(generateFunctionBody(body))
             } else if alwaysEmitBody {
+                addExtraLeading(.spaces(1))
                 builder.useBody(generateEmptyFunctionBody())
             }
         }
@@ -806,14 +810,17 @@ extension SwiftSyntaxProducer {
             builder.useDeinitKeyword(makeStartToken(SyntaxFactory.makeDeinitKeyword))
             
             if let body = intention.functionBody {
+                addExtraLeading(.spaces(1))
                 builder.useBody(generateFunctionBody(body))
             }
         }
     }
     
-    func generateFunction(_ intention: SignatureFunctionIntention,
-                          alwaysEmitBody: Bool) -> FunctionDeclSyntax {
-        
+    func generateFunction(
+        _ intention: SignatureFunctionIntention,
+        alwaysEmitBody: Bool
+    ) -> FunctionDeclSyntax {
+
         addHistoryTrackingLeadingIfEnabled(intention)
         
         if let fromSource = intention as? FromSourceIntention {
@@ -832,12 +839,14 @@ extension SwiftSyntaxProducer {
                 makeStartToken(SyntaxFactory.makeFuncKeyword)
                     .addingTrailingSpace()
             )
-            builder.useSignature(generateSignature(intention.signature))
             builder.useIdentifier(makeIdentifier(intention.signature.name))
+            builder.useSignature(generateSignature(intention.signature))
             
             if let body = intention.functionBody {
+                addExtraLeading(.spaces(1))
                 builder.useBody(generateFunctionBody(body))
             } else if alwaysEmitBody {
+                addExtraLeading(.spaces(1))
                 builder.useBody(generateEmptyFunctionBody())
             }
         }
@@ -848,18 +857,17 @@ extension SwiftSyntaxProducer {
             builder.useInput(generateParameterClause(signature.parameters))
             
             if signature.returnType != .void {
-                builder.useOutput(generateReturn(signature.returnType))
+                builder.useOutput(generateReturnType(signature.returnType))
             }
         }
     }
     
-    func generateReturn(_ ret: SwiftType) -> ReturnClauseSyntax {
+    func generateReturnType(_ ret: SwiftType) -> ReturnClauseSyntax {
         ReturnClauseSyntax { builder in
             builder.useArrow(
                 SyntaxFactory
                     .makeArrowToken()
-                    .addingLeadingSpace()
-                    .addingTrailingSpace()
+                    .addingSurroundingSpaces()
             )
             builder.useReturnType(SwiftTypeConverter.makeTypeSyntax(ret, startTokenHandler: self))
         }
@@ -925,9 +933,7 @@ extension SwiftSyntaxProducer {
     func generateEmptyFunctionBody() -> CodeBlockSyntax {
         CodeBlockSyntax { builder in
             builder.useLeftBrace(
-                SyntaxFactory
-                    .makeLeftBraceToken()
-                    .withLeadingSpace()
+                makeStartToken(SyntaxFactory.makeLeftBraceToken)
             )
             builder.useRightBrace(
                 SyntaxFactory
@@ -960,6 +966,9 @@ extension SwiftSyntaxProducer {
 }
 
 // MARK: - General/commons
+
+// MARK: TokenSyntax
+
 func makeIdentifier(_ identifier: String) -> TokenSyntax {
     SyntaxFactory.makeIdentifier(identifier)
 }
@@ -1019,6 +1028,58 @@ extension TokenSyntax {
 
 extension TokenSyntax {
     func withExtraLeading(from producer: SwiftSyntaxProducer) -> TokenSyntax {
+        withExtraLeading(consuming: &producer.extraLeading)
+    }
+}
+
+// MARK: Syntax
+
+
+extension SyntaxProtocol {
+    func withExtraLeading(consuming trivia: inout Trivia?) -> Self {
+        if let t = trivia {
+            trivia = nil
+            return withLeadingTrivia(t + (leadingTrivia ?? []))
+        }
+        
+        return self
+    }
+    
+    func withLeadingSpace(count: Int = 1) -> Self {
+        withLeadingTrivia(.spaces(count))
+    }
+    
+    func withTrailingSpace(count: Int = 1) -> Self {
+        withTrailingTrivia(.spaces(count))
+    }
+    
+    func addingLeadingSpace(count: Int = 1) -> Self {
+        addingLeadingTrivia(.spaces(count))
+    }
+    
+    func addingTrailingSpace(count: Int = 1) -> Self {
+        addingTrailingTrivia(.spaces(count))
+    }
+    
+    func addingLeadingTrivia(_ trivia: Trivia) -> Self {
+        withLeadingTrivia((leadingTrivia ?? []) + trivia)
+    }
+    
+    func addingTrailingTrivia(_ trivia: Trivia) -> Self {
+        withTrailingTrivia((trailingTrivia ?? []) + trivia)
+    }
+    
+    func addingSurroundingSpaces() -> Self {
+        addingLeadingSpace().addingTrailingSpace()
+    }
+    
+    func onNewline() -> Self {
+        withLeadingTrivia(.newlines(1))
+    }
+}
+
+extension SyntaxProtocol {
+    func withExtraLeading(from producer: SwiftSyntaxProducer) -> Self {
         withExtraLeading(consuming: &producer.extraLeading)
     }
 }

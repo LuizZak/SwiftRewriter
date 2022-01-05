@@ -101,16 +101,6 @@ class JsParserTests: XCTestCase {
 
     #if JS_PARSER_TESTS_FULL_FIXTURES
 
-        func testParse_bezierFixture() throws {
-            let fixtureUrl = try XCTUnwrap(
-                Bundle.module.url(forResource: "bezier", withExtension: "js")
-            )
-
-            let source = try String(contentsOf: fixtureUrl, encoding: .utf8)
-
-            _ = parserTest(source)
-        }
-
         func testParse_allFixtures() throws {
             let fixtures = try XCTUnwrap(
                 Bundle.module.urls(forResourcesWithExtension: "js", subdirectory: nil)

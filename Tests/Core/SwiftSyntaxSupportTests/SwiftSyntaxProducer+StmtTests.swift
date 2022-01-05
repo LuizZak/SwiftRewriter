@@ -38,7 +38,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntax,
             matches: """
-                 {
+                {
                     foo
                     bar
                 }
@@ -84,7 +84,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntax,
             matches: """
-                 {
+                {
                     var foo: Int, bar: Float = 0.0
                 }
                 """
@@ -122,7 +122,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntax,
             matches: """
-                 {
+                {
                     var foo: Int, bar: Float = 0.0
                     let baz: Int, zaz: String
                 }
@@ -569,6 +569,30 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         )
     }
 
+    func testDoStatement_catchBlocks() {
+        let stmt = Statement
+            .do([])
+            .catch(body: [
+                .expression(.identifier("a").call())
+            ])
+            .catch(pattern: .identifier("error"), body: [
+                .expression(.identifier("b").call())
+            ])
+
+        assert(
+            stmt,
+            producer: SwiftSyntaxProducer.generateDo,
+            matches: """
+                do {
+                } catch {
+                    a()
+                } catch let error {
+                    b()
+                }
+                """
+        )
+    }
+
     func testDeferStatement() {
         assert(
             Statement.defer([]),
@@ -599,9 +623,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
 
     func testUnknownStatementNested() {
         assert(
-            Statement.do([
-                .unknown(.init(context: "abc"))
-            ]),
+            Statement.do([.unknown(.init(context: "abc"))]),
             producer: SwiftSyntaxProducer.generateDo,
             matches: """
                 do {
@@ -727,7 +749,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntaxes,
             matches: """
-                 {
+                {
                     // A Comment
                     // Another Comment
                     value
@@ -748,7 +770,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntaxes,
             matches: """
-                 {
+                {
                     // A Comment
                     // Another Comment
                     // label:
@@ -770,7 +792,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntaxes,
             matches: """
-                 {
+                {
                     // A Comment
                     // Another Comment
                     label:
@@ -792,7 +814,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntaxes,
             matches: """
-                 {
+                {
                     var value: Int // A trailing comment
                 }
                 """
@@ -810,7 +832,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntaxes,
             matches: """
-                 {
+                {
                     if value {
                     } // A trailing comment
                 }
@@ -832,7 +854,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntaxes,
             matches: """
-                 {
+                {
                     stmt1()
                     stmt2() // A trailing comment
                 }
@@ -886,7 +908,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntaxes,
             matches: """
-                 {
+                {
                     var b: Float = 1
 
                     func localFunction(a: Float) -> Float {
@@ -914,7 +936,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             ]),
             producer: SwiftSyntaxProducer.generateStatement,
             matches: """
-                 {
+                {
                     throw Error
                 }
                 """

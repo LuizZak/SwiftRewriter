@@ -11,7 +11,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits an expression node
     ///
-    /// - Parameter exp: An Expression to visit
+    /// - Parameter exp: An `Expression` to visit
     /// - Returns: Result of visiting this expression node
     open func visitExpression(_ exp: Expression) -> Expression {
         exp.accept(self)
@@ -19,7 +19,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits an assignment operation node
     ///
-    /// - Parameter exp: An AssignmentExpression to visit
+    /// - Parameter exp: An `AssignmentExpression` to visit
     /// - Returns: Result of visiting this assignment operation node
     open func visitAssignment(_ exp: AssignmentExpression) -> Expression {
         exp.lhs = visitExpression(exp.lhs)
@@ -30,7 +30,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a binary operation node
     ///
-    /// - Parameter exp: A BinaryExpression to visit
+    /// - Parameter exp: A `BinaryExpression` to visit
     /// - Returns: Result of visiting this binary operation node
     open func visitBinary(_ exp: BinaryExpression) -> Expression {
         exp.lhs = visitExpression(exp.lhs)
@@ -41,7 +41,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a unary operation node
     ///
-    /// - Parameter exp: A UnaryExpression to visit
+    /// - Parameter exp: A `UnaryExpression` to visit
     /// - Returns: Result of visiting this unary operation node
     open func visitUnary(_ exp: UnaryExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
@@ -51,7 +51,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a sizeof expression
     ///
-    /// - Parameter exp: A SizeOfExpression to visit
+    /// - Parameter exp: A `SizeOfExpression` to visit
     /// - Returns: Result of visiting the sizeof expression node
     open func visitSizeOf(_ exp: SizeOfExpression) -> Expression {
         switch exp.value {
@@ -65,7 +65,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a prefix operation node
     ///
-    /// - Parameter exp: A PrefixExpression to visit
+    /// - Parameter exp: A `PrefixExpression` to visit
     /// - Returns: Result of visiting this prefix operation node
     open func visitPrefix(_ exp: PrefixExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
@@ -75,7 +75,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a postfix operation node
     ///
-    /// - Parameter exp: A PostfixExpression to visit
+    /// - Parameter exp: A `PostfixExpression` to visit
     /// - Returns: Result of visiting this postfix operation node
     open func visitPostfix(_ exp: PostfixExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
@@ -96,7 +96,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a constant node
     ///
-    /// - Parameter exp: A ConstantExpression to visit
+    /// - Parameter exp: A `ConstantExpression` to visit
     /// - Returns: Result of visiting this constant node
     open func visitConstant(_ exp: ConstantExpression) -> Expression {
         exp
@@ -104,7 +104,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a parenthesized expression node
     ///
-    /// - Parameter exp: A ParensExpression to visit
+    /// - Parameter exp: A `ParensExpression` to visit
     /// - Returns: Result of visiting this parenthesis node
     open func visitParens(_ exp: ParensExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
@@ -114,7 +114,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits an identifier node
     ///
-    /// - Parameter exp: An IdentifierExpression to visit
+    /// - Parameter exp: An `IdentifierExpression` to visit
     /// - Returns: Result of visiting this identifier node
     open func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
         exp
@@ -122,7 +122,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a type-casting expression node
     ///
-    /// - Parameter exp: A CastExpression to visit
+    /// - Parameter exp: A `CastExpression` to visit
     /// - Returns: Result of visiting this cast node
     open func visitCast(_ exp: CastExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
@@ -132,7 +132,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a type-check expression node
     ///
-    /// - Parameter exp: A type check expression to visit
+    /// - Parameter exp: A `TypeCheckExpression` to visit
     /// - Returns: Result of visiting this type check node
     open func visitTypeCheck(_ exp: TypeCheckExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
@@ -142,7 +142,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits an array literal node
     ///
-    /// - Parameter exp: An ArrayLiteralExpression to visit
+    /// - Parameter exp: An `ArrayLiteralExpression` to visit
     /// - Returns: Result of visiting this array literal node
     open func visitArray(_ exp: ArrayLiteralExpression) -> Expression {
         exp.items = exp.items.map(visitExpression)
@@ -152,7 +152,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a dictionary literal node
     ///
-    /// - Parameter exp: A DictionaryLiteralExpression to visit
+    /// - Parameter exp: A `DictionaryLiteralExpression` to visit
     /// - Returns: Result of visiting this dictionary literal node
     open func visitDictionary(_ exp: DictionaryLiteralExpression) -> Expression {
         exp.pairs = exp.pairs.map { pair in
@@ -167,7 +167,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a block expression
     ///
-    /// - Parameter exp: A BlockLiteralExpression to visit
+    /// - Parameter exp: A `BlockLiteralExpression` to visit
     /// - Returns: Result of visiting this block expression node
     open func visitBlock(_ exp: BlockLiteralExpression) -> Expression {
         exp.body = _visitCompound(exp.body)
@@ -177,7 +177,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a ternary operation node
     ///
-    /// - Parameter exp: A TernaryExpression to visit
+    /// - Parameter exp: A `TernaryExpression` to visit
     /// - Returns: Result of visiting this ternary expression node
     open func visitTernary(_ exp: TernaryExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
@@ -189,7 +189,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a tuple node
     ///
-    /// - Parameter exp: A tuple expression to visit
+    /// - Parameter exp: A `TupleExpression` to visit
     /// - Returns: Result of visiting this tuple node
     open func visitTuple(_ exp: TupleExpression) -> Expression {
         exp.elements = exp.elements.map(visitExpression)
@@ -199,7 +199,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a selector reference node
     ///
-    /// - Parameter exp: A selector reference expression to visit
+    /// - Parameter exp: A `SelectorExpression` to visit
     /// - Returns: Result of visiting this tuple node
     open func visitSelector(_ exp: SelectorExpression) -> Expression {
         return exp
@@ -207,7 +207,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits an unknown expression node
     ///
-    /// - Parameter exp: An UnknownExpression to visit
+    /// - Parameter exp: An `UnknownExpression` to visit
     /// - Returns: Result of visiting this unknown expression node
     open func visitUnknown(_ exp: UnknownExpression) -> Expression {
         exp
@@ -215,7 +215,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a pattern from an expression
     ///
-    /// - Parameter ptn: A Pattern to visit
+    /// - Parameter ptn: A `Pattern` to visit
     /// - Returns: Result of visiting the pattern node
     open func visitPattern(_ ptn: Pattern) -> Pattern {
         switch ptn {
@@ -240,7 +240,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a compound statement with this visitor
     ///
-    /// - Parameter stmt: A CompoundStatement to visit
+    /// - Parameter stmt: A `CompoundStatement` to visit
     /// - Returns: Result of visiting the compound statement
     open func visitCompound(_ stmt: CompoundStatement) -> Statement {
         for i in 0..<stmt.statements.count {
@@ -252,7 +252,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits an `if` statement with this visitor
     ///
-    /// - Parameter stmt: An IfStatement to visit
+    /// - Parameter stmt: An `IfStatement` to visit
     /// - Returns: Result of visiting the `if` statement node
     open func visitIf(_ stmt: IfStatement) -> Statement {
         stmt.exp = visitExpression(stmt.exp)
@@ -264,7 +264,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a `switch` statement with this visitor
     ///
-    /// - Parameter stmt: A SwitchStatement to visit
+    /// - Parameter stmt: A `SwitchStatement` to visit
     /// - Returns: Result of visiting the `switch` statement node
     open func visitSwitch(_ stmt: SwitchStatement) -> Statement {
         stmt.exp = visitExpression(stmt.exp)
@@ -284,7 +284,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a `while` statement with this visitor
     ///
-    /// - Parameter stmt: A WhileStatement to visit
+    /// - Parameter stmt: A `WhileStatement` to visit
     /// - Returns: Result of visiting the `while` statement node
     open func visitWhile(_ stmt: WhileStatement) -> Statement {
         stmt.exp = visitExpression(stmt.exp)
@@ -295,7 +295,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a `do/while` statement with this visitor
     ///
-    /// - Parameter stmt: A DoWhileStatement to visit
+    /// - Parameter stmt: A `DoWhileStatement` to visit
     /// - Returns: Result of visiting the `do/while` statement node
     open func visitDoWhile(_ stmt: DoWhileStatement) -> Statement {
         stmt.exp = visitExpression(stmt.exp)
@@ -306,7 +306,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a `for` loop statement with this visitor
     ///
-    /// - Parameter stmt: A ForStatement to visit
+    /// - Parameter stmt: A `ForStatement` to visit
     /// - Returns: Result of visiting the `for` node
     open func visitFor(_ stmt: ForStatement) -> Statement {
         stmt.pattern = visitPattern(stmt.pattern)
@@ -318,7 +318,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a `do` statement node
     ///
-    /// - Parameter stmt: A DoStatement to visit
+    /// - Parameter stmt: A `DoStatement` to visit
     /// - Returns: Result of visiting the `do` statement
     open func visitDo(_ stmt: DoStatement) -> Statement {
         _=visitStatement(stmt.body)
@@ -328,7 +328,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a `defer` statement node
     ///
-    /// - Parameter stmt: A DeferStatement to visit
+    /// - Parameter stmt: A `DeferStatement` to visit
     /// - Returns: Result of visiting the `defer` statement
     open func visitDefer(_ stmt: DeferStatement) -> Statement {
         _=visitStatement(stmt.body)
@@ -338,7 +338,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a return statement
     ///
-    /// - Parameter stmt: A ReturnStatement to visit
+    /// - Parameter stmt: A `ReturnStatement` to visit
     /// - Returns: Result of visiting the `return` statement
     open func visitReturn(_ stmt: ReturnStatement) -> Statement {
         stmt.exp = stmt.exp.map(visitExpression)
@@ -348,7 +348,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a break statement
     ///
-    /// - Parameter stmt: A BreakStatement to visit
+    /// - Parameter stmt: A `BreakStatement` to visit
     /// - Returns: Result of visiting the break statement
     open func visitBreak(_ stmt: BreakStatement) -> Statement {
         stmt
@@ -356,7 +356,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
 
     /// Visits a fallthrough statement
     ///
-    /// - Parameter stmt: A FallthroughStatement to visit
+    /// - Parameter stmt: A `FallthroughStatement` to visit
     /// - Returns: Result of visiting the fallthrough statement
     open func visitFallthrough(_ stmt: FallthroughStatement) -> Statement {
         stmt
@@ -364,7 +364,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
 
     /// Visits a continue statement
     ///
-    /// - Parameter stmt: A ContinueStatement to visit
+    /// - Parameter stmt: A `ContinueStatement` to visit
     /// - Returns: Result of visiting the continue statement
     open func visitContinue(_ stmt: ContinueStatement) -> Statement {
         stmt
@@ -372,7 +372,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits an expression sequence statement
     ///
-    /// - Parameter stmt: An ExpressionsStatement to visit
+    /// - Parameter stmt: An `ExpressionsStatement` to visit
     /// - Returns: Result of visiting the expressions statement
     open func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
         for i in 0..<stmt.expressions.count {
@@ -384,7 +384,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a variable declaration statement
     ///
-    /// - Parameter stmt: A VariableDeclarationsStatement to visit
+    /// - Parameter stmt: A `VariableDeclarationsStatement` to visit
     /// - Returns: Result of visiting the variables statement
     open func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
         for i in 0..<stmt.decl.count {
@@ -397,7 +397,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     
     /// Visits a local function statement
     ///
-    /// - Parameter stmt: A LocalFunctionStatement to visit
+    /// - Parameter stmt: A `LocalFunctionStatement` to visit
     /// - Returns: Result of visiting the local function statement node
     open func visitLocalFunction(_ stmt: LocalFunctionStatement) -> Statement {
         stmt.function.body = _visitCompound(stmt.function.body)
@@ -407,12 +407,23 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
 
     /// Visits a throw statement
     ///
-    /// - Parameter stmt: A ThrowStatement to visit
+    /// - Parameter stmt: A `ThrowStatement` to visit
     /// - Returns: Result of visiting the throw node
     open func visitThrow(_ stmt: ThrowStatement) -> Statement {
         stmt.exp = visitExpression(stmt.exp)
         
         return stmt
+    }
+    
+    /// Visits a catch block from a `do` statement.
+    ///
+    /// - Parameter catchBlock: A `CatchBlock` to visit.
+    /// - Returns: Result of visiting the catch block
+    open func visitCatchBlock(_ catchBlock: CatchBlock) -> CatchBlock {
+        CatchBlock(
+            pattern: catchBlock.pattern.map(visitPattern),
+            body: _visitCompound(catchBlock.body)
+        )
     }
     
     private func _visitCompound(_ stmt: CompoundStatement) -> CompoundStatement {
