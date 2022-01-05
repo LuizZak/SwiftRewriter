@@ -1,4 +1,8 @@
-public class ArrayLiteralExpression: Expression {
+public class ArrayLiteralExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .arrayLiteral(self)
+    }
+
     public var items: [Expression] {
         didSet {
             oldValue.forEach { $0.parent = nil }

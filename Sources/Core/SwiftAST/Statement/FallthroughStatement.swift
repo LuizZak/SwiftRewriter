@@ -1,4 +1,8 @@
-public class FallthroughStatement: Statement {
+public class FallthroughStatement: Statement, StatementKindType {
+    public var statementKind: StatementKind {
+        .fallthrough(self)
+    }
+
     public override var isUnconditionalJump: Bool {
         true
     }
@@ -17,16 +21,19 @@ public class FallthroughStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? FallthroughStatement`.
     @inlinable
     var asFallthrough: FallthroughStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `FallthroughStatement` class.
     @inlinable
     var isFallthrough: Bool? {
         asFallthrough != nil
     }
     
+    /// Creates a `FallthroughStatement` instance.
     static var `fallthrough`: FallthroughStatement {
         FallthroughStatement()
     }

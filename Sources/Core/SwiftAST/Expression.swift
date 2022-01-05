@@ -50,6 +50,10 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable,
     open var subExpressions: [Expression] {
         []
     }
+
+    open override var children: [SyntaxNode] {
+        subExpressions
+    }
     
     /// If this expression's parent type is an expression, returns that parent
     /// casted to an expression.

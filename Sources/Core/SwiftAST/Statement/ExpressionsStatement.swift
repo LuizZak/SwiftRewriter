@@ -1,11 +1,15 @@
-public class ExpressionsStatement: Statement {
+public class ExpressionsStatement: Statement, StatementKindType {
+    public var statementKind: StatementKind {
+        .expressions(self)
+    }
+
     public var expressions: [Expression] {
         didSet {
             oldValue.forEach { $0.parent = self }
             expressions.forEach { $0.parent = self }
         }
     }
-    
+
     public override var children: [SyntaxNode] {
         expressions
     }
@@ -61,20 +65,24 @@ public class ExpressionsStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? ExpressionsStatement`.
     @inlinable
     var asExpressions: ExpressionsStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `ExpressionsStatement` class.
     @inlinable
     var isExpressions: Bool? {
         asExpressions != nil
     }
 
+    /// Creates a `ExpressionsStatement` instance for the given expression list.
     static func expressions(_ exp: [Expression]) -> ExpressionsStatement {
         ExpressionsStatement(expressions: exp)
     }
 
+    /// Creates a `ExpressionsStatement` instance for the given expression.
     static func expression(_ expr: Expression) -> ExpressionsStatement {
         .expressions([expr])
     }

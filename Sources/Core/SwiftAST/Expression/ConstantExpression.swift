@@ -1,5 +1,8 @@
-public class ConstantExpression: Expression, ExpressibleByStringLiteral,
-                                 ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
+public class ConstantExpression: Expression, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .constant(self)
+    }
+
     public var constant: Constant
     
     public override var isLiteralExpression: Bool {

@@ -1,4 +1,8 @@
-public class PrefixExpression: Expression {
+public class PrefixExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .prefix(self)
+    }
+
     public var op: SwiftOperator
     public var exp: Expression {
         didSet { oldValue.parent = nil; exp.parent = self; }

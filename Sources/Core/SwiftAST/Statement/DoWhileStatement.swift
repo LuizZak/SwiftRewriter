@@ -1,4 +1,8 @@
-public class DoWhileStatement: Statement {
+public class DoWhileStatement: Statement, StatementKindType {
+    public var statementKind: StatementKind {
+        .doWhile(self)
+    }
+
     public var exp: Expression {
         didSet {
             oldValue.parent = nil
@@ -76,16 +80,21 @@ public class DoWhileStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? DoWhileStatement`.
     @inlinable
     var asDoWhile: DoWhileStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `DoWhileStatement`
+    /// class.
     @inlinable
     var isDoWhile: Bool? {
         asDoWhile != nil
     }
     
+    /// Creates a `DoWhileStatement` instance using the given condition expression
+    /// and compound statement as its body.
     static func doWhile(_ exp: Expression, body: CompoundStatement) -> DoWhileStatement {
         DoWhileStatement(exp: exp, body: body)
     }

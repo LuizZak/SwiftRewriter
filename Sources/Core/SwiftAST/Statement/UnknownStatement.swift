@@ -1,4 +1,8 @@
-public class UnknownStatement: Statement {
+public class UnknownStatement: Statement, StatementKindType {
+    public var statementKind: StatementKind {
+        .unknown(self)
+    }
+
     public var context: UnknownASTContext
     
     public init(context: UnknownASTContext) {
@@ -34,16 +38,21 @@ public class UnknownStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? UnknownStatement`.
     @inlinable
     var asUnknown: UnknownStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `UnknownStatement`
+    /// class.
     @inlinable
     var isUnknown: Bool? {
         asUnknown != nil
     }
     
+    /// Creates a `UnknownStatement` instance using a given context for the
+    /// unknown statement representation.
     static func unknown(_ context: UnknownASTContext) -> UnknownStatement {
         UnknownStatement(context: context)
     }

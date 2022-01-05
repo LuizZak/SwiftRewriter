@@ -1,4 +1,8 @@
-public class ParensExpression: Expression {
+public class ParensExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .parens(self)
+    }
+
     public var exp: Expression {
         didSet { oldValue.parent = nil; exp.parent = self; }
     }

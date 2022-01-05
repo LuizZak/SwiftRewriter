@@ -1,4 +1,8 @@
-public class TupleExpression: Expression {
+public class TupleExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .tuple(self)
+    }
+
     public var elements: [Expression] {
         didSet {
             oldValue.forEach { $0.parent = nil }

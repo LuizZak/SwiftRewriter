@@ -1,4 +1,8 @@
-public class CastExpression: Expression {
+public class CastExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .cast(self)
+    }
+
     public var exp: Expression {
         didSet { oldValue.parent = nil; exp.parent = self }
     }

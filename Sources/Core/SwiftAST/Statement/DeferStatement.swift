@@ -1,4 +1,8 @@
-public class DeferStatement: Statement {
+public class DeferStatement: Statement, StatementKindType {
+    public var statementKind: StatementKind {
+        .defer(self)
+    }
+
     public var body: CompoundStatement {
         didSet {
             oldValue.parent = nil
@@ -60,16 +64,20 @@ public class DeferStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? DeferStatement`.
     @inlinable
     var asDefer: DeferStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `DeferStatement` class.
     @inlinable
     var isDefer: Bool? {
         asDefer != nil
     }
     
+    /// Creates a `DeferStatement` instance using the given compound statement as
+    /// its body.
     static func `defer`(_ stmt: CompoundStatement) -> DeferStatement {
         DeferStatement(body: stmt)
     }

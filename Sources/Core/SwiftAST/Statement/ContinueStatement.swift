@@ -1,4 +1,8 @@
-public class ContinueStatement: Statement {
+public class ContinueStatement: Statement, StatementKindType {
+    public var statementKind: StatementKind {
+        .continue(self)
+    }
+
     public override var isUnconditionalJump: Bool {
         true
     }
@@ -55,20 +59,24 @@ public class ContinueStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? ContinueStatement`.
     @inlinable
     var asContinue: ContinueStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `ContinueStatement` class.
     @inlinable
     var isContinue: Bool? {
         asContinue != nil
     }
 
+    /// Creates a `ContinueStatement` instance.
     static func `continue`() -> ContinueStatement {
         ContinueStatement()
     }
     
+    /// Creates a `ContinueStatement` instance with the given label.
     static func `continue`(targetLabel: String?) -> ContinueStatement {
         ContinueStatement(targetLabel: targetLabel)
     }

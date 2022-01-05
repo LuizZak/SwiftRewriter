@@ -1,4 +1,8 @@
-public class PostfixExpression: Expression {
+public class PostfixExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .postfix(self)
+    }
+
     private var _subExpressions: [Expression] = []
     
     public var exp: Expression {

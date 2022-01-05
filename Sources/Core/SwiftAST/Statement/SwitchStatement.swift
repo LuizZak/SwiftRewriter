@@ -1,6 +1,10 @@
-public class SwitchStatement: Statement {
+public class SwitchStatement: Statement, StatementKindType {
     /// Cache of children expression and statements stored into each case pattern
     private var _childrenNodes: [SyntaxNode] = []
+
+    public var statementKind: StatementKind {
+        .switch(self)
+    }
     
     public var exp: Expression {
         didSet {
@@ -89,9 +93,11 @@ public class SwitchStatement: Statement {
     
     @inlinable
     public override func copy() -> SwitchStatement {
-        SwitchStatement(exp: exp.copy(),
-                        cases: cases.map { $0.copy() },
-                        defaultCase: defaultCase?.map { $0.copy() }).copyMetadata(from: self)
+        SwitchStatement(
+            exp: exp.copy(),
+            cases: cases.map { $0.copy() },
+            defaultCase: defaultCase?.map { $0.copy() }
+        ).copyMetadata(from: self)
     }
     
     private func reloadChildrenNodes() {
@@ -143,16 +149,21 @@ public class SwitchStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? SwitchStatement`.
     @inlinable
     var asSwitch: SwitchStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `SwitchStatement`
+    /// class.
     @inlinable
     var isSwitch: Bool? {
         asSwitch != nil
     }
 
+    /// Creates a `SwitchStatement` instance using the given expression and list
+    /// of cases, optionally specifying a default case as a list of statements.
     static func `switch`(
         _ exp: Expression,
         cases: [SwitchCase],

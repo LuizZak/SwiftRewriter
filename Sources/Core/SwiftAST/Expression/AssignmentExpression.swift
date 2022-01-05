@@ -1,4 +1,8 @@
-public class AssignmentExpression: Expression {
+public class AssignmentExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .assignment(self)
+    }
+
     public var lhs: Expression {
         didSet { oldValue.parent = nil; lhs.parent = self; }
     }

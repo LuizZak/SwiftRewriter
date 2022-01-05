@@ -1,4 +1,8 @@
-public class SizeOfExpression: Expression {
+public class SizeOfExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .sizeOf(self)
+    }
+
     public var value: Value {
         didSet {
             switch oldValue {

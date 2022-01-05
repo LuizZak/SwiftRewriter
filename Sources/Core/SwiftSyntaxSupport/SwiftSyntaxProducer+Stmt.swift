@@ -113,57 +113,9 @@ extension SwiftSyntaxProducer {
         var genList: [StatementBlockProducer]
         
         switch stmt {
-        case let stmt as ReturnStatement:
-            genList = [{ $0.generateReturn(stmt).inCodeBlock() }]
-            
-        case let stmt as ContinueStatement:
-            genList = [{ $0.generateContinue(stmt).inCodeBlock() }]
-            
-        case let stmt as BreakStatement:
-            genList = [{ $0.generateBreak(stmt).inCodeBlock() }]
-            
-        case let stmt as FallthroughStatement:
-            genList = [{ $0.generateFallthrough(stmt).inCodeBlock() }]
-            
-        case let stmt as ExpressionsStatement:
-            genList = generateExpressions(stmt)
-            
-        case let stmt as VariableDeclarationsStatement:
-            genList = generateVariableDeclarations(stmt)
-            
-        case let stmt as IfStatement:
-            genList = [{ $0.generateIfStmt(stmt).inCodeBlock() }]
-            
-        case let stmt as SwitchStatement:
-            genList = [{ $0.generateSwitchStmt(stmt).inCodeBlock() }]
-            
-        case let stmt as WhileStatement:
-            genList = [{ $0.generateWhileStmt(stmt).inCodeBlock() }]
-            
-        case let stmt as DoStatement:
-            genList = [{ $0.generateDo(stmt).inCodeBlock() }]
-            
-        case let stmt as DoWhileStatement:
-            genList = [{ $0.generateDoWhileStmt(stmt).inCodeBlock() }]
-            
-        case let stmt as ForStatement:
-            genList = [{ $0.generateForIn(stmt).inCodeBlock() }]
-            
-        case let stmt as DeferStatement:
-            genList = [{ $0.generateDefer(stmt).inCodeBlock() }]
-            
-        case let stmt as CompoundStatement:
-            genList = stmt.statements.flatMap(generateStatementBlockItems)
+        case let stmt as StatementKindType:
+            genList = generateStatementKind(stmt.statementKind)
 
-        case let stmt as LocalFunctionStatement:
-            genList = [{ $0.generateLocalFunction(stmt).inCodeBlock() }]
-
-        case let stmt as ThrowStatement:
-            genList = [{ $0.generateThrow(stmt).inCodeBlock() }]
-            
-        case let stmt as UnknownStatement:
-            genList = [self.generateUnknown(stmt)]
-            
         default:
             assertionFailure("Found unknown statement syntax node type \(type(of: stmt))")
             genList = [{ _ in SyntaxFactory.makeBlankExpressionStmt().inCodeBlock() }]
@@ -178,6 +130,61 @@ extension SwiftSyntaxProducer {
         genList = applyingTrailingComment(stmt.trailingComment, toList: genList)
         
         return genList
+    }
+
+    private func generateStatementKind(_ statementKind: StatementKind) -> [StatementBlockProducer] {
+        switch statementKind {
+        case .return(let stmt):
+            return [{ $0.generateReturn(stmt).inCodeBlock() }]
+            
+        case .continue(let stmt):
+            return [{ $0.generateContinue(stmt).inCodeBlock() }]
+            
+        case .break(let stmt):
+            return [{ $0.generateBreak(stmt).inCodeBlock() }]
+            
+        case .fallthrough(let stmt):
+            return [{ $0.generateFallthrough(stmt).inCodeBlock() }]
+            
+        case .expressions(let stmt):
+            return generateExpressions(stmt)
+            
+        case .variableDeclarations(let stmt):
+            return generateVariableDeclarations(stmt)
+            
+        case .if(let stmt):
+            return [{ $0.generateIfStmt(stmt).inCodeBlock() }]
+            
+        case .switch(let stmt):
+            return [{ $0.generateSwitchStmt(stmt).inCodeBlock() }]
+            
+        case .while(let stmt):
+            return [{ $0.generateWhileStmt(stmt).inCodeBlock() }]
+            
+        case .do(let stmt):
+            return [{ $0.generateDo(stmt).inCodeBlock() }]
+            
+        case .doWhile(let stmt):
+            return [{ $0.generateDoWhileStmt(stmt).inCodeBlock() }]
+            
+        case .for(let stmt):
+            return [{ $0.generateForIn(stmt).inCodeBlock() }]
+            
+        case .defer(let stmt):
+            return [{ $0.generateDefer(stmt).inCodeBlock() }]
+            
+        case .compound(let stmt):
+            return stmt.statements.flatMap(generateStatementBlockItems)
+
+        case .localFunction(let stmt):
+            return [{ $0.generateLocalFunction(stmt).inCodeBlock() }]
+
+        case .throw(let stmt):
+            return [{ $0.generateThrow(stmt).inCodeBlock() }]
+            
+        case .unknown(let stmt):
+            return [self.generateUnknown(stmt)]
+        }
     }
     
     private func applyingLeadingComments(

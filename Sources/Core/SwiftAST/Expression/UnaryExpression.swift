@@ -1,4 +1,8 @@
-public class UnaryExpression: Expression {
+public class UnaryExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .unary(self)
+    }
+
     public var op: SwiftOperator
     public var exp: Expression {
         didSet { oldValue.parent = nil; exp.parent = self; }

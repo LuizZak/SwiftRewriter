@@ -1,4 +1,8 @@
-public class TernaryExpression: Expression {
+public class TernaryExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .ternary(self)
+    }
+
     public var exp: Expression {
         didSet { oldValue.parent = nil; exp.parent = self }
     }

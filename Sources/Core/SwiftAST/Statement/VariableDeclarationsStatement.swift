@@ -1,4 +1,8 @@
-public class VariableDeclarationsStatement: Statement {
+public class VariableDeclarationsStatement: Statement, StatementKindType {
+    public var statementKind: StatementKind {
+        .variableDeclarations(self)
+    }
+
     public var decl: [StatementVariableDeclaration] {
         didSet {
             oldValue.forEach {
@@ -68,20 +72,27 @@ public class VariableDeclarationsStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? VariableDeclarationsStatement`.
     @inlinable
     var asVariableDeclaration: VariableDeclarationsStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `VariableDeclarationsStatement`
+    /// class.
     @inlinable
     var isVariableDeclaration: Bool? {
         asVariableDeclaration != nil
     }
 
+    /// Creates a `VariableDeclarationsStatement` instance using the given list
+    /// of variable declarations.
     static func variableDeclarations(_ decl: [StatementVariableDeclaration]) -> VariableDeclarationsStatement {
         VariableDeclarationsStatement(decl: decl)
     }
 
+    /// Creates a `VariableDeclarationsStatement` instance for a single variable
+    /// definition with the given parameters.
     static func variableDeclaration(
         identifier: String,
         type: SwiftType,

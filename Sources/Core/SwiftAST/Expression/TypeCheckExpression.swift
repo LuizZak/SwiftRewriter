@@ -1,4 +1,8 @@
-public class TypeCheckExpression: Expression {
+public class TypeCheckExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .typeCheck(self)
+    }
+
     public var exp: Expression {
         didSet { oldValue.parent = nil; exp.parent = self }
     }

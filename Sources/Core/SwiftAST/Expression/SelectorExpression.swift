@@ -1,4 +1,8 @@
-public class SelectorExpression: Expression {
+public class SelectorExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .selector(self)
+    }
+
     public var kind: Kind
     
     public override var description: String {

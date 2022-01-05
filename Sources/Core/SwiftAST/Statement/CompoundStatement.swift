@@ -1,6 +1,10 @@
 /// Encapsulates a compound statement, that is, a series of statements enclosed
 /// within braces.
-public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
+public class CompoundStatement: Statement, ExpressibleByArrayLiteral, StatementKindType {
+    public var statementKind: StatementKind {
+        .compound(self)
+    }
+
     private var _statements: [Statement] = []
 
     /// An empty compound statement.
@@ -99,16 +103,20 @@ extension CompoundStatement: Sequence {
 }
 
 public extension Statement {
+    /// Returns `self as? CompoundStatement`.
     @inlinable
     var asCompound: CompoundStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `CompoundStatement` class.
     @inlinable
     var isCompound: Bool? {
         asCompound != nil
     }
     
+    /// Creates a `CompoundStatement` instance using the given statement list as
+    /// its body.
     static func compound(_ cpd: [Statement]) -> CompoundStatement {
         CompoundStatement(statements: cpd)
     }

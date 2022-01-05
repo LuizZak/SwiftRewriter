@@ -2,7 +2,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
     /// Returns `true` if this statement resolve to an unconditional jump out
     /// of the current context.
     ///
-    /// Returns true for `.break`, `.continue` and `.return` statements.
+    /// Returns true for `.break`, `.continue`, `.return`, and `.throw` statements.
     public var isUnconditionalJump: Bool {
         false
     }

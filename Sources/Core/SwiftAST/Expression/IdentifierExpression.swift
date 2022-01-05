@@ -1,4 +1,8 @@
-public class IdentifierExpression: Expression, ExpressibleByStringLiteral {
+public class IdentifierExpression: Expression, ExpressibleByStringLiteral, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .identifier(self)
+    }
+
     public var identifier: String
     
     public override var description: String {

@@ -54,36 +54,6 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
         container = nil
     }
 
-    func assertNotifiedChange(file: StaticString = #filePath, line: UInt = #line) {
-        if !notified {
-            XCTFail(
-                """
-                Expected syntax rewriter \(sutType!) to notify change via \
-                \(\ASTRewriterPassContext.notifyChangedTree), but it did not.
-                """,
-                file: file,
-                line: line
-            )
-        }
-
-        notified = false
-    }
-
-    func assertDidNotNotifyChange(file: StaticString = #filePath, line: UInt = #line) {
-        if notified {
-            XCTFail(
-                """
-                Expected syntax rewriter \(sutType!) to not notify any changes \
-                via \(\ASTRewriterPassContext.notifyChangedTree), but it did.
-                """,
-                file: file,
-                line: line
-            )
-        }
-        
-        notified = false
-    }
-
     @discardableResult
     public func assertNoTransformParsed(
         expression original: String,
@@ -236,32 +206,13 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
         let sut = makeSut(container: .statement(statement))
         let result = sut.apply(on: statement, context: makeContext(container: .statement(statement)))
 
-        if expected != result {
-            var expString = ""
-            var resString = ""
-
-            let producer = SwiftSyntaxProducer()
-
-            expString = producer.generateStatement(expected).description + "\n"
-            resString = producer.generateStatement(result).description + "\n"
-
-            dump(expected, to: &expString)
-            dump(result, to: &resString)
-
-            XCTFail(
-                """
-                Failed to convert: Expected to convert statement into
-
-                \(expString)
-
-                but received
-
-                \(resString)
-                """,
-                file: file,
-                line: line
-            )
-        }
+        assertStatementsEqual(
+            actual: result,
+            expected: expected,
+            messageHeader: "Failed to convert: Expected to convert statement into",
+            file: file,
+            line: line
+        )
         
         return result
     }
@@ -277,24 +228,13 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
         let sut = makeSut(container: .expression(expression))
         let result = sut.apply(on: expression, context: makeContext(container: .expression(expression)))
 
-        if expected != result {
-            var expString = ""
-            var resString = ""
-
-            dump(expected, to: &expString)
-            dump(result, to: &resString)
-
-            XCTFail(
-                """
-                Failed to convert: Expected to convert expression into
-                \(expString)
-                but received
-                \(resString)
-                """,
-                file: file,
-                line: line
-            )
-        }
+        assertExpressionsEqual(
+            actual: result,
+            expected: expected,
+            messageHeader: "Failed to convert: Expected to convert expression into",
+            file: file,
+            line: line
+        )
         
         return result
     }
@@ -383,5 +323,35 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
             source: intentionContext,
             container: container
         )
+    }
+    
+    func assertNotifiedChange(file: StaticString = #filePath, line: UInt = #line) {
+        if !notified {
+            XCTFail(
+                """
+                Expected syntax rewriter \(sutType!) to notify change via \
+                \(\ASTRewriterPassContext.notifyChangedTree), but it did not.
+                """,
+                file: file,
+                line: line
+            )
+        }
+
+        notified = false
+    }
+
+    func assertDidNotNotifyChange(file: StaticString = #filePath, line: UInt = #line) {
+        if notified {
+            XCTFail(
+                """
+                Expected syntax rewriter \(sutType!) to not notify any changes \
+                via \(\ASTRewriterPassContext.notifyChangedTree), but it did.
+                """,
+                file: file,
+                line: line
+            )
+        }
+        
+        notified = false
     }
 }

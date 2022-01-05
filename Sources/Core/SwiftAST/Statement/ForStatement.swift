@@ -1,7 +1,11 @@
-public class ForStatement: Statement {
+public class ForStatement: Statement, StatementKindType {
     /// Cache of children nodes
     private var _childrenNodes: [SyntaxNode] = []
     
+    public var statementKind: StatementKind {
+        .for(self)
+    }
+
     public var pattern: Pattern {
         didSet {
             oldValue.setParent(nil)
@@ -45,6 +49,8 @@ public class ForStatement: Statement {
         pattern.setParent(self)
         exp.parent = self
         body.parent = self
+
+        reloadChildrenNodes()
     }
     
     public required init(from decoder: Decoder) throws {
@@ -59,6 +65,8 @@ public class ForStatement: Statement {
         pattern.setParent(self)
         exp.parent = self
         body.parent = self
+        
+        reloadChildrenNodes()
     }
     
     @inlinable
@@ -68,10 +76,10 @@ public class ForStatement: Statement {
     }
     
     private func reloadChildrenNodes() {
-        _childrenNodes = [exp]
-        
+        _childrenNodes.removeAll()
+
         pattern.collect(expressions: &_childrenNodes)
-        
+        _childrenNodes.append(exp)
         _childrenNodes.append(body)
     }
     
@@ -106,16 +114,21 @@ public class ForStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? ForStatement`.
     @inlinable
     var asFor: ForStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `ForStatement`
+    /// class.
     @inlinable
     var isFor: Bool? {
         asFor != nil
     }
     
+    /// Creates a `ForStatement` instance using the given pattern and expression
+    /// and compound statement as its body.
     static func `for`(_ pattern: Pattern, _ exp: Expression, body: CompoundStatement) -> ForStatement {
         ForStatement(pattern: pattern, exp: exp, body: body)
     }

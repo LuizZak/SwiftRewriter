@@ -1,4 +1,8 @@
-public class ReturnStatement: Statement {
+public class ReturnStatement: Statement, StatementKindType {
+    public var statementKind: StatementKind {
+        .return(self)
+    }
+
     public override var isUnconditionalJump: Bool {
         true
     }
@@ -68,16 +72,21 @@ public class ReturnStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? ReturnStatement`.
     @inlinable
     var asReturn: ReturnStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `ReturnStatement`
+    /// class.
     @inlinable
     var isReturn: Bool? {
         asReturn != nil
     }
     
+    /// Creates a `ReturnStatement` instance, optionally specifying the returned
+    /// expression.
     static func `return`(_ exp: Expression?) -> ReturnStatement {
         ReturnStatement(exp: exp)
     }

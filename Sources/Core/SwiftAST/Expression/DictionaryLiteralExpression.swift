@@ -1,4 +1,8 @@
-public class DictionaryLiteralExpression: Expression {
+public class DictionaryLiteralExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .dictionaryLiteral(self)
+    }
+
     private var _subExpressions: [Expression] = []
     
     public var pairs: [ExpressionDictionaryPair] {

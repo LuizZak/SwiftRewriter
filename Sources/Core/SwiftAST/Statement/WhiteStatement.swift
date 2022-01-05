@@ -1,4 +1,8 @@
-public class WhileStatement: Statement {
+public class WhileStatement: Statement, StatementKindType {
+    public var statementKind: StatementKind {
+        .while(self)
+    }
+
     public var exp: Expression {
         didSet {
             oldValue.parent = nil
@@ -76,16 +80,21 @@ public class WhileStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? WhileStatement`.
     @inlinable
     var asWhile: WhileStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `WhileStatement`
+    /// class.
     @inlinable
     var isWhile: Bool? {
         asWhile != nil
     }
     
+    /// Creates a `WhileStatement` instance using the given condition expression
+    /// and compound statement as its body.
     static func `while`(_ exp: Expression, body: CompoundStatement) -> WhileStatement {
         WhileStatement(exp: exp, body: body)
     }

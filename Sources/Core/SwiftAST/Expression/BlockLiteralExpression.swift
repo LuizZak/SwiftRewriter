@@ -1,8 +1,16 @@
-public class BlockLiteralExpression: Expression {
+public class BlockLiteralExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .blockLiteral(self)
+    }
+
     public var parameters: [BlockParameter]
     public var returnType: SwiftType
     public var body: CompoundStatement {
         didSet { oldValue.parent = nil; body.parent = self }
+    }
+
+    public override var children: [SyntaxNode] {
+        [body]
     }
     
     public override var description: String {

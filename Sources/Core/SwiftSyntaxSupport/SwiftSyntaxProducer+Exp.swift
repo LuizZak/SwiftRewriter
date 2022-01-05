@@ -3,65 +3,74 @@ import Intentions
 import SwiftAST
 
 extension SwiftSyntaxProducer {
-    func generateExpression(_ expression: Expression) -> ExprSyntax {
+    
+    /// Generates an expression syntax for the given expression.
+    public func generateExpression(_ expression: Expression) -> ExprSyntax {
         switch expression {
-        case let exp as IdentifierExpression:
-            return generateIdentifier(exp).asExprSyntax
-            
-        case let exp as BinaryExpression:
-            return generateBinary(exp).asExprSyntax
-            
-        case let exp as UnaryExpression:
-            return generateUnary(exp)
-            
-        case let exp as PrefixExpression:
-            return generatePrefix(exp)
-            
-        case let exp as SizeOfExpression:
-            return generateSizeOf(exp)
-            
-        case let exp as AssignmentExpression:
-            return generateAssignment(exp).asExprSyntax
-            
-        case let exp as ConstantExpression:
-            return generateConstant(exp)
-            
-        case let exp as ArrayLiteralExpression:
-            return generateArrayLiteral(exp).asExprSyntax
-            
-        case let exp as DictionaryLiteralExpression:
-            return generateDictionaryLiteral(exp).asExprSyntax
-            
-        case let exp as PostfixExpression:
-            return generatePostfix(exp)
-            
-        case let exp as ParensExpression:
-            return generateParens(exp)
-            
-        case let exp as CastExpression:
-            return generateCast(exp).asExprSyntax
-        
-        case let exp as TypeCheckExpression:
-            return generateTypeCheck(exp).asExprSyntax
-            
-        case let exp as TernaryExpression:
-            return generateTernary(exp)
-            
-        case let exp as TupleExpression:
-            return generateTuple(exp)
-            
-        case let exp as SelectorExpression:
-            return generateSelector(exp)
-            
-        case let exp as BlockLiteralExpression:
-            return generateClosure(exp).asExprSyntax
-            
-        case is UnknownExpression:
-            return SyntaxFactory.makeBlankUnknownExpr().asExprSyntax
+        case let exp as ExpressionKindType:
+            return generateExpressionKind(exp.expressionKind)
             
         default:
             assertionFailure("Found unknown expression syntax node type \(type(of: expression))")
             return SyntaxFactory.makeBlankAsExpr().asExprSyntax
+        }
+    }
+
+    func generateExpressionKind(_ expressionKind: ExpressionKind) -> ExprSyntax {
+        switch expressionKind {
+        case .identifier(let exp):
+            return generateIdentifier(exp).asExprSyntax
+            
+        case .binary(let exp):
+            return generateBinary(exp).asExprSyntax
+            
+        case .unary(let exp):
+            return generateUnary(exp)
+            
+        case .prefix(let exp):
+            return generatePrefix(exp)
+            
+        case .sizeOf(let exp):
+            return generateSizeOf(exp)
+            
+        case .assignment(let exp):
+            return generateAssignment(exp).asExprSyntax
+            
+        case .constant(let exp):
+            return generateConstant(exp)
+            
+        case .arrayLiteral(let exp):
+            return generateArrayLiteral(exp).asExprSyntax
+            
+        case .dictionaryLiteral(let exp):
+            return generateDictionaryLiteral(exp).asExprSyntax
+            
+        case .postfix(let exp):
+            return generatePostfix(exp)
+            
+        case .parens(let exp):
+            return generateParens(exp)
+            
+        case .cast(let exp):
+            return generateCast(exp).asExprSyntax
+        
+        case .typeCheck(let exp):
+            return generateTypeCheck(exp).asExprSyntax
+            
+        case .ternary(let exp):
+            return generateTernary(exp)
+            
+        case .tuple(let exp):
+            return generateTuple(exp)
+            
+        case .selector(let exp):
+            return generateSelector(exp)
+            
+        case .blockLiteral(let exp):
+            return generateClosure(exp).asExprSyntax
+
+        case .unknown:
+            return SyntaxFactory.makeBlankUnknownExpr().asExprSyntax
         }
     }
     

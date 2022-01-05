@@ -1,4 +1,8 @@
-public class ThrowStatement: Statement {
+public class ThrowStatement: Statement, StatementKindType {
+    public var statementKind: StatementKind {
+        .throw(self)
+    }
+
     public override var isUnconditionalJump: Bool {
         true
     }
@@ -64,16 +68,21 @@ public class ThrowStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? ThrowStatement`.
     @inlinable
     var asThrow: ThrowStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `ThrowStatement`
+    /// class.
     @inlinable
     var isThrow: Bool? {
         asThrow != nil
     }
 
+    /// Creates a `ThrowStatement` instance using the given expression as the
+    /// thrown error expression.
     static func `throw`(_ exp: Expression) -> ThrowStatement {
         .init(exp: exp)
     }

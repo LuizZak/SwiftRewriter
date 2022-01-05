@@ -10,6 +10,7 @@ open class SyntaxNode {
         }
     }
     
+    /// Gets the list of children `SyntaxNode` within this syntax node.
     open var children: [SyntaxNode] {
         []
     }

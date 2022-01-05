@@ -1,4 +1,8 @@
-public class IfStatement: Statement {
+public class IfStatement: Statement, StatementKindType {
+    public var statementKind: StatementKind {
+        .if(self)
+    }
+
     public var exp: Expression {
         didSet { oldValue.parent = nil; exp.parent = self }
     }
@@ -13,17 +17,33 @@ public class IfStatement: Statement {
     /// pattern match over a given pattern.
     ///
     /// This is used to create if-let statements.
-    public var pattern: Pattern?
+    public var pattern: Pattern? {
+        didSet {
+            oldValue?.setParent(nil)
+            pattern?.setParent(self)
+        }
+    }
     
+    /// Returns whether this `IfExpression` represents an if-let statement.
     public var isIfLet: Bool {
         pattern != nil
     }
     
     public override var children: [SyntaxNode] {
-        if let elseBody = elseBody {
-            return [exp, body, elseBody]
+        var result: [SyntaxNode] = []
+
+        if let pattern = pattern {
+            pattern.collect(expressions: &result)
         }
-        return [exp, body]
+
+        result.append(exp)
+        result.append(body)
+
+        if let elseBody = elseBody {
+            result.append(elseBody)
+        }
+
+        return result
     }
     
     public override var isLabelableStatementType: Bool {
@@ -63,11 +83,13 @@ public class IfStatement: Statement {
     @inlinable
     public override func copy() -> IfStatement {
         let copy =
-            IfStatement(exp: exp.copy(),
-                        body: body.copy(),
-                        elseBody: elseBody?.copy(),
-                        pattern: pattern?.copy())
-                .copyMetadata(from: self)
+            IfStatement(
+                exp: exp.copy(),
+                body: body.copy(),
+                elseBody: elseBody?.copy(),
+                pattern: pattern?.copy()
+            )
+            .copyMetadata(from: self)
         
         copy.pattern = pattern?.copy()
         
@@ -107,27 +129,40 @@ public class IfStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? IfStatement`.
     @inlinable
     var asIf: IfStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `IfStatement`
+    /// class.
     @inlinable
     var isIf: Bool? {
         asIf != nil
     }
     
-    static func `if`(_ exp: Expression,
-                     body: CompoundStatement,
-                     else elseBody: CompoundStatement? = nil) -> IfStatement {
-        
+    /// Creates a `IfStatement` instance using the given condition expression
+    /// and compound statement as its body, optionally specifying an else block.
+    static func `if`(
+        _ exp: Expression,
+        body: CompoundStatement,
+        else elseBody: CompoundStatement? = nil
+    ) -> IfStatement {
+
         IfStatement(exp: exp, body: body, elseBody: elseBody, pattern: nil)
     }
-    static func ifLet(_ pattern: Pattern,
-                      _ exp: Expression,
-                      body: CompoundStatement,
-                      else elseBody: CompoundStatement? = nil) -> IfStatement {
-        
+    
+    /// Creates a `IfStatement` instance for an if-let binding using the given
+    /// pattern and condition expression and compound statement as its body,
+    /// optionally specifying an else block.
+    static func ifLet(
+        _ pattern: Pattern,
+        _ exp: Expression,
+        body: CompoundStatement,
+        else elseBody: CompoundStatement? = nil
+    ) -> IfStatement {
+
         IfStatement(exp: exp, body: body, elseBody: elseBody, pattern: pattern)
     }
 }

@@ -1,4 +1,8 @@
-public class DoStatement: Statement {
+public class DoStatement: Statement, StatementKindType {
+    public var statementKind: StatementKind {
+        .do(self)
+    }
+
     public var body: CompoundStatement {
         didSet {
             oldValue.parent = nil
@@ -64,16 +68,20 @@ public class DoStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? DoStatement`.
     @inlinable
     var asDoStatement: DoStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `DoStatement` class.
     @inlinable
     var isDoStatement: Bool? {
         asDoStatement != nil
     }
     
+    /// Creates a `DoStatement` instance using the given compound statement as
+    /// its body.
     static func `do`(_ stmt: CompoundStatement) -> DoStatement {
         DoStatement(body: stmt)
     }

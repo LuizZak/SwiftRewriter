@@ -1,4 +1,8 @@
-public class LocalFunctionStatement: Statement {
+public class LocalFunctionStatement: Statement, StatementKindType {
+    public var statementKind: StatementKind {
+        .localFunction(self)
+    }
+
     /// Gets or sets the function for this local function statement.
     public var function: LocalFunction {
         didSet {
@@ -8,7 +12,7 @@ public class LocalFunctionStatement: Statement {
     }
     
     public override var children: [SyntaxNode] {
-        return [function.body]
+        [function.body]
     }
     
     public init(function: LocalFunction) {
@@ -61,22 +65,29 @@ public class LocalFunctionStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? LocalFunctionStatement`.
     @inlinable
     var asLocalFunction: LocalFunctionStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `LocalFunctionStatement`
+    /// class.
     @inlinable
     var isLocalFunction: Bool? {
         asLocalFunction != nil
     }
 
+    /// Creates a `LocalFunctionStatement` instance using the local function
+    /// definition.
     static func localFunction(
         _ localFunction: LocalFunction
     ) -> LocalFunctionStatement {
         LocalFunctionStatement(function: localFunction)
     }
 
+    /// Creates a `LocalFunctionStatement` instance by using a set of parameters
+    /// for its local function definition.
     static func localFunction(
         identifier: String,
         parameters: [ParameterSignature],
@@ -94,6 +105,8 @@ public extension Statement {
         )
     }
 
+    /// Creates a `LocalFunctionStatement` instance by using a signature and
+    /// function body.
     static func localFunction(
         signature: FunctionSignature,
         body: CompoundStatement

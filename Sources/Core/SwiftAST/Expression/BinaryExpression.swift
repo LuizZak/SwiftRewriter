@@ -1,4 +1,8 @@
-public class BinaryExpression: Expression {
+public class BinaryExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .binary(self)
+    }
+
     public var lhs: Expression {
         didSet { oldValue.parent = nil; lhs.parent = self; }
     }

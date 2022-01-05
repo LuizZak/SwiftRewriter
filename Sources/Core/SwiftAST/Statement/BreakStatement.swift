@@ -1,4 +1,8 @@
-public class BreakStatement: Statement {
+public class BreakStatement: Statement, StatementKindType {
+    public var statementKind: StatementKind {
+        .break(self)
+    }
+
     public override var isUnconditionalJump: Bool {
         true
     }
@@ -55,20 +59,24 @@ public class BreakStatement: Statement {
     }
 }
 public extension Statement {
+    /// Returns `self as? BreakStatement`.
     @inlinable
     var asBreak: BreakStatement? {
         cast()
     }
 
+    /// Returns `true` if this `Statement` is an instance of `BreakStatement` class.
     @inlinable
     var isBreak: Bool? {
         asBreak != nil
     }
 
+    /// Creates a `BreakStatement` instance.
     static func `break`() -> BreakStatement {
         BreakStatement()
     }
     
+    /// Creates a `BreakStatement` instance with the given label.
     static func `break`(targetLabel: String?) -> BreakStatement {
         BreakStatement(targetLabel: targetLabel)
     }

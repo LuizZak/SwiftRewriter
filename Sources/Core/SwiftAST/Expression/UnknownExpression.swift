@@ -1,4 +1,8 @@
-public class UnknownExpression: Expression {
+public class UnknownExpression: Expression, ExpressionKindType {
+    public var expressionKind: ExpressionKind {
+        .unknown(self)
+    }
+
     public var context: UnknownASTContext
     
     public override var description: String {
