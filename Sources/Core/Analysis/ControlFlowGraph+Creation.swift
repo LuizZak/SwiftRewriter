@@ -32,17 +32,25 @@ extension ControlFlowGraph {
     }
     
     func addNode(_ node: ControlFlowGraphNode) {
-        assert(node !== self,
-               "Adding a node as a subnode of itself!")
-        assert(!self.containsNode(node),
-               "Node \(node) already exists in this graph")
+        if let subgraph = node as? ControlFlowSubgraphNode {
+            assert(
+                subgraph.graph !== self,
+                "Adding a graph as a subnode of itself!"
+            )
+        }
+        assert(
+            !self.containsNode(node),
+            "Node \(node) already exists in this graph"
+        )
         
         nodes.append(node)
     }
     
     func addEdge(_ edge: ControlFlowGraphEdge) {
-        assert(self.edge(from: edge.start, to: edge.end) == nil,
-               "An edge between nodes \(edge.start.node) and \(edge.end.node) already exists within this graph")
+        assert(
+            self.edge(from: edge.start, to: edge.end) == nil,
+            "An edge between nodes \(edge.start.node) and \(edge.end.node) already exists within this graph"
+        )
         
         edges.append(edge)
     }
@@ -72,16 +80,43 @@ public extension ControlFlowGraph {
     /// The entry and exit points for the resulting graph will be the compound
     /// statement itself, with its inner nodes being the statements contained
     /// within.
-    static func forCompoundStatement(_ compoundStatement: CompoundStatement) -> ControlFlowGraph {
+    ///
+    /// If `pruneUnreachable` is `true`, the resulting graph has nodes that are
+    /// unreachable from the entry point removed before the final graph is produced.
+    static func forCompoundStatement(
+        _ compoundStatement: CompoundStatement,
+        pruneUnreachable: Bool = false
+    ) -> ControlFlowGraph {
         let graph = innerForCompoundStatement(compoundStatement)
         
         markBackEdges(in: graph)
+
+        if pruneUnreachable {
+            prune(graph)
+        }
         
         return graph
     }
 }
 
 private extension ControlFlowGraph {
+    /// Prunes a control flow graph, removing any nodes that are unreachable
+    /// from its initial node.
+    static func prune(_ graph: ControlFlowGraph) {
+        var toRemove: Set<Node> = Set(graph.nodes)
+
+        graph.breadthFirstVisit(start: graph.entry) { visit in
+            toRemove.remove(visit.node)
+        }
+
+        toRemove.forEach(graph.removeNode)
+    }
+
+    /// Marks back edges for a graph.
+    ///
+    /// A back edge is an edge that connects one node to another node that comes
+    /// earlier in the graph when visiting the graph in depth-first fashion
+    /// starting from its entry point.
     static func markBackEdges(in graph: ControlFlowGraph) {
         var queue: [(start: ControlFlowGraphNode, visited: [ControlFlowGraphNode])] = []
         
@@ -154,15 +189,17 @@ private extension ControlFlowGraph {
         
         previous = _connections(for: statements, start: previous)
             .returnToExits()
-            .throwToExists()
+            .throwToExits()
         
         previous.apply(to: graph, endNode: exit)
         
         return graph
     }
     
-    private static func _connections(for statements: [Statement],
-                                     start: _NodeCreationResult) -> _NodeCreationResult {
+    private static func _connections(
+        for statements: [Statement],
+        start: _NodeCreationResult
+    ) -> _NodeCreationResult {
         
         var activeDefers: [ControlFlowSubgraphNode] = []
         
@@ -236,7 +273,7 @@ private extension ControlFlowGraph {
             result = _connections(for: stmt.statements)
             
         case let stmt as DoStatement:
-            result = _connections(for: stmt.body)
+            result = _connections(forDo: stmt)
             
         case let stmt as IfStatement:
             result = _connections(forIf: stmt)
@@ -288,6 +325,22 @@ private extension ControlFlowGraph {
         
         return _NodeCreationResult(startNode: node)
             .addingFallthroughNode(node)
+    }
+
+    static func _connections(forDo stmt: DoStatement) -> _NodeCreationResult {
+        var result = _connections(for: stmt.body)
+        
+        for catchBlock in stmt.catchBlocks {
+            let catchNode =
+                _connections(for: catchBlock.body)
+                .satisfyingThrows()
+            
+            result = result.appendingWithNoConnection(
+                catchNode.addingJumpInto(from: result.throwNodes)
+            )
+        }
+
+        return result.satisfyingThrows()
     }
     
     static func _connections(forIf stmt: IfStatement) -> _NodeCreationResult {
@@ -541,7 +594,7 @@ private extension ControlFlowGraph {
             return result.satisfyingReturns()
         }
 
-        func throwToExists() -> _NodeCreationResult {
+        func throwToExits() -> _NodeCreationResult {
             var result = self
             result.exitNodes.merge(with: result.throwNodes)
             return result.satisfyingThrows()
@@ -571,6 +624,28 @@ private extension ControlFlowGraph {
             return result
         }
         
+        /**
+        Connects this subgraph to another subgraph by making the jump target nodes
+        point to the start of this subgraph.
+
+        Example:
+
+        This subgraph:
+
+            n1 -> n2
+        
+        Second subgraph:
+
+            start -> p1 --> p2
+                        `-> p3 (jump target)
+                        `-> p4 (jump target)
+        
+        Resulting subgraph:
+            
+            start -> p1 --> p2
+                        `-> p3 --> n1 --> n2
+                        `-> p4 -´
+        */
         func addingJumpInto(from target: ControlFlowGraphJumpTarget) -> _NodeCreationResult {
             if !isValid {
                 return self
@@ -611,11 +686,26 @@ private extension ControlFlowGraph {
                 return result
             }
             
+            var newResult = appendingWithNoConnection(result)
+            newResult.operations.append(.addEdge(start: startNode, end: result.startNode))
+
+            return newResult
+        }
+        
+        /// Appends this node creation result with another node creation result,
+        /// but without connecting the entry points.
+        func appendingWithNoConnection(_ result: _NodeCreationResult) -> _NodeCreationResult {
+            if !result.isValid {
+                return self
+            }
+            if !isValid {
+                return result
+            }
+
             var newResult = self
             
             newResult.operations.append(.addNode(startNode))
             newResult.operations.append(.addNode(result.startNode))
-            newResult.operations.append(.addEdge(start: startNode, end: result.startNode))
             newResult.operations.append(contentsOf: result.operations)
             
             newResult.exitNodes.merge(with: result.exitNodes)

@@ -228,7 +228,6 @@
 		],
 		"swiftTest.swift.testParams": [
 			"--enable-code-coverage",
-			"--skip-build",
 		],
 	},
 	"extensions": {

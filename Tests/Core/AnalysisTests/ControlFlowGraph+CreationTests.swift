@@ -33,6 +33,66 @@ class ControlFlowGraphCreationTests: XCTestCase {
         )
     }
 
+    func testPruneUnreachable_true() {
+        let stmt: CompoundStatement = [
+            .expression(.identifier("a")),
+            .return(nil),
+            .expression(.identifier("b")),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt, pruneUnreachable: true)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="a"]
+                    n3 [label="{return}"]
+                    n4 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                }
+                """
+        )
+        XCTAssertEqual(graph.nodes.count, 4)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testPruneUnreachable_false() {
+        let stmt: CompoundStatement = [
+            .expression(.identifier("a")),
+            .return(nil),
+            .expression(.identifier("b")),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt, pruneUnreachable: false)
+
+        sanitize(graph, expectsUnreachable: true)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="a"]
+                    n3 [label="b"]
+                    n4 [label="{return}"]
+                    n5 [label="exit"]
+                    n1 -> n2
+                    n2 -> n4
+                    n3 -> n5
+                    n4 -> n5
+                }
+                """
+        )
+        XCTAssertEqual(graph.nodes.count, 5)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+    }
+
     func testCreateNestedEmptyCompoundStatementGetsFlattenedToEmptyGraph() {
         let stmt: CompoundStatement = [
             CompoundStatement(statements: [])
@@ -1214,6 +1274,37 @@ class ControlFlowGraphCreationTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
     }
 
+    func testReturnStatement_skipRemaining() {
+        let stmt: CompoundStatement = [
+            .expression(.identifier("preReturn").call()),
+            .return(nil),
+            .expression(.identifier("postReturn").call()),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph, expectsUnreachable: true)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="postReturn()"]
+                    n3 [label="preReturn()"]
+                    n4 [label="{return}"]
+                    n5 [label="exit"]
+                    n1 -> n3
+                    n2 -> n5
+                    n3 -> n4
+                    n4 -> n5
+                }
+                """
+        )
+        XCTAssertEqual(graph.nodes.count, 5)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+    }
+
     func testThrowStatement() {
         let stmt: CompoundStatement = [
             Statement.while(
@@ -1245,6 +1336,192 @@ class ControlFlowGraphCreationTests: XCTestCase {
         XCTAssertEqual(graph.nodes.count, 4)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+    }
+
+    func testThrowErrorFlow() {
+        let stmt: CompoundStatement = [
+            .expression(.identifier("preError").call()),
+            .throw(.identifier("Error").call()),
+            .expression(.identifier("postError").call()),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph, expectsUnreachable: true)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="postError()"]
+                    n3 [label="preError()"]
+                    n4 [label="{throw Error()}"]
+                    n5 [label="exit"]
+                    n1 -> n3
+                    n2 -> n5
+                    n3 -> n4
+                    n4 -> n5
+                }
+                """
+        )
+        XCTAssertEqual(graph.nodes.count, 5)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+    }
+
+    func testConditionalThrowErrorFlow() {
+        let stmt: CompoundStatement = [
+            .expression(.identifier("preError").call()),
+            .if(.identifier("a"), body: [
+                .throw(.identifier("Error").call()),
+            ]),
+            .expression(.identifier("postError").call()),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="postError()"]
+                    n3 [label="preError()"]
+                    n4 [label="{if}"]
+                    n5 [label="{throw Error()}"]
+                    n6 [label="exit"]
+                    n1 -> n3
+                    n2 -> n6
+                    n3 -> n4
+                    n4 -> n5
+                    n4 -> n2
+                    n5 -> n6
+                }
+                """
+        )
+        XCTAssertEqual(graph.nodes.count, 6)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+    }
+
+    func testCatchThrowErrorFlow() {
+        let stmt: CompoundStatement = [
+            .do([
+                .expression(.identifier("preError")),
+                .throw(.identifier("Error").call()),
+                .expression(.identifier("postError")),
+            ]).catch(body: [
+                .expression(.identifier("errorHandler")),
+            ]),
+            .expression(.identifier("end")),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph, expectsUnreachable: true)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="end"]
+                    n3 [label="errorHandler"]
+                    n4 [label="postError"]
+                    n5 [label="preError"]
+                    n6 [label="{throw Error()}"]
+                    n7 [label="exit"]
+                    n1 -> n5
+                    n2 -> n7
+                    n3 -> n2
+                    n4 -> n2
+                    n5 -> n6
+                    n6 -> n3
+                }
+                """
+        )
+        XCTAssertEqual(graph.nodes.count, 7)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testCatchConditionalThrowErrorFlow() {
+        let stmt: CompoundStatement = [
+            .do([
+                .expression(.identifier("preError")),
+                .if(.identifier("a"), body: [
+                    .throw(.identifier("Error").call()),
+                ]),
+                .expression(.identifier("postError")),
+            ]).catch(body: [
+                .expression(.identifier("errorHandler")),
+            ]),
+            .expression(.identifier("end")),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph, expectsUnreachable: true)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="end"]
+                    n3 [label="errorHandler"]
+                    n4 [label="postError"]
+                    n5 [label="preError"]
+                    n6 [label="{if}"]
+                    n7 [label="{throw Error()}"]
+                    n8 [label="exit"]
+                    n1 -> n5
+                    n2 -> n8
+                    n3 -> n2
+                    n4 -> n2
+                    n5 -> n6
+                    n6 -> n7
+                    n6 -> n4
+                    n7 -> n3
+                }
+                """
+        )
+        XCTAssertEqual(graph.nodes.count, 8)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testCatchWithNoThrowFlow() {
+        let stmt: CompoundStatement = [
+            .do([
+                .expression(.identifier("a")),
+            ]).catch(body: [
+                .expression(.identifier("b")),
+            ]),
+            .expression(.identifier("c")),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph, expectsUnreachable: true)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="a"]
+                    n3 [label="b"]
+                    n4 [label="c"]
+                    n5 [label="exit"]
+                    n1 -> n2
+                    n2 -> n4
+                    n3 -> n4
+                    n4 -> n5
+                }
+                """
+        )
+        XCTAssertEqual(graph.nodes.count, 5)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
 
     func testBreakStatement() {
