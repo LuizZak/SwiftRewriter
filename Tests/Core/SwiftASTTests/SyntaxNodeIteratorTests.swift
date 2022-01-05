@@ -1,5 +1,6 @@
 import SwiftAST
 import XCTest
+import TestCommons
 
 class SyntaxNodeIteratorTests: XCTestCase {
     func testAssignmentExpression() {
@@ -218,6 +219,25 @@ class SyntaxNodeIteratorTests: XCTestCase {
             .if(.constant(true), body: [.do([.break()])], else: [.do([.continue()])]),
             iteratesAs: [
                 Statement.if(.constant(true), body: [.do([.break()])], else: [.do([.continue()])]),
+                Expression.constant(true),
+                Statement.compound([.do([.break()])]),
+                Statement.compound([.do([.continue()])]),
+                Statement.do([.break()]),
+                Statement.do([.continue()]),
+                Statement.compound([.break()]),
+                Statement.compound([.continue()]),
+                Statement.break(),
+                Statement.continue(),
+            ]
+        )
+    }
+
+    func testIfLet() {
+        assertStatement(
+            .ifLet(.expression(.identifier("a")), .constant(true), body: [.do([.break()])], else: [.do([.continue()])]),
+            iteratesAs: [
+                Statement.ifLet(.expression(.identifier("a")), .constant(true), body: [.do([.break()])], else: [.do([.continue()])]),
+                Expression.identifier("a"),
                 Expression.constant(true),
                 Statement.compound([.do([.break()])]),
                 Statement.compound([.do([.continue()])]),
@@ -858,6 +878,16 @@ class SyntaxNodeIteratorTests: XCTestCase {
             ]
         )
     }
+
+    func testThrowStatement() {
+        assertStatement(
+            .throw(.identifier("a")),
+            iteratesAs: [
+                Statement.throw(.identifier("a")),
+                Expression.identifier("a"),
+            ]
+        )
+    }
 }
 
 extension SyntaxNodeIteratorTests {
@@ -917,13 +947,27 @@ extension SyntaxNodeIteratorTests {
         for (i, (actual, expect)) in zip(result, expected).enumerated() {
             switch (expect, actual) {
             case (let lhs as Statement, let rhs as Statement):
-                if lhs == rhs {
-                    continue
-                }
+                if lhs == rhs { continue }
+
+                assertStatementsEqual(
+                    actual: lhs,
+                    expected: rhs,
+                    messageHeader: "Expected index \(i) of iterator to be:",
+                    file: file,
+                    line: line
+                )
+            
             case (let lhs as Expression, let rhs as Expression):
-                if lhs == rhs {
-                    continue
-                }
+                if lhs == rhs { continue }
+
+                assertExpressionsEqual(
+                    actual: lhs,
+                    expected: rhs,
+                    messageHeader: "Expected index \(i) of iterator to be:",
+                    file: file,
+                    line: line
+                )
+
             default:
                 XCTFail(
                     """
@@ -936,22 +980,6 @@ extension SyntaxNodeIteratorTests {
                 break
             }
 
-            var expString = ""
-            var actString = ""
-
-            dump(expect, to: &expString)
-            dump(actual, to: &actString)
-
-            XCTFail(
-                """
-                Expected index \(i) of iterator to be:
-                \(expString)
-                but found:
-                \(actString)
-                """,
-                file: file,
-                line: line
-            )
             return
         }
 
