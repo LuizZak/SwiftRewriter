@@ -92,6 +92,11 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
     }
 
     public override func visitForInStatement(_ ctx: JavaScriptParser.ForInStatementContext) -> Statement? {
+        // TODO: Add support for for-in statement
+        return unknown(ctx)
+    }
+    
+    public override func visitForOfStatement(_ ctx: JavaScriptParser.ForOfStatementContext) -> Statement? {
         // TODO: Improve support for tuple-based for-in loops.
 
         let identifier: String?
@@ -118,11 +123,6 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
         }
 
         return unknown(ctx)
-    }
-    
-    public override func visitForOfStatement(_ ctx: JavaScriptParser.ForOfStatementContext) -> Statement? {
-        // TODO: Support for-of statement
-        unknown(ctx)
     }
 
     public override func visitContinueStatement(_ ctx: JavaScriptParser.ContinueStatementContext) -> Statement? {
@@ -172,8 +172,11 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
     }
 
     public override func visitThrowStatement(_ ctx: JavaScriptParser.ThrowStatementContext) -> Statement? {
-        // TODO: Support throw statement
-        unknown(ctx)
+        guard let exp = ctx.expressionSequence()?.accept(expressionReader) else {
+            return unknown(ctx)
+        }
+
+        return .throw(exp)
     }
 
     public override func visitTryStatement(_ ctx: JavaScriptParser.TryStatementContext) -> Statement? {

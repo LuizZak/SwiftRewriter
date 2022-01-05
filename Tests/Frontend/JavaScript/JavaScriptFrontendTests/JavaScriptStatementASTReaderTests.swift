@@ -173,10 +173,10 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
         )
     }
 
-    func testForInStatement() {
+    func testForOfStatement() {
         assert(
             jsStmt: """
-            for (i in exp) {
+            for (i of exp) {
                 true;
             }
             """,
@@ -190,10 +190,10 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
         )
     }
 
-    func testForInStatement_variableDeclarationInitializer() {
+    func testForOfStatement_variableDeclarationInitializer() {
         assert(
             jsStmt: """
-            for (var i in exp) {
+            for (var i of exp) {
                 true;
             }
             """,
@@ -461,6 +461,15 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
                     .return(.constant(0))
                 ]
             )
+        )
+    }
+
+    func testThrowStatement() {
+        assert(
+            jsStmt: """
+            throw new Error();
+            """,
+            readsAs: .throw(.identifier("Error").call())
         )
     }
 }
