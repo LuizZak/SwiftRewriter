@@ -57,7 +57,7 @@ public class DoStatement: Statement, StatementKindType {
     }
 
     /// Returns a copy of this `DoStatement` with a `CatchBlock` appended at the end.
-    public func `catch`(pattern: Pattern? = nil, body: CompoundStatement) -> DoStatement {
+    public func `catch`(pattern: Pattern? = nil, _ body: CompoundStatement) -> DoStatement {
         let copy = copy()
         copy.catchBlocks.append(
             .init(pattern: pattern, body: body)

@@ -1407,11 +1407,12 @@ class ControlFlowGraphCreationTests: XCTestCase {
 
     func testCatchThrowErrorFlow() {
         let stmt: CompoundStatement = [
+            .expression(.identifier("preDo")),
             .do([
                 .expression(.identifier("preError")),
                 .throw(.identifier("Error").call()),
                 .expression(.identifier("postError")),
-            ]).catch(body: [
+            ]).catch([
                 .expression(.identifier("errorHandler")),
             ]),
             .expression(.identifier("end")),
@@ -1428,19 +1429,21 @@ class ControlFlowGraphCreationTests: XCTestCase {
                     n2 [label="end"]
                     n3 [label="errorHandler"]
                     n4 [label="postError"]
-                    n5 [label="preError"]
-                    n6 [label="{throw Error()}"]
-                    n7 [label="exit"]
+                    n5 [label="preDo"]
+                    n6 [label="preError"]
+                    n7 [label="{throw Error()}"]
+                    n8 [label="exit"]
                     n1 -> n5
-                    n2 -> n7
+                    n2 -> n8
                     n3 -> n2
                     n4 -> n2
                     n5 -> n6
-                    n6 -> n3
+                    n6 -> n7
+                    n7 -> n3
                 }
                 """
         )
-        XCTAssertEqual(graph.nodes.count, 7)
+        XCTAssertEqual(graph.nodes.count, 8)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
@@ -1453,7 +1456,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                     .throw(.identifier("Error").call()),
                 ]),
                 .expression(.identifier("postError")),
-            ]).catch(body: [
+            ]).catch([
                 .expression(.identifier("errorHandler")),
             ]),
             .expression(.identifier("end")),
@@ -1494,7 +1497,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let stmt: CompoundStatement = [
             .do([
                 .expression(.identifier("a")),
-            ]).catch(body: [
+            ]).catch([
                 .expression(.identifier("b")),
             ]),
             .expression(.identifier("c")),

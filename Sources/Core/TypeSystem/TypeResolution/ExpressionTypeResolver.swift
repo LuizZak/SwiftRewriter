@@ -182,28 +182,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         return stmt
     }
     
-    func collectInPattern(_ pattern: Pattern,
-                          type: SwiftType,
-                          location: LocalCodeDefinition.DefinitionLocation,
-                          to scope: CodeScope) {
-        
-        switch pattern {
-        case .identifier(let ident):
-            scope.recordDefinition(
-                .forLocalIdentifier(
-                    ident,
-                    type: type,
-                    isConstant: true,
-                    location: location
-                ),
-                overwrite: true
-            )
-        default:
-            // Other (more complex) patterns are not (yet) supported!
-            break
-        }
-    }
-    
     public override func visitIf(_ stmt: IfStatement) -> Statement {
         if let pattern = stmt.pattern {
             let result = super.visitIf(stmt)
@@ -268,6 +246,43 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         }
         
         return super.visitReturn(stmt)
+    }
+
+    public override func visitCatchBlock(_ catchBlock: CatchBlock) -> CatchBlock {
+        if let pattern = catchBlock.pattern {
+            collectInPattern(
+                pattern,
+                type: "Error",
+                location: .catchBlock(catchBlock, .`self`),
+                to: catchBlock.body
+            )
+        }
+
+        return super.visitCatchBlock(catchBlock)
+    }
+    
+    func collectInPattern(
+        _ pattern: Pattern,
+        type: SwiftType,
+        location: LocalCodeDefinition.DefinitionLocation,
+        to scope: CodeScope
+    ) {
+        
+        switch pattern {
+        case .identifier(let ident):
+            scope.recordDefinition(
+                .forLocalIdentifier(
+                    ident,
+                    type: type,
+                    isConstant: true,
+                    location: location
+                ),
+                overwrite: true
+            )
+        default:
+            // Other (more complex) patterns are not (yet) supported!
+            break
+        }
     }
     
     // MARK: - Expression Resolving

@@ -572,10 +572,10 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
     func testDoStatement_catchBlocks() {
         let stmt = Statement
             .do([])
-            .catch(body: [
+            .catch([
                 .expression(.identifier("a").call())
             ])
-            .catch(pattern: .identifier("error"), body: [
+            .catch(pattern: .identifier("error"), [
                 .expression(.identifier("b").call())
             ])
 

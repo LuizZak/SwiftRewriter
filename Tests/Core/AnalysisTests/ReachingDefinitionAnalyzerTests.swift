@@ -17,7 +17,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         controlFlowGraph = nil
     }
 
-    func testVarDecl() {
+    func testVarDecl() throws {
         let body: CompoundStatement = [
             .variableDeclaration(identifier: "a", type: .int, initialization: .constant(0)),
             .expression(.identifier("a")),
@@ -25,7 +25,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         setupTest(with: body)
 
         let definitions = sut.reachingDefinitions(
-            for: controlFlowGraph.graphNode(for: body.statements[1])!
+            for: try XCTUnwrap(controlFlowGraph.graphNode(for: try body.statements[try: 1]))
         )
 
         XCTAssertEqual(definitions.count, 1)
@@ -33,7 +33,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         XCTAssert(definitions.first?.definitionSite === body.statements[0])
     }
 
-    func testVarDeclReplace() {
+    func testVarDeclReplace() throws {
         let body: CompoundStatement = [
             .variableDeclaration(identifier: "a", type: .int, initialization: .constant(0)),
             .expression(.assignment(lhs: .identifier("a"), op: .assign, rhs: .constant(1))),
@@ -42,7 +42,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         setupTest(with: body)
 
         let definitions = sut.reachingDefinitions(
-            for: controlFlowGraph.graphNode(for: body.statements[2])!
+            for: try XCTUnwrap(controlFlowGraph.graphNode(for: try body.statements[try: 2]))
         )
 
         XCTAssertEqual(definitions.count, 1)
@@ -52,7 +52,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         )
     }
 
-    func testVarDeclWithNoInitialization() {
+    func testVarDeclWithNoInitialization() throws {
         let body: CompoundStatement = [
             .variableDeclaration(identifier: "a", type: .int, initialization: nil),
             .expression(.identifier("a")),
@@ -60,13 +60,13 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         setupTest(with: body)
 
         let definitions = sut.reachingDefinitions(
-            for: controlFlowGraph.graphNode(for: body.statements[1])!
+            for: try XCTUnwrap(controlFlowGraph.graphNode(for: try body.statements[try: 1]))
         )
 
         XCTAssertEqual(definitions.count, 0)
     }
 
-    func testIf() {
+    func testIf() throws {
         let body: CompoundStatement = [
             .variableDeclaration(
                 identifier: "a",
@@ -88,8 +88,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
 
         let definitions =
             sut.reachingDefinitions(
-                for:
-                    controlFlowGraph.graphNode(for: body.statements[2])!
+                for: try XCTUnwrap(controlFlowGraph.graphNode(for: try body.statements[try: 2]))
             )
 
         XCTAssertEqual(definitions.count, 2)
@@ -105,7 +104,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         )
     }
 
-    func testIfElse() {
+    func testIfElse() throws {
         let body: CompoundStatement = [
             .variableDeclaration(
                 identifier: "a",
@@ -134,7 +133,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         let definitions =
             sut.reachingDefinitions(
                 for:
-                    controlFlowGraph.graphNode(for: body.statements[2])!
+                    try XCTUnwrap(controlFlowGraph.graphNode(for: try body.statements[try: 2]))
             )
 
         XCTAssertEqual(definitions.count, 2)
@@ -155,7 +154,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         )
     }
 
-    func testIfLet() {
+    func testIfLet() throws {
         let body: CompoundStatement = [
             .ifLet(
                 .identifier("a"),
@@ -181,7 +180,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         XCTAssert(definitions.first?.definitionSite === body.statements[0])
     }
 
-    func testForLoop() {
+    func testForLoop() throws {
         let body: CompoundStatement = [
             .for(
                 .identifier("a"),
@@ -196,28 +195,89 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         let definitions =
             sut.reachingDefinitions(
                 for:
-                    controlFlowGraph.graphNode(for: body.statements[0].asFor!.body.statements[0])!
+                    try XCTUnwrap(controlFlowGraph.graphNode(for: try XCTUnwrap(body.statements[try: 0].asFor?.body.statements[try: 0])))
             )
 
         XCTAssertEqual(definitions.count, 1)
         XCTAssertEqual(definitions.first?.definition.name, "a")
         XCTAssert(definitions.first?.definitionSite === body.statements[0])
     }
+
+    func testCatchThrowErrorFlow() throws {
+        
+        let body: CompoundStatement = [
+            .variableDeclaration(identifier: "a", type: .int, initialization: .constant(0)),
+            .do([
+                .throw(.identifier("Error")),
+                .expression(.identifier("a").assignment(op: .assign, rhs: .constant(1))),
+            ]).catch([
+                .expression(.identifier("a").assignment(op: .assign, rhs: .constant(2))),
+            ]),
+            .expression(.identifier("a")),
+        ]
+        setupTest(with: body)
+
+        let definitions =
+            sut.reachingDefinitions(
+                for:
+                    try XCTUnwrap(controlFlowGraph.graphNode(for: body.statements[try: 2]))
+            )
+
+        XCTAssertEqual(definitions.count, 1)
+        XCTAssertEqual(definitions.first?.definition.name, "a")
+        XCTAssertTrue(
+            definitions.contains {
+                $0.definitionSite === body.statements[1].asDoStatement?.catchBlocks[0].body.statements[0].asExpressions?.expressions[0]
+            }
+        )
+    }
 }
 
 extension ReachingDefinitionAnalyzerTests {
-    fileprivate func setupTest(with body: CompoundStatement) {
+    private func setupTest(with body: CompoundStatement) {
         let typeSystem = TypeSystem.defaultTypeSystem
 
         let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
         _ = resolver.resolveTypes(in: body)
 
-        controlFlowGraph = ControlFlowGraph.forCompoundStatement(body)
+        controlFlowGraph = ControlFlowGraph.forCompoundStatement(body, pruneUnreachable: true)
         sut = ReachingDefinitionAnalyzer(
             controlFlowGraph: controlFlowGraph,
             container: .statement(body),
             intention: nil,
             typeSystem: typeSystem
         )
+    }
+
+    private func assertIdentical(
+        _ actual: SyntaxNode?,
+        _ expected: SyntaxNode?,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) {
+        guard actual !== expected else {
+            return
+        }
+
+        switch (actual, expected) {
+        case (nil, nil):
+            return
+        case (let lhs as Expression?, let rhs as Expression?):
+            assertExpressionsEqual(
+                actual: lhs,
+                expected: rhs,
+                file: file,
+                line: line
+            )
+        case (let lhs as Statement?, let rhs as Statement?):
+            assertStatementsEqual(
+                actual: lhs,
+                expected: rhs,
+                file: file,
+                line: line
+            )
+        default:
+            XCTFail("Received nodes of different types: \(type(of: expected)) vs \(type(of: actual))")
+        }
     }
 }

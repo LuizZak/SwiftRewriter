@@ -369,6 +369,7 @@ public class LocalCodeDefinition: CodeDefinition {
         case forLoop(ForStatement, PatternLocation)
         case ifLet(IfStatement, PatternLocation)
         case localFunction(LocalFunctionStatement)
+        case catchBlock(CatchBlock, PatternLocation)
         
         public func hash(into hasher: inout Hasher) {
             switch self {
@@ -403,6 +404,11 @@ public class LocalCodeDefinition: CodeDefinition {
             case let .localFunction(stmt):
                 hasher.combine(8)
                 hasher.combine(ObjectIdentifier(stmt))
+            
+            case .catchBlock(let catchBlock, let loc):
+                hasher.combine(9)
+                hasher.combine(ObjectIdentifier(catchBlock.body))
+                hasher.combine(loc)
             }
         }
     }

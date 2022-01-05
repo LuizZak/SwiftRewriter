@@ -1783,6 +1783,41 @@ class ExpressionTypeResolverTests: XCTestCase {
             expectsType: "Error"
         )
     }
+
+    func testDoCatchBlockTypeResolving() {
+        _ = startScopedTest(
+            with: Statement.compound([
+                .do([
+
+                ]).catch([
+                    .expression(.identifier("a")),
+                ]),
+            ]),
+            sut: ExpressionTypeResolver()
+        )
+        .definingLocal(name: "a", type: .int)
+        .thenAssertExpression(
+            at: \.statements[0].asDoStatement?.catchBlocks[0].body.statements[0].asExpressions?.expressions[0],
+            resolvedAs: .int
+        )
+    }
+
+    func testDoCatchBlock_patterns() {
+        _ = startScopedTest(
+            with: Statement.compound([
+                .do([
+
+                ]).catch(pattern: .identifier("a"), [
+                    .expression(.identifier("a")),
+                ]),
+            ]),
+            sut: ExpressionTypeResolver()
+        )
+        .thenAssertExpression(
+            at: \.statements[0].asDoStatement?.catchBlocks[0].body.statements[0].asExpressions?.expressions[0],
+            resolvedAs: "Error"
+        )
+    }
 }
 
 // MARK: - Test Building Helpers

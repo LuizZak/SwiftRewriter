@@ -321,7 +321,8 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: A `DoStatement` to visit
     /// - Returns: Result of visiting the `do` statement
     open func visitDo(_ stmt: DoStatement) -> Statement {
-        _=visitStatement(stmt.body)
+        stmt.body = _visitCompound(stmt.body)
+        stmt.catchBlocks = stmt.catchBlocks.map(visitCatchBlock)
         
         return stmt
     }
