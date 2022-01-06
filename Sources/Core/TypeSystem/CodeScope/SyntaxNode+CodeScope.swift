@@ -37,8 +37,8 @@ public extension CodeScopeNode where Self: SyntaxNode {
         return definitions.functionDefinitions(matching: identifier) + defs
     }
     
-    func allDefinitions() -> [CodeDefinition] {
-        definitions.allDefinitions()
+    func localDefinitions() -> [CodeDefinition] {
+        definitions.localDefinitions()
     }
     
     func recordDefinition(_ definition: CodeDefinition, overwrite: Bool) {
@@ -49,8 +49,8 @@ public extension CodeScopeNode where Self: SyntaxNode {
         self.definitions.recordDefinitions(definitions, overwrite: overwrite)
     }
     
-    func removeAllDefinitions() {
-        definitions.removeAllDefinitions()
+    func removeLocalDefinitions() {
+        definitions.removeLocalDefinitions()
     }
 }
 
@@ -79,6 +79,7 @@ public extension SyntaxNode {
 
 extension CompoundStatement: CodeScopeNode { }
 extension BlockLiteralExpression: CodeScopeNode { }
+extension CatchBlock: CodeScopeNode { }
 
 public extension IdentifierExpression {
     /// Gets the definition this identifier references.

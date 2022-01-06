@@ -327,6 +327,17 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
         return stmt
     }
     
+    /// Visits a catch block from a `do` statement.
+    ///
+    /// - Parameter catchBlock: A `CatchBlock` to visit.
+    /// - Returns: Result of visiting the catch block
+    open func visitCatchBlock(_ catchBlock: CatchBlock) -> CatchBlock {
+        catchBlock.pattern = catchBlock.pattern.map(visitPattern)
+        catchBlock.body = _visitCompound(catchBlock.body)
+
+        return catchBlock
+    }
+    
     /// Visits a `defer` statement node
     ///
     /// - Parameter stmt: A `DeferStatement` to visit
@@ -414,17 +425,6 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
         stmt.exp = visitExpression(stmt.exp)
         
         return stmt
-    }
-    
-    /// Visits a catch block from a `do` statement.
-    ///
-    /// - Parameter catchBlock: A `CatchBlock` to visit.
-    /// - Returns: Result of visiting the catch block
-    open func visitCatchBlock(_ catchBlock: CatchBlock) -> CatchBlock {
-        CatchBlock(
-            pattern: catchBlock.pattern.map(visitPattern),
-            body: _visitCompound(catchBlock.body)
-        )
     }
     
     private func _visitCompound(_ stmt: CompoundStatement) -> CompoundStatement {

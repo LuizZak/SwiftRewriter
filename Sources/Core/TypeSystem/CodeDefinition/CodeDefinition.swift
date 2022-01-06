@@ -182,6 +182,33 @@ public extension CodeDefinition {
             location: location
         )
     }
+
+    /// Creates a code definition for the captured error value of a do statement's
+    /// catch block.
+    static func forCatchBlockPattern(
+        _ catchBlock: CatchBlock
+    ) -> LocalCodeDefinition {
+
+        if let pattern = catchBlock.pattern {
+            switch pattern.simplified {
+            case .identifier(let name):
+                return LocalCodeDefinition(
+                    constantNamed: name,
+                    type: .swiftError,
+                    location: .catchBlock(catchBlock, .`self`)
+                )
+            // TODO: Support mode pattern binding types
+            default:
+                break
+            }
+        }
+
+        return LocalCodeDefinition(
+            constantNamed: "error",
+            type: .swiftError,
+            location: .catchBlock(catchBlock, nil)
+        )
+    }
     
     static func forVarDeclStatement(_ stmt: VariableDeclarationsStatement) -> [LocalCodeDefinition] {
         stmt.decl.enumerated().map { (i, decl) in
@@ -369,7 +396,7 @@ public class LocalCodeDefinition: CodeDefinition {
         case forLoop(ForStatement, PatternLocation)
         case ifLet(IfStatement, PatternLocation)
         case localFunction(LocalFunctionStatement)
-        case catchBlock(CatchBlock, PatternLocation)
+        case catchBlock(CatchBlock, PatternLocation?)
         
         public func hash(into hasher: inout Hasher) {
             switch self {

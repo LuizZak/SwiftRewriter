@@ -280,36 +280,6 @@ public extension SwiftType {
         }
     }
     
-    static let void = SwiftType.tuple(.empty)
-    static let int = SwiftType.typeName("Int")
-    static let uint = SwiftType.typeName("UInt")
-    static let string = SwiftType.typeName("String")
-    static let bool = SwiftType.typeName("Bool")
-    static let float = SwiftType.typeName("Float")
-    static let double = SwiftType.typeName("Double")
-    static let cgFloat = SwiftType.typeName("CGFloat")
-    static let any = SwiftType.typeName("Any")
-    static let anyObject = SwiftType.typeName("AnyObject")
-    
-    static let selector = SwiftType.typeName("Selector")
-    
-    static let nsArray = SwiftType.typeName("NSArray")
-    static let nsDictionary = SwiftType.typeName("NSDictionary")
-    
-    /// A special type name to use to represent instancetype's from Objective-C.
-    static let instancetype = SwiftType.typeName("__instancetype")
-    
-    /// A special type used in place of definitions with improper typing
-    static let errorType = SwiftType.typeName("<<error type>>")
-    
-    static func openRange(_ operand: SwiftType) -> SwiftType {
-        .nominal(.generic("Range", parameters: .one(operand)))
-    }
-    
-    static func closedRange(_ operand: SwiftType) -> SwiftType {
-        .nominal(.generic("ClosedRange", parameters: .one(operand)))
-    }
-    
     static func typeName(_ name: String) -> SwiftType {
         .nominal(.typeName(name))
     }
@@ -318,27 +288,31 @@ public extension SwiftType {
         .nominal(.generic(name, parameters: parameters))
     }
     
-    static func swiftBlock(returnType: SwiftType,
-                           parameters: [SwiftType] = []) -> SwiftType {
-        
+    static func swiftBlock(
+        returnType: SwiftType,
+        parameters: [SwiftType] = []
+    ) -> SwiftType {
+
         .block(returnType: returnType, parameters: parameters, attributes: [])
     }
     
     /// Returns a type that is the same as the input, but with any .optional or
-    /// .implicitUnwrappedOptional types unwrapped to non optional, inclusing
+    /// .implicitUnwrappedOptional types unwrapped to non optional, including
     /// block parameters.
     ///
     /// - Parameters:
     ///   - type: The input type
-    ///   - removeImplicitsOnly: Whether to only remove implicit unwrapped optionals,
-    /// keeping optionals in place.
+    ///   - removeUnspecifiedNullabilityOnly: Whether to only remove unspecified
+    /// nullability optionals, keeping optionals in place.
     /// - Returns: The deeply unwrapped version of the input type.
-    static func asNonnullDeep(_ type: SwiftType,
-                              removeUnspecifiedsOnly: Bool = false) -> SwiftType {
+    static func asNonnullDeep(
+        _ type: SwiftType,
+        removeUnspecifiedNullabilityOnly: Bool = false
+    ) -> SwiftType {
         
         var result: SwiftType = type
         
-        if removeUnspecifiedsOnly {
+        if removeUnspecifiedNullabilityOnly {
             if case .nullabilityUnspecified(let inner) = type {
                 result = inner
             }
@@ -349,16 +323,23 @@ public extension SwiftType {
         switch result {
         case let .block(returnType, parameters, attributes):
             let returnType =
-                asNonnullDeep(returnType,
-                              removeUnspecifiedsOnly: removeUnspecifiedsOnly)
+                asNonnullDeep(
+                    returnType,
+                    removeUnspecifiedNullabilityOnly: removeUnspecifiedNullabilityOnly
+                )
             
             let parameters = parameters.map {
-                asNonnullDeep($0, removeUnspecifiedsOnly: removeUnspecifiedsOnly)
+                asNonnullDeep(
+                    $0,
+                    removeUnspecifiedNullabilityOnly: removeUnspecifiedNullabilityOnly
+                )
             }
             
-            result = .block(returnType: returnType,
-                            parameters: parameters,
-                            attributes: attributes)
+            result = .block(
+                returnType: returnType,
+                parameters: parameters,
+                attributes: attributes
+            )
             
         default:
             break

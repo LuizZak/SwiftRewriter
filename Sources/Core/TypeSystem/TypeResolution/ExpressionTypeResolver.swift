@@ -81,7 +81,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             AnonymousSyntaxNodeVisitor { node in
                 switch node {
                 case let scoped as CodeScopeNode:
-                    scoped.removeAllDefinitions()
+                    scoped.removeLocalDefinitions()
                     
                 case let ident as IdentifierExpression:
                     ident.definition = nil
@@ -249,14 +249,10 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     }
 
     public override func visitCatchBlock(_ catchBlock: CatchBlock) -> CatchBlock {
-        if let pattern = catchBlock.pattern {
-            collectInPattern(
-                pattern,
-                type: "Error",
-                location: .catchBlock(catchBlock, .`self`),
-                to: catchBlock.body
-            )
-        }
+        catchBlock.recordDefinition(
+            .forCatchBlockPattern(catchBlock),
+            overwrite: true
+        )
 
         return super.visitCatchBlock(catchBlock)
     }

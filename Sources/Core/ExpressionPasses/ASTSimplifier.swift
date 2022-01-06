@@ -16,12 +16,12 @@ public class ASTSimplifier: ASTRewriterPass {
     public override func visitCompound(_ stmt: CompoundStatement) -> Statement {
         /// Simplify `do` statements that are the only statement within a compound
         /// statement context.
-        if stmt.statements.count == 1, let doStmt = stmt.statements[0].asDoStatement {
+        if stmt.statements.count == 1, let doStmt = stmt.statements[0].asDoStatement, doStmt.catchBlocks.isEmpty {
             let body = doStmt.body.statements
             doStmt.body.statements = []
             stmt.statements = body
             
-            for def in doStmt.body.allDefinitions() {
+            for def in doStmt.body.localDefinitions() {
                 stmt.definitions.recordDefinition(def, overwrite: false)
             }
             

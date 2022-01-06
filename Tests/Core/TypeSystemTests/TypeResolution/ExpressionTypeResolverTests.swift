@@ -1802,6 +1802,40 @@ class ExpressionTypeResolverTests: XCTestCase {
         )
     }
 
+    func testDoCatchBlockDefaultErrorBindingDefinition() {
+        let stmt = Statement.do([
+        ]).catch([
+        ])
+
+        _ = startScopedTest(
+            with: stmt,
+            sut: ExpressionTypeResolver()
+        )
+        .thenAssertDefined(
+            in: stmt.catchBlocks[0],
+            localNamed: "error",
+            type: .swiftError,
+            isConstant: true
+        )
+    }
+
+    func testDoCatchBlockDefaultErrorBindingResolution() {
+        _ = startScopedTest(
+            with: Statement.compound([
+                .do([
+
+                ]).catch([
+                    .expression(.identifier("error")),
+                ]),
+            ]),
+            sut: ExpressionTypeResolver()
+        )
+        .thenAssertExpression(
+            at: \.statements[0].asDoStatement?.catchBlocks[0].body.statements[0].asExpressions?.expressions[0],
+            resolvedAs: .swiftError
+        )
+    }
+
     func testDoCatchBlock_patterns() {
         _ = startScopedTest(
             with: Statement.compound([

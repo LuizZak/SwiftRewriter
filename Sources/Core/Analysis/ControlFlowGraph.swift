@@ -140,6 +140,9 @@ public final class ControlFlowGraphEdge: DirectedGraphEdge {
     /// True if this is a back edge which points backwards towards the start of
     /// a flow
     public var isBackEdge: Bool = false
+
+    /// A label that can be used during debugging to discern CFG edges.
+    public var debugLabel: String?
     
     init(start: ControlFlowGraphNode, end: ControlFlowGraphNode) {
         self.start = start

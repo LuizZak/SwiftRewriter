@@ -33,7 +33,7 @@ public final class DefaultCodeScope: CodeScope {
         functionDefinitions[identifier] ?? []
     }
     
-    public func allDefinitions() -> [CodeDefinition] {
+    public func localDefinitions() -> [CodeDefinition] {
         definitions
     }
     
@@ -60,7 +60,7 @@ public final class DefaultCodeScope: CodeScope {
         }
     }
     
-    public func removeAllDefinitions() {
+    public func removeLocalDefinitions() {
         definitions.removeAll()
         definitionsByName.removeAll()
     }

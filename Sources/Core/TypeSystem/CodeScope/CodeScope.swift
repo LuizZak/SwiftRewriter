@@ -12,8 +12,8 @@ public protocol CodeScope: DefinitionsSource {
     /// whether any conflicting definitions within this scope should be overwritten.
     func recordDefinitions(_ definitions: [CodeDefinition], overwrite: Bool)
 
-    /// Removes all definitions within this scope.
-    func removeAllDefinitions()
+    /// Removes all local definitions within this scope.
+    func removeLocalDefinitions()
 }
 
 /// A no-op code scope to return when requesting code scope for statements that
@@ -27,7 +27,7 @@ class EmptyCodeScope: CodeScope {
         []
     }
     
-    func allDefinitions() -> [CodeDefinition] {
+    func localDefinitions() -> [CodeDefinition] {
         []
     }
 
@@ -39,7 +39,7 @@ class EmptyCodeScope: CodeScope {
 
     }
     
-    func removeAllDefinitions() {
+    func removeLocalDefinitions() {
 
     }
 }

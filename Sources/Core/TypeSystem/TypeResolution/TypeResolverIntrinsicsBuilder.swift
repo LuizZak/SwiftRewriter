@@ -117,7 +117,7 @@ class TypeResolverIntrinsicsBuilder {
         }
         
         typeResolver.intrinsicVariables = EmptyCodeScope()
-        miscellaneousDefinitions.removeAllDefinitions()
+        miscellaneousDefinitions.removeLocalDefinitions()
         knownTypeDefinitionsSource = nil
     }
     
@@ -344,10 +344,9 @@ class KnownTypePropertiesDefinitionsSource: DefinitionsSource {
         []
     }
     
-    func allDefinitions() -> [CodeDefinition] {
+    func localDefinitions() -> [CodeDefinition] {
         []
     }
-    
 }
 
 class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
@@ -393,7 +392,7 @@ class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
             }
     }
     
-    func allDefinitions() -> [CodeDefinition] {
+    func localDefinitions() -> [CodeDefinition] {
         let variables: [CodeDefinition] =
             globals.varMap.flatMap(\.value)
                 .filter { global in
@@ -457,7 +456,7 @@ class IntentionCollectionFileGlobalsDefinitionsSource: DefinitionsSource {
             }
     }
     
-    func allDefinitions() -> [CodeDefinition] {
+    func localDefinitions() -> [CodeDefinition] {
         let variables: [CodeDefinition] =
             globals.varMap.flatMap(\.value)
                 .filter { global in

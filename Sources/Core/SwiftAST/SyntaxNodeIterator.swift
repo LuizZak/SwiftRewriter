@@ -34,9 +34,17 @@ public final class SyntaxNodeIterator: IteratorProtocol {
                 enqueue(contentsOf: exp.children)
             }
 
-        case let statement as Statement:
-            enqueue(contentsOf: statement.children)
+        case let stmt as Statement:
+            if inspectBlocks || !(stmt is LocalFunctionStatement) {
+                enqueue(contentsOf: stmt.children)
+            }
+        
+        case let catchBlock as CatchBlock:
+            if let pattern = catchBlock.pattern {
+                enqueue(pattern: pattern)
+            }
 
+            enqueue(catchBlock.body)
         default:
             break
         }
@@ -53,12 +61,6 @@ public final class SyntaxNodeIterator: IteratorProtocol {
         case .identifier:
             break
         }
-    }
-    
-    private func enqueue(switchCase: SwitchCase) {
-        switchCase.patterns.forEach(enqueue)
-        
-        enqueue(contentsOf: switchCase.statements)
     }
     
     private func enqueue(_ syntaxNode: SyntaxNode) {

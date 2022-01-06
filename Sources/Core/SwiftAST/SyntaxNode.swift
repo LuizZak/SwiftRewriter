@@ -5,8 +5,10 @@ open class SyntaxNode {
     
     internal(set) public weak var parent: SyntaxNode? {
         willSet {
-            assert(newValue == nil || parent == nil || parent === newValue,
-                   "Reassigning node that already has a parent")
+            assert(
+                newValue == nil || parent == nil || parent === newValue,
+                "Reassigning parent for node that already has a non-nil parent"
+            )
         }
     }
     

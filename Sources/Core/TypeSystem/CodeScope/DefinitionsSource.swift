@@ -10,5 +10,5 @@ public protocol DefinitionsSource {
     func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition]
     
     /// Returns all definitions from this local scope only
-    func allDefinitions() -> [CodeDefinition]
+    func localDefinitions() -> [CodeDefinition]
 }

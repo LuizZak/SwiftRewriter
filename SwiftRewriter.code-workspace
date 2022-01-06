@@ -216,15 +216,19 @@
 			"deinitializer",
 			"deinitializers",
 			"dont",
+			"Fallthroughs",
+			"Graphviz",
 			"Initializable",
 			"ivar",
 			"ivars",
 			"mutex",
 			"Nonnull",
+			"penwidth",
 			"swiftpm",
 			"swiftrewriter",
 			"swiftwriter",
-			"Trivias"
+			"Trivias",
+			"whitespaces"
 		],
 		"swiftTest.swift.testParams": [
 			"--enable-code-coverage",

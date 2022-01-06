@@ -39,7 +39,7 @@ public class CompoundDefinitionsSource: DefinitionsSource {
         return definitions
     }
     
-    public func allDefinitions() -> [CodeDefinition] {
-        sources.flatMap { $0.allDefinitions() }
+    public func localDefinitions() -> [CodeDefinition] {
+        sources.flatMap { $0.localDefinitions() }
     }
 }

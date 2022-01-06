@@ -327,6 +327,7 @@ let package = Package(
             name: "SwiftASTTests",
             dependencies: [
                 "SwiftAST",
+                "SwiftSyntaxSupport",
                 "TestCommons",
             ],
             path: "Tests/Core/SwiftASTTests"

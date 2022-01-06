@@ -32,7 +32,7 @@ public struct ArrayDefinitionsSource: DefinitionsSource {
         functionDefinitions[identifier] ?? []
     }
     
-    public func allDefinitions() -> [CodeDefinition] {
+    public func localDefinitions() -> [CodeDefinition] {
         definitions
     }
 }

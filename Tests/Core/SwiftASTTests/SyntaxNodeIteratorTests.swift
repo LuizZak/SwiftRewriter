@@ -1,6 +1,7 @@
 import SwiftAST
 import XCTest
 import TestCommons
+import SwiftSyntaxSupport
 
 class SyntaxNodeIteratorTests: XCTestCase {
     func testAssignmentExpression() {
@@ -259,6 +260,41 @@ class SyntaxNodeIteratorTests: XCTestCase {
                 .compound([.break(), .continue()]),
                 .break(),
                 .continue(),
+            ]
+        )
+    }
+
+    func testDoCatchBlock() {
+        assertStatement(
+            .do([
+                .expression(.identifier("a")),
+                .expression(.identifier("b")),
+            ]).catch([
+                .expression(.identifier("c")),
+            ]),
+            iteratesAs: [
+                Statement.do([
+                    .expression(.identifier("a")),
+                    .expression(.identifier("b")),
+                ]).catch([
+                    .expression(.identifier("c")),
+                ]),
+                Statement.compound([
+                    .expression(.identifier("a")),
+                    .expression(.identifier("b")),
+                ]),
+                CatchBlock(pattern: nil, body: [
+                    .expression(.identifier("c")),
+                ]),
+                Statement.expression(.identifier("a")),
+                Statement.expression(.identifier("b")),
+                Statement.compound([
+                    .expression(.identifier("c")),
+                ]),
+                Expression.identifier("a"),
+                Expression.identifier("b"),
+                Statement.expression(.identifier("c")),
+                Expression.identifier("c"),
             ]
         )
     }
@@ -795,7 +831,7 @@ class SyntaxNodeIteratorTests: XCTestCase {
     }
 
     /// When visiting expressions within blocks, enqueue them such that they happen
-    /// only after expressions within the depth the block was found where visited.
+    /// only after expressions within the depth the block where visited.
     /// This allows the search to occur in a more controller breadth-first manner.
     func testStatementVisitOrder() {
         assertStatement(
@@ -849,7 +885,7 @@ class SyntaxNodeIteratorTests: XCTestCase {
         )
     }
 
-    func testLocalFunctionStatement() {
+    func testLocalFunctionStatement_inspectBlocksFalse() {
         assertStatement(
             .localFunction(
                 signature: FunctionSignature(name: "f"),
@@ -859,6 +895,28 @@ class SyntaxNodeIteratorTests: XCTestCase {
                 ]
             ),
             inspectingBlocks: false,
+            iteratesAs: [
+                Statement.localFunction(
+                    signature: FunctionSignature(name: "f"),
+                    body: [
+                        .expression(.identifier("a")),
+                        .expression(.identifier("b")),
+                    ]
+                )
+            ]
+        )
+    }
+
+    func testLocalFunctionStatement_inspectBlocksTrue() {
+        assertStatement(
+            .localFunction(
+                signature: FunctionSignature(name: "f"),
+                body: [
+                    .expression(.identifier("a")),
+                    .expression(.identifier("b")),
+                ]
+            ),
+            inspectingBlocks: true,
             iteratesAs: [
                 Statement.localFunction(
                     signature: FunctionSignature(name: "f"),
@@ -944,6 +1002,44 @@ extension SyntaxNodeIteratorTests {
     ) {
         let result = Array(AnyIterator(iterator))
 
+        func dumpIterator(_ sequence: [SyntaxNode], differenceIndex: Int? = nil) {
+            for (i, node) in sequence.enumerated() {
+                if i == differenceIndex {
+                    print("difference starts here => ", terminator: "")
+                }
+                print("#\(i) (<\(type(of: node))>): ", terminator: "")
+
+                let syntaxProducer = SwiftSyntaxProducer()
+
+                switch node {
+                case let node as Expression:
+                    print(node.description)
+                case let stmt as Statement:
+                    print(syntaxProducer.generateStatement(stmt).description)
+                case let catchBlock as CatchBlock:
+                    let body = syntaxProducer.generateStatement(catchBlock.body).description
+
+                    if let pattern = catchBlock.pattern {
+                        print("catch let \(pattern.description) \(body)")
+                    } else {
+                        print("catch \(body)")
+                    }
+                default:
+                    print("<unknown SyntaxNode type \(type(of: node))>")
+                }
+            }
+        }
+
+        func dumpFullIterators(differenceIndex: Int? = nil) {
+            print("Full iterators:")
+            
+            print("\nExpected:")
+            dumpIterator(expected, differenceIndex: differenceIndex)
+            
+            print("\nActual:")
+            dumpIterator(result, differenceIndex: differenceIndex)
+        }
+
         for (i, (actual, expect)) in zip(result, expected).enumerated() {
             switch (expect, actual) {
             case (let lhs as Statement, let rhs as Statement):
@@ -967,6 +1063,30 @@ extension SyntaxNodeIteratorTests {
                     file: file,
                     line: line
                 )
+            
+            case (let lhs as CatchBlock, let rhs as CatchBlock):
+                if lhs == rhs { continue }
+
+                if lhs.pattern != rhs.pattern {
+                    XCTFail(
+                        """
+                        Expected index \(i) of iterator are catch blocks with different patterns:
+
+                        expected: \(lhs.pattern?.description ?? "<nil>")
+                        found: \(rhs.pattern?.description ?? "<nil>")
+                        """,
+                        file: file,
+                        line: line
+                    )
+                } else if lhs.body != rhs.body {
+                    assertStatementsEqual(
+                        actual: lhs.body,
+                        expected: rhs.body,
+                        messageHeader: "Expected body of catch block at index \(i) of iterator to be:",
+                        file: file,
+                        line: line
+                    )
+                }
 
             default:
                 XCTFail(
@@ -977,7 +1097,8 @@ extension SyntaxNodeIteratorTests {
                     file: file,
                     line: line
                 )
-                break
+
+                dumpFullIterators(differenceIndex: i)
             }
 
             return

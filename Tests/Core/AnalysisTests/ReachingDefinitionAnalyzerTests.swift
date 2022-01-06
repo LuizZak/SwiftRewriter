@@ -203,8 +203,67 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         XCTAssert(definitions.first?.definitionSite === body.statements[0])
     }
 
-    func testCatchThrowErrorFlow() throws {
+    func testNestedCompound() throws {
+        let body: CompoundStatement = [
+            .variableDeclaration(identifier: "a", type: .int, initialization: .constant(0)),
+            .if(.constant(true), body: [
+                .variableDeclaration(identifier: "b", type: .int, initialization: .constant(0)),
+            ]),
+            .expression(.identifier("a")),
+        ]
+        setupTest(with: body)
+        let stmt = try XCTUnwrap(
+            body
+            .statements[try: 2]
+        )
         
+        let definitions =
+            sut.reachingDefinitions(
+                for: try XCTUnwrap(controlFlowGraph.graphNode(for: stmt))
+            )
+        
+        XCTAssertEqual(definitions.count, 1)
+        XCTAssertEqual(definitions.first?.definition.name, "a")
+        XCTAssertEqual(definitions.first?.definition.type, .int)
+        try XCTAssertTrue(
+            definitions.contains {
+                try $0.definitionSite === body.statements[try: 0]
+            }
+        )
+    }
+
+    func testCatchBlockError() throws {
+        let body: CompoundStatement = [
+            .do([
+                .throw(.identifier("Error")),
+            ]).catch([
+                .expression(.identifier("error").assignment(op: .assign, rhs: .constant(2))),
+            ]),
+        ]
+        setupTest(with: body)
+        let stmt = try XCTUnwrap(
+            body
+            .statements[try: 0].asDoStatement?
+            .catchBlocks[try: 0]
+            .body
+            .statements[try: 0]
+        )
+        
+        let definitions =
+            sut.reachingDefinitions(
+                for: try XCTUnwrap(controlFlowGraph.graphNode(for: stmt))
+            )
+        
+        XCTAssertEqual(definitions.count, 1)
+        XCTAssertEqual(definitions.first?.definition.name, "error")
+        try XCTAssertTrue(
+            definitions.contains {
+                try $0.definitionSite === body.statements[try: 0].asDoStatement?.catchBlocks[try: 0]
+            }
+        )
+    }
+
+    func testCatchThrowErrorFlow() throws {
         let body: CompoundStatement = [
             .variableDeclaration(identifier: "a", type: .int, initialization: .constant(0)),
             .do([
@@ -240,7 +299,11 @@ extension ReachingDefinitionAnalyzerTests {
         let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
         _ = resolver.resolveTypes(in: body)
 
-        controlFlowGraph = ControlFlowGraph.forCompoundStatement(body, pruneUnreachable: true)
+        controlFlowGraph = ControlFlowGraph.forCompoundStatement(
+            body,
+            pruneUnreachable: false
+        )
+
         sut = ReachingDefinitionAnalyzer(
             controlFlowGraph: controlFlowGraph,
             container: .statement(body),

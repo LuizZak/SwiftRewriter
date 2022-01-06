@@ -11,7 +11,7 @@ public class DoStatement: Statement, StatementKindType {
     }
     
     public override var children: [SyntaxNode] {
-        [body] + catchBlocks.flatMap { $0.children }
+        [body] + catchBlocks
     }
     
     public override var isLabelableStatementType: Bool {
@@ -21,8 +21,8 @@ public class DoStatement: Statement, StatementKindType {
     /// A list of catch blocks appended to the end of this `DoStatement`.
     public var catchBlocks: [CatchBlock] {
         didSet {
-            oldValue.forEach { $0.setParent(nil) }
-            catchBlocks.forEach { $0.setParent(self) }
+            oldValue.forEach { $0.parent = nil }
+            catchBlocks.forEach { $0.parent = self }
         }
     }
     
@@ -33,7 +33,7 @@ public class DoStatement: Statement, StatementKindType {
         super.init()
         
         body.parent = self
-        catchBlocks.forEach { $0.setParent(self) }
+        catchBlocks.forEach { $0.parent = self }
     }
     
     public required init(from decoder: Decoder) throws {
@@ -45,7 +45,7 @@ public class DoStatement: Statement, StatementKindType {
         try super.init(from: container.superDecoder())
         
         body.parent = self
-        catchBlocks.forEach { $0.setParent(self) }
+        catchBlocks.forEach { $0.parent = self }
     }
     
     @inlinable
@@ -59,9 +59,8 @@ public class DoStatement: Statement, StatementKindType {
     /// Returns a copy of this `DoStatement` with a `CatchBlock` appended at the end.
     public func `catch`(pattern: Pattern? = nil, _ body: CompoundStatement) -> DoStatement {
         let copy = copy()
-        copy.catchBlocks.append(
-            .init(pattern: pattern, body: body)
-        )
+        let catchBlock = CatchBlock(pattern: pattern, body: body)
+        copy.catchBlocks.append(catchBlock)
         return copy
     }
 
@@ -114,14 +113,14 @@ public extension Statement {
 }
 
 /// A catch block for a `DoStatement`
-public struct CatchBlock: Codable, Equatable {
+public class CatchBlock: SyntaxNode, Codable, Equatable {
     /// An optional pattern to match against caught errors.
     public var pattern: Pattern?
 
     /// The body of this catch block.
     public var body: CompoundStatement
     
-    fileprivate var children: [SyntaxNode] {
+    public override var children: [SyntaxNode] {
         var result: [SyntaxNode] = []
 
         if let pattern = pattern {
@@ -135,13 +134,23 @@ public struct CatchBlock: Codable, Equatable {
     public init(pattern: Pattern? = nil, body: CompoundStatement) {
         self.pattern = pattern
         self.body = body
+
+        super.init()
+
+        pattern?.setParent(self)
+        body.parent = self
     }
 
-    public init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         pattern = try container.decode(Pattern.self, forKey: .pattern)
         body = try container.decodeStatement(CompoundStatement.self, forKey: .body)
+
+        super.init()
+
+        pattern?.setParent(self)
+        body.parent = self
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -151,14 +160,15 @@ public struct CatchBlock: Codable, Equatable {
         try container.encodeStatement(body, forKey: .body)
     }
 
-    fileprivate func setParent(_ parent: SyntaxNode?) {
-        pattern?.setParent(parent)
-        body.parent = parent
+    override public func copy() -> CatchBlock {
+        CatchBlock(
+            pattern: pattern?.copy(),
+            body: body.copy()
+        )
     }
 
-    @usableFromInline
-    internal func copy() -> CatchBlock {
-        CatchBlock(pattern: pattern?.copy(), body: body.copy())
+    public static func == (lhs: CatchBlock, rhs: CatchBlock) -> Bool {
+        lhs === rhs || (lhs.pattern == rhs.pattern && lhs.body == rhs.body)
     }
     
     private enum CodingKeys: String, CodingKey {

@@ -50,7 +50,7 @@ class DefaultCodeScopeTests: XCTestCase {
         XCTAssertTrue(try result[try: 1] === a_2)
     }
 
-    func testAllDefinitions() throws {
+    func testLocalDefinitions() throws {
         let a_1: CodeDefinition = .forLocalIdentifier("a", type: .int, isConstant: false, location: .parameter(index: 0))
         let b: CodeDefinition = .forLocalIdentifier("b", type: .string, isConstant: false, location: .parameter(index: 0))
         let a_2: CodeDefinition = .forGlobalVariable(name: "a", isConstant: false, type: .float)
@@ -61,7 +61,7 @@ class DefaultCodeScopeTests: XCTestCase {
             a_1, b, a_2, c
         ])
 
-        let result = sut.allDefinitions()
+        let result = sut.localDefinitions()
 
         XCTAssertEqual(result.count, 4)
         XCTAssertTrue(result.elementsEqual([a_1, b, a_2, c], by: ===))
@@ -82,7 +82,7 @@ class DefaultCodeScopeTests: XCTestCase {
         sut.recordDefinition(a_2, overwrite: false)
         
         // Assert
-        var result = sut.allDefinitions()
+        var result = sut.localDefinitions()
         XCTAssertEqual(result.count, 3)
         XCTAssertTrue(result.elementsEqual([a_1, b, a_2], by: ===))
         
@@ -90,7 +90,7 @@ class DefaultCodeScopeTests: XCTestCase {
         sut.recordDefinition(c, overwrite: false)
         
         // Assert 2
-        result = sut.allDefinitions()
+        result = sut.localDefinitions()
         XCTAssertEqual(result.count, 4)
         XCTAssertTrue(result.elementsEqual([a_1, b, a_2, c], by: ===))
     }
@@ -110,7 +110,7 @@ class DefaultCodeScopeTests: XCTestCase {
         sut.recordDefinition(a_2, overwrite: true)
         
         // Assert
-        var result = sut.allDefinitions()
+        var result = sut.localDefinitions()
         XCTAssertEqual(result.count, 2)
         XCTAssertTrue(result.elementsEqual([b, a_2], by: ===))
         
@@ -118,12 +118,12 @@ class DefaultCodeScopeTests: XCTestCase {
         sut.recordDefinition(c, overwrite: true)
         
         // Assert 2
-        result = sut.allDefinitions()
+        result = sut.localDefinitions()
         XCTAssertEqual(result.count, 3)
         XCTAssertTrue(result.elementsEqual([b, a_2, c], by: ===))
     }
 
-    func testRemoveAllDefinitions() throws {
+    func testRemoveLocalDefinitions() throws {
         let a_1: CodeDefinition = .forLocalIdentifier("a", type: .int, isConstant: false, location: .parameter(index: 0))
         let b: CodeDefinition = .forLocalIdentifier("b", type: .string, isConstant: false, location: .parameter(index: 0))
         let a_2: CodeDefinition = .forGlobalVariable(name: "a", isConstant: false, type: .float)
@@ -134,9 +134,9 @@ class DefaultCodeScopeTests: XCTestCase {
             a_1, b, a_2, c
         ])
 
-        sut.removeAllDefinitions()
+        sut.removeLocalDefinitions()
 
-        let result = sut.allDefinitions()
+        let result = sut.localDefinitions()
         XCTAssertEqual(result.count, 0)
     }
 
