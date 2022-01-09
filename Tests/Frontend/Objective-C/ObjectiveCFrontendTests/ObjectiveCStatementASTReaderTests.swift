@@ -64,7 +64,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
     func testDoWhile() {
         assert(
             objcStmt: "do { } while(true);",
-            readsAs: Statement.doWhile(.constant(true), body: .empty)
+            readsAs: Statement.repeatWhile(.constant(true), body: .empty)
         )
     }
 

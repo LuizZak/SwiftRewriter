@@ -1052,7 +1052,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
 
     func testDoWhileLoop() {
         let stmt: CompoundStatement = [
-            Statement.doWhile(
+            Statement.repeatWhile(
                 .identifier("predicate"),
                 body: [
                     .expression(.identifier("loopBody"))
@@ -1088,7 +1088,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
 
     func testEmptyDoWhileLoop() {
         let stmt: CompoundStatement = [
-            Statement.doWhile(
+            Statement.repeatWhile(
                 .identifier("predicate"),
                 body: []
             ),
@@ -1118,7 +1118,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
 
     func testDoWhileLoop_labeledContinue() {
         let stmt: CompoundStatement = [
-            .doWhile(
+            .repeatWhile(
                 .identifier("predicate"),
                 body: [
                     .while(.identifier("predicateInner"), body: [
@@ -1159,7 +1159,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
 
     func testDoWhileLoop_labeledBreak() {
         let stmt: CompoundStatement = [
-            .doWhile(
+            .repeatWhile(
                 .identifier("predicate"),
                 body: [
                     .while(.identifier("predicateInner"), body: [
@@ -1200,7 +1200,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
 
     func testBreakInDoWhileLoop() {
         let stmt: CompoundStatement = [
-            Statement.doWhile(
+            Statement.repeatWhile(
                 .identifier("predicate"),
                 body: [
                     .break()
@@ -2378,7 +2378,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
 
     func testDeferStatementInDoWhileLoop() {
         let stmt: CompoundStatement = [
-            Statement.doWhile(
+            Statement.repeatWhile(
                 .identifier("predicate"),
                 body: [
                     .defer([

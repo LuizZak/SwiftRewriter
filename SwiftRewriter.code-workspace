@@ -228,6 +228,7 @@
 			"swiftrewriter",
 			"swiftwriter",
 			"Trivias",
+			"uniquing",
 			"whitespaces"
 		],
 		"swiftTest.swift.testParams": [

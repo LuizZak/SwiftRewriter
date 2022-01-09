@@ -164,7 +164,7 @@ extension SwiftSyntaxProducer {
         case .do(let stmt):
             return [{ $0.generateDo(stmt).inCodeBlock() }]
             
-        case .doWhile(let stmt):
+        case .repeatWhile(let stmt):
             return [{ $0.generateDoWhileStmt(stmt).inCodeBlock() }]
             
         case .for(let stmt):
@@ -556,7 +556,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    public func generateDoWhileStmt(_ stmt: DoWhileStatement) -> RepeatWhileStmtSyntax {
+    public func generateDoWhileStmt(_ stmt: RepeatWhileStatement) -> RepeatWhileStmtSyntax {
         RepeatWhileStmtSyntax { builder in
             if let label = stmt.label {
                 builder.useLabelName(

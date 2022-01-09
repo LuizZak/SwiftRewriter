@@ -538,7 +538,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
 
     func testRepeatWhileStatement() {
         assert(
-            Statement.doWhile(.constant(true), body: []),
+            Statement.repeatWhile(.constant(true), body: []),
             producer: SwiftSyntaxProducer.generateDoWhileStmt,
             matches: """
                 repeat {
@@ -677,7 +677,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
     }
 
     func testLabeledRepeatWhileStatement() {
-        let stmt = Statement.doWhile(.constant(true), body: []).labeled("label")
+        let stmt = Statement.repeatWhile(.constant(true), body: []).labeled("label")
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
 
         assert(

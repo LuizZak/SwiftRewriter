@@ -3,11 +3,11 @@ public extension KeyedDecodingContainerProtocol {
     func decodeStatement<S: Statement>(_ type: S.Type = S.self, forKey key: Key) throws -> S {
         let container = try self.decode(SwiftASTSerializer.StatementContainer.self, forKey: key)
         
-        if let s = container.statement as? S {
+        if let s = container.kind.statement as? S {
             return s
         }
         
-        throw SwiftASTSerializer.Error.unexpectedStatementType(Swift.type(of: container.statement))
+        throw SwiftASTSerializer.Error.unexpectedStatementType(Swift.type(of: container.kind.statement))
     }
     
     func decodeStatements(forKey key: Key) throws -> [Statement] {
@@ -27,11 +27,11 @@ public extension KeyedDecodingContainerProtocol {
             return nil
         }
         
-        if let s = container.statement as? S {
+        if let s = container.kind.statement as? S {
             return s
         }
         
-        throw SwiftASTSerializer.Error.unexpectedStatementType(Swift.type(of: container.statement))
+        throw SwiftASTSerializer.Error.unexpectedStatementType(Swift.type(of: container.kind.statement))
     }
     
     func decodeStatementsIfPresent(forKey key: Key) throws -> [Statement]? {
@@ -56,11 +56,11 @@ public extension KeyedDecodingContainerProtocol {
     func decodeExpression<E: Expression>(_ type: E.Type = E.self, forKey key: Key) throws -> E {
         let container = try self.decode(SwiftASTSerializer.ExpressionContainer.self, forKey: key)
         
-        if let s = container.expression as? E {
+        if let s = container.kind.expression as? E {
             return s
         }
         
-        throw SwiftASTSerializer.Error.unexpectedExpressionType(Swift.type(of: container.expression))
+        throw SwiftASTSerializer.Error.unexpectedExpressionType(Swift.type(of: container.kind.expression))
     }
     
     func decodeExpressions(forKey key: Key) throws -> [Expression] {
@@ -80,10 +80,10 @@ public extension KeyedDecodingContainerProtocol {
             return nil
         }
         
-        if let s = container.expression as? E {
+        if let s = container.kind.expression as? E {
             return s
         }
         
-        throw SwiftASTSerializer.Error.unexpectedExpressionType(Swift.type(of: container.expression))
+        throw SwiftASTSerializer.Error.unexpectedExpressionType(Swift.type(of: container.kind.expression))
     }
 }

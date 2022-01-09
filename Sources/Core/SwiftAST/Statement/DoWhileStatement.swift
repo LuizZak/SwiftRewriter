@@ -1,6 +1,6 @@
-public class DoWhileStatement: Statement, StatementKindType {
+public class RepeatWhileStatement: Statement, StatementKindType {
     public var statementKind: StatementKind {
-        .doWhile(self)
+        .repeatWhile(self)
     }
 
     public var exp: Expression {
@@ -47,18 +47,18 @@ public class DoWhileStatement: Statement, StatementKindType {
     }
     
     @inlinable
-    public override func copy() -> DoWhileStatement {
-        DoWhileStatement(exp: exp.copy(), body: body.copy()).copyMetadata(from: self)
+    public override func copy() -> RepeatWhileStatement {
+        RepeatWhileStatement(exp: exp.copy(), body: body.copy()).copyMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        visitor.visitDoWhile(self)
+        visitor.visitRepeatWhile(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
         switch other {
-        case let rhs as DoWhileStatement:
+        case let rhs as RepeatWhileStatement:
             return exp == rhs.exp && body == rhs.body
         default:
             return false
@@ -80,22 +80,22 @@ public class DoWhileStatement: Statement, StatementKindType {
     }
 }
 public extension Statement {
-    /// Returns `self as? DoWhileStatement`.
+    /// Returns `self as? RepeatWhileStatement`.
     @inlinable
-    var asDoWhile: DoWhileStatement? {
+    var asRepeatWhile: RepeatWhileStatement? {
         cast()
     }
 
-    /// Returns `true` if this `Statement` is an instance of `DoWhileStatement`
+    /// Returns `true` if this `Statement` is an instance of `RepeatWhileStatement`
     /// class.
     @inlinable
-    var isDoWhile: Bool? {
-        asDoWhile != nil
+    var isRepeatWhile: Bool? {
+        asRepeatWhile != nil
     }
     
-    /// Creates a `DoWhileStatement` instance using the given condition expression
+    /// Creates a `RepeatWhileStatement` instance using the given condition expression
     /// and compound statement as its body.
-    static func doWhile(_ exp: Expression, body: CompoundStatement) -> DoWhileStatement {
-        DoWhileStatement(exp: exp, body: body)
+    static func repeatWhile(_ exp: Expression, body: CompoundStatement) -> RepeatWhileStatement {
+        RepeatWhileStatement(exp: exp, body: body)
     }
 }

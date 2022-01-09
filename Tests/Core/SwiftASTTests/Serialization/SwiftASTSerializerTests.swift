@@ -71,7 +71,7 @@ class SwiftASTSerializerTests: XCTestCase {
                 .fallthrough,
                 .variableDeclaration(identifier: "abc", type: .int, initialization: nil),
             ]),
-            .doWhile(
+            .repeatWhile(
                 .cast(.constant(0), type: .int),
                 body: [
                     .expressions([

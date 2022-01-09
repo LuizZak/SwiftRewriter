@@ -283,8 +283,8 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     
     /// Visits a `do/while` statement with this visitor
     ///
-    /// - Parameter stmt: A DoWhileStatement to visit
-    public func visitDoWhile(_ stmt: DoWhileStatement) {
+    /// - Parameter stmt: A RepeatWhileStatement to visit
+    public func visitRepeatWhile(_ stmt: RepeatWhileStatement) {
         listener(stmt)
         
         visitExpression(stmt.exp)

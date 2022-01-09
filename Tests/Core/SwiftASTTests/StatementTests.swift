@@ -23,7 +23,7 @@ class StatementTests: XCTestCase {
         XCTAssertFalse(Statement.variableDeclarations([]).isLabelableStatementType)
 
         XCTAssertTrue(Statement.do([]).isLabelableStatementType)
-        XCTAssertTrue(Statement.doWhile(.constant(true), body: []).isLabelableStatementType)
+        XCTAssertTrue(Statement.repeatWhile(.constant(true), body: []).isLabelableStatementType)
         XCTAssertTrue(
             Statement.for(.expression(.constant(true)), .constant(true), body: [])
                 .isLabelableStatementType

@@ -318,7 +318,7 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
             return .unknown(UnknownASTContext(context: ctx.getText()))
         }
         
-        return .doWhile(expr, body: body)
+        return .repeatWhile(expr, body: body)
     }
     
     public override func visitForStatement(_ ctx: Parser.ForStatementContext) -> Statement? {

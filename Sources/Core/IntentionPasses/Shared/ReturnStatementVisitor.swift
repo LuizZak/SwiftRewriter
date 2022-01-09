@@ -46,7 +46,7 @@ struct ReturnStatementVisitor: StatementVisitor {
         defaultCase.statements.flatMap(visitStatement)
     }
     
-    func visitDoWhile(_ stmt: DoWhileStatement) -> [ReturnStatement] {
+    func visitRepeatWhile(_ stmt: RepeatWhileStatement) -> [ReturnStatement] {
         return stmt.body.accept(self)
     }
 

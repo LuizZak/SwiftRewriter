@@ -46,7 +46,7 @@ fileprivate func labelForSyntaxNode(_ node: SyntaxNode) -> String {
     case is WhileStatement:
         label = "{while}"
 
-    case is DoWhileStatement:
+    case is RepeatWhileStatement:
         label = "{do-while}"
 
     case let ret as ReturnStatement:

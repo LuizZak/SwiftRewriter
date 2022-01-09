@@ -7,7 +7,7 @@ extension CatchBlock: ControlFlowGraphSyntaxNode { }
 extension CompoundStatement: ControlFlowGraphSyntaxNode { }
 extension ContinueStatement: ControlFlowGraphSyntaxNode { }
 extension DeferStatement: ControlFlowGraphSyntaxNode { }
-extension DoWhileStatement: ControlFlowGraphSyntaxNode { }
+extension RepeatWhileStatement: ControlFlowGraphSyntaxNode { }
 extension ExpressionsStatement: ControlFlowGraphSyntaxNode { }
 extension FallthroughStatement: ControlFlowGraphSyntaxNode { }
 extension ForStatement: ControlFlowGraphSyntaxNode { }

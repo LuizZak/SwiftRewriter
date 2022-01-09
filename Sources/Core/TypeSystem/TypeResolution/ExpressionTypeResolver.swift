@@ -215,10 +215,10 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         return super.visitWhile(stmt)
     }
     
-    public override func visitDoWhile(_ stmt: DoWhileStatement) -> Statement {
+    public override func visitRepeatWhile(_ stmt: RepeatWhileStatement) -> Statement {
         stmt.exp.expectedType = .bool
         
-        return super.visitDoWhile(stmt)
+        return super.visitRepeatWhile(stmt)
     }
 
     public override func visitLocalFunction(_ stmt: LocalFunctionStatement) -> Statement {

@@ -71,7 +71,7 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
             return unknown(ctx)
         }
 
-        return .doWhile(expression, body: statement)
+        return .repeatWhile(expression, body: statement)
     }
 
     public override func visitWhileStatement(_ ctx: JavaScriptParser.WhileStatementContext) -> Statement? {

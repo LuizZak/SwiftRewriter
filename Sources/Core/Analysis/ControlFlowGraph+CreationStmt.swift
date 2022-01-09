@@ -199,7 +199,7 @@ internal extension ControlFlowGraph {
             case .while(let stmt):
                 result = _connections(forWhile: stmt, options: options)
                 
-            case .doWhile(let stmt):
+            case .repeatWhile(let stmt):
                 result = _connections(forDoWhile: stmt, options: options)
                 
             case .for(let stmt):
@@ -495,7 +495,7 @@ internal extension ControlFlowGraph {
     }
     
     private static func _connections(
-        forDoWhile stmt: DoWhileStatement,
+        forDoWhile stmt: RepeatWhileStatement,
         options: GenerationOptions
     ) -> _LazySubgraphGenerator {
         

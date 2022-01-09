@@ -105,7 +105,7 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
                 false;
             } while (true)
             """,
-            readsAs: .doWhile(
+            readsAs: .repeatWhile(
                 .constant(true),
                 body: [
                     .expression(.constant(false))
