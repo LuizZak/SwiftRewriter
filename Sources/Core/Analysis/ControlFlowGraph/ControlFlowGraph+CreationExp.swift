@@ -1,6 +1,44 @@
 import SwiftAST
 
 extension ControlFlowGraph {
+    static func innerForExpression(
+        _ expression: Expression,
+        options: GenerationOptions
+    ) -> ControlFlowGraph {
+
+        let graph = forExpression(expression, options: options)
+        
+        expandSubgraphs(in: graph)
+        
+        return graph
+    }
+    
+    private static func forExpression(
+        _ expression: Expression,
+        baseNode: ControlFlowGraphSyntaxNode,
+        options: GenerationOptions
+    ) -> ControlFlowGraph {
+
+        let entry = ControlFlowGraphEntryNode(node: baseNode)
+        let exit = ControlFlowGraphExitNode(node: baseNode)
+        
+        let graph = ControlFlowGraph(entry: entry, exit: exit)
+        
+        var result = _LazySubgraphGenerator(startNode: entry)
+            .addingExitNode(entry)
+        
+        result = 
+            connections(
+                for: expression
+            )
+            .nullCoalesceToExits()
+            .throwToExits()
+        
+        result.apply(to: graph, endNode: exit)
+        
+        return graph
+    }
+    
     internal static func connections(for expression: Expression) -> _LazySubgraphGenerator {
         connections(for: [expression])
     }

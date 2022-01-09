@@ -247,7 +247,7 @@ public final class ObjectiveC2SwiftRewriter {
                                 typeContext: nil
                             )
                         
-                    case .globalVar(let v):
+                    case .globalVar(let v, _):
                         guard let expression = v.typedSource?.constantExpression?.expression?.expression else {
                             return
                         }
@@ -462,24 +462,33 @@ public final class ObjectiveC2SwiftRewriter {
 
             let functionBody: FunctionBodyIntention
             let typeResolver: ExpressionTypeResolver
+            let carrier: FunctionBodyCarryingIntention?
 
             switch declaration.parseItem {
             case .enumCase, .globalVar:
                 continue
 
             case .method(let body, let intention):
+                carrier = .method(intention)
+
                 functionBody = body
                 typeResolver = typeResolverDelegate.makeContext(forMethod: intention).typeResolver
 
             case .initializer(let body, let intention):
+                carrier = .initializer(intention)
+
                 functionBody = body
                 typeResolver = typeResolverDelegate.makeContext(forInit: intention).typeResolver
 
             case .deinitializer(let body, let intention):
+                carrier = .deinit(intention)
+
                 functionBody = body
                 typeResolver = typeResolverDelegate.makeContext(forDeinit: intention).typeResolver
 
             case .globalFunction(let body, let intention):
+                carrier = .global(intention)
+
                 functionBody = body
                 typeResolver = typeResolverDelegate.makeContext(forFunction: intention).typeResolver
             }

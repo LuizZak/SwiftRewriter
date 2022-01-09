@@ -52,6 +52,29 @@ public extension ControlFlowGraph {
         
         return graph
     }
+
+    /// Creates a control flow graph for a given expression.
+    /// The entry and exit points for the resulting graph will be the expression
+    /// itself, with its inner nodes being the sub expressions contained within.
+    ///
+    /// Block literals are not traversed during CFG creation.
+    static func forExpression(
+        _ expression: Expression,
+        options: GenerationOptions = .default
+    ) -> ControlFlowGraph {
+        let graph = innerForExpression(
+            expression,
+            options: options
+        )
+        
+        markBackEdges(in: graph)
+
+        if options.pruneUnreachable {
+            prune(graph)
+        }
+        
+        return graph
+    }
 }
 
 // MARK: - Internals

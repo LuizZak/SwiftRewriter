@@ -260,7 +260,7 @@ public class ObjectiveCIntentionCollector {
                     source: initialExpression
                 )
             
-            delegate?.reportForLazyParsing(.globalVar(initialExpr))
+            delegate?.reportForLazyParsing(.globalVar(initialExpr, intent))
             
             intent.initialValueIntention = initialExpr
         }
@@ -902,7 +902,7 @@ public enum ObjectiveCLazyParseItem {
     case initializer(FunctionBodyIntention, InitGenerationIntention)
     case deinitializer(FunctionBodyIntention, DeinitGenerationIntention)
     case method(FunctionBodyIntention, MethodGenerationIntention)
-    case globalVar(GlobalVariableInitialValueIntention)
+    case globalVar(GlobalVariableInitialValueIntention, GlobalVariableGenerationIntention)
 }
 
 /// An element that `ObjectiveCIntentionCollector` reports for lazy type resolving.

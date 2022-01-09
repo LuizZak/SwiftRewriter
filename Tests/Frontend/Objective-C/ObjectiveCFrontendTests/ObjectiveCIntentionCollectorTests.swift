@@ -369,8 +369,8 @@ extension ObjectiveCLazyParseItem: Equatable {
                 return lb === rb && li === ri
             case (.method(let lb, let li), .method(let rb, let ri)):
                 return lb === rb && li === ri
-            case (.globalVar(let li), .globalVar(let ri)):
-                return li === ri
+            case (.globalVar(let lb, let li), .globalVar(let rb, let ri)):
+                return lb === rb && li === ri
             default:
                 return false
         }
