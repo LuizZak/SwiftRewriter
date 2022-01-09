@@ -438,7 +438,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             producer: SwiftSyntaxProducer.generateSwitchStmt,
             matches: """
                 switch value {
-                defaultStatements:
+                default:
                     break
                 }
                 """
