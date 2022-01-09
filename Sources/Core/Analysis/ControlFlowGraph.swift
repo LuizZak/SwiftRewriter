@@ -123,9 +123,13 @@ extension ControlFlowGraph {
 }
 
 /// Specifies a control flow graph node
-public class ControlFlowGraphNode: DirectedGraphNode {
+public class ControlFlowGraphNode: DirectedGraphNode, CustomStringConvertible {
     /// An associated node for this control flow graph node.
     public let node: SyntaxNode
+
+    public var description: String {
+        "{node: \(type(of: node)): \(node)}"
+    }
 
     init(node: SyntaxNode) {
         self.node = node

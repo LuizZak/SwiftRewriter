@@ -96,62 +96,6 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
 
-    func testIf() {
-        let stmt: CompoundStatement = [
-            Statement.variableDeclaration(identifier: "v", type: .int, initialization: nil),
-            Statement.expression(.identifier("v").call()),
-            Statement.if(
-                .identifier("v").dot("didWork"),
-                body: [
-                    .expression(
-                        .identifier("print").call([.constant("Did work!")])
-                    )
-                ]
-            ),
-        ]
-
-        let graph = ControlFlowGraph.forCompoundStatement(stmt)
-
-        sanitize(graph)
-        assertGraphviz(
-            graph: graph,
-            matches: #"""
-                digraph flow {
-                    n1 [label="entry"]
-                    n2 [label="v: Int"]
-                    n3 [label="{exp}"]
-                    n4 [label="v"]
-                    n5 [label="v()"]
-                    n6 [label="v"]
-                    n7 [label="v.didWork"]
-                    n8 [label="{if}"]
-                    n9 [label="{exp}"]
-                    n10 [label="print"]
-                    n11 [label="\"Did work!\""]
-                    n12 [label="print(\"Did work!\")"]
-                    n13 [label="exit"]
-                    n1 -> n2
-                    n2 -> n3
-                    n3 -> n4
-                    n4 -> n5 [label="()"]
-                    n5 -> n6
-                    n6 -> n7 [label=".didWork"]
-                    n7 -> n8
-                    n8 -> n9
-                    n8 -> n13
-                    n9 -> n10
-                    n10 -> n11
-                    n11 -> n12 [label="(\"Did work!\")"]
-                    n12 -> n13
-                }
-                """#
-        )
-        XCTAssert(graph.entry.node === stmt)
-        XCTAssert(graph.exit.node === stmt)
-        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
-    }
-
     func testDoStatement() {
         let stmt: CompoundStatement = [
             Statement.do([
@@ -184,13 +128,15 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
 
-    func testLabeledBreakStatement() {
+    func testDoStatement_labeledBreak() {
         let stmt: CompoundStatement = [
-            Statement.do([
-                .expression(.identifier("a")),
-                .break(targetLabel: "doLabel"),
-                .expression(.identifier("b")),
-            ]).labeled("doLabel")
+            .while(.identifier("predicate"), body: [
+                Statement.do([
+                    .expression(.identifier("a")),
+                    .break(targetLabel: "doLabel"),
+                    .expression(.identifier("b")),
+                ]).labeled("doLabel"),
+            ]),
         ]
 
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
@@ -201,63 +147,13 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="{exp}"]
-                    n3 [label="a"]
-                    n4 [label="BreakStatement"]
-                    n5 [label="{exp}"]
-                    n6 [label="b"]
-                    n7 [label="exit"]
-                    n1 -> n2
-                    n2 -> n3
-                    n3 -> n4
-                    n4 -> n7
-                    n5 -> n6
-                    n6 -> n7
-                }
-                """
-        )
-        XCTAssert(graph.entry.node === stmt)
-        XCTAssert(graph.exit.node === stmt)
-        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
-    }
-
-    func testLabeledContinueStatement() {
-        let stmt: CompoundStatement = [
-            Statement.for(
-                .identifier("a"),
-                .identifier("a"),
-                body: [
-                    Statement.while(
-                        .identifier("b"),
-                        body: [
-                            Statement.if(
-                                .identifier("predicate"),
-                                body: [
-                                    .continue(targetLabel: "outer")
-                                ]
-                            )
-                        ]
-                    )
-                ]
-            ).labeled("outer")
-        ]
-
-        let graph = ControlFlowGraph.forCompoundStatement(stmt)
-
-        sanitize(graph)
-        assertGraphviz(
-            graph: graph,
-            matches: """
-                digraph flow {
-                    n1 [label="entry"]
-                    n2 [label="a"]
-                    n3 [label="{for}"]
-                    n4 [label="b"]
-                    n5 [label="{while}"]
-                    n6 [label="predicate"]
-                    n7 [label="{if}"]
-                    n8 [label="ContinueStatement"]
+                    n2 [label="predicate"]
+                    n3 [label="{while}"]
+                    n4 [label="{exp}"]
+                    n5 [label="a"]
+                    n6 [label="BreakStatement"]
+                    n7 [label="{exp}"]
+                    n8 [label="b"]
                     n9 [label="exit"]
                     n1 -> n2
                     n2 -> n3
@@ -265,11 +161,9 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n3 -> n9
                     n4 -> n5
                     n5 -> n6
-                    n5 -> n3 [color="#aa3333", penwidth=0.5]
-                    n6 -> n7
+                    n6 -> n2 [color="#aa3333", penwidth=0.5]
                     n7 -> n8
-                    n7 -> n4 [color="#aa3333", penwidth=0.5]
-                    n8 -> n3 [color="#aa3333", penwidth=0.5]
+                    n8 -> n2
                 }
                 """
         )
@@ -279,21 +173,12 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
 
-    func testIfElse() {
+    func testIf() {
         let stmt: CompoundStatement = [
-            Statement.variableDeclaration(identifier: "v", type: .int, initialization: nil),
-            Statement.expression(.identifier("v").call()),
             Statement.if(
-                .identifier("v").dot("didWork"),
+                .identifier("predicate"),
                 body: [
-                    .expression(
-                        .identifier("print").call([.constant("Did work!")])
-                    )
-                ],
-                else: [
-                    .expression(
-                        .identifier("print").call([.constant("Did no work")])
-                    )
+                    .expression(.identifier("ifBody")),
                 ]
             ),
         ]
@@ -306,39 +191,62 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
             matches: #"""
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="v: Int"]
-                    n3 [label="{exp}"]
-                    n4 [label="v"]
-                    n5 [label="v()"]
-                    n6 [label="v"]
-                    n7 [label="v.didWork"]
-                    n8 [label="{if}"]
-                    n9 [label="{exp}"]
-                    n10 [label="{exp}"]
-                    n11 [label="print"]
-                    n12 [label="print"]
-                    n13 [label="\"Did no work\""]
-                    n14 [label="\"Did work!\""]
-                    n15 [label="print(\"Did no work\")"]
-                    n16 [label="print(\"Did work!\")"]
-                    n17 [label="exit"]
+                    n2 [label="predicate"]
+                    n3 [label="{if}"]
+                    n4 [label="{exp}"]
+                    n5 [label="ifBody"]
+                    n6 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
-                    n4 -> n5 [label="()"]
+                    n3 -> n6
+                    n4 -> n5
                     n5 -> n6
-                    n6 -> n7 [label=".didWork"]
+                }
+                """#
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+    }
+
+    func testIfElse() {
+        let stmt: CompoundStatement = [
+            Statement.if(
+                .identifier("predicate"),
+                body: [
+                    .expression(.identifier("ifBody")),
+                ],
+                else: [
+                    .expression(.identifier("elseBody")),
+                ]
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: #"""
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="predicate"]
+                    n3 [label="{if}"]
+                    n4 [label="{exp}"]
+                    n5 [label="{exp}"]
+                    n6 [label="elseBody"]
+                    n7 [label="ifBody"]
+                    n8 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n3 -> n5
+                    n4 -> n7
+                    n5 -> n6
+                    n6 -> n8
                     n7 -> n8
-                    n8 -> n9
-                    n8 -> n10
-                    n9 -> n11
-                    n10 -> n12
-                    n11 -> n14
-                    n12 -> n13
-                    n13 -> n15 [label="(\"Did no work\")"]
-                    n14 -> n16 [label="(\"Did work!\")"]
-                    n15 -> n17
-                    n16 -> n17
                 }
                 """#
         )
@@ -350,29 +258,21 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
 
     func testIfElseIf() {
         let stmt: CompoundStatement = [
-            Statement.variableDeclaration(identifier: "v", type: .int, initialization: nil),
-            Statement.expression(.identifier("v").call()),
-            Statement.if(
-                .identifier("v").dot("didWork"),
+            .if(
+                .identifier("predicate"),
                 body: [
-                    .expression(
-                        .identifier("print").call([.constant("Did work!")])
-                    )
+                    .expression(.identifier("ifBody")),
                 ],
                 else: [
                     .if(
-                        .identifier("v").dot("didWork2"),
+                        .identifier("predicate2"),
                         body: [
-                            .expression(
-                                .identifier("print").call([.constant("Did work twice!")])
-                            )
+                            .expression(.identifier("ifElseIfBody")),
                         ],
                         else: [
-                            .expression(
-                                .identifier("print").call([.constant("Did no work twice")])
-                            )
+                            .expression(.identifier("ifElseIfElseBody")),
                         ]
-                    )
+                    ),
                 ]
             ),
         ]
@@ -385,54 +285,30 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
             matches: #"""
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="v: Int"]
-                    n3 [label="{exp}"]
-                    n4 [label="v"]
-                    n5 [label="v()"]
-                    n6 [label="v"]
-                    n7 [label="v.didWork"]
-                    n8 [label="{if}"]
-                    n9 [label="v"]
-                    n10 [label="{exp}"]
-                    n11 [label="v.didWork2"]
-                    n12 [label="print"]
-                    n13 [label="{if}"]
-                    n14 [label="\"Did work!\""]
-                    n15 [label="{exp}"]
-                    n16 [label="{exp}"]
-                    n17 [label="print(\"Did work!\")"]
-                    n18 [label="print"]
-                    n19 [label="print"]
-                    n20 [label="\"Did no work twice\""]
-                    n21 [label="\"Did work twice!\""]
-                    n22 [label="print(\"Did no work twice\")"]
-                    n23 [label="print(\"Did work twice!\")"]
-                    n24 [label="exit"]
+                    n2 [label="predicate"]
+                    n3 [label="{if}"]
+                    n4 [label="predicate2"]
+                    n5 [label="{exp}"]
+                    n6 [label="{if}"]
+                    n7 [label="ifBody"]
+                    n8 [label="{exp}"]
+                    n9 [label="{exp}"]
+                    n10 [label="ifElseIfBody"]
+                    n11 [label="ifElseIfElseBody"]
+                    n12 [label="exit"]
                     n1 -> n2
                     n2 -> n3
+                    n3 -> n5
                     n3 -> n4
-                    n4 -> n5 [label="()"]
-                    n5 -> n6
-                    n6 -> n7 [label=".didWork"]
-                    n7 -> n8
+                    n4 -> n6
+                    n5 -> n7
+                    n6 -> n8
+                    n6 -> n9
+                    n7 -> n12
                     n8 -> n10
-                    n8 -> n9
-                    n9 -> n11 [label=".didWork2"]
+                    n9 -> n11
                     n10 -> n12
-                    n11 -> n13
-                    n12 -> n14
-                    n13 -> n15
-                    n13 -> n16
-                    n14 -> n17 [label="(\"Did work!\")"]
-                    n15 -> n18
-                    n16 -> n19
-                    n17 -> n24
-                    n18 -> n21
-                    n19 -> n20
-                    n20 -> n22 [label="(\"Did no work twice\")"]
-                    n21 -> n23 [label="(\"Did work twice!\")"]
-                    n22 -> n24
-                    n23 -> n24
+                    n11 -> n12
                 }
                 """#
         )
@@ -440,6 +316,61 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
         XCTAssert(graph.exit.node === stmt)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 3)
+    }
+
+    func testIf_labeledBreak() {
+        let stmt: CompoundStatement = [
+            .while(.identifier("whilePredicate"), body: [
+                .if(
+                    .identifier("predicate"),
+                    body: [
+                        .if(.identifier("predicateInner"), body: [
+                            .break(targetLabel: "outer"),
+                            .expression(.identifier("postBreak")),
+                        ]),
+                    ]
+                ).labeled("outer"),
+            ]),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph, expectsUnreachable: true)
+        assertGraphviz(
+            graph: graph,
+            matches: #"""
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="whilePredicate"]
+                    n3 [label="{while}"]
+                    n4 [label="predicate"]
+                    n5 [label="{if}"]
+                    n6 [label="predicateInner"]
+                    n7 [label="{if}"]
+                    n8 [label="BreakStatement"]
+                    n9 [label="{exp}"]
+                    n10 [label="postBreak"]
+                    n11 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n3 -> n11
+                    n4 -> n5
+                    n5 -> n6
+                    n5 -> n2 [color="#aa3333", penwidth=0.5]
+                    n6 -> n7
+                    n7 -> n8
+                    n7 -> n2 [color="#aa3333", penwidth=0.5]
+                    n8 -> n2 [color="#aa3333", penwidth=0.5]
+                    n9 -> n10
+                    n10 -> n2
+                }
+                """#
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
 
     func testSwitchStatement() {

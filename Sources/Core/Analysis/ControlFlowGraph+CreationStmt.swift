@@ -226,11 +226,7 @@ internal extension ControlFlowGraph {
             result = _LazySubgraphGenerator(startNode: node).addingExitNode(node)
         }
         
-        if let label = statement.label {
-            result = result
-                .breakToExits(targetLabel: label)
-                .satisfyingBreaks(labeled: label)
-        }
+        result = result.breakToExitsIfLabelIsPresent(statement.label)
         
         return result
     }
@@ -298,7 +294,10 @@ internal extension ControlFlowGraph {
         options: GenerationOptions
     ) -> _LazySubgraphGenerator {
 
-        var result = _connections(for: stmt.body, options: options)
+        var result = _connections(
+            for: stmt.body,
+            options: options
+        )
         
         for catchBlock in stmt.catchBlocks {
             let catchNode =
@@ -306,7 +305,7 @@ internal extension ControlFlowGraph {
             
             result = result.chainingThrows(to: catchNode)
         }
-
+        
         return result
     }
 
@@ -449,7 +448,7 @@ internal extension ControlFlowGraph {
             for: stmt.body,
             options: options
         )
-
+        
         result =
             loopCondition
             .then(
@@ -526,5 +525,17 @@ internal extension ControlFlowGraph {
             .breakToExits(targetLabel: stmt.label)
 
         return result
+    }
+}
+
+fileprivate extension ControlFlowGraph._LazySubgraphGenerator {
+    /// If the given label is non-nil, returns this subgraph with the breaks
+    /// with the matching label converted to exits and satisfied.
+    func breakToExitsIfLabelIsPresent(_ label: String?) -> Self {
+        if let label = label {
+            return self.breakToExitsExclusive(targetLabel: label)
+        }
+
+        return self
     }
 }

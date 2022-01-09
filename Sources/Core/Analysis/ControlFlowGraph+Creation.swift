@@ -369,6 +369,16 @@ internal extension ControlFlowGraph {
             return result
         }
 
+        /// Returns a copy of this lazy subgraph with break jump sources that
+        /// match a given label removed.
+        ///
+        /// Break jumps that have `nil` label will not be removed by this method.
+        func satisfyingBreaksExclusive(labeled targetLabel: String) -> Self {
+            var result = self
+            result.breakNodes.clear(labeled: targetLabel)
+            return result
+        }
+
         /// Returns a copy of this lazy subgraph with continue jump sources removed,
         /// optionally filtering to only remove continue sources with a given
         /// label.
@@ -420,6 +430,16 @@ internal extension ControlFlowGraph {
             result.exitNodes.merge(with: result.breakNodes.matchingTargetLabel(targetLabel))
             result.exitNodes.merge(with: result.breakNodes.matchingTargetLabel(nil))
             return result.satisfyingBreaks(labeled: targetLabel)
+        }
+        
+        /// Returns a copy of this lazy subgraph with break jump sources that match
+        /// a given label converted into exit jumps.
+        ///
+        /// Break jumps that have `nil` label will not be removed by this method.
+        func breakToExitsExclusive(targetLabel: String) -> Self {
+            var result = self
+            result.exitNodes.merge(with: result.breakNodes.matchingTargetLabel(targetLabel))
+            return result.satisfyingBreaksExclusive(labeled: targetLabel)
         }
         
         /// Returns a copy of this lazy subgraph with return sources converted into
@@ -980,7 +1000,7 @@ internal extension ControlFlowGraph {
     /// A list of control flow graph nodes that represent control flow jumps from
     /// specific points in a subgraph.
     struct ControlFlowGraphJumpSources<Tag: SyntaxNode>: CustomStringConvertible {
-        private(set) var nodes: [JumpNodeEntry] = []
+        private(set) var nodes: [JumpNodeEntry<Tag>] = []
 
         var description: String {
             "[" + nodes.map(\.description).joined(separator: ", ") + "]"
@@ -991,8 +1011,14 @@ internal extension ControlFlowGraph {
             nodes.isEmpty
         }
         
-        mutating func clear(labeled targetLabel: String? = nil) {
+        /// Removes jump sources that match a given label.
+        mutating func clear(labeled targetLabel: String?) {
             nodes.removeAll(where: { $0.jumpLabel == targetLabel })
+        }
+        
+        /// Removes all jump source nodes.
+        mutating func clear() {
+            nodes.removeAll()
         }
         
         mutating func addNode(_ node: ControlFlowGraphNode, targetLabel: String? = nil) {
@@ -1017,7 +1043,7 @@ internal extension ControlFlowGraph {
             ControlFlowGraphJumpSources(nodes: entriesForTargetLabel(targetLabel))
         }
         
-        func entriesForTargetLabel(_ label: String?) -> [JumpNodeEntry] {
+        func entriesForTargetLabel(_ label: String?) -> [JumpNodeEntry<Tag>] {
             nodes.filter({ $0.jumpLabel == label })
         }
         
@@ -1038,7 +1064,7 @@ internal extension ControlFlowGraph {
         }
         
         mutating func merge<T>(with second: ControlFlowGraphJumpSources<T>) where Tag == SyntaxNode {
-            self = ControlFlowGraphJumpSources(nodes: nodes + second.nodes)
+            self = ControlFlowGraphJumpSources(nodes: nodes + second.nodes.cast())
         }
         
         /// Returns a chain of lazy graph operations that execute all jumps listed
@@ -1077,14 +1103,23 @@ internal extension ControlFlowGraph {
         }
     }
     
-    struct JumpNodeEntry: CustomStringConvertible {
+    struct JumpNodeEntry<Tag: SyntaxNode>: CustomStringConvertible {
         var node: ControlFlowGraphNode
         var defers: [ControlFlowSubgraphNode]
         var endOfScopes: [ControlFlowGraphEndScopeNode]
         var jumpLabel: String?
 
         var description: String {
-            "{note: \(node), defers: \(defers), endOfScopes: \(endOfScopes), jumpLabel: \(jumpLabel ?? "<nil>")}"
+            "{node: \(node), defers: \(defers), endOfScopes: \(endOfScopes), jumpLabel: \(jumpLabel ?? "<nil>")}"
+        }
+
+        func cast<U>() -> JumpNodeEntry<U> {
+            .init(
+                node: node,
+                defers: defers,
+                endOfScopes: endOfScopes,
+                jumpLabel: jumpLabel
+            )
         }
     }
 }
@@ -1106,5 +1141,15 @@ internal extension Sequence where Element == ControlFlowGraph._LazySubgraphGener
         }
 
         return result ?? .invalid
+    }
+}
+
+private extension Sequence {
+    /// Returns the result of chaining all of the subgraph elements' exists to
+    /// one element to the next on this sequence.
+    ///
+    /// If this sequence is empty of elements, `.invalid` is returned, instead.
+    func cast<T, U>() -> [ControlFlowGraph.JumpNodeEntry<U>] where Element == ControlFlowGraph.JumpNodeEntry<T> {
+        map { $0.cast() }
     }
 }
