@@ -456,11 +456,11 @@ internal extension ControlFlowGraph {
                 loopHead
                 .branching(
                     to: loopBody
-                        .connectingContinues(to: loopCondition.startNode)
+                        .connectingContinues(label: stmt.label, to: loopCondition.startNode)
                         .connectingExits(to: loopCondition.startNode)
                 )
             )
-            .breakToExits()
+            .breakToExits(targetLabel: stmt.label)
 
         return result
     }
@@ -481,8 +481,9 @@ internal extension ControlFlowGraph {
         let loopCondition = connections(for: stmt.exp)
 
         let loopStart =
-            loopBody.connectingContinues(to:
-                loopHead.startNode
+            loopBody.connectingContinues(
+                label: stmt.label,
+                to: loopCondition.startNode
             )
             .then(loopCondition)
 
@@ -491,7 +492,7 @@ internal extension ControlFlowGraph {
             .then(
                 loopHead.branchingExits(to: loopStart.startNode)
             )
-            .breakToExits()
+            .breakToExits(targetLabel: stmt.label)
 
         return result
     }
@@ -500,27 +501,30 @@ internal extension ControlFlowGraph {
         forForLoop stmt: ForStatement,
         options: GenerationOptions
     ) -> _LazySubgraphGenerator {
+        
+        var result = _LazySubgraphGenerator.invalid
 
-        let node = ControlFlowGraphNode(node: stmt)
-        var result = _LazySubgraphGenerator(startNode: node)
-        
-        let bodyConnections = _connections(for: stmt.body, options: options)
-        
-        if bodyConnections.isValid {
-            result = result
-                .addingBranch(towards: bodyConnections)
-                .connectingExits(to: result.startNode)
-                .breakToExits(targetLabel: stmt.label)
-                .connectingContinues(label: stmt.label, to: result.startNode)
-                .satisfyingContinues(label: stmt.label)
-        } else {
-            result = result
-                .addingExitNode(node)
-                .connectingExits(to: result.startNode)
-        }
-        
-        result = result.addingExitNode(node)
-        
+        let loopHead = _LazySubgraphGenerator(
+            startAndExitNode: ControlFlowGraphNode(node: stmt)
+        )
+        let loopExpression = connections(for: stmt.exp)
+        let loopBody = _connections(
+            for: stmt.body,
+            options: options
+        )
+
+        result =
+            loopExpression
+            .then(
+                loopHead
+                .branching(
+                    to: loopBody
+                        .connectingContinues(label: stmt.label, to: loopHead.startNode)
+                        .connectingExits(to: loopHead.startNode)
+                )
+            )
+            .breakToExits(targetLabel: stmt.label)
+
         return result
     }
 }

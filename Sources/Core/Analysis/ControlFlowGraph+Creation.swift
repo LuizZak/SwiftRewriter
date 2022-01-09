@@ -572,8 +572,8 @@ internal extension ControlFlowGraph {
                 return self
             }
 
-            return combine(other)
-                .branchingExits(to: other.startNode)
+            return branchingExits(to: other.startNode)
+                .combine(other)
         }
         
         /**

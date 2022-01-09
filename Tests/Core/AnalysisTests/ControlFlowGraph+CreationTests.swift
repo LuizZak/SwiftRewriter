@@ -264,23 +264,25 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n1 [label="entry"]
                     n2 [label="0"]
                     n3 [label="a: Int = 0"]
-                    n4 [label="{for}"]
-                    n5 [label="0"]
-                    n6 [label="{exp}"]
-                    n7 [label="c: Int = 0"]
-                    n8 [label="d"]
-                    n9 [label="{end scope of {for}}"]
-                    n10 [label="exit"]
+                    n4 [label="b"]
+                    n5 [label="{for}"]
+                    n6 [label="0"]
+                    n7 [label="{exp}"]
+                    n8 [label="c: Int = 0"]
+                    n9 [label="d"]
+                    n10 [label="{end scope of {for}}"]
+                    n11 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
-                    n4 -> n6
+                    n5 -> n6
                     n5 -> n7
                     n6 -> n8
                     n7 -> n9
                     n8 -> n10
-                    n9 -> n4 [color="#aa3333", penwidth=0.5]
+                    n9 -> n11
+                    n10 -> n5 [color="#aa3333", penwidth=0.5]
                 }
                 """
         )
