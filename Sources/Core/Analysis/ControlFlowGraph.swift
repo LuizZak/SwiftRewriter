@@ -50,7 +50,7 @@ public final class ControlFlowGraph: DirectedGraph {
     /// Returns `nil`, if no graph node represents the given syntax node directly.
     ///
     /// A reference equality test (===) is used to determine syntax node equality.
-    public func graphNode(for node: SyntaxNode) -> ControlFlowGraphNode? {
+    public func graphNode(for node: ControlFlowGraphSyntaxNode) -> ControlFlowGraphNode? {
         nodes.first { $0.node === node }
     }
     
@@ -59,11 +59,11 @@ public final class ControlFlowGraph: DirectedGraph {
     /// When searching across ancestors, the nearest ancestors are searched first.
     ///
     /// A reference equality test (===) is used to determine syntax node equality.
-    public func graphNode(forFirstAncestorOf node: SyntaxNode) -> ControlFlowGraphNode? {
+    public func graphNode(forFirstAncestorOf node: ControlFlowGraphSyntaxNode) -> ControlFlowGraphNode? {
         var current: SyntaxNode? = node
 
         while let c = current {
-            if let graphNode = graphNode(for: c) {
+            if let cfgNode = c as? ControlFlowGraphSyntaxNode, let graphNode = graphNode(for: cfgNode) {
                 return graphNode
             }
 
@@ -125,13 +125,13 @@ extension ControlFlowGraph {
 /// Specifies a control flow graph node
 public class ControlFlowGraphNode: DirectedGraphNode, CustomStringConvertible {
     /// An associated node for this control flow graph node.
-    public let node: SyntaxNode
+    public let node: ControlFlowGraphSyntaxNode
 
     public var description: String {
         "{node: \(type(of: node)): \(node)}"
     }
 
-    init(node: SyntaxNode) {
+    init(node: ControlFlowGraphSyntaxNode) {
         self.node = node
     }
 }
@@ -151,7 +151,7 @@ public final class ControlFlowSubgraphNode: ControlFlowGraphNode {
     /// An associated node for this control flow graph node.
     public let graph: ControlFlowGraph
     
-    init(node: SyntaxNode, graph: ControlFlowGraph) {
+    init(node: ControlFlowGraphSyntaxNode, graph: ControlFlowGraph) {
         self.graph = graph
         
         super.init(node: node)
@@ -163,7 +163,7 @@ public final class ControlFlowGraphEndScopeNode: ControlFlowGraphNode {
     /// An associated code scope for this control flow graph node.
     public let scope: CodeScopeNode
 
-    init(node: SyntaxNode, scope: CodeScopeNode) {
+    init(node: ControlFlowGraphSyntaxNode, scope: CodeScopeNode) {
         self.scope = scope
 
         super.init(node: node)
@@ -186,4 +186,9 @@ public final class ControlFlowGraphEdge: DirectedGraphEdge {
         self.start = start
         self.end = end
     }
+}
+
+/// Protocol for marking syntax nodes that can be present in a CFG.
+public protocol ControlFlowGraphSyntaxNode: SyntaxNode {
+
 }

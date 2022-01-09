@@ -20,8 +20,8 @@ internal extension ControlFlowGraph {
     
     private static func forStatementList(
         _ statements: [Statement],
-        baseNode: SyntaxNode,
-        endingScope: CodeScopeNode? = nil,
+        baseNode: ControlFlowGraphSyntaxNode,
+        endingScope: (CodeScopeNode & ControlFlowGraphSyntaxNode)? = nil,
         options: GenerationOptions
     ) -> ControlFlowGraph {
 
@@ -50,7 +50,7 @@ internal extension ControlFlowGraph {
 
     private static func _connections(
         for statements: [Statement],
-        endingScope: CodeScopeNode?,
+        endingScope: (CodeScopeNode & ControlFlowGraphSyntaxNode)?,
         options: GenerationOptions
     ) -> _LazySubgraphGenerator {
 
@@ -65,7 +65,7 @@ internal extension ControlFlowGraph {
     private static func _connections(
         for statements: [Statement],
         start: _LazySubgraphGenerator,
-        endingScope: CodeScopeNode?,
+        endingScope: (CodeScopeNode & ControlFlowGraphSyntaxNode)?,
         options: GenerationOptions
     ) -> _LazySubgraphGenerator {
 
@@ -214,16 +214,18 @@ internal extension ControlFlowGraph {
             case .localFunction(_):
                 result = .invalid
             
-            case .unknown(_):
-                let node = ControlFlowGraphNode(node: statement)
+            case .unknown(let stmt):
+                let node = ControlFlowGraphNode(node: stmt)
                 
                 result = _LazySubgraphGenerator(startNode: node)
                     .addingExitNode(node)
             }
-        } else {
+        } else if let statement = statement as? ControlFlowGraphSyntaxNode {
             let node = ControlFlowGraphNode(node: statement)
             
             result = _LazySubgraphGenerator(startNode: node).addingExitNode(node)
+        } else {
+            result = .invalid
         }
         
         result = result.breakToExitsIfLabelIsPresent(statement.label)
@@ -270,7 +272,7 @@ internal extension ControlFlowGraph {
 
         let node = ControlFlowGraphNode(node: declaration)
         let graph = _LazySubgraphGenerator(startNode: node)
-
+        
         let initialization = declaration.initialization.map(connections(for:)) ?? .invalid
 
         return initialization
@@ -313,6 +315,8 @@ internal extension ControlFlowGraph {
         forCatchBlock catchBlock: CatchBlock,
         options: GenerationOptions
     ) -> _LazySubgraphGenerator {
+
+        // TODO: Connect pattern of catch blocks to CFG
 
         let node = ControlFlowGraphNode(node: catchBlock)
         var result = _LazySubgraphGenerator(startNode: node)

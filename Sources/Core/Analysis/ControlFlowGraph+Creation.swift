@@ -979,7 +979,7 @@ internal extension ControlFlowGraph {
             return newResult.satisfyingThrows()
         }
         
-        private class _InvalidSyntaxNode: SyntaxNode {
+        private class _InvalidSyntaxNode: SyntaxNode, ControlFlowGraphSyntaxNode {
             
         }
         

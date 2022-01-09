@@ -329,3 +329,9 @@ extension ReachingDefinitionAnalyzerTests {
         }
     }
 }
+
+private extension ControlFlowGraph {
+    func graphNode(for node: SyntaxNode) -> ControlFlowGraphNode? {
+        nodes.first { $0.node === node }
+    }
+}
