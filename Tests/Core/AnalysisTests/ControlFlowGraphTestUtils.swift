@@ -75,6 +75,23 @@ fileprivate func labelForSyntaxNode(_ node: SyntaxNode) -> String {
             label = "{catch}"
         }
     
+    case let stmt as BreakStatement:
+        if let l = stmt.targetLabel {
+            label = "{break \(l)}"
+        } else {
+            label = "{break}"
+        }
+    
+    case let stmt as ContinueStatement:
+        if let l = stmt.targetLabel {
+            label = "{continue \(l)}"
+        } else {
+            label = "{continue}"
+        }
+    
+    case is FallthroughStatement:
+        label = "{fallthrough}"
+
     case let obj as CustomStringConvertible:
         label = obj.description
 

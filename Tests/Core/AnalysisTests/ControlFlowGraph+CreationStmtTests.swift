@@ -151,7 +151,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n3 [label="{while}"]
                     n4 [label="{exp}"]
                     n5 [label="a"]
-                    n6 [label="BreakStatement"]
+                    n6 [label="{break doLabel}"]
                     n7 [label="{exp}"]
                     n8 [label="b"]
                     n9 [label="exit"]
@@ -347,7 +347,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n5 [label="{if}"]
                     n6 [label="predicateInner"]
                     n7 [label="{if}"]
-                    n8 [label="BreakStatement"]
+                    n8 [label="{break outer}"]
                     n9 [label="{exp}"]
                     n10 [label="postBreak"]
                     n11 [label="exit"]
@@ -542,7 +542,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n1 [label="entry"]
                     n2 [label="a"]
                     n3 [label="SwitchStatement"]
-                    n4 [label="FallthroughStatement"]
+                    n4 [label="{fallthrough}"]
                     n5 [label="exit"]
                     n1 -> n2
                     n2 -> n3
@@ -596,7 +596,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n7 [label="b"]
                     n8 [label="c"]
                     n9 [label="defaultExp"]
-                    n10 [label="FallthroughStatement"]
+                    n10 [label="{fallthrough}"]
                     n11 [label="exit"]
                     n1 -> n2
                     n2 -> n3
@@ -661,7 +661,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 [label="predicate"]
                     n9 [label="{if}"]
                     n10 [label="{exp}"]
-                    n11 [label="BreakStatement"]
+                    n11 [label="{break}"]
                     n12 [label="d"]
                     n13 [label="{exp}"]
                     n14 [label="{exp}"]
@@ -748,7 +748,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n10 [label="predicateFallthrough"]
                     n11 [label="{if}"]
                     n12 [label="{exp}"]
-                    n13 [label="FallthroughStatement"]
+                    n13 [label="{fallthrough}"]
                     n14 [label="d"]
                     n15 [label="{exp}"]
                     n16 [label="{exp}"]
@@ -852,8 +852,8 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n13 [label="{exp}"]
                     n14 [label="d"]
                     n15 [label="e"]
-                    n16 [label="FallthroughStatement"]
-                    n17 [label="predicateReturn"]
+                    n16 [label="predicateReturn"]
+                    n17 [label="{fallthrough}"]
                     n18 [label="{exp}"]
                     n19 [label="{if}"]
                     n20 [label="{exp}"]
@@ -881,10 +881,10 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n11 -> n13
                     n12 -> n14
                     n13 -> n15
-                    n14 -> n16
-                    n15 -> n17
-                    n16 -> n18
-                    n17 -> n19
+                    n14 -> n17
+                    n15 -> n16
+                    n16 -> n19
+                    n17 -> n18
                     n18 -> n21
                     n19 -> n22
                     n19 -> n20
@@ -992,7 +992,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n3 [label="{while}"]
                     n4 [label="predicateInner"]
                     n5 [label="{while}"]
-                    n6 [label="ContinueStatement"]
+                    n6 [label="{continue outer}"]
                     n7 [label="exit"]
                     n1 -> n2
                     n2 -> n3
@@ -1033,7 +1033,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n3 [label="{while}"]
                     n4 [label="predicateInner"]
                     n5 [label="{while}"]
-                    n6 [label="BreakStatement"]
+                    n6 [label="{break outer}"]
                     n7 [label="exit"]
                     n1 -> n2
                     n2 -> n3
@@ -1138,7 +1138,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n1 [label="entry"]
                     n2 [label="predicateInner"]
                     n3 [label="{while}"]
-                    n4 [label="ContinueStatement"]
+                    n4 [label="{continue outer}"]
                     n5 [label="predicate"]
                     n6 [label="{do-while}"]
                     n7 [label="exit"]
@@ -1180,7 +1180,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n2 [label="predicateInner"]
                     n3 [label="{while}"]
                     n4 [label="predicate"]
-                    n5 [label="BreakStatement"]
+                    n5 [label="{break outer}"]
                     n6 [label="{do-while}"]
                     n7 [label="exit"]
                     n1 -> n2
@@ -1216,7 +1216,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="BreakStatement"]
+                    n2 [label="{break}"]
                     n3 [label="predicate"]
                     n4 [label="{do-while}"]
                     n5 [label="exit"]
@@ -1325,7 +1325,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n3 [label="{for}"]
                     n4 [label="predicateInner"]
                     n5 [label="{while}"]
-                    n6 [label="ContinueStatement"]
+                    n6 [label="{continue outer}"]
                     n7 [label="exit"]
                     n1 -> n2
                     n2 -> n3
@@ -1367,7 +1367,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n3 [label="{for}"]
                     n4 [label="predicateInner"]
                     n5 [label="{while}"]
-                    n6 [label="BreakStatement"]
+                    n6 [label="{break outer}"]
                     n7 [label="exit"]
                     n1 -> n2
                     n2 -> n3
@@ -1415,9 +1415,9 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n4 [label="ifPredicate"]
                     n5 [label="{if}"]
                     n6 [label="{exp}"]
-                    n7 [label="BreakStatement"]
+                    n7 [label="{break}"]
                     n8 [label="preContinue"]
-                    n9 [label="ContinueStatement"]
+                    n9 [label="{continue}"]
                     n10 [label="{exp}"]
                     n11 [label="postIf"]
                     n12 [label="exit"]
@@ -1443,7 +1443,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
 
     func testReturnStatement() {
         let stmt: CompoundStatement = [
-            .return(nil)
+            .return(nil),
         ]
 
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
@@ -1465,14 +1465,40 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
 
+    func testReturnStatement_withExpression() {
+        let stmt: CompoundStatement = [
+            .return(.identifier("exp")),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="exp"]
+                    n3 [label="{return exp}"]
+                    n4 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                }
+                """
+        )
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
     func testReturnStatement_inLoop() {
         let stmt: CompoundStatement = [
             Statement.while(
                 .identifier("predicate"),
                 body: [
-                    .return(nil)
+                    .return(nil),
                 ]
-            )
+            ),
         ]
 
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
@@ -1501,9 +1527,9 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
 
     func testReturnStatement_skipRemaining() {
         let stmt: CompoundStatement = [
-            .expression(.identifier("preReturn").call()),
+            .expression(.identifier("preReturn")),
             .return(nil),
-            .expression(.identifier("postReturn").call()),
+            .expression(.identifier("postReturn")),
         ]
 
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
@@ -1516,20 +1542,16 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n1 [label="entry"]
                     n2 [label="{exp}"]
                     n3 [label="preReturn"]
-                    n4 [label="preReturn()"]
-                    n5 [label="{return}"]
-                    n6 [label="{exp}"]
-                    n7 [label="postReturn"]
-                    n8 [label="postReturn()"]
-                    n9 [label="exit"]
+                    n4 [label="{return}"]
+                    n5 [label="{exp}"]
+                    n6 [label="postReturn"]
+                    n7 [label="exit"]
                     n1 -> n2
                     n2 -> n3
-                    n3 -> n4 [label="()"]
-                    n4 -> n5
-                    n5 -> n9
+                    n3 -> n4
+                    n4 -> n7
+                    n5 -> n6
                     n6 -> n7
-                    n7 -> n8 [label="()"]
-                    n8 -> n9
                 }
                 """
         )
@@ -1557,13 +1579,15 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n1 [label="entry"]
                     n2 [label="predicate"]
                     n3 [label="{while}"]
-                    n4 [label="{throw Error}"]
-                    n5 [label="exit"]
+                    n4 [label="Error"]
+                    n5 [label="{throw Error}"]
+                    n6 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
-                    n3 -> n5
+                    n3 -> n6
                     n4 -> n5
+                    n5 -> n6
                 }
                 """
         )
@@ -1573,9 +1597,9 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
 
     func testThrowErrorFlow() {
         let stmt: CompoundStatement = [
-            .expression(.identifier("preError").call()),
-            .throw(.identifier("Error").call()),
-            .expression(.identifier("postError").call()),
+            .expression(.identifier("preError")),
+            .throw(.identifier("Error")),
+            .expression(.identifier("postError")),
         ]
 
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
@@ -1588,20 +1612,18 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n1 [label="entry"]
                     n2 [label="{exp}"]
                     n3 [label="preError"]
-                    n4 [label="preError()"]
-                    n5 [label="{throw Error()}"]
+                    n4 [label="Error"]
+                    n5 [label="{throw Error}"]
                     n6 [label="{exp}"]
                     n7 [label="postError"]
-                    n8 [label="postError()"]
-                    n9 [label="exit"]
+                    n8 [label="exit"]
                     n1 -> n2
                     n2 -> n3
-                    n3 -> n4 [label="()"]
+                    n3 -> n4
                     n4 -> n5
-                    n5 -> n9
+                    n5 -> n8
                     n6 -> n7
-                    n7 -> n8 [label="()"]
-                    n8 -> n9
+                    n7 -> n8
                 }
                 """
         )
@@ -1611,11 +1633,11 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
 
     func testConditionalThrowErrorFlow() {
         let stmt: CompoundStatement = [
-            .expression(.identifier("preError").call()),
+            .expression(.identifier("preError")),
             .if(.identifier("a"), body: [
-                .throw(.identifier("Error").call()),
+                .throw(.identifier("Error")),
             ]),
-            .expression(.identifier("postError").call()),
+            .expression(.identifier("postError")),
         ]
 
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
@@ -1628,25 +1650,23 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n1 [label="entry"]
                     n2 [label="{exp}"]
                     n3 [label="preError"]
-                    n4 [label="preError()"]
-                    n5 [label="a"]
-                    n6 [label="{if}"]
+                    n4 [label="a"]
+                    n5 [label="{if}"]
+                    n6 [label="Error"]
                     n7 [label="{exp}"]
-                    n8 [label="{throw Error()}"]
-                    n9 [label="postError"]
-                    n10 [label="postError()"]
-                    n11 [label="exit"]
+                    n8 [label="postError"]
+                    n9 [label="{throw Error}"]
+                    n10 [label="exit"]
                     n1 -> n2
                     n2 -> n3
-                    n3 -> n4 [label="()"]
+                    n3 -> n4
                     n4 -> n5
                     n5 -> n6
-                    n6 -> n8
-                    n6 -> n7
-                    n7 -> n9
-                    n8 -> n11
-                    n9 -> n10 [label="()"]
-                    n10 -> n11
+                    n5 -> n7
+                    n6 -> n9
+                    n7 -> n8
+                    n8 -> n10
+                    n9 -> n10
                 }
                 """
         )
@@ -1659,7 +1679,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
             .expression(.identifier("preDo")),
             .do([
                 .expression(.identifier("preError")),
-                .throw(.identifier("Error").call()),
+                .throw(.identifier("Error")),
                 .expression(.identifier("postError")),
             ]).catch([
                 .expression(.identifier("errorHandler")),
@@ -1679,15 +1699,16 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n3 [label="preDo"]
                     n4 [label="{exp}"]
                     n5 [label="preError"]
-                    n6 [label="{throw Error()}"]
-                    n7 [label="{catch}"]
-                    n8 [label="{exp}"]
-                    n9 [label="errorHandler"]
-                    n10 [label="{exp}"]
-                    n11 [label="end"]
-                    n12 [label="{exp}"]
-                    n13 [label="postError"]
-                    n14 [label="exit"]
+                    n6 [label="Error"]
+                    n7 [label="{throw Error}"]
+                    n8 [label="{catch}"]
+                    n9 [label="{exp}"]
+                    n10 [label="errorHandler"]
+                    n11 [label="{exp}"]
+                    n12 [label="end"]
+                    n13 [label="{exp}"]
+                    n14 [label="postError"]
+                    n15 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -1698,9 +1719,10 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 -> n9
                     n9 -> n10
                     n10 -> n11
-                    n11 -> n14
-                    n12 -> n13
-                    n13 -> n10
+                    n11 -> n12
+                    n12 -> n15
+                    n13 -> n14
+                    n14 -> n11
                 }
                 """
         )
@@ -1713,7 +1735,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
             .do([
                 .expression(.identifier("preError")),
                 .if(.identifier("a"), body: [
-                    .throw(.identifier("Error").call()),
+                    .throw(.identifier("Error")),
                 ]),
                 .expression(.identifier("postError")),
             ]).catch([
@@ -1734,15 +1756,16 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n3 [label="preError"]
                     n4 [label="a"]
                     n5 [label="{if}"]
-                    n6 [label="{throw Error()}"]
+                    n6 [label="Error"]
                     n7 [label="{exp}"]
-                    n8 [label="{catch}"]
+                    n8 [label="{throw Error}"]
                     n9 [label="postError"]
-                    n10 [label="{exp}"]
+                    n10 [label="{catch}"]
                     n11 [label="{exp}"]
-                    n12 [label="errorHandler"]
+                    n12 [label="{exp}"]
                     n13 [label="end"]
-                    n14 [label="exit"]
+                    n14 [label="errorHandler"]
+                    n15 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -1755,8 +1778,9 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n9 -> n11
                     n10 -> n12
                     n11 -> n13
-                    n12 -> n11
-                    n13 -> n14
+                    n12 -> n14
+                    n13 -> n15
+                    n14 -> n11
                 }
                 """
         )
@@ -1770,7 +1794,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
             .do([
                 .expression(.identifier("preError")),
                 .do([
-                    .throw(.identifier("Error").call()),
+                    .throw(.identifier("Error")),
                 ]),
                 .expression(.identifier("postError")),
             ]).catch([
@@ -1791,15 +1815,16 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n3 [label="preDo"]
                     n4 [label="{exp}"]
                     n5 [label="preError"]
-                    n6 [label="{throw Error()}"]
-                    n7 [label="{catch}"]
-                    n8 [label="{exp}"]
-                    n9 [label="errorHandler"]
-                    n10 [label="{exp}"]
-                    n11 [label="end"]
-                    n12 [label="{exp}"]
-                    n13 [label="postError"]
-                    n14 [label="exit"]
+                    n6 [label="Error"]
+                    n7 [label="{throw Error}"]
+                    n8 [label="{catch}"]
+                    n9 [label="{exp}"]
+                    n10 [label="errorHandler"]
+                    n11 [label="{exp}"]
+                    n12 [label="end"]
+                    n13 [label="{exp}"]
+                    n14 [label="postError"]
+                    n15 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -1810,9 +1835,10 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 -> n9
                     n9 -> n10
                     n10 -> n11
-                    n11 -> n14
-                    n12 -> n13
-                    n13 -> n10
+                    n11 -> n12
+                    n12 -> n15
+                    n13 -> n14
+                    n14 -> n11
                 }
                 """
         )
@@ -1827,7 +1853,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
             .expression(.identifier("preDo")),
             .do([
                 .expression(.identifier("preError")),
-                .throw(.identifier("Error").call()),
+                .throw(.identifier("Error")),
                 .expression(.identifier("postError")),
             ]).catch([
                 .expression(.identifier("errorHandler 1")),
@@ -1849,18 +1875,19 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n3 [label="preDo"]
                     n4 [label="{exp}"]
                     n5 [label="preError"]
-                    n6 [label="{throw Error()}"]
-                    n7 [label="{catch}"]
-                    n8 [label="{exp}"]
-                    n9 [label="errorHandler 1"]
-                    n10 [label="{exp}"]
-                    n11 [label="end"]
-                    n12 [label="{catch}"]
-                    n13 [label="{exp}"]
+                    n6 [label="Error"]
+                    n7 [label="{throw Error}"]
+                    n8 [label="{catch}"]
+                    n9 [label="{exp}"]
+                    n10 [label="errorHandler 1"]
+                    n11 [label="{exp}"]
+                    n12 [label="end"]
+                    n13 [label="{catch}"]
                     n14 [label="{exp}"]
-                    n15 [label="errorHandler 2"]
-                    n16 [label="postError"]
-                    n17 [label="exit"]
+                    n15 [label="{exp}"]
+                    n16 [label="errorHandler 2"]
+                    n17 [label="postError"]
+                    n18 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -1871,12 +1898,13 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 -> n9
                     n9 -> n10
                     n10 -> n11
-                    n11 -> n17
-                    n12 -> n14
-                    n13 -> n16
-                    n14 -> n15
-                    n15 -> n10
-                    n16 -> n10
+                    n11 -> n12
+                    n12 -> n18
+                    n13 -> n15
+                    n14 -> n17
+                    n15 -> n16
+                    n16 -> n11
+                    n17 -> n11
                 }
                 """
         )
@@ -1945,7 +1973,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n1 [label="entry"]
                     n2 [label="v"]
                     n3 [label="{while}"]
-                    n4 [label="BreakStatement"]
+                    n4 [label="{break}"]
                     n5 [label="exit"]
                     n1 -> n2
                     n2 -> n3
@@ -1979,7 +2007,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n1 [label="entry"]
                     n2 [label="v"]
                     n3 [label="{while}"]
-                    n4 [label="ContinueStatement"]
+                    n4 [label="{continue}"]
                     n5 [label="exit"]
                     n1 -> n2
                     n2 -> n3
@@ -2014,7 +2042,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n1 [label="entry"]
                     n2 [label="v"]
                     n3 [label="{while}"]
-                    n4 [label="ContinueStatement"]
+                    n4 [label="{continue}"]
                     n5 [label="{exp}"]
                     n6 [label="v"]
                     n7 [label="exit"]
@@ -2098,17 +2126,18 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n3 [label="a"]
                     n4 [label="predicate"]
                     n5 [label="{if}"]
-                    n6 [label="{throw error}"]
+                    n6 [label="error"]
                     n7 [label="{exp}"]
-                    n8 [label="{exp}"]
+                    n8 [label="{throw error}"]
                     n9 [label="c"]
-                    n10 [label="b"]
+                    n10 [label="{exp}"]
                     n11 [label="{exp}"]
-                    n12 [label="{catch}"]
+                    n12 [label="b"]
                     n13 [label="b"]
-                    n14 [label="{exp}"]
-                    n15 [label="d"]
-                    n16 [label="exit"]
+                    n14 [label="{catch}"]
+                    n15 [label="{exp}"]
+                    n16 [label="d"]
+                    n17 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -2122,9 +2151,10 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n10 -> n12
                     n11 -> n13
                     n12 -> n14
-                    n13 -> n16
+                    n13 -> n17
                     n14 -> n15
                     n15 -> n16
+                    n16 -> n17
                 }
                 """
         )
@@ -2324,7 +2354,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n5 [label="{exp}"]
                     n6 [label="c"]
                     n7 [label="d"]
-                    n8 [label="BreakStatement"]
+                    n8 [label="{break}"]
                     n9 [label="{exp}"]
                     n10 [label="b"]
                     n11 [label="exit"]
@@ -2431,7 +2461,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 [label="predicate"]
                     n9 [label="{if}"]
                     n10 [label="{exp}"]
-                    n11 [label="BreakStatement"]
+                    n11 [label="{break outer}"]
                     n12 [label="deferred"]
                     n13 [label="{exp}"]
                     n14 [label="deferred"]
@@ -2501,7 +2531,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n6 [label="predicate"]
                     n7 [label="{if}"]
                     n8 [label="{exp}"]
-                    n9 [label="ContinueStatement"]
+                    n9 [label="{continue outer}"]
                     n10 [label="deferred"]
                     n11 [label="{exp}"]
                     n12 [label="deferred"]
@@ -2561,15 +2591,16 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n4 [label="predicate"]
                     n5 [label="{if}"]
                     n6 [label="{exp}"]
-                    n7 [label="{return 0}"]
+                    n7 [label="0"]
                     n8 [label="d"]
-                    n9 [label="{exp}"]
+                    n9 [label="{return 0}"]
                     n10 [label="{exp}"]
-                    n11 [label="a"]
+                    n11 [label="{exp}"]
                     n12 [label="c"]
-                    n13 [label="{exp}"]
-                    n14 [label="a"]
-                    n15 [label="exit"]
+                    n13 [label="a"]
+                    n14 [label="{exp}"]
+                    n15 [label="a"]
+                    n16 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -2581,10 +2612,11 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 -> n10
                     n9 -> n11
                     n10 -> n12
-                    n11 -> n15
-                    n12 -> n13
-                    n13 -> n14
+                    n11 -> n13
+                    n12 -> n14
+                    n13 -> n16
                     n14 -> n15
+                    n15 -> n16
                 }
                 """
         )

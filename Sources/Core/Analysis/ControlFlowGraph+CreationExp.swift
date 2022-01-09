@@ -189,8 +189,7 @@ extension ControlFlowGraph {
     private static func _connections(for exp: SizeOfExpression) -> _LazySubgraphGenerator {
         let node = ControlFlowGraphNode(node: exp)
         let subgraph =
-            _LazySubgraphGenerator(startNode: node)
-                .addingExitNode(node)
+            _LazySubgraphGenerator(startAndExitNode: node)
         
         switch exp.value {
         case .expression(let exp):

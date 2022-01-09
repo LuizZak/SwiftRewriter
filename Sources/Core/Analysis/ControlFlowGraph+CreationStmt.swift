@@ -168,16 +168,10 @@ internal extension ControlFlowGraph {
                     .addingContinueNode(node, targetLabel: stmt.targetLabel)
                 
             case .return(let stmt):
-                let node = ControlFlowGraphNode(node: stmt)
-                
-                result = _LazySubgraphGenerator(startNode: node)
-                    .addingReturnNode(node)
+                result = _connections(forReturn: stmt, options: options)
                 
             case .throw(let stmt):
-                let node = ControlFlowGraphNode(node: stmt)
-                
-                result = _LazySubgraphGenerator(startNode: node)
-                    .addingThrowNode(node)
+                result = _connections(forThrow: stmt, options: options)
                 
             // Handled separately in _connections(for:start:) above
             case .defer:
@@ -289,6 +283,38 @@ internal extension ControlFlowGraph {
         
         return _LazySubgraphGenerator(startNode: node)
             .addingFallthroughNode(node)
+    }
+
+    private static func _connections(
+        forReturn stmt: ReturnStatement,
+        options: GenerationOptions
+    ) -> _LazySubgraphGenerator {
+        
+        let node = ControlFlowGraphNode(node: stmt)
+        
+        var graph = _LazySubgraphGenerator(startNode: node)
+            .addingReturnNode(node)
+
+        if let exp = stmt.exp {
+            graph = connections(for: exp)
+                .chainingExits(to: graph)
+        }
+
+        return graph
+    }
+
+    private static func _connections(
+        forThrow stmt: ThrowStatement,
+        options: GenerationOptions
+    ) -> _LazySubgraphGenerator {
+        
+        let node = ControlFlowGraphNode(node: stmt)
+        
+        let graph = _LazySubgraphGenerator(startNode: node)
+            .addingThrowNode(node)
+
+        return connections(for: stmt.exp)
+            .chainingExits(to: graph)
     }
 
     private static func _connections(

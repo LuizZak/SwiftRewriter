@@ -157,15 +157,16 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n3 [label="a"]
                     n4 [label="b"]
                     n5 [label="{if}"]
-                    n6 [label="{throw c}"]
+                    n6 [label="c"]
                     n7 [label="{end scope of DoStatement}"]
-                    n8 [label="{end scope of {if}}"]
-                    n9 [label="{end scope of DoStatement}"]
-                    n10 [label="{catch}"]
-                    n11 [label="{exp}"]
-                    n12 [label="d"]
-                    n13 [label="{end scope of {catch}}"]
-                    n14 [label="exit"]
+                    n8 [label="{throw c}"]
+                    n9 [label="{end scope of {if}}"]
+                    n10 [label="{end scope of DoStatement}"]
+                    n11 [label="{catch}"]
+                    n12 [label="{exp}"]
+                    n13 [label="d"]
+                    n14 [label="{end scope of {catch}}"]
+                    n15 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -173,13 +174,14 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n5 -> n6
                     n5 -> n7
                     n6 -> n8
-                    n7 -> n14
+                    n7 -> n15
                     n8 -> n9
                     n9 -> n10
                     n10 -> n11
                     n11 -> n12
                     n12 -> n13
                     n13 -> n14
+                    n14 -> n15
                 }
                 """
         )
@@ -384,28 +386,30 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="{throw Error}"]
-                    n3 [label="{end scope of DoStatement}"]
-                    n4 [label="{catch}"]
-                    n5 [label="{exp}"]
-                    n6 [label="errorHandler"]
-                    n7 [label="2"]
-                    n8 [label="errorHandler = 2"]
-                    n9 [label="{end scope of {catch}}"]
-                    n10 [label="{exp}"]
-                    n11 [label="postDo"]
-                    n12 [label="exit"]
+                    n2 [label="Error"]
+                    n3 [label="{throw Error}"]
+                    n4 [label="{end scope of DoStatement}"]
+                    n5 [label="{catch}"]
+                    n6 [label="{exp}"]
+                    n7 [label="errorHandler"]
+                    n8 [label="2"]
+                    n9 [label="errorHandler = 2"]
+                    n10 [label="{end scope of {catch}}"]
+                    n11 [label="{exp}"]
+                    n12 [label="postDo"]
+                    n13 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
                     n5 -> n6
-                    n6 -> n7 [label="="]
-                    n7 -> n8
+                    n6 -> n7
+                    n7 -> n8 [label="="]
                     n8 -> n9
                     n9 -> n10
                     n10 -> n11
                     n11 -> n12
+                    n12 -> n13
                 }
                 """
         )
