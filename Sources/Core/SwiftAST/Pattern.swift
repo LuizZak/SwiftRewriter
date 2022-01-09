@@ -9,6 +9,31 @@ public enum Pattern: Codable, Equatable {
     /// A tuple pattern
     indirect case tuple([Pattern])
     
+    /// Simplifies patterns that feature 1-item tuples (i.e. `(<item>)`) by
+    /// unwrapping the inner patterns.
+    public var simplified: Pattern {
+        switch self {
+        case .tuple(let pt) where pt.count == 1:
+            return pt[0].simplified
+        default:
+            return self
+        }
+    }
+    
+    /// Returns a list of sub-expressions contained within this pattern.
+    public var subExpressions: [Expression] {
+        switch self {
+        case .expression(let exp):
+            return [exp]
+            
+        case .tuple(let tuple):
+            return tuple.flatMap { $0.subExpressions }
+            
+        case .identifier:
+            return []
+        }
+    }
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
@@ -47,17 +72,6 @@ public enum Pattern: Codable, Equatable {
         case .tuple(let pattern):
             try container.encode("tuple", forKey: .discriminator)
             try container.encode(pattern, forKey: .payload)
-        }
-    }
-    
-    /// Simplifies patterns that feature 1-item tuples (i.e. `(<item>)`) by
-    /// unwrapping the inner patterns.
-    public var simplified: Pattern {
-        switch self {
-        case .tuple(let pt) where pt.count == 1:
-            return pt[0].simplified
-        default:
-            return self
         }
     }
     
@@ -110,19 +124,19 @@ public enum Pattern: Codable, Equatable {
     /// Returns a sub-pattern in this pattern on a specified pattern location.
     ///
     /// - Parameter location: Location of pattern to search
-    /// - Returns: `self`, if `location == .self`, or a subpattern within.
+    /// - Returns: `self`, if `location == .self`, or a sub-pattern within.
     /// Returns `nil`, if the location is invalid within this pattern.
-    func subpattern(at location: PatternLocation) -> Pattern? {
+    func subPattern(at location: PatternLocation) -> Pattern? {
         switch (location, self) {
         case (.self, _):
             return self
             
-        case let (.tuple(index, subLocation), .tuple(subpatterns)):
-            if index >= subpatterns.count {
+        case let (.tuple(index, subLocation), .tuple(subPatterns)):
+            if index >= subPatterns.count {
                 return nil
             }
             
-            return subpatterns[index].subpattern(at: subLocation)
+            return subPatterns[index].subPattern(at: subLocation)
             
         default:
             return nil
@@ -153,11 +167,11 @@ extension Pattern: CustomStringConvertible {
 ///
 /// - `self`: The root pattern itself
 /// - tuple: The tuple within the pattern, at a given index, with a given nested
-/// subpattern.
+/// sub-pattern.
 public enum PatternLocation: Hashable {
     /// The root pattern itself
     case `self`
     /// The tuple within the pattern, at a given index, with a given nested
-    /// subpattern.
+    /// sub-pattern.
     indirect case tuple(index: Int, pattern: PatternLocation)
 }

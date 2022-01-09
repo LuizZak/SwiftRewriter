@@ -1,6 +1,6 @@
 /// Base class for syntax nodes
 open class SyntaxNode {
-    /// Custom metadata that can be associated with this node
+    /// Custom runtime metadata that can be associated with this node
     public var metadata: [String: Any] = [:]
     
     internal(set) public weak var parent: SyntaxNode? {

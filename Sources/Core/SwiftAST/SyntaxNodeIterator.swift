@@ -29,24 +29,14 @@ public final class SyntaxNodeIterator: IteratorProtocol {
         let next = queue.removeFirst()
         
         switch next {
-        case let exp as Expression:
-            if inspectBlocks || !(exp is BlockLiteralExpression) {
-                enqueue(contentsOf: exp.children)
-            }
-
-        case let stmt as Statement:
-            if inspectBlocks || !(stmt is LocalFunctionStatement) {
-                enqueue(contentsOf: stmt.children)
-            }
-        
-        case let catchBlock as CatchBlock:
-            if let pattern = catchBlock.pattern {
-                enqueue(pattern: pattern)
-            }
-
-            enqueue(catchBlock.body)
-        default:
+        case
+            is LocalFunctionStatement where !inspectBlocks,
+            is BlockLiteralExpression where !inspectBlocks:
+            
             break
+
+        default:
+            enqueue(contentsOf: next.children)
         }
         
         return next

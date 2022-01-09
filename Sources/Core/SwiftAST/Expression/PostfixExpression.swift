@@ -170,15 +170,19 @@ public class PostfixExpression: Expression, ExpressionKindType {
         case functionCall
     }
 }
-extension Expression {
+public extension Expression {
     @inlinable
-    public var asPostfix: PostfixExpression? {
+    var asPostfix: PostfixExpression? {
         cast()
     }
 
     @inlinable
     var isPostfix: Bool {
         asPostfix != nil
+    }
+    
+    static func postfix(_ exp: Expression, _ op: Postfix) -> PostfixExpression {
+        PostfixExpression(exp: exp, op: op)
     }
 }
 

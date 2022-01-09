@@ -322,7 +322,7 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
                     )
                 
                 usages.append(usage)
-        }
+            }
         
         container.accept(visitor)
         

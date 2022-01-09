@@ -3,13 +3,29 @@ import KnownType
 
 private let _codeScopeKey = "_codeScopeKey"
 private let _identifierDefinitionKey = "_identifierDefinitionKey"
+private let _identifierReadOnlyUsageKey = "_identifierReadOnlyUsageKey"
 
 /// Protocol for statements that feature code scoping.
-public protocol CodeScopeNode: CodeScope {
+public protocol CodeScopeNode: SyntaxNode, CodeScope {
     var definitions: CodeScope { get }
 }
 
-public extension CodeScopeNode where Self: SyntaxNode {
+/// Protocol for syntax nodes that can reference code definitions.
+public protocol DefinitionReferenceNode: SyntaxNode {
+    /// Gets the definition this node references.
+    ///
+    /// To gather definitions to nodes, use a `ExpressionTypeResolver` on the
+    /// syntax tree this node is contained in.
+    var definition: CodeDefinition? { get }
+
+    /// Gets a value specifying whether the definition referenced by this node is
+    /// being read or written into.
+    ///
+    /// Result of this property is invalid if `self.definition` is `nil`
+    var isReadOnlyUsage: Bool { get }
+}
+
+public extension CodeScopeNode {
     var definitions: CodeScope {
         if let scope = metadata[_codeScopeKey] as? CodeScope {
             return scope
@@ -79,13 +95,15 @@ public extension SyntaxNode {
 
 extension CompoundStatement: CodeScopeNode { }
 extension BlockLiteralExpression: CodeScopeNode { }
-extension CatchBlock: CodeScopeNode { }
+// extension CatchBlock: CodeScopeNode { }
+extension SwitchCase: CodeScopeNode { }
+extension SwitchDefaultCase: CodeScopeNode { }
 
-public extension IdentifierExpression {
+extension IdentifierExpression: DefinitionReferenceNode {
     /// Gets the definition this identifier references.
     /// To gather definitions to identifiers, use a `ExpressionTypeResolver` on
     /// the syntax tree this identifier is contained in.
-    var definition: CodeDefinition? {
+    public var definition: CodeDefinition? {
         get {
             metadata[_identifierDefinitionKey] as? CodeDefinition
         }
@@ -93,8 +111,19 @@ public extension IdentifierExpression {
             metadata[_identifierDefinitionKey] = newValue
         }
     }
+
+    public var isReadOnlyUsage: Bool {
+        get {
+            (metadata[_identifierReadOnlyUsageKey] as? Bool) ?? false
+        }
+        set {
+            metadata[_identifierReadOnlyUsageKey] = newValue
+        }
+    }
     
-    func settingDefinition(_ definition: CodeDefinition) -> IdentifierExpression {
+    /// Returns a copy of this `IdentifierExpression` with a given definition
+    /// associated with the copy.
+    public func settingDefinition(_ definition: CodeDefinition) -> IdentifierExpression {
         let new = copy()
         new.definition = definition
         return new

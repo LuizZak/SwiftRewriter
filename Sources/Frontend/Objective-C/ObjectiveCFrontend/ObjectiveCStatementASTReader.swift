@@ -286,7 +286,7 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
             def = [.break()]
         }
         
-        return .switch(exp, cases: cases, default: def)
+        return .switch(exp, cases: cases, defaultStatements: def)
     }
     
     // MARK: - while / do-while / for / for-in

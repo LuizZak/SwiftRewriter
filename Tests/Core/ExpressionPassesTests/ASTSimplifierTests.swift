@@ -251,7 +251,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                             ]
                         )
                     ],
-                    default: [
+                    defaultStatements: [
                         Statement.expression(.identifier("stmt")),
                         Statement.break(),
                     ]
@@ -267,7 +267,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                             ]
                         )
                     ],
-                    default: [
+                    defaultStatements: [
                         Statement.expression(.identifier("stmt"))
                     ]
                 )
@@ -289,7 +289,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                             ]
                         )
                     ],
-                    default: [
+                    defaultStatements: [
                         Statement.break()
                     ]
                 )

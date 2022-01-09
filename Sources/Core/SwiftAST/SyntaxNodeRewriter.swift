@@ -269,17 +269,30 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     open func visitSwitch(_ stmt: SwitchStatement) -> Statement {
         stmt.exp = visitExpression(stmt.exp)
         
-        stmt.cases = stmt.cases.map {
-            SwitchCase(
-                patterns: $0.patterns.map(visitPattern),
-                statements: $0.statements.map(visitStatement)
-            )
-        }
-        if let def = stmt.defaultCase {
-            stmt.defaultCase = def.map(visitStatement)
-        }
-        
+        stmt.cases = stmt.cases.map(visitSwitchCase)
+        stmt.defaultCase = stmt.defaultCase.map(visitSwitchDefaultCase)
+
         return stmt
+    }
+    
+    /// Visits a `case` block from a `SwitchStatement`.
+    ///
+    /// - Parameter switchCase: A switch case block to visit
+    open func visitSwitchCase(_ switchCase: SwitchCase) -> SwitchCase {
+        switchCase.patterns = switchCase.patterns.map(visitPattern)
+        switchCase.statements = switchCase.statements.map(visitStatement)
+
+        return switchCase
+    }
+    
+    /// Visits a `default` block from a `SwitchStatement`.
+    ///
+    /// - Parameter defaultCase: A switch default case block to visit
+    /// - Returns: Result of visiting the switch default case block
+    open func visitSwitchDefaultCase(_ defaultCase: SwitchDefaultCase) -> SwitchDefaultCase {
+        defaultCase.statements = defaultCase.statements.map(visitStatement)
+
+        return defaultCase
     }
     
     /// Visits a `while` statement with this visitor
@@ -399,12 +412,21 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: A `VariableDeclarationsStatement` to visit
     /// - Returns: Result of visiting the variables statement
     open func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
-        for i in 0..<stmt.decl.count {
-            stmt.decl[i].initialization =
-                stmt.decl[i].initialization.map(visitExpression)
+        for (i, decl) in stmt.decl.enumerated() {
+            stmt.decl[i] = visitStatementVariableDeclaration(decl)
         }
         
         return stmt
+    }
+    
+    /// Visits a catch block from a `do` statement.
+    ///
+    /// - Parameter catchBlock: A `CatchBlock` to visit.
+    /// - Returns: Result of visiting the catch block
+    open func visitStatementVariableDeclaration(_ decl: StatementVariableDeclaration) -> StatementVariableDeclaration {
+        decl.initialization = decl.initialization.map(visitExpression)
+        
+        return decl
     }
     
     /// Visits a local function statement

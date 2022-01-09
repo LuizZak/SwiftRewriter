@@ -1,4 +1,5 @@
 import SwiftAST
+import TypeSystem
 
 /// Class that represents control flow graphs (CFGs) of functions.
 public final class ControlFlowGraph: DirectedGraph {
@@ -53,6 +54,25 @@ public final class ControlFlowGraph: DirectedGraph {
         nodes.first { $0.node === node }
     }
     
+    /// Returns the control flow graph node that represents a given syntax node,
+    /// or any of its ancestors.
+    /// When searching across ancestors, the nearest ancestors are searched first.
+    ///
+    /// A reference equality test (===) is used to determine syntax node equality.
+    public func graphNode(forFirstAncestorOf node: SyntaxNode) -> ControlFlowGraphNode? {
+        var current: SyntaxNode? = node
+
+        while let c = current {
+            if let graphNode = graphNode(for: c) {
+                return graphNode
+            }
+
+            current = c.parent
+        }
+
+        return nil
+    }
+    
     /// Returns all outgoing edges for a given control flow graph node.
     ///
     /// A reference equality test (===) is used to determine graph node equality.
@@ -83,6 +103,7 @@ extension ControlFlowGraph {
         
         depthFirstVisit(start: entry) {
             list.append($0.node)
+            return true
         }
         
         return list
@@ -94,6 +115,7 @@ extension ControlFlowGraph {
         
         breadthFirstVisit(start: entry) {
             list.append($0.node)
+            return true
         }
         
         return list
@@ -104,7 +126,7 @@ extension ControlFlowGraph {
 public class ControlFlowGraphNode: DirectedGraphNode {
     /// An associated node for this control flow graph node.
     public let node: SyntaxNode
-    
+
     init(node: SyntaxNode) {
         self.node = node
     }
@@ -128,6 +150,18 @@ public final class ControlFlowSubgraphNode: ControlFlowGraphNode {
     init(node: SyntaxNode, graph: ControlFlowGraph) {
         self.graph = graph
         
+        super.init(node: node)
+    }
+}
+
+/// A graph node that signifies the end of a definition scope.
+public final class ControlFlowGraphEndScopeNode: ControlFlowGraphNode {
+    /// An associated code scope for this control flow graph node.
+    public let scope: CodeScopeNode
+
+    init(node: SyntaxNode, scope: CodeScopeNode) {
+        self.scope = scope
+
         super.init(node: node)
     }
 }

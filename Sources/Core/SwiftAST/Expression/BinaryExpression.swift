@@ -104,14 +104,53 @@ public class BinaryExpression: Expression, ExpressionKindType {
         case rhs
     }
 }
-extension Expression {
+public extension Expression {
     @inlinable
-    public var asBinary: BinaryExpression? {
+    var asBinary: BinaryExpression? {
         cast()
     }
 
     @inlinable
     var isBinary: Bool {
         asBinary != nil
+    }
+    
+    static func binary(lhs: Expression, op: SwiftOperator, rhs: Expression) -> BinaryExpression {
+        BinaryExpression(lhs: lhs, op: op, rhs: rhs)
+    }
+}
+
+// MARK: - Operators
+public extension Expression {
+    static func + (lhs: Expression, rhs: Expression) -> Expression {
+        .binary(lhs: lhs, op: .add, rhs: rhs)
+    }
+    
+    static func - (lhs: Expression, rhs: Expression) -> Expression {
+        .binary(lhs: lhs, op: .subtract, rhs: rhs)
+    }
+    
+    static func * (lhs: Expression, rhs: Expression) -> Expression {
+        .binary(lhs: lhs, op: .multiply, rhs: rhs)
+    }
+    
+    static func / (lhs: Expression, rhs: Expression) -> Expression {
+        .binary(lhs: lhs, op: .divide, rhs: rhs)
+    }
+    
+    static func && (lhs: Expression, rhs: Expression) -> Expression {
+        .binary(lhs: lhs, op: .and, rhs: rhs)
+    }
+    
+    static func || (lhs: Expression, rhs: Expression) -> Expression {
+        .binary(lhs: lhs, op: .or, rhs: rhs)
+    }
+    
+    static func | (lhs: Expression, rhs: Expression) -> Expression {
+        .binary(lhs: lhs, op: .bitwiseOr, rhs: rhs)
+    }
+    
+    static func & (lhs: Expression, rhs: Expression) -> Expression {
+        .binary(lhs: lhs, op: .bitwiseAnd, rhs: rhs)
     }
 }

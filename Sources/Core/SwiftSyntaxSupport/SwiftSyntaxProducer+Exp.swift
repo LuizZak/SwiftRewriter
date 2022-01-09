@@ -74,7 +74,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateSizeOf(_ exp: SizeOfExpression) -> ExprSyntax {
+    public func generateSizeOf(_ exp: SizeOfExpression) -> ExprSyntax {
         func _forType(_ type: SwiftType) -> ExprSyntax {
             MemberAccessExprSyntax { builder in
                 let base = SpecializeExprSyntax { builder in
@@ -130,7 +130,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateParens(_ exp: ParensExpression) -> ExprSyntax {
+    public func generateParens(_ exp: ParensExpression) -> ExprSyntax {
         TupleExprSyntax { builder in
             builder.useLeftParen(makeStartToken(SyntaxFactory.makeLeftParenToken))
             builder.useRightParen(SyntaxFactory.makeRightParenToken())
@@ -140,13 +140,13 @@ extension SwiftSyntaxProducer {
         }.asExprSyntax
     }
     
-    func generateIdentifier(_ exp: IdentifierExpression) -> IdentifierExprSyntax {
+    public func generateIdentifier(_ exp: IdentifierExpression) -> IdentifierExprSyntax {
         IdentifierExprSyntax { builder in
             builder.useIdentifier(prepareStartToken(makeIdentifier(exp.identifier)))
         }
     }
     
-    func generateCast(_ exp: CastExpression) -> SequenceExprSyntax {
+    public func generateCast(_ exp: CastExpression) -> SequenceExprSyntax {
         SequenceExprSyntax { builder in
             builder.addElement(generateExpression(exp.exp))
             
@@ -176,7 +176,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateTypeCheck(_ exp: TypeCheckExpression) -> SequenceExprSyntax {
+    public func generateTypeCheck(_ exp: TypeCheckExpression) -> SequenceExprSyntax {
         SequenceExprSyntax { builder in
             builder.addElement(generateExpression(exp.exp))
             
@@ -192,7 +192,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateClosure(_ exp: BlockLiteralExpression) -> ClosureExprSyntax {
+    public func generateClosure(_ exp: BlockLiteralExpression) -> ClosureExprSyntax {
         ClosureExprSyntax { builder in
             builder.useLeftBrace(makeStartToken(SyntaxFactory.makeLeftBraceToken))
             
@@ -276,7 +276,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateArrayLiteral(_ exp: ArrayLiteralExpression) -> ArrayExprSyntax {
+    public func generateArrayLiteral(_ exp: ArrayLiteralExpression) -> ArrayExprSyntax {
         ArrayExprSyntax { builder in
             builder.useLeftSquare(
                 makeStartToken(SyntaxFactory.makeLeftSquareBracketToken)
@@ -299,7 +299,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateDictionaryLiteral(_ exp: DictionaryLiteralExpression) -> DictionaryExprSyntax {
+    public func generateDictionaryLiteral(_ exp: DictionaryLiteralExpression) -> DictionaryExprSyntax {
         DictionaryExprSyntax { builder in
             builder.useLeftSquare(
                 makeStartToken(SyntaxFactory.makeLeftSquareBracketToken)
@@ -343,7 +343,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateAssignment(_ exp: AssignmentExpression) -> SequenceExprSyntax {
+    public func generateAssignment(_ exp: AssignmentExpression) -> SequenceExprSyntax {
         SequenceExprSyntax { builder in
             builder.addElement(generateExpression(exp.lhs))
             
@@ -357,15 +357,15 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateUnary(_ exp: UnaryExpression) -> ExprSyntax {
+    public func generateUnary(_ exp: UnaryExpression) -> ExprSyntax {
         generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNeccessary(exp.exp) }))
     }
     
-    func generatePrefix(_ exp: PrefixExpression) -> ExprSyntax {
+    public func generatePrefix(_ exp: PrefixExpression) -> ExprSyntax {
         generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNeccessary(exp.exp) }))
     }
     
-    func generateBinary(_ exp: BinaryExpression) -> SequenceExprSyntax {
+    public func generateBinary(_ exp: BinaryExpression) -> SequenceExprSyntax {
         SequenceExprSyntax { builder in
             builder.addElement(generateExpression(exp.lhs))
             
@@ -383,9 +383,11 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generatePostfix(_ exp: PostfixExpression) -> ExprSyntax {
-        func makeExprSyntax(_ exp: Expression,
-                            optionalAccessKind: Postfix.OptionalAccessKind) -> ExprSyntax {
+    public func generatePostfix(_ exp: PostfixExpression) -> ExprSyntax {
+        func makeExprSyntax(
+            _ exp: Expression,
+            optionalAccessKind: Postfix.OptionalAccessKind
+        ) -> ExprSyntax {
             
             let base = generateWithinParensIfNeccessary(exp)
             
@@ -519,7 +521,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateTernary(_ exp: TernaryExpression) -> ExprSyntax {
+    public func generateTernary(_ exp: TernaryExpression) -> ExprSyntax {
         TernaryExprSyntax { builder in
             builder.useConditionExpression(generateExpression(exp.exp))
             builder.useQuestionMark(
@@ -537,7 +539,7 @@ extension SwiftSyntaxProducer {
         }.asExprSyntax
     }
     
-    func generateTuple(_ exp: TupleExpression) -> ExprSyntax {
+    public func generateTuple(_ exp: TupleExpression) -> ExprSyntax {
         TupleExprSyntax { builder in
             builder.useLeftParen(makeStartToken(SyntaxFactory.makeLeftParenToken))
             builder.useRightParen(SyntaxFactory.makeRightParenToken())
@@ -558,7 +560,7 @@ extension SwiftSyntaxProducer {
         }.asExprSyntax
     }
     
-    func generateSelector(_ exp: SelectorExpression) -> ExprSyntax {
+    public func generateSelector(_ exp: SelectorExpression) -> ExprSyntax {
         return ObjcSelectorExprSyntax { builder in
             builder.usePoundSelector(makeStartToken(SyntaxFactory.makePoundSelectorKeyword))
             builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
@@ -601,7 +603,7 @@ extension SwiftSyntaxProducer {
         }.asExprSyntax
     }
     
-    func generateConstant(_ constant: ConstantExpression) -> ExprSyntax {
+    public func generateConstant(_ constant: ConstantExpression) -> ExprSyntax {
         switch constant.constant {
         case .boolean(let bool):
             let tokenFactory = bool ? SyntaxFactory.makeTrueKeyword : SyntaxFactory.makeFalseKeyword

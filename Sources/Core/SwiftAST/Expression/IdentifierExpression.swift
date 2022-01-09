@@ -79,4 +79,8 @@ public extension Expression {
     var isIdentifier: Bool {
         asIdentifier != nil
     }
+
+    static func identifier(_ ident: String) -> IdentifierExpression {
+        IdentifierExpression(identifier: ident)
+    }
 }

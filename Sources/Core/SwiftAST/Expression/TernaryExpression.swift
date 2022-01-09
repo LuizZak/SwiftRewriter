@@ -114,4 +114,12 @@ public extension Expression {
     var isTernary: Bool {
         asTernary != nil
     }
+
+    static func ternary(
+        _ exp: Expression,
+        `true` ifTrue: Expression,
+        `false` ifFalse: Expression
+    ) -> TernaryExpression {
+        TernaryExpression(exp: exp, ifTrue: ifTrue, ifFalse: ifFalse)
+    }
 }

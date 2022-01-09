@@ -30,13 +30,14 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
 
         XCTAssertEqual(definitions.count, 1)
         XCTAssertEqual(definitions.first?.definition.name, "a")
-        XCTAssert(definitions.first?.definitionSite === body.statements[0])
+        XCTAssert(definitions.first?.definitionSite === body.statements[0].asVariableDeclaration?.decl[0])
     }
 
     func testVarDeclReplace() throws {
+        let ident = Expression.identifier("a")
         let body: CompoundStatement = [
             .variableDeclaration(identifier: "a", type: .int, initialization: .constant(0)),
-            .expression(.assignment(lhs: .identifier("a"), op: .assign, rhs: .constant(1))),
+            .expression(.assignment(lhs: ident, op: .assign, rhs: .constant(1))),
             .expression(.identifier("a")),
         ]
         setupTest(with: body)
@@ -48,7 +49,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         XCTAssertEqual(definitions.count, 1)
         XCTAssertEqual(definitions.first?.definition.name, "a")
         XCTAssert(
-            definitions.first?.definitionSite === body.statements[1].asExpressions?.expressions[0]
+            definitions.first?.definitionSite === ident
         )
     }
 
@@ -67,6 +68,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
     }
 
     func testIf() throws {
+        let ident = Expression.identifier("a")
         let body: CompoundStatement = [
             .variableDeclaration(
                 identifier: "a",
@@ -77,8 +79,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
                 .identifier("predicate"),
                 body: [
                     .expression(
-                        .identifier("a")
-                            .assignment(op: .assign, rhs: .constant(1))
+                        ident.assignment(op: .assign, rhs: .constant(1))
                     )
                 ]
             ),
@@ -94,17 +95,14 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         XCTAssertEqual(definitions.count, 2)
         XCTAssertEqual(definitions.first?.definition.name, "a")
         XCTAssert(
-            definitions.contains { $0.definitionSite === body.statements[0].asVariableDeclaration }
+            definitions.contains { $0.definitionSite === body.statements[0].asVariableDeclaration?.decl[0] }
         )
-        XCTAssert(
-            definitions.contains {
-                $0.definitionSite
-                    === body.statements[1].asIf?.body.statements[0].asExpressions?.expressions[0]
-            }
-        )
+        XCTAssert(definitions.contains { $0.definitionSite === ident })
     }
 
     func testIfElse() throws {
+        let identIf = Expression.identifier("a")
+        let identElse = Expression.identifier("a")
         let body: CompoundStatement = [
             .variableDeclaration(
                 identifier: "a",
@@ -115,14 +113,12 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
                 .identifier("predicate"),
                 body: [
                     .expression(
-                        .identifier("a")
-                            .assignment(op: .assign, rhs: .constant(0))
+                        identIf.assignment(op: .assign, rhs: .constant(0))
                     )
                 ],
                 else: [
                     .expression(
-                        .identifier("a")
-                            .assignment(op: .assign, rhs: .constant(1))
+                        identElse.assignment(op: .assign, rhs: .constant(1))
                     )
                 ]
             ),
@@ -138,20 +134,8 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
 
         XCTAssertEqual(definitions.count, 2)
         XCTAssertEqual(definitions.first?.definition.name, "a")
-        XCTAssert(
-            definitions.contains {
-                $0.definitionSite
-                    === body.statements[1].asIf?.body.statements[0].asExpressions?.expressions[0]
-            }
-        )
-        XCTAssert(
-            definitions.contains {
-                $0.definitionSite
-                    === body.statements[1].asIf?.elseBody?.statements[0].asExpressions?.expressions[
-                        0
-                    ]
-            }
-        )
+        XCTAssert(definitions.contains { $0.definitionSite === identIf })
+        XCTAssert(definitions.contains { $0.definitionSite === identElse })
     }
 
     func testIfLet() throws {
@@ -168,12 +152,9 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
             )
         ]
         setupTest(with: body)
+        let node = try XCTUnwrap(controlFlowGraph.graphNode(for: XCTUnwrap(body.statements[0].asIf?.body.statements[0])))
 
-        let definitions =
-            sut.reachingDefinitions(
-                for:
-                    controlFlowGraph.graphNode(for: body.statements[0].asIf!.body.statements[0])!
-            )
+        let definitions = sut.reachingDefinitions(for: node)
 
         XCTAssertEqual(definitions.count, 1)
         XCTAssertEqual(definitions.first?.definition.name, "a")
@@ -212,10 +193,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
             .expression(.identifier("a")),
         ]
         setupTest(with: body)
-        let stmt = try XCTUnwrap(
-            body
-            .statements[try: 2]
-        )
+        let stmt = try XCTUnwrap(body.statements[try: 2])
         
         let definitions =
             sut.reachingDefinitions(
@@ -227,7 +205,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         XCTAssertEqual(definitions.first?.definition.type, .int)
         try XCTAssertTrue(
             definitions.contains {
-                try $0.definitionSite === body.statements[try: 0]
+                try $0.definitionSite === body.statements[try: 0].asVariableDeclaration?.decl[0]
             }
         )
     }
@@ -264,13 +242,15 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
     }
 
     func testCatchThrowErrorFlow() throws {
+        let identDo = Expression.identifier("a")
+        let identCatch = Expression.identifier("a")
         let body: CompoundStatement = [
             .variableDeclaration(identifier: "a", type: .int, initialization: .constant(0)),
             .do([
                 .throw(.identifier("Error")),
-                .expression(.identifier("a").assignment(op: .assign, rhs: .constant(1))),
+                .expression(identDo.assignment(op: .assign, rhs: .constant(1))),
             ]).catch([
-                .expression(.identifier("a").assignment(op: .assign, rhs: .constant(2))),
+                .expression(identCatch.assignment(op: .assign, rhs: .constant(2))),
             ]),
             .expression(.identifier("a")),
         ]
@@ -284,11 +264,7 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
 
         XCTAssertEqual(definitions.count, 1)
         XCTAssertEqual(definitions.first?.definition.name, "a")
-        XCTAssertTrue(
-            definitions.contains {
-                $0.definitionSite === body.statements[1].asDoStatement?.catchBlocks[0].body.statements[0].asExpressions?.expressions[0]
-            }
-        )
+        XCTAssertTrue(definitions.contains { $0.definitionSite === identCatch })
     }
 }
 
@@ -301,8 +277,17 @@ extension ReachingDefinitionAnalyzerTests {
 
         controlFlowGraph = ControlFlowGraph.forCompoundStatement(
             body,
-            pruneUnreachable: false
+            options: .init(
+                generateEndScopes: true,
+                pruneUnreachable: true
+            )
         )
+
+        #if false // For debug purposes
+
+        printGraphviz(graph: controlFlowGraph)
+
+        #endif
 
         sut = ReachingDefinitionAnalyzer(
             controlFlowGraph: controlFlowGraph,

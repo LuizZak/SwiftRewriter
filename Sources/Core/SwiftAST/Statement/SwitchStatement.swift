@@ -10,51 +10,35 @@ public class SwitchStatement: Statement, StatementKindType {
         didSet {
             oldValue.parent = nil
             exp.parent = self
-            
-            reloadChildrenNodes()
         }
     }
     public var cases: [SwitchCase] {
         didSet {
-            oldValue.forEach {
-                $0.patterns.forEach {
-                    $0.setParent(self)
-                }
-                $0.statements.forEach {
-                    $0.parent = self
-                }
-            }
-            
-            cases.forEach {
-                $0.patterns.forEach {
-                    $0.setParent(self)
-                }
-                $0.statements.forEach {
-                    $0.parent = self
-                }
-            }
-            
-            reloadChildrenNodes()
+            oldValue.forEach { $0.parent = nil }
+            cases.forEach { $0.parent = self }
         }
     }
-    public var defaultCase: [Statement]? {
+    public var defaultCase: SwitchDefaultCase? {
         didSet {
-            oldValue?.forEach { $0.parent = nil }
-            defaultCase?.forEach { $0.parent = nil }
-            
-            reloadChildrenNodes()
+            oldValue?.parent = nil
+            defaultCase?.parent = self
         }
     }
     
     public override var children: [SyntaxNode] {
-        _childrenNodes
+        var result = [exp] + cases
+        if let defaultCase = defaultCase {
+            result.append(defaultCase)
+        }
+
+        return result
     }
     
     public override var isLabelableStatementType: Bool {
         return true
     }
     
-    public init(exp: Expression, cases: [SwitchCase], defaultCase: [Statement]?) {
+    public init(exp: Expression, cases: [SwitchCase], defaultCase: SwitchDefaultCase?) {
         self.exp = exp
         self.cases = cases
         self.defaultCase = defaultCase
@@ -69,7 +53,7 @@ public class SwitchStatement: Statement, StatementKindType {
         
         exp = try container.decodeExpression(Expression.self, forKey: .exp)
         cases = try container.decode([SwitchCase].self, forKey: .cases)
-        defaultCase = try container.decodeStatementsIfPresent(forKey: .defaultCase)
+        defaultCase = try container.decodeIfPresent(SwitchDefaultCase.self, forKey: .defaultCase)
         
         try super.init(from: container.superDecoder())
         
@@ -78,17 +62,8 @@ public class SwitchStatement: Statement, StatementKindType {
     
     fileprivate func adjustParent() {
         exp.parent = self
-        cases.forEach {
-            $0.patterns.forEach {
-                $0.setParent(self)
-            }
-            $0.statements.forEach {
-                $0.parent = self
-            }
-        }
-        defaultCase?.forEach { $0.parent = self }
-        
-        reloadChildrenNodes()
+        cases.forEach { $0.parent = self }
+        defaultCase?.parent = self
     }
     
     @inlinable
@@ -96,23 +71,8 @@ public class SwitchStatement: Statement, StatementKindType {
         SwitchStatement(
             exp: exp.copy(),
             cases: cases.map { $0.copy() },
-            defaultCase: defaultCase?.map { $0.copy() }
+            defaultCase: defaultCase?.copy()
         ).copyMetadata(from: self)
-    }
-    
-    private func reloadChildrenNodes() {
-        _childrenNodes = [exp]
-        
-        cases.forEach {
-            $0.patterns.forEach {
-                $0.collect(expressions: &_childrenNodes)
-            }
-            _childrenNodes.append(contentsOf: $0.statements)
-        }
-        
-        if let defaultCase = defaultCase {
-            _childrenNodes.append(contentsOf: defaultCase)
-        }
     }
     
     @inlinable
@@ -134,10 +94,7 @@ public class SwitchStatement: Statement, StatementKindType {
         
         try container.encodeExpression(exp, forKey: .exp)
         try container.encode(cases, forKey: .cases)
-        
-        if let defaultCase = defaultCase {
-            try container.encodeStatements(defaultCase, forKey: .defaultCase)
-        }
+        try container.encode(defaultCase, forKey: .defaultCase)
         
         try super.encode(to: container.superEncoder())
     }
@@ -167,24 +124,59 @@ public extension Statement {
     static func `switch`(
         _ exp: Expression,
         cases: [SwitchCase],
-        default defaultCase: [Statement]?
+        defaultStatements defaultCase: [Statement]?
     ) -> SwitchStatement {
-        SwitchStatement(exp: exp, cases: cases, defaultCase: defaultCase)
+
+        SwitchStatement(
+            exp: exp,
+            cases: cases,
+            defaultCase: defaultCase.map(SwitchDefaultCase.init)
+        )
+    }
+
+    /// Creates a `SwitchStatement` instance using the given expression and list
+    /// of cases, optionally specifying a default case as a list of statements.
+    static func `switch`(
+        _ exp: Expression,
+        cases: [SwitchCase],
+        default defaultCase: SwitchDefaultCase?
+    ) -> SwitchStatement {
+
+        SwitchStatement(
+            exp: exp,
+            cases: cases,
+            defaultCase: defaultCase
+        )
     }
 }
 
-public struct SwitchCase: Codable, Equatable {
+public class SwitchCase: SyntaxNode, Codable, Equatable {
     /// Patterns for this switch case
-    public var patterns: [Pattern]
+    public var patterns: [Pattern] {
+        didSet {
+            oldValue.forEach { $0.setParent(nil) }
+            patterns.forEach { $0.setParent(self) }
+        }
+    }
+
     /// Statements for the switch case
-    public var statements: [Statement]
+    public var statements: [Statement] {
+        didSet {
+            oldValue.forEach { $0.parent = nil }
+            statements.forEach { $0.parent = self }
+        }
+    }
+
+    public override var children: [SyntaxNode] {
+        patterns.flatMap(\.subExpressions) + statements
+    }
     
     public init(patterns: [Pattern], statements: [Statement]) {
         self.patterns = patterns
         self.statements = statements
     }
     
-    public init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         self.patterns = try container.decode([Pattern].self, forKey: .patterns)
@@ -192,20 +184,71 @@ public struct SwitchCase: Codable, Equatable {
     }
     
     @inlinable
-    public func copy() -> SwitchCase {
-        SwitchCase(patterns: patterns.map { $0.copy() },
-                          statements: statements.map { $0.copy() })
+    public override func copy() -> SwitchCase {
+        SwitchCase(
+            patterns: patterns.map { $0.copy() },
+            statements: statements.map { $0.copy() }
+        )
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
         try container.encode(patterns, forKey: .patterns)
         try container.encodeStatements(statements, forKey: .statements)
     }
+
+    public static func == (lhs: SwitchCase, rhs: SwitchCase) -> Bool {
+        lhs === lhs || (lhs.patterns == rhs.patterns && lhs.statements == rhs.statements)
+    }
     
     private enum CodingKeys: String, CodingKey {
         case patterns
+        case statements
+    }
+}
+
+public class SwitchDefaultCase: SyntaxNode, Codable, Equatable {
+    /// Statements for the switch case
+    public var statements: [Statement] {
+        didSet {
+            oldValue.forEach { $0.parent = nil }
+            statements.forEach { $0.parent = self }
+        }
+    }
+
+    public override var children: [SyntaxNode] {
+        statements
+    }
+    
+    public init(statements: [Statement]) {
+        self.statements = statements
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.statements = try container.decodeStatements(forKey: .statements)
+    }
+    
+    @inlinable
+    public override func copy() -> SwitchDefaultCase {
+        .init(
+            statements: statements.map { $0.copy() }
+        )
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeStatements(statements, forKey: .statements)
+    }
+
+    public static func == (lhs: SwitchDefaultCase, rhs: SwitchDefaultCase) -> Bool {
+        lhs === lhs || (lhs.statements == rhs.statements)
+    }
+    
+    private enum CodingKeys: String, CodingKey {
         case statements
     }
 }

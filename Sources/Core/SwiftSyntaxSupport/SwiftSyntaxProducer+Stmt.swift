@@ -292,7 +292,7 @@ extension SwiftSyntaxProducer {
             }
     }
     
-    func generateReturn(_ stmt: ReturnStatement) -> ReturnStmtSyntax {
+    public func generateReturn(_ stmt: ReturnStatement) -> ReturnStmtSyntax {
         ReturnStmtSyntax { builder in
             var returnToken = makeStartToken(SyntaxFactory.makeReturnKeyword)
             
@@ -305,7 +305,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateContinue(_ stmt: ContinueStatement) -> ContinueStmtSyntax {
+    public func generateContinue(_ stmt: ContinueStatement) -> ContinueStmtSyntax {
         ContinueStmtSyntax { builder in
             builder.useContinueKeyword(
                 makeStartToken(SyntaxFactory.makeContinueKeyword)
@@ -317,7 +317,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateBreak(_ stmt: BreakStatement) -> BreakStmtSyntax {
+    public func generateBreak(_ stmt: BreakStatement) -> BreakStmtSyntax {
         BreakStmtSyntax { builder in
             builder.useBreakKeyword(makeStartToken(SyntaxFactory.makeBreakKeyword))
             
@@ -327,7 +327,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateFallthrough(_ stmt: FallthroughStatement) -> FallthroughStmtSyntax {
+    public func generateFallthrough(_ stmt: FallthroughStatement) -> FallthroughStmtSyntax {
         FallthroughStmtSyntax { builder in
             builder.useFallthroughKeyword(
                 makeStartToken(SyntaxFactory.makeFallthroughKeyword)
@@ -335,7 +335,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateIfStmt(_ stmt: IfStatement) -> IfStmtSyntax {
+    public func generateIfStmt(_ stmt: IfStatement) -> IfStmtSyntax {
         IfStmtSyntax { builder in
             if let label = stmt.label {
                 builder.useLabelName(
@@ -401,7 +401,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateSwitchStmt(_ stmt: SwitchStatement) -> SwitchStmtSyntax {
+    public func generateSwitchStmt(_ stmt: SwitchStatement) -> SwitchStmtSyntax {
         SwitchStmtSyntax { builder in
             if let label = stmt.label {
                 builder.useLabelName(
@@ -436,25 +436,15 @@ extension SwiftSyntaxProducer {
             for _case in stmt.cases {
                 addExtraLeading(.newlines(1) + indentation())
                 
-                let label = generateSwitchCaseLabel(_case).asSyntax
-                let switchCase
-                    = generateSwitchCase(label, statements: _case.statements)
+                let switchCase = generateSwitchCase(_case)
                 
                 syntaxes.append(switchCase.asSyntax)
             }
             
-            if let _default = stmt.defaultCase {
+            if let defaultCase = stmt.defaultCase {
                 addExtraLeading(.newlines(1) + indentation())
                 
-                let label = SwitchDefaultLabelSyntax { builder in
-                    builder.useDefaultKeyword(
-                        makeStartToken(SyntaxFactory.makeDefaultKeyword)
-                    )
-                    
-                    builder.useColon(SyntaxFactory.makeColonToken())
-                }.asSyntax
-                
-                let switchCase = generateSwitchCase(label, statements: _default)
+                let switchCase = generateSwitchDefaultCase(defaultCase)
                 
                 syntaxes.append(switchCase.asSyntax)
             }
@@ -463,18 +453,21 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateSwitchCase(_ caseLabel: Syntax,
-                            statements: [Statement]) -> SwitchCaseSyntax {
+    public func generateSwitchCase(
+        _ switchCase: SwitchCase
+    ) -> SwitchCaseSyntax {
         
         SwitchCaseSyntax { builder in
-            builder.useLabel(caseLabel)
+            let label = generateSwitchCaseLabel(switchCase).asSyntax
+
+            builder.useLabel(label)
             
             indent()
             defer {
                 deindent()
             }
             
-            let stmts = _generateStatements(statements)
+            let stmts = _generateStatements(switchCase.statements)
             
             for stmt in stmts {
                 builder.addStatement(stmt)
@@ -482,7 +475,35 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateSwitchCaseLabel(_ _case: SwitchCase) -> SwitchCaseLabelSyntax {
+    public func generateSwitchDefaultCase(
+        _ defaultCase: SwitchDefaultCase
+    ) -> SwitchCaseSyntax {
+        
+        SwitchCaseSyntax { builder in
+            let label = SwitchDefaultLabelSyntax { builder in
+                builder.useDefaultKeyword(
+                    makeStartToken(SyntaxFactory.makeDefaultKeyword)
+                )
+                
+                builder.useColon(SyntaxFactory.makeColonToken())
+            }.asSyntax
+            
+            builder.useLabel(label)
+            
+            indent()
+            defer {
+                deindent()
+            }
+            
+            let stmts = _generateStatements(defaultCase.statements)
+            
+            for stmt in stmts {
+                builder.addStatement(stmt)
+            }
+        }
+    }
+    
+    public func generateSwitchCaseLabel(_ _case: SwitchCase) -> SwitchCaseLabelSyntax {
         SwitchCaseLabelSyntax { builder in
             builder.useCaseKeyword(
                 makeStartToken(SyntaxFactory.makeCaseKeyword)
@@ -507,7 +528,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateWhileStmt(_ stmt: WhileStatement) -> WhileStmtSyntax {
+    public func generateWhileStmt(_ stmt: WhileStatement) -> WhileStmtSyntax {
         WhileStmtSyntax { builder in
             if let label = stmt.label {
                 builder.useLabelName(
@@ -535,7 +556,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateDoWhileStmt(_ stmt: DoWhileStatement) -> RepeatWhileStmtSyntax {
+    public func generateDoWhileStmt(_ stmt: DoWhileStatement) -> RepeatWhileStmtSyntax {
         RepeatWhileStmtSyntax { builder in
             if let label = stmt.label {
                 builder.useLabelName(
@@ -562,7 +583,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateForIn(_ stmt: ForStatement) -> ForInStmtSyntax {
+    public func generateForIn(_ stmt: ForStatement) -> ForInStmtSyntax {
         ForInStmtSyntax { builder in
             if let label = stmt.label {
                 builder.useLabelName(
@@ -590,7 +611,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateDo(_ stmt: DoStatement) -> DoStmtSyntax {
+    public func generateDo(_ stmt: DoStatement) -> DoStmtSyntax {
         DoStmtSyntax { builder in
             if let label = stmt.label {
                 builder.useLabelName(
@@ -616,7 +637,7 @@ extension SwiftSyntaxProducer {
         }
     }
 
-    func generateCatchBlock(_ catchBlock: CatchBlock) -> CatchClauseSyntax {
+    public func generateCatchBlock(_ catchBlock: CatchBlock) -> CatchClauseSyntax {
         CatchClauseSyntax { builder in
             builder.useCatchKeyword(
                 SyntaxFactory.makeCatchKeyword()
@@ -634,7 +655,7 @@ extension SwiftSyntaxProducer {
         }
     }
 
-    func generateCatchItem(from pattern: Pattern, hasComma: Bool = false) -> CatchItemSyntax {
+    public func generateCatchItem(from pattern: Pattern, hasComma: Bool = false) -> CatchItemSyntax {
         CatchItemSyntax { builder in
             builder.usePattern(
                 generateValueBindingPattern(pattern)
@@ -647,7 +668,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateDefer(_ stmt: DeferStatement) -> DeferStmtSyntax {
+    public func generateDefer(_ stmt: DeferStatement) -> DeferStmtSyntax {
         DeferStmtSyntax { builder in
             builder.useDeferKeyword(
                 makeStartToken(SyntaxFactory.makeDeferKeyword)
@@ -657,7 +678,7 @@ extension SwiftSyntaxProducer {
         }
     }
 
-    func generateLocalFunction(_ stmt: LocalFunctionStatement) -> FunctionDeclSyntax {
+    public func generateLocalFunction(_ stmt: LocalFunctionStatement) -> FunctionDeclSyntax {
         FunctionDeclSyntax { builder in
             builder.useFuncKeyword(makeStartToken(SyntaxFactory.makeFuncKeyword).withTrailingSpace())
             builder.useIdentifier(makeIdentifier(stmt.function.identifier))
@@ -666,7 +687,7 @@ extension SwiftSyntaxProducer {
         }
     }
 
-    func generateThrow(_ stmt: ThrowStatement) -> ThrowStmtSyntax {
+    public func generateThrow(_ stmt: ThrowStatement) -> ThrowStmtSyntax {
         ThrowStmtSyntax { builder in
             builder.useThrowKeyword(
                 makeStartToken(SyntaxFactory.makeThrowKeyword)
@@ -676,7 +697,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generatePattern(_ pattern: Pattern) -> PatternSyntax {
+    public func generatePattern(_ pattern: Pattern) -> PatternSyntax {
         switch pattern {
         case .identifier(let ident):
             return IdentifierPatternSyntax {
@@ -711,7 +732,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateValueBindingPattern(_ pattern: Pattern, isConstant: Bool = true) -> ValueBindingPatternSyntax {
+    public func generateValueBindingPattern(_ pattern: Pattern, isConstant: Bool = true) -> ValueBindingPatternSyntax {
         ValueBindingPatternSyntax { builder in
             if isConstant {
                 builder.useLetOrVarKeyword(

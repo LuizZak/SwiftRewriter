@@ -90,14 +90,18 @@ public class PrefixExpression: Expression, ExpressionKindType {
         case op
     }
 }
-extension Expression {
+public extension Expression {
     @inlinable
-    public var asPrefix: PrefixExpression? {
+    var asPrefix: PrefixExpression? {
         cast()
     }
 
     @inlinable
     var isPrefix: Bool {
         asPrefix != nil
+    }
+
+    static func prefix(op: SwiftOperator, _ exp: Expression) -> PrefixExpression {
+        PrefixExpression(op: op, exp: exp)
     }
 }

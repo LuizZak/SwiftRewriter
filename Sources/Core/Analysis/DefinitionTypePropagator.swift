@@ -136,7 +136,7 @@ public class DefinitionTypePropagator {
                     continue
                 }
 
-                guard let firstAssignment = self.firstAssignment(for: decl, stmt, index: i) else {
+                guard let firstAssignment = self.firstAssignment(for: decl) else {
                     continue
                 }
 
@@ -180,23 +180,21 @@ public class DefinitionTypePropagator {
         }
 
         private func firstAssignment(
-            for decl: StatementVariableDeclaration,
-            _ stmt: VariableDeclarationsStatement,
-            index: Int
+            for decl: StatementVariableDeclaration
         ) -> Expression? {
 
             if let initialization = decl.initialization {
                 return initialization
             }
 
-            guard let parent = stmt.parent as? Statement else {
+            guard let scope = decl.nearestScope as? Statement else {
                 return nil
             }
-
-            let definition: LocalCodeDefinition = .forVarDeclElement(decl, stmt, index: index)
+            
+            let definition: LocalCodeDefinition = .forVarDeclElement(decl)
             let usages = localUsageAnalyzer.findUsagesOf(
                 definition: definition,
-                in: .statement(parent),
+                in: .statement(scope),
                 intention: nil
             )
 

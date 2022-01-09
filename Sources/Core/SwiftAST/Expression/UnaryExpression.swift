@@ -90,14 +90,25 @@ public class UnaryExpression: Expression, ExpressionKindType {
         case op
     }
 }
-extension Expression {
+public extension Expression {
     @inlinable
-    public var asUnary: UnaryExpression? {
+    var asUnary: UnaryExpression? {
         cast()
     }
 
     @inlinable
     var isUnary: Bool {
         asUnary != nil
+    }
+    
+    static func unary(op: SwiftOperator, _ exp: Expression) -> UnaryExpression {
+        UnaryExpression(op: op, exp: exp)
+    }
+}
+
+// MARK: - Operator definitions
+public extension Expression {
+    static prefix func ! (lhs: Expression) -> Expression {
+        .unary(op: .negate, lhs)
     }
 }

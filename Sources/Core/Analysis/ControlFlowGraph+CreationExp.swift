@@ -1,8 +1,18 @@
 import SwiftAST
 
 extension ControlFlowGraph {
-    internal static func _connections(for expressions: [Expression]) -> _LazySubgraphGenerator {
+    internal static func connections(for expression: Expression) -> _LazySubgraphGenerator {
+        connections(for: [expression])
+    }
+
+    internal static func connections(for expressions: [Expression]) -> _LazySubgraphGenerator {
         _connections(for: expressions, start: .invalid)
+    }
+
+    internal static func connections(for pattern: Pattern) -> _LazySubgraphGenerator {
+        let expressions = pattern.subExpressions
+
+        return connections(for: expressions)
     }
     
     private static func _connections(
@@ -10,15 +20,10 @@ extension ControlFlowGraph {
         start: _LazySubgraphGenerator
     ) -> _LazySubgraphGenerator {
         
-        var previous = start
-        
-        for expression in expressions {
-            let connections = _connections(forExpression: expression)
-            
-            previous = previous.chainingExits(to: connections)
-        }
-        
-        return previous
+        return expressions
+            .map(_connections(forExpression:))
+            .chainingExits()
+            .nullCoalesceToExits()
     }
 
     private static func _connections(forExpression expression: Expression) -> _LazySubgraphGenerator {
@@ -51,9 +56,7 @@ extension ControlFlowGraph {
                 result = _LazySubgraphGenerator(startNode: node).addingExitNode(node)
 
             case .dictionaryLiteral(let exp):
-                let node = ControlFlowGraphNode(node: exp)
-            
-                result = _LazySubgraphGenerator(startNode: node).addingExitNode(node)
+                result = _connections(for: exp)
 
             case .identifier(let exp):
                 let node = ControlFlowGraphNode(node: exp)
@@ -63,17 +66,15 @@ extension ControlFlowGraph {
             case .parens(let exp):
                 let node = ControlFlowGraphNode(node: exp)
             
-                result = _LazySubgraphGenerator(startNode: node).addingExitNode(node)
+                result = _LazySubgraphGenerator(startNode: node)
+                    .nullCoalesceToExits()
+                    .addingExitNode(node)
 
             case .postfix(let exp):
-                let node = ControlFlowGraphNode(node: exp)
-            
-                result = _LazySubgraphGenerator(startNode: node).addingExitNode(node)
+                result = _connections(for: exp)
 
             case .prefix(let exp):
-                let node = ControlFlowGraphNode(node: exp)
-            
-                result = _LazySubgraphGenerator(startNode: node).addingExitNode(node)
+                result = _chainConnection(for: exp.exp, into: exp)
 
             case .selector(let exp):
                 let node = ControlFlowGraphNode(node: exp)
@@ -81,27 +82,19 @@ extension ControlFlowGraph {
                 result = _LazySubgraphGenerator(startNode: node).addingExitNode(node)
 
             case .sizeOf(let exp):
-                let node = ControlFlowGraphNode(node: exp)
-            
-                result = _LazySubgraphGenerator(startNode: node).addingExitNode(node)
+                result = _connections(for: exp)
 
             case .ternary(let exp):
                 result = _connections(for: exp)
 
             case .tuple(let exp):
-                let node = ControlFlowGraphNode(node: exp)
-            
-                result = _LazySubgraphGenerator(startNode: node).addingExitNode(node)
+                result = _connections(for: exp)
 
             case .typeCheck(let exp):
-                let node = ControlFlowGraphNode(node: exp)
-            
-                result = _LazySubgraphGenerator(startNode: node).addingExitNode(node)
+                result = _chainConnection(for: exp.exp, into: exp)
 
             case .unary(let exp):
-                let node = ControlFlowGraphNode(node: exp)
-            
-                result = _LazySubgraphGenerator(startNode: node).addingExitNode(node)
+                result = _chainConnection(for: exp.exp, into: exp)
 
             case .unknown(let exp):
                 let node = ControlFlowGraphNode(node: exp)
@@ -123,18 +116,37 @@ extension ControlFlowGraph {
             _LazySubgraphGenerator(startNode: node)
                 .addingExitNode(node)
         
-        return _connections(for: exp.items)
+        return connections(for: exp.items)
+            .chainingExits(to: arraySubgraph)
+    }
+
+    private static func _connections(for exp: DictionaryLiteralExpression) -> _LazySubgraphGenerator {
+        let node = ControlFlowGraphNode(node: exp)
+        let arraySubgraph =
+            _LazySubgraphGenerator(startNode: node)
+                .addingExitNode(node)
+        
+        return connections(for: exp.subExpressions)
             .chainingExits(to: arraySubgraph)
     }
 
     private static func _connections(for exp: AssignmentExpression) -> _LazySubgraphGenerator {
         let node = ControlFlowGraphNode(node: exp)
-        
-        let result =
+        let subgraph =
             _LazySubgraphGenerator(startNode: node)
-                .addingExitNode(node)
+            .addingExitNode(node)
 
-        return result
+        let lhs = _connections(forExpression: exp.lhs)
+        let rhs = _connections(forExpression: exp.rhs)
+
+        let result = lhs
+            .chainingExits(
+                to: rhs.satisfyingNullCoalesce(),
+                debugLabel: exp.op.description
+            )
+            .nullCoalesceToExits()
+        
+        return result.chainingExits(to: subgraph)
     }
 
     private static func _connections(for exp: BinaryExpression) -> _LazySubgraphGenerator {
@@ -156,14 +168,73 @@ extension ControlFlowGraph {
         return result
     }
 
-    private static func _connections(for exp: TernaryExpression) -> _LazySubgraphGenerator {
-        let predicate = _connections(forExpression: exp.exp)
-        let ifTrue = _connections(forExpression: exp.ifTrue)
-        let ifFalse = _connections(forExpression: exp.ifFalse)
+    private static func _connections(for exp: PostfixExpression) -> _LazySubgraphGenerator {
+        let node = ControlFlowGraphNode(node: exp)
+        var subgraph = _LazySubgraphGenerator(startNode: node)
 
-        return predicate
+        let base = _connections(forExpression: exp.exp)
+        let args = connections(for: exp.op.subExpressions)
+
+        subgraph = base
+            .chainingExits(to: args)
+            .chainingExits(to: subgraph, debugLabel: "\(exp.op.description)")
+        
+        if exp.op.optionalAccessKind == .safeUnwrap {
+            subgraph = subgraph.addingNullCoalesceNode(node)
+        }
+
+        return subgraph.addingExitNode(node)
+    }
+
+    private static func _connections(for exp: SizeOfExpression) -> _LazySubgraphGenerator {
+        let node = ControlFlowGraphNode(node: exp)
+        let subgraph =
+            _LazySubgraphGenerator(startNode: node)
+                .addingExitNode(node)
+        
+        switch exp.value {
+        case .expression(let exp):
+            return _connections(forExpression: exp)
+                .nullCoalesceToExits()
+                .chainingExits(to: subgraph)
+        case .type:
+            return subgraph
+        }
+    }
+
+    private static func _connections(for exp: TernaryExpression) -> _LazySubgraphGenerator {
+        let predicate = _connections(forExpression: exp.exp).satisfyingNullCoalesce()
+        let ifTrue = _connections(forExpression: exp.ifTrue).nullCoalesceToExits()
+        let ifFalse = _connections(forExpression: exp.ifFalse).nullCoalesceToExits()
+
+        return  predicate
             .satisfyingExits()
-            .addingBranch(towards: ifTrue, debugLabel: "true")
-            .addingBranch(towards: ifFalse, debugLabel: "false")
+            .combine(
+                ifTrue.addingJumpInto(from: predicate.exitNodes, debugLabel: "true")
+            )
+            .combine(
+                ifFalse.addingJumpInto(from: predicate.exitNodes, debugLabel: "false")
+            )
+    }
+
+    private static func _connections(for exp: TupleExpression) -> _LazySubgraphGenerator {
+        let node = ControlFlowGraphNode(node: exp)
+        let arraySubgraph =
+            _LazySubgraphGenerator(startNode: node)
+                .addingExitNode(node)
+        
+        return connections(for: exp.elements)
+            .chainingExits(to: arraySubgraph)
+    }
+
+    private static func _chainConnection(for exp: Expression, into parent: Expression) -> _LazySubgraphGenerator {
+        let node = ControlFlowGraphNode(node: parent)
+        let subgraph =
+            _LazySubgraphGenerator(startNode: node)
+                .addingExitNode(node)
+        
+        return _connections(forExpression: exp)
+            .nullCoalesceToExits()
+            .chainingExits(to: subgraph)
     }
 }

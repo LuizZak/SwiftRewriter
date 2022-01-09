@@ -6,6 +6,7 @@ public func assertStatementsEqual(
     actual: Statement?,
     expected: Statement?,
     messageHeader: String = "Failed: Expected statement",
+    printTypes: Bool = false,
     file: StaticString = #file,
     line: UInt = #line
 ) {
@@ -20,7 +21,15 @@ public func assertStatementsEqual(
             return "<nil>"
         }
         
-        return producer.generateStatement(stmt).description
+        var result: String = ""
+
+        if printTypes {
+            result = "\(type(of: stmt)): "
+        }
+
+        result += producer.generateStatement(stmt).description
+
+        return result
     }
 
     var expString = ""
@@ -55,6 +64,7 @@ public func assertExpressionsEqual(
     actual: Expression?,
     expected: Expression?,
     messageHeader: String = "Failed: Expected statement",
+    printTypes: Bool = false,
     file: StaticString = #file,
     line: UInt = #line
 ) {
@@ -69,11 +79,19 @@ public func assertExpressionsEqual(
             return "<nil>"
         }
 
-        if exp.isBlock {
-            return producer.generateExpression(exp).description
+        var result: String = ""
+
+        if printTypes {
+            result = "\(type(of: exp)): "
         }
 
-        return exp.description
+        if exp.isBlock {
+            result += producer.generateExpression(exp).description
+        } else {
+            result += exp.description
+        }
+
+        return result
     }
 
     var expString = ""

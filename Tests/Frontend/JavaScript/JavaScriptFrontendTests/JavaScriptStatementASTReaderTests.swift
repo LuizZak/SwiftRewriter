@@ -283,7 +283,7 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
             readsAs: .switch(
                 .identifier("value"),
                 cases: [],
-                default: [
+                defaultStatements: [
                     .break()
                 ]
             )
@@ -307,7 +307,7 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
                         ]
                     )
                 ],
-                default: [
+                defaultStatements: [
                     .break()
                 ]
             )
@@ -333,7 +333,7 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
                         ]
                     )
                 ],
-                default: [
+                defaultStatements: [
                     .break()
                 ]
             )
@@ -358,7 +358,7 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
                         ]
                     )
                 ],
-                default: [
+                defaultStatements: [
                     .break()
                 ]
             )
@@ -371,7 +371,7 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
             readsAs: .switch(
                 .identifier("value"),
                 cases: [SwitchCase(patterns: [.expression(.constant(0))], statements: [.break()])],
-                default: [.break()]
+                defaultStatements: [.break()]
             )
         )
 
@@ -383,7 +383,7 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
                     SwitchCase(patterns: [.expression(.constant(0))], statements: [.break()]),
                     SwitchCase(patterns: [.expression(.constant(1))], statements: [.break()]),
                 ],
-                default: [.break()]
+                defaultStatements: [.break()]
             )
         )
 
@@ -397,12 +397,12 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
                         statements: [.break()]
                     )
                 ],
-                default: [.break()]
+                defaultStatements: [.break()]
             )
         )
 
         assert(
-            jsStmt: "switch(value) { case 0: case 1: break; default: stmt(); }",
+            jsStmt: "switch(value) { case 0: case 1: break; defaultStatements: stmt(); }",
             readsAs: .switch(
                 .identifier("value"),
                 cases: [
@@ -414,7 +414,7 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
                         statements: [.break()]
                     )
                 ],
-                default: [
+                defaultStatements: [
                     .expression(
                         Expression.identifier("stmt").call()
                     )
@@ -438,7 +438,7 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
                     ),
                     SwitchCase(patterns: [.expression(.constant(1))], statements: [.break()]),
                 ],
-                default: [.break()]
+                defaultStatements: [.break()]
             )
         )
     }

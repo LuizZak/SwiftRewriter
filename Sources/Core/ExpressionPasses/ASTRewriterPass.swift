@@ -124,13 +124,8 @@ open class ASTRewriterPass: SyntaxNodeRewriter {
     open override func visitSwitch(_ stmt: SwitchStatement) -> Statement {
         stmt.exp = visitBaseExpression(stmt.exp)
         
-        stmt.cases = stmt.cases.map {
-            return SwitchCase(patterns: $0.patterns.map(visitPattern),
-                              statements: $0.statements.map(visitStatement))
-        }
-        if let def = stmt.defaultCase {
-            stmt.defaultCase = def.map(visitStatement)
-        }
+        stmt.cases = stmt.cases.map(visitSwitchCase)
+        stmt.defaultCase = stmt.defaultCase.map(visitSwitchDefaultCase)
         
         return stmt
     }

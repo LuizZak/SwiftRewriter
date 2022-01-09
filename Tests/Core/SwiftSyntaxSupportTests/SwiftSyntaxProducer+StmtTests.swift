@@ -428,7 +428,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             .switch(
                 .identifier("value"),
                 cases: [],
-                default: [
+                defaultStatements: [
                     .break()
                 ]
             )
@@ -438,7 +438,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             producer: SwiftSyntaxProducer.generateSwitchStmt,
             matches: """
                 switch value {
-                default:
+                defaultStatements:
                     break
                 }
                 """
@@ -460,7 +460,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                         ]
                     )
                 ],
-                default: [
+                defaultStatements: [
                     .break()
                 ]
             )
@@ -503,7 +503,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                         ]
                     ),
                 ],
-                default: [
+                defaultStatements: [
                     .break()
                 ]
             )
@@ -696,7 +696,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
             .switch(
                 .identifier("value"),
                 cases: [],
-                default: nil
+                defaultStatements: nil
             ).labeled("label")
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
 

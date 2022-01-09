@@ -212,21 +212,19 @@ public extension CodeDefinition {
     
     static func forVarDeclStatement(_ stmt: VariableDeclarationsStatement) -> [LocalCodeDefinition] {
         stmt.decl.enumerated().map { (i, decl) in
-            forVarDeclElement(decl, stmt, index: i)
+            forVarDeclElement(decl)
         }
     }
 
     static func forVarDeclElement(
-        _ decl: StatementVariableDeclaration,
-        _ stmt: VariableDeclarationsStatement,
-        index: Int
+        _ decl: StatementVariableDeclaration
     ) -> LocalCodeDefinition {
         CodeDefinition.forLocalIdentifier(
             decl.identifier,
             type: decl.type,
             ownership: decl.ownership,
             isConstant: decl.isConstant,
-            location: .variableDeclaration(stmt, index: index)
+            location: .variableDeclaration(decl)
         )
     }
     
@@ -392,7 +390,7 @@ public class LocalCodeDefinition: CodeDefinition {
         case staticSelf
         case setterValue
         case parameter(index: Int)
-        case variableDeclaration(VariableDeclarationsStatement, index: Int)
+        case variableDeclaration(StatementVariableDeclaration)
         case forLoop(ForStatement, PatternLocation)
         case ifLet(IfStatement, PatternLocation)
         case localFunction(LocalFunctionStatement)
@@ -413,10 +411,9 @@ public class LocalCodeDefinition: CodeDefinition {
                 hasher.combine(4)
                 hasher.combine(index)
                 
-            case let .variableDeclaration(stmt, index):
+            case let .variableDeclaration(decl):
                 hasher.combine(5)
-                hasher.combine(ObjectIdentifier(stmt))
-                hasher.combine(index)
+                hasher.combine(ObjectIdentifier(decl))
                 
             case let .forLoop(stmt, loc):
                 hasher.combine(6)

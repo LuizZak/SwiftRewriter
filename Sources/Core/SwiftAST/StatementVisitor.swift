@@ -4,6 +4,9 @@
 /// returning the resulting value after done traversing.
 public protocol StatementVisitor {
     associatedtype StmtResult
+    associatedtype SwitchCaseResult = StmtResult
+    associatedtype SwitchDefaultCaseResult = StmtResult
+    associatedtype CatchBlockResult = StmtResult
     
     /// Visits a statement node
     ///
@@ -35,6 +38,18 @@ public protocol StatementVisitor {
     /// - Returns: Result of visiting the `switch` statement node
     func visitSwitch(_ stmt: SwitchStatement) -> StmtResult
     
+    /// Visits a `case` block from a `SwitchStatement`.
+    ///
+    /// - Parameter switchCase: A switch case block to visit
+    /// - Returns: Result of visiting the switch case block
+    func visitSwitchCase(_ switchCase: SwitchCase) -> SwitchCaseResult
+    
+    /// Visits a `default` block from a `SwitchStatement`.
+    ///
+    /// - Parameter defaultCase: A switch default case block to visit
+    /// - Returns: Result of visiting the switch default case block
+    func visitSwitchDefaultCase(_ defaultCase: SwitchDefaultCase) -> SwitchDefaultCaseResult
+    
     /// Visits a `do/while` statement with this visitor
     ///
     /// - Parameter stmt: A while statement to visit
@@ -53,6 +68,12 @@ public protocol StatementVisitor {
     /// - Returns: Result of visiting the `do` statement
     func visitDo(_ stmt: DoStatement) -> StmtResult
     
+    /// Visits a `catch` block from a `DoStatement`.
+    ///
+    /// - Parameter block: A catch block to visit
+    /// - Returns: Result of visiting the catch block
+    func visitCatchBlock(_ block: CatchBlock) -> CatchBlockResult
+
     /// Visits a `defer` statement node
     ///
     /// - Parameter stmt: A defer statement to visit
@@ -94,7 +115,7 @@ public protocol StatementVisitor {
     /// - Parameter stmt: A variable declaration statement to visit
     /// - Returns: Result of visiting the variables statement
     func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> StmtResult
-    
+
     /// Visits a local function statement
     ///
     /// - Parameter stmt: A local function statement to visit

@@ -22,7 +22,6 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                 }
                 """
         )
-        XCTAssertEqual(graph.nodes.count, 2)
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
@@ -33,14 +32,18 @@ class ControlFlowGraph_CreationTests: XCTestCase {
         )
     }
 
-    func testPruneUnreachable_true() {
+    func testGenerateEndScopes_true() {
         let stmt: CompoundStatement = [
-            .expression(.identifier("a")),
-            .return(nil),
+            .compound([
+                .expression(.identifier("a")),
+            ]),
             .expression(.identifier("b")),
         ]
 
-        let graph = ControlFlowGraph.forCompoundStatement(stmt, pruneUnreachable: true)
+        let graph = ControlFlowGraph.forCompoundStatement(
+            stmt,
+            options: .init(generateEndScopes: true)
+        )
 
         sanitize(graph)
         assertGraphviz(
@@ -48,16 +51,274 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="a"]
-                    n3 [label="{return}"]
-                    n4 [label="exit"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="{end scope of CompoundStatement}"]
+                    n5 [label="{exp}"]
+                    n6 [label="b"]
+                    n7 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
+                    n4 -> n5
+                    n5 -> n6
+                    n6 -> n7
                 }
                 """
         )
-        XCTAssertEqual(graph.nodes.count, 4)
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testGenerateEndScopes_true_defers() {
+        let stmt: CompoundStatement = [
+            .compound([
+                .defer([
+                    .expression(.identifier("a")),
+                ]),
+                .expression(.identifier("b")),
+            ]),
+            .defer([
+                .expression(.identifier("c")),
+            ]),
+            .expression(.identifier("d")),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(
+            stmt,
+            options: .init(generateEndScopes: true)
+        )
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="b"]
+                    n4 [label="{exp}"]
+                    n5 [label="a"]
+                    n6 [label="{end scope of DeferStatement}"]
+                    n7 [label="{end scope of CompoundStatement}"]
+                    n8 [label="{exp}"]
+                    n9 [label="d"]
+                    n10 [label="{exp}"]
+                    n11 [label="c"]
+                    n12 [label="{end scope of DeferStatement}"]
+                    n13 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n4 -> n5
+                    n5 -> n6
+                    n6 -> n7
+                    n7 -> n8
+                    n8 -> n9
+                    n9 -> n10
+                    n10 -> n11
+                    n11 -> n12
+                    n12 -> n13
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testGenerateEndScopes_true_errorFlow() {
+        let stmt: CompoundStatement = [
+            .do([
+                .expression(.identifier("a")),
+                .if(.identifier("b"), body:[
+                    .throw(.identifier("c")),
+                ]),
+            ]).catch([
+                .expression(.identifier("d")),
+            ]),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(
+            stmt,
+            options: .init(generateEndScopes: true)
+        )
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="b"]
+                    n5 [label="{if}"]
+                    n6 [label="{throw c}"]
+                    n7 [label="{end scope of DoStatement}"]
+                    n8 [label="{end scope of {if}}"]
+                    n9 [label="{end scope of DoStatement}"]
+                    n10 [label="{catch}"]
+                    n11 [label="{exp}"]
+                    n12 [label="d"]
+                    n13 [label="{end scope of {catch}}"]
+                    n14 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n4 -> n5
+                    n5 -> n6
+                    n5 -> n7
+                    n6 -> n8
+                    n7 -> n14
+                    n8 -> n9
+                    n9 -> n10
+                    n10 -> n11
+                    n11 -> n12
+                    n12 -> n13
+                    n13 -> n14
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+    }
+
+    func testGenerateEndScopes_true_ifStatement() {
+        let stmt: CompoundStatement = [
+            .variableDeclaration(identifier: "preIf", type: .int, initialization: .constant(0)),
+            .if(.constant(true), body: [
+                .variableDeclaration(identifier: "ifBody", type: .int, initialization: .constant(0)),
+            ]),
+            .expression(.identifier("postIf")),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(
+            stmt,
+            options: .init(generateEndScopes: true)
+        )
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="0"]
+                    n3 [label="preIf: Int = 0"]
+                    n4 [label="true"]
+                    n5 [label="{if}"]
+                    n6 [label="0"]
+                    n7 [label="{exp}"]
+                    n8 [label="ifBody: Int = 0"]
+                    n9 [label="postIf"]
+                    n10 [label="{end scope of {if}}"]
+                    n11 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n4 -> n5
+                    n5 -> n6
+                    n5 -> n7
+                    n6 -> n8
+                    n7 -> n9
+                    n8 -> n10
+                    n9 -> n11
+                    n10 -> n7
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testGenerateEndScopes_true_forStatement() {
+        // TODO: Validate if end-of-scopes for loops should be ended before or
+        // TODO: after the loop exits.
+
+        let stmt: CompoundStatement = [
+            .variableDeclaration(identifier: "a", type: .int, initialization: .constant(0)),
+            .for(.identifier("a"), .identifier("b"), body: [
+                .variableDeclaration(identifier: "c", type: .int, initialization: .constant(0)),
+            ]),
+            .expression(.identifier("d")),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(
+            stmt,
+            options: .init(generateEndScopes: true)
+        )
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="0"]
+                    n3 [label="a: Int = 0"]
+                    n4 [label="{for}"]
+                    n5 [label="0"]
+                    n6 [label="{exp}"]
+                    n7 [label="c: Int = 0"]
+                    n8 [label="d"]
+                    n9 [label="{end scope of {for}}"]
+                    n10 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n4 -> n5
+                    n4 -> n6
+                    n5 -> n7
+                    n6 -> n8
+                    n7 -> n9
+                    n8 -> n10
+                    n9 -> n4 [color="#aa3333", penwidth=0.5]
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testPruneUnreachable_true() {
+        let stmt: CompoundStatement = [
+            .expression(.identifier("a")),
+            .return(nil),
+            .expression(.identifier("b")),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(
+            stmt,
+            options: .init(pruneUnreachable: true)
+        )
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="{return}"]
+                    n5 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n4 -> n5
+                }
+                """
+        )
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
@@ -69,7 +330,10 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             .expression(.identifier("b")),
         ]
 
-        let graph = ControlFlowGraph.forCompoundStatement(stmt, pruneUnreachable: false)
+        let graph = ControlFlowGraph.forCompoundStatement(
+            stmt,
+            options: .init(pruneUnreachable: false)
+        )
 
         sanitize(graph, expectsUnreachable: true)
         assertGraphviz(
@@ -77,21 +341,78 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="a"]
-                    n3 [label="b"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
                     n4 [label="{return}"]
-                    n5 [label="exit"]
+                    n5 [label="{exp}"]
+                    n6 [label="b"]
+                    n7 [label="exit"]
                     n1 -> n2
-                    n2 -> n4
-                    n3 -> n5
-                    n4 -> n5
+                    n2 -> n3
+                    n3 -> n4
+                    n4 -> n7
+                    n5 -> n6
+                    n6 -> n7
                 }
                 """
         )
-        XCTAssertEqual(graph.nodes.count, 5)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
     }
+
+    func testGenerateEndScopes_true_pruneUnreachable_true_errorFlow_unconditionalError_dontLeaveDanglingBranches() {
+        let stmt: CompoundStatement = [
+            .do([
+                .throw(.identifier("Error")),
+                .expression(.identifier("postError").assignment(op: .assign, rhs: .constant(1))),
+            ]).catch([
+                .expression(.identifier("errorHandler").assignment(op: .assign, rhs: .constant(2))),
+            ]),
+            .expression(.identifier("postDo")),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(
+            stmt,
+            options: .init(generateEndScopes: true, pruneUnreachable: true)
+        )
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{throw Error}"]
+                    n3 [label="{end scope of DoStatement}"]
+                    n4 [label="{catch}"]
+                    n5 [label="{exp}"]
+                    n6 [label="errorHandler"]
+                    n7 [label="2"]
+                    n8 [label="errorHandler = 2"]
+                    n9 [label="{end scope of {catch}}"]
+                    n10 [label="{exp}"]
+                    n11 [label="postDo"]
+                    n12 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n4 -> n5
+                    n5 -> n6
+                    n6 -> n7 [label="="]
+                    n7 -> n8
+                    n8 -> n9
+                    n9 -> n10
+                    n10 -> n11
+                    n11 -> n12
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
 
     func testCreateNestedEmptyCompoundStatementGetsFlattenedToEmptyGraph() {
         let stmt: CompoundStatement = [
@@ -111,7 +432,6 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                 }
                 """
         )
-        XCTAssertEqual(graph.nodes.count, 2)
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
@@ -121,352 +441,4 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             [stmt, stmt]
         )
     }
-}
-
-internal func sanitize(
-    _ graph: ControlFlowGraph,
-    expectsUnreachable: Bool = false,
-    file: StaticString = #filePath,
-    line: UInt = #line
-) {
-
-    if !graph.nodes.contains(where: { $0 === graph.entry }) {
-        XCTFail(
-            """
-            Graph's entry node is not currently present in nodes array
-            """,
-            file: file,
-            line: line
-        )
-    }
-    if !graph.nodes.contains(where: { $0 === graph.exit }) {
-        XCTFail(
-            """
-            Graph's exit node is not currently present in nodes array
-            """,
-            file: file,
-            line: line
-        )
-    }
-
-    if graph.entry.node !== graph.exit.node {
-        XCTFail(
-            """
-            Graph's entry and exit nodes must point to the same AST node
-            """,
-            file: file,
-            line: line
-        )
-    }
-
-    for edge in graph.edges {
-        if !graph.containsNode(edge.start) {
-            XCTFail(
-                """
-                Edge contains reference for node that is not present in graph: \(edge.start.node)
-                """,
-                file: file,
-                line: line
-            )
-        }
-        if !graph.containsNode(edge.end) {
-            XCTFail(
-                """
-                Edge contains reference for node that is not present in graph: \(edge.end.node)
-                """,
-                file: file,
-                line: line
-            )
-        }
-    }
-
-    for node in graph.nodes {
-        if node is ControlFlowSubgraphNode {
-            XCTFail(
-                """
-                Found non-expanded subgraph node: \(node.node)
-                """,
-                file: file,
-                line: line
-            )
-        }
-
-        if graph.allEdges(for: node).isEmpty {
-            XCTFail(
-                """
-                Found a free node with no edges or connections: \(node.node)
-                """,
-                file: file,
-                line: line
-            )
-
-            continue
-        }
-
-        if !expectsUnreachable && node !== graph.entry && graph.edges(towards: node).isEmpty {
-            XCTFail(
-                """
-                Found non-entry node that has no connections towards it: \(node.node)
-                """,
-                file: file,
-                line: line
-            )
-        }
-
-        if node !== graph.exit && graph.edges(from: node).isEmpty {
-            XCTFail(
-                """
-                Found non-exit node that has no connections from it: \(node.node)
-                """,
-                file: file,
-                line: line
-            )
-        }
-    }
-}
-
-internal func assertGraphviz(
-    graph: ControlFlowGraph,
-    matches expected: String,
-    file: StaticString = #filePath,
-    line: UInt = #line
-) {
-    let text = graphviz(graph: graph)
-
-    if text == expected {
-        return
-    }
-
-    XCTFail(
-        """
-        Expected produced graph to be
-
-        \(expected)
-
-        But found:
-
-        \(text.makeDifferenceMarkString(against: expected))
-        """,
-        file: file,
-        line: line
-    )
-}
-
-internal func printGraphviz(graph: ControlFlowGraph) {
-    let string = graphviz(graph: graph)
-    print(string)
-}
-
-internal func graphviz(graph: ControlFlowGraph) -> String {
-    func labelForNode(_ node: ControlFlowGraphNode) -> String {
-        if node === graph.entry {
-            return "entry"
-        }
-        if node === graph.exit {
-            return "exit"
-        }
-
-        var label: String
-        switch node.node {
-        case let exp as ExpressionsStatement:
-            label = exp.expressions[0].description
-            label = label.replacingOccurrences(of: "\"", with: "\\\"")
-
-        case is IfStatement:
-            label = "{if}"
-
-        case is ForStatement:
-            label = "{for}"
-
-        case is WhileStatement:
-            label = "{while}"
-
-        case is DoWhileStatement:
-            label = "{do-while}"
-
-        case let ret as ReturnStatement:
-            if let exp = ret.exp {
-                label = "{return \(exp)}"
-            } else {
-                label = "{return}"
-            }
-
-        case let stmt as ThrowStatement:
-            label = "{throw \(stmt.exp)}"
-
-        case let varDecl as VariableDeclarationsStatement:
-            label = varDecl.decl.map { decl -> String in
-                var declLabel = decl.isConstant ? "let " : "var "
-                declLabel += decl.identifier
-                declLabel += ": \(decl.type)"
-
-                return declLabel
-            }.joined(separator: "\n")
-        
-        case let catchBlock as CatchBlock:
-            if let pattern = catchBlock.pattern {
-                label = "{catch \(pattern)}"
-            } else {
-                label = "{catch}"
-            }
-
-        default:
-            label = "\(type(of: node.node))"
-        }
-
-        return label
-    }
-
-    func attributeList(_ list: [(key: String, value: String)]) -> String {
-        if list.isEmpty {
-            return ""
-        }
-
-        return "[" + list.map {
-            "\($0.key)=\($0.value)"
-        }.joined(separator: ", ") + "]"
-    }
-
-    func attributes(_ list: (key: String, value: String)...) -> String {
-        return attributeList(list)
-    }
-
-    let buffer = StringRewriterOutput(settings: .defaults)
-    buffer.output(line: "digraph flow {")
-    buffer.indented {
-        var nodeIds: [ObjectIdentifier: String] = [:]
-
-        var nodeDefinitions: [NodeDefinition] = []
-
-        // Prepare nodes
-        for node in graph.nodes {
-            var label: String = "\(type(of: node.node))"
-            if node === graph.entry {
-                label = "entry"
-            }
-            if node === graph.exit {
-                label = "exit"
-            }
-
-            switch node.node {
-            case let exp as Expression:
-                label = exp.description
-                label = label.replacingOccurrences(of: "\"", with: "\\\"")
-
-            case let exp as ExpressionsStatement:
-                label = exp.expressions[0].description
-                label = label.replacingOccurrences(of: "\"", with: "\\\"")
-
-            case is IfStatement:
-                label = "{if}"
-
-            case is ForStatement:
-                label = "{for}"
-
-            case is WhileStatement:
-                label = "{while}"
-
-            case is DoWhileStatement:
-                label = "{do-while}"
-
-            case let ret as ReturnStatement:
-                if let exp = ret.exp {
-                    label = "{return \(exp)}"
-                } else {
-                    label = "{return}"
-                }
-
-            case let stmt as ThrowStatement:
-                label = "{throw \(stmt.exp)}"
-
-            case let varDecl as VariableDeclarationsStatement:
-                label = varDecl.decl.map { decl -> String in
-                    var declLabel = decl.isConstant ? "let " : "var "
-                    declLabel += decl.identifier
-                    declLabel += ": \(decl.type)"
-
-                    return declLabel
-                }.joined(separator: "\n")
-            
-            case let catchBlock as CatchBlock:
-                if let pattern = catchBlock.pattern {
-                    label = "{catch \(pattern)}"
-                } else {
-                    label = "{catch}"
-                }
-
-            default:
-                break
-            }
-
-            nodeDefinitions.append(NodeDefinition(node: node, label: label))
-        }
-
-        // Sort nodes so the result is more stable
-        nodeDefinitions.sort { (n1, n2) -> Bool in
-            if n1.node === graph.entry {
-                return true
-            }
-            if n2.node === graph.entry {
-                return false
-            }
-            if n1.node === graph.exit {
-                return false
-            }
-            if n2.node === graph.exit {
-                return true
-            }
-
-            return n1.label < n2.label
-        }
-
-        // Prepare nodes
-        for (i, definition) in nodeDefinitions.enumerated() {
-            let id = "n\(i + 1)"
-            nodeIds[ObjectIdentifier(definition.node)] = id
-
-            //buffer.output(line: "\(id) [label=\"\(definition.label)\"]")
-            buffer.output(line: "\(id) \(attributes(("label", #""\#(definition.label)""#)))")
-        }
-
-        // Output connections
-        for definition in nodeDefinitions {
-            let node = definition.node
-
-            guard let nodeId = nodeIds[ObjectIdentifier(node)] else {
-                continue
-            }
-
-            let edges = graph.edges(from: node)
-
-            for edge in edges {
-                let target = edge.end
-                guard let targetId = nodeIds[ObjectIdentifier(target)] else {
-                    continue
-                }
-
-                var attributes: [(key: String, value: String)] = []
-                if let label = edge.debugLabel {
-                    attributes.append((key: "label", value: #""\#(label)""#))
-                }
-                if edge.isBackEdge {
-                    attributes.append((key: "color", value: "\"#aa3333\""))
-                    attributes.append((key: "penwidth", value: "0.5"))
-                }
-
-                var line = "\(nodeId) -> \(targetId)"
-                line += " \(attributeList(attributes))"
-
-                buffer.output(line: line.trimmingCharacters(in: .whitespacesAndNewlines))
-            }
-        }
-    }
-    buffer.output(line: "}")
-
-    return buffer.buffer.trimmingCharacters(in: .whitespacesAndNewlines)
-}
-
-internal struct NodeDefinition {
-    var node: ControlFlowGraphNode
-    var label: String
 }

@@ -165,14 +165,22 @@ public class SizeOfExpression: Expression, ExpressionKindType {
         case value
     }
 }
-extension Expression {
+public extension Expression {
     @inlinable
-    public var asSizeOf: SizeOfExpression? {
+    var asSizeOf: SizeOfExpression? {
         cast()
     }
 
     @inlinable
     var isSizeOf: Bool {
         asSizeOf != nil
+    }
+    
+    static func sizeof(_ exp: Expression) -> SizeOfExpression {
+        SizeOfExpression(value: .expression(exp))
+    }
+    
+    static func sizeof(type: SwiftType) -> SizeOfExpression {
+        SizeOfExpression(value: .type(type))
     }
 }

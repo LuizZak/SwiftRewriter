@@ -26,19 +26,26 @@ struct ReturnStatementVisitor: StatementVisitor {
     }
 
     func visitSwitch(_ stmt: SwitchStatement) -> [ReturnStatement] {
-        var result: [ReturnStatement] = []
-
-        for caseClause in stmt.cases {
-            result.append(contentsOf: caseClause.statements.flatMap { $0.accept(self) })
+        var result = stmt.cases.flatMap(visitSwitchCase)
+        if let defaultCase = stmt.defaultCase {
+            result.append(contentsOf: visitSwitchDefaultCase(defaultCase))
         }
-
-        if let def = stmt.defaultCase {
-            result.append(contentsOf: def.flatMap { $0.accept(self) })
-        }
-
+        
         return result
     }
 
+    func visitSwitchCase(_ switchCase: SwitchCase) -> [ReturnStatement] {
+        switchCase.statements.flatMap(visitStatement)
+    }
+    
+    /// Visits a `default` block from a `SwitchStatement`.
+    ///
+    /// - Parameter defaultCase: A switch default case block to visit
+    /// - Returns: Result of visiting the switch default case block
+    func visitSwitchDefaultCase(_ defaultCase: SwitchDefaultCase) -> [ReturnStatement] {
+        defaultCase.statements.flatMap(visitStatement)
+    }
+    
     func visitDoWhile(_ stmt: DoWhileStatement) -> [ReturnStatement] {
         return stmt.body.accept(self)
     }
@@ -49,6 +56,10 @@ struct ReturnStatementVisitor: StatementVisitor {
 
     func visitDo(_ stmt: DoStatement) -> [ReturnStatement] {
         return stmt.body.accept(self)
+    }
+
+    func visitCatchBlock(_ block: CatchBlock) -> [ReturnStatement] {
+        return block.body.accept(self)
     }
 
     func visitDefer(_ stmt: DeferStatement) -> [ReturnStatement] {

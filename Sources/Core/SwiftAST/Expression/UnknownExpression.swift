@@ -65,4 +65,8 @@ public extension Expression {
     var isUnknown: Bool {
         asUnknown != nil
     }
+    
+    static func unknown(_ exp: UnknownASTContext) -> UnknownExpression {
+        UnknownExpression(context: exp)
+    }
 }

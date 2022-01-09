@@ -295,7 +295,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             readsAs: .switch(
                 .identifier("value"),
                 cases: [SwitchCase(patterns: [.expression(.constant(0))], statements: [.break()])],
-                default: [.break()]
+                defaultStatements: [.break()]
             )
         )
 
@@ -307,7 +307,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
                     SwitchCase(patterns: [.expression(.constant(0))], statements: [.break()]),
                     SwitchCase(patterns: [.expression(.constant(1))], statements: [.break()]),
                 ],
-                default: [.break()]
+                defaultStatements: [.break()]
             )
         )
 
@@ -321,7 +321,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
                         statements: [.break()]
                     )
                 ],
-                default: [.break()]
+                defaultStatements: [.break()]
             )
         )
 
@@ -338,7 +338,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
                         statements: [.break()]
                     )
                 ],
-                default: [
+                defaultStatements: [
                     .expression(
                         Expression.identifier("stmt").call()
                     )
@@ -362,7 +362,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
                     ),
                     SwitchCase(patterns: [.expression(.constant(1))], statements: [.break()]),
                 ],
-                default: [.break()]
+                defaultStatements: [.break()]
             )
         )
     }

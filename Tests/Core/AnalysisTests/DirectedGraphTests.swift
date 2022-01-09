@@ -85,7 +85,7 @@ class DirectedGraphTests: XCTestCase {
             start: n1,
             visitMethod: sut.depthFirstVisit,
             expected: [
-                .root(n1),
+                .start(n1),
                 n1 => (e0, n2),
                 n1 => (e0, n2) => (e2, n4),
                 n1 => (e0, n2) => (e2, n4) => (e3, n5),
@@ -111,7 +111,7 @@ class DirectedGraphTests: XCTestCase {
             start: n1,
             visitMethod: sut.breadthFirstVisit,
             expected: [
-                .root(n1),
+                .start(n1),
                 n1 => (e0, n2),
                 n1 => (e0, n2) => (e1, n3),
                 n1 => (e0, n2) => (e2, n4),
@@ -162,13 +162,14 @@ class DirectedGraphTests: XCTestCase {
     private func assertVisit(
         _ sut: TestGraph,
         start: TestGraph.Node,
-        visitMethod: (TestGraph.Node, (TestGraph.VisitElement) -> Void) -> Void,
+        visitMethod: (TestGraph.Node, (TestGraph.VisitElement) -> Bool) -> Void,
         expected: [TestGraph.VisitElement],
         line: UInt = #line
     ) {
         var visits: [TestGraph.VisitElement] = []
-        let _visit: (TestGraph.VisitElement) -> Void = {
+        let _visit: (TestGraph.VisitElement) -> Bool = {
             visits.append($0)
+            return true
         }
 
         visitMethod(start, _visit)
@@ -179,7 +180,7 @@ class DirectedGraphTests: XCTestCase {
 
         func _formatVisit(_ visit: TestGraph.VisitElement) -> String {
             switch visit {
-            case .root(let node):
+            case .start(let node):
                 return _formatNode(node)
             case .edge(let e, let from, let towards):
                 return "\(_formatVisit(from)) -(edge index: \(e.index))> \(_formatNode(towards))"
@@ -250,7 +251,7 @@ func => <E, N>(lhs: DirectedGraphVisitElement<E, N>, rhs: (edge: E, node: N)) ->
 
 // Creates a visit from `.root(lhs)` to `rhs.node` through `rhs.edge`.
 func => <E, N>(lhs: N, rhs: (edge: E, node: N)) -> DirectedGraphVisitElement<E, N> {
-    .edge(rhs.edge, from: .root(lhs), towards: rhs.node)
+    .edge(rhs.edge, from: .start(lhs), towards: rhs.node)
 }
 
 private class TestGraph {

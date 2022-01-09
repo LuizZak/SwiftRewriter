@@ -114,6 +114,15 @@ public extension Expression {
     var isBlock: Bool {
         asBlock != nil
     }
+    
+    static func block(
+        parameters: [BlockParameter] = [],
+        `return` returnType: SwiftType = .void,
+        body: CompoundStatement
+    ) -> BlockLiteralExpression {
+        
+        BlockLiteralExpression(parameters: parameters, returnType: returnType, body: body)
+    }
 }
 
 public struct BlockParameter: Codable, Equatable {

@@ -440,72 +440,137 @@ class SyntaxNodeIteratorTests: XCTestCase {
      And then recursively within each one, in breadth-first manner.
      */
 
-    func testSwitchNotInspectingBlocks() {
-        var cases: [SwitchCase] {
-            return [
-                SwitchCase(
+    func testSwitchNotInspectingBlocks() throws {
+        let switchExp = makeBlock("a")
+        let stmt = Statement.switch(
+            switchExp,
+            cases: [
+                .init(
                     patterns: [.expression(makeBlock("b"))],
                     statements: [.expression(.identifier("c"))]
                 )
+            ],
+            defaultStatements: [
+                .expression(.identifier("d"))
             ]
-        }
+        )
 
-        assertStatement(
-            .switch(
-                makeBlock(),
-                cases: cases,
-                default: nil
-            ),
+        try assertNode(
+            stmt,
+            inspectingBlocks: false,
             iteratesAs: [
-                Statement.switch(
-                    makeBlock("a"),
-                    cases: cases,
-                    default: nil
-                ),
-                // switch expression
-                makeBlock(),
-                // case 0 -> [pattern] -> block
-                makeBlock("b"),
-                // default -> statement(s)
-                Statement.expression(.identifier("c")),
+                // -- depth 0
+                // switch
+                el(stmt),
 
-                // default -> statement(s) -> expression
-                Expression.identifier("c"),
+                // -- depth 1
+                // switch -> exp
+                el(switchExp),
+                // switch -> case 0
+                el(stmt.cases[0]),
+                // switch -> default
+                el(stmt.defaultCase),
+
+                // -- depth 2
+                // switch -> case 0 (patterns) 0 -> sub expression
+                el(stmt.cases[0].patterns[0].subExpressions[0]),
+                // switch -> case 0 -> statement 0
+                el(stmt.cases[0].statements[0]),
+                // switch -> default -> statement 0
+                el(stmt.defaultCase?.statements[0]),
+
+                // -- depth 3
+                // switch -> case 0 -> statement 0 -> expression 0
+                el(stmt.cases[0].statements[0].asExpressions?.expressions[0]),
+                // switch -> default -> statement 0 -> expression 0
+                el(stmt.defaultCase?.statements[0].asExpressions?.expressions[0]),
             ]
         )
     }
 
-    func testSwitchInspectingBlocks() {
-        var cases: [SwitchCase] {
-            return [
-                SwitchCase(
+    func testSwitchInspectingBlocks() throws {
+        let switchExp = makeBlock("a")
+        let stmt = Statement.switch(
+            switchExp,
+            cases: [
+                .init(
                     patterns: [.expression(makeBlock("b"))],
                     statements: [.expression(.identifier("c"))]
                 )
+            ],
+            defaultStatements: [
+                .expression(.identifier("d"))
             ]
-        }
+        )
 
-        assertStatement(
-            .switch(
-                makeBlock(),
-                cases: cases,
-                default: [Statement.expression(.identifier("d"))]
-            ),
+        try assertNode(
+            stmt,
             inspectingBlocks: true,
             iteratesAs: [
-                Statement.switch(
-                    makeBlock("a"),
-                    cases: cases,
-                    default: [Statement.expression(.identifier("d"))]
-                ),
-                // switch expression -> block
-                makeBlock(),
+                // -- depth 0
+                // switch
+                el(stmt),
+
+                // -- depth 1
+                // switch -> exp
+                el(switchExp),
+                // switch -> case 0
+                el(stmt.cases[0]),
+                // switch -> default
+                el(stmt.defaultCase),
+
+                // -- depth 2
+                // switch -> exp -> body
+                el(switchExp.body),
+                // switch -> case 0 (patterns) 0 -> sub expression
+                el(stmt.cases[0].patterns[0].subExpressions[0]),
+                // switch -> case 0 -> statement 0
+                el(stmt.cases[0].statements[0]),
+                // switch -> default -> statement 0
+                el(stmt.defaultCase?.statements[0]),
+
+                // -- depth 3
+                // switch -> exp -> body -> statements
+                el(switchExp.body.statements[0]),
+                // switch -> case 0 (patterns) 0 -> sub expression 0 -> body
+                el(stmt.cases[0].patterns[0].subExpressions[0].asBlock?.body),
+                // switch -> case 0 -> statement 0 -> expression 0
+                el(stmt.cases[0].statements[0].asExpressions?.expressions[0]),
+                // switch -> default -> statement 0 -> expression 0
+                el(stmt.defaultCase?.statements[0].asExpressions?.expressions[0]),
+
+                // -- depth 4
+                // switch -> exp -> body -> statements -> expression
+                el(switchExp.body.statements[0].asExpressions?.expressions[0]),
+                // switch -> case 0 (patterns) 0 -> sub expression 0 -> body -> statement 0
+                el(stmt.cases[0].patterns[0].subExpressions[0].asBlock?.body.statements[0]),
+
+                // -- depth 5
+                // switch -> case 0 (patterns) 0 -> sub expression 0 -> body -> statement 0 -> expression 0
+                el(stmt.cases[0].patterns[0].subExpressions[0].asBlock?.body.statements[0].asExpressions?.expressions[0]),
+            ]
+        )
+
+        /*
+        assertStatement(
+            stmt,
+            inspectingBlocks: true,
+            iteratesAs: [
+                stmt,
+                // switch expression
+                stmt.exp,
+                // case 0
+                stmt.cases[0],
+                // default
+                stmt.defaultCase!,
+                // switch expression -> block/statements
+                stmt.exp.children[0],
                 // case 0 -> [pattern] -> block
-                makeBlock("b"),
+                stmt.cases[0].patterns[0].subExpressions[0],
                 // case 0 -> statement(s)
-                Statement.expression(.identifier("c")),
+                stmt.cases[0].statements[0],
                 // default -> statement(s)
-                Statement.expression(.identifier("d")),
+                stmt.defaultCase!.statements[0],
 
                 // switch expression -> block -> compound statement
                 Statement.compound([.expression(.identifier("a"))]),
@@ -526,6 +591,7 @@ class SyntaxNodeIteratorTests: XCTestCase {
                 Expression.identifier("b"),
             ]
         )
+        */
     }
 
     func testDefer() {
@@ -602,6 +668,13 @@ class SyntaxNodeIteratorTests: XCTestCase {
                         initialization: makeBlock("a")
                     )
                 ]),
+                StatementVariableDeclaration(
+                    identifier: "a",
+                    type: .void,
+                    ownership: .strong,
+                    isConstant: false,
+                    initialization: makeBlock("a")
+                ),
                 makeBlock("a"),
             ]
         )
@@ -629,6 +702,13 @@ class SyntaxNodeIteratorTests: XCTestCase {
                         initialization: makeBlock("a")
                     )
                 ]),
+                StatementVariableDeclaration(
+                    identifier: "a",
+                    type: .void,
+                    ownership: .strong,
+                    isConstant: false,
+                    initialization: makeBlock("a")
+                ),
                 makeBlock("a"),
                 Statement.compound([.expression(.identifier("a"))]),
                 Statement.expression(.identifier("a")),
@@ -949,12 +1029,15 @@ class SyntaxNodeIteratorTests: XCTestCase {
 }
 
 extension SyntaxNodeIteratorTests {
+    typealias LazyIteratorElement<T: SyntaxNode> = ((T) -> SyntaxNode?, file: StaticString, line: UInt)
+    typealias IteratorElement = (node: SyntaxNode, file: StaticString, line: UInt)
+
     /// Creates a test block which contains only a single statement containing an
     /// `Expression.identifier()` case with a given input value as the identifier.
     ///
     /// Used in tests to generate an expression that contains statements, to test
     /// iterating statements through expressions.
-    private func makeBlock(_ identifier: String = "a") -> Expression {
+    private func makeBlock(_ identifier: String = "a") -> BlockLiteralExpression {
         return .block(
             parameters: [],
             return: .void,
@@ -975,7 +1058,7 @@ extension SyntaxNodeIteratorTests {
                 inspectBlocks: inspectingBlocks
             )
 
-        assertIterator(iterator: iterator, iterates: expected, file: file, line: line)
+        assertIterator(iterator: iterator, iteratesAs: expected, file: file, line: line)
     }
 
     private func assertStatement(
@@ -991,128 +1074,354 @@ extension SyntaxNodeIteratorTests {
                 inspectBlocks: inspectingBlocks
             )
 
-        assertIterator(iterator: iterator, iterates: expected, file: file, line: line)
+        assertIterator(iterator: iterator, iteratesAs: expected, file: file, line: line)
+    }
+
+    private func assertNodeLazily<T: SyntaxNode>(
+        _ source: T,
+        inspectingBlocks: Bool = false,
+        iteratesAsKeyPaths expected: [LazyIteratorElement<T>],
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let iterator =
+            SyntaxNodeIterator(
+                node: source,
+                inspectBlocks: inspectingBlocks
+            )
+
+        assertIterator(
+            iterator: iterator,
+            object: source,
+            iteratesLazilyAs: expected,
+            file: file,
+            line: line
+        )
+    }
+
+    private func assertNode(
+        _ source: SyntaxNode,
+        inspectingBlocks: Bool = false,
+        iteratesAs expected: [IteratorElement],
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let iterator =
+            SyntaxNodeIterator(
+                node: source,
+                inspectBlocks: inspectingBlocks
+            )
+
+        assertIterator(
+            iterator: iterator,
+            iteratesAs: expected,
+            file: file,
+            line: line
+        )
+    }
+    
+    private func assertIterator(
+        iterator: SyntaxNodeIterator,
+        iteratesAs expected: [SyntaxNode],
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        var list: [IteratorElement] = []
+
+        for node in expected {
+            list.append((
+                node: node,
+                file: file,
+                line: line
+            ))
+        }
+
+        assertIterator(
+            iterator: iterator,
+            iteratesAs: list,
+            file: file,
+            line: line
+        )
+    }
+
+    private func assertIterator<T: SyntaxNode>(
+        iterator: SyntaxNodeIterator,
+        object: T,
+        iteratesLazilyAs expectedLazy: [LazyIteratorElement<T>],
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        var expectedList: [IteratorElement] = []
+
+        for (i, expLazy) in expectedLazy.enumerated() {
+            guard let element = expLazy.0(object) else {
+                XCTFail(
+                    "Unexpected nil element iterator at index #\(i)",
+                    file: expLazy.file,
+                    line: expLazy.line
+                )
+                return
+            }
+
+            expectedList.append((element, expLazy.file, expLazy.line))
+        }
+
+        assertIterator(
+            iterator: iterator,
+            iteratesAs: expectedList,
+            file: file,
+            line: line
+        )
     }
 
     private func assertIterator(
         iterator: SyntaxNodeIterator,
-        iterates expected: [SyntaxNode],
+        iteratesAs expectedList: [IteratorElement],
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-        let result = Array(AnyIterator(iterator))
+        let resultList = Array(AnyIterator(iterator))
 
-        func dumpIterator(_ sequence: [SyntaxNode], differenceIndex: Int? = nil) {
-            for (i, node) in sequence.enumerated() {
-                if i == differenceIndex {
-                    print("difference starts here => ", terminator: "")
-                }
-                print("#\(i) (<\(type(of: node))>): ", terminator: "")
-
-                let syntaxProducer = SwiftSyntaxProducer()
-
-                switch node {
-                case let node as Expression:
-                    print(node.description)
-                case let stmt as Statement:
-                    print(syntaxProducer.generateStatement(stmt).description)
-                case let catchBlock as CatchBlock:
-                    let body = syntaxProducer.generateStatement(catchBlock.body).description
-
-                    if let pattern = catchBlock.pattern {
-                        print("catch let \(pattern.description) \(body)")
-                    } else {
-                        print("catch \(body)")
-                    }
-                default:
-                    print("<unknown SyntaxNode type \(type(of: node))>")
-                }
-            }
-        }
-
-        func dumpFullIterators(differenceIndex: Int? = nil) {
-            print("Full iterators:")
-            
-            print("\nExpected:")
-            dumpIterator(expected, differenceIndex: differenceIndex)
-            
-            print("\nActual:")
-            dumpIterator(result, differenceIndex: differenceIndex)
-        }
-
-        for (i, (actual, expect)) in zip(result, expected).enumerated() {
-            switch (expect, actual) {
-            case (let lhs as Statement, let rhs as Statement):
-                if lhs == rhs { continue }
+        for (i, (expected, actual)) in zip(expectedList, resultList).enumerated() {
+            switch (expected.node, actual) {
+            case (let exp as Statement, let act as Statement):
+                if exp == act { continue }
 
                 assertStatementsEqual(
-                    actual: lhs,
-                    expected: rhs,
+                    actual: act,
+                    expected: exp,
                     messageHeader: "Expected index \(i) of iterator to be:",
-                    file: file,
-                    line: line
+                    printTypes: true,
+                    file: expected.file,
+                    line: expected.line
                 )
             
-            case (let lhs as Expression, let rhs as Expression):
-                if lhs == rhs { continue }
+            case (let exp as Expression, let act as Expression):
+                if exp == act { continue }
 
                 assertExpressionsEqual(
-                    actual: lhs,
-                    expected: rhs,
+                    actual: act,
+                    expected: exp,
                     messageHeader: "Expected index \(i) of iterator to be:",
-                    file: file,
-                    line: line
+                    printTypes: true,
+                    file: expected.file,
+                    line: expected.line
                 )
             
-            case (let lhs as CatchBlock, let rhs as CatchBlock):
-                if lhs == rhs { continue }
+            case (let exp as CatchBlock, let act as CatchBlock):
+                if exp == act { continue }
 
-                if lhs.pattern != rhs.pattern {
+                if exp.pattern != act.pattern {
                     XCTFail(
                         """
                         Expected index \(i) of iterator are catch blocks with different patterns:
 
-                        expected: \(lhs.pattern?.description ?? "<nil>")
-                        found: \(rhs.pattern?.description ?? "<nil>")
+                        expected: \(exp.pattern?.description ?? "<nil>")
+                        found: \(act.pattern?.description ?? "<nil>")
                         """,
-                        file: file,
-                        line: line
+                        file: expected.file,
+                        line: expected.line
                     )
-                } else if lhs.body != rhs.body {
+                } else if exp.body != act.body {
                     assertStatementsEqual(
-                        actual: lhs.body,
-                        expected: rhs.body,
+                        actual: act.body,
+                        expected: exp.body,
                         messageHeader: "Expected body of catch block at index \(i) of iterator to be:",
-                        file: file,
-                        line: line
+                    printTypes: true,
+                        file: expected.file,
+                        line: expected.line
                     )
                 }
+            
+            case (let exp as StatementVariableDeclaration, let act as StatementVariableDeclaration):
+                if exp == act { continue }
+
+                XCTFail(
+                    """
+                    Expected index \(i) of iterator are unequal variable declarations:
+
+                    expected: \(dumpNode(exp))
+                    found: \(dumpNode(act))
+                    """,
+                    file: expected.file,
+                    line: expected.line
+                )
+            
+            case (let exp as SwitchCase, let act as SwitchCase):
+                if exp == act { continue }
+
+                XCTFail(
+                    """
+                    Expected index \(i) of iterator are unequal switch cases:
+
+                    Expected:
+                    
+                    \(dumpNode(exp))
+
+                    Found:
+                    
+                    \(dumpNode(act))
+                    """,
+                    file: expected.file,
+                    line: expected.line
+                )
+            
+            case (let exp as SwitchDefaultCase, let act as SwitchDefaultCase):
+                if exp == act { continue }
+
+                XCTFail(
+                    """
+                    Expected index \(i) of iterator are unequal switch default cases:
+
+                    Expected:
+                    
+                    \(dumpNode(exp))
+
+                    Found:
+                    
+                    \(dumpNode(act))
+                    """,
+                    file: expected.file,
+                    line: expected.line
+                )
 
             default:
                 XCTFail(
                     """
-                    Items at index \(i) of type \(type(of: expect)) and \(type(of: actual)) \
+                    Items at index \(i) of type \(type(of: expected.node)) and \(type(of: actual)) \
                     cannot be compared.
                     """,
-                    file: file,
-                    line: line
+                    file: expected.file,
+                    line: expected.line
                 )
-
-                dumpFullIterators(differenceIndex: i)
             }
+
+            dumpFullIterators(expectedList, resultList, differenceIndex: i)
 
             return
         }
 
-        if expected.count != result.count {
+        if expectedList.count != resultList.count {
             XCTFail(
                 """
-                Mismatched result count: Expected \(expected.count) item(s) but \
-                received \(result.count)
+                Mismatched result count: Expected \(expectedList.count) item(s) but \
+                received \(resultList.count)
                 """,
                 file: file,
-                line: line
+                line: expectedList.last?.line ?? line
             )
         }
+    }
+
+    func kp<T, S: SyntaxNode>(
+        _ value: KeyPath<T, S>,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> LazyIteratorElement<T> {
+
+        return ({ $0[keyPath: value] }, file, line)
+    }
+
+    func kp<T, S: SyntaxNode>(
+        _ value: KeyPath<T, S?>,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> LazyIteratorElement<T> {
+
+        return ({ $0[keyPath: value] }, file, line)
+    }
+
+    func el(
+        _ value: SyntaxNode?,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) throws -> IteratorElement {
+        
+        guard let value = value else {
+            throw Error.unexpectedNil
+        }
+
+        return (value, file, line)
+    }
+    
+    func dumpFullIterators(
+        _ expected: [IteratorElement],
+        _ result: [SyntaxNode],
+        differenceIndex: Int? = nil
+    ) {
+        
+        print("Full iterators:")
+        
+        print("\nExpected:")
+        dumpIterator(expected, differenceIndex: differenceIndex)
+        
+        print("\nActual:")
+        dumpIterator(result, differenceIndex: differenceIndex)
+    }
+
+    func dumpIterator(_ sequence: [SyntaxNode], differenceIndex: Int? = nil) {
+        for (i, node) in sequence.enumerated() {
+            if i == differenceIndex {
+                print("difference starts here => ", terminator: "")
+            }
+            print("#\(i) (<\(type(of: node))>): \(dumpNode(node))")
+        }
+    }
+
+    func dumpIterator(_ sequence: [IteratorElement], differenceIndex: Int? = nil) {
+        for (i, element) in sequence.enumerated() {
+            if i == differenceIndex {
+                print("difference starts here => ", terminator: "")
+            }
+            let node = element.0
+
+            print("#\(i) (<\(type(of: node))>): \(dumpNode(node))")
+        }
+    }
+
+    func dumpNode(_ node: SyntaxNode) -> String {
+        let syntaxProducer = SwiftSyntaxProducer()
+
+        switch node {
+        case let node as Expression:
+            return syntaxProducer.generateExpression(node).description
+
+        case let stmt as Statement:
+            return syntaxProducer.generateStatement(stmt).description
+
+        case let catchBlock as CatchBlock:
+            let body = syntaxProducer.generateStatement(catchBlock.body).description
+
+            if let pattern = catchBlock.pattern {
+                return "catch let \(pattern.description) \(body)"
+            }
+
+            return "catch \(body)"
+        
+        case let block as SwitchCase:
+            let syntax = syntaxProducer.generateSwitchCase(block)
+
+            return syntax.description
+        
+        case let block as SwitchDefaultCase:
+            let syntax = syntaxProducer.generateSwitchDefaultCase(block)
+
+            return syntax.description
+        
+        case let decl as StatementVariableDeclaration:
+            var result = "\(decl.identifier): \(decl.type)"
+            if let exp = decl.initialization {
+                result += " = \(exp)"
+            }
+
+            return result
+
+        default:
+            return "<unknown SyntaxNode type \(type(of: node))>"
+        }
+    }
+
+    private enum Error: Swift.Error {
+        case unexpectedNil
     }
 }

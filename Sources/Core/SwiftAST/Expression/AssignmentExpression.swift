@@ -110,4 +110,8 @@ public extension Expression {
     var isAssignment: Bool {
         asAssignment != nil
     }
+
+    static func assignment(lhs: Expression, op: SwiftOperator, rhs: Expression) -> AssignmentExpression {
+        AssignmentExpression(lhs: lhs, op: op, rhs: rhs)
+    }
 }

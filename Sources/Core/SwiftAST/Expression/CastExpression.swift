@@ -98,6 +98,10 @@ public extension Expression {
     var isCast: Bool {
         asCast != nil
     }
+    
+    static func cast(_ exp: Expression, type: SwiftType, isOptionalCast: Bool = true) -> CastExpression {
+        CastExpression(exp: exp, type: type, isOptionalCast: isOptionalCast)
+    }
 }
 
 extension CastExpression {

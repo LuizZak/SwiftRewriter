@@ -123,8 +123,8 @@ public class ASTSimplifier: ASTRewriterPass {
         }
         
         if let def = stmt.defaultCase {
-            if def.count > 1 && def.last is BreakStatement {
-                stmt.defaultCase?.removeLast()
+            if def.statements.count > 1 && def.statements.last is BreakStatement {
+                def.statements.removeLast()
                 notifyChange()
             }
         }

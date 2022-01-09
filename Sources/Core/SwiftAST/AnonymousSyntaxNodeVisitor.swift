@@ -248,13 +248,27 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
         
         visitExpression(stmt.exp)
         
-        stmt.cases.forEach {
-            $0.patterns.forEach(visitPattern)
-            $0.statements.forEach(visitStatement)
+        stmt.cases.forEach { visitSwitchCase($0) }
+
+        if let defaultCase = stmt.defaultCase {
+            visitSwitchDefaultCase(defaultCase)
         }
-        if let def = stmt.defaultCase {
-            def.forEach(visitStatement)
-        }
+    }
+    
+    /// Visits a `case` block from a `SwitchStatement`.
+    ///
+    /// - Parameter switchCase: A switch case block to visit
+    public func visitSwitchCase(_ switchCase: SwitchCase) {
+        switchCase.patterns.forEach(visitPattern)
+        switchCase.statements.forEach(visitStatement)
+    }
+    
+    /// Visits a `default` block from a `SwitchStatement`.
+    ///
+    /// - Parameter defaultCase: A switch default case block to visit
+    /// - Returns: Result of visiting the switch default case block
+    public func visitSwitchDefaultCase(_ defaultCase: SwitchDefaultCase) {
+        defaultCase.statements.forEach(visitStatement)
     }
     
     /// Visits a `while` statement with this visitor
@@ -295,6 +309,22 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
         listener(stmt)
         
         visitStatement(stmt.body)
+    }
+    
+    /// Visits a `catch` block from a `DoStatement`.
+    ///
+    /// - Parameter stmt: A catch block to visit
+    /// - Returns: Result of visiting the catch block
+    public func visitCatchBlock(_ block: CatchBlock) -> CatchBlock {
+        listener(block)
+
+        if let pattern = block.pattern {
+            visitPattern(pattern)
+        }
+
+        visitCompound(block.body)
+
+        return block
     }
     
     /// Visits a `defer` statement node

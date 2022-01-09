@@ -106,40 +106,48 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     }
     
     // MARK: - Definition Collection
-    public override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
-        for (i, decl) in stmt.decl.enumerated() {
-            var type = decl.type
-            
-            decl.initialization?.expectedType = type
-            stmt.decl[i].initialization = decl.initialization.map(visitExpression)
-            
-            // TODO: This optionality promotion should probably be reserved to
-            // expression passes only.
-            if !typeSystem.isScalarType(decl.type) && decl.ownership != .weak,
-                let initValueType = decl.initialization?.resolvedType {
-                
-                type = type.withSameOptionalityAs(initValueType)
-                
-                // Promote implicitly unwrapped optionals to full optionals
-                if initValueType.canBeImplicitlyUnwrapped {
-                    type = .optional(type.unwrapped)
-                }
-            }
-            
-            let definition =
-                CodeDefinition
-                    .forLocalIdentifier(
-                        decl.identifier,
-                        type: type,
-                        ownership: decl.ownership,
-                        isConstant: decl.isConstant,
-                        location: .variableDeclaration(stmt, index: i)
-                    )
-            
-            nearestScope(for: stmt)?.recordDefinition(definition, overwrite: true)
-        }
+    public override func visitStatementVariableDeclaration(_ decl: StatementVariableDeclaration) -> StatementVariableDeclaration {
+        var type = decl.type
         
-        return super.visitVariableDeclarations(stmt)
+        decl.initialization?.expectedType = type
+        decl.initialization = decl.initialization.map(visitExpression)
+        
+        // TODO: This optionality promotion should probably be reserved to
+        // expression passes only.
+        if !typeSystem.isScalarType(decl.type) && decl.ownership != .weak,
+            let initValueType = decl.initialization?.resolvedType {
+            
+            type = type.withSameOptionalityAs(initValueType)
+            
+            // Promote implicitly unwrapped optionals to full optionals
+            if initValueType.canBeImplicitlyUnwrapped {
+                type = .optional(type.unwrapped)
+            }
+        }
+
+        let definition = CodeDefinition
+            .forLocalIdentifier(
+                decl.identifier,
+                type: type,
+                ownership: decl.ownership,
+                isConstant: decl.isConstant,
+                location: .variableDeclaration(decl)
+            )
+
+        nearestScope(for: decl)?.recordDefinition(definition, overwrite: true)
+
+        return super.visitStatementVariableDeclaration(decl)
+    }
+    
+    public override func visitCatchBlock(_ catchBlock: CatchBlock) -> CatchBlock {
+        catchBlock
+        .body
+        .recordDefinition(
+            .forCatchBlockPattern(catchBlock),
+            overwrite: true
+        )
+
+        return super.visitCatchBlock(catchBlock)
     }
     
     public override func visitFor(_ stmt: ForStatement) -> Statement {
@@ -248,15 +256,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         return super.visitReturn(stmt)
     }
 
-    public override func visitCatchBlock(_ catchBlock: CatchBlock) -> CatchBlock {
-        catchBlock.recordDefinition(
-            .forCatchBlockPattern(catchBlock),
-            overwrite: true
-        )
-
-        return super.visitCatchBlock(catchBlock)
-    }
-    
     func collectInPattern(
         _ pattern: Pattern,
         type: SwiftType,
@@ -280,7 +279,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             break
         }
     }
-    
+
     // MARK: - Expression Resolving
 
     public override func visitExpression(_ exp: Expression) -> Expression {
@@ -530,6 +529,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         // Visit identifier's type from current context
         if let definition = searchIdentifierDefinition(exp) {
             exp.definition = definition
+            exp.isReadOnlyUsage = isReadOnlyContext(exp)
             exp.resolvedType = definition.type
         } else {
             exp.definition = nil
@@ -729,6 +729,53 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
 
     private func makeCoercionVerifier(type: SwiftType) -> CoercionVerifier {
         CoercionVerifier(type: type, typeSystem: typeSystem)
+    }
+    
+    /// Returns `true` if a given expression is being used in a read-only context.
+    private func isReadOnlyContext(_ expression: Expression) -> Bool {
+        if let assignment = expression.parentExpression?.asAssignment {
+            return expression !== assignment.lhs
+        }
+        // Unary '&' is interpreted as 'address-of', which is a mutable operation.
+        if let unary = expression.parentExpression?.asUnary {
+            return unary.op != .bitwiseAnd
+        }
+        if let postfix = expression.parentExpression?.asPostfix {
+            let root = postfix.topPostfixExpression
+            
+            // If at any point we find a function call, the original value cannot
+            // be mutated due to any change on the returned value, so we just
+            // assume it's never written.
+            let chain = PostfixChainInverter.invert(expression: root)
+            if let call = chain.first(where: { $0.postfix is FunctionCallPostfix }),
+                let member = call.postfixExpression?.exp.asPostfix?.member {
+                
+                // Skip checking mutating methods on reference types, since those
+                // don't mutate variables.
+                if let type = chain.first?.expression?.resolvedType,
+                    !typeSystem.isScalarType(type) {
+                    
+                    return true
+                }
+                
+                if let method = member.memberDefinition as? KnownMethod {
+                    return !method.signature.isMutating
+                }
+                
+                return true
+            }
+            
+            // Writing to a reference type at any point invalidates mutations
+            // to the original value.
+            let types = chain.compactMap(\.resolvedType)
+            if types.contains(where: { typeSystem.isClassInstanceType($0) }) {
+                return true
+            }
+            
+            return isReadOnlyContext(root)
+        }
+        
+        return true
     }
 }
 
@@ -1146,20 +1193,24 @@ private class MemberInvocationResolver {
         return nil
     }
     
-    func method(isStatic: Bool,
-                memberName: String,
-                arguments: [FunctionArgument],
-                in type: SwiftType) -> KnownMethod? {
+    func method(
+        isStatic: Bool,
+        memberName: String,
+        arguments: [FunctionArgument],
+        in type: SwiftType
+    ) -> KnownMethod? {
         
         let identifier = FunctionIdentifier(name: memberName, argumentLabels: arguments.map(\.label))
         
         let types = arguments.map(\.expression.resolvedType)
         
-        return typeSystem.method(withIdentifier: identifier,
-                                 invocationTypeHints: types,
-                                 static: isStatic,
-                                 includeOptional: true,
-                                 in: type)
+        return typeSystem.method(
+            withIdentifier: identifier,
+            invocationTypeHints: types,
+            static: isStatic,
+            includeOptional: true,
+            in: type
+        )
     }
 }
 

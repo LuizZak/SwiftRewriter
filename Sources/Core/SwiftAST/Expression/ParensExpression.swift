@@ -90,6 +90,10 @@ public extension Expression {
     var isParens: Bool {
         asParens != nil
     }
+
+    static func parens(_ exp: Expression) -> ParensExpression {
+        ParensExpression(exp: exp)
+    }
     
     /// Returns the first non-`ParensExpression` child expression of this syntax
     /// node.

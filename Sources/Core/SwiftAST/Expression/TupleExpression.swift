@@ -85,4 +85,8 @@ public extension Expression {
     var isTuple: Bool {
         asTuple != nil
     }
+    
+    static func tuple(_ elements: [Expression]) -> TupleExpression {
+        TupleExpression(elements: elements)
+    }
 }

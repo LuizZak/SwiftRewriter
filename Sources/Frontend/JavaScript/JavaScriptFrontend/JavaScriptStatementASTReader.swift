@@ -167,7 +167,7 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
         return .switch(
             exp,
             cases: cases,
-            default: defaultCase
+            defaultStatements: defaultCase
         )
     }
 

@@ -7,27 +7,46 @@
 /// semantics of 'unwinding' are preserved across all different types of branching
 /// events in a CFG, like early returns and loop continuation and breaking.
 
-// TODO: Add support for expressions in control flow graph.
-
 import SwiftAST
+import TypeSystem
 
 public extension ControlFlowGraph {
+    /// Options that can be specified during generation of control flow graphs.
+    struct GenerationOptions {
+        public static var `default`: Self = Self()
+        
+        /// If `true`, generates marker nodes between code scope changes.
+        public var generateEndScopes: Bool
+
+        /// If `true`, prunes the resulting CFG so that nodes that are unreachable
+        /// from the entry node are removed from the graph.
+        public var pruneUnreachable: Bool
+
+        public init(
+            generateEndScopes: Bool = false,
+            pruneUnreachable: Bool = false
+        ) {
+            self.generateEndScopes = generateEndScopes
+            self.pruneUnreachable = pruneUnreachable
+        }
+    }
+
     /// Creates a control flow graph for a given compound statement.
     /// The entry and exit points for the resulting graph will be the compound
     /// statement itself, with its inner nodes being the statements contained
     /// within.
-    ///
-    /// If `pruneUnreachable` is `true`, the resulting graph has nodes that are
-    /// unreachable from the entry point removed before the final graph is produced.
     static func forCompoundStatement(
         _ compoundStatement: CompoundStatement,
-        pruneUnreachable: Bool = false
+        options: GenerationOptions = .default
     ) -> ControlFlowGraph {
-        let graph = innerForCompoundStatement(compoundStatement)
+        let graph = innerForCompoundStatement(
+            compoundStatement,
+            options: options
+        )
         
         markBackEdges(in: graph)
 
-        if pruneUnreachable {
+        if options.pruneUnreachable {
             prune(graph)
         }
         
@@ -85,6 +104,11 @@ extension ControlFlowGraph {
     
     @discardableResult
     func addEdge(from node1: ControlFlowGraphNode, to node2: ControlFlowGraphNode) -> ControlFlowGraphEdge {
+        assert(
+            containsNode(node1) && containsNode(node2),
+            "Attempted to add edge between nodes that are no contained within this graph."
+        )
+        
         let edge = ControlFlowGraphEdge(start: node1, end: node2)
         addEdge(edge)
         
@@ -111,6 +135,8 @@ internal extension ControlFlowGraph {
 
         graph.breadthFirstVisit(start: graph.entry) { visit in
             toRemove.remove(visit.node)
+            
+            return true
         }
 
         toRemove.forEach(graph.removeNode)
@@ -181,24 +207,51 @@ internal extension ControlFlowGraph {
     struct _LazySubgraphGenerator {
         static let invalid = _LazySubgraphGenerator(startNode: ControlFlowGraphNode(node: _InvalidSyntaxNode()))
         
+        private var operations: [GraphOperation] = []
+
         var isValid: Bool {
             !(startNode.node is _InvalidSyntaxNode)
         }
         
         var startNode: ControlFlowGraphNode
         var exitNodes: ExitNodes = ExitNodes()
+
+        // Statement-specific nodes
         var breakNodes: BreakNodes = BreakNodes()
         var continueNodes: ContinueNodes = ContinueNodes()
         var fallthroughNodes: FallthroughNodes = FallthroughNodes()
         var returnNodes: ReturnNodes = ReturnNodes()
         var throwNodes: ThrowNodes = ThrowNodes()
-        
-        private var operations: [GraphOperation] = []
+
+        // Expression-specific nodes
+        var nullCoalesceNodes: NullCoalesceNodes = NullCoalesceNodes()
         
         init(startNode: ControlFlowGraphNode) {
             self.startNode = startNode
             
             operations = [.addNode(startNode)]
+        }
+        
+        init(startAndExitNode startNode: ControlFlowGraphNode) {
+            self.startNode = startNode
+            
+            operations = [.addNode(startNode)]
+            exitNodes.addNode(startNode)
+        }
+
+        /// Returns `true` if the list of operations contains a reference to a
+        /// given node.
+        private func _containsNode(_ node: ControlFlowGraphNode) -> Bool {
+            for operation in operations {
+                switch operation {
+                case .addNode(let n) where n == node:
+                    return true
+                default:
+                    break
+                }
+            }
+
+            return false
         }
         
         /// Applies the operations enqueued on this lazy subgraph to the given
@@ -224,10 +277,23 @@ internal extension ControlFlowGraph {
                 }
             }
         }
+
+        /// Returns a copy of this subgraph, with another subgraph embedded, with
+        /// the resulting list of non-exit jumps being a union between the two.
+        func mergingNonExitJumps(_ other: Self) -> Self {
+            var copy = self
+            copy.breakNodes.merge(with: other.breakNodes)
+            copy.continueNodes.merge(with: other.continueNodes)
+            copy.fallthroughNodes.merge(with: other.fallthroughNodes)
+            copy.returnNodes.merge(with: other.returnNodes)
+            copy.throwNodes.merge(with: other.throwNodes)
+            copy.nullCoalesceNodes.merge(with: other.nullCoalesceNodes)
+            return copy
+        }
         
         /// Returns a copy of this lazy subgraph with an extra exit node
         /// appended to the exit jump sources list.
-        func addingExitNode(_ node: ControlFlowGraphNode) -> _LazySubgraphGenerator {
+        func addingExitNode(_ node: ControlFlowGraphNode) -> Self {
             var result = self
             result.exitNodes.addNode(node)
             return result
@@ -236,7 +302,7 @@ internal extension ControlFlowGraph {
         /// Returns a copy of this lazy subgraph with an extra continue node
         /// appended to the continue jump sources list, optionally specifying a
         /// label.
-        func addingBreakNode(_ node: ControlFlowGraphNode, targetLabel: String? = nil) -> _LazySubgraphGenerator {
+        func addingBreakNode(_ node: ControlFlowGraphNode, targetLabel: String? = nil) -> Self {
             var result = self
             result.breakNodes.addNode(node, targetLabel: targetLabel)
             return result
@@ -245,7 +311,7 @@ internal extension ControlFlowGraph {
         /// Returns a copy of this lazy subgraph with an extra continue node
         /// appended to the continue jump sources list, optionally specifying a
         /// label.
-        func addingContinueNode(_ node: ControlFlowGraphNode, targetLabel: String? = nil) -> _LazySubgraphGenerator {
+        func addingContinueNode(_ node: ControlFlowGraphNode, targetLabel: String? = nil) -> Self {
             var result = self
             result.continueNodes.addNode(node, targetLabel: targetLabel)
             return result
@@ -253,7 +319,7 @@ internal extension ControlFlowGraph {
 
         /// Returns a copy of this lazy subgraph with an extra fallthrough node
         /// appended to the fallthrough jump sources list.
-        func addingFallthroughNode(_ node: ControlFlowGraphNode) -> _LazySubgraphGenerator {
+        func addingFallthroughNode(_ node: ControlFlowGraphNode) -> Self {
             var result = self
             result.fallthroughNodes.addNode(node)
             return result
@@ -261,7 +327,7 @@ internal extension ControlFlowGraph {
 
         /// Returns a copy of this lazy subgraph with an extra return node appended
         /// to the return jump sources list.
-        func addingReturnNode(_ node: ControlFlowGraphNode) -> _LazySubgraphGenerator {
+        func addingReturnNode(_ node: ControlFlowGraphNode) -> Self {
             var result = self
             result.returnNodes.addNode(node)
             return result
@@ -269,14 +335,22 @@ internal extension ControlFlowGraph {
 
         /// Returns a copy of this lazy subgraph with an extra throw node appended
         /// to the throw jump sources list.
-        func addingThrowNode(_ node: ControlFlowGraphNode) -> _LazySubgraphGenerator {
+        func addingThrowNode(_ node: ControlFlowGraphNode) -> Self {
             var result = self
             result.throwNodes.addNode(node)
             return result
         }
+
+        /// Returns a copy of this lazy subgraph with an extra null-coalesce node
+        /// appended to the null-coalesce jump sources list.
+        func addingNullCoalesceNode(_ node: ControlFlowGraphNode) -> Self {
+            var result = self
+            result.nullCoalesceNodes.addNode(node)
+            return result
+        }
         
         /// Returns a copy of this lazy subgraph with exit jump sources removed.
-        func satisfyingExits() -> _LazySubgraphGenerator {
+        func satisfyingExits() -> Self {
             var result = self
             result.exitNodes.clear()
             return result
@@ -286,8 +360,9 @@ internal extension ControlFlowGraph {
         /// optionally filtering to only remove break sources with a given
         /// label.
         ///
-        /// breaks with no labels are always removed by this method.
-        func satisfyingBreaks(labeled targetLabel: String? = nil) -> _LazySubgraphGenerator {
+        /// Break jumps that have `nil` label will also be satisfied by this
+        /// method.
+        func satisfyingBreaks(labeled targetLabel: String? = nil) -> Self {
             var result = self
             result.breakNodes.clear(labeled: nil)
             result.breakNodes.clear(labeled: targetLabel)
@@ -298,8 +373,9 @@ internal extension ControlFlowGraph {
         /// optionally filtering to only remove continue sources with a given
         /// label.
         ///
-        /// Continues with no labels are always removed by this method.
-        func satisfyingContinues(label targetLabel: String? = nil) -> _LazySubgraphGenerator {
+        /// Continue jumps that have `nil` label will also be satisfied by this
+        /// method.
+        func satisfyingContinues(label targetLabel: String? = nil) -> Self {
             var result = self
             result.continueNodes.clear(labeled: nil)
             result.continueNodes.clear(labeled: targetLabel)
@@ -307,29 +383,39 @@ internal extension ControlFlowGraph {
         }
 
         /// Returns a copy of this lazy subgraph with fallthrough jump sources removed.
-        func satisfyingFallthroughs() -> _LazySubgraphGenerator {
+        func satisfyingFallthroughs() -> Self {
             var result = self
             result.fallthroughNodes.clear()
             return result
         }
 
         /// Returns a copy of this lazy subgraph with return jump sources removed.
-        func satisfyingReturns() -> _LazySubgraphGenerator {
+        func satisfyingReturns() -> Self {
             var result = self
             result.returnNodes.clear()
             return result
         }
 
         /// Returns a copy of this lazy subgraph with throw jump sources removed.
-        func satisfyingThrows() -> _LazySubgraphGenerator {
+        func satisfyingThrows() -> Self {
             var result = self
             result.throwNodes.clear()
+            return result
+        }
+
+        /// Returns a copy of this lazy subgraph with null-coalesce jump sources
+        /// removed.
+        func satisfyingNullCoalesce() -> Self {
+            var result = self
+            result.nullCoalesceNodes.clear()
             return result
         }
         
         /// Returns a copy of this lazy subgraph with break sources converted into
         /// exit jumps, optionally specifying a target label to satisfy.
-        func breakToExits(targetLabel: String? = nil) -> _LazySubgraphGenerator {
+        ///
+        /// Break jumps that have `nil` label will also be satisfied by this method.
+        func breakToExits(targetLabel: String? = nil) -> Self {
             var result = self
             result.exitNodes.merge(with: result.breakNodes.matchingTargetLabel(targetLabel))
             result.exitNodes.merge(with: result.breakNodes.matchingTargetLabel(nil))
@@ -338,7 +424,7 @@ internal extension ControlFlowGraph {
         
         /// Returns a copy of this lazy subgraph with return sources converted into
         /// exit jumps.
-        func returnToExits() -> _LazySubgraphGenerator {
+        func returnToExits() -> Self {
             var result = self
             result.exitNodes.merge(with: result.returnNodes)
             return result.satisfyingReturns()
@@ -346,21 +432,73 @@ internal extension ControlFlowGraph {
 
         /// Returns a copy of this lazy subgraph with throw sources converted into
         /// exit jumps.
-        func throwToExits() -> _LazySubgraphGenerator {
+        func throwToExits() -> Self {
             var result = self
             result.exitNodes.merge(with: result.throwNodes)
             return result.satisfyingThrows()
         }
+
+        /// Returns a copy of this lazy subgraph with null-coalesce sources
+        /// converted into exit jumps.
+        func nullCoalesceToExits() -> Self {
+            var result = self
+            result.exitNodes.merge(with: result.nullCoalesceNodes)
+            return result.satisfyingNullCoalesce()
+        }
+
+        /// Returns a copy of this lazy subgraph with a given end of scope node
+        /// appended to all the jump source lists.
+        ///
+        /// If `node` is `nil`, no change is made.
+        func appendingEndOfScopeIfAvailable(_ node: ControlFlowGraphEndScopeNode?) -> Self {
+            if let node = node {
+                return appendingEndOfScope(node)
+            }
+
+            return self
+        }
+
+        /// Returns a copy of this lazy subgraph with a given end of scope node
+        /// appended to all the jump source lists except exit jump lists.
+        func appendingEndOfScope(_ node: ControlFlowGraphEndScopeNode) -> Self {
+            var result = self
+            result.breakNodes.appendEndOfScope(node)
+            result.continueNodes.appendEndOfScope(node)
+            result.fallthroughNodes.appendEndOfScope(node)
+            result.returnNodes.appendEndOfScope(node)
+            result.throwNodes.appendEndOfScope(node)
+            return result
+        }
+
+        /// Returns a copy of this lazy subgraph with a given end of scope node
+        /// appended to exit jump source lists only.
+        ///
+        /// If `node` is `nil`, no change is made.
+        func appendingEndOfScopeOnExitsIfAvailable(_ node: ControlFlowGraphEndScopeNode?) -> Self {
+            if let node = node {
+                return appendingEndOfScopeOnExits(node)
+            }
+
+            return self
+        }
+
+        /// Returns a copy of this lazy subgraph with a given end of scope node
+        /// appended to the exit jump source lists only.
+        func appendingEndOfScopeOnExits(_ node: ControlFlowGraphEndScopeNode) -> Self {
+            var result = self
+            result.exitNodes.appendEndOfScope(node)
+            return result
+        }
         
-        /// Returns a copy of this lazy subgraph with a given defer appended to
-        /// all jump source lists, except for the exit jump source list.
-        func appendingExitDefers(_ defers: [ControlFlowSubgraphNode]) -> _LazySubgraphGenerator {
+        /// Returns a copy of this lazy subgraph with a given list of defers
+        /// appended to the exit jump source list only.
+        func appendingExitDefers(_ defers: [ControlFlowSubgraphNode]) -> Self {
             defers.reduce(self, { $0.appendingExitDefer($1) })
         }
         
         /// Returns a copy of this lazy subgraph with a given defer appended to
         /// the exit jump source list only.
-        func appendingExitDefer(_ node: ControlFlowSubgraphNode) -> _LazySubgraphGenerator {
+        func appendingExitDefer(_ node: ControlFlowSubgraphNode) -> Self {
             var result = self
             result.exitNodes.appendDefer(node)
             return result
@@ -368,13 +506,13 @@ internal extension ControlFlowGraph {
         
         /// Returns a copy of this lazy subgraph with a given list of defer nodes
         /// appended to all jump source lists, except for the exit jump source list.
-        func appendingDefers(_ defers: [ControlFlowSubgraphNode]) -> _LazySubgraphGenerator {
+        func appendingDefers(_ defers: [ControlFlowSubgraphNode]) -> Self {
             defers.reduce(self, { $0.appendingDefer($1) })
         }
         
         /// Returns a copy of this lazy subgraph with a given defer appended to
         /// all jump source lists, except for the exit jump source list.
-        func appendingDefer(_ node: ControlFlowSubgraphNode) -> _LazySubgraphGenerator {
+        func appendingDefer(_ node: ControlFlowSubgraphNode) -> Self {
             var result = self
             result.breakNodes.appendDefer(node)
             result.continueNodes.appendDefer(node)
@@ -382,6 +520,60 @@ internal extension ControlFlowGraph {
             result.returnNodes.appendDefer(node)
             result.throwNodes.appendDefer(node)
             return result
+        }
+
+        /// Chain the exits from this subgraph into a second subgraph's start
+        /// node.
+        func then(_ other: Self) -> Self {
+            if !isValid {
+                return other
+            }
+
+            let chain = self.exitNodes.chainOperations(endingIn: other.startNode)
+
+            var copy = self
+                .mergingNonExitJumps(other)
+                .satisfyingExits()
+            
+            copy.operations.append(contentsOf: other.operations)
+            copy.operations.append(contentsOf: chain)
+            copy.exitNodes = other.exitNodes
+
+            return copy
+        }
+
+        /// Adds a branch from the exit nodes of this subgraph to another subgraph's
+        /// start node, ignoring the other subgraph's remaining nodes and jumps.
+        ///
+        /// Calling this method assumes that the other subgraph's contents are
+        /// already present within this subgraph.
+        ///
+        /// This method does not erase the existing exit nodes from this graph.
+        func loop(_ other: Self) -> Self {
+            if !isValid {
+                return other
+            }
+            if !other.isValid {
+                return self
+            }
+
+            return connectingExits(to: other.startNode)
+        }
+
+        /// Adds a branch from the exit nodes of this subgraph to another subgraph's
+        /// start node.
+        ///
+        /// This method does not erase the existing exit nodes from this graph.
+        func branching(to other: Self) -> Self {
+            if !isValid {
+                return other
+            }
+            if !other.isValid {
+                return self
+            }
+
+            return combine(other)
+                .branchingExits(to: other.startNode)
         }
         
         /**
@@ -405,14 +597,17 @@ internal extension ControlFlowGraph {
             
             p3 --> n1 --> n2
             p4 -´
+        
+        A debug label can optionally be specified and will be added to the jump's
+        edge representation.
         */
-        func addingJumpInto<Tag>(from source: ControlFlowGraphJumpSources<Tag>) -> _LazySubgraphGenerator {
+        func addingJumpInto<Tag>(from source: ControlFlowGraphJumpSources<Tag>, debugLabel: String? = nil) -> Self {
             if !isValid {
                 return self
             }
             
             var result = self
-            result.operations.append(contentsOf: source.chainOperations(endingIn: startNode))
+            result.operations.append(contentsOf: source.chainOperations(endingIn: startNode, debugLabel: debugLabel))
             return result
         }
         
@@ -420,6 +615,9 @@ internal extension ControlFlowGraph {
          Returns a copy of this subgraph by connecting another subgraph result by
          means of connecting the start node of this subgraph to the start node of
          the given subgraph.
+
+         If `from` is specified, the jump is made from that node instead of the
+         start node of this subgraph.
          
          Example:
          
@@ -438,19 +636,29 @@ internal extension ControlFlowGraph {
              start
                   `-> p1 --> p2
                          `-> p3
+        
+        A debug label can optionally be specified and will be added to the branch's
+        edge representation.
          */
-        func addingBranch(towards result: _LazySubgraphGenerator, debugLabel: String? = nil) -> _LazySubgraphGenerator {
+        func addingBranch(towards result: _LazySubgraphGenerator, from: ControlFlowGraphNode? = nil, debugLabel: String? = nil) -> Self {
             if !result.isValid {
                 return self
             }
             if !isValid {
                 return result
             }
+
+            if let from = from {
+                assert(
+                    _containsNode(from),
+                    "Referenced node to branch from that is not contained in this subgraph: \(from)"
+                )
+            }
             
-            var newResult = appendingWithNoConnection(result)
+            var newResult = combine(result)
             newResult.operations.append(
                 .addEdge(
-                    start: startNode,
+                    start: from ?? startNode,
                     end: result.startNode,
                     debugLabel: debugLabel
                 )
@@ -461,7 +669,9 @@ internal extension ControlFlowGraph {
         
         /// Returns a copy of this subgraph with another subgraph appended to it,
         /// but with no connections made between the nodes of each other.
-        func appendingWithNoConnection(_ other: _LazySubgraphGenerator) -> _LazySubgraphGenerator {
+        ///
+        /// Jump nodes are the result of the combination of both subgraphs.
+        func combine(_ other: _LazySubgraphGenerator) -> Self {
             if !other.isValid {
                 return self
             }
@@ -479,6 +689,7 @@ internal extension ControlFlowGraph {
             newResult.fallthroughNodes.merge(with: other.fallthroughNodes)
             newResult.returnNodes.merge(with: other.returnNodes)
             newResult.throwNodes.merge(with: other.throwNodes)
+            newResult.nullCoalesceNodes.merge(with: other.nullCoalesceNodes)
             
             return newResult
         }
@@ -497,18 +708,18 @@ internal extension ControlFlowGraph {
         
         Second subgraph:
 
-            n1 -> n2
+            n1 -> n2 -> <exit>
         
         Resulting subgraph:
             
-            start -> p1 --> p2 --> n1 -> n2
+            start -> p1 --> p2 --> n1 -> n2 -> <exit>
                         `-> p3  /
                         `-> p4 ´
         
         A debug label can optionally be specified and will be added to the exit
         jumps' edge representation.
         */
-        func chainingExits(to next: _LazySubgraphGenerator, debugLabel: String? = nil) -> _LazySubgraphGenerator {
+        func chainingExits(to next: _LazySubgraphGenerator, debugLabel: String? = nil) -> Self {
             if !next.isValid {
                 return self
             }
@@ -526,6 +737,116 @@ internal extension ControlFlowGraph {
             newResult.fallthroughNodes.merge(with: next.fallthroughNodes)
             newResult.returnNodes.merge(with: next.returnNodes)
             newResult.throwNodes.merge(with: next.throwNodes)
+            newResult.nullCoalesceNodes.merge(with: next.nullCoalesceNodes)
+            
+            return newResult
+        }
+        
+        /**
+        Returns a copy of this subgraph with a connection to another subgraph by
+        making the continue jump nodes list point to the start of the other subgraph.
+
+        Example:
+
+        This subgraph:
+
+            start -> p1 --> p2 -> <throw>
+                        `-> p3
+                        `-> p4 -> <exit>
+        
+        Second subgraph:
+
+            n1 -> n2 -> <exit>
+        
+        Resulting subgraph:
+            
+            start -> p1 --> p2 --> n1 -> n2 -> <exit>
+                        `-> p3
+                        `-> p4 -> <exit>
+        
+        The resulting subgraph has the continue jumps from this subgraph with
+        the matching label satisfied, but will still contain continue jumps from
+        the referenced subgraph.
+        
+        A debug label can optionally be specified and will be added to the jumps'
+        edge representation.
+        */
+        func chainingContinues(
+            label targetLabel: String? = nil,
+            to next: _LazySubgraphGenerator,
+            debugLabel: String? = nil
+        ) -> Self {
+            
+            if !next.isValid {
+                return self
+            }
+            if !isValid {
+                return next
+            }
+            
+            var newResult = self.connectingContinues(
+                label: targetLabel,
+                to: next.startNode,
+                debugLabel: debugLabel
+            )
+            
+            newResult.operations.append(contentsOf: next.operations)
+            
+            newResult.exitNodes.merge(with: next.exitNodes)
+            newResult.breakNodes.merge(with: next.breakNodes)
+            newResult.continueNodes = next.continueNodes
+            newResult.fallthroughNodes.merge(with: next.fallthroughNodes)
+            newResult.returnNodes.merge(with: next.returnNodes)
+            newResult.throwNodes.merge(with: next.throwNodes)
+            newResult.nullCoalesceNodes.merge(with: next.nullCoalesceNodes)
+            
+            return newResult
+        }
+        
+        /**
+        Returns a copy of this subgraph with a connection to another subgraph by
+        making the throw jump nodes list point to the start of the other subgraph.
+
+        Example:
+
+        This subgraph:
+
+            start -> p1 --> p2 -> <throw>
+                        `-> p3
+                        `-> p4 -> <exit>
+        
+        Second subgraph:
+
+            n1 -> n2
+        
+        Resulting subgraph:
+            
+            start -> p1 --> p2 --> n1 -> n2
+                        `-> p3
+                        `-> p4 -> <exit>
+        
+        A debug label can optionally be specified and will be added to the throw
+        jumps' edge representation.
+        */
+        func chainingThrows(to next: _LazySubgraphGenerator, debugLabel: String? = nil) -> Self {
+            if !next.isValid {
+                return self
+            }
+            if !isValid {
+                return next
+            }
+
+            var newResult = self.connectingThrows(to: next.startNode, debugLabel: debugLabel)
+            
+            newResult.operations.append(contentsOf: next.operations)
+            
+            newResult.exitNodes.merge(with: next.exitNodes)
+            newResult.breakNodes.merge(with: next.breakNodes)
+            newResult.continueNodes.merge(with: next.continueNodes)
+            newResult.fallthroughNodes.merge(with: next.fallthroughNodes)
+            newResult.returnNodes.merge(with: next.returnNodes)
+            newResult.throwNodes = next.throwNodes
+            newResult.nullCoalesceNodes.merge(with: next.nullCoalesceNodes)
             
             return newResult
         }
@@ -537,7 +858,7 @@ internal extension ControlFlowGraph {
         ///
         /// A debug label can optionally be specified and will be added to the
         /// exit jumps' edge representation.
-        func connectingExits(to node: ControlFlowGraphNode, debugLabel: String? = nil) -> _LazySubgraphGenerator {
+        func connectingExits(to node: ControlFlowGraphNode, debugLabel: String? = nil) -> Self {
             if !isValid {
                 return _LazySubgraphGenerator(startNode: node)
             }
@@ -554,26 +875,88 @@ internal extension ControlFlowGraph {
             return result.satisfyingExits()
         }
         
+        /// Returns a copy of this subgraph with all exit jumps pointing to a
+        /// given node.
+        ///
+        /// The resulting subgraph still has the current exit nodes available.
+        ///
+        /// A debug label can optionally be specified and will be added to the
+        /// exit jumps' edge representation.
+        func branchingExits(to node: ControlFlowGraphNode, debugLabel: String? = nil) -> Self {
+            if !isValid {
+                return _LazySubgraphGenerator(startNode: node)
+            }
+
+            var result = self
+            
+            result.operations.append(contentsOf:
+                exitNodes.chainOperations(
+                    endingIn: node,
+                    debugLabel: debugLabel
+                )
+            )
+            
+            return result
+        }
+        
         /// Returns a copy of this subgraph with all continue jumps pointing to
         /// a given node, optionally specifying a target label to filter the
         /// continue jumps.
         ///
         /// The resulting subgraph has the continue jumps with the matching label
         /// satisfied.
+        ///
+        /// A debug label can optionally be specified and will be added to the
+        /// jumps' edge representation.
         func connectingContinues(
             label targetLabel: String? = nil,
-            to node: ControlFlowGraphNode
-        ) -> _LazySubgraphGenerator {
+            to node: ControlFlowGraphNode,
+            debugLabel: String? = nil
+        ) -> Self {
+            if !isValid {
+                return .invalid
+            }
             
             var newResult = self
             
             let operations = continueNodes
                 .matchingTargetLabel(targetLabel)
-                .chainOperations(endingIn: node)
+                .chainOperations(
+                    endingIn: node,
+                    debugLabel: debugLabel
+                )
             
             newResult.operations.append(contentsOf: operations)
             
             return newResult.satisfyingContinues(label: targetLabel)
+        }
+        
+        /// Returns a copy of this subgraph with all throw jumps pointing to
+        /// a given node.
+        ///
+        /// The resulting subgraph has the throw jumps satisfied.
+        ///
+        /// A debug label can optionally be specified and will be added to the
+        /// jumps' edge representation.
+        func connectingThrows(
+            to node: ControlFlowGraphNode,
+            debugLabel: String? = nil
+        ) -> Self {
+            if !isValid {
+                return .invalid
+            }
+
+            var newResult = self
+            
+            let operations = throwNodes
+                .chainOperations(
+                    endingIn: node,
+                    debugLabel: debugLabel
+                )
+            
+            newResult.operations.append(contentsOf: operations)
+            
+            return newResult.satisfyingThrows()
         }
         
         private class _InvalidSyntaxNode: SyntaxNode {
@@ -592,11 +975,21 @@ internal extension ControlFlowGraph {
     typealias FallthroughNodes = ControlFlowGraphJumpSources<FallthroughStatement>
     typealias ReturnNodes = ControlFlowGraphJumpSources<ReturnStatement>
     typealias ThrowNodes = ControlFlowGraphJumpSources<ThrowStatement>
+    typealias NullCoalesceNodes = ControlFlowGraphJumpSources<Expression>
     
     /// A list of control flow graph nodes that represent control flow jumps from
     /// specific points in a subgraph.
-    struct ControlFlowGraphJumpSources<Tag: SyntaxNode> {
+    struct ControlFlowGraphJumpSources<Tag: SyntaxNode>: CustomStringConvertible {
         private(set) var nodes: [JumpNodeEntry] = []
+
+        var description: String {
+            "[" + nodes.map(\.description).joined(separator: ", ") + "]"
+        }
+
+        /// Returns `true` if no nodes are present within this jump source.
+        var isEmpty: Bool {
+            nodes.isEmpty
+        }
         
         mutating func clear(labeled targetLabel: String? = nil) {
             nodes.removeAll(where: { $0.jumpLabel == targetLabel })
@@ -610,7 +1003,14 @@ internal extension ControlFlowGraph {
                 """
             )
 
-            nodes.append(JumpNodeEntry(node: node, defers: [], jumpLabel: targetLabel))
+            nodes.append(
+                JumpNodeEntry(
+                    node: node,
+                    defers: [],
+                    endOfScopes: [],
+                    jumpLabel: targetLabel
+                )
+            )
         }
         
         func matchingTargetLabel(_ targetLabel: String?) -> ControlFlowGraphJumpSources {
@@ -624,6 +1024,12 @@ internal extension ControlFlowGraph {
         mutating func appendDefer(_ node: ControlFlowSubgraphNode) {
             for i in 0..<nodes.count {
                 nodes[i].defers.append(node)
+            }
+        }
+        
+        mutating func appendEndOfScope(_ node: ControlFlowGraphEndScopeNode) {
+            for i in 0..<nodes.count {
+                nodes[i].endOfScopes.append(node)
             }
         }
         
@@ -647,10 +1053,14 @@ internal extension ControlFlowGraph {
                 let sourceNodes =
                     [source.node]
                         + Array(source.defers.reversed())
+                        + Array(source.endOfScopes)
                         + [ending]
                 
+                // Add nodes before edges
+                for node in sourceNodes {
+                    operations.append(.addNode(node))
+                }
                 for (first, second) in zip(sourceNodes, sourceNodes.dropFirst()) {
-                    operations.append(.addNode(first))
                     operations.append(.addEdge(start: first, end: second, debugLabel: second === ending ? debugLabel : nil))
                 }
             }
@@ -667,9 +1077,34 @@ internal extension ControlFlowGraph {
         }
     }
     
-    struct JumpNodeEntry {
+    struct JumpNodeEntry: CustomStringConvertible {
         var node: ControlFlowGraphNode
         var defers: [ControlFlowSubgraphNode]
+        var endOfScopes: [ControlFlowGraphEndScopeNode]
         var jumpLabel: String?
+
+        var description: String {
+            "{note: \(node), defers: \(defers), endOfScopes: \(endOfScopes), jumpLabel: \(jumpLabel ?? "<nil>")}"
+        }
+    }
+}
+
+internal extension Sequence where Element == ControlFlowGraph._LazySubgraphGenerator {
+    /// Returns the result of chaining all of the subgraph elements' exists to
+    /// one element to the next on this sequence.
+    ///
+    /// If this sequence is empty of elements, `.invalid` is returned, instead.
+    func chainingExits() -> Element {
+        var result: Element?
+
+        for element in self {
+            if let current = result {
+                result = current.chainingExits(to: element)
+            } else {
+                result = element
+            }
+        }
+
+        return result ?? .invalid
     }
 }

@@ -48,27 +48,26 @@ public class ReachingDefinitionAnalyzer {
         while !changed.isEmpty {
             let n = changed.removeFirst()
             
-            inreaching[n] =
-                controlFlowGraph
-                    .nodesConnected(towards: n)
-                    .compactMap {
-                        outreaching[$0]
-                    }.reduce(into: []) { $0.formUnion($1) }
-            
-            let oldOut = outreaching[n]
+            inreaching[n] = controlFlowGraph
+                .nodesConnected(towards: n)
+                .compactMap {
+                    outreaching[$0]
+                }.reduce([]) {
+                    $0.union($1)
+                }
             
             let killed: Set<Definition> =
                 Set(kill[n]!.compactMap { localDef -> Definition? in
-                    return inreaching[n]!.first(where: { $0.definition == localDef })
+                    inreaching[n]!.first {
+                        $0.definition == localDef
+                    }
                 })
             
-            let newOut =
-                gen[n]!
-                    .union(
-                        inreaching[n]!
-                            .subtracting(killed)
-                    )
+            let newOut = gen[n]!.union(
+                inreaching[n]!.subtracting(killed)
+            )
             
+            let oldOut = outreaching[n]
             outreaching[n] = newOut
             
             if newOut != oldOut {
@@ -101,29 +100,19 @@ public class ReachingDefinitionAnalyzer {
     }
     
     private func definitionsKilled(_ node: ControlFlowGraphNode) -> [LocalCodeDefinition] {
+        if let endOfScope = node as? ControlFlowGraphEndScopeNode {
+            return endOfScope.scope.localDefinitions().compactMap { $0 as? LocalCodeDefinition }
+        }
+
         switch node.node {
-        case let stmt as ExpressionsStatement:
-            var killed: [LocalCodeDefinition] = []
-            
-            for exp in stmt.expressions {
-                let usages =
-                    LocalUsageAnalyzer(typeSystem: typeSystem)
-                        .findAllUsages(
-                            in: exp,
-                            intention: intention
-                        )
-                
-                let localsKilled =
-                    usages.filter { usage in
-                        !usage.isReadOnlyUsage
-                    }.compactMap { usage in
-                        usage.definition as? LocalCodeDefinition
-                    }
-                
-                killed.append(contentsOf: localsKilled)
+        case let defNode as DefinitionReferenceNode:
+            guard let definition = defNode.definition as? LocalCodeDefinition else {
+                break
             }
-            
-            return killed
+
+            if !defNode.isReadOnlyUsage {
+                return [definition]
+            }
             
         default:
             break
@@ -136,6 +125,10 @@ public class ReachingDefinitionAnalyzer {
     // TODO: nodes
     
     private func definitionsGenerated(_ node: ControlFlowGraphNode) -> Set<Definition> {
+        if node is ControlFlowGraphEndScopeNode {
+            return []
+        }
+
         switch node.node {
         case let catchBlock as CatchBlock:
             return [
@@ -145,28 +138,24 @@ public class ReachingDefinitionAnalyzer {
                 )
             ]
 
-        case let stmt as VariableDeclarationsStatement:
-            return Set(
-                CodeDefinition
-                    .forVarDeclStatement(stmt)
-                    .compactMap { def in
-                        
-                        // Make sure we only record variable declarations that
-                        // actually have an initial value
-                        switch def.location {
-                        case .variableDeclaration(_, let index)
-                            where stmt.decl[index].initialization != nil:
-                            
-                            return Definition(
-                                definitionSite: node.node,
-                                definition: def
-                            )
-                        default:
-                            return nil
-                        }
-                    }
-                )
-            
+        case let decl as StatementVariableDeclaration:
+            let localDef = CodeDefinition.forVarDeclElement(decl)
+
+            // Make sure we only record variable declarations that
+            // actually have an initial value
+            switch localDef.location {
+            case .variableDeclaration(let decl) where decl.initialization != nil:
+                return [
+                    Definition(
+                        definitionSite: node.node,
+                        definition: localDef
+                    )
+                ]
+            default:
+                break
+            }
+
+        /*
         case let stmt as ExpressionsStatement:
             var generated: Set<Definition> = []
             
@@ -191,6 +180,18 @@ public class ReachingDefinitionAnalyzer {
             }
             
             return generated
+            */
+            
+        case let defNode as DefinitionReferenceNode:
+            guard let definition = defNode.definition as? LocalCodeDefinition else {
+                break
+            }
+
+            if !defNode.isReadOnlyUsage {
+                return [
+                    .init(definitionSite: defNode, definition: definition)
+                ]
+            }
             
         case let stmt as IfStatement:
             guard let pattern = stmt.pattern else {

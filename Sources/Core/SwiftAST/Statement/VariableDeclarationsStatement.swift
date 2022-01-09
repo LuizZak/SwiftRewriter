@@ -1,4 +1,4 @@
-public class VariableDeclarationsStatement: Statement, StatementKindType {
+public class VariableDeclarationsStatement: Statement, StatementKindType, CustomStringConvertible {
     public var statementKind: StatementKind {
         .variableDeclarations(self)
     }
@@ -6,16 +6,20 @@ public class VariableDeclarationsStatement: Statement, StatementKindType {
     public var decl: [StatementVariableDeclaration] {
         didSet {
             oldValue.forEach {
-                $0.initialization?.parent = nil
+                $0.parent = nil
             }
             decl.forEach {
-                $0.initialization?.parent = self
+                $0.parent = self
             }
         }
     }
     
     public override var children: [SyntaxNode] {
-        decl.compactMap(\.initialization)
+        decl
+    }
+
+    public var description: String {
+        decl.map(\.description).joined(separator: ", ")
     }
     
     public init(decl: [StatementVariableDeclaration]) {
@@ -24,7 +28,7 @@ public class VariableDeclarationsStatement: Statement, StatementKindType {
         super.init()
         
         decl.forEach {
-            $0.initialization?.parent = self
+            $0.parent = self
         }
     }
     
@@ -36,13 +40,15 @@ public class VariableDeclarationsStatement: Statement, StatementKindType {
         try super.init(from: container.superDecoder())
         
         decl.forEach {
-            $0.initialization?.parent = self
+            $0.parent = self
         }
     }
     
     @inlinable
     public override func copy() -> VariableDeclarationsStatement {
-        VariableDeclarationsStatement(decl: decl.map { $0.copy() }).copyMetadata(from: self)
+        VariableDeclarationsStatement(
+            decl: decl.map { $0.copy() }
+        ).copyMetadata(from: self)
     }
     
     @inlinable
@@ -114,10 +120,15 @@ public extension Statement {
 }
 
 /// A variable declaration statement
-public struct StatementVariableDeclaration: Codable, Equatable {
+public class StatementVariableDeclaration: SyntaxNode, Codable, Equatable, CustomStringConvertible {
     public var identifier: String
     public var storage: ValueStorage
-    public var initialization: Expression?
+    public var initialization: Expression? {
+        didSet {
+            oldValue?.parent = nil
+            initialization?.parent = self
+        }
+    }
     
     public var type: SwiftType {
         get {
@@ -143,41 +154,73 @@ public struct StatementVariableDeclaration: Codable, Equatable {
             storage.isConstant = newValue
         }
     }
+
+    public override var children: [SyntaxNode] {
+        if let exp = initialization {
+            return [exp]
+        }
+
+        return []
+    }
+
+    public var description: String {
+        if let exp = initialization {
+            return "\(identifier): \(type) = \(exp)"
+        }
+
+        return "\(identifier): \(type)"
+    }
     
-    public init(identifier: String,
-                storage: ValueStorage,
-                initialization: Expression? = nil) {
-        
+    public init(
+        identifier: String,
+        storage: ValueStorage,
+        initialization: Expression? = nil
+    ) {
         self.identifier = identifier
         self.storage = storage
         self.initialization = initialization
+
+        super.init()
+
+        initialization?.parent = self
     }
     
-    public init(identifier: String,
-                type: SwiftType,
-                ownership: Ownership = .strong,
-                isConstant: Bool = false,
-                initialization: Expression? = nil) {
-        
-        self.init(identifier: identifier,
-                  storage: ValueStorage(type: type,
-                                        ownership: ownership,
-                                        isConstant: isConstant),
-                  initialization: initialization)
+    public convenience init(
+        identifier: String,
+        type: SwiftType,
+        ownership: Ownership = .strong,
+        isConstant: Bool = false,
+        initialization: Expression? = nil
+    ) {
+        self.init(
+            identifier: identifier,
+            storage: ValueStorage(
+                type: type,
+                ownership: ownership,
+                isConstant: isConstant
+            ),
+            initialization: initialization
+        )
     }
     
-    public init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         try self.identifier = container.decode(String.self, forKey: .identifier)
         try self.storage = container.decode(ValueStorage.self, forKey: .storage)
         try self.initialization = container.decodeExpressionIfPresent(forKey: .initialization)
+
+        super.init()
+
+        initialization?.parent = self
     }
     
-    public func copy() -> StatementVariableDeclaration {
-        var new = self
-        new.initialization = self.initialization?.copy()
-        return new
+    public override func copy() -> StatementVariableDeclaration {
+        return .init(
+            identifier: identifier,
+            storage: storage,
+            initialization: initialization?.copy()
+        )
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -186,7 +229,10 @@ public struct StatementVariableDeclaration: Codable, Equatable {
         try container.encode(identifier, forKey: .identifier)
         try container.encode(storage, forKey: .storage)
         try container.encodeExpressionIfPresent(initialization, forKey: .initialization)
-        
+    }
+
+    public static func == (lhs: StatementVariableDeclaration, rhs: StatementVariableDeclaration) -> Bool {
+        lhs === rhs || (lhs.identifier == rhs.identifier && lhs.storage == rhs.storage && lhs.initialization == rhs.initialization)
     }
     
     private enum CodingKeys: String, CodingKey {

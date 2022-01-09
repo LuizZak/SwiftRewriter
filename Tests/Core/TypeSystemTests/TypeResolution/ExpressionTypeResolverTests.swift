@@ -1812,7 +1812,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             sut: ExpressionTypeResolver()
         )
         .thenAssertDefined(
-            in: stmt.catchBlocks[0],
+            in: stmt.catchBlocks[0].body,
             localNamed: "error",
             type: .swiftError,
             isConstant: true

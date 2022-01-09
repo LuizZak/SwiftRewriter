@@ -95,6 +95,20 @@ public extension Expression {
     var isDictionary: Bool {
         asDictionary != nil
     }
+
+    static func dictionaryLiteral(_ pairs: [ExpressionDictionaryPair]) -> DictionaryLiteralExpression {
+        DictionaryLiteralExpression(pairs: pairs)
+    }
+    
+    static func dictionaryLiteral(
+        _ pairs: KeyValuePairs<Expression, Expression>
+    ) -> DictionaryLiteralExpression {
+        DictionaryLiteralExpression(
+            pairs: pairs.map {
+                ExpressionDictionaryPair(key: $0.key, value: $0.value)
+            }
+        )
+    }
 }
 
 public struct ExpressionDictionaryPair: Codable, Equatable {

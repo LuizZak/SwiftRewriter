@@ -85,4 +85,8 @@ public extension Expression {
     var isArray: Bool {
         asArray != nil
     }
+    
+    static func arrayLiteral(_ array: [Expression]) -> ArrayLiteralExpression {
+        ArrayLiteralExpression(items: array)
+    }
 }

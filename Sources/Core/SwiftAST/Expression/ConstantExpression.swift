@@ -118,6 +118,10 @@ public extension Expression {
     var isConstant: Bool {
         asConstant != nil
     }
+    
+    static func constant(_ constant: Constant) -> ConstantExpression {
+        ConstantExpression(constant: constant)
+    }
 }
 
 /// Represents one of the recognized compile-time constant value types.
