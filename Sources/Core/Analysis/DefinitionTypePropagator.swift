@@ -15,46 +15,200 @@ public class DefinitionTypePropagator {
         self.typeResolver = typeResolver
     }
 
-    public func propagate(_ statement: CompoundStatement) -> CompoundStatement {
-        typeResolver.ignoreResolvedExpressions = false
-
-        var current: CompoundStatement = statement
-        var didWork: Bool = false
-
-        let rewriter = makeVariableDeclarationPropagator {
-            didWork = true
+    public func propagate(in intention: FunctionBodyCarryingIntention) {
+        guard let body = intention.functionBody else {
+            return
         }
 
-        repeat {
-            current = toCompound(typeResolver.resolveTypes(in: current))
+        typeResolver.ignoreResolvedExpressions = false
 
-            didWork = false
+        var didModify: Bool
+
+        repeat {
+            didModify = false
+
+            body.body = propagate(body.body)
+            body.body = toCompound(typeResolver.resolveTypes(in: body.body))
+
+            let graph = makeCFG(for: body.body)
+            let analyzer = makeReachingDefinitionAnalyzer(
+                graph,
+                container: .function(body),
+                intention: intention
+            )
+            let allDefinitions = analyzer.allDefinitions()
+            let grouped = allDefinitions.groupBy {
+                $0.definition
+            }
+
+            for (localDef, definitions) in grouped {
+                guard let types = computePossibleTypes(analyzer, definitions, in: graph) else {
+                    continue
+                }
+                guard types.count == 1, localDef.location.canModify else {
+                    continue
+                }
+
+                let type = types[0]
+                if localDef.type != type {
+                    localDef.location.modifyType(type)
+                    didModify = true
+                    continue
+                }
+            }
             
-            current = toCompound(rewriter.visitCompound(current))
-        } while didWork
+        } while didModify
+    }
+
+    public func propagate(_ statement: CompoundStatement) -> CompoundStatement {
+        var current: CompoundStatement = statement
+
+        repeatPropagation {
+            current = toCompound(typeResolver.resolveTypes(in: current))
+            current = toCompound($0.visitCompound(current))
+        }
 
         return current
     }
 
     public func propagate(_ expression: Expression) -> Expression {
-        typeResolver.ignoreResolvedExpressions = false
-
         var current: Expression = expression
+
+        repeatPropagation {
+            current = typeResolver.resolveType(current)
+            current = $0.visitExpression(current)
+        }
+
+        return current
+    }
+
+    private func repeatPropagation(_ block: (VariableDeclarationTypePropagationRewriter) -> Void) {
+        typeResolver.ignoreResolvedExpressions = false
+        
         var didWork: Bool = false
 
-        let rewriter = makeVariableDeclarationPropagator {
+        let propagator = makeVariableDeclarationPropagator {
             didWork = true
         }
 
         repeat {
-            current = typeResolver.resolveType(expression)
-
             didWork = false
             
-            current = rewriter.visitExpression(expression)
+            block(propagator)
         } while didWork
+    }
 
-        return current
+    private func computePossibleTypes(
+        _ analyzer: ReachingDefinitionAnalyzer,
+        _ definitions: Set<ReachingDefinitionAnalyzer.Definition>,
+        in graph: ControlFlowGraph
+    ) -> [SwiftType]? {
+        
+        var types: [SwiftType] = []
+        for reachingDef in definitions {
+            if let type = typeForDefinition(reachingDef) {
+                types.append(type)
+            }
+        }
+
+        // Attempt to reduce types by checking possible coercions
+
+        // Perform special treatment for numeric literals
+        if types.allSatisfy(typeSystem.isNumeric), let baseNumericType = options.baseNumericType {
+            if checkCanCoerce(definitions, to: baseNumericType) {
+                return [baseNumericType]
+            }
+        }
+
+        types = types.filter {
+            checkCanCoerce(definitions, to: $0)
+        }
+
+        return types
+    }
+
+    private func checkCanCoerce<S: Sequence>(
+        _ definitions: S,
+        to type: SwiftType
+    ) -> Bool where S.Element == ReachingDefinitionAnalyzer.Definition {
+        
+        definitions.allSatisfy { checkCanCoerce(definition: $0, to: type) }
+    }
+
+    private func checkCanCoerce(
+        definition: ReachingDefinitionAnalyzer.Definition,
+        to type: SwiftType
+    ) -> Bool {
+
+        let verifier = makeCoercionVerifier()
+        
+        switch definition.context {
+        case .assignment(let exp):
+            if verifier.canCoerce(exp.rhs, toType: type) {
+                return true
+            }
+
+        case .initialValue(let exp):
+            if verifier.canCoerce(exp, toType: type) {
+                return true
+            }
+
+        case .ifLetBinding(let stmt):
+            if verifier.canCoerce(stmt.exp, toType: type) {
+                return true
+            }
+        
+        case .forBinding(let stmt):
+            if verifier.canCoerce(stmt.exp, toType: type) {
+                return true
+            }
+        
+        case .catchBlock:
+            return type == .swiftError
+
+        case nil:
+            return false
+        }
+
+        return false
+    }
+
+    private func makeCoercionVerifier() -> CoercionVerifier {
+        CoercionVerifier(typeSystem: typeSystem)
+    }
+
+    private func makeCFG(for statement: CompoundStatement) -> ControlFlowGraph {
+        .forCompoundStatement(
+            statement,
+            options: .init(
+                generateEndScopes: true,
+                pruneUnreachable: true
+            )
+        )
+    }
+
+    private func makeCFG(for expression: Expression) -> ControlFlowGraph {
+        .forExpression(
+            expression,
+            options: .init(
+                generateEndScopes: true,
+                pruneUnreachable: true
+            )
+        )
+    }
+
+    private func makeReachingDefinitionAnalyzer(
+        _ graph: ControlFlowGraph,
+        container: StatementContainer,
+        intention: FunctionBodyCarryingIntention?
+    ) -> ReachingDefinitionAnalyzer {
+
+        return ReachingDefinitionAnalyzer(
+            controlFlowGraph: graph,
+            container: container,
+            intention: intention,
+            typeSystem: typeSystem
+        )
     }
 
     private func makeVariableDeclarationPropagator(_ didWork: @escaping () -> Void) -> VariableDeclarationTypePropagationRewriter {
@@ -69,12 +223,28 @@ public class DefinitionTypePropagator {
         )
     }
 
+    // MARK: - Utilities
+
     private func toCompound<S: Statement>(_ stmt: S) -> CompoundStatement {
         if let stmt = stmt.asCompound {
             return stmt
         }
 
         return .compound([stmt])
+    }
+
+    private func typeForDefinition(_ definition: ReachingDefinitionAnalyzer.Definition) -> SwiftType? {
+
+        switch definition.context {
+        case .assignment(let exp):
+            return exp.rhs.resolvedType
+        case .initialValue(let exp):
+            return exp.resolvedType
+        case .ifLetBinding, .forBinding, .catchBlock:
+            return definition.definition.type
+        case nil:
+            return nil
+        }
     }
 
     public struct Options {

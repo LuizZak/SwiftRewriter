@@ -503,7 +503,11 @@ public final class ObjectiveC2SwiftRewriter {
                 typeResolver: typeResolver
             )
 
-            functionBody.body = typePropagator.propagate(functionBody.body)
+            if let carrier = carrier {
+                typePropagator.propagate(in: carrier)
+            } else {
+                functionBody.body = typePropagator.propagate(functionBody.body)
+            }
         }
     }
     

@@ -1207,6 +1207,31 @@ class ExpressionTypeResolverTests: XCTestCase {
         .thenAssertExpression(at: \Expression.asUnary?.exp, expectsType: .bool)
     }
 
+    /// Comparison operators (==, !=, >, >=, <, <=) have boolean return types by
+    /// default. Expressions that use such operators should result to bool type
+    /// by default, regardless of operand's resolved types.
+    func testComparisonOperatorTentativelySetsExpressionTypeToBoolean() {
+        _ = startScopedTest(
+            with: Expression.identifier("a").binary(op: .lessThan, rhs: .identifier("b")),
+            sut: ExpressionTypeResolver()
+        )
+        .resolve()
+        .thenAssertExpression(resolvedAs: .bool)
+    }
+
+    /// Comparison operators (==, !=, >, >=, <, <=) have boolean return types by
+    /// default. Expressions that use such operators should result to bool type
+    /// by default, regardless of operand's resolved types.
+    func testComparisonOperatorTentativelySetsExpressionTypeToBoolean_nonComparableOperands() {
+        _ = startScopedTest(
+            with: Expression.identifier("a").binary(op: .lessThan, rhs: .constant(0)),
+            sut: ExpressionTypeResolver()
+        )
+        .definingLocal(name: "a", type: .any)
+        .resolve()
+        .thenAssertExpression(resolvedAs: .bool)
+    }
+
     /// Tests that on contexts where the expected type of a block literal type is
     /// set, try to infer the nullability of that block's parameters based on the
     /// expected type signature.

@@ -56,10 +56,10 @@ public class AssignmentExpression: Expression, ExpressionKindType {
     @inlinable
     public override func copy() -> AssignmentExpression {
         AssignmentExpression(
-                lhs: lhs.copy(),
-                op: op,
-                rhs: rhs.copy()
-            ).copyTypeAndMetadata(from: self)
+            lhs: lhs.copy(),
+            op: op,
+            rhs: rhs.copy()
+        ).copyTypeAndMetadata(from: self)
     }
     
     @inlinable

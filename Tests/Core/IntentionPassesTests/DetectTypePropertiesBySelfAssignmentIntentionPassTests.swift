@@ -69,6 +69,26 @@ class DetectTypePropertiesBySelfAssignmentIntentionPassTests: XCTestCase {
         }
     }
 
+    func testDetectTypeOnAssignment_preferAssignmentTypes() throws {
+        try runTest(forStaticProperty: false, swiftType: .bool) { (field, type) in
+            type.createConstructor(withParameters: []) { builder in
+                builder.setBody([
+                    .variableDeclaration(identifier: "local", type: .any, initialization: .identifier("self").dot(field)),
+                    .expression(
+                        .identifier("self")
+                        .dot(field)
+                        .assignment(
+                            op: .assign,
+                            rhs:
+                                .identifier("unknown")
+                                .binary(op: .lessThan, rhs: .constant(0))
+                        )
+                    ),
+                ])
+            }
+        }
+    }
+
     func testDontDuplicateProperties() throws {
         try runTest(forStaticProperty: false, swiftType: .int) { (field, type) in
             type.createMethod(named: "method") { builder in

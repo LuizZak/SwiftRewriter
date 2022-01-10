@@ -266,10 +266,62 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         XCTAssertEqual(definitions.first?.definition.name, "a")
         XCTAssertTrue(definitions.contains { $0.definitionSite === identCatch })
     }
+
+    func testAllDefinitions() throws {
+        typealias Definition = ReachingDefinitionAnalyzer.Definition
+
+        let identDo = Expression.identifier("a")
+        let identCatch = Expression.identifier("a")
+        let varDecl = Statement.variableDeclaration(identifier: "a", type: .int, initialization: .constant(0))
+        let assignDo = identDo.assignment(op: .assign, rhs: .constant(1))
+        let assignCatch = identCatch.assignment(op: .assign, rhs: .constant(2))
+        let doBlock = Statement.do([
+            .throw(.identifier("Error")),
+            .expression(assignDo),
+        ]).catch([
+            .expression(assignCatch),
+        ])
+        let body: CompoundStatement = [
+            varDecl,
+            doBlock,
+            .expression(.identifier("a")),
+        ]
+        setupTest(with: body, prune: false)
+
+        let result = sut.allDefinitions()
+
+        XCTAssertEqual(result.count, 4)
+        try XCTAssertEqual(result, [
+            Definition(
+                node: XCTUnwrap(controlFlowGraph.graphNode(for: varDecl.decl[0])),
+                definitionSite: varDecl.decl[0],
+                context: .initialValue(XCTUnwrap(varDecl.decl[0].initialization)),
+                definition: .forVarDeclElement(varDecl.decl[0])
+            ),
+            Definition(
+                node: XCTUnwrap(controlFlowGraph.graphNode(for: identDo)),
+                definitionSite: identDo,
+                context: .assignment(assignDo),
+                definition: .forVarDeclElement(varDecl.decl[0])
+            ),
+            Definition(
+                node: XCTUnwrap(controlFlowGraph.graphNode(for: identCatch)),
+                definitionSite: identCatch,
+                context: .assignment(assignCatch),
+                definition: .forVarDeclElement(varDecl.decl[0])
+            ),
+            Definition(
+                node: XCTUnwrap(controlFlowGraph.graphNode(for: doBlock.catchBlocks[0])),
+                definitionSite: doBlock.catchBlocks[0],
+                context: .catchBlock(doBlock.catchBlocks[0]),
+                definition: .forCatchBlockPattern(doBlock.catchBlocks[0])
+            )
+        ] as Set)
+    }
 }
 
 extension ReachingDefinitionAnalyzerTests {
-    private func setupTest(with body: CompoundStatement) {
+    private func setupTest(with body: CompoundStatement, prune: Bool = true) {
         let typeSystem = TypeSystem.defaultTypeSystem
 
         let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
@@ -279,7 +331,7 @@ extension ReachingDefinitionAnalyzerTests {
             body,
             options: .init(
                 generateEndScopes: true,
-                pruneUnreachable: true
+                pruneUnreachable: prune
             )
         )
 

@@ -433,4 +433,55 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testRewrite_deducePropertyTypeByOperatorUsage() {
+        assertRewrite(
+            js: """
+            class A {
+                computedirection() {
+                    let clockwise = false;
+                    clockwise = this.clockwise;
+                }
+            }
+            """,
+            swift: """
+            class A {
+                var clockwise: Bool = false
+
+                func computedirection() {
+                    var clockwise: Bool = false
+
+                    clockwise = self.clockwise
+                }
+            }
+            """
+        )
+    }
+
+    func testRewrite_deducePropertyTypeByOperatorUsage_preferWriteUsages() {
+        assertRewrite(
+            js: """
+            class A {
+                computedirection() {
+                    const clockwise = this.clockwise;
+                    const angle = utils.angle;
+
+                    this.clockwise = angle > 0;
+                }
+            }
+            """,
+            swift: """
+            class A {
+                var clockwise: Bool = false
+
+                func computedirection() {
+                    let clockwise: Any = self.clockwise
+                    let angle: Any = utils.angle
+
+                    self.clockwise = angle > 0
+                }
+            }
+            """
+        )
+    }
 }

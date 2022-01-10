@@ -8,6 +8,40 @@ import TestCommons
 @testable import Analysis
 
 class DefinitionTypePropagatorTests: XCTestCase {
+    func testPropagate_functionBodyIntention() {
+        let sut = makeSut()
+        let functionBody = FunctionBodyIntention(body: [
+            .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
+        ], source: nil)
+        let intention = GlobalFunctionGenerationIntention(signature: .init(name: "f"))
+        intention.functionBody = functionBody
+
+        sut.propagate(in: .global(intention))
+        
+        assertEqual(functionBody.body, [
+            .variableDeclaration(identifier: "a", type: .double, initialization: .constant(0)),
+        ])
+    }
+
+    func testPropagate_functionBodyIntention_performTypeCoercionOfAssignments() {
+        let sut = makeSut(numericType: .int)
+        let functionBody = FunctionBodyIntention(body: [
+            .variableDeclaration(identifier: "a", type: .any, initialization: nil),
+            .expression(.identifier("a").assignment(op: .assign, rhs: .constant(0))),
+            .expression(.identifier("a").assignment(op: .assign, rhs: .constant(0.0))),
+        ], source: nil)
+        let intention = GlobalFunctionGenerationIntention(signature: .init(name: "f"))
+        intention.functionBody = functionBody
+
+        sut.propagate(in: .global(intention))
+        
+        assertEqual(functionBody.body, [
+            .variableDeclaration(identifier: "a", type: .double, initialization: nil),
+            .expression(.identifier("a").assignment(op: .assign, rhs: .constant(0))),
+            .expression(.identifier("a").assignment(op: .assign, rhs: .constant(0.0))),
+        ])
+    }
+    
     func testPropagate_expression() {
         let sut = makeSut()
         let exp: Expression = .block(body: [

@@ -5,7 +5,7 @@ import TypeSystem
 
 /// A refined usage analyzer capable of inspecting usages of local variables by
 /// name within a method body.
-public protocol LocalsUsageAnalyzer: UsageAnalyzer {
+public protocol LocalUsageAnalyzerType: UsageAnalyzer {
     /// Finds all usages of a local with a given name.
     /// Returns all usages of any local named `local`, even those which are shadowed
     /// by other, deeper scoped definitions.

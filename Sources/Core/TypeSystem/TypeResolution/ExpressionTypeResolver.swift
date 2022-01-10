@@ -156,6 +156,8 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             stmt.exp = resolveType(stmt.exp)
         }
         
+        // TODO: Move this responsibility to `TypeSystem`?
+        
         let iteratorType: SwiftType
         
         switch stmt.exp.resolvedType {
@@ -448,9 +450,19 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         }
         
         exp.rhs = visitExpression(exp.rhs)
-        
+
         // Propagate error type
         if exp.lhs.isErrorTyped || exp.rhs.isErrorTyped {
+            // Try to deduce some common operations before propagating the error
+            // type
+            switch exp.op.category {
+            case .comparison:
+                exp.resolvedType = .bool
+                return exp
+            default:
+                break
+            }
+
             return exp.makeErrorTyped()
         }
         
@@ -724,11 +736,12 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     // MARK: - Internals
 
     private func canCoerce(_ exp: Expression, toType type: SwiftType) -> Bool {
-        exp.accept(makeCoercionVerifier(type: type))
+        makeCoercionVerifier()
+            .canCoerce(exp, toType: type)
     }
 
-    private func makeCoercionVerifier(type: SwiftType) -> CoercionVerifier {
-        CoercionVerifier(type: type, typeSystem: typeSystem)
+    private func makeCoercionVerifier() -> CoercionVerifier {
+        CoercionVerifier(typeSystem: typeSystem)
     }
     
     /// Returns `true` if a given expression is being used in a read-only context.
@@ -1211,125 +1224,5 @@ private class MemberInvocationResolver {
             includeOptional: true,
             in: type
         )
-    }
-}
-
-/// Verifies that implicit coercions of expression trees are possible.
-private class CoercionVerifier: ExpressionVisitor {
-    typealias ExprResult = Bool
-
-    let type: SwiftType
-    let typeSystem: TypeSystem
-
-    init(type: SwiftType, typeSystem: TypeSystem) {
-        self.type = type
-        self.typeSystem = typeSystem
-    }
-
-    func visitExpression(_ expression: Expression) -> Bool {
-        expression.accept(self)
-    }
-
-    func visitAssignment(_ exp: AssignmentExpression) -> Bool {
-        false
-    }
-
-    func visitBinary(_ exp: BinaryExpression) -> Bool {
-        exp.lhs.accept(self) && exp.rhs.accept(self)
-    }
-
-    func visitUnary(_ exp: UnaryExpression) -> Bool {
-        exp.exp.accept(self)
-    }
-
-    func visitSizeOf(_ exp: SizeOfExpression) -> Bool {
-        type == .int
-    }
-
-    func visitPrefix(_ exp: PrefixExpression) -> Bool {
-        exp.exp.accept(self)
-    }
-
-    func visitPostfix(_ exp: PostfixExpression) -> Bool {
-        false
-    }
-
-    func visitConstant(_ exp: ConstantExpression) -> Bool {
-        switch exp.constant {
-        case .int:
-            return typeSystem.isNumeric(type)
-        case .float:
-            return typeSystem.isFloat(type)
-        case .string:
-            return type == .string
-        case .boolean:
-            return type == .bool
-        default:
-            return false
-        }
-    }
-
-    func visitParens(_ exp: ParensExpression) -> Bool {
-        exp.exp.accept(self)
-    }
-
-    func visitIdentifier(_ exp: IdentifierExpression) -> Bool {
-        false
-    }
-
-    func visitCast(_ exp: CastExpression) -> Bool {
-        typeSystem.isType(exp.type, assignableTo: type)
-    }
-
-    func visitTypeCheck(_ exp: TypeCheckExpression) -> Bool {
-        type == .bool
-    }
-
-    func visitArray(_ exp: ArrayLiteralExpression) -> Bool {
-        // TODO: Analyze array-of-constant expressions
-        false
-    }
-
-    func visitDictionary(_ exp: DictionaryLiteralExpression) -> Bool {
-        // TODO: Analyze dictionary-of-constant expressions
-        false
-    }
-
-    func visitBlock(_ exp: BlockLiteralExpression) -> Bool {
-        type == exp.resolvedType
-    }
-
-    func visitTernary(_ exp: TernaryExpression) -> Bool {
-        exp.ifTrue.accept(self) && exp.ifFalse.accept(self)
-    }
-
-    func visitTuple(_ exp: TupleExpression) -> Bool {
-        switch type {
-        case .tuple(.empty), .void:
-            return exp.elements.isEmpty
-
-        case .tuple(.types(let types)):
-            guard exp.elements.count == types.count else {
-                return false
-            }
-
-            for (expEl, type) in zip(exp.elements, types) {
-                if !expEl.accept(CoercionVerifier(type: type, typeSystem: typeSystem)) {
-                    return false
-                }
-            }
-
-            return true
-        default:
-            return false
-        }
-    }
-
-    func visitSelector(_ exp: SelectorExpression) -> Bool {
-        false
-    }
-
-    func visitUnknown(_ exp: UnknownExpression) -> Bool {
-        false
     }
 }

@@ -56,12 +56,11 @@ public class DoStatement: Statement, StatementKindType {
         ).copyMetadata(from: self)
     }
 
-    /// Returns a copy of this `DoStatement` with a `CatchBlock` appended at the end.
+    /// Returns `self` with a `CatchBlock` appended at the end.
     public func `catch`(pattern: Pattern? = nil, _ body: CompoundStatement) -> DoStatement {
-        let copy = copy()
         let catchBlock = CatchBlock(pattern: pattern, body: body)
-        copy.catchBlocks.append(catchBlock)
-        return copy
+        catchBlocks.append(catchBlock)
+        return self
     }
 
     @inlinable

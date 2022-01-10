@@ -115,7 +115,7 @@ public final class JavaScript2SwiftRewriter {
             }
 
             parseStatements(lazyParse)
-            resolveAutotypeDeclarations(lazyParse)
+            propagateDeclarationTypes(lazyParse)
             performIntentionAndSyntaxPasses(intentionCollection)
             outputDefinitions(intentionCollection)
         }
@@ -362,7 +362,7 @@ public final class JavaScript2SwiftRewriter {
         fatalError("Not implemented")
     }
 
-    private func resolveAutotypeDeclarations(_ items: [LazyParseItem]) {
+    private func propagateDeclarationTypes(_ items: [LazyParseItem]) {
         let typeResolverInvoker = makeTypeResolverInvoker()
 
         // Make a pre-type resolve before propagating types
@@ -386,6 +386,11 @@ public final class JavaScript2SwiftRewriter {
         }
 
         for item in items {
+            typeResolverInvoker.resolveAllExpressionTypes(
+                in: intentionCollection,
+                force: true
+            )
+
             let typeResolverDelegate = typeResolverInvoker.makeQueueDelegate()
 
             let functionBody: FunctionBodyIntention
@@ -446,11 +451,13 @@ public final class JavaScript2SwiftRewriter {
         var requiresResolve = false
         
         let context =
-            IntentionPassContext(typeSystem: typeSystem,
-                                 typeMapper: typeMapper,
-                                 typeResolverInvoker: typeResolverInvoker,
-                                 numThreads: settings.numThreads,
-                                 notifyChange: { requiresResolve = true })
+            IntentionPassContext(
+                typeSystem: typeSystem,
+                typeMapper: typeMapper,
+                typeResolverInvoker: typeResolverInvoker,
+                numThreads: settings.numThreads,
+                notifyChange: { requiresResolve = true }
+            )
         
         let intentionPasses = intentionPassesSource.intentionPasses
         
@@ -483,8 +490,10 @@ public final class JavaScript2SwiftRewriter {
                 
                 if requiresResolve {
                     typeResolverInvoker
-                        .resolveAllExpressionTypes(in: intentionCollection,
-                                                   force: true)
+                        .resolveAllExpressionTypes(
+                            in: intentionCollection,
+                            force: true
+                        )
                 }
             }
         }
@@ -495,8 +504,10 @@ public final class JavaScript2SwiftRewriter {
         
         // Resolve all expressions again
         typeResolverInvoker
-            .resolveAllExpressionTypes(in: intentionCollection,
-                                       force: true)
+            .resolveAllExpressionTypes(
+                in: intentionCollection,
+                force: true
+            )
         
         let syntaxPasses = astRewriterPassSources.syntaxNodePasses
         

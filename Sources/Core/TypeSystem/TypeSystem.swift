@@ -436,8 +436,14 @@ public class TypeSystem {
             return true
         }
         
-        let unaliasedType = resolveAlias(in: type)
+        // Any type can be assigned to a `Any` type, or any depth of optionality
+        // for `Any`
         let unaliasedBaseType = resolveAlias(in: baseType)
+        if unaliasedBaseType.deepUnwrapped == .any {
+            return true
+        }
+
+        let unaliasedType = resolveAlias(in: type)
         
         if unaliasedType == unaliasedBaseType {
             return true
@@ -457,6 +463,27 @@ public class TypeSystem {
         default:
             return false
         }
+    }
+
+    /// Returns `true` if the given type expands to an optional Swift type.
+    public func isOptionalType(_ type: SwiftType) -> Bool {
+        resolveAlias(in: type).isOptional
+    }
+
+    /// Returns the given type, with any optionality at the top level unwrapped.
+    ///
+    /// If `keepAliases` is `true`, the unwrapping is done shallowly and no aliases
+    /// are looked into and expanded.
+    public func optionalUnwrapped(_ type: SwiftType, keepAliases: Bool) -> SwiftType {
+        if keepAliases {
+            return type.deepUnwrapped
+        }
+        
+        if type.isOptional {
+            return resolveAlias(in: type.deepUnwrapped).deepUnwrapped
+        }
+        
+        return resolveAlias(in: type).deepUnwrapped
     }
     
     /// Returns the category for a given type name.

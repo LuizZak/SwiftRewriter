@@ -395,6 +395,42 @@ public class LocalCodeDefinition: CodeDefinition {
         case ifLet(IfStatement, PatternLocation)
         case localFunction(LocalFunctionStatement)
         case catchBlock(CatchBlock, PatternLocation?)
+
+        public var canModify: Bool {
+            switch self {
+            case 
+                .instanceSelf,
+                .staticSelf,
+                .setterValue,
+                .forLoop,
+                .ifLet,
+                .localFunction,
+                .parameter,
+                .catchBlock:
+                return false
+
+            case .variableDeclaration:
+                return true
+            }
+        }
+
+        public func modifyType(_ newType: SwiftType) {
+            switch self {
+            case 
+                .instanceSelf,
+                .staticSelf,
+                .setterValue,
+                .forLoop,
+                .ifLet,
+                .localFunction,
+                .parameter,
+                .catchBlock:
+                break
+
+            case .variableDeclaration(let decl):
+                decl.type = newType
+            }
+        }
         
         public func hash(into hasher: inout Hasher) {
             switch self {

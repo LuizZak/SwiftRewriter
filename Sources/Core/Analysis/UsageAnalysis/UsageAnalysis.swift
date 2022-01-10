@@ -14,10 +14,28 @@ public protocol UsageAnalyzer {
 
 /// Usage analyzer that specializes in lookup of usages of locals within function
 /// bodies.
-public class LocalUsageAnalyzer: BaseUsageAnalyzer {
-    
+public class LocalUsageAnalyzer: BaseUsageAnalyzer, LocalUsageAnalyzerType {
+
     public override init(typeSystem: TypeSystem) {
         super.init(typeSystem: typeSystem)
+    }
+
+    public func findDefinitionOf(
+        localNamed local: String,
+        inScopeOf syntaxNode: SyntaxNode,
+        in container: StatementContainer,
+        intention: FunctionBodyCarryingIntention?
+    ) -> LocalCodeDefinition? {
+
+        guard let scope = syntaxNode.nearestScope else {
+            return nil
+        }
+
+        if let def = scope.firstDefinition(named: local) as? LocalCodeDefinition {
+            return def
+        }
+
+        return nil
     }
     
     public func findUsagesOf(

@@ -103,10 +103,10 @@ public class DetectTypePropertiesBySelfAssignmentIntentionPass: TypeVisitingInte
                     continue
                 }
 
-                // If a collision was found, decide based on the usage that has
-                // the most specific type.
                 let existing = suggestions[index]
 
+                // If a collision was found, decide based on the usage that has
+                // the most specific type.
                 switch (next.type, existing.type) {
                 case (nil, _?):
                     break
@@ -115,6 +115,16 @@ public class DetectTypePropertiesBySelfAssignmentIntentionPass: TypeVisitingInte
                     suggestions[index] = next
                 
                 case (let nextType?, let existingType?) where nextType != existingType:
+                    // If a read usage conflicts with a write usage, prefer the
+                    // write usage's type, instead.
+                    if next.isWrite && !existing.isWrite {
+                        suggestions[index] = next
+                        break
+                    }
+                    if !next.isWrite && existing.isWrite {
+                        break
+                    }
+
                     if context.typeSystem.isType(existingType, assignableTo: nextType) {
                         suggestions[index] = next
                     }
@@ -170,13 +180,15 @@ public class DetectTypePropertiesBySelfAssignmentIntentionPass: TypeVisitingInte
                 name: member.name,
                 isStatic: isStatic,
                 type: type,
+                usageExpression: postfixExp,
+                isWrite: isWriteUsage(postfixExp, usage: usage),
                 usage: usage
             )
 
             return suggestion
         }
 
-        private func detectType(expression: Expression) -> SwiftType? {
+        private func detectType(expression: PostfixExpression) -> SwiftType? {
             if let assignment = expression.parentExpression?.asAssignment, assignment.lhs == expression {
                 return assignment.rhs.resolvedType
             }
@@ -184,10 +196,24 @@ public class DetectTypePropertiesBySelfAssignmentIntentionPass: TypeVisitingInte
             return expression.expectedType
         }
 
+        private func isWriteUsage(_ expression: PostfixExpression, usage: DefinitionUsage) -> Bool {
+            if !usage.isReadOnlyUsage {
+                return true
+            }
+
+            guard let assignment = expression.parentExpression?.asAssignment else {
+                return false
+            }
+
+            return assignment.lhs == expression
+        }
+
         struct PropertySuggestion {
             var name: String
             var isStatic: Bool
             var type: SwiftType?
+            var usageExpression: PostfixExpression
+            var isWrite: Bool
             var usage: DefinitionUsage
         }
     }
