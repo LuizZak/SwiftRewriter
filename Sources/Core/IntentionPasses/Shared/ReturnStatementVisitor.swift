@@ -86,6 +86,10 @@ struct ReturnStatementVisitor: StatementVisitor {
         return []
     }
 
+    func visitStatementVariableDeclaration(_ decl: StatementVariableDeclaration) -> [ReturnStatement] {
+        return []
+    }
+
     func visitLocalFunction(_ stmt: LocalFunctionStatement) -> [ReturnStatement] {
         return []
     }

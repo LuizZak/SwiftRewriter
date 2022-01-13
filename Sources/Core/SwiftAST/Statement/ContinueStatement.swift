@@ -37,6 +37,11 @@ public class ContinueStatement: Statement, StatementKindType {
         visitor.visitContinue(self)
     }
     
+    @inlinable
+    public override func accept<V: StatementStatefulVisitor>(_ visitor: V, state: V.State) -> V.StmtResult {
+        visitor.visitContinue(self, state: state)
+    }
+    
     public override func isEqual(to other: Statement) -> Bool {
         switch other {
         case let rhs as ContinueStatement:

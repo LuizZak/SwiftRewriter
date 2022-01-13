@@ -45,6 +45,9 @@ public protocol DirectedGraph {
     /// them currently exist.
     @inlinable
     func edge(from start: Node, to end: Node) -> Edge?
+
+    /// Returns `true` if the two given nodes are connected with an edge.
+    func areConnected(start: Node, end: Node) -> Bool
     
     /// Returns all graph nodes that are connected from a given directed graph
     /// node.
@@ -60,6 +63,9 @@ public protocol DirectedGraph {
     /// graph node.
     @inlinable
     func allNodesConnected(to node: Node) -> [Node]
+
+    /// Returns `true` if the directed graph has a path between the two given nodes.
+    func hasPath(from start: Node, to end: Node) -> Bool
 
     /// Returns the shortest number of edges that need to be traversed to get from
     /// the given start node to the given end node.
@@ -144,6 +150,11 @@ public extension DirectedGraph {
     func allEdges(for node: Node) -> [Edge] {
         edges(towards: node) + edges(from: node)
     }
+
+    @inlinable
+    func areConnected(start: Node, end: Node) -> Bool {
+        edge(from: start, to: end) != nil
+    }
     
     @inlinable
     func nodesConnected(from node: Node) -> [Node] {
@@ -158,6 +169,21 @@ public extension DirectedGraph {
     @inlinable
     func allNodesConnected(to node: Node) -> [Node] {
         nodesConnected(towards: node) + nodesConnected(from: node)
+    }
+
+    @inlinable
+    func hasPath(from start: Node, to end: Node) -> Bool {
+        var found = false
+        depthFirstVisit(start: start) { visit in
+            if areNodesEqual(visit.node, end) {
+                found = true
+                return false
+            }
+
+            return true
+        }
+
+        return found
     }
 
     @inlinable

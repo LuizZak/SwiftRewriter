@@ -7,6 +7,7 @@ public protocol StatementVisitor {
     associatedtype SwitchCaseResult = StmtResult
     associatedtype SwitchDefaultCaseResult = StmtResult
     associatedtype CatchBlockResult = StmtResult
+    associatedtype StatementVariableDeclarationResult = StmtResult
     
     /// Visits a statement node
     ///
@@ -115,6 +116,12 @@ public protocol StatementVisitor {
     /// - Parameter stmt: A variable declaration statement to visit
     /// - Returns: Result of visiting the variables statement
     func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> StmtResult
+
+    /// Visits a variable declaration statement's element
+    ///
+    /// - Parameter stmt: A variable declaration statement's element to visit
+    /// - Returns: Result of visiting the variable declaration statement's element
+    func visitStatementVariableDeclaration(_ decl: StatementVariableDeclaration) -> StatementVariableDeclarationResult
 
     /// Visits a local function statement
     ///

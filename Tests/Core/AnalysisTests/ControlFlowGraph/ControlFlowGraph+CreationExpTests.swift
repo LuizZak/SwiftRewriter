@@ -68,7 +68,7 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                     n6 [label="exit"]
                     n1 -> n2
                     n2 -> n3
-                    n3 -> n4 [label="="]
+                    n3 -> n4
                     n4 -> n5
                     n5 -> n6
                 }
@@ -103,9 +103,150 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                     n7 [label="exit"]
                     n1 -> n2
                     n2 -> n3
-                    n3 -> n4 [label="?.b"]
-                    n4 -> n5 [label="="]
-                    n4 -> n6
+                    n3 -> n4
+                    n4 -> n5
+                    n4 -> n7
+                    n5 -> n6
+                    n6 -> n7
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+    }
+
+    func testExpression_assignment_optionalShortCircuiting_rightSide() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .identifier("a").optional().dot("b").assignment(op: .assign, rhs: .identifier("c").optional().dot("d").optional().dot("e"))
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="a?.b"]
+                    n5 [label="c"]
+                    n6 [label="c?.d"]
+                    n7 [label="c?.d?.e"]
+                    n8 [label="a?.b = c?.d?.e"]
+                    n9 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n4 -> n5
+                    n4 -> n9
+                    n5 -> n6
+                    n6 -> n7
+                    n6 -> n8
+                    n7 -> n8
+                    n8 -> n9
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+    }
+
+    func testExpression_blockLiteral() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .block(body: [])
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="{ () -> Void in < body > }"]
+                    n4 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testExpression_cast() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .cast(.identifier("a"), type: .int)
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="a as? Int"]
+                    n5 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n4 -> n5
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testExpression_cast_shortCircuit() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .cast(.identifier("a").binary(op: .nullCoalesce, rhs: .identifier("b")), type: .int)
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="b"]
+                    n5 [label="a ?? b"]
+                    n6 [label="a ?? b as? Int"]
+                    n7 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n3 -> n5
+                    n4 -> n5
                     n5 -> n6
                     n6 -> n7
                 }
@@ -117,9 +258,11 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
 
-    func testExpression_shortCircuit_andOperand() {
+    func testExpression_constant() {
         let stmt: CompoundStatement = [
-            .expression(.identifier("a").binary(op: .and, rhs: .identifier("b"))),
+            .expression(
+                .constant(0)
+            ),
         ]
 
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
@@ -131,114 +274,11 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                 digraph flow {
                     n1 [label="entry"]
                     n2 [label="{exp}"]
-                    n3 [label="a"]
-                    n4 [label="b"]
-                    n5 [label="exit"]
+                    n3 [label="0"]
+                    n4 [label="exit"]
                     n1 -> n2
                     n2 -> n3
-                    n3 -> n4 [label="&&"]
-                    n3 -> n5
-                    n4 -> n5
-                }
-                """
-        )
-        XCTAssert(graph.entry.node === stmt)
-        XCTAssert(graph.exit.node === stmt)
-        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
-    }
-
-    func testExpression_shortCircuit_orOperand() {
-        let stmt: CompoundStatement = [
-            .expression(.identifier("a").binary(op: .or, rhs: .identifier("b"))),
-        ]
-
-        let graph = ControlFlowGraph.forCompoundStatement(stmt)
-
-        sanitize(graph)
-        assertGraphviz(
-            graph: graph,
-            matches: """
-                digraph flow {
-                    n1 [label="entry"]
-                    n2 [label="{exp}"]
-                    n3 [label="a"]
-                    n4 [label="b"]
-                    n5 [label="exit"]
-                    n1 -> n2
-                    n2 -> n3
-                    n3 -> n4 [label="||"]
-                    n3 -> n5
-                    n4 -> n5
-                }
-                """
-        )
-        XCTAssert(graph.entry.node === stmt)
-        XCTAssert(graph.exit.node === stmt)
-        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
-    }
-
-    func testExpression_shortCircuit_nullCoalesceOperand() {
-        let stmt: CompoundStatement = [
-            .expression(.identifier("a").binary(op: .nullCoalesce, rhs: .identifier("b"))),
-        ]
-
-        let graph = ControlFlowGraph.forCompoundStatement(stmt)
-
-        sanitize(graph)
-        assertGraphviz(
-            graph: graph,
-            matches: """
-                digraph flow {
-                    n1 [label="entry"]
-                    n2 [label="{exp}"]
-                    n3 [label="a"]
-                    n4 [label="b"]
-                    n5 [label="exit"]
-                    n1 -> n2
-                    n2 -> n3
-                    n3 -> n4 [label="??"]
-                    n3 -> n5
-                    n4 -> n5
-                }
-                """
-        )
-        XCTAssert(graph.entry.node === stmt)
-        XCTAssert(graph.exit.node === stmt)
-        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
-    }
-
-    func testShortCircuitNestedExpression() {
-        let stmt: CompoundStatement = [
-            .expression(.arrayLiteral([
-                .identifier("a").binary(op: .and, rhs: .identifier("b")),
-                .identifier("c"),
-            ])),
-        ]
-
-        let graph = ControlFlowGraph.forCompoundStatement(stmt)
-
-        sanitize(graph)
-        assertGraphviz(
-            graph: graph,
-            matches: """
-                digraph flow {
-                    n1 [label="entry"]
-                    n2 [label="{exp}"]
-                    n3 [label="a"]
-                    n4 [label="b"]
-                    n5 [label="c"]
-                    n6 [label="[a && b, c]"]
-                    n7 [label="exit"]
-                    n1 -> n2
-                    n2 -> n3
-                    n3 -> n4 [label="&&"]
-                    n3 -> n5
-                    n4 -> n5
-                    n5 -> n6
-                    n6 -> n7
+                    n3 -> n4
                 }
                 """
         )
@@ -294,6 +334,36 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
 
+    func testExpression_identifier() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .identifier("a")
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
     func testExpression_parens() {
         let stmt: CompoundStatement = [
             .expression(
@@ -310,11 +380,52 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                 digraph flow {
                     n1 [label="entry"]
                     n2 [label="{exp}"]
-                    n3 [label="(a())"]
-                    n4 [label="exit"]
+                    n3 [label="a"]
+                    n4 [label="a()"]
+                    n5 [label="(a())"]
+                    n6 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
+                    n4 -> n5
+                    n5 -> n6
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testExpression_parens_shortCircuit() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .parens(.identifier("a").optional().call().optional().dot("b"))
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="a?()"]
+                    n5 [label="a?()?.b"]
+                    n6 [label="(a?()?.b)"]
+                    n7 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n4 -> n5
+                    n4 -> n6
+                    n5 -> n6
+                    n6 -> n7
                 }
                 """
         )
@@ -345,7 +456,7 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                     n5 [label="exit"]
                     n1 -> n2
                     n2 -> n3
-                    n3 -> n4 [label=".b"]
+                    n3 -> n4
                     n4 -> n5
                 }
                 """
@@ -377,7 +488,7 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                     n5 [label="exit"]
                     n1 -> n2
                     n2 -> n3
-                    n3 -> n4 [label="()"]
+                    n3 -> n4
                     n4 -> n5
                 }
                 """
@@ -413,7 +524,7 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
-                    n5 -> n6 [label="(b, c)"]
+                    n5 -> n6
                     n6 -> n7
                 }
                 """
@@ -444,18 +555,20 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                     n4 [label="b"]
                     n5 [label="c"]
                     n6 [label="0"]
-                    n7 [label="d"]
-                    n8 [label="a(b, c ?? 0, d)"]
-                    n9 [label="exit"]
+                    n7 [label="c ?? 0"]
+                    n8 [label="d"]
+                    n9 [label="a(b, c ?? 0, d)"]
+                    n10 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
-                    n5 -> n6 [label="??"]
+                    n5 -> n6
                     n5 -> n7
                     n6 -> n7
-                    n7 -> n8 [label="(b, c ?? 0, d)"]
+                    n7 -> n8
                     n8 -> n9
+                    n9 -> n10
                 }
                 """
         )
@@ -488,7 +601,7 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
-                    n4 -> n5 [label="[0]"]
+                    n4 -> n5
                     n5 -> n6
                 }
                 """
@@ -518,15 +631,17 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                     n3 [label="a"]
                     n4 [label="b"]
                     n5 [label="0"]
-                    n6 [label="a[b ?? 0]"]
-                    n7 [label="exit"]
+                    n6 [label="b ?? 0"]
+                    n7 [label="a[b ?? 0]"]
+                    n8 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
-                    n4 -> n5 [label="??"]
-                    n4 -> n6 [label="[b ?? 0]"]
-                    n5 -> n6 [label="[b ?? 0]"]
+                    n4 -> n5
+                    n4 -> n6
+                    n5 -> n6
                     n6 -> n7
+                    n7 -> n8
                 }
                 """
         )
@@ -560,11 +675,11 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                     n8 [label="exit"]
                     n1 -> n2
                     n2 -> n3
-                    n3 -> n4 [label="?.b"]
+                    n3 -> n4
                     n4 -> n5
                     n4 -> n8
-                    n5 -> n6 [label="?[0]"]
-                    n6 -> n7 [label="?()"]
+                    n5 -> n6
+                    n6 -> n7
                     n6 -> n8
                     n7 -> n8
                 }
@@ -574,6 +689,105 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
         XCTAssert(graph.exit.node === stmt)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 3)
+    }
+
+    func testExpression_prefix() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .prefix(op: .subtract, .identifier("a"))
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="-a"]
+                    n5 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n4 -> n5
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testExpression_prefix_shortCircuit() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .prefix(op: .subtract, .identifier("a").binary(op: .nullCoalesce, rhs: .identifier("b")))
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="b"]
+                    n5 [label="a ?? b"]
+                    n6 [label="-(a ?? b)"]
+                    n7 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n3 -> n5
+                    n4 -> n5
+                    n5 -> n6
+                    n6 -> n7
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testExpression_selector() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .selector(getter: "a")
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="#selector(getter: a)"]
+                    n4 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
 
     func testExpression_sizeOf_expression() {
@@ -627,17 +841,19 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                     n3 [label="print"]
                     n4 [label="a"]
                     n5 [label="0"]
-                    n6 [label="MemoryLayout.size(ofValue: a ?? 0)"]
-                    n7 [label="print(MemoryLayout.size(ofValue: a ?? 0))"]
-                    n8 [label="exit"]
+                    n6 [label="a ?? 0"]
+                    n7 [label="MemoryLayout.size(ofValue: a ?? 0)"]
+                    n8 [label="print(MemoryLayout.size(ofValue: a ?? 0))"]
+                    n9 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
-                    n4 -> n5 [label="??"]
+                    n4 -> n5
                     n4 -> n6
                     n5 -> n6
-                    n6 -> n7 [label="(MemoryLayout.size(ofValue: a ?? 0))"]
+                    n6 -> n7
                     n7 -> n8
+                    n8 -> n9
                 }
                 """
         )
@@ -698,15 +914,17 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                     n1 [label="entry"]
                     n2 [label="{exp}"]
                     n3 [label="a"]
-                    n4 [label="b"]
-                    n5 [label="c"]
-                    n6 [label="exit"]
+                    n4 [label="a ? b : c"]
+                    n5 [label="b"]
+                    n6 [label="c"]
+                    n7 [label="exit"]
                     n1 -> n2
                     n2 -> n3
-                    n3 -> n4 [label="true"]
-                    n3 -> n5 [label="false"]
+                    n3 -> n4
+                    n4 -> n5
                     n4 -> n6
-                    n5 -> n6
+                    n5 -> n7
+                    n6 -> n7
                 }
                 """
         )
@@ -737,25 +955,29 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                     n1 [label="entry"]
                     n2 [label="{exp}"]
                     n3 [label="a"]
-                    n4 [label="b"]
-                    n5 [label="d"]
-                    n6 [label="c"]
-                    n7 [label="exit"]
+                    n4 [label="a ? b ?? c : d"]
+                    n5 [label="b"]
+                    n6 [label="d"]
+                    n7 [label="c"]
+                    n8 [label="b ?? c"]
+                    n9 [label="exit"]
                     n1 -> n2
                     n2 -> n3
-                    n3 -> n4 [label="true"]
-                    n3 -> n5 [label="false"]
-                    n4 -> n6 [label="??"]
-                    n4 -> n7
+                    n3 -> n4
+                    n4 -> n5
+                    n4 -> n6
                     n5 -> n7
-                    n6 -> n7
+                    n5 -> n8
+                    n6 -> n9
+                    n7 -> n8
+                    n8 -> n9
                 }
                 """
         )
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 3)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
     }
 
     func testExpression_tuple() {
@@ -789,6 +1011,363 @@ class ControlFlowGraph_CreationExpTests: XCTestCase {
                     n4 -> n5
                     n5 -> n6
                     n6 -> n7
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testExpression_tuple_shortCircuit() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .tuple([
+                    .identifier("a").binary(op: .nullCoalesce, rhs: .identifier("b")),
+                    .identifier("c"),
+                    .identifier("d").binary(op: .and, rhs: .identifier("e")),
+                ])
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="b"]
+                    n5 [label="a ?? b"]
+                    n6 [label="c"]
+                    n7 [label="d"]
+                    n8 [label="e"]
+                    n9 [label="d && e"]
+                    n10 [label="(a ?? b, c, d && e)"]
+                    n11 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n3 -> n5
+                    n4 -> n5
+                    n5 -> n6
+                    n6 -> n7
+                    n7 -> n8
+                    n7 -> n9
+                    n8 -> n9
+                    n9 -> n10
+                    n10 -> n11
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testExpression_typeCheck() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .typeCheck(.identifier("a"), type: .int)
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="a is Int"]
+                    n5 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n4 -> n5
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testExpression_typeCheck_shortCircuit() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .typeCheck(.identifier("a").binary(op: .nullCoalesce, rhs: .identifier("b")), type: .int)
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="b"]
+                    n5 [label="a ?? b"]
+                    n6 [label="a ?? b is Int"]
+                    n7 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n3 -> n5
+                    n4 -> n5
+                    n5 -> n6
+                    n6 -> n7
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testExpression_unary() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .unary(op: .subtract, .identifier("a"))
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="-a"]
+                    n5 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n4 -> n5
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testExpression_unary_shortCircuit() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .unary(op: .subtract, .identifier("a").binary(op: .nullCoalesce, rhs: .identifier("b")))
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="b"]
+                    n5 [label="a ?? b"]
+                    n6 [label="-(a ?? b)"]
+                    n7 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n3 -> n5
+                    n4 -> n5
+                    n5 -> n6
+                    n6 -> n7
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testExpression_unknown() {
+        let stmt: CompoundStatement = [
+            .expression(
+                .unknown(.init(context: "a"))
+            ),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func tesShortCircuit_andOperand() {
+        let stmt: CompoundStatement = [
+            .expression(.identifier("a").binary(op: .and, rhs: .identifier("b"))),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="b"]
+                    n5 [label="a && b"]
+                    n6 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n3 -> n5
+                    n4 -> n5
+                    n5 -> n6
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testShortCircuit_orOperand() {
+        let stmt: CompoundStatement = [
+            .expression(.identifier("a").binary(op: .or, rhs: .identifier("b"))),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="b"]
+                    n5 [label="a || b"]
+                    n6 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n3 -> n5
+                    n4 -> n5
+                    n5 -> n6
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testShortCircuit_nullCoalesceOperand() {
+        let stmt: CompoundStatement = [
+            .expression(.identifier("a").binary(op: .nullCoalesce, rhs: .identifier("b"))),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="b"]
+                    n5 [label="a ?? b"]
+                    n6 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n3 -> n5
+                    n4 -> n5
+                    n5 -> n6
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testShortCircuit_nestedExpression() {
+        let stmt: CompoundStatement = [
+            .expression(.arrayLiteral([
+                .identifier("a").binary(op: .and, rhs: .identifier("b")),
+                .identifier("c"),
+            ])),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="b"]
+                    n5 [label="a && b"]
+                    n6 [label="c"]
+                    n7 [label="[a && b, c]"]
+                    n8 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n3 -> n5
+                    n4 -> n5
+                    n5 -> n6
+                    n6 -> n7
+                    n7 -> n8
                 }
                 """
         )

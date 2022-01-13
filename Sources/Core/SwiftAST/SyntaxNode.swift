@@ -11,6 +11,12 @@ open class SyntaxNode {
             )
         }
     }
+
+    /// Returns the top-most parent node in this syntax node's hierarchy.
+    /// If `parent == nil`, root is `self`.
+    public var root: SyntaxNode {
+        parent?.root ?? self
+    }
     
     /// Gets the list of children `SyntaxNode` within this syntax node.
     open var children: [SyntaxNode] {
@@ -59,6 +65,26 @@ open class SyntaxNode {
             currentParent = p.parent
         }
         
+        return nil
+    }
+
+    /// Returns the first common ancestor between two given syntax nodes.
+    ///
+    /// Returns `nil` if the nodes do not share a common ancestor.
+    public static func firstCommonAncestor(between node1: SyntaxNode, _ node2: SyntaxNode) -> SyntaxNode? {
+        if node1 === node2 {
+            return node1
+        }
+
+        var parent: SyntaxNode? = node1
+        while let p = parent {
+            if node2.isDescendent(of: p) {
+                return p
+            }
+
+            parent = p.parent
+        }
+
         return nil
     }
 }

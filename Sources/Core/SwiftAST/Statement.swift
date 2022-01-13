@@ -60,6 +60,18 @@ public class Statement: SyntaxNode, Codable, Equatable {
         fatalError("Must be overridden by subclasses")
     }
     
+    /// Accepts the given stateful visitor instance, calling the appropriate
+    /// visiting method according to this statement's type.
+    ///
+    /// - Parameter visitor: The visitor to accept
+    /// - Parameter state: The state to pass to the visitor
+    /// - Returns: The result of the visitor's `visit-` call when applied to this
+    /// statement
+    @inlinable
+    public func accept<V: StatementStatefulVisitor>(_ visitor: V, state: V.State) -> V.StmtResult {
+        fatalError("Must be overridden by subclasses")
+    }
+    
     public func isEqual(to other: Statement) -> Bool {
         false
     }

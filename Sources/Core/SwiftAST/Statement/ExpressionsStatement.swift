@@ -43,6 +43,11 @@ public class ExpressionsStatement: Statement, StatementKindType {
         visitor.visitExpressions(self)
     }
     
+    @inlinable
+    public override func accept<V: StatementStatefulVisitor>(_ visitor: V, state: V.State) -> V.StmtResult {
+        visitor.visitExpressions(self, state: state)
+    }
+    
     public override func isEqual(to other: Statement) -> Bool {
         switch other {
         case let rhs as ExpressionsStatement:

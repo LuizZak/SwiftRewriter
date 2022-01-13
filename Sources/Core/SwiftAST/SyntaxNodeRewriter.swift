@@ -280,7 +280,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter switchCase: A switch case block to visit
     open func visitSwitchCase(_ switchCase: SwitchCase) -> SwitchCase {
         switchCase.patterns = switchCase.patterns.map(visitPattern)
-        switchCase.statements = switchCase.statements.map(visitStatement)
+        switchCase.body = _visitCompound(switchCase.body)
 
         return switchCase
     }
@@ -290,7 +290,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter defaultCase: A switch default case block to visit
     /// - Returns: Result of visiting the switch default case block
     open func visitSwitchDefaultCase(_ defaultCase: SwitchDefaultCase) -> SwitchDefaultCase {
-        defaultCase.statements = defaultCase.statements.map(visitStatement)
+        defaultCase.body = _visitCompound(defaultCase.body)
 
         return defaultCase
     }
@@ -419,10 +419,10 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
         return stmt
     }
     
-    /// Visits a catch block from a `do` statement.
+    /// Visits a statement variable declaration from a `var` statement
     ///
-    /// - Parameter catchBlock: A `CatchBlock` to visit.
-    /// - Returns: Result of visiting the catch block
+    /// - Parameter decl: A `StatementVariableDeclaration` to visit
+    /// - Returns: Result of visiting the variable declaration element
     open func visitStatementVariableDeclaration(_ decl: StatementVariableDeclaration) -> StatementVariableDeclaration {
         decl.initialization = decl.initialization.map(visitExpression)
         

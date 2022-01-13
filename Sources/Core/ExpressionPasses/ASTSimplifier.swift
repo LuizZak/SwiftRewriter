@@ -117,14 +117,14 @@ public class ASTSimplifier: ASTRewriterPass {
     public override func visitSwitch(_ stmt: SwitchStatement) -> Statement {
         for (i, cs) in stmt.cases.enumerated() {
             if cs.statements.count > 1 && cs.statements.last is BreakStatement {
-                stmt.cases[i].statements.removeLast()
+                stmt.cases[i].body.statements.removeLast()
                 notifyChange()
             }
         }
         
         if let def = stmt.defaultCase {
             if def.statements.count > 1 && def.statements.last is BreakStatement {
-                def.statements.removeLast()
+                def.body.statements.removeLast()
                 notifyChange()
             }
         }

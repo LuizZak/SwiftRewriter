@@ -88,6 +88,11 @@ public class ForStatement: Statement, StatementKindType {
         visitor.visitFor(self)
     }
     
+    @inlinable
+    public override func accept<V: StatementStatefulVisitor>(_ visitor: V, state: V.State) -> V.StmtResult {
+        visitor.visitFor(self, state: state)
+    }
+    
     public override func isEqual(to other: Statement) -> Bool {
         switch other {
         case let rhs as ForStatement:

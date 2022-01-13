@@ -221,6 +221,7 @@
 			"Initializable",
 			"ivar",
 			"ivars",
+			"Labelable",
 			"mutex",
 			"Nonnull",
 			"penwidth",

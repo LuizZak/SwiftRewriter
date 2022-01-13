@@ -15,6 +15,11 @@ public class FallthroughStatement: Statement, StatementKindType {
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         visitor.visitFallthrough(self)
     }
+    
+    @inlinable
+    public override func accept<V: StatementStatefulVisitor>(_ visitor: V, state: V.State) -> V.StmtResult {
+        visitor.visitFallthrough(self, state: state)
+    }
 
     public override func isEqual(to other: Statement) -> Bool {
         other is FallthroughStatement

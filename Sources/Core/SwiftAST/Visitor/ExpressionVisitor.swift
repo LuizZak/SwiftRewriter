@@ -4,6 +4,7 @@
 /// returning the resulting value after done traversing.
 public protocol ExpressionVisitor {
     associatedtype ExprResult
+    associatedtype PatternResult = ExprResult
     
     /// Visits an expression node
     ///
@@ -118,4 +119,10 @@ public protocol ExpressionVisitor {
     /// - Parameter exp: An unknown expression to visit
     /// - Returns: Result of visiting this unknown expression node
     func visitUnknown(_ exp: UnknownExpression) -> ExprResult
+
+    /// Visits a pattern
+    ///
+    /// - Parameter pattern: A pattern to visit
+    /// - Returns: Result of visiting this pattern
+    func visitPattern(_ pattern: Pattern) -> PatternResult
 }

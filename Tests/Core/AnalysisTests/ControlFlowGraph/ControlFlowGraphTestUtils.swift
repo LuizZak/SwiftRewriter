@@ -1,7 +1,8 @@
-import Analysis
 import SwiftAST
 import WriterTargetOutput
 import XCTest
+
+@testable import Analysis
 
 fileprivate enum AttributeValue: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByFloatLiteral, ExpressibleByStringInterpolation {
     case double(Double)
@@ -39,6 +40,19 @@ fileprivate func labelForSyntaxNode(_ node: SyntaxNode) -> String {
 
     case is IfStatement:
         label = "{if}"
+    
+    case is SwitchStatement:
+        label = "{switch}"
+    
+    case let clause as SwitchCase:
+        if clause.patterns.count == 1 {
+            label = "{case \(clause.patterns[0])}"
+        } else {
+            label = "{case \(clause.patterns)}"
+        }
+    
+    case is SwitchDefaultCase:
+        label = "{default}"
 
     case is ForStatement:
         label = "{for}"
@@ -47,8 +61,21 @@ fileprivate func labelForSyntaxNode(_ node: SyntaxNode) -> String {
         label = "{while}"
 
     case is RepeatWhileStatement:
-        label = "{do-while}"
+        label = "{repeat-while}"
 
+    case is DoStatement:
+        label = "{do}"
+
+    case let catchBlock as CatchBlock:
+        if let pattern = catchBlock.pattern {
+            label = "{catch \(pattern)}"
+        } else {
+            label = "{catch}"
+        }
+    
+    case is DeferStatement:
+        label = "{defer}"
+    
     case let ret as ReturnStatement:
         if let exp = ret.exp {
             label = "{return \(exp)}"
@@ -66,14 +93,7 @@ fileprivate func labelForSyntaxNode(_ node: SyntaxNode) -> String {
             declLabel += ": \(decl.type)"
 
             return declLabel
-        }.joined(separator: "\n")
-    
-    case let catchBlock as CatchBlock:
-        if let pattern = catchBlock.pattern {
-            label = "{catch \(pattern)}"
-        } else {
-            label = "{catch}"
-        }
+        }.joined(separator: ", ")
     
     case let stmt as BreakStatement:
         if let l = stmt.targetLabel {
@@ -371,7 +391,19 @@ internal func graphviz(graph: ControlFlowGraph) -> String {
                 continue
             }
 
-            let edges = graph.edges(from: node)
+            var edges = graph.edges(from: node)
+
+            // Sort edges by lexical ordering
+            edges.sort {
+                guard let lhs = nodeIds[ObjectIdentifier($0.end)] else {
+                    return false
+                }
+                guard let rhs = nodeIds[ObjectIdentifier($1.end)] else {
+                    return true
+                }
+                
+                return lhs.compare(rhs, options: .numeric) == .orderedAscending
+            }
 
             for edge in edges {
                 let target = edge.end

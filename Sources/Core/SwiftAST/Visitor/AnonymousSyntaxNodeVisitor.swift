@@ -380,12 +380,17 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// - Parameter stmt: A VariableDeclarationsStatement to visit
     public func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) {
         listener(stmt)
-        
-        for i in 0..<stmt.decl.count {
-            stmt.decl[i].initialization.map(visitExpression)
-        }
+
+        stmt.decl.forEach(visitStatementVariableDeclaration)
     }
     
+    /// Visits a variable declaration statement's element
+    ///
+    /// - Parameter stmt: A variable declaration statement's element to visit
+    public func visitStatementVariableDeclaration(_ decl: StatementVariableDeclaration) {
+        listener(decl)
+    }
+
     /// Visits a local function statement
     ///
     /// - Parameter stmt: A LocalFunctionStatement to visit

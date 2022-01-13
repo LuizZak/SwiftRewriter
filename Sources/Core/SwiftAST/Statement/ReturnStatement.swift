@@ -50,6 +50,11 @@ public class ReturnStatement: Statement, StatementKindType {
         visitor.visitReturn(self)
     }
     
+    @inlinable
+    public override func accept<V: StatementStatefulVisitor>(_ visitor: V, state: V.State) -> V.StmtResult {
+        visitor.visitReturn(self, state: state)
+    }
+    
     public override func isEqual(to other: Statement) -> Bool {
         switch other {
         case let rhs as ReturnStatement:

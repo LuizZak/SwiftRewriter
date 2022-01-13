@@ -80,6 +80,11 @@ public class SwitchStatement: Statement, StatementKindType {
         visitor.visitSwitch(self)
     }
     
+    @inlinable
+    public override func accept<V: StatementStatefulVisitor>(_ visitor: V, state: V.State) -> V.StmtResult {
+        visitor.visitSwitch(self, state: state)
+    }
+    
     public override func isEqual(to other: Statement) -> Bool {
         switch other {
         case let rhs as SwitchStatement:
@@ -161,33 +166,41 @@ public class SwitchCase: SyntaxNode, Codable, Equatable {
 
     /// Statements for the switch case
     public var statements: [Statement] {
+        body.statements
+    }
+
+    public var body: CompoundStatement {
         didSet {
-            oldValue.forEach { $0.parent = nil }
-            statements.forEach { $0.parent = self }
+            oldValue.parent = nil
+            body.parent = self
         }
     }
 
     public override var children: [SyntaxNode] {
-        patterns.flatMap(\.subExpressions) + statements
+        patterns.flatMap(\.subExpressions) + [body]
     }
     
-    public init(patterns: [Pattern], statements: [Statement]) {
+    public convenience init(patterns: [Pattern], statements: [Statement]) {
+        self.init(patterns: patterns, body: CompoundStatement(statements: statements))
+    }
+    
+    public init(patterns: [Pattern], body: CompoundStatement) {
         self.patterns = patterns
-        self.statements = statements
+        self.body = body
     }
     
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         self.patterns = try container.decode([Pattern].self, forKey: .patterns)
-        self.statements = try container.decodeStatements(forKey: .statements)
+        self.body = try container.decodeStatement(forKey: .body)
     }
     
     @inlinable
     public override func copy() -> SwitchCase {
         SwitchCase(
             patterns: patterns.map { $0.copy() },
-            statements: statements.map { $0.copy() }
+            body: body.copy()
         )
     }
 
@@ -195,60 +208,68 @@ public class SwitchCase: SyntaxNode, Codable, Equatable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
         try container.encode(patterns, forKey: .patterns)
-        try container.encodeStatements(statements, forKey: .statements)
+        try container.encodeStatement(body, forKey: .body)
     }
 
     public static func == (lhs: SwitchCase, rhs: SwitchCase) -> Bool {
-        lhs === lhs || (lhs.patterns == rhs.patterns && lhs.statements == rhs.statements)
+        lhs === lhs || (lhs.patterns == rhs.patterns && lhs.body == rhs.body)
     }
     
     private enum CodingKeys: String, CodingKey {
         case patterns
-        case statements
+        case body
     }
 }
 
 public class SwitchDefaultCase: SyntaxNode, Codable, Equatable {
     /// Statements for the switch case
     public var statements: [Statement] {
+        body.statements
+    }
+
+    public var body: CompoundStatement {
         didSet {
-            oldValue.forEach { $0.parent = nil }
-            statements.forEach { $0.parent = self }
+            oldValue.parent = nil
+            body.parent = self
         }
     }
 
     public override var children: [SyntaxNode] {
-        statements
+        [body]
     }
     
-    public init(statements: [Statement]) {
-        self.statements = statements
+    public convenience init(statements: [Statement]) {
+        self.init(body: CompoundStatement(statements: statements))
+    }
+    
+    public init(body: CompoundStatement) {
+        self.body = body
     }
     
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        self.statements = try container.decodeStatements(forKey: .statements)
+        self.body = try container.decodeStatement(forKey: .body)
     }
     
     @inlinable
     public override func copy() -> SwitchDefaultCase {
         .init(
-            statements: statements.map { $0.copy() }
+            body: body.copy()
         )
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
-        try container.encodeStatements(statements, forKey: .statements)
+        try container.encodeStatement(body, forKey: .body)
     }
 
     public static func == (lhs: SwitchDefaultCase, rhs: SwitchDefaultCase) -> Bool {
-        lhs === lhs || (lhs.statements == rhs.statements)
+        lhs === lhs || (lhs.body == rhs.body)
     }
     
     private enum CodingKeys: String, CodingKey {
-        case statements
+        case body
     }
 }

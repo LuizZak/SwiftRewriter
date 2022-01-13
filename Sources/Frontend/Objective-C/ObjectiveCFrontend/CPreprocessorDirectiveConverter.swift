@@ -136,6 +136,10 @@ private class ValidatorExpressionVisitor: ExpressionVisitor {
     init(typeSystem: TypeSystem) {
         self.typeSystem = typeSystem
     }
+
+    func visitPattern(_ pattern: Pattern) -> Bool {
+        return false
+    }
     
     func visitExpression(_ expression: Expression) -> Bool {
         return expression.accept(self)

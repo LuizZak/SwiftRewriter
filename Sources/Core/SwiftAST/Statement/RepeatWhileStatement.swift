@@ -56,6 +56,11 @@ public class RepeatWhileStatement: Statement, StatementKindType {
         visitor.visitRepeatWhile(self)
     }
     
+    @inlinable
+    public override func accept<V: StatementStatefulVisitor>(_ visitor: V, state: V.State) -> V.StmtResult {
+        visitor.visitRepeatWhile(self, state: state)
+    }
+    
     public override func isEqual(to other: Statement) -> Bool {
         switch other {
         case let rhs as RepeatWhileStatement:

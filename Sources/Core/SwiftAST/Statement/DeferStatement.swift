@@ -43,6 +43,11 @@ public class DeferStatement: Statement, StatementKindType {
         visitor.visitDefer(self)
     }
     
+    @inlinable
+    public override func accept<V: StatementStatefulVisitor>(_ visitor: V, state: V.State) -> V.StmtResult {
+        visitor.visitDefer(self, state: state)
+    }
+    
     public override func isEqual(to other: Statement) -> Bool {
         switch other {
         case let rhs as DeferStatement:

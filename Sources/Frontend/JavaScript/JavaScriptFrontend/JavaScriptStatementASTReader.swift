@@ -231,7 +231,7 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
             if cases.count > 0, let last = cases.last {
                 if last.statements.isEmpty {
                     cases[cases.count - 1].patterns.append(contentsOf: patterns)
-                    cases[cases.count - 1].statements.append(contentsOf: statements)
+                    cases[cases.count - 1].body.statements.append(contentsOf: statements)
                     continue
                 }
             }

@@ -56,6 +56,11 @@ public class VariableDeclarationsStatement: Statement, StatementKindType, Custom
         visitor.visitVariableDeclarations(self)
     }
     
+    @inlinable
+    public override func accept<V: StatementStatefulVisitor>(_ visitor: V, state: V.State) -> V.StmtResult {
+        visitor.visitVariableDeclarations(self, state: state)
+    }
+    
     public override func isEqual(to other: Statement) -> Bool {
         switch other {
         case let rhs as VariableDeclarationsStatement:

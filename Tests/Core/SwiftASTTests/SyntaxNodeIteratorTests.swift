@@ -422,24 +422,6 @@ class SyntaxNodeIteratorTests: XCTestCase {
         )
     }
 
-    /*
-     Switch statement traversal:
-
-              1
-     switch <exp> { <cases> <default> }
-                       L. case -> patterns
-                   2.           |    L. pattern -> expression(s)
-                   3.  L. case -> statement(s)
-                   4.  L. default ->  statement(s)
-
-     1. Switch expression
-     2. Switch cases' patterns
-     3. Switch cases' statements
-     4. Switch default statements
-
-     And then recursively within each one, in breadth-first manner.
-     */
-
     func testSwitchNotInspectingBlocks() throws {
         let switchExp = makeBlock("a")
         let stmt = Statement.switch(
@@ -474,16 +456,22 @@ class SyntaxNodeIteratorTests: XCTestCase {
                 // -- depth 2
                 // switch -> case 0 (patterns) 0 -> sub expression
                 el(stmt.cases[0].patterns[0].subExpressions[0]),
-                // switch -> case 0 -> statement 0
-                el(stmt.cases[0].statements[0]),
-                // switch -> default -> statement 0
-                el(stmt.defaultCase?.statements[0]),
+                // switch -> case 0 -> body
+                el(stmt.cases[0].body),
+                // switch -> default -> body
+                el(stmt.defaultCase?.body),
 
                 // -- depth 3
-                // switch -> case 0 -> statement 0 -> expression 0
-                el(stmt.cases[0].statements[0].asExpressions?.expressions[0]),
-                // switch -> default -> statement 0 -> expression 0
-                el(stmt.defaultCase?.statements[0].asExpressions?.expressions[0]),
+                // switch -> case 0 -> body -> statement 0
+                el(stmt.cases[0].body.statements[0]),
+                // switch -> default -> body -> statement 0
+                el(stmt.defaultCase?.body.statements[0]),
+
+                // -- depth 4
+                // switch -> case 0 -> body -> statement 0 -> expression 0
+                el(stmt.cases[0].body.statements[0].asExpressions?.expressions[0]),
+                // switch -> default -> body -> statement 0 -> expression 0
+                el(stmt.defaultCase?.body.statements[0].asExpressions?.expressions[0]),
             ]
         )
     }
@@ -522,76 +510,38 @@ class SyntaxNodeIteratorTests: XCTestCase {
                 // -- depth 2
                 // switch -> exp -> body
                 el(switchExp.body),
-                // switch -> case 0 (patterns) 0 -> sub expression
+                // switch -> case 0 (patterns) -> sub expression 0
                 el(stmt.cases[0].patterns[0].subExpressions[0]),
-                // switch -> case 0 -> statement 0
-                el(stmt.cases[0].statements[0]),
-                // switch -> default -> statement 0
-                el(stmt.defaultCase?.statements[0]),
+                // switch -> case 0 -> body
+                el(stmt.cases[0].body),
+                // switch -> default -> body
+                el(stmt.defaultCase?.body),
 
                 // -- depth 3
                 // switch -> exp -> body -> statements
                 el(switchExp.body.statements[0]),
                 // switch -> case 0 (patterns) 0 -> sub expression 0 -> body
                 el(stmt.cases[0].patterns[0].subExpressions[0].asBlock?.body),
-                // switch -> case 0 -> statement 0 -> expression 0
-                el(stmt.cases[0].statements[0].asExpressions?.expressions[0]),
-                // switch -> default -> statement 0 -> expression 0
-                el(stmt.defaultCase?.statements[0].asExpressions?.expressions[0]),
+                // switch -> case 0 -> body -> statement 0
+                el(stmt.cases[0].body.statements[0]),
+                // switch -> default -> body -> statement 0
+                el(stmt.defaultCase?.body.statements[0]),
 
                 // -- depth 4
                 // switch -> exp -> body -> statements -> expression
                 el(switchExp.body.statements[0].asExpressions?.expressions[0]),
                 // switch -> case 0 (patterns) 0 -> sub expression 0 -> body -> statement 0
                 el(stmt.cases[0].patterns[0].subExpressions[0].asBlock?.body.statements[0]),
+                // switch -> case 0 -> body -> statement 0 -> expression 0
+                el(stmt.cases[0].body.statements[0].asExpressions?.expressions[0]),
+                // switch -> default -> body -> statement 0 -> expression 0
+                el(stmt.defaultCase?.body.statements[0].asExpressions?.expressions[0]),
 
                 // -- depth 5
                 // switch -> case 0 (patterns) 0 -> sub expression 0 -> body -> statement 0 -> expression 0
                 el(stmt.cases[0].patterns[0].subExpressions[0].asBlock?.body.statements[0].asExpressions?.expressions[0]),
             ]
         )
-
-        /*
-        assertStatement(
-            stmt,
-            inspectingBlocks: true,
-            iteratesAs: [
-                stmt,
-                // switch expression
-                stmt.exp,
-                // case 0
-                stmt.cases[0],
-                // default
-                stmt.defaultCase!,
-                // switch expression -> block/statements
-                stmt.exp.children[0],
-                // case 0 -> [pattern] -> block
-                stmt.cases[0].patterns[0].subExpressions[0],
-                // case 0 -> statement(s)
-                stmt.cases[0].statements[0],
-                // default -> statement(s)
-                stmt.defaultCase!.statements[0],
-
-                // switch expression -> block -> compound statement
-                Statement.compound([.expression(.identifier("a"))]),
-                // case 0 -> [pattern] -> block -> compound statement
-                Statement.compound([.expression(.identifier("b"))]),
-                // case 0 -> statement(s) -> expression
-                Expression.identifier("c"),
-                // default -> statement(s) -> expression
-                Expression.identifier("d"),
-
-                // switch expression -> block -> compound statement -> expression statement
-                Statement.expression(.identifier("a")),
-                // case 0 -> [pattern] -> block -> compound statement -> expression statement
-                Statement.expression(.identifier("b")),
-                // switch expression -> block -> compound statement -> expression statement
-                Expression.identifier("a"),
-                // case 0 -> [pattern] -> block -> compound statement -> expression statement -> expression
-                Expression.identifier("b"),
-            ]
-        )
-        */
     }
 
     func testDefer() {

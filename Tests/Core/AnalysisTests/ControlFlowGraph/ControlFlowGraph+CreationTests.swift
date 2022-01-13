@@ -56,13 +56,15 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n4 [label="{end scope of CompoundStatement}"]
                     n5 [label="{exp}"]
                     n6 [label="b"]
-                    n7 [label="exit"]
+                    n7 [label="{end scope of CompoundStatement}"]
+                    n8 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
                     n5 -> n6
                     n6 -> n7
+                    n7 -> n8
                 }
                 """
         )
@@ -99,16 +101,19 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n1 [label="entry"]
                     n2 [label="{exp}"]
                     n3 [label="b"]
-                    n4 [label="{exp}"]
-                    n5 [label="a"]
-                    n6 [label="{end scope of DeferStatement}"]
-                    n7 [label="{end scope of CompoundStatement}"]
-                    n8 [label="{exp}"]
-                    n9 [label="d"]
-                    n10 [label="{exp}"]
-                    n11 [label="c"]
-                    n12 [label="{end scope of DeferStatement}"]
-                    n13 [label="exit"]
+                    n4 [label="{defer}"]
+                    n5 [label="{exp}"]
+                    n6 [label="a"]
+                    n7 [label="{end scope of {defer}}"]
+                    n8 [label="{end scope of CompoundStatement}"]
+                    n9 [label="{exp}"]
+                    n10 [label="d"]
+                    n11 [label="{defer}"]
+                    n12 [label="{exp}"]
+                    n13 [label="c"]
+                    n14 [label="{end scope of {defer}}"]
+                    n15 [label="{end scope of CompoundStatement}"]
+                    n16 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -121,6 +126,9 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n10 -> n11
                     n11 -> n12
                     n12 -> n13
+                    n13 -> n14
+                    n14 -> n15
+                    n15 -> n16
                 }
                 """
         )
@@ -147,48 +155,54 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             options: .init(generateEndScopes: true)
         )
 
-        sanitize(graph)
+        sanitize(graph, expectsUnreachable: true)
         assertGraphviz(
             graph: graph,
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="{exp}"]
-                    n3 [label="a"]
-                    n4 [label="b"]
-                    n5 [label="{if}"]
-                    n6 [label="c"]
-                    n7 [label="{end scope of DoStatement}"]
-                    n8 [label="{throw c}"]
-                    n9 [label="{end scope of {if}}"]
-                    n10 [label="{end scope of DoStatement}"]
-                    n11 [label="{catch}"]
-                    n12 [label="{exp}"]
-                    n13 [label="d"]
-                    n14 [label="{end scope of {catch}}"]
-                    n15 [label="exit"]
+                    n2 [label="{do}"]
+                    n3 [label="{exp}"]
+                    n4 [label="a"]
+                    n5 [label="b"]
+                    n6 [label="{if}"]
+                    n7 [label="c"]
+                    n8 [label="{end scope of {do}}"]
+                    n9 [label="{throw c}"]
+                    n10 [label="{end scope of CompoundStatement}"]
+                    n11 [label="{end scope of {if}}"]
+                    n12 [label="{end scope of {do}}"]
+                    n13 [label="{catch}"]
+                    n14 [label="{exp}"]
+                    n15 [label="d"]
+                    n16 [label="{end scope of {catch}}"]
+                    n17 [label="{end scope of {if}}"]
+                    n18 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
                     n5 -> n6
-                    n5 -> n7
+                    n6 -> n7
                     n6 -> n8
-                    n7 -> n15
-                    n8 -> n9
-                    n9 -> n10
-                    n10 -> n11
+                    n7 -> n9
+                    n8 -> n10
+                    n9 -> n11
+                    n10 -> n18
                     n11 -> n12
                     n12 -> n13
                     n13 -> n14
                     n14 -> n15
+                    n15 -> n16
+                    n16 -> n10
+                    n17 -> n8
                 }
                 """
         )
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
 
     func testGenerateEndScopes_true_ifStatement() {
@@ -211,27 +225,33 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="0"]
-                    n3 [label="preIf: Int = 0"]
-                    n4 [label="true"]
-                    n5 [label="{if}"]
-                    n6 [label="0"]
-                    n7 [label="{exp}"]
-                    n8 [label="ifBody: Int = 0"]
-                    n9 [label="postIf"]
-                    n10 [label="{end scope of {if}}"]
-                    n11 [label="exit"]
+                    n2 [label="var preIf: Int"]
+                    n3 [label="0"]
+                    n4 [label="preIf: Int = 0"]
+                    n5 [label="true"]
+                    n6 [label="{if}"]
+                    n7 [label="var ifBody: Int"]
+                    n8 [label="{exp}"]
+                    n9 [label="0"]
+                    n10 [label="postIf"]
+                    n11 [label="ifBody: Int = 0"]
+                    n12 [label="{end scope of CompoundStatement}"]
+                    n13 [label="{end scope of {if}}"]
+                    n14 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
                     n5 -> n6
-                    n5 -> n7
+                    n6 -> n7
                     n6 -> n8
                     n7 -> n9
                     n8 -> n10
                     n9 -> n11
-                    n10 -> n7
+                    n10 -> n12
+                    n11 -> n13
+                    n12 -> n14
+                    n13 -> n8
                 }
                 """
         )
@@ -242,9 +262,6 @@ class ControlFlowGraph_CreationTests: XCTestCase {
     }
 
     func testGenerateEndScopes_true_forStatement() {
-        // TODO: Validate if end-of-scopes for loops should be ended before or
-        // TODO: after the loop exits.
-
         let stmt: CompoundStatement = [
             .variableDeclaration(identifier: "a", type: .int, initialization: .constant(0)),
             .for(.identifier("a"), .identifier("b"), body: [
@@ -264,27 +281,33 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="0"]
-                    n3 [label="a: Int = 0"]
-                    n4 [label="b"]
-                    n5 [label="{for}"]
-                    n6 [label="0"]
-                    n7 [label="{exp}"]
-                    n8 [label="c: Int = 0"]
-                    n9 [label="d"]
-                    n10 [label="{end scope of {for}}"]
-                    n11 [label="exit"]
+                    n2 [label="var a: Int"]
+                    n3 [label="0"]
+                    n4 [label="a: Int = 0"]
+                    n5 [label="b"]
+                    n6 [label="{for}"]
+                    n7 [label="var c: Int"]
+                    n8 [label="{exp}"]
+                    n9 [label="0"]
+                    n10 [label="d"]
+                    n11 [label="c: Int = 0"]
+                    n12 [label="{end scope of CompoundStatement}"]
+                    n13 [label="{end scope of {for}}"]
+                    n14 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
                     n5 -> n6
-                    n5 -> n7
+                    n6 -> n7
                     n6 -> n8
                     n7 -> n9
                     n8 -> n10
                     n9 -> n11
-                    n10 -> n5 [color="#aa3333", penwidth=0.5]
+                    n10 -> n12
+                    n11 -> n13
+                    n12 -> n14
+                    n13 -> n6 [color="#aa3333", penwidth=0.5]
                 }
                 """
         )
@@ -386,30 +409,34 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="Error"]
-                    n3 [label="{throw Error}"]
-                    n4 [label="{end scope of DoStatement}"]
-                    n5 [label="{catch}"]
-                    n6 [label="{exp}"]
-                    n7 [label="errorHandler"]
-                    n8 [label="2"]
-                    n9 [label="errorHandler = 2"]
-                    n10 [label="{end scope of {catch}}"]
-                    n11 [label="{exp}"]
-                    n12 [label="postDo"]
-                    n13 [label="exit"]
+                    n2 [label="{do}"]
+                    n3 [label="Error"]
+                    n4 [label="{throw Error}"]
+                    n5 [label="{end scope of {do}}"]
+                    n6 [label="{catch}"]
+                    n7 [label="{exp}"]
+                    n8 [label="errorHandler"]
+                    n9 [label="2"]
+                    n10 [label="errorHandler = 2"]
+                    n11 [label="{end scope of {catch}}"]
+                    n12 [label="{exp}"]
+                    n13 [label="postDo"]
+                    n14 [label="{end scope of CompoundStatement}"]
+                    n15 [label="exit"]
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
                     n5 -> n6
                     n6 -> n7
-                    n7 -> n8 [label="="]
+                    n7 -> n8
                     n8 -> n9
                     n9 -> n10
                     n10 -> n11
                     n11 -> n12
                     n12 -> n13
+                    n13 -> n14
+                    n14 -> n15
                 }
                 """
         )

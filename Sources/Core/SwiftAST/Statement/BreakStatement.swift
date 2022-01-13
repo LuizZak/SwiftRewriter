@@ -37,6 +37,11 @@ public class BreakStatement: Statement, StatementKindType {
         visitor.visitBreak(self)
     }
     
+    @inlinable
+    public override func accept<V: StatementStatefulVisitor>(_ visitor: V, state: V.State) -> V.StmtResult {
+        visitor.visitBreak(self, state: state)
+    }
+    
     public override func isEqual(to other: Statement) -> Bool {
         switch other {
         case let rhs as BreakStatement:

@@ -1,5 +1,6 @@
 import SwiftAST
 
+/*
 // MARK: - Statements
 
 extension BreakStatement: ControlFlowGraphSyntaxNode { }
@@ -24,3 +25,4 @@ extension WhileStatement: ControlFlowGraphSyntaxNode { }
 // MARK: - Expressions
 
 extension Expression: ControlFlowGraphSyntaxNode { } // Any expression can be a part of a CFG.
+*/

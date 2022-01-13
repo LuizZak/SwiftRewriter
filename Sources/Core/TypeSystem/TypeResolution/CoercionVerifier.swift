@@ -140,6 +140,10 @@ private class _CoercionVerifierVisitor: ExpressionVisitor {
         false
     }
 
+    func visitPattern(_ pattern: Pattern) -> Bool {
+        false
+    }
+
     private func _makeVerifier() -> CoercionVerifier {
         CoercionVerifier(typeSystem: typeSystem)
     }
