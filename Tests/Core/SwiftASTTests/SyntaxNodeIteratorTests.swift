@@ -198,6 +198,16 @@ class SyntaxNodeIteratorTests: XCTestCase {
         )
     }
 
+    func testTryExpression() {
+        assertExpression(
+            .try(.identifier("a")),
+            iteratesAs: [
+                Expression.try(.identifier("a")),
+                Expression.identifier("a"),
+            ]
+        )
+    }
+
     func testBlockTraversalFalse() {
         assertExpression(makeBlock(), iteratesAs: [makeBlock()])
     }

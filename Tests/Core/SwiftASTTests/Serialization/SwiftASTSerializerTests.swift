@@ -100,6 +100,9 @@ class SwiftASTSerializerTests: XCTestCase {
                 body: [
                     .expression(.binary(lhs: .identifier("a"), op: .lessThan, rhs: .constant(2)))
                 ]
+            ),
+            .expression(
+                .try(.identifier("a"))
             )
         ]
 

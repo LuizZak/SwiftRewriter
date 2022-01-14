@@ -68,6 +68,9 @@ extension SwiftSyntaxProducer {
             
         case .blockLiteral(let exp):
             return generateClosure(exp).asExprSyntax
+        
+        case .tryExpression(let exp):
+            return generateTry(exp).asExprSyntax
 
         case .unknown:
             return SyntaxFactory.makeBlankUnknownExpr().asExprSyntax
@@ -675,6 +678,29 @@ extension SwiftSyntaxProducer {
             return IdentifierExprSyntax { builder in
                 builder.useIdentifier(prepareStartToken(makeIdentifier(constant)))
             }.asExprSyntax
+        }
+    }
+
+    public func generateTry(_ exp: TryExpression) -> TryExprSyntax {
+        TryExprSyntax { builder in
+            builder.useTryKeyword(makeStartToken(SyntaxFactory.makeTryKeyword))
+
+            switch exp.mode {
+            case .throwable:
+                break
+            case .forced:
+                builder.useQuestionOrExclamationMark(
+                    SyntaxFactory.makeExclamationMarkToken()
+                )
+            case .optional:
+                builder.useQuestionOrExclamationMark(
+                    SyntaxFactory.makeInfixQuestionMarkToken()
+                )
+            }
+
+            addExtraLeading(.spaces(1))
+
+            builder.useExpression(generateExpression(exp.exp))
         }
     }
     

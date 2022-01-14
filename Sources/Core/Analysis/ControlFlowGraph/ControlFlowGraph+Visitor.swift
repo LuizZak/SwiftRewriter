@@ -586,6 +586,23 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
         CFGVisitResult(forSyntaxNode: exp)
     }
 
+    func visitTry(_ exp: TryExpression) -> CFGVisitResult {
+        let result =
+            visitExpression(exp.exp)
+            .resolvingJumpsToExit(kind: .expressionShortCircuit)
+        
+        let node: CFGVisitResult
+        switch exp.mode {
+        case .throwable:
+            node = CFGVisitResult(withBranchingSyntaxNode: exp, toUnresolvedJump: .throw)
+
+        case .optional, .forced:
+            node = .init(forSyntaxNode: exp)
+        }
+
+        return result.then(node)
+    }
+
     func visitUnknown(_ exp: UnknownExpression) -> CFGVisitResult {
         CFGVisitResult(forSyntaxNode: exp)
     }

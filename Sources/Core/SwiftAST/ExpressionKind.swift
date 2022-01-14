@@ -20,6 +20,7 @@ public enum ExpressionKind: Codable {
     case tuple(TupleExpression)
     case typeCheck(TypeCheckExpression)
     case unary(UnaryExpression)
+    case tryExpression(TryExpression)
     case unknown(UnknownExpression)
 
     /// Attempts to initialize this expression kind with a given expression.
@@ -70,6 +71,8 @@ public enum ExpressionKind: Codable {
         case .typeCheck(let e):
             return e
         case .unary(let e):
+            return e
+        case .tryExpression(let e):
             return e
         case .unknown(let e):
             return e

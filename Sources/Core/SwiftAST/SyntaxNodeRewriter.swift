@@ -12,7 +12,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits an expression node
     ///
     /// - Parameter exp: An `Expression` to visit
-    /// - Returns: Result of visiting this expression node
+    /// - Returns: Result of visiting the expression node
     open func visitExpression(_ exp: Expression) -> Expression {
         exp.accept(self)
     }
@@ -20,7 +20,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits an assignment operation node
     ///
     /// - Parameter exp: An `AssignmentExpression` to visit
-    /// - Returns: Result of visiting this assignment operation node
+    /// - Returns: Result of visiting the assignment operation node
     open func visitAssignment(_ exp: AssignmentExpression) -> Expression {
         exp.lhs = visitExpression(exp.lhs)
         exp.rhs = visitExpression(exp.rhs)
@@ -31,7 +31,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits a binary operation node
     ///
     /// - Parameter exp: A `BinaryExpression` to visit
-    /// - Returns: Result of visiting this binary operation node
+    /// - Returns: Result of visiting the binary operation node
     open func visitBinary(_ exp: BinaryExpression) -> Expression {
         exp.lhs = visitExpression(exp.lhs)
         exp.rhs = visitExpression(exp.rhs)
@@ -42,7 +42,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits a unary operation node
     ///
     /// - Parameter exp: A `UnaryExpression` to visit
-    /// - Returns: Result of visiting this unary operation node
+    /// - Returns: Result of visiting the unary operation node
     open func visitUnary(_ exp: UnaryExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
         
@@ -66,7 +66,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits a prefix operation node
     ///
     /// - Parameter exp: A `PrefixExpression` to visit
-    /// - Returns: Result of visiting this prefix operation node
+    /// - Returns: Result of visiting the prefix operation node
     open func visitPrefix(_ exp: PrefixExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
         
@@ -76,7 +76,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits a postfix operation node
     ///
     /// - Parameter exp: A `PostfixExpression` to visit
-    /// - Returns: Result of visiting this postfix operation node
+    /// - Returns: Result of visiting the postfix operation node
     open func visitPostfix(_ exp: PostfixExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
         
@@ -97,7 +97,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits a constant node
     ///
     /// - Parameter exp: A `ConstantExpression` to visit
-    /// - Returns: Result of visiting this constant node
+    /// - Returns: Result of visiting the constant node
     open func visitConstant(_ exp: ConstantExpression) -> Expression {
         exp
     }
@@ -105,7 +105,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits a parenthesized expression node
     ///
     /// - Parameter exp: A `ParensExpression` to visit
-    /// - Returns: Result of visiting this parenthesis node
+    /// - Returns: Result of visiting the parenthesis node
     open func visitParens(_ exp: ParensExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
         
@@ -115,7 +115,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits an identifier node
     ///
     /// - Parameter exp: An `IdentifierExpression` to visit
-    /// - Returns: Result of visiting this identifier node
+    /// - Returns: Result of visiting the identifier node
     open func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
         exp
     }
@@ -123,7 +123,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits a type-casting expression node
     ///
     /// - Parameter exp: A `CastExpression` to visit
-    /// - Returns: Result of visiting this cast node
+    /// - Returns: Result of visiting the cast node
     open func visitCast(_ exp: CastExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
         
@@ -133,7 +133,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits a type-check expression node
     ///
     /// - Parameter exp: A `TypeCheckExpression` to visit
-    /// - Returns: Result of visiting this type check node
+    /// - Returns: Result of visiting the type check node
     open func visitTypeCheck(_ exp: TypeCheckExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
 
@@ -143,7 +143,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits an array literal node
     ///
     /// - Parameter exp: An `ArrayLiteralExpression` to visit
-    /// - Returns: Result of visiting this array literal node
+    /// - Returns: Result of visiting the array literal node
     open func visitArray(_ exp: ArrayLiteralExpression) -> Expression {
         exp.items = exp.items.map(visitExpression)
         
@@ -153,7 +153,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits a dictionary literal node
     ///
     /// - Parameter exp: A `DictionaryLiteralExpression` to visit
-    /// - Returns: Result of visiting this dictionary literal node
+    /// - Returns: Result of visiting the dictionary literal node
     open func visitDictionary(_ exp: DictionaryLiteralExpression) -> Expression {
         exp.pairs = exp.pairs.map { pair in
             ExpressionDictionaryPair(
@@ -168,7 +168,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits a block expression
     ///
     /// - Parameter exp: A `BlockLiteralExpression` to visit
-    /// - Returns: Result of visiting this block expression node
+    /// - Returns: Result of visiting the block expression node
     open func visitBlock(_ exp: BlockLiteralExpression) -> Expression {
         exp.body = _visitCompound(exp.body)
         
@@ -178,7 +178,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits a ternary operation node
     ///
     /// - Parameter exp: A `TernaryExpression` to visit
-    /// - Returns: Result of visiting this ternary expression node
+    /// - Returns: Result of visiting the ternary expression node
     open func visitTernary(_ exp: TernaryExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
         exp.ifTrue = visitExpression(exp.ifTrue)
@@ -190,7 +190,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits a tuple node
     ///
     /// - Parameter exp: A `TupleExpression` to visit
-    /// - Returns: Result of visiting this tuple node
+    /// - Returns: Result of visiting the tuple node
     open func visitTuple(_ exp: TupleExpression) -> Expression {
         exp.elements = exp.elements.map(visitExpression)
         
@@ -200,15 +200,25 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// Visits a selector reference node
     ///
     /// - Parameter exp: A `SelectorExpression` to visit
-    /// - Returns: Result of visiting this tuple node
+    /// - Returns: Result of visiting the selector node
     open func visitSelector(_ exp: SelectorExpression) -> Expression {
         return exp
     }
     
+    /// Visits a try expression node
+    ///
+    /// - Parameter exp: A try expression to visit
+    /// - Returns: Result of visiting the try expression
+    open func visitTry(_ exp: TryExpression) -> Expression {
+        exp.exp = visitExpression(exp.exp)
+
+        return exp
+    }
+
     /// Visits an unknown expression node
     ///
     /// - Parameter exp: An `UnknownExpression` to visit
-    /// - Returns: Result of visiting this unknown expression node
+    /// - Returns: Result of visiting the unknown expression node
     open func visitUnknown(_ exp: UnknownExpression) -> Expression {
         exp
     }

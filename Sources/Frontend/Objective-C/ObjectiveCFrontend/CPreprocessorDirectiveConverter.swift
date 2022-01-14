@@ -221,6 +221,10 @@ private class ValidatorExpressionVisitor: ExpressionVisitor {
     func visitSelector(_ exp: SelectorExpression) -> Bool {
         return false
     }
+
+    func visitTry(_ exp: TryExpression) -> Bool {
+        return exp.exp.accept(self)
+    }
     
     func visitUnknown(_ exp: UnknownExpression) -> Bool {
         return false

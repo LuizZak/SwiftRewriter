@@ -733,6 +733,29 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         return super.visitSelector(exp)
     }
 
+    public override func visitTry(_ exp: TryExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+
+        _=super.visitTry(exp)
+
+        if exp.exp.isErrorTyped {
+            return exp.makeErrorTyped()
+        }
+
+        guard let resolvedType = exp.exp.resolvedType else {
+            return exp
+        }
+
+        switch exp.mode {
+        case .forced, .throwable:
+            exp.resolvedType = resolvedType
+        case .optional:
+            exp.resolvedType = .optional(resolvedType)
+        }
+
+        return exp
+    }
+
     // MARK: - Internals
 
     private func canCoerce(_ exp: Expression, toType type: SwiftType) -> Bool {

@@ -1877,6 +1877,77 @@ class ExpressionTypeResolverTests: XCTestCase {
             resolvedAs: "Error"
         )
     }
+
+    func testTryExpression() {
+        _ = startScopedTest(
+            with:
+                Expression.try(.identifier("errorProne").call()),
+            sut: ExpressionTypeResolver()
+        )
+        .definingLocal(
+            .forLocalFunctionStatement(
+                .init(function:
+                    .init(
+                        signature: FunctionSignature(
+                            name: "errorProne",
+                            returnType: .int,
+                            traits: [.throwing]
+                        ),
+                        body: []
+                    )
+                )
+            )
+        )
+        .resolve()
+        .thenAssertExpression(resolvedAs: .int)
+    }
+
+    func testTryExpression_nonThrowingFunction() {
+        _ = startScopedTest(
+            with:
+                Expression.try(.identifier("noError").call()),
+            sut: ExpressionTypeResolver()
+        )
+        .definingLocal(
+            .forLocalFunctionStatement(
+                .init(function:
+                    .init(
+                        signature: FunctionSignature(
+                            name: "noError",
+                            returnType: .int
+                        ),
+                        body: []
+                    )
+                )
+            )
+        )
+        .resolve()
+        .thenAssertExpression(resolvedAs: .int)
+    }
+
+    func testTryExpression_optional() {
+        _ = startScopedTest(
+            with:
+                Expression.try(.identifier("errorProne").call(), mode: .optional),
+            sut: ExpressionTypeResolver()
+        )
+        .definingLocal(
+            .forLocalFunctionStatement(
+                .init(function:
+                    .init(
+                        signature: FunctionSignature(
+                            name: "errorProne",
+                            returnType: .int,
+                            traits: [.throwing]
+                        ),
+                        body: []
+                    )
+                )
+            )
+        )
+        .resolve()
+        .thenAssertExpression(resolvedAs: .optional(.int))
+    }
 }
 
 // MARK: - Test Building Helpers

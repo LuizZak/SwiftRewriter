@@ -124,7 +124,6 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a type-check expression node
     ///
     /// - Parameter exp: A type check expression to visit
-    /// - Returns: Result of visiting this type check node
     public func visitTypeCheck(_ exp: TypeCheckExpression) {
         listener(exp)
 
@@ -175,7 +174,6 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a tuple node
     ///
     /// - Parameter exp: A tuple expression to visit
-    /// - Returns: Result of visiting this tuple node
     public func visitTuple(_ exp: TupleExpression) {
         listener(exp)
         
@@ -185,11 +183,17 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a selector reference node
     ///
     /// - Parameter exp: A selector reference expression to visit
-    /// - Returns: Result of visiting this tuple node
     public func visitSelector(_ exp: SelectorExpression) {
         listener(exp)
     }
     
+    /// Visits a try expression node
+    ///
+    /// - Parameter exp: A try expression to visit
+    public func visitTry(_ exp: TryExpression) {
+        listener(exp)
+    }
+
     /// Visits an unknown expression node
     ///
     /// - Parameter exp: An UnknownExpression to visit
@@ -266,7 +270,6 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a `default` block from a `SwitchStatement`.
     ///
     /// - Parameter defaultCase: A switch default case block to visit
-    /// - Returns: Result of visiting the switch default case block
     public func visitSwitchDefaultCase(_ defaultCase: SwitchDefaultCase) {
         defaultCase.statements.forEach(visitStatement)
     }
@@ -314,7 +317,6 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a `catch` block from a `DoStatement`.
     ///
     /// - Parameter stmt: A catch block to visit
-    /// - Returns: Result of visiting the catch block
     public func visitCatchBlock(_ block: CatchBlock) -> CatchBlock {
         listener(block)
 

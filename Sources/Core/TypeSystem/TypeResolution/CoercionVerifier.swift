@@ -136,6 +136,15 @@ private class _CoercionVerifierVisitor: ExpressionVisitor {
         false
     }
 
+    func visitTry(_ exp: TryExpression) -> Bool {
+        switch exp.mode {
+        case .forced, .throwable:
+            return visitExpression(exp.exp)
+        case .optional:
+            return _makeVerifier().canCoerce(exp.exp, toType: .optional(type))
+        }
+    }
+
     func visitUnknown(_ exp: UnknownExpression) -> Bool {
         false
     }

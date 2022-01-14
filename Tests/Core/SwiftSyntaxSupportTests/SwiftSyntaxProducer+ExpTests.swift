@@ -590,4 +590,28 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
             matches: "1 + 2 + 3"
         )
     }
+
+    func testTryExpression() {
+        assert(
+            Expression.try(.identifier("a")),
+            producer: SwiftSyntaxProducer.generateTry,
+            matches: "try a"
+        )
+    }
+
+    func testTryExpression_optional() {
+        assert(
+            Expression.try(.identifier("a"), mode: .optional),
+            producer: SwiftSyntaxProducer.generateTry,
+            matches: "try? a"
+        )
+    }
+
+    func testTryExpression_forced() {
+        assert(
+            Expression.try(.identifier("a"), mode: .forced),
+            producer: SwiftSyntaxProducer.generateTry,
+            matches: "try! a"
+        )
+    }
 }

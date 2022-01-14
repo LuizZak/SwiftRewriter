@@ -2,11 +2,48 @@
 public struct FunctionSignature: Hashable {
     private var _asIdentifier: FunctionIdentifier = FunctionIdentifier(name: "", argumentLabels: [])
     private var _asSelector: SelectorSignature = SelectorSignature(isStatic: false, keywords: [])
-    
-    public var isMutating: Bool
-    public var isStatic: Bool {
+
+    /// Traits for this function signature.
+    public var traits: Traits = [] {
         didSet {
             _recreateAliases()
+        }
+    }
+    
+    public var isMutating: Bool {
+        get {
+            traits.contains(.mutating)
+        }
+        set {
+            if newValue {
+                traits.insert(.mutating)
+            } else {
+                traits.remove(.mutating)
+            }
+        }
+    }
+    public var isStatic: Bool {
+        get {
+            traits.contains(.static)
+        }
+        set {
+            if newValue {
+                traits.insert(.static)
+            } else {
+                traits.remove(.static)
+            }
+        }
+    }
+    public var isThrowing: Bool {
+        get {
+            traits.contains(.throwing)
+        }
+        set {
+            if newValue {
+                traits.insert(.throwing)
+            } else {
+                traits.remove(.throwing)
+            }
         }
     }
     public var name: String {
@@ -33,8 +70,10 @@ public struct FunctionSignature: Hashable {
     // TODO: Support supplying type attributes for function signatures
     /// Returns a `SwiftType.block`-equivalent type for this function signature
     public var swiftClosureType: SwiftType {
-        .swiftBlock(returnType: returnType,
-                    parameters: parameters.map(\.type))
+        .swiftBlock(
+            returnType: returnType,
+            parameters: parameters.map(\.type)
+        )
     }
     
     /// Returns a new function signature where parameters and return type have
@@ -44,26 +83,53 @@ public struct FunctionSignature: Hashable {
             ParameterSignature(label: $0.label, name: $0.name, type: $0.type.deepUnwrapped)
         }
         
-        return FunctionSignature(name: name,
-                                 parameters: parameters,
-                                 returnType: returnType.deepUnwrapped,
-                                 isStatic: isStatic,
-                                 isMutating: isMutating)
+        return FunctionSignature(
+            name: name,
+            parameters: parameters,
+            returnType: returnType.deepUnwrapped,
+            isStatic: isStatic,
+            isMutating: isMutating
+        )
     }
     
-    public init(name: String,
-                parameters: [ParameterSignature] = [],
-                returnType: SwiftType = .void,
-                isStatic: Bool = false,
-                isMutating: Bool = false) {
+    public init(
+        name: String,
+        parameters: [ParameterSignature] = [],
+        returnType: SwiftType = .void,
+        isStatic: Bool = false,
+        isMutating: Bool = false,
+        isThrowing: Bool = false
+    ) {
         
-        _asIdentifier = FunctionIdentifier(name: name, argumentLabels: parameters.map(\.label))
-        _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map(\.label))
-        self.isStatic = isStatic
+        self.traits = []
         self.name = name
         self.returnType = returnType
         self.parameters = parameters
+
+        _asIdentifier = FunctionIdentifier(name: name, argumentLabels: parameters.map(\.label))
+        _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map(\.label))
+
+        //
+
+        self.isStatic = isStatic
         self.isMutating = isMutating
+        self.isThrowing = isThrowing
+    }
+    
+    public init(
+        name: String,
+        parameters: [ParameterSignature] = [],
+        returnType: SwiftType = .void,
+        traits: Traits
+    ) {
+        
+        self.traits = traits
+        self.name = name
+        self.returnType = returnType
+        self.parameters = parameters
+
+        _asIdentifier = FunctionIdentifier(name: name, argumentLabels: parameters.map(\.label))
+        _asSelector = SelectorSignature(isStatic: traits.contains(.static), keywords: [name] + parameters.map(\.label))
     }
     
     private mutating func _recreateAliases() {
@@ -251,6 +317,27 @@ public struct FunctionSignature: Hashable {
     public func matchesAsCFunction(_ other: FunctionSignature) -> Bool {
         name == other.name && parameters.count == other.parameters.count
     }
+
+    /// Defines traits for a function signature.
+    public struct Traits: Codable, OptionSet, Hashable {
+        public var rawValue: Int
+
+        public init(rawValue: Int) {
+            self.rawValue = rawValue
+        }
+
+        /// Function mutates its reference.
+        public static let `mutating`: Self = Self(rawValue: 0b0000_0001)
+
+        /// Function can throw error
+        public static let throwing: Self = Self(rawValue: 0b0000_0010)
+
+        /// Function is static
+        public static let `static`: Self = Self(rawValue: 0b0000_0100)
+
+        /// Function is async
+        public static let `async`: Self = Self(rawValue: 0b0000_1000)
+    }
 }
 
 extension FunctionSignature: Codable {
@@ -258,8 +345,7 @@ extension FunctionSignature: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try isMutating = container.decode(Bool.self, forKey: .isMutating)
-        try isStatic = container.decode(Bool.self, forKey: .isStatic)
+        try traits = container.decode(Traits.self, forKey: .traits)
         try name = container.decode(String.self, forKey: .name)
         try returnType = container.decode(SwiftType.self, forKey: .returnType)
         try parameters = container.decode([ParameterSignature].self, forKey: .parameters)
@@ -268,11 +354,10 @@ extension FunctionSignature: Codable {
     }
     
     public enum CodingKeys: String, CodingKey {
-        case isMutating
-        case isStatic
         case name
         case returnType
         case parameters
+        case traits
     }
 }
 
