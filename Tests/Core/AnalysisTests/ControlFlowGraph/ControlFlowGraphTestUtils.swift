@@ -129,6 +129,9 @@ func labelForNode(_ node: ControlFlowGraphNode, graph: ControlFlowGraph) -> Stri
     if node === graph.exit {
         return "exit"
     }
+    if node.node is MarkerSyntaxNode {
+        return "{marker}"
+    }
     if let endScope = node as? ControlFlowGraphEndScopeNode {
         var reportNode: SyntaxNode = endScope.scope
 
@@ -161,6 +164,7 @@ fileprivate func attributes(_ list: (key: String, value: AttributeValue)...) -> 
 internal func sanitize(
     _ graph: ControlFlowGraph,
     expectsUnreachable: Bool = false,
+    expectsNonExitEndNodes: Bool = false,
     file: StaticString = #filePath,
     line: UInt = #line
 ) {
@@ -226,7 +230,7 @@ internal func sanitize(
             )
         }
 
-        if graph.allEdges(for: node).isEmpty {
+        if graph.allEdges(for: node).isEmpty && node !== graph.entry && node !== graph.exit {
             XCTFail(
                 """
                 Found a free node with no edges or connections: \(node.node)
@@ -248,7 +252,7 @@ internal func sanitize(
             )
         }
 
-        if node !== graph.exit && graph.edges(from: node).isEmpty {
+        if !expectsNonExitEndNodes && node !== graph.exit && graph.edges(from: node).isEmpty {
             XCTFail(
                 """
                 Found non-exit node that has no connections from it: \(node.node)

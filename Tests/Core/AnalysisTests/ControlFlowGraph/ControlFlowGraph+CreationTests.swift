@@ -1,6 +1,7 @@
 import SwiftAST
 import TestCommons
 import WriterTargetOutput
+import Intentions
 import XCTest
 
 @testable import Analysis
@@ -473,5 +474,86 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             graph.depthFirstList().compactMap { $0.node as? Statement },
             [stmt, stmt]
         )
+    }
+
+    func testCreateFromFunctionBody() {
+        let stmt: CompoundStatement = [
+            .expression(.identifier("a")),
+        ]
+        let body = FunctionBodyIntention(body: stmt)
+
+        let result = ControlFlowGraph.forFunctionBody(body, keepUnresolvedJumps: false)
+
+        let graph = result.graph
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{exp}"]
+                    n3 [label="a"]
+                    n4 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+
+    func testCreateFromFunctionBody_keepUnresolvedJumps() {
+        let stmt: CompoundStatement = [
+            .if(.identifier("a"), body: [
+                .throw(.identifier("Error")),
+            ]),
+            .return(.identifier("b")),
+        ]
+        let body = FunctionBodyIntention(body: stmt)
+
+        let result = ControlFlowGraph
+            .forFunctionBody(
+                body,
+                keepUnresolvedJumps: true
+            )
+
+        let graph = result.graph
+        sanitize(graph, expectsUnreachable: true, expectsNonExitEndNodes: true)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="a"]
+                    n3 [label="{if}"]
+                    n4 [label="Error"]
+                    n5 [label="b"]
+                    n6 [label="{return b}"]
+                    n7 [label="{throw Error}"]
+                    n8 [label="{marker}"]
+                    n9 [label="{marker}"]
+                    n10 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n3 -> n5
+                    n4 -> n7
+                    n5 -> n6
+                    n6 -> n9
+                    n7 -> n8
+                }
+                """
+        )
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 0)
+        XCTAssertEqual(result.unresolvedJumps.count, 2)
+        XCTAssertEqual(result.unresolvedJumps(ofKind: .throw).count, 1)
+        XCTAssertEqual(result.unresolvedJumps(ofKind: .return).count, 1)
     }
 }

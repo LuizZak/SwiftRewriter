@@ -8,6 +8,7 @@
 /// events in a CFG, like early returns and loop continuation and breaking.
 
 import SwiftAST
+import Intentions
 import TypeSystem
 
 public extension ControlFlowGraph {
@@ -29,6 +30,35 @@ public extension ControlFlowGraph {
             self.generateEndScopes = generateEndScopes
             self.pruneUnreachable = pruneUnreachable
         }
+    }
+
+    /// Returns a `CFGVisitResult` object containing information about a given
+    /// function body.
+    ///
+    /// The resulting CFG can optionally be left with unresolved top-level jumps
+    /// so they can be analyzed at a later point.
+    static func forFunctionBody(
+        _ body: FunctionBodyIntention,
+        keepUnresolvedJumps: Bool,
+        options: GenerationOptions = .default
+    ) -> CFGVisitResult {
+
+        let visitor = CFGVisitor(options: options)
+        var result = visitor.visitCompound(body.body)
+
+        if !keepUnresolvedJumps {
+            result = _finalizeGraph(result, entry: body.body)
+        } else {
+            result = _adjustEntryExitPoint(in: result, entry: body.body)
+        }
+
+        result.graph.markBackEdges()
+
+        if options.pruneUnreachable {
+            result.graph.prune()
+        }
+
+        return result
     }
     
     /// Creates a control flow graph for a given compound statement.
@@ -86,6 +116,14 @@ public extension ControlFlowGraph {
         var result = result
         result.resolveJumpsToExit(kind: .throw)
         result.resolveJumpsToExit(kind: .return)
+
+        return _adjustEntryExitPoint(in: result, entry: entry)
+    }
+
+    private static func _adjustEntryExitPoint(
+        in result: CFGVisitResult,
+        entry: SyntaxNode
+    ) -> CFGVisitResult {
 
         let graph = result.graph
 
