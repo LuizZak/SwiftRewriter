@@ -116,6 +116,7 @@ public extension ControlFlowGraph {
         var result = result
         result.resolveJumpsToExit(kind: .throw)
         result.resolveJumpsToExit(kind: .return)
+        result.resolveJumpsToExit(kind: .expressionShortCircuit)
 
         return _adjustEntryExitPoint(in: result, entry: entry)
     }

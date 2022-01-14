@@ -1,165 +1,9 @@
 import SwiftAST
 import WriterTargetOutput
+import SwiftSyntax
 import XCTest
 
 @testable import Analysis
-
-fileprivate enum AttributeValue: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByFloatLiteral, ExpressibleByStringInterpolation {
-    case double(Double)
-    case string(String)
-    case raw(String)
-
-    var description: String {
-        switch self {
-        case .double(let value):
-            return value.description
-        case .raw(let value):
-            return value
-        case .string(let value):
-            return #""\#(value.replacingOccurrences(of: "\"", with: #"\""#))""#
-        }
-    }
-
-    init(stringLiteral value: String) {
-        self = .string(value)
-    }
-
-    init(floatLiteral value: Double) {
-        self = .double(value)
-    }
-}
-
-fileprivate func labelForSyntaxNode(_ node: SyntaxNode) -> String {
-    var label: String
-    switch node {
-    case let exp as Expression:
-        label = exp.description
-
-    case is ExpressionsStatement:
-        label = "{exp}"
-
-    case is IfStatement:
-        label = "{if}"
-    
-    case is SwitchStatement:
-        label = "{switch}"
-    
-    case let clause as SwitchCase:
-        if clause.patterns.count == 1 {
-            label = "{case \(clause.patterns[0])}"
-        } else {
-            label = "{case \(clause.patterns)}"
-        }
-    
-    case is SwitchDefaultCase:
-        label = "{default}"
-
-    case is ForStatement:
-        label = "{for}"
-
-    case is WhileStatement:
-        label = "{while}"
-
-    case is RepeatWhileStatement:
-        label = "{repeat-while}"
-
-    case is DoStatement:
-        label = "{do}"
-
-    case let catchBlock as CatchBlock:
-        if let pattern = catchBlock.pattern {
-            label = "{catch \(pattern)}"
-        } else {
-            label = "{catch}"
-        }
-    
-    case is DeferStatement:
-        label = "{defer}"
-    
-    case let ret as ReturnStatement:
-        if let exp = ret.exp {
-            label = "{return \(exp)}"
-        } else {
-            label = "{return}"
-        }
-
-    case let stmt as ThrowStatement:
-        label = "{throw \(stmt.exp)}"
-
-    case let varDecl as VariableDeclarationsStatement:
-        label = varDecl.decl.map { decl -> String in
-            var declLabel = decl.isConstant ? "let " : "var "
-            declLabel += decl.identifier
-            declLabel += ": \(decl.type)"
-
-            return declLabel
-        }.joined(separator: ", ")
-    
-    case let stmt as BreakStatement:
-        if let l = stmt.targetLabel {
-            label = "{break \(l)}"
-        } else {
-            label = "{break}"
-        }
-    
-    case let stmt as ContinueStatement:
-        if let l = stmt.targetLabel {
-            label = "{continue \(l)}"
-        } else {
-            label = "{continue}"
-        }
-    
-    case is FallthroughStatement:
-        label = "{fallthrough}"
-
-    case let obj as CustomStringConvertible:
-        label = obj.description
-
-    default:
-        label = "\(type(of: node))"
-    }
-
-    return label
-}
-
-func labelForNode(_ node: ControlFlowGraphNode, graph: ControlFlowGraph) -> String {
-    if node === graph.entry {
-        return "entry"
-    }
-    if node === graph.exit {
-        return "exit"
-    }
-    if node.node is MarkerSyntaxNode {
-        return "{marker}"
-    }
-    if let endScope = node as? ControlFlowGraphEndScopeNode {
-        var reportNode: SyntaxNode = endScope.scope
-
-        // Try to find a more descriptive scope node instead of using the
-        // compound statement always
-        if endScope.scope is CompoundStatement {
-            reportNode = reportNode.parent ?? reportNode
-        }
-
-        return "{end scope of \(labelForSyntaxNode(reportNode))}"
-    }
-
-    return labelForSyntaxNode(node.node)
-}
-
-fileprivate func attributeList(_ list: [(key: String, value: AttributeValue)]) -> String {
-    if list.isEmpty {
-        return ""
-    }
-
-    return "[" + list.map {
-        "\($0.key)=\($0.value)"
-    }.joined(separator: ", ") + "]"
-}
-
-fileprivate func attributes(_ list: (key: String, value: AttributeValue)...) -> String {
-    return attributeList(list)
-}
 
 internal func sanitize(
     _ graph: ControlFlowGraph,
@@ -264,6 +108,8 @@ internal func sanitize(
     }
 }
 
+internal var recordMode: Bool = false
+private var recordedGraphs: [GraphvizUpdateEntry] = []
 internal func assertGraphviz(
     graph: ControlFlowGraph,
     matches expected: String,
@@ -274,6 +120,16 @@ internal func assertGraphviz(
 
     if text == expected {
         return
+    }
+
+    if recordMode {
+        recordedGraphs.append(
+            .init(
+                file: "\(file)",
+                line: Int(line),
+                newGraphviz: text
+            )
+        )
     }
 
     XCTFail(
@@ -436,6 +292,31 @@ internal func graphviz(graph: ControlFlowGraph) -> String {
     return buffer.buffer.trimmingCharacters(in: .whitespacesAndNewlines)
 }
 
+func updateAllRecordedGraphviz() throws {
+    guard recordMode else {
+        return
+    }
+    defer { recordedGraphs.removeAll() }
+
+    // Need to apply from bottom to top to avoid early rewrites offsetting later
+    // rewrites
+    let sorted = recordedGraphs.sorted(by: { $0.line > $1.line })
+
+    for entry in sorted {
+        try updateGraphvizCode(entry: entry)
+    }
+}
+
+func throwErrorIfInGraphvizRecordMode(file: StaticString = #file) throws {
+    struct TestError: Error, CustomStringConvertible {
+        var description: String
+    }
+
+    if recordMode {
+        throw TestError(description: "Record mode is on on graphviz tests in file \(file)")
+    }
+}
+
 internal struct NodeDefinition {
     var node: ControlFlowGraphNode
     
@@ -456,4 +337,287 @@ internal struct NodeDefinition {
     var rankFromEnd: Int?
 
     var label: String
+}
+
+fileprivate enum AttributeValue: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByFloatLiteral, ExpressibleByStringInterpolation {
+    case double(Double)
+    case string(String)
+    case raw(String)
+
+    var description: String {
+        switch self {
+        case .double(let value):
+            return value.description
+        case .raw(let value):
+            return value
+        case .string(let value):
+            return #""\#(value.replacingOccurrences(of: "\"", with: #"\""#))""#
+        }
+    }
+
+    init(stringLiteral value: String) {
+        self = .string(value)
+    }
+
+    init(floatLiteral value: Double) {
+        self = .double(value)
+    }
+}
+
+fileprivate func labelForSyntaxNode(_ node: SwiftAST.SyntaxNode) -> String {
+    var label: String
+    switch node {
+    case let exp as Expression:
+        label = exp.description
+    
+    case is CompoundStatement:
+        label = "{compound}"
+
+    case is ExpressionsStatement:
+        label = "{exp}"
+
+    case is IfStatement:
+        label = "{if}"
+    
+    case is SwitchStatement:
+        label = "{switch}"
+    
+    case let clause as SwitchCase:
+        if clause.patterns.count == 1 {
+            label = "{case \(clause.patterns[0])}"
+        } else {
+            label = "{case \(clause.patterns)}"
+        }
+    
+    case is SwitchDefaultCase:
+        label = "{default}"
+
+    case is ForStatement:
+        label = "{for}"
+
+    case is WhileStatement:
+        label = "{while}"
+
+    case is RepeatWhileStatement:
+        label = "{repeat-while}"
+
+    case is DoStatement:
+        label = "{do}"
+
+    case let catchBlock as CatchBlock:
+        if let pattern = catchBlock.pattern {
+            label = "{catch \(pattern)}"
+        } else {
+            label = "{catch}"
+        }
+    
+    case is DeferStatement:
+        label = "{defer}"
+    
+    case let ret as ReturnStatement:
+        if let exp = ret.exp {
+            label = "{return \(exp)}"
+        } else {
+            label = "{return}"
+        }
+
+    case let stmt as ThrowStatement:
+        label = "{throw \(stmt.exp)}"
+
+    case let varDecl as VariableDeclarationsStatement:
+        label = varDecl.decl.map { decl -> String in
+            var declLabel = decl.isConstant ? "let " : "var "
+            declLabel += decl.identifier
+            declLabel += ": \(decl.type)"
+
+            return declLabel
+        }.joined(separator: ", ")
+    
+    case let stmt as BreakStatement:
+        if let l = stmt.targetLabel {
+            label = "{break \(l)}"
+        } else {
+            label = "{break}"
+        }
+    
+    case let stmt as ContinueStatement:
+        if let l = stmt.targetLabel {
+            label = "{continue \(l)}"
+        } else {
+            label = "{continue}"
+        }
+    
+    case is FallthroughStatement:
+        label = "{fallthrough}"
+
+    case let obj as CustomStringConvertible:
+        label = obj.description
+
+    default:
+        label = "\(type(of: node))"
+    }
+
+    return label
+}
+
+func labelForNode(_ node: ControlFlowGraphNode, graph: ControlFlowGraph) -> String {
+    if node === graph.entry {
+        return "entry"
+    }
+    if node === graph.exit {
+        return "exit"
+    }
+    if node.node is MarkerSyntaxNode {
+        return "{marker}"
+    }
+    if let endScope = node as? ControlFlowGraphEndScopeNode {
+        var reportNode: SwiftAST.SyntaxNode = endScope.scope
+
+        // Try to find a more descriptive scope node instead of using the
+        // compound statement always
+        if endScope.scope is CompoundStatement {
+            reportNode = reportNode.parent ?? reportNode
+        }
+
+        return "{end scope of \(labelForSyntaxNode(reportNode))}"
+    }
+
+    return labelForSyntaxNode(node.node)
+}
+
+private func attributeList(_ list: [(key: String, value: AttributeValue)]) -> String {
+    if list.isEmpty {
+        return ""
+    }
+
+    return "[" + list.map {
+        "\($0.key)=\($0.value)"
+    }.joined(separator: ", ") + "]"
+}
+
+private func attributes(_ list: (key: String, value: AttributeValue)...) -> String {
+    return attributeList(list)
+}
+
+private func updateGraphvizCode(entry: GraphvizUpdateEntry) throws {
+    let path = URL(fileURLWithPath: entry.file)
+
+    let syntax = try SyntaxParser.parse(path)
+
+    let converter = SourceLocationConverter(file: entry.file, tree: syntax)
+    let rewriter = GraphvizUpdateRewriter(entry: entry, locationConverter: converter)
+    
+    let newSyntax = rewriter.visit(syntax)
+    
+    guard syntax.description != newSyntax.description else {
+        return
+    }
+
+    try newSyntax.description.write(to: path, atomically: true, encoding: .utf8)
+}
+
+private class GraphvizUpdateRewriter: SyntaxRewriter {
+    private var _convertNextString: Bool = false
+
+    let entry: GraphvizUpdateEntry
+    let locationConverter: SourceLocationConverter
+
+
+    convenience init(
+        file: String,
+        line: Int,
+        newGraphviz: String,
+        locationConverter: SourceLocationConverter
+    ) {
+
+        self.init(
+            entry: .init(file: file, line: line, newGraphviz: newGraphviz),
+            locationConverter: locationConverter
+        )
+    }
+
+    init(entry: GraphvizUpdateEntry, locationConverter: SourceLocationConverter) {
+        self.entry = entry
+        self.locationConverter = locationConverter
+    }
+
+    override func visit(_ node: FunctionCallExprSyntax) -> ExprSyntax {
+        guard matchesEntryLine(node) else {
+            return super.visit(node)
+        }
+        guard let ident = node.calledExpression.as(IdentifierExprSyntax.self) else {
+            return super.visit(node)
+        }
+        guard matchesAssertIdentifier(ident) else {
+            return super.visit(node)
+        }
+
+        let args = node.argumentList
+        guard args.count == 2 else {
+            return super.visit(node)
+        }
+
+        _convertNextString = true
+        defer { _convertNextString = false }
+
+        return super.visit(node)
+    }
+
+    override func visit(_ node: StringLiteralExprSyntax) -> ExprSyntax {
+        if _convertNextString {
+            return ExprSyntax(updatingExpectedString(node))
+        }
+
+        return super.visit(node)
+    }
+
+    private func updatingExpectedString(_ exp: StringLiteralExprSyntax) -> StringLiteralExprSyntax {
+        let result = StringLiteralExprSyntax { builder in
+            builder.useOpenQuote(
+                SyntaxFactory.makeMultilineStringQuoteToken()
+            )
+            builder.useCloseQuote(
+                SyntaxFactory.makeMultilineStringQuoteToken()
+            )
+
+            let formatted = formatGraphviz(entry.newGraphviz)
+
+            builder.addSegment(
+                Syntax(
+                    SyntaxFactory
+                    .makeStringSegment(formatted)
+                )
+            )
+        }
+
+        return result
+    }
+
+    private func formatGraphviz(_ string: String, indentationInSpaces: Int = 16) -> String {
+        let indentation = String(repeating: " ", count: indentationInSpaces)
+        let lines = string.split(separator: "\n")
+        let lineSeparator = "\n\(indentation)"
+
+        return lineSeparator + lines.joined(separator: lineSeparator) + lineSeparator
+    }
+
+    private func matchesAssertIdentifier(_ syntax: IdentifierExprSyntax) -> Bool {
+        return syntax.identifier.withoutTrivia().description == "assertGraphviz"
+    }
+
+    private func matchesEntryLine(_ syntax: SyntaxProtocol) -> Bool {
+        let loc = location(of: syntax)
+
+        return loc.line == entry.line
+    }
+
+    private func location(of syntax: SyntaxProtocol) -> SourceLocation {
+        syntax.sourceRange(converter: locationConverter).start
+    }
+}
+
+private struct GraphvizUpdateEntry {
+    var file: String
+    var line: Int
+    var newGraphviz: String
 }

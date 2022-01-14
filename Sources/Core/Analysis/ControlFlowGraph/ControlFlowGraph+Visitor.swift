@@ -44,7 +44,7 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
             }
         }
 
-        var result = CFGVisitResult()
+        var result = CFGVisitResult(forSyntaxNode: stmt)
 
         var endEntries: [CompoundEndEntry] = []
 
