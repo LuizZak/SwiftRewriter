@@ -1228,13 +1228,13 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n18 [label="e"]
                     n19 [label="{exp}"]
                     n20 [label="{defer}"]
-                    n21 [label="d"]
+                    n21 [label="deferredExp"]
                     n22 [label="{exp}"]
                     n23 [label="{defer}"]
                     n24 [label="deferredExp"]
                     n25 [label="{exp}"]
                     n26 [label="{defer}"]
-                    n27 [label="deferredExp"]
+                    n27 [label="d"]
                     n28 [label="{exp}"]
                     n29 [label="d"]
                     n30 [label="exit"]
@@ -1352,21 +1352,21 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n23 [label="{exp}"]
                     n24 [label="{return}"]
                     n25 [label="{defer}"]
-                    n26 [label="deferredExp"]
+                    n26 [label="f"]
                     n27 [label="{defer}"]
                     n28 [label="{exp}"]
                     n29 [label="{defer}"]
                     n30 [label="{exp}"]
                     n31 [label="f"]
-                    n32 [label="deferredExp"]
+                    n32 [label="f"]
                     n33 [label="{exp}"]
                     n34 [label="{defer}"]
-                    n35 [label="f"]
+                    n35 [label="deferredExp"]
                     n36 [label="{defer}"]
                     n37 [label="{exp}"]
                     n38 [label="{exp}"]
                     n39 [label="deferredExp"]
-                    n40 [label="f"]
+                    n40 [label="deferredExp"]
                     n41 [label="exit"]
                     n1 -> n2
                     n2 -> n3
@@ -2869,14 +2869,14 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n11 [label="{defer}"]
                     n12 [label="{exp}"]
                     n13 [label="{exp}"]
-                    n14 [label="a"]
+                    n14 [label="c"]
                     n15 [label="c"]
                     n16 [label="{defer}"]
                     n17 [label="{defer}"]
                     n18 [label="{exp}"]
                     n19 [label="{exp}"]
                     n20 [label="a"]
-                    n21 [label="c"]
+                    n21 [label="a"]
                     n22 [label="exit"]
                     n1 -> n2
                     n2 -> n3
@@ -2890,10 +2890,10 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n9 -> n11
                     n10 -> n12
                     n11 -> n13
-                    n12 -> n15
-                    n13 -> n14
-                    n14 -> n17
-                    n15 -> n16
+                    n12 -> n14
+                    n13 -> n15
+                    n14 -> n16
+                    n15 -> n17
                     n16 -> n18
                     n17 -> n19
                     n18 -> n20
@@ -2905,5 +2905,78 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
         )
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+    }
+
+    func testDeferStatement_orderingOnJumps() {
+        let stmt: CompoundStatement = [
+            .do([
+                .defer([
+                    .expression(.identifier("defer_a")),
+                ]),
+                .defer([
+                    .expression(.identifier("defer_b")),
+                ]),
+                .throw(.identifier("Error")),
+            ]).catch([
+                .expression(.identifier("errorHandler")),
+            ]),
+            .expression(.identifier("postDo")),
+        ]
+
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+
+        sanitize(graph, expectsUnreachable: true)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph flow {
+                    n1 [label="entry"]
+                    n2 [label="{do}"]
+                    n3 [label="Error"]
+                    n4 [label="{throw Error}"]
+                    n5 [label="{defer}"]
+                    n6 [label="{exp}"]
+                    n7 [label="defer_b"]
+                    n8 [label="{defer}"]
+                    n9 [label="{exp}"]
+                    n10 [label="defer_a"]
+                    n11 [label="{catch}"]
+                    n12 [label="{exp}"]
+                    n13 [label="errorHandler"]
+                    n14 [label="{exp}"]
+                    n15 [label="postDo"]
+                    n16 [label="{defer}"]
+                    n17 [label="{exp}"]
+                    n18 [label="defer_b"]
+                    n19 [label="{defer}"]
+                    n20 [label="{exp}"]
+                    n21 [label="defer_a"]
+                    n22 [label="exit"]
+                    n1 -> n2
+                    n2 -> n3
+                    n3 -> n4
+                    n4 -> n5
+                    n5 -> n6
+                    n6 -> n7
+                    n7 -> n8
+                    n8 -> n9
+                    n9 -> n10
+                    n10 -> n11
+                    n11 -> n12
+                    n12 -> n13
+                    n13 -> n14
+                    n14 -> n15
+                    n15 -> n22
+                    n16 -> n17
+                    n17 -> n18
+                    n18 -> n19
+                    n19 -> n20
+                    n20 -> n21
+                    n21 -> n14
+                }
+                """
+        )
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
 }

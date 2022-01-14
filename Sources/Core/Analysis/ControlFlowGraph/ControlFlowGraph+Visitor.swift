@@ -55,15 +55,16 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
             }
         }
 
+        endEntries.reverse()
+        
         if options.generateEndScopes {
-            endEntries.insert(.endOfScope(stmt), at: 0)
+            endEntries.append(.endOfScope(stmt))
         }
         
         return
             result
             .then(
                 endEntries
-                .reversed()
                 .reduce(CFGVisitResult()) {
                     $0.then($1.toGraph(visitor: self))
                 }
@@ -243,7 +244,7 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
     }
 
     func visitDo(_ stmt: DoStatement) -> CFGVisitResult {
-        let body = 
+        let body =
             CFGVisitResult(forSyntaxNode: stmt)
             .then(
                 stmt.body.accept(self)
@@ -635,7 +636,11 @@ struct CFGVisitResult {
     /// which branches off from the main exit, which remains unconnected.
     ///
     /// `entry -> syntaxNode -> jump X-> exit`.
-    init(forUnresolvedJumpSyntaxNode syntaxNode: SyntaxNode, kind: UnresolvedJump.Kind) {
+    init(
+        forUnresolvedJumpSyntaxNode syntaxNode: SyntaxNode,
+        kind: UnresolvedJump.Kind
+    ) {
+
         let node = ControlFlowGraphNode(node: syntaxNode)
 
         self.init()
@@ -678,7 +683,11 @@ struct CFGVisitResult {
     /// entry -> syntaxNode --> exit
     ///                     \-> jump
     /// ```
-    init(withBranchingSyntaxNode syntaxNode: SyntaxNode, toUnresolvedJump kind: UnresolvedJump.Kind) {
+    init(
+        withBranchingSyntaxNode syntaxNode: SyntaxNode,
+        toUnresolvedJump kind: UnresolvedJump.Kind
+    ) {
+
         let node = ControlFlowGraphNode(node: syntaxNode)
 
         self.init()

@@ -30,7 +30,13 @@ public struct LocalFunction: Codable {
     /// This local function's body.
     public var body: CompoundStatement
 
-    public init(identifier: String, parameters: [ParameterSignature], returnType: SwiftType, body: CompoundStatement) {
+    public init(
+        identifier: String,
+        parameters: [ParameterSignature],
+        returnType: SwiftType,
+        body: CompoundStatement
+    ) {
+        
         self.identifier = identifier
         self.parameters = parameters
         self.returnType = returnType
