@@ -2,39 +2,32 @@ import SwiftAST
 
 /// A default implementation of a code scope
 public final class DefaultCodeScope: CodeScope {
-    private var definitionsByName: [String: CodeDefinition] = [:]
-    private var functionDefinitions: [FunctionIdentifier: [CodeDefinition]] = [:]
-    internal var definitions: [CodeDefinition]
+    private var source: ArrayDefinitionsSource
+    internal var definitions: [CodeDefinition] {
+        didSet {
+            source = ArrayDefinitionsSource(definitions: definitions)
+        }
+    }
     
     public init(definitions: [CodeDefinition] = []) {
         self.definitions = definitions
-        self.definitionsByName = definitions
-            .groupBy(\.name)
-            .mapValues { $0[0] }
-        
-        self.functionDefinitions =
-            definitions
-                .compactMap { def -> (FunctionIdentifier, CodeDefinition)? in
-                    switch def.kind {
-                    case .function(let signature):
-                        return (signature.asIdentifier, def)
-                    case .variable:
-                        return nil
-                    }
-                }.groupBy(\.0)
-                .mapValues { $0.map(\.1) }
+        self.source = ArrayDefinitionsSource(definitions: definitions)
     }
     
     public func firstDefinition(named name: String) -> CodeDefinition? {
-        definitionsByName[name]
+        source.firstDefinition(named: name)
     }
     
     public func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
-        functionDefinitions[identifier] ?? []
+        source.functionDefinitions(matching: identifier)
+    }
+    
+    public func functionDefinitions(named name: String) -> [CodeDefinition] {
+        source.functionDefinitions(named: name)
     }
     
     public func localDefinitions() -> [CodeDefinition] {
-        definitions
+        source.localDefinitions()
     }
     
     public func recordDefinition(_ definition: CodeDefinition, overwrite: Bool) {
@@ -43,15 +36,6 @@ public final class DefaultCodeScope: CodeScope {
         }
 
         definitions.append(definition)
-        definitionsByName[definition.name] = definition
-        
-        switch definition.kind {
-        case .function(let signature):
-            functionDefinitions[signature.asIdentifier, default: []].append(definition)
-            
-        case .variable:
-            break
-        }
     }
     
     public func recordDefinitions(_ definitions: [CodeDefinition], overwrite: Bool) {
@@ -62,6 +46,5 @@ public final class DefaultCodeScope: CodeScope {
     
     public func removeLocalDefinitions() {
         definitions.removeAll()
-        definitionsByName.removeAll()
     }
 }

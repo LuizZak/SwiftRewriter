@@ -27,6 +27,10 @@ class EmptyCodeScope: CodeScope {
         []
     }
     
+    func functionDefinitions(named name: String) -> [CodeDefinition] {
+        []
+    }
+    
     func localDefinitions() -> [CodeDefinition] {
         []
     }

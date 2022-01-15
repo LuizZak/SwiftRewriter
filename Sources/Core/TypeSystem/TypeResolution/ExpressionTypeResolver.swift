@@ -36,8 +36,10 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         super.init()
     }
     
-    public init(typeSystem: TypeSystem,
-                intrinsicVariables: DefinitionsSource) {
+    public init(
+        typeSystem: TypeSystem,
+        intrinsicVariables: DefinitionsSource
+    ) {
         
         self.typeSystem = typeSystem
         self.intrinsicVariables = intrinsicVariables
@@ -45,8 +47,10 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         super.init()
     }
     
-    public init(typeSystem: TypeSystem,
-                contextFunctionReturnType: SwiftType) {
+    public init(
+        typeSystem: TypeSystem,
+        contextFunctionReturnType: SwiftType
+    ) {
         
         self.typeSystem = typeSystem
         self.intrinsicVariables = EmptyCodeScope()
@@ -54,9 +58,11 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         super.init()
     }
     
-    public init(typeSystem: TypeSystem,
-                intrinsicVariables: DefinitionsSource,
-                contextFunctionReturnType: SwiftType) {
+    public init(
+        typeSystem: TypeSystem,
+        intrinsicVariables: DefinitionsSource,
+        contextFunctionReturnType: SwiftType
+    ) {
         
         self.typeSystem = typeSystem
         self.intrinsicVariables = intrinsicVariables
@@ -840,9 +846,15 @@ extension ExpressionTypeResolver {
         if let definition = nearestScope(for: exp)?.firstDefinition(named: exp.identifier) {
             return definition
         }
+        if let definition = nearestScope(for: exp)?.functionDefinitions(named: exp.identifier).first {
+            return definition
+        }
         
         // Look into intrinsics first, since they always take precedence
         if let intrinsic = intrinsicVariables.firstDefinition(named: exp.identifier) {
+            return intrinsic
+        }
+        if let intrinsic = intrinsicVariables.functionDefinitions(named: exp.identifier).first {
             return intrinsic
         }
         
@@ -854,8 +866,10 @@ extension ExpressionTypeResolver {
         return nil
     }
     
-    func searchFunctionDefinitions(matching identifier: FunctionIdentifier,
-                                   _ exp: IdentifierExpression) -> [CodeDefinition] {
+    func searchFunctionDefinitions(
+        matching identifier: FunctionIdentifier,
+        _ exp: IdentifierExpression
+    ) -> [CodeDefinition] {
         
         var definitions: [CodeDefinition] = []
         
@@ -1010,16 +1024,29 @@ private class MemberInvocationResolver {
                 exp.op.returnType = exp.resolvedType
                 
                 break
-            } else if let field = typeSystem.field(named: member.name,
-                                                   static: innerType.isMetatype,
-                                                   in: innerType) {
+            }
+            if let field = typeSystem.field(named: member.name,
+                                            static: innerType.isMetatype,
+                                            in: innerType) {
                 
                 member.memberDefinition = field
                 exp.resolvedType = field.storage.type
                 exp.op.returnType = exp.resolvedType
                 
                 break
-            } else if innerType.isMetatype {
+            }
+            if let typeMember = typeSystem.member(named: member.name,
+                                              static: innerType.isMetatype,
+                                              in: innerType) {
+                
+                member.memberDefinition = typeMember
+                exp.resolvedType = typeMember.memberType
+                exp.op.returnType = exp.resolvedType
+                
+                break
+            }
+            
+            if innerType.isMetatype {
                 if case .metatype(.nominal(let nominal)) = innerType,
                     typeSystem.nestedType(named: member.name, in: innerType) != nil {
                     
@@ -1047,8 +1074,10 @@ private class MemberInvocationResolver {
         return exp
     }
     
-    func handleFunctionCall(postfix: PostfixExpression,
-                            functionCall: FunctionCallPostfix) -> Expression {
+    func handleFunctionCall(
+        postfix: PostfixExpression,
+        functionCall: FunctionCallPostfix
+    ) -> Expression {
         
         var functionCall = functionCall
         

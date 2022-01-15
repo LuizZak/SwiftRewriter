@@ -753,6 +753,37 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(resolvedAs: .int)
     }
 
+    func testMethodLookupByIdentifierOnly() {
+        // a.aMethod
+        let exp =
+            Expression
+            .identifier("a")
+            .dot("aMethod")
+
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(named: "A") { builder in
+                return
+                    builder.method(
+                        withSignature:
+                            FunctionSignature(
+                                name: "aMethod",
+                                parameters: [
+                                    ParameterSignature(label: nil, name: "arg0", type: .int),
+                                    ParameterSignature(
+                                        label: "secondParam",
+                                        name: "arg1",
+                                        type: .int
+                                    ),
+                                ],
+                                returnType: .int
+                            )
+                    ).build()
+            }
+            .definingLocal(name: "a", type: .typeName("A"))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .block(returnType: .int, parameters: [.int, .int]))
+    }
+
     func testStaticMemberLookup() {
         // A.a
         let asClass = Expression.identifier("A").dot("a")
@@ -937,7 +968,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testVariableDeclaration() {
-        let blockType: SwiftType = .block(returnType: .void, parameters: [], attributes: [])
+        let blockType: SwiftType = .block(returnType: .void, parameters: [])
 
         _ = startScopedTest(
             with:
@@ -1089,11 +1120,11 @@ class ExpressionTypeResolverTests: XCTestCase {
             sut: ExpressionTypeResolver()
         )
         .resolve()
-        .thenAssertExpression(resolvedAs: .block(returnType: .void, parameters: [], attributes: []))
+        .thenAssertExpression(resolvedAs: .block(returnType: .void, parameters: []))
     }
 
     func testBlockWithExpectedType() {
-        let expectedType: SwiftType = .block(returnType: .void, parameters: [], attributes: [])
+        let expectedType: SwiftType = .block(returnType: .void, parameters: [])
 
         _ = startScopedTest(
             with:
@@ -1101,7 +1132,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             sut: ExpressionTypeResolver()
         )
         .resolve()
-        .thenAssertExpression(resolvedAs: .block(returnType: .void, parameters: [], attributes: []))
+        .thenAssertExpression(resolvedAs: .block(returnType: .void, parameters: []))
     }
 
     /// Tests invoking a block sets the parameters to the properly expected

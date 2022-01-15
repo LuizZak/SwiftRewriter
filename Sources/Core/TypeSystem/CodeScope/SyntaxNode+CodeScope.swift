@@ -53,6 +53,15 @@ public extension CodeScopeNode {
         return definitions.functionDefinitions(matching: identifier) + defs
     }
     
+    func functionDefinitions(named name: String) -> [CodeDefinition] {
+        let defs =
+            nearestScopeThatIsNotSelf?
+                .functionDefinitions(named: name)
+                    ?? []
+        
+        return definitions.functionDefinitions(named: name) + defs
+    }
+
     func localDefinitions() -> [CodeDefinition] {
         definitions.localDefinitions()
     }

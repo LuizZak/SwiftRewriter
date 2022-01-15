@@ -655,6 +655,78 @@ class TypeSystemTests: XCTestCase {
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type3))
     }
 
+    func testMemberNameLookup_field() {
+        let cls =
+            KnownTypeBuilder(typeName: "B")
+            .field(named: "aMember", type: .int)
+            .field(named: "aStaticMember", type: .int, isStatic: true)
+            .build()
+        sut.addType(cls)
+
+        XCTAssertNotNil(
+            sut.member(
+                named: "aMember",
+                static: false,
+                in: cls
+            )
+        )
+        XCTAssertNotNil(
+            sut.member(
+                named: "aStaticMember",
+                static: true,
+                in: cls
+            )
+        )
+    }
+
+    func testMemberNameLookup_property() {
+        let cls =
+            KnownTypeBuilder(typeName: "B")
+            .property(named: "aMember", type: .int)
+            .property(named: "aStaticMember", type: .int, isStatic: true)
+            .build()
+        sut.addType(cls)
+
+        XCTAssertNotNil(
+            sut.member(
+                named: "aMember",
+                static: false,
+                in: cls
+            )
+        )
+        XCTAssertNotNil(
+            sut.member(
+                named: "aStaticMember",
+                static: true,
+                in: cls
+            )
+        )
+    }
+
+    func testMemberNameLookup_method() {
+        let cls =
+            KnownTypeBuilder(typeName: "B")
+            .method(named: "aMember", returning: .void)
+            .method(named: "aStaticMember", returning: .void, isStatic: true)
+            .build()
+        sut.addType(cls)
+
+        XCTAssertNotNil(
+            sut.member(
+                named: "aMember",
+                static: false,
+                in: cls
+            )
+        )
+        XCTAssertNotNil(
+            sut.member(
+                named: "aStaticMember",
+                static: true,
+                in: cls
+            )
+        )
+    }
+
     func testMethodLookupIgnoresOptionalProtocolMethodsNotImplemented() {
         let prot =
             KnownTypeBuilder(typeName: "A", kind: .protocol)

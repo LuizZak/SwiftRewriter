@@ -484,4 +484,29 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testRewrite_deducePropertyTypeByOperatorUsage_ignoreMethodReferences() {
+        assertRewrite(
+            js: """
+            class A {
+                constructor() {
+                    const local = this.aMethod;
+                }
+                aMethod() {
+
+                }
+            }
+            """,
+            swift: """
+            class A {
+                init() {
+                    let local: () -> Any = self.aMethod
+                }
+
+                func aMethod() {
+                }
+            }
+            """
+        )
+    }
 }

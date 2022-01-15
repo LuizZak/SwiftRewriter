@@ -9,7 +9,8 @@ public struct FunctionSignature: Hashable {
             _recreateAliases()
         }
     }
-    
+
+    /// Whether the function is mutating, i.e. `mutating func` in Swift.
     public var isMutating: Bool {
         get {
             traits.contains(.mutating)
@@ -22,6 +23,8 @@ public struct FunctionSignature: Hashable {
             }
         }
     }
+
+    /// Whether the function is static, i.e. `static func` in Swift.
     public var isStatic: Bool {
         get {
             traits.contains(.static)
@@ -34,6 +37,8 @@ public struct FunctionSignature: Hashable {
             }
         }
     }
+
+    /// Whether the function is throwing, i.e. `throws` in Swift.
     public var isThrowing: Bool {
         get {
             traits.contains(.throwing)
@@ -46,18 +51,33 @@ public struct FunctionSignature: Hashable {
             }
         }
     }
+
+    /// The identifier for the function name.
+    ///
+    /// E.g.:
+    ///
+    /// `func aFunction(_ a: Int, b: String)`
+    ///
+    /// Has the name:
+    ///
+    /// `aFunction`
     public var name: String {
         didSet {
             _recreateAliases()
         }
     }
+
+    /// The return type of the function signature
     public var returnType: SwiftType
+
+    /// The list of parameters for the function
     public var parameters: [ParameterSignature] {
         didSet {
             _recreateAliases()
         }
     }
     
+    /// Gets a function identifier for this function's name and parameter labels.
     public var asIdentifier: FunctionIdentifier {
         _asIdentifier
     }

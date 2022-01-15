@@ -18,10 +18,12 @@ class TypeResolverIntrinsicsBuilder {
     private var intentionGlobals: IntentionCollectionGlobals
     private var knownTypeDefinitionsSource: KnownTypePropertiesDefinitionsSource?
     
-    init(typeResolver: ExpressionTypeResolver,
-         globals: DefinitionsSource,
-         typeSystem: TypeSystem,
-         intentionGlobals: IntentionCollectionGlobals) {
+    init(
+        typeResolver: ExpressionTypeResolver,
+        globals: DefinitionsSource,
+        typeSystem: TypeSystem,
+        intentionGlobals: IntentionCollectionGlobals
+    ) {
         
         self.typeResolver = typeResolver
         self.globals = globals
@@ -344,6 +346,10 @@ class KnownTypePropertiesDefinitionsSource: DefinitionsSource {
         []
     }
     
+    func functionDefinitions(named name: String) -> [CodeDefinition] {
+        []
+    }
+    
     func localDefinitions() -> [CodeDefinition] {
         []
     }
@@ -379,6 +385,21 @@ class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
     
     func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
         guard let functions = globals.funcIdentMap[identifier] else {
+            return []
+        }
+        
+        return
+            functions.compactMap { function in
+                if function.isVisible(for: symbol) {
+                    return CodeDefinition.forGlobalFunction(function)
+                }
+                
+                return nil
+            }
+    }
+    
+    func functionDefinitions(named name: String) -> [CodeDefinition] {
+        guard let functions = globals.funcMap[name] else {
             return []
         }
         
@@ -443,6 +464,21 @@ class IntentionCollectionFileGlobalsDefinitionsSource: DefinitionsSource {
     
     func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
         guard let functions = globals.funcIdentMap[identifier] else {
+            return []
+        }
+        
+        return
+            functions.compactMap { function in
+                if function.isVisible(in: file) {
+                    return CodeDefinition.forGlobalFunction(function)
+                }
+                
+                return nil
+            }
+    }
+    
+    func functionDefinitions(named name: String) -> [CodeDefinition] {
+        guard let functions = globals.funcMap[name] else {
             return []
         }
         

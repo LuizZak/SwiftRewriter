@@ -149,6 +149,26 @@ class DetectTypePropertiesBySelfAssignmentIntentionPassTests: XCTestCase {
         try XCTAssertEqual(type.instanceVariables[try: 0].type, .int)
     }
 
+    func testDontCreatePropertiesForMethodMembers() throws {
+        let intentions =
+            IntentionCollectionBuilder()
+            .createFileWithClass(named: "A") { type in
+                type.createConstructor() { builder in
+                    builder.setBody([
+                        .expression(.identifier("self").dot("method")),
+                    ])
+                }.createMethod(named: "method")
+            }.build(typeChecked: true)
+        let sut = DetectTypePropertiesBySelfAssignmentIntentionPass()
+
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+
+        let type = try intentions.fileIntentions()[try: 0].classIntentions[try: 0]
+
+        XCTAssertEqual(type.properties.count, 0)
+        XCTAssertEqual(type.instanceVariables.count, 0)
+    }
+
     // MARK: - Test internals
 
     private func runTest(forStaticProperty isStatic: Bool = false, swiftType: SwiftType, builder: (_ fieldName: String, TypeBuilder<ClassGenerationIntention>) -> Void, line: UInt = #line) throws {

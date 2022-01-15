@@ -39,6 +39,18 @@ public class CompoundDefinitionsSource: DefinitionsSource {
         return definitions
     }
     
+    public func functionDefinitions(named name: String) -> [CodeDefinition] {
+        var definitions: [CodeDefinition] = []
+        
+        for source in sources {
+            let defs = source.functionDefinitions(named: name)
+            
+            definitions.append(contentsOf: defs)
+        }
+        
+        return definitions
+    }
+    
     public func localDefinitions() -> [CodeDefinition] {
         sources.flatMap { $0.localDefinitions() }
     }

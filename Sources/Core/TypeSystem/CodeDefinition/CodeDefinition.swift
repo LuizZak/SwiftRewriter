@@ -5,6 +5,10 @@ import Intentions
 /// Specifies a definition for a global function or variable, or a local variable
 /// of a function.
 public class CodeDefinition {
+    /// Gets the name of this definition.
+    ///
+    /// If this code definition is a function, the name is the identifier from
+    /// the function's signature.
     public var name: String {
         kind.name
     }

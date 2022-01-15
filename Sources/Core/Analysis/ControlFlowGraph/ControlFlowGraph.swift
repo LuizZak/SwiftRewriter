@@ -1,7 +1,7 @@
 import SwiftAST
 import TypeSystem
 
-/// Class that represents control flow graphs (CFGs) of functions.
+/// Class that represents control flow graphs (CFGs) of Swift functions.
 public final class ControlFlowGraph: DirectedGraph {
     /// The entry point of this control flow graph
     internal(set) public var entry: ControlFlowGraphEntryNode
