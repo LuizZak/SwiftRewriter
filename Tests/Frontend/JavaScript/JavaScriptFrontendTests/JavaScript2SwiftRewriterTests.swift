@@ -314,8 +314,8 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             js: """
             class AClass {
                 constructor(a, b) {
-                    self.a = a
-                    self.b = b
+                    this.a = a
+                    this.b = b
                 }
             }
             """,
@@ -338,11 +338,11 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             js: """
             class AClass {
                 constructor() {
-                    self.field1 = 0
+                    this.field1 = 0
                 }
 
                 method() {
-                    self.field2 = "value"
+                    this.field2 = "value"
                 }
             }
             """,
