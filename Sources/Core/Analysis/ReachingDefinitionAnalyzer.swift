@@ -5,7 +5,6 @@ import TypeSystem
 public class ReachingDefinitionAnalyzer {
     let controlFlowGraph: ControlFlowGraph
     let container: StatementContainer
-    let intention: FunctionBodyCarryingIntention?
     let typeSystem: TypeSystem
     private var inreaching: [ControlFlowGraphNode: Set<Definition>] = [:]
     private var outreaching: [ControlFlowGraphNode: Set<Definition>] = [:]
@@ -15,13 +14,11 @@ public class ReachingDefinitionAnalyzer {
     public init(
         controlFlowGraph: ControlFlowGraph,
         container: StatementContainer,
-        intention: FunctionBodyCarryingIntention?,
         typeSystem: TypeSystem
     ) {
         
         self.controlFlowGraph = controlFlowGraph
         self.container = container
-        self.intention = intention
         self.typeSystem = typeSystem
     }
     

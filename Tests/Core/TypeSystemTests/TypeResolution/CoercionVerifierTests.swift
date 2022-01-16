@@ -18,6 +18,34 @@ class CoercionVerifierTests: XCTestCase {
         typeSystem = nil
     }
 
+    // Identifier w/ type information
+
+    func testIdentifier_canBeCoercedToMatchingType() {
+        let fixture = makeFixture(type: .float)
+
+        fixture
+        .assertCanCoerce(
+            .identifier("a").typed(.float).settingDefinition(
+                LocalCodeDefinition.forLocalIdentifier(
+                    "a",
+                    type: .float,
+                    isConstant: true,
+                    location: .parameter(index: 0)
+                )
+            )
+        )
+        .assertCannotCoerce(
+            .identifier("a").typed(.string).settingDefinition(
+                LocalCodeDefinition.forLocalIdentifier(
+                    "a",
+                    type: .string,
+                    isConstant: true,
+                    location: .parameter(index: 0)
+                )
+            )
+        )
+    }
+
     // Any
 
     func testAnyType_canCoerceAllExpressions() {

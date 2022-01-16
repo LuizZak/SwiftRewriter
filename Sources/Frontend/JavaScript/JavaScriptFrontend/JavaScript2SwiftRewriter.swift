@@ -363,71 +363,80 @@ public final class JavaScript2SwiftRewriter {
     }
 
     private func propagateDeclarationTypes(_ items: [LazyParseItem]) {
-        let typeResolverInvoker = makeTypeResolverInvoker()
-
-        // Make a pre-type resolve before propagating types
-        typeResolverInvoker.resolveAllExpressionTypes(
-            in: intentionCollection,
-            force: true
-        )
-
-        let baseType = SwiftType.any
-
-        let makePropagator: (ExpressionTypeResolver) -> DefinitionTypePropagator = { [typeSystem] in
-            return DefinitionTypePropagator(
-                options: .init(
-                    baseType: baseType,
-                    baseNumericType: .double,
-                    baseStringType: nil
-                ),
-                typeSystem: typeSystem,
-                typeResolver: $0
-            )
+        if settings.verbose {
+            print("Deducing declaration types...")
         }
 
-        for item in items {
-            typeResolverInvoker.resolveAllExpressionTypes(
-                in: intentionCollection,
-                force: true
-            )
+        let baseType = SwiftType.any
+        
+        var shouldRepeat: Bool = true
 
-            let typeResolverDelegate = typeResolverInvoker.makeQueueDelegate()
+        outer:
+        while shouldRepeat {
+            shouldRepeat = false
 
-            let functionBody: FunctionBodyIntention
-            let typeResolver: ExpressionTypeResolver
+            let typeResolverInvoker = makeTypeResolverInvoker()
 
-            switch item {
-            case .globalVar(_, let value, let intention):
-                typeResolver = typeResolverDelegate.makeContext(forGlobalVariable: intention, initializer: value).typeResolver
+            for item in items {
+                typeResolverInvoker.resolveAllExpressionTypes(
+                    in: intentionCollection,
+                    force: true
+                )
 
-                let typePropagator = makePropagator(typeResolver)
-                value.expression = typePropagator.propagate(value.expression)
+                let carrier: FunctionBodyCarryingIntention
+
+                switch item {
+                case .globalVar(_, let initialization, let intention):
+                    carrier = .globalVariable(intention, initialization)
+
+                case .classProperty(_, let value, let intention):
+                    carrier = .propertyInitializer(intention, value)
                 
-                continue
-            
-            case .classProperty(_, let value, let intention):
-                typeResolver = typeResolverDelegate.makeContext(forProperty: intention, initializer: value).typeResolver
+                case .method(_, _, let intention):
+                    carrier = .method(intention)
 
-                let typePropagator = makePropagator(typeResolver)
-                value.expression = typePropagator.propagate(value.expression)
+                case .initializer(_, _, let intention):
+                    carrier = .initializer(intention)
 
-                continue
+                case .globalFunction(_, _, let intention):
+                    carrier = .global(intention)
+                }
 
-            case .initializer(_, let body, let intention):
-                functionBody = body
-                typeResolver = typeResolverDelegate.makeContext(forInit: intention).typeResolver
+                let localTypeResolver = DefaultLocalTypeResolverInvoker(
+                    intention: carrier,
+                    globals: makeGlobalDefinitionsSource(),
+                    typeSystem: typeSystem
+                )
 
-            case .method(_, let body, let intention):
-                functionBody = body
-                typeResolver = typeResolverDelegate.makeContext(forMethod: intention).typeResolver
+                let typePropagator = DefinitionTypePropagator(
+                    options: .init(
+                        baseType: baseType,
+                        baseNumericType: .double,
+                        baseStringType: nil
+                    ),
+                    typeSystem: typeSystem,
+                    typeResolver: localTypeResolver
+                )
 
-            case .globalFunction(_, let body, let intention):
-                functionBody = body
-                typeResolver = typeResolverDelegate.makeContext(forFunction: intention).typeResolver
+                if let parameterized = carrier.parameterizedFunction as? MutableSignatureFunctionIntention {
+                    // TODO: This should be moved to DefaultTypePropagator.
+
+                    let types = typePropagator.computeParameterTypes(in: parameterized)
+
+                    for (i, type) in types.enumerated() {
+                        guard let type = type else {
+                            continue
+                        }
+
+                        parameterized.signature.parameters[i].type = type
+                        shouldRepeat = true
+
+                        continue outer
+                    }
+                }
+
+                typePropagator.propagate(in: carrier)
             }
-
-            let typePropagator = makePropagator(typeResolver)
-            functionBody.body = typePropagator.propagate(functionBody.body)
         }
     }
     
@@ -664,6 +673,17 @@ public final class JavaScript2SwiftRewriter {
         print("")
     }
     
+    /// Returns a list of all globals within all intentions.
+    private func makeGlobalDefinitionsSource() -> DefinitionsSource {
+        let globals = CompoundDefinitionsSource()
+        
+        for provider in globalsProvidersSource.globalsProviders {
+            globals.addSource(provider.definitionsSource())
+        }
+
+        return globals
+    }
+    
     private func makeTypeResolverInvoker() -> DefaultTypeResolverInvoker {
         let globals = CompoundDefinitionsSource()
 
@@ -673,8 +693,11 @@ public final class JavaScript2SwiftRewriter {
         }
 
         let typeResolverInvoker =
-            DefaultTypeResolverInvoker(globals: globals, typeSystem: typeSystem,
-                                       numThreads: settings.numThreads)
+            DefaultTypeResolverInvoker(
+                globals: globals,
+                typeSystem: typeSystem,
+                numThreads: settings.numThreads
+            )
         
         return typeResolverInvoker
     }

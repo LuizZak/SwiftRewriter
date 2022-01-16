@@ -509,4 +509,31 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testRewrite_deduceArgumentTypes() {
+        assertRewrite(
+            js: """
+            function f(a, b) {
+                if (b == false) {
+                    b = 0
+                }
+
+                a = b + 10
+
+                return a
+            }
+            """,
+            swift: """
+            func f(_ a: Double, _ b: Double) -> Any {
+                if b == false {
+                    b = 0
+                }
+
+                a = b + 10
+
+                return a
+            }
+            """
+        )
+    }
 }

@@ -458,40 +458,33 @@ public final class ObjectiveC2SwiftRewriter {
                 typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection, force: true)
             }
             
-            let typeResolverDelegate = typeResolverInvoker.makeQueueDelegate()
-
-            let functionBody: FunctionBodyIntention
-            let typeResolver: ExpressionTypeResolver
-            let carrier: FunctionBodyCarryingIntention?
+            let carrier: FunctionBodyCarryingIntention
 
             switch declaration.parseItem {
-            case .enumCase, .globalVar:
+            case .enumCase:
                 continue
-
-            case .method(let body, let intention):
+            
+            case .globalVar(let initialization, let intention):
+                carrier = .globalVariable(intention, initialization)
+            
+            case .method(_, let intention):
                 carrier = .method(intention)
 
-                functionBody = body
-                typeResolver = typeResolverDelegate.makeContext(forMethod: intention).typeResolver
-
-            case .initializer(let body, let intention):
+            case .initializer(_, let intention):
                 carrier = .initializer(intention)
 
-                functionBody = body
-                typeResolver = typeResolverDelegate.makeContext(forInit: intention).typeResolver
-
-            case .deinitializer(let body, let intention):
+            case .deinitializer(_, let intention):
                 carrier = .deinit(intention)
 
-                functionBody = body
-                typeResolver = typeResolverDelegate.makeContext(forDeinit: intention).typeResolver
-
-            case .globalFunction(let body, let intention):
+            case .globalFunction(_, let intention):
                 carrier = .global(intention)
-
-                functionBody = body
-                typeResolver = typeResolverDelegate.makeContext(forFunction: intention).typeResolver
             }
+
+            let localTypeResolver = DefaultLocalTypeResolverInvoker(
+                intention: carrier,
+                globals: makeGlobalDefinitionsSource(),
+                typeSystem: typeSystem
+            )
 
             let typePropagator = DefinitionTypePropagator(
                 options: .init(
@@ -500,28 +493,19 @@ public final class ObjectiveC2SwiftRewriter {
                     baseStringType: nil
                 ),
                 typeSystem: typeSystem,
-                typeResolver: typeResolver
+                typeResolver: localTypeResolver
             )
 
-            if let carrier = carrier {
-                typePropagator.propagate(in: carrier)
-            } else {
-                functionBody.body = typePropagator.propagate(functionBody.body)
-            }
+            typePropagator.propagate(in: carrier)
         }
     }
     
     private func performIntentionAndSyntaxPasses() {
-        let globals = CompoundDefinitionsSource()
-        
         if settings.verbose {
             print("Running intention passes...")
         }
         
-        // Register globals first
-        for provider in globalsProvidersSource.globalsProviders {
-            globals.addSource(provider.definitionsSource())
-        }
+        let globals = makeGlobalDefinitionsSource()
         
         let typeResolverInvoker = makeTypeResolverInvoker()
         
@@ -621,7 +605,7 @@ public final class ObjectiveC2SwiftRewriter {
         
         typeSystem.tearDownCache()
     }
-    
+
     private func outputDefinitions() {
         if settings.verbose {
             print("Applying Swift syntax passes and saving files...")
@@ -751,6 +735,17 @@ public final class ObjectiveC2SwiftRewriter {
         print("Diagnose file: \(match.targetPath)\ncontext: \(step)")
         print(output)
         print("")
+    }
+    
+    /// Returns a list of all globals within all intentions.
+    private func makeGlobalDefinitionsSource() -> DefinitionsSource {
+        let globals = CompoundDefinitionsSource()
+        
+        for provider in globalsProvidersSource.globalsProviders {
+            globals.addSource(provider.definitionsSource())
+        }
+
+        return globals
     }
     
     private func makeTypeResolverInvoker() -> DefaultTypeResolverInvoker {

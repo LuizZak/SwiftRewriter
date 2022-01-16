@@ -16,7 +16,7 @@ public protocol ParameterizedFunctionIntention: FunctionIntention {
 }
 
 /// Defines a protocol for intentions that feature full function signatures
-public protocol SignatureFunctionIntention: FunctionIntention {
+public protocol SignatureFunctionIntention: ParameterizedFunctionIntention {
     var signature: FunctionSignature { get }
 }
 

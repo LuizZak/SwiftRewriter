@@ -1,6 +1,8 @@
 /// Describes an intention that is a carrier of a function body or a top-level
 /// expression.
 public enum FunctionBodyCarryingIntention {
+    // TODO: Add enum case constant value generation intention entry in this enum
+    
     case method(MethodGenerationIntention)
     case initializer(InitGenerationIntention)
     case `deinit`(DeinitGenerationIntention)
@@ -33,6 +35,33 @@ public enum FunctionBodyCarryingIntention {
         case .propertyInitializer:
             return nil
         case .globalVariable(_, _):
+            return nil
+        }
+    }
+
+    /// If this function body carrying reference is a parameterized function
+    /// intention, returns its type-erased value, otherwise returns `nil`.
+    public var parameterizedFunction: ParameterizedFunctionIntention? {
+        switch self {
+        case .method(let intention):
+            return intention
+        case .initializer(let intention):
+            return intention
+        case .deinit:
+            return nil
+        case .global(let intention):
+            return intention
+        case .propertyGetter:
+            return nil
+        case .propertySetter:
+            return nil
+        case .subscriptGetter:
+            return nil
+        case .subscriptSetter:
+            return nil
+        case .propertyInitializer:
+            return nil
+        case .globalVariable:
             return nil
         }
     }

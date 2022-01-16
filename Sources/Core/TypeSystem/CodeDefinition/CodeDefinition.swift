@@ -26,6 +26,18 @@ public class CodeDefinition {
             return signature.swiftClosureType
         }
     }
+
+    /// Gets the ownership of this definition.
+    ///
+    /// In case this is a function definition, the ownership is always `strong`.
+    public var ownership: Ownership {
+        switch kind {
+        case .variable(_, let storage):
+            return storage.ownership
+        case .function:
+            return .strong
+        }
+    }
     
     /// Attempts to return the value of this code definition as a function signature,
     /// if it can be implicitly interpreted as one.

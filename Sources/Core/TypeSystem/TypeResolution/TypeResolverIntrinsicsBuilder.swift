@@ -130,8 +130,10 @@ class TypeResolverIntrinsicsBuilder {
         
         // Push file-level global definitions (variables and functions)
         let intentionGlobals =
-            IntentionCollectionFileGlobalsDefinitionsSource(globals: self.intentionGlobals,
-                                                            file: file)
+            IntentionCollectionFileGlobalsDefinitionsSource(
+                globals: self.intentionGlobals,
+                file: file
+            )
         
         // Push global definitions
         let compoundIntrinsics = CompoundDefinitionsSource()
@@ -157,8 +159,10 @@ class TypeResolverIntrinsicsBuilder {
         
         // Push file-level global definitions (variables and functions)
         let intentionGlobals =
-            IntentionCollectionGlobalsDefinitionsSource(globals: self.intentionGlobals,
-                                                        symbol: function)
+            IntentionCollectionGlobalsDefinitionsSource(
+                globals: self.intentionGlobals,
+                symbol: function
+            )
         
         // Push global definitions
         let compoundIntrinsics = CompoundDefinitionsSource()

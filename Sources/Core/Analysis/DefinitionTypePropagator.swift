@@ -7,34 +7,116 @@ import TypeSystem
 public class DefinitionTypePropagator {
     let options: Options
     let typeSystem: TypeSystem
-    let typeResolver: ExpressionTypeResolver
+    let typeResolver: LocalTypeResolverInvoker
 
-    public init(options: Options, typeSystem: TypeSystem, typeResolver: ExpressionTypeResolver) {
+    public init(
+        options: Options,
+        typeSystem: TypeSystem,
+        typeResolver: LocalTypeResolverInvoker
+    ) {
+
         self.options = options
         self.typeSystem = typeSystem
         self.typeResolver = typeResolver
     }
 
+    /// Returns a list of Swift types, on for each parameter, deduced from the
+    /// control flow of the given function.
+    ///
+    /// Parameters with unknown or ambiguous types are set to `nil`.
+    public func computeParameterTypes(
+        in functionIntention: ParameterizedFunctionIntention
+    ) -> [SwiftType?] {
+
+        var result: [SwiftType?] = functionIntention.parameters.map { _ in nil }
+
+        guard let body = functionIntention.functionBody else {
+            return result
+        }
+
+        body.body = toCompound(propagate(body.body))
+        body.body = toCompound(typeResolver.resolveTypes(in: body.body, force: true))
+
+        let graph = makeCFG(for: body.body)
+        let analyzer = makeReachingDefinitionAnalyzer(
+            graph,
+            container: .function(body)
+        )
+        let allDefinitions =
+            analyzer
+            .allDefinitions()
+            .filter {
+                switch $0.definition.location {
+                case .parameter(_):
+                    return true
+                default:
+                    return false
+                }
+            }
+        
+        let grouped = allDefinitions.groupBy {
+            $0.definition
+        }
+
+        for (localDef, definitions) in grouped {
+            guard let types = computePossibleTypes(analyzer, definitions, in: graph) else {
+                continue
+            }
+            guard types.count == 1 else {
+                continue
+            }
+
+            let type = types[0]
+            guard localDef.type != type, type != .errorType else {
+                continue
+            }
+
+            switch localDef.location {
+            case .parameter(let index):
+                result[index] = type
+            default:
+                break
+            }
+        }
+
+        return result
+    }
+
     public func propagate(in intention: FunctionBodyCarryingIntention) {
-        guard let body = intention.functionBody else {
+        guard let container = intention.statementContainer else {
             return
         }
 
-        typeResolver.ignoreResolvedExpressions = false
+        _ = propagate(in: container)
+    }
 
+    public func propagate(in container: StatementContainer) -> StatementContainer {
+        switch container {
+        case .function(let body):
+            propagate(body)
+            return container
+
+        case .statement(let stmt):
+            return .statement(propagate(stmt))
+
+        case .expression(let exp):
+            return .expression(propagate(exp))
+        }
+    }
+
+    public func propagate(_ body: FunctionBodyIntention) {
         var didModify: Bool
 
         repeat {
             didModify = false
 
-            body.body = propagate(body.body)
-            body.body = toCompound(typeResolver.resolveTypes(in: body.body))
+            body.body = toCompound(propagate(body.body))
+            body.body = toCompound(typeResolver.resolveTypes(in: body.body, force: true))
 
             let graph = makeCFG(for: body.body)
             let analyzer = makeReachingDefinitionAnalyzer(
                 graph,
-                container: .function(body),
-                intention: intention
+                container: .function(body)
             )
             let allDefinitions = analyzer.allDefinitions()
             let grouped = allDefinitions.groupBy {
@@ -49,8 +131,14 @@ public class DefinitionTypePropagator {
                     continue
                 }
 
-                let type = types[0]
-                if localDef.type != type {
+                var type = types[0]
+                // Perform weak ownership changes
+                if localDef.ownership == .weak && typeSystem.isClassInstanceType(type) {
+                    type = .optional(type)
+                }
+
+                if localDef.type != type, type != .errorType {
+                    
                     localDef.location.modifyType(type)
                     didModify = true
                     continue
@@ -60,12 +148,12 @@ public class DefinitionTypePropagator {
         } while didModify
     }
 
-    public func propagate(_ statement: CompoundStatement) -> CompoundStatement {
-        var current: CompoundStatement = statement
+    public func propagate(_ statement: Statement) -> Statement {
+        var current: Statement = statement
 
         repeatPropagation {
-            current = toCompound(typeResolver.resolveTypes(in: current))
-            current = toCompound($0.visitCompound(current))
+            current = typeResolver.resolveTypes(in: current, force: true)
+            current = $0.visitStatement(current)
         }
 
         return current
@@ -75,7 +163,7 @@ public class DefinitionTypePropagator {
         var current: Expression = expression
 
         repeatPropagation {
-            current = typeResolver.resolveType(current)
+            current = typeResolver.resolveType(current, force: true)
             current = $0.visitExpression(current)
         }
 
@@ -83,8 +171,6 @@ public class DefinitionTypePropagator {
     }
 
     private func repeatPropagation(_ block: (VariableDeclarationTypePropagationRewriter) -> Void) {
-        typeResolver.ignoreResolvedExpressions = false
-        
         var didWork: Bool = false
 
         let propagator = makeVariableDeclarationPropagator {
@@ -199,14 +285,12 @@ public class DefinitionTypePropagator {
 
     private func makeReachingDefinitionAnalyzer(
         _ graph: ControlFlowGraph,
-        container: StatementContainer,
-        intention: FunctionBodyCarryingIntention?
+        container: StatementContainer
     ) -> ReachingDefinitionAnalyzer {
 
         return ReachingDefinitionAnalyzer(
             controlFlowGraph: graph,
             container: container,
-            intention: intention,
             typeSystem: typeSystem
         )
     }
@@ -280,14 +364,14 @@ public class DefinitionTypePropagator {
     private class VariableDeclarationTypePropagationRewriter: SyntaxNodeRewriter {
         let options: Options
         let typeSystem: TypeSystem
-        let typeResolver: ExpressionTypeResolver
+        let typeResolver: LocalTypeResolverInvoker
         let localUsageAnalyzer: LocalUsageAnalyzer
         let didWork: () -> Void
 
         init(
             options: Options,
             typeSystem: TypeSystem,
-            typeResolver: ExpressionTypeResolver,
+            typeResolver: LocalTypeResolverInvoker,
             localUsageAnalyzer: LocalUsageAnalyzer,
             didWork: @escaping () -> Void
         ) {
@@ -310,7 +394,7 @@ public class DefinitionTypePropagator {
                     continue
                 }
 
-                let resolved = typeResolver.resolveType(firstAssignment)
+                let resolved = typeResolver.resolveType(firstAssignment, force: true)
                 guard !resolved.isErrorTyped, let resolvedType = resolved.resolvedType else {
                     continue
                 }

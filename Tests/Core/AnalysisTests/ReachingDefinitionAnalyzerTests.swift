@@ -344,7 +344,6 @@ extension ReachingDefinitionAnalyzerTests {
         sut = ReachingDefinitionAnalyzer(
             controlFlowGraph: controlFlowGraph,
             container: .statement(body),
-            intention: nil,
             typeSystem: typeSystem
         )
     }

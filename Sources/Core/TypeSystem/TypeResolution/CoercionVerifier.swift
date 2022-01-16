@@ -1,5 +1,6 @@
 import SwiftAST
 
+/// Verifies that implicit coercions of expression trees are possible.
 public class CoercionVerifier {
     let typeSystem: TypeSystem
 
@@ -19,7 +20,6 @@ public class CoercionVerifier {
     }
 }
 
-/// Verifies that implicit coercions of expression trees are possible.
 private class _CoercionVerifierVisitor: ExpressionVisitor {
     typealias ExprResult = Bool
 
@@ -56,7 +56,7 @@ private class _CoercionVerifierVisitor: ExpressionVisitor {
     }
 
     func visitPostfix(_ exp: PostfixExpression) -> Bool {
-        false
+        exp.resolvedType == type
     }
 
     func visitConstant(_ exp: ConstantExpression) -> Bool {
@@ -81,11 +81,11 @@ private class _CoercionVerifierVisitor: ExpressionVisitor {
     }
 
     func visitIdentifier(_ exp: IdentifierExpression) -> Bool {
-        false
+        _isAssignable(valueType: exp.resolvedType, to: type)
     }
 
     func visitCast(_ exp: CastExpression) -> Bool {
-        typeSystem.isType(exp.type, assignableTo: type)
+        _isAssignable(valueType: exp.type, to: type)
     }
 
     func visitTypeCheck(_ exp: TypeCheckExpression) -> Bool {
@@ -94,16 +94,16 @@ private class _CoercionVerifierVisitor: ExpressionVisitor {
 
     func visitArray(_ exp: ArrayLiteralExpression) -> Bool {
         // TODO: Analyze array-of-constant expressions
-        false
+        _isAssignable(valueType: exp.resolvedType, to: type)
     }
 
     func visitDictionary(_ exp: DictionaryLiteralExpression) -> Bool {
         // TODO: Analyze dictionary-of-constant expressions
-        false
+        _isAssignable(valueType: exp.resolvedType, to: type)
     }
 
     func visitBlock(_ exp: BlockLiteralExpression) -> Bool {
-        type == exp.resolvedType
+        _isAssignable(valueType: exp.resolvedType, to: type)
     }
 
     func visitTernary(_ exp: TernaryExpression) -> Bool {
@@ -151,6 +151,14 @@ private class _CoercionVerifierVisitor: ExpressionVisitor {
 
     func visitPattern(_ pattern: Pattern) -> Bool {
         false
+    }
+
+    private func _isAssignable(valueType: SwiftType?, to targetType: SwiftType) -> Bool {
+        guard let valueType = valueType else {
+            return false
+        }
+
+        return typeSystem.isType(valueType, assignableTo: targetType)
     }
 
     private func _makeVerifier() -> CoercionVerifier {
