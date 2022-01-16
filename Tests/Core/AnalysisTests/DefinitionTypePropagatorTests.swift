@@ -62,6 +62,29 @@ class DefinitionTypePropagatorTests: XCTestCase {
         XCTAssertNil(result[2])
     }
 
+    func testComputeParameterTypes_dontSuggestCachedTypes() {
+        let function = GlobalFunctionGenerationIntention(
+            signature: .init(
+                name: "f",
+                parameters: [
+                    .init(name: "a", type: .any),
+                ]
+            )
+        )
+        function.functionBody = FunctionBodyIntention(body: [
+            .expression(.identifier("a").assignment(op: .assign, rhs: .constant(0))),
+        ])
+        let carrier = FunctionBodyCarryingIntention.global(function)
+        let cache = DefinitionTypePropagator.DefinitionTypeCache()
+        cache[.forParameters(inSignature: function.signature)[0]] = [.double]
+        let sut = makeSut(intention: carrier, cache: cache)
+
+        let result = sut.computeParameterTypes(in: function)
+
+        XCTAssertEqual(result.count, 1)
+        XCTAssertNil(result[0])
+    }
+
     func testPropagate_functionBodyIntention() {
         let functionBody = FunctionBodyIntention(body: [
             .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
@@ -116,6 +139,29 @@ class DefinitionTypePropagatorTests: XCTestCase {
         assertEqual(body.body, [
             .variableDeclaration(identifier: "a", type: .any, initialization: .identifier("foo")),
         ] as CompoundStatement)
+    }
+
+    func testPropagate_functionBody_dontSuggestCachedTypes() {
+        let varDecl = Statement.variableDeclaration(
+            identifier: "a",
+            type: .any,
+            initialization: .constant(0)
+        )
+        let functionBody = FunctionBodyIntention(body: [
+            varDecl
+        ], source: nil)
+        let intention = GlobalFunctionGenerationIntention(signature: .init(name: "f"))
+        intention.functionBody = functionBody
+        let carrier = FunctionBodyCarryingIntention.global(intention)
+        let cache = DefinitionTypePropagator.DefinitionTypeCache()
+        cache[.forVarDeclElement(varDecl.decl[0])] = [.double]
+        let sut = makeSut(intention: carrier, cache: cache)
+
+        sut.propagate(in: carrier)
+        
+        assertEqual(functionBody.body, [
+            .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
+        ])
     }
 
     func testPropagate_expression() {
@@ -360,7 +406,8 @@ class DefinitionTypePropagatorTests: XCTestCase {
         typeSystem: IntentionCollectionTypeSystem = IntentionCollectionTypeSystem(intentions: .init()),
         globals: DefinitionsSource = ArrayDefinitionsSource(),
         numericType: SwiftType? = .double,
-        stringType: SwiftType? = .string
+        stringType: SwiftType? = .string,
+        cache: DefinitionTypePropagator.DefinitionTypeCache = .init()
     ) -> DefinitionTypePropagator {
 
         let intention = GlobalFunctionGenerationIntention(
@@ -373,7 +420,8 @@ class DefinitionTypePropagatorTests: XCTestCase {
             typeSystem: typeSystem,
             globals: globals,
             numericType: numericType,
-            stringType: stringType
+            stringType: stringType,
+            cache: cache
         )
     }
 
@@ -382,7 +430,8 @@ class DefinitionTypePropagatorTests: XCTestCase {
         typeSystem: IntentionCollectionTypeSystem = IntentionCollectionTypeSystem(intentions: .init()),
         globals: DefinitionsSource = ArrayDefinitionsSource(),
         numericType: SwiftType? = .double,
-        stringType: SwiftType? = .string
+        stringType: SwiftType? = .string,
+        cache: DefinitionTypePropagator.DefinitionTypeCache = .init()
     ) -> DefinitionTypePropagator {
         
         let localTypeResolver = DefaultLocalTypeResolverInvoker(
@@ -396,6 +445,7 @@ class DefinitionTypePropagatorTests: XCTestCase {
             typeSystem: typeSystem,
             numericType: numericType,
             stringType: stringType,
+            cache: cache,
             localTypeResolver: localTypeResolver
         )
     }
@@ -405,10 +455,12 @@ class DefinitionTypePropagatorTests: XCTestCase {
         typeSystem: TypeSystem = TypeSystem(),
         numericType: SwiftType? = .double,
         stringType: SwiftType? = .string,
+        cache: DefinitionTypePropagator.DefinitionTypeCache = .init(),
         localTypeResolver: DefaultLocalTypeResolverInvoker
     ) -> DefinitionTypePropagator {
 
         return .init(
+            cache: cache,
             options: .init(
                 baseType: .any,
                 baseNumericType: numericType,

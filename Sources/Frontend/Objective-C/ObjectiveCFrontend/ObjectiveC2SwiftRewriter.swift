@@ -446,6 +446,7 @@ public final class ObjectiveC2SwiftRewriter {
             force: true
         )
 
+        let cache = DefinitionTypePropagator.PerIntentionTypeCache()
         let autotype = SwiftType.typeName("__auto_type")
 
         for declaration in declarations {
@@ -487,6 +488,7 @@ public final class ObjectiveC2SwiftRewriter {
             )
 
             let typePropagator = DefinitionTypePropagator(
+                cache: cache.cache(for: carrier),
                 options: .init(
                     baseType: autotype,
                     baseNumericType: nil,

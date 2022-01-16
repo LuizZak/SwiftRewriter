@@ -5,16 +5,19 @@ import TypeSystem
 /// Performs analysis on operations performed on values and suggests types for
 /// definitions.
 public class DefinitionTypePropagator {
+    let cache: DefinitionTypeCache
     let options: Options
     let typeSystem: TypeSystem
     let typeResolver: LocalTypeResolverInvoker
 
     public init(
+        cache: DefinitionTypeCache,
         options: Options,
         typeSystem: TypeSystem,
         typeResolver: LocalTypeResolverInvoker
     ) {
 
+        self.cache = cache
         self.options = options
         self.typeSystem = typeSystem
         self.typeResolver = typeResolver
@@ -67,9 +70,11 @@ public class DefinitionTypePropagator {
             }
 
             let type = types[0]
-            guard localDef.type != type, type != .errorType else {
+            guard localDef.type != type, type != .errorType, !cache[localDef].contains(type) else {
                 continue
             }
+
+            cache[localDef].append(type)
 
             switch localDef.location {
             case .parameter(let index):
@@ -137,8 +142,8 @@ public class DefinitionTypePropagator {
                     type = .optional(type)
                 }
 
-                if localDef.type != type, type != .errorType {
-                    
+                if localDef.type != type, type != .errorType, !cache[localDef].contains(type) {
+                    cache[localDef].append(type)
                     localDef.location.modifyType(type)
                     didModify = true
                     continue
@@ -299,6 +304,7 @@ public class DefinitionTypePropagator {
         let localUsageAnalyzer = LocalUsageAnalyzer(typeSystem: typeSystem)
 
         return VariableDeclarationTypePropagationRewriter(
+            cache: cache,
             options: options,
             typeSystem: typeSystem,
             typeResolver: typeResolver,
@@ -361,7 +367,43 @@ public class DefinitionTypePropagator {
         }
     }
 
+    /// Provides `DefinitionTypeCache` on a per-function basis.
+    public class PerIntentionTypeCache {
+        private var _cache: [FunctionBodyCarryingIntention: DefinitionTypeCache] = [:]
+
+        public init() {
+
+        }
+
+        public func cache(for intention: FunctionBodyCarryingIntention) -> DefinitionTypeCache {
+            if let existing = _cache[intention] {
+                return existing
+            }
+
+            let cache = DefinitionTypeCache()
+            _cache[intention] = cache
+            
+            return cache
+        }
+    }
+
+    /// State that can be passed around different type propagators to enable
+    /// infinite loop detection.
+    public class DefinitionTypeCache {
+        var cache: [LocalCodeDefinition: [SwiftType]] = [:]
+
+        subscript(definition: LocalCodeDefinition) -> [SwiftType] {
+            get {
+                cache[definition, default: []]
+            }
+            set {
+                cache[definition] = newValue
+            }
+        }
+    }
+
     private class VariableDeclarationTypePropagationRewriter: SyntaxNodeRewriter {
+        let cache: DefinitionTypeCache
         let options: Options
         let typeSystem: TypeSystem
         let typeResolver: LocalTypeResolverInvoker
@@ -369,12 +411,14 @@ public class DefinitionTypePropagator {
         let didWork: () -> Void
 
         init(
+            cache: DefinitionTypeCache,
             options: Options,
             typeSystem: TypeSystem,
             typeResolver: LocalTypeResolverInvoker,
             localUsageAnalyzer: LocalUsageAnalyzer,
             didWork: @escaping () -> Void
         ) {
+            self.cache = cache
             self.options = options
             self.typeSystem = typeSystem
             self.typeResolver = typeResolver
@@ -404,6 +448,14 @@ public class DefinitionTypePropagator {
                     if stmt.decl[i].type == type {
                         return
                     }
+
+                    // Avoid cycles
+                    let def = LocalCodeDefinition.forVarDeclElement(decl)
+                    if cache[def].contains(type) {
+                        return
+                    }
+
+                    cache[def].append(type)
 
                     stmt.decl[i].type = type
 

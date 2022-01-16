@@ -1,6 +1,6 @@
 /// Describes an intention that is a carrier of a function body or a top-level
 /// expression.
-public enum FunctionBodyCarryingIntention {
+public enum FunctionBodyCarryingIntention: Hashable {
     // TODO: Add enum case constant value generation intention entry in this enum
     
     case method(MethodGenerationIntention)
@@ -88,6 +88,77 @@ public enum FunctionBodyCarryingIntention {
             return .expression(initializer.expression)
         case .globalVariable(_, let initializer):
             return .expression(initializer.expression)
+        }
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        switch self {
+        case .method(let intention):
+            hasher.combine(ObjectIdentifier(intention))
+
+        case .initializer(let intention):
+            hasher.combine(ObjectIdentifier(intention))
+
+        case .deinit(let intention):
+            hasher.combine(ObjectIdentifier(intention))
+
+        case .global(let intention):
+            hasher.combine(ObjectIdentifier(intention))
+
+        case .propertyGetter(_, let intention):
+            hasher.combine(ObjectIdentifier(intention))
+
+        case .propertySetter(_, let setter):
+            hasher.combine(ObjectIdentifier(setter.body))
+            
+        case .subscriptGetter(_, let intention):
+            hasher.combine(ObjectIdentifier(intention))
+
+        case .subscriptSetter(_, let setter):
+            hasher.combine(ObjectIdentifier(setter.body))
+
+        case .propertyInitializer(_, let initializer):
+            hasher.combine(ObjectIdentifier(initializer))
+
+        case .globalVariable(_, let initializer):
+            hasher.combine(ObjectIdentifier(initializer))
+        }
+    }
+
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        switch (lhs, rhs) {
+        case (.method(let lhs), .method(let rhs)):
+            return lhs === rhs
+
+        case (.initializer(let lhs), .initializer(let rhs)):
+            return lhs === rhs
+
+        case (.deinit(let lhs), .deinit(let rhs)):
+            return lhs === rhs
+
+        case (.global(let lhs), .global(let rhs)):
+            return lhs === rhs
+
+        case (.propertyGetter(let lhs, let lhsBody), .propertyGetter(let rhs, let rhsBody)):
+            return lhs === rhs && lhsBody === rhsBody
+
+        case (.propertySetter(let lhs, let lhsBody), .propertySetter(let rhs, let rhsBody)):
+            return lhs === rhs && lhsBody.body === rhsBody.body
+            
+        case (.subscriptGetter(let lhs, let lhsBody), .subscriptGetter(let rhs, let rhsBody)):
+            return lhs === rhs && lhsBody === rhsBody
+
+        case (.subscriptSetter(let lhs, let lhsBody), .subscriptSetter(let rhs, let rhsBody)):
+            return lhs === rhs && lhsBody.body === rhsBody.body
+
+        case (.propertyInitializer(let lhs, let lhsBody), .propertyInitializer(let rhs, let rhsBody)):
+            return lhs === rhs && lhsBody === rhsBody
+
+        case (.globalVariable(let lhs, let lhsBody), .globalVariable(let rhs, let rhsBody)):
+            return lhs === rhs && lhsBody === rhsBody
+        
+        default:
+            return false
         }
     }
 }

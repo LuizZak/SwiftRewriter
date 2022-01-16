@@ -12,7 +12,7 @@ struct GlobalOptions: ParsableArguments {
     var colorize: Bool = false
     
     @Flag(
-        name: [.long, .customShort("e")],
+        name: [.long],
         help: "Prints the type of each top-level resolved expression statement found in function bodies."
     )
     var printExpressionTypes: Bool = false

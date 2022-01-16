@@ -139,6 +139,14 @@ class CoercionVerifierTests: XCTestCase {
         )
     }
 
+    func testFloatType_doubleConstant() {
+        let fixture = makeFixture(type: .float)
+
+        fixture.assertCanCoerce(
+            .constant(.double(0))
+        )
+    }
+
     // Double
 
     func testDoubleType_integerConstant() {
@@ -157,6 +165,14 @@ class CoercionVerifierTests: XCTestCase {
 
         fixture.assertCanCoerce(
             .constant(.float(0.0))
+        )
+    }
+
+    func testDoubleType_doubleConstant() {
+        let fixture = makeFixture(type: .double)
+
+        fixture.assertCanCoerce(
+            .constant(.double(0))
         )
     }
 

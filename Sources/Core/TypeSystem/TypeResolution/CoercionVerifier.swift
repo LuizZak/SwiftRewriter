@@ -63,7 +63,7 @@ private class _CoercionVerifierVisitor: ExpressionVisitor {
         switch exp.constant {
         case .int:
             return typeSystem.isNumeric(type)
-        case .float:
+        case .float, .double:
             return typeSystem.isFloat(type)
         case .string:
             return type == .string

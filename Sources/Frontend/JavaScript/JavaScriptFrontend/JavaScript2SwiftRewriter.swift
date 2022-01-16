@@ -368,7 +368,8 @@ public final class JavaScript2SwiftRewriter {
         }
 
         let baseType = SwiftType.any
-        
+
+        let cache = DefinitionTypePropagator.PerIntentionTypeCache()
         var shouldRepeat: Bool = true
 
         outer:
@@ -409,6 +410,7 @@ public final class JavaScript2SwiftRewriter {
                 )
 
                 let typePropagator = DefinitionTypePropagator(
+                    cache: cache.cache(for: carrier),
                     options: .init(
                         baseType: baseType,
                         baseNumericType: .double,
@@ -423,14 +425,19 @@ public final class JavaScript2SwiftRewriter {
 
                     let types = typePropagator.computeParameterTypes(in: parameterized)
 
+                    var assigned = false
+
                     for (i, type) in types.enumerated() {
                         guard let type = type else {
                             continue
                         }
 
                         parameterized.signature.parameters[i].type = type
-                        shouldRepeat = true
+                        assigned = true
+                    }
 
+                    if assigned {
+                        shouldRepeat = true
                         continue outer
                     }
                 }

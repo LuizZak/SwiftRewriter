@@ -536,4 +536,80 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testRewrite_deduceArgumentTypes_repeatedArgumentNames() {
+        assertRewrite(
+            js: """
+            function foo(a) {
+                a = 10
+            }
+            function bar(a) {
+                a = 10
+            }
+            function baz(b) {
+                b = 10
+            }
+            """,
+            swift: """
+            func foo(_ a: Double) {
+                a = 10
+            }
+            func bar(_ a: Double) {
+                a = 10
+            }
+            func baz(_ b: Double) {
+                b = 10
+            }
+            """
+        )
+    }
+
+    func testRewrite_deduceArgumentTypes_staticMethod() {
+        assertRewrite(
+            js: """
+            class A {
+                static quadraticFromPoints(p1, p2, p3, t) {
+                    p3 = 0.0;
+                    
+                    if (typeof t === "undefined") {
+                        t = 0.5;
+                    }
+                    // shortcuts, although they're really dumb
+                    if (t === 0) {
+                        return new Bezier(p2, p2);
+                    }
+                    if (t === 1) {
+                        return new Bezier(p1, p2);
+                    }
+                    // real fitting.
+                    const abc = Bezier.getABC(2, p1, p2, t);
+                    return new Bezier(p1, abc.A);
+                }
+            }
+            """,
+            swift: """
+            class A {
+                static func quadraticFromPoints(_ p1: Any, _ p2: Any, _ p3: Double, _ t: Double) -> Any {
+                    p3 = 0.0
+
+                    if String(type(of: t)) == "undefined" {
+                        t = 0.5
+                    }
+
+                    if t == 0 {
+                        return Bezier(p2, p2)
+                    }
+
+                    if t == 1 {
+                        return Bezier(p1, p2)
+                    }
+
+                    let abc: Any = Bezier.getABC(2, p1, p2, t)
+
+                    return Bezier(p1, abc.A)
+                }
+            }
+            """
+        )
+    }
 }

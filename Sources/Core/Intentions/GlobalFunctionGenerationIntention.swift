@@ -37,12 +37,19 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIn
     
     public var knownAttributes: [KnownAttribute] = []
     
-    public init(signature: FunctionSignature,
-                accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+    public init(
+        signature: FunctionSignature,
+        functionBody: FunctionBodyIntention? = nil,
+        accessLevel: AccessLevel = .internal,
+        source: ASTNode? = nil
+    ) {
         
         self.signature = signature
+        self.functionBody = functionBody
+
         super.init(accessLevel: accessLevel, source: source)
+
+        functionBody?.parent = self
     }
     
     public required init(from decoder: Decoder) throws {
