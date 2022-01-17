@@ -156,10 +156,13 @@ public class DetectTypePropertiesBySelfAssignmentIntentionPass: TypeVisitingInte
         }
 
         private func analyze(usage: DefinitionUsage, isStatic: Bool) -> PropertySuggestion? {
-            guard let postfixExp = usage.expression.parentExpression?.asPostfix else {
+            guard case .identifier(let identifier) = usage.expression else {
                 return nil
             }
-            guard postfixExp.exp == usage.expression else {
+            guard let postfixExp = identifier.parentExpression?.asPostfix else {
+                return nil
+            }
+            guard postfixExp.exp == identifier else {
                 return nil
             }
             guard let member = postfixExp.op.asMember else {

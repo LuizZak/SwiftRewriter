@@ -376,6 +376,11 @@ public final class JavaScript2SwiftRewriter {
         let cache = DefinitionTypePropagator.PerIntentionTypeCache()
         var shouldRepeat: Bool = true
 
+        typeSystem.makeCache()
+        defer {
+            typeSystem.tearDownCache()
+        }
+
         outer:
         while shouldRepeat {
             shouldRepeat = false

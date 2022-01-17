@@ -376,6 +376,82 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
         )
     }
 
+    func testRewrite_detectPropertyBySelfAssignment() {
+        assertRewrite(
+            js: """
+            class A {
+                computedirection() {
+                    let clockwise = false;
+                    clockwise = this.clockwise;
+                }
+            }
+            """,
+            swift: """
+            class A {
+                var clockwise: Any
+
+                func computedirection() {
+                    var clockwise: Any = false
+
+                    clockwise = self.clockwise
+                }
+            }
+            """
+        )
+    }
+
+    func testRewrite_detectPropertyBySelfAssignment_preferWriteUsages() {
+        assertRewrite(
+            js: """
+            class A {
+                computedirection() {
+                    const clockwise = this.clockwise;
+                    const angle = utils.angle;
+
+                    this.clockwise = angle > 0;
+                }
+            }
+            """,
+            swift: """
+            class A {
+                var clockwise: Bool = false
+
+                func computedirection() {
+                    let clockwise: Any = self.clockwise
+                    let angle: Any = utils.angle
+
+                    self.clockwise = angle > 0
+                }
+            }
+            """
+        )
+    }
+
+    func testRewrite_detectPropertyBySelfAssignment_ignoreMethodReferences() {
+        assertRewrite(
+            js: """
+            class A {
+                constructor() {
+                    const local = this.aMethod;
+                }
+                aMethod() {
+
+                }
+            }
+            """,
+            swift: """
+            class A {
+                init() {
+                    let local: Any = self.aMethod
+                }
+
+                func aMethod() {
+                }
+            }
+            """
+        )
+    }
+
     func testRewrite_deduceTypes_deducesLocalVariableType() {
         assertRewrite(
             js: """
@@ -484,83 +560,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
         )
     }
 
-    func testRewrite_detectPropertyBySelfAssignment() {
-        assertRewrite(
-            js: """
-            class A {
-                computedirection() {
-                    let clockwise = false;
-                    clockwise = this.clockwise;
-                }
-            }
-            """,
-            swift: """
-            class A {
-                var clockwise: Any
-
-                func computedirection() {
-                    var clockwise: Any = false
-
-                    clockwise = self.clockwise
-                }
-            }
-            """
-        )
-    }
-
-    func testRewrite_detectPropertyBySelfAssignment_preferWriteUsages() {
-        assertRewrite(
-            js: """
-            class A {
-                computedirection() {
-                    const clockwise = this.clockwise;
-                    const angle = utils.angle;
-
-                    this.clockwise = angle > 0;
-                }
-            }
-            """,
-            swift: """
-            class A {
-                var clockwise: Bool = false
-
-                func computedirection() {
-                    let clockwise: Any = self.clockwise
-                    let angle: Any = utils.angle
-
-                    self.clockwise = angle > 0
-                }
-            }
-            """
-        )
-    }
-
-    func testRewrite_detectPropertyBySelfAssignment_ignoreMethodReferences() {
-        assertRewrite(
-            js: """
-            class A {
-                constructor() {
-                    const local = this.aMethod;
-                }
-                aMethod() {
-
-                }
-            }
-            """,
-            swift: """
-            class A {
-                init() {
-                    let local: Any = self.aMethod
-                }
-
-                func aMethod() {
-                }
-            }
-            """
-        )
-    }
-
-    func testRewrite_deduceArgumentTypes() {
+    func testRewrite_deduceTypes_deduceArgumentTypes() {
         assertRewrite(
             js: """
             function f(a, b) {
@@ -588,7 +588,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
         )
     }
 
-    func testRewrite_deduceArgumentTypes_repeatedArgumentNames() {
+    func testRewrite_deduceTypes_deduceArgumentTypes_repeatedArgumentNames() {
         assertRewrite(
             js: """
             function foo(a) {
@@ -616,7 +616,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
         )
     }
 
-    func testRewrite_deduceArgumentTypes_staticMethod() {
+    func testRewrite_deduceTypes_deduceArgumentTypes_staticMethod() {
         assertRewrite(
             js: """
             class A {

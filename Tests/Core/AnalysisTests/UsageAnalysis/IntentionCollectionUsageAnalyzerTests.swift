@@ -44,7 +44,7 @@ class IntentionCollectionUsageAnalyzerTests: XCTestCase {
         let usages = sut.findUsagesOf(method: method)
 
         XCTAssertEqual(
-            usages[0].expression,
+            usages[0].expression.expression,
             Expression
                 .identifier("B").call()
                 .dot("b")

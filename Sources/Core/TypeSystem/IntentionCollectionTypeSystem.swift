@@ -48,8 +48,10 @@ public class IntentionCollectionTypeSystem: TypeSystem {
             })
         
         intentionsProvider.cache =
-            IntentionCollectionProvider.Cache(typeAliases: aliases,
-                                              types: compoundTypes)
+            IntentionCollectionProvider.Cache(
+                typeAliases: aliases,
+                types: compoundTypes
+            )
     }
     
     public override func tearDownCache() {
@@ -131,7 +133,11 @@ public class IntentionCollectionTypeSystem: TypeSystem {
                 return types.first
             }
             
-            return CompoundKnownType(typeName: name, types: Array(types), typeSystem: typeSystem)
+            return CompoundKnownType(
+                typeName: name,
+                types: Array(types),
+                typeSystem: typeSystem
+            )
         }
         
         func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {

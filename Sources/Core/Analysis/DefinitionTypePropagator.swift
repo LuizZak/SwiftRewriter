@@ -10,6 +10,10 @@ public class DefinitionTypePropagator {
     let typeSystem: TypeSystem
     let typeResolver: LocalTypeResolverInvoker
 
+    /// Delegate to be invoked during type resolution to allow for external
+    ///type suggestions according to definition usages.
+    public weak var delegate: DefinitionTypePropagatorDelegate?
+
     public init(
         cache: DefinitionTypeCache,
         options: Options,
@@ -30,6 +34,9 @@ public class DefinitionTypePropagator {
     public func computeParameterTypes(
         in functionIntention: ParameterizedFunctionIntention
     ) -> [SwiftType?] {
+
+        // TODO: Reduce duplication with propagate(_ functionBody: FunctionBodyIntention)
+        // TODO: bellow
 
         var result: [SwiftType?] = functionIntention.parameters.map { _ in nil }
 
@@ -57,12 +64,20 @@ public class DefinitionTypePropagator {
                 }
             }
         
-        let grouped = allDefinitions.groupBy {
+        let groupedDefinitions = allDefinitions.groupBy {
             $0.definition
         }
 
-        for (localDef, definitions) in grouped {
-            guard let types = computePossibleTypes(analyzer, definitions, in: graph) else {
+        let localAnalyzer = makeLocalUsageAnalyzer()
+        let allUsages = localAnalyzer.findAllUsages(in: body.body, intention: nil)
+        let groupedUsages = allUsages.groupBy {
+            $0.definition as? LocalCodeDefinition
+        }
+
+        for (localDef, definitions) in groupedDefinitions {
+            let usages = groupedUsages[localDef] ?? []
+
+            guard let types = computePossibleTypes(localDef, analyzer, definitions, usages, in: graph) else {
                 continue
             }
             guard types.count == 1 else {
@@ -115,7 +130,7 @@ public class DefinitionTypePropagator {
         repeat {
             didModify = false
 
-            body.body = toCompound(propagate(body.body))
+            //body.body = toCompound(propagate(body.body))
             body.body = toCompound(typeResolver.resolveTypes(in: body.body, force: true))
 
             let graph = makeCFG(for: body.body)
@@ -124,12 +139,33 @@ public class DefinitionTypePropagator {
                 container: .function(body)
             )
             let allDefinitions = analyzer.allDefinitions()
-            let grouped = allDefinitions.groupBy {
+            let groupedDefinitions = allDefinitions.groupBy {
                 $0.definition
             }
 
-            for (localDef, definitions) in grouped {
-                guard let types = computePossibleTypes(analyzer, definitions, in: graph) else {
+            let localAnalyzer = makeLocalUsageAnalyzer()
+            let allUsages = localAnalyzer.findAllUsages(in: body.body, intention: nil)
+            let groupedUsages = allUsages.groupBy {
+               $0.definition as? LocalCodeDefinition
+            }
+
+            let definitionsToCheck =
+                groupedDefinitions.keys
+                + groupedUsages.keys.compactMap({ $0 })
+
+            for localDef in definitionsToCheck {
+                guard localDef.type == options.baseType else {
+                    continue
+                }
+
+                let usages = groupedUsages[localDef] ?? []
+                let definitions = groupedDefinitions[localDef] ?? []
+
+                guard usages.count > 0 || definitions.count > 0 else {
+                    continue
+                }
+
+                guard let types = computePossibleTypes(localDef, analyzer, definitions, usages, in: graph) else {
                     continue
                 }
                 guard types.count == 1, localDef.location.canModify else {
@@ -190,12 +226,31 @@ public class DefinitionTypePropagator {
     }
 
     private func computePossibleTypes(
+        _ definition: LocalCodeDefinition,
         _ analyzer: ReachingDefinitionAnalyzer,
         _ definitions: Set<ReachingDefinitionAnalyzer.Definition>,
+        _ usages: [DefinitionUsage],
         in graph: ControlFlowGraph
     ) -> [SwiftType]? {
         
         var types: [SwiftType] = []
+        var typesFromDelegate: DefinitionTypePropagator.TypeSuggestion = .none
+        
+        // Query delegate
+        if let delegate = delegate {
+            let contexts = usages.compactMap(usageContext(for:))
+            
+            typesFromDelegate = delegate.suggestTypeForDefinitionUsages(
+                self,
+                definition: definition,
+                usages: contexts
+            )
+            
+            if case .certain(let type) = typesFromDelegate {
+                return [type]
+            }
+        }
+
         for reachingDef in definitions {
             if let type = typeForDefinition(reachingDef) {
                 types.append(type)
@@ -207,7 +262,15 @@ public class DefinitionTypePropagator {
         // Perform special treatment for numeric literals
         if types.allSatisfy(typeSystem.isNumeric), let baseNumericType = options.baseNumericType {
             if checkCanCoerce(definitions, to: baseNumericType) {
-                return [baseNumericType]
+                let result = [baseNumericType]
+
+                switch typesFromDelegate {
+                case .none, .oneOfPossibly, .certain:
+                    return result
+
+                case .oneOfCertain(let subset):
+                    return Array(Set(subset).intersection(result))
+                }
             }
         }
 
@@ -215,7 +278,13 @@ public class DefinitionTypePropagator {
             checkCanCoerce(definitions, to: $0)
         }
 
-        return types
+        switch typesFromDelegate {
+        case .none, .oneOfPossibly, .certain:
+            return types
+            
+        case .oneOfCertain(let subset):
+            return Array(Set(subset).intersection(types))
+        }
     }
 
     private func checkCanCoerce<S: Sequence>(
@@ -264,6 +333,37 @@ public class DefinitionTypePropagator {
         return false
     }
 
+    private func usageContext(for usage: DefinitionUsage) -> UsageContext? {
+        guard case .identifier(let exp) = usage.expression else {
+            return nil
+        }
+        guard let postfixExp = exp.parentExpression?.asPostfix else {
+            return nil
+        }
+
+        switch postfixExp.op {
+        case let op as MemberPostfix:
+            // Detect member accesses that are immediately called as a function
+            if
+            let nextPostfix = postfixExp.parentExpression?.asPostfix,
+            let functionCall = nextPostfix.op.asFunctionCall,
+            nextPostfix.exp == postfixExp {
+                return .memberFunctionCall(exp, op, functionCall, in: nextPostfix)
+            }
+            
+            return .memberAccess(exp, op, in: postfixExp)
+        
+        case let op as SubscriptPostfix:
+            return .subscriptAccess(exp, op, in: postfixExp)
+        
+        case let op as FunctionCallPostfix:
+            return .functionCall(exp, op, in: postfixExp)
+
+        default:
+            return nil
+        }
+    }
+
     private func makeCoercionVerifier() -> CoercionVerifier {
         CoercionVerifier(typeSystem: typeSystem)
     }
@@ -293,11 +393,15 @@ public class DefinitionTypePropagator {
         container: StatementContainer
     ) -> ReachingDefinitionAnalyzer {
 
-        return ReachingDefinitionAnalyzer(
+        ReachingDefinitionAnalyzer(
             controlFlowGraph: graph,
             container: container,
             typeSystem: typeSystem
         )
+    }
+
+    private func makeLocalUsageAnalyzer() -> LocalUsageAnalyzer {
+        LocalUsageAnalyzer(typeSystem: typeSystem)
     }
 
     private func makeVariableDeclarationPropagator(_ didWork: @escaping () -> Void) -> VariableDeclarationTypePropagationRewriter {
@@ -324,14 +428,16 @@ public class DefinitionTypePropagator {
     }
 
     private func typeForDefinition(_ definition: ReachingDefinitionAnalyzer.Definition) -> SwiftType? {
-
         switch definition.context {
         case .assignment(let exp):
             return exp.rhs.resolvedType
+            
         case .initialValue(let exp):
             return exp.resolvedType
+
         case .ifLetBinding, .forBinding, .catchBlock:
             return definition.definition.type
+
         case nil:
             return nil
         }
@@ -402,6 +508,66 @@ public class DefinitionTypePropagator {
         }
     }
 
+    /// Defines the context for an unknown member access of a definition.
+    ///
+    /// The expression that resolves to the definition's type is stored as the
+    /// first value of each enumeration case.
+    public enum UsageContext: Equatable {
+        /// Definition has a member access that resolves to an unknown member.
+        case memberAccess(Expression, MemberPostfix, in: PostfixExpression)
+
+        /// Definition has a function call to the definition.
+        case functionCall(Expression, FunctionCallPostfix, in: PostfixExpression)
+
+        /// Definition has a function call to an unknown member access.
+        ///
+        /// The associated `PostfixExpression` associated is the postfix for the
+        /// function call postfix access.
+        case memberFunctionCall(Expression, MemberPostfix, FunctionCallPostfix, in: PostfixExpression)
+
+        /// Definition has a subscription to an unknown subscript member.
+        case subscriptAccess(Expression, SubscriptPostfix, in: PostfixExpression)
+    }
+
+    /// Defines the result of a type suggestion by a `DefinitionTypePropagatorDelegate`.
+    public enum TypeSuggestion {
+        /// Specifies no suggestion.
+        case none
+
+        /// States that the type for the definition be set as a given type.
+        case certain(SwiftType)
+
+        /// States that the definition is of one of the given types, and no more.
+        ///
+        /// The type propagator uses the information to trim down the possible
+        /// type of a definition.
+        ///
+        /// Note: Returning an empty array implies the definition has no proper
+        /// type.
+        case oneOfCertain([SwiftType])
+
+        /// States that the definition is possibly of one of the given types.
+        ///
+        /// The type propagator takes the types and appends them to its internal
+        /// type deduction phase.
+        case oneOfPossibly([SwiftType])
+    }
+}
+
+public protocol DefinitionTypePropagatorDelegate: AnyObject {
+    /// Requests type suggestions from the delegate for a given definition, used
+    /// in a given set of contexts.
+    ///
+    /// The resulting type suggestion is used internally by `DefinitionTypePropagator`
+    /// during analysis of a syntax tree.
+    func suggestTypeForDefinitionUsages(
+        _ typePropagator: DefinitionTypePropagator,
+        definition: LocalCodeDefinition,
+        usages: [DefinitionTypePropagator.UsageContext]
+    ) -> DefinitionTypePropagator.TypeSuggestion
+}
+
+private extension DefinitionTypePropagator {
     private class VariableDeclarationTypePropagationRewriter: SyntaxNodeRewriter {
         let cache: DefinitionTypeCache
         let options: Options
@@ -508,7 +674,7 @@ public class DefinitionTypePropagator {
                 return nil
             }
 
-            let expression = first.expression
+            let expression = first.expression.expression
 
             guard let parent = expression.parentExpression else {
                 return nil

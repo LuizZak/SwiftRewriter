@@ -109,7 +109,10 @@ public class PostfixExpression: Expression, ExpressionKindType {
     }
     
     public override func copy() -> PostfixExpression {
-        PostfixExpression(exp: exp.copy(), op: op.copy()).copyTypeAndMetadata(from: self)
+        PostfixExpression(
+            exp: exp.copy(),
+            op: op.copy()
+        ).copyTypeAndMetadata(from: self)
     }
     
     @inlinable
@@ -140,11 +143,15 @@ public class PostfixExpression: Expression, ExpressionKindType {
         case is FunctionCallPostfix:
             try container.encode(OpType.functionCall, forKey: .opType)
         default:
-            throw EncodingError.invalidValue(type(of: op),
-                                             EncodingError.Context.init(
-                                                codingPath:
-                                                encoder.codingPath + [CodingKeys.op],
-                                                debugDescription: "Unknown postfix type \(type(of: op))"))
+            throw EncodingError
+                .invalidValue(
+                    type(of: op),
+                    EncodingError.Context.init(
+                        codingPath:
+                        encoder.codingPath + [CodingKeys.op],
+                        debugDescription: "Unknown postfix type \(type(of: op))"
+                    )
+                )
         }
         
         try super.encode(to: container.superEncoder())

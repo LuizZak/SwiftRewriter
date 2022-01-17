@@ -88,7 +88,7 @@ public class VariableNullabilityPromotionExpressionPass: ASTRewriterPass {
         }
         
         for usage in usages where !usage.isReadOnlyUsage {
-            guard let assignExp = usage.expression.parentExpression?.asAssignment else {
+            guard let assignExp = usage.expression.expression.parentExpression?.asAssignment else {
                 continue
             }
             

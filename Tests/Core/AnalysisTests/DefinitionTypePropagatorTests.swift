@@ -399,7 +399,248 @@ class DefinitionTypePropagatorTests: XCTestCase {
         ] as CompoundStatement)
     }
 
-    // MARK: - Test internals
+    func testPropagate_delegateTypeSuggestions_usageContext_memberAccess() {
+        let exp = Expression.identifier("a").dot("member")
+        let function = makeFunction([
+            .variableDeclaration(identifier: "a", type: .any, initialization: .identifier("unknown")),
+            .expression(.identifier("print").call([exp]))
+        ])
+        let sut = makeSut(intention: .global(function.intention))
+        let delegate = TestDefinitionTypePropagatorDelegate()
+        sut.delegate = delegate
+
+        sut.propagate(function.body)
+
+        XCTAssertGreaterThan(delegate.didCallSuggestTypeForDefinitionUsages.count, 0)
+        XCTAssertEqual(
+            delegate.didCallSuggestTypeForDefinitionUsages[0].usages[0],
+            .memberAccess(.identifier("a"), .member("member"), in: exp)
+        )
+    }
+
+    func testPropagate_delegateTypeSuggestions_usageContext_functionCall() {
+        let exp = Expression.identifier("a").call()
+        let function = makeFunction([
+            .variableDeclaration(identifier: "a", type: .any, initialization: .identifier("unknown")),
+            .expression(exp)
+        ])
+        let sut = makeSut(intention: .global(function.intention))
+        let delegate = TestDefinitionTypePropagatorDelegate()
+        sut.delegate = delegate
+
+        sut.propagate(function.body)
+
+        XCTAssertGreaterThan(delegate.didCallSuggestTypeForDefinitionUsages.count, 0)
+        XCTAssertEqual(
+            delegate.didCallSuggestTypeForDefinitionUsages[0].usages[0],
+            .functionCall(.identifier("a"), .functionCall(), in: exp)
+        )
+    }
+
+    func testPropagate_delegateTypeSuggestions_usageContext_subscript() {
+        let exp = Expression.identifier("a").sub(.constant(0))
+        let function = makeFunction([
+            .variableDeclaration(identifier: "a", type: .any, initialization: .identifier("unknown")),
+            .expression(exp)
+        ])
+        let sut = makeSut(intention: .global(function.intention))
+        let delegate = TestDefinitionTypePropagatorDelegate()
+        sut.delegate = delegate
+
+        sut.propagate(function.body)
+
+        XCTAssertGreaterThan(delegate.didCallSuggestTypeForDefinitionUsages.count, 0)
+        XCTAssertEqual(
+            delegate.didCallSuggestTypeForDefinitionUsages[0].usages[0],
+            .subscriptAccess(.identifier("a"), .subscript(.constant(0)), in: exp)
+        )
+    }
+
+    func testPropagate_delegateTypeSuggestions_usageContext_memberFunctionCall() {
+        let exp = Expression.identifier("a").dot("member").call()
+        let function = makeFunction([
+            .variableDeclaration(identifier: "a", type: .any, initialization: .identifier("unknown")),
+            .expression(exp)
+        ])
+        let sut = makeSut(intention: .global(function.intention))
+        let delegate = TestDefinitionTypePropagatorDelegate()
+        sut.delegate = delegate
+
+        sut.propagate(function.body)
+
+        XCTAssertGreaterThan(delegate.didCallSuggestTypeForDefinitionUsages.count, 0)
+        XCTAssertEqual(
+            delegate.didCallSuggestTypeForDefinitionUsages[0].usages[0],
+            .memberFunctionCall(.identifier("a"), .member("member"), .functionCall(), in: exp)
+        )
+    }
+
+    func testPropagate_delegateTypeSuggestions_certain() {
+        let exp = Expression.identifier("a").dot("member")
+        let suggestedType: SwiftType = "SuggestedType"
+        let function = makeFunction([
+            .variableDeclaration(identifier: "a", type: .any, initialization: nil),
+            .expression(exp)
+        ])
+        let sut = makeSut(intention: .global(function.intention))
+        let delegate = TestDefinitionTypePropagatorDelegate { (_, _, _) in
+            .certain(suggestedType)
+        }
+        sut.delegate = delegate
+
+        sut.propagate(function.body)
+
+        XCTAssertGreaterThan(delegate.didCallSuggestTypeForDefinitionUsages.count, 0)
+        assertEqual(function.body.body, [
+            .variableDeclaration(identifier: "a", type: suggestedType, initialization: nil),
+            .expression(exp.copy())
+        ] as CompoundStatement)
+    }
+
+    func testPropagate_delegateTypeSuggestions_certain_overridesDeducedTypes() {
+        let exp = Expression.identifier("a").dot("member")
+        let suggestedType: SwiftType = "SuggestedType"
+        let function = makeFunction([
+            .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
+            .expression(exp)
+        ])
+        let sut = makeSut(intention: .global(function.intention))
+        let delegate = TestDefinitionTypePropagatorDelegate { (_, _, _) in
+            .certain(suggestedType)
+        }
+        sut.delegate = delegate
+
+        sut.propagate(function.body)
+
+        XCTAssertGreaterThan(delegate.didCallSuggestTypeForDefinitionUsages.count, 0)
+        assertEqual(function.body.body, [
+            .variableDeclaration(identifier: "a", type: suggestedType, initialization: .constant(0)),
+            .expression(exp.copy())
+        ] as CompoundStatement)
+    }
+
+    func testPropagate_delegateTypeSuggestions_oneOfCertain() {
+        let exp = Expression.identifier("a").dot("member")
+        let suggestedType: SwiftType = "SuggestedType"
+        let function = makeFunction([
+            .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
+            .expression(exp)
+        ])
+        let sut = makeSut(intention: .global(function.intention))
+        let delegate = TestDefinitionTypePropagatorDelegate { (_, _, _) in
+            .oneOfCertain([
+                suggestedType,
+                .double
+            ])
+        }
+        sut.delegate = delegate
+
+        sut.propagate(function.body)
+
+        XCTAssertGreaterThan(delegate.didCallSuggestTypeForDefinitionUsages.count, 0)
+        assertEqual(function.body.body, [
+            .variableDeclaration(identifier: "a", type: .double, initialization: .constant(0)),
+            .expression(exp.copy())
+        ] as CompoundStatement)
+    }
+
+    func testPropagate_delegateTypeSuggestions_oneOfCertain_reducesPossibleSet() {
+        let exp = Expression.identifier("a").dot("member")
+        let suggestedType: SwiftType = "SuggestedType"
+        let function = makeFunction([
+            .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
+            .expression(exp)
+        ])
+        let sut = makeSut(intention: .global(function.intention))
+        let delegate = TestDefinitionTypePropagatorDelegate { (_, _, _) in
+            .oneOfCertain([
+                suggestedType,
+                .bool
+            ])
+        }
+        sut.delegate = delegate
+
+        sut.propagate(function.body)
+
+        XCTAssertGreaterThan(delegate.didCallSuggestTypeForDefinitionUsages.count, 0)
+        assertEqual(function.body.body, [
+            .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
+            .expression(exp.copy())
+        ] as CompoundStatement)
+    }
+
+    func testPropagate_delegateTypeSuggestions_oneOfPossibly() {
+        let exp = Expression.identifier("a").dot("member")
+        let function = makeFunction([
+            .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
+            .expression(exp)
+        ])
+        let sut = makeSut(intention: .global(function.intention))
+        let delegate = TestDefinitionTypePropagatorDelegate { (_, _, _) in
+            .oneOfPossibly([
+                .int,
+                .double
+            ])
+        }
+        sut.delegate = delegate
+
+        sut.propagate(function.body)
+
+        XCTAssertGreaterThan(delegate.didCallSuggestTypeForDefinitionUsages.count, 0)
+        assertEqual(function.body.body, [
+            .variableDeclaration(identifier: "a", type: .double, initialization: .constant(0)),
+            .expression(exp.copy())
+        ] as CompoundStatement)
+    }
+
+    func testPropagate_delegateTypeSuggestions_none() {
+        let exp = Expression.identifier("a").dot("member")
+        let function = makeFunction([
+            .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
+            .expression(exp)
+        ])
+        let sut = makeSut(intention: .global(function.intention))
+        let delegate = TestDefinitionTypePropagatorDelegate { (_, _, _) in
+            .none
+        }
+        sut.delegate = delegate
+
+        sut.propagate(function.body)
+
+        XCTAssertGreaterThan(delegate.didCallSuggestTypeForDefinitionUsages.count, 0)
+        assertEqual(function.body.body, [
+            .variableDeclaration(identifier: "a", type: .double, initialization: .constant(0)),
+            .expression(exp.copy())
+        ] as CompoundStatement)
+    }
+
+    func testPropagate_delegateTypeSuggestions_dontInvokeForTypedDefinitions() {
+        let exp = Expression.identifier("a").dot("member")
+        let function = makeFunction([
+            .variableDeclaration(identifier: "a", type: .bool, initialization: .identifier("unknown")),
+            .expression(.identifier("print").call([exp]))
+        ])
+        let sut = makeSut(intention: .global(function.intention))
+        let delegate = TestDefinitionTypePropagatorDelegate()
+        sut.delegate = delegate
+
+        sut.propagate(function.body)
+
+        XCTAssertEqual(delegate.didCallSuggestTypeForDefinitionUsages.count, 0)
+    }
+}
+
+// MARK: - Test internals
+
+extension DefinitionTypePropagatorTests {
+    private func makeFunction(_ body: CompoundStatement) -> (intention: GlobalFunctionGenerationIntention, body: FunctionBodyIntention) {
+        let functionBody = FunctionBodyIntention(body: body, source: nil)
+        let intention = GlobalFunctionGenerationIntention(signature: .init(name: "f"))
+
+        intention.functionBody = functionBody
+
+        return (intention, functionBody)
+    }
 
     private func makeSut(
         body: CompoundStatement,
@@ -505,5 +746,45 @@ class DefinitionTypePropagatorTests: XCTestCase {
             file: file,
             line: line
         )
+    }
+}
+
+private class TestDefinitionTypePropagatorDelegate: DefinitionTypePropagatorDelegate {
+    typealias SuggestedTypeForDefinitionUsages_Parameters = (
+        typePropagator: DefinitionTypePropagator,
+        definition: LocalCodeDefinition,
+        usages: [DefinitionTypePropagator.UsageContext]
+    )
+
+    typealias SuggestedTypeForDefinitionUsages = (
+        DefinitionTypePropagator,
+        LocalCodeDefinition,
+        [DefinitionTypePropagator.UsageContext]
+    ) -> DefinitionTypePropagator.TypeSuggestion
+
+    var _suggestTypeForDefinitionUsages: SuggestedTypeForDefinitionUsages?
+    var didCallSuggestTypeForDefinitionUsages: [SuggestedTypeForDefinitionUsages_Parameters] = []
+
+    init() {
+
+    }
+
+    init(_ suggestTypeForDefinitionUsages: @escaping SuggestedTypeForDefinitionUsages) {
+        self._suggestTypeForDefinitionUsages = suggestTypeForDefinitionUsages
+    }
+
+    func suggestTypeForDefinitionUsages(
+        _ typePropagator: DefinitionTypePropagator,
+        definition: LocalCodeDefinition,
+        usages: [DefinitionTypePropagator.UsageContext]
+    ) -> DefinitionTypePropagator.TypeSuggestion {
+
+        didCallSuggestTypeForDefinitionUsages.append((
+            typePropagator,
+            definition,
+            usages
+        ))
+        
+        return _suggestTypeForDefinitionUsages?(typePropagator, definition, usages) ?? .none
     }
 }

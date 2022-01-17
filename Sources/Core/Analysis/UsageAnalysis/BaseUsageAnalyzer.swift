@@ -20,24 +20,38 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                 guard let exp = node as? PostfixExpression else {
                     return
                 }
-                guard let expMethod = exp.member?.memberDefinition as? KnownMethod else {
+                guard let member = exp.member else {
+                    return
+                }
+                guard let expMethod = member.memberDefinition as? KnownMethod else {
                     return
                 }
                 guard expMethod.signature == method.signature else {
                     return
                 }
-                
-                if expMethod.ownerType?.asTypeName == method.ownerType?.asTypeName {
-                    let usage =
-                        DefinitionUsage(
-                            intention: intention,
-                            definition: .forKnownMember(method),
-                            expression: exp,
-                            isReadOnlyUsage: true
-                        )
-                    
-                    usages.append(usage)
+                guard expMethod.ownerType?.asTypeName == method.ownerType?.asTypeName else {
+                    return
                 }
+
+                // Attempt to infer usage of a function call, for context purposes.
+                var expressionKind: DefinitionUsage.ExpressionKind
+                expressionKind = .memberAccess(exp.exp, member, in: exp)
+
+                if let parent = exp.parentExpression?.asPostfix {
+                    if let functionCall = parent.op.asFunctionCall {
+                        expressionKind = .functionCall(exp, functionCall, in: parent)
+                    }
+                }
+
+                let usage =
+                    DefinitionUsage(
+                        intention: intention,
+                        definition: .forKnownMember(method),
+                        expression: expressionKind,
+                        isReadOnlyUsage: true
+                    )
+                
+                usages.append(usage)
             }
             
             switch container {
@@ -63,7 +77,10 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                 guard let exp = node as? PostfixExpression else {
                     return
                 }
-                guard let expProperty = exp.member?.memberDefinition as? KnownProperty else {
+                guard let member = exp.member else {
+                    return
+                }
+                guard let expProperty = member.memberDefinition as? KnownProperty else {
                     return
                 }
                 guard expProperty.name == property.name else {
@@ -77,7 +94,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                         DefinitionUsage(
                             intention: intention,
                             definition: .forKnownMember(property),
-                            expression: exp,
+                            expression: .memberAccess(exp.exp, member, in: exp),
                             isReadOnlyUsage: readOnly
                         )
                     
