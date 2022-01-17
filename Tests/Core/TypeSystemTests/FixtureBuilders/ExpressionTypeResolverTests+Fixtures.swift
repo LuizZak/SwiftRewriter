@@ -521,6 +521,7 @@ extension ExpressionTypeResolverTests {
             self.scope = scope
         }
 
+        @discardableResult
         func resolve() -> Asserter {
             sut.typeSystem = typeSystem
             sut.intrinsicVariables = intrinsics

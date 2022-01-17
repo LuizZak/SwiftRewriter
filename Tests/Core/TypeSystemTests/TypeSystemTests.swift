@@ -1089,10 +1089,12 @@ class TypeSystemTests: XCTestCase {
         sut.addType(structType)
         sut.addType(enumType)
 
+        XCTAssertTrue(sut.isClassInstanceType(.anyObject))
         XCTAssertTrue(sut.isClassInstanceType(.typeName("NSObject")))
         XCTAssertTrue(sut.isClassInstanceType(.typeName("NSSet")))
         XCTAssertTrue(sut.isClassInstanceType(classType.typeName))
         XCTAssertTrue(sut.isClassInstanceType(protocolType.typeName))
+        XCTAssertFalse(sut.isClassInstanceType(.any))
         XCTAssertFalse(sut.isClassInstanceType(structType.typeName))
         XCTAssertFalse(sut.isClassInstanceType(enumType.typeName))
     }

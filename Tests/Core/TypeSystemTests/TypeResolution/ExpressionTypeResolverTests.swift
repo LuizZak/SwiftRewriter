@@ -942,7 +942,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                 ])
             ])
 
-        _ = startScopedTest(with: exp, sut: ExpressionTypeResolver())
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(
                 name: "callback",
                 type: .optional(.swiftBlock(returnType: .void, parameters: []))
@@ -957,7 +957,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testChainedOptionalAccess() {
         let exp = Expression.identifier("a").optional().dot("b").dot("c")
 
-        _ = startScopedTest(with: exp, sut: ExpressionTypeResolver())
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(named: "A") { builder in
                 builder.property(named: "b", type: .typeName("B")).build()
             }.definingType(named: "B") { builder in
@@ -970,7 +970,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testVariableDeclaration() {
         let blockType: SwiftType = .block(returnType: .void, parameters: [])
 
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Statement.variableDeclaration(
                     identifier: "a",
@@ -984,7 +984,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testVariableDeclarationTransmitsOptionalFromInitializerValue() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Statement.variableDeclaration(
                     identifier: "a",
@@ -996,7 +996,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         .definingLocal(name: "value", type: .string)
         .thenAssertDefined(localNamed: "a", type: .string)
 
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Statement.variableDeclaration(
                     identifier: "a",
@@ -1008,7 +1008,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         .definingLocal(name: "value", type: .optional(.string))
         .thenAssertDefined(localNamed: "a", type: .optional(.string))
 
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Statement.variableDeclaration(
                     identifier: "a",
@@ -1022,7 +1022,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testVariableDeclarationDoesNotTransmitOptionalFromInitializerValueForStructTypes() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Statement.variableDeclaration(
                     identifier: "a",
@@ -1034,7 +1034,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         .definingLocal(name: "value", type: .int)
         .thenAssertDefined(localNamed: "a", type: .int)
 
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Statement.variableDeclaration(
                     identifier: "a",
@@ -1046,7 +1046,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         .definingLocal(name: "value", type: .optional(.int))
         .thenAssertDefined(localNamed: "a", type: .int)
 
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Statement.variableDeclaration(
                     identifier: "a",
@@ -1060,7 +1060,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testVariableDeclarationDoesNotTransmitOptionalForWeakDeclarations() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Statement.variableDeclaration(
                     identifier: "a",
@@ -1078,7 +1078,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     /// Tests that on an assignment expression, the right-hand-side of the expression
     /// is set to expect the type from the left-hand-side.
     func testAssignmentExpectedType() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Expression.identifier("a").assignment(op: .assign, rhs: .constant(false)),
             sut: ExpressionTypeResolver()
@@ -1091,7 +1091,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     /// Tests invoking a known selector function sets the parameters to the properly
     /// expected types.
     func testFunctionParameterExpectedType() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Expression.identifier("self").dot("a").call([.constant(false)]),
             sut: ExpressionTypeResolver()
@@ -1114,7 +1114,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testBlockWithNoExpectedType() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Expression.block(body: []),
             sut: ExpressionTypeResolver()
@@ -1126,7 +1126,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testBlockWithExpectedType() {
         let expectedType: SwiftType = .block(returnType: .void, parameters: [])
 
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Expression.block(body: []).typed(expected: expectedType),
             sut: ExpressionTypeResolver()
@@ -1138,7 +1138,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     /// Tests invoking a block sets the parameters to the properly expected
     /// types.
     func testBlockParameterExpectedType() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Expression.identifier("a").call([.constant(false)]),
             sut: ExpressionTypeResolver()
@@ -1154,7 +1154,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     /// Tests invoking a constructor sets the parameters to the properly expected
     /// types.
     func testConstructorParameterExpectedType() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Expression.identifier("A").call([.constant(false)]),
             sut: ExpressionTypeResolver()
@@ -1177,7 +1177,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     /// Tests ternary expressions `<exp> ? <ifTrue> : <ifFalse>` have `<exp>`
     /// properly set as expecting a boolean result type
     func testTernaryExpressionSetsExpectedTypeOfTestExpressionToBoolean() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Expression.ternary(.identifier("a"), true: .constant(0), false: .constant(0)),
             sut: ExpressionTypeResolver()
@@ -1189,7 +1189,7 @@ class ExpressionTypeResolverTests: XCTestCase {
 
     /// Tests expressions on `if` statements have expectedType set to boolean.
     func testIfStatementSetsExpectedTypeOfExpressionsToBoolean() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Statement.if(.constant(0), body: []),
             sut: ExpressionTypeResolver()
@@ -1199,7 +1199,7 @@ class ExpressionTypeResolverTests: XCTestCase {
 
     /// Tests expressions on `while` statements have expectedType set to boolean.
     func testWhileStatementSetsExpectedTypeOfExpressionsToBoolean() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Statement.while(.constant(0), body: []),
             sut: ExpressionTypeResolver()
@@ -1211,7 +1211,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     /// expect the type resolver to mark both operands as expecting to be resolved
     /// as boolean types.
     func testLogicalBinaryExpressionSetsOperandsToBooleanExpectedTypes() {
-        _ = startScopedTest(
+        startScopedTest(
             with: Expression.constant(0).binary(op: .and, rhs: .constant(0)),
             sut: ExpressionTypeResolver()
         )
@@ -1219,7 +1219,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         .thenAssertExpression(at: \Expression.asBinary?.lhs, expectsType: .bool)
         .thenAssertExpression(at: \Expression.asBinary?.rhs, expectsType: .bool)
 
-        _ = startScopedTest(
+        startScopedTest(
             with: Expression.constant(0).binary(op: .or, rhs: .constant(0)),
             sut: ExpressionTypeResolver()
         )
@@ -1230,7 +1230,7 @@ class ExpressionTypeResolverTests: XCTestCase {
 
     /// Unary `!` operator must expect operand to be a boolean type.
     func testLogicalUnaryOperatorSetsOperandToBooleanExpectedType() {
-        _ = startScopedTest(
+        startScopedTest(
             with: Expression.unary(op: .negate, .constant(0)),
             sut: ExpressionTypeResolver()
         )
@@ -1242,7 +1242,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     /// default. Expressions that use such operators should result to bool type
     /// by default, regardless of operand's resolved types.
     func testComparisonOperatorTentativelySetsExpressionTypeToBoolean() {
-        _ = startScopedTest(
+        startScopedTest(
             with: Expression.identifier("a").binary(op: .lessThan, rhs: .identifier("b")),
             sut: ExpressionTypeResolver()
         )
@@ -1254,7 +1254,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     /// default. Expressions that use such operators should result to bool type
     /// by default, regardless of operand's resolved types.
     func testComparisonOperatorTentativelySetsExpressionTypeToBoolean_nonComparableOperands() {
-        _ = startScopedTest(
+        startScopedTest(
             with: Expression.identifier("a").binary(op: .lessThan, rhs: .constant(0)),
             sut: ExpressionTypeResolver()
         )
@@ -1679,7 +1679,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testNestedTypeReference() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Expression.identifier("A").dot("Nested").dot("self"),
             sut: ExpressionTypeResolver()
@@ -1697,7 +1697,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testNestedTypeNestedTypeReference() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Expression.identifier("A").dot("Nested").dot("Nested").dot("self"),
             sut: ExpressionTypeResolver()
@@ -1717,7 +1717,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testNestedTypeInitialization() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Expression.identifier("A").dot("Nested").call(),
             sut: ExpressionTypeResolver()
@@ -1737,7 +1737,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testNestedTypeEnumCaseFetch() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Expression.identifier("A").dot("Nested").dot("case1"),
             sut: ExpressionTypeResolver()
@@ -1767,7 +1767,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             ]
         )
 
-        _ = startScopedTest(
+        startScopedTest(
             with: stmt,
             sut: ExpressionTypeResolver()
         ) 
@@ -1783,7 +1783,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testLocalFunction() {
-        _ = startScopedTest(
+        startScopedTest(
             with: Statement.compound([
                 .localFunction(
                     identifier: "f",
@@ -1807,7 +1807,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testLocalFunction_resolvesFunctionBody() {
-        _ = startScopedTest(
+        startScopedTest(
             with: Statement.localFunction(
                 identifier: "f",
                 parameters: [.init(name: "a", type: .int)], returnType: .bool,
@@ -1824,7 +1824,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testThrowsStatement() {
-        _ = startScopedTest(
+        startScopedTest(
             with: Statement.throw(
                 .constant(0)
             ),
@@ -1841,7 +1841,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testDoCatchBlockTypeResolving() {
-        _ = startScopedTest(
+        startScopedTest(
             with: Statement.compound([
                 .do([
 
@@ -1863,7 +1863,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         ]).catch([
         ])
 
-        _ = startScopedTest(
+        startScopedTest(
             with: stmt,
             sut: ExpressionTypeResolver()
         )
@@ -1876,7 +1876,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testDoCatchBlockDefaultErrorBindingResolution() {
-        _ = startScopedTest(
+        startScopedTest(
             with: Statement.compound([
                 .do([
 
@@ -1893,7 +1893,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testDoCatchBlock_patterns() {
-        _ = startScopedTest(
+        startScopedTest(
             with: Statement.compound([
                 .do([
 
@@ -1910,7 +1910,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testTryExpression() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Expression.try(.identifier("errorProne").call()),
             sut: ExpressionTypeResolver()
@@ -1934,7 +1934,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testTryExpression_nonThrowingFunction() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Expression.try(.identifier("noError").call()),
             sut: ExpressionTypeResolver()
@@ -1957,7 +1957,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testTryExpression_optional() {
-        _ = startScopedTest(
+        startScopedTest(
             with:
                 Expression.try(.identifier("errorProne").call(), mode: .optional),
             sut: ExpressionTypeResolver()
@@ -1978,6 +1978,23 @@ class ExpressionTypeResolverTests: XCTestCase {
         )
         .resolve()
         .thenAssertExpression(resolvedAs: .optional(.int))
+    }
+
+    func testWriteToReferenceType_setsReadOnlyUsageTrue() {
+        let identifier = Expression.identifier("a")
+        let exp = identifier.dot("b").assignment(op: .assign, rhs: .constant(0))
+
+        startScopedTest(
+            with: exp,
+            sut: ExpressionTypeResolver()
+        )
+        .definingLocal(
+            name: "a",
+            type: .anyObject
+        )
+        .resolve()
+
+        XCTAssertTrue(identifier.isReadOnlyUsage)
     }
 }
 

@@ -547,8 +547,8 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         // Visit identifier's type from current context
         if let definition = searchIdentifierDefinition(exp) {
             exp.definition = definition
-            exp.isReadOnlyUsage = isReadOnlyContext(exp)
             exp.resolvedType = definition.type
+            exp.isReadOnlyUsage = isReadOnlyContext(exp)
         } else {
             exp.definition = nil
             exp.resolvedType = .errorType

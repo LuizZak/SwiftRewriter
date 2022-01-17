@@ -74,8 +74,21 @@ public class DefinitionTypePropagator {
             $0.definition as? LocalCodeDefinition
         }
 
-        for (localDef, definitions) in groupedDefinitions {
+        let definitionsToCheck =
+            groupedDefinitions.keys
+            + groupedUsages.keys.compactMap({ $0 })
+
+        for localDef in definitionsToCheck {
+            guard localDef.type == options.baseType else {
+                    continue
+            }
+
             let usages = groupedUsages[localDef] ?? []
+            let definitions = groupedDefinitions[localDef] ?? []
+
+            guard usages.count > 0 || definitions.count > 0 else {
+                continue
+            }
 
             guard let types = computePossibleTypes(localDef, analyzer, definitions, usages, in: graph) else {
                 continue
@@ -251,7 +264,11 @@ public class DefinitionTypePropagator {
             }
         }
 
-        for reachingDef in definitions {
+        let mutatingDefinitions = definitions.filter {
+            isDirectlyMutatingDefinition($0)
+        }
+
+        for reachingDef in mutatingDefinitions {
             if let type = typeForDefinition(reachingDef) {
                 types.append(type)
             }
@@ -260,8 +277,8 @@ public class DefinitionTypePropagator {
         // Attempt to reduce types by checking possible coercions
 
         // Perform special treatment for numeric literals
-        if types.allSatisfy(typeSystem.isNumeric), let baseNumericType = options.baseNumericType {
-            if checkCanCoerce(definitions, to: baseNumericType) {
+        if !types.isEmpty && types.allSatisfy(typeSystem.isNumeric), let baseNumericType = options.baseNumericType {
+            if checkCanCoerce(mutatingDefinitions, to: baseNumericType) {
                 let result = [baseNumericType]
 
                 switch typesFromDelegate {
@@ -275,11 +292,18 @@ public class DefinitionTypePropagator {
         }
 
         types = types.filter {
-            checkCanCoerce(definitions, to: $0)
+            checkCanCoerce(mutatingDefinitions, to: $0)
         }
 
         switch typesFromDelegate {
-        case .none, .oneOfPossibly, .certain:
+        case .none, .certain:
+            return types
+        
+        case .oneOfPossibly(let suggested):
+            if types.isEmpty {
+                return suggested
+            }
+
             return types
             
         case .oneOfCertain(let subset):
@@ -430,6 +454,10 @@ public class DefinitionTypePropagator {
     private func typeForDefinition(_ definition: ReachingDefinitionAnalyzer.Definition) -> SwiftType? {
         switch definition.context {
         case .assignment(let exp):
+            if !isDirectlyMutatingDefinition(definition) {
+                return nil
+            }
+
             return exp.rhs.resolvedType
             
         case .initialValue(let exp):
@@ -440,6 +468,31 @@ public class DefinitionTypePropagator {
 
         case nil:
             return nil
+        }
+    }
+
+    /// Returns `true` if a given definition mutates the underlying code definition
+    /// directly, instead of a member within the definition.
+    private func isDirectlyMutatingDefinition(_ definition: ReachingDefinitionAnalyzer.Definition) -> Bool {
+        switch definition.context {
+        case .assignment(let exp):
+            guard let defNode = exp.lhs as? DefinitionReferenceNode else {
+                return false
+            }
+            guard defNode.definition as? LocalCodeDefinition == definition.definition else {
+                return false
+            }
+
+            return true
+            
+        case .initialValue:
+            return true
+
+        case .ifLetBinding, .forBinding, .catchBlock:
+            return false
+
+        case nil:
+            return false
         }
     }
 

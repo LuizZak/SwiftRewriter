@@ -164,6 +164,37 @@ class DefinitionTypePropagatorTests: XCTestCase {
         ])
     }
 
+    func testPropagate_functionBody_dontSuggestTypesForReadOnlyVariables() {
+        let (intention, functionBody) = makeFunction([
+            .variableDeclaration(identifier: "a", type: .any, initialization: nil),
+            .expression(.identifier("a"))
+        ])
+        let carrier = FunctionBodyCarryingIntention.global(intention)
+        let sut = makeSut(intention: carrier)
+
+        sut.propagate(in: carrier)
+        
+        assertEqual(functionBody.body, [
+            .variableDeclaration(identifier: "a", type: .any, initialization: nil),
+            .expression(.identifier("a"))
+        ])
+    }
+    
+    func testPropagate_functionBody_ignoreWriteReferencesToMembers() {
+        let (intention, functionBody) = makeFunction([
+            .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
+            .expression(.identifier("a").dot("b").assignment(op: .assign, rhs: .constant(true)))
+        ])
+        let sut = makeSut(intention: .global(intention))
+
+        sut.propagate(functionBody)
+
+        assertEqual(functionBody.body, [
+            .variableDeclaration(identifier: "a", type: .double, initialization: .constant(0)),
+            .expression(.identifier("a").dot("b").assignment(op: .assign, rhs: .constant(true)))
+        ] as CompoundStatement)
+    }
+
     func testPropagate_expression() {
         let exp: Expression = .block(body: [
             .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
@@ -399,6 +430,21 @@ class DefinitionTypePropagatorTests: XCTestCase {
         ] as CompoundStatement)
     }
 
+    func testPropagate_ignoreWriteReferencesToMembers() {
+        let body: CompoundStatement = [
+            .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
+            .expression(.identifier("a").dot("b").assignment(op: .assign, rhs: .constant(true)))
+        ]
+        let sut = makeSut(body: body)
+
+        let result = sut.propagate(body)
+
+        assertEqual(result, [
+            .variableDeclaration(identifier: "a", type: .double, initialization: .constant(0)),
+            .expression(.identifier("a").dot("b").assignment(op: .assign, rhs: .constant(true)))
+        ] as CompoundStatement)
+    }
+
     func testPropagate_delegateTypeSuggestions_usageContext_memberAccess() {
         let exp = Expression.identifier("a").dot("member")
         let function = makeFunction([
@@ -589,6 +635,29 @@ class DefinitionTypePropagatorTests: XCTestCase {
         XCTAssertGreaterThan(delegate.didCallSuggestTypeForDefinitionUsages.count, 0)
         assertEqual(function.body.body, [
             .variableDeclaration(identifier: "a", type: .double, initialization: .constant(0)),
+            .expression(exp.copy())
+        ] as CompoundStatement)
+    }
+
+    func testPropagate_delegateTypeSuggestions_oneOfPossibly_usesSuggestedTypeForUnknownTypes() {
+        let exp = Expression.identifier("a").dot("member")
+        let function = makeFunction([
+            .variableDeclaration(identifier: "a", type: .any, initialization: nil),
+            .expression(exp)
+        ])
+        let sut = makeSut(intention: .global(function.intention))
+        let delegate = TestDefinitionTypePropagatorDelegate { (_, _, _) in
+            .oneOfPossibly([
+                .nsArray
+            ])
+        }
+        sut.delegate = delegate
+
+        sut.propagate(function.body)
+
+        XCTAssertGreaterThan(delegate.didCallSuggestTypeForDefinitionUsages.count, 0)
+        assertEqual(function.body.body, [
+            .variableDeclaration(identifier: "a", type: .nsArray, initialization: nil),
             .expression(exp.copy())
         ] as CompoundStatement)
     }

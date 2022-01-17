@@ -318,6 +318,29 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
             )
         ] as Set)
     }
+
+    func testWriteIntoReferenceTypeDefinition() {
+        typealias Definition = ReachingDefinitionAnalyzer.Definition
+
+        let varDecl = Statement.variableDeclaration(identifier: "a", type: .anyObject, initialization: .constant(0))
+        let body: CompoundStatement = [
+            varDecl,
+            .expression(.identifier("a").dot("b").assignment(op: .assign, rhs: .constant(0)))
+        ]
+        setupTest(with: body, prune: false)
+
+        let result = sut.allDefinitions()
+
+        XCTAssertEqual(result.count, 1)
+        try XCTAssertEqual(result, [
+            Definition(
+                node: XCTUnwrap(controlFlowGraph.graphNode(for: varDecl.decl[0])),
+                definitionSite: varDecl.decl[0],
+                context: .initialValue(XCTUnwrap(varDecl.decl[0].initialization)),
+                definition: .forVarDeclElement(varDecl.decl[0])
+            )
+        ] as Set)
+    }
 }
 
 extension ReachingDefinitionAnalyzerTests {

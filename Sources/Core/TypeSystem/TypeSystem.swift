@@ -257,6 +257,10 @@ public class TypeSystem {
         guard let aliased = typeNameIn(swiftType: resolveAlias(in: typeName)) else {
             return false
         }
+
+        if aliased == "AnyObject" {
+            return true
+        }
         
         if TypeDefinitions.classesList.classes.contains(where: { $0.typeName == aliased }) {
             return true
@@ -270,8 +274,10 @@ public class TypeSystem {
     }
     
     /// Returns `true` if a given type is considered a class instance type.
+    ///
     /// Class instance types are considered to be any type that is either a Swift
-    /// or Objective-C class/protocol, or a subclass implementer of one of them.
+    /// or Objective-C class/protocol, or a subclass implementer of one of them,
+    /// or `AnyObject`.
     public func isClassInstanceType(_ type: SwiftType) -> Bool {
         switch type.unwrapped {
         case .nominal(.typeName(let typeName)), .nominal(.generic(let typeName, _)):
