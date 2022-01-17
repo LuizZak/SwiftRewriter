@@ -418,6 +418,7 @@ public final class JavaScript2SwiftRewriter {
                     typeSystem: typeSystem
                 )
 
+                let delegate = TypeDetectingDelegate(typeSystem: typeSystem)
                 let typePropagator = DefinitionTypePropagator(
                     cache: cache.cache(for: carrier),
                     options: .init(
@@ -428,11 +429,14 @@ public final class JavaScript2SwiftRewriter {
                     typeSystem: typeSystem,
                     typeResolver: localTypeResolver
                 )
+                typePropagator.delegate = delegate
 
                 if let parameterized = carrier.parameterizedFunction as? MutableSignatureFunctionIntention {
                     // TODO: This should be moved to DefaultTypePropagator.
-
-                    let types = typePropagator.computeParameterTypes(in: parameterized)
+                    
+                    let types = withExtendedLifetime(delegate) {
+                        typePropagator.computeParameterTypes(in: parameterized)
+                    }
 
                     var assigned = false
 
@@ -451,7 +455,9 @@ public final class JavaScript2SwiftRewriter {
                     }
                 }
 
-                typePropagator.propagate(in: carrier)
+                withExtendedLifetime(delegate) {
+                    typePropagator.propagate(in: carrier)
+                }
             }
         }
     }
@@ -905,6 +911,69 @@ fileprivate extension JavaScript2SwiftRewriter {
 
         init(parseItem: LazyParseItem) {
             self.parseItem = parseItem
+        }
+    }
+}
+
+// MARK: - DefinitionTypePropagatorDelegate
+private extension JavaScript2SwiftRewriter {
+    class TypeDetectingDelegate: DefinitionTypePropagatorDelegate {
+        private let typeSystem: TypeSystem
+
+        init(typeSystem: TypeSystem) {
+            self.typeSystem = typeSystem
+        }
+
+        func suggestTypeForDefinitionUsages(
+            _ typePropagator: DefinitionTypePropagator,
+            definition: LocalCodeDefinition,
+            usages: [DefinitionTypePropagator.UsageContext]
+        ) -> DefinitionTypePropagator.TypeSuggestion {
+            
+            var possible: Set<SwiftType> = []
+
+            for usage in usages {
+                if isArrayUsage(usage) {
+                    possible.insert(.nsArray)
+                }
+            }
+
+            if possible.count == 1, let first = possible.first {
+                return .certain(first)
+            }
+
+            return .none
+        }
+
+        private func isArrayUsage(_ context: DefinitionTypePropagator.UsageContext) -> Bool {
+            switch context {
+            case .memberFunctionCall(_, let member, _, _):
+                return member.name == "push"
+
+            case .memberAccess(_, let member, in: let exp):
+                if member.name == "length" {
+                    if let expected = exp.expectedType {
+                        return typeSystem.isNumeric(expected)
+                    }
+
+                    return true
+                }
+            
+            case .subscriptAccess(_, let op, _):
+                guard op.subExpressions.count == 1 else {
+                    break
+                }
+                guard let resolvedType = op.subExpressions[0].resolvedType else {
+                    break
+                }
+
+                return typeSystem.isNumeric(resolvedType)
+                
+            default:
+                break
+            }
+
+            return false
         }
     }
 }

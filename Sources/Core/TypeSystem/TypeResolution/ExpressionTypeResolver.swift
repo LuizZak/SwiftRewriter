@@ -782,7 +782,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         if let unary = expression.parentExpression?.asUnary {
             return unary.op != .bitwiseAnd
         }
-        if let postfix = expression.parentExpression?.asPostfix {
+        if let postfix = expression.parentExpression?.asPostfix, expression == postfix.exp {
             let root = postfix.topPostfixExpression
             
             // If at any point we find a function call, the original value cannot
@@ -940,6 +940,8 @@ private class MemberInvocationResolver {
             // Array<T> / Dictionary<T> resolving
             switch typeResolver.expandAliases(in: expType) {
             case .nominal(.generic("Array", let params)) where Array(params).count == 1:
+                exp.op.subExpressions[0].expectedType = .int
+
                 resolveArgTypes()
                 
                 // Can only subscript arrays with integers!
@@ -949,10 +951,16 @@ private class MemberInvocationResolver {
                 
                 exp.resolvedType = Array(params)[0]
                 
-            case .nominal(.generic("Dictionary", let params)) where Array(params).count == 2:
-                exp.resolvedType = .optional(Array(params)[1])
+            case .nominal(.generic("Dictionary", let params)) where params.count == 2:
+                exp.op.subExpressions[0].expectedType = params.first
+                
+                resolveArgTypes()
+
+                exp.resolvedType = .optional(params.last)
                 
             case .array(let element):
+                exp.op.subExpressions[0].expectedType = .int
+
                 resolveArgTypes()
                 
                 if exp.op.subExpressions[0].resolvedType != .int {
@@ -962,6 +970,8 @@ private class MemberInvocationResolver {
                 exp.resolvedType = element
                 
             case let .dictionary(key, value):
+                exp.op.subExpressions[0].expectedType = key
+
                 resolveArgTypes()
                 
                 if exp.op.subExpressions[0].resolvedType != key {
@@ -972,21 +982,24 @@ private class MemberInvocationResolver {
 
             default:
                 
-                let subscriptDecl =
-                    typeSystem
-                        .subscription(withParameterLabels: [nil],
-                                      invocationTypeHints: subTypes,
-                                      static: expType.isMetatype,
-                                      in: expType)
+                let subscriptDecl = typeSystem.subscription(
+                    withParameterLabels: [nil],
+                    invocationTypeHints: subTypes,
+                    static: expType.isMetatype,
+                    in: expType
+                )
                 
                 if let subscriptDecl = subscriptDecl {
                     exp.resolvedType = subscriptDecl.returnType
-                    matchParameterTypes(parameters: subscriptDecl.parameters, callArguments: sub.arguments)
-                    
-                    resolveArgTypes()
+                    matchParameterTypes(
+                        parameters: subscriptDecl.parameters,
+                        callArguments: sub.arguments
+                    )
                 } else {
                     exp.makeErrorTyped()
                 }
+                
+                resolveArgTypes()
             }
             
             exp.op.returnType = exp.resolvedType

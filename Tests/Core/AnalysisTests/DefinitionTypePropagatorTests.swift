@@ -85,6 +85,31 @@ class DefinitionTypePropagatorTests: XCTestCase {
         XCTAssertNil(result[0])
     }
 
+    func testComputeParameterTypes_dontInsertCacheEntriesForNonParametersUsages() {
+        let varDecl = Statement.variableDeclaration(
+            identifier: "a",
+            type: .any,
+            initialization: .identifier("b")
+        )
+        let (function, _) = makeFunction([
+            varDecl,
+            .expression(.identifier("a")),
+        ])
+        let carrier = FunctionBodyCarryingIntention.global(function)
+        let cache = DefinitionTypePropagator.DefinitionTypeCache()
+        let delegate = TestDefinitionTypePropagatorDelegate { (_, _, _) in
+            return .certain(.string)
+        }
+        let sut = makeSut(intention: carrier, cache: cache)
+        sut.delegate = delegate
+
+        withExtendedLifetime(delegate) {
+            _ = sut.computeParameterTypes(in: function)
+        }
+
+        XCTAssertTrue(cache[.forVarDeclElement(varDecl.decl[0])].isEmpty)
+    }
+
     func testPropagate_functionBodyIntention() {
         let functionBody = FunctionBodyIntention(body: [
             .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),

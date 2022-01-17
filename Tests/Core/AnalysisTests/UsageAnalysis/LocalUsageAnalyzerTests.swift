@@ -528,4 +528,22 @@ class LocalsUsageAnalyzerTests: XCTestCase {
             )
         )
     }
+
+    func testIsReadOnlyContext_parameterToMutatingSubscript() {
+        let typeSystem = TypeSystem()
+        let identifier = Expression.identifier("b")
+        let exp = Expression.identifier("a").sub(identifier).assignment(
+            op: .assign,
+            rhs: .constant(1)
+        )
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        typeResolver.intrinsicVariables = ArrayDefinitionsSource(definitions: [
+            .forLocalIdentifier("a", type: .array(.int), isConstant: false, location: .parameter(index: 0)),
+            .forLocalIdentifier("b", type: .int, isConstant: false, location: .parameter(index: 1))
+        ])
+        _ = typeResolver.resolveTypes(in: .expression(exp))
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
+
+        XCTAssertTrue(sut.isReadOnlyContext(identifier))
+    }
 }

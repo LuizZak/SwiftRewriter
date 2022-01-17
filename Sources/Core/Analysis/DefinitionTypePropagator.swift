@@ -52,17 +52,7 @@ public class DefinitionTypePropagator {
             graph,
             container: .function(body)
         )
-        let allDefinitions =
-            analyzer
-            .allDefinitions()
-            .filter {
-                switch $0.definition.location {
-                case .parameter(_):
-                    return true
-                default:
-                    return false
-                }
-            }
+        let allDefinitions = analyzer.allDefinitions()
         
         let groupedDefinitions = allDefinitions.groupBy {
             $0.definition
@@ -80,7 +70,10 @@ public class DefinitionTypePropagator {
 
         for localDef in definitionsToCheck {
             guard localDef.type == options.baseType else {
-                    continue
+                continue
+            }
+            guard case .parameter(let index) = localDef.location else {
+                continue
             }
 
             let usages = groupedUsages[localDef] ?? []
@@ -103,13 +96,7 @@ public class DefinitionTypePropagator {
             }
 
             cache[localDef].append(type)
-
-            switch localDef.location {
-            case .parameter(let index):
-                result[index] = type
-            default:
-                break
-            }
+            result[index] = type
         }
 
         return result

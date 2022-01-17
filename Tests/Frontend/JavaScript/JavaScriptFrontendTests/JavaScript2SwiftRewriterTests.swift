@@ -534,7 +534,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
         )
     }
 
-    func testRewrite_deduceTypes_useTypeInformation() {
+    func testRewrite_deduceTypes_useLocalTypeInformation() {
         assertRewrite(
             js: """
             class A {
@@ -554,6 +554,25 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
 
                 func aMethod() {
                 }
+            }
+            """,
+            rewriterSettings: .default.with(\.deduceTypes, true)
+        )
+    }
+
+    func testRewrite_deduceTypes_detectArrayByNumericSubscript() {
+        assertRewrite(
+            js: """
+            function foo() {
+                var a = b;
+                a[0] = "c";
+            }
+            """,
+            swift: """
+            func foo() {
+                var a: NSArray = b
+
+                a[0] = "c"
             }
             """,
             rewriterSettings: .default.with(\.deduceTypes, true)
@@ -660,6 +679,78 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
 
                     return Bezier(p1, abc.A)
                 }
+            }
+            """,
+            rewriterSettings: .default.with(\.deduceTypes, true)
+        )
+    }
+
+    func testRewrite_deduceTypes_deduceArgumentTypes_detectArrayByPushCall() {
+        assertRewrite(
+            js: """
+            function foo(a) {
+                a.push(0);
+            }
+            """,
+            swift: """
+            func foo(_ a: NSArray) {
+                a.push(0)
+            }
+            """,
+            rewriterSettings: .default.with(\.deduceTypes, true)
+        )
+    }
+
+    func testRewrite_deduceTypes_deduceArgumentTypes_detectArrayByLengthGetter() {
+        assertRewrite(
+            js: """
+            function foo(a) {
+                if (a.length > 0) {
+                }
+            }
+            """,
+            swift: """
+            func foo(_ a: NSArray) {
+                if a.length > 0 {
+                }
+            }
+            """,
+            rewriterSettings: .default.with(\.deduceTypes, true)
+        )
+    }
+
+    func testRewrite_deduceTypes_deduceArgumentTypes_detectArrayByNumericSubscript() {
+        assertRewrite(
+            js: """
+            function foo(a) {
+                var b = 0;
+                a[b] = 0;
+            }
+            """,
+            swift: """
+            func foo(_ a: NSArray) {
+                let b: Double = 0
+
+                a[b] = 0
+            }
+            """,
+            rewriterSettings: .default.with(\.deduceTypes, true)
+        )
+    }
+
+    func testRewrite_deduceTypes_deduceArgumentTypes_doNotReportNonNumericSubscriptsAsArray() {
+        assertRewrite(
+            js: """
+            function foo(a) {
+                var b = "p";
+                a[b] = 0;
+            }
+            """,
+            swift: """
+            func foo(_ a: Any) {
+                let b: String = "p"
+
+                a[b] = 0
             }
             """,
             rewriterSettings: .default.with(\.deduceTypes, true)

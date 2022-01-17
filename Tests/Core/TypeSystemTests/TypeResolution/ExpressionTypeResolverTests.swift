@@ -851,6 +851,39 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(resolvedAs: .int)
     }
 
+    func testSubscript_resolvesArgumentTypes() {
+        // A[b]
+        let exp = Expression.identifier("a").sub(.identifier("b"))
+
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(named: "A") { builder in
+                return
+                    builder
+                    .subscription(indexType: .int, type: .int)
+                    .build()
+            }
+            .definingLocal(name: "a", type: "A")
+            .definingLocal(name: "b", type: .int)
+            .resolve()
+            .thenAssertExpression(resolvedAs: .int)
+            .thenAssertExpression(at: \.op.asSubscription?.arguments[0].expression, resolvedAs: .int)
+    }
+
+    func testSubscript_resolvesArgumentTypesOnUnknownSubscripts() {
+        // A[b]
+        let exp = Expression.identifier("a").sub(.identifier("b"))
+
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(named: "A") { builder in
+                builder.build()
+            }
+            .definingLocal(name: "a", type: "A")
+            .definingLocal(name: "b", type: .int)
+            .resolve()
+            .thenAssertExpression(resolvedAs: .errorType)
+            .thenAssertExpression(at: \.op.asSubscription?.arguments[0].expression, resolvedAs: .int)
+    }
+
     func testOptionalAccess() {
         // a?.b
         let exp = Expression.identifier("a").optional().dot("b")
@@ -1991,6 +2024,27 @@ class ExpressionTypeResolverTests: XCTestCase {
         .definingLocal(
             name: "a",
             type: .anyObject
+        )
+        .resolve()
+
+        XCTAssertTrue(identifier.isReadOnlyUsage)
+    }
+
+    func testSubscriptParameterReferenceUsageOnAssignmentLhs_setsReadOnlyUsageTrue() {
+        let identifier = Expression.identifier("b")
+        let exp = Expression.identifier("a").sub(identifier).assignment(op: .assign, rhs: .constant(""))
+
+        startScopedTest(
+            with: exp,
+            sut: ExpressionTypeResolver()
+        )
+        .definingLocal(
+            name: "a",
+            type: .array(.string)
+        )
+        .definingLocal(
+            name: "b",
+            type: .int
         )
         .resolve()
 

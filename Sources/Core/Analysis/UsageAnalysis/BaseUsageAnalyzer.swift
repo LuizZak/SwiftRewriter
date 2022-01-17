@@ -116,6 +116,8 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
     }
     
     func isReadOnlyContext(_ expression: Expression) -> Bool {
+        // TODO: Reduce duplication of this code here and in ExpressionTypeResolver
+
         if let assignment = expression.parentExpression?.asAssignment {
             return expression !== assignment.lhs
         }
@@ -123,7 +125,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
         if let unary = expression.parentExpression?.asUnary {
             return unary.op != .bitwiseAnd
         }
-        if let postfix = expression.parentExpression?.asPostfix {
+        if let postfix = expression.parentExpression?.asPostfix, expression == postfix.exp {
             let root = postfix.topPostfixExpression
             
             // If at any point we find a function call, the original value cannot
