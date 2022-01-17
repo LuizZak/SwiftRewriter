@@ -28,7 +28,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func test() -> Any {
-                let a: Double = 0
+                let a: Any = 0
 
                 return a + 10
             }
@@ -46,8 +46,8 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func test() {
-                let a: Double = 0
-                let b: Double = a
+                let a: Any = 0
+                let b: Any = a
             }
             """
         )
@@ -141,69 +141,11 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func foo() {
-                var a: Double, b: Double, c: Double = 1
+                var a: Any, b: Any, c: Any = 1
 
                 b = c
                 a = b
             }
-            """
-        )
-    }
-
-    func testRewrite_visitGlobalVariableExpression() {
-        assertRewrite(
-            js: """
-            const utils = {
-                foo: function () {
-                    for (let p = 0, d = 0, c = d - 1; d > 1; d--, c--) {
-                        const list = [];
-                        for (let j = 0, dpt; j < c; j++) {
-                            dpt = {
-                                x: c * (p[j + 1].x - p[j].x),
-                                y: c * (p[j + 1].y - p[j].y),
-                            };
-                            if (_3d) {
-                                dpt.z = c * (p[j + 1].z - p[j].z);
-                            }
-                            list.push(dpt);
-                        }
-                        dpoints.push(list);
-                        p = list;
-                    }
-                }
-            }
-            """,
-            swift: """
-            var utils: Any = [foo: { () -> Any in
-                var p: Double = 0, d: Double = 0, c: Double = d - 1
-
-                while d > 1 {
-                    defer {
-                        d -= 1
-                        c -= 1
-                    }
-
-                    let list: NSArray = []
-                    var j: Double = 0, dpt: Any
-
-                    while j < c {
-                        defer {
-                            j += 1
-                        }
-
-                        dpt = [x: c * (p[j + 1].x - p[j].x), y: c * (p[j + 1].y - p[j].y)]
-
-                        if _3d {
-                            dpt.z = c * (p[j + 1].z - p[j].z)
-                        }
-
-                        list.push(dpt)
-                    }
-
-                    dpoints.push(list)
-                    p = list
-                }
-            }]
             """
         )
     }
@@ -286,7 +228,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func f1() {
-                var a: Double
+                var a: Any
             
                 a = 0
             }
@@ -399,7 +341,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             }
             // End of file JavaScriptObject.swift
             func f() {
-                // decl type: JavaScriptObject
+                // decl type: Any
                 // init type: JavaScriptObject
                 let object = JavaScriptObject(["x": 1, "y": 2])
             }
@@ -427,14 +369,122 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func f() {
-                let a: Double = 0
+                let a: Any = 0
                 let b: Any = [a: a, c: 10]
             }
             """
         )
     }
 
-    func testRewrite_deducePropertyTypeByOperatorUsage() {
+    func testRewrite_deduceTypes_deducesLocalVariableType() {
+        assertRewrite(
+            js: """
+            function foo() {
+                var a = 0;
+                var b = a;
+                var c;
+                c = a > b;
+            }
+            """,
+            swift: """
+            func foo() {
+                let a: Double = 0
+                let b: Double = a
+                var c: Bool
+
+                c = a > b
+            }
+            """,
+            rewriterSettings: .default.with(\.deduceTypes, true)
+        )
+    }
+
+    func testRewrite_deduceTypes_visitGlobalVariableExpression() {
+        assertRewrite(
+            js: """
+            const utils = {
+                foo: function () {
+                    for (let p = 0, d = 0, c = d - 1; d > 1; d--, c--) {
+                        const list = [];
+                        for (let j = 0, dpt; j < c; j++) {
+                            dpt = {
+                                x: c * (p[j + 1].x - p[j].x),
+                                y: c * (p[j + 1].y - p[j].y),
+                            };
+                            if (_3d) {
+                                dpt.z = c * (p[j + 1].z - p[j].z);
+                            }
+                            list.push(dpt);
+                        }
+                        dpoints.push(list);
+                        p = list;
+                    }
+                }
+            }
+            """,
+            swift: """
+            var utils: Any = [foo: { () -> Any in
+                var p: Double = 0, d: Double = 0, c: Double = d - 1
+
+                while d > 1 {
+                    defer {
+                        d -= 1
+                        c -= 1
+                    }
+
+                    let list: NSArray = []
+                    var j: Double = 0, dpt: Any
+
+                    while j < c {
+                        defer {
+                            j += 1
+                        }
+
+                        dpt = [x: c * (p[j + 1].x - p[j].x), y: c * (p[j + 1].y - p[j].y)]
+
+                        if _3d {
+                            dpt.z = c * (p[j + 1].z - p[j].z)
+                        }
+
+                        list.push(dpt)
+                    }
+
+                    dpoints.push(list)
+                    p = list
+                }
+            }]
+            """,
+            rewriterSettings: .default.with(\.deduceTypes, true)
+        )
+    }
+
+    func testRewrite_deduceTypes_useTypeInformation() {
+        assertRewrite(
+            js: """
+            class A {
+                constructor() {
+                    const local = this.aMethod;
+                }
+                aMethod() {
+
+                }
+            }
+            """,
+            swift: """
+            class A {
+                init() {
+                    let local: () -> Any = self.aMethod
+                }
+
+                func aMethod() {
+                }
+            }
+            """,
+            rewriterSettings: .default.with(\.deduceTypes, true)
+        )
+    }
+
+    func testRewrite_detectPropertyBySelfAssignment() {
         assertRewrite(
             js: """
             class A {
@@ -446,10 +496,10 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class A {
-                var clockwise: Bool = false
+                var clockwise: Any
 
                 func computedirection() {
-                    var clockwise: Bool = false
+                    var clockwise: Any = false
 
                     clockwise = self.clockwise
                 }
@@ -458,7 +508,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
         )
     }
 
-    func testRewrite_deducePropertyTypeByOperatorUsage_preferWriteUsages() {
+    func testRewrite_detectPropertyBySelfAssignment_preferWriteUsages() {
         assertRewrite(
             js: """
             class A {
@@ -485,7 +535,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
         )
     }
 
-    func testRewrite_deducePropertyTypeByOperatorUsage_ignoreMethodReferences() {
+    func testRewrite_detectPropertyBySelfAssignment_ignoreMethodReferences() {
         assertRewrite(
             js: """
             class A {
@@ -500,7 +550,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             swift: """
             class A {
                 init() {
-                    let local: () -> Any = self.aMethod
+                    let local: Any = self.aMethod
                 }
 
                 func aMethod() {
@@ -533,7 +583,8 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
 
                 return a
             }
-            """
+            """,
+            rewriterSettings: .default.with(\.deduceTypes, true)
         )
     }
 
@@ -560,7 +611,8 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             func baz(_ b: Double) {
                 b = 10
             }
-            """
+            """,
+            rewriterSettings: .default.with(\.deduceTypes, true)
         )
     }
 
@@ -609,7 +661,8 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
                     return Bezier(p1, abc.A)
                 }
             }
-            """
+            """,
+            rewriterSettings: .default.with(\.deduceTypes, true)
         )
     }
 }

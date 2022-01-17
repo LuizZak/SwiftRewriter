@@ -54,6 +54,16 @@ extension JavaScriptCommand {
             """
         )
         var emitJavaScriptObject: Bool = false
+
+        @Flag(
+            name: .long,
+            help: """
+            Whether to spend time attempting to deduce types of local variables \
+            and parameter types for functions.
+            Specifying this option can greatly increase time taken during conversion.
+            """
+        )
+        var deduceTypes: Bool = false
     }
 }
 
@@ -236,6 +246,7 @@ private func makeSettings(_ options: JavaScriptCommand.Options) throws -> JavaSc
     settings.astWriter.format = try options.globalOptions.computeFormatterMode()
     settings.rewriter.forceUseLLPrediction = options.globalOptions.forceLl
     settings.rewriter.emitJavaScriptObject = options.emitJavaScriptObject
+    settings.rewriter.deduceTypes = options.deduceTypes
     
     return settings
 }

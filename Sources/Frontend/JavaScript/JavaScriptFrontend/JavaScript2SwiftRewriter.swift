@@ -115,7 +115,11 @@ public final class JavaScript2SwiftRewriter {
             }
 
             parseStatements(lazyParse)
-            propagateDeclarationTypes(lazyParse)
+            
+            if settings.deduceTypes {
+                propagateDeclarationTypes(lazyParse)
+            }
+            
             performIntentionAndSyntaxPasses(intentionCollection)
             outputDefinitions(intentionCollection)
         }
@@ -732,11 +736,12 @@ public final class JavaScript2SwiftRewriter {
             diagnoseFiles: [],
             forceUseLLPrediction: false,
             stageDiagnostics: [],
-            emitJavaScriptObject: false
+            emitJavaScriptObject: false,
+            deduceTypes: false
         )
         
         /// The number of concurrent threads to use when applying intention/syntax
-        /// node passes and other multi-threadable operations.
+        /// node passes and other multi-threaded operations.
         ///
         /// Default is 8.
         public var numThreads: Int
@@ -767,13 +772,18 @@ public final class JavaScript2SwiftRewriter {
         /// the JavaScriptObject type definition.
         public var emitJavaScriptObject: Bool
 
+        /// Whether to spend time attempting to deduce types of local variables
+        /// and parameter types for functions.
+        public var deduceTypes: Bool
+
         public init(
             numThreads: Int,
             verbose: Bool,
             diagnoseFiles: [String],
             forceUseLLPrediction: Bool,
             stageDiagnostics: [StageDiagnosticFlag],
-            emitJavaScriptObject: Bool
+            emitJavaScriptObject: Bool,
+            deduceTypes: Bool
         ) {
             self.numThreads = numThreads
             self.verbose = verbose
@@ -781,6 +791,7 @@ public final class JavaScript2SwiftRewriter {
             self.forceUseLLPrediction = forceUseLLPrediction
             self.stageDiagnostics = stageDiagnostics
             self.emitJavaScriptObject = emitJavaScriptObject
+            self.deduceTypes = deduceTypes
         }
         
         /// To ease modifications of single parameters from default settings

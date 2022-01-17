@@ -16,8 +16,8 @@ public class JavaScript2SwiftRewriterJob {
     public var globalsProvidersSource: GlobalsProvidersSource?
     public var syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider?
     public var preprocessors: [SourcePreprocessor]
-    public var settings: JavaScript2SwiftRewriter.Settings = .default
-    public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
+    public var settings: JavaScript2SwiftRewriter.Settings
+    public var swiftSyntaxOptions: SwiftSyntaxOptions
     public var parserCache: JavaScriptParserCache?
     
     public init(
