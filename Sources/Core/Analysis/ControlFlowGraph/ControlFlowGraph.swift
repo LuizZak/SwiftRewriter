@@ -2,17 +2,12 @@ import SwiftAST
 import TypeSystem
 
 /// Class that represents control flow graphs (CFGs) of Swift functions.
-public final class ControlFlowGraph: DirectedGraph {
+public final class ControlFlowGraph: DirectedGraphBase<ControlFlowGraphNode, ControlFlowGraphEdge> {
     /// The entry point of this control flow graph
     internal(set) public var entry: ControlFlowGraphEntryNode
     /// The exit point of this control flow graph
     internal(set) public var exit: ControlFlowGraphExitNode
     
-    /// A list of all nodes contained in this graph
-    internal(set) public var nodes: [ControlFlowGraphNode] = []
-    /// A list of all edges contained in this graph
-    internal(set) public var edges: [ControlFlowGraphEdge] = []
-
     /// Returns `true` if the only nodes in this graph are the entry and exit
     /// nodes, and marker nodes.
     var isEmpty: Bool {
@@ -24,33 +19,11 @@ public final class ControlFlowGraph: DirectedGraph {
     init(entry: ControlFlowGraphEntryNode, exit: ControlFlowGraphExitNode) {
         self.entry = entry
         self.exit = exit
+
+        super.init(nodes: [], edges: [])
         
         addNode(entry)
         addNode(exit)
-    }
-    
-    /// Returns whether a given control flow graph node exists in this control
-    /// flow graph.
-    ///
-    /// A reference equality test (===) is used to determine syntax node equality.
-    public func containsNode(_ node: ControlFlowGraphNode) -> Bool {
-        nodes.contains { $0 === node }
-    }
-    
-    /// Returns `true` iff two node references represent the same underlying node
-    /// in this graph.
-    public func areNodesEqual(_ node1: ControlFlowGraphNode, _ node2: ControlFlowGraphNode) -> Bool {
-        node1 === node2
-    }
-    
-    @inlinable
-    public func startNode(for edge: ControlFlowGraphEdge) -> ControlFlowGraphNode {
-        edge.start
-    }
-    
-    @inlinable
-    public func endNode(for edge: ControlFlowGraphEdge) -> ControlFlowGraphNode {
-        edge.end
     }
     
     /// Returns the control flow graph node that represents a given syntax node,
@@ -81,28 +54,58 @@ public final class ControlFlowGraph: DirectedGraph {
         return nil
     }
     
-    /// Returns all outgoing edges for a given control flow graph node.
-    ///
-    /// A reference equality test (===) is used to determine graph node equality.
-    public func edges(from node: ControlFlowGraphNode) -> [ControlFlowGraphEdge] {
-        edges.filter { $0.start === node }
-    }
+    // MARK: - Internals
+
+    override func copyMetadata(from node1: ControlFlowGraphNode, to node2: ControlFlowGraphNode) {
     
-    /// Returns all ingoing edges for a given control flow graph node.
-    ///
-    /// A reference equality test (===) is used to determine graph node equality.
-    public func edges(towards node: ControlFlowGraphNode) -> [ControlFlowGraphEdge] {
-        edges.filter { $0.end === node }
     }
-    
-    /// Returns an existing edge between two nodes, or `nil`, if no edges between
-    /// them currently exist.
+
+    override func copyMetadata(from edge1: ControlFlowGraphEdge, to edge2: ControlFlowGraphEdge) {
+        edge2.debugLabel = edge1.debugLabel
+        edge2.isBackEdge = edge1.isBackEdge
+    }
+
+    /// Removes all nodes and edges from this control flow graph.
     ///
-    /// A reference equality test (===) is used to determine graph node equality.
-    public func edge(from start: ControlFlowGraphNode, to end: ControlFlowGraphNode) -> ControlFlowGraphEdge? {
-        edges.first { $0.start === start && $0.end === end }
+    /// The graph is reset to an empty graph with just the entry and exit nodes.
+    override func clear() {
+        super.clear()
+
+        nodes = [entry, exit]
+    }
+
+    /// Adds a given node to this graph.
+    override func addNode(_ node: Node) {
+        if let subgraph = node as? ControlFlowSubgraphNode {
+            assert(
+                subgraph.graph !== self,
+                "Adding a graph as a subnode of itself!"
+            )
+        }
+        
+        super.addNode(node)
+    }
+
+    /// Adds an edge `start -> end` to this graph.
+    @discardableResult
+    override func addEdge(from start: Node, to end: Node) -> Edge {
+        assert(
+            containsNode(start),
+            "Attempted to add edge between nodes that are not contained within this graph: \(start)."
+        )
+        assert(
+            containsNode(end),
+            "Attempted to add edge between nodes that are not contained within this graph: \(end)."
+        )
+        
+        let edge = Edge(start: start, end: end)
+        addEdge(edge)
+        
+        return edge
     }
 }
+
+// MARK: - Internals - extension
 
 extension ControlFlowGraph {
     /// Returns a list of nodes collected in depth-first order
@@ -130,19 +133,7 @@ extension ControlFlowGraph {
     }
 }
 
-// MARK: - Internals
-
 extension ControlFlowGraph {
-    /// Removes all nodes and edges from this control flow graph.
-    ///
-    /// The graph is reset to an empty graph with just the entry and exit nodes.
-    func clear() {
-        nodes.removeAll()
-        edges.removeAll()
-
-        nodes = [entry, exit]
-    }
-
     /// Returns a copy of this control flow graph, containing the same node
     /// references as the current graph.
     func copy() -> ControlFlowGraph {
@@ -151,8 +142,7 @@ extension ControlFlowGraph {
         
         for edge in edges {
             let edgeCopy = copy.addEdge(from: edge.start, to: edge.end)
-            edgeCopy.isBackEdge = edge.isBackEdge
-            edgeCopy.debugLabel = edge.debugLabel
+            copyMetadata(from: edge, to: edgeCopy)
         }
 
         return copy
@@ -167,8 +157,7 @@ extension ControlFlowGraph {
         
         for edge in edges {
             let edgeCopy = copy.addEdge(from: edge.start, to: edge.end)
-            edgeCopy.isBackEdge = edge.isBackEdge
-            edgeCopy.debugLabel = edge.debugLabel
+            copyMetadata(from: edge, to: edgeCopy)
         }
 
         return copy
@@ -222,170 +211,8 @@ extension ControlFlowGraph {
             }
 
             let e = addEdge(from: edge.start, to: edge.end)
-            e.isBackEdge = edge.isBackEdge
-            e.debugLabel = edge.debugLabel
+            copyMetadata(from: edge, to: e)
         }
-    }
-    
-    /// Adds a given node to this graph.
-    func addNode(_ node: Node) {
-        if let subgraph = node as? ControlFlowSubgraphNode {
-            assert(
-                subgraph.graph !== self,
-                "Adding a graph as a subnode of itself!"
-            )
-        }
-        assert(
-            !self.containsNode(node),
-            "Node \(node) already exists in this graph"
-        )
-        
-        nodes.append(node)
-    }
-
-    /// Adds a sequence of nodes to this graph.
-    func addNodes<S: Sequence>(_ nodes: S) where S.Element == Node {
-        nodes.forEach(addNode)
-    }
-    
-    /// Adds a given edge to this graph.
-    func addEdge(_ edge: Edge) {
-        assert(
-            self.edge(from: edge.start, to: edge.end) == nil,
-            "An edge between nodes \(edge.start.node) and \(edge.end.node) already exists within this graph"
-        )
-        
-        edges.append(edge)
-    }
-    
-    /// Adds an edge `start -> end` to this graph.
-    @discardableResult
-    func addEdge(from start: Node, to end: Node) -> Edge {
-        assert(
-            containsNode(start),
-            "Attempted to add edge between nodes that are not contained within this graph: \(start)."
-        )
-        assert(
-            containsNode(end),
-            "Attempted to add edge between nodes that are not contained within this graph: \(end)."
-        )
-        
-        let edge = Edge(start: start, end: end)
-        addEdge(edge)
-        
-        return edge
-    }
-
-    /// Removes an edge between two nodes from this graph.
-    func removeEdge(from start: Node, to end: Node) {
-        func predicate(_ edge: Edge) -> Bool {
-            areNodesEqual(edge.start, start) && self.areNodesEqual(edge.end, end)
-        }
-
-        assert(
-            edges.contains(where: predicate),
-            "Attempted to remove edge from nodes \(start) -> \(end) that do not exist in this graph."
-        )
-
-        edges.removeAll(where: predicate)
-    }
-    
-    /// Removes a given node from this graph.
-    func removeNode(_ node: Node) {
-        assert(
-            containsNode(node),
-            "Attempted to remove a node that is not present in this graph: \(node)."
-        )
-
-        removeEdges(allEdges(for: node))
-        nodes.removeAll(where: { $0 === node })
-    }
-    
-    /// Removes a given sequence of edges from this graph.
-    func removeEdges<S: Sequence>(_ edgesToRemove: S) where S.Element == Edge {
-        edges.removeAll(where: edgesToRemove.contains)
-    }
-    
-    /// Removes a given sequence of nodes from this graph.
-    func removeNodes<S: Sequence>(_ nodesToRemove: S) where S.Element == Node {
-        nodes.removeAll(where: nodesToRemove.contains)
-    }
-
-    /// Removes the entry edges from a given node.
-    @discardableResult
-    func removeEntryEdges(towards node: Node) -> [Edge] {
-        let connections = edges(towards: node)
-        removeEdges(connections)
-        return connections
-    }
-
-    /// Removes the exit edges from a given node.
-    @discardableResult
-    func removeExitEdges(from node: Node) -> [Edge] {
-        let connections = edges(from: node)
-        removeEdges(connections)
-        return connections
-    }
-
-    /// Moves the entry edges from a given node to a target node.
-    ///
-    /// The existing entry edges for `other` are kept as is.
-    ///
-    /// The return list contains the new edges that where created.
-    @discardableResult
-    func redirectEntries(for node: Node, to other: Node) -> [ControlFlowGraphEdge] {
-        var result: [ControlFlowGraphEdge] = []
-
-        for connection in removeEntryEdges(towards: node) {
-            guard !areConnected(start: connection.start, end: other) else {
-                continue
-            }
-
-            let edge = addEdge(from: connection.start, to: other)
-            edge.debugLabel = connection.debugLabel
-
-            result.append(edge)
-        }
-
-        return result
-    }
-
-    /// Moves the exit edges from a given node to a target node.
-    ///
-    /// The existing exit edges for `other` are kept as is.
-    ///
-    /// The return list contains the new edges that where created.
-    @discardableResult
-    func redirectExits(for node: Node, to other: Node) -> [ControlFlowGraphEdge] {
-        var result: [ControlFlowGraphEdge] = []
-
-        for connection in removeExitEdges(from: node) {
-            guard !areConnected(start: other, end: connection.end) else {
-                continue
-            }
-
-            let edge = addEdge(from: other, to: connection.end)
-            edge.debugLabel = connection.debugLabel
-
-            result.append(edge)
-        }
-
-        return result
-    }
-
-    /// Prepends a node before a suffix node, redirecting the entries to the
-    /// suffix node to the prefix node, and adding an edge from the prefix to the
-    /// suffix node.
-    func prepend(_ node: Node, before next: Node) {
-        if !containsNode(node) {
-            addNode(node)
-        } else {
-            let fromEdges = edges(from: node)
-            removeEdges(fromEdges)
-        }
-
-        redirectEntries(for: next, to: node)
-        addEdge(from: node, to: next)
     }
 }
 
@@ -579,7 +406,7 @@ public final class ControlFlowGraphEndScopeNode: ControlFlowGraphNode {
 }
 
 /// Represents a directed edge in a control flow graph.
-public final class ControlFlowGraphEdge: DirectedGraphEdge {
+public final class ControlFlowGraphEdge: DirectedGraphBaseEdgeType {
     public let start: ControlFlowGraphNode
     public let end: ControlFlowGraphNode
     
