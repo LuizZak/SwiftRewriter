@@ -248,14 +248,14 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
         // is not a jump stmt to somewhere else (`return`, `continue` or
         // `break`)
         return cases.map { caseClause in
-            var statements = caseClause.statements
+            var statements = caseClause.statements.map { $0.copy() }
 
             let hasBreak = statements.last?.isUnconditionalJump ?? false
             if !hasBreak {
                 statements.append(.fallthrough)
             }
 
-            return .init(patterns: caseClause.patterns, statements: statements)
+            return .init(patterns: caseClause.patterns.map { $0.copy() }, statements: statements)
         }
     }
 
