@@ -41,10 +41,6 @@
 					"build",
 					"--build-tests",
 					"--enable-code-coverage",
-					"-Xswiftc",
-					"-Xfrontend",
-					"-Xswiftc",
-					"-serialize-debugging-options",
 				],
 				"detail": "swift build --build-tests --enable-test-discovery -Xswiftc -Xfrontend -Xswiftc -serialize-debugging-options",
 			},
@@ -66,10 +62,6 @@
 					"-c=release",
 					"-Xswiftc",
 					"-DJS_PARSER_TESTS_FULL_FIXTURES",
-					"-Xswiftc",
-					"-Xfrontend",
-					"-Xswiftc",
-					"-serialize-debugging-options",
 				],
 				"detail": "swift build --build-tests --enable-test-discovery -Xswiftc -Xfrontend -Xswiftc -serialize-debugging-options",
 			},
@@ -84,10 +76,6 @@
 				"args": [
 					"test",
 					"--enable-code-coverage",
-					"-Xswiftc",
-					"-Xfrontend",
-					"-Xswiftc",
-					"-serialize-debugging-options",
 				],
 			},
             {
@@ -100,10 +88,6 @@
 					"-c", "release",
 					"-Xswiftc",
 					"-DJS_PARSER_TESTS_FULL_FIXTURES",
-					"-Xswiftc",
-					"-Xfrontend",
-					"-Xswiftc",
-					"-serialize-debugging-options",
 				],
 			},
 		],
@@ -179,7 +163,6 @@
 			".*.sw?": true,
 			"**/.DS_Store": true,
 		},
-		"cmake.configureOnOpen": false,
 		"commentAnchors.workspace.excludeFiles": "**/{node_modules,.git,.idea,target,out,build,vendor,.build,.swiftpm}/**/*",
 		"commentAnchors.tags.list": [
 			{
@@ -228,19 +211,19 @@
 			"swiftpm",
 			"swiftrewriter",
 			"swiftwriter",
+			"synthesization",
 			"Trivias",
 			"uniquing",
 			"whitespaces"
 		],
-		"swiftTest.swift.testParams": [
-			"--enable-code-coverage",
-		],
+		"swiftTestFileGen.gotoTestFile.useFilenameHeuristics": true,
+		"swiftTestFileGen.gotoTestFile.heuristicFilenamePattern": "$1Tests"
 	},
 	"extensions": {
 		"recommendations": [
 			"exodiusstudios.comment-anchors",
-			"makeitbetter.vscode-swift-test-adapter",
 			"vknabel.swift-coverage",
+			"luizzak.swifttestfilegen"
 		],
 	},
 }

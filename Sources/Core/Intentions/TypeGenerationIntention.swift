@@ -4,6 +4,10 @@ import KnownType
 
 /// An intention to generate a class, struct or enumeration in swift.
 public class TypeGenerationIntention: FromSourceIntention {
+    public override var children: [Intention] {
+        protocols + properties + methods + constructors + subscripts
+    }
+
     public var origin: String
     
     public var typeName: String

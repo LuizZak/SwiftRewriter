@@ -31,7 +31,7 @@ public final class ControlFlowGraph: DirectedGraphBase<ControlFlowGraphNode, Con
     /// Returns `nil`, if no graph node represents the given syntax node directly.
     ///
     /// A reference equality test (===) is used to determine syntax node equality.
-    public func graphNode(for node: SyntaxNode) -> ControlFlowGraphNode? {
+    public func graphNode(for node: SyntaxNode) -> Node? {
         nodes.first { $0.node === node }
     }
     
@@ -40,7 +40,7 @@ public final class ControlFlowGraph: DirectedGraphBase<ControlFlowGraphNode, Con
     /// When searching across ancestors, the nearest ancestors are searched first.
     ///
     /// A reference equality test (===) is used to determine syntax node equality.
-    public func graphNode(forFirstAncestorOf node: SyntaxNode) -> ControlFlowGraphNode? {
+    public func graphNode(forFirstAncestorOf node: SyntaxNode) -> Node? {
         var current: SyntaxNode? = node
 
         while let c = current {
@@ -56,11 +56,11 @@ public final class ControlFlowGraph: DirectedGraphBase<ControlFlowGraphNode, Con
     
     // MARK: - Internals
 
-    override func copyMetadata(from node1: ControlFlowGraphNode, to node2: ControlFlowGraphNode) {
+    override func copyMetadata(from node1: Node, to node2: Node) {
     
     }
 
-    override func copyMetadata(from edge1: ControlFlowGraphEdge, to edge2: ControlFlowGraphEdge) {
+    override func copyMetadata(from edge1: Edge, to edge2: Edge) {
         edge2.debugLabel = edge1.debugLabel
         edge2.isBackEdge = edge1.isBackEdge
     }
@@ -109,8 +109,8 @@ public final class ControlFlowGraph: DirectedGraphBase<ControlFlowGraphNode, Con
 
 extension ControlFlowGraph {
     /// Returns a list of nodes collected in depth-first order
-    func depthFirstList() -> [ControlFlowGraphNode] {
-        var list: [ControlFlowGraphNode] = []
+    func depthFirstList() -> [Node] {
+        var list: [Node] = []
         
         depthFirstVisit(start: entry) {
             list.append($0.node)
@@ -121,8 +121,8 @@ extension ControlFlowGraph {
     }
     
     /// Returns a list of nodes collected in breadth-first order
-    func breadthFirstList() -> [ControlFlowGraphNode] {
-        var list: [ControlFlowGraphNode] = []
+    func breadthFirstList() -> [Node] {
+        var list: [Node] = []
         
         breadthFirstVisit(start: entry) {
             list.append($0.node)
@@ -179,7 +179,7 @@ extension ControlFlowGraph {
         
         assert(other !== self, "attempting to merge a graph with itself!")
 
-        func shouldMerge(_ node: ControlFlowGraphNode) -> Bool {
+        func shouldMerge(_ node: Node) -> Bool {
             if !ignoreEntryExit {
                 return true
             }
@@ -267,7 +267,7 @@ internal extension ControlFlowGraph {
         // TODO: Can use breadthFirstVisit now that the new visit element has the
         // TODO: visited nodes/path information built in it?
 
-        var queue: [(start: ControlFlowGraphNode, visited: [ControlFlowGraphNode])] = []
+        var queue: [(start: Node, visited: [Node])] = []
         
         queue.append((entry, [entry]))
         

@@ -4,15 +4,14 @@ import GrammarModelBase
 /// An intention represents the intent of the code transpiler to generate a
 /// file/class/struct/property/etc. with Swift code.
 public protocol IntentionProtocol: AnyObject, Historic {
-    /// Gets the history tracker for this intention
-    var history: IntentionHistory { get }
+
 }
 
 /// An intention represents the intent of the code transpiler to generate a
 /// file/class/struct/property/etc. with Swift code.
 public class Intention: IntentionProtocol, Codable {
     private var _history = IntentionHistoryTracker()
-    
+
     /// Original source location of the node that generated this intention
     public var originLocation: SourceLocation?
     
@@ -28,6 +27,11 @@ public class Intention: IntentionProtocol, Codable {
     
     /// Parent for this intention
     public internal(set) weak var parent: Intention?
+
+    /// Sub-intentions nested within this intention object.
+    public var children: [Intention] {
+        []
+    }
     
     /// Gets the history tracker for this intention
     public var history: IntentionHistory {
@@ -45,6 +49,10 @@ public class Intention: IntentionProtocol, Codable {
 
     public convenience init() {
         self.init(source: nil)
+    }
+
+    public func accept<T: IntentionVisitor>(_ visitor: T) -> T.Result {
+        fatalError("Must be overridden by subclasses")
     }
     
     private enum CodingKeys: String, CodingKey {

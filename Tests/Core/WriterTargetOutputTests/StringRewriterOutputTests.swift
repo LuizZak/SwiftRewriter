@@ -1,6 +1,7 @@
 import TestCommons
 import XCTest
 import SwiftSyntax
+import SwiftSyntaxParser
 
 @testable import WriterTargetOutput
 

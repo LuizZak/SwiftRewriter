@@ -4,6 +4,7 @@ import ObjcParser
 import SwiftAST
 import SwiftFormatConfiguration
 import SwiftSyntax
+import SwiftSyntaxParser
 import SwiftSyntaxSupport
 import TestCommons
 import TypeSystem

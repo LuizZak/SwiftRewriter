@@ -1,5 +1,6 @@
 import Foundation
 import SwiftSyntax
+import SwiftSyntaxParser
 import SwiftSyntaxSupport
 import TestCommons
 import XCTest

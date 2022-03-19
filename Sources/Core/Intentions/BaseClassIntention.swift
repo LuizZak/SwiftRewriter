@@ -4,6 +4,10 @@ import KnownType
 
 /// Base intention for Class and Class Category/Extension intentions
 public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContainerIntention {
+    public override var children: [Intention] {
+        super.children + instanceVariables + synthesizations + (deinitIntention.map { [$0] } ?? [])
+    }
+
     /// Returns `true` if this class intention originated from an `@interface`
     /// declaration.
     public var isInterfaceSource: Bool = false
