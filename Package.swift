@@ -24,10 +24,11 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/LuizZak/MiniLexer.git", .exact("0.10.0")),
-        .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.34"),
-        .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.0")),
-        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50500.0")),
-        .package(url: "https://github.com/apple/swift-argument-parser.git", .exact("0.3.1"))
+        .package(url: "https://github.com/LuizZak/antlr4-swift.git", .exact("4.0.35")),
+        .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.2")),
+        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50700.0")),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-format.git", .exact("0.50700.0")),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define
@@ -142,8 +143,8 @@ let package = Package(
         .testTarget(
             name: "SwiftSyntaxSupportTests",
             dependencies: ["SwiftSyntaxSupport",
-                           "SwiftSyntax", "KnownType", "Intentions", "SwiftAST",
-                           "TestCommons", "SwiftRewriterLib"]),
+                           "SwiftSyntax", "SwiftSyntaxParser", "KnownType",
+                           "Intentions", "SwiftAST", "TestCommons", "SwiftRewriterLib"]),
         .testTarget(
             name: "TypeSystemTests",
             dependencies: ["TypeSystem",
@@ -152,8 +153,8 @@ let package = Package(
                            "GlobalsProviders"]),
         .testTarget(
             name: "SwiftSyntaxRewriterPassesTests",
-            dependencies: ["SwiftSyntaxRewriterPasses", "SwiftSyntax", "SwiftSyntaxSupport",
-                           "TestCommons"]),
+            dependencies: ["SwiftSyntaxRewriterPasses", "SwiftSyntax", "SwiftSyntaxParser",
+                           "SwiftSyntaxSupport", "TestCommons"]),
         .testTarget(
             name: "SwiftRewriterLibTests",
             dependencies: ["SwiftRewriterLib",

@@ -34,8 +34,26 @@
 				"type": "shell",
 				"command": "swift",
 				"args": [
-					"build"
-				]
+					"build",
+					"--build-tests",
+				],
+				"detail": "swift build --build-tests",
+			},
+            {
+				"label": "Build (release)",
+				"type": "shell",
+				"command": "swift",
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
+				"args": [
+					"build",
+					"-c=release",
+					"-Xswiftc",
+					"-DJS_PARSER_TESTS_FULL_FIXTURES",
+				],
+				"detail": "swift build -c=release -Xswiftc -DJS_PARSER_TESTS_FULL_FIXTURES",
 			},
             {
 				"label": "Test",
@@ -43,9 +61,23 @@
 				"command": "swift",
 				"args": [
 					"test"
-				]
-			}
-		]
+				],
+				"detail": "swift test",
+			},
+            {
+				"label": "Test (release)",
+				"type": "shell",
+				"command": "swift",
+				"group": "test",
+				"args": [
+					"test",
+					"-c", "release",
+					"-Xswiftc",
+					"-DJS_PARSER_TESTS_FULL_FIXTURES",
+				],
+				"detail": "swift test -c=release -Xswiftc -DJS_PARSER_TESTS_FULL_FIXTURES",
+			},
+		],
 	},
 	"folders": [
 		{
