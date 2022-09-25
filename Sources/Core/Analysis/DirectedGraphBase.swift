@@ -5,7 +5,6 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
     /// A list of all edges contained in this graph
     internal(set) public var edges: [Edge] = []
 
-
     init(nodes: [Node], edges: [Edge]) {
         self.nodes = nodes
         self.edges = edges

@@ -21,8 +21,8 @@ public class CallGraph: DirectedGraphBase<CallGraphNode, CallGraphEdge> {
         return edge
     }
 
-    public static func fromIntentions(_ intentionCollection: IntentionCollection) {
-        
+    public static func fromIntentions(_ intentionCollection: IntentionCollection) -> CallGraph {
+        _fromIntentions(intentionCollection)
     }
 
     @discardableResult
