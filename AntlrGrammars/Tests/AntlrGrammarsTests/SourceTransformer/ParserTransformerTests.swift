@@ -234,6 +234,11 @@ class ParserTransformerTests: XCTestCase {
                     _interp = ParserATNSimulator(self, _ATN, _decisionToDFA, _sharedContextCache)
                 }
 
+                func dummyMethod() {
+                    abc()
+                    def()
+                }
+
                 static let _serializedATN: [Int] = [1, 2, 3, 4]
             }
 
@@ -330,6 +335,13 @@ private let stubParserFile: String = """
             RuntimeMetaData.checkVersion("4.11.1", RuntimeMetaData.VERSION)
             try super.init(input)
             _interp = ParserATNSimulator(self,ObjectiveCPreprocessorParser._ATN,ObjectiveCPreprocessorParser._decisionToDFA, ObjectiveCPreprocessorParser._sharedContextCache)
+        }
+
+        func dummyMethod() {
+            var _prevctx: Preprocessor_expressionContext = _localctx
+            abc()
+            _prevctx = _localctx
+            def()
         }
 
         static let _serializedATN:[Int] = [1,2,3,4]

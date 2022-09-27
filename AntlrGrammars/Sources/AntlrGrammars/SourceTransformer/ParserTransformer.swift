@@ -50,7 +50,20 @@ class ParserTransformer: TransformerType {
         
         let transformed = rewriter.visit(file).as(SourceFileSyntax.self) ?? file
 
-        return try formatter?.format(transformed) ?? transformed
+        return try formatter?.format(_stripPrevCtx(transformed)) ?? transformed
+    }
+
+    /// Strips 'var _prevctx' declarations and usages, which emit a warning when
+    /// compiling later.
+    private func _stripPrevCtx(_ file: SourceFileSyntax) throws -> SourceFileSyntax {
+        let newFile =
+            file
+            .description
+            .split(separator: "\n")
+            .filter { !$0.contains("_prevctx") }
+            .joined(separator: "\n")
+        
+        return try SyntaxParser.parse(source: newFile)
     }
 
     /// Attempt to verify that changes have not been done already on a given
