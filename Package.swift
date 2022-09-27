@@ -3,6 +3,7 @@
 // build this package.
 
 import PackageDescription
+
 let package = Package(
     name: "SwiftRewriter",
     platforms: [
@@ -116,7 +117,7 @@ let package = Package(
                 "SwiftAST", "SwiftSyntaxSupport", "SwiftRewriterLib", "Intentions",
                 "KnownType", "GrammarModels", "Utils", "TypeSystem"
             ])
-        
+
     ] + /* Tests */ [
         .testTarget(
             name: "UtilsTests",
