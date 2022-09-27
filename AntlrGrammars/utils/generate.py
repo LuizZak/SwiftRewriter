@@ -54,7 +54,6 @@ def generate_antlr_grammar(output_path: Path, files: list[Path]):
         "antlr4",
         "-Dlanguage=Swift",
         "-visitor",
-        "-lib",
         *normalized_paths,
         "-o",
         rel_output_path,
@@ -82,7 +81,7 @@ def generate_objc_antlr_grammar():
     output_path = base_path.joinpath("gen")
     grammar_files = [
         base_path.joinpath("ObjectiveCParser.g4"),
-        two_step_path.joinpath("ObjectiveCLexer.g4"),
+        base_path.joinpath("ObjectiveCLexer.g4"),
         two_step_path.joinpath("ObjectiveCPreprocessorLexer.g4"),
         two_step_path.joinpath("ObjectiveCPreprocessorParser.g4"),
     ]

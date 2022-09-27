@@ -97,15 +97,15 @@ enum SourceGenerator {
     }
 
     /// ```swift
-	/// public required convenience init(_ input: CharStream) {
-	/// 	self.init(input, State())
+	/// override public convenience init(_ input: TokenStream) throws {
+	/// 	try self.init(input, State())
 	/// }
     /// ```
     static func parserConvenienceInit() -> DeclSyntax {
         let file = try! SyntaxParser.parse(source: """
         class C {            
-            public required convenience init(_ input: TokenStream) {
-                self.init(input, State())
+            override public convenience init(_ input: TokenStream) throws {
+                try self.init(input, State())
             }
         }
         """)
@@ -114,7 +114,7 @@ enum SourceGenerator {
     }
 
     /// ```swift
-	/// override public required init(_ input: TokenStream, _ state: State) throws {
+	/// public required init(_ input: TokenStream, _ state: State) throws {
 	///     self.state = state
     /// 
 	///     RuntimeMetaData.checkVersion("4.11.1", RuntimeMetaData.VERSION)
@@ -124,8 +124,8 @@ enum SourceGenerator {
     /// ```
     static func parserStatefulInitializer() -> DeclSyntax {
         let file = try! SyntaxParser.parse(source: """
-        class C {            
-            override public required init(_ input: TokenStream, _ state: State) throws {
+        class C {
+            public required init(_ input: TokenStream, _ state: State) throws {
                 self.state = state
 
                 RuntimeMetaData.checkVersion("4.11.1", RuntimeMetaData.VERSION)
