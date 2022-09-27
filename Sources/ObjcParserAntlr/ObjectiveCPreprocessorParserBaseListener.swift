@@ -1,4 +1,4 @@
-// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/two-step-processing/ObjectiveCPreprocessorParser.g4 by ANTLR 4.9.1
+// Generated from java-escape by ANTLR 4.11.1
 
 import Antlr4
 
@@ -152,19 +152,6 @@ open class ObjectiveCPreprocessorParserBaseListener: ObjectiveCPreprocessorParse
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitDirective_text(_ ctx: ObjectiveCPreprocessorParser.Directive_textContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterPath_directive(_ ctx: ObjectiveCPreprocessorParser.Path_directiveContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitPath_directive(_ ctx: ObjectiveCPreprocessorParser.Path_directiveContext) { }
 
 	/**
 	 * {@inheritDoc}

@@ -1,4 +1,4 @@
-// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/two-step-processing/ObjectiveCPreprocessorParser.g4 by ANTLR 4.9.1
+// Generated from java-escape by ANTLR 4.11.1
 import Antlr4
 
 /**
@@ -123,16 +123,6 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	- returns: the visitor result
 	 */
 	open func visitDirective_text(_ ctx: ObjectiveCPreprocessorParser.Directive_textContext) -> T {
-	 	fatalError(#function + " must be overridden")
-	}
-
-	/**
-	 * Visit a parse tree produced by {@link ObjectiveCPreprocessorParser#path_directive}.
-	- Parameters:
-	  - ctx: the parse tree
-	- returns: the visitor result
-	 */
-	open func visitPath_directive(_ ctx: ObjectiveCPreprocessorParser.Path_directiveContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 

@@ -1,4 +1,4 @@
-// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/two-step-processing/ObjectiveCPreprocessorParser.g4 by ANTLR 4.9.1
+// Generated from java-escape by ANTLR 4.11.1
 import Antlr4
 
 /**
@@ -87,13 +87,6 @@ open class ObjectiveCPreprocessorParserBaseVisitor<T>: AbstractParseTreeVisitor<
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	open func visitDirective_text(_ ctx: ObjectiveCPreprocessorParser.Directive_textContext) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	open func visitPath_directive(_ ctx: ObjectiveCPreprocessorParser.Path_directiveContext) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
 	 *
