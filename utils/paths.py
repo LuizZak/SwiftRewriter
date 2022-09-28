@@ -3,6 +3,7 @@ from pathlib import Path
 
 SOURCE_ROOT_PATH = Path(__file__).parents[1]
 SCRIPTS_ROOT_PATH = Path(__file__).parents[0]
+GRAMMARS_ROOT_PATH = Path(__file__).parents[1].joinpath("AntlrGrammars")
 
 
 def path(root: Path | str, *args: str | PathLike[str]) -> Path:

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from enum import Enum, unique
 import inspect
 import json
+from os import PathLike
 from pathlib import Path
 import sys
 import subprocess
@@ -12,6 +13,7 @@ from typing import Any, Callable, Generator, List, Optional, TypeVar
 
 from parser_generate import do_parser_generation
 from process import run, run_output
+from paths import GRAMMARS_ROOT_PATH, SOURCE_ROOT_PATH
 
 debug_args: list[str] = []
 release_args: list[str] = []
@@ -205,14 +207,20 @@ class RunCommandArgs:
 class TestCommandArgs:
     config: str
     definitions: list[str] | None
+    enable_code_coverage: bool = True
 
     def swift_test_args(self) -> List[str]:
-        return [
+        args = [
             "--configuration",
             self.config,
             *debug_args,
             *toSwiftCDefList(self.definitions),
         ]
+
+        if self.enable_code_coverage:
+            args.append("--enable-code-coverage")
+        
+        return args
 
 
 # Settings for post-build process.
@@ -277,24 +285,24 @@ def get_package_description() -> Any:
     return json.loads(j)
 
 
-def run_build(settings: BuildCommandArgs):
+def run_build(settings: BuildCommandArgs, cwd: str | PathLike | None = None):
     run("swift", "--version", silent=False)
 
     args = settings.swift_build_args()
 
-    run("swift", "build", *args)
+    run("swift", "build", *args, cwd=cwd)
 
 
-def run_test(settings: TestCommandArgs):
+def run_test(settings: TestCommandArgs, cwd: str | PathLike | None = None):
     args = settings.swift_test_args()
-    run("swift", "test", *args)
+    run("swift", "test", *args, cwd=cwd)
 
 
-def run_target(settings: RunCommandArgs):
+def run_target(settings: RunCommandArgs, cwd: str | PathLike | None = None):
     args = settings.swift_build_args()
 
-    run("swift", "build", *args)
-    run("swift", "run", *settings.swift_run_args())
+    run("swift", "build", *args, cwd=cwd)
+    run("swift", "run", *settings.swift_run_args(), cwd=cwd)
 
 
 def do_build_command(args: Any):
@@ -309,7 +317,10 @@ def do_build_command(args: Any):
         args.definitions,
         args.enable_cross_module_optimization,
     )
-    run_build(settings)
+
+    # Run build for SwiftRewriter and AntlrGrammars sub-project
+    run_build(settings, cwd=SOURCE_ROOT_PATH)
+    run_build(settings, cwd=GRAMMARS_ROOT_PATH)
 
     print("Success!")
 
@@ -320,7 +331,10 @@ def do_test_command(args: Any):
     print("")
 
     settings = TestCommandArgs(args.configuration, args.definitions)
-    run_test(settings)
+
+    # Run test for SwiftRewriter and AntlrGrammars sub-project
+    run_test(settings, cwd=SOURCE_ROOT_PATH)
+    run_test(settings, cwd=GRAMMARS_ROOT_PATH)
 
     print("Success!")
 
