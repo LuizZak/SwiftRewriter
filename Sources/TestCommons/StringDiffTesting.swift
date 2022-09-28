@@ -258,7 +258,7 @@ extension XCTestCase: DiffTestCaseFailureReporter {
                 sourceCodeContext: XCTSourceCodeContext(location: location),
                 associatedError: nil,
                 attachments: []
-            ) as XCTIssue
+            )
         )
 
         #else
