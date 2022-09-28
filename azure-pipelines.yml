@@ -11,6 +11,8 @@ jobs:
   pool:
     vmImage: 'macOS-12'
   steps:
+# TODO: Fix code coverage reporting for non-.xcodeproj release, otherwise use 'swift test'.
+#  - bash: 'swift test --enable-code-coverage'
   - bash: 'sudo xcode-select -s /Applications/Xcode_14.0.app/Contents/Developer'
   - bash: 'swift package resolve'
   - bash: 'swift package generate-xcodeproj --enable-code-coverage'
