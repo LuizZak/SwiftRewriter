@@ -153,6 +153,18 @@ public protocol ObjectiveCPreprocessorParserListener: ParseTreeListener {
 	 */
 	func exitDirective_text(_ ctx: ObjectiveCPreprocessorParser.Directive_textContext)
 	/**
+	 * Enter a parse tree produced by {@link ObjectiveCPreprocessorParser#path_directive}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterPath_directive(_ ctx: ObjectiveCPreprocessorParser.Path_directiveContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCPreprocessorParser#path_directive}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitPath_directive(_ ctx: ObjectiveCPreprocessorParser.Path_directiveContext)
+	/**
 	 * Enter a parse tree produced by the {@code preprocessorParenthesis}
 	 * labeled alternative in {@link ObjectiveCPreprocessorParser#preprocessor_expression}.
 	 - Parameters:

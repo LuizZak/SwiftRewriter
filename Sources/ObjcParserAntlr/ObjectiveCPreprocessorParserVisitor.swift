@@ -127,6 +127,16 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
+	 * Visit a parse tree produced by {@link ObjectiveCPreprocessorParser#path_directive}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitPath_directive(_ ctx: ObjectiveCPreprocessorParser.Path_directiveContext) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
 	 * Visit a parse tree produced by the {@code preprocessorParenthesis}
 	 * labeled alternative in {@link ObjectiveCPreprocessorParser#preprocessor_expression}.
 	- Parameters:

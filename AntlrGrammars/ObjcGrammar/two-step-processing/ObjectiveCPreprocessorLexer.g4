@@ -33,6 +33,7 @@ SLASH:                    '/'                                        -> type(COD
 CHARACTER_LITERAL:        '\'' (EscapeSequence | ~('\''|'\\')) '\''  -> type(CODE);
 QUOTE_STRING:             '\'' (EscapeSequence | ~('\''|'\\'))* '\'' -> type(CODE);
 STRING:                   StringFragment                             -> type(CODE);
+PATH:                     PathFragment                               -> type(CODE);
 CODE:                     ~[#'"/]+;
 
 mode DIRECTIVE_MODE;
@@ -54,6 +55,7 @@ TRUE:     T R U E;
 FALSE:    F A L S E;
 ERROR:   'error' -> mode(DIRECTIVE_TEXT);
 WARNING: 'warning' -> mode(DIRECTIVE_TEXT);
+HASINCLUDE: '__has_include';
 
 BANG:             '!' ;
 LPAREN:           '(' ;
@@ -69,6 +71,7 @@ GE:               '>=';
 
 DIRECTIVE_WHITESPACES:      [ \t]+                           -> channel(HIDDEN);
 DIRECTIVE_STRING:           StringFragment;
+DIRECTIVE_PATH:             PATH;
 CONDITIONAL_SYMBOL:         LETTER (LETTER | [0-9])*;
 DECIMAL_LITERAL:            [0-9]+;
 FLOAT:                      ([0-9]+ '.' [0-9]* | '.' [0-9]+);
@@ -114,6 +117,9 @@ fragment HexDigit:          [0-9a-fA-F];
 
 fragment
 StringFragment: '"' (~('\\' | '"') | '\\' .)* '"';
+
+fragment
+PathFragment: '<' (~('>'))* '>';
 
 fragment LETTER
     : [$A-Za-z_]

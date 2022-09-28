@@ -58,6 +58,11 @@ directive_text
     : TEXT+
     ;
 
+path_directive
+    : DIRECTIVE_STRING
+    | DIRECTIVE_PATH
+    ;
+
 preprocessor_expression
     : TRUE                                                                   #preprocessorConstant
     | FALSE                                                                  #preprocessorConstant
@@ -70,5 +75,6 @@ preprocessor_expression
     | preprocessor_expression op=AND preprocessor_expression                 #preprocessorBinary
     | preprocessor_expression op=OR preprocessor_expression                  #preprocessorBinary
     | preprocessor_expression op=(LT | GT | LE | GE) preprocessor_expression #preprocessorBinary
-    | DEFINED (CONDITIONAL_SYMBOL | LPAREN CONDITIONAL_SYMBOL RPAREN)         #preprocessorDefined
+    | DEFINED (CONDITIONAL_SYMBOL | LPAREN CONDITIONAL_SYMBOL RPAREN)        #preprocessorDefined
+    | HASINCLUDE LPAREN path_directive RPAREN                                 #preprocessorConditionalSymbol
     ;

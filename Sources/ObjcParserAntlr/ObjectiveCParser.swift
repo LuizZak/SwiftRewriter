@@ -210,43 +210,47 @@ open class ObjectiveCParser: Parser {
         case STRING_NEWLINE = 183
         case STRING_END = 184
         case STRING_VALUE = 185
-        case DIRECTIVE_IMPORT = 186
-        case DIRECTIVE_INCLUDE = 187
-        case DIRECTIVE_PRAGMA = 188
-        case DIRECTIVE_DEFINE = 189
-        case DIRECTIVE_DEFINED = 190
-        case DIRECTIVE_IF = 191
-        case DIRECTIVE_ELIF = 192
-        case DIRECTIVE_ELSE = 193
-        case DIRECTIVE_UNDEF = 194
-        case DIRECTIVE_IFDEF = 195
-        case DIRECTIVE_IFNDEF = 196
-        case DIRECTIVE_ENDIF = 197
-        case DIRECTIVE_TRUE = 198
-        case DIRECTIVE_FALSE = 199
-        case DIRECTIVE_ERROR = 200
-        case DIRECTIVE_WARNING = 201
-        case DIRECTIVE_BANG = 202
-        case DIRECTIVE_LP = 203
-        case DIRECTIVE_RP = 204
-        case DIRECTIVE_EQUAL = 205
-        case DIRECTIVE_NOTEQUAL = 206
-        case DIRECTIVE_AND = 207
-        case DIRECTIVE_OR = 208
-        case DIRECTIVE_LT = 209
-        case DIRECTIVE_GT = 210
-        case DIRECTIVE_LE = 211
-        case DIRECTIVE_GE = 212
-        case DIRECTIVE_STRING = 213
-        case DIRECTIVE_ID = 214
-        case DIRECTIVE_DECIMAL_LITERAL = 215
-        case DIRECTIVE_FLOAT = 216
-        case DIRECTIVE_NEWLINE = 217
-        case DIRECTIVE_MULTI_COMMENT = 218
-        case DIRECTIVE_SINGLE_COMMENT = 219
-        case DIRECTIVE_BACKSLASH_NEWLINE = 220
-        case DIRECTIVE_TEXT_NEWLINE = 221
-        case DIRECTIVE_TEXT = 222
+        case PATH = 186
+        case DIRECTIVE_IMPORT = 187
+        case DIRECTIVE_INCLUDE = 188
+        case DIRECTIVE_PRAGMA = 189
+        case DIRECTIVE_DEFINE = 190
+        case DIRECTIVE_DEFINED = 191
+        case DIRECTIVE_IF = 192
+        case DIRECTIVE_ELIF = 193
+        case DIRECTIVE_ELSE = 194
+        case DIRECTIVE_UNDEF = 195
+        case DIRECTIVE_IFDEF = 196
+        case DIRECTIVE_IFNDEF = 197
+        case DIRECTIVE_ENDIF = 198
+        case DIRECTIVE_TRUE = 199
+        case DIRECTIVE_FALSE = 200
+        case DIRECTIVE_ERROR = 201
+        case DIRECTIVE_WARNING = 202
+        case DIRECTIVE_HASINCLUDE = 203
+        case DIRECTIVE_BANG = 204
+        case DIRECTIVE_LP = 205
+        case DIRECTIVE_RP = 206
+        case DIRECTIVE_EQUAL = 207
+        case DIRECTIVE_NOTEQUAL = 208
+        case DIRECTIVE_AND = 209
+        case DIRECTIVE_OR = 210
+        case DIRECTIVE_LT = 211
+        case DIRECTIVE_GT = 212
+        case DIRECTIVE_LE = 213
+        case DIRECTIVE_GE = 214
+        case DIRECTIVE_STRING = 215
+        case DIRECTIVE_ID = 216
+        case DIRECTIVE_DECIMAL_LITERAL = 217
+        case DIRECTIVE_FLOAT = 218
+        case DIRECTIVE_NEWLINE = 219
+        case DIRECTIVE_MULTI_COMMENT = 220
+        case DIRECTIVE_SINGLE_COMMENT = 221
+        case DIRECTIVE_BACKSLASH_NEWLINE = 222
+        case DIRECTIVE_TEXT_NEWLINE = 223
+        case DIRECTIVE_TEXT = 224
+        case DIRECTIVE_PATH = 225
+        case DIRECTIVE_PATH_STRING = 226
     }
 
     public static let RULE_translationUnit = 0, RULE_topLevelDeclaration = 1,
@@ -373,7 +377,7 @@ open class ObjectiveCParser: Parser {
         "'->'", "'@'", "'='", nil, nil, nil, "'~'", "'?'", "':'", nil, nil, nil, nil, nil, nil,
         "'++'", "'--'", "'+'", "'-'", "'*'", "'/'", "'&'", "'|'", "'^'", "'%'", "'+='", "'-='",
         "'*='", "'/='", "'&='", "'|='", "'^='", "'%='", "'<<='", "'>>='", "'...'", nil, nil, nil,
-        nil, nil, nil, nil, nil, nil, nil, "'\\'", nil, nil, nil, nil, nil, nil, nil, nil,
+        nil, nil, nil, nil, nil, nil, nil, "'\\'", nil, nil, nil, nil, nil, nil, nil, nil, nil,
         "'defined'", nil, "'elif'", nil, "'undef'", "'ifdef'", "'ifndef'", "'endif'",
     ]
     private static let _SYMBOLIC_NAMES: [String?] = [
@@ -401,16 +405,17 @@ open class ObjectiveCParser: Parser {
         "LSHIFT_ASSIGN", "RSHIFT_ASSIGN", "ELIPSIS", "CHARACTER_LITERAL", "STRING_START",
         "HEX_LITERAL", "OCTAL_LITERAL", "BINARY_LITERAL", "DECIMAL_LITERAL",
         "FLOATING_POINT_LITERAL", "WS", "MULTI_COMMENT", "SINGLE_COMMENT", "BACKSLASH", "SHARP",
-        "STRING_NEWLINE", "STRING_END", "STRING_VALUE", "DIRECTIVE_IMPORT", "DIRECTIVE_INCLUDE",
-        "DIRECTIVE_PRAGMA", "DIRECTIVE_DEFINE", "DIRECTIVE_DEFINED", "DIRECTIVE_IF",
-        "DIRECTIVE_ELIF", "DIRECTIVE_ELSE", "DIRECTIVE_UNDEF", "DIRECTIVE_IFDEF",
+        "STRING_NEWLINE", "STRING_END", "STRING_VALUE", "PATH", "DIRECTIVE_IMPORT",
+        "DIRECTIVE_INCLUDE", "DIRECTIVE_PRAGMA", "DIRECTIVE_DEFINE", "DIRECTIVE_DEFINED",
+        "DIRECTIVE_IF", "DIRECTIVE_ELIF", "DIRECTIVE_ELSE", "DIRECTIVE_UNDEF", "DIRECTIVE_IFDEF",
         "DIRECTIVE_IFNDEF", "DIRECTIVE_ENDIF", "DIRECTIVE_TRUE", "DIRECTIVE_FALSE",
-        "DIRECTIVE_ERROR", "DIRECTIVE_WARNING", "DIRECTIVE_BANG", "DIRECTIVE_LP", "DIRECTIVE_RP",
-        "DIRECTIVE_EQUAL", "DIRECTIVE_NOTEQUAL", "DIRECTIVE_AND", "DIRECTIVE_OR", "DIRECTIVE_LT",
-        "DIRECTIVE_GT", "DIRECTIVE_LE", "DIRECTIVE_GE", "DIRECTIVE_STRING", "DIRECTIVE_ID",
-        "DIRECTIVE_DECIMAL_LITERAL", "DIRECTIVE_FLOAT", "DIRECTIVE_NEWLINE",
-        "DIRECTIVE_MULTI_COMMENT", "DIRECTIVE_SINGLE_COMMENT", "DIRECTIVE_BACKSLASH_NEWLINE",
-        "DIRECTIVE_TEXT_NEWLINE", "DIRECTIVE_TEXT",
+        "DIRECTIVE_ERROR", "DIRECTIVE_WARNING", "DIRECTIVE_HASINCLUDE", "DIRECTIVE_BANG",
+        "DIRECTIVE_LP", "DIRECTIVE_RP", "DIRECTIVE_EQUAL", "DIRECTIVE_NOTEQUAL", "DIRECTIVE_AND",
+        "DIRECTIVE_OR", "DIRECTIVE_LT", "DIRECTIVE_GT", "DIRECTIVE_LE", "DIRECTIVE_GE",
+        "DIRECTIVE_STRING", "DIRECTIVE_ID", "DIRECTIVE_DECIMAL_LITERAL", "DIRECTIVE_FLOAT",
+        "DIRECTIVE_NEWLINE", "DIRECTIVE_MULTI_COMMENT", "DIRECTIVE_SINGLE_COMMENT",
+        "DIRECTIVE_BACKSLASH_NEWLINE", "DIRECTIVE_TEXT_NEWLINE", "DIRECTIVE_TEXT", "DIRECTIVE_PATH",
+        "DIRECTIVE_PATH_STRING",
     ]
     public static let VOCABULARY = Vocabulary(_LITERAL_NAMES, _SYMBOLIC_NAMES)
 
@@ -13310,7 +13315,7 @@ open class ObjectiveCParser: Parser {
                         && ((Int64(1) << (_la - 64)) & 9_223_372_036_854_775_807) != 0
                     || (Int64((_la - 128)) & ~0x3f) == 0 && ((Int64(1) << (_la - 128)) & -1) != 0
                     || (Int64((_la - 192)) & ~0x3f) == 0
-                        && ((Int64(1) << (_la - 192)) & 2_147_483_647) != 0
+                        && ((Int64(1) << (_la - 192)) & 34_359_738_367) != 0
                 setState(1816)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
 
@@ -14146,7 +14151,7 @@ open class ObjectiveCParser: Parser {
     }
 
     static let _serializedATN: [Int] = [
-        4, 1, 222, 1884, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2, 5, 7, 5, 2,
+        4, 1, 226, 1884, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2, 5, 7, 5, 2,
         6, 7, 6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7, 10, 2, 11, 7, 11, 2, 12, 7, 12, 2,
         13, 7, 13, 2, 14, 7, 14, 2, 15, 7, 15, 2, 16, 7, 16, 2, 17, 7, 17, 2, 18, 7, 18, 2, 19, 7,
         19, 2, 20, 7, 20, 2, 21, 7, 21, 2, 22, 7, 22, 2, 23, 7, 23, 2, 24, 7, 24, 2, 25, 7, 25, 2,

@@ -93,6 +93,13 @@ open class ObjectiveCPreprocessorParserBaseVisitor<T>: AbstractParseTreeVisitor<
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	open func visitPath_directive(_ ctx: ObjectiveCPreprocessorParser.Path_directiveContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	open func visitPreprocessorParenthesis(_ ctx: ObjectiveCPreprocessorParser.PreprocessorParenthesisContext) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}

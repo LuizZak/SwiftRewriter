@@ -269,6 +269,12 @@ STRING_ESCAPE:    EscapeSequence          -> channel(DEFAULT_TOKEN_CHANNEL), typ
 STRING_END:       '"'                     -> channel(DEFAULT_TOKEN_CHANNEL), mode(DEFAULT_MODE);
 STRING_VALUE:     ~["\\]+                 -> channel(DEFAULT_TOKEN_CHANNEL);
 
+// Path
+
+mode PATH_MODE;
+
+PATH:             PathFragment            -> channel(DEFAULT_TOKEN_CHANNEL);
+
 // Preprocessor directives
 
 mode DIRECTIVE_MODE;
@@ -290,6 +296,7 @@ DIRECTIVE_TRUE:                 T R U E         -> channel(DIRECTIVE_CHANNEL);
 DIRECTIVE_FALSE:                F A L S E       -> channel(DIRECTIVE_CHANNEL);
 DIRECTIVE_ERROR:               'error'          -> channel(DIRECTIVE_CHANNEL), mode(DIRECTIVE_TEXT_MODE);
 DIRECTIVE_WARNING:             'warning'        -> channel(DIRECTIVE_CHANNEL), mode(DIRECTIVE_TEXT_MODE);
+DIRECTIVE_HASINCLUDE:          '__has_include'  -> channel(DIRECTIVE_CHANNEL), mode(DIRECTIVE_PATH_MODE);
 
 DIRECTIVE_BANG:                '!'              -> channel(DIRECTIVE_CHANNEL);
 DIRECTIVE_LP:                  '('              -> channel(DIRECTIVE_CHANNEL);
@@ -327,6 +334,11 @@ DIRECTIVE_TEXT_SINGLE_COMMENT:    '//' ~[\r\n]*    -> channel(COMMENTS_CHANNEL),
 DIRECTIVE_SLASH:                  '/'              -> channel(DIRECTIVE_CHANNEL), type(DIRECTIVE_TEXT);
 DIRECTIVE_TEXT:                   ~[\r\n\\/]+      -> channel(DIRECTIVE_CHANNEL);
 
+mode DIRECTIVE_PATH_MODE;
+
+DIRECTIVE_PATH:                   '(' (PATH | DIRECTIVE_PATH_STRING) ')' -> channel(DIRECTIVE_CHANNEL), mode(DIRECTIVE_MODE);
+DIRECTIVE_PATH_STRING:            StringStart ~["\\]+ StringStart;
+
 fragment LetterOrDec
     : Letter
     | Dec
@@ -343,6 +355,8 @@ fragment IntegerTypeSuffix: [uUlL] [uUlL]? [uUlL]?;
 fragment Exponent:          [eE] [+\-]? Dec+;
 fragment Dec:               [0-9];
 fragment FloatTypeSuffix:   [fFdD];
+
+fragment PathFragment:      '<' (~('>'))* '>';
 
 fragment StringStart:       (('L' | '@') Ws*)? '"';
 
