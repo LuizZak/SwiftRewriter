@@ -25,4 +25,5 @@ jobs:
     image: swift:5.7-focal
   pool:
     vmImage: ubuntu-20.04
-  - script: 'swift test'
+  steps:
+  - bash: 'swift test'
