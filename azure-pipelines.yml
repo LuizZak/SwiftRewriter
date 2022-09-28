@@ -22,9 +22,9 @@ jobs:
 
 - job: Linux
   container:
-    image: swift:5.7-focal
+    image: swift:5.7-jammy
   pool:
-    vmImage: ubuntu-20.04
+    vmImage: ubuntu-22.04
   steps:
   - task: UsePythonVersion@0
     inputs:
