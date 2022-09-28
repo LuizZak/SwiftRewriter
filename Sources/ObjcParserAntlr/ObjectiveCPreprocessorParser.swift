@@ -15,11 +15,11 @@ open class ObjectiveCPreprocessorParser: Parser {
         }
     }
 
-    public var _ATN: ATN { return self._ATN }
+    public var _ATN: ATN { return state._ATN }
 
-    internal var _decisionToDFA: [DFA] { return self._decisionToDFA }
+    internal var _decisionToDFA: [DFA] { return state._decisionToDFA }
 
-    internal var _sharedContextCache: PredictionContextCache { return self._sharedContextCache }
+    internal var _sharedContextCache: PredictionContextCache { return state._sharedContextCache }
 
     public var state: State
 

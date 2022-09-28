@@ -53,7 +53,7 @@ enum SourceGenerator {
             .public,
             "_ATN",
             type: typeName("ATN"),
-            expr: memberAccessExpr("self", "_ATN")
+            expr: memberAccessExpr("state", "_ATN")
         )
     }
 
@@ -67,7 +67,7 @@ enum SourceGenerator {
             .internal,
             "_decisionToDFA",
             type: arrayType(of: typeName("DFA")),
-            expr: memberAccessExpr("self", "_decisionToDFA")
+            expr: memberAccessExpr("state", "_decisionToDFA")
         )
     }
 
@@ -81,7 +81,7 @@ enum SourceGenerator {
             .internal,
             "_sharedContextCache",
             type: typeName("PredictionContextCache"),
-            expr: memberAccessExpr("self", "_sharedContextCache")
+            expr: memberAccessExpr("state", "_sharedContextCache")
         )
     }
 
