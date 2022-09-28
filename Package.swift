@@ -204,7 +204,7 @@ let jsFrontend: [Target] = [
 let package = Package(
     name: "SwiftRewriter",
     platforms: [
-        .macOS(.v10_12),
+        .macOS(.v10_15),
     ],
     products: [
         .library(
