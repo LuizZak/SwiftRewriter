@@ -257,21 +257,33 @@ extension XCTestCase: DiffTestCaseFailureReporter {
         let location = XCTSourceCodeLocation(filePath: filePath.description,
                                              lineNumber: Int(lineNumber))
         
+        let issue = XCTIssueReference(
+            type: .assertionFailure,
+            compactDescription: description,
+            detailedDescription: nil,
+            sourceCodeContext: XCTSourceCodeContext(location: location),
+            associatedError: nil,
+            attachments: []
+        )
+        
+        #if XCODE
+        
         self.record(
-            XCTIssueReference(
-                type: .assertionFailure,
-                compactDescription: description,
-                detailedDescription: nil,
-                sourceCodeContext: XCTSourceCodeContext(location: location),
-                associatedError: nil,
-                attachments: []
-            )
+            issue
         )
 
-        #else
+        #else // #if XCODE
+        
+        self.record(
+            issue as XCTIssue
+        )
+
+        #endif // #if XCODE
+
+        #else // #if os(macOS)
 
         XCTFail(description, file: filePath, line: lineNumber)
 
-        #endif
+        #endif // #if os(macOS)
     }
 }
