@@ -2,11 +2,11 @@ import SwiftSyntax
 
 /// Terms for locating elements in a `Syntax` tree.
 enum SyntaxSearchTerm: CustomStringConvertible {
-    case memberVarDecl(modifiers: [DeclModifierSyntax]? = nil, identifier: String? = nil, type: TypeSyntax? = nil)
+    case memberVarDecl(modifiers: [DeclModifierSyntax]? = nil, identifier: StringMatcher? = nil, type: TypeSyntax? = nil)
     case initializer(modifiers: [DeclModifierSyntax]? = nil, parameters: [Self]? = nil)
-    case method(modifiers: [DeclModifierSyntax]? = nil, identifier: String?, parameters: [Self]? = nil)
-    case parameter(firstName: String? = nil, secondName: String? = nil, type: TypeSyntax? = nil)
-    case classDecl(modifiers: [DeclModifierSyntax]? = nil, identifier: String? = nil, inheritance: [String]? = nil)
+    case method(modifiers: [DeclModifierSyntax]? = nil, identifier: StringMatcher?, parameters: [Self]? = nil)
+    case parameter(firstName: StringMatcher? = nil, secondName: StringMatcher? = nil, type: TypeSyntax? = nil)
+    case classDecl(modifiers: [DeclModifierSyntax]? = nil, identifier: StringMatcher? = nil, inheritance: [StringMatcher]? = nil)
 
     var description: String {
         switch self {
@@ -99,7 +99,7 @@ enum SyntaxSearchTerm: CustomStringConvertible {
                     return false
                 }
 
-                if identifierSyntax.identifier.text != identifier {
+                if !identifier.matches(identifierSyntax.identifier.text) {
                     return false
                 }
 
@@ -148,6 +148,59 @@ enum SyntaxSearchTerm: CustomStringConvertible {
     }
 }
 
+/// Matches strings, either partially, fully or by prefix-/suffix-
+enum StringMatcher: Equatable, CustomStringConvertible {
+    /// Matches `term` exactly.
+    case exact(String)
+
+    /// Matches `*term*`, case sensitive.
+    case contains(String)
+
+    /// Matches `term*`, case sensitive.
+    case prefix(String)
+
+    /// Matches `*term`, case sensitive.
+    case suffix(String)
+
+    func matches(_ str: String) -> Bool {
+        switch self {
+        case .exact(let exp):
+            return str == exp
+
+        case .contains(let exp):
+            return str.contains(exp)
+
+        case .prefix(let exp):
+            return str.hasPrefix(exp)
+
+        case .suffix(let exp):
+            return str.hasSuffix(exp)
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .exact(let exp):
+            return exp
+
+        case .contains(let exp):
+            return "*\(exp)*"
+
+        case .prefix(let exp):
+            return "\(exp)*"
+
+        case .suffix(let exp):
+            return "*\(exp)"
+        }
+    }
+}
+
+extension StringMatcher: ExpressibleByStringLiteral {
+    init(stringLiteral value: String) {
+        self = .exact(value)
+    }
+}
+
 extension SyntaxProtocol {
     /// Returns `true` if any child syntax node within this syntax object matches
     /// the given search term.
@@ -189,6 +242,13 @@ extension SyntaxCollection {
 
         return nil
     }
+}
+
+private func tokenMatches(_ token: TokenSyntax?, expected: StringMatcher?) -> Bool {
+    guard let expected else { return true }
+    guard let token else { return false }
+
+    return expected.matches(token.text)
 }
 
 private func tokenMatches(_ token: TokenSyntax?, expected: String?) -> Bool {
@@ -258,7 +318,7 @@ private func parametersMatch(_ actual: FunctionParameterListSyntax?, expected: [
     return true
 }
 
-private func inheritancesMatch(_ actual: TypeInheritanceClauseSyntax?, expected: [String]?) -> Bool {
+private func inheritancesMatch(_ actual: TypeInheritanceClauseSyntax?, expected: [StringMatcher]?) -> Bool {
     guard let expected else {
         return true
     }
@@ -271,7 +331,7 @@ private func inheritancesMatch(_ actual: TypeInheritanceClauseSyntax?, expected:
     }
     
     for (inheritance, exp) in zip(actual.inheritedTypeCollection, expected) {
-        if !typesMatch(inheritance.typeName, expected: typeName(exp)) {
+        if !exp.matches(inheritance.typeName.description) {
             return false
         }
     }
@@ -307,10 +367,10 @@ private func toString(parameters: [SyntaxSearchTerm]?) -> String {
     return "(\(parameters.map { $0.description }.joined(separator: ", ")))"
 }
 
-private func toString(inheritance: [String]?) -> String {
+private func toString(inheritance: [Any]?) -> String {
     guard let inheritance else {
         return ""
     }
 
-    return ": \(inheritance.joined(separator: ", "))"
+    return ": \(inheritance.map { String(describing: $0) }.joined(separator: ", "))"
 }

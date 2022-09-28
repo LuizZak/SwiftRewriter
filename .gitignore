@@ -9,3 +9,5 @@
 !*.xcodeproj/xcshareddata/
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
+__pycache__/
+.mypy_cache/

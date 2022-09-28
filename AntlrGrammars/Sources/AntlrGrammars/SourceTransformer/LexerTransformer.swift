@@ -86,11 +86,11 @@ private class _LexerRewriter: SyntaxRewriter {
         ]
 
         /// ```swift
-        /// open class <any>: Lexer
+        /// open class <any>: *Lexer*
         /// ```
         static let lexerSubclass: SyntaxSearchTerm = .classDecl(
             modifiers: [declModifier("open")],
-            inheritance: ["Lexer"]
+            inheritance: [.contains("Lexer")]
         )
 
         /// ```swift

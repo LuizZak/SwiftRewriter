@@ -81,17 +81,21 @@
 	},
 	"folders": [
 		{
+            "name": "SwiftRewriter",
 			"path": ".",
-            "name": "SwiftRewriter"
+		},
+		{
+			"name": "AntlrGrammars",
+			"path": "AntlrGrammars",
 		},
 		{
 			"name": "Swift Package Dependencies",
-			"path": ".build/checkouts"
+			"path": ".build/checkouts",
 		},
 		{
 			"name": "Build",
-			"path": ".build/x86_64-unknown-windows-msvc"
-		}
+			"path": ".build/x86_64-unknown-windows-msvc",
+		},
 	],
 	"settings": {
 		"files.eol": "\n",
@@ -129,6 +133,18 @@
 				"scope": "file"
 			},
 		],
+		
+		"python.formatting.provider": "black",
+    	"python.linting.enabled": true,
+		"python.linting.flake8Enabled": true,
+		"python.linting.flake8Args": ["--ignore=E203,E225,E302,E501,W293,W503"],
+		"[python]": {
+			"editor.formatOnSave": true
+		},
+		"mypy.configFile": "utils/mypy.ini",
+
+		"swift.buildArguments": [],
+
 		"ShortcutMenuBar.userButton01Command": "workbench.action.tasks.runTask|Build (debug)",
 		"ShortcutMenuBar.userButton02Command": "workbench.action.tasks.runTask|Test",
 		"ShortcutMenuBar.userButton03Command": "workbench.action.tasks.runTask|Test (release)",

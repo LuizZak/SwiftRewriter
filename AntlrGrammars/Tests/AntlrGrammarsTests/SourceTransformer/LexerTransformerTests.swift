@@ -8,7 +8,7 @@ class LexerTransformerTests: XCTestCase {
             // Generated from java-escape by ANTLR 4.11.1
             import Antlr4
 
-            open class TestLexer: Lexer {
+            open class TestLexer: SomeLexerClass {
                 internal static var _decisionToDFA: [DFA]
                 internal static let _sharedContextCache = PredictionContextCache()
                 public required init(_ input: CharStream) {}

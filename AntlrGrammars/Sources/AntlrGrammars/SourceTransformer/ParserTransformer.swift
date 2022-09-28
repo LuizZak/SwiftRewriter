@@ -59,7 +59,7 @@ class ParserTransformer: TransformerType {
         let newFile =
             file
             .description
-            .split(separator: "\n")
+            .split(separator: "\n", omittingEmptySubsequences: false)
             .filter { !$0.contains("_prevctx") }
             .joined(separator: "\n")
         
@@ -99,11 +99,11 @@ private class _ParserRewriter: SyntaxRewriter {
         ]
 
         /// ```swift
-        /// open class <any>: Parser
+        /// open class <any>: *Parser*
         /// ```
         static let parserSubclass: SyntaxSearchTerm = .classDecl(
             modifiers: [declModifier("open")],
-            inheritance: ["Parser"]
+            inheritance: [.contains("Parser")]
         )
 
         /// ```swift

@@ -8,7 +8,7 @@ class ParserTransformerTests: XCTestCase {
             // Generated from java-escape by ANTLR 4.11.1
             import Antlr4
 
-            open class TestParser: Parser {
+            open class TestParser: SomeParserClass {
                 internal static var _decisionToDFA: [DFA]
                 internal static let _sharedContextCache = PredictionContextCache()
                 override public init(_ input: TokenStream) throws {}
