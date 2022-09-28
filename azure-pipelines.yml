@@ -13,6 +13,7 @@ jobs:
   steps:
   - bash: 'sudo xcode-select -s /Applications/Xcode_14.0.app/Contents/Developer'
   - bash: 'swift package resolve'
+  - bash: 'swift package generate-xcodeproj --enable-code-coverage'
   # Fix for missing modulemap for _CSwiftSyntax
   - bash: 'bash gen-_cswiftsyntax-module-map.sh'
   - bash: 'xcodebuild -scheme SwiftRewriter build test'
