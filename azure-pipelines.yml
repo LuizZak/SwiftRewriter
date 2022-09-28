@@ -9,7 +9,7 @@ trigger:
 jobs:
 - job: macOS
   pool:
-    vmImage: 'macOS-11'
+    vmImage: 'macOS-12'
   steps:
   - bash: 'swift package resolve'
   - bash: 'swift test --enable-code-coverage'
@@ -19,7 +19,7 @@ jobs:
 
 - job: Linux
   container:
-    image: swift:5.5.2-focal
+    image: swift:5.7-focal
   pool:
     vmImage: ubuntu-20.04
   steps:

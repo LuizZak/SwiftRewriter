@@ -13,3 +13,6 @@ default.profraw
 default.profdata
 coverage.profdata
 /coverage.txt
+__pycache__/
+.mypy_cache/
+*.profraw

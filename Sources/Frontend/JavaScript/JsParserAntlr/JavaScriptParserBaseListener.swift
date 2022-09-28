@@ -1,4 +1,4 @@
-// Generated from JavaScriptParser.g4 by ANTLR 4.9.3
+// Generated from java-escape by ANTLR 4.11.1
 
 import Antlr4
 
@@ -997,6 +997,19 @@ open class JavaScriptParserBaseListener: JavaScriptParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitLogicalOrExpression(_ ctx: JavaScriptParser.LogicalOrExpressionContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterOptionalChainExpression(_ ctx: JavaScriptParser.OptionalChainExpressionContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitOptionalChainExpression(_ ctx: JavaScriptParser.OptionalChainExpressionContext) { }
 
 	/**
 	 * {@inheritDoc}

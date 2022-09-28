@@ -1,4 +1,4 @@
-// Generated from JavaScriptParser.g4 by ANTLR 4.9.3
+// Generated from java-escape by ANTLR 4.11.1
 import Antlr4
 
 /**
@@ -542,6 +542,13 @@ open class JavaScriptParserBaseVisitor<T>: AbstractParseTreeVisitor<T> {
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	open func visitLogicalOrExpression(_ ctx: JavaScriptParser.LogicalOrExpressionContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitOptionalChainExpression(_ ctx: JavaScriptParser.OptionalChainExpressionContext) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -32,7 +32,6 @@
             {
 				"label": "Build (debug)",
 				"type": "swift",
-				"command": "swift",
 				"group": {
 					"kind": "build",
 					"isDefault": true
@@ -52,6 +51,19 @@
             {
 				"label": "Build (release)",
 				"type": "swift",
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
+				"args": [
+					"build",
+					"--build-tests",
+				],
+				"detail": "swift build --build-tests",
+			},
+            {
+				"label": "Build (release)",
+				"type": "shell",
 				"command": "swift",
 				"group": {
 					"kind": "build",
@@ -63,7 +75,7 @@
 					"-Xswiftc",
 					"-DJS_PARSER_TESTS_FULL_FIXTURES",
 				],
-				"detail": "swift build --build-tests --enable-test-discovery -Xswiftc -Xfrontend -Xswiftc -serialize-debugging-options",
+				"detail": "swift build -c=release -Xswiftc -DJS_PARSER_TESTS_FULL_FIXTURES",
 			},
             {
 				"label": "Test",
@@ -77,6 +89,7 @@
 					"test",
 					"--enable-code-coverage",
 				],
+				"detail": "swift test",
 			},
             {
 				"label": "Test (release)",
@@ -89,13 +102,18 @@
 					"-Xswiftc",
 					"-DJS_PARSER_TESTS_FULL_FIXTURES",
 				],
+				"detail": "swift test -c=release -Xswiftc -DJS_PARSER_TESTS_FULL_FIXTURES",
 			},
 		],
 	},
 	"folders": [
 		{
-			"path": ".",
             "name": "SwiftRewriter",
+			"path": ".",
+		},
+		{
+			"name": "AntlrGrammars",
+			"path": "AntlrGrammars",
 		},
 		{
 			"name": "Swift Package Dependencies",
@@ -103,7 +121,7 @@
 		},
 		{
 			"name": "Build",
-			"path": ".build/debug/..",
+			"path": ".build",
 		},
 	],
 	"launch": {
@@ -190,10 +208,24 @@
 				"scope": "file"
 			},
 		],
-		"ShortcutMenuBar.userButton01Command": "workbench.action.tasks.runTask|Build (debug) and reload tests",
+		
+		"python.formatting.provider": "black",
+    	"python.linting.enabled": true,
+		"python.linting.flake8Enabled": true,
+		"python.linting.flake8Args": ["--ignore=E203,E225,E302,E501,W293,W503"],
+		"[python]": {
+			"editor.formatOnSave": true
+		},
+		"mypy.configFile": "utils/mypy.ini",
+
+		"swift.buildArguments": [],
+
+		"ShortcutMenuBar.userButton01Command": "workbench.action.tasks.runTask|Build (debug)",
 		"ShortcutMenuBar.userButton02Command": "workbench.action.tasks.runTask|Test",
 		"ShortcutMenuBar.userButton03Command": "workbench.action.tasks.runTask|Test (release)",
 		"cSpell.words": [
+			"Antlr",
+			"swiftpm",
 			"antlr",
 			"autoreleasepool",
 			"deinitializer",
@@ -214,7 +246,7 @@
 			"synthesization",
 			"Trivias",
 			"uniquing",
-			"whitespaces"
+			"whitespaces",
 		],
 		"swiftTestFileGen.gotoTestFile.useFilenameHeuristics": true,
 		"swiftTestFileGen.gotoTestFile.heuristicFilenamePattern": "$1Tests"

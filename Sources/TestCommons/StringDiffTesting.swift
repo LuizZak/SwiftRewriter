@@ -217,7 +217,7 @@ public class DiffingTest {
                    contextLinesBefore: Int = 3,
                    contextLinesAfter: Int = 3) -> (result: String, linesBefore: Int, linesAfter: Int) {
         
-        let lines = string.split(separator: "\n")
+        let lines = string.split(separator: "\n", omittingEmptySubsequences: false)
         let minLine = max(0, line - contextLinesBefore)
         let maxLine = min(lines.count, line + contextLinesAfter)
         
@@ -265,7 +265,7 @@ extension XCTestCase: DiffTestCaseFailureReporter {
                 sourceCodeContext: XCTSourceCodeContext(location: location),
                 associatedError: nil,
                 attachments: []
-            ) as XCTIssue
+            )
         )
 
         #else

@@ -1,4 +1,4 @@
-// Generated from JavaScriptParser.g4 by ANTLR 4.9.3
+// Generated from java-escape by ANTLR 4.11.1
 import Antlr4
 
 /**
@@ -788,6 +788,17 @@ open class JavaScriptParserVisitor<T>: ParseTreeVisitor<T> {
 	- returns: the visitor result
 	 */
 	open func visitLogicalOrExpression(_ ctx: JavaScriptParser.LogicalOrExpressionContext) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by the {@code OptionalChainExpression}
+	 * labeled alternative in {@link JavaScriptParser#singleExpression}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitOptionalChainExpression(_ ctx: JavaScriptParser.OptionalChainExpressionContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
