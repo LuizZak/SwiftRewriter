@@ -2,6 +2,7 @@
 import Antlr4
 
 open class ObjectiveCParser: Parser {
+
     public class State {
         public let _ATN: ATN = try! ATNDeserializer().deserialize(_serializedATN)
         internal var _decisionToDFA: [DFA]
@@ -13,10 +14,15 @@ open class ObjectiveCParser: Parser {
             _decisionToDFA = decisionToDFA
         }
     }
+
     public var _ATN: ATN { return self._ATN }
+
     internal var _decisionToDFA: [DFA] { return self._decisionToDFA }
+
     internal var _sharedContextCache: PredictionContextCache { return self._sharedContextCache }
+
     public var state: State
+
     public enum Tokens: Int {
         case EOF = -1
         case AUTO = 1
@@ -242,6 +248,7 @@ open class ObjectiveCParser: Parser {
         case DIRECTIVE_TEXT_NEWLINE = 221
         case DIRECTIVE_TEXT = 222
     }
+
     public static let RULE_translationUnit = 0, RULE_topLevelDeclaration = 1,
         RULE_importDeclaration = 2, RULE_classInterface = 3, RULE_classInterfaceName = 4,
         RULE_categoryInterface = 5, RULE_classImplementation = 6, RULE_classImplementatioName = 7,
@@ -299,6 +306,7 @@ open class ObjectiveCParser: Parser {
         RULE_postfixExpression = 148, RULE_postfixExpr = 149, RULE_argumentExpressionList = 150,
         RULE_argumentExpression = 151, RULE_primaryExpression = 152, RULE_constant = 153,
         RULE_stringLiteral = 154, RULE_identifier = 155
+
     public static let ruleNames: [String] = [
         "translationUnit", "topLevelDeclaration", "importDeclaration", "classInterface",
         "classInterfaceName", "categoryInterface", "classImplementation", "classImplementatioName",
@@ -341,6 +349,7 @@ open class ObjectiveCParser: Parser {
         "postfixExpression", "postfixExpr", "argumentExpressionList", "argumentExpression",
         "primaryExpression", "constant", "stringLiteral", "identifier",
     ]
+
     private static let _LITERAL_NAMES: [String?] = [
         nil, "'auto'", "'break'", "'case'", "'char'", "'const'", "'continue'", "'default'", "'do'",
         "'double'", nil, "'enum'", "'extern'", "'float'", "'for'", "'goto'", nil, "'inline'",
@@ -404,18 +413,27 @@ open class ObjectiveCParser: Parser {
         "DIRECTIVE_TEXT_NEWLINE", "DIRECTIVE_TEXT",
     ]
     public static let VOCABULARY = Vocabulary(_LITERAL_NAMES, _SYMBOLIC_NAMES)
+
     override open func getGrammarFileName() -> String { return "java-escape" }
+
     override open func getRuleNames() -> [String] { return ObjectiveCParser.ruleNames }
+
     override open func getSerializedATN() -> [Int] { return ObjectiveCParser._serializedATN }
+
     override open func getATN() -> ATN { return _ATN }
+
     override open func getVocabulary() -> Vocabulary { return ObjectiveCParser.VOCABULARY }
+
     override public convenience init(_ input: TokenStream) throws { try self.init(input, State()) }
+
     public required init(_ input: TokenStream, _ state: State) throws {
         self.state = state
+
         RuntimeMetaData.checkVersion("4.11.1", RuntimeMetaData.VERSION)
         try super.init(input)
         _interp = ParserATNSimulator(self, _ATN, _decisionToDFA, _sharedContextCache)
     }
+
     public class TranslationUnitContext: ParserRuleContext {
         open func EOF() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.EOF.rawValue, 0)
@@ -464,19 +482,23 @@ open class ObjectiveCParser: Parser {
             {
                 setState(312)
                 try topLevelDeclaration()
+
                 setState(317)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
             setState(318)
             try match(ObjectiveCParser.Tokens.EOF.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class TopLevelDeclarationContext: ParserRuleContext {
         open func importDeclaration() -> ImportDeclarationContext? {
             return getRuleContext(ImportDeclarationContext.self, 0)
@@ -547,56 +569,67 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(320)
                 try importDeclaration()
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(321)
                 try functionDeclaration()
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
                 setState(322)
                 try declaration()
+
                 break
             case 4:
                 try enterOuterAlt(_localctx, 4)
                 setState(323)
                 try classInterface()
+
                 break
             case 5:
                 try enterOuterAlt(_localctx, 5)
                 setState(324)
                 try classImplementation()
+
                 break
             case 6:
                 try enterOuterAlt(_localctx, 6)
                 setState(325)
                 try categoryInterface()
+
                 break
             case 7:
                 try enterOuterAlt(_localctx, 7)
                 setState(326)
                 try categoryImplementation()
+
                 break
             case 8:
                 try enterOuterAlt(_localctx, 8)
                 setState(327)
                 try protocolDeclaration()
+
                 break
             case 9:
                 try enterOuterAlt(_localctx, 9)
                 setState(328)
                 try protocolDeclarationList()
+
                 break
             case 10:
                 try enterOuterAlt(_localctx, 10)
                 setState(329)
                 try classDeclarationList()
+
                 break
             case 11:
                 try enterOuterAlt(_localctx, 11)
                 setState(330)
                 try functionDefinition()
+
                 break
             default: break
             }
@@ -605,8 +638,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ImportDeclarationContext: ParserRuleContext {
         open func IMPORT() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.IMPORT.rawValue, 0)
@@ -651,13 +686,16 @@ open class ObjectiveCParser: Parser {
             try identifier()
             setState(335)
             try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ClassInterfaceContext: ParserRuleContext {
         open func INTERFACE() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.INTERFACE.rawValue, 0)
@@ -712,7 +750,9 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue {
                 setState(337)
                 try match(ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue)
+
             }
+
             setState(340)
             try match(ObjectiveCParser.Tokens.INTERFACE.rawValue)
             setState(341)
@@ -723,7 +763,9 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.LBRACE.rawValue {
                 setState(342)
                 try instanceVariables()
+
             }
+
             setState(346)
             try _errHandler.sync(self)
             _la = try _input.LA(1)
@@ -735,16 +777,21 @@ open class ObjectiveCParser: Parser {
             {
                 setState(345)
                 try interfaceDeclarationList()
+
             }
+
             setState(348)
             try match(ObjectiveCParser.Tokens.END.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ClassInterfaceNameContext: ParserRuleContext {
         open func className() -> ClassNameContext? {
             return getRuleContext(ClassNameContext.self, 0)
@@ -806,7 +853,9 @@ open class ObjectiveCParser: Parser {
                     try match(ObjectiveCParser.Tokens.COLON.rawValue)
                     setState(352)
                     try superclassName()
+
                 }
+
                 setState(359)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
@@ -817,7 +866,9 @@ open class ObjectiveCParser: Parser {
                     try protocolList()
                     setState(357)
                     try match(ObjectiveCParser.Tokens.GT.rawValue)
+
                 }
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -831,7 +882,9 @@ open class ObjectiveCParser: Parser {
                     try match(ObjectiveCParser.Tokens.COLON.rawValue)
                     setState(363)
                     try genericSuperclassName()
+
                 }
+
                 setState(370)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
@@ -842,7 +895,9 @@ open class ObjectiveCParser: Parser {
                     try protocolList()
                     setState(368)
                     try match(ObjectiveCParser.Tokens.GT.rawValue)
+
                 }
+
                 break
             default: break
             }
@@ -851,8 +906,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class CategoryInterfaceContext: ParserRuleContext {
         open var categoryName: ClassNameContext!
         open func INTERFACE() -> TerminalNode? {
@@ -916,6 +973,7 @@ open class ObjectiveCParser: Parser {
                 let assignmentValue = try className()
                 _localctx.castdown(CategoryInterfaceContext.self).categoryName = assignmentValue
             }()
+
             setState(376)
             try match(ObjectiveCParser.Tokens.LP.rawValue)
             setState(378)
@@ -927,7 +985,9 @@ open class ObjectiveCParser: Parser {
             {
                 setState(377)
                 try identifier()
+
             }
+
             setState(380)
             try match(ObjectiveCParser.Tokens.RP.rawValue)
             setState(385)
@@ -940,14 +1000,18 @@ open class ObjectiveCParser: Parser {
                 try protocolList()
                 setState(383)
                 try match(ObjectiveCParser.Tokens.GT.rawValue)
+
             }
+
             setState(388)
             try _errHandler.sync(self)
             _la = try _input.LA(1)
             if _la == ObjectiveCParser.Tokens.LBRACE.rawValue {
                 setState(387)
                 try instanceVariables()
+
             }
+
             setState(391)
             try _errHandler.sync(self)
             _la = try _input.LA(1)
@@ -959,16 +1023,21 @@ open class ObjectiveCParser: Parser {
             {
                 setState(390)
                 try interfaceDeclarationList()
+
             }
+
             setState(393)
             try match(ObjectiveCParser.Tokens.END.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ClassImplementationContext: ParserRuleContext {
         open func IMPLEMENTATION() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.IMPLEMENTATION.rawValue, 0)
@@ -1026,7 +1095,9 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.LBRACE.rawValue {
                 setState(397)
                 try instanceVariables()
+
             }
+
             setState(401)
             try _errHandler.sync(self)
             _la = try _input.LA(1)
@@ -1038,16 +1109,21 @@ open class ObjectiveCParser: Parser {
             {
                 setState(400)
                 try implementationDefinitionList()
+
             }
+
             setState(403)
             try match(ObjectiveCParser.Tokens.END.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ClassImplementatioNameContext: ParserRuleContext {
         open func className() -> ClassNameContext? {
             return getRuleContext(ClassNameContext.self, 0)
@@ -1106,7 +1182,9 @@ open class ObjectiveCParser: Parser {
                     try match(ObjectiveCParser.Tokens.COLON.rawValue)
                     setState(407)
                     try superclassName()
+
                 }
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -1120,7 +1198,9 @@ open class ObjectiveCParser: Parser {
                     try match(ObjectiveCParser.Tokens.COLON.rawValue)
                     setState(412)
                     try genericSuperclassName()
+
                 }
+
                 break
             default: break
             }
@@ -1129,8 +1209,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class CategoryImplementationContext: ParserRuleContext {
         open var categoryName: ClassNameContext!
         open func IMPLEMENTATION() -> TerminalNode? {
@@ -1189,6 +1271,7 @@ open class ObjectiveCParser: Parser {
                 _localctx.castdown(CategoryImplementationContext.self).categoryName =
                     assignmentValue
             }()
+
             setState(419)
             try match(ObjectiveCParser.Tokens.LP.rawValue)
             setState(420)
@@ -1206,16 +1289,21 @@ open class ObjectiveCParser: Parser {
             {
                 setState(422)
                 try implementationDefinitionList()
+
             }
+
             setState(425)
             try match(ObjectiveCParser.Tokens.END.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ClassNameContext: ParserRuleContext {
         open func identifier() -> IdentifierContext? {
             return getRuleContext(IdentifierContext.self, 0)
@@ -1266,20 +1354,25 @@ open class ObjectiveCParser: Parser {
                 try protocolList()
                 setState(430)
                 try match(ObjectiveCParser.Tokens.GT.rawValue)
+
                 break
             case 2:
                 setState(432)
                 try genericsSpecifier()
+
                 break
             default: break
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class SuperclassNameContext: ParserRuleContext {
         open func identifier() -> IdentifierContext? {
             return getRuleContext(IdentifierContext.self, 0)
@@ -1314,13 +1407,16 @@ open class ObjectiveCParser: Parser {
             try enterOuterAlt(_localctx, 1)
             setState(435)
             try identifier()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class GenericSuperclassNameContext: ParserRuleContext {
         open func identifier() -> IdentifierContext? {
             return getRuleContext(IdentifierContext.self, 0)
@@ -1362,13 +1458,16 @@ open class ObjectiveCParser: Parser {
             try identifier()
             setState(438)
             try genericSuperclassSpecifier()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class GenericTypeSpecifierContext: ParserRuleContext {
         open func identifier() -> IdentifierContext? {
             return getRuleContext(IdentifierContext.self, 0)
@@ -1423,20 +1522,25 @@ open class ObjectiveCParser: Parser {
                 try protocolList()
                 setState(443)
                 try match(ObjectiveCParser.Tokens.GT.rawValue)
+
                 break
             case 2:
                 setState(445)
                 try genericsSpecifier()
+
                 break
             default: break
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class GenericSuperclassSpecifierContext: ParserRuleContext {
         open func LT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0) }
         open func GT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0) }
@@ -1504,20 +1608,26 @@ open class ObjectiveCParser: Parser {
                     try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                     setState(451)
                     try superclassTypeSpecifierWithPrefixes()
+
                     setState(456)
                     try _errHandler.sync(self)
                     _la = try _input.LA(1)
                 }
+
             }
+
             setState(459)
             try match(ObjectiveCParser.Tokens.GT.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class SuperclassTypeSpecifierWithPrefixesContext: ParserRuleContext {
         open func typeSpecifier() -> TypeSpecifierContext? {
             return getRuleContext(TypeSpecifierContext.self, 0)
@@ -1570,6 +1680,7 @@ open class ObjectiveCParser: Parser {
                 if _alt == 1 {
                     setState(461)
                     try typePrefix()
+
                 }
                 setState(466)
                 try _errHandler.sync(self)
@@ -1583,14 +1694,18 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.MUL.rawValue {
                 setState(468)
                 try pointer()
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ProtocolDeclarationContext: ParserRuleContext {
         open func PROTOCOL() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.PROTOCOL.rawValue, 0)
@@ -1657,7 +1772,9 @@ open class ObjectiveCParser: Parser {
                 try protocolList()
                 setState(475)
                 try match(ObjectiveCParser.Tokens.GT.rawValue)
+
             }
+
             setState(482)
             try _errHandler.sync(self)
             _la = try _input.LA(1)
@@ -1669,19 +1786,23 @@ open class ObjectiveCParser: Parser {
             {
                 setState(479)
                 try protocolDeclarationSection()
+
                 setState(484)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
             setState(485)
             try match(ObjectiveCParser.Tokens.END.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ProtocolDeclarationSectionContext: ParserRuleContext {
         open var modifier: Token!
         open func REQUIRED() -> TerminalNode? {
@@ -1754,11 +1875,13 @@ open class ObjectiveCParser: Parser {
                     if _alt == 1 {
                         setState(488)
                         try interfaceDeclarationList()
+
                     }
                     setState(493)
                     try _errHandler.sync(self)
                     _alt = try getInterpreter().adaptivePredict(_input, 28, _ctx)
                 }
+
                 break
             case .AUTO, .CHAR, .CONST, .DOUBLE, .ENUM, .EXTERN, .FLOAT, .INLINE, .INT, .LONG,
                 .REGISTER, .RESTRICT, .SHORT, .SIGNED, .STATIC, .STRUCT, .TYPEDEF, .UNION,
@@ -1780,6 +1903,7 @@ open class ObjectiveCParser: Parser {
                     case 1:
                         setState(494)
                         try interfaceDeclarationList()
+
                         break
                     default: throw ANTLRException.recognition(e: NoViableAltException(self))
                     }
@@ -1787,6 +1911,7 @@ open class ObjectiveCParser: Parser {
                     try _errHandler.sync(self)
                     _alt = try getInterpreter().adaptivePredict(_input, 29, _ctx)
                 } while _alt != 2 && _alt != ATN.INVALID_ALT_NUMBER
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -1795,8 +1920,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ProtocolDeclarationListContext: ParserRuleContext {
         open func PROTOCOL() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.PROTOCOL.rawValue, 0)
@@ -1844,13 +1971,16 @@ open class ObjectiveCParser: Parser {
             try protocolList()
             setState(503)
             try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ClassDeclarationListContext: ParserRuleContext {
         open func CLASS() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.CLASS.rawValue, 0)
@@ -1913,19 +2043,23 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                 setState(508)
                 try className()
+
                 setState(513)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
             setState(514)
             try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ProtocolListContext: ParserRuleContext {
         open func protocolName() -> [ProtocolNameContext] {
             return getRuleContexts(ProtocolNameContext.self)
@@ -1978,17 +2112,21 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                 setState(518)
                 try protocolName()
+
                 setState(523)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class PropertyDeclarationContext: ParserRuleContext {
         open func PROPERTY() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.PROPERTY.rawValue, 0)
@@ -2050,13 +2188,16 @@ open class ObjectiveCParser: Parser {
                 try propertyAttributesList()
                 setState(527)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
+
             }
+
             setState(532)
             try _errHandler.sync(self)
             switch try getInterpreter().adaptivePredict(_input, 34, _ctx) {
             case 1:
                 setState(531)
                 try ibOutletQualifier()
+
                 break
             default: break
             }
@@ -2066,18 +2207,22 @@ open class ObjectiveCParser: Parser {
             case 1:
                 setState(534)
                 try match(ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue)
+
                 break
             default: break
             }
             setState(537)
             try fieldDeclaration()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class PropertyAttributesListContext: ParserRuleContext {
         open func propertyAttribute() -> [PropertyAttributeContext] {
             return getRuleContexts(PropertyAttributeContext.self)
@@ -2132,17 +2277,21 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                 setState(541)
                 try propertyAttribute()
+
                 setState(546)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class PropertyAttributeContext: ParserRuleContext {
         open func ATOMIC() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.ATOMIC.rawValue, 0)
@@ -2226,51 +2375,61 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(547)
                 try match(ObjectiveCParser.Tokens.ATOMIC.rawValue)
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(548)
                 try match(ObjectiveCParser.Tokens.NONATOMIC.rawValue)
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
                 setState(549)
                 try match(ObjectiveCParser.Tokens.STRONG.rawValue)
+
                 break
             case 4:
                 try enterOuterAlt(_localctx, 4)
                 setState(550)
                 try match(ObjectiveCParser.Tokens.WEAK.rawValue)
+
                 break
             case 5:
                 try enterOuterAlt(_localctx, 5)
                 setState(551)
                 try match(ObjectiveCParser.Tokens.RETAIN.rawValue)
+
                 break
             case 6:
                 try enterOuterAlt(_localctx, 6)
                 setState(552)
                 try match(ObjectiveCParser.Tokens.ASSIGN.rawValue)
+
                 break
             case 7:
                 try enterOuterAlt(_localctx, 7)
                 setState(553)
                 try match(ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue)
+
                 break
             case 8:
                 try enterOuterAlt(_localctx, 8)
                 setState(554)
                 try match(ObjectiveCParser.Tokens.COPY.rawValue)
+
                 break
             case 9:
                 try enterOuterAlt(_localctx, 9)
                 setState(555)
                 try match(ObjectiveCParser.Tokens.READONLY.rawValue)
+
                 break
             case 10:
                 try enterOuterAlt(_localctx, 10)
                 setState(556)
                 try match(ObjectiveCParser.Tokens.READWRITE.rawValue)
+
                 break
             case 11:
                 try enterOuterAlt(_localctx, 11)
@@ -2280,6 +2439,7 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue)
                 setState(559)
                 try identifier()
+
                 break
             case 12:
                 try enterOuterAlt(_localctx, 12)
@@ -2291,16 +2451,19 @@ open class ObjectiveCParser: Parser {
                 try identifier()
                 setState(563)
                 try match(ObjectiveCParser.Tokens.COLON.rawValue)
+
                 break
             case 13:
                 try enterOuterAlt(_localctx, 13)
                 setState(565)
                 try nullabilitySpecifier()
+
                 break
             case 14:
                 try enterOuterAlt(_localctx, 14)
                 setState(566)
                 try identifier()
+
                 break
             default: break
             }
@@ -2309,8 +2472,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ProtocolNameContext: ParserRuleContext {
         open func LT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0) }
         open func protocolList() -> ProtocolListContext? {
@@ -2365,6 +2530,7 @@ open class ObjectiveCParser: Parser {
                 try protocolList()
                 setState(571)
                 try match(ObjectiveCParser.Tokens.GT.rawValue)
+
                 break
             case .BOOL, .Class, .BYCOPY, .BYREF, .ID, .IMP, .IN, .INOUT, .ONEWAY, .OUT, .PROTOCOL_,
                 .SEL, .SELF, .SUPER, .ATOMIC, .NONATOMIC, .RETAIN, .AUTORELEASING_QUALIFIER, .BLOCK,
@@ -2388,11 +2554,13 @@ open class ObjectiveCParser: Parser {
                         _errHandler.reportMatch(self)
                         try consume()
                     }
+
                     break
                 default: break
                 }
                 setState(576)
                 try identifier()
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -2401,8 +2569,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class InstanceVariablesContext: ParserRuleContext {
         open func LBRACE() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0)
@@ -2456,19 +2626,23 @@ open class ObjectiveCParser: Parser {
             {
                 setState(580)
                 try visibilitySection()
+
                 setState(585)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
             setState(586)
             try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class VisibilitySectionContext: ParserRuleContext {
         open func accessModifier() -> AccessModifierContext? {
             return getRuleContext(AccessModifierContext.self, 0)
@@ -2521,11 +2695,13 @@ open class ObjectiveCParser: Parser {
                     if _alt == 1 {
                         setState(589)
                         try fieldDeclaration()
+
                     }
                     setState(594)
                     try _errHandler.sync(self)
                     _alt = try getInterpreter().adaptivePredict(_input, 41, _ctx)
                 }
+
                 break
             case .AUTO, .CHAR, .CONST, .DOUBLE, .ENUM, .EXTERN, .FLOAT, .INLINE, .INT, .LONG,
                 .REGISTER, .RESTRICT, .SHORT, .SIGNED, .STATIC, .STRUCT, .UNION, .UNSIGNED, .VOID,
@@ -2546,6 +2722,7 @@ open class ObjectiveCParser: Parser {
                     case 1:
                         setState(595)
                         try fieldDeclaration()
+
                         break
                     default: throw ANTLRException.recognition(e: NoViableAltException(self))
                     }
@@ -2553,6 +2730,7 @@ open class ObjectiveCParser: Parser {
                     try _errHandler.sync(self)
                     _alt = try getInterpreter().adaptivePredict(_input, 42, _ctx)
                 } while _alt != 2 && _alt != ATN.INVALID_ALT_NUMBER
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -2561,8 +2739,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class AccessModifierContext: ParserRuleContext {
         open func PRIVATE() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.PRIVATE.rawValue, 0)
@@ -2613,13 +2793,16 @@ open class ObjectiveCParser: Parser {
                 _errHandler.reportMatch(self)
                 try consume()
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class InterfaceDeclarationListContext: ParserRuleContext {
         open func declaration() -> [DeclarationContext] {
             return getRuleContexts(DeclarationContext.self)
@@ -2696,25 +2879,31 @@ open class ObjectiveCParser: Parser {
                     case 1:
                         setState(604)
                         try declaration()
+
                         break
                     case 2:
                         setState(605)
                         try classMethodDeclaration()
+
                         break
                     case 3:
                         setState(606)
                         try instanceMethodDeclaration()
+
                         break
                     case 4:
                         setState(607)
                         try propertyDeclaration()
+
                         break
                     case 5:
                         setState(608)
                         try functionDeclaration()
+
                         break
                     default: break
                     }
+
                     break
                 default: throw ANTLRException.recognition(e: NoViableAltException(self))
                 }
@@ -2722,13 +2911,16 @@ open class ObjectiveCParser: Parser {
                 try _errHandler.sync(self)
                 _alt = try getInterpreter().adaptivePredict(_input, 45, _ctx)
             } while _alt != 2 && _alt != ATN.INVALID_ALT_NUMBER
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ClassMethodDeclarationContext: ParserRuleContext {
         open func ADD() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.ADD.rawValue, 0)
@@ -2770,13 +2962,16 @@ open class ObjectiveCParser: Parser {
             try match(ObjectiveCParser.Tokens.ADD.rawValue)
             setState(614)
             try methodDeclaration()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class InstanceMethodDeclarationContext: ParserRuleContext {
         open func SUB() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.SUB.rawValue, 0)
@@ -2820,13 +3015,16 @@ open class ObjectiveCParser: Parser {
             try match(ObjectiveCParser.Tokens.SUB.rawValue)
             setState(617)
             try methodDeclaration()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class MethodDeclarationContext: ParserRuleContext {
         open func methodSelector() -> MethodSelectorContext? {
             return getRuleContext(MethodSelectorContext.self, 0)
@@ -2879,7 +3077,9 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.LP.rawValue {
                 setState(619)
                 try methodType()
+
             }
+
             setState(622)
             try methodSelector()
             setState(626)
@@ -2888,6 +3088,7 @@ open class ObjectiveCParser: Parser {
             while _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue {
                 setState(623)
                 try attributeSpecifier()
+
                 setState(628)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
@@ -2901,16 +3102,21 @@ open class ObjectiveCParser: Parser {
             {
                 setState(629)
                 try macro()
+
             }
+
             setState(632)
             try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ImplementationDefinitionListContext: ParserRuleContext {
         open func functionDefinition() -> [FunctionDefinitionContext] {
             return getRuleContexts(FunctionDefinitionContext.self)
@@ -2985,25 +3191,31 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(634)
                     try functionDefinition()
+
                     break
                 case 2:
                     setState(635)
                     try declaration()
+
                     break
                 case 3:
                     setState(636)
                     try classMethodDefinition()
+
                     break
                 case 4:
                     setState(637)
                     try instanceMethodDefinition()
+
                     break
                 case 5:
                     setState(638)
                     try propertyImplementation()
+
                     break
                 default: break
                 }
+
                 setState(641)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
@@ -3013,13 +3225,16 @@ open class ObjectiveCParser: Parser {
                     && ((Int64(1) << (_la - 78)) & 142_936_511_610_873) != 0
                 || _la == ObjectiveCParser.Tokens.ADD.rawValue
                 || _la == ObjectiveCParser.Tokens.SUB.rawValue
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ClassMethodDefinitionContext: ParserRuleContext {
         open func ADD() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.ADD.rawValue, 0)
@@ -3061,13 +3276,16 @@ open class ObjectiveCParser: Parser {
             try match(ObjectiveCParser.Tokens.ADD.rawValue)
             setState(644)
             try methodDefinition()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class InstanceMethodDefinitionContext: ParserRuleContext {
         open func SUB() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.SUB.rawValue, 0)
@@ -3111,13 +3329,16 @@ open class ObjectiveCParser: Parser {
             try match(ObjectiveCParser.Tokens.SUB.rawValue)
             setState(647)
             try methodDefinition()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class MethodDefinitionContext: ParserRuleContext {
         open func methodSelector() -> MethodSelectorContext? {
             return getRuleContext(MethodSelectorContext.self, 0)
@@ -3175,7 +3396,9 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.LP.rawValue {
                 setState(649)
                 try methodType()
+
             }
+
             setState(652)
             try methodSelector()
             setState(654)
@@ -3188,21 +3411,27 @@ open class ObjectiveCParser: Parser {
             {
                 setState(653)
                 try initDeclaratorList()
+
             }
+
             setState(657)
             try _errHandler.sync(self)
             _la = try _input.LA(1)
             if _la == ObjectiveCParser.Tokens.SEMI.rawValue {
                 setState(656)
                 try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
             }
+
             setState(660)
             try _errHandler.sync(self)
             _la = try _input.LA(1)
             if _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue {
                 setState(659)
                 try attributeSpecifier()
+
             }
+
             setState(662)
             try compoundStatement()
             setState(664)
@@ -3211,14 +3440,18 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.SEMI.rawValue {
                 setState(663)
                 try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class MethodSelectorContext: ParserRuleContext {
         open func selector() -> SelectorContext? { return getRuleContext(SelectorContext.self, 0) }
         open func keywordDeclarator() -> [KeywordDeclaratorContext] {
@@ -3269,6 +3502,7 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(666)
                 try selector()
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -3280,6 +3514,7 @@ open class ObjectiveCParser: Parser {
                     case 1:
                         setState(667)
                         try keywordDeclarator()
+
                         break
                     default: throw ANTLRException.recognition(e: NoViableAltException(self))
                     }
@@ -3295,7 +3530,9 @@ open class ObjectiveCParser: Parser {
                     try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                     setState(673)
                     try match(ObjectiveCParser.Tokens.ELIPSIS.rawValue)
+
                 }
+
                 break
             default: break
             }
@@ -3304,8 +3541,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class KeywordDeclaratorContext: ParserRuleContext {
         open func COLON() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0)
@@ -3361,7 +3600,9 @@ open class ObjectiveCParser: Parser {
             {
                 setState(678)
                 try selector()
+
             }
+
             setState(681)
             try match(ObjectiveCParser.Tokens.COLON.rawValue)
             setState(685)
@@ -3370,6 +3611,7 @@ open class ObjectiveCParser: Parser {
             while _la == ObjectiveCParser.Tokens.LP.rawValue {
                 setState(682)
                 try methodType()
+
                 setState(687)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
@@ -3380,18 +3622,22 @@ open class ObjectiveCParser: Parser {
             case 1:
                 setState(688)
                 try arcBehaviourSpecifier()
+
                 break
             default: break
             }
             setState(691)
             try identifier()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class SelectorContext: ParserRuleContext {
         open func identifier() -> IdentifierContext? {
             return getRuleContext(IdentifierContext.self, 0)
@@ -3445,31 +3691,42 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(693)
                 try identifier()
+
                 break
+
             case .RETURN:
                 try enterOuterAlt(_localctx, 2)
                 setState(694)
                 try match(ObjectiveCParser.Tokens.RETURN.rawValue)
+
                 break
+
             case .SWITCH:
                 try enterOuterAlt(_localctx, 3)
                 setState(695)
                 try match(ObjectiveCParser.Tokens.SWITCH.rawValue)
+
                 break
+
             case .IF:
                 try enterOuterAlt(_localctx, 4)
                 setState(696)
                 try match(ObjectiveCParser.Tokens.IF.rawValue)
+
                 break
+
             case .ELSE:
                 try enterOuterAlt(_localctx, 5)
                 setState(697)
                 try match(ObjectiveCParser.Tokens.ELSE.rawValue)
+
                 break
+
             case .DEFAULT:
                 try enterOuterAlt(_localctx, 6)
                 setState(698)
                 try match(ObjectiveCParser.Tokens.DEFAULT.rawValue)
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -3478,8 +3735,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class MethodTypeContext: ParserRuleContext {
         open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
         open func typeName() -> TypeNameContext? { return getRuleContext(TypeNameContext.self, 0) }
@@ -3518,13 +3777,16 @@ open class ObjectiveCParser: Parser {
             try typeName()
             setState(703)
             try match(ObjectiveCParser.Tokens.RP.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class PropertyImplementationContext: ParserRuleContext {
         open func SYNTHESIZE() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.SYNTHESIZE.rawValue, 0)
@@ -3578,7 +3840,9 @@ open class ObjectiveCParser: Parser {
                 try propertySynthesizeList()
                 setState(707)
                 try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                 break
+
             case .DYNAMIC:
                 try enterOuterAlt(_localctx, 2)
                 setState(709)
@@ -3587,6 +3851,7 @@ open class ObjectiveCParser: Parser {
                 try propertySynthesizeList()
                 setState(711)
                 try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -3595,8 +3860,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class PropertySynthesizeListContext: ParserRuleContext {
         open func propertySynthesizeItem() -> [PropertySynthesizeItemContext] {
             return getRuleContexts(PropertySynthesizeItemContext.self)
@@ -3651,17 +3918,21 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                 setState(717)
                 try propertySynthesizeItem()
+
                 setState(722)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class PropertySynthesizeItemContext: ParserRuleContext {
         open func identifier() -> [IdentifierContext] {
             return getRuleContexts(IdentifierContext.self)
@@ -3713,14 +3984,18 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue)
                 setState(725)
                 try identifier()
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class BlockTypeContext: ParserRuleContext {
         open func typeSpecifier() -> [TypeSpecifierContext] {
             return getRuleContexts(TypeSpecifierContext.self)
@@ -3775,6 +4050,7 @@ open class ObjectiveCParser: Parser {
             case 1:
                 setState(728)
                 try nullabilitySpecifier()
+
                 break
             default: break
             }
@@ -3786,7 +4062,9 @@ open class ObjectiveCParser: Parser {
             if (Int64((_la - 99)) & ~0x3f) == 0 && ((Int64(1) << (_la - 99)) & 15) != 0 {
                 setState(732)
                 try nullabilitySpecifier()
+
             }
+
             setState(735)
             try match(ObjectiveCParser.Tokens.LP.rawValue)
             setState(736)
@@ -3797,10 +4075,12 @@ open class ObjectiveCParser: Parser {
             case 1:
                 setState(737)
                 try nullabilitySpecifier()
+
                 break
             case 2:
                 setState(738)
                 try typeSpecifier()
+
                 break
             default: break
             }
@@ -3812,14 +4092,18 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.LP.rawValue {
                 setState(742)
                 try blockParameters()
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class GenericsSpecifierContext: ParserRuleContext {
         open func LT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LT.rawValue, 0) }
         open func GT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.GT.rawValue, 0) }
@@ -3883,20 +4167,26 @@ open class ObjectiveCParser: Parser {
                     try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                     setState(748)
                     try typeSpecifierWithPrefixes()
+
                     setState(753)
                     try _errHandler.sync(self)
                     _la = try _input.LA(1)
                 }
+
             }
+
             setState(756)
             try match(ObjectiveCParser.Tokens.GT.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class TypeSpecifierWithPrefixesContext: ParserRuleContext {
         open func typeSpecifier() -> TypeSpecifierContext? {
             return getRuleContext(TypeSpecifierContext.self, 0)
@@ -3949,6 +4239,7 @@ open class ObjectiveCParser: Parser {
                 if _alt == 1 {
                     setState(758)
                     try typePrefix()
+
                 }
                 setState(763)
                 try _errHandler.sync(self)
@@ -3962,14 +4253,18 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.MUL.rawValue {
                 setState(765)
                 try pointer()
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class DictionaryExpressionContext: ParserRuleContext {
         open func AT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.AT.rawValue, 0) }
         open func LBRACE() -> TerminalNode? {
@@ -4046,6 +4341,7 @@ open class ObjectiveCParser: Parser {
                         try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                         setState(772)
                         try dictionaryPair()
+
                     }
                     setState(777)
                     try _errHandler.sync(self)
@@ -4057,17 +4353,23 @@ open class ObjectiveCParser: Parser {
                 if _la == ObjectiveCParser.Tokens.COMMA.rawValue {
                     setState(778)
                     try match(ObjectiveCParser.Tokens.COMMA.rawValue)
+
                 }
+
             }
+
             setState(783)
             try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class DictionaryPairContext: ParserRuleContext {
         open func castExpression() -> CastExpressionContext? {
             return getRuleContext(CastExpressionContext.self, 0)
@@ -4112,13 +4414,16 @@ open class ObjectiveCParser: Parser {
             try match(ObjectiveCParser.Tokens.COLON.rawValue)
             setState(787)
             try expression(0)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ArrayExpressionContext: ParserRuleContext {
         open func AT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.AT.rawValue, 0) }
         open func LBRACK() -> TerminalNode? {
@@ -4183,17 +4488,23 @@ open class ObjectiveCParser: Parser {
                 if _la == ObjectiveCParser.Tokens.COMMA.rawValue {
                     setState(792)
                     try match(ObjectiveCParser.Tokens.COMMA.rawValue)
+
                 }
+
             }
+
             setState(797)
             try match(ObjectiveCParser.Tokens.RBRACK.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class BoxExpressionContext: ParserRuleContext {
         open func AT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.AT.rawValue, 0) }
         open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
@@ -4245,6 +4556,7 @@ open class ObjectiveCParser: Parser {
                 try expression(0)
                 setState(802)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -4258,6 +4570,7 @@ open class ObjectiveCParser: Parser {
                     .FLOATING_POINT_LITERAL:
                     setState(805)
                     try constant()
+
                     break
                 case .BOOL, .Class, .BYCOPY, .BYREF, .ID, .IMP, .IN, .INOUT, .ONEWAY, .OUT,
                     .PROTOCOL_, .SEL, .SELF, .SUPER, .ATOMIC, .NONATOMIC, .RETAIN,
@@ -4269,9 +4582,11 @@ open class ObjectiveCParser: Parser {
                     .IB_DESIGNABLE, .IDENTIFIER:
                     setState(806)
                     try identifier()
+
                     break
                 default: throw ANTLRException.recognition(e: NoViableAltException(self))
                 }
+
                 break
             default: break
             }
@@ -4280,8 +4595,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class BlockParametersContext: ParserRuleContext {
         open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
         open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
@@ -4344,10 +4661,12 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(812)
                     try typeVariableDeclaratorOrName()
+
                     break
                 case 2:
                     setState(813)
                     try match(ObjectiveCParser.Tokens.VOID.rawValue)
+
                     break
                 default: break
                 }
@@ -4359,20 +4678,26 @@ open class ObjectiveCParser: Parser {
                     try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                     setState(817)
                     try typeVariableDeclaratorOrName()
+
                     setState(822)
                     try _errHandler.sync(self)
                     _la = try _input.LA(1)
                 }
+
             }
+
             setState(825)
             try match(ObjectiveCParser.Tokens.RP.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class TypeVariableDeclaratorOrNameContext: ParserRuleContext {
         open func typeVariableDeclarator() -> TypeVariableDeclaratorContext? {
             return getRuleContext(TypeVariableDeclaratorContext.self, 0)
@@ -4416,11 +4741,13 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(827)
                 try typeVariableDeclarator()
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(828)
                 try typeName()
+
                 break
             default: break
             }
@@ -4429,8 +4756,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class BlockExpressionContext: ParserRuleContext {
         open func BITXOR() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.BITXOR.rawValue, 0)
@@ -4484,6 +4813,7 @@ open class ObjectiveCParser: Parser {
             case 1:
                 setState(832)
                 try typeSpecifier()
+
                 break
             default: break
             }
@@ -4493,23 +4823,30 @@ open class ObjectiveCParser: Parser {
             if (Int64((_la - 99)) & ~0x3f) == 0 && ((Int64(1) << (_la - 99)) & 15) != 0 {
                 setState(835)
                 try nullabilitySpecifier()
+
             }
+
             setState(839)
             try _errHandler.sync(self)
             _la = try _input.LA(1)
             if _la == ObjectiveCParser.Tokens.LP.rawValue {
                 setState(838)
                 try blockParameters()
+
             }
+
             setState(841)
             try compoundStatement()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class MessageExpressionContext: ParserRuleContext {
         open func LBRACK() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, 0)
@@ -4557,13 +4894,16 @@ open class ObjectiveCParser: Parser {
             try messageSelector()
             setState(846)
             try match(ObjectiveCParser.Tokens.RBRACK.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ReceiverContext: ParserRuleContext {
         open func expression() -> ExpressionContext? {
             return getRuleContext(ExpressionContext.self, 0)
@@ -4601,11 +4941,13 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(848)
                 try expression(0)
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(849)
                 try genericTypeSpecifier()
+
                 break
             default: break
             }
@@ -4614,8 +4956,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class MessageSelectorContext: ParserRuleContext {
         open func selector() -> SelectorContext? { return getRuleContext(SelectorContext.self, 0) }
         open func keywordArgument() -> [KeywordArgumentContext] {
@@ -4659,6 +5003,7 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(852)
                 try selector()
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -4668,6 +5013,7 @@ open class ObjectiveCParser: Parser {
                 repeat {
                     setState(853)
                     try keywordArgument()
+
                     setState(856)
                     try _errHandler.sync(self)
                     _la = try _input.LA(1)
@@ -4675,6 +5021,7 @@ open class ObjectiveCParser: Parser {
                     && ((Int64(1) << _la) & 142_143_763_999_949_952) != 0
                     || (Int64((_la - 81)) & ~0x3f) == 0
                         && ((Int64(1) << (_la - 81)) & 4_611_703_885_491_150_775) != 0
+
                 break
             default: break
             }
@@ -4683,8 +5030,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class KeywordArgumentContext: ParserRuleContext {
         open func COLON() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.COLON.rawValue, 0)
@@ -4740,7 +5089,9 @@ open class ObjectiveCParser: Parser {
             {
                 setState(860)
                 try selector()
+
             }
+
             setState(863)
             try match(ObjectiveCParser.Tokens.COLON.rawValue)
             setState(864)
@@ -4753,17 +5104,21 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                 setState(866)
                 try keywordArgumentType()
+
                 setState(871)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class KeywordArgumentTypeContext: ParserRuleContext {
         open func expressions() -> ExpressionsContext? {
             return getRuleContext(ExpressionsContext.self, 0)
@@ -4819,6 +5174,7 @@ open class ObjectiveCParser: Parser {
             case 1:
                 setState(873)
                 try nullabilitySpecifier()
+
                 break
             default: break
             }
@@ -4832,14 +5188,18 @@ open class ObjectiveCParser: Parser {
                 try initializerList()
                 setState(878)
                 try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class SelectorExpressionContext: ParserRuleContext {
         open func SELECTOR() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.SELECTOR.rawValue, 0)
@@ -4885,13 +5245,16 @@ open class ObjectiveCParser: Parser {
             try selectorName()
             setState(885)
             try match(ObjectiveCParser.Tokens.RP.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class SelectorNameContext: ParserRuleContext {
         open func selector() -> [SelectorContext] { return getRuleContexts(SelectorContext.self) }
         open func selector(_ i: Int) -> SelectorContext? {
@@ -4938,6 +5301,7 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(887)
                 try selector()
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -4955,9 +5319,12 @@ open class ObjectiveCParser: Parser {
                     {
                         setState(888)
                         try selector()
+
                     }
+
                     setState(891)
                     try match(ObjectiveCParser.Tokens.COLON.rawValue)
+
                     setState(894)
                     try _errHandler.sync(self)
                     _la = try _input.LA(1)
@@ -4965,6 +5332,7 @@ open class ObjectiveCParser: Parser {
                     && ((Int64(1) << _la) & 142_143_763_999_949_952) != 0
                     || (Int64((_la - 81)) & ~0x3f) == 0
                         && ((Int64(1) << (_la - 81)) & 4_611_703_885_491_150_775) != 0
+
                 break
             default: break
             }
@@ -4973,8 +5341,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ProtocolExpressionContext: ParserRuleContext {
         open func PROTOCOL() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.PROTOCOL.rawValue, 0)
@@ -5020,13 +5390,16 @@ open class ObjectiveCParser: Parser {
             try protocolName()
             setState(901)
             try match(ObjectiveCParser.Tokens.RP.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class EncodeExpressionContext: ParserRuleContext {
         open func ENCODE() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.ENCODE.rawValue, 0)
@@ -5070,13 +5443,16 @@ open class ObjectiveCParser: Parser {
             try typeName()
             setState(906)
             try match(ObjectiveCParser.Tokens.RP.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class TypeVariableDeclaratorContext: ParserRuleContext {
         open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
             return getRuleContext(DeclarationSpecifiersContext.self, 0)
@@ -5118,13 +5494,16 @@ open class ObjectiveCParser: Parser {
             try declarationSpecifiers()
             setState(909)
             try declarator()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ThrowStatementContext: ParserRuleContext {
         open func THROW() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.THROW.rawValue, 0)
@@ -5177,6 +5556,7 @@ open class ObjectiveCParser: Parser {
                 try identifier()
                 setState(914)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -5184,6 +5564,7 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.THROW.rawValue)
                 setState(917)
                 try expression(0)
+
                 break
             default: break
             }
@@ -5192,8 +5573,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class TryBlockContext: ParserRuleContext {
         open var tryStatement: CompoundStatementContext!
         open var finallyStatement: CompoundStatementContext!
@@ -5247,12 +5630,14 @@ open class ObjectiveCParser: Parser {
                 let assignmentValue = try compoundStatement()
                 _localctx.castdown(TryBlockContext.self).tryStatement = assignmentValue
             }()
+
             setState(925)
             try _errHandler.sync(self)
             _la = try _input.LA(1)
             while _la == ObjectiveCParser.Tokens.CATCH.rawValue {
                 setState(922)
                 try catchStatement()
+
                 setState(927)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
@@ -5268,14 +5653,18 @@ open class ObjectiveCParser: Parser {
                     let assignmentValue = try compoundStatement()
                     _localctx.castdown(TryBlockContext.self).finallyStatement = assignmentValue
                 }()
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class CatchStatementContext: ParserRuleContext {
         open func CATCH() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.CATCH.rawValue, 0)
@@ -5326,13 +5715,16 @@ open class ObjectiveCParser: Parser {
             try match(ObjectiveCParser.Tokens.RP.rawValue)
             setState(936)
             try compoundStatement()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class SynchronizedStatementContext: ParserRuleContext {
         open func SYNCHRONIZED() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.SYNCHRONIZED.rawValue, 0)
@@ -5385,13 +5777,16 @@ open class ObjectiveCParser: Parser {
             try match(ObjectiveCParser.Tokens.RP.rawValue)
             setState(942)
             try compoundStatement()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class AutoreleaseStatementContext: ParserRuleContext {
         open func AUTORELEASEPOOL() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.AUTORELEASEPOOL.rawValue, 0)
@@ -5433,13 +5828,16 @@ open class ObjectiveCParser: Parser {
             try match(ObjectiveCParser.Tokens.AUTORELEASEPOOL.rawValue)
             setState(945)
             try compoundStatement()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class FunctionDeclarationContext: ParserRuleContext {
         open func functionSignature() -> FunctionSignatureContext? {
             return getRuleContext(FunctionSignatureContext.self, 0)
@@ -5481,13 +5879,16 @@ open class ObjectiveCParser: Parser {
             try functionSignature()
             setState(948)
             try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class FunctionDefinitionContext: ParserRuleContext {
         open func functionSignature() -> FunctionSignatureContext? {
             return getRuleContext(FunctionSignatureContext.self, 0)
@@ -5527,13 +5928,16 @@ open class ObjectiveCParser: Parser {
             try functionSignature()
             setState(951)
             try compoundStatement()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class FunctionSignatureContext: ParserRuleContext {
         open func identifier() -> IdentifierContext? {
             return getRuleContext(IdentifierContext.self, 0)
@@ -5584,11 +5988,13 @@ open class ObjectiveCParser: Parser {
             case 1:
                 setState(953)
                 try declarationSpecifiers()
+
                 break
             default: break
             }
             setState(956)
             try identifier()
+
             setState(957)
             try match(ObjectiveCParser.Tokens.LP.rawValue)
             setState(959)
@@ -5600,23 +6006,30 @@ open class ObjectiveCParser: Parser {
             {
                 setState(958)
                 try parameterList()
+
             }
+
             setState(961)
             try match(ObjectiveCParser.Tokens.RP.rawValue)
+
             setState(964)
             try _errHandler.sync(self)
             _la = try _input.LA(1)
             if _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue {
                 setState(963)
                 try attributeSpecifier()
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class AttributeContext: ParserRuleContext {
         open func attributeName() -> AttributeNameContext? {
             return getRuleContext(AttributeNameContext.self, 0)
@@ -5659,14 +6072,18 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.LP.rawValue {
                 setState(967)
                 try attributeParameters()
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class AttributeNameContext: ParserRuleContext {
         open func CONST() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.CONST.rawValue, 0)
@@ -5708,6 +6125,7 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(970)
                 try match(ObjectiveCParser.Tokens.CONST.rawValue)
+
                 break
             case .BOOL, .Class, .BYCOPY, .BYREF, .ID, .IMP, .IN, .INOUT, .ONEWAY, .OUT, .PROTOCOL_,
                 .SEL, .SELF, .SUPER, .ATOMIC, .NONATOMIC, .RETAIN, .AUTORELEASING_QUALIFIER, .BLOCK,
@@ -5719,6 +6137,7 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 2)
                 setState(971)
                 try identifier()
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -5727,8 +6146,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class AttributeParametersContext: ParserRuleContext {
         open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
         open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
@@ -5779,16 +6200,21 @@ open class ObjectiveCParser: Parser {
             {
                 setState(975)
                 try attributeParameterList()
+
             }
+
             setState(978)
             try match(ObjectiveCParser.Tokens.RP.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class AttributeParameterListContext: ParserRuleContext {
         open func attributeParameter() -> [AttributeParameterContext] {
             return getRuleContexts(AttributeParameterContext.self)
@@ -5843,17 +6269,21 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                 setState(982)
                 try attributeParameter()
+
                 setState(987)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class AttributeParameterContext: ParserRuleContext {
         open func attribute() -> AttributeContext? {
             return getRuleContext(AttributeContext.self, 0)
@@ -5899,21 +6329,25 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(988)
                 try attribute()
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(989)
                 try constant()
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
                 setState(990)
                 try stringLiteral()
+
                 break
             case 4:
                 try enterOuterAlt(_localctx, 4)
                 setState(991)
                 try attributeParameterAssignment()
+
                 break
             default: break
             }
@@ -5922,8 +6356,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class AttributeParameterAssignmentContext: ParserRuleContext {
         open func attributeName() -> [AttributeNameContext] {
             return getRuleContexts(AttributeNameContext.self)
@@ -5982,6 +6418,7 @@ open class ObjectiveCParser: Parser {
                 .FLOATING_POINT_LITERAL:
                 setState(996)
                 try constant()
+
                 break
             case .CONST, .BOOL, .Class, .BYCOPY, .BYREF, .ID, .IMP, .IN, .INOUT, .ONEWAY, .OUT,
                 .PROTOCOL_, .SEL, .SELF, .SUPER, .ATOMIC, .NONATOMIC, .RETAIN,
@@ -5992,20 +6429,26 @@ open class ObjectiveCParser: Parser {
                 .IB_OUTLET, .IB_OUTLET_COLLECTION, .IB_INSPECTABLE, .IB_DESIGNABLE, .IDENTIFIER:
                 setState(997)
                 try attributeName()
+
                 break
+
             case .STRING_START:
                 setState(998)
                 try stringLiteral()
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class DeclarationContext: ParserRuleContext {
         open func functionCallExpression() -> FunctionCallExpressionContext? {
             return getRuleContext(FunctionCallExpressionContext.self, 0)
@@ -6059,6 +6502,7 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(1001)
                 try functionCallExpression()
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -6066,21 +6510,25 @@ open class ObjectiveCParser: Parser {
                 try functionPointer()
                 setState(1003)
                 try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
                 setState(1005)
                 try enumDeclaration()
+
                 break
             case 4:
                 try enterOuterAlt(_localctx, 4)
                 setState(1006)
                 try varDeclaration()
+
                 break
             case 5:
                 try enterOuterAlt(_localctx, 5)
                 setState(1007)
                 try typedefDeclaration()
+
                 break
             default: break
             }
@@ -6089,8 +6537,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class FunctionPointerContext: ParserRuleContext {
         open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
             return getRuleContext(DeclarationSpecifiersContext.self, 0)
@@ -6156,7 +6606,9 @@ open class ObjectiveCParser: Parser {
             {
                 setState(1013)
                 try identifier()
+
             }
+
             setState(1016)
             try match(ObjectiveCParser.Tokens.RP.rawValue)
             setState(1017)
@@ -6170,16 +6622,21 @@ open class ObjectiveCParser: Parser {
             {
                 setState(1018)
                 try functionPointerParameterList()
+
             }
+
             setState(1021)
             try match(ObjectiveCParser.Tokens.RP.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class FunctionPointerParameterListContext: ParserRuleContext {
         open func functionPointerParameterDeclarationList()
             -> FunctionPointerParameterDeclarationListContext?
@@ -6233,14 +6690,18 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                 setState(1025)
                 try match(ObjectiveCParser.Tokens.ELIPSIS.rawValue)
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class FunctionPointerParameterDeclarationListContext: ParserRuleContext {
         open func functionPointerParameterDeclaration()
             -> [FunctionPointerParameterDeclarationContext]
@@ -6298,18 +6759,22 @@ open class ObjectiveCParser: Parser {
                     try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                     setState(1030)
                     try functionPointerParameterDeclaration()
+
                 }
                 setState(1035)
                 try _errHandler.sync(self)
                 _alt = try getInterpreter().adaptivePredict(_input, 114, _ctx)
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class FunctionPointerParameterDeclarationContext: ParserRuleContext {
         open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
             return getRuleContext(DeclarationSpecifiersContext.self, 0)
@@ -6366,10 +6831,12 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1036)
                     try declarationSpecifiers()
+
                     break
                 case 2:
                     setState(1037)
                     try functionPointer()
+
                     break
                 default: break
                 }
@@ -6383,12 +6850,15 @@ open class ObjectiveCParser: Parser {
                 {
                     setState(1040)
                     try declarator()
+
                 }
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(1043)
                 try match(ObjectiveCParser.Tokens.VOID.rawValue)
+
                 break
             default: break
             }
@@ -6397,8 +6867,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class FunctionCallExpressionContext: ParserRuleContext {
         open func identifier() -> IdentifierContext? {
             return getRuleContext(IdentifierContext.self, 0)
@@ -6454,7 +6926,9 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue {
                 setState(1046)
                 try attributeSpecifier()
+
             }
+
             setState(1049)
             try identifier()
             setState(1051)
@@ -6463,7 +6937,9 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue {
                 setState(1050)
                 try attributeSpecifier()
+
             }
+
             setState(1053)
             try match(ObjectiveCParser.Tokens.LP.rawValue)
             setState(1054)
@@ -6472,13 +6948,16 @@ open class ObjectiveCParser: Parser {
             try match(ObjectiveCParser.Tokens.RP.rawValue)
             setState(1056)
             try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class EnumDeclarationContext: ParserRuleContext {
         open func enumSpecifier() -> EnumSpecifierContext? {
             return getRuleContext(EnumSpecifierContext.self, 0)
@@ -6530,14 +7009,18 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue {
                 setState(1058)
                 try attributeSpecifier()
+
             }
+
             setState(1062)
             try _errHandler.sync(self)
             _la = try _input.LA(1)
             if _la == ObjectiveCParser.Tokens.TYPEDEF.rawValue {
                 setState(1061)
                 try match(ObjectiveCParser.Tokens.TYPEDEF.rawValue)
+
             }
+
             setState(1064)
             try enumSpecifier()
             setState(1066)
@@ -6549,16 +7032,21 @@ open class ObjectiveCParser: Parser {
             {
                 setState(1065)
                 try identifier()
+
             }
+
             setState(1068)
             try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class VarDeclarationContext: ParserRuleContext {
         open func SEMI() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0)
@@ -6605,22 +7093,27 @@ open class ObjectiveCParser: Parser {
                 try declarationSpecifiers()
                 setState(1071)
                 try initDeclaratorList()
+
                 break
             case 2:
                 setState(1073)
                 try declarationSpecifiers()
+
                 break
             default: break
             }
             setState(1076)
             try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class TypedefDeclarationContext: ParserRuleContext {
         open func TYPEDEF() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.TYPEDEF.rawValue, 0)
@@ -6680,7 +7173,9 @@ open class ObjectiveCParser: Parser {
                 if _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue {
                     setState(1078)
                     try attributeSpecifier()
+
                 }
+
                 setState(1081)
                 try match(ObjectiveCParser.Tokens.TYPEDEF.rawValue)
                 setState(1086)
@@ -6691,10 +7186,12 @@ open class ObjectiveCParser: Parser {
                     try declarationSpecifiers()
                     setState(1083)
                     try typeDeclaratorList()
+
                     break
                 case 2:
                     setState(1085)
                     try declarationSpecifiers()
+
                     break
                 default: break
                 }
@@ -6707,9 +7204,12 @@ open class ObjectiveCParser: Parser {
                 {
                     setState(1088)
                     try macro()
+
                 }
+
                 setState(1091)
                 try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -6719,13 +7219,16 @@ open class ObjectiveCParser: Parser {
                 if _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue {
                     setState(1093)
                     try attributeSpecifier()
+
                 }
+
                 setState(1096)
                 try match(ObjectiveCParser.Tokens.TYPEDEF.rawValue)
                 setState(1097)
                 try functionPointer()
                 setState(1098)
                 try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                 break
             default: break
             }
@@ -6734,8 +7237,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class TypeDeclaratorListContext: ParserRuleContext {
         open func declarator() -> [DeclaratorContext] {
             return getRuleContexts(DeclaratorContext.self)
@@ -6788,17 +7293,21 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                 setState(1104)
                 try declarator()
+
                 setState(1109)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class DeclarationSpecifiersContext: ParserRuleContext {
         open func storageClassSpecifier() -> [StorageClassSpecifierContext] {
             return getRuleContexts(StorageClassSpecifierContext.self)
@@ -6891,37 +7400,46 @@ open class ObjectiveCParser: Parser {
                     case 1:
                         setState(1110)
                         try storageClassSpecifier()
+
                         break
                     case 2:
                         setState(1111)
                         try attributeSpecifier()
+
                         break
                     case 3:
                         setState(1112)
                         try arcBehaviourSpecifier()
+
                         break
                     case 4:
                         setState(1113)
                         try nullabilitySpecifier()
+
                         break
                     case 5:
                         setState(1114)
                         try ibOutletQualifier()
+
                         break
                     case 6:
                         setState(1115)
                         try typePrefix()
+
                         break
                     case 7:
                         setState(1116)
                         try typeQualifier()
+
                         break
                     case 8:
                         setState(1117)
                         try typeSpecifier()
+
                         break
                     default: break
                     }
+
                     break
                 default: throw ANTLRException.recognition(e: NoViableAltException(self))
                 }
@@ -6929,13 +7447,16 @@ open class ObjectiveCParser: Parser {
                 try _errHandler.sync(self)
                 _alt = try getInterpreter().adaptivePredict(_input, 131, _ctx)
             } while _alt != 2 && _alt != ATN.INVALID_ALT_NUMBER
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class AttributeSpecifierContext: ParserRuleContext {
         open func ATTRIBUTE() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.ATTRIBUTE.rawValue, 0)
@@ -7005,6 +7526,7 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                 setState(1127)
                 try attribute()
+
                 setState(1132)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
@@ -7013,13 +7535,16 @@ open class ObjectiveCParser: Parser {
             try match(ObjectiveCParser.Tokens.RP.rawValue)
             setState(1134)
             try match(ObjectiveCParser.Tokens.RP.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class InitDeclaratorListContext: ParserRuleContext {
         open func initDeclarator() -> [InitDeclaratorContext] {
             return getRuleContexts(InitDeclaratorContext.self)
@@ -7072,17 +7597,21 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                 setState(1138)
                 try initDeclarator()
+
                 setState(1143)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class InitDeclaratorContext: ParserRuleContext {
         open func declarator() -> DeclaratorContext? {
             return getRuleContext(DeclaratorContext.self, 0)
@@ -7132,14 +7661,18 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue)
                 setState(1146)
                 try initializer()
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class StructOrUnionSpecifierContext: ParserRuleContext {
         open func STRUCT() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.STRUCT.rawValue, 0)
@@ -7215,6 +7748,7 @@ open class ObjectiveCParser: Parser {
             while _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue {
                 setState(1150)
                 try attributeSpecifier()
+
                 setState(1155)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
@@ -7225,6 +7759,7 @@ open class ObjectiveCParser: Parser {
             case 1:
                 setState(1156)
                 try identifier()
+
                 break
             case 2:
                 setState(1158)
@@ -7236,7 +7771,9 @@ open class ObjectiveCParser: Parser {
                 {
                     setState(1157)
                     try identifier()
+
                 }
+
                 setState(1160)
                 try match(ObjectiveCParser.Tokens.LBRACE.rawValue)
                 setState(1162)
@@ -7245,6 +7782,7 @@ open class ObjectiveCParser: Parser {
                 repeat {
                     setState(1161)
                     try fieldDeclaration()
+
                     setState(1164)
                     try _errHandler.sync(self)
                     _la = try _input.LA(1)
@@ -7254,16 +7792,20 @@ open class ObjectiveCParser: Parser {
                         && ((Int64(1) << (_la - 81)) & 17_867_063_951_359) != 0
                 setState(1166)
                 try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
+
                 break
             default: break
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class FieldDeclarationContext: ParserRuleContext {
         open func specifierQualifierList() -> SpecifierQualifierListContext? {
             return getRuleContext(SpecifierQualifierListContext.self, 0)
@@ -7324,9 +7866,12 @@ open class ObjectiveCParser: Parser {
                 {
                     setState(1172)
                     try macro()
+
                 }
+
                 setState(1175)
                 try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -7334,6 +7879,7 @@ open class ObjectiveCParser: Parser {
                 try functionPointer()
                 setState(1178)
                 try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                 break
             default: break
             }
@@ -7342,8 +7888,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class SpecifierQualifierListContext: ParserRuleContext {
         open func arcBehaviourSpecifier() -> [ArcBehaviourSpecifierContext] {
             return getRuleContexts(ArcBehaviourSpecifierContext.self)
@@ -7424,29 +7972,36 @@ open class ObjectiveCParser: Parser {
                     case 1:
                         setState(1182)
                         try arcBehaviourSpecifier()
+
                         break
                     case 2:
                         setState(1183)
                         try nullabilitySpecifier()
+
                         break
                     case 3:
                         setState(1184)
                         try ibOutletQualifier()
+
                         break
                     case 4:
                         setState(1185)
                         try typePrefix()
+
                         break
                     case 5:
                         setState(1186)
                         try typeQualifier()
+
                         break
                     case 6:
                         setState(1187)
                         try typeSpecifier()
+
                         break
                     default: break
                     }
+
                     break
                 default: throw ANTLRException.recognition(e: NoViableAltException(self))
                 }
@@ -7454,13 +8009,16 @@ open class ObjectiveCParser: Parser {
                 try _errHandler.sync(self)
                 _alt = try getInterpreter().adaptivePredict(_input, 142, _ctx)
             } while _alt != 2 && _alt != ATN.INVALID_ALT_NUMBER
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class IbOutletQualifierContext: ParserRuleContext {
         open func IB_OUTLET_COLLECTION() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue, 0)
@@ -7513,11 +8071,14 @@ open class ObjectiveCParser: Parser {
                 try identifier()
                 setState(1195)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
+
                 break
+
             case .IB_OUTLET:
                 try enterOuterAlt(_localctx, 2)
                 setState(1197)
                 try match(ObjectiveCParser.Tokens.IB_OUTLET.rawValue)
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -7526,8 +8087,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ArcBehaviourSpecifierContext: ParserRuleContext {
         open func WEAK_QUALIFIER() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.WEAK_QUALIFIER.rawValue, 0)
@@ -7580,13 +8143,16 @@ open class ObjectiveCParser: Parser {
                 _errHandler.reportMatch(self)
                 try consume()
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class NullabilitySpecifierContext: ParserRuleContext {
         open func NULL_UNSPECIFIED() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue, 0)
@@ -7639,13 +8205,16 @@ open class ObjectiveCParser: Parser {
                 _errHandler.reportMatch(self)
                 try consume()
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class StorageClassSpecifierContext: ParserRuleContext {
         open func AUTO() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.AUTO.rawValue, 0)
@@ -7698,13 +8267,16 @@ open class ObjectiveCParser: Parser {
                 _errHandler.reportMatch(self)
                 try consume()
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class TypePrefixContext: ParserRuleContext {
         open func BRIDGE() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.BRIDGE.rawValue, 0)
@@ -7766,13 +8338,16 @@ open class ObjectiveCParser: Parser {
                 _errHandler.reportMatch(self)
                 try consume()
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class TypeQualifierContext: ParserRuleContext {
         open func CONST() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.CONST.rawValue, 0)
@@ -7820,21 +8395,27 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(1208)
                 try match(ObjectiveCParser.Tokens.CONST.rawValue)
+
                 break
+
             case .VOLATILE:
                 try enterOuterAlt(_localctx, 2)
                 setState(1209)
                 try match(ObjectiveCParser.Tokens.VOLATILE.rawValue)
+
                 break
+
             case .RESTRICT:
                 try enterOuterAlt(_localctx, 3)
                 setState(1210)
                 try match(ObjectiveCParser.Tokens.RESTRICT.rawValue)
+
                 break
             case .BYCOPY, .BYREF, .IN, .INOUT, .ONEWAY, .OUT:
                 try enterOuterAlt(_localctx, 4)
                 setState(1211)
                 try protocolQualifier()
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -7843,8 +8424,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ProtocolQualifierContext: ParserRuleContext {
         open func IN() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IN.rawValue, 0) }
         open func OUT() -> TerminalNode? {
@@ -7899,13 +8482,16 @@ open class ObjectiveCParser: Parser {
                 _errHandler.reportMatch(self)
                 try consume()
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class TypeSpecifierContext: ParserRuleContext {
         open func scalarTypeSpecifier() -> ScalarTypeSpecifierContext? {
             return getRuleContext(ScalarTypeSpecifierContext.self, 0)
@@ -7969,14 +8555,17 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1217)
                     try pointer()
+
                     break
                 default: break
                 }
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(1220)
                 try typeofExpression()
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
@@ -7986,6 +8575,7 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1221)
                     try match(ObjectiveCParser.Tokens.KINDOF.rawValue)
+
                     break
                 default: break
                 }
@@ -7997,9 +8587,11 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1225)
                     try pointer()
+
                     break
                 default: break
                 }
+
                 break
             case 4:
                 try enterOuterAlt(_localctx, 4)
@@ -8011,14 +8603,17 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1229)
                     try pointer()
+
                     break
                 default: break
                 }
+
                 break
             case 5:
                 try enterOuterAlt(_localctx, 5)
                 setState(1232)
                 try enumSpecifier()
+
                 break
             case 6:
                 try enterOuterAlt(_localctx, 6)
@@ -8028,6 +8623,7 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1233)
                     try match(ObjectiveCParser.Tokens.KINDOF.rawValue)
+
                     break
                 default: break
                 }
@@ -8039,9 +8635,11 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1237)
                     try pointer()
+
                     break
                 default: break
                 }
+
                 break
             default: break
             }
@@ -8050,8 +8648,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ScalarTypeSpecifierContext: ParserRuleContext {
         open func VOID() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.VOID.rawValue, 0)
@@ -8119,13 +8719,16 @@ open class ObjectiveCParser: Parser {
                 _errHandler.reportMatch(self)
                 try consume()
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class TypeofExpressionContext: ParserRuleContext {
         open func TYPEOF() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.TYPEOF.rawValue, 0)
@@ -8165,19 +8768,23 @@ open class ObjectiveCParser: Parser {
             try enterOuterAlt(_localctx, 1)
             setState(1244)
             try match(ObjectiveCParser.Tokens.TYPEOF.rawValue)
+
             setState(1245)
             try match(ObjectiveCParser.Tokens.LP.rawValue)
             setState(1246)
             try expression(0)
             setState(1247)
             try match(ObjectiveCParser.Tokens.RP.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class FieldDeclaratorListContext: ParserRuleContext {
         open func fieldDeclarator() -> [FieldDeclaratorContext] {
             return getRuleContexts(FieldDeclaratorContext.self)
@@ -8232,17 +8839,21 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                 setState(1251)
                 try fieldDeclarator()
+
                 setState(1256)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class FieldDeclaratorContext: ParserRuleContext {
         open func declarator() -> DeclaratorContext? {
             return getRuleContext(DeclaratorContext.self, 0)
@@ -8286,6 +8897,7 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(1257)
                 try declarator()
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -8299,11 +8911,14 @@ open class ObjectiveCParser: Parser {
                 {
                     setState(1258)
                     try declarator()
+
                 }
+
                 setState(1261)
                 try match(ObjectiveCParser.Tokens.COLON.rawValue)
                 setState(1262)
                 try constant()
+
                 break
             default: break
             }
@@ -8312,8 +8927,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class EnumSpecifierContext: ParserRuleContext {
         open func ENUM() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.ENUM.rawValue, 0)
@@ -8397,11 +9014,14 @@ open class ObjectiveCParser: Parser {
                     {
                         setState(1266)
                         try identifier()
+
                     }
+
                     setState(1269)
                     try match(ObjectiveCParser.Tokens.COLON.rawValue)
                     setState(1270)
                     try typeName()
+
                     break
                 default: break
                 }
@@ -8428,10 +9048,13 @@ open class ObjectiveCParser: Parser {
                         try enumeratorList()
                         setState(1276)
                         try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
+
                         break
                     default: break
                     }
+
                     break
+
                 case .LBRACE:
                     setState(1280)
                     try match(ObjectiveCParser.Tokens.LBRACE.rawValue)
@@ -8439,9 +9062,11 @@ open class ObjectiveCParser: Parser {
                     try enumeratorList()
                     setState(1282)
                     try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
+
                     break
                 default: throw ANTLRException.recognition(e: NoViableAltException(self))
                 }
+
                 break
             case .NS_ENUM, .NS_OPTIONS:
                 try enterOuterAlt(_localctx, 2)
@@ -8471,6 +9096,7 @@ open class ObjectiveCParser: Parser {
                 try enumeratorList()
                 setState(1294)
                 try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -8479,8 +9105,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class EnumeratorListContext: ParserRuleContext {
         open func enumerator() -> [EnumeratorContext] {
             return getRuleContexts(EnumeratorContext.self)
@@ -8535,6 +9163,7 @@ open class ObjectiveCParser: Parser {
                     try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                     setState(1300)
                     try enumerator()
+
                 }
                 setState(1305)
                 try _errHandler.sync(self)
@@ -8546,14 +9175,18 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.COMMA.rawValue {
                 setState(1306)
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class EnumeratorContext: ParserRuleContext {
         open func enumeratorIdentifier() -> EnumeratorIdentifierContext? {
             return getRuleContext(EnumeratorIdentifierContext.self, 0)
@@ -8603,14 +9236,18 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue)
                 setState(1311)
                 try expression(0)
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class EnumeratorIdentifierContext: ParserRuleContext {
         open func identifier() -> IdentifierContext? {
             return getRuleContext(IdentifierContext.self, 0)
@@ -8647,13 +9284,16 @@ open class ObjectiveCParser: Parser {
             try enterOuterAlt(_localctx, 1)
             setState(1314)
             try identifier()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class DirectDeclaratorContext: ParserRuleContext {
         open func identifier() -> IdentifierContext? {
             return getRuleContext(IdentifierContext.self, 0)
@@ -8730,7 +9370,9 @@ open class ObjectiveCParser: Parser {
                     .IB_DESIGNABLE, .IDENTIFIER:
                     setState(1316)
                     try identifier()
+
                     break
+
                 case .LP:
                     setState(1317)
                     try match(ObjectiveCParser.Tokens.LP.rawValue)
@@ -8738,6 +9380,7 @@ open class ObjectiveCParser: Parser {
                     try declarator()
                     setState(1319)
                     try match(ObjectiveCParser.Tokens.RP.rawValue)
+
                     break
                 default: throw ANTLRException.recognition(e: NoViableAltException(self))
                 }
@@ -8747,6 +9390,7 @@ open class ObjectiveCParser: Parser {
                 while _la == ObjectiveCParser.Tokens.LBRACK.rawValue {
                     setState(1323)
                     try declaratorSuffix()
+
                     setState(1328)
                     try _errHandler.sync(self)
                     _la = try _input.LA(1)
@@ -8757,9 +9401,11 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1329)
                     try attributeSpecifier()
+
                     break
                 default: break
                 }
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -8773,6 +9419,7 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1334)
                     try nullabilitySpecifier()
+
                     break
                 default: break
                 }
@@ -8785,11 +9432,14 @@ open class ObjectiveCParser: Parser {
                 {
                     setState(1337)
                     try identifier()
+
                 }
+
                 setState(1340)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
                 setState(1341)
                 try blockParameters()
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
@@ -8803,6 +9453,7 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1344)
                     try nullabilitySpecifier()
+
                     break
                 default: break
                 }
@@ -8815,11 +9466,14 @@ open class ObjectiveCParser: Parser {
                 {
                     setState(1347)
                     try identifier()
+
                 }
+
                 setState(1350)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
                 setState(1351)
                 try blockParameters()
+
                 break
             default: break
             }
@@ -8828,8 +9482,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class DeclaratorSuffixContext: ParserRuleContext {
         open func LBRACK() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, 0)
@@ -8882,16 +9538,21 @@ open class ObjectiveCParser: Parser {
             {
                 setState(1355)
                 try constantExpression()
+
             }
+
             setState(1358)
             try match(ObjectiveCParser.Tokens.RBRACK.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ParameterListContext: ParserRuleContext {
         open func parameterDeclarationList() -> ParameterDeclarationListContext? {
             return getRuleContext(ParameterDeclarationListContext.self, 0)
@@ -8941,14 +9602,18 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                 setState(1362)
                 try match(ObjectiveCParser.Tokens.ELIPSIS.rawValue)
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class PointerContext: ParserRuleContext {
         open func MUL() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.MUL.rawValue, 0)
@@ -8989,6 +9654,7 @@ open class ObjectiveCParser: Parser {
             case 1:
                 setState(1366)
                 try declarationSpecifiers()
+
                 break
             default: break
             }
@@ -8998,16 +9664,20 @@ open class ObjectiveCParser: Parser {
             case 1:
                 setState(1369)
                 try pointer()
+
                 break
             default: break
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class MacroContext: ParserRuleContext {
         open func identifier() -> IdentifierContext? {
             return getRuleContext(IdentifierContext.self, 0)
@@ -9069,20 +9739,25 @@ open class ObjectiveCParser: Parser {
                     try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                     setState(1376)
                     try primaryExpression()
+
                     setState(1381)
                     try _errHandler.sync(self)
                     _la = try _input.LA(1)
                 }
                 setState(1382)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ArrayInitializerContext: ParserRuleContext {
         open func LBRACE() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0)
@@ -9154,6 +9829,7 @@ open class ObjectiveCParser: Parser {
                         try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                         setState(1389)
                         try expression(0)
+
                     }
                     setState(1394)
                     try _errHandler.sync(self)
@@ -9165,17 +9841,23 @@ open class ObjectiveCParser: Parser {
                 if _la == ObjectiveCParser.Tokens.COMMA.rawValue {
                     setState(1395)
                     try match(ObjectiveCParser.Tokens.COMMA.rawValue)
+
                 }
+
             }
+
             setState(1400)
             try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class StructInitializerContext: ParserRuleContext {
         open func LBRACE() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0)
@@ -9244,6 +9926,7 @@ open class ObjectiveCParser: Parser {
                         try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                         setState(1405)
                         try structInitializerItem()
+
                     }
                     setState(1410)
                     try _errHandler.sync(self)
@@ -9255,17 +9938,23 @@ open class ObjectiveCParser: Parser {
                 if _la == ObjectiveCParser.Tokens.COMMA.rawValue {
                     setState(1411)
                     try match(ObjectiveCParser.Tokens.COMMA.rawValue)
+
                 }
+
             }
+
             setState(1416)
             try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class StructInitializerItemContext: ParserRuleContext {
         open func DOT() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.DOT.rawValue, 0)
@@ -9317,16 +10006,19 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.DOT.rawValue)
                 setState(1419)
                 try expression(0)
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(1420)
                 try structInitializer()
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
                 setState(1421)
                 try arrayInitializer()
+
                 break
             default: break
             }
@@ -9335,8 +10027,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class InitializerListContext: ParserRuleContext {
         open func initializer() -> [InitializerContext] {
             return getRuleContexts(InitializerContext.self)
@@ -9391,6 +10085,7 @@ open class ObjectiveCParser: Parser {
                     try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                     setState(1426)
                     try initializer()
+
                 }
                 setState(1431)
                 try _errHandler.sync(self)
@@ -9402,14 +10097,18 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.COMMA.rawValue {
                 setState(1432)
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class TypeNameContext: ParserRuleContext {
         open func specifierQualifierList() -> SpecifierQualifierListContext? {
             return getRuleContext(SpecifierQualifierListContext.self, 0)
@@ -9459,12 +10158,15 @@ open class ObjectiveCParser: Parser {
                 {
                     setState(1436)
                     try abstractDeclarator()
+
                 }
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(1439)
                 try blockType()
+
                 break
             default: break
             }
@@ -9473,8 +10175,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class AbstractDeclaratorContext: ParserRuleContext {
         open func pointer() -> PointerContext? { return getRuleContext(PointerContext.self, 0) }
         open func abstractDeclarator() -> AbstractDeclaratorContext? {
@@ -9549,8 +10253,11 @@ open class ObjectiveCParser: Parser {
                 {
                     setState(1443)
                     try abstractDeclarator()
+
                 }
+
                 break
+
             case .LP:
                 try enterOuterAlt(_localctx, 2)
                 setState(1446)
@@ -9563,7 +10270,9 @@ open class ObjectiveCParser: Parser {
                 {
                     setState(1447)
                     try abstractDeclarator()
+
                 }
+
                 setState(1450)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
                 setState(1452)
@@ -9572,12 +10281,15 @@ open class ObjectiveCParser: Parser {
                 repeat {
                     setState(1451)
                     try abstractDeclaratorSuffix()
+
                     setState(1454)
                     try _errHandler.sync(self)
                     _la = try _input.LA(1)
                 } while _la == ObjectiveCParser.Tokens.LP.rawValue
                     || _la == ObjectiveCParser.Tokens.LBRACK.rawValue
+
                 break
+
             case .LBRACK:
                 try enterOuterAlt(_localctx, 3)
                 setState(1461)
@@ -9598,13 +10310,17 @@ open class ObjectiveCParser: Parser {
                     {
                         setState(1457)
                         try constantExpression()
+
                     }
+
                     setState(1460)
                     try match(ObjectiveCParser.Tokens.RBRACK.rawValue)
+
                     setState(1463)
                     try _errHandler.sync(self)
                     _la = try _input.LA(1)
                 } while _la == ObjectiveCParser.Tokens.LBRACK.rawValue
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -9613,8 +10329,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class AbstractDeclaratorSuffixContext: ParserRuleContext {
         open func LBRACK() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, 0)
@@ -9680,10 +10398,14 @@ open class ObjectiveCParser: Parser {
                 {
                     setState(1468)
                     try constantExpression()
+
                 }
+
                 setState(1471)
                 try match(ObjectiveCParser.Tokens.RBRACK.rawValue)
+
                 break
+
             case .LP:
                 try enterOuterAlt(_localctx, 2)
                 setState(1472)
@@ -9697,9 +10419,12 @@ open class ObjectiveCParser: Parser {
                 {
                     setState(1473)
                     try parameterDeclarationList()
+
                 }
+
                 setState(1476)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -9708,8 +10433,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ParameterDeclarationListContext: ParserRuleContext {
         open func parameterDeclaration() -> [ParameterDeclarationContext] {
             return getRuleContexts(ParameterDeclarationContext.self)
@@ -9767,18 +10494,22 @@ open class ObjectiveCParser: Parser {
                     try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                     setState(1481)
                     try parameterDeclaration()
+
                 }
                 setState(1486)
                 try _errHandler.sync(self)
                 _alt = try getInterpreter().adaptivePredict(_input, 197, _ctx)
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ParameterDeclarationContext: ParserRuleContext {
         open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
             return getRuleContext(DeclarationSpecifiersContext.self, 0)
@@ -9830,16 +10561,19 @@ open class ObjectiveCParser: Parser {
                 try declarationSpecifiers()
                 setState(1488)
                 try declarator()
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(1490)
                 try functionPointer()
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
                 setState(1491)
                 try match(ObjectiveCParser.Tokens.VOID.rawValue)
+
                 break
             default: break
             }
@@ -9848,8 +10582,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class DeclaratorContext: ParserRuleContext {
         open func directDeclarator() -> DirectDeclaratorContext? {
             return getRuleContext(DirectDeclaratorContext.self, 0)
@@ -9890,16 +10626,21 @@ open class ObjectiveCParser: Parser {
             if _la == ObjectiveCParser.Tokens.MUL.rawValue {
                 setState(1494)
                 try pointer()
+
             }
+
             setState(1497)
             try directDeclarator()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class StatementContext: ParserRuleContext {
         open func labeledStatement() -> LabeledStatementContext? {
             return getRuleContext(LabeledStatementContext.self, 0)
@@ -9970,9 +10711,11 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1500)
                     try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                     break
                 default: break
                 }
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -9984,9 +10727,11 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1504)
                     try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                     break
                 default: break
                 }
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
@@ -9998,9 +10743,11 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1508)
                     try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                     break
                 default: break
                 }
+
                 break
             case 4:
                 try enterOuterAlt(_localctx, 4)
@@ -10012,9 +10759,11 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1512)
                     try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                     break
                 default: break
                 }
+
                 break
             case 5:
                 try enterOuterAlt(_localctx, 5)
@@ -10022,6 +10771,7 @@ open class ObjectiveCParser: Parser {
                 try jumpStatement()
                 setState(1516)
                 try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                 break
             case 6:
                 try enterOuterAlt(_localctx, 6)
@@ -10033,9 +10783,11 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1519)
                     try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                     break
                 default: break
                 }
+
                 break
             case 7:
                 try enterOuterAlt(_localctx, 7)
@@ -10047,9 +10799,11 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1523)
                     try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                     break
                 default: break
                 }
+
                 break
             case 8:
                 try enterOuterAlt(_localctx, 8)
@@ -10057,6 +10811,7 @@ open class ObjectiveCParser: Parser {
                 try throwStatement()
                 setState(1527)
                 try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                 break
             case 9:
                 try enterOuterAlt(_localctx, 9)
@@ -10068,9 +10823,11 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1530)
                     try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                     break
                 default: break
                 }
+
                 break
             case 10:
                 try enterOuterAlt(_localctx, 10)
@@ -10078,11 +10835,13 @@ open class ObjectiveCParser: Parser {
                 try expressions()
                 setState(1534)
                 try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                 break
             case 11:
                 try enterOuterAlt(_localctx, 11)
                 setState(1536)
                 try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
                 break
             default: break
             }
@@ -10091,8 +10850,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class LabeledStatementContext: ParserRuleContext {
         open func identifier() -> IdentifierContext? {
             return getRuleContext(IdentifierContext.self, 0)
@@ -10137,13 +10898,16 @@ open class ObjectiveCParser: Parser {
             try match(ObjectiveCParser.Tokens.COLON.rawValue)
             setState(1541)
             try statement()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class RangeExpressionContext: ParserRuleContext {
         open func expression() -> [ExpressionContext] {
             return getRuleContexts(ExpressionContext.self)
@@ -10193,14 +10957,18 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.ELIPSIS.rawValue)
                 setState(1545)
                 try expression(0)
+
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class CompoundStatementContext: ParserRuleContext {
         open func LBRACE() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0)
@@ -10266,26 +11034,32 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1549)
                     try declaration()
+
                     break
                 case 2:
                     setState(1550)
                     try statement()
+
                     break
                 default: break
                 }
+
                 setState(1555)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
             setState(1556)
             try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class SelectionStatementContext: ParserRuleContext {
         open var ifBody: StatementContext!
         open var elseBody: StatementContext!
@@ -10352,6 +11126,7 @@ open class ObjectiveCParser: Parser {
                     let assignmentValue = try statement()
                     _localctx.castdown(SelectionStatementContext.self).ifBody = assignmentValue
                 }()
+
                 setState(1565)
                 try _errHandler.sync(self)
                 switch try getInterpreter().adaptivePredict(_input, 211, _ctx) {
@@ -10364,14 +11139,18 @@ open class ObjectiveCParser: Parser {
                         _localctx.castdown(SelectionStatementContext.self).elseBody =
                             assignmentValue
                     }()
+
                     break
                 default: break
                 }
+
                 break
+
             case .SWITCH:
                 try enterOuterAlt(_localctx, 2)
                 setState(1567)
                 try switchStatement()
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -10380,8 +11159,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class SwitchStatementContext: ParserRuleContext {
         open func SWITCH() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.SWITCH.rawValue, 0)
@@ -10432,13 +11213,16 @@ open class ObjectiveCParser: Parser {
             try match(ObjectiveCParser.Tokens.RP.rawValue)
             setState(1574)
             try switchBlock()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class SwitchBlockContext: ParserRuleContext {
         open func LBRACE() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.LBRACE.rawValue, 0)
@@ -10491,19 +11275,23 @@ open class ObjectiveCParser: Parser {
             {
                 setState(1577)
                 try switchSection()
+
                 setState(1582)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
             setState(1583)
             try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class SwitchSectionContext: ParserRuleContext {
         open func switchLabel() -> [SwitchLabelContext] {
             return getRuleContexts(SwitchLabelContext.self)
@@ -10552,6 +11340,7 @@ open class ObjectiveCParser: Parser {
             repeat {
                 setState(1585)
                 try switchLabel()
+
                 setState(1588)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
@@ -10563,6 +11352,7 @@ open class ObjectiveCParser: Parser {
             repeat {
                 setState(1590)
                 try statement()
+
                 setState(1593)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
@@ -10572,13 +11362,16 @@ open class ObjectiveCParser: Parser {
                     && ((Int64(1) << (_la - 69)) & -6_123_769_594_089_079_423) != 0
                 || (Int64((_la - 136)) & ~0x3f) == 0
                     && ((Int64(1) << (_la - 136)) & 4_363_692_523_569) != 0
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class SwitchLabelContext: ParserRuleContext {
         open func CASE() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.CASE.rawValue, 0)
@@ -10634,6 +11427,7 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1596)
                     try rangeExpression()
+
                     break
                 case 2:
                     setState(1597)
@@ -10642,18 +11436,22 @@ open class ObjectiveCParser: Parser {
                     try rangeExpression()
                     setState(1599)
                     try match(ObjectiveCParser.Tokens.RP.rawValue)
+
                     break
                 default: break
                 }
                 setState(1603)
                 try match(ObjectiveCParser.Tokens.COLON.rawValue)
+
                 break
+
             case .DEFAULT:
                 try enterOuterAlt(_localctx, 2)
                 setState(1605)
                 try match(ObjectiveCParser.Tokens.DEFAULT.rawValue)
                 setState(1606)
                 try match(ObjectiveCParser.Tokens.COLON.rawValue)
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -10662,8 +11460,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class IterationStatementContext: ParserRuleContext {
         open func whileStatement() -> WhileStatementContext? {
             return getRuleContext(WhileStatementContext.self, 0)
@@ -10711,21 +11511,25 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(1609)
                 try whileStatement()
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(1610)
                 try doStatement()
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
                 setState(1611)
                 try forStatement()
+
                 break
             case 4:
                 try enterOuterAlt(_localctx, 4)
                 setState(1612)
                 try forInStatement()
+
                 break
             default: break
             }
@@ -10734,8 +11538,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class WhileStatementContext: ParserRuleContext {
         open func WHILE() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.WHILE.rawValue, 0)
@@ -10786,13 +11592,16 @@ open class ObjectiveCParser: Parser {
             try match(ObjectiveCParser.Tokens.RP.rawValue)
             setState(1619)
             try statement()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class DoStatementContext: ParserRuleContext {
         open func DO() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DO.rawValue, 0) }
         open func statement() -> StatementContext? {
@@ -10851,13 +11660,16 @@ open class ObjectiveCParser: Parser {
             try match(ObjectiveCParser.Tokens.RP.rawValue)
             setState(1627)
             try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ForStatementContext: ParserRuleContext {
         open func FOR() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.FOR.rawValue, 0)
@@ -10926,7 +11738,9 @@ open class ObjectiveCParser: Parser {
             {
                 setState(1631)
                 try forLoopInitializer()
+
             }
+
             setState(1634)
             try match(ObjectiveCParser.Tokens.SEMI.rawValue)
             setState(1636)
@@ -10940,7 +11754,9 @@ open class ObjectiveCParser: Parser {
             {
                 setState(1635)
                 try expression(0)
+
             }
+
             setState(1638)
             try match(ObjectiveCParser.Tokens.SEMI.rawValue)
             setState(1640)
@@ -10954,18 +11770,23 @@ open class ObjectiveCParser: Parser {
             {
                 setState(1639)
                 try expressions()
+
             }
+
             setState(1642)
             try match(ObjectiveCParser.Tokens.RP.rawValue)
             setState(1643)
             try statement()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ForLoopInitializerContext: ParserRuleContext {
         open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
             return getRuleContext(DeclarationSpecifiersContext.self, 0)
@@ -11012,11 +11833,13 @@ open class ObjectiveCParser: Parser {
                 try declarationSpecifiers()
                 setState(1646)
                 try initDeclaratorList()
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(1648)
                 try expressions()
+
                 break
             default: break
             }
@@ -11025,8 +11848,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ForInStatementContext: ParserRuleContext {
         open func FOR() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.FOR.rawValue, 0)
@@ -11091,18 +11916,23 @@ open class ObjectiveCParser: Parser {
             {
                 setState(1655)
                 try expression(0)
+
             }
+
             setState(1658)
             try match(ObjectiveCParser.Tokens.RP.rawValue)
             setState(1659)
             try statement()
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class JumpStatementContext: ParserRuleContext {
         open func GOTO() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.GOTO.rawValue, 0)
@@ -11159,17 +11989,23 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.GOTO.rawValue)
                 setState(1662)
                 try identifier()
+
                 break
+
             case .CONTINUE:
                 try enterOuterAlt(_localctx, 2)
                 setState(1663)
                 try match(ObjectiveCParser.Tokens.CONTINUE.rawValue)
+
                 break
+
             case .BREAK:
                 try enterOuterAlt(_localctx, 3)
                 setState(1664)
                 try match(ObjectiveCParser.Tokens.BREAK.rawValue)
+
                 break
+
             case .RETURN:
                 try enterOuterAlt(_localctx, 4)
                 setState(1665)
@@ -11185,7 +12021,9 @@ open class ObjectiveCParser: Parser {
                 {
                     setState(1666)
                     try expression(0)
+
                 }
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -11194,8 +12032,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ExpressionsContext: ParserRuleContext {
         open func expression() -> [ExpressionContext] {
             return getRuleContexts(ExpressionContext.self)
@@ -11249,18 +12089,22 @@ open class ObjectiveCParser: Parser {
                     try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                     setState(1673)
                     try expression(0)
+
                 }
                 setState(1678)
                 try _errHandler.sync(self)
                 _alt = try getInterpreter().adaptivePredict(_input, 226, _ctx)
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ExpressionContext: ParserRuleContext {
         open var assignmentExpression: ExpressionContext!
         open var op: Token!
@@ -11357,6 +12201,7 @@ open class ObjectiveCParser: Parser {
             }
         }
     }
+
     public final func expression() throws -> ExpressionContext { return try expression(0) }
     @discardableResult private func expression(_ _p: Int) throws -> ExpressionContext {
         let _parentctx: ParserRuleContext? = _ctx
@@ -11376,6 +12221,7 @@ open class ObjectiveCParser: Parser {
             case 1:
                 setState(1680)
                 try castExpression()
+
                 break
             case 2:
                 setState(1681)
@@ -11388,6 +12234,7 @@ open class ObjectiveCParser: Parser {
                     _localctx.castdown(ExpressionContext.self).assignmentExpression =
                         assignmentValue
                 }()
+
                 break
             case 3:
                 setState(1685)
@@ -11396,6 +12243,7 @@ open class ObjectiveCParser: Parser {
                 try compoundStatement()
                 setState(1687)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
+
                 break
             default: break
             }
@@ -11432,6 +12280,7 @@ open class ObjectiveCParser: Parser {
                         }
                         setState(1693)
                         try expression(14)
+
                         break
                     case 2:
                         _localctx = ExpressionContext(_parentctx, _parentState)
@@ -11456,6 +12305,7 @@ open class ObjectiveCParser: Parser {
                         }
                         setState(1696)
                         try expression(13)
+
                         break
                     case 3:
                         _localctx = ExpressionContext(_parentctx, _parentState)
@@ -11474,17 +12324,21 @@ open class ObjectiveCParser: Parser {
                             try match(ObjectiveCParser.Tokens.LT.rawValue)
                             setState(1699)
                             try match(ObjectiveCParser.Tokens.LT.rawValue)
+
                             break
+
                         case .GT:
                             setState(1700)
                             try match(ObjectiveCParser.Tokens.GT.rawValue)
                             setState(1701)
                             try match(ObjectiveCParser.Tokens.GT.rawValue)
+
                             break
                         default: throw ANTLRException.recognition(e: NoViableAltException(self))
                         }
                         setState(1704)
                         try expression(12)
+
                         break
                     case 4:
                         _localctx = ExpressionContext(_parentctx, _parentState)
@@ -11509,6 +12363,7 @@ open class ObjectiveCParser: Parser {
                         }
                         setState(1707)
                         try expression(11)
+
                         break
                     case 5:
                         _localctx = ExpressionContext(_parentctx, _parentState)
@@ -11533,6 +12388,7 @@ open class ObjectiveCParser: Parser {
                         }
                         setState(1710)
                         try expression(10)
+
                         break
                     case 6:
                         _localctx = ExpressionContext(_parentctx, _parentState)
@@ -11548,8 +12404,10 @@ open class ObjectiveCParser: Parser {
                             let assignmentValue = try match(ObjectiveCParser.Tokens.BITAND.rawValue)
                             _localctx.castdown(ExpressionContext.self).op = assignmentValue
                         }()
+
                         setState(1713)
                         try expression(9)
+
                         break
                     case 7:
                         _localctx = ExpressionContext(_parentctx, _parentState)
@@ -11565,8 +12423,10 @@ open class ObjectiveCParser: Parser {
                             let assignmentValue = try match(ObjectiveCParser.Tokens.BITXOR.rawValue)
                             _localctx.castdown(ExpressionContext.self).op = assignmentValue
                         }()
+
                         setState(1716)
                         try expression(8)
+
                         break
                     case 8:
                         _localctx = ExpressionContext(_parentctx, _parentState)
@@ -11582,8 +12442,10 @@ open class ObjectiveCParser: Parser {
                             let assignmentValue = try match(ObjectiveCParser.Tokens.BITOR.rawValue)
                             _localctx.castdown(ExpressionContext.self).op = assignmentValue
                         }()
+
                         setState(1719)
                         try expression(7)
+
                         break
                     case 9:
                         _localctx = ExpressionContext(_parentctx, _parentState)
@@ -11599,8 +12461,10 @@ open class ObjectiveCParser: Parser {
                             let assignmentValue = try match(ObjectiveCParser.Tokens.AND.rawValue)
                             _localctx.castdown(ExpressionContext.self).op = assignmentValue
                         }()
+
                         setState(1722)
                         try expression(6)
+
                         break
                     case 10:
                         _localctx = ExpressionContext(_parentctx, _parentState)
@@ -11616,8 +12480,10 @@ open class ObjectiveCParser: Parser {
                             let assignmentValue = try match(ObjectiveCParser.Tokens.OR.rawValue)
                             _localctx.castdown(ExpressionContext.self).op = assignmentValue
                         }()
+
                         setState(1725)
                         try expression(5)
+
                         break
                     case 11:
                         _localctx = ExpressionContext(_parentctx, _parentState)
@@ -11646,7 +12512,9 @@ open class ObjectiveCParser: Parser {
                                 _localctx.castdown(ExpressionContext.self).trueExpression =
                                     assignmentValue
                             }()
+
                         }
+
                         setState(1731)
                         try match(ObjectiveCParser.Tokens.COLON.rawValue)
                         setState(1732)
@@ -11655,6 +12523,7 @@ open class ObjectiveCParser: Parser {
                             _localctx.castdown(ExpressionContext.self).falseExpression =
                                 assignmentValue
                         }()
+
                         break
                     default: break
                     }
@@ -11663,13 +12532,16 @@ open class ObjectiveCParser: Parser {
                 try _errHandler.sync(self)
                 _alt = try getInterpreter().adaptivePredict(_input, 231, _ctx)
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class AssignmentOperatorContext: ParserRuleContext {
         open func ASSIGNMENT() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue, 0)
@@ -11743,13 +12615,16 @@ open class ObjectiveCParser: Parser {
                 _errHandler.reportMatch(self)
                 try consume()
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class CastExpressionContext: ParserRuleContext {
         open func unaryExpression() -> UnaryExpressionContext? {
             return getRuleContext(UnaryExpressionContext.self, 0)
@@ -11797,6 +12672,7 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(1740)
                 try unaryExpression()
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -11806,19 +12682,23 @@ open class ObjectiveCParser: Parser {
                 try typeName()
                 setState(1743)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
+
                 setState(1747)
                 try _errHandler.sync(self)
                 switch try getInterpreter().adaptivePredict(_input, 232, _ctx) {
                 case 1:
                     setState(1745)
                     try castExpression()
+
                     break
                 case 2:
                     setState(1746)
                     try initializer()
+
                     break
                 default: break
                 }
+
                 break
             default: break
             }
@@ -11827,8 +12707,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class InitializerContext: ParserRuleContext {
         open func expression() -> ExpressionContext? {
             return getRuleContext(ExpressionContext.self, 0)
@@ -11873,16 +12755,19 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(1751)
                 try expression(0)
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(1752)
                 try arrayInitializer()
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
                 setState(1753)
                 try structInitializer()
+
                 break
             default: break
             }
@@ -11891,8 +12776,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ConstantExpressionContext: ParserRuleContext {
         open func identifier() -> IdentifierContext? {
             return getRuleContext(IdentifierContext.self, 0)
@@ -11938,6 +12825,7 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(1756)
                 try identifier()
+
                 break
             case .TRUE, .FALSE, .NIL, .NO, .NULL, .YES, .ADD, .SUB, .CHARACTER_LITERAL,
                 .HEX_LITERAL, .OCTAL_LITERAL, .BINARY_LITERAL, .DECIMAL_LITERAL,
@@ -11945,6 +12833,7 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 2)
                 setState(1757)
                 try constant()
+
                 break
             default: throw ANTLRException.recognition(e: NoViableAltException(self))
             }
@@ -11953,8 +12842,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class UnaryExpressionContext: ParserRuleContext {
         open var op: Token!
         open func postfixExpression() -> PostfixExpressionContext? {
@@ -12018,6 +12909,7 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(1760)
                 try postfixExpression(0)
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -12029,6 +12921,7 @@ open class ObjectiveCParser: Parser {
                 case 1:
                     setState(1762)
                     try unaryExpression()
+
                     break
                 case 2:
                     setState(1763)
@@ -12037,9 +12930,11 @@ open class ObjectiveCParser: Parser {
                     try typeSpecifier()
                     setState(1765)
                     try match(ObjectiveCParser.Tokens.RP.rawValue)
+
                     break
                 default: break
                 }
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
@@ -12057,6 +12952,7 @@ open class ObjectiveCParser: Parser {
                 }
                 setState(1770)
                 try unaryExpression()
+
                 break
             case 4:
                 try enterOuterAlt(_localctx, 4)
@@ -12064,6 +12960,7 @@ open class ObjectiveCParser: Parser {
                 try unaryOperator()
                 setState(1772)
                 try castExpression()
+
                 break
             default: break
             }
@@ -12072,8 +12969,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class UnaryOperatorContext: ParserRuleContext {
         open func BITAND() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.BITAND.rawValue, 0)
@@ -12130,13 +13029,16 @@ open class ObjectiveCParser: Parser {
                 _errHandler.reportMatch(self)
                 try consume()
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class PostfixExpressionContext: ParserRuleContext {
         open func primaryExpression() -> PrimaryExpressionContext? {
             return getRuleContext(PrimaryExpressionContext.self, 0)
@@ -12180,6 +13082,7 @@ open class ObjectiveCParser: Parser {
             }
         }
     }
+
     public final func postfixExpression() throws -> PostfixExpressionContext {
         return try postfixExpression(0)
     }
@@ -12205,11 +13108,13 @@ open class ObjectiveCParser: Parser {
                 if _alt == 1 {
                     setState(1780)
                     try postfixExpr()
+
                 }
                 setState(1785)
                 try _errHandler.sync(self)
                 _alt = try getInterpreter().adaptivePredict(_input, 238, _ctx)
             }
+
             _ctx!.stop = try _input.LT(-1)
             setState(1797)
             try _errHandler.sync(self)
@@ -12244,23 +13149,28 @@ open class ObjectiveCParser: Parser {
                         if _alt == 1 {
                             setState(1789)
                             try postfixExpr()
+
                         }
                         setState(1794)
                         try _errHandler.sync(self)
                         _alt = try getInterpreter().adaptivePredict(_input, 239, _ctx)
                     }
+
                 }
                 setState(1799)
                 try _errHandler.sync(self)
                 _alt = try getInterpreter().adaptivePredict(_input, 240, _ctx)
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class PostfixExprContext: ParserRuleContext {
         open var _RP: Token!
         open var macroArguments: [Token] = [Token]()
@@ -12334,6 +13244,7 @@ open class ObjectiveCParser: Parser {
                 try expression(0)
                 setState(1802)
                 try match(ObjectiveCParser.Tokens.RBRACK.rawValue)
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
@@ -12350,9 +13261,12 @@ open class ObjectiveCParser: Parser {
                 {
                     setState(1805)
                     try argumentExpressionList()
+
                 }
+
                 setState(1808)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
@@ -12368,6 +13282,7 @@ open class ObjectiveCParser: Parser {
                     case 1:
                         setState(1810)
                         try match(ObjectiveCParser.Tokens.COMMA.rawValue)
+
                         break
                     case 2:
                         setState(1811)
@@ -12382,9 +13297,11 @@ open class ObjectiveCParser: Parser {
                         }
                         _localctx.castdown(PostfixExprContext.self).macroArguments.append(
                             _localctx.castdown(PostfixExprContext.self)._tset3398)
+
                         break
                     default: break
                     }
+
                     setState(1814)
                     try _errHandler.sync(self)
                     _la = try _input.LA(1)
@@ -12396,6 +13313,7 @@ open class ObjectiveCParser: Parser {
                         && ((Int64(1) << (_la - 192)) & 2_147_483_647) != 0
                 setState(1816)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
+
                 break
             case 4:
                 try enterOuterAlt(_localctx, 4)
@@ -12411,6 +13329,7 @@ open class ObjectiveCParser: Parser {
                     _errHandler.reportMatch(self)
                     try consume()
                 }
+
                 break
             default: break
             }
@@ -12419,8 +13338,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ArgumentExpressionListContext: ParserRuleContext {
         open func argumentExpression() -> [ArgumentExpressionContext] {
             return getRuleContexts(ArgumentExpressionContext.self)
@@ -12475,17 +13396,21 @@ open class ObjectiveCParser: Parser {
                 try match(ObjectiveCParser.Tokens.COMMA.rawValue)
                 setState(1822)
                 try argumentExpression()
+
                 setState(1827)
                 try _errHandler.sync(self)
                 _la = try _input.LA(1)
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ArgumentExpressionContext: ParserRuleContext {
         open func expression() -> ExpressionContext? {
             return getRuleContext(ExpressionContext.self, 0)
@@ -12527,11 +13452,13 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(1828)
                 try expression(0)
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(1829)
                 try genericTypeSpecifier()
+
                 break
             default: break
             }
@@ -12540,8 +13467,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class PrimaryExpressionContext: ParserRuleContext {
         open func identifier() -> IdentifierContext? {
             return getRuleContext(IdentifierContext.self, 0)
@@ -12613,16 +13542,19 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(1832)
                 try identifier()
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(1833)
                 try constant()
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
                 setState(1834)
                 try stringLiteral()
+
                 break
             case 4:
                 try enterOuterAlt(_localctx, 4)
@@ -12632,46 +13564,55 @@ open class ObjectiveCParser: Parser {
                 try expression(0)
                 setState(1837)
                 try match(ObjectiveCParser.Tokens.RP.rawValue)
+
                 break
             case 5:
                 try enterOuterAlt(_localctx, 5)
                 setState(1839)
                 try messageExpression()
+
                 break
             case 6:
                 try enterOuterAlt(_localctx, 6)
                 setState(1840)
                 try selectorExpression()
+
                 break
             case 7:
                 try enterOuterAlt(_localctx, 7)
                 setState(1841)
                 try protocolExpression()
+
                 break
             case 8:
                 try enterOuterAlt(_localctx, 8)
                 setState(1842)
                 try encodeExpression()
+
                 break
             case 9:
                 try enterOuterAlt(_localctx, 9)
                 setState(1843)
                 try dictionaryExpression()
+
                 break
             case 10:
                 try enterOuterAlt(_localctx, 10)
                 setState(1844)
                 try arrayExpression()
+
                 break
             case 11:
                 try enterOuterAlt(_localctx, 11)
                 setState(1845)
                 try boxExpression()
+
                 break
             case 12:
                 try enterOuterAlt(_localctx, 12)
                 setState(1846)
                 try blockExpression()
+
                 break
             default: break
             }
@@ -12680,8 +13621,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class ConstantContext: ParserRuleContext {
         open func HEX_LITERAL() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.HEX_LITERAL.rawValue, 0)
@@ -12754,16 +13697,19 @@ open class ObjectiveCParser: Parser {
                 try enterOuterAlt(_localctx, 1)
                 setState(1849)
                 try match(ObjectiveCParser.Tokens.HEX_LITERAL.rawValue)
+
                 break
             case 2:
                 try enterOuterAlt(_localctx, 2)
                 setState(1850)
                 try match(ObjectiveCParser.Tokens.OCTAL_LITERAL.rawValue)
+
                 break
             case 3:
                 try enterOuterAlt(_localctx, 3)
                 setState(1851)
                 try match(ObjectiveCParser.Tokens.BINARY_LITERAL.rawValue)
+
                 break
             case 4:
                 try enterOuterAlt(_localctx, 4)
@@ -12783,9 +13729,12 @@ open class ObjectiveCParser: Parser {
                         _errHandler.reportMatch(self)
                         try consume()
                     }
+
                 }
+
                 setState(1855)
                 try match(ObjectiveCParser.Tokens.DECIMAL_LITERAL.rawValue)
+
                 break
             case 5:
                 try enterOuterAlt(_localctx, 5)
@@ -12805,44 +13754,54 @@ open class ObjectiveCParser: Parser {
                         _errHandler.reportMatch(self)
                         try consume()
                     }
+
                 }
+
                 setState(1859)
                 try match(ObjectiveCParser.Tokens.FLOATING_POINT_LITERAL.rawValue)
+
                 break
             case 6:
                 try enterOuterAlt(_localctx, 6)
                 setState(1860)
                 try match(ObjectiveCParser.Tokens.CHARACTER_LITERAL.rawValue)
+
                 break
             case 7:
                 try enterOuterAlt(_localctx, 7)
                 setState(1861)
                 try match(ObjectiveCParser.Tokens.NIL.rawValue)
+
                 break
             case 8:
                 try enterOuterAlt(_localctx, 8)
                 setState(1862)
                 try match(ObjectiveCParser.Tokens.NULL.rawValue)
+
                 break
             case 9:
                 try enterOuterAlt(_localctx, 9)
                 setState(1863)
                 try match(ObjectiveCParser.Tokens.YES.rawValue)
+
                 break
             case 10:
                 try enterOuterAlt(_localctx, 10)
                 setState(1864)
                 try match(ObjectiveCParser.Tokens.NO.rawValue)
+
                 break
             case 11:
                 try enterOuterAlt(_localctx, 11)
                 setState(1865)
                 try match(ObjectiveCParser.Tokens.TRUE.rawValue)
+
                 break
             case 12:
                 try enterOuterAlt(_localctx, 12)
                 setState(1866)
                 try match(ObjectiveCParser.Tokens.FALSE.rawValue)
+
                 break
             default: break
             }
@@ -12851,8 +13810,10 @@ open class ObjectiveCParser: Parser {
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class StringLiteralContext: ParserRuleContext {
         open func STRING_START() -> [TerminalNode] {
             return getTokens(ObjectiveCParser.Tokens.STRING_START.rawValue)
@@ -12932,12 +13893,14 @@ open class ObjectiveCParser: Parser {
                             _errHandler.reportMatch(self)
                             try consume()
                         }
+
                         setState(1875)
                         try _errHandler.sync(self)
                         _la = try _input.LA(1)
                     }
                     setState(1876)
                     try match(ObjectiveCParser.Tokens.STRING_END.rawValue)
+
                     break
                 default: throw ANTLRException.recognition(e: NoViableAltException(self))
                 }
@@ -12945,13 +13908,16 @@ open class ObjectiveCParser: Parser {
                 try _errHandler.sync(self)
                 _alt = try getInterpreter().adaptivePredict(_input, 252, _ctx)
             } while _alt != 2 && _alt != ATN.INVALID_ALT_NUMBER
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     public class IdentifierContext: ParserRuleContext {
         open func IDENTIFIER() -> TerminalNode? {
             return getToken(ObjectiveCParser.Tokens.IDENTIFIER.rawValue, 0)
@@ -13130,13 +14096,16 @@ open class ObjectiveCParser: Parser {
                 _errHandler.reportMatch(self)
                 try consume()
             }
+
         } catch ANTLRException.recognition(let re) {
             _localctx.exception = re
             _errHandler.reportError(self, re)
             try _errHandler.recover(self, re)
         }
+
         return _localctx
     }
+
     override open func sempred(_ _localctx: RuleContext?, _ ruleIndex: Int, _ predIndex: Int) throws
         -> Bool
     {
@@ -13175,6 +14144,7 @@ open class ObjectiveCParser: Parser {
         default: return true
         }
     }
+
     static let _serializedATN: [Int] = [
         4, 1, 222, 1884, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2, 5, 7, 5, 2,
         6, 7, 6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7, 10, 2, 11, 7, 11, 2, 12, 7, 12, 2,

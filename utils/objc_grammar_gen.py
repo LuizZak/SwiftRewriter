@@ -1,6 +1,12 @@
 # Requires Python 3.10.0 or later.
 
-from generator_paths import grammars_package_path
+import shutil
+from generator_paths import (
+    SOURCE_ROOT_PATH,
+    grammars_package_path,
+    make_relative,
+    srcroot_path,
+)
 from antlr_grammar_gen import (
     generate_antlr_grammar,
     transform_source,
@@ -31,3 +37,21 @@ def generate_objc_antlr_grammar():
     )
 
     transform_source(swift_files)
+
+    # Copy files now
+    target_parser_path = srcroot_path("Sources", "ObjcParserAntlr")
+
+    if not target_parser_path.is_dir():
+        print(
+            f"Error: Could not find path for placing generated files @ {make_relative(SOURCE_ROOT_PATH, target_parser_path)}"
+        )
+        exit(1)
+
+    files_to_copy = list(output_path.glob("*.swift"))
+
+    print(
+        f"Copying {len(files_to_copy)} file(s) to {make_relative(SOURCE_ROOT_PATH, target_parser_path)}..."
+    )
+
+    for file in files_to_copy:
+        shutil.copy(file, target_parser_path)
