@@ -29,4 +29,4 @@ jobs:
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '3.10.x'
-  - bash: 'python utils/build.py test'
+  - script: 'python utils/build.py test'
