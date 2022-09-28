@@ -11,7 +11,7 @@ jobs:
   pool:
     vmImage: 'macOS-12'
   steps:
-  - bash: 'sudo xcode-select -s /Applications/Xcode_14.app/Contents/Developer'
+  - bash: 'sudo xcode-select -s /Applications/Xcode_14.0.app/Contents/Developer'
   - bash: 'swift package resolve'
   # Fix for missing modulemap for _CSwiftSyntax
   - bash: 'bash gen-_cswiftsyntax-module-map.sh'
