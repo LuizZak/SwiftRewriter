@@ -11,6 +11,7 @@ jobs:
   pool:
     vmImage: 'macOS-12'
   steps:
+  - bash: 'sudo xcode-select -s /Applications/Xcode_14.0.app/Contents/Developer'
   - bash: 'swift package resolve'
   - bash: 'swift test --enable-code-coverage'
   - bash: 'xcrun llvm-profdata merge -sparse ./.build/debug/codecov/*.profraw -o coverage.profdata'
