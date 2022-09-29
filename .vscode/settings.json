@@ -1,0 +1,6 @@
+{
+    "mypy.configFile": "utils/mypy.ini",
+    "mypy.targets": [
+        "utils",
+    ],
+}
