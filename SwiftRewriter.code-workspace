@@ -141,7 +141,12 @@
 		"[python]": {
 			"editor.formatOnSave": true
 		},
-		"mypy.configFile": "utils/mypy.ini",
+		
+		// Hack to disable mypy from looking into every workspace folder by default.
+		// Main workspace folder has a .vscode/settings.json that overrides this.
+		"mypy.targets": [
+			"/dev/null",
+		],
 
 		"swift.buildArguments": [],
 
