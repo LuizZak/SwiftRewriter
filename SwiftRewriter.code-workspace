@@ -31,18 +31,17 @@
 		"tasks": [
             {
 				"label": "Build (debug)",
-				"type": "swift",
+				"type": "shell",
+				"command": "swift",
 				"group": {
 					"kind": "build",
-					"isDefault": true
+					"isDefault": true,
 				},
 				"args": [
 					"build",
 					"--build-tests",
-					"--enable-code-coverage",
 				],
-				"cwd": "",
-				"detail": "swift build --build-tests --enable-test-discovery -Xswiftc -Xfrontend -Xswiftc -serialize-debugging-options",
+				"detail": "swift build --build-tests",
 			},
             {
 				"label": "Build (debug) and reload tests",
@@ -55,7 +54,7 @@
 				"command": "swift",
 				"group": {
 					"kind": "build",
-					"isDefault": true
+					"isDefault": true,
 				},
 				"args": [
 					"build",
@@ -71,7 +70,7 @@
 				"command": "swift",
 				"group": {
 					"kind": "test",
-					"isDefault": true
+					"isDefault": true,
 				},
 				"args": [
 					"test",
@@ -118,7 +117,7 @@
 				"id": "test_filter",
 				"type": "promptString",
 				"description": "Filter to pass to swift test --filter"
-			}
+			},
 		],
 		"configurations": [
 			{
@@ -153,11 +152,11 @@
 				"name": "Test SwiftRewriter (filtered)",
 				"program": "./.build/debug/SwiftRewriterPackageTests.xctest",
 				"args": [
-					"${input:test_filter}"
+					"${input:test_filter}",
 				],
 				"cwd": "${workspaceFolder:SwiftRewriter}",
 				"preLaunchTask": "Build (debug)",
-			}
+			},
 		]
 	},
 	"settings": {
@@ -204,7 +203,12 @@
 		"[python]": {
 			"editor.formatOnSave": true
 		},
-		"mypy.configFile": "utils/mypy.ini",
+		
+		// Hack to disable mypy from looking into every workspace folder by default.
+		// Main workspace folder has a .vscode/settings.json that overrides this.
+		"mypy.targets": [
+			"/dev/null",
+		],
 
 		"swift.buildArguments": [],
 
@@ -228,6 +232,7 @@
 			"ivars",
 			"Labelable",
 			"mutex",
+			"mypy",
 			"Nonnull",
 			"penwidth",
 			"srcroot",
@@ -247,7 +252,7 @@
 		"recommendations": [
 			"exodiusstudios.comment-anchors",
 			"vknabel.swift-coverage",
-			"luizzak.swifttestfilegen"
+			"luizzak.swifttestfilegen",
 		],
 	},
 }
