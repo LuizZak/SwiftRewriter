@@ -1,20 +1,26 @@
 # Requires Python 3.10.0 or later.
 
 import shutil
-from generator_paths import (
+from paths import (
     SOURCE_ROOT_PATH,
-    grammars_package_path,
+    grammars_path,
     make_relative,
     srcroot_path,
 )
 from antlr_grammar_gen import (
+    copy_generated_files,
     generate_antlr_grammar,
     transform_source,
 )
+from console_color import ConsoleColor
 
 
 def generate_js_antlr_grammar():
-    base_path = grammars_package_path("JsGrammar")
+    base_path = grammars_path("JsGrammar")
+
+    print(
+        f"Generating JavaScript grammar files @ {ConsoleColor.CYAN(make_relative(SOURCE_ROOT_PATH, base_path))}..."
+    )
 
     output_path = base_path.joinpath("gen")
     grammar_files = [
@@ -46,6 +52,7 @@ def generate_js_antlr_grammar():
         )
     )
 
+    print("Transforming source files...")
     transform_source(swift_files)
 
     # Copy files now
@@ -56,17 +63,4 @@ def generate_js_antlr_grammar():
         "JsParserAntlr",
     )
 
-    if not target_parser_path.is_dir():
-        print(
-            f"Error: Could not find path for placing generated files @ {make_relative(SOURCE_ROOT_PATH, target_parser_path)}"
-        )
-        exit(1)
-
-    files_to_copy = list(output_path.glob("*.swift"))
-
-    print(
-        f"Copying {len(files_to_copy)} file(s) to {make_relative(SOURCE_ROOT_PATH, target_parser_path)}..."
-    )
-
-    for file in files_to_copy:
-        shutil.copy(file, target_parser_path)
+    copy_generated_files(output_path, target_parser_path)

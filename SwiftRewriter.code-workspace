@@ -41,25 +41,13 @@
 					"--build-tests",
 					"--enable-code-coverage",
 				],
+				"cwd": "",
 				"detail": "swift build --build-tests --enable-test-discovery -Xswiftc -Xfrontend -Xswiftc -serialize-debugging-options",
 			},
             {
 				"label": "Build (debug) and reload tests",
 				"command": "${command:test-explorer.reload}",
 				"dependsOn": "Build (debug)"
-			},
-            {
-				"label": "Build (release)",
-				"type": "swift",
-				"group": {
-					"kind": "build",
-					"isDefault": true
-				},
-				"args": [
-					"build",
-					"--build-tests",
-				],
-				"detail": "swift build --build-tests",
 			},
             {
 				"label": "Build (release)",
@@ -112,8 +100,8 @@
 			"path": ".",
 		},
 		{
-			"name": "AntlrGrammars",
-			"path": "AntlrGrammars",
+			"name": "GrammarTransformer",
+			"path": "AntlrGrammars/GrammarTransformer",
 		},
 		{
 			"name": "Swift Package Dependencies",
@@ -224,12 +212,12 @@
 		"ShortcutMenuBar.userButton02Command": "workbench.action.tasks.runTask|Test",
 		"ShortcutMenuBar.userButton03Command": "workbench.action.tasks.runTask|Test (release)",
 		"cSpell.words": [
-			"Antlr",
-			"swiftpm",
 			"antlr",
+			"Antlr",
 			"autoreleasepool",
 			"deinitializer",
 			"deinitializers",
+			"Dlanguage",
 			"dont",
 			"Fallthroughs",
 			"Graphviz",
@@ -240,6 +228,7 @@
 			"mutex",
 			"Nonnull",
 			"penwidth",
+			"srcroot",
 			"swiftpm",
 			"swiftrewriter",
 			"swiftwriter",
@@ -247,6 +236,7 @@
 			"Trivias",
 			"uniquing",
 			"whitespaces",
+			"Xexact",
 		],
 		"swiftTestFileGen.gotoTestFile.useFilenameHeuristics": true,
 		"swiftTestFileGen.gotoTestFile.heuristicFilenamePattern": "$1Tests"

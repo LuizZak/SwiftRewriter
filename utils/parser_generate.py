@@ -9,18 +9,22 @@ from antlr_grammar_gen import (
 )
 from objc_grammar_gen import generate_objc_antlr_grammar
 from js_grammar_gen import generate_js_antlr_grammar
+from paths import GRAMMAR_TRANSFORMER_ROOT_PATH, SOURCE_ROOT_PATH, make_relative
+from console_color import ConsoleColor
 
 
 def do_parser_generation():
     validate_antlr_version()
 
-    print("Prebuilding Swift project...")
+    print(
+        f"Prebuilding Swift project @ {make_relative(SOURCE_ROOT_PATH, GRAMMAR_TRANSFORMER_ROOT_PATH)}..."
+    )
     build_swift_gen_transformer()
 
     generate_objc_antlr_grammar()
     generate_js_antlr_grammar()
 
-    print("Success!")
+    print(ConsoleColor.GREEN("Success!"))
 
 
 def main() -> int:

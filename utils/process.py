@@ -3,12 +3,14 @@ import subprocess
 
 from typing import Any
 
+from console_color import ConsoleColor
+
 
 def run_output(
     bin_name: str, *args: Any, cwd: str | PathLike | None = None, echo: bool = True
 ) -> str:
     if echo:
-        print(">", bin_name, *list(args))
+        print(ConsoleColor.MAGENTA(">", bin_name, *list(args)))
 
     return (
         subprocess.check_output([bin_name] + list(args), cwd=cwd).decode("UTF8").strip()
@@ -23,7 +25,7 @@ def run(
     silent: bool = False,
 ):
     if echo:
-        print(">", bin_name, *list(args))
+        print(ConsoleColor.MAGENTA(">", bin_name, *list(args)))
 
     if silent:
         subprocess.check_output([bin_name] + list(args), cwd=cwd)
