@@ -75,10 +75,12 @@ class DirectedGraphTests: XCTestCase {
         let n3 = sut.addNode(3)
         let n4 = sut.addNode(4)
         let n5 = sut.addNode(5)
+        let n6 = sut.addNode(6)
         let e0 = sut.addEdge(from: n1, to: n2)
         let e1 = sut.addEdge(from: n2, to: n3)
         let e2 = sut.addEdge(from: n2, to: n4)
         let e3 = sut.addEdge(from: n4, to: n5)
+        let e4 = sut.addEdge(from: n1, to: n6)
 
         assertVisit(
             sut,
@@ -87,9 +89,10 @@ class DirectedGraphTests: XCTestCase {
             expected: [
                 .start(n1),
                 n1 => (e0, n2),
+                n1 => (e0, n2) => (e1, n3),
                 n1 => (e0, n2) => (e2, n4),
                 n1 => (e0, n2) => (e2, n4) => (e3, n5),
-                n1 => (e0, n2) => (e1, n3),
+                n1 => (e4, n6),
             ]
         )
     }
@@ -101,10 +104,12 @@ class DirectedGraphTests: XCTestCase {
         let n3 = sut.addNode(3)
         let n4 = sut.addNode(4)
         let n5 = sut.addNode(5)
+        let n6 = sut.addNode(6)
         let e0 = sut.addEdge(from: n1, to: n2)
         let e1 = sut.addEdge(from: n2, to: n3)
         let e2 = sut.addEdge(from: n2, to: n4)
         let e3 = sut.addEdge(from: n4, to: n5)
+        let e4 = sut.addEdge(from: n1, to: n6)
 
         assertVisit(
             sut,
@@ -113,6 +118,7 @@ class DirectedGraphTests: XCTestCase {
             expected: [
                 .start(n1),
                 n1 => (e0, n2),
+                n1 => (e4, n6),
                 n1 => (e0, n2) => (e1, n3),
                 n1 => (e0, n2) => (e2, n4),
                 n1 => (e0, n2) => (e2, n4) => (e3, n5),

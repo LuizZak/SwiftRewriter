@@ -230,7 +230,7 @@ public extension DirectedGraph {
                 return
             }
             
-            for nextEdge in edges(from: next.node) {
+            for nextEdge in edges(from: next.node).reversed() {
                 let node = endNode(for: nextEdge)
                 if visited.contains(node) {
                     continue
