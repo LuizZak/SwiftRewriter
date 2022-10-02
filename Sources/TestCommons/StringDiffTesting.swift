@@ -245,26 +245,6 @@ extension XCTestCase: DiffTestCaseFailureReporter {
                                atLine lineNumber: UInt,
                                expected: Bool) {
         
-        #if os(macOS)
-
-        let location = XCTSourceCodeLocation(filePath: filePath.description,
-                                             lineNumber: Int(lineNumber))
-        
-        self.record(
-            XCTIssueReference(
-                type: .assertionFailure,
-                compactDescription: description,
-                detailedDescription: nil,
-                sourceCodeContext: XCTSourceCodeContext(location: location),
-                associatedError: nil,
-                attachments: []
-            )
-        )
-
-        #else
-
         XCTFail(description, file: filePath, line: lineNumber)
-
-        #endif
     }
 }
