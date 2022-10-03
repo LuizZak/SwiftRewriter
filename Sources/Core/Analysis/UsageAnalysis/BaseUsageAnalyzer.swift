@@ -9,6 +9,57 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
     init(typeSystem: TypeSystem) {
         self.typeSystem = typeSystem
     }
+
+    public func findUsagesOf(function: GlobalFunctionGenerationIntention) -> [DefinitionUsage] {
+        let containers = statementContainers()
+        
+        var usages: [DefinitionUsage] = []
+
+        for (container, intention) in containers {
+            let visitor = AnonymousSyntaxNodeVisitor { node in
+                guard let exp = node as? IdentifierExpression else {
+                    return
+                }
+                guard let definition = exp.definition as? GlobalIntentionCodeDefinition else {
+                    return
+                }
+                guard definition.intention === function else {
+                    return
+                }
+
+                // Attempt to infer usage of a function call, for context purposes.
+                var expressionKind: DefinitionUsage.ExpressionKind
+                expressionKind = .identifier(exp)
+
+                if let parent = exp.parentExpression?.asPostfix {
+                    if let functionCall = parent.op.asFunctionCall {
+                        expressionKind = .functionCall(exp, functionCall, in: parent)
+                    }
+                }
+
+                let usage =
+                    DefinitionUsage(
+                        intention: intention,
+                        definition: .forGlobalFunction(function),
+                        expression: expressionKind,
+                        isReadOnlyUsage: true
+                    )
+                
+                usages.append(usage)
+            }
+            
+            switch container {
+            case .function(let body):
+                visitor.visitStatement(body.body)
+            case .expression(let exp):
+                visitor.visitExpression(exp)
+            case .statement(let stmt):
+                visitor.visitStatement(stmt)
+            }
+        }
+        
+        return usages
+    }
     
     public func findUsagesOf(method: KnownMethod) -> [DefinitionUsage] {
         let containers = statementContainers()

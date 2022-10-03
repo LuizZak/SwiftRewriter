@@ -214,4 +214,99 @@ class IntentionCollectionUsageAnalyzerTests: XCTestCase {
 
         XCTAssertEqual(usages.count, 1)
     }
+
+    func testFindGlobalFunctionUsages() {
+        let builder = IntentionCollectionBuilder()
+        let body: CompoundStatement = [
+            // globalFunc()
+            .expression(
+                Expression
+                    .identifier("globalFunc").call()
+            )
+        ]
+
+        builder
+            .createFile(named: "A.m") { file in
+                file
+                    .createGlobalFunction(withName: "globalFunc")
+                    .createClass(withName: "A") { builder in
+                        builder.createVoidMethod(named: "f1") { method in
+                            method.setBody(body)
+                        }
+                    }
+            }
+        let intentions = builder.build(typeChecked: true)
+        let sut = IntentionCollectionUsageAnalyzer(
+            intentions: intentions,
+            typeSystem: TypeSystem(),
+            numThreads: 8
+        )
+        let function = intentions.fileIntentions()[0].globalFunctionIntentions[0]
+
+        let usages = sut.findUsagesOf(function: function)
+
+        XCTAssertEqual(
+            usages[0].expression.expression,
+            Expression
+                .identifier("globalFunc")
+        )
+
+        XCTAssertEqual(usages.count, 1)
+    }
+
+    func testFindGlobalFunctionUsages_detectsOverloads() {
+        let builder = IntentionCollectionBuilder()
+        let body: CompoundStatement = [
+            // globalFunc(0)
+            .expression(
+                Expression
+                    .identifier("globalFunc").call([.constant(0)])
+            ),
+            // globalFunc("")
+            .expression(
+                Expression
+                    .identifier("globalFunc").call([.constant("")])
+            )
+        ]
+
+        builder
+            .createFile(named: "A.m") { file in
+                file
+                    .createGlobalFunction(withName: "globalFunc", parameters: [
+                        .init(label: nil, name: "i", type: .int),
+                    ])
+                    .createGlobalFunction(withName: "globalFunc", parameters: [
+                        .init(label: nil, name: "s", type: .string),
+                    ])
+                    .createClass(withName: "A") { builder in
+                        builder.createVoidMethod(named: "f1") { method in
+                            method.setBody(body)
+                        }
+                    }
+            }
+        let intentions = builder.build(typeChecked: true)
+        let sut = IntentionCollectionUsageAnalyzer(
+            intentions: intentions,
+            typeSystem: TypeSystem(),
+            numThreads: 8
+        )
+        let functionInt = intentions.fileIntentions()[0].globalFunctionIntentions[0]
+        let functionStr = intentions.fileIntentions()[0].globalFunctionIntentions[1]
+
+        let usagesInt = sut.findUsagesOf(function: functionInt)
+        let usagesStr = sut.findUsagesOf(function: functionStr)
+
+        XCTAssertEqual(
+            usagesInt.first?.expression.expression,
+            Expression
+                .identifier("globalFunc")
+        )
+        XCTAssertEqual(usagesInt.count, 1)
+        XCTAssertEqual(
+            usagesStr.first?.expression.expression,
+            Expression
+                .identifier("globalFunc")
+        )
+        XCTAssertEqual(usagesStr.count, 1)
+    }
 }
