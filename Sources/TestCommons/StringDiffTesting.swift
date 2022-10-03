@@ -1,27 +1,33 @@
 import XCTest
 
 public protocol DiffTestCaseFailureReporter {
-    func _recordFailure(withDescription description: String,
-                        inFile filePath: StaticString,
-                        atLine lineNumber: UInt,
-                        expected: Bool)
+    func _recordFailure(
+        withDescription description: String,
+        inFile filePath: StaticString,
+        atLine lineNumber: UInt,
+        expected: Bool
+    )
 }
 
 public extension DiffTestCaseFailureReporter {
     
-    func diffTest(expected input: String,
-                  highlightLineInEditor: Bool = true,
-                  diffOnly: Bool = false,
-                  file: StaticString = #filePath,
-                  line: UInt = #line) -> DiffingTest {
+    func diffTest(
+        expected input: String,
+        highlightLineInEditor: Bool = true,
+        diffOnly: Bool = false,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> DiffingTest {
         
         let location = DiffLocation(file: file, line: line)
         let diffable = DiffableString(string: input, location: location)
         
-        return DiffingTest(expected: diffable,
-                           testCase: self,
-                           highlightLineInEditor: highlightLineInEditor,
-                           diffOnly: diffOnly)
+        return DiffingTest(
+            expected: diffable,
+            testCase: self,
+            highlightLineInEditor: highlightLineInEditor,
+            diffOnly: diffOnly
+        )
     }
 }
 
@@ -64,9 +70,17 @@ public class DiffingTest {
         self.diffOnly = diffOnly
     }
     
+<<<<<<< HEAD
     public func diff(_ actual: String,
                      file: StaticString = #filePath,
                      line: UInt = #line) {
+=======
+    public func diff(
+        _ res: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+>>>>>>> master
         
         if expectedDiff.string == actual {
             return
@@ -212,10 +226,12 @@ public class DiffingTest {
         """
     }
     
-    func omitLines(_ string: String,
-                   aroundLine line: Int,
-                   contextLinesBefore: Int = 3,
-                   contextLinesAfter: Int = 3) -> (result: String, linesBefore: Int, linesAfter: Int) {
+    func omitLines(
+        _ string: String,
+        aroundLine line: Int,
+        contextLinesBefore: Int = 3,
+        contextLinesAfter: Int = 3
+    ) -> (result: String, linesBefore: Int, linesAfter: Int) {
         
         let lines = string.split(separator: "\n", omittingEmptySubsequences: false)
         let minLine = max(0, line - contextLinesBefore)
@@ -254,8 +270,10 @@ extension XCTestCase: DiffTestCaseFailureReporter {
         
         #if os(macOS)
 
-        let location = XCTSourceCodeLocation(filePath: filePath.description,
-                                             lineNumber: Int(lineNumber))
+        let location = XCTSourceCodeLocation(
+            filePath: filePath.description,
+            lineNumber: Int(lineNumber)
+        )
         
         let issue = XCTIssueReference(
             type: .assertionFailure,
