@@ -9,6 +9,8 @@
 
 A program that aims to aid in automatization of conversion of Objective-C code into equivalent Swift code.
 
+An experimental WIP JavaScript frontend is also available.
+
 For information about how it's structured, see the [Architecture](Architecture.md) page.
 
 #### Example
@@ -97,6 +99,26 @@ $ swift run -c=release SwiftRewriter path /path/to/project/
 - Run `swift run SwiftRewriter --help` to print the full reference of command line arguments SwiftRewriter accepts. Reference also available bellow (for `path` subcommand):
 
 Usage:
+
+```
+OVERVIEW: 
+Main frontend API for SwiftRewriter. Allows selection of specific source language modes.
+
+USAGE: SwiftRewriter <subcommand>
+
+OPTIONS:
+  -h, --help              Show help information.
+
+SUBCOMMANDS:
+  objc (default)          Objective-C code conversion frontend
+  js                      JavaScript code conversion frontend [EXPERIMENTAL]
+
+  See 'SwiftRewriter help <subcommand>' for detailed help.
+```
+
+Objective-C frontend command arguments:
+
+`> swift run SwiftRewriter objc path --help`
 
 ```
 OVERVIEW: 
