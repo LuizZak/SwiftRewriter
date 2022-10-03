@@ -70,17 +70,11 @@ public class DiffingTest {
         self.diffOnly = diffOnly
     }
     
-<<<<<<< HEAD
-    public func diff(_ actual: String,
-                     file: StaticString = #filePath,
-                     line: UInt = #line) {
-=======
     public func diff(
-        _ res: String,
+        _ actual: String,
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
->>>>>>> master
         
         if expectedDiff.string == actual {
             return
