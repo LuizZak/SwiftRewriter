@@ -4,7 +4,7 @@ import Intentions
 
 /// Specifies a definition for a global function or variable, or a local variable
 /// of a function.
-public class CodeDefinition {
+public class CodeDefinition: Equatable {
     /// Gets the name of this definition.
     ///
     /// If this code definition is a function, the name is the identifier from
@@ -79,6 +79,16 @@ public class CodeDefinition {
     
     fileprivate init(functionSignature: FunctionSignature) {
         kind = .function(signature: functionSignature)
+    }
+
+    /// Returns `true` if `self` and `other` reference the same definition.
+    public func isEqual(to other: CodeDefinition) -> Bool {
+        self === other
+    }
+
+    /// Returns `true` if both code definitions reference the same definition.
+    public static func == (lhs: CodeDefinition, rhs: CodeDefinition) -> Bool {
+        lhs.isEqual(to: rhs)
     }
     
     public enum Kind: Hashable {
@@ -235,6 +245,7 @@ public extension CodeDefinition {
     static func forVarDeclElement(
         _ decl: StatementVariableDeclaration
     ) -> LocalCodeDefinition {
+
         CodeDefinition.forLocalIdentifier(
             decl.identifier,
             type: decl.type,
@@ -244,26 +255,26 @@ public extension CodeDefinition {
         )
     }
     
-    static func forGlobalFunction(_ function: GlobalFunctionGenerationIntention) -> CodeDefinition {
+    static func forGlobalFunction(_ function: GlobalFunctionGenerationIntention) -> GlobalIntentionCodeDefinition {
         GlobalIntentionCodeDefinition(intention: function)
     }
     
-    static func forGlobalVariable(_ variable: GlobalVariableGenerationIntention) -> CodeDefinition {
+    static func forGlobalVariable(_ variable: GlobalVariableGenerationIntention) -> GlobalIntentionCodeDefinition {
         GlobalIntentionCodeDefinition(intention: variable)
     }
     
-    static func forGlobalFunction(signature: FunctionSignature) -> CodeDefinition {
+    static func forGlobalFunction(signature: FunctionSignature) -> GlobalCodeDefinition {
         GlobalCodeDefinition(functionSignature: signature)
     }
     
-    static func forLocalFunctionStatement(_ stmt: LocalFunctionStatement) -> CodeDefinition {
+    static func forLocalFunctionStatement(_ stmt: LocalFunctionStatement) -> LocalCodeDefinition {
         LocalCodeDefinition(
             functionSignature: stmt.function.signature,
             location: .localFunction(stmt)
         )
     }
     
-    static func forGlobalVariable(name: String, isConstant: Bool, type: SwiftType) -> CodeDefinition {
+    static func forGlobalVariable(name: String, isConstant: Bool, type: SwiftType) -> GlobalCodeDefinition {
         if isConstant {
             return GlobalCodeDefinition(constantNamed: name, type: type)
         }
@@ -271,7 +282,7 @@ public extension CodeDefinition {
         return GlobalCodeDefinition(variableNamed: name, type: type)
     }
     
-    static func forKnownMember(_ knownMember: KnownMember) -> CodeDefinition {
+    static func forKnownMember(_ knownMember: KnownMember) -> KnownMemberCodeDefinition {
         KnownMemberCodeDefinition(knownMember: knownMember)
     }
     
@@ -303,22 +314,32 @@ public class KnownMemberCodeDefinition: CodeDefinition {
 
 /// A code definition that refers to a type of matching name
 public class TypeCodeDefinition: CodeDefinition {
-    
-}
-extension TypeCodeDefinition: Equatable {
-    public static func == (lhs: TypeCodeDefinition, rhs: TypeCodeDefinition) -> Bool {
-        lhs.name == rhs.name
+    public override func isEqual(to other: CodeDefinition) -> Bool {
+        switch other {
+        case let other as TypeCodeDefinition:
+            return isEqual(to: other)
+        default:
+            return super.isEqual(to: other)
+        }
+    }
+
+    public func isEqual(to other: TypeCodeDefinition) -> Bool {
+        name == other.name
     }
 }
 
 public class GlobalCodeDefinition: CodeDefinition {
-    fileprivate func isEqual(to other: GlobalCodeDefinition) -> Bool {
-        kind == other.kind
+    public override func isEqual(to other: CodeDefinition) -> Bool {
+        switch other {
+        case let other as GlobalCodeDefinition:
+            return isEqual(to: other)
+        default:
+            return super.isEqual(to: other)
+        }
     }
-}
-extension GlobalCodeDefinition: Equatable {
-    public static func == (lhs: GlobalCodeDefinition, rhs: GlobalCodeDefinition) -> Bool {
-        lhs.isEqual(to: rhs)
+
+    public func isEqual(to other: GlobalCodeDefinition) -> Bool {
+        kind == other.kind
     }
 }
 
@@ -341,7 +362,7 @@ public class GlobalIntentionCodeDefinition: GlobalCodeDefinition {
         }
     }
     
-    fileprivate override func isEqual(to other: GlobalCodeDefinition) -> Bool {
+    public override func isEqual(to other: GlobalCodeDefinition) -> Bool {
         if let other = other as? GlobalIntentionCodeDefinition {
             return intention === other.intention
         }
@@ -399,6 +420,19 @@ public class LocalCodeDefinition: CodeDefinition {
         self.location = location
         
         super.init(functionSignature: functionSignature)
+    }
+    
+    public override func isEqual(to other: CodeDefinition) -> Bool {
+        switch other {
+        case let other as LocalCodeDefinition:
+            return isEqual(to: other)
+        default:
+            return super.isEqual(to: other)
+        }
+    }
+
+    public func isEqual(to other: LocalCodeDefinition) -> Bool {
+        (self.kind == other.kind && self.location == other.location)
     }
     
     public enum DefinitionLocation: Hashable {
@@ -487,12 +521,6 @@ public class LocalCodeDefinition: CodeDefinition {
                 hasher.combine(loc)
             }
         }
-    }
-}
-
-extension LocalCodeDefinition: Equatable {
-    public static func == (lhs: LocalCodeDefinition, rhs: LocalCodeDefinition) -> Bool {
-        lhs === rhs || (lhs.kind == rhs.kind && lhs.location == rhs.location)
     }
 }
 

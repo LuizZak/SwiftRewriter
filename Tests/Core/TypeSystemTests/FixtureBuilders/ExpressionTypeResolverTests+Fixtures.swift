@@ -661,8 +661,8 @@ extension ExpressionTypeResolverTests {
 
             /// Opens a block to expose the original expression and allow the user to
             /// perform custom assertions
-            func thenAssert(with block: (T) -> Void) {
-                block(expression)
+            func thenAssert(with block: (T) throws -> Void) rethrows {
+                try block(expression)
             }
         }
     }

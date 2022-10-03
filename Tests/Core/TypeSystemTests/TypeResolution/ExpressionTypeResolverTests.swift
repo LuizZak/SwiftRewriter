@@ -1696,6 +1696,45 @@ class ExpressionTypeResolverTests: XCTestCase {
         .thenAssertExpression(resolvedAs: .string)
     }
 
+    func testFunctionOverloadingResolution_usesProperDefinition() throws {
+        let fIntDef = CodeDefinition.forGlobalFunction(
+            signature:
+                try! FunctionSignature(signatureString: "f(_ i: Int) -> Bool")
+        )
+        let fDoubleDef = CodeDefinition.forGlobalFunction(
+            signature:
+                try! FunctionSignature(signatureString: "f(_ d: Double) -> String")
+        )
+
+        try startScopedTest(
+            with: Expression.identifier("f").call([.constant(0)]),
+            sut: ExpressionTypeResolver()
+        )
+        .definingIntrinsic(fIntDef)
+        .definingIntrinsic(fDoubleDef)
+        .resolve()
+        .thenAssertExpression(resolvedAs: .bool)
+        .thenAssert { exp in
+            let identifier = try XCTUnwrap(exp.exp.asIdentifier)
+
+            XCTAssertEqual(identifier.definition, fIntDef)
+        }
+
+        try startScopedTest(
+            with: Expression.identifier("f").call([.constant(0.0)]),
+            sut: ExpressionTypeResolver()
+        )
+        .definingIntrinsic(fIntDef)
+        .definingIntrinsic(fDoubleDef)
+        .resolve()
+        .thenAssertExpression(resolvedAs: .string)
+        .thenAssert { exp in
+            let identifier = try XCTUnwrap(exp.exp.asIdentifier)
+
+            XCTAssertEqual(identifier.definition, fDoubleDef)
+        }
+    }
+
     func testInvocationOfOptionalProtocolRequirement() {
         startScopedTest(
             with: Expression.identifier("prot").dot("method").call(),

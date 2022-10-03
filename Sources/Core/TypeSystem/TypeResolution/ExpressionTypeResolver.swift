@@ -1191,8 +1191,10 @@ private class MemberInvocationResolver {
         if let target = postfix.exp.asIdentifier {
             
             let identifier =
-                FunctionIdentifier(name: target.identifier,
-                                   argumentLabels: arguments.map(\.label))
+                FunctionIdentifier(
+                    name: target.identifier,
+                    argumentLabels: arguments.map(\.label)
+                )
             
             let definitions =
                 typeResolver.searchFunctionDefinitions(matching: identifier, target)
@@ -1202,9 +1204,17 @@ private class MemberInvocationResolver {
                 functionCall.subExpressions.map(typeResolver.visitExpression)
             )
             
+            let bestMatchIndex =
+                findBestMatchIndex(signatures, matching: functionCall.arguments)
+
             let bestMatch =
-                findBestMatch(signatures, matching: functionCall.arguments)?.swiftClosureType
+                (bestMatchIndex.map { signatures[$0] })?.swiftClosureType
                     ?? postfix.exp.resolvedType
+            
+            // Update code definition
+            if let bestMatchIndex {
+                target.definition = definitions[bestMatchIndex]
+            }
             
             if let type = bestMatch,
                 case let .block(ret, args, _) = type.deepUnwrapped {
@@ -1254,21 +1264,32 @@ private class MemberInvocationResolver {
         arguments.map(\.label)
     }
     
-    func findBestMatch(_ functions: [FunctionSignature],
-                       matching arguments: [FunctionArgument]) -> FunctionSignature? {
+    func findBestMatch(
+        _ functions: [FunctionSignature],
+        matching arguments: [FunctionArgument]
+    ) -> FunctionSignature? {
         
-        let argTypes = arguments.asOverloadResolverArguments
-        
-        if let index =
-            typeSystem
-                .overloadResolver()
-                .findBestOverload(inSignatures: functions,
-                                  arguments: argTypes) {
-            
+        if let index = findBestMatchIndex(functions, matching: arguments) {
             return functions[index]
         }
         
         return nil
+    }
+    
+    func findBestMatchIndex(
+        _ functions: [FunctionSignature],
+        matching arguments: [FunctionArgument]
+    ) -> Int? {
+        
+        let argTypes = arguments.asOverloadResolverArguments
+        
+        return
+            typeSystem
+                .overloadResolver()
+                .findBestOverload(
+                    inSignatures: functions,
+                    arguments: argTypes
+                )
     }
     
     func method(
