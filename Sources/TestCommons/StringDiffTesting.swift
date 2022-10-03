@@ -263,7 +263,7 @@ extension XCTestCase: DiffTestCaseFailureReporter {
         )
 
         self.record(
-            XCTIssue(
+            XCTIssueReference(
                 type: .assertionFailure,
                 compactDescription: description,
                 detailedDescription: nil,
