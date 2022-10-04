@@ -34,12 +34,18 @@ public final class InitGenerationIntention: MemberGenerationIntention, MutableFu
         )
     }
     
-    public init(parameters: [ParameterSignature],
-                accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
-        
+    public init(
+        parameters: [ParameterSignature],
+        functionBody: FunctionBodyIntention? = nil,
+        accessLevel: AccessLevel = .internal,
+        source: ASTNode? = nil
+    ) {
+        self.functionBody = functionBody
         self.parameters = parameters
+
         super.init(accessLevel: accessLevel, source: source)
+
+        functionBody?.parent = self
     }
     
     public required init(from decoder: Decoder) throws {

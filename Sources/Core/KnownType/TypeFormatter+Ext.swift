@@ -191,16 +191,18 @@ public extension TypeFormatter {
     }
     
     /// Generates a string representation of a given method's signature
-    static func asString(method: KnownMethod,
-                         ofType type: KnownType,
-                         withTypeName typeName: Bool = true) -> String {
+    static func asString(
+        method: KnownMethod,
+        ofType type: KnownTypeReferenceConvertible,
+        withTypeName typeName: Bool = true
+    ) -> String {
         
         var result = ""
         
         result += method.isStatic ? "static " : ""
         
         if typeName {
-            result += type.typeName + "."
+            result += type.asKnownTypeReference.asTypeName + "."
         }
         
         result += method.signature.name
@@ -213,11 +215,13 @@ public extension TypeFormatter {
     
     /// Generates a string representation of a given property's signature, with
     /// type name, property name and property type.
-    static func asString(property: KnownProperty,
-                         ofType type: KnownType,
-                         withTypeName typeName: Bool = true,
-                         includeVarKeyword: Bool = false,
-                         includeAccessors: Bool = false) -> String {
+    static func asString(
+        property: KnownProperty,
+        ofType type: KnownTypeReferenceConvertible,
+        withTypeName typeName: Bool = true,
+        includeVarKeyword: Bool = false,
+        includeAccessors: Bool = false
+    ) -> String {
         
         var result = ""
         
@@ -230,7 +234,7 @@ public extension TypeFormatter {
         }
         
         if typeName {
-            result += type.typeName + "."
+            result += type.asKnownTypeReference.asTypeName + "."
         }
         
         result += property.name + ": " + stringify(property.storage.type)
@@ -251,10 +255,12 @@ public extension TypeFormatter {
     
     /// Generates a string representation of a given field's signature, with
     /// type name, field name and field type.
-    static func asString(field: KnownProperty,
-                         ofType type: KnownType,
-                         withTypeName typeName: Bool = true,
-                         includeVarKeyword: Bool = false) -> String {
+    static func asString(
+        field: KnownProperty,
+        ofType type: KnownTypeReferenceConvertible,
+        withTypeName typeName: Bool = true,
+        includeVarKeyword: Bool = false
+    ) -> String {
         
         var result = ""
         
@@ -266,7 +272,7 @@ public extension TypeFormatter {
         }
         
         if typeName {
-            result += type.typeName + "."
+            result += type.asKnownTypeReference.asTypeName + "."
         }
         
         result += field.name + ": " + stringify(field.storage.type)
@@ -274,17 +280,19 @@ public extension TypeFormatter {
         return result
     }
     
-    static func asString(subscript decl: KnownSubscript,
-                         ofType type: KnownType,
-                         withTypeName typeName: Bool = true,
-                         includeAccessors: Bool = false) -> String {
+    static func asString(
+        subscript decl: KnownSubscript,
+        ofType type: KnownTypeReferenceConvertible,
+        withTypeName typeName: Bool = true,
+        includeAccessors: Bool = false
+    ) -> String {
         
         var result = ""
         
         result += decl.isStatic ? "static " : ""
         
         if typeName {
-            result += type.typeName + "."
+            result += type.asKnownTypeReference.asTypeName + "."
         }
         
         result += "subscript\(asString(parameters: decl.parameters)) -> " + stringify(decl.returnType)
@@ -311,6 +319,25 @@ public extension TypeFormatter {
         }
         
         result += "init"
+        
+        if initializer.isFallible {
+            result += "?"
+        }
+        
+        result += asString(parameters: initializer.parameters)
+        
+        return result
+    }
+    
+    /// Generates a string representation of a given initializer.
+    static func asString(initializer: KnownConstructor, ofType type: KnownTypeReferenceConvertible) -> String {
+        var result: String = ""
+        
+        if initializer.isConvenience {
+            result = "convenience "
+        }
+        
+        result += "\(type.asKnownTypeReference.asTypeName).init"
         
         if initializer.isFallible {
             result += "?"

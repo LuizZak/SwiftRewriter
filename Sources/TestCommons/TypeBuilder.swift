@@ -88,7 +88,10 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
         builder: (InitializerBuilder) -> Void = emptyInit
     ) -> TypeBuilder {
         
-        let ctor = InitGenerationIntention(parameters: parameters, builder: builder)
+        let ctor = InitGenerationIntention(
+            parameters: parameters,
+            builder: builder
+        )
         
         targetType.addConstructor(ctor)
         

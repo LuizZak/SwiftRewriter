@@ -21,6 +21,25 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
             mode.setParent(self)
         }
     }
+
+    /// Returns the getter body for this subscript generation intention.
+    public var getter: FunctionBodyIntention {
+        switch mode {
+        case .getter(let body),
+            .getterAndSetter(let body, _):
+            return body
+        }
+    }
+    
+    /// If this subscript features a setter, returns the settings for that setter.
+    public var setter: Setter? {
+        switch mode {
+        case .getterAndSetter(_, let setter):
+            return setter
+        default:
+            return nil
+        }
+    }
     
     public init(
         parameters: [ParameterSignature],

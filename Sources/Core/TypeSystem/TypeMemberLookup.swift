@@ -83,9 +83,11 @@ class TypeMemberLookup {
                 
                 if let method =
                     typeSystem.overloadResolver()
-                        .findBestOverload(in: methods,
-                                          argumentTypes: invocationTypeHints)
-                        ?? methods.first {
+                        .findBestOverload(
+                            in: methods,
+                            argumentTypes: invocationTypeHints
+                        ) ?? methods.first
+                {
                     
                     return method
                 }
@@ -119,12 +121,15 @@ class TypeMemberLookup {
                 continue
             }
             
-            if let method = method(withIdentifier: identifier,
-                                   invocationTypeHints: invocationTypeHints,
-                                   static: isStatic,
-                                   includeOptional: includeOptional,
-                                   in: prot) {
-                
+            if let method =
+                method(
+                    withIdentifier: identifier,
+                    invocationTypeHints: invocationTypeHints,
+                    static: isStatic,
+                    includeOptional: includeOptional,
+                    in: prot
+                )
+            {
                 return method
             }
         }
@@ -143,11 +148,13 @@ class TypeMemberLookup {
         
         if memberSearchCache.usingCache,
             let result =
-            memberSearchCache.lookupProperty(named: name,
-                                             static: isStatic,
-                                             includeOptional: includeOptional,
-                                             in: type.typeName) {
-            
+                memberSearchCache.lookupProperty(
+                    named: name,
+                    static: isStatic,
+                    includeOptional: includeOptional,
+                    in: type.typeName
+                )
+        {
             return result
         }
         
@@ -204,10 +211,12 @@ class TypeMemberLookup {
         
         if memberSearchCache.usingCache,
             let result =
-            memberSearchCache.lookupField(named: name,
-                                          static: isStatic,
-                                          in: type.typeName) {
-            
+            memberSearchCache.lookupField(
+                named: name,
+                static: isStatic,
+                in: type.typeName
+            )
+        {
             return result
         }
         
@@ -228,7 +237,8 @@ class TypeMemberLookup {
     func _field(named name: String, static isStatic: Bool, in type: KnownType) -> KnownProperty? {
         if let field =
             type.knownFields
-                .first(where: { $0.name == name && $0.isStatic == isStatic }) {
+                .first(where: { $0.name == name && $0.isStatic == isStatic })
+        {
             return field
         }
         
@@ -248,10 +258,12 @@ class TypeMemberLookup {
         
         if memberSearchCache.usingCache,
             let result =
-            memberSearchCache.lookupMember(named: name,
-                                          static: isStatic,
-                                          in: type.typeName) {
-            
+                memberSearchCache.lookupMember(
+                    named: name,
+                    static: isStatic,
+                    in: type.typeName
+                )
+        {
             return result
         }
         
@@ -305,11 +317,13 @@ class TypeMemberLookup {
         
         if memberSearchCache.usingCache,
             let result =
-            memberSearchCache.lookupSubscription(withParameterLabels: labels,
-                                                 invocationTypeHints: invocationTypeHints,
-                                                 static: isStatic,
-                                                 in: type.typeName) {
-            
+                memberSearchCache.lookupSubscription(
+                    withParameterLabels: labels,
+                    invocationTypeHints: invocationTypeHints,
+                    static: isStatic,
+                    in: type.typeName
+                )
+        {
             return result
         }
         
@@ -358,10 +372,11 @@ class TypeMemberLookup {
                 
                 if let method =
                     typeSystem.overloadResolver()
-                        .findBestOverload(inSubscripts: subscripts,
-                                          arguments: invocationTypeHints.asOverloadResolverArguments)
-                        ?? subscripts.first {
-                    
+                        .findBestOverload(
+                            inSubscripts: subscripts,
+                            arguments: invocationTypeHints.asOverloadResolverArguments
+                        ) ?? subscripts.first
+                {
                     return method
                 }
             }
@@ -393,11 +408,14 @@ class TypeMemberLookup {
                 continue
             }
             
-            if let method = subscription(withParameterLabels: labels,
-                                         invocationTypeHints: invocationTypeHints,
-                                         static: isStatic,
-                                         in: prot) {
-                
+            if let method =
+                subscription(
+                    withParameterLabels: labels,
+                    invocationTypeHints: invocationTypeHints,
+                    static: isStatic,
+                    in: prot
+                )
+            {
                 return method
             }
         }
@@ -420,11 +438,14 @@ class TypeMemberLookup {
         
         if memberSearchCache.usingCache, let typeName = typeName {
             if let result =
-                memberSearchCache.lookupMethod(withIdentifier: identifier,
-                                               invocationTypeHints: invocationTypeHints,
-                                               static: isStatic,
-                                               includeOptional: includeOptional,
-                                               in: typeName) {
+                memberSearchCache.lookupMethod(
+                    withIdentifier: identifier,
+                    invocationTypeHints: invocationTypeHints,
+                    static: isStatic,
+                    includeOptional: includeOptional,
+                    in: typeName
+                )
+            {
                 
                 return result
             }
@@ -472,11 +493,13 @@ class TypeMemberLookup {
         
         if memberSearchCache.usingCache, let typeName = typeName {
             if let result =
-                memberSearchCache.lookupProperty(named: name,
-                                                 static: isStatic,
-                                                 includeOptional: includeOptional,
-                                                 in: typeName) {
-                
+                memberSearchCache.lookupProperty(
+                    named: name,
+                    static: isStatic,
+                    includeOptional: includeOptional,
+                    in: typeName
+                )
+            {
                 return result
             }
         }

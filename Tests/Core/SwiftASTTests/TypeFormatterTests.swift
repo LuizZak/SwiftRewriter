@@ -3,18 +3,18 @@ import XCTest
 
 class TypeFormatterTests: XCTestCase {
     func testAsStringFunctionSignature() {
-        let sig1 = FunctionSignature(
+        let sig1 = FunctionSignature.init(
             name: "abc",
             parameters: [],
             returnType: .int,
-            isStatic: false
+            traits: []
         )
 
         let sig2 = FunctionSignature(
             name: "abc",
             parameters: [ParameterSignature(label: "a", name: "b", type: .float)],
             returnType: .void,
-            isStatic: false
+            traits: []
         )
 
         let sig3 = FunctionSignature(
@@ -24,7 +24,7 @@ class TypeFormatterTests: XCTestCase {
                 ParameterSignature(label: "c", name: "c", type: .int),
             ],
             returnType: .void,
-            isStatic: true
+            traits: [.static, .throwing]
         )
 
         XCTAssertEqual("abc() -> Int", TypeFormatter.asString(signature: sig1, includeName: true))
@@ -37,8 +37,12 @@ class TypeFormatterTests: XCTestCase {
         XCTAssertEqual("(a b: Float)", TypeFormatter.asString(signature: sig2, includeName: false))
 
         XCTAssertEqual(
-            "static abc(a b: Float, c: Int)",
+            "static throwing abc(a b: Float, c: Int)",
             TypeFormatter.asString(signature: sig3, includeName: true)
+        )
+        XCTAssertEqual(
+            "static abc(a b: Float, c: Int)",
+            TypeFormatter.asString(signature: sig3, includeName: true, includeTraits: false)
         )
         XCTAssertEqual(
             "static (a b: Float, c: Int)",

@@ -264,23 +264,19 @@ internal extension ControlFlowGraph {
     /// earlier in the graph when visiting the graph in depth-first fashion
     /// starting from its entry point.
     func markBackEdges() {
-        // TODO: Can use breadthFirstVisit now that the new visit element has the
-        // TODO: visited nodes/path information built in it?
+        var visited: Set<Node> = []
 
-        var queue: [(start: Node, visited: [Node])] = []
-        
-        queue.append((entry, [entry]))
-        
-        while let next = queue.popLast() {
-            for nextEdge in edges(from: next.start) {
-                let node = nextEdge.end
-                if next.visited.contains(node) {
+        breadthFirstVisit(start: entry) { visit in
+            for nextEdge in edges(from: visit.node) {
+                let node = endNode(for: nextEdge)
+                if visit.allNodes.contains(node) {
                     nextEdge.isBackEdge = true
-                    continue
                 }
-                
-                queue.append((node, next.visited + [node]))
             }
+
+            visited.insert(visit.node)
+
+            return true
         }
     }
     

@@ -42,31 +42,43 @@ public class MethodGenerationIntention: MemberGenerationIntention, Parameterized
         signature.swiftClosureType
     }
     
-    public convenience init(isStatic: Bool,
-                            name: String,
-                            returnType: SwiftType,
-                            parameters: [ParameterSignature],
-                            accessLevel: AccessLevel = .internal,
-                            source: ASTNode? = nil) {
+    public convenience init(
+        isStatic: Bool,
+        name: String,
+        returnType: SwiftType,
+        parameters: [ParameterSignature],
+        accessLevel: AccessLevel = .internal,
+        source: ASTNode? = nil
+    ) {
         
         let signature =
-            FunctionSignature(name: name,
-                              parameters: parameters,
-                              returnType: returnType,
-                              isStatic: isStatic,
-                              isMutating: false)
+            FunctionSignature(
+                name: name,
+                parameters: parameters,
+                returnType: returnType,
+                isStatic: isStatic,
+                isMutating: false
+            )
         
-        self.init(signature: signature,
-                  accessLevel: accessLevel,
-                  source: source)
+        self.init(
+            signature: signature,
+            accessLevel: accessLevel,
+            source: source
+        )
     }
     
-    public init(signature: FunctionSignature,
-                accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
-        
+    public init(
+        signature: FunctionSignature,
+        functionBody: FunctionBodyIntention? = nil,
+        accessLevel: AccessLevel = .internal,
+        source: ASTNode? = nil
+    ) {
+        self.functionBody = functionBody
         self.signature = signature
+        
         super.init(accessLevel: accessLevel, source: source)
+
+        self.functionBody?.parent = self
     }
     
     public required init(from decoder: Decoder) throws {

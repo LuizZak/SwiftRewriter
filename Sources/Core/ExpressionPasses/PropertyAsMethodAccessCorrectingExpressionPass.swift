@@ -63,7 +63,7 @@ public class PropertyAsMethodAccessCorrectingExpressionPass: BaseExpressionPass 
         guard let member = exp.member else {
             return nil
         }
-        if let memberDefinition = member.memberDefinition {
+        if let memberDefinition = member.definition {
             return memberDefinition
         }
         

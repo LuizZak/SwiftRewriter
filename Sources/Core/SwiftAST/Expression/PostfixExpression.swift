@@ -664,7 +664,6 @@ extension FunctionArgument: CustomStringConvertible {
 }
 
 extension Postfix {
-    
     @inlinable
     public func copyTypeAndMetadata(from other: Postfix) -> Self {
         self.metadata = other.metadata
@@ -673,11 +672,9 @@ extension Postfix {
         
         return self
     }
-    
 }
 
 extension FunctionCallPostfix {
-    
     @inlinable
     public func copyTypeAndMetadata(from other: FunctionCallPostfix) -> Self {
         _ = (self as Postfix).copyTypeAndMetadata(from: other)
@@ -686,5 +683,4 @@ extension FunctionCallPostfix {
         
         return self
     }
-    
 }

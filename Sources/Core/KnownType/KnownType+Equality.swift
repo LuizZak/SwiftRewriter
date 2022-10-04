@@ -43,7 +43,7 @@ func areEquivalent(_ ctor1: KnownConstructor, _ ctor2: KnownConstructor) -> Bool
 }
 
 /// Returns `true` if two methods have the same signatures, attributes, and
-/// sesmantics.
+/// semantics.
 /// Bodies are ignored during comparison
 func areEquivalent(_ method1: KnownMethod, _ method2: KnownMethod) -> Bool {
     return method1.signature == method2.signature
@@ -55,7 +55,7 @@ func areEquivalent(_ method1: KnownMethod, _ method2: KnownMethod) -> Bool {
 }
 
 /// Returns `true` if two properties have the same signatures, attributes, and
-/// sesmantics.
+/// semantics.
 func areEquivalent(_ prop1: KnownProperty, _ prop2: KnownProperty) -> Bool {
     return prop1.name == prop2.name
         && prop1.storage == prop2.storage
@@ -69,7 +69,7 @@ func areEquivalent(_ prop1: KnownProperty, _ prop2: KnownProperty) -> Bool {
 }
 
 /// Returns `true` if two subscripts have the same signatures, attributes, and
-/// sesmantics.
+/// semantics.
 func areEquivalent(_ sub1: KnownSubscript, _ sub2: KnownSubscript) -> Bool {
     return sub1.parameters == sub2.parameters
         && sub1.returnType == sub2.returnType

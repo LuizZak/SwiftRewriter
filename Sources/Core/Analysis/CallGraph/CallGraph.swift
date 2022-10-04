@@ -1,4 +1,5 @@
 import Intentions
+import TypeSystem
 
 /// Represents call order dependencies of functions and variable initializers in
 /// a program.
@@ -21,8 +22,12 @@ public class CallGraph: DirectedGraphBase<CallGraphNode, CallGraphEdge> {
         return edge
     }
 
-    public static func fromIntentions(_ intentionCollection: IntentionCollection) -> CallGraph {
-        _fromIntentions(intentionCollection)
+    public static func fromIntentions(
+        _ collection: IntentionCollection,
+        typeSystem: TypeSystem
+    ) -> CallGraph {
+        
+        _fromIntentions(collection, typeSystem: typeSystem)
     }
 
     @discardableResult
@@ -32,6 +37,8 @@ public class CallGraph: DirectedGraphBase<CallGraphNode, CallGraphEdge> {
         }
 
         let node = Node(declaration: declaration)
+        addNode(node)
+        
         return node
     }
 }
@@ -49,6 +56,9 @@ public class CallGraphNode: DirectedGraphNode {
 public class CallGraphEdge: DirectedGraphBaseEdgeType {
     public let start: CallGraphNode
     public let end: CallGraphNode
+
+    /// A label that can be used during debugging to discern call graph edges.
+    public var debugLabel: String?
 
     internal init(start: CallGraphNode, end: CallGraphNode) {
         self.start = start

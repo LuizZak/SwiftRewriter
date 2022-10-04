@@ -139,9 +139,9 @@ extension IdentifierExpression: DefinitionReferenceNode {
     }
 }
 
-public extension MemberPostfix {
-    /// Gets the member this member postfix operation references
-    var memberDefinition: KnownMember? {
+public extension Postfix {
+    /// Gets the member this postfix operation references
+    var definition: KnownMember? {
         get {
             metadata[_identifierDefinitionKey] as? KnownMember
         }

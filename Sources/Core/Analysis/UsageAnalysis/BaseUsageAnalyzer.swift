@@ -74,7 +74,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                 guard let member = exp.member else {
                     return
                 }
-                guard let expMethod = member.memberDefinition as? KnownMethod else {
+                guard let expMethod = member.definition as? KnownMethod else {
                     return
                 }
                 guard expMethod.signature == method.signature else {
@@ -131,7 +131,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                 guard let member = exp.member else {
                     return
                 }
-                guard let expProperty = member.memberDefinition as? KnownProperty else {
+                guard let expProperty = member.definition as? KnownProperty else {
                     return
                 }
                 guard expProperty.name == property.name else {
@@ -166,6 +166,178 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
         return usages
     }
     
+    public func findUsagesOf(subscript sub: KnownSubscript) -> [DefinitionUsage] {
+        let containers = statementContainers()
+        
+        var usages: [DefinitionUsage] = []
+        
+        for (container, intention) in containers {
+            let visitor = AnonymousSyntaxNodeVisitor { node in
+                guard let exp = node as? PostfixExpression else {
+                    return
+                }
+                guard let subExp = exp.subscription else {
+                    return
+                }
+                guard let expMethod = subExp.definition as? KnownSubscript else {
+                    return
+                }
+                guard expMethod.parameters == sub.parameters else {
+                    return
+                }
+                guard expMethod.ownerType?.asTypeName == sub.ownerType?.asTypeName else {
+                    return
+                }
+
+                let usage =
+                    DefinitionUsage(
+                        intention: intention,
+                        definition: .forKnownMember(sub),
+                        expression: .subscript(exp.exp, subExp, in: exp),
+                        isReadOnlyUsage: true
+                    )
+                
+                usages.append(usage)
+            }
+            
+            switch container {
+            case .function(let body):
+                visitor.visitStatement(body.body)
+            case .expression(let exp):
+                visitor.visitExpression(exp)
+            case .statement(let stmt):
+                visitor.visitStatement(stmt)
+            }
+        }
+        
+        return usages
+    }
+    
+    /// Returns an array of all usages found within a given syntax node tree.
+    public func findAllUsagesIn(_ syntaxNode: SyntaxNode, intention: FunctionBodyCarryingIntention) -> [DefinitionUsage] {
+        var usages: [DefinitionUsage] = []
+
+        func pushDefinition(_ newUsage: DefinitionUsage) {
+            // Avoid double-definition usages
+            for usage in usages {
+                if usage.expression.expression == newUsage.expression.expression {
+                    return
+                }
+            }
+
+            usages.append(newUsage)
+        }
+        
+        let visitor = AnonymousSyntaxNodeVisitor { node in
+            if let exp = node as? PostfixExpression {
+                if let member = exp.member {
+                    // Property/field definition
+                    if let expProperty = member.definition {
+                        let readOnly = self.isReadOnlyContext(exp)
+                                        
+                        let usage =
+                            DefinitionUsage(
+                                intention: intention,
+                                definition: .forKnownMember(expProperty),
+                                expression: .memberAccess(exp.exp, member, in: exp),
+                                isReadOnlyUsage: readOnly
+                            )
+                        
+                        pushDefinition(usage)
+                    }
+                } else if let sub = exp.subscription {
+                    // Subscript member definition
+                    if let expSub = sub.definition {
+                        let readOnly = self.isReadOnlyContext(exp)
+                                        
+                        let usage =
+                            DefinitionUsage(
+                                intention: intention,
+                                definition: .forKnownMember(expSub),
+                                expression: .subscript(exp.exp, sub, in: exp),
+                                isReadOnlyUsage: readOnly
+                            )
+                        
+                        pushDefinition(usage)
+                    }
+                } else if let call = exp.functionCall {
+                    // Callable member definition
+                    if let expCall = call.definition {
+                        let readOnly = self.isReadOnlyContext(exp)
+                                        
+                        let usage =
+                            DefinitionUsage(
+                                intention: intention,
+                                definition: .forKnownMember(expCall),
+                                expression: .functionCall(exp, call, in: exp),
+                                isReadOnlyUsage: readOnly
+                            )
+                        
+                        pushDefinition(usage)
+                    }
+                }
+            }
+
+            // Identifier-based access
+            if let exp = node as? IdentifierExpression, exp.definition != nil {
+                // Global function
+                if
+                    let definition = exp.definition as? GlobalIntentionCodeDefinition,
+                    let globalFunc = definition.intention as? GlobalFunctionGenerationIntention
+                {
+                    // Attempt to infer usage of a function call, for context purposes.
+                    var expressionKind: DefinitionUsage.ExpressionKind
+                    expressionKind = .identifier(exp)
+
+                    if let parent = exp.parentExpression?.asPostfix {
+                        if let functionCall = parent.op.asFunctionCall {
+                            expressionKind = .functionCall(exp, functionCall, in: parent)
+                        }
+                    }
+
+                    let usage =
+                        DefinitionUsage(
+                            intention: intention,
+                            definition: .forGlobalFunction(globalFunc),
+                            expression: expressionKind,
+                            isReadOnlyUsage: true
+                        )
+                    
+                    pushDefinition(usage)
+                }
+
+                // Global variable
+                if
+                    let definition = exp.definition as? GlobalIntentionCodeDefinition,
+                    let globalVar = definition.intention as? GlobalVariableGenerationIntention
+                {
+                    let usage =
+                        DefinitionUsage(
+                            intention: intention,
+                            definition: .forGlobalVariable(globalVar),
+                            expression: .identifier(exp),
+                            isReadOnlyUsage: true
+                        )
+                    
+                    pushDefinition(usage)
+                }
+            }
+        }
+
+        switch syntaxNode {
+        case let expr as Expression:
+            expr.accept(visitor)
+        
+        case let stmt as Statement:
+            stmt.accept(visitor)
+
+        default:
+            break
+        }
+        
+        return usages
+    }
+    
     func isReadOnlyContext(_ expression: Expression) -> Bool {
         // TODO: Reduce duplication of this code here and in ExpressionTypeResolver
 
@@ -194,7 +366,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                     return true
                 }
                 
-                if let method = member.memberDefinition as? KnownMethod {
+                if let method = member.definition as? KnownMethod {
                     return !method.signature.isMutating
                 }
                 

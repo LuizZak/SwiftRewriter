@@ -17,7 +17,7 @@ public struct ArrayDefinitionsSource: DefinitionsSource {
                 switch def.kind {
                 case .function(let signature):
                     return (signature.name, def)
-                case .variable:
+                case .variable, .initializer:
                     return nil
                 }
             }
@@ -29,7 +29,7 @@ public struct ArrayDefinitionsSource: DefinitionsSource {
                 switch def.kind {
                 case .function(let signature):
                     return (signature.asIdentifier, def)
-                case .variable:
+                case .variable, .initializer:
                     return nil
                 }
             }

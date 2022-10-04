@@ -170,7 +170,7 @@ public class DetectTypePropertiesBySelfAssignmentIntentionPass: TypeVisitingInte
             }
 
             // Ignore member accesses that are known to the type system.
-            guard member.memberDefinition == nil else {
+            guard member.definition == nil else {
                 return nil
             }
 

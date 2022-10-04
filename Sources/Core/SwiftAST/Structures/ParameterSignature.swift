@@ -21,3 +21,29 @@ public struct ParameterSignature: Hashable, Codable {
         self.hasDefaultValue = hasDefaultValue
     }
 }
+
+extension ParameterSignature: CustomStringConvertible {
+    public var description: String {
+        var result = ""
+
+        if let label = label {
+            if label != name {
+                result += "\(label) "
+            }
+        } else {
+            result += "_ "
+        }
+
+        result += "\(name): "
+        result += type.description
+
+        if isVariadic {
+            result += "..."
+        }
+        if hasDefaultValue {
+            result += "= default"
+        }
+
+        return result
+    }
+}

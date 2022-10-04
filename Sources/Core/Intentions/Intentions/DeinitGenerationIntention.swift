@@ -14,10 +14,16 @@ public class DeinitGenerationIntention: MemberGenerationIntention, MutableFuncti
         }
     }
     
-    public override init(accessLevel: AccessLevel = .internal,
-                         source: ASTNode? = nil) {
-        
+    public init(
+        functionBody: FunctionBodyIntention? = nil,
+        accessLevel: AccessLevel = .internal,
+        source: ASTNode? = nil
+    ) {
+        self.functionBody = functionBody
+
         super.init(accessLevel: accessLevel, source: source)
+
+        functionBody?.parent = self
     }
     
     public required init(from decoder: Decoder) throws {

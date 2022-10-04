@@ -36,7 +36,7 @@ public class EnumRewriterExpressionPass: ASTRewriterPass {
             let result = ident.dot(_case.name)
             
             result.resolvedType = .typeName(_enum.typeName)
-            result.member?.memberDefinition = _case
+            result.member?.definition = _case
 
             notifyChange()
             

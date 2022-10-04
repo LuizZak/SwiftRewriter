@@ -70,7 +70,7 @@ public enum KnownTypeKind: String, Codable {
 ///
 /// - knownType: A concrete known type reference.
 /// - typeName: The type that is referenced by a loose type name.
-public enum KnownTypeReference: KnownTypeReferenceConvertible, Equatable {
+public enum KnownTypeReference: KnownTypeReferenceConvertible, Hashable {
     case typeName(String)
     indirect case nested(base: KnownTypeReference, typeName: String)
     
@@ -139,22 +139,6 @@ public extension KnownType {
     }
 }
 
-/// Describes a known type constructor
-public protocol KnownConstructor: SemanticalObject, AttributeTaggeableObject {
-    /// Gets the parameters for this constructor
-    var parameters: [ParameterSignature] { get }
-    
-    /// Gets whether this initializer can fail (i.e. return nil)
-    var isFallible: Bool { get }
-    
-    /// Gets whether this initializer is a convenience initializer
-    var isConvenience: Bool { get }
-    
-    /// Miscellaneous semantical annotations that do not affect this initializer's
-    /// signature.
-    var annotations: [String] { get }
-}
-
 /// Describes a known member of a type
 public protocol KnownMember: SemanticalObject, AttributeTaggeableObject {
     /// The owner type for this known member
@@ -170,6 +154,22 @@ public protocol KnownMember: SemanticalObject, AttributeTaggeableObject {
     var memberType: SwiftType { get }
     
     /// Miscellaneous semantical annotations that do not affect this member's
+    /// signature.
+    var annotations: [String] { get }
+}
+
+/// Describes a known type constructor
+public protocol KnownConstructor: KnownMember {
+    /// Gets the parameters for this constructor
+    var parameters: [ParameterSignature] { get }
+    
+    /// Gets whether this initializer can fail (i.e. return nil)
+    var isFallible: Bool { get }
+    
+    /// Gets whether this initializer is a convenience initializer
+    var isConvenience: Bool { get }
+    
+    /// Miscellaneous semantical annotations that do not affect this initializer's
     /// signature.
     var annotations: [String] { get }
 }
@@ -246,6 +246,20 @@ public extension KnownMethod {
     }
 }
 
+public extension KnownConstructor {
+    var memberType: SwiftType {
+        SwiftType.block(
+            returnType: ownerType?.asSwiftType ?? .any,
+            parameters: parameters.map(\.type),
+            attributes: []
+        )
+    }
+
+    var isStatic: Bool {
+        true
+    }
+}
+
 public extension KnownProperty {
     var memberType: SwiftType {
         storage.type
@@ -312,8 +326,11 @@ public enum TraitType: Equatable, Codable {
                 Unknown TraitType discriminator. Maybe data was encoded using a \
                 different version of SwiftRewriter?
                 """
-            throw DecodingError.dataCorruptedError(forKey: .discriminator, in: container,
-                                                   debugDescription: message)
+            throw DecodingError.dataCorruptedError(
+                forKey: .discriminator,
+                in: container,
+                debugDescription: message
+            )
         }
     }
     
@@ -365,7 +382,9 @@ public struct KnownAttribute: Codable, Equatable {
 
 public extension SwiftRewriterAttribute {
     var asKnownAttribute: KnownAttribute {
-        KnownAttribute(name: SwiftRewriterAttribute.name,
-                       parameters: content.asString)
+        KnownAttribute(
+            name: SwiftRewriterAttribute.name,
+            parameters: content.asString
+        )
     }
 }

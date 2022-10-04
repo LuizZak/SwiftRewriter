@@ -115,6 +115,28 @@ public enum DirectedGraphVisitElement<E: DirectedGraphEdge, N: DirectedGraphNode
         }
     }
 
+    /// Gets the last edge that is associated with the visit.
+    ///
+    /// If this visit is not an `.edge` case, `nil` is returned instead.
+    public var edge: E? {
+        switch self {
+        case .start:
+            return nil
+        case .edge(let edge, _, _):
+            return edge
+        }
+    }
+
+    /// Gets the list of all edges from this visit element.
+    public var allEdges: [E] {
+        switch self {
+        case .start:
+            return []
+        case .edge(let edge, let from, _):
+            return from.allEdges + [edge]
+        }
+    }
+
     /// Gets an array of all nodes from this visit element.
     public var allNodes: [N] {
         switch self {

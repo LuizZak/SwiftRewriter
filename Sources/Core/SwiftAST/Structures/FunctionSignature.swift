@@ -339,7 +339,7 @@ public struct FunctionSignature: Hashable {
     }
 
     /// Defines traits for a function signature.
-    public struct Traits: Codable, OptionSet, Hashable {
+    public struct Traits: Codable, OptionSet, Hashable, CustomStringConvertible {
         public var rawValue: Int
 
         public init(rawValue: Int) {
@@ -357,6 +357,25 @@ public struct FunctionSignature: Hashable {
 
         /// Function is async
         public static let `async`: Self = Self(rawValue: 0b0000_1000)
+
+        public var description: String {
+            var result = ""
+
+            if contains(.mutating) {
+                result += "mutating "
+            }
+            if contains(.throwing) {
+                result += "throwing "
+            }
+            if contains(.static) {
+                result += "static "
+            }
+            if contains(.async) {
+                result += "async "
+            }
+
+            return result.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
     }
 }
 
@@ -378,6 +397,28 @@ extension FunctionSignature: Codable {
         case returnType
         case parameters
         case traits
+    }
+}
+
+extension FunctionSignature: CustomStringConvertible {
+    public var description: String {
+        var result = ""
+        
+        let traitDesc = traits.description
+        if !traitDesc.isEmpty {
+            result += traitDesc + " "
+        }
+
+        result += "func "
+        result += name
+        
+        result += TypeFormatter.asString(parameters: parameters)
+        
+        if returnType != .void {
+            result += " -> \(TypeFormatter.stringify(returnType))"
+        }
+        
+        return result
     }
 }
 

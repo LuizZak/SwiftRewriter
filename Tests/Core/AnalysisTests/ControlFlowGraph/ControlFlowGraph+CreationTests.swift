@@ -39,7 +39,8 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n1 -> n2
                     n2 -> n3
                 }
-                """
+                """,
+            syntaxNode: stmt
         )
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -89,7 +90,8 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n8 -> n9
                     n9 -> n10
                 }
-                """
+                """,
+            syntaxNode: stmt
         )
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -161,7 +163,8 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n18 -> n19
                     n19 -> n20
                 }
-                """
+                """,
+            syntaxNode: stmt
         )
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -236,7 +239,8 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n20 -> n12
                     n21 -> n10
                 }
-                """
+                """,
+            syntaxNode: stmt
         )
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -296,7 +300,8 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n14 -> n15
                     n15 -> n9
                 }
-                """
+                """,
+            syntaxNode: stmt
         )
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -356,7 +361,8 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n14 -> n15
                     n15 -> n7 [color="#aa3333", penwidth=0.5]
                 }
-                """
+                """,
+            syntaxNode: stmt
         )
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -393,7 +399,8 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n4 -> n5
                     n5 -> n6
                 }
-                """
+                """,
+            syntaxNode: stmt
         )
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
@@ -432,7 +439,8 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n6 -> n7
                     n7 -> n8
                 }
-                """
+                """,
+            syntaxNode: stmt
         )
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
@@ -495,7 +503,8 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n16 -> n17
                     n17 -> n18
                 }
-                """
+                """,
+            syntaxNode: stmt
         )
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -527,7 +536,8 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n3 -> n4
                     n4 -> n5
                 }
-                """
+                """,
+            syntaxNode: stmt
         )
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -579,7 +589,8 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n8 -> n9
                     n10 -> n11
                 }
-                """
+                """,
+            syntaxNode: stmt
         )
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)

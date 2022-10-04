@@ -3,6 +3,7 @@ import WriterTargetOutput
 import SwiftSyntax
 import SwiftSyntaxParser
 import XCTest
+import TestCommons
 
 @testable import Analysis
 
@@ -114,6 +115,7 @@ private var recordedGraphs: [GraphvizUpdateEntry] = []
 internal func assertGraphviz(
     graph: ControlFlowGraph,
     matches expected: String,
+    syntaxNode: SwiftAST.SyntaxNode? = nil,
     file: StaticString = #filePath,
     line: UInt = #line
 ) {
@@ -133,9 +135,21 @@ internal func assertGraphviz(
         )
     }
 
+    let syntaxString: String?
+    switch syntaxNode {
+    case let node as Expression:
+        syntaxString = ExpressionPrinter.toString(expression: node)
+
+    case let node as Statement:
+        syntaxString = StatementPrinter.toString(statement: node)
+    
+    default:
+        syntaxString = nil
+    }
+
     XCTFail(
         """
-        Expected produced graph to be
+        \(syntaxString.map{ "\($0)\n\n" } ?? "")Expected produced graph to be
 
         \(expected)
 
@@ -164,7 +178,7 @@ internal func graphviz(graph: ControlFlowGraph) -> String {
     buffer.indented {
         var nodeIds: [ObjectIdentifier: String] = [:]
 
-        var nodeDefinitions: [NodeDefinition] = []
+        var nodeDefinitions: [NodeDefinition<ControlFlowGraphNode>] = []
         
         // Prepare nodes
         for node in graph.nodes {
@@ -318,8 +332,8 @@ func throwErrorIfInGraphvizRecordMode(file: StaticString = #file) throws {
     }
 }
 
-internal struct NodeDefinition {
-    var node: ControlFlowGraphNode
+internal struct NodeDefinition<Node: DirectedGraphNode> {
+    var node: Node
     
     /// Rank of the node, or the minimal number of edges that connect the node
     /// to the entry of the graph.
@@ -461,7 +475,7 @@ fileprivate func labelForSyntaxNode(_ node: SwiftAST.SyntaxNode) -> String {
     return label
 }
 
-func labelForNode(_ node: ControlFlowGraphNode, graph: ControlFlowGraph) -> String {
+fileprivate func labelForNode(_ node: ControlFlowGraphNode, graph: ControlFlowGraph) -> String {
     if node === graph.entry {
         return "entry"
     }
@@ -522,7 +536,6 @@ private class GraphvizUpdateRewriter: SyntaxRewriter {
 
     let entry: GraphvizUpdateEntry
     let locationConverter: SourceLocationConverter
-
 
     convenience init(
         file: String,

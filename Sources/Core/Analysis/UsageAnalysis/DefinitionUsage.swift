@@ -18,7 +18,7 @@ public struct DefinitionUsage {
     public var expression: ExpressionKind
     
     /// Whether, in the context of this usage, the referenced definition is being
-    /// used in a read-only context.
+    /// read or read-written into.
     public var isReadOnlyUsage: Bool
 
     /// Specifies a recognized expression contexts for definition usages.
@@ -26,11 +26,14 @@ public struct DefinitionUsage {
         /// Usage is of an identifier.
         case identifier(IdentifierExpression)
 
-        /// Definition is a member access, rooted on a given base expression.
+        /// Usage is a member access, rooted on a given base expression.
         case memberAccess(Expression, MemberPostfix, in: PostfixExpression)
 
-        /// Definition is a function call, rooted on a given base expression.
+        /// Usage is a function, rooted on a given base expression.
         case functionCall(Expression, FunctionCallPostfix, in: PostfixExpression)
+
+        /// Usage is a subscript, rooted on a given base expression.
+        case `subscript`(Expression, SubscriptPostfix, in: PostfixExpression)
 
         /// Gets the context's expression, where the resolved type is the type
         /// of the definition.
@@ -43,6 +46,9 @@ public struct DefinitionUsage {
                 return exp
 
             case .memberAccess(_, _, let exp):
+                return exp
+            
+            case .subscript(_, _, let exp):
                 return exp
             }
         }

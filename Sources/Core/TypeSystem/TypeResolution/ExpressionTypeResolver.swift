@@ -789,18 +789,22 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             // be mutated due to any change on the returned value, so we just
             // assume it's never written.
             let chain = PostfixChainInverter.invert(expression: root)
-            if let call = chain.first(where: { $0.postfix is FunctionCallPostfix }),
-                let member = call.postfixExpression?.exp.asPostfix?.member {
+            if
+                let call = chain.first(where: { $0.postfix is FunctionCallPostfix }),
+                let member = call.postfixExpression?.exp.asPostfix?.member
+            {
                 
                 // Skip checking mutating methods on reference types, since those
                 // don't mutate variables.
-                if let type = chain.first?.expression?.resolvedType,
-                    !typeSystem.isScalarType(type) {
+                if
+                    let type = chain.first?.expression?.resolvedType,
+                    !typeSystem.isScalarType(type)
+                {
                     
                     return true
                 }
                 
-                if let method = member.memberDefinition as? KnownMethod {
+                if let method = member.definition as? KnownMethod {
                     return !method.signature.isMutating
                 }
                 
@@ -925,13 +929,16 @@ private class MemberInvocationResolver {
                 return exp
             }
             
+            var subTypes = sub.arguments.map(\.expression.resolvedType)
+
             func resolveArgTypes() {
                 exp.op = sub.replacingArguments(
                     sub.subExpressions.map(typeResolver.visitExpression)
                 )
+                
+                subTypes = sub.arguments.map(\.expression.resolvedType)
             }
             
-            let subTypes = sub.arguments.map(\.expression.resolvedType)
             // Propagate error type
             if sub.arguments.any(\.expression.isErrorTyped) {
                 return exp.makeErrorTyped()
@@ -982,14 +989,17 @@ private class MemberInvocationResolver {
 
             default:
                 
+                resolveArgTypes()
+                
                 let subscriptDecl = typeSystem.subscription(
-                    withParameterLabels: [nil],
+                    withParameterLabels: sub.arguments.map(\.label),
                     invocationTypeHints: subTypes,
                     static: expType.isMetatype,
                     in: expType
                 )
                 
                 if let subscriptDecl = subscriptDecl {
+                    sub.definition = subscriptDecl
                     exp.resolvedType = subscriptDecl.returnType
                     matchParameterTypes(
                         parameters: subscriptDecl.parameters,
@@ -1027,32 +1037,41 @@ private class MemberInvocationResolver {
                 return exp.makeErrorTyped()
             }
             
-            if let property = typeSystem.property(named: member.name,
-                                                  static: innerType.isMetatype,
-                                                  includeOptional: true,
-                                                  in: innerType) {
-                
-                member.memberDefinition = property
+            if let property =
+                typeSystem.property(
+                    named: member.name,
+                    static: innerType.isMetatype,
+                    includeOptional: true,
+                    in: innerType
+                )
+            {
+                member.definition = property
                 exp.resolvedType = property.storage.type
                 exp.op.returnType = exp.resolvedType
                 
                 break
             }
-            if let field = typeSystem.field(named: member.name,
-                                            static: innerType.isMetatype,
-                                            in: innerType) {
-                
-                member.memberDefinition = field
+            if let field =
+                typeSystem.field(
+                    named: member.name,
+                    static: innerType.isMetatype,
+                    in: innerType
+                )
+            {
+                member.definition = field
                 exp.resolvedType = field.storage.type
                 exp.op.returnType = exp.resolvedType
                 
                 break
             }
-            if let typeMember = typeSystem.member(named: member.name,
-                                              static: innerType.isMetatype,
-                                              in: innerType) {
-                
-                member.memberDefinition = typeMember
+            if let typeMember =
+                typeSystem.member(
+                    named: member.name,
+                    static: innerType.isMetatype,
+                    in: innerType
+                )
+            {
+                member.definition = typeMember
                 exp.resolvedType = typeMember.memberType
                 exp.op.returnType = exp.resolvedType
                 
@@ -1106,18 +1125,23 @@ private class MemberInvocationResolver {
                 
                 if args.count == argTypes.count {
                     postfix.exp.expectedType =
-                        .block(returnType: expectedType,
-                               parameters: argTypes,
-                               attributes: [])
+                        .block(
+                            returnType: expectedType,
+                            parameters: argTypes,
+                            attributes: []
+                        )
                 }
             }
         }
         
         let arguments = functionCall.arguments
         
-        // Parameterless type constructor on type metadata (i.e. `MyClass.init()`)
-        if let target = postfix.exp.asPostfix?.exp.asIdentifier,
-            postfix.exp.asPostfix?.op == .member("init") && arguments.isEmpty {
+        // Parameterless type constructor on type metadata (i.e. `MyClass.init([params])`)
+        if
+            let target = postfix.exp.asPostfix?.exp.asIdentifier,
+            let initAccess = postfix.exp.asPostfix,
+            initAccess.op == .member("init")
+        {
             
             guard let metatype = extractMetatype(from: target) else {
                 return postfix.makeErrorTyped()
@@ -1129,9 +1153,13 @@ private class MemberInvocationResolver {
             postfix.resolvedType = metatype
             functionCall.returnType = metatype
             functionCall.callableSignature =
-                .block(returnType: metatype,
-                       parameters: ctor.parameters.map(\.type),
-                       attributes: [])
+                .block(
+                    returnType: metatype,
+                    parameters: ctor.parameters.map(\.type),
+                    attributes: []
+                )
+            functionCall.definition = ctor
+            initAccess.op.definition = ctor
             
             matchParameterTypes(parameters: ctor.parameters, callArguments: functionCall.arguments)
             
@@ -1146,9 +1174,12 @@ private class MemberInvocationResolver {
             postfix.resolvedType = metatype
             functionCall.returnType = metatype
             functionCall.callableSignature =
-                .block(returnType: metatype,
-                       parameters: ctor.parameters.map(\.type),
-                       attributes: [])
+                .block(
+                    returnType: metatype,
+                    parameters: ctor.parameters.map(\.type),
+                    attributes: []
+                )
+            functionCall.definition = ctor
             
             matchParameterTypes(parameters: ctor.parameters, callArguments: functionCall.arguments)
             
@@ -1159,16 +1190,21 @@ private class MemberInvocationResolver {
             guard let type = target.resolvedType else {
                 return postfix.makeErrorTyped()
             }
-            guard let method = method(isStatic: type.isMetatype,
-                                      memberName: member.name,
-                                      arguments: arguments,
-                                      in: type) else {
+            guard let method =
+                method(
+                    isStatic: type.isMetatype,
+                    memberName: member.name,
+                    arguments: arguments,
+                    in: type
+                )
+            else {
+                
                 return postfix.makeErrorTyped()
             }
             
             let signature = method.signature
             
-            member.memberDefinition = method
+            member.definition = method
             member.returnType = signature.swiftClosureType
             
             postfix.exp.resolvedType = signature.swiftClosureType
@@ -1176,6 +1212,7 @@ private class MemberInvocationResolver {
             
             functionCall.returnType = signature.returnType
             functionCall.callableSignature = signature.swiftClosureType
+            functionCall.definition = method
             
             if method.optional {
                 member.returnType = member.returnType?.asOptional

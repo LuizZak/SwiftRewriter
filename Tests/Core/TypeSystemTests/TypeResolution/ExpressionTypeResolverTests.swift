@@ -653,6 +653,38 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(resolvedAs: .errorType)
     }
 
+    func testConstructorInvocation_assignsDefinition() throws {
+        let exp = Expression.identifier("TypeName").call()
+
+        try startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(named: "TypeName") { builder in
+                return builder.constructor().build()
+            }
+            .resolve()
+            .thenAssert { exp in
+                let functionCall = try XCTUnwrap(exp.functionCall)
+
+                XCTAssertTrue(functionCall.definition is KnownConstructor)
+            }
+    }
+
+    func testMetatypeConstructorInvocation_assignsDefinition() throws {
+        let exp = Expression.identifier("TypeName").dot("init").call()
+
+        try startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(named: "TypeName") { builder in
+                return builder.constructor().build()
+            }
+            .resolve()
+            .thenAssert { exp in
+                let functionCall = try XCTUnwrap(exp.functionCall)
+                let parentMember = try XCTUnwrap(exp.exp.asPostfix?.member)
+                
+                XCTAssertTrue(functionCall.definition is KnownConstructor)
+                XCTAssertTrue(parentMember.definition is KnownConstructor)
+            }
+    }
+
     func testForLoopArrayIteratorTypeResolving() {
         let exp = Expression.identifier("")
         exp.resolvedType = .array(.int)
@@ -835,6 +867,28 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(resolvedAs: .int)
     }
 
+    func testSubscriptLookup_assignsDefinition() {
+        // a[b]
+        let exp = Expression.identifier("a").sub(.identifier("b"))
+        let knownType =
+            KnownTypeBuilder(typeName: "A")
+                .subscription(indexType: .int, type: .int)
+                .build()
+
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(knownType)
+            .definingLocal(name: "b", type: .int)
+            .definingLocal(name: "a", type: .typeName("A"))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .int)
+            .thenAssert { exp in
+                guard let subExp = exp.subscription else { return }
+
+                XCTAssertTrue(subExp.definition is KnownSubscript)
+                XCTAssertTrue(subExp.definition?.ownerType?.asTypeName == knownType.typeName)
+            }
+    }
+
     func testStaticSubscriptLookup() {
         // A[b]
         let exp = Expression.identifier("A").sub(.identifier("b"))
@@ -882,6 +936,30 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(resolvedAs: .errorType)
             .thenAssertExpression(at: \.op.asSubscription?.arguments[0].expression, resolvedAs: .int)
+    }
+
+    func testSubscriptLookup_performsOverloadResolution() throws {
+        // a[b]
+        let exp = Expression.identifier("a").sub(.identifier("b"))
+        let knownType =
+            KnownTypeBuilder(typeName: "A")
+                .subscription(indexType: .int, type: .int)
+                .subscription(indexType: .string, type: .string)
+                .build()
+
+        try startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(knownType)
+            .definingLocal(name: "b", type: .string)
+            .definingLocal(name: "a", type: .typeName("A"))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .string)
+            .thenAssert { exp in
+                guard let subExp = exp.subscription else { return }
+
+                let subDef = try XCTUnwrap(subExp.definition as? KnownSubscript)
+
+                XCTAssertEqual(subDef.returnType, .string)
+            }
     }
 
     func testOptionalAccess() {

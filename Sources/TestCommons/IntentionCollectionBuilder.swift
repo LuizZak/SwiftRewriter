@@ -36,8 +36,10 @@ public class IntentionCollectionBuilder {
     }
     
     @discardableResult
-    public func createFile(named name: String,
-                           initializer: (FileIntentionBuilder) -> Void = emptyInit) -> IntentionCollectionBuilder {
+    public func createFile(
+        named name: String,
+        initializer: (FileIntentionBuilder) -> Void = emptyInit
+    ) -> IntentionCollectionBuilder {
         
         let builder = FileIntentionBuilder(fileNamed: name)
         
@@ -72,8 +74,10 @@ public class FileIntentionBuilder {
     var inNonnullContext = false
     var intention: FileGenerationIntention
     
-    public static func makeFileIntention(fileName: String,
-                                         _ builderBlock: (FileIntentionBuilder) -> Void) -> FileGenerationIntention {
+    public static func makeFileIntention(
+        fileName: String,
+        _ builderBlock: (FileIntentionBuilder) -> Void
+    ) -> FileGenerationIntention {
         
         let builder = FileIntentionBuilder(fileNamed: fileName)
         
@@ -91,37 +95,49 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
-    public func createGlobalVariable(withName name: String,
-                                     type: SwiftType,
-                                     ownership: Ownership = .strong,
-                                     isConstant: Bool = false,
-                                     accessLevel: AccessLevel = .internal,
-                                     initialExpression: Expression? = nil) -> FileIntentionBuilder {
+    public func createGlobalVariable(
+        withName name: String,
+        type: SwiftType,
+        ownership: Ownership = .strong,
+        isConstant: Bool = false,
+        accessLevel: AccessLevel = .internal,
+        initialExpression: Expression? = nil
+    ) -> FileIntentionBuilder {
+
         let storage =
             ValueStorage(type: type, ownership: ownership, isConstant: isConstant)
         
-        return createGlobalVariable(withName: name,
-                                    storage: storage,
-                                    accessLevel: accessLevel,
-                                    initialExpression: initialExpression)
+        return createGlobalVariable(
+            withName: name,
+            storage: storage,
+            accessLevel: accessLevel,
+            initialExpression: initialExpression
+        )
     }
     
     @discardableResult
-    public func createGlobalVariable(withName name: String,
-                                     storage: ValueStorage,
-                                     accessLevel: AccessLevel = .internal,
-                                     initialExpression: Expression? = nil) -> FileIntentionBuilder {
+    public func createGlobalVariable(
+        withName name: String,
+        storage: ValueStorage,
+        accessLevel: AccessLevel = .internal,
+        initialExpression: Expression? = nil
+    ) -> FileIntentionBuilder {
+
         let varIntention =
-            GlobalVariableGenerationIntention(name: name,
-                                              storage: storage,
-                                              accessLevel: accessLevel)
+            GlobalVariableGenerationIntention(
+                name: name,
+                storage: storage,
+                accessLevel: accessLevel
+            )
         
         varIntention.inNonnullContext = inNonnullContext
         
         if let initialExpression = initialExpression {
             varIntention.initialValueIntention =
-                GlobalVariableInitialValueIntention(expression: initialExpression,
-                                                    source: nil)
+                GlobalVariableInitialValueIntention(
+                    expression: initialExpression,
+                    source: nil
+                )
         }
         
         intention.addGlobalVariable(varIntention)
@@ -130,22 +146,30 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
-    public func createGlobalFunction(withName name: String,
-                                     returnType: SwiftType = .void,
-                                     parameters: [ParameterSignature] = [],
-                                     body: CompoundStatement? = nil) -> FileIntentionBuilder {
+    public func createGlobalFunction(
+        withName name: String,
+        returnType: SwiftType = .void,
+        parameters: [ParameterSignature] = [],
+        body: CompoundStatement? = nil
+    ) -> FileIntentionBuilder {
+
         let signature =
-            FunctionSignature(name: name,
-                              parameters: parameters,
-                              returnType: returnType,
-                              isStatic: false)
+            FunctionSignature(
+                name: name,
+                parameters: parameters,
+                returnType: returnType,
+                isStatic: false
+            )
         
         return createGlobalFunction(withSignature: signature, body: body)
     }
     
     @discardableResult
-    public func createGlobalFunction(withSignature signature: FunctionSignature,
-                                     body: CompoundStatement? = nil) -> FileIntentionBuilder {
+    public func createGlobalFunction(
+        withSignature signature: FunctionSignature,
+        body: CompoundStatement? = nil
+    ) -> FileIntentionBuilder {
+
         let funcIntent =
             GlobalFunctionGenerationIntention(signature: signature)
         funcIntent.inNonnullContext = inNonnullContext
@@ -160,10 +184,16 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
-    public func createGlobalFunction(withName name: String,
-                                     _ initialization: (FunctionBuilder<GlobalFunctionGenerationIntention>) -> Void) -> FileIntentionBuilder {
+    public func createGlobalFunction(
+        withName name: String,
+        _ initialization: (FunctionBuilder<GlobalFunctionGenerationIntention>) -> Void
+    ) -> FileIntentionBuilder {
         
-        var funcIntent = GlobalFunctionGenerationIntention(signature: FunctionSignature(name: name))
+        var funcIntent = GlobalFunctionGenerationIntention(
+            signature: FunctionSignature(name: name),
+            functionBody: FunctionBodyIntention(body: [])
+        )
+        
         funcIntent.inNonnullContext = inNonnullContext
         
         let builder = FunctionBuilder<GlobalFunctionGenerationIntention>(target: funcIntent)
@@ -179,7 +209,8 @@ public class FileIntentionBuilder {
     @discardableResult
     public func createClass(
         withName name: String,
-        initializer: (TypeBuilder<ClassGenerationIntention>) -> Void = emptyInit) -> FileIntentionBuilder {
+        initializer: (TypeBuilder<ClassGenerationIntention>) -> Void = emptyInit
+    ) -> FileIntentionBuilder {
         
         let classIntention = ClassGenerationIntention(typeName: name)
         classIntention.inNonnullContext = inNonnullContext
@@ -197,9 +228,11 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
-    public func createTypealias(withName name: String,
-                                swiftType: SwiftType,
-                                type: ObjcType) -> FileIntentionBuilder {
+    public func createTypealias(
+        withName name: String,
+        swiftType: SwiftType,
+        type: ObjcType
+    ) -> FileIntentionBuilder {
         
         let intent = TypealiasIntention(
             originalObjcType: type,
@@ -218,7 +251,8 @@ public class FileIntentionBuilder {
     public func createExtension(
         forClassNamed name: String,
         categoryName: String? = nil,
-        initializer: (TypeBuilder<ClassExtensionGenerationIntention>) -> Void = emptyInit) -> FileIntentionBuilder {
+        initializer: (TypeBuilder<ClassExtensionGenerationIntention>) -> Void = emptyInit
+    ) -> FileIntentionBuilder {
         
         let classIntention = ClassExtensionGenerationIntention(typeName: name)
         classIntention.categoryName = categoryName
@@ -232,7 +266,8 @@ public class FileIntentionBuilder {
     @discardableResult
     public func createProtocol(
         withName name: String,
-        initializer: (TypeBuilder<ProtocolGenerationIntention>) -> Void = emptyInit) -> FileIntentionBuilder {
+        initializer: (TypeBuilder<ProtocolGenerationIntention>) -> Void = emptyInit
+    ) -> FileIntentionBuilder {
         
         let prot = ProtocolGenerationIntention(typeName: name)
         prot.inNonnullContext = inNonnullContext
@@ -243,8 +278,11 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
-    public func createEnum(withName name: String, rawValue: SwiftType,
-                           initializer: (EnumTypeBuilder) -> Void = emptyInit) -> FileIntentionBuilder {
+    public func createEnum(
+        withName name: String,
+        rawValue: SwiftType,
+        initializer: (EnumTypeBuilder) -> Void = emptyInit
+    ) -> FileIntentionBuilder {
         
         let enumIntention = EnumGenerationIntention(typeName: name, rawValueType: rawValue)
         enumIntention.inNonnullContext = inNonnullContext
@@ -260,7 +298,8 @@ public class FileIntentionBuilder {
     @discardableResult
     public func createStruct(
         withName name: String,
-        initializer: (TypeBuilder<StructGenerationIntention>) -> Void = emptyInit) -> FileIntentionBuilder {
+        initializer: (TypeBuilder<StructGenerationIntention>) -> Void = emptyInit
+    ) -> FileIntentionBuilder {
         
         let structIntention = StructGenerationIntention(typeName: name)
         structIntention.inNonnullContext = inNonnullContext
@@ -304,7 +343,8 @@ public class FileIntentionBuilder {
     
     private func innerBuildTypeWithClosure<T>(
         type: T,
-        initializer: (TypeBuilder<T>) -> Void) where T: TypeGenerationIntention {
+        initializer: (TypeBuilder<T>) -> Void
+    ) where T: TypeGenerationIntention {
         
         let builder = TypeBuilder(targetType: type)
         initializer(builder)

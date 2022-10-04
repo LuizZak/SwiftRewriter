@@ -50,4 +50,17 @@ public enum StatementContainer {
             return nil
         }
     }
+
+    /// Gets the syntax node associated with this statement container.
+    public var syntaxNode: SyntaxNode {
+        switch self {            
+        case .function(let value):
+            return value.body
+
+        case
+            .statement(let value as SyntaxNode),
+            .expression(let value as SyntaxNode):
+            return value
+        }
+    }
 }
