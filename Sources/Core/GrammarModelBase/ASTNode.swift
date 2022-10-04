@@ -31,9 +31,11 @@ open class ASTNode {
     
     /// Instantiates a bare ASTNode with a given range.
     /// Defaults to an invalid range
-    public init(location: SourceLocation = .invalid,
-                length: SourceLength = .zero,
-                existsInSource: Bool = true) {
+    public init(
+        location: SourceLocation = .invalid,
+        length: SourceLength = .zero,
+        existsInSource: Bool = true
+    ) {
         
         self.location = location
         self.length = length

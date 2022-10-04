@@ -24,7 +24,7 @@ class JavaScript2SwiftRewriterJobBuilderTests: XCTestCase {
         XCTAssert(intentsIterator.next() is SubscriptDeclarationIntentionPass)
         XCTAssert(intentsIterator.next() is PromoteProtocolPropertyConformanceIntentionPass)
         XCTAssert(intentsIterator.next() is ProtocolNullabilityPropagationToConformersIntentionPass)
-        XCTAssert(intentsIterator.next() is PropertyMergeIntentionPass)
+        XCTAssert(intentsIterator.next() is JavaScriptPropertyMergeIntentionPass)
         XCTAssert(intentsIterator.next() is StoredPropertyToNominalTypesIntentionPass)
         XCTAssert(intentsIterator.next() is SwiftifyMethodSignaturesIntentionPass)
         XCTAssert(intentsIterator.next() is InitAnalysisIntentionPass)

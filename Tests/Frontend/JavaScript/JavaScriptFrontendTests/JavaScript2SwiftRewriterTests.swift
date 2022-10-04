@@ -756,4 +756,68 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             rewriterSettings: .default.with(\.deduceTypes, true)
         )
     }
+
+    func testRewrite_detectGetters() {
+        assertRewrite(
+            js: """
+            class Example {
+                constructor (id) {
+                    this._id = id
+                }
+                get id() {
+                    return this._id
+                }
+            }
+            """,
+            swift: """
+            class Example {
+                var _id: Any
+                var id: Any {
+                    return self._id
+                }
+
+                init(_ id: Any) {
+                    self._id = id
+                }
+            }
+            """,
+            rewriterSettings: .default.with(\.deduceTypes, true)
+        )
+    }
+
+    func testRewrite_detectGettersSetters() {
+        assertRewrite(
+            js: """
+            class Example {
+                constructor (id) {
+                    this._id = id
+                }
+                set id(v) {
+                    this._id = v
+                }
+                get id() {
+                    return this._id
+                }
+            }
+            """,
+            swift: """
+            class Example {
+                var _id: Any
+                var id: Any {
+                    get {
+                        return self._id
+                    }
+                    set(v) {
+                        self._id = v
+                    }
+                }
+
+                init(_ id: Any) {
+                    self._id = id
+                }
+            }
+            """,
+            rewriterSettings: .default.with(\.deduceTypes, true)
+        )
+    }
 }

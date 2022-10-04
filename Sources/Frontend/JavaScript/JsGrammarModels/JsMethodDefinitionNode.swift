@@ -11,6 +11,9 @@ public class JsMethodDefinitionNode: JsASTNode, JsFunctionNodeType, JsInitializa
     /// The signature for this function.
     public var signature: JsFunctionSignature?
 
+    /// The context associated to this method definition.
+    public var context: Context?
+
     /// Gets the function body for this method definition.
     public var body: JsFunctionBodyNode? {
         firstChild()
@@ -18,5 +21,14 @@ public class JsMethodDefinitionNode: JsASTNode, JsFunctionNodeType, JsInitializa
 
     public required init() {
         super.init()
+    }
+
+    /// Extra context that can be appended to a method definition.
+    public enum Context {
+        /// Method was parsed from a property getter.
+        case isGetter
+
+        /// Method was parsed from a property setter.
+        case isSetter
     }
 }

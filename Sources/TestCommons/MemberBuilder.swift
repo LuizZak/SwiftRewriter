@@ -1,6 +1,7 @@
 import SwiftAST
 import Intentions
 import KnownType
+import GrammarModelBase
 
 public class MemberBuilder<T: MemberGenerationIntention>: DeclarationBuilder<T> {
     var targetMember: T {
@@ -14,6 +15,13 @@ public class MemberBuilder<T: MemberGenerationIntention>: DeclarationBuilder<T> 
     
     public init(targetMember: T) {
         super.init(declaration: targetMember)
+    }
+
+    @discardableResult
+    public func setSource(_ source: ASTNode) -> MemberBuilder {
+        targetMember.source = source
+
+        return self
     }
     
     @discardableResult

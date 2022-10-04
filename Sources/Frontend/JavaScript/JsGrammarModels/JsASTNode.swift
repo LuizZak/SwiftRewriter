@@ -6,10 +6,16 @@ open class JsASTNode: ASTNode {
     
     /// Instantiates a bare JsASTNode with a given range.
     /// Defaults to an invalid range
-    public override init(location: SourceLocation = .invalid,
-                         length: SourceLength = .zero,
-                         existsInSource: Bool = true) {
+    public override init(
+        location: SourceLocation = .invalid,
+        length: SourceLength = .zero,
+        existsInSource: Bool = true
+    ) {
         
-        super.init(location: location, length: length, existsInSource: existsInSource)
+        super.init(
+            location: location,
+            length: length,
+            existsInSource: existsInSource
+        )
     }
 }

@@ -70,6 +70,7 @@ class JsParserListenerTests: XCTestCase {
         XCTAssertEqual(classDecl.methods.count, 1)
         XCTAssertEqual(classDecl.methods[0].identifier?.name, "method")
         XCTAssertFalse(classDecl.methods[0].isStatic)
+        XCTAssertNil(classDecl.methods[0].context)
         XCTAssertEqual(
             classDecl.methods[0].signature,
             JsFunctionSignature(arguments: [
@@ -77,6 +78,56 @@ class JsParserListenerTests: XCTestCase {
                 .init(identifier: "b", isVariadic: false),
             ])
         )
+    }
+
+    func testCollectClassGetter() throws {
+        let node = parserTest(
+            """
+            class AClass {
+                get a() {
+                    return 0;
+                }
+            }
+            """
+        )
+
+        let classDecl: JsClassNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(classDecl.methods.count, 1)
+        XCTAssertEqual(classDecl.methods[0].identifier?.name, "get_a")
+        XCTAssertFalse(classDecl.methods[0].isStatic)
+        XCTAssertEqual(classDecl.methods[0].context, .isGetter)
+        XCTAssertEqual(
+            classDecl.methods[0].signature,
+            JsFunctionSignature(arguments: [])
+        )
+        XCTAssertNotNil(classDecl.methods[0].body)
+    }
+
+    func testCollectClassSetter() throws {
+        let node = parserTest(
+            """
+            class AClass {
+                set a(v) {
+                    
+                }
+            }
+            """
+        )
+
+        let classDecl: JsClassNode = try XCTUnwrap(node.firstChild())
+
+        XCTAssertEqual(classDecl.methods.count, 1)
+        XCTAssertEqual(classDecl.methods[0].identifier?.name, "set_a")
+        XCTAssertFalse(classDecl.methods[0].isStatic)
+        XCTAssertEqual(classDecl.methods[0].context, .isSetter)
+        XCTAssertEqual(
+            classDecl.methods[0].signature,
+            JsFunctionSignature(arguments: [
+                .init(identifier: "v", isVariadic: false),
+            ])
+        )
+        XCTAssertNotNil(classDecl.methods[0].body)
     }
 
     func testCollectClassMethod_staticMethod() throws {

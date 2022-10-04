@@ -144,6 +144,7 @@ internal class JsParserListener: JavaScriptParserBaseListener {
 
         // TODO: Reduce duplication of code here
 
+        // Constructor
         if methodName?.getText() == "constructor" {
             let methodNode = JsConstructorDefinitionNode()
             context.pushContext(node: methodNode)
@@ -158,21 +159,45 @@ internal class JsParserListener: JavaScriptParserBaseListener {
             
             methodNode.signature = functionSignature(from: ctx.formalParameterList())
             methodNode.isStatic = context.isStaticContext
-        } else {
-            let methodNode = JsMethodDefinitionNode()
-            context.pushContext(node: methodNode)
 
-            nodeFactory.updateSourceLocation(for: methodNode, with: ctx)
-            methodNode.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
-
-            if let methodName = methodName {
-                let identifierNode = nodeFactory.makeIdentifier(from: methodName)
-                methodNode.addChild(identifierNode)
-            }
-            
-            methodNode.signature = functionSignature(from: ctx.formalParameterList())
-            methodNode.isStatic = context.isStaticContext
+            return
         }
+
+        let methodNode = JsMethodDefinitionNode()
+        context.pushContext(node: methodNode)
+
+        nodeFactory.updateSourceLocation(for: methodNode, with: ctx)
+        methodNode.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
+
+        if let methodName = methodName {
+            let identifierNode = nodeFactory.makeIdentifier(from: methodName)
+            methodNode.addChild(identifierNode)
+        }
+        // Getter
+        if
+            let getter = ctx.getter(),
+            let methodName = getter.propertyName()?.identifierName()?.identifier()
+        {
+            let identifierNode = nodeFactory.makeIdentifier(from: methodName)
+            identifierNode.name = "get_\(identifierNode.name)"
+
+            methodNode.addChild(identifierNode)
+            methodNode.context = .isGetter
+        }
+        // Setter
+        if
+            let setter = ctx.setter(),
+            let methodName = setter.propertyName()?.identifierName()?.identifier()
+        {
+            let identifierNode = nodeFactory.makeIdentifier(from: methodName)
+            identifierNode.name = "set_\(identifierNode.name)"
+            
+            methodNode.addChild(identifierNode)
+            methodNode.context = .isSetter
+        }
+        
+        methodNode.signature = functionSignature(from: ctx.formalParameterList())
+        methodNode.isStatic = context.isStaticContext
     }
 
     override func exitMethodDefinition(_ ctx: JavaScriptParser.MethodDefinitionContext) {

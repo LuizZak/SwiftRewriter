@@ -28,7 +28,7 @@ public struct JavaScript2SwiftRewriterJobBuilder {
             SubscriptDeclarationIntentionPass(),
             PromoteProtocolPropertyConformanceIntentionPass(),
             ProtocolNullabilityPropagationToConformersIntentionPass(),
-            PropertyMergeIntentionPass(),
+            JavaScriptPropertyMergeIntentionPass(),
             StoredPropertyToNominalTypesIntentionPass(),
             SwiftifyMethodSignaturesIntentionPass(),
             InitAnalysisIntentionPass(),

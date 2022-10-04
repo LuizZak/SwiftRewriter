@@ -1,5 +1,6 @@
 import SwiftAST
 import Intentions
+import GrammarModelBase
 
 public protocol _FunctionBuilder {
     associatedtype FunctionType = FunctionIntention
@@ -8,6 +9,13 @@ public protocol _FunctionBuilder {
 
 public extension _FunctionBuilder where FunctionType: MutableSignatureFunctionIntention {
     var signature: FunctionSignature { get { target.signature } nonmutating set { target.signature = newValue } }
+    
+    @discardableResult
+    func setSource(_ source: ASTNode) -> Self where FunctionType: FromSourceIntention {
+        target.source = source
+
+        return self
+    }
     
     @discardableResult
     func createSignature(_ builder: (FunctionSignatureBuilder) -> Void) -> Self {
