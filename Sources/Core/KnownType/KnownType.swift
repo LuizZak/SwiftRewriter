@@ -1,7 +1,7 @@
 import SwiftAST
 
 /// Describes a known type with known properties and methods and their signatures.
-public protocol KnownType: KnownTypeReferenceConvertible, KnownDeclaration, AttributeTaggeableObject, SemanticalObject {
+public protocol KnownType: KnownTypeReferenceConvertible, KnownDeclaration, AttributeTaggableObject, SemanticalObject {
     /// A string that specifies the origin of this known type.
     /// This should be implemented by conformers by returning an as precise as
     /// possible set of informations that can help pinpoint the origin of this
@@ -140,7 +140,7 @@ public extension KnownType {
 }
 
 /// Describes a known member of a type
-public protocol KnownMember: SemanticalObject, AttributeTaggeableObject {
+public protocol KnownMember: SemanticalObject, AttributeTaggableObject {
     /// The owner type for this known member
     var ownerType: KnownTypeReference? { get }
     
@@ -358,7 +358,7 @@ public enum TraitType: Equatable, Codable {
 }
 
 /// An object that supports attribute markings
-public protocol AttributeTaggeableObject {
+public protocol AttributeTaggableObject {
     /// Gets an array of all known attributes for this object
     var knownAttributes: [KnownAttribute] { get }
 }

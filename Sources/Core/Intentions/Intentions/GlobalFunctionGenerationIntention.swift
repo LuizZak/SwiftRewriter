@@ -3,7 +3,7 @@ import SwiftAST
 import KnownType
 
 /// An intention to generate a global function.
-public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIntention, MutableSignatureFunctionIntention, MutableFunctionIntention, ParameterizedFunctionIntention, AttributeTaggeableObject {
+public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIntention, MutableSignatureFunctionIntention, MutableFunctionIntention, ParameterizedFunctionIntention, AttributeTaggableObject {
     public override var children: [Intention] {
         (functionBody.map { [$0] } ?? [])
     }

@@ -155,7 +155,7 @@ public extension TypeFormatter {
             instanceProperties.forEach(outputProperty)
             type.knownSubscripts.forEach(outputSubscript)
             
-            // Output a spacing between fields/properties/subscripts and initialiezers/methods
+            // Output a spacing between fields/properties/subscripts and initializers/methods
             if (!type.knownFields.isEmpty || !type.knownProperties.isEmpty || !type.knownSubscripts.isEmpty) &&
                 (!type.knownConstructors.isEmpty || !type.knownMethods.isEmpty) {
                 o.output(line: "")

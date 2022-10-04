@@ -39,21 +39,20 @@ extension CallGraph {
             )
 
             for usage in usages {
-                guard let refIntention =
-                    _extractIntention(
+                let refIntentions =
+                    _extractIntentions(
                         usage.definition,
-                        isReadOnly: usage.isReadOnlyUsage,
+                        usageKind: usage.usageKind,
                         collection,
                         typeSystem
-                    ) 
-                else {
-                    continue
-                }
+                    )
 
-                let next = graph.ensureNode(refIntention)
+                for ref in refIntentions {
+                    let next = graph.ensureNode(ref)
 
-                if !graph.areConnected(start: node, end: next) {
-                    graph.addEdge(from: node, to: next)
+                    if !graph.areConnected(start: node, end: next) {
+                        graph.addEdge(from: node, to: next)
+                    }
                 }
             }
         }
@@ -61,79 +60,83 @@ extension CallGraph {
         return graph
     }
 
-    private static func _extractIntention(
+    private static func _extractIntentions(
         _ definition: CodeDefinition,
-        isReadOnly: Bool,
+        usageKind: DefinitionUsage.UsageKind,
         _ collection: IntentionCollection,
         _ typeSystem: TypeSystem
-    ) -> FunctionBodyCarryingIntention? {
+    ) -> [FunctionBodyCarryingIntention] {
 
         switch definition {
         case let def as KnownMemberCodeDefinition:
-            return _extractIntention(def.knownMember, isReadOnly: isReadOnly, collection, typeSystem)
+            return _extractIntentions(def.knownMember, usageKind: usageKind, collection, typeSystem)
 
         case let def as GlobalIntentionCodeDefinition:
-            return _extractIntention(def, isReadOnly: isReadOnly, collection, typeSystem)
+            return _extractIntentions(def, usageKind: usageKind, collection, typeSystem)
 
         default:
             break
         }
 
-        return nil
+        return []
     }
 
-    private static func _extractIntention(
+    private static func _extractIntentions(
         _ member: KnownMember,
-        isReadOnly: Bool,
+        usageKind: DefinitionUsage.UsageKind,
         _ collection: IntentionCollection,
         _ typeSystem: TypeSystem
-    ) -> FunctionBodyCarryingIntention? {
+    ) -> [FunctionBodyCarryingIntention] {
         
         switch member {
         case let member as InitGenerationIntention:
-            return .initializer(member)
+            return [.initializer(member)]
             
         case let member as MethodGenerationIntention:
-            return .method(member)
+            return [.method(member)]
         
         case let member as PropertyGenerationIntention:
-            if isReadOnly, let getter = member.getter {
-                return .propertyGetter(member, getter)
+            var result: [FunctionBodyCarryingIntention] = []
+
+            if usageKind.isRead, let getter = member.getter {
+                result.append(.propertyGetter(member, getter))
             }
-            if !isReadOnly, let setter = member.setter {
-                return .propertySetter(member, setter)
+            if usageKind.isWrite, let setter = member.setter {
+                result.append(.propertySetter(member, setter))
             }
 
-            return nil
+            return result
             
         case let member as SubscriptGenerationIntention:
-            if isReadOnly {
-                return .subscriptGetter(member, member.getter)
+            var result: [FunctionBodyCarryingIntention] = []
+
+            if usageKind.isRead {
+                result.append(.subscriptGetter(member, member.getter))
             }
-            if !isReadOnly, let setter = member.setter {
-                return .subscriptSetter(member, setter)
+            if usageKind.isWrite, let setter = member.setter {
+                result.append(.subscriptSetter(member, setter))
             }
 
-            return nil
+            return result
 
         default:
-            return nil
+            return []
         }
     }
 
-    private static func _extractIntention(
+    private static func _extractIntentions(
         _ definition: GlobalIntentionCodeDefinition,
-        isReadOnly: Bool,
+        usageKind: DefinitionUsage.UsageKind,
         _ collection: IntentionCollection,
         _ typeSystem: TypeSystem
-    ) -> FunctionBodyCarryingIntention? {
+    ) -> [FunctionBodyCarryingIntention] {
 
         switch definition.intention {
         case let def as GlobalFunctionGenerationIntention:
-            return .global(def)
+            return [.global(def)]
 
         default:
-            return nil
+            return []
         }
     }
 }

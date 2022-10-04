@@ -316,7 +316,7 @@ public final class JavaScriptExprASTReader: JavaScriptParserBaseVisitor<Expressi
 
         // Handle power-assign expressions as regular 'pow()' assignment expressions
         if assignmentOperator.PowerAssign() != nil {
-            return lhs.assignment(op: .equals, rhs: .identifier("pow").call([lhs, rhs]))
+            return lhs.assignment(op: .assign, rhs: .identifier("pow").call([lhs, rhs]))
         }
 
         guard let op = self.assignmentOperator(assignmentOperator) else { return unknown(ctx) }

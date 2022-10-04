@@ -106,7 +106,7 @@ class DetectTypePropertiesBySelfAssignmentIntentionPassTests: XCTestCase {
             .createFileWithClass(named: "A") { type in
                 type.createConstructor() { builder in
                     builder.setBody([
-                        .expression(.identifier("self").dot("property").assignment(op: .equals, rhs: .constant(0))),
+                        .expression(.identifier("self").dot("property").assignment(op: .assign, rhs: .constant(0))),
                     ])
                 }.createProperty(
                     named: "property",
@@ -130,7 +130,7 @@ class DetectTypePropertiesBySelfAssignmentIntentionPassTests: XCTestCase {
             .createFileWithClass(named: "A") { type in
                 type.createConstructor() { builder in
                     builder.setBody([
-                        .expression(.identifier("self").dot("variable").assignment(op: .equals, rhs: .constant(0))),
+                        .expression(.identifier("self").dot("variable").assignment(op: .assign, rhs: .constant(0))),
                     ])
                 }.createInstanceVariable(
                     named: "variable",

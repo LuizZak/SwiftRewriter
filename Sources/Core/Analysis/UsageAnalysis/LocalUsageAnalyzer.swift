@@ -47,14 +47,14 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer, LocalUsageAnalyzerType {
                 }
                 
                 if def.name == local {
-                    let readOnly = self.isReadOnlyContext(identifier)
+                    let usageKind = self.usageKindContext(identifier)
                     
                     let usage =
                         DefinitionUsage(
                             intention: intention,
                             definition: def,
                             expression: .identifier(identifier),
-                            isReadOnlyUsage: readOnly
+                            usageKind: usageKind
                         )
                     
                     usages.append(usage)
@@ -102,14 +102,14 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer, LocalUsageAnalyzerType {
                     return
                 }
                 
-                let readOnly = self.isReadOnlyContext(identifier)
+                let usageKind = self.usageKindContext(identifier)
                 
                 let usage =
                     DefinitionUsage(
                         intention: intention,
                         definition: def,
                         expression: .identifier(identifier),
-                        isReadOnlyUsage: readOnly
+                        usageKind: usageKind
                     )
                 
                 usages.append(usage)
@@ -136,14 +136,14 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer, LocalUsageAnalyzerType {
                     return
                 }
                 
-                let readOnly = self.isReadOnlyContext(identifier)
+                let usageKind = self.usageKindContext(identifier)
                 
                 let usage =
                     DefinitionUsage(
                         intention: intention,
                         definition: definition,
                         expression: .identifier(identifier),
-                        isReadOnlyUsage: readOnly
+                        usageKind: usageKind
                     )
                 
                 usages.append(usage)

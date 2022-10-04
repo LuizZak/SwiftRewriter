@@ -42,7 +42,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                         intention: intention,
                         definition: .forGlobalFunction(function),
                         expression: expressionKind,
-                        isReadOnlyUsage: true
+                        usageKind: .readOnly
                     )
                 
                 usages.append(usage)
@@ -99,7 +99,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                         intention: intention,
                         definition: .forKnownMember(method),
                         expression: expressionKind,
-                        isReadOnlyUsage: true
+                        usageKind: .readOnly
                     )
                 
                 usages.append(usage)
@@ -139,14 +139,14 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                 }
                 
                 if expProperty.ownerType?.asTypeName == property.ownerType?.asTypeName {
-                    let readOnly = self.isReadOnlyContext(exp)
+                    let usageKind = self.usageKindContext(exp)
                     
                     let usage =
                         DefinitionUsage(
                             intention: intention,
                             definition: .forKnownMember(property),
                             expression: .memberAccess(exp.exp, member, in: exp),
-                            isReadOnlyUsage: readOnly
+                            usageKind: usageKind
                         )
                     
                     usages.append(usage)
@@ -194,7 +194,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                         intention: intention,
                         definition: .forKnownMember(sub),
                         expression: .subscript(exp.exp, subExp, in: exp),
-                        isReadOnlyUsage: true
+                        usageKind: .readOnly
                     )
                 
                 usages.append(usage)
@@ -233,14 +233,14 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                 if let member = exp.member {
                     // Property/field definition
                     if let expProperty = member.definition {
-                        let readOnly = self.isReadOnlyContext(exp)
+                        let usageKind = self.usageKindContext(exp)
                                         
                         let usage =
                             DefinitionUsage(
                                 intention: intention,
                                 definition: .forKnownMember(expProperty),
                                 expression: .memberAccess(exp.exp, member, in: exp),
-                                isReadOnlyUsage: readOnly
+                                usageKind: usageKind
                             )
                         
                         pushDefinition(usage)
@@ -248,14 +248,14 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                 } else if let sub = exp.subscription {
                     // Subscript member definition
                     if let expSub = sub.definition {
-                        let readOnly = self.isReadOnlyContext(exp)
+                        let usageKind = self.usageKindContext(exp)
                                         
                         let usage =
                             DefinitionUsage(
                                 intention: intention,
                                 definition: .forKnownMember(expSub),
                                 expression: .subscript(exp.exp, sub, in: exp),
-                                isReadOnlyUsage: readOnly
+                                usageKind: usageKind
                             )
                         
                         pushDefinition(usage)
@@ -263,14 +263,14 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                 } else if let call = exp.functionCall {
                     // Callable member definition
                     if let expCall = call.definition {
-                        let readOnly = self.isReadOnlyContext(exp)
+                        let usageKind = self.usageKindContext(exp)
                                         
                         let usage =
                             DefinitionUsage(
                                 intention: intention,
                                 definition: .forKnownMember(expCall),
                                 expression: .functionCall(exp, call, in: exp),
-                                isReadOnlyUsage: readOnly
+                                usageKind: usageKind
                             )
                         
                         pushDefinition(usage)
@@ -300,7 +300,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                             intention: intention,
                             definition: .forGlobalFunction(globalFunc),
                             expression: expressionKind,
-                            isReadOnlyUsage: true
+                            usageKind: .readOnly
                         )
                     
                     pushDefinition(usage)
@@ -316,7 +316,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                             intention: intention,
                             definition: .forGlobalVariable(globalVar),
                             expression: .identifier(exp),
-                            isReadOnlyUsage: true
+                            usageKind: .readOnly
                         )
                     
                     pushDefinition(usage)
@@ -338,16 +338,23 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
         return usages
     }
     
-    func isReadOnlyContext(_ expression: Expression) -> Bool {
+    func usageKindContext(_ expression: Expression) -> DefinitionUsage.UsageKind {
         // TODO: Reduce duplication of this code here and in ExpressionTypeResolver
 
         if let assignment = expression.parentExpression?.asAssignment {
-            return expression !== assignment.lhs
+            guard expression === assignment.lhs else {
+                return .readOnly
+            }
+
+            return usageForAssignmentOperator(assignment.op)
         }
-        // Unary '&' is interpreted as 'address-of', which is a mutable operation.
+
+        // Unary '&' is interpreted as 'address-of', which is a read/write mutable
+        // operation.
         if let unary = expression.parentExpression?.asUnary {
-            return unary.op != .bitwiseAnd
+            return unary.op == .bitwiseAnd ? .readWrite : .readOnly
         }
+
         if let postfix = expression.parentExpression?.asPostfix, expression == postfix.exp {
             let root = postfix.topPostfixExpression
             
@@ -355,35 +362,46 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
             // be mutated due to any change on the returned value, so we just
             // assume it's never written.
             let chain = PostfixChainInverter.invert(expression: root)
-            if let call = chain.first(where: { $0.postfix is FunctionCallPostfix }),
-                let member = call.postfixExpression?.exp.asPostfix?.member {
+
+            if
+                let call = chain.first(where: { $0.postfix is FunctionCallPostfix }),
+                let member = call.postfixExpression?.exp.asPostfix?.member
+            {
                 
                 // Skip checking mutating methods on reference types, since those
                 // don't mutate variables.
                 if let type = chain.first?.expression?.resolvedType,
                     !typeSystem.isScalarType(type) {
                     
-                    return true
+                    return .readOnly
                 }
                 
                 if let method = member.definition as? KnownMethod {
-                    return !method.signature.isMutating
+                    return method.signature.isMutating ? .readWrite : .readOnly
                 }
                 
-                return true
+                return .readOnly
             }
             
             // Writing to a reference type at any point invalidates mutations
             // to the original value.
             let types = chain.compactMap(\.resolvedType)
             if types.contains(where: { typeSystem.isClassInstanceType($0) }) {
-                return true
+                return .readOnly
             }
             
-            return isReadOnlyContext(root)
+            return usageKindContext(root)
         }
         
-        return true
+        return .readOnly
+    }
+
+    private func usageForAssignmentOperator(_ op: SwiftOperator) -> DefinitionUsage.UsageKind {
+        guard op.category == .assignment else {
+            return .readOnly
+        }
+
+        return op == .assign ? .writeOnly : .readWrite
     }
     
     func statementContainers() -> [(StatementContainer, FunctionBodyCarryingIntention)] {

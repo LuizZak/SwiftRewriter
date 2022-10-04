@@ -356,14 +356,14 @@ class LocalsUsageAnalyzerTests: XCTestCase {
         XCTAssertEqual(usages[1].isReadOnlyUsage, true)
     }
 
-    func testIsReadOnlyContext() {
+    func testUsageKindContext() {
         let typeSystem = TypeSystem()
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
 
-        XCTAssertTrue(sut.isReadOnlyContext(.identifier("a")))
+        XCTAssertEqual(sut.usageKindContext(.identifier("a")), .readOnly)
     }
 
-    func testIsReadOnlyContextWriteToVariable() {
+    func testUsageKindContext_writeToVariable() {
         let typeSystem = TypeSystem()
         typeSystem.addType(
             KnownTypeBuilder(typeName: "A")
@@ -378,10 +378,46 @@ class LocalsUsageAnalyzerTests: XCTestCase {
         _ = typeResolver.resolveTypes(in: .expression(exp))
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
 
-        XCTAssertFalse(sut.isReadOnlyContext(exp.asAssignment!.lhs))
+        XCTAssertEqual(sut.usageKindContext(exp.asAssignment!.lhs), .writeOnly)
     }
 
-    func testIsReadOnlyContextWritingPropertyOnValueType() {
+    func testUsageKindContext_compoundAssignmentWriteToVariable() {
+        let typeSystem = TypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A")
+                .constructor()
+                .build()
+        )
+        let exp = Expression.identifier("a").assignment(op: .addAssign, rhs: .identifier("A").call())
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        typeResolver.intrinsicVariables = ArrayDefinitionsSource(definitions: [
+            .forLocalIdentifier("a", type: "A", isConstant: false, location: .parameter(index: 0))
+        ])
+        _ = typeResolver.resolveTypes(in: .expression(exp))
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
+
+        XCTAssertEqual(sut.usageKindContext(exp.asAssignment!.lhs), .readWrite)
+    }
+
+    func testUsageKindContext_mutableReference() {
+        let typeSystem = TypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A")
+                .constructor()
+                .build()
+        )
+        let exp = Expression.identifier("a").unary(op: .bitwiseAnd)
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        typeResolver.intrinsicVariables = ArrayDefinitionsSource(definitions: [
+            .forLocalIdentifier("a", type: "A", isConstant: false, location: .parameter(index: 0))
+        ])
+        _ = typeResolver.resolveTypes(in: .expression(exp))
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
+
+        XCTAssertEqual(sut.usageKindContext(exp.asUnary!.exp), .readWrite)
+    }
+
+    func testUsageKindContext_writingPropertyOnValueType() {
         let typeSystem = TypeSystem()
         typeSystem.addType(
             KnownTypeBuilder(typeName: "A", kind: .struct)
@@ -396,10 +432,10 @@ class LocalsUsageAnalyzerTests: XCTestCase {
         _ = typeResolver.resolveTypes(in: .expression(exp))
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
 
-        XCTAssertFalse(sut.isReadOnlyContext(exp.asAssignment!.lhs.asPostfix!.exp))
+        XCTAssertEqual(sut.usageKindContext(exp.asAssignment!.lhs.asPostfix!.exp), .writeOnly)
     }
 
-    func testIsReadOnlyContextWritingPropertyOnReferenceType() {
+    func testUsageKindContext_writingPropertyOnReferenceType() {
         let typeSystem = TypeSystem()
         typeSystem.addType(
             KnownTypeBuilder(typeName: "A")
@@ -414,10 +450,10 @@ class LocalsUsageAnalyzerTests: XCTestCase {
         _ = typeResolver.resolveTypes(in: .expression(exp))
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
 
-        XCTAssertTrue(sut.isReadOnlyContext(exp.asAssignment!.lhs.asPostfix!.exp))
+        XCTAssertEqual(sut.usageKindContext(exp.asAssignment!.lhs.asPostfix!.exp), .readOnly)
     }
 
-    func testIsReadOnlyContextMutatingMethodOnValueType() {
+    func testUsageKindContext_mutatingMethodOnValueType() {
         let typeSystem = TypeSystem()
         typeSystem.addType(
             KnownTypeBuilder(typeName: "A", kind: .struct)
@@ -435,11 +471,11 @@ class LocalsUsageAnalyzerTests: XCTestCase {
         _ = typeResolver.resolveTypes(in: .expression(expMut))
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
 
-        XCTAssertTrue(sut.isReadOnlyContext(expNonMut.asPostfix!.exp.asPostfix!.exp))
-        XCTAssertFalse(sut.isReadOnlyContext(expMut.asPostfix!.exp.asPostfix!.exp))
+        XCTAssertEqual(sut.usageKindContext(expNonMut.asPostfix!.exp.asPostfix!.exp), .readOnly)
+        XCTAssertEqual(sut.usageKindContext(expMut.asPostfix!.exp.asPostfix!.exp), .readWrite)
     }
 
-    func testIsReadOnlyContextMutatingMethodOnReferenceType() {
+    func testUsageKindContext_mutatingMethodOnReferenceType() {
         let typeSystem = TypeSystem()
         typeSystem.addType(
             KnownTypeBuilder(typeName: "A")
@@ -457,11 +493,11 @@ class LocalsUsageAnalyzerTests: XCTestCase {
         _ = typeResolver.resolveTypes(in: .expression(expMut))
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
 
-        XCTAssertTrue(sut.isReadOnlyContext(expNonMut.asPostfix!.exp.asPostfix!.exp))
-        XCTAssertTrue(sut.isReadOnlyContext(expMut.asPostfix!.exp.asPostfix!.exp))
+        XCTAssertEqual(sut.usageKindContext(expNonMut.asPostfix!.exp.asPostfix!.exp), .readOnly)
+        XCTAssertEqual(sut.usageKindContext(expMut.asPostfix!.exp.asPostfix!.exp), .readOnly)
     }
 
-    func testIsReadOnlyContextWritingSubscriptOnValueType() {
+    func testUsageKindContext_writingSubscriptOnValueType() {
         let typeSystem = TypeSystem()
         typeSystem.addType(
             KnownTypeBuilder(typeName: "A", kind: .struct)
@@ -479,10 +515,10 @@ class LocalsUsageAnalyzerTests: XCTestCase {
         _ = typeResolver.resolveTypes(in: .expression(exp))
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
 
-        XCTAssertFalse(sut.isReadOnlyContext(exp.asAssignment!.lhs.asPostfix!.exp))
+        XCTAssertEqual(sut.usageKindContext(exp.asAssignment!.lhs.asPostfix!.exp), .writeOnly)
     }
 
-    func testIsReadOnlyContextWritingSubscriptOnReferenceType() {
+    func testUsageKindContext_writingSubscriptOnReferenceType() {
         let typeSystem = TypeSystem()
         typeSystem.addType(
             KnownTypeBuilder(typeName: "A")
@@ -500,10 +536,10 @@ class LocalsUsageAnalyzerTests: XCTestCase {
         _ = typeResolver.resolveTypes(in: .expression(exp))
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
 
-        XCTAssertTrue(sut.isReadOnlyContext(exp.asAssignment!.lhs.asPostfix!.exp))
+        XCTAssertEqual(sut.usageKindContext(exp.asAssignment!.lhs.asPostfix!.exp), .readOnly)
     }
 
-    func testIsReadOnlyContextWriteToResultOfValueTypeMethodCall() {
+    func testUsageKindContext_writeToResultOfValueTypeMethodCall() {
         let typeSystem = TypeSystem()
         typeSystem.addType(
             KnownTypeBuilder(typeName: "A", kind: .struct)
@@ -522,14 +558,15 @@ class LocalsUsageAnalyzerTests: XCTestCase {
         _ = typeResolver.resolveTypes(in: .expression(exp))
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
 
-        XCTAssertTrue(
-            sut.isReadOnlyContext(
+        XCTAssertEqual(
+            sut.usageKindContext(
                 exp.asAssignment!.lhs.asPostfix!.exp.asPostfix!.exp.asPostfix!.exp
-            )
+            ),
+            .readOnly
         )
     }
 
-    func testIsReadOnlyContext_parameterToMutatingSubscript() {
+    func testUsageKindContext_parameterToMutatingSubscript() {
         let typeSystem = TypeSystem()
         let identifier = Expression.identifier("b")
         let exp = Expression.identifier("a").sub(identifier).assignment(
@@ -544,6 +581,6 @@ class LocalsUsageAnalyzerTests: XCTestCase {
         _ = typeResolver.resolveTypes(in: .expression(exp))
         let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
 
-        XCTAssertTrue(sut.isReadOnlyContext(identifier))
+        XCTAssertEqual(sut.usageKindContext(identifier), .readOnly)
     }
 }

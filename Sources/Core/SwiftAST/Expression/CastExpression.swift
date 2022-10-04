@@ -99,6 +99,11 @@ public extension Expression {
         asCast != nil
     }
     
+    /// Creates a type-cast expression with this expression
+    func casted(to type: SwiftType, optional: Bool = true) -> CastExpression {
+        .cast(expressionToBuild, type: type, isOptionalCast: optional)
+    }
+    
     static func cast(_ exp: Expression, type: SwiftType, isOptionalCast: Bool = true) -> CastExpression {
         CastExpression(exp: exp, type: type, isOptionalCast: isOptionalCast)
     }

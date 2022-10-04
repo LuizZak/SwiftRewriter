@@ -51,7 +51,7 @@ class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
             Statement.expression(
                 Expression
                     .identifier("test")
-                    .assignment(op: .equals, rhs: .constant(1))
+                    .assignment(op: .assign, rhs: .constant(1))
             ),
         ]
         

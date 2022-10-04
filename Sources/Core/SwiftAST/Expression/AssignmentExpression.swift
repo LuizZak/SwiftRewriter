@@ -111,6 +111,12 @@ public extension Expression {
         asAssignment != nil
     }
 
+    /// Creates a BinaryExpression between this expression and a right-hand-side
+    /// expression.
+    func assignment(op: SwiftOperator, rhs: Expression) -> AssignmentExpression {
+        .assignment(lhs: self, op: op, rhs: rhs)
+    }
+
     static func assignment(lhs: Expression, op: SwiftOperator, rhs: Expression) -> AssignmentExpression {
         AssignmentExpression(lhs: lhs, op: op, rhs: rhs)
     }

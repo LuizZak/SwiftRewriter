@@ -115,6 +115,12 @@ public extension Expression {
         asBinary != nil
     }
     
+    /// Creates a BinaryExpression between this expression and a right-hand-side
+    /// expression.
+    func binary(op: SwiftOperator, rhs: Expression) -> BinaryExpression {
+        .binary(lhs: self, op: op, rhs: rhs)
+    }
+    
     static func binary(lhs: Expression, op: SwiftOperator, rhs: Expression) -> BinaryExpression {
         BinaryExpression(lhs: lhs, op: op, rhs: rhs)
     }

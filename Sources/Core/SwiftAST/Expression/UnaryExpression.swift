@@ -101,6 +101,11 @@ public extension Expression {
         asUnary != nil
     }
     
+    /// Returns an unary operator wrapping this expression.
+    func unary(op: SwiftOperator) -> UnaryExpression {
+        UnaryExpression(op: op, exp: self)
+    }
+    
     static func unary(op: SwiftOperator, _ exp: Expression) -> UnaryExpression {
         UnaryExpression(op: op, exp: exp)
     }

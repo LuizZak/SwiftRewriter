@@ -92,6 +92,10 @@ public extension Expression {
     var isTypeCheck: Bool {
         asTypeCheck != nil
     }
+
+    func typeCheck(as type: SwiftType) -> TypeCheckExpression {
+        .typeCheck(self, type: type)
+    }
     
     static func typeCheck(_ exp: Expression, type: SwiftType) -> TypeCheckExpression {
         TypeCheckExpression(exp: exp, type: type)

@@ -87,7 +87,7 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
     func attributes(for intention: IntentionProtocol,
                     inline: Bool) -> [() -> AttributeSyntax] {
         
-        guard let attributable = intention as? AttributeTaggeableObject else {
+        guard let attributable = intention as? AttributeTaggableObject else {
             return []
         }
         

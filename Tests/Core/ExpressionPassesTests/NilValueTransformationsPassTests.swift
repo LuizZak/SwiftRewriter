@@ -323,9 +323,9 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
 
     func testAssignmentIntoOptionalValue() {
         // a.b = c
-        let exp = Expression.identifier("a").dot("b").assignment(op: .equals, rhs: .identifier("c"))
+        let exp = Expression.identifier("a").dot("b").assignment(op: .assign, rhs: .identifier("c"))
         let expected = Expression.identifier("a").optional().dot("b").assignment(
-            op: .equals,
+            op: .assign,
             rhs: .identifier("c")
         )
         exp.lhs.subExpressions[0].resolvedType = .optional(.typeName("A"))

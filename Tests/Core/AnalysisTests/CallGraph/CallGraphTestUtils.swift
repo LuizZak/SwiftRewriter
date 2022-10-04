@@ -256,6 +256,30 @@ fileprivate func labelForDeclaration(_ declaration: FunctionBodyCarryingIntentio
         return getter ? "\(base) { get }" :  "\(base) { set }"
     }
 
+    func labelFor(_ property: KnownProperty, getter: Bool, ofType type: KnownTypeReferenceConvertible?) -> String {
+        let base: String
+
+        if let type = type?.asKnownTypeReference {
+            base = TypeFormatter.asString(property: property, ofType: type, includeAccessors: false)
+        } else {
+            base = "var \(property.name): \(property.memberType)"
+        }
+
+        return getter ? "\(base) { get }" :  "\(base) { set }"
+    }
+
+    func labelFor(_ sub: KnownSubscript, getter: Bool, ofType type: KnownTypeReferenceConvertible?) -> String {
+        let base: String
+
+        if let type = type?.asKnownTypeReference {
+            base = TypeFormatter.asString(subscript: sub, ofType: type, includeAccessors: false)
+        } else {
+            base = "subscript\(TypeFormatter.asString(parameters: sub.parameters)) -> \(sub.returnType)"
+        }
+
+        return getter ? "\(base) { get }" :  "\(base) { set }"
+    }
+
     func labelFor(_ method: KnownMethod, ofType type: KnownTypeReferenceConvertible?) -> String {
         if let type = type?.asKnownTypeReference {
             return TypeFormatter.asString(method: method, ofType: type)
@@ -287,16 +311,16 @@ fileprivate func labelForDeclaration(_ declaration: FunctionBodyCarryingIntentio
         label = labelFor(intention)
 
     case .propertyGetter(let intention, _):
-        label = prependType(intention.ownerType, labelFor(intention, getter: true))
+        label = labelFor(intention, getter: true, ofType: intention.ownerType)
 
     case .propertySetter(let intention, _):
-        label = prependType(intention.ownerType, labelFor(intention, getter: false))
+        label = labelFor(intention, getter: false, ofType: intention.ownerType)
 
     case .subscriptGetter(let intention, _):
-        label = prependType(intention.ownerType, labelFor(intention, getter: true))
+        label = labelFor(intention, getter: true, ofType: intention.ownerType)
 
     case .subscriptSetter(let intention, _):
-        label = prependType(intention.ownerType, labelFor(intention, getter: false))
+        label = labelFor(intention, getter: false, ofType: intention.ownerType)
 
     case .propertyInitializer(let intention, _):
         label = prependType(intention.ownerType, labelFor(intention) + " = <initializer>")

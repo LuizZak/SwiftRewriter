@@ -36,7 +36,7 @@ public class Postfix: ExpressionComponent, Codable, Equatable, CustomStringConve
     }
     
     public func copy() -> Postfix {
-        fatalError("Must be overriden by subclasses")
+        fatalError("Must be overridden by subclasses")
     }
     
     public func withOptionalAccess(kind: OptionalAccessKind) -> Postfix {

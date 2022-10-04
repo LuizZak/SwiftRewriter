@@ -158,7 +158,7 @@ public struct FunctionSignature: Hashable {
     }
     
     /// Returns a set of possible selector signature variations for this function
-    /// signature when permutating over default argument type variations.
+    /// signature when permuting over default argument type variations.
     ///
     /// e.g.: Given the following signature:
     ///
@@ -166,7 +166,7 @@ public struct FunctionSignature: Hashable {
     /// foo(bar: Int, baz: Int = default, _ zaz: Int = default)
     /// ```
     ///
-    /// permutated selector signature set returned by this method would be:
+    /// permuting selector signature set returned by this method would be:
     ///
     /// ```
     /// foo:bar:
@@ -230,7 +230,7 @@ public struct FunctionSignature: Hashable {
     }
     
     /// Returns a set of possible function identifier signature variations for
-    /// this function signature when permutating over default argument type variations.
+    /// this function signature when permuting over default argument type variations.
     ///
     /// e.g.: Given the following signature:
     ///
@@ -238,7 +238,7 @@ public struct FunctionSignature: Hashable {
     /// foo(bar: Int, baz: Int = default, _ zaz: Int = default)
     /// ```
     ///
-    /// permutated identifier signature set returned by this method would be:
+    /// permuting identifier signature set returned by this method would be:
     ///
     /// ```
     /// foo(bar:)
