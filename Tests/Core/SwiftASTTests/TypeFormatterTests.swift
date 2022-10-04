@@ -45,18 +45,22 @@ class TypeFormatterTests: XCTestCase {
             TypeFormatter.asString(signature: sig3, includeName: true, includeTraits: false)
         )
         XCTAssertEqual(
-            "static (a b: Float, c: Int)",
+            "static throwing (a b: Float, c: Int)",
             TypeFormatter.asString(signature: sig3, includeName: false)
         )
         XCTAssertEqual(
-            "(a b: Float, c: Int)",
+            "throwing (a b: Float, c: Int)",
             TypeFormatter.asString(signature: sig3, includeName: false, includeStatic: false)
+        )
+        XCTAssertEqual(
+            "(a b: Float, c: Int)",
+            TypeFormatter.asString(signature: sig3, includeName: false, includeTraits: false, includeStatic: false)
         )
 
         // Test default values for `includeName`
         XCTAssertEqual("() -> Int", TypeFormatter.asString(signature: sig1))
         XCTAssertEqual("(a b: Float)", TypeFormatter.asString(signature: sig2))
-        XCTAssertEqual("static (a b: Float, c: Int)", TypeFormatter.asString(signature: sig3))
+        XCTAssertEqual("static throwing (a b: Float, c: Int)", TypeFormatter.asString(signature: sig3))
     }
 
     func testAsStringParameterDefaultValue() {

@@ -18,7 +18,11 @@ public enum TypeFormatter {
         }
 
         if includeTraits {
-            result += signature.traits.subtracting(.static).description + " "
+            let traitDesc = signature.traits.subtracting(.static).description
+
+            if !traitDesc.isEmpty {
+                result += traitDesc + " "
+            }
         }
         
         if includeFuncKeyword {

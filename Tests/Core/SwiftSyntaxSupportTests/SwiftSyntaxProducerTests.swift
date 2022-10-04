@@ -902,7 +902,7 @@ extension SwiftSyntaxProducerTests {
         initMethod.functionBody = FunctionBodyIntention(body: [])
         let sut = SwiftSyntaxProducer()
 
-        let output = sut.generateInitializer(initMethod, alwaysEmitBody: true).description
+        let output = sut.generateInitializer(initMethod, emitBody: true, alwaysEmitBody: true).description
 
         let expected = """
             init?() {
@@ -920,7 +920,7 @@ extension SwiftSyntaxProducerTests {
         initMethod.functionBody = FunctionBodyIntention(body: [])
         let sut = SwiftSyntaxProducer()
 
-        let output = sut.generateInitializer(initMethod, alwaysEmitBody: true).description
+        let output = sut.generateInitializer(initMethod, emitBody: true, alwaysEmitBody: true).description
 
         let expected = """
             convenience init() {

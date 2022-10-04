@@ -41,7 +41,7 @@ extension ParameterSignature: CustomStringConvertible {
             result += "..."
         }
         if hasDefaultValue {
-            result += "= default"
+            result += " = default"
         }
 
         return result

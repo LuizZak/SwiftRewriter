@@ -729,6 +729,7 @@ extension SwiftSyntaxProducer {
                     SyntaxFactory.makeMemberDeclListItem(
                         decl: generateInitializer(
                             _init,
+                            emitBody: !(intention is ProtocolGenerationIntention),
                             alwaysEmitBody: !(intention is ProtocolGenerationIntention)
                         ).asDeclSyntax,
                         semicolon: nil
@@ -771,6 +772,7 @@ extension SwiftSyntaxProducer {
     
     func generateInitializer(
         _ intention: InitGenerationIntention,
+        emitBody: Bool,
         alwaysEmitBody: Bool
     ) -> InitializerDeclSyntax {
         
@@ -793,12 +795,14 @@ extension SwiftSyntaxProducer {
             
             builder.useParameters(generateParameterClause(intention.parameters))
             
-            if let body = intention.functionBody {
-                addExtraLeading(.spaces(1))
-                builder.useBody(generateFunctionBody(body))
-            } else if alwaysEmitBody {
-                addExtraLeading(.spaces(1))
-                builder.useBody(generateEmptyFunctionBody())
+            if emitBody {
+                if let body = intention.functionBody {
+                    addExtraLeading(.spaces(1))
+                    builder.useBody(generateFunctionBody(body))
+                } else if alwaysEmitBody {
+                    addExtraLeading(.spaces(1))
+                    builder.useBody(generateEmptyFunctionBody())
+                }
             }
         }
     }
