@@ -1,8 +1,8 @@
 import Intentions
 import TypeSystem
 
-/// Represents call order dependencies of functions and variable initializers in
-/// a program.
+/// Represents call order dependencies of functions, computed variables, and
+/// subscripts in a program.
 public class CallGraph: DirectedGraphBase<CallGraphNode, CallGraphEdge> {
     /// Adds an edge `start -> end` to this graph.
     @discardableResult
