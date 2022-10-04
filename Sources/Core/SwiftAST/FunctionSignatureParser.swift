@@ -142,9 +142,7 @@ public final class FunctionSignatureParser {
         
         // Return type (optional)
         var returnType: SwiftType = .void
-        if tokenizer.tokenType(is: .functionArrow) {
-            tokenizer.skipToken()
-            
+        if tokenizer.consumeToken(ifTypeIs: .functionArrow) != nil {
             returnType = try SwiftTypeParser.parse(from: tokenizer.lexer)
         }
         
@@ -158,7 +156,132 @@ public final class FunctionSignatureParser {
             )
     }
     
+    /// Parses a subscript signature from a given input lexer.
+    ///
+    /// Parsing begins at the subscript name and the input should not start with
+    /// a `func` keyword.
+    ///
+    /// formal grammar of a subscript signature:
+    ///
+    /// ```
+    /// subscript-signature
+    ///     | 'subscript' parameter-signature return-type
+    ///     ;
+    /// ```
+    ///
+    /// Support for parsing Swift types is borrowed from `SwiftTypeParser`.
+    ///
+    /// - Parameter string: The input string to parse, containing the subscript
+    /// signature, starting at the 'subscript' keyword.
+    /// - Returns: A subscript signature, with parameters and a return type.
+    /// - Throws: Lexing errors, if string is malformed.
+    public static func parseSubscriptSignature(from lexer: Lexer) throws -> SubscriptSignature {
+        let tokenizer = Tokenizer(lexer: lexer)
+
+        try tokenizer.advance(overTokenType: .subscript)
+
+        let parameters = try parseParameterList(tokenizer: tokenizer)
+        
+        // Return type
+        try tokenizer.advance(overTokenType: .functionArrow) // ->
+        let returnType = try SwiftTypeParser.parse(from: tokenizer.lexer)
+        
+        return
+            SubscriptSignature(
+                parameters: parameters,
+                returnType: returnType,
+                isStatic: false
+            )
+    }
+    
+    /// Parses a subscript signature from a given input string.
+    ///
+    /// Parsing begins at the subscript name and the input should not start with
+    /// a `func` keyword.
+    ///
+    /// formal grammar of a subscript signature:
+    ///
+    /// ```
+    /// subscript-signature
+    ///     | 'subscript' parameter-signature return-type
+    ///     ;
+    /// ```
+    ///
+    /// Support for parsing Swift types is borrowed from `SwiftTypeParser`.
+    ///
+    /// - Parameter string: The input string to parse, containing the subscript
+    /// signature, starting at the 'subscript' keyword.
+    /// - Returns: A subscript signature, with parameters and a return type.
+    /// - Throws: Lexing errors, if string is malformed.
+    public static func parseSubscriptSignature(from string: String) throws -> SubscriptSignature {
+        let lexer = Lexer(input: string)
+        
+        let signature = try parseSubscriptSignature(from: lexer)
+        
+        // Verify extraneous input
+        if !lexer.isEof() {
+            let rem = lexer.withTemporaryIndex { lexer.consumeRemaining() }
+            
+            throw lexer.syntaxError("Extraneous input '\(rem)'")
+        }
+        
+        return signature
+    }
+    
     /// Parses an array of parameter signatures from a given input string.
+    ///
+    /// Input must contain the argument list enclosed within their respective
+    /// parenthesis - e.g. the following string produces the following parameter
+    /// signatures:
+    ///
+    /// ```
+    /// (_ arg0: Int, arg1: String?)
+    /// ```
+    /// resulting parameters:
+    /// ```
+    /// [
+    ///   ParameterSignature(label: "_", name: "arg0", type: .typeName("Int")),
+    ///   ParameterSignature(name: "arg1", type: .optional(.typeName("String")))
+    /// ]
+    /// ```
+    ///
+    /// Formal grammar of parameters signature:
+    ///
+    /// ```
+    /// parameter-signature
+    ///     : '(' parameter-list? ')'
+    ///     ;
+    ///
+    /// parameter-list
+    ///     : parameter (',' parameter)*
+    ///     ;
+    ///
+    /// parameter
+    ///     : parameter-name ':' parameter-attribute-list? swift-type parameter-default-value?
+    ///     ;
+    ///
+    /// parameter-name
+    ///     : identifier? identifier
+    ///     ;
+    ///
+    /// parameter-attribute-list
+    ///     : parameter-attribute parameter-attribute-list?
+    ///     | 'inout'
+    ///     ;
+    ///
+    /// parameter-attribute
+    ///     : '@' identifier
+    ///     ;
+    ///
+    /// parameter-default-value
+    ///     : '=' 'default'
+    ///     | '=' '[]'
+    ///     ;
+    ///
+    /// identifier
+    ///     : [a-zA-Z_] [a-zA-Z_0-9]+
+    ///     ;
+    /// ```
     ///
     /// - Parameter string: The input string to parse, containing the parameter
     /// list enclosed within parenthesis.
@@ -431,6 +554,7 @@ public final class FunctionSignatureParser {
         case `rethrows`
         case functionArrow
         case eof
+        case `subscript`
         
         func advance(in lexer: Lexer) throws {
             let len = length(in: lexer)
@@ -456,6 +580,8 @@ public final class FunctionSignatureParser {
                 return 8
             case .rethrows:
                 return 8
+            case .subscript:
+                return 9
             case .identifier:
                 return Token.identifierLexer.maximumLength(in: lexer) ?? 0
             case .eof:
@@ -510,6 +636,9 @@ public final class FunctionSignatureParser {
                 }
                 if ident == "mutating" {
                     return .mutating
+                }
+                if ident == "subscript" {
+                    return .subscript
                 }
                 
                 return .identifier

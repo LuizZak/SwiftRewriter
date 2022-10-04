@@ -142,4 +142,93 @@ class CallGraph_CreationTests: XCTestCase {
                 """
         )
     }
+
+    func testSubscriptGetter() {
+        let builder = IntentionCollectionBuilder()
+        let body: CompoundStatement = [
+            // b[0]
+            .expression(
+                Expression
+                    .identifier("b")
+                    .sub(.constant(0))
+            )
+        ]
+        builder
+            .createFile(named: "A.m") { file in
+                file
+                    .createGlobalFunction(withName: "a") { method in
+                        method
+                            .createSignature { sign in
+                                sign.addParameter(name: "b", type: "B")
+                            }.setBody(body)
+                    }
+                    .createClass(withName: "B") { builder in
+                        builder.createSubscript(parameters: [.init(name: "v", type: .int)], returnType: .string)
+                    }
+            }
+        let intentions = builder.build(typeChecked: true)
+        let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
+
+        let graph = CallGraph.fromIntentions(intentions, typeSystem: typeSystem)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph calls {
+                    n1 [label="B.subscript(v: Int) -> String { get }"]
+                    n2 [label="func a(b: B)"]
+                    n2 -> n1
+                }
+                """
+        )
+    }
+
+    func testSubscriptSetter() {
+        let builder = IntentionCollectionBuilder()
+        let body: CompoundStatement = [
+            // b[0] = ""
+            .expression(
+                Expression
+                    .identifier("b")
+                    .sub(.constant(0))
+                    .assignment(op: .equals, rhs: .constant(""))
+            )
+        ]
+        builder
+            .createFile(named: "A.m") { file in
+                file
+                    .createGlobalFunction(withName: "a") { method in
+                        method
+                            .createSignature { sign in
+                                sign.addParameter(name: "b", type: "B")
+                            }.setBody(body)
+                    }
+                    .createClass(withName: "B") { builder in
+                        builder.createSubscript(parameters: [.init(name: "v", type: .int)], returnType: .string) { builder in
+                            builder.setAsGetterSetter(
+                                getter: [],
+                                setter: .init(valueIdentifier: "v", body: [])
+                            )
+                        }
+                    }
+            }
+        let intentions = builder.build(typeChecked: true)
+        let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
+
+        let graph = CallGraph.fromIntentions(intentions, typeSystem: typeSystem)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph calls {
+                    n1 [label="B.subscript(v: Int) -> String { get }"]
+                    n2 [label="B.subscript(v: Int) -> String { set }"]
+                    n3 [label="func a(b: B)"]
+                    n3 -> n2
+                }
+                """
+        )
+    }
 }

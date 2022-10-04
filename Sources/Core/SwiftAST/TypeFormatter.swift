@@ -41,6 +41,32 @@ public enum TypeFormatter {
         
         return result
     }
+
+    /// Generates a string representation of a given subscript signature.
+    public static func asString(
+        signature: SubscriptSignature,
+        includeSubscriptKeyword: Bool = true,
+        includeStatic: Bool = true
+    ) -> String {
+        
+        var result = ""
+        
+        if signature.isStatic && includeStatic {
+            result += "static "
+        }
+        
+        if includeSubscriptKeyword {
+            result += "subscript"
+        }
+        
+        result += asString(parameters: signature.parameters)
+        
+        if signature.returnType != .void {
+            result += " -> \(stringify(signature.returnType))"
+        }
+        
+        return result
+    }
     
     /// Generates a string representation of a given set of function parameters,
     /// with parenthesis enclosing the types.

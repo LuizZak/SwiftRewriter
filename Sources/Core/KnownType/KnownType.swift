@@ -217,6 +217,9 @@ public protocol KnownProperty: KnownMember {
 
 /// A known type subscript
 public protocol KnownSubscript: KnownMember {
+    /// Gets the subscript signature for this subscript member
+    var signature: SubscriptSignature { get }
+    
     /// Gets the type for the indexing values of this subscription as an array of
     /// parameters.
     var parameters: [ParameterSignature] { get }

@@ -23,8 +23,13 @@ public class CodeDefinition: Equatable {
         switch kind {
         case .variable(_, let storage):
             return storage.type
+
         case .function(let signature):
             return signature.swiftClosureType
+        
+        case .subscript(let signature):
+            return signature.swiftClosureType
+
         case .initializer(let typeName, let parameters):
             return .block(
                 returnType: typeName.asSwiftType,
@@ -40,7 +45,7 @@ public class CodeDefinition: Equatable {
         switch kind {
         case .variable(_, let storage):
             return storage.ownership
-        case .function, .initializer:
+        case .function, .initializer, .subscript:
             return .strong
         }
     }
@@ -52,10 +57,19 @@ public class CodeDefinition: Equatable {
         case .function(let signature):
             return signature
         
-        case .initializer:
+        case .initializer, .variable, .subscript:
             return nil
-            
-        case .variable:
+        }
+    }
+    
+    /// Attempts to return the value of this code definition as a subscript signature,
+    /// if it can be implicitly interpreted as one.
+    public var asSubscriptSignature: SubscriptSignature? {
+        switch kind {
+        case .subscript(let signature):
+            return signature
+        
+        case .initializer, .variable, .function:
             return nil
         }
     }
@@ -90,6 +104,10 @@ public class CodeDefinition: Equatable {
         kind = .function(signature: functionSignature)
     }
     
+    init(subscriptSignature: SubscriptSignature) {
+        kind = .subscript(signature: subscriptSignature)
+    }
+    
     init(typeInitializer type: KnownTypeReference, parameters: [ParameterSignature]) {
         kind = .initializer(type, parameters: parameters)
     }
@@ -107,6 +125,7 @@ public class CodeDefinition: Equatable {
     public enum Kind: Hashable {
         case variable(name: String, storage: ValueStorage)
         case function(signature: FunctionSignature)
+        case `subscript`(signature: SubscriptSignature)
         case initializer(KnownTypeReference, parameters: [ParameterSignature])
         
         public var name: String {
@@ -116,6 +135,9 @@ public class CodeDefinition: Equatable {
                 
             case .function(let signature):
                 return signature.name
+            
+            case .subscript(let signature):
+                return signature.description
 
             case .initializer(let typeName, _):
                 return typeName.asSwiftType.description

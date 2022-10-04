@@ -16,6 +16,9 @@ public class KnownMemberCodeDefinition: CodeDefinition {
             
         case let method as KnownMethod:
             super.init(functionSignature: method.signature)
+
+        case let sub as KnownSubscript:
+            super.init(subscriptSignature: sub.signature)
         
         case let ctor as KnownConstructor:
             guard let ownerType = ownerType?.asKnownTypeReference ?? ctor.ownerType else {
@@ -23,7 +26,7 @@ public class KnownMemberCodeDefinition: CodeDefinition {
             }
 
             super.init(typeInitializer: ownerType, parameters: ctor.parameters)
-            
+        
         default:
             fatalError("Attempting to create a \(KnownMemberCodeDefinition.self) from unknown \(KnownMember.self)-type \(Swift.type(of: knownMember))")
         }

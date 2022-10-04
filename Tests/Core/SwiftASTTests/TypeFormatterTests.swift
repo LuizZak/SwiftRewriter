@@ -63,6 +63,28 @@ class TypeFormatterTests: XCTestCase {
         XCTAssertEqual("static throwing (a b: Float, c: Int)", TypeFormatter.asString(signature: sig3))
     }
 
+    func testAsStringSubscriptSignature() {
+        let sig1 = SubscriptSignature.init(
+            parameters: [.init(name: "i", type: .int)],
+            returnType: .int
+        )
+        let sig2 = SubscriptSignature.init(
+            parameters: [.init(name: "i", type: .int)],
+            returnType: .int,
+            isStatic: true
+        )
+
+        XCTAssertEqual("subscript(i: Int) -> Int", TypeFormatter.asString(signature: sig1, includeSubscriptKeyword: true))
+        XCTAssertEqual("(i: Int) -> Int", TypeFormatter.asString(signature: sig1, includeSubscriptKeyword: false))
+
+        XCTAssertEqual("static subscript(i: Int) -> Int", TypeFormatter.asString(signature: sig2, includeStatic: true))
+        XCTAssertEqual("subscript(i: Int) -> Int", TypeFormatter.asString(signature: sig2, includeStatic: false))
+
+        // Test default parameters
+        XCTAssertEqual("subscript(i: Int) -> Int", TypeFormatter.asString(signature: sig1))
+        XCTAssertEqual("static subscript(i: Int) -> Int", TypeFormatter.asString(signature: sig2))
+    }
+
     func testAsStringParameterDefaultValue() {
         let parameters = [
             ParameterSignature(label: "label", name: "name", type: .int, hasDefaultValue: true)

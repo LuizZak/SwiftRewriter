@@ -543,6 +543,13 @@ public struct KnownTypeBuilder {
         
         var new = clone()
         
+        let signature =
+            SubscriptSignature(
+                parameters: parameters,
+                returnType: returnType,
+                isStatic: isStatic
+            )
+        
         let sub = BuildingKnownSubscript(
             isStatic: isStatic,
             ownerType: self.type.asKnownTypeReference,
@@ -551,7 +558,8 @@ public struct KnownTypeBuilder {
             isConstant: isConstant,
             knownAttributes: attributes,
             semantics: semantics,
-            annotations: annotations
+            annotations: annotations,
+            signature: signature
         )
         
         new.type.subscripts.append(sub)
@@ -1015,10 +1023,19 @@ final class BuildingKnownSubscript: KnownSubscript, Codable {
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
     var annotations: [String]
+    var signature: SubscriptSignature
     
-    init(isStatic: Bool, ownerType: KnownTypeReference?, parameters: [ParameterSignature],
-         returnType: SwiftType, isConstant: Bool, knownAttributes: [KnownAttribute],
-         semantics: Set<Semantic>, annotations: [String]) {
+    init(
+        isStatic: Bool,
+        ownerType: KnownTypeReference?,
+        parameters: [ParameterSignature],
+        returnType: SwiftType,
+        isConstant: Bool,
+        knownAttributes: [KnownAttribute],
+        semantics: Set<Semantic>,
+        annotations: [String],
+        signature: SubscriptSignature
+    ) {
         
         self.isStatic = isStatic
         self.ownerType = ownerType
@@ -1028,6 +1045,7 @@ final class BuildingKnownSubscript: KnownSubscript, Codable {
         self.knownAttributes = knownAttributes
         self.semantics = semantics
         self.annotations = annotations
+        self.signature = signature
     }
 }
 

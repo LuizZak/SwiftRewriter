@@ -375,6 +375,19 @@ class FunctionSignatureParserTests: XCTestCase {
             XCTFail("Wrong error type \(type(of: error))")
         }
     }
+
+    func testSubscriptSignature() {
+        assert(
+            string: "subscript(_ int: Int) -> Double",
+            parseInto: SubscriptSignature(
+                parameters: [
+                    ParameterSignature(label: nil, name: "int", type: .int)
+                ],
+                returnType: .double,
+                isStatic: false
+            )
+        )
+    }
 }
 
 extension FunctionSignatureParserTests {
@@ -406,6 +419,31 @@ extension FunctionSignatureParserTests {
     func assert(string: String, parseInto expected: FunctionSignature, line: UInt = #line) {
         do {
             let parsed = try FunctionSignatureParser.parseSignature(from: string)
+
+            if parsed != expected {
+                XCTFail(
+                    """
+                    Expected to parse '\(string)' into function signature \
+                    \(TypeFormatter.asString(signature: expected)) but received \
+                    \(TypeFormatter.asString(signature: parsed))
+                    """,
+                    file: #filePath,
+                    line: line
+                )
+            }
+        }
+        catch {
+            XCTFail(
+                "Error parsing signature: \(error)",
+                file: #filePath,
+                line: line
+            )
+        }
+    }
+
+    func assert(string: String, parseInto expected: SubscriptSignature, line: UInt = #line) {
+        do {
+            let parsed = try FunctionSignatureParser.parseSubscriptSignature(from: string)
 
             if parsed != expected {
                 XCTFail(

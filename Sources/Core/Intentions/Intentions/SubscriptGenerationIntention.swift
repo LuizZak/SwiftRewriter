@@ -215,5 +215,11 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
 }
 
 extension SubscriptGenerationIntention: KnownSubscript {
-    
+    public var signature: SubscriptSignature {
+        .init(
+            parameters: parameters,
+            returnType: returnType,
+            isStatic: isStatic
+        )
+    }
 }
