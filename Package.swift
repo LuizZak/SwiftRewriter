@@ -3,6 +3,13 @@ import PackageDescription
 
 let core: [Target] = [
     .target(
+        name: "Graphviz",
+        dependencies: [
+
+        ],
+        path: "Sources/Core/Graphviz"
+    ),
+    .target(
         name: "AntlrCommons",
         dependencies: [
             .product(name: "Antlr4", package: "antlr4-swift"),
@@ -287,6 +294,14 @@ let package = Package(
             path: "Sources/TestCommons"
         ),
         /* Tests */
+        .testTarget(
+            name: "GraphvizTests",
+            dependencies: [
+                "Graphviz",
+                "TestCommons",
+            ],
+            path: "Tests/Core/Graphviz"
+        ),
         .testTarget(
             name: "UtilsTests",
             dependencies: [
