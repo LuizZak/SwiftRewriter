@@ -8,6 +8,22 @@ import XCTest
 @testable import Analysis
 
 class CallGraph_CreationTests: XCTestCase {
+    override class func tearDown() {
+        super.tearDown()
+
+        do {
+            try updateAllRecordedGraphviz()
+        } catch {
+            print("Error updating test list: \(error)")
+        }
+    }
+
+    override func tearDownWithError() throws {
+        try throwErrorIfInGraphvizRecordMode()
+
+        try super.tearDownWithError()
+    }
+
     func testEmptyCallGraph() {
         let builder = IntentionCollectionBuilder()
         let intentions = builder.build(typeChecked: true)

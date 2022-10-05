@@ -112,7 +112,7 @@ internal func sanitize(
 }
 
 internal var recordMode: Bool = false
-private var recordedGraphs: [GraphvizUpdateEntry] = []
+internal var recordedGraphs: [GraphvizUpdateEntry] = []
 internal func assertGraphviz(
     graph: ControlFlowGraph,
     matches expected: String,
@@ -472,7 +472,7 @@ fileprivate func labelForNode(_ node: ControlFlowGraphNode, graph: ControlFlowGr
     return labelForSyntaxNode(node.node)
 }
 
-private func updateGraphvizCode(entry: GraphvizUpdateEntry) throws {
+internal func updateGraphvizCode(entry: GraphvizUpdateEntry) throws {
     let path = URL(fileURLWithPath: entry.file)
 
     let syntax = try SyntaxParser.parse(path)
@@ -588,7 +588,7 @@ private class GraphvizUpdateRewriter: SyntaxRewriter {
     }
 }
 
-private struct GraphvizUpdateEntry {
+internal struct GraphvizUpdateEntry {
     var file: String
     var line: Int
     var newGraphviz: String

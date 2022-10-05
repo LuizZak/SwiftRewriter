@@ -33,6 +33,16 @@ internal func assertGraphviz(
         return
     }
 
+    if recordMode {
+        recordedGraphs.append(
+            .init(
+                file: "\(file)",
+                line: Int(line),
+                newGraphviz: text
+            )
+        )
+    }
+
     let syntaxString: String?
     switch syntaxNode {
     case let node as Expression:
