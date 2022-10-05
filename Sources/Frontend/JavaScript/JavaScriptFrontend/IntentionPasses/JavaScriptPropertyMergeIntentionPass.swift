@@ -201,6 +201,9 @@ public class JavaScriptPropertyMergeIntentionPass: IntentionPass {
                 \(TypeFormatter.asString(method: setter, ofType: setterOwner))
                 """
             )
+            property.history.mergeHistories(getter.history)
+            property.history.mergeHistories(setter.history)
+            property.precedingComments = getter.precedingComments + setter.precedingComments
 
             classIntention.addProperty(property)
             
@@ -246,6 +249,8 @@ public class JavaScriptPropertyMergeIntentionPass: IntentionPass {
                 \(TypeFormatter.asString(method: getter, ofType: getterOwner))
                 """
             )
+            property.history.mergeHistories(getter.history)
+            property.precedingComments = getter.precedingComments
 
             classIntention.addProperty(property)
             
