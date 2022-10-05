@@ -99,6 +99,48 @@ class JsParserTests: XCTestCase {
         )
     }
 
+    // TODO: Support "string name" imports as per described here:
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#named_import
+    func testParseImportDeclaration() throws {
+        let sut =
+            JsParser(
+                string: """
+                import defaultExport from "/file1.js";
+                import * as name from "/file2.js";
+                import { export1 } from "/file3.js";
+                import { export1 as alias1 } from "/file4.js";
+                import { default as alias } from "/file5.js";
+                import { export1, export2 } from "/file6.js";
+                import { export1, export2 as alias2, /* … */ } from "/file7.js";
+                // import { "string name" as alias } from "/file8.js";
+                import defaultExport, { export1, /* … */ } from "/file9.js";
+                import defaultExport, * as name from "/file10.js";
+                import "/file11.js";
+                """
+            )
+
+        try sut.parse()
+        if !sut.diagnostics.diagnostics.isEmpty {
+            var diag = ""
+            sut.diagnostics.printDiagnostics(to: &diag)
+
+            XCTFail("Unexpected diagnostics while parsing:\n\(diag)")
+        }
+
+        XCTAssertEqual(sut.importDirectives, [
+            .init(symbols: ["defaultExport"], path: "/file1.js", isSystemImport: false),
+            .init(symbols: ["*"], path: "/file2.js", isSystemImport: false),
+            .init(symbols: ["export1"], path: "/file3.js", isSystemImport: false),
+            .init(symbols: ["export1"], path: "/file4.js", isSystemImport: false),
+            .init(symbols: ["default"], path: "/file5.js", isSystemImport: false),
+            .init(symbols: ["export1", "export2"], path: "/file6.js", isSystemImport: false),
+            .init(symbols: ["export1", "export2"], path: "/file7.js", isSystemImport: false),
+            .init(symbols: ["defaultExport", "export1"], path: "/file9.js", isSystemImport: false),
+            .init(symbols: ["defaultExport", "*"], path: "/file10.js", isSystemImport: false),
+            .init(symbols: [], path: "/file11.js", isSystemImport: false),
+        ])
+    }
+
     #if JS_PARSER_TESTS_FULL_FIXTURES
 
         func testParse_allFixtures() throws {

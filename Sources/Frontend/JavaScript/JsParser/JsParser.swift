@@ -5,6 +5,9 @@ import class Antlr4.ParseTreeWalker
 import class Antlr4.ParserRuleContext
 import class Antlr4.Parser
 import class Antlr4.DFA
+import protocol Antlr4.TerminalNode
+import struct Foundation.CharacterSet
+
 import JsParserAntlr
 import AntlrCommons
 import Utils
@@ -46,12 +49,16 @@ public class JsParser {
         self.init(source: StringCodeSource(source: string, fileName: fileName))
     }
     
-    public convenience init(string: String,
-                            fileName: String = "",
-                            state: JsParserState) {
+    public convenience init(
+        string: String,
+        fileName: String = "",
+        state: JsParserState
+    ) {
         
-        self.init(source: StringCodeSource(source: string, fileName: fileName),
-                  state: state)
+        self.init(
+            source: StringCodeSource(source: string, fileName: fileName),
+            state: state
+        )
     }
     
     public convenience init(source: CodeSource) {
@@ -91,9 +98,20 @@ public class JsParser {
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)
 
+        try collectImports(root)
+
         rootNode = listener.rootNode
 
         parsed = true
+    }
+
+    private func collectImports(_ root: JavaScriptParser.ProgramContext) throws {
+        let listener = JsImportDeclListener()
+        
+        let walker = ParseTreeWalker()
+        try walker.walk(listener, root)
+
+        self.importDirectives = listener.importDecls
     }
     
     private func tryParse<T: ParserRuleContext, P: Parser>(from parser: P, _ operation: (P) throws -> T) throws -> T {
@@ -138,6 +156,12 @@ public class JsParser {
     }
     
     // MARK: - Global context-free parsing functions
+
+    public static func parseStringContents(_ ctx: Antlr4.TerminalNode) -> String {
+        let text = ctx.getText()
+
+        return text.trimmingCharacters(in: CharacterSet(charactersIn: "\"'`"))
+    }
 
     public static func parseComments(input: String) -> [RawCodeComment] {
         var result: [RawCodeComment] = []
