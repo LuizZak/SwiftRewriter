@@ -238,6 +238,7 @@ let package = Package(
                 .product(name: "Console", package: "console"),
                 .product(name: "SwiftFormat", package: "swift-format"),
                 .product(name: "SwiftFormatConfiguration", package: "swift-format"),
+                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
                 // Objective-C
                 "ObjcGrammarModels", "ObjcParser",
                 // JavaScript
@@ -297,6 +298,7 @@ let package = Package(
             name: "WriterTargetOutputTests",
             dependencies: [
                 "WriterTargetOutput",
+                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
                 "TestCommons",
             ],
             path: "Tests/Core/WriterTargetOutputTests"
@@ -383,6 +385,7 @@ let package = Package(
             name: "SwiftRewriterLibTests",
             dependencies: [
                 "SwiftRewriterLib",
+                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
                 "SwiftAST", "ObjcGrammarModels", "ObjcParser", "ExpressionPasses",
                 "IntentionPasses", "TestCommons", "GlobalsProviders",
                 "Intentions", "TypeSystem", "WriterTargetOutput",
@@ -442,6 +445,7 @@ let package = Package(
             name: "AnalysisTests",
             dependencies: [
                 "Analysis",
+                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
                 "SwiftAST", "SwiftRewriterLib", "GlobalsProviders",
                 "TestCommons", "TypeSystem",
             ],
