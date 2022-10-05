@@ -44,6 +44,13 @@ extension ObjectiveCCommand {
               Ignored when converting from standard input.
               """)
         var followImports: Bool = false
+        
+        @Flag(name: .long,
+              help: """
+              If set, prints the call graph of the entire final Swift program generated \
+              to the standard output before emitting the files.
+              """)
+        var printCallGraph: Bool = false
 
         @OptionGroup()
         var globalOptions: GlobalOptions
@@ -66,8 +73,12 @@ extension ObjectiveCCommand {
             
             let fileProvider = FileDiskProvider()
             let fileCollectionStep = ObjectiveCFileCollectionStep(fileProvider: fileProvider)
-            let delegate = ObjectiveCImportDirectiveFileCollectionDelegate(parserCache: rewriter.parserCache,
-                                                                 fileProvider: fileProvider)
+            let delegate =
+                ObjectiveCImportDirectiveFileCollectionDelegate(
+                    parserCache: rewriter.parserCache,
+                    fileProvider: fileProvider
+                )
+            
             if options.followImports {
                 fileCollectionStep.delegate = delegate
             }
@@ -76,8 +87,10 @@ extension ObjectiveCCommand {
             }
             try withExtendedLifetime(delegate) {
                 for fileUrl in files {
-                    try fileCollectionStep.addFile(fromUrl: URL(fileURLWithPath: fileUrl),
-                                                   isPrimary: true)
+                    try fileCollectionStep.addFile(
+                        fromUrl: URL(fileURLWithPath: fileUrl),
+                        isPrimary: true
+                    )
                 }
             }
             
@@ -222,6 +235,10 @@ private func makeSettings(_ options: ObjectiveCCommand.Options) throws -> Object
     settings.astWriter.emitObjcCompatibility = options.emitObjcCompatibility
     settings.astWriter.format = try options.globalOptions.computeFormatterMode()
     settings.rewriter.forceUseLLPrediction = options.globalOptions.forceLl
+
+    if options.printCallGraph {
+        settings.rewriter.stageDiagnostics.append(.callGraph)
+    }
     
     return settings
 }

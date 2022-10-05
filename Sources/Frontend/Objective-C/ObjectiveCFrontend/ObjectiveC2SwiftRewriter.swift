@@ -604,6 +604,19 @@ public final class ObjectiveC2SwiftRewriter {
         withExtendedLifetime(progressDelegate) {
             applier.apply(on: intentionCollection)
         }
+
+        if settings.stageDiagnostics.contains(.callGraph) {
+            let graph = CallGraph.fromIntentions(
+                intentionCollection,
+                typeSystem: typeSystem
+            )
+
+            let graphviz = graph.asGraphviz().generateFile(
+                options: .init(simplifyGroups: false)
+            )
+
+            print(graphviz)
+        }
         
         typeSystem.tearDownCache()
     }
@@ -809,11 +822,13 @@ public final class ObjectiveC2SwiftRewriter {
         /// Enables printing outputs of stages for diagnostic purposes.
         public var stageDiagnostics: [StageDiagnosticFlag]
 
-        public init(numThreads: Int,
-                    verbose: Bool,
-                    diagnoseFiles: [String],
-                    forceUseLLPrediction: Bool,
-                    stageDiagnostics: [StageDiagnosticFlag]) {
+        public init(
+            numThreads: Int,
+            verbose: Bool,
+            diagnoseFiles: [String],
+            forceUseLLPrediction: Bool,
+            stageDiagnostics: [StageDiagnosticFlag]
+        ) {
             
             self.numThreads = numThreads
             self.verbose = verbose
@@ -823,8 +838,11 @@ public final class ObjectiveC2SwiftRewriter {
         }
         
         public enum StageDiagnosticFlag {
-            /// Prints result of Objective-C grammar parsing stage
+            /// Prints result of Objective-C grammar parsing stage.
             case parsedAST
+
+            /// Prints result of call graph from generated IntentionCollection.
+            case callGraph
         }
     }
 }
