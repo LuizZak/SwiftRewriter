@@ -27,7 +27,12 @@ internal func assertGraphviz(
     file: StaticString = #filePath,
     line: UInt = #line
 ) {
-    let text = graph.asGraphviz().generateFile()
+    let text =
+        graph
+            .asGraphviz()
+            .generateFile(
+                options: .init(simplifyGroups: false)
+            )
 
     if text == expected {
         return

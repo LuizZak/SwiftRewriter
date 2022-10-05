@@ -52,7 +52,7 @@ class CallGraph_CreationTests: XCTestCase {
             )
         ]
         builder
-            .createFile(named: "A.m") { file in
+            .createFile(named: "A.swift") { file in
                 file
                     .createClass(withName: "A") { builder in
                         builder.createVoidMethod(named: "f1") { method in
@@ -75,12 +75,25 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
-                    n1 [label="A.f1()"]
-                    n2 [label="B.b()"]
-                    n3 [label="B.init()"]
-
-                    n1 -> n2
-                    n1 -> n3
+                    subgraph cluster_1 {
+                        label = "A.swift"
+                
+                        subgraph cluster_2 {
+                            label = "class A"
+                
+                            n1 [label="A.f1()"]
+                        }
+                
+                        subgraph cluster_3 {
+                            label = "class B"
+                
+                            n2 [label="B.b()"]
+                            n3 [label="B.init()"]
+                        }
+                
+                        n1 -> n2
+                        n1 -> n3
+                    }
                 }
                 """
         )
@@ -100,7 +113,7 @@ class CallGraph_CreationTests: XCTestCase {
             )
         ]
         builder
-            .createFile(named: "A.m") { file in
+            .createFile(named: "A.swift") { file in
                 file
                     .createGlobalFunction(withName: "a") { method in
                         method.setBody(body)
@@ -116,9 +129,13 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
-                    n1 [label="func a()"]
-
-                    n1 -> n1
+                    subgraph cluster_1 {
+                        label = "A.swift"
+                
+                        n1 [label="func a()"]
+                
+                        n1 -> n1
+                    }
                 }
                 """
         )
@@ -134,7 +151,7 @@ class CallGraph_CreationTests: XCTestCase {
             )
         ]
         builder
-            .createFile(named: "A.m") { file in
+            .createFile(named: "A.swift") { file in
                 file
                     .createGlobalFunction(withName: "a") { method in
                         method.setBody(body)
@@ -153,10 +170,19 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
-                    n1 [label="B.init()"]
-                    n2 [label="func a()"]
-
-                    n2 -> n1
+                    subgraph cluster_1 {
+                        label = "A.swift"
+                
+                        n2 [label="func a()"]
+                
+                        subgraph cluster_2 {
+                            label = "class B"
+                
+                            n1 [label="B.init()"]
+                        }
+                
+                        n2 -> n1
+                    }
                 }
                 """
         )
@@ -175,7 +201,7 @@ class CallGraph_CreationTests: XCTestCase {
             )
         ]
         builder
-            .createFile(named: "A.m") { file in
+            .createFile(named: "A.swift") { file in
                 file
                     .createGlobalFunction(withName: "a") { method in
                         method
@@ -197,10 +223,19 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
-                    n1 [label="B.subscript(v: Int) -> String { get }"]
-                    n2 [label="func a(b: B)"]
-
-                    n2 -> n1
+                    subgraph cluster_1 {
+                        label = "A.swift"
+                
+                        n2 [label="func a(b: B)"]
+                
+                        subgraph cluster_2 {
+                            label = "class B"
+                
+                            n1 [label="B.subscript(v: Int) -> String { get }"]
+                        }
+                
+                        n2 -> n1
+                    }
                 }
                 """
         )
@@ -218,7 +253,7 @@ class CallGraph_CreationTests: XCTestCase {
             )
         ]
         builder
-            .createFile(named: "A.m") { file in
+            .createFile(named: "A.swift") { file in
                 file
                     .createGlobalFunction(withName: "a") { method in
                         method
@@ -245,11 +280,20 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
-                    n1 [label="B.subscript(v: Int) -> String { get }"]
-                    n2 [label="B.subscript(v: Int) -> String { set }"]
-                    n3 [label="func a(b: B)"]
-
-                    n3 -> n2
+                    subgraph cluster_1 {
+                        label = "A.swift"
+                
+                        n3 [label="func a(b: B)"]
+                
+                        subgraph cluster_2 {
+                            label = "class B"
+                
+                            n1 [label="B.subscript(v: Int) -> String { get }"]
+                            n2 [label="B.subscript(v: Int) -> String { set }"]
+                        }
+                
+                        n3 -> n2
+                    }
                 }
                 """
         )
@@ -267,7 +311,7 @@ class CallGraph_CreationTests: XCTestCase {
             )
         ]
         builder
-            .createFile(named: "A.m") { file in
+            .createFile(named: "A.swift") { file in
                 file
                     .createGlobalFunction(withName: "a") { method in
                         method
@@ -294,12 +338,21 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
-                    n1 [label="B.subscript(v: Int) -> String { get }"]
-                    n2 [label="B.subscript(v: Int) -> String { set }"]
-                    n3 [label="func a(b: B)"]
-
-                    n3 -> n1
-                    n3 -> n2
+                    subgraph cluster_1 {
+                        label = "A.swift"
+                
+                        n3 [label="func a(b: B)"]
+                
+                        subgraph cluster_2 {
+                            label = "class B"
+                
+                            n1 [label="B.subscript(v: Int) -> String { get }"]
+                            n2 [label="B.subscript(v: Int) -> String { set }"]
+                        }
+                
+                        n3 -> n1
+                        n3 -> n2
+                    }
                 }
                 """
         )
@@ -318,7 +371,7 @@ class CallGraph_CreationTests: XCTestCase {
             )
         ]
         builder
-            .createFile(named: "A.m") { file in
+            .createFile(named: "A.swift") { file in
                 file
                     .createGlobalFunction(withName: "a") { method in
                         method
@@ -340,7 +393,11 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
-                    n1 [label="func a(b: B)"]
+                    subgraph cluster_1 {
+                        label = "A.swift"
+                
+                        n1 [label="func a(b: B)"]
+                    }
                 }
                 """
         )
@@ -358,7 +415,7 @@ class CallGraph_CreationTests: XCTestCase {
             )
         ]
         builder
-            .createFile(named: "A.m") { file in
+            .createFile(named: "A.swift") { file in
                 file
                     .createGlobalFunction(withName: "a") { method in
                         method
@@ -380,7 +437,11 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
-                    n1 [label="func a(b: B)"]
+                    subgraph cluster_1 {
+                        label = "A.swift"
+                
+                        n1 [label="func a(b: B)"]
+                    }
                 }
                 """
         )
@@ -397,7 +458,7 @@ class CallGraph_CreationTests: XCTestCase {
             )
         ]
         builder
-            .createFile(named: "A.m") { file in
+            .createFile(named: "A.swift") { file in
                 file
                     .createGlobalFunction(withName: "a") { method in
                         method
@@ -421,10 +482,19 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
-                    n1 [label="B.c: Int { get }"]
-                    n2 [label="func a(b: B)"]
-
-                    n2 -> n1
+                    subgraph cluster_1 {
+                        label = "A.swift"
+                
+                        n2 [label="func a(b: B)"]
+                
+                        subgraph cluster_2 {
+                            label = "class B"
+                
+                            n1 [label="B.c: Int { get }"]
+                        }
+                
+                        n2 -> n1
+                    }
                 }
                 """
         )
@@ -442,7 +512,7 @@ class CallGraph_CreationTests: XCTestCase {
             )
         ]
         builder
-            .createFile(named: "A.m") { file in
+            .createFile(named: "A.swift") { file in
                 file
                     .createGlobalFunction(withName: "a") { method in
                         method
@@ -469,11 +539,20 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
-                    n1 [label="B.c: Int { get }"]
-                    n2 [label="B.c: Int { set }"]
-                    n3 [label="func a(b: B)"]
-
-                    n3 -> n2
+                    subgraph cluster_1 {
+                        label = "A.swift"
+                
+                        n3 [label="func a(b: B)"]
+                
+                        subgraph cluster_2 {
+                            label = "class B"
+                
+                            n1 [label="B.c: Int { get }"]
+                            n2 [label="B.c: Int { set }"]
+                        }
+                
+                        n3 -> n2
+                    }
                 }
                 """
         )
@@ -491,7 +570,7 @@ class CallGraph_CreationTests: XCTestCase {
             )
         ]
         builder
-            .createFile(named: "A.m") { file in
+            .createFile(named: "A.swift") { file in
                 file
                     .createGlobalFunction(withName: "a") { method in
                         method
@@ -518,12 +597,21 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
-                    n1 [label="B.c: Int { get }"]
-                    n2 [label="B.c: Int { set }"]
-                    n3 [label="func a(b: B)"]
-
-                    n3 -> n1
-                    n3 -> n2
+                    subgraph cluster_1 {
+                        label = "A.swift"
+                
+                        n3 [label="func a(b: B)"]
+                
+                        subgraph cluster_2 {
+                            label = "class B"
+                
+                            n1 [label="B.c: Int { get }"]
+                            n2 [label="B.c: Int { set }"]
+                        }
+                
+                        n3 -> n1
+                        n3 -> n2
+                    }
                 }
                 """
         )

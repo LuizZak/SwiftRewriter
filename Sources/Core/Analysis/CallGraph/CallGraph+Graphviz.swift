@@ -1,3 +1,4 @@
+import Foundation
 import Intentions
 import SwiftAST
 import TypeSystem
@@ -7,7 +8,6 @@ import Graphviz
 extension CallGraph {
     /// Generates a GraphViz representation of this call graph.
     public func asGraphviz() -> GraphViz {
-
         let viz = GraphViz(rootGraphName: "calls")
         viz.rankDir = .topToBottom
 
@@ -68,7 +68,39 @@ extension CallGraph {
 
         // Prepare nodes
         for definition in nodeDefinitions {
-            nodeIds[ObjectIdentifier(definition.node)] = viz.createNode(label: definition.label)
+            var group: [String] = []
+
+            switch definition.node.ownerFile {
+            case let intention as FileGenerationIntention:
+                group.append((intention.targetPath as NSString).lastPathComponent)
+                
+            case let knownFile?:
+                group.append(knownFile.fileName)
+
+            case nil:
+                break
+            }
+
+            switch definition.node.ownerType {
+            case let ownerType as TypeGenerationIntention:
+                let baseNames = ownerType.parentType?.asNestedTypeNames ?? []
+
+                group.append(contentsOf: baseNames + [
+                    "\(ownerType.kind.rawValue) \(ownerType.typeName)"
+                ])
+                
+            case let ownerType?:
+                group.append(contentsOf: ownerType.asKnownTypeReference.asNestedTypeNames)
+
+            case nil:
+                break
+            }
+
+            nodeIds[ObjectIdentifier(definition.node)] =
+                viz.createNode(
+                    label: definition.label,
+                    groups: group
+                )
         }
 
         // Output connections
