@@ -27,7 +27,7 @@ public struct ObjectiveC2SwiftRewriterJobBuilder {
             SubscriptDeclarationIntentionPass(),
             PromoteProtocolPropertyConformanceIntentionPass(),
             ProtocolNullabilityPropagationToConformersIntentionPass(),
-            PropertyMergeIntentionPass(),
+            ObjectiveCPropertyMergeIntentionPass(),
             StoredPropertyToNominalTypesIntentionPass(),
             SwiftifyMethodSignaturesIntentionPass(),
             InitAnalysisIntentionPass(),

@@ -2,10 +2,11 @@ import SwiftAST
 import SwiftRewriterLib
 import TestCommons
 import XCTest
+import IntentionPasses
 
-@testable import IntentionPasses
+@testable import ObjectiveCFrontend
 
-class PropertyMergeIntentionPassTests: XCTestCase {
+class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
     func testMergeGetterAndSetter() {
         let intentions =
             IntentionCollectionBuilder()
@@ -13,7 +14,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 builder.ext_makePropertyWithGetterSetter(named: "a")
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -52,7 +53,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     )
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -78,7 +79,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     .createMethod(named: "setA", returnType: .cgFloat)
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -103,7 +104,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 builder.ext_makePropertyWithSetter(named: "a", type: .int)
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -128,7 +129,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 builder.ext_makeReadonlyPropertyWithGetter(named: "a")
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -176,7 +177,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -214,7 +215,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     }
             }.build()
         let cls = intentions.extensionIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -229,7 +230,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         }
     }
 
-    // Checks if PropertyMergeIntentionPass properly records history entries on
+    // Checks if ObjectiveCPropertyMergeIntentionPass properly records history entries on
     // the merged properties and the types the properties are contained within.
     func testHistoryTrackingMergingGetterSetterMethods() {
         let intentions =
@@ -238,20 +239,20 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 builder.ext_makePropertyWithGetterSetter(named: "a")
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
         XCTAssertEqual(
             cls.history.summary,
             """
-            [PropertyMergeIntentionPass:1] Removed method A.a() -> Int since deduced it is a getter for property A.a: Int
-            [PropertyMergeIntentionPass:1] Removed method A.setA(_ a: Int) since deduced it is a setter for property A.a: Int
+            [ObjectiveCPropertyMergeIntentionPass:1] Removed method A.a() -> Int since deduced it is a getter for property A.a: Int
+            [ObjectiveCPropertyMergeIntentionPass:1] Removed method A.setA(_ a: Int) since deduced it is a setter for property A.a: Int
             """
         )
         XCTAssertEqual(
             cls.properties[0].history.summary,
-            "[PropertyMergeIntentionPass:1] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
+            "[ObjectiveCPropertyMergeIntentionPass:1] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
         )
     }
 
@@ -270,7 +271,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -301,14 +302,14 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         XCTAssertEqual(
             cls.history.summary,
             """
-            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+            [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
             that the backing field of A.a: Int (_a) was being used in A.b().
             """
         )
         XCTAssertEqual(
             cls.properties[0].history.summary,
             """
-            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+            [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
             that the backing field of A.a: Int (_a) was being used in A.b().
             """
         )
@@ -329,7 +330,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -360,14 +361,14 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         XCTAssertEqual(
             cls.history.summary,
             """
-            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+            [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
             that the backing field of A.a: Int (_a) was being used in A.deinit.
             """
         )
         XCTAssertEqual(
             cls.properties[0].history.summary,
             """
-            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+            [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
             that the backing field of A.a: Int (_a) was being used in A.deinit.
             """
         )
@@ -398,7 +399,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -416,14 +417,14 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         XCTAssertEqual(
             cls.history.summary,
             """
-            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+            [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
             that the backing field of A.a: Int (_a) was being used in A.b().
             """
         )
         XCTAssertEqual(
             cls.properties[0].history.summary,
             """
-            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+            [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
             that the backing field of A.a: Int (_a) was being used in A.b().
             """
         )
@@ -465,7 +466,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -498,7 +499,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -547,7 +548,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
         let context = makeContext(intentions: intentions)
         context.typeResolverInvoker.resolveAllExpressionTypes(in: intentions, force: true)
 
@@ -595,7 +596,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     )
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -635,7 +636,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -669,7 +670,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -717,7 +718,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -761,7 +762,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 }
             }.build()
         let type = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -812,7 +813,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -837,7 +838,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -876,7 +877,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             }.build()
         let cls = intentions.classIntentions()[0]
         let ext = intentions.extensionIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -904,7 +905,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -936,7 +937,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -982,7 +983,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                         }
                 }
             }.build()
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -1049,7 +1050,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                         }
                 }
             }.build()
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -1093,7 +1094,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 }
             }
             .build()
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -1121,7 +1122,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -1154,7 +1155,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
@@ -1185,7 +1186,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     }
             }.build()
         let cls = intentions.classIntentions()[0]
-        let sut = PropertyMergeIntentionPass()
+        let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 

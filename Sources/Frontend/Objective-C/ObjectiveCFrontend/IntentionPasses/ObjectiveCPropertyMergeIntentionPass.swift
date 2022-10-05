@@ -3,7 +3,7 @@ import KnownType
 import Intentions
 
 /// Merges properties with getter/setters in types
-public class PropertyMergeIntentionPass: IntentionPass {
+public class ObjectiveCPropertyMergeIntentionPass: IntentionPass {
     /// A number representing the unique index of an operation to aid in history
     /// checking by tag.
     /// Represents the number of operations applied by this intention pass while
@@ -15,7 +15,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
     
     /// Textual tag this intention pass applies to history tracking entries.
     private var historyTag: String {
-        "\(PropertyMergeIntentionPass.self):\(operationsNumber)"
+        "\(ObjectiveCPropertyMergeIntentionPass.self):\(operationsNumber)"
     }
     
     public init() {
