@@ -26,6 +26,29 @@ class GraphVizTests: XCTestCase {
         .diff(sut.generateFile())
     }
 
+    func testGenerateFile_rankDir() {
+        let sut = makeSut(rootGraphName: "testGraph")
+        sut.rankDir = .bottomToTop
+
+        diffTest(expected: """
+        digraph testGraph {
+            graph [rankdir=BT]
+        }
+        """)
+        .diff(sut.generateFile())
+    }
+
+    func testGenerateFile_rankDir_doesNotEmitIfRankDirIsTopToBottom() {
+        let sut = makeSut(rootGraphName: "testGraph")
+        sut.rankDir = .topToBottom
+
+        diffTest(expected: """
+        digraph testGraph {
+        }
+        """)
+        .diff(sut.generateFile())
+    }
+
     func testGenerateFile_singleNode() {
         let sut = makeSut()
         sut.createNode(label: "node")
@@ -34,7 +57,7 @@ class GraphVizTests: XCTestCase {
         digraph {
             graph [rankdir=LR]
 
-            0 [label="node"]
+            n1 [label="node"]
         }
         """)
         .diff(sut.generateFile())
@@ -50,10 +73,10 @@ class GraphVizTests: XCTestCase {
         digraph {
             graph [rankdir=LR]
 
-            0 [label="node1"]
-            1 [label="node2"]
+            n1 [label="node1"]
+            n2 [label="node2"]
 
-            1 -> 0
+            n1 -> n2
         }
         """)
         .diff(sut.generateFile())
@@ -69,10 +92,10 @@ class GraphVizTests: XCTestCase {
         digraph {
             graph [rankdir=LR]
 
-            0 [label="node1"]
-            1 [label="node2"]
+            n1 [label="node1"]
+            n2 [label="node2"]
 
-            1 -> 0 [label="connection label"]
+            n1 -> n2 [label="connection label"]
         }
         """)
         .diff(sut.generateFile())
@@ -88,10 +111,10 @@ class GraphVizTests: XCTestCase {
         digraph {
             graph [rankdir=LR]
 
-            0 [label="node1"]
-            1 [label="node2"]
+            n1 [label="node1"]
+            n2 [label="node2"]
 
-            1 -> 0 [color="red"]
+            n1 -> n2 [color="red"]
         }
         """)
         .diff(sut.generateFile())
@@ -107,10 +130,10 @@ class GraphVizTests: XCTestCase {
         digraph {
             graph [rankdir=LR]
 
-            0 [label="node1"]
-            1 [label="node2"]
+            n1 [label="node1"]
+            n2 [label="node2"]
 
-            1 -> 0 [label="connection label", color="red"]
+            n1 -> n2 [color="red", label="connection label"]
         }
         """)
         .diff(sut.generateFile())
@@ -129,15 +152,15 @@ class GraphVizTests: XCTestCase {
 
             label = "Subgroup"
 
-            0 [label="node1"]
+            n1 [label="node1"]
 
             subgraph cluster_1 {
                 label = "Inner Subgroup"
 
-                1 [label="node2"]
-                2 [label="node3"]
+                n2 [label="node2"]
+                n3 [label="node3"]
 
-                2 -> 1
+                n2 -> n3
             }
         }
         """)
@@ -154,8 +177,8 @@ class GraphVizTests: XCTestCase {
         digraph {
             graph [rankdir=LR]
 
-            0 [label="node"]
-            1 [label="node"]
+            n1 [label="node"]
+            n2 [label="node"]
         }
         """)
         .diff(sut.generateFile())
@@ -171,7 +194,7 @@ class GraphVizTests: XCTestCase {
         digraph {
             graph [rankdir=LR]
 
-            0 [label="node"]
+            n1 [label="node"]
         }
         """)
         .diff(sut.generateFile())
@@ -187,7 +210,7 @@ class GraphVizTests: XCTestCase {
 
             label = "Subgroup"
 
-            0 [label="node"]
+            n1 [label="node"]
         }
         """)
         .diff(sut.generateFile())
@@ -204,7 +227,7 @@ class GraphVizTests: XCTestCase {
             subgraph cluster_1 {
                 label = "Subgroup"
 
-                0 [label="node"]
+                n1 [label="node"]
             }
         }
         """)
@@ -227,14 +250,42 @@ class GraphVizTests: XCTestCase {
 
             label = "Subgroup"
 
-            0 [label="node1"]
+            n1 [label="node1"]
 
             subgraph cluster_1 {
                 label = "Inner Subgroup"
 
-                1 [label="node2"]
-                2 [label="node3"]
+                n2 [label="node2"]
+                n3 [label="node3"]
             }
+        }
+        """)
+        .diff(sut.generateFile())
+    }
+
+    func testAddConnection_attributes() {
+        let sut = makeSut()
+        let n1 = sut.createNode(label: "node1")
+        let n2 = sut.createNode(label: "node2")
+
+        sut.addConnection(
+            from: n1,
+            to: n2,
+            attributes: [
+                "label": .string("connection label"),
+                "color": .string("red"),
+                "penwidth": 0.5,
+            ]
+        )
+
+        diffTest(expected: """
+        digraph {
+            graph [rankdir=LR]
+
+            n1 [label="node1"]
+            n2 [label="node2"]
+
+            n1 -> n2 [color="red", label="connection label", penwidth=0.5]
         }
         """)
         .diff(sut.generateFile())

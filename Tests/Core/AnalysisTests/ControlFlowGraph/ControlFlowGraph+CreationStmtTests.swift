@@ -39,6 +39,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n3 [label="{exp}"]
                     n4 [label="exp"]
                     n5 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -72,6 +73,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n5 [label="{exp}"]
                     n6 [label="exp2"]
                     n7 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -107,6 +109,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n5 [label="var v2: Int"]
                     n6 [label="v2: Int"]
                     n7 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -145,6 +148,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n6 [label="b"]
                     n7 [label="v2: Int = b"]
                     n8 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -182,6 +186,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n6 [label="var v2: Int"]
                     n7 [label="v2: Int"]
                     n8 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -221,6 +226,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n5 [label="{exp}"]
                     n6 [label="exp"]
                     n7 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -267,19 +273,20 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n11 [label="{exp}"]
                     n12 [label="b"]
                     n13 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n10 -> n3 [color="#aa3333", penwidth=0.5]
+                    n12 -> n3
                     n3 -> n4
                     n4 -> n5
-                    n4 -> n13
                     n5 -> n6
                     n6 -> n7
                     n7 -> n8
                     n8 -> n9
                     n9 -> n10
-                    n10 -> n3 [color="#aa3333", penwidth=0.5]
                     n11 -> n12
-                    n12 -> n3
+                    n4 -> n13
                 }
                 """
         )
@@ -328,6 +335,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n17 [label="{exp}"]
                     n18 [label="postError"]
                     n19 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -342,10 +350,10 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n12 -> n13
                     n13 -> n14
                     n14 -> n15
-                    n15 -> n16
-                    n16 -> n19
-                    n17 -> n18
                     n18 -> n15
+                    n15 -> n16
+                    n17 -> n18
+                    n16 -> n19
                 }
                 """
         )
@@ -394,6 +402,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n18 [label="{exp}"]
                     n19 [label="errorHandler"]
                     n20 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -407,13 +416,13 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n10 -> n12
                     n11 -> n13
                     n12 -> n14
+                    n19 -> n14
                     n13 -> n15
                     n14 -> n16
                     n15 -> n17
-                    n16 -> n20
                     n17 -> n18
                     n18 -> n19
-                    n19 -> n14
+                    n16 -> n20
                 }
                 """
         )
@@ -464,6 +473,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n19 [label="{exp}"]
                     n20 [label="postError"]
                     n21 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -480,10 +490,10 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n14 -> n15
                     n15 -> n16
                     n16 -> n17
-                    n17 -> n18
-                    n18 -> n21
-                    n19 -> n20
                     n20 -> n17
+                    n17 -> n18
+                    n19 -> n20
+                    n18 -> n21
                 }
                 """
         )
@@ -538,6 +548,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n21 [label="errorHandler 2"]
                     n22 [label="postError"]
                     n23 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -552,14 +563,14 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n12 -> n13
                     n13 -> n14
                     n14 -> n15
-                    n15 -> n16
-                    n16 -> n23
-                    n17 -> n18
-                    n18 -> n20
-                    n19 -> n22
-                    n20 -> n21
                     n21 -> n15
                     n22 -> n15
+                    n15 -> n16
+                    n17 -> n18
+                    n18 -> n20
+                    n20 -> n21
+                    n19 -> n22
+                    n16 -> n23
                 }
                 """
         )
@@ -597,18 +608,19 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n11 [label="{exp}"]
                     n12 [label="b"]
                     n13 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
                     n5 -> n6
                     n6 -> n7
+                    n12 -> n7
                     n7 -> n8
-                    n8 -> n13
                     n9 -> n10
                     n10 -> n11
                     n11 -> n12
-                    n12 -> n7
+                    n8 -> n13
                 }
                 """
         )
@@ -641,13 +653,14 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n6 [label="{exp}"]
                     n7 [label="ifBody"]
                     n8 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
-                    n4 -> n8
                     n5 -> n6
                     n6 -> n7
+                    n4 -> n8
                     n7 -> n8
                 }
                 """
@@ -689,6 +702,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n9 [label="elseBody"]
                     n10 [label="ifBody"]
                     n11 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -696,8 +710,8 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n4 -> n6
                     n5 -> n7
                     n6 -> n8
-                    n7 -> n10
                     n8 -> n9
+                    n7 -> n10
                     n9 -> n11
                     n10 -> n11
                 }
@@ -754,6 +768,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n15 [label="ifElseIfBody"]
                     n16 [label="ifElseIfElseBody"]
                     n17 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -765,11 +780,11 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 -> n10
                     n9 -> n11
                     n9 -> n12
-                    n10 -> n17
                     n11 -> n13
                     n12 -> n14
                     n13 -> n15
                     n14 -> n16
+                    n10 -> n17
                     n15 -> n17
                     n16 -> n17
                 }
@@ -818,23 +833,24 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n13 [label="{exp}"]
                     n14 [label="postBreak"]
                     n15 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n7 -> n3 [color="#aa3333", penwidth=0.5]
+                    n10 -> n3 [color="#aa3333", penwidth=0.5]
+                    n12 -> n3 [color="#aa3333", penwidth=0.5]
+                    n14 -> n3
                     n3 -> n4
                     n4 -> n5
-                    n4 -> n15
                     n5 -> n6
                     n6 -> n7
-                    n7 -> n3 [color="#aa3333", penwidth=0.5]
                     n7 -> n8
                     n8 -> n9
                     n9 -> n10
-                    n10 -> n3 [color="#aa3333", penwidth=0.5]
                     n10 -> n11
                     n11 -> n12
-                    n12 -> n3 [color="#aa3333", penwidth=0.5]
                     n13 -> n14
-                    n14 -> n3
+                    n4 -> n15
                 }
                 """
         )
@@ -889,6 +905,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n11 [label="case1"]
                     n12 [label="case2"]
                     n13 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -976,6 +993,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n23 [label="e"]
                     n24 [label="defaultCase"]
                     n25 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -993,15 +1011,15 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n11 -> n16
                     n12 -> n17
                     n13 -> n18
-                    n14 -> n25
                     n15 -> n19
                     n16 -> n20
                     n17 -> n21
-                    n18 -> n25
                     n19 -> n22
                     n20 -> n23
-                    n21 -> n25
                     n22 -> n24
+                    n14 -> n25
+                    n18 -> n25
+                    n21 -> n25
                     n23 -> n25
                     n24 -> n25
                 }
@@ -1043,6 +1061,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n11 [label="{compound}"]
                     n12 [label="{compound}"]
                     n13 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -1051,11 +1070,11 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n5 -> n7
                     n6 -> n8
                     n6 -> n9
-                    n7 -> n13
                     n8 -> n10
                     n8 -> n11
-                    n9 -> n13
                     n10 -> n12
+                    n7 -> n13
+                    n9 -> n13
                     n11 -> n13
                     n12 -> n13
                 }
@@ -1103,20 +1122,21 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n12 [label="{compound}"]
                     n13 [label="{compound}"]
                     n14 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
                     n5 -> n6
                     n5 -> n7
-                    n6 -> n9
                     n7 -> n8
+                    n6 -> n9
                     n7 -> n10
+                    n9 -> n10
                     n8 -> n11
                     n8 -> n12
-                    n9 -> n10
-                    n10 -> n14
                     n11 -> n13
+                    n10 -> n14
                     n12 -> n14
                     n13 -> n14
                 }
@@ -1175,6 +1195,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n16 [label="c"]
                     n17 [label="defaultExp"]
                     n18 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -1184,13 +1205,13 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n6 -> n8
                     n7 -> n9
                     n7 -> n10
+                    n14 -> n10
                     n8 -> n11
                     n9 -> n12
                     n10 -> n13
                     n11 -> n14
                     n12 -> n15
                     n13 -> n16
-                    n14 -> n10
                     n15 -> n17
                     n16 -> n18
                     n17 -> n18
@@ -1262,6 +1283,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n25 [label="c"]
                     n26 [label="c"]
                     n27 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -1275,11 +1297,10 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n10 -> n12
                     n11 -> n13
                     n12 -> n14
-                    n13 -> n27
                     n14 -> n15
                     n14 -> n16
-                    n15 -> n18
                     n16 -> n17
+                    n15 -> n18
                     n17 -> n19
                     n18 -> n20
                     n19 -> n21
@@ -1288,6 +1309,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n22 -> n24
                     n23 -> n25
                     n24 -> n26
+                    n13 -> n27
                     n25 -> n27
                     n26 -> n27
                 }
@@ -1405,6 +1427,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n37 [label="d"]
                     n38 [label="d"]
                     n39 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -1414,6 +1437,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n6 -> n8
                     n7 -> n9
                     n7 -> n10
+                    n37 -> n10
                     n8 -> n11
                     n9 -> n12
                     n10 -> n13
@@ -1422,10 +1446,8 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n13 -> n16
                     n14 -> n17
                     n15 -> n18
-                    n16 -> n39
                     n17 -> n19
                     n17 -> n20
-                    n18 -> n39
                     n19 -> n21
                     n20 -> n22
                     n21 -> n23
@@ -1444,7 +1466,8 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n34 -> n36
                     n35 -> n37
                     n36 -> n38
-                    n37 -> n10
+                    n16 -> n39
+                    n18 -> n39
                     n38 -> n39
                 }
                 """
@@ -1556,6 +1579,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n51 [label="{exp}"]
                     n52 [label="deferredExp"]
                     n53 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -1565,6 +1589,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n6 -> n8
                     n7 -> n9
                     n7 -> n10
+                    n48 -> n10
                     n8 -> n11
                     n9 -> n12
                     n10 -> n13
@@ -1573,10 +1598,8 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n13 -> n16
                     n14 -> n17
                     n15 -> n18
-                    n16 -> n53
                     n17 -> n19
                     n17 -> n20
-                    n18 -> n53
                     n19 -> n21
                     n20 -> n22
                     n21 -> n23
@@ -1607,10 +1630,11 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n45 -> n48
                     n46 -> n49
                     n47 -> n50
-                    n48 -> n10
                     n49 -> n51
-                    n50 -> n53
                     n51 -> n52
+                    n16 -> n53
+                    n18 -> n53
+                    n50 -> n53
                     n52 -> n53
                 }
                 """
@@ -1643,14 +1667,15 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n6 [label="{exp}"]
                     n7 [label="loopBody"]
                     n8 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n7 -> n3 [color="#aa3333", penwidth=0.5]
                     n3 -> n4
                     n4 -> n5
-                    n4 -> n8
                     n5 -> n6
                     n6 -> n7
-                    n7 -> n3 [color="#aa3333", penwidth=0.5]
+                    n4 -> n8
                 }
                 """
         )
@@ -1679,12 +1704,13 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n4 [label="{while}"]
                     n5 [label="{compound}"]
                     n6 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n5 -> n3 [color="#aa3333", penwidth=0.5]
                     n3 -> n4
                     n4 -> n5
                     n4 -> n6
-                    n5 -> n3 [color="#aa3333", penwidth=0.5]
                 }
                 """
         )
@@ -1721,17 +1747,18 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 [label="{compound}"]
                     n9 [label="{continue outer}"]
                     n10 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n7 -> n3 [color="#aa3333", penwidth=0.5]
+                    n9 -> n3 [color="#aa3333", penwidth=0.5]
                     n3 -> n4
                     n4 -> n5
-                    n4 -> n10
                     n5 -> n6
                     n6 -> n7
-                    n7 -> n3 [color="#aa3333", penwidth=0.5]
                     n7 -> n8
                     n8 -> n9
-                    n9 -> n3 [color="#aa3333", penwidth=0.5]
+                    n4 -> n10
                 }
                 """
         )
@@ -1768,16 +1795,17 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 [label="{compound}"]
                     n9 [label="{break outer}"]
                     n10 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n7 -> n3 [color="#aa3333", penwidth=0.5]
                     n3 -> n4
                     n4 -> n5
-                    n4 -> n10
                     n5 -> n6
                     n6 -> n7
-                    n7 -> n3 [color="#aa3333", penwidth=0.5]
                     n7 -> n8
                     n8 -> n9
+                    n4 -> n10
                     n9 -> n10
                 }
                 """
@@ -1827,11 +1855,13 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n14 [label="{exp}"]
                     n15 [label="postIf"]
                     n16 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n13 -> n3 [color="#aa3333", penwidth=0.5]
+                    n15 -> n3
                     n3 -> n4
                     n4 -> n5
-                    n4 -> n16
                     n5 -> n6
                     n6 -> n7
                     n7 -> n8
@@ -1839,11 +1869,10 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 -> n10
                     n9 -> n11
                     n10 -> n12
-                    n11 -> n16
                     n12 -> n13
-                    n13 -> n3 [color="#aa3333", penwidth=0.5]
                     n14 -> n15
-                    n15 -> n3
+                    n4 -> n16
+                    n11 -> n16
                 }
                 """
         )
@@ -1876,13 +1905,14 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n6 [label="predicate"]
                     n7 [label="{repeat-while}"]
                     n8 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n7 -> n3 [color="#aa3333", penwidth=0.5]
                     n3 -> n4
                     n4 -> n5
                     n5 -> n6
                     n6 -> n7
-                    n7 -> n3 [color="#aa3333", penwidth=0.5]
                     n7 -> n8
                 }
                 """
@@ -1912,11 +1942,12 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n4 [label="predicate"]
                     n5 [label="{repeat-while}"]
                     n6 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n5 -> n3 [color="#aa3333", penwidth=0.5]
                     n3 -> n4
                     n4 -> n5
-                    n5 -> n3 [color="#aa3333", penwidth=0.5]
                     n5 -> n6
                 }
                 """
@@ -1954,16 +1985,17 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 [label="{continue outer}"]
                     n9 [label="{repeat-while}"]
                     n10 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n9 -> n3 [color="#aa3333", penwidth=0.5]
                     n3 -> n4
                     n4 -> n5
                     n5 -> n6
                     n5 -> n7
+                    n8 -> n7
                     n6 -> n8
                     n7 -> n9
-                    n8 -> n7
-                    n9 -> n3 [color="#aa3333", penwidth=0.5]
                     n9 -> n10
                 }
                 """
@@ -2001,16 +2033,17 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 [label="{break outer}"]
                     n9 [label="{repeat-while}"]
                     n10 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n9 -> n3 [color="#aa3333", penwidth=0.5]
                     n3 -> n4
                     n4 -> n5
                     n5 -> n6
                     n5 -> n7
-                    n6 -> n9
                     n7 -> n8
+                    n6 -> n9
                     n8 -> n10
-                    n9 -> n3 [color="#aa3333", penwidth=0.5]
                     n9 -> n10
                 }
                 """
@@ -2043,12 +2076,13 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n5 [label="predicate"]
                     n6 [label="{repeat-while}"]
                     n7 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
-                    n3 -> n4
-                    n4 -> n7
-                    n5 -> n6
                     n6 -> n3
+                    n3 -> n4
+                    n5 -> n6
+                    n4 -> n7
                     n6 -> n7
                 }
                 """
@@ -2083,14 +2117,15 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n6 [label="{exp}"]
                     n7 [label="b"]
                     n8 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
+                    n7 -> n4 [color="#aa3333", penwidth=0.5]
                     n4 -> n5
-                    n4 -> n8
                     n5 -> n6
                     n6 -> n7
-                    n7 -> n4 [color="#aa3333", penwidth=0.5]
+                    n4 -> n8
                 }
                 """
         )
@@ -2120,12 +2155,13 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n4 [label="{for}"]
                     n5 [label="{compound}"]
                     n6 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
+                    n5 -> n4 [color="#aa3333", penwidth=0.5]
                     n4 -> n5
                     n4 -> n6
-                    n5 -> n4 [color="#aa3333", penwidth=0.5]
                 }
                 """
         )
@@ -2163,17 +2199,18 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 [label="{compound}"]
                     n9 [label="{continue outer}"]
                     n10 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
+                    n7 -> n4 [color="#aa3333", penwidth=0.5]
+                    n9 -> n4 [color="#aa3333", penwidth=0.5]
                     n4 -> n5
-                    n4 -> n10
                     n5 -> n6
                     n6 -> n7
-                    n7 -> n4 [color="#aa3333", penwidth=0.5]
                     n7 -> n8
                     n8 -> n9
-                    n9 -> n4 [color="#aa3333", penwidth=0.5]
+                    n4 -> n10
                 }
                 """
         )
@@ -2211,16 +2248,17 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 [label="{compound}"]
                     n9 [label="{break outer}"]
                     n10 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
+                    n7 -> n4 [color="#aa3333", penwidth=0.5]
                     n4 -> n5
-                    n4 -> n10
                     n5 -> n6
                     n6 -> n7
-                    n7 -> n4 [color="#aa3333", penwidth=0.5]
                     n7 -> n8
                     n8 -> n9
+                    n4 -> n10
                     n9 -> n10
                 }
                 """
@@ -2245,6 +2283,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n2 [label="{compound}"]
                     n3 [label="{return}"]
                     n4 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -2272,6 +2311,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n3 [label="exp"]
                     n4 [label="{return exp}"]
                     n5 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -2307,12 +2347,13 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n5 [label="{compound}"]
                     n6 [label="{return}"]
                     n7 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
-                    n4 -> n7
                     n5 -> n6
+                    n4 -> n7
                     n6 -> n7
                 }
                 """
@@ -2343,12 +2384,13 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n6 [label="{exp}"]
                     n7 [label="postReturn"]
                     n8 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
-                    n5 -> n8
                     n6 -> n7
+                    n5 -> n8
                     n7 -> n8
                 }
                 """
@@ -2382,13 +2424,14 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n6 [label="Error"]
                     n7 [label="{throw Error}"]
                     n8 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
-                    n4 -> n8
                     n5 -> n6
                     n6 -> n7
+                    n4 -> n8
                     n7 -> n8
                 }
                 """
@@ -2420,13 +2463,14 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n7 [label="{exp}"]
                     n8 [label="postError"]
                     n9 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
                     n5 -> n6
-                    n6 -> n9
                     n7 -> n8
+                    n6 -> n9
                     n8 -> n9
                 }
                 """
@@ -2463,6 +2507,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n10 [label="postError"]
                     n11 [label="{throw Error}"]
                     n12 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -2506,12 +2551,13 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n5 [label="{compound}"]
                     n6 [label="{break}"]
                     n7 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
-                    n4 -> n7
                     n5 -> n6
+                    n4 -> n7
                     n6 -> n7
                 }
                 """
@@ -2575,16 +2621,18 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n21 [label="{exp}"]
                     n22 [label="deferred"]
                     n23 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
+                    n9 -> n4 [color="#aa3333", penwidth=0.5]
                     n4 -> n5
                     n4 -> n6
+                    n22 -> n6
                     n5 -> n7
+                    n19 -> n7 [color="#aa3333", penwidth=0.5]
                     n6 -> n8
                     n7 -> n9
-                    n8 -> n23
-                    n9 -> n4 [color="#aa3333", penwidth=0.5]
                     n9 -> n10
                     n10 -> n11
                     n11 -> n12
@@ -2596,10 +2644,9 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n16 -> n18
                     n17 -> n19
                     n18 -> n20
-                    n19 -> n7 [color="#aa3333", penwidth=0.5]
                     n20 -> n21
                     n21 -> n22
-                    n22 -> n6
+                    n8 -> n23
                 }
                 """
         )
@@ -2633,13 +2680,14 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n5 [label="{compound}"]
                     n6 [label="{continue}"]
                     n7 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n6 -> n3 [color="#aa3333", penwidth=0.5]
                     n3 -> n4
                     n4 -> n5
-                    n4 -> n7
                     n5 -> n6
-                    n6 -> n3 [color="#aa3333", penwidth=0.5]
+                    n4 -> n7
                 }
                 """
         )
@@ -2674,15 +2722,16 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n7 [label="{exp}"]
                     n8 [label="v"]
                     n9 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n6 -> n3 [color="#aa3333", penwidth=0.5]
+                    n8 -> n3
                     n3 -> n4
                     n4 -> n5
-                    n4 -> n9
                     n5 -> n6
-                    n6 -> n3 [color="#aa3333", penwidth=0.5]
                     n7 -> n8
-                    n8 -> n3
+                    n4 -> n9
                 }
                 """
         )
@@ -2742,29 +2791,30 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n19 [label="{exp}"]
                     n20 [label="deferred"]
                     n21 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
-                    n4 -> n5
-                    n4 -> n21
-                    n5 -> n6
-                    n6 -> n7
                     n7 -> n4 [color="#aa3333", penwidth=0.5]
+                    n20 -> n4 [color="#aa3333", penwidth=0.5]
+                    n4 -> n5
+                    n5 -> n6
+                    n17 -> n6 [color="#aa3333", penwidth=0.5]
+                    n6 -> n7
                     n7 -> n8
                     n8 -> n9
                     n9 -> n10
                     n10 -> n11
                     n10 -> n12
-                    n11 -> n14
                     n12 -> n13
-                    n13 -> n16
+                    n11 -> n14
                     n14 -> n15
-                    n15 -> n18
+                    n13 -> n16
                     n16 -> n17
-                    n17 -> n6 [color="#aa3333", penwidth=0.5]
+                    n15 -> n18
                     n18 -> n19
                     n19 -> n20
-                    n20 -> n4 [color="#aa3333", penwidth=0.5]
+                    n4 -> n21
                 }
                 """
         )
@@ -2801,6 +2851,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n9 [label="{exp}"]
                     n10 [label="b"]
                     n11 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -2867,6 +2918,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n24 [label="{exp}"]
                     n25 [label="d"]
                     n26 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -2887,11 +2939,11 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n17 -> n19
                     n18 -> n20
                     n19 -> n21
-                    n20 -> n26
                     n21 -> n22
                     n22 -> n23
                     n23 -> n24
                     n24 -> n25
+                    n20 -> n26
                     n25 -> n26
                 }
                 """
@@ -2938,22 +2990,23 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n14 [label="{exp}"]
                     n15 [label="c"]
                     n16 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
                     n4 -> n6
+                    n15 -> n6
                     n5 -> n7
                     n6 -> n8
                     n7 -> n9
-                    n8 -> n16
                     n9 -> n10
                     n10 -> n11
                     n11 -> n12
                     n12 -> n13
                     n13 -> n14
                     n14 -> n15
-                    n15 -> n6
+                    n8 -> n16
                 }
                 """
         )
@@ -3009,6 +3062,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n19 [label="{exp}"]
                     n20 [label="f"]
                     n21 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -3072,20 +3126,21 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n12 [label="{exp}"]
                     n13 [label="b"]
                     n14 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n13 -> n3 [color="#aa3333", penwidth=0.5]
                     n3 -> n4
                     n4 -> n5
                     n4 -> n6
                     n5 -> n7
                     n6 -> n8
                     n7 -> n9
-                    n8 -> n14
                     n9 -> n10
                     n10 -> n11
                     n11 -> n12
                     n12 -> n13
-                    n13 -> n3 [color="#aa3333", penwidth=0.5]
+                    n8 -> n14
                 }
                 """
         )
@@ -3134,25 +3189,26 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n17 [label="{exp}"]
                     n18 [label="b"]
                     n19 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n18 -> n3
                     n3 -> n4
                     n4 -> n5
                     n4 -> n6
+                    n14 -> n6
                     n5 -> n7
                     n6 -> n8
                     n7 -> n9
-                    n8 -> n19
                     n9 -> n10
                     n10 -> n11
                     n11 -> n12
                     n12 -> n13
                     n13 -> n14
-                    n14 -> n6
                     n15 -> n16
                     n16 -> n17
                     n17 -> n18
-                    n18 -> n3
+                    n8 -> n19
                 }
                 """
         )
@@ -3192,8 +3248,10 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n10 [label="predicate"]
                     n11 [label="{repeat-while}"]
                     n12 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
+                    n11 -> n3 [color="#aa3333", penwidth=0.5]
                     n3 -> n4
                     n4 -> n5
                     n5 -> n6
@@ -3202,7 +3260,6 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n8 -> n9
                     n9 -> n10
                     n10 -> n11
-                    n11 -> n3 [color="#aa3333", penwidth=0.5]
                     n11 -> n12
                 }
                 """
@@ -3264,6 +3321,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n26 [label="a"]
                     n27 [label="a"]
                     n28 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -3351,6 +3409,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n27 [label="{exp}"]
                     n28 [label="defer_a"]
                     n29 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -3369,8 +3428,8 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n16 -> n17
                     n17 -> n18
                     n18 -> n19
+                    n28 -> n19
                     n19 -> n20
-                    n20 -> n29
                     n21 -> n22
                     n22 -> n23
                     n23 -> n24
@@ -3378,7 +3437,7 @@ class ControlFlowGraph_CreationStmtTests: XCTestCase {
                     n25 -> n26
                     n26 -> n27
                     n27 -> n28
-                    n28 -> n19
+                    n20 -> n29
                 }
                 """
         )

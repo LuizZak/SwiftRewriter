@@ -4,6 +4,7 @@ import SwiftSyntax
 import SwiftSyntaxParser
 import XCTest
 import TestCommons
+import Graphviz
 
 @testable import Analysis
 
@@ -173,145 +174,139 @@ internal func printGraphviz(graph: ControlFlowGraph) {
 
 internal func graphviz(graph: ControlFlowGraph) -> String {
 
-    let buffer = StringRewriterOutput(settings: .defaults)
-    buffer.output(line: "digraph flow {")
-    buffer.indented {
-        var nodeIds: [ObjectIdentifier: String] = [:]
+    let viz = GraphViz(rootGraphName: "flow")
+    viz.rankDir = .topToBottom
 
-        var nodeDefinitions: [NodeDefinition<ControlFlowGraphNode>] = []
+    var nodeIds: [ObjectIdentifier: GraphViz.NodeId] = [:]
+    var nodeDefinitions: [NodeDefinition<ControlFlowGraphNode>] = []
+    
+    // Prepare nodes
+    for node in graph.nodes {
+        let label = labelForNode(node, graph: graph)
         
-        // Prepare nodes
-        for node in graph.nodes {
-            let label = labelForNode(node, graph: graph)
-            
-            let rankStart = graph.shortestDistance(from: graph.entry, to: node)
-            let rankEnd = graph.shortestDistance(from: node, to: graph.exit)
+        let rankStart = graph.shortestDistance(from: graph.entry, to: node)
+        let rankEnd = graph.shortestDistance(from: node, to: graph.exit)
 
-            nodeDefinitions.append(
-                .init(
-                    node: node,
-                    rankFromStart: rankStart,
-                    rankFromEnd: rankEnd,
-                    label: label
-                )
+        nodeDefinitions.append(
+            .init(
+                node: node,
+                rankFromStart: rankStart,
+                rankFromEnd: rankEnd,
+                label: label
             )
+        )
+    }
+
+    // Sort nodes so the result is more stable
+    nodeDefinitions.sort { (n1, n2) -> Bool in
+        if n1.node === graph.entry {
+            return true
+        }
+        if n1.node === graph.exit {
+            return false
+        }
+        if n2.node === graph.entry {
+            return false
+        }
+        if n2.node === graph.exit {
+            return true
+        }
+        
+        // If rank data is available, use it to create a more linear list of
+        // nodes on the output. Nodes with no rank should be added to the end
+        // of the graph, after all ranked nodes.
+        switch (n1.rankFromStart, n2.rankFromStart) {
+        case (nil, _?):
+            return false
+
+        case (_?, nil):
+            return true
+        
+        case (let r1?, let r2?) where r1 < r2:
+            return true
+
+        case (let r1?, let r2?) where r1 > r2:
+            return false
+        
+        default:
+            break
         }
 
-        // Sort nodes so the result is more stable
-        nodeDefinitions.sort { (n1, n2) -> Bool in
-            if n1.node === graph.entry {
-                return true
-            }
-            if n1.node === graph.exit {
-                return false
-            }
-            if n2.node === graph.entry {
-                return false
-            }
-            if n2.node === graph.exit {
-                return true
-            }
-            
-            // If rank data is available, use it to create a more linear list of
-            // nodes on the output. Nodes with no rank should be added to the end
-            // of the graph, after all ranked nodes.
-            switch (n1.rankFromStart, n2.rankFromStart) {
-            case (nil, _?):
-                return false
+        switch (n1.rankFromEnd, n2.rankFromEnd) {
+        case (nil, _?):
+            return true
 
-            case (_?, nil):
-                return true
-            
-            case (let r1?, let r2?) where r1 < r2:
-                return true
+        case (_?, nil):
+            return false
+        
+        case (let r1?, let r2?) where r1 < r2:
+            return false
 
-            case (let r1?, let r2?) where r1 > r2:
-                return false
-            
-            default:
-                break
-            }
+        case (let r1?, let r2?) where r1 > r2:
+            return true
+        
+        default:
+            return n1.label < n2.label
+        }
+    }
 
-            switch (n1.rankFromEnd, n2.rankFromEnd) {
-            case (nil, _?):
-                return true
+    // Prepare nodes
+    for definition in nodeDefinitions {
+        nodeIds[ObjectIdentifier(definition.node)] = viz.createNode(label: definition.label)
+    }
 
-            case (_?, nil):
-                return false
-            
-            case (let r1?, let r2?) where r1 < r2:
-                return false
+    // Output connections
+    for definition in nodeDefinitions {
+        let node = definition.node
 
-            case (let r1?, let r2?) where r1 > r2:
-                return true
-            
-            default:
-                return n1.label < n2.label
-            }
+        guard let nodeId = nodeIds[ObjectIdentifier(node)] else {
+            continue
         }
 
-        // Prepare nodes
-        for (i, definition) in nodeDefinitions.enumerated() {
-            let id = "n\(i + 1)"
-            nodeIds[ObjectIdentifier(definition.node)] = id
+        var edges = graph.edges(from: node)
 
-            buffer.output(line: "\(id) \(attributes(("label", .string(definition.label))))")
+        // Sort edges by lexical ordering
+        edges.sort {
+            guard let lhs = nodeIds[ObjectIdentifier($0.end)] else {
+                return false
+            }
+            guard let rhs = nodeIds[ObjectIdentifier($1.end)] else {
+                return true
+            }
+            
+            return lhs.description.compare(rhs.description, options: .numeric) == .orderedAscending
         }
 
-        // Output connections
-        for definition in nodeDefinitions {
-            let node = definition.node
-
-            guard let nodeId = nodeIds[ObjectIdentifier(node)] else {
+        for edge in edges {
+            let target = edge.end
+            guard let targetId = nodeIds[ObjectIdentifier(target)] else {
                 continue
             }
 
-            var edges = graph.edges(from: node)
+            var attributes: GraphViz.Attributes = GraphViz.Attributes()
 
-            // Sort edges by lexical ordering
-            edges.sort {
-                guard let lhs = nodeIds[ObjectIdentifier($0.end)] else {
-                    return false
-                }
-                guard let rhs = nodeIds[ObjectIdentifier($1.end)] else {
-                    return true
-                }
-                
-                return lhs.compare(rhs, options: .numeric) == .orderedAscending
+            if let label = edge.debugLabel {
+                attributes["label"] = .string(label)
+            }
+            if edge.isBackEdge {
+                attributes["color"] = .string("#aa3333")
+                attributes["penwidth"] = 0.5
             }
 
-            for edge in edges {
-                let target = edge.end
-                guard let targetId = nodeIds[ObjectIdentifier(target)] else {
-                    continue
-                }
-
-                var attributes: [(key: String, value: AttributeValue)] = []
-                if let label = edge.debugLabel {
-                    attributes.append((key: "label", value: .string(label)))
-                }
-                if edge.isBackEdge {
-                    attributes.append((key: "color", value: "#aa3333"))
-                    attributes.append((key: "penwidth", value: 0.5))
-                }
-
-                var line = "\(nodeId) -> \(targetId)"
-                line += " \(attributeList(attributes))"
-
-                buffer.output(line: line.trimmingCharacters(in: .whitespacesAndNewlines))
-            }
+            viz.addConnection(from: nodeId, to: targetId, attributes: attributes)
         }
     }
-    buffer.output(line: "}")
 
-    return buffer.buffer.trimmingCharacters(in: .whitespacesAndNewlines)
+    return viz.generateFile()
 }
 
 func updateAllRecordedGraphviz() throws {
-    guard recordMode else {
+    guard recordMode && !recordedGraphs.isEmpty else {
         return
     }
     defer { recordedGraphs.removeAll() }
+
+    print("Updating test cases, please wait...")
 
     // Need to apply from bottom to top to avoid early rewrites offsetting later
     // rewrites
@@ -320,6 +315,8 @@ func updateAllRecordedGraphviz() throws {
     for entry in sorted {
         try updateGraphvizCode(entry: entry)
     }
+
+    print("Success!")
 }
 
 func throwErrorIfInGraphvizRecordMode(file: StaticString = #file) throws {
@@ -352,31 +349,6 @@ internal struct NodeDefinition<Node: DirectedGraphNode> {
     var rankFromEnd: Int?
 
     var label: String
-}
-
-fileprivate enum AttributeValue: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByFloatLiteral, ExpressibleByStringInterpolation {
-    case double(Double)
-    case string(String)
-    case raw(String)
-
-    var description: String {
-        switch self {
-        case .double(let value):
-            return value.description
-        case .raw(let value):
-            return value
-        case .string(let value):
-            return #""\#(value.replacingOccurrences(of: "\"", with: #"\""#))""#
-        }
-    }
-
-    init(stringLiteral value: String) {
-        self = .string(value)
-    }
-
-    init(floatLiteral value: Double) {
-        self = .double(value)
-    }
 }
 
 fileprivate func labelForSyntaxNode(_ node: SwiftAST.SyntaxNode) -> String {
@@ -500,20 +472,6 @@ fileprivate func labelForNode(_ node: ControlFlowGraphNode, graph: ControlFlowGr
     return labelForSyntaxNode(node.node)
 }
 
-private func attributeList(_ list: [(key: String, value: AttributeValue)]) -> String {
-    if list.isEmpty {
-        return ""
-    }
-
-    return "[" + list.map {
-        "\($0.key)=\($0.value)"
-    }.joined(separator: ", ") + "]"
-}
-
-private func attributes(_ list: (key: String, value: AttributeValue)...) -> String {
-    return attributeList(list)
-}
-
 private func updateGraphvizCode(entry: GraphvizUpdateEntry) throws {
     let path = URL(fileURLWithPath: entry.file)
 
@@ -567,7 +525,7 @@ private class GraphvizUpdateRewriter: SyntaxRewriter {
         }
 
         let args = node.argumentList
-        guard args.count == 2 else {
+        guard args.count == 2 || args.count == 3 else {
             return super.visit(node)
         }
 
@@ -609,7 +567,7 @@ private class GraphvizUpdateRewriter: SyntaxRewriter {
 
     private func formatGraphviz(_ string: String, indentationInSpaces: Int = 16) -> String {
         let indentation = String(repeating: " ", count: indentationInSpaces)
-        let lines = string.split(separator: "\n")
+        let lines = string.split(separator: "\n", omittingEmptySubsequences: false)
         let lineSeparator = "\n\(indentation)"
 
         return lineSeparator + lines.joined(separator: lineSeparator) + lineSeparator

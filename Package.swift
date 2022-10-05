@@ -462,7 +462,7 @@ let package = Package(
                 "Analysis",
                 .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
                 "SwiftAST", "SwiftRewriterLib", "GlobalsProviders",
-                "TestCommons", "TypeSystem",
+                "TestCommons", "TypeSystem", "Graphviz",
             ],
             path: "Tests/Core/AnalysisTests"
         ),

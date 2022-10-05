@@ -36,6 +36,7 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n1 [label="entry"]
                     n2 [label="{compound}"]
                     n3 [label="exit"]
+
                     n1 -> n2
                     n2 -> n3
                 }
@@ -80,6 +81,7 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n8 [label="b"]
                     n9 [label="{end scope of {compound}}"]
                     n10 [label="exit"]
+
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -143,6 +145,7 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n18 [label="{end scope of {defer}}"]
                     n19 [label="{end scope of {compound}}"]
                     n20 [label="exit"]
+
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -216,6 +219,7 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n20 [label="{end scope of {catch}}"]
                     n21 [label="{end scope of {if}}"]
                     n22 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -225,10 +229,11 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n7 -> n8
                     n8 -> n9
                     n8 -> n10
+                    n21 -> n10
                     n9 -> n11
                     n10 -> n12
+                    n20 -> n12
                     n11 -> n13
-                    n12 -> n22
                     n13 -> n14
                     n14 -> n15
                     n15 -> n16
@@ -236,8 +241,7 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n17 -> n18
                     n18 -> n19
                     n19 -> n20
-                    n20 -> n12
-                    n21 -> n10
+                    n12 -> n22
                 }
                 """,
             syntaxNode: stmt
@@ -283,6 +287,7 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n14 [label="ifBody: Int = 0"]
                     n15 [label="{end scope of {if}}"]
                     n16 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -291,14 +296,14 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n6 -> n7
                     n7 -> n8
                     n7 -> n9
+                    n15 -> n9
                     n8 -> n10
                     n9 -> n11
                     n10 -> n12
                     n11 -> n13
                     n12 -> n14
-                    n13 -> n16
                     n14 -> n15
-                    n15 -> n9
+                    n13 -> n16
                 }
                 """,
             syntaxNode: stmt
@@ -344,12 +349,14 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n14 [label="c: Int = 0"]
                     n15 [label="{end scope of {for}}"]
                     n16 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
                     n5 -> n6
                     n6 -> n7
+                    n15 -> n7 [color="#aa3333", penwidth=0.5]
                     n7 -> n8
                     n7 -> n9
                     n8 -> n10
@@ -357,9 +364,8 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n10 -> n12
                     n11 -> n13
                     n12 -> n14
-                    n13 -> n16
                     n14 -> n15
-                    n15 -> n7 [color="#aa3333", penwidth=0.5]
+                    n13 -> n16
                 }
                 """,
             syntaxNode: stmt
@@ -393,6 +399,7 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n4 [label="a"]
                     n5 [label="{return}"]
                     n6 [label="exit"]
+
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -431,12 +438,13 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n6 [label="{exp}"]
                     n7 [label="b"]
                     n8 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
-                    n5 -> n8
                     n6 -> n7
+                    n5 -> n8
                     n7 -> n8
                 }
                 """,
@@ -485,6 +493,7 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n16 [label="postDo"]
                     n17 [label="{end scope of {compound}}"]
                     n18 [label="exit"]
+
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -531,6 +540,7 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n3 [label="{exp}"]
                     n4 [label="a"]
                     n5 [label="exit"]
+
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
@@ -578,15 +588,16 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n10 [label="{throw Error}"]
                     n11 [label="{marker}"]
                     n12 [label="exit"]
+                
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
                     n4 -> n6
-                    n5 -> n8
                     n6 -> n7
-                    n7 -> n10
+                    n5 -> n8
                     n8 -> n9
+                    n7 -> n10
                     n10 -> n11
                 }
                 """,

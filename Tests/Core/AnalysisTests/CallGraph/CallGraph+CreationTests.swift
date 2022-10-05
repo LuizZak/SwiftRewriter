@@ -62,6 +62,7 @@ class CallGraph_CreationTests: XCTestCase {
                     n1 [label="A.f1()"]
                     n2 [label="B.b()"]
                     n3 [label="B.init()"]
+
                     n1 -> n2
                     n1 -> n3
                 }
@@ -100,6 +101,7 @@ class CallGraph_CreationTests: XCTestCase {
             matches: """
                 digraph calls {
                     n1 [label="func a()"]
+
                     n1 -> n1
                 }
                 """
@@ -137,6 +139,7 @@ class CallGraph_CreationTests: XCTestCase {
                 digraph calls {
                     n1 [label="B.init()"]
                     n2 [label="func a()"]
+
                     n2 -> n1
                 }
                 """
@@ -180,6 +183,7 @@ class CallGraph_CreationTests: XCTestCase {
                 digraph calls {
                     n1 [label="B.subscript(v: Int) -> String { get }"]
                     n2 [label="func a(b: B)"]
+
                     n2 -> n1
                 }
                 """
@@ -228,6 +232,7 @@ class CallGraph_CreationTests: XCTestCase {
                     n1 [label="B.subscript(v: Int) -> String { get }"]
                     n2 [label="B.subscript(v: Int) -> String { set }"]
                     n3 [label="func a(b: B)"]
+
                     n3 -> n2
                 }
                 """
@@ -276,6 +281,7 @@ class CallGraph_CreationTests: XCTestCase {
                     n1 [label="B.subscript(v: Int) -> String { get }"]
                     n2 [label="B.subscript(v: Int) -> String { set }"]
                     n3 [label="func a(b: B)"]
+
                     n3 -> n1
                     n3 -> n2
                 }
@@ -401,6 +407,7 @@ class CallGraph_CreationTests: XCTestCase {
                 digraph calls {
                     n1 [label="B.c: Int { get }"]
                     n2 [label="func a(b: B)"]
+
                     n2 -> n1
                 }
                 """
@@ -449,6 +456,7 @@ class CallGraph_CreationTests: XCTestCase {
                     n1 [label="B.c: Int { get }"]
                     n2 [label="B.c: Int { set }"]
                     n3 [label="func a(b: B)"]
+
                     n3 -> n2
                 }
                 """
@@ -497,6 +505,7 @@ class CallGraph_CreationTests: XCTestCase {
                     n1 [label="B.c: Int { get }"]
                     n2 [label="B.c: Int { set }"]
                     n3 [label="func a(b: B)"]
+
                     n3 -> n1
                     n3 -> n2
                 }

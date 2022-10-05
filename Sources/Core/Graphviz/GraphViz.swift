@@ -4,17 +4,32 @@ import Foundation
 public class GraphViz {
     public typealias NodeId = Int
 
-    private var _nextId: Int = 0
+    private var _nextId: Int = 1
     private var _rootGroup: Group
 
     /// The name for the root graph/digraph.
     /// If `nil`, no name is given to the root graph.
     public var rootGraphName: String?
 
+    /// Rank direction for this graph.
+    public var rankDir: RankDir = .leftToRight
+
     public init(rootGraphName: String? = nil) {
         self.rootGraphName = rootGraphName
 
         _rootGroup = Group(title: nil, isCluster: false)
+    }
+
+    private static func _defaultGraphAttributes() -> Attributes {
+        return [
+            "rankdir": .raw(RankDir.topToBottom.rawValue)
+        ]
+    }
+
+    private func _graphAttributes() -> Attributes {
+        return [
+            "rankdir": .raw(rankDir.rawValue)
+        ]
     }
 
     /// Generates a .dot file for visualization.
@@ -30,12 +45,25 @@ public class GraphViz {
         }
 
         out(beginBlock: graphLabel) {
-            out(line: "graph [rankdir=LR]")
+            let spacer = out.spacerToken(disabled: true)
+
+            let attr =
+                _graphAttributes()
+                    .toDotFileString(
+                        defaultValues: Self._defaultGraphAttributes()
+                    )
+            
+            if !attr.isEmpty {
+                out(line: "graph \(attr)")
+
+                spacer.reset()
+            }
 
             var clusterCounter = 0
             simplified.generateGraph(
                 in: out,
                 options: options,
+                spacer: spacer,
                 clusterCounter: &clusterCounter
             )
         }
@@ -55,7 +83,8 @@ public class GraphViz {
 
         let id = _nextId
 
-        let node = Node(id: id, label: label)
+        var node = Node(id: id)
+        node.label = label
         
         _rootGroup.getOrCreateGroup(groups).addNode(node)
 
@@ -91,13 +120,52 @@ public class GraphViz {
     }
 
     /// Adds a connection between two node IDs.
-    public func addConnection(from: NodeId, to: NodeId, label: String? = nil, color: String? = nil) {
-        _rootGroup.addConnection(.init(idFrom: from, idTo: to, label: label, color: color))
+    public func addConnection(
+        from: NodeId,
+        to: NodeId,
+        label: String? = nil,
+        color: String? = nil
+    ) {
+
+        var connection = Connection(
+            idFrom: from,
+            idTo: to
+        )
+        
+        connection.label = label
+        connection.color = color
+
+        _rootGroup.addConnection(connection)
+    }
+
+    /// Adds a connection between two node IDs.
+    public func addConnection(
+        from: NodeId,
+        to: NodeId,
+        attributes: Attributes
+    ) {
+        
+        let connection = Connection(
+            idFrom: from,
+            idTo: to,
+            attributes: attributes
+        )
+
+        _rootGroup.addConnection(connection)
     }
 
     private struct Node: Comparable {
         var id: NodeId
-        var label: String
+        var attributes: Attributes = Attributes()
+
+        var label: String {
+            get {
+                attributes["label"]?.rawValue ?? ""
+            }
+            set {
+                attributes["label"] = .string(newValue)
+            }
+        }
 
         static func < (lhs: Self, rhs: Self) -> Bool {
             lhs.label < rhs.label
@@ -107,8 +175,33 @@ public class GraphViz {
     private struct Connection: Comparable {
         var idFrom: NodeId
         var idTo: NodeId
-        var label: String?
-        var color: String?
+        var attributes: Attributes = Attributes()
+
+        var label: String? {
+            get {
+                attributes["label"]?.rawValue
+            }
+            set {
+                if let label = newValue {
+                    attributes["label"] = .string(label)
+                } else {
+                    attributes.removeValue(forKey: "label")
+                }
+            }
+        }
+
+        var color: String? {
+            get {
+                attributes["color"]?.rawValue
+            }
+            set {
+                if let label = newValue {
+                    attributes["color"] = .string(label)
+                } else {
+                    attributes.removeValue(forKey: "color")
+                }
+            }
+        }
 
         static func < (lhs: Self, rhs: Self) -> Bool {
             guard lhs.idTo == rhs.idTo else {
@@ -230,7 +323,14 @@ public class GraphViz {
                 spacer.apply()
 
                 for node in nodes {
-                    out(line: #"\#(node.id) [label="\#(node.label)"]"#)
+                    let properties = node.attributes.toDotFileString()
+                    let nodeString = dotFileNodeId(for: node.id)
+
+                    if !properties.isEmpty {
+                        out(line: nodeString + " \(properties)")
+                    } else {
+                        out(line: nodeString)
+                    }
                 }
 
                 spacer.reset()
@@ -266,20 +366,13 @@ public class GraphViz {
                 spacer.apply()
 
                 for connection in connections.sorted() {
-                    let conString = "\(connection.idTo) -> \(connection.idFrom)"
-                    var properties: [(name: String, value: String)] = []
-
-                    if let label = connection.label {
-                        properties.append(("label", #""\#(label)""#))
-                    }
-                    if let color = connection.color {
-                        properties.append(("color", #""\#(color)""#))
-                    }
+                    let conString =
+                        "\(dotFileNodeId(for: connection.idFrom)) -> \(dotFileNodeId(for: connection.idTo))"
+                    
+                    let properties = connection.attributes.toDotFileString()
 
                     if !properties.isEmpty {
-                        let propString = properties.map { "\($0.name)=\($0.value)" }.joined(separator: ", ")
-
-                        out(line: conString + " [\(propString)]")
+                        out(line: conString + " \(properties)")
                     } else {
                         out(line: conString)
                     }
@@ -287,6 +380,12 @@ public class GraphViz {
 
                 spacer.reset()
             }
+        }
+
+        /// Returns the textual ID to use when emitting a given node ID on .dot
+        /// files.
+        func dotFileNodeId(for nodeId: NodeId) -> String {
+            "n\(nodeId.description)"
         }
 
         func findNode(id: NodeId) -> Node? {
@@ -446,6 +545,7 @@ public class GraphViz {
 
         func apply() {
             guard !didApply else { return }
+            didApply = true
 
             out()
         }
