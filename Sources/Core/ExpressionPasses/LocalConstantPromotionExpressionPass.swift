@@ -17,7 +17,7 @@ public class LocalConstantPromotionExpressionPass: ASTRewriterPass {
             )
             
             // Look for read-only usages
-            if usages.contains(where: { !$0.isReadOnlyUsage }) {
+            if usages.contains(where: { $0.usageKind.isWrite }) {
                 return super.visitVariableDeclarations(stmt)
             }
             

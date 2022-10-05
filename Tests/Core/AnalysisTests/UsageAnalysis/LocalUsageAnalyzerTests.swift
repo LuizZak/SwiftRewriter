@@ -65,6 +65,45 @@ class LocalsUsageAnalyzerTests: XCTestCase {
         XCTAssertEqual(usages[1].isReadOnlyUsage, false)
     }
 
+    func testFindUsagesOfLocalVariableDetectingWritingUsagesInVariableDeclarations() {
+        let body: CompoundStatement = [
+            // var a: Int
+            .variableDeclaration(
+                identifier: "a",
+                type: .int,
+                initialization: nil
+            ),
+            // var result1 = takesValue(&a)
+            Statement.variableDeclaration(
+                identifier: "result1",
+                type: .int,
+                isConstant: false,
+                initialization:
+                    .identifier("takesValue")
+                    .call([.identifier("a")])
+            ),
+            // var result2 = takesReference(&a)
+            Statement.variableDeclaration(
+                identifier: "result2",
+                type: .int,
+                isConstant: false,
+                initialization:
+                    .identifier("takesReference")
+                    .call([.identifier("a").unary(op: .bitwiseAnd)])
+            ),
+        ]
+        let typeResolver = ExpressionTypeResolver(typeSystem: TypeSystem())
+        _ = typeResolver.resolveTypes(in: body)
+
+        let sut = LocalUsageAnalyzer(typeSystem: TypeSystem())
+
+        let usages = sut.findUsagesOf(localNamed: "a", in: .statement(body), intention: nil)
+
+        XCTAssertEqual(usages.count, 2)
+        XCTAssertEqual(usages[0].isReadOnlyUsage, true)
+        XCTAssertEqual(usages[1].isReadOnlyUsage, false)
+    }
+
     func testFindUsagesOfLocalVariableDetectingWritingUsagesOfPostfixType() {
         // Writing to a local's member or member-of-member should be detected
         // as a writing usage

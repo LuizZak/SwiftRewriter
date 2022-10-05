@@ -391,6 +391,8 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// - Parameter stmt: A variable declaration statement's element to visit
     public func visitStatementVariableDeclaration(_ decl: StatementVariableDeclaration) {
         listener(decl)
+
+        decl.initialization?.accept(self)
     }
 
     /// Visits a local function statement

@@ -83,4 +83,51 @@ class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
             statement: body
         )
     }
+
+    func testDoNotPromoteWriteUsagesInVariableDeclaration() {
+        let body: CompoundStatement = [
+            // var test: Int
+            Statement.variableDeclaration(
+                identifier: "test",
+                type: .int,
+                isConstant: false,
+                initialization: .constant(0)
+            ),
+            // var result = takesReference(&a)
+            Statement.variableDeclaration(
+                identifier: "result",
+                type: .int,
+                isConstant: false,
+                initialization:
+                    .identifier("takesReference")
+                    .call([.identifier("test").unary(op: .bitwiseAnd)])
+            )
+        ]
+        
+        let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
+        _ = resolver.resolveTypes(in: body)
+
+
+        assertTransform(
+            statement: body,
+            into: CompoundStatement(statements: [
+                // var test: Int
+                Statement.variableDeclaration(
+                    identifier: "test",
+                    type: .int,
+                    isConstant: false,
+                    initialization: .constant(0)
+                ),
+                // let result = takesReference(&a)
+                Statement.variableDeclaration(
+                    identifier: "result",
+                    type: .int,
+                    isConstant: true,
+                    initialization:
+                        .identifier("takesReference")
+                        .call([.identifier("test").unary(op: .bitwiseAnd)])
+                )
+            ])
+        )
+    }
 }

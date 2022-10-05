@@ -3340,4 +3340,34 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 """
         )
     }
+
+    func testRewriteByReferenceErrorValue() {
+        assertRewrite(
+            objc: """
+                @interface A
+                @end
+                @implementation A
+                - (void)test {
+                    NSError *error1;
+                    [self errorOperation:&error1];
+                    
+                    NSError *error2;
+                    id result = [self errorOperation:&error2];
+                }
+                @end
+                """,
+            swift: """
+                class A {
+                    func test() {
+                        var error1: Error!
+
+                        self.errorOperation(&error1)
+
+                        var error2: Error!
+                        let result: AnyObject! = self.errorOperation(&error2)
+                    }
+                }
+                """
+        )
+    }
 }
