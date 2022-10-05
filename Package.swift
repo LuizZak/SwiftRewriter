@@ -89,7 +89,7 @@ let core: [Target] = [
         name: "Analysis",
         dependencies: [
             "SwiftAST", "KnownType", "Commons", "Utils",
-            "Intentions", "TypeSystem",
+            "Intentions", "TypeSystem", "Graphviz",
         ],
         path: "Sources/Core/Analysis"
     ),
