@@ -169,32 +169,28 @@
 			"**/.DS_Store": true,
 		},
 		"commentAnchors.workspace.excludeFiles": "**/{node_modules,.git,.idea,target,out,build,vendor,.build,.swiftpm}/**/*",
-		"commentAnchors.tags.list": [
-			{
-				"tag": "MARK",
-				"iconColor": "default",
-				"highlightColor": "#A8C023",
-				"scope": "file"
-			},
-			{
-				"tag": "TODO",
-				"iconColor": "blue",
-				"highlightColor": "#3ea8ff",
-				"scope": "workspace"
-			},
-			{
-				"tag": "FIXME",
-				"iconColor": "red",
-				"highlightColor": "#F44336",
-				"scope": "workspace"
-			},
-			{
-				"tag": "NOTE",
-				"iconColor": "orange",
-				"highlightColor": "#FFB300",
-				"scope": "file"
-			},
-		],
+		"commentAnchors.tags.anchors": {
+            "MARK:": {
+                "iconColor": "default",
+                "highlightColor": "#A8C023",
+                "scope": "file",
+            },
+            "TODO:": {
+                "iconColor": "blue",
+                "highlightColor": "#3ea8ff",
+                "scope": "workspace",
+            },
+            "FIXME:": {
+                "iconColor": "red",
+                "highlightColor": "#F44336",
+                "scope": "workspace",
+            },
+            "NOTE:": {
+                "iconColor": "orange",
+                "highlightColor": "#FFB300",
+                "scope": "file",
+            },
+        },
 		
 		"python.formatting.provider": "black",
     	"python.linting.enabled": true,
