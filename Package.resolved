@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/apple/swift-format.git",
         "state": {
           "branch": null,
-          "revision": "3dd9b517b9e9846435aa782d769ef5825e7c2d65",
-          "version": "0.50700.0"
+          "revision": "5f184220d032a019a63df457cdea4b9c8241e911",
+          "version": "0.50700.1"
         }
       },
       {
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/apple/swift-syntax.git",
         "state": {
           "branch": null,
-          "revision": "04d4497be6b88e524a71778d828790e9589ae1c4",
-          "version": "0.50700.0"
+          "revision": "72d3da66b085c2299dd287c2be3b92b5ebd226de",
+          "version": "0.50700.1"
         }
       },
       {
