@@ -121,8 +121,14 @@ internal class JsParserListener: JavaScriptParserBaseListener {
                 return
             }
 
-            let node = nodeFactory.makeClassPropertyNode(from: ctx, identifier: identifier, expression: singleExpression)
-
+            let node =
+                nodeFactory
+                    .makeClassPropertyNode(
+                        from: ctx,
+                        identifier: identifier,
+                        expression: singleExpression
+                    )
+            
             node.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
 
             classNode.addChild(node)

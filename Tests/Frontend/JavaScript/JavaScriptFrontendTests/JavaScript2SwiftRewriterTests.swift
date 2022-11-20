@@ -820,4 +820,35 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
             rewriterSettings: .default.with(\.deduceTypes, true)
         )
     }
+
+    func testRewrite_privateField() {
+        assertRewrite(
+            js: """
+            class Example {
+                #_var = 0;
+
+                constructor () {
+                    this.#_var = this.#_method()
+                }
+
+                #_method() {
+
+                }
+            }
+            """,
+            swift: """
+            class Example {
+                var _var: Any = 0
+
+                init() {
+                    self._var = self._method()
+                }
+
+                func _method() {
+                }
+            }
+            """,
+            rewriterSettings: .default.with(\.deduceTypes, true)
+        )
+    }
 }

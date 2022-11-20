@@ -83,11 +83,13 @@ class MultiFileTestBuilder {
         _ expectedSwift: String,
         expectsErrors: Bool = false,
         options: SwiftSyntaxOptions = JavaScript2SwiftRewriter.defaultWriterOptions,
+        settings: JavaScript2SwiftRewriter.Settings = .default,
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> MultiFileTestBuilder {
 
         builder.swiftSyntaxOptions = options
+        builder.settings = settings
 
         let job = builder.createJob()
         let output = TestWriterOutput()
