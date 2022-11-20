@@ -229,8 +229,8 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.0.0"),
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", .exact("4.1.2")),
         .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.2")),
-        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50700.0")),
-        .package(url: "https://github.com/apple/swift-format.git", .exact("0.50700.0")),
+        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50700.1")),
+        .package(url: "https://github.com/apple/swift-format.git", .exact("0.50700.1")),
     ],
     targets: core + objcFrontend + jsFrontend + [
         .target(
