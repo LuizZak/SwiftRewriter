@@ -31,16 +31,19 @@ public extension Contextable where Base: DeclarationParserRule {
     }
 }
 
-public extension Contextable where Base: ObjectiveCParser.VarDeclarationContext {
+public extension Contextable where Base: ObjectiveCParser.TypeVariableDeclaratorContext {
     /// Whether this declaration represents a static variable declaration
     var isStatic: Bool {
-        guard let specs = base.declarationSpecifiers()?.storageClassSpecifier() else {
+
+        guard let specs = TypeParsing.declarationSpecifiers(from: base) else {
             return false
         }
-        
-        return specs.contains(where: { $0.STATIC() != nil })
+
+        return specs.any { spec in
+            spec.storageClassSpecifier()?.STATIC() != nil
+        }
     }
 }
 
-extension ObjectiveCParser.VarDeclarationContext: DeclarationParserRule { }
+extension ObjectiveCParser.TypeVariableDeclaratorContext: DeclarationParserRule { }
 extension ObjectiveCParser.FunctionDefinitionContext: DeclarationParserRule { }

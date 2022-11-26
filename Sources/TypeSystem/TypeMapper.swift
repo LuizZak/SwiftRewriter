@@ -653,6 +653,9 @@ public class DefaultTypeMapper: TypeMapper {
         return types.contains(where: \.isPointer)
     }
     
+    // TODO: Improve handling of multiple type specifier patterns that map to the
+    // same type
+
     private static let _scalarMappings: [String: SwiftType] = [
         // Objective-C-specific types
         "BOOL": .bool,
@@ -662,21 +665,36 @@ public class DefaultTypeMapper: TypeMapper {
         "instancetype": .instancetype,
         
         // C scalar types
+        "bool": .bool,
         "char": .typeName("CChar"),
         "signed": .typeName("CInt"),
         "unsigned": .typeName("CUnsignedInt"),
         "unsigned char": .typeName("CUnsignedChar"),
         "unsigned short": .typeName("CUnsignedShort"),
+        "unsigned short int": .typeName("CUnsignedShort"),
         "unsigned int": .typeName("CUnsignedInt"),
         "unsigned long": .typeName("CUnsignedLong"),
+        "unsigned long int": .typeName("CUnsignedLong"),
         "unsigned long long": .typeName("CUnsignedLongLong"),
+        "unsigned long long int": .typeName("CUnsignedLongLong"),
         "signed char": .typeName("CSignedChar"),
         "short": .typeName("CShort"),
+        "short int": .typeName("CShort"),
+        "signed short": .typeName("CShort"),
+        "signed short int": .typeName("CShort"),
         "int": .typeName("CInt"),
+        "signed int": .typeName("CInt"),
         "long": .typeName("CLong"),
+        "long int": .typeName("CLong"),
+        "signed long": .typeName("CLong"),
+        "signed long int": .typeName("CLong"),
         "long long": .typeName("CLongLong"),
+        "long long int": .typeName("CLongLong"),
+        "signed long long": .typeName("CLongLong"),
+        "signed long long int": .typeName("CLongLong"),
         "float": .typeName("CFloat"),
         "double": .typeName("CDouble"),
+        "long double": .typeName("CDouble"), // TODO: Validate this conversion in Xcode
         "wchar_t": .typeName("CWideChar"),
         "char16_t": .typeName("CChar16"),
         "char32_t": .typeName("CChar32"),

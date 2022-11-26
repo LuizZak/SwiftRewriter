@@ -24,6 +24,8 @@ public class TypeParsing {
     // Helper for mapping Objective-C types from type declarations into structured
     // types.
     public func parseObjcTypes(in decl: Parser.FieldDeclarationContext) -> [ObjcType] {
+        return []
+        /*
         var types: [ObjcType] = []
         
         guard let specQualifier = decl.specifierQualifierList() else {
@@ -61,11 +63,13 @@ public class TypeParsing {
         }
         
         return types
+        */
     }
     
     // Helper for mapping Objective-C types from type declarations into structured
     // types.
     public func parseObjcType(in decl: Parser.FieldDeclarationContext) -> ObjcType? {
+        /*
         guard let specQualifier = decl.specifierQualifierList() else {
             return nil
         }
@@ -74,8 +78,12 @@ public class TypeParsing {
         }
         
         return parseObjcType(in: specQualifier, declarator: declarator)
+        */
+
+        return nil
     }
     
+    /*
     public func parseObjcType(in specQual: Parser.SpecifierQualifierListContext) -> ObjcType? {
         guard let typeName = VarDeclarationTypeStringExtractor.extract(from: specQual) else {
             return nil
@@ -84,8 +92,10 @@ public class TypeParsing {
         return parseObjcType(typeName)
     }
     
-    public func parseObjcType(in specifierQualifierList: Parser.SpecifierQualifierListContext,
-                              declarator: Parser.DeclaratorContext) -> ObjcType? {
+    public func parseObjcType(
+        in specifierQualifierList: Parser.SpecifierQualifierListContext,
+        declarator: Parser.DeclaratorContext
+    ) -> ObjcType? {
         
         guard let specifiersString = VarDeclarationTypeStringExtractor.extract(from: specifierQualifierList) else {
             return nil
@@ -108,6 +118,7 @@ public class TypeParsing {
         
         return handleFixedArray(type, declarator: declarator)
     }
+    */
     
     public func parseObjcType(in declarationSpecifiers: Parser.DeclarationSpecifiersContext) -> ObjcType? {
         guard let specifiersString = VarDeclarationTypeStringExtractor.extract(from: declarationSpecifiers) else {
@@ -308,6 +319,8 @@ public class TypeParsing {
     }
     
     public func parseObjcType(from typeName: Parser.TypeNameContext) -> ObjcType? {
+        return nil
+        /*
         // Block type
         if let blockType = typeName.blockType() {
             return parseObjcType(from: blockType)
@@ -321,6 +334,7 @@ public class TypeParsing {
         }
         
         return type
+        */
     }
     
     public func parseObjcType(from ctx: Parser.FunctionPointerContext) -> ObjcType? {
@@ -369,34 +383,76 @@ public class TypeParsing {
         
         return functionPointerType
     }
-    
+
     private func handleFixedArray(_ type: ObjcType, declarator: Parser.DeclaratorContext) -> ObjcType {
         guard let directDeclarator = declarator.directDeclarator() else {
             return type
         }
         
         var type = type
+        if let base = directDeclarator.directDeclarator() {
+            type = handleFixedArray(type, directDeclarator: base)
+        }
         
-        for suffix in directDeclarator.declaratorSuffix().reversed() {
-            guard let constantExpression = suffix.constantExpression() else {
-                continue
-            }
-            
-            if let int = Int(constantExpression.getText()) {
+        return handleFixedArray(type, directDeclarator: directDeclarator)
+    }
+    
+    private func handleFixedArray(_ type: ObjcType, directDeclarator: Parser.DirectDeclaratorContext) -> ObjcType {
+        var type = type
+        if let base = directDeclarator.directDeclarator() {
+            type = handleFixedArray(type, directDeclarator: base)
+        }
+        
+        guard directDeclarator.LBRACK() != nil else {
+            return type
+        }
+
+        if let constant = extractConstant(from: directDeclarator.primaryExpression()) {
+            if let int = Int(constant.getText()) {
                 type = .fixedArray(type, length: int)
             }
         }
         
         return type
     }
+
+    private func extractConstant(from rule: Parser.PrimaryExpressionContext?) -> Parser.ConstantContext? {
+        guard let rule = rule else {
+            return nil
+        }
+
+        return ConstantContextExtractor.extract(from: rule) ?? nil
+    }
 }
 
 extension TypeParsing {
+    /*
     static func qualifiers(from spec: Parser.SpecifierQualifierListContext) -> [Parser.TypeQualifierContext] {
         spec.typeQualifier()
     }
+    */
     
     static func qualifiers(from spec: Parser.DeclarationSpecifiersContext) -> [Parser.TypeQualifierContext] {
-        spec.typeQualifier()
+        spec.declarationSpecifier().compactMap {
+            $0.typeQualifier()
+        }
+    }
+    
+    static func declarationSpecifiers(from spec: Parser.DeclarationContext) -> [Parser.DeclarationSpecifierContext] {
+        spec.declarationSpecifiers().flatMap {
+            declarationSpecifiers(from: $0)
+        } ?? []
+    }
+    
+    static func declarationSpecifiers(from spec: Parser.DeclarationSpecifiersContext) -> [Parser.DeclarationSpecifierContext] {
+        spec.declarationSpecifier()
+    }
+    
+    static func declarationSpecifiers(from varDecl: Parser.TypeVariableDeclaratorContext) -> [Parser.DeclarationSpecifierContext]? {
+        if let spec = varDecl.declarationSpecifiers() {
+            return declarationSpecifiers(from: spec)
+        }
+
+        return nil
     }
 }

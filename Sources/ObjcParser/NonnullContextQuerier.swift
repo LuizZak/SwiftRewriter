@@ -1,16 +1,16 @@
 import Antlr4
 
-class NonnullContextQuerier {
+public class NonnullContextQuerier {
     /// When NS_ASSUME_NONNULL_BEGIN/END pairs are present on the source code, this
     /// array keeps the index of the BEGIN/END token pairs so that later on the
     /// rewriter can leverage this information to infer nonnull contexts.
     let nonnullMacroRegionsTokenRange: [(start: Int, end: Int)]
     
-    init(nonnullMacroRegionsTokenRange: [(start: Int, end: Int)]) {
+    public init(nonnullMacroRegionsTokenRange: [(start: Int, end: Int)]) {
         self.nonnullMacroRegionsTokenRange = nonnullMacroRegionsTokenRange
     }
     
-    func isInNonnullContext(_ node: ParserRuleContext) -> Bool {
+    public func isInNonnullContext(_ node: ParserRuleContext) -> Bool {
         guard let startToken = node.getStart(), let stopToken = node.getStop() else {
             return false
         }

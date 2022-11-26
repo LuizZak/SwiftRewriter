@@ -171,19 +171,6 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func enterGenericTypeSpecifier(_ ctx: ObjectiveCParser.GenericTypeSpecifierContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitGenericTypeSpecifier(_ ctx: ObjectiveCParser.GenericTypeSpecifierContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	open func enterGenericSuperclassSpecifier(_ ctx: ObjectiveCParser.GenericSuperclassSpecifierContext) { }
 	/**
 	 * {@inheritDoc}
@@ -574,32 +561,6 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func enterGenericsSpecifier(_ ctx: ObjectiveCParser.GenericsSpecifierContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitGenericsSpecifier(_ ctx: ObjectiveCParser.GenericsSpecifierContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterTypeSpecifierWithPrefixes(_ ctx: ObjectiveCParser.TypeSpecifierWithPrefixesContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitTypeSpecifierWithPrefixes(_ ctx: ObjectiveCParser.TypeSpecifierWithPrefixesContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	open func enterDictionaryExpression(_ ctx: ObjectiveCParser.DictionaryExpressionContext) { }
 	/**
 	 * {@inheritDoc}
@@ -672,6 +633,19 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitTypeVariableDeclaratorOrName(_ ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterBlockExpression_(_ ctx: ObjectiveCParser.BlockExpression_Context) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitBlockExpression_(_ ctx: ObjectiveCParser.BlockExpression_Context) { }
 
 	/**
 	 * {@inheritDoc}
@@ -925,6 +899,19 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	open func enterDeclarationList(_ ctx: ObjectiveCParser.DeclarationListContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitDeclarationList(_ ctx: ObjectiveCParser.DeclarationListContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	open func enterAttribute(_ ctx: ObjectiveCParser.AttributeContext) { }
 	/**
 	 * {@inheritDoc}
@@ -997,19 +984,6 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitAttributeParameterAssignment(_ ctx: ObjectiveCParser.AttributeParameterAssignmentContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterDeclaration(_ ctx: ObjectiveCParser.DeclarationContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitDeclaration(_ ctx: ObjectiveCParser.DeclarationContext) { }
 
 	/**
 	 * {@inheritDoc}
@@ -1094,26 +1068,26 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func enterVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) { }
+	open func enterVarDeclaration_(_ ctx: ObjectiveCParser.VarDeclaration_Context) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func exitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) { }
+	open func exitVarDeclaration_(_ ctx: ObjectiveCParser.VarDeclaration_Context) { }
 
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func enterTypedefDeclaration(_ ctx: ObjectiveCParser.TypedefDeclarationContext) { }
+	open func enterTypedefDeclaration_(_ ctx: ObjectiveCParser.TypedefDeclaration_Context) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func exitTypedefDeclaration(_ ctx: ObjectiveCParser.TypedefDeclarationContext) { }
+	open func exitTypedefDeclaration_(_ ctx: ObjectiveCParser.TypedefDeclaration_Context) { }
 
 	/**
 	 * {@inheritDoc}
@@ -1133,6 +1107,45 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	open func enterDeclarationSpecifiers_(_ ctx: ObjectiveCParser.DeclarationSpecifiers_Context) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitDeclarationSpecifiers_(_ ctx: ObjectiveCParser.DeclarationSpecifiers_Context) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterDeclarationSpecifier__(_ ctx: ObjectiveCParser.DeclarationSpecifier__Context) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitDeclarationSpecifier__(_ ctx: ObjectiveCParser.DeclarationSpecifier__Context) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterDeclarationSpecifier(_ ctx: ObjectiveCParser.DeclarationSpecifierContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitDeclarationSpecifier(_ ctx: ObjectiveCParser.DeclarationSpecifierContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	open func enterDeclarationSpecifiers(_ ctx: ObjectiveCParser.DeclarationSpecifiersContext) { }
 	/**
 	 * {@inheritDoc}
@@ -1146,13 +1159,26 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func enterAttributeSpecifier(_ ctx: ObjectiveCParser.AttributeSpecifierContext) { }
+	open func enterDeclarationSpecifiers2(_ ctx: ObjectiveCParser.DeclarationSpecifiers2Context) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func exitAttributeSpecifier(_ ctx: ObjectiveCParser.AttributeSpecifierContext) { }
+	open func exitDeclarationSpecifiers2(_ ctx: ObjectiveCParser.DeclarationSpecifiers2Context) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterDeclaration(_ ctx: ObjectiveCParser.DeclarationContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitDeclaration(_ ctx: ObjectiveCParser.DeclarationContext) { }
 
 	/**
 	 * {@inheritDoc}
@@ -1185,6 +1211,214 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	open func enterDeclarator(_ ctx: ObjectiveCParser.DeclaratorContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitDeclarator(_ ctx: ObjectiveCParser.DeclaratorContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterDirectDeclarator(_ ctx: ObjectiveCParser.DirectDeclaratorContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitDirectDeclarator(_ ctx: ObjectiveCParser.DirectDeclaratorContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterTypeName(_ ctx: ObjectiveCParser.TypeNameContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitTypeName(_ ctx: ObjectiveCParser.TypeNameContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterAbstractDeclarator_(_ ctx: ObjectiveCParser.AbstractDeclarator_Context) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitAbstractDeclarator_(_ ctx: ObjectiveCParser.AbstractDeclarator_Context) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterAbstractDeclarator(_ ctx: ObjectiveCParser.AbstractDeclaratorContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitAbstractDeclarator(_ ctx: ObjectiveCParser.AbstractDeclaratorContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterDirectAbstractDeclarator(_ ctx: ObjectiveCParser.DirectAbstractDeclaratorContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitDirectAbstractDeclarator(_ ctx: ObjectiveCParser.DirectAbstractDeclaratorContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterAbstractDeclaratorSuffix_(_ ctx: ObjectiveCParser.AbstractDeclaratorSuffix_Context) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitAbstractDeclaratorSuffix_(_ ctx: ObjectiveCParser.AbstractDeclaratorSuffix_Context) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterParameterTypeList(_ ctx: ObjectiveCParser.ParameterTypeListContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitParameterTypeList(_ ctx: ObjectiveCParser.ParameterTypeListContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterParameterList(_ ctx: ObjectiveCParser.ParameterListContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitParameterList(_ ctx: ObjectiveCParser.ParameterListContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterParameterDeclarationList_(_ ctx: ObjectiveCParser.ParameterDeclarationList_Context) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitParameterDeclarationList_(_ ctx: ObjectiveCParser.ParameterDeclarationList_Context) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterParameterDeclaration(_ ctx: ObjectiveCParser.ParameterDeclarationContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitParameterDeclaration(_ ctx: ObjectiveCParser.ParameterDeclarationContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterTypeQualifierList(_ ctx: ObjectiveCParser.TypeQualifierListContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitTypeQualifierList(_ ctx: ObjectiveCParser.TypeQualifierListContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterIdentifierList(_ ctx: ObjectiveCParser.IdentifierListContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitIdentifierList(_ ctx: ObjectiveCParser.IdentifierListContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterDeclaratorSuffix(_ ctx: ObjectiveCParser.DeclaratorSuffixContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitDeclaratorSuffix(_ ctx: ObjectiveCParser.DeclaratorSuffixContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterAttributeSpecifier(_ ctx: ObjectiveCParser.AttributeSpecifierContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitAttributeSpecifier(_ ctx: ObjectiveCParser.AttributeSpecifierContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterAtomicTypeSpecifier(_ ctx: ObjectiveCParser.AtomicTypeSpecifierContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitAtomicTypeSpecifier(_ ctx: ObjectiveCParser.AtomicTypeSpecifierContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	open func enterStructOrUnionSpecifier(_ ctx: ObjectiveCParser.StructOrUnionSpecifierContext) { }
 	/**
 	 * {@inheritDoc}
@@ -1205,19 +1439,6 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitFieldDeclaration(_ ctx: ObjectiveCParser.FieldDeclarationContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterSpecifierQualifierList(_ ctx: ObjectiveCParser.SpecifierQualifierListContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitSpecifierQualifierList(_ ctx: ObjectiveCParser.SpecifierQualifierListContext) { }
 
 	/**
 	 * {@inheritDoc}
@@ -1302,6 +1523,32 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	open func enterFunctionSpecifier(_ ctx: ObjectiveCParser.FunctionSpecifierContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitFunctionSpecifier(_ ctx: ObjectiveCParser.FunctionSpecifierContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterAlignmentSpecifier(_ ctx: ObjectiveCParser.AlignmentSpecifierContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitAlignmentSpecifier(_ ctx: ObjectiveCParser.AlignmentSpecifierContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	open func enterProtocolQualifier(_ ctx: ObjectiveCParser.ProtocolQualifierContext) { }
 	/**
 	 * {@inheritDoc}
@@ -1315,6 +1562,19 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	open func enterTypeSpecifier_(_ ctx: ObjectiveCParser.TypeSpecifier_Context) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitTypeSpecifier_(_ ctx: ObjectiveCParser.TypeSpecifier_Context) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	open func enterTypeSpecifier(_ ctx: ObjectiveCParser.TypeSpecifierContext) { }
 	/**
 	 * {@inheritDoc}
@@ -1322,6 +1582,58 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitTypeSpecifier(_ ctx: ObjectiveCParser.TypeSpecifierContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterTypedefName(_ ctx: ObjectiveCParser.TypedefNameContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitTypedefName(_ ctx: ObjectiveCParser.TypedefNameContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterGenericTypeSpecifier(_ ctx: ObjectiveCParser.GenericTypeSpecifierContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitGenericTypeSpecifier(_ ctx: ObjectiveCParser.GenericTypeSpecifierContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterGenericTypeList(_ ctx: ObjectiveCParser.GenericTypeListContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitGenericTypeList(_ ctx: ObjectiveCParser.GenericTypeListContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterGenericTypeParameter(_ ctx: ObjectiveCParser.GenericTypeParameterContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitGenericTypeParameter(_ ctx: ObjectiveCParser.GenericTypeParameterContext) { }
 
 	/**
 	 * {@inheritDoc}
@@ -1432,39 +1744,78 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func enterDirectDeclarator(_ ctx: ObjectiveCParser.DirectDeclaratorContext) { }
+	open func enterVcSpecificModifer(_ ctx: ObjectiveCParser.VcSpecificModiferContext) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func exitDirectDeclarator(_ ctx: ObjectiveCParser.DirectDeclaratorContext) { }
+	open func exitVcSpecificModifer(_ ctx: ObjectiveCParser.VcSpecificModiferContext) { }
 
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func enterDeclaratorSuffix(_ ctx: ObjectiveCParser.DeclaratorSuffixContext) { }
+	open func enterGccDeclaratorExtension(_ ctx: ObjectiveCParser.GccDeclaratorExtensionContext) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func exitDeclaratorSuffix(_ ctx: ObjectiveCParser.DeclaratorSuffixContext) { }
+	open func exitGccDeclaratorExtension(_ ctx: ObjectiveCParser.GccDeclaratorExtensionContext) { }
 
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func enterParameterList(_ ctx: ObjectiveCParser.ParameterListContext) { }
+	open func enterGccAttributeSpecifier(_ ctx: ObjectiveCParser.GccAttributeSpecifierContext) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func exitParameterList(_ ctx: ObjectiveCParser.ParameterListContext) { }
+	open func exitGccAttributeSpecifier(_ ctx: ObjectiveCParser.GccAttributeSpecifierContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterGccAttributeList(_ ctx: ObjectiveCParser.GccAttributeListContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitGccAttributeList(_ ctx: ObjectiveCParser.GccAttributeListContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterGccAttribute(_ ctx: ObjectiveCParser.GccAttributeContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitGccAttribute(_ ctx: ObjectiveCParser.GccAttributeContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterPointer_(_ ctx: ObjectiveCParser.Pointer_Context) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitPointer_(_ ctx: ObjectiveCParser.Pointer_Context) { }
 
 	/**
 	 * {@inheritDoc}
@@ -1478,6 +1829,19 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitPointer(_ ctx: ObjectiveCParser.PointerContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterPointerEntry(_ ctx: ObjectiveCParser.PointerEntryContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitPointerEntry(_ ctx: ObjectiveCParser.PointerEntryContext) { }
 
 	/**
 	 * {@inheritDoc}
@@ -1549,78 +1913,13 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func enterTypeName(_ ctx: ObjectiveCParser.TypeNameContext) { }
+	open func enterStaticAssertDeclaration(_ ctx: ObjectiveCParser.StaticAssertDeclarationContext) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func exitTypeName(_ ctx: ObjectiveCParser.TypeNameContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterAbstractDeclarator(_ ctx: ObjectiveCParser.AbstractDeclaratorContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitAbstractDeclarator(_ ctx: ObjectiveCParser.AbstractDeclaratorContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterAbstractDeclaratorSuffix(_ ctx: ObjectiveCParser.AbstractDeclaratorSuffixContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitAbstractDeclaratorSuffix(_ ctx: ObjectiveCParser.AbstractDeclaratorSuffixContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterParameterDeclarationList(_ ctx: ObjectiveCParser.ParameterDeclarationListContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitParameterDeclarationList(_ ctx: ObjectiveCParser.ParameterDeclarationListContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterParameterDeclaration(_ ctx: ObjectiveCParser.ParameterDeclarationContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitParameterDeclaration(_ ctx: ObjectiveCParser.ParameterDeclarationContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterDeclarator(_ ctx: ObjectiveCParser.DeclaratorContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitDeclarator(_ ctx: ObjectiveCParser.DeclaratorContext) { }
+	open func exitStaticAssertDeclaration(_ ctx: ObjectiveCParser.StaticAssertDeclarationContext) { }
 
 	/**
 	 * {@inheritDoc}
@@ -1855,6 +2154,19 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitExpression(_ ctx: ObjectiveCParser.ExpressionContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterAssignmentExpression(_ ctx: ObjectiveCParser.AssignmentExpressionContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitAssignmentExpression(_ ctx: ObjectiveCParser.AssignmentExpressionContext) { }
 
 	/**
 	 * {@inheritDoc}

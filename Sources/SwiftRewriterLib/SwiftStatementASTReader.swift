@@ -25,6 +25,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
         self.delegate = delegate
     }
     
+    /*
     public override func visitDeclaration(_ ctx: Parser.DeclarationContext) -> Statement? {
         if let varDecl = ctx.varDeclaration()?.accept(self) {
             return varDecl
@@ -35,6 +36,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
         
         return .unknown(UnknownASTContext(context: ctx.getText()))
     }
+    */
     
     public override func visitFunctionCallExpression(_ ctx: Parser.FunctionCallExpressionContext) -> Statement? {
         guard let ident = ctx.identifier() else {
@@ -56,6 +58,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             )
     }
     
+    /*
     public override func visitVarDeclaration(_ ctx: Parser.VarDeclarationContext) -> Statement? {
         let extractor =
             VarDeclarationExtractor(expressionReader: expressionReader,
@@ -64,6 +67,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
         
         return ctx.accept(extractor)
     }
+    */
     
     public override func visitLabeledStatement(_ ctx: ObjectiveCParser.LabeledStatementContext) -> Statement? {
         guard let stmt = ctx.statement()?.accept(self), let label = ctx.identifier() else {
@@ -488,6 +492,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             return varDeclStmt
         }
         
+        /*
         override func visitVarDeclaration(_ ctx: Parser.VarDeclarationContext) -> Statement? {
             guard let declarationSpecifiers = ctx.declarationSpecifiers() else {
                 return .unknown(UnknownASTContext(context: ctx.getText()))
@@ -548,6 +553,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             
             return varDeclStmt
         }
+        */
 
         private func reportAutotypeDeclarations(in declarationStatement: VariableDeclarationsStatement) {
             guard let delegate = delegate else {

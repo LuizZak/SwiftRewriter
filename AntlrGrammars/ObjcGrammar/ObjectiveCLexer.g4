@@ -66,11 +66,13 @@ UNSIGNED:                 'unsigned';
 VOID:                     'void';
 VOLATILE:                 'volatile';
 WHILE:                    'while';
+CBOOL:                    'bool';
 BOOL_:                    '_Bool';
 COMPLEX:                  '_Complex';
 IMAGINERY:                '_Imaginery';
 TRUE:                     'true';
 FALSE:                    'false';
+CONSTEXPR:                'constexpr';
 
 // Words you shouldn't use
 
@@ -132,10 +134,32 @@ CONTRAVARIANT:            '__contravariant';
 DEPRECATED:               '__deprecated';
 KINDOF:                   '__kindof';
 STRONG_QUALIFIER:         '__strong';
-TYPEOF:                   'typeof' | '__typeof' | '__typeof__';
+TYPEOF:                   'typeof' | '__typeof' | TYPEOF__;
+TYPEOF__:                 '__typeof__';
 UNSAFE_UNRETAINED_QUALIFIER:'__unsafe_unretained';
 UNUSED:                   '__unused';
 WEAK_QUALIFIER:           '__weak';
+ASM:                      '__asm';
+CDECL:                    '__cdecl';
+CLRCALL:                  '__clrcall';
+STDCALL:                  '__stdcall';
+DECLSPEC:                 '__declspec';
+FASTCALL:                 '__fastcall';
+THISCALL:                 '__thiscall';
+VECTORCALL:               '__vectorcall';
+INLINE__:                 '__inline__';
+EXTENSION:                '__extension__';
+M128:                     '__m128';
+M128D:                    '__m128d';
+M128I:                    '__m128i';
+
+// Attributes with `_` prefix
+
+ATOMIC_:                  '_Atomic';
+NORETURN_:                '_Noreturn';
+ALIGNAS_:                 '_Alignas';
+THREAD_LOCAL_:            '_Thread_local' | 'thread_local';
+STATIC_ASSERT_:           '_Static_assert';
 
 // Nullability specifiers
 
@@ -244,7 +268,8 @@ STRING_START:             StringStart -> mode(STRING_MODE);
 HEX_LITERAL:              '0' [xX] HexDigit+ IntegerTypeSuffix?;
 OCTAL_LITERAL:            '0' [0-7]+ IntegerTypeSuffix?;
 BINARY_LITERAL:           '0' [bB] [01]+ IntegerTypeSuffix?;
-DECIMAL_LITERAL:          [0-9]+ IntegerTypeSuffix?;
+DECIMAL_LITERAL:          Dec+ IntegerTypeSuffix?;
+DIGITS:                   [0-9]+;
 
 FLOATING_POINT_LITERAL
                         : (Dec+ '.' Dec* | '.' Dec+) Exponent? FloatTypeSuffix?

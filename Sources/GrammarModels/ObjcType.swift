@@ -33,14 +33,81 @@ public enum ObjcType: Equatable, Codable, CustomStringConvertible {
     
     /// An objective-C block type.
     /// Block types may specify names, or not (in case of block literals).
-    indirect case blockType(name: String?, returnType: ObjcType, parameters: [ObjcType])
+    indirect case blockType(name: String? = nil, returnType: ObjcType, parameters: [ObjcType] = [])
     
     /// A C function pointer.
     /// Function pointer types may specify names, or not (in case of pointer literals).
-    indirect case functionPointer(name: String?, returnType: ObjcType, parameters: [ObjcType])
+    indirect case functionPointer(name: String? = nil, returnType: ObjcType, parameters: [ObjcType] = [])
     
     /// A fixed array type
     indirect case fixedArray(ObjcType, length: Int)
+    
+    /// Gets the plain string definition for this type.
+    /// Always maps to valid objc type
+    public var description: String {
+        switch self {
+        case .instancetype:
+            return "instancetype"
+            
+        case .void:
+            return "void"
+            
+        case .struct(let s):
+            return s
+            
+        case let .generic(cl, parameters):
+            let typeNames = parameters.map(\.description).joined(separator: ", ")
+            
+            if !typeNames.isEmpty {
+                return "\(cl)<\(typeNames)>"
+            } else {
+                return cl
+            }
+            
+        case .id(let protocols):
+            if !protocols.isEmpty {
+                let protocolNames = protocols.joined(separator: ", ")
+                return "id<\(protocolNames)>"
+            } else {
+                return "id"
+            }
+            
+        case .pointer(let type):
+            return "\(type.description)*"
+            
+        case let .qualified(type, qualifiers):
+            return "\(type.description) \(qualifiers.joined(separator: " "))"
+            
+        case let .specified(specifiers, type):
+            return "\(specifiers.joined(separator: " ")) \(type.description)"
+            
+        case let .blockType(name, returnType, parameters):
+            return "\(returnType)(^\(name ?? ""))(\(parameters.map(\.description).joined(separator: ", ")))"
+            
+        case let .functionPointer(name, returnType, parameters):
+            return "\(returnType)(*\(name ?? ""))(\(parameters.map(\.description).joined(separator: ", ")))"
+            
+        case let .fixedArray(type, length):
+            return "\(type)[\(length)]"
+        }
+    }
+    
+    /// Returns true if this is a pointer type
+    public var isPointer: Bool {
+        switch self {
+        case .pointer, .id, .instancetype, .blockType, .functionPointer, .fixedArray:
+            return true
+            
+        case .specified(_, let type):
+            return type.isPointer
+            
+        case .qualified(let type, _):
+            return type.isPointer
+            
+        default:
+            return false
+        }
+    }
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -159,73 +226,6 @@ public enum ObjcType: Equatable, Codable, CustomStringConvertible {
         }
     }
     
-    /// Gets the plain string definition for this type.
-    /// Always maps to valid objc type
-    public var description: String {
-        switch self {
-        case .instancetype:
-            return "instancetype"
-            
-        case .void:
-            return "void"
-            
-        case .struct(let s):
-            return s
-            
-        case let .generic(cl, parameters):
-            let typeNames = parameters.map(\.description).joined(separator: ", ")
-            
-            if !typeNames.isEmpty {
-                return "\(cl)<\(typeNames)>"
-            } else {
-                return cl
-            }
-            
-        case .id(let protocols):
-            if !protocols.isEmpty {
-                let protocolNames = protocols.joined(separator: ", ")
-                return "id<\(protocolNames)>"
-            } else {
-                return "id"
-            }
-            
-        case .pointer(let type):
-            return "\(type.description)*"
-            
-        case let .qualified(type, qualifiers):
-            return "\(type.description) \(qualifiers.joined(separator: " "))"
-            
-        case let .specified(specifiers, type):
-            return "\(specifiers.joined(separator: " ")) \(type.description)"
-            
-        case let .blockType(name, returnType, parameters):
-            return "\(returnType)(^\(name ?? ""))(\(parameters.map(\.description).joined(separator: ", ")))"
-            
-        case let .functionPointer(name, returnType, parameters):
-            return "\(returnType)(*\(name ?? ""))(\(parameters.map(\.description).joined(separator: ", ")))"
-            
-        case let .fixedArray(type, length):
-            return "\(type)[\(length)]"
-        }
-    }
-    
-    /// Returns true if this is a pointer type
-    public var isPointer: Bool {
-        switch self {
-        case .pointer, .id, .instancetype, .blockType, .functionPointer, .fixedArray:
-            return true
-            
-        case .specified(_, let type):
-            return type.isPointer
-            
-        case .qualified(let type, _):
-            return type.isPointer
-            
-        default:
-            return false
-        }
-    }
-    
     private enum CodingKeys: String, CodingKey {
         case discriminator
         case payload0
@@ -245,5 +245,17 @@ public enum ObjcType: Equatable, Codable, CustomStringConvertible {
         case blockType
         case functionPointer
         case fixedArray
+    }
+}
+
+extension ObjcType: ExpressibleByStringLiteral {
+    /// Initializes a `ObjcType.struct()` case with the given string literal
+    /// as its type.
+    public init(stringLiteral value: String) {
+        if value == "void" {
+            self = .void
+        } else {
+            self = .struct(value)
+        }
     }
 }

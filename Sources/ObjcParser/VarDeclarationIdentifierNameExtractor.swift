@@ -51,6 +51,9 @@ public class VarDeclarationIdentifierNameExtractor: ObjectiveCParserBaseVisitor<
     public override func visitIdentifier(_ ctx: O.IdentifierContext) -> O.IdentifierContext? {
         ctx
     }
+    public override func visitFunctionSignature(_ ctx: O.FunctionSignatureContext) -> O.IdentifierContext? {
+        ctx.declarator()?.accept(self)
+    }
     public override func visitFunctionPointer(_ ctx: O.FunctionPointerContext) -> O.IdentifierContext? {
         ctx.identifier()
     }

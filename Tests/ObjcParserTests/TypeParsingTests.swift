@@ -5,7 +5,7 @@ import ObjcParserAntlr
 import Antlr4
 
 class TypeParsingTests: XCTestCase {
-    func testParseObjcTypeInFieldDeclarationContext() {
+    func testParseObjcType_fieldDeclarationContext() {
         prepareTester(ObjectiveCParser.fieldDeclaration, { $0.parseObjcType(in: $1) }) { tester in
             tester.assert("int a;", parsesAs: .struct("int"))
             tester.assert("int *a;", parsesAs: .pointer(.struct("int")))
@@ -13,7 +13,7 @@ class TypeParsingTests: XCTestCase {
         }
     }
     
-    func testParseObjcTypeInFieldDeclarationContextMultiple() {
+    func testParseObjcType_fieldDeclarationContext_multiple() {
         let sut = makeSut()
         
         withParserRule("int a, *b;", { try $0.fieldDeclaration() }) { rule in
@@ -21,7 +21,7 @@ class TypeParsingTests: XCTestCase {
         }
     }
     
-    func testParseObjcTypeInFieldDeclarationContextMultiple_withArcBehavior() {
+    func testParseObjcType_fieldDeclarationContext_multiple_withArcBehavior() {
         let sut = makeSut()
         
         withParserRule("__weak NSObject *a;", { try $0.fieldDeclaration() }) { rule in
@@ -29,7 +29,8 @@ class TypeParsingTests: XCTestCase {
         }
     }
     
-    func testParseObjcTypeInSpecifierQualifierListContext() {
+    /*
+    func testParseObjcType_specifierQualifierListContext() {
         prepareTester(ObjectiveCParser.specifierQualifierList, { $0.parseObjcType(in: $1) }) { tester in
             tester.assert("int", parsesAs: .struct("int"))
             tester.assert("int *", parsesAs: .pointer(.struct("int")))
@@ -38,34 +39,41 @@ class TypeParsingTests: XCTestCase {
             tester.assert("__weak _Nonnull NSObject*", parsesAs: .specified(specifiers: ["__weak", "_Nonnull"], .pointer(.struct("NSObject"))))
         }
     }
+    */
     
-    func testParseObjcTypeInDeclarationSpecifiersContext() {
+    func testParseObjcType_declarationSpecifiersContext() {
         prepareTester(ObjectiveCParser.declarationSpecifiers, { $0.parseObjcType(in: $1) }) { tester in
             tester.assert("__weak NSObject *a", parsesAs: .specified(specifiers: ["__weak"], .pointer(.struct("NSObject"))))
         }
     }
     
-    func testParseObjcTypeInTypeVariableDeclaratorContext_blockType() {
+    func testParseObjcType_typeVariableDeclaratorContext_blockType() {
         prepareTester(ObjectiveCParser.typeVariableDeclarator, { $0.parseObjcType(from: $1) }) { tester in
             tester.assert("NSObject (^)()", parsesAs: .blockType(name: nil, returnType: .struct("NSObject"), parameters: []))
         }
     }
     
-    func testParseObjcTypeInDeclarationSpecifiersDeclaratorContext_blockType() {
+    func testParseObjcType_declarationSpecifiers_declaratorContext_blockType() {
         prepareTester(ObjectiveCParser.typeVariableDeclarator, { $0.parseObjcType(in: $1.declarationSpecifiers()!, declarator: $1.declarator()!) }) { tester in
             tester.assert("NSObject (^)()", parsesAs: .blockType(name: nil, returnType: .struct("NSObject"), parameters: []))
         }
     }
     
-    func testParseObjcTypeInDeclarationSpecifiersDeclaratorContext_fixedArray() {
+    func testParseObjcType_declarationSpecifiers_declaratorContext_fixedArray() {
         prepareTester(ObjectiveCParser.typeVariableDeclarator, { $0.parseObjcType(in: $1.declarationSpecifiers()!, declarator: $1.declarator()!) }) { tester in
             tester.assert("NSObject (a)[2]", parsesAs: .fixedArray(.struct("NSObject"), length: 2))
         }
     }
     
-    func testParseObjcTypeInTypeVariableDeclaratorOrNameContext_blockType() {
+    func testParseObjcType_typeVariableDeclaratorOrNameContext_blockType() {
         prepareTester(ObjectiveCParser.typeVariableDeclaratorOrName, { $0.parseObjcType(from: $1) }) { tester in
             tester.assert("NSObject (^)void", parsesAs: .blockType(name: nil, returnType: .struct("NSObject"), parameters: []))
+        }
+    }
+    
+    func testParseObjcType_declarationSpecifiers_declaratorContext_unsignedInteger() {
+        prepareTester(ObjectiveCParser.typeVariableDeclarator, { $0.parseObjcType(in: $1.declarationSpecifiers()!, declarator: $1.declarator()!) }) { tester in
+            tester.assert("unsigned a", parsesAs: .struct("unsigned"))
         }
     }
     
@@ -158,27 +166,5 @@ private extension TypeParsingTests {
                 XCTAssertEqual(result, expected, "(\(resultStr)) is not equal to (\(expectStr))", line: line)
             }
         }
-    }
-}
-
-private class ErrorListener: BaseErrorListener {
-    var errors: [String] = []
-    
-    var errorDescription: String {
-        return errors.joined(separator: "\n")
-    }
-    
-    var hasErrors: Bool {
-        return !errors.isEmpty
-    }
-    
-    override func syntaxError<T>(_ recognizer: Recognizer<T>,
-                                 _ offendingSymbol: AnyObject?,
-                                 _ line: Int,
-                                 _ charPositionInLine: Int,
-                                 _ msg: String,
-                                 _ e: AnyObject?) where T : ATNSimulator {
-        
-        errors.append(msg)
     }
 }

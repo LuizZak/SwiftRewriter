@@ -497,6 +497,26 @@ class ObjcParserTests: XCTestCase {
         XCTAssert(sut.importDirectives[0].isSystemImport)
         XCTAssertFalse(sut.importDirectives[1].isSystemImport)
     }
+
+    func testParseCFunctionArrayArguments() throws {
+        let sut = ObjcParser(string: """
+            void aFunction(unsigned n, int args[]) {
+
+            }
+            """)
+
+        try sut.parse()
+
+        let funcDecl = try XCTUnwrap(sut.rootNode.functionDefinitions.first)
+        let parameterList = try XCTUnwrap(funcDecl.parameterList)
+
+        XCTAssertEqual(funcDecl.identifier?.name, "aFunction")
+        XCTAssertEqual(parameterList.parameters.count, 2)
+        XCTAssertEqual(parameterList.parameters[0].type?.type, .struct("unsigned"))
+        XCTAssertEqual(parameterList.parameters[0].identifier?.name, "n")
+        XCTAssertEqual(parameterList.parameters[1].type?.type, .struct("int"))
+        XCTAssertEqual(parameterList.parameters[1].identifier?.name, "args")
+    }
     
     func testCommentRanges() throws {
         let string = """

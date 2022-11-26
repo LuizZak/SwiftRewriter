@@ -13,7 +13,7 @@ from antlr_grammar_gen import (
 )
 
 
-def generate_objc_antlr_grammar():
+def generate_objc_antlr_grammar(antlr_v: str | None = None):
     base_path = grammars_package_path("ObjcGrammar")
     two_step_path = base_path.joinpath("two-step-processing")
 
@@ -25,7 +25,7 @@ def generate_objc_antlr_grammar():
         two_step_path.joinpath("ObjectiveCPreprocessorParser.g4"),
     ]
 
-    generate_antlr_grammar(output_path, grammar_files)
+    generate_antlr_grammar(output_path, grammar_files, antlr_v)
 
     swift_files = list(output_path.glob("*.swift"))
     swift_files = list(

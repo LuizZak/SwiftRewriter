@@ -28,22 +28,31 @@ def transform_source(swift_files: list[Path]):
     call_swift("run", *swift_build_args, "--skip-build", "AntlrGrammars", *swift_files)
 
 
-def generate_antlr_grammar(output_path: Path, files: list[Path]):
+def generate_antlr_grammar(
+    output_path: Path, files: list[Path], antlr_v: str | None = None
+):
     cwd = Path.cwd()
     normalized_paths = map(lambda path: make_relative(cwd, path), files)
     rel_output_path = make_relative(cwd, output_path)
 
     print(f"Generating Antlr grammar files to {rel_output_path}...")
 
-    run(
-        "antlr4",
+    args = [
         "-Dlanguage=Swift",
         "-visitor",
         *normalized_paths,
         "-o",
-        rel_output_path,
+        str(rel_output_path),
         "-Xexact-output-dir",
-    )
+    ]
+
+    if antlr_v is not None:
+        args = [
+            "-v",
+            antlr_v,
+        ] + args
+
+    run("antlr4", *args)
 
     # Remove extraneous .token and .interp files
     print(f"Removing extraneous generated files in {rel_output_path}...")
@@ -59,9 +68,15 @@ def generate_antlr_grammar(output_path: Path, files: list[Path]):
             print(f"Removed {make_relative(cwd, file)}")
 
 
-def validate_antlr_version():
+def validate_antlr_version(antlr_v: str | None = None):
     # Validate setup
-    antlr_call = run_output("antlr4", echo=False)
+    antlr_call: str
+
+    if antlr_v is not None:
+        antlr_call = run_output("antlr4", "-v", antlr_v, echo=False)
+    else:
+        antlr_call = run_output("antlr4", echo=False)
+
     antlr_version_pattern = re.compile(
         r"ANTLR Parser Generator\s+Version\s+((?:\d+\.)+\d+)"
     )

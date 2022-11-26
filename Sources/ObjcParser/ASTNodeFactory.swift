@@ -2,50 +2,54 @@ import Antlr4
 import ObjcParserAntlr
 import GrammarModels
 
-class ASTNodeFactory {
-    typealias Parser = ObjectiveCParser
+public class ASTNodeFactory {
+    public typealias Parser = ObjectiveCParser
     
     let source: Source
     let nonnullContextQuerier: NonnullContextQuerier
     let commentQuerier: CommentQuerier
     
-    init(source: Source,
-         nonnullContextQuerier: NonnullContextQuerier,
-         commentQuerier: CommentQuerier) {
+    public init(
+        source: Source,
+        nonnullContextQuerier: NonnullContextQuerier,
+        commentQuerier: CommentQuerier
+    ) {
         
         self.source = source
         self.nonnullContextQuerier = nonnullContextQuerier
         self.commentQuerier = commentQuerier
     }
     
-    func isInNonnullContext(_ context: ParserRuleContext) -> Bool {
+    public func isInNonnullContext(_ context: ParserRuleContext) -> Bool {
         nonnullContextQuerier.isInNonnullContext(context)
     }
     
-    func comments(preceeding context: ParserRuleContext) -> [ObjcComment] {
+    public func comments(preceeding context: ParserRuleContext) -> [ObjcComment] {
         commentQuerier.popClosestCommentsBefore(node: context)
     }
     
-    func comments(overlapping context: ParserRuleContext) -> [ObjcComment] {
+    public func comments(overlapping context: ParserRuleContext) -> [ObjcComment] {
         commentQuerier.popCommentsOverlapping(node: context)
     }
     
-    func makeIdentifier(from context: Parser.IdentifierContext) -> Identifier {
+    public func makeIdentifier(from context: Parser.IdentifierContext) -> Identifier {
         let nonnull = isInNonnullContext(context)
         let node = Identifier(name: context.getText(), isInNonnullContext: nonnull)
         updateSourceLocation(for: node, with: context)
         return node
     }
     
-    func makeSuperclassName(from context: Parser.SuperclassNameContext) -> SuperclassName {
+    public func makeSuperclassName(from context: Parser.SuperclassNameContext) -> SuperclassName {
         let nonnull = isInNonnullContext(context)
         let node = SuperclassName(name: context.getText(), isInNonnullContext: nonnull)
         updateSourceLocation(for: node, with: context)
         return node
     }
     
-    func makeSuperclassName(from context: Parser.GenericSuperclassNameContext,
-                            identifier: Parser.IdentifierContext) -> SuperclassName {
+    public func makeSuperclassName(
+        from context: Parser.GenericSuperclassNameContext,
+        identifier: Parser.IdentifierContext
+    ) -> SuperclassName {
         
         let nonnull = isInNonnullContext(context)
         let node = SuperclassName(name: identifier.getText(), isInNonnullContext: nonnull)
@@ -53,7 +57,7 @@ class ASTNodeFactory {
         return node
     }
     
-    func makeProtocolReferenceList(from context: Parser.ProtocolListContext) -> ProtocolReferenceList {
+    public func makeProtocolReferenceList(from context: Parser.ProtocolListContext) -> ProtocolReferenceList {
         let protocolListNode =
             ProtocolReferenceList(isInNonnullContext: isInNonnullContext(context))
         
@@ -72,16 +76,20 @@ class ASTNodeFactory {
         return protocolListNode
     }
     
-    func makePointer(from context: ObjectiveCParser.PointerContext) -> PointerNode {
+    public func makePointer(from context: ObjectiveCParser.PointerContext) -> PointerNode {
         let node = PointerNode(isInNonnullContext: isInNonnullContext(context))
         updateSourceLocation(for: node, with: context)
-        if let pointer = context.pointer() {
-            node.addChild(makePointer(from: pointer))
+        
+        for pointerEntry in context.pointerEntry().dropFirst() {
+            if pointerEntry.MUL() != nil {
+                node.addChild(makePointer(from: context))
+            }
         }
+
         return node
     }
     
-    func makeTypeDeclarator(from context: ObjectiveCParser.DeclaratorContext) -> TypeDeclaratorNode {
+    public func makeTypeDeclarator(from context: ObjectiveCParser.DeclaratorContext) -> TypeDeclaratorNode {
         let node = TypeDeclaratorNode(isInNonnullContext: isInNonnullContext(context))
         updateSourceLocation(for: node, with: context)
         if let identifierNode = context.directDeclarator()?.identifier().map(makeIdentifier) {
@@ -93,7 +101,7 @@ class ASTNodeFactory {
         return node
     }
     
-    func makeNullabilitySpecifier(from rule: Parser.NullabilitySpecifierContext) -> NullabilitySpecifier {
+    public func makeNullabilitySpecifier(from rule: Parser.NullabilitySpecifierContext) -> NullabilitySpecifier {
         let spec = NullabilitySpecifier(name: rule.getText(),
                                         isInNonnullContext: isInNonnullContext(rule))
         updateSourceLocation(for: spec, with: rule)
@@ -101,7 +109,7 @@ class ASTNodeFactory {
         return spec
     }
     
-    func makeMethodBody(from rule: Parser.MethodDefinitionContext) -> MethodBody {
+    public func makeMethodBody(from rule: Parser.MethodDefinitionContext) -> MethodBody {
         let methodBody = MethodBody(isInNonnullContext: isInNonnullContext(rule))
         updateSourceLocation(for: methodBody, with: rule)
         methodBody.statements = rule.compoundStatement()
@@ -110,7 +118,7 @@ class ASTNodeFactory {
         return methodBody
     }
     
-    func makeMethodBody(from rule: Parser.CompoundStatementContext) -> MethodBody {
+    public func makeMethodBody(from rule: Parser.CompoundStatementContext) -> MethodBody {
         
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
         
@@ -122,7 +130,7 @@ class ASTNodeFactory {
         return body
     }
     
-    func makeEnumCase(from rule: Parser.EnumeratorContext, identifier: Parser.IdentifierContext) -> ObjcEnumCase {
+    public func makeEnumCase(from rule: Parser.EnumeratorContext, identifier: Parser.IdentifierContext) -> ObjcEnumCase {
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
         
         let enumCase = ObjcEnumCase(isInNonnullContext: nonnull)
@@ -142,7 +150,7 @@ class ASTNodeFactory {
         return enumCase
     }
     
-    func updateSourceLocation(for node: ASTNode, with rule: ParserRuleContext) {
+    public func updateSourceLocation(for node: ASTNode, with rule: ParserRuleContext) {
         (node.location, node.length) = sourceLocationAndLength(for: rule)
     }
     
@@ -171,5 +179,4 @@ class ASTNodeFactory {
         
         return (location, length)
     }
-    
 }

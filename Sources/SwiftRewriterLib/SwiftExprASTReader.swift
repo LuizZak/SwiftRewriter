@@ -45,14 +45,14 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             }
         }
         // Assignment expression
-        if let assignmentExpression = ctx.assignmentExpression {
-            guard let unaryExpr = ctx.unaryExpression()?.accept(self) else {
+        if let assignmentExpression = ctx.assignmentExpression() {
+            guard let unaryExpr = assignmentExpression.unaryExpression()?.accept(self) else {
                 return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             guard let assignExpr = assignmentExpression.accept(self) else {
                 return .unknown(UnknownASTContext(context: ctx.getText()))
             }
-            guard let assignOp = ctx.assignmentOperator() else {
+            guard let assignOp = assignmentExpression.assignmentOperator() else {
                 return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             guard let op = swiftOperator(from: assignOp.getText()) else {
@@ -352,6 +352,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitBlockExpression(_ ctx: ObjectiveCParser.BlockExpressionContext) -> Expression? {
+        /*
         let returnType = ctx.typeSpecifier().flatMap { typeSpecifier -> ObjcType? in
             return typeParser.parseObjcType(from: typeSpecifier)
         } ?? .void
@@ -384,6 +385,9 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         let swiftReturnType = typeMapper.swiftType(forObjcType: returnType)
         
         return .block(parameters: parameters, return: swiftReturnType, body: body)
+        */
+        
+        return nil
     }
     
     public override func visitConstant(_ ctx: ObjectiveCParser.ConstantContext) -> Expression? {

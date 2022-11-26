@@ -8,6 +8,7 @@ class VarDeclarationTypeExtractorTests: XCTestCase {
     
     var tokens: CommonTokenStream!
     
+    /*
     func testReadVarDeclaration() {
         assertTypeVisit(objc: "NSString* abc;",
                         { try $0.varDeclaration() },
@@ -76,4 +77,5 @@ class VarDeclarationTypeExtractorTests: XCTestCase {
         
         return (tokens, parser)
     }
+    */
 }
