@@ -890,16 +890,6 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#declarationSpecifiers2}.
-	- Parameters:
-	  - ctx: the parse tree
-	- returns: the visitor result
-	 */
-	open func visitDeclarationSpecifiers2(_ ctx: ObjectiveCParser.DeclarationSpecifiers2Context) -> T {
-	 	fatalError(#function + " must be overridden")
-	}
-
-	/**
 	 * Visit a parse tree produced by {@link ObjectiveCParser#declaration}.
 	- Parameters:
 	  - ctx: the parse tree
@@ -1090,12 +1080,82 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#structOrUnionSpecifier_}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitStructOrUnionSpecifier_(_ ctx: ObjectiveCParser.StructOrUnionSpecifier_Context) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
 	 * Visit a parse tree produced by {@link ObjectiveCParser#structOrUnionSpecifier}.
 	- Parameters:
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
 	open func visitStructOrUnionSpecifier(_ ctx: ObjectiveCParser.StructOrUnionSpecifierContext) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#structOrUnion}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitStructOrUnion(_ ctx: ObjectiveCParser.StructOrUnionContext) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#structDeclarationList}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitStructDeclarationList(_ ctx: ObjectiveCParser.StructDeclarationListContext) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#structDeclaration}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitStructDeclaration(_ ctx: ObjectiveCParser.StructDeclarationContext) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#specifierQualifierList}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitSpecifierQualifierList(_ ctx: ObjectiveCParser.SpecifierQualifierListContext) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#structDeclaratorList}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitStructDeclaratorList(_ ctx: ObjectiveCParser.StructDeclaratorListContext) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#structDeclarator}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitStructDeclarator(_ ctx: ObjectiveCParser.StructDeclaratorContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -1220,6 +1280,16 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#typeofTypeSpecifier}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitTypeofTypeSpecifier(_ ctx: ObjectiveCParser.TypeofTypeSpecifierContext) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
 	 * Visit a parse tree produced by {@link ObjectiveCParser#typedefName}.
 	- Parameters:
 	  - ctx: the parse tree
@@ -1266,16 +1336,6 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	- returns: the visitor result
 	 */
 	open func visitScalarTypeSpecifier(_ ctx: ObjectiveCParser.ScalarTypeSpecifierContext) -> T {
-	 	fatalError(#function + " must be overridden")
-	}
-
-	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#typeofExpression}.
-	- Parameters:
-	  - ctx: the parse tree
-	- returns: the visitor result
-	 */
-	open func visitTypeofExpression(_ ctx: ObjectiveCParser.TypeofExpressionContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 

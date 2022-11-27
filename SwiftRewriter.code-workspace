@@ -155,6 +155,7 @@
 		"ShortcutMenuBar.userButton03Command": "workbench.action.tasks.runTask|Test (release)",
 		"cSpell.words": [
 			"Antlr",
+			"Initializable",
 			"instancetype",
 			"kindof",
 			"nonnull",

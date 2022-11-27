@@ -11,11 +11,12 @@ from antlr_grammar_gen import (
 from objc_grammar_gen import generate_objc_antlr_grammar
 
 
-def do_parser_generation(antlr_version: str | None = None):
+def do_parser_generation(antlr_version: str | None = None, skip_build: bool = False):
     validate_antlr_version(antlr_version)
 
-    print("Prebuilding Swift project...")
-    build_swift_gen_transformer()
+    if not skip_build:
+        print("Prebuilding Swift project...")
+        build_swift_gen_transformer()
 
     generate_objc_antlr_grammar(antlr_version)
 
@@ -32,6 +33,13 @@ def make_argparser() -> argparse.ArgumentParser:
         dest="antlr_version",
         help="Optional ANTLR4 tag to pass during 'antlr4' invocations. If not specified, defaults to latest version from Maven, depending on how antlr4 was installed.",
     )
+    parser.add_argument(
+        "--skip-build",
+        default=False,
+        action="store_true",
+        dest="skip_build",
+        help="Whether to skip building the Swift AntlrGrammars package prior to generating the parser. May result in failures if the package is not already built.",
+    )
 
     return parser
 
@@ -40,7 +48,7 @@ def main() -> int:
     argparser = make_argparser()
     args = argparser.parse_args()
 
-    do_parser_generation(args.antlr_version)
+    do_parser_generation(args.antlr_version, args.skip_build)
 
     return 0
 

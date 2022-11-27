@@ -222,7 +222,7 @@ public class VarDeclarationTypeStringExtractor: ObjectiveCParserBaseVisitor<Stri
     
     public override func visitTypeSpecifier(_ ctx: Parser.TypeSpecifierContext) -> String? {
         // TODO: Support __typeof__ expressions
-        if ctx.TYPEOF__() != nil {
+        if ctx.typeofTypeSpecifier() != nil {
             return nil
         }
         // TODO: Support enumSpecifier

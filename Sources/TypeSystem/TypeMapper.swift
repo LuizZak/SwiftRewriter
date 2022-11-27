@@ -352,6 +352,9 @@ public class DefaultTypeMapper: TypeMapper {
             }
             
             return swiftType(type: type, withNullability: context.nullability())
+        
+        case .anonymousEnum, .anonymousStruct:
+            return swiftType(type: .any, withNullability: context.nullability())
             
         case .struct(let str):
             return swiftType(forObjcStructType: str, context: context)

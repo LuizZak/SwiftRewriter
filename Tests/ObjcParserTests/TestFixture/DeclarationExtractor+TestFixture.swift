@@ -73,8 +73,31 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         return nil
     }
 
-    func assertDefinedCount(_ count: Int, file: StaticString = #file, line: UInt = #line) {
-        XCTAssertEqual(object.count, count, file: file, line: line)
+    @discardableResult
+    func assertNoDeclarations(file: StaticString = #file, line: UInt = #line) -> Self? {
+        guard object.isEmpty else {
+            XCTFail(
+                "Expected no declarations, but found \(object.count) declaration(s)",
+                file: file,
+                line: line
+            )
+            dumpObject()
+
+            return nil
+        }
+
+        return self
+    }
+
+    @discardableResult
+    func assertDefinedCount(_ count: Int, file: StaticString = #file, line: UInt = #line) -> Self? {
+        guard object.count == count else {
+            XCTAssertEqual(object.count, count, file: file, line: line)
+            dumpObject()
+            return nil
+        }
+
+        return self
     }
 
     @discardableResult
@@ -252,6 +275,56 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
 
     @discardableResult
     func asserter(
+        forStruct name: String, 
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<DeclarationExtractor.StructOrUnionSpecifier>) -> Void = { _ in }
+    ) -> DeclarationExtractor.StructOrUnionSpecifier? {
+
+        let decl = _assertOneOrMore(
+            message: "Expected to define at least one struct with identifier '\(name)'",
+            file: file,
+            line: line
+        ) { decl in
+
+            return decl.declaration.identifierString == name
+                && decl.specifiers.typeSpecifiers().contains(where: { $0.isStructOrUnionSpecifier })
+        }
+        
+        if let decl = decl?.specifiers.typeSpecifiers().first(where: { $0.isStructOrUnionSpecifier })?.asStructOrUnionSpecifier {
+            closure(.init(object: decl))
+        }
+
+        return nil
+    }
+
+    @discardableResult
+    func asserter(
+        forEnum name: String, 
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<DeclarationExtractor.EnumSpecifier>) -> Void = { _ in }
+    ) -> DeclarationExtractor.EnumSpecifier? {
+
+        let decl = _assertOneOrMore(
+            message: "Expected to define at least one enum with identifier '\(name)'",
+            file: file,
+            line: line
+        ) { decl in
+
+            return decl.declaration.identifierString == name
+                && decl.specifiers.typeSpecifiers().contains(where: { $0.isEnumSpecifier })
+        }
+        
+        if let decl = decl?.specifiers.typeSpecifiers().first(where: { $0.isEnumSpecifier })?.asEnumSpecifier {
+            closure(.init(object: decl))
+        }
+
+        return nil
+    }
+
+    @discardableResult
+    func asserter(
         forDecl name: String, 
         file: StaticString = #file,
         line: UInt = #line,
@@ -399,6 +472,38 @@ extension Asserter where Object: DeclarationConvertible {
             dumpObject()
             return nil
         }
+    }
+
+    @discardableResult
+    func assertIsStructOrUnion(file: StaticString = #file, line: UInt = #line) -> Self? {
+        let typeSpecifiers = object.decl.specifiers.typeSpecifiers()
+        guard typeSpecifiers.contains(where: { $0.isStructOrUnionSpecifier }) else {
+            XCTFail(
+                "Expected to define at least one struct/union",
+                file: file,
+                line: line
+            )
+            dumpObject()
+            return nil
+        }
+
+        return self
+    }
+
+    @discardableResult
+    func assertIsEnum(file: StaticString = #file, line: UInt = #line) -> Self? {
+        let typeSpecifiers = object.decl.specifiers.typeSpecifiers()
+        guard typeSpecifiers.contains(where: { $0.isEnumSpecifier }) else {
+            XCTFail(
+                "Expected to define at least one enum",
+                file: file,
+                line: line
+            )
+            dumpObject()
+            return nil
+        }
+
+        return self
     }
 
     @discardableResult
@@ -586,6 +691,98 @@ extension Asserter where Object == BlockDeclWrapper {
     ) -> Self? {
 
         assert(specifierStrings: specifierStrings, file: file, line: line)
+    }
+}
+
+extension Asserter where Object == DeclarationExtractor.StructOrUnionSpecifier {
+    @discardableResult
+    func assertFieldCount(
+        _ count: Int,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        guard object.fields?.count == count else {
+            XCTAssertEqual(
+                object.fields?.count,
+                count,
+                "Unexpected field count for struct definition '\(object.identifier?.getText() ?? "<nil>")'",
+                line: line
+            )
+
+            dumpObject()
+
+            return nil
+        }
+
+        return self
+    }
+
+    @discardableResult
+    func assertField(
+        name: String,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Asserter<DeclarationExtractor.StructFieldDeclaration>? {
+
+        guard let field = object.fields?.first(where: { $0.declaration.declaration.identifierString == name }) else {
+            XCTFail(
+                "Expected to find field named \(name) in struct definition '\(object.identifier?.getText() ?? "<nil>")'",
+                line: line
+            )
+
+            dumpObject()
+
+            return nil
+        }
+
+        return .init(object: field)
+    }
+}
+
+extension Asserter where Object == DeclarationExtractor.EnumSpecifier {
+    @discardableResult
+    func assertEnumeratorCount(
+        _ count: Int,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        guard object.enumerators?.count == count else {
+            XCTAssertEqual(
+                object.enumerators?.count,
+                count,
+                "Unexpected enumerator count for enum definition '\(object.identifier?.getText() ?? "<nil>")'",
+                line: line
+            )
+
+            dumpObject()
+
+            return nil
+        }
+
+        return self
+    }
+
+    @discardableResult
+    func assertEnumerator(
+        name: String,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Asserter<DeclarationExtractor.EnumeratorDeclaration>? {
+
+        guard let enumerator = object.enumerators?.first(where: { $0.identifier.getText() == name }) else {
+            XCTFail(
+                "Expected to find enumerator named \(name) in enum definition '\(object.identifier?.getText() ?? "<nil>")'",
+                line: line
+            )
+
+            dumpObject()
+
+            return nil
+        }
+
+        return .init(object: enumerator)
     }
 }
 

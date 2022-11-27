@@ -52,7 +52,9 @@ def generate_antlr_grammar(
             antlr_v,
         ] + args
 
-    run("antlr4", *args)
+    result = run_output("antlr4", *args)
+    if result.find("error(") > -1:
+        raise Exception(f"ANTLR4 failed to execute! Check output bellow:\n\n{result}.")
 
     # Remove extraneous .token and .interp files
     print(f"Removing extraneous generated files in {rel_output_path}...")

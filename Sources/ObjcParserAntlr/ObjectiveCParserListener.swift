@@ -1063,18 +1063,6 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitDeclarationSpecifiers(_ ctx: ObjectiveCParser.DeclarationSpecifiersContext)
 	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#declarationSpecifiers2}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func enterDeclarationSpecifiers2(_ ctx: ObjectiveCParser.DeclarationSpecifiers2Context)
-	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#declarationSpecifiers2}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func exitDeclarationSpecifiers2(_ ctx: ObjectiveCParser.DeclarationSpecifiers2Context)
-	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#declaration}.
 	 - Parameters:
 	   - ctx: the parse tree
@@ -1303,6 +1291,18 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitAtomicTypeSpecifier(_ ctx: ObjectiveCParser.AtomicTypeSpecifierContext)
 	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#structOrUnionSpecifier_}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterStructOrUnionSpecifier_(_ ctx: ObjectiveCParser.StructOrUnionSpecifier_Context)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#structOrUnionSpecifier_}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitStructOrUnionSpecifier_(_ ctx: ObjectiveCParser.StructOrUnionSpecifier_Context)
+	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#structOrUnionSpecifier}.
 	 - Parameters:
 	   - ctx: the parse tree
@@ -1314,6 +1314,78 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	   - ctx: the parse tree
 	 */
 	func exitStructOrUnionSpecifier(_ ctx: ObjectiveCParser.StructOrUnionSpecifierContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#structOrUnion}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterStructOrUnion(_ ctx: ObjectiveCParser.StructOrUnionContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#structOrUnion}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitStructOrUnion(_ ctx: ObjectiveCParser.StructOrUnionContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#structDeclarationList}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterStructDeclarationList(_ ctx: ObjectiveCParser.StructDeclarationListContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#structDeclarationList}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitStructDeclarationList(_ ctx: ObjectiveCParser.StructDeclarationListContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#structDeclaration}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterStructDeclaration(_ ctx: ObjectiveCParser.StructDeclarationContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#structDeclaration}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitStructDeclaration(_ ctx: ObjectiveCParser.StructDeclarationContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#specifierQualifierList}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterSpecifierQualifierList(_ ctx: ObjectiveCParser.SpecifierQualifierListContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#specifierQualifierList}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitSpecifierQualifierList(_ ctx: ObjectiveCParser.SpecifierQualifierListContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#structDeclaratorList}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterStructDeclaratorList(_ ctx: ObjectiveCParser.StructDeclaratorListContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#structDeclaratorList}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitStructDeclaratorList(_ ctx: ObjectiveCParser.StructDeclaratorListContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#structDeclarator}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterStructDeclarator(_ ctx: ObjectiveCParser.StructDeclaratorContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#structDeclarator}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitStructDeclarator(_ ctx: ObjectiveCParser.StructDeclaratorContext)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#fieldDeclaration}.
 	 - Parameters:
@@ -1459,6 +1531,18 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitTypeSpecifier(_ ctx: ObjectiveCParser.TypeSpecifierContext)
 	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#typeofTypeSpecifier}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterTypeofTypeSpecifier(_ ctx: ObjectiveCParser.TypeofTypeSpecifierContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#typeofTypeSpecifier}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitTypeofTypeSpecifier(_ ctx: ObjectiveCParser.TypeofTypeSpecifierContext)
+	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#typedefName}.
 	 - Parameters:
 	   - ctx: the parse tree
@@ -1518,18 +1602,6 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	   - ctx: the parse tree
 	 */
 	func exitScalarTypeSpecifier(_ ctx: ObjectiveCParser.ScalarTypeSpecifierContext)
-	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#typeofExpression}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func enterTypeofExpression(_ ctx: ObjectiveCParser.TypeofExpressionContext)
-	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#typeofExpression}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func exitTypeofExpression(_ ctx: ObjectiveCParser.TypeofExpressionContext)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#fieldDeclaratorList}.
 	 - Parameters:

@@ -178,7 +178,7 @@ class DeclarationExtractorTests: XCTestCase {
         }
     }
 
-    func testTranslate_singleDec_typedef_functionPointer() {
+    func testExtract_singleDec_typedef_functionPointer() {
         let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
 
         tester.assert("typedef int (*f)(void *, void *);") { asserter in
@@ -186,6 +186,72 @@ class DeclarationExtractorTests: XCTestCase {
                 .asserter(forDecl: "f") { fDecl in
                     fDecl.assertIsFunctionPointer(name: "f")
                 }
+        }
+    }
+
+    func testExtract_singleDecl_struct_named() {
+        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+
+        tester.assert("struct AStruct { int field; };") { asserter in
+            asserter
+                .asserter(forDecl: "AStruct") { aStruct in
+                    aStruct.assertIsStructOrUnion()
+                }
+        }
+    }
+
+    func testExtract_singleDecl_struct_typedef() {
+        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+
+        tester.assert("typedef struct { int field; } AStruct;") { asserter in
+            asserter
+                .asserter(forStruct: "AStruct") { aStruct in
+                    aStruct
+                        .assertField(name: "field")
+                }
+        }
+    }
+
+    func testExtract_singleDecl_enum_named() {
+        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+
+        tester.assert("enum AnEnum { CASE0 = 1, CASE1 = 2 };") { asserter in
+            asserter
+                .asserter(forDecl: "AnEnum") { aStruct in
+                    aStruct.assertIsEnum()
+                }
+        }
+    }
+
+    func testExtract_singleDecl_enum_typedef() {
+        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+
+        tester.assert("typedef enum { CASE0 = 1, CASE1 = 2, CASE2 } AnEnum;") { asserter in
+            asserter
+                .asserter(forEnum: "AnEnum") { anEnum in
+                    anEnum.assertEnumeratorCount(3)
+                    anEnum.assertEnumerator(name: "CASE0")
+                    anEnum.assertEnumerator(name: "CASE1")
+                    anEnum.assertEnumerator(name: "CASE2")
+                }
+        }
+    }
+
+    func testExtract_singleDecl_struct_anonymous_doesNotExtract() {
+        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+
+        tester.assert("struct { int field; };") { asserter in
+            asserter
+                .assertNoDeclarations()
+        }
+    }
+
+    func testExtract_singleDecl_enum_anonymous_doesNotExtract() {
+        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+
+        tester.assert("enum { CASE0 = 0 };") { asserter in
+            asserter
+                .assertNoDeclarations()
         }
     }
 }

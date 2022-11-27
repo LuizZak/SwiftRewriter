@@ -15,6 +15,12 @@ public enum ObjcType: Equatable, Codable, CustomStringConvertible {
     
     /// A special `void` type that indicates an empty value.
     case void
+
+    /// An anonymous struct type.
+    case anonymousStruct
+
+    /// An anonymous enum type.
+    case anonymousEnum
     
     /// A composed pointer, like `NSObject*` or `int*`.
     /// May be an objc class or a struct-type pointer.
@@ -54,6 +60,12 @@ public enum ObjcType: Equatable, Codable, CustomStringConvertible {
             
         case .struct(let s):
             return s
+        
+        case .anonymousStruct:
+            return "struct"
+        
+        case .anonymousEnum:
+            return "enum"
             
         case let .generic(cl, parameters):
             let typeNames = parameters.map(\.description).joined(separator: ", ")
@@ -104,7 +116,7 @@ public enum ObjcType: Equatable, Codable, CustomStringConvertible {
         case .qualified(let type, _):
             return type.isPointer
             
-        default:
+        case .anonymousEnum, .anonymousStruct, .void, .struct, .generic:
             return false
         }
     }
@@ -123,6 +135,12 @@ public enum ObjcType: Equatable, Codable, CustomStringConvertible {
             
         case .struct:
             self = .struct(try container.decode(String.self, forKey: .payload0))
+            
+        case .anonymousStruct:
+            self = .anonymousStruct
+
+        case .anonymousEnum:
+            self = .anonymousEnum
             
         case .void:
             self = .void
@@ -184,6 +202,12 @@ public enum ObjcType: Equatable, Codable, CustomStringConvertible {
         case .struct(let name):
             try container.encode(Discriminator.struct, forKey: .discriminator)
             try container.encode(name, forKey: .payload0)
+        
+        case .anonymousStruct:
+            try container.encode(Discriminator.anonymousStruct, forKey: .discriminator)
+        
+        case .anonymousEnum:
+            try container.encode(Discriminator.anonymousEnum, forKey: .discriminator)
             
         case .void:
             try container.encode(Discriminator.void, forKey: .discriminator)
@@ -237,6 +261,8 @@ public enum ObjcType: Equatable, Codable, CustomStringConvertible {
         case id
         case instancetype
         case `struct`
+        case anonymousStruct
+        case anonymousEnum
         case void
         case pointer
         case generic
@@ -252,9 +278,14 @@ extension ObjcType: ExpressibleByStringLiteral {
     /// Initializes a `ObjcType.struct()` case with the given string literal
     /// as its type.
     public init(stringLiteral value: String) {
-        if value == "void" {
+        switch value {
+        case "void":
             self = .void
-        } else {
+        case "struct":
+            self = .anonymousStruct
+        case "enum":
+            self = .anonymousEnum
+        default:
             self = .struct(value)
         }
     }

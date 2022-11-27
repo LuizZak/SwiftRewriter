@@ -439,6 +439,13 @@ class ObjcParserTests: XCTestCase {
             """)
     }
     
+    func testParseTypeofSpecifier() {
+        _=parserTest("""
+            __typeof__(0) a;
+            __typeof__(0 + 1) *b;
+            """)
+    }
+    
     func testParseVariableDeclarationOfPointerToFunction() {
         _=parserTest("""
             void test() {
@@ -512,9 +519,9 @@ class ObjcParserTests: XCTestCase {
 
         XCTAssertEqual(funcDecl.identifier?.name, "aFunction")
         XCTAssertEqual(parameterList.parameters.count, 2)
-        XCTAssertEqual(parameterList.parameters[0].type?.type, .struct("unsigned"))
+        XCTAssertEqual(parameterList.parameters[0].type?.type, .struct("unsigned int"))
         XCTAssertEqual(parameterList.parameters[0].identifier?.name, "n")
-        XCTAssertEqual(parameterList.parameters[1].type?.type, .struct("int"))
+        XCTAssertEqual(parameterList.parameters[1].type?.type, .pointer("signed int"))
         XCTAssertEqual(parameterList.parameters[1].identifier?.name, "args")
     }
     

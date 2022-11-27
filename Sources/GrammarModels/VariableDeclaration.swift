@@ -1,3 +1,5 @@
+import ObjcParserAntlr
+
 /// A global variable declaration.
 public class VariableDeclaration: ASTNode, InitializableNode {
     public var type: TypeNameNode? {
@@ -38,4 +40,9 @@ public class ConstantExpressionNode: ASTNode, InitializableNode {
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)
     }
+}
+
+/// A node containing an unprocessed expression parser rule context.
+public final class ExpressionNode: ASTNode {
+    public var expression: ObjectiveCParser.ExpressionContext?
 }

@@ -149,6 +149,39 @@ public class ASTNodeFactory {
         
         return enumCase
     }
+
+    public func makeInitialExpression(from rule: Parser.ExpressionContext) -> InitialExpression {
+        let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
+        
+        let node = InitialExpression(isInNonnullContext: nonnull)
+        node.addChild(makeConstantExpression(from: rule))
+
+        updateSourceLocation(for: node, with: rule)
+
+        return node
+    }
+
+    public func makeConstantExpression(from rule: Parser.ExpressionContext) -> ConstantExpressionNode {
+        let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
+
+        let node = ConstantExpressionNode(isInNonnullContext: nonnull)
+        node.addChild(makeExpression(from: rule))
+
+        updateSourceLocation(for: node, with: rule)
+
+        return node
+    }
+
+    public func makeExpression(from rule: Parser.ExpressionContext) -> ExpressionNode {
+        let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
+
+        let node = ExpressionNode(isInNonnullContext: nonnull)
+        node.expression = rule
+
+        updateSourceLocation(for: node, with: rule)
+
+        return node
+    }
     
     public func updateSourceLocation(for node: ASTNode, with rule: ParserRuleContext) {
         (node.location, node.length) = sourceLocationAndLength(for: rule)

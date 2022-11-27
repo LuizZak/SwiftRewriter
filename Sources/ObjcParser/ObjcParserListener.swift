@@ -741,16 +741,13 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
             nodeFactory: nodeFactory
         )
         
-        /*
         for topLevelDeclaration in topLevelDeclarations {
             guard let declaration = topLevelDeclaration.declaration() else { continue }
-            guard let varDeclaration = declaration.varDeclaration() else { continue }
             
-            if let vars = varDeclaration.accept(visitor) {
+            if let vars = declaration.accept(visitor) {
                 declarations.append(contentsOf: vars)
             }
         }
-        */
     }
     
     /*
@@ -834,6 +831,88 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
         override func visitDeclaration(_ ctx: ObjectiveCParser.DeclarationContext) -> [ASTNode]? {
             var declarations: [ASTNode] = []
 
+            /*
+            let extractor = DeclarationExtractor()
+            let translator = DeclarationTranslator()
+
+            let decls = extractor.extract(from: ctx)
+            let nodeDecls = translator.translate(decls, context: .init(nodeFactory: nodeFactory))
+
+            // Collect variables
+            for nodeDecl in nodeDecls {
+                let varDecl = VariableDeclaration(isInNonnullContext: false)
+                varDecl.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
+
+                switch nodeDecl {
+                case .variable(_, let identifier, let type, _):
+                    varDecl.isInNonnullContext = identifier.isInNonnullContext
+                    varDecl.addChild(identifier)
+                    varDecl.addChild(type)
+                    
+                case .block(_, let identifier, _, _, _),
+                    .functionPointer(_, let identifier, _, _, _):
+                    
+                    varDecl.isInNonnullContext = identifier.isInNonnullContext
+                    varDecl.addChild(identifier)
+
+                    guard let type = nodeDecl.objcType else {
+                        continue
+                    }
+                    let typeNode = TypeNameNode(type: type, isInNonnullContext: identifier.isInNonnullContext)
+                    varDecl.addChild(typeNode)
+
+                default:
+                    continue
+                }
+
+                if let initializer = nodeDecl.initializer {
+                    let expression = ExpressionNode(
+                        isInNonnullContext: varDecl.isInNonnullContext
+                    )
+
+                    expression.expression = initializer.expression()
+                    if let exp = initializer.expression() {
+                        nodeFactory.updateSourceLocation(for: expression, with: exp)
+                    }
+
+                    let constantExpression = ConstantExpressionNode(
+                        isInNonnullContext: varDecl.isInNonnullContext
+                    )
+                    constantExpression.addChild(expression)
+                    constantExpression.updateSourceRange()
+
+                    let initialExpression = InitialExpression(
+                        isInNonnullContext: varDecl.isInNonnullContext
+                    )
+                    initialExpression.addChild(constantExpression)
+                    initialExpression.updateSourceRange()
+                    
+                    varDecl.addChild(initialExpression)
+                }
+                
+                varDecl.updateSourceRange()
+                
+                declarations.append(varDecl)
+            }
+
+            // Collect type aliases
+            for nodeDecl in nodeDecls {
+                switch nodeDecl {
+                case .typedef(_, let typeNode, let alias):
+                    let typeDef = TypedefNode(isInNonnullContext: typeNode.isInNonnullContext)
+
+                    typeDef.addChild(typeNode)
+                    typeDef.addChild(alias)
+
+                    typeDef.updateSourceRange()
+
+                    declarations.append(typeDef)
+
+                default:
+                    break
+                }
+            }
+
             // Free struct/union declarators
             for specifier in TypeParsing.declarationSpecifiers(from: ctx) {
                 if let vars = specifier.accept(self) {
@@ -885,6 +964,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                 
                 declarations.append(varDecl)
             }
+            */
             
             return declarations
         }
@@ -893,9 +973,11 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
             
             if ctx.structOrUnionSpecifier() != nil {
                 let structListener =
-                    StructListener(typeParser: typeParser,
-                                   nonnullContextQuerier: nonnullContextQuerier,
-                                   nodeFactory: nodeFactory)
+                    StructListener(
+                        typeParser: typeParser,
+                        nonnullContextQuerier: nonnullContextQuerier,
+                        nodeFactory: nodeFactory
+                    )
                 
                 let walker = ParseTreeWalker()
                 try? walker.walk(structListener, ctx)
@@ -924,6 +1006,7 @@ private class StructListener: ObjectiveCParserBaseListener {
     }
     
     override func enterStructOrUnionSpecifier(_ ctx: ObjectiveCParser.StructOrUnionSpecifierContext) {
+        /*
         guard ctx.STRUCT() != nil else {
             return
         }
@@ -971,6 +1054,7 @@ private class StructListener: ObjectiveCParserBaseListener {
         }
         
         structs.append(str)
+        */
     }
 }
 

@@ -10,6 +10,12 @@ public class DeclarationExtractor {
         _context = .empty
     }
 
+    /// Creates an independent declaration extractor that can be used to collect
+    /// nested declarations without affecting the current context state.
+    private func makeSubExtractor() -> DeclarationExtractor {
+        DeclarationExtractor()
+    }
+
     /// Extracts one or more declarations from a given declaration parser context.
     func extract(from ctx: ObjectiveCParser.DeclarationContext) -> [Declaration] {
         guard let initDeclaratorList = ctx.initDeclaratorList() else {
@@ -85,6 +91,20 @@ public class DeclarationExtractor {
         return typeName(from: ctx)
     }
 
+    /// Extracts one or more struct field declarations from a given struct
+    /// declaration context.
+    func extract(
+        fromStructDeclaration structDecl: ObjectiveCParser.StructDeclarationContext
+    ) -> [StructFieldDeclaration]? {
+
+        clearContext()
+
+        collectSpecifiers(from: structDecl)
+
+        return declarations(from: structDecl, context: _context)
+    }
+
+    /// Returns `true` if a direct declarator represents a named variable type.
     func isVariableDeclaration(_ ctx: ObjectiveCParser.DirectDeclaratorContext) -> Bool {
         declaration(
             from: ctx,
@@ -100,16 +120,25 @@ public class DeclarationExtractor {
         guard let declarationKind = declarationKind(from: nil) else {
             return nil
         }
+        guard let ctx = context.specifiersContext else {
+            return nil
+        }
 
-        // Drop last type specifier (the name of the declaration itself)
-        let specifiers = context.specifiers.dropLast()
+        // Drop last type specifier (the name of the declaration itself), in case
+        // it is a .typeName case
+        let specifiers: [DeclSpecifier]
+        if context.specifiers.last?.typeSpecifier?.isTypeName == true {
+            specifiers = context.specifiers.dropLast()
+        } else {
+            specifiers = context.specifiers
+        }
 
         return Declaration(
             typePrefix: context.typePrefixes.first,
             specifiers: Array(specifiers),
             pointer: nil,
             declaration: declarationKind,
-            declarationNode: nil,
+            declarationNode: .declSpecifiers(ctx),
             initializer: nil
         )
     }
@@ -170,9 +199,87 @@ public class DeclarationExtractor {
             specifiers: context.specifiers,
             pointer: pointer,
             declaration: declarationKind,
-            declarationNode: ctx,
+            declarationNode: .directDeclarator(ctx),
             initializer: nil
         )
+    }
+
+    private func declarations(
+        from ctx: ObjectiveCParser.StructDeclarationContext?,
+        context: Context
+    ) -> [StructFieldDeclaration]? {
+
+        guard let ctx = ctx else {
+            return nil
+        }
+
+        guard let declList = ctx.structDeclaratorList() else {
+            // Fallback to `specifierQualifierList SEMI` parser rule case
+            guard let decl = declaration(context: context) else {
+                return nil
+            }
+
+            return [
+                StructFieldDeclaration(
+                    declaration: decl,
+                    declarator: nil,
+                    constantExpression: nil
+                )
+            ]
+        }
+
+        var result: [StructFieldDeclaration] = []
+
+        for decl in declList.structDeclarator() {
+            if let decl = declaration(from: decl, context: context) {
+                result.append(decl)
+            }
+        }
+
+        return result
+    }
+
+    private func declaration(
+        from ctx: ObjectiveCParser.StructDeclaratorContext?,
+        context: Context
+    ) -> StructFieldDeclaration? {
+
+        guard let ctx = ctx else {
+            return nil
+        }
+
+        let declarator = ctx.declarator()
+        let constantExpression = ctx.constantExpression()
+
+        var decl: Declaration?
+
+        switch (declarator, constantExpression) {
+        case (let declarator?, nil):
+            // `declarator` case
+            decl = declaration(from: declarator, context: context)
+        
+        case (let declarator?, _?):
+            // `declarator COLON constantExpression` case
+            decl = declaration(from: declarator, context: context)
+
+        case (nil, _?):
+            // `<none> COLON constantExpression` case
+            decl = declaration(context: context)
+            
+        case (nil, nil):
+            // Invalid case
+            return nil
+        }
+
+        if let decl = decl {
+            return StructFieldDeclaration(
+                declaration: decl,
+                declarator: declarator,
+                constantExpression: constantExpression
+            )
+        }
+
+        return nil
     }
 
     private func declaration(
@@ -189,7 +296,7 @@ public class DeclarationExtractor {
             return nil
         }
 
-        let extractor = DeclarationExtractor()
+        let extractor = makeSubExtractor()
 
         return extractor.extract(
             fromSpecifiers: declarationSpecifiers,
@@ -260,14 +367,24 @@ public class DeclarationExtractor {
         collectSpecifiers(from: ctx?.declarationSpecifiers())
     }
     private func collectSpecifiers(from ctx: ObjectiveCParser.DeclarationSpecifiersContext?) {
-        ctx?.declarationSpecifier().forEach(collectSpecifier(from:))
-    }
-    private func collectSpecifier(from ctx: ObjectiveCParser.DeclarationSpecifierContext?) {
-        guard let declSpecifier = declSpecifier(from: ctx) else {
+        guard let ctx = ctx else {
+            return
+        }
+        guard let declSpecifiers = declSpecifiers(from: ctx) else {
             return
         }
 
-        addDeclSpecifier(declSpecifier)
+        setDeclSpecifiers(declSpecifiers, rule: ctx)
+    }
+    private func collectSpecifiers(from ctx: ObjectiveCParser.StructDeclarationContext?) {
+        guard let ctx = ctx else {
+            return
+        }
+        guard let declSpecifiers = declSpecifiers(from: ctx.specifierQualifierList()) else {
+            return
+        }
+
+        setDeclSpecifiers(declSpecifiers, rule: ctx)
     }
 
     private func collectTypePrefix(from ctx: ObjectiveCParser.DeclarationContext?) {
@@ -277,11 +394,14 @@ public class DeclarationExtractor {
         collectTypePrefix(from: ctx?.typePrefix())
     }
     private func collectTypePrefix(from ctx: ObjectiveCParser.TypePrefixContext?) {
+        guard let ctx = ctx else {
+            return
+        }
         guard let typePrefix = typePrefix(from: ctx) else {
             return
         }
 
-        addTypePrefix(typePrefix)
+        setTypePrefix(typePrefix, rule: ctx)
     }
 
     // MARK: - Context management
@@ -290,11 +410,26 @@ public class DeclarationExtractor {
         _context = .empty
     }
 
-    private func addDeclSpecifier(_ declSpecifier: DeclSpecifier) {
-        _context.specifiers.append(declSpecifier)
+    private func setDeclSpecifiers(
+        _ declSpecifiers: [DeclSpecifier],
+        rule: ObjectiveCParser.DeclarationSpecifiersContext
+    ) {
+        _context.specifiers = declSpecifiers
+        _context.specifiersContext = rule
     }
-    private func addTypePrefix(_ typePrefix: TypePrefix) {
-        _context.typePrefixes.append(typePrefix)
+    private func setDeclSpecifiers(
+        _ declSpecifiers: [DeclSpecifier],
+        rule: ObjectiveCParser.StructDeclarationContext
+    ) {
+        _context.specifiers = declSpecifiers
+        _context.structDeclarationContext = rule
+    }
+    private func setTypePrefix(
+        _ typePrefix: TypePrefix,
+        rule: ObjectiveCParser.TypePrefixContext
+    ) {
+        _context.typePrefixes = [typePrefix]
+        _context.typePrefixContext = rule
     }
 
     // MARK: - Parsing helpers
@@ -464,7 +599,7 @@ public class DeclarationExtractor {
         }
 
         if let declarator = rule.declarator() {
-            let extractor = DeclarationExtractor()
+            let extractor = makeSubExtractor()
 
             return extractor.extract(
                 fromSpecifiers: declarationSpecifiers,
@@ -555,6 +690,26 @@ public class DeclarationExtractor {
         return result
     }
 
+    private func declSpecifiers(from rule: ObjectiveCParser.SpecifierQualifierListContext?) -> [DeclSpecifier]? {
+        guard let rule = rule else {
+            return nil
+        }
+
+        var result: [DeclSpecifier] = []
+
+        if let typeSpecifier = typeSpecifier(from: rule.typeSpecifier()) {
+            result.append(.typeSpecifier(typeSpecifier))
+        }
+        if let typeQualifier = typeQualifier(from: rule.typeQualifier()) {
+            result.append(.typeQualifier(typeQualifier))
+        }
+        if let tail = declSpecifiers(from: rule.specifierQualifierList()) {
+            result.append(contentsOf: tail)
+        }
+
+        return result
+    }
+
     private func declSpecifier(from rule: ObjectiveCParser.DeclarationSpecifierContext?) -> DeclSpecifier? {
         guard let rule = rule else {
             return nil
@@ -634,14 +789,115 @@ public class DeclarationExtractor {
         {
             return .typeName(identifier.getText(), identifier, genericTypeSpecifier)
         }
-        if let structOrUnionSpecifier = rule.structOrUnionSpecifier() {
+        if let structOrUnionSpecifier = structOrUnionSpecifier(from: rule.structOrUnionSpecifier()) {
             return .structOrUnionSpecifier(structOrUnionSpecifier)
         }
-        if let enumSpecifier = rule.enumSpecifier() {
+        if let enumSpecifier = enumSpecifier(from: rule.enumSpecifier()) {
             return .enumSpecifier(enumSpecifier)
         }
 
         return nil
+    }
+
+    private func structOrUnionSpecifier(from rule: ObjectiveCParser.StructOrUnionSpecifierContext?) -> StructOrUnionSpecifier? {
+        guard let rule = rule else {
+            return nil
+        }
+
+        let fields: [StructFieldDeclaration]?
+        if rule.LBRACE() != nil {
+            if let declList = self.structFieldDeclarations(from: rule.structDeclarationList()) {
+                fields = declList
+            } else {
+                // Malformed struct body
+                return nil
+            }
+        } else {
+            fields = nil
+        }
+
+        return StructOrUnionSpecifier(
+            rule: rule,
+            identifier: rule.identifier(),
+            fields: fields
+        )
+    }
+
+    private func structFieldDeclarations(
+        from rule: ObjectiveCParser.StructDeclarationListContext?
+    ) -> [StructFieldDeclaration]? {
+        
+        guard let rule = rule else {
+            return nil
+        }
+
+        return rule
+            .structDeclaration()
+            .compactMap(self.structFieldDeclarations(from:))
+            .flatMap({ $0 })
+    }
+
+    private func structFieldDeclarations(
+        from rule: ObjectiveCParser.StructDeclarationContext?
+    ) -> [StructFieldDeclaration]? {
+
+        guard let rule = rule else {
+            return nil
+        }
+
+        let extractor = makeSubExtractor()
+        let result = extractor.extract(fromStructDeclaration: rule)
+
+        return result
+    }
+
+    private func enumSpecifier(from rule: ObjectiveCParser.EnumSpecifierContext?) -> EnumSpecifier? {
+        guard let rule = rule else {
+            return nil
+        }
+
+        let fields: [EnumeratorDeclaration]?
+        if rule.LBRACE() != nil {
+            if let declList = self.enumeratorDeclarations(from: rule.enumeratorList()) {
+                fields = declList
+            } else {
+                // Malformed enum body
+                return nil
+            }
+        } else {
+            fields = nil
+        }
+
+        return EnumSpecifier(
+            rule: rule,
+            typeName: typeName(from: rule.typeName()),
+            identifier: rule.identifier().first,
+            enumerators: fields
+        )
+    }
+
+    private func enumeratorDeclarations(from rule: ObjectiveCParser.EnumeratorListContext?) -> [EnumeratorDeclaration]? {
+        guard let rule = rule else {
+            return nil
+        }
+
+        return rule
+            .enumerator()
+            .compactMap(self.enumeratorDeclaration(from:))
+    }
+
+    private func enumeratorDeclaration(from rule: ObjectiveCParser.EnumeratorContext?) -> EnumeratorDeclaration? {
+        guard let rule = rule else {
+            return nil
+        }
+        guard let identifier = rule.enumeratorIdentifier() else {
+            return nil
+        }
+
+        return EnumeratorDeclaration(
+            identifier: identifier,
+            expression: rule.expression()
+        )
     }
 
     private func genericTypeList(from rule: ObjectiveCParser.GenericTypeListContext?) -> GenericTypeList? {
@@ -665,7 +921,7 @@ public class DeclarationExtractor {
             return nil
         }
 
-        let extractor = DeclarationExtractor()
+        let extractor = makeSubExtractor()
         guard let type = extractor.extract(fromTypeName: typeName) else {
             return nil
         }
@@ -886,6 +1142,24 @@ public class DeclarationExtractor {
 
         /// The specifiers for declarations
         var specifiers: [DeclSpecifier]
+
+        /// The parser rule context where the current declaration specifiers where
+        /// derived from.
+        /// 
+        /// Is mutually exclusive with `structDeclarationContext`, and defining
+        /// both at the same time is an undefined state.
+        var specifiersContext: ObjectiveCParser.DeclarationSpecifiersContext?
+        
+        /// The parser rule context where the current type prefix was derived
+        /// from.
+        var typePrefixContext: ObjectiveCParser.TypePrefixContext?
+
+        /// The parser rule context where the current declaration specifiers where
+        /// derived from.
+        /// 
+        /// Is mutually exclusive with `specifiersContext`, and defining both at
+        /// the same time is an undefined state.
+        var structDeclarationContext: ObjectiveCParser.StructDeclarationContext?
     }
 }
 
@@ -906,9 +1180,8 @@ public extension DeclarationExtractor {
         /// or array storage, etc.
         var declaration: DeclarationKind
 
-        /// The syntax node for this declaration.
-        /// Is nil if this declaration is non-initialized.
-        var declarationNode: ObjectiveCParser.DirectDeclaratorContext?
+        /// The syntax node containing this declaration.
+        var declarationNode: DeclarationDeclNode
 
         /// An initializer that was collected alongside this declaration.
         var initializer: ObjectiveCParser.InitializerContext?
@@ -920,6 +1193,64 @@ public extension DeclarationExtractor {
                 return true
             default:
                 return false
+            }
+        }
+    }
+
+    /// The source for a `Declaration` value
+    enum DeclarationDeclNode {
+        /// A direct declarator context where the type was defined.
+        case directDeclarator(ObjectiveCParser.DirectDeclaratorContext)
+
+        /// A list of declaration specifiers that contained the definition.
+        case declSpecifiers(ObjectiveCParser.DeclarationSpecifiersContext)
+
+        /// A struct or union field declaration.
+        case structDeclaration(ObjectiveCParser.StructDeclarationContext)
+
+        /// Returns a common base rule context for this declaration node which is
+        /// guaranteed to exist in the underlying AST.
+        var rule: ParserRuleContext {
+            switch self {
+            case
+                .directDeclarator(let ctx as ParserRuleContext),
+                .declSpecifiers(let ctx as ParserRuleContext),
+                .structDeclaration(let ctx as ParserRuleContext):
+
+                return ctx
+            }
+        }
+
+        /// Returns the associated value if this enum is a `.directDeclarator()`
+        /// case.
+        var asDirectDeclarator: ObjectiveCParser.DirectDeclaratorContext? {
+            switch self {
+            case .directDeclarator(let rule):
+                return rule
+            default:
+                return nil
+            }
+        }
+
+        /// Returns the associated value if this enum is a `.declSpecifiers()`
+        /// case.
+        var asDeclSpecifiers: ObjectiveCParser.DeclarationSpecifiersContext? {
+            switch self {
+            case .declSpecifiers(let rule):
+                return rule
+            default:
+                return nil
+            }
+        }
+
+        /// Returns the associated value if this enum is a `.structDeclaration()`
+        /// case.
+        var asStructDeclaration: ObjectiveCParser.StructDeclarationContext? {
+            switch self {
+            case .structDeclaration(let rule):
+                return rule
+            default:
+                return nil
             }
         }
     }
@@ -1294,8 +1625,8 @@ public extension DeclarationExtractor {
     enum TypeSpecifier: CustomStringConvertible {
         case scalar(ScalarType)
         case typeName(String, ObjectiveCParser.IdentifierContext, GenericTypeList? = nil)
-        case structOrUnionSpecifier(ObjectiveCParser.StructOrUnionSpecifierContext)
-        case enumSpecifier(ObjectiveCParser.EnumSpecifierContext)
+        case structOrUnionSpecifier(StructOrUnionSpecifier)
+        case enumSpecifier(EnumSpecifier)
 
         public var description: String {
             switch self {
@@ -1309,10 +1640,10 @@ public extension DeclarationExtractor {
                 return "\(value)\(generic)"
             
             case .structOrUnionSpecifier(let value):
-                return value.getText()
+                return value.rule.getText()
             
             case .enumSpecifier(let value):
-                return value.getText()
+                return value.rule.getText()
             }
         }
 
@@ -1326,18 +1657,52 @@ public extension DeclarationExtractor {
             }
         }
 
+        /// Returns the associated struct/union specifier parser context, in case
+        /// this type specifier is a struct/union type specifier.
+        public var asStructOrUnionSpecifier: StructOrUnionSpecifier? {
+            switch self {
+            case .structOrUnionSpecifier(let value):
+                return value
+            default:
+                return nil
+            }
+        }
+        /// Returns the associated enum specifier parser context, in case this
+        /// type specifier is an enum type specifier.
+        public var asEnumSpecifier: EnumSpecifier? {
+            switch self {
+            case .enumSpecifier(let value):
+                return value
+            default:
+                return nil
+            }
+        }
+
         /// Returns an identifier parser rule context associated with this type
         /// specifier, in case it features one.
         public var identifierContext: ObjectiveCParser.IdentifierContext? {
             switch self {
             case .typeName(_, let identifier, _):
                 return identifier
+            case .enumSpecifier(let ctx):
+                return ctx.identifier
+            case .structOrUnionSpecifier(let ctx):
+                return ctx.identifier
             default:
                 return nil
             }
         }
 
-        /// Returns `true` if this type specifier is a type name
+        /// Returns `true` if this type specifier is a `.scalar` case.
+        public var isScalar: Bool {
+            switch self {
+            case .scalar:
+                return true
+            default:
+                return false
+            }
+        }
+        /// Returns `true` if this type specifier is a `.typeName` case.
         public var isTypeName: Bool {
             switch self {
             case .typeName:
@@ -1346,6 +1711,64 @@ public extension DeclarationExtractor {
                 return false
             }
         }
+        /// Returns `true` if this type specifier is a `.structOrUnionSpecifier` case.
+        public var isStructOrUnionSpecifier: Bool {
+            switch self {
+            case .structOrUnionSpecifier:
+                return true
+            default:
+                return false
+            }
+        }
+        /// Returns `true` if this type specifier is a `.enumSpecifier` case.
+        public var isEnumSpecifier: Bool {
+            switch self {
+            case .enumSpecifier:
+                return true
+            default:
+                return false
+            }
+        }
+    }
+
+    /// A C struct or union type specifier
+    struct StructOrUnionSpecifier {
+        var rule: ObjectiveCParser.StructOrUnionSpecifierContext
+        /// The identifier that represents the type name for this enum.
+        var identifier: ObjectiveCParser.IdentifierContext?
+
+        /// List of struct field declarations. Is `nil` if the original struct
+        /// did not feature a field declaration list, i.e. it's an anonymous
+        /// struct specifier.
+        var fields: [StructFieldDeclaration]?
+    }
+
+    /// A struct or union field declarator
+    struct StructFieldDeclaration {
+        /// The computed declaration for this field.
+        var declaration: Declaration
+
+        var declarator: ObjectiveCParser.DeclaratorContext?
+        var constantExpression: ObjectiveCParser.ConstantExpressionContext?
+    }
+
+    /// An enum type specifier
+    struct EnumSpecifier {
+        var rule: ObjectiveCParser.EnumSpecifierContext
+        var typeName: TypeName?
+        /// The identifier that represents the type name for this enum.
+        var identifier: ObjectiveCParser.IdentifierContext?
+
+        /// List of enumerator declarations. Is `nil` if the original enum did
+        /// not feature an enumerator declaration list, i.e. it's an anonymous
+        /// enum specifier.
+        var enumerators: [EnumeratorDeclaration]?
+    }
+
+    /// An enumerator declaration inside an enum declaration
+    struct EnumeratorDeclaration {
+        var identifier: ObjectiveCParser.EnumeratorIdentifierContext
+        var expression: ObjectiveCParser.ExpressionContext?
     }
 
     /// A C type qualifier

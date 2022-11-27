@@ -400,6 +400,7 @@ attributeParameterAssignment
     : attributeName ASSIGNMENT (constant | attributeName | stringLiteral)
     ;
 
+// TODO: Replace usages of functionPointer with declaration
 functionPointer
     : declarationSpecifiers LP MUL identifier? RP LP functionPointerParameterList? RP
     ;
@@ -472,10 +473,6 @@ declarationSpecifier
     ;
 
 declarationSpecifiers
-    : typePrefix? declarationSpecifier+
-    ;
-
-declarationSpecifiers2
     : typePrefix? declarationSpecifier+
     ;
 
@@ -583,13 +580,46 @@ atomicTypeSpecifier
     :   ATOMIC_ LP typeName RP
     ;
 
-structOrUnionSpecifier
+structOrUnionSpecifier_
     : (STRUCT | UNION) attributeSpecifier* (identifier | identifier? LBRACE fieldDeclaration+ RBRACE)
+    ;
+
+structOrUnionSpecifier
+    :   structOrUnion identifier? LBRACE structDeclarationList RBRACE
+    |   structOrUnion identifier
+    ;
+
+structOrUnion
+    : STRUCT
+    | UNION
+    ;
+
+structDeclarationList
+    :   structDeclaration+
+    ;
+
+structDeclaration // The first two rules have priority order and cannot be simplified to one expression.
+    :   specifierQualifierList structDeclaratorList SEMI
+    |   specifierQualifierList SEMI
+    |   staticAssertDeclaration
+    ;
+
+specifierQualifierList
+    :   (typeSpecifier | typeQualifier) specifierQualifierList?
+    ;
+
+structDeclaratorList
+    :   structDeclarator (COMMA structDeclarator)*
+    ;
+
+structDeclarator
+    :   declarator
+    |   declarator? COLON constantExpression
     ;
 
 fieldDeclaration
     : declarationSpecifiers fieldDeclaratorList macro? SEMI
-    | functionPointer SEMI
+    //| functionPointer SEMI
     ;
 
 ibOutletQualifier
@@ -663,7 +693,7 @@ protocolQualifier
 
 typeSpecifier_
     : scalarTypeSpecifier pointer?
-    | typeofExpression
+    | typeofTypeSpecifier
     | KINDOF? genericTypeSpecifier pointer?
     | structOrUnionSpecifier pointer?
     | enumSpecifier
@@ -678,7 +708,11 @@ typeSpecifier
     |   structOrUnionSpecifier
     |   enumSpecifier
     |   typedefName
-    |   TYPEOF__ LP constantExpression RP // GCC extension
+    |   typeofTypeSpecifier
+    ;
+
+typeofTypeSpecifier
+    : TYPEOF (LP expression RP) // GCC extension
     ;
 
 typedefName
@@ -715,10 +749,6 @@ scalarTypeSpecifier
     | M128I
     ;
 
-typeofExpression
-    : TYPEOF (LP expression RP)
-    ;
-
 fieldDeclaratorList
     : fieldDeclarator (COMMA fieldDeclarator)*
     ;
@@ -728,6 +758,7 @@ fieldDeclarator
     | declarator? COLON constant
     ;
 
+// TODO: Fix the first alt on this syntax: It accepts invalid syntax like 'enum <ident>: <type> <ident> { <fields> }'.
 enumSpecifier
     : ENUM (identifier? COLON typeName)? (identifier (LBRACE enumeratorList RBRACE)? | LBRACE enumeratorList RBRACE)
     | (NS_OPTIONS | NS_ENUM) LP typeName COMMA identifier RP LBRACE enumeratorList RBRACE
@@ -927,7 +958,7 @@ assignmentOperator
 
 castExpression
     : unaryExpression
-    | EXTENSION? (LP typeName RP) (castExpression)
+    | EXTENSION? LP typeName RP castExpression
     | DIGITS // for
     ;
 
