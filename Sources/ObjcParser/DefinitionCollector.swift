@@ -28,7 +28,6 @@ protocol DefinitionCollectorDelegate: AnyObject {
 /// into `ASTNode` declarations.
 class DefinitionCollector {
     var declarations: [ASTNode] = []
-    var typeParser: TypeParsing
     var nonnullContextQuerier: NonnullContextQuerier
     var commentQuerier: CommentQuerier
     var nodeFactory: ASTNodeFactory
@@ -36,13 +35,10 @@ class DefinitionCollector {
     weak var delegate: DefinitionCollectorDelegate?
     
     init(
-        typeParser: TypeParsing,
         nonnullContextQuerier: NonnullContextQuerier,
         commentQuerier: CommentQuerier,
         nodeFactory: ASTNodeFactory
     ) {
-        
-        self.typeParser = typeParser
         self.nonnullContextQuerier = nonnullContextQuerier
         self.commentQuerier = commentQuerier
         self.nodeFactory = nodeFactory
@@ -143,8 +139,11 @@ class DefinitionCollector {
             node.addChild(identifier)
         }
 
-        node.updateSourceRange()
+        let bodyNode = ObjcStructDeclarationBody(isInNonnullContext: nonnull)
+        bodyNode.addChildren(fields)
+        node.addChild(bodyNode)
 
+        node.updateSourceRange()
         collectComments(node, rule)
 
         return [node]
@@ -158,7 +157,22 @@ class DefinitionCollector {
         enumerators: [ObjcEnumCase]
     ) -> [ASTNode]? {
 
-        return nil
+        let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
+
+        let node = ObjcEnumDeclaration(isInNonnullContext: nonnull)
+        if let identifier = identifier {
+            node.addChild(identifier)
+        }
+        if let typeName = typeName {
+            node.addChild(typeName)
+        }
+
+        node.addChildren(enumerators)
+
+        node.updateSourceRange()
+        collectComments(node, rule)
+
+        return [node]
     }
 
     private func processTypeAlias(
@@ -168,7 +182,20 @@ class DefinitionCollector {
         alias: Identifier
     ) -> [ASTNode]? {
 
-        return nil
+        let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
+
+        let node = TypedefNode(isInNonnullContext: nonnull)
+        node.addChild(alias)
+        node.addChild(typeNode)
+
+        if let baseNodes = processDeclaration(baseDecl) {
+            node.addChildren(baseNodes)
+        }
+
+        node.updateSourceRange()
+        collectComments(node, rule)
+
+        return [node]
     }
 
     private func processDeclaration(_ decl: DeclarationTranslator.ASTNodeDeclaration?) -> [ASTNode]? {

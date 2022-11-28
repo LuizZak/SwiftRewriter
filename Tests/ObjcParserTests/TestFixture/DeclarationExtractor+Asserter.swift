@@ -10,6 +10,7 @@ import ObjcParserAntlr
 protocol DeclarationConvertible {
     var decl: DeclarationExtractor.Declaration { get }
 }
+
 struct FunctionDeclWrapper: DeclarationConvertible {
     var decl: DeclarationExtractor.Declaration
     var base: DeclarationExtractor.DeclarationKind?
@@ -28,6 +29,7 @@ struct FunctionDeclWrapper: DeclarationConvertible {
         }
     }
 }
+
 struct BlockDeclWrapper: DeclarationConvertible {
     var decl: DeclarationExtractor.Declaration
     var nullability: DeclarationExtractor.NullabilitySpecifier?
@@ -54,15 +56,20 @@ extension DeclarationExtractor.Declaration: DeclarationConvertible {
 }
 
 extension Asserter where Object == [DeclarationExtractor.Declaration] {
+    /// Asserts that there is at least one element on the underlying declaration
+    /// array being tested that testes true for a given predicate.
+    ///
+    /// Returns `nil` if the test failed, or the first `Object.Element` that
+    /// passed the predicate.
     @discardableResult
     func _assertOneOrMore(
         message: @autoclosure () -> String,
         file: StaticString = #file,
         line: UInt,
-        _ closure: (Object.Element) -> Bool
+        _ predicate: (Object.Element) -> Bool
     ) -> Object.Element? {
         for obj in object {
-            if closure(obj) {
+            if predicate(obj) {
                 return obj
             }
         }
@@ -73,8 +80,17 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         return nil
     }
 
+    /// Asserts that there are no elements on the underlying declaration array
+    /// being tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
     @discardableResult
-    func assertNoDeclarations(file: StaticString = #file, line: UInt = #line) -> Self? {
+    func assertNoDeclarations(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
         guard object.isEmpty else {
             XCTFail(
                 "Expected no declarations, but found \(object.count) declaration(s)",
@@ -89,8 +105,18 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         return self
     }
 
+    /// Asserts that there are exactly `count` of elements on the underlying
+    /// declaration array being tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
     @discardableResult
-    func assertDefinedCount(_ count: Int, file: StaticString = #file, line: UInt = #line) -> Self? {
+    func assertDefinedCount(
+        _ count: Int,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
         guard object.count == count else {
             XCTAssertEqual(object.count, count, file: file, line: line)
             dumpObject()
@@ -100,11 +126,27 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         return self
     }
 
+    /// Asserts that there is at least one variable with a specified name on the
+    /// underlying declaration array being tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns an `Asserter<Declaration>`
+    /// for chaining further tests on the variable that was found.
     @discardableResult
-    func assertVariable(name: String, file: StaticString = #file, line: UInt = #line) -> Asserter<DeclarationExtractor.Declaration>? {
+    func assertVariable(
+        name: String,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Asserter<DeclarationExtractor.Declaration>? {
+
         return asserter(forVariable: name, file: file, line: line) { _ in }
     }
 
+    /// Asserts that there is at least one variable with a specified name and
+    /// list of declaration specifiers on the underlying declaration array being
+    /// tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns an `Asserter<Declaration>`
+    /// for chaining further tests on the variable that was found.
     @discardableResult
     func assertVariable(
         name: String,
@@ -118,6 +160,12 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         }
     }
 
+    /// Asserts that there is at least one variable with a specified name and
+    /// list of declaration specifiers on the underlying declaration array being
+    /// tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns an `Asserter<Declaration>`
+    /// for chaining further tests on the variable that was found.
     @discardableResult
     func assertVariable(
         name: String,
