@@ -14,9 +14,9 @@ class DeclarationExtractorTests: XCTestCase {
     }
     
     func testExtract_declaration_singleDecl_withInitializer() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "short int a = 0;")
 
-        tester.assert("short int a = 0;") { asserter in
+        tester.assert { asserter in
             asserter
                 .asserter(forVariable: "a")?
                 .assert(specifierStrings: ["short", "int"])?
@@ -27,26 +27,26 @@ class DeclarationExtractorTests: XCTestCase {
     }
 
     func testExtract_declaration_singleDecl_noInitializer() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "short int a;")
 
-        tester.assert("short int a;") { asserter in
+        tester.assert { asserter in
             asserter.assertVariable(name: "a", specifierStrings: ["short", "int"])
         }
     }
 
     func testExtract_declaration_multiDecl_noInitializer() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "short int a, b;")
 
-        tester.assert("short int a, b;") { asserter in
+        tester.assert { asserter in
             asserter.assertVariable(name: "a", specifierStrings: ["short", "int"])
             asserter.assertVariable(name: "b", specifierStrings: ["short", "int"])
         }
     }
 
     func testExtract_declaration_multiDecl_singlePointer() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "short int *a, b;")
 
-        tester.assert("short int *a, b;") { asserter in
+        tester.assert { asserter in
             asserter
                 .asserter(forVariable: "a")?
                 .assert(specifierStrings: ["short", "int"])?
@@ -58,9 +58,9 @@ class DeclarationExtractorTests: XCTestCase {
     }
 
     func testExtract_declaration_multiDecl_singleInitializer() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "short int a = 0, b;")
 
-        tester.assert("short int a = 0, b;") { asserter in
+        tester.assert { asserter in
             asserter
                 .asserter(forVariable: "a")?
                 .assert(specifierStrings: ["short", "int"])?
@@ -75,9 +75,9 @@ class DeclarationExtractorTests: XCTestCase {
     }
 
     func testExtract_declaration_singleDecl_function_voidReturn_noParameter() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "void a();")
 
-        tester.assert("void a();") { asserter in
+        tester.assert { asserter in
             asserter
                 .assertFunction(name: "a")?
                 .assert(returnTypeSpecifierStrings: ["void"])?
@@ -86,9 +86,9 @@ class DeclarationExtractorTests: XCTestCase {
     }
 
     func testExtract_declaration_singleDecl_function_voidReturn_voidParameterList() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "void a(void);")
 
-        tester.assert("void a(void);") { asserter in
+        tester.assert { asserter in
             asserter
                 .assertFunction(name: "a")?
                 .assert(returnTypeSpecifierStrings: ["void"])?
@@ -97,9 +97,9 @@ class DeclarationExtractorTests: XCTestCase {
     }
 
     func testExtract_declaration_singleDecl_function_noParameter() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "short int a();")
 
-        tester.assert("short int a();") { asserter in
+        tester.assert { asserter in
             asserter
                 .assertFunction(name: "a")?
                 .assert(returnTypeSpecifierStrings: ["short", "int"])?
@@ -108,9 +108,9 @@ class DeclarationExtractorTests: XCTestCase {
     }
 
     func testExtract_declaration_singleDecl_function_withParameters() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "short int a(int p1, int *p2);")
 
-        tester.assert("short int a(int p1, int *p2);") { asserter in
+        tester.assert { asserter in
             asserter
                 .assertFunction(name: "a")?
                 .assert(returnTypeSpecifierStrings: ["short", "int"])?
@@ -123,9 +123,9 @@ class DeclarationExtractorTests: XCTestCase {
     }
 
     func testExtract_declaration_singleDecl_function_pointer() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "short int *a();")
 
-        tester.assert("short int *a();") { asserter in
+        tester.assert { asserter in
             asserter
                 .assertFunction(name: "a")?
                 .assert(returnTypeSpecifierStrings: ["short", "int"])?
@@ -134,9 +134,9 @@ class DeclarationExtractorTests: XCTestCase {
     }
 
     func testExtract_declaration_singleDecl_unsizedArray() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "int a[];")
 
-        tester.assert("int a[];") { asserter in
+        tester.assert { asserter in
             asserter
                 .assertVariable(name: "a")?
                 .assert(specifierStrings: ["int"])?
@@ -146,9 +146,9 @@ class DeclarationExtractorTests: XCTestCase {
     }
 
     func testExtract_declaration_singleDecl_staticArray() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "int a[5];")
 
-        tester.assert("int a[5];") { asserter in
+        tester.assert { asserter in
             asserter
                 .assertVariable(name: "a")?
                 .assert(specifierStrings: ["int"])?
@@ -158,9 +158,9 @@ class DeclarationExtractorTests: XCTestCase {
     }
 
     func testExtract_declaration_singleDecl_blockDecl_noParameters() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "void (^a)();")
 
-        tester.assert("void (^a)();") { asserter in
+        tester.assert { asserter in
             asserter
                 .assertBlock(name: "a")?
                 .assert(returnTypeSpecifierStrings: ["void"])?
@@ -169,9 +169,9 @@ class DeclarationExtractorTests: XCTestCase {
     }
 
     func testExtract_declaration_singleDecl_blockDecl_withInitializer() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "void (^a)() = ^{ };")
 
-        tester.assert("void (^a)() = ^{ };") { asserter in
+        tester.assert { asserter in
             asserter
                 .assertBlock(name: "a")?
                 .assertHasInitializer()
@@ -179,9 +179,9 @@ class DeclarationExtractorTests: XCTestCase {
     }
 
     func testExtract_singleDec_typedef_functionPointer() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "typedef int (*f)(void *, void *);")
 
-        tester.assert("typedef int (*f)(void *, void *);") { asserter in
+        tester.assert { asserter in
             asserter
                 .asserter(forDecl: "f") { fDecl in
                     fDecl.assertIsFunctionPointer(name: "f")
@@ -190,20 +190,21 @@ class DeclarationExtractorTests: XCTestCase {
     }
 
     func testExtract_singleDecl_struct_named() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "struct AStruct { int field; };")
 
-        tester.assert("struct AStruct { int field; };") { asserter in
+        tester.assert { asserter in
             asserter
-                .asserter(forDecl: "AStruct") { aStruct in
-                    aStruct.assertIsStructOrUnion()
+                .asserter(forStruct: "AStruct") { aStruct in
+                    aStruct.assertFieldCount(1)?
+                        .assertField(name: "field")
                 }
         }
     }
 
     func testExtract_singleDecl_struct_typedef() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "typedef struct { int field; } AStruct;")
 
-        tester.assert("typedef struct { int field; } AStruct;") { asserter in
+        tester.assert { asserter in
             asserter
                 .asserter(forStruct: "AStruct") { aStruct in
                     aStruct
@@ -212,24 +213,102 @@ class DeclarationExtractorTests: XCTestCase {
         }
     }
 
-    func testExtract_singleDecl_enum_named() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+    func testExtract_singleDecl_struct_typedef_pointerReference() {
+        let tester = prepareTest(declaration: "typedef struct { int field; } AStruct, *AStructPtr;")
 
-        tester.assert("enum AnEnum { CASE0 = 1, CASE1 = 2 };") { asserter in
+        tester.assert { asserter in
             asserter
-                .asserter(forDecl: "AnEnum") { aStruct in
-                    aStruct.assertIsEnum()
+                .assertDefinedCount(2)?
+                .asserter(forItemAt: 0) { aStruct in
+                    aStruct
+                        .assertIsStructOrUnion()?
+                        .assertIsNotPointer()
+                }?
+                .asserter(forItemAt: 1) { typedef in
+                    typedef
+                        .assertIsTypeDef()?
+                        .assertIsPointer()
+                }
+        }
+    }
+
+    func testExtract_singleDecl_struct_typedef_typeDeclaratorStressCases() {
+        let tester = prepareTest(declaration: "typedef struct { int field; } A, *APtr, AArray[5], *AArrayPtr[5], (*AFuncRet)();")
+
+        tester.assert { asserter in
+            asserter
+                .assertDefinedCount(5)?
+                .asserter(forItemAt: 0) { aStruct in
+                    aStruct
+                        .assertIsStructOrUnion()?
+                        .assertIsNotPointer()
+                }?
+                .asserter(forItemAt: 1) { ptr in
+                    ptr
+                        .assertIsTypeDef()?
+                        .assertIsPointer()
+                }?
+                .asserter(forItemAt: 2) { array in
+                    array.assertIsTypeDef()?
+                        .assertIsStaticArray(count: 5)
+                }?
+                .asserter(forItemAt: 3) { array in
+                    array.assertIsTypeDef()?
+                        .assertIsStaticArray(count: 5)?
+                        .assertIsPointer()
+                }?
+                .asserter(forItemAt: 4) { array in
+                    array.assertIsFunctionPointer(name: "AFuncRet")
+                }
+        }
+    }
+
+    func testExtract_singleDecl_enum_named() {
+        let tester = prepareTest(declaration: "enum AnEnum { CASE0 = 1, CASE1 = 2 };")
+
+        tester.assert { asserter in
+            asserter
+                .asserter(forEnum: "AnEnum") { anEnum in
+                    anEnum.assertNoTypeName()
                 }
         }
     }
 
     func testExtract_singleDecl_enum_typedef() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "typedef enum { CASE0 = 1, CASE1 = 2, CASE2 } AnEnum;")
 
-        tester.assert("typedef enum { CASE0 = 1, CASE1 = 2, CASE2 } AnEnum;") { asserter in
+        tester.assert { asserter in
             asserter
                 .asserter(forEnum: "AnEnum") { anEnum in
-                    anEnum.assertEnumeratorCount(3)
+                    anEnum.assertEnumeratorCount(3)?.assertNoTypeName()
+                    anEnum.assertEnumerator(name: "CASE0")
+                    anEnum.assertEnumerator(name: "CASE1")
+                    anEnum.assertEnumerator(name: "CASE2")
+                }
+        }
+    }
+
+    func testExtract_singleDecl_enum_nsEnum() {
+        let tester = prepareTest(declaration: "typedef NS_ENUM(NSInteger, AnEnum) { CASE0 = 1, CASE1 = 2, CASE2 };")
+
+        tester.assert { asserter in
+            asserter
+                .asserter(forEnum: "AnEnum") { anEnum in
+                    anEnum.assertEnumeratorCount(3)?.assertHasTypeName()
+                    anEnum.assertEnumerator(name: "CASE0")
+                    anEnum.assertEnumerator(name: "CASE1")
+                    anEnum.assertEnumerator(name: "CASE2")
+                }
+        }
+    }
+
+    func testExtract_singleDecl_enum_nsOptions() {
+        let tester = prepareTest(declaration: "typedef NS_OPTIONS(NSInteger, AnEnum) { CASE0 = 1, CASE1 = 2, CASE2 };")
+
+        tester.assert { asserter in
+            asserter
+                .asserter(forEnum: "AnEnum") { anEnum in
+                    anEnum.assertEnumeratorCount(3)?.assertHasTypeName()
                     anEnum.assertEnumerator(name: "CASE0")
                     anEnum.assertEnumerator(name: "CASE1")
                     anEnum.assertEnumerator(name: "CASE2")
@@ -238,18 +317,18 @@ class DeclarationExtractorTests: XCTestCase {
     }
 
     func testExtract_singleDecl_struct_anonymous_doesNotExtract() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "struct { int field; };")
 
-        tester.assert("struct { int field; };") { asserter in
+        tester.assert { asserter in
             asserter
                 .assertNoDeclarations()
         }
     }
 
     func testExtract_singleDecl_enum_anonymous_doesNotExtract() {
-        let tester = prepareTester(ObjectiveCParser.declaration, { $0.extract(from: $1) })
+        let tester = prepareTest(declaration: "enum { CASE0 = 0 };")
 
-        tester.assert("enum { CASE0 = 0 };") { asserter in
+        tester.assert { asserter in
             asserter
                 .assertNoDeclarations()
         }
@@ -259,68 +338,39 @@ class DeclarationExtractorTests: XCTestCase {
 // MARK: - Test Internals
 
 private extension DeclarationExtractorTests {
-    func prepareTester<T: ParserRuleContext>(
-        _ ruleDeriver: @escaping (ObjectiveCParser) -> () throws -> T,
-        _ parseMethod: @escaping (DeclarationExtractor, T) -> [DeclarationExtractor.Declaration]
-    ) -> Tester<T> {
-        
-        let tester = Tester<T>(
-            ruleDeriver: ruleDeriver,
-            parseMethod: parseMethod,
-            declarationExtractor: self.makeSut()
-        )
+    func prepareTest(declaration: String) -> Tester {
+        Tester(source: declaration)
+    }
+    
+    class Tester: BaseParserTestFixture<ObjectiveCParser.DeclarationContext> {
+        var source: String
 
-        _retainedParser = tester.parserObject
-        
-        return tester
-    }
-    
-    func makeSut() -> DeclarationExtractor {
-        return DeclarationExtractor()
-    }
-    
-    class Tester<T: ParserRuleContext> {
-        var parserObject: ObjectiveCParserAntlr?
-        let parserState = ObjcParserState()
-        let ruleDeriver: (ObjectiveCParser) -> () throws -> T
-        let parseMethod: (DeclarationExtractor, T) -> [DeclarationExtractor.Declaration]
-        let declarationExtractor: DeclarationExtractor
-        
-        init(
-            ruleDeriver: @escaping (ObjectiveCParser) -> () throws -> T,
-            parseMethod: @escaping (DeclarationExtractor, T) -> [DeclarationExtractor.Declaration],
-            declarationExtractor: DeclarationExtractor
-        ) {
-            
-            self.ruleDeriver = ruleDeriver
-            self.parseMethod = parseMethod
-            self.declarationExtractor = declarationExtractor
+        init(source: String) {
+            self.source = source
+
+            super.init(ruleDeriver: ObjectiveCParser.declaration)
         }
 
         func assert(
-            _ string: String,
+            file: StaticString = #file,
             line: UInt = #line,
-            closure: (Asserter<[DeclarationExtractor.Declaration]>) throws -> Void
+            _ closure: (Asserter<[DeclarationExtractor.Declaration]>) throws -> Void
         ) rethrows {
-            
-            let parserObject = try! parserState.makeMainParser(input: string)
-            self.parserObject = parserObject
 
-            let parser = parserObject.parser
-            let errorListener = ErrorListener()
-            parser.removeErrorListeners()
-            parser.addErrorListener(errorListener)
-            
-            let rule = try! ruleDeriver(parser)()
-            
-            if errorListener.hasErrors {
-                XCTFail("Parser errors while parsing '\(string)': \(errorListener.errorDescription)", line: line)
-                return
+            let sut = DeclarationExtractor()
+
+            do {
+                let parserRule = try parse(source)
+                let result = sut.extract(from: parserRule)
+
+                try closure(.init(object: result))
+            } catch {
+                XCTFail(
+                    "Failed to parse from source string: \(source)\n\(error)",
+                    file: file,
+                    line: line
+                )
             }
-            
-            let result = parseMethod(declarationExtractor, rule)
-            
-            try closure(Asserter(object: result))
         }
     }
 }

@@ -5,6 +5,9 @@ import GrammarModels
 /// Converts a declaration from `DeclarationExtractor` to a proper `ASTNode`
 /// representing the declaration.
 public class DeclarationTranslator {
+    public init() {
+
+    }
 
     /// Translates a single C declaration into an appropriate collection of AST
     /// node declarations.
@@ -161,6 +164,35 @@ public class DeclarationTranslator {
                     type: typeNameNode,
                     initialValue: nil
                 )
+            
+            case .typedef(_, _, let baseTypeDecl):
+                guard let identifierNode = identifierNode(from: decl.declaration, context: context) else {
+                    return nil
+                }
+
+                let convertedBase = translate(baseTypeDecl, context: context)
+
+                guard let firstDecl = convertedBase.first else {
+                    return nil
+                }
+                guard let type = firstDecl.objcType else {
+                    return nil
+                }
+
+                let finalType = PartialType.applyPointer(base: type, partialType.pointer)
+                
+                let typeNameNode = typeNameNode(
+                    from: finalType,
+                    ctxNode: ctxNode,
+                    context: context
+                )
+                
+                result = .typedef(
+                    rule: baseTypeDecl.declarationNode.rule,
+                    baseType: firstDecl,
+                    typeNode: typeNameNode,
+                    alias: identifierNode
+                )
             }
 
             return result
@@ -169,32 +201,37 @@ public class DeclarationTranslator {
         result = _applyDeclarator(decl.declaration)
         result?.initializer = decl.initializer
 
-        if
-            let enumSpecifier = partialType.enumSpecifier,
-            let identifierNode = identifierNode(from: decl.declaration, context: context)
-        {
-            let typeNameNode = typeNameNode(from: enumSpecifier.typeName, context: context)
-            let enumerators = enumCases(enumSpecifier.enumerators, context: context)
+        // TODO: Refactor the declaration translation code to avoid having to
+        // hardcode checking for typedef this way instead of just using the
+        // value returned by `_applyDecorator` as-is.
+        //if result?.isTypedef == false {
+            if
+                let enumSpecifier = partialType.enumSpecifier,
+                let identifierNode = identifierNode(from: decl.declaration, context: context)
+            {
+                let typeNameNode = typeNameNode(from: enumSpecifier.typeName, context: context)
+                let enumerators = enumCases(enumSpecifier.enumerators, context: context)
 
-            result = .enumDecl(
-                rule: decl.declarationNode.rule,
-                identifier: identifierNode,
-                typeName: typeNameNode,
-                enumSpecifier,
-                enumerators
-            )
-        } else if
-            let structOrUnionSpecifier = partialType.structOrUnionSpecifier,
-            let identifierNode = identifierNode(from: decl.declaration, context: context)
-        {
-            let fields = structFields(structOrUnionSpecifier.fields, context: context)
+                result = .enumDecl(
+                    rule: decl.declarationNode.rule,
+                    identifier: identifierNode,
+                    typeName: typeNameNode,
+                    enumSpecifier,
+                    enumerators
+                )
+            } else if
+                let structOrUnionSpecifier = partialType.structOrUnionSpecifier,
+                let identifierNode = identifierNode(from: decl.declaration, context: context)
+            {
+                let fields = structFields(structOrUnionSpecifier.fields, context: context)
 
-            result = .structOrUnionDecl(
-                rule: decl.declarationNode.rule,
-                identifier: identifierNode,
-                structOrUnionSpecifier,
-                fields
-            )
+                result = .structOrUnionDecl(
+                    rule: decl.declarationNode.rule,
+                    identifier: identifierNode,
+                    structOrUnionSpecifier,
+                    fields
+                )
+            //}
         } else if
             partialType.isTypedef,
             let result = result,
@@ -295,6 +332,13 @@ public class DeclarationTranslator {
                 )
 
                 return _applyDeclarator(base, type: partial)
+                
+            case .typedef(_, _, baseType: let baseTypeDecl):
+                guard let baseType = translateObjectiveCType(baseTypeDecl, context: context) else {
+                    return nil
+                }
+
+                return _applyDeclarator(baseTypeDecl.declaration, type: baseType)
             }
         }
 
@@ -641,6 +685,9 @@ public class DeclarationTranslator {
         case .staticArray(let base, _, _), .pointer(let base, _):
             return identifierNode(from: base, context: context)
 
+        case .typedef(_, let identifier, _):
+            return context.nodeFactory.makeIdentifier(from: identifier)
+
         case .identifier(_, let node):
             let identifierNode = context.nodeFactory.makeIdentifier(from: node)
 
@@ -885,6 +932,17 @@ public class DeclarationTranslator {
                 return rule
             }
         }
+
+        /// Returns `true` if this AST node declaration value is a `.typedef()`
+        /// case.
+        var isTypedef: Bool {
+            switch self {
+            case .typedef:
+                return true
+            default:
+                return false
+            }
+        }
     }
 
     /// Specifies a nullability of a declaration.
@@ -1004,21 +1062,15 @@ public class DeclarationTranslator {
         }
 
         func makePointer(
-            _ ptr: DeclarationExtractor.Pointer?,
+            _ pointer: DeclarationExtractor.Pointer?,
             _ genericTypeParsing: (DeclarationExtractor.GenericTypeParameter) -> ObjcType?
         ) -> ObjcType? {
 
-            guard var result = makeType(genericTypeParsing) else {
+            guard let result = makeType(genericTypeParsing) else {
                 return nil
             }
 
-            if let pointer = pointer {
-                for _ in pointer.pointers {
-                    result = .pointer(result)
-                }
-            }
-
-            return result
+            return Self.applyPointer(base: result, pointer)
         }
 
         func makePointer(_ genericTypeParsing: (DeclarationExtractor.GenericTypeParameter) -> ObjcType?) -> ObjcType? {
@@ -1035,6 +1087,23 @@ public class DeclarationTranslator {
             let baseType = makeType(genericTypeParsing)
 
             return baseType.map { .fixedArray($0, length: length) }
+        }
+        
+        /// Applies a given pointer declaration on top of a given Objective-C type.
+        static func applyPointer(
+            base: ObjcType,
+            _ pointer: DeclarationExtractor.Pointer?
+        ) -> ObjcType {
+
+            var result = base
+
+            if let pointer = pointer {
+                for _ in pointer.pointers {
+                    result = .pointer(result)
+                }
+            }
+
+            return result
         }
     }
 }
@@ -1167,17 +1236,18 @@ func objcTypeFromSpecifiers(
     case .scalar(let name):
         return .struct(name.description)
 
-    case .typeName(let base, _, nil):
-        return .struct(base)
+    case .typeName(let value):
+        if let genericTypeList = value.genericTypes {
+            let genericTypes = genericTypeList.types.map(genericTypeParsing)
 
-    case .typeName(let base, _, let genericTypes?):
-        let genericTypes = genericTypes.types.map(genericTypeParsing)
+            if genericTypes.contains(nil) {
+                return nil
+            }
 
-        if genericTypes.contains(nil) {
-            return nil
+            return .generic(value.name, parameters: genericTypes.compactMap({ $0 }))
         }
 
-        return .generic(base, parameters: genericTypes.compactMap({ $0 }))
+        return .struct(value.name)
 
     case .structOrUnionSpecifier(let ctx):
         if let ident = ctx.identifier {

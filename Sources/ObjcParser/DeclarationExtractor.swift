@@ -17,9 +17,12 @@ public class DeclarationExtractor {
     }
 
     /// Extracts one or more declarations from a given declaration parser context.
-    func extract(from ctx: ObjectiveCParser.DeclarationContext) -> [Declaration] {
+    public func extract(from ctx: ObjectiveCParser.DeclarationContext) -> [Declaration] {
+        guard let specifiers = ctx.declarationSpecifiers() else {
+            return []
+        }
         guard let initDeclaratorList = ctx.initDeclaratorList() else {
-            if let specifiers = ctx.declarationSpecifiers(), let decl = extract(fromSpecifiers: specifiers) {
+            if let decl = extract(fromSpecifiers: specifiers) {
                 return [decl]
             }
 
@@ -33,9 +36,32 @@ public class DeclarationExtractor {
         collectSpecifiers(from: ctx)
         collectTypePrefix(from: ctx)
 
-        for initDeclarator in initDeclaratorList.initDeclarator() {
+        let isTypeDef = _context.isTypeDef
+
+        for (i, initDeclarator) in initDeclaratorList.initDeclarator().enumerated() {
             if let declaration = declaration(from: initDeclarator, context: _context) {
                 result.append(declaration)
+
+                // After first typedef declaration, the remaining declarators
+                // use as a declaration specifier the aliased type name that was
+                // just defined.
+                if isTypeDef && i == 0, let typeNameCtx = declaration.identifierContext {
+
+                    setDeclSpecifiers(
+                        [
+                            .storageSpecifier(.typedef),
+                            .typeSpecifier(
+                                .typeName(
+                                    .init(
+                                        name: typeNameCtx.getText(),
+                                        identifier: typeNameCtx
+                                    )
+                                )
+                            )
+                        ],
+                        rule: specifiers
+                    )
+                }
             }
         }
 
@@ -47,7 +73,7 @@ public class DeclarationExtractor {
     /// The declaration specifiers context must contain at least one unqualified
     /// identifier at the end of the specifiers list for it to be considered a
     /// non-initialized declaration.
-    func extract(
+    public func extract(
         fromSpecifiers ctx: ObjectiveCParser.DeclarationSpecifiersContext
     ) -> Declaration? {
 
@@ -61,7 +87,7 @@ public class DeclarationExtractor {
 
     /// Extracts a declaration from a given declaration specifier and declarator
     /// parser contexts.
-    func extract(
+    public func extract(
         fromSpecifiers ctx: ObjectiveCParser.DeclarationSpecifiersContext,
         declarator: ObjectiveCParser.DeclaratorContext
     ) -> Declaration? {
@@ -75,7 +101,7 @@ public class DeclarationExtractor {
     }
 
     /// Extracts a type name from a given type name context.
-    func extract(
+    public func extract(
         fromTypeName ctx: ObjectiveCParser.TypeNameContext
     ) -> TypeName? {
 
@@ -93,7 +119,7 @@ public class DeclarationExtractor {
 
     /// Extracts one or more struct field declarations from a given struct
     /// declaration context.
-    func extract(
+    public func extract(
         fromStructDeclaration structDecl: ObjectiveCParser.StructDeclarationContext
     ) -> [StructFieldDeclaration]? {
 
@@ -105,11 +131,11 @@ public class DeclarationExtractor {
     }
 
     /// Returns `true` if a direct declarator represents a named variable type.
-    func isVariableDeclaration(_ ctx: ObjectiveCParser.DirectDeclaratorContext) -> Bool {
+    public func isVariableDeclaration(_ ctx: ObjectiveCParser.DirectDeclaratorContext) -> Bool {
         declaration(
             from: ctx,
             pointer: nil,
-            context: Context(typePrefixes: [], specifiers: [])
+            context: .empty
         )?.isVariableDeclaration ?? false
     }
 
@@ -320,9 +346,6 @@ public class DeclarationExtractor {
         let declKind = abstractDeclarationKind(
             from: ctx.abstractDeclarator()?.directAbstractDeclarator()
         )
-        if pointer == nil && declKind == nil {
-            return nil
-        }
 
         return TypeName(
             specifiers: specifiers,
@@ -778,7 +801,9 @@ public class DeclarationExtractor {
             )
         }
         if let identifier = rule.typedefName()?.identifier() {
-            return .typeName(identifier.getText(), identifier)
+            return .typeName(
+                .init(name: identifier.getText(), identifier: identifier)
+            )
         }
         if
             let genericTypeSpecifier = rule.genericTypeSpecifier(),
@@ -787,7 +812,13 @@ public class DeclarationExtractor {
                 from: genericTypeSpecifier.genericTypeList()
             )
         {
-            return .typeName(identifier.getText(), identifier, genericTypeSpecifier)
+            return .typeName(
+                .init(
+                    name: identifier.getText(),
+                    identifier: identifier,
+                    genericTypes: genericTypeSpecifier
+                )
+            )
         }
         if let structOrUnionSpecifier = structOrUnionSpecifier(from: rule.structOrUnionSpecifier()) {
             return .structOrUnionSpecifier(structOrUnionSpecifier)
@@ -1136,7 +1167,7 @@ public class DeclarationExtractor {
             typePrefixes: [],
             specifiers: []
         )
-        
+
         /// A list of type prefixes for declarations
         var typePrefixes: [TypePrefix]
 
@@ -1160,6 +1191,14 @@ public class DeclarationExtractor {
         /// Is mutually exclusive with `specifiersContext`, and defining both at
         /// the same time is an undefined state.
         var structDeclarationContext: ObjectiveCParser.StructDeclarationContext?
+
+        /// Whether the current declaration is a typedef declaration context.
+        var isTypeDef: Bool { specifiers.storageSpecifiers().contains { $0.isTypedef } }
+        
+        /// Gets the last type name specifier on the specifier list.
+        var lastTypeNameSpecifier: TypeNameSpecifier? {
+            specifiers.typeSpecifiers().last(where: { $0.isTypeName })?.asTypeNameSpecifier
+        }
     }
 }
 
@@ -1194,6 +1233,18 @@ public extension DeclarationExtractor {
             default:
                 return false
             }
+        }
+
+        /// Extracts the root identifier parser rule context for this declaration,
+        /// if any is available.
+        var identifierContext: ObjectiveCParser.IdentifierContext? {
+            declaration.identifierContext
+        }
+
+        /// Extracts the root identifier string for this declaration, if any is
+        /// available.
+        var identifierString: String? {
+            declaration.identifierString
         }
     }
 
@@ -1328,6 +1379,13 @@ public extension DeclarationExtractor {
             arguments: [BlockParameter]
         )
 
+        /// A type definition declaration.
+        indirect case typedef(
+            String,
+            ObjectiveCParser.IdentifierContext,
+            baseType: Declaration
+        )
+
         /// Extracts the root identifier parser rule context for this declaration
         /// kind, if any is available.
         var identifierContext: ObjectiveCParser.IdentifierContext? {
@@ -1338,6 +1396,8 @@ public extension DeclarationExtractor {
                 return base.identifierContext
             case .function(let base, _), .block(_, let base, _):
                 return base?.identifierContext
+            case .typedef(_, let identifier, _):
+                return identifier
             }
         }
 
@@ -1351,6 +1411,8 @@ public extension DeclarationExtractor {
                 return base.identifierString
             case .function(let base, _), .block(_, let base, _):
                 return base?.identifierString
+            case .typedef(_, let identifier, _):
+                return identifier.getText()
             }
         }
     }
@@ -1624,7 +1686,7 @@ public extension DeclarationExtractor {
     /// A C type specifier
     enum TypeSpecifier: CustomStringConvertible {
         case scalar(ScalarType)
-        case typeName(String, ObjectiveCParser.IdentifierContext, GenericTypeList? = nil)
+        case typeName(TypeNameSpecifier)
         case structOrUnionSpecifier(StructOrUnionSpecifier)
         case enumSpecifier(EnumSpecifier)
 
@@ -1633,11 +1695,8 @@ public extension DeclarationExtractor {
             case .scalar(let value):
                 return value.description
 
-            case .typeName(let value, _, nil):
-                return "\(value)"
-
-            case .typeName(let value, _, let generic?):
-                return "\(value)\(generic)"
+            case .typeName(let value):
+                return value.description
             
             case .structOrUnionSpecifier(let value):
                 return value.rule.getText()
@@ -1682,8 +1741,8 @@ public extension DeclarationExtractor {
         /// specifier, in case it features one.
         public var identifierContext: ObjectiveCParser.IdentifierContext? {
             switch self {
-            case .typeName(_, let identifier, _):
-                return identifier
+            case .typeName(let value):
+                return value.identifier
             case .enumSpecifier(let ctx):
                 return ctx.identifier
             case .structOrUnionSpecifier(let ctx):
@@ -1728,6 +1787,34 @@ public extension DeclarationExtractor {
             default:
                 return false
             }
+        }
+
+        /// Returns the value associated with this enum if this value is a
+        /// `.typeName()` case.
+        public var asTypeNameSpecifier: TypeNameSpecifier? {
+            switch self {
+            case .typeName(let value):
+                return value
+            default:
+                return nil
+            }
+        }
+    }
+
+    /// A C type name specifier context
+    struct TypeNameSpecifier: CustomStringConvertible {
+        var name: String
+        var identifier: ObjectiveCParser.IdentifierContext
+        var genericTypes: GenericTypeList? = nil
+
+        public var description: String {
+            var result = name
+
+            if let genericTypes = genericTypes {
+                result += "\(genericTypes)"
+            }
+            
+            return result
         }
     }
 
@@ -2036,5 +2123,25 @@ public extension Sequence where Element == DeclarationExtractor.DeclSpecifier {
     }
     func ibOutletQualifiers() -> [DeclarationExtractor.IBOutletQualifier] {
         compactMap { $0.ibOutletQualifier }
+    }
+}
+
+private extension RuleContext {
+    /// Returns `true` if this rule context is a descendant of another rule context.
+    /// Comparison of nodes is made by reference.
+    ///
+    /// Returns `true` if `other === self`.
+    func isDescendantOf(_ other: RuleContext) -> Bool {
+        var current: RuleContext? = self
+
+        repeat {
+            if other === current {
+                return true
+            }
+
+            current = current?.parent
+        } while current != nil
+
+        return false
     }
 }

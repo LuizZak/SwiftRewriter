@@ -51,6 +51,37 @@ struct BlockDeclWrapper: DeclarationConvertible {
     }
 }
 
+struct TypedefDeclWrapper: DeclarationConvertible {
+    var decl: DeclarationExtractor.Declaration
+    var name: String
+    //var identifier: ObjectiveCParser.IdentifierContext
+    //var baseType: DeclarationExtractor.Declaration
+
+    init?(object: DeclarationExtractor.Declaration) {
+        guard object.specifiers.storageSpecifiers().contains(where: { $0.isTypedef }) else {
+            return nil
+        }
+        guard let name = object.declaration.identifierString else {
+            return nil
+        }
+
+        self.decl = object
+        self.name = name
+
+        /*
+        switch object.declaration {
+        case .typedef(let name, let identifier, let baseType):
+            self.name = name
+            self.identifier = identifier
+            self.baseType = baseType
+
+        default:
+            return nil
+        }
+        */
+    }
+}
+
 extension DeclarationExtractor.Declaration: DeclarationConvertible {
     var decl: DeclarationExtractor.Declaration { self }
 }
@@ -555,6 +586,38 @@ extension Asserter where Object: DeclarationConvertible {
     }
 
     @discardableResult
+    func assertIsTypeDef(
+        name: String? = nil,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        guard let typedef = TypedefDeclWrapper(object: object.decl) else {
+            XCTFail(
+                "Expected to define at least one typedef",
+                file: file,
+                line: line
+            )
+            dumpObject()
+
+            return nil
+        }
+
+        guard name == nil || name == typedef.name else {
+            XCTFail(
+                "Expected to define a typedef with name \(name ?? "<nil>") but found \(typedef.name)",
+                file: file,
+                line: line
+            )
+            dumpObject()
+
+            return nil
+        }
+
+        return self
+    }
+
+    @discardableResult
     func assert(
         specifiers: [DeclarationExtractor.DeclSpecifier],
         file: StaticString = #file,
@@ -592,6 +655,20 @@ extension Asserter where Object: DeclarationConvertible {
     }
 
     @discardableResult
+    func asserterForSpecifiers(
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<[DeclarationExtractor.DeclSpecifier]>) -> Void
+    ) -> Self {
+
+        let specifiers = object.decl.specifiers
+
+        closure(.init(object: specifiers))
+
+        return self
+    }
+
+    @discardableResult
     func asserterForPointer(
         file: StaticString = #file,
         line: UInt = #line,
@@ -613,6 +690,36 @@ extension Asserter where Object: DeclarationConvertible {
         closure(asserter)
 
         return asserter
+    }
+}
+
+extension Asserter where Object == [DeclarationExtractor.DeclSpecifier] {
+    /// Asserts that the underlying `[DeclSpecifier]` object being tested contains
+    /// one or more declaration specifiers that when converted to a string matches
+    /// a specified string value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertHasSpecifier(
+        string: String,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+        
+        let result = asserterForFirstElement(
+            message: "Expected to find one or more declaration specifiers matching raw string '\(string)'.",
+            file: file,
+            line: line
+        ) { declSpecifier in
+            declSpecifier.description == string
+        }
+
+        if result == nil {
+            return nil
+        }
+
+        return self
     }
 }
 
@@ -831,6 +938,46 @@ extension Asserter where Object == DeclarationExtractor.EnumSpecifier {
         }
 
         return .init(object: enumerator)
+    }
+
+    @discardableResult
+    func assertHasTypeName(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+        
+        guard object.typeName != nil else {
+            XCTAssertNotNil(
+                object.typeName,
+                file: file,
+                line: line
+            )
+            dumpObject()
+
+            return nil
+        }
+
+        return self
+    }
+
+    @discardableResult
+    func assertNoTypeName(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+        
+        guard object.typeName == nil else {
+            XCTAssertNil(
+                object.typeName,
+                file: file,
+                line: line
+            )
+            dumpObject()
+
+            return nil
+        }
+
+        return self
     }
 }
 

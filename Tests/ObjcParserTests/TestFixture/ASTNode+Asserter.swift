@@ -100,7 +100,7 @@ extension Asserter where Object == Identifier {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.name, file: file, line: line) {
+        asserterConditional(forKeyPath: \.name, file: file, line: line) {
             $0.assert(equals: name, message: message(), file: file, line: line)
         }
     }
@@ -120,7 +120,7 @@ extension Asserter where Object == TypeNameNode {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.type, file: file, line: line) {
+        asserterConditional(forKeyPath: \.type, file: file, line: line) {
             $0.assert(equals: type, message: message(), file: file, line: line)
         }
     }
@@ -140,7 +140,7 @@ extension Asserter where Object == InitialExpression {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(
+        asserterConditional(
             forKeyPath: \.constantExpression,
             file: file,
             line: line
@@ -165,8 +165,33 @@ extension Asserter where Object == ConstantExpressionNode {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(
-            forKeyPath: \.expression?.expression,
+        asserterConditional(
+            forKeyPath: \.expression,
+            file: file,
+            line: line
+        ) {
+            $0.assertNotNil(file: file, line: line)?
+                .assert(expressionString: expressionString, message: message(), file: file, line: line)
+        }
+    }
+}
+
+extension Asserter where Object == ExpressionNode {
+    /// Asserts that the underlying `ExpressionNode` being tested has a
+    /// parser rule expression that matches a specified string value exactly.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        expressionString: String,
+        message: @autoclosure () -> String = "",
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserterConditional(
+            forKeyPath: \.expression,
             file: file,
             line: line
         ) {
@@ -189,7 +214,7 @@ extension Asserter where Object == TypedefNode {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.identifier, file: file, line: line) {
+        asserterConditional(forKeyPath: \.identifier, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(name: name, file: file, line: line)
         }
@@ -207,9 +232,62 @@ extension Asserter where Object == TypedefNode {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.type, file: file, line: line) {
+        asserterConditional(forKeyPath: \.type, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(type: type, file: file, line: line)
+        }
+    }
+
+    /// Opens an asserter context for `BlockParametersNode` object within the
+    /// underlying `TypedefNode` being tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserterForBlockParameters(
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<BlockParametersNode>) -> Void
+    ) -> Self? {
+
+        asserterConditional(forKeyPath: \.blockParameters, file: file, line: line) {
+            $0.assertNotNil(file: file, line: line)?
+                .inClosure(closure)
+        }
+    }
+
+    /// Opens an asserter context for `ObjcStructDeclaration` object within the
+    /// underlying `TypedefNode` being tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserterForStructDeclaration(
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<ObjcStructDeclaration>) -> Void
+    ) -> Self? {
+
+        asserterConditional(forKeyPath: \.structDeclaration, file: file, line: line) {
+            $0.assertNotNil(file: file, line: line)?
+                .inClosure(closure)
+        }
+    }
+
+    /// Opens an asserter context for `[TypeDeclaratorNode]` object within the
+    /// underlying `TypedefNode` being tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserterForTypeDeclarators(
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<[TypeDeclaratorNode]>) -> Void
+    ) -> Self? {
+
+        asserterConditional(forKeyPath: \.typeDeclarators, file: file, line: line) {
+            $0.inClosure(closure)
         }
     }
 }
@@ -227,7 +305,7 @@ extension Asserter where Object == VariableDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.identifier, file: file, line: line) {
+        asserterConditional(forKeyPath: \.identifier, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(name: name, file: file, line: line)
         }
@@ -245,7 +323,7 @@ extension Asserter where Object == VariableDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.type, file: file, line: line) {
+        asserterConditional(forKeyPath: \.type, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(type: type, file: file, line: line)
         }
@@ -264,7 +342,7 @@ extension Asserter where Object == VariableDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(
+        asserterConditional(
             forKeyPath: \.initialExpression,
             file: file,
             line: line
@@ -285,7 +363,7 @@ extension Asserter where Object == VariableDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(
+        asserterConditional(
             forKeyPath: \.initialExpression,
             file: file,
             line: line
@@ -312,7 +390,7 @@ extension Asserter where Object == ObjcStructDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.identifier, file: file, line: line) {
+        asserterConditional(forKeyPath: \.identifier, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(name: name, file: file, line: line)
         }
@@ -330,8 +408,9 @@ extension Asserter where Object == ObjcStructDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.body?.children, file: file, line: line) {
-            $0.assertNotNil(file: file, line: line)?.assertCount(count)
+        asserterConditional(forKeyPath: \.body?.children, file: file, line: line) {
+            $0.assertNotNil(file: file, line: line)?
+                .assertCount(count, file: file, line: line)
         }
     }
 
@@ -348,20 +427,17 @@ extension Asserter where Object == ObjcStructDeclaration {
         _ closure: (Asserter<ObjcStructField>) -> Void
     ) -> Self? {
 
-        guard let field = object.body?.fields.first(where: { $0.identifier?.name == name }) else {
-            XCTFail(
-                "Expected to find a field with name \(name) in struct declaration \(object.identifier?.name ?? "<nil>").",
-                file: file,
-                line: line
-            )
-            dumpObject()
-
-            return nil
+        return asserterConditional(forKeyPath: \.body?.fields, file: file, line: line) { fields in
+            fields
+                .assertNotNil(file: file, line: line)?
+                .asserterForFirstElement(
+                    message: "Expected to find a field with name \(name) in struct declaration \(object.identifier?.name ?? "<nil>").",
+                    file: file,
+                    line: line
+                ) { field in
+                    field.identifier?.name == name
+                }?.inClosure(closure)
         }
-
-        closure(.init(object: field))
-
-        return self
     }
 }
 
@@ -378,7 +454,7 @@ extension Asserter where Object == ObjcStructField {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.identifier, file: file, line: line) {
+        asserterConditional(forKeyPath: \.identifier, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(name: name, file: file, line: line)
         }
@@ -396,7 +472,7 @@ extension Asserter where Object == ObjcStructField {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.type, file: file, line: line) {
+        asserterConditional(forKeyPath: \.type, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(type: type, file: file, line: line)
         }
@@ -415,13 +491,176 @@ extension Asserter where Object == ObjcStructField {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(
+        asserterConditional(
             forKeyPath: \.expression,
             file: file,
             line: line
         ) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(expressionString: expressionString, file: file, line: line)
+        }
+    }
+}
+
+extension Asserter where Object == ObjcEnumDeclaration {
+    /// Asserts that the underlying `ObjcEnumDeclaration` being tested has an
+    /// identifier node with a specified `name` value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        name: String,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserterConditional(forKeyPath: \.identifier, file: file, line: line) {
+            $0.assertNotNil(file: file, line: line)?
+                .assert(name: name, file: file, line: line)
+        }
+    }
+
+    /// Asserts that the underlying `ObjcEnumDeclaration` being tested has a
+    /// specified count of children fields defined.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertEnumeratorCount(
+        _ count: Int,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserterConditional(forKeyPath: \.cases, file: file, line: line) {
+            $0.assertCount(count, file: file, line: line)
+        }
+    }
+
+    /// Opens an asserter context for the first field on the underlying
+    /// `ObjcEnumDeclaration` object that matches a given name.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserter(
+        forEnumeratorName name: String,
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<ObjcEnumCase>) -> Void
+    ) -> Self? {
+
+        guard let field = object.cases.first(where: { $0.identifier?.name == name }) else {
+            XCTFail(
+                "Expected to find an enumerator with name \(name) in enum declaration \(object.identifier?.name ?? "<nil>").",
+                file: file,
+                line: line
+            )
+            dumpObject()
+
+            return nil
+        }
+
+        closure(.init(object: field))
+
+        return self
+    }
+
+    /// Asserts that the underlying `ObjcEnumDeclaration` being tested has a
+    /// type name node with a specified type.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        typeName: ObjcType,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserterConditional(forKeyPath: \.type, file: file, line: line) {
+            $0.assertNotNil(file: file, line: line)?
+                .assert(type: typeName, file: file, line: line)
+        }
+    }
+
+    /// Asserts that the underlying `ObjcEnumDeclaration` being tested has no
+    /// type name node specified.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertNoTypeName(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserterConditional(forKeyPath: \.type, file: file, line: line) {
+            $0.assertNil(file: file, line: line)
+        }
+    }
+}
+
+extension Asserter where Object == ObjcEnumCase {
+    /// Asserts that the underlying `ObjcEnumCase` being tested has an identifier
+    /// node with a specified `name` value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        name: String,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserterConditional(forKeyPath: \.identifier, file: file, line: line) {
+            $0.assertNotNil(file: file, line: line)?
+                .assert(name: name, file: file, line: line)
+        }
+    }
+
+    /// Asserts that the underlying `ObjcEnumCase` being tested has an
+    /// expression node with a parser rule expression that matches a
+    /// specified string value exactly.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        expressionString: String,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserterConditional(
+            forKeyPath: \.expression,
+            file: file,
+            line: line
+        ) {
+            $0.assertNotNil(file: file, line: line)?
+                .assert(expressionString: expressionString, file: file, line: line)
+        }
+    }
+
+    /// Asserts that the underlying `ObjcEnumCase` being tested has no expression
+    /// node associated with it.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertNoExpression(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserterConditional(
+            forKeyPath: \.expression,
+            file: file,
+            line: line
+        ) {
+            $0.assertNil(file: file, line: line)
         }
     }
 }
