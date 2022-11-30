@@ -164,35 +164,6 @@ public class DeclarationTranslator {
                     type: typeNameNode,
                     initialValue: nil
                 )
-            
-            case .typedef(_, _, let baseTypeDecl):
-                guard let identifierNode = identifierNode(from: decl.declaration, context: context) else {
-                    return nil
-                }
-
-                let convertedBase = translate(baseTypeDecl, context: context)
-
-                guard let firstDecl = convertedBase.first else {
-                    return nil
-                }
-                guard let type = firstDecl.objcType else {
-                    return nil
-                }
-
-                let finalType = PartialType.applyPointer(base: type, partialType.pointer)
-                
-                let typeNameNode = typeNameNode(
-                    from: finalType,
-                    ctxNode: ctxNode,
-                    context: context
-                )
-                
-                result = .typedef(
-                    rule: baseTypeDecl.declarationNode.rule,
-                    baseType: firstDecl,
-                    typeNode: typeNameNode,
-                    alias: identifierNode
-                )
             }
 
             return result
@@ -201,37 +172,32 @@ public class DeclarationTranslator {
         result = _applyDeclarator(decl.declaration)
         result?.initializer = decl.initializer
 
-        // TODO: Refactor the declaration translation code to avoid having to
-        // hardcode checking for typedef this way instead of just using the
-        // value returned by `_applyDecorator` as-is.
-        //if result?.isTypedef == false {
-            if
-                let enumSpecifier = partialType.enumSpecifier,
-                let identifierNode = identifierNode(from: decl.declaration, context: context)
-            {
-                let typeNameNode = typeNameNode(from: enumSpecifier.typeName, context: context)
-                let enumerators = enumCases(enumSpecifier.enumerators, context: context)
+        if
+            let enumSpecifier = partialType.enumSpecifier,
+            let identifierNode = identifierNode(from: decl.declaration, context: context)
+        {
+            let typeNameNode = typeNameNode(from: enumSpecifier.typeName, context: context)
+            let enumerators = enumCases(enumSpecifier.enumerators, context: context)
 
-                result = .enumDecl(
-                    rule: decl.declarationNode.rule,
-                    identifier: identifierNode,
-                    typeName: typeNameNode,
-                    enumSpecifier,
-                    enumerators
-                )
-            } else if
-                let structOrUnionSpecifier = partialType.structOrUnionSpecifier,
-                let identifierNode = identifierNode(from: decl.declaration, context: context)
-            {
-                let fields = structFields(structOrUnionSpecifier.fields, context: context)
+            result = .enumDecl(
+                rule: decl.declarationNode.rule,
+                identifier: identifierNode,
+                typeName: typeNameNode,
+                enumSpecifier,
+                enumerators
+            )
+        } else if
+            let structOrUnionSpecifier = partialType.structOrUnionSpecifier,
+            let identifierNode = identifierNode(from: decl.declaration, context: context)
+        {
+            let fields = structFields(structOrUnionSpecifier.fields, context: context)
 
-                result = .structOrUnionDecl(
-                    rule: decl.declarationNode.rule,
-                    identifier: identifierNode,
-                    structOrUnionSpecifier,
-                    fields
-                )
-            //}
+            result = .structOrUnionDecl(
+                rule: decl.declarationNode.rule,
+                identifier: identifierNode,
+                structOrUnionSpecifier,
+                fields
+            )
         } else if
             partialType.isTypedef,
             let result = result,
@@ -332,13 +298,6 @@ public class DeclarationTranslator {
                 )
 
                 return _applyDeclarator(base, type: partial)
-                
-            case .typedef(_, _, baseType: let baseTypeDecl):
-                guard let baseType = translateObjectiveCType(baseTypeDecl, context: context) else {
-                    return nil
-                }
-
-                return _applyDeclarator(baseTypeDecl.declaration, type: baseType)
             }
         }
 
@@ -684,9 +643,6 @@ public class DeclarationTranslator {
 
         case .staticArray(let base, _, _), .pointer(let base, _):
             return identifierNode(from: base, context: context)
-
-        case .typedef(_, let identifier, _):
-            return context.nodeFactory.makeIdentifier(from: identifier)
 
         case .identifier(_, let node):
             let identifierNode = context.nodeFactory.makeIdentifier(from: node)

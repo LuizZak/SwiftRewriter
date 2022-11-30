@@ -1379,13 +1379,6 @@ public extension DeclarationExtractor {
             arguments: [BlockParameter]
         )
 
-        /// A type definition declaration.
-        indirect case typedef(
-            String,
-            ObjectiveCParser.IdentifierContext,
-            baseType: Declaration
-        )
-
         /// Extracts the root identifier parser rule context for this declaration
         /// kind, if any is available.
         var identifierContext: ObjectiveCParser.IdentifierContext? {
@@ -1396,8 +1389,6 @@ public extension DeclarationExtractor {
                 return base.identifierContext
             case .function(let base, _), .block(_, let base, _):
                 return base?.identifierContext
-            case .typedef(_, let identifier, _):
-                return identifier
             }
         }
 
@@ -1411,8 +1402,6 @@ public extension DeclarationExtractor {
                 return base.identifierString
             case .function(let base, _), .block(_, let base, _):
                 return base?.identifierString
-            case .typedef(_, let identifier, _):
-                return identifier.getText()
             }
         }
     }
