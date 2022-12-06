@@ -4,7 +4,7 @@ indirect public enum SwiftType: Hashable {
     case nominal(NominalSwiftType)
     case protocolComposition(ProtocolCompositionSwiftType)
     case tuple(TupleSwiftType)
-    case block(returnType: SwiftType, parameters: [SwiftType], attributes: Set<BlockTypeAttribute>)
+    case block(returnType: SwiftType, parameters: [SwiftType], attributes: Set<BlockTypeAttribute> = [])
     case metatype(for: SwiftType)
     case optional(SwiftType)
     case implicitUnwrappedOptional(SwiftType)

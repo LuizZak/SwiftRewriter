@@ -77,6 +77,7 @@ public final class KeywordDeclarator: ASTNode, InitializableNode {
     }
 }
 
+/// Specifies the return type of a method.
 public final class MethodType: ASTNode, InitializableNode {
     public var nullabilitySpecifiers: [NullabilitySpecifier] {
         childrenMatching()
@@ -91,5 +92,5 @@ public final class MethodType: ASTNode, InitializableNode {
 }
 
 public final class NullabilitySpecifier: Identifier {
-    
+    public var nullabilitySpecifier: ObjcNullabilitySpecifier = .nullUnspecified
 }

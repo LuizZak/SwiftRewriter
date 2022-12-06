@@ -82,6 +82,25 @@ class SwiftStatementASTReaderTests: XCTestCase {
                             ])
         )
     }
+
+    func testFor_uninitializedIterator() {
+        assert(
+            objcStmt: "for(NSInteger i; i < 10; i++) { }",
+            readsAs: .compound([
+                .variableDeclaration(identifier: "i", type: .int, initialization: nil),
+                .while(
+                    .binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
+                    body: [
+                        .defer([
+                            .expression(
+                                .assignment(lhs: .identifier("i"), op: .addAssign, rhs: .constant(1))
+                            )
+                        ])
+                    ]
+                )
+            ])
+        )
+    }
     
     func testForConvertingToWhile() {
         // In some cases, the parser has to unwrap for loops that cannot be cleanly
@@ -277,13 +296,23 @@ class SwiftStatementASTReaderTests: XCTestCase {
                                              initialization: .constant(1)))
     }
     
+    func testDeclaration_uninitialized() {
+        assert(objcStmt: "CGFloat value;",
+               parseBlock: { try $0.declaration() },
+               readsAs: .variableDeclaration(identifier: "value",
+                                             type: .typeName("CGFloat"),
+                                             initialization: nil))
+    }
+    
     func testBlockDeclaration() {
         assert(objcStmt: "void(^callback)();",
                parseBlock: { try $0.declaration() },
                readsAs: .variableDeclaration(identifier: "callback",
                                              type: .nullabilityUnspecified(.swiftBlock(returnType: .void, parameters: [])),
                                              initialization: nil))
-        
+    }
+
+    func testBlockDeclaration_nullabilitySpecifier() {
         assert(objcStmt: "void(^_Nonnull callback)();",
                parseBlock: { try $0.declaration() },
                readsAs: .variableDeclaration(identifier: "callback",
@@ -458,29 +487,43 @@ class SwiftStatementASTReaderTests: XCTestCase {
 
 extension SwiftStatementASTReaderTests {
     @discardableResult
-    func assert(objcStmt: String,
-                comments: [ObjcComment] = [],
-                parseBlock: (ObjectiveCParser) throws -> (ParserRuleContext) = { try $0.statement() },
-                readsAs expected: Statement,
-                file: StaticString = #filePath,
-                line: UInt = #line) -> Statement? {
+    func assert(
+        objcStmt: String,
+        comments: [ObjcComment] = [],
+        parseBlock: (ObjectiveCParser) throws -> (ParserRuleContext) = { try $0.statement() },
+        readsAs expected: Statement,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> Statement? {
         
         let typeSystem = TypeSystem()
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
-        let typeParser = TypeParsing(state: SwiftStatementASTReaderTests._state)
+        let source = StringCodeSource(source: objcStmt)
+        let typeParser = TypeParsing(
+            state: SwiftStatementASTReaderTests._state,
+            source: source,
+            nonnullContextQuerier: NonnullContextQuerier(
+                nonnullMacroRegionsTokenRange: []
+            )
+        )
         
         let expReader =
             SwiftExprASTReader(
                 typeMapper: typeMapper,
                 typeParser: typeParser,
-                context: SwiftASTReaderContext(typeSystem: typeSystem,
-                                               typeContext: nil,
-                                               comments: comments),
-                delegate: delegate)
+                context: SwiftASTReaderContext(
+                    typeSystem: typeSystem,
+                    typeContext: nil,
+                    comments: comments
+                ),
+                delegate: delegate
+            )
         
-        let sut = SwiftStatementASTReader(expressionReader: expReader,
-                                          context: expReader.context,
-                                          delegate: delegate)
+        let sut = SwiftStatementASTReader(
+            expressionReader: expReader,
+            context: expReader.context,
+            delegate: delegate
+        )
         
         do {
             let parser = try SwiftStatementASTReaderTests._state.makeMainParser(input: objcStmt).parser

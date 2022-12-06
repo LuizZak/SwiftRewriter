@@ -12,17 +12,21 @@ public class PreprocessorDirectiveConverter {
     let typeSystem: TypeSystem
     let typeResolverInvoker: TypeResolverInvoker
     
-    public init(parserStatePool: ObjcParserStatePool,
-                typeSystem: TypeSystem,
-                typeResolverInvoker: TypeResolverInvoker) {
+    public init(
+        parserStatePool: ObjcParserStatePool,
+        typeSystem: TypeSystem,
+        typeResolverInvoker: TypeResolverInvoker
+    ) {
         
         self.parserStatePool = parserStatePool
         self.typeSystem = typeSystem
         self.typeResolverInvoker = typeResolverInvoker
     }
     
-    public func convert(directive directiveString: String,
-                        inFile file: FileGenerationIntention) -> DirectiveDeclaration? {
+    public func convert(
+        directive directiveString: String,
+        inFile file: FileGenerationIntention
+    ) -> DirectiveDeclaration? {
         
         guard let directive = processDirective(directiveString) else {
             return nil
@@ -47,9 +51,11 @@ public class PreprocessorDirectiveConverter {
             return nil
         }
         
-        return DirectiveDeclaration(name: directive.identifier,
-                                    type: declaration.type,
-                                    expresion: declaration.expression)
+        return DirectiveDeclaration(
+            name: directive.identifier,
+            type: declaration.type,
+            expression: declaration.expression
+        )
     }
     
     func processDirective(_ directive: String) -> Directive? {
@@ -79,8 +85,14 @@ public class PreprocessorDirectiveConverter {
         let state = parserStatePool.pull()
         defer { parserStatePool.repool(state) }
         
-        let astReader = SwiftASTReader(typeMapper: DefaultTypeMapper(typeSystem: typeSystem),
-                                       typeParser: TypeParsing(state: state))
+        let astReader = SwiftASTReader(
+            typeMapper: DefaultTypeMapper(typeSystem: typeSystem),
+            typeParser: TypeParsing(
+                state: state,
+                source: StringCodeSource(source: ctx.getText()),
+                nonnullContextQuerier: NonnullContextQuerier(nonnullMacroRegionsTokenRange: [])
+            )
+        )
         
         return astReader.parseExpression(expression: ctx)
     }
@@ -117,12 +129,12 @@ public class PreprocessorDirectiveConverter {
 public struct DirectiveDeclaration {
     public var name: String
     public var type: SwiftType
-    public var expresion: Expression
+    public var expression: Expression
     
-    public init(name: String, type: SwiftType, expresion: Expression) {
+    public init(name: String, type: SwiftType, expression: Expression) {
         self.name = name
         self.type = type
-        self.expresion = expresion
+        self.expression = expression
     }
 }
 

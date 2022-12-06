@@ -387,7 +387,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
                 .createFile(named: "A.h") { file in
-                    file.createTypealias(withName: "Abc", type: .struct("NSInteger"))
+                    file.createTypealias(withName: "Abc", type: .typeName("NSInteger"))
                 }.createFile(named: "A.m")
                 .build()
         let sut = FileTypeMergingIntentionPass()
@@ -568,7 +568,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                             swiftType: .swiftBlock(returnType: .void, parameters: ["A"]),
                             type: .blockType(name: "ABlock",
                                              returnType: .void,
-                                             parameters: [.pointer(.struct("A"))])
+                                             parameters: [.pointer(.typeName("A"))])
                         )
                         .endNonnullContext()
                 }

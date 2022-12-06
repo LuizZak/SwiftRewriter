@@ -91,17 +91,17 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitClassImplementation(_ ctx: ObjectiveCParser.ClassImplementationContext)
 	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#classImplementatioName}.
+	 * Enter a parse tree produced by {@link ObjectiveCParser#classImplementationName}.
 	 - Parameters:
 	   - ctx: the parse tree
 	 */
-	func enterClassImplementatioName(_ ctx: ObjectiveCParser.ClassImplementatioNameContext)
+	func enterClassImplementationName(_ ctx: ObjectiveCParser.ClassImplementationNameContext)
 	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#classImplementatioName}.
+	 * Exit a parse tree produced by {@link ObjectiveCParser#classImplementationName}.
 	 - Parameters:
 	   - ctx: the parse tree
 	 */
-	func exitClassImplementatioName(_ ctx: ObjectiveCParser.ClassImplementatioNameContext)
+	func exitClassImplementationName(_ ctx: ObjectiveCParser.ClassImplementationNameContext)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#categoryImplementation}.
 	 - Parameters:
@@ -151,17 +151,17 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitGenericSuperclassName(_ ctx: ObjectiveCParser.GenericSuperclassNameContext)
 	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#genericSuperclassSpecifier}.
+	 * Enter a parse tree produced by {@link ObjectiveCParser#genericClassParametersSpecifier}.
 	 - Parameters:
 	   - ctx: the parse tree
 	 */
-	func enterGenericSuperclassSpecifier(_ ctx: ObjectiveCParser.GenericSuperclassSpecifierContext)
+	func enterGenericClassParametersSpecifier(_ ctx: ObjectiveCParser.GenericClassParametersSpecifierContext)
 	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#genericSuperclassSpecifier}.
+	 * Exit a parse tree produced by {@link ObjectiveCParser#genericClassParametersSpecifier}.
 	 - Parameters:
 	   - ctx: the parse tree
 	 */
-	func exitGenericSuperclassSpecifier(_ ctx: ObjectiveCParser.GenericSuperclassSpecifierContext)
+	func exitGenericClassParametersSpecifier(_ ctx: ObjectiveCParser.GenericClassParametersSpecifierContext)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#superclassTypeSpecifierWithPrefixes}.
 	 - Parameters:
@@ -222,6 +222,18 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	   - ctx: the parse tree
 	 */
 	func exitClassDeclarationList(_ ctx: ObjectiveCParser.ClassDeclarationListContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#classDeclaration}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterClassDeclaration(_ ctx: ObjectiveCParser.ClassDeclarationContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#classDeclaration}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitClassDeclaration(_ ctx: ObjectiveCParser.ClassDeclarationContext)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#protocolList}.
 	 - Parameters:
@@ -499,18 +511,6 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitPropertySynthesizeItem(_ ctx: ObjectiveCParser.PropertySynthesizeItemContext)
 	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#blockType}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func enterBlockType(_ ctx: ObjectiveCParser.BlockTypeContext)
-	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#blockType}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func exitBlockType(_ ctx: ObjectiveCParser.BlockTypeContext)
-	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#dictionaryExpression}.
 	 - Parameters:
 	   - ctx: the parse tree
@@ -570,30 +570,6 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	   - ctx: the parse tree
 	 */
 	func exitBlockParameters(_ ctx: ObjectiveCParser.BlockParametersContext)
-	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#typeVariableDeclaratorOrName}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func enterTypeVariableDeclaratorOrName(_ ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext)
-	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#typeVariableDeclaratorOrName}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func exitTypeVariableDeclaratorOrName(_ ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext)
-	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#blockExpression_}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func enterBlockExpression_(_ ctx: ObjectiveCParser.BlockExpression_Context)
-	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#blockExpression_}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func exitBlockExpression_(_ ctx: ObjectiveCParser.BlockExpression_Context)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#blockExpression}.
 	 - Parameters:
@@ -1123,6 +1099,18 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitDirectDeclarator(_ ctx: ObjectiveCParser.DirectDeclaratorContext)
 	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#blockDeclarationSpecifier}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterBlockDeclarationSpecifier(_ ctx: ObjectiveCParser.BlockDeclarationSpecifierContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#blockDeclarationSpecifier}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitBlockDeclarationSpecifier(_ ctx: ObjectiveCParser.BlockDeclarationSpecifierContext)
+	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#typeName}.
 	 - Parameters:
 	   - ctx: the parse tree
@@ -1291,17 +1279,17 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitAtomicTypeSpecifier(_ ctx: ObjectiveCParser.AtomicTypeSpecifierContext)
 	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#structOrUnionSpecifier_}.
+	 * Enter a parse tree produced by {@link ObjectiveCParser#fieldDeclaration}.
 	 - Parameters:
 	   - ctx: the parse tree
 	 */
-	func enterStructOrUnionSpecifier_(_ ctx: ObjectiveCParser.StructOrUnionSpecifier_Context)
+	func enterFieldDeclaration(_ ctx: ObjectiveCParser.FieldDeclarationContext)
 	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#structOrUnionSpecifier_}.
+	 * Exit a parse tree produced by {@link ObjectiveCParser#fieldDeclaration}.
 	 - Parameters:
 	   - ctx: the parse tree
 	 */
-	func exitStructOrUnionSpecifier_(_ ctx: ObjectiveCParser.StructOrUnionSpecifier_Context)
+	func exitFieldDeclaration(_ ctx: ObjectiveCParser.FieldDeclarationContext)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#structOrUnionSpecifier}.
 	 - Parameters:
@@ -1363,41 +1351,53 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitSpecifierQualifierList(_ ctx: ObjectiveCParser.SpecifierQualifierListContext)
 	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#structDeclaratorList}.
+	 * Enter a parse tree produced by {@link ObjectiveCParser#enumSpecifier}.
 	 - Parameters:
 	   - ctx: the parse tree
 	 */
-	func enterStructDeclaratorList(_ ctx: ObjectiveCParser.StructDeclaratorListContext)
+	func enterEnumSpecifier(_ ctx: ObjectiveCParser.EnumSpecifierContext)
 	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#structDeclaratorList}.
+	 * Exit a parse tree produced by {@link ObjectiveCParser#enumSpecifier}.
 	 - Parameters:
 	   - ctx: the parse tree
 	 */
-	func exitStructDeclaratorList(_ ctx: ObjectiveCParser.StructDeclaratorListContext)
+	func exitEnumSpecifier(_ ctx: ObjectiveCParser.EnumSpecifierContext)
 	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#structDeclarator}.
+	 * Enter a parse tree produced by {@link ObjectiveCParser#enumeratorList}.
 	 - Parameters:
 	   - ctx: the parse tree
 	 */
-	func enterStructDeclarator(_ ctx: ObjectiveCParser.StructDeclaratorContext)
+	func enterEnumeratorList(_ ctx: ObjectiveCParser.EnumeratorListContext)
 	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#structDeclarator}.
+	 * Exit a parse tree produced by {@link ObjectiveCParser#enumeratorList}.
 	 - Parameters:
 	   - ctx: the parse tree
 	 */
-	func exitStructDeclarator(_ ctx: ObjectiveCParser.StructDeclaratorContext)
+	func exitEnumeratorList(_ ctx: ObjectiveCParser.EnumeratorListContext)
 	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#fieldDeclaration}.
+	 * Enter a parse tree produced by {@link ObjectiveCParser#enumerator}.
 	 - Parameters:
 	   - ctx: the parse tree
 	 */
-	func enterFieldDeclaration(_ ctx: ObjectiveCParser.FieldDeclarationContext)
+	func enterEnumerator(_ ctx: ObjectiveCParser.EnumeratorContext)
 	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#fieldDeclaration}.
+	 * Exit a parse tree produced by {@link ObjectiveCParser#enumerator}.
 	 - Parameters:
 	   - ctx: the parse tree
 	 */
-	func exitFieldDeclaration(_ ctx: ObjectiveCParser.FieldDeclarationContext)
+	func exitEnumerator(_ ctx: ObjectiveCParser.EnumeratorContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#enumeratorIdentifier}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterEnumeratorIdentifier(_ ctx: ObjectiveCParser.EnumeratorIdentifierContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#enumeratorIdentifier}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitEnumeratorIdentifier(_ ctx: ObjectiveCParser.EnumeratorIdentifierContext)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#ibOutletQualifier}.
 	 - Parameters:
@@ -1627,65 +1627,17 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitFieldDeclarator(_ ctx: ObjectiveCParser.FieldDeclaratorContext)
 	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#enumSpecifier}.
+	 * Enter a parse tree produced by {@link ObjectiveCParser#vcSpecificModifier}.
 	 - Parameters:
 	   - ctx: the parse tree
 	 */
-	func enterEnumSpecifier(_ ctx: ObjectiveCParser.EnumSpecifierContext)
+	func enterVcSpecificModifier(_ ctx: ObjectiveCParser.VcSpecificModifierContext)
 	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#enumSpecifier}.
+	 * Exit a parse tree produced by {@link ObjectiveCParser#vcSpecificModifier}.
 	 - Parameters:
 	   - ctx: the parse tree
 	 */
-	func exitEnumSpecifier(_ ctx: ObjectiveCParser.EnumSpecifierContext)
-	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#enumeratorList}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func enterEnumeratorList(_ ctx: ObjectiveCParser.EnumeratorListContext)
-	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#enumeratorList}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func exitEnumeratorList(_ ctx: ObjectiveCParser.EnumeratorListContext)
-	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#enumerator}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func enterEnumerator(_ ctx: ObjectiveCParser.EnumeratorContext)
-	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#enumerator}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func exitEnumerator(_ ctx: ObjectiveCParser.EnumeratorContext)
-	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#enumeratorIdentifier}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func enterEnumeratorIdentifier(_ ctx: ObjectiveCParser.EnumeratorIdentifierContext)
-	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#enumeratorIdentifier}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func exitEnumeratorIdentifier(_ ctx: ObjectiveCParser.EnumeratorIdentifierContext)
-	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#vcSpecificModifer}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func enterVcSpecificModifer(_ ctx: ObjectiveCParser.VcSpecificModiferContext)
-	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#vcSpecificModifer}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func exitVcSpecificModifer(_ ctx: ObjectiveCParser.VcSpecificModiferContext)
+	func exitVcSpecificModifier(_ ctx: ObjectiveCParser.VcSpecificModifierContext)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#gccDeclaratorExtension}.
 	 - Parameters:

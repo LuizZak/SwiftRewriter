@@ -2,6 +2,10 @@ import Antlr4
 import ObjcParserAntlr
 import GrammarModels
 
+// TODO: Refactor to remove `ASTNode` creation from this translation level and
+// TODO: leave that to `DefinitionCollector`, as this is causing problems down
+// TODO: the pipeline in the Swift AST/Expression generation layer.
+
 /// Converts a declaration from `DeclarationExtractor` to a proper `ASTNode`
 /// representing the declaration.
 public class DeclarationTranslator {
@@ -38,6 +42,7 @@ public class DeclarationTranslator {
         func _applyDeclarator(
             _ declKind: DeclarationExtractor.DeclarationKind?
         ) -> ASTNodeDeclaration? {
+
             guard let declKind = declKind else {
                 return nil
             }
@@ -57,11 +62,15 @@ public class DeclarationTranslator {
                 nodeFactory.updateSourceLocation(for: typeNode, with: identifier)
 
                 result = .variable(
-                    rule: decl.declarationNode.rule,
-                    nullability: partialType.nullability,
-                    identifier: identifierNode,
-                    type: typeNode,
-                    initialValue: nil
+                    .init(
+                        rule: decl.declarationNode.rule,
+                        nullability: partialType.nullability,
+                        arcSpecifier: partialType.arcSpecifier,
+                        identifier: identifierNode,
+                        type: typeNode,
+                        initialValue: nil,
+                        isStatic: partialType.isStatic
+                    )
                 )
             
             case .pointer(let base, _):
@@ -71,21 +80,24 @@ public class DeclarationTranslator {
 
                 // TODO: Support other types of pointer declarators
                 switch base {
-                case .function(let rule, let identifier, let parameters, let returnType):
+                case .function(let decl):
                     result = .functionPointer(
-                        rule: rule,
-                        nullability: nil,
-                        identifier: identifier,
-                        parameters: parameters,
-                        returnType: returnType,
-                        initialValue: nil
+                        .init(
+                            rule: decl.rule,
+                            nullability: nil,
+                            identifier: decl.identifier,
+                            parameters: decl.parameters,
+                            returnType: decl.returnType,
+                            initialValue: nil,
+                            isStatic: partialType.isStatic
+                        )
                     )
 
                 default:
                     return nil
                 }
             
-            case .block(let nullabilitySpecifier, _, let parameters):
+            case .block(let blockSpecifiers, _, let parameters):
                 guard let identifierNode = identifierNode(from: decl.declaration, context: context) else {
                     return nil
                 }
@@ -100,15 +112,21 @@ public class DeclarationTranslator {
                 )
 
                 result = .block(
-                    rule: decl.declarationNode.rule,
-                    nullability: nullability(from: nullabilitySpecifier) ?? partialType.nullability,
-                    identifier: identifierNode,
-                    parameters: parameterNodes,
-                    returnType: returnTypeNode,
-                    initialValue: nil
+                    .init(
+                        rule: decl.declarationNode.rule,
+                        nullability: blockSpecifiers.nullabilitySpecifier().last ?? partialType.nullability,
+                        arcSpecifier: blockSpecifiers.arcBehaviourSpecifier().last ?? partialType.arcSpecifier,
+                        typeQualifiers: blockSpecifiers.typeQualifier(),
+                        typePrefix: blockSpecifiers.typePrefix().last,
+                        identifier: identifierNode,
+                        parameters: parameterNodes,
+                        returnType: returnTypeNode,
+                        initialValue: nil,
+                        isStatic: partialType.isStatic
+                    )
                 )
             
-            case .function(_, let parameters):
+            case .function(_, let parameters, let isVariadic):
                 guard let identifierNode = identifierNode(from: decl.declaration, context: context) else {
                     return nil
                 }
@@ -123,10 +141,13 @@ public class DeclarationTranslator {
                 )
 
                 result = .function(
-                    rule: decl.declarationNode.rule,
-                    identifier: identifierNode,
-                    parameters: parameterNodes,
-                    returnType: returnTypeNode
+                    .init(
+                        rule: decl.declarationNode.rule,
+                        identifier: identifierNode,
+                        parameters: parameterNodes,
+                        returnType: returnTypeNode,
+                        isVariadic: isVariadic
+                    )
                 )
             
             case .staticArray(_, _, let length):
@@ -158,11 +179,15 @@ public class DeclarationTranslator {
                 )
 
                 result = .variable(
-                    rule: decl.declarationNode.rule,
-                    nullability: partialType.nullability,
-                    identifier: identifierNode,
-                    type: typeNameNode,
-                    initialValue: nil
+                    .init(
+                        rule: decl.declarationNode.rule,
+                        nullability: partialType.nullability,
+                        arcSpecifier: nil,
+                        identifier: identifierNode,
+                        type: typeNameNode,
+                        initialValue: nil,
+                        isStatic: partialType.isStatic
+                    )
                 )
             }
 
@@ -172,7 +197,24 @@ public class DeclarationTranslator {
         result = _applyDeclarator(decl.declaration)
         result?.initializer = decl.initializer
 
+        // Conversion into struct/enum/typedef
         if
+            isStructConvertible(decl, partialType),
+            let structOrUnionSpecifier = partialType.structOrUnionSpecifier,
+            let identifierNode = identifierNode(from: decl.declaration, context: context)
+        {
+            let fields = structFields(structOrUnionSpecifier.fields, context: context)
+
+            result = .structOrUnionDecl(
+                .init(
+                    rule: decl.declarationNode.rule,
+                    identifier: identifierNode,
+                    context: structOrUnionSpecifier,
+                    fields: fields
+                )
+            )
+        } else if
+            isEnumConvertible(decl, partialType),
             let enumSpecifier = partialType.enumSpecifier,
             let identifierNode = identifierNode(from: decl.declaration, context: context)
         {
@@ -180,38 +222,35 @@ public class DeclarationTranslator {
             let enumerators = enumCases(enumSpecifier.enumerators, context: context)
 
             result = .enumDecl(
-                rule: decl.declarationNode.rule,
-                identifier: identifierNode,
-                typeName: typeNameNode,
-                enumSpecifier,
-                enumerators
+                .init(
+                    rule: decl.declarationNode.rule,
+                    identifier: identifierNode,
+                    typeName: typeNameNode,
+                    context: enumSpecifier,
+                    enumerators: enumerators
+                )
             )
         } else if
-            let structOrUnionSpecifier = partialType.structOrUnionSpecifier,
-            let identifierNode = identifierNode(from: decl.declaration, context: context)
-        {
-            let fields = structFields(structOrUnionSpecifier.fields, context: context)
-
-            result = .structOrUnionDecl(
-                rule: decl.declarationNode.rule,
-                identifier: identifierNode,
-                structOrUnionSpecifier,
-                fields
-            )
-        } else if
-            partialType.isTypedef,
+            isTypedefConvertible(decl, partialType),
             let result = result,
             let identifierNode = identifierNode(from: decl.declaration, context: context),
-            let baseType = result.objcType
+            var baseType = result.objcType
         {
+            // Handle opaque/anonymous struct/enum declarations
+            if partialType.pointer != nil && partialType.isOpaqueOrAnonymousDeclaration {
+                baseType = PartialType.applyPointer(base: .void, partialType.pointer)
+            }
+
             let typeNode = typeNameNode(from: baseType, ctxNode: ctxNode, context: context)
 
             return [
                 .typedef(
-                    rule: decl.declarationNode.rule,
-                    baseType: result,
-                    typeNode: typeNode,
-                    alias: identifierNode
+                    .init(
+                        rule: decl.declarationNode.rule,
+                        baseType: result,
+                        typeNode: typeNode,
+                        alias: identifierNode
+                    )
                 )
             ]
         }
@@ -231,7 +270,9 @@ public class DeclarationTranslator {
 
         return decls.flatMap({ self.translate($0, context: context) })
     }
-
+    
+    // TODO: Reduce duplication with translate() above.
+    
     /// Translates the C type of a declaration into an appropriate `ObjcType`
     /// instance.
     public func translateObjectiveCType(
@@ -257,7 +298,7 @@ public class DeclarationTranslator {
             case .identifier:
                 return type
 
-            case .function(let base, let params):
+            case .function(let base, let params, _):
                 guard let paramTypes = functionArgumentTypes(from: params, context: context) else {
                     return nil
                 }
@@ -286,16 +327,24 @@ public class DeclarationTranslator {
 
                 return _applyDeclarator(base, type: partial)
             
-            case .block(_, let base, let params):
+            case .block(let blockSpecifiers, let base, let params):
                 guard let paramTypes = functionArgumentTypes(from: params, context: context) else {
                     return nil
                 }
 
-                let partial: ObjcType = .functionPointer(
+                var partial: ObjcType = .blockType(
                     name: nil,
                     returnType: type,
-                    parameters: paramTypes
+                    parameters: paramTypes,
+                    nullabilitySpecifier: blockSpecifiers.nullabilitySpecifier().last ?? partialType.nullability
                 )
+
+                if let lastArcSpecifier = blockSpecifiers.arcBehaviourSpecifier().last {
+                    partial = .specified(specifiers: [.arcSpecifier(lastArcSpecifier)], partial)
+                }
+                if !blockSpecifiers.typeQualifier().isEmpty {
+                    partial = .qualified(partial, qualifiers: blockSpecifiers.typeQualifier())
+                }
 
                 return _applyDeclarator(base, type: partial)
             }
@@ -336,7 +385,7 @@ public class DeclarationTranslator {
             }
 
             switch declKind {
-            case .function(let base, let params):
+            case .function(let base, let params, _):
                 guard let paramTypes = functionArgumentTypes(from: params, context: context) else {
                     return nil
                 }
@@ -346,6 +395,26 @@ public class DeclarationTranslator {
                     returnType: type,
                     parameters: paramTypes
                 )
+
+                return _applyDeclarator(base, type: partial)
+            
+            case .block(let base, let specifiers, let params):
+                guard let paramTypes = functionArgumentTypes(from: params, context: context) else {
+                    return nil
+                }
+
+                var partial: ObjcType = .blockType(
+                    name: nil,
+                    returnType: type,
+                    parameters: paramTypes,
+                    nullabilitySpecifier: specifiers.nullabilitySpecifier().last
+                )
+                if let lastArcSpecifier = specifiers.arcBehaviourSpecifier().last {
+                    partial = .specified(specifiers: [.arcSpecifier(lastArcSpecifier)], partial)
+                }
+                if !specifiers.typeQualifier().isEmpty {
+                    partial = .qualified(partial, qualifiers: specifiers.typeQualifier())
+                }
 
                 return _applyDeclarator(base, type: partial)
             
@@ -365,6 +434,66 @@ public class DeclarationTranslator {
         return _applyDeclarator(decl.declaration, type: type)
     }
 
+    /// Returns `true` if the contents of a declaration along with a partial type
+    /// can be converted into a struct declaration.
+    private func isStructConvertible(
+        _ decl: DeclarationExtractor.Declaration,
+        _ partialType: PartialType
+    ) -> Bool {
+
+        guard partialType.isStructOrUnionSpecifier else {
+            return false
+        }
+        guard decl.declaration.identifierContext != nil else {
+            return false
+        }
+        guard !partialType.isOpaqueStructOrUnion else {
+            return false
+        }
+        guard !(partialType.pointer != nil && partialType.isOpaqueOrAnonymousDeclaration) else {
+            return false
+        }
+
+        return true
+    }
+
+    /// Returns `true` if the contents of a declaration along with a partial type
+    /// can be converted into an enum declaration.
+    private func isEnumConvertible(
+        _ decl: DeclarationExtractor.Declaration,
+        _ partialType: PartialType
+    ) -> Bool {
+
+        guard partialType.isEnumSpecifier else {
+            return false
+        }
+        guard decl.declaration.identifierContext != nil else {
+            return false
+        }
+        guard !partialType.isOpaqueEnum else {
+            return false
+        }
+        guard !(partialType.pointer != nil && partialType.isOpaqueOrAnonymousDeclaration) else {
+            return false
+        }
+
+        return true
+    }
+
+    /// Returns `true` if the contents of a declaration along with a partial type
+    /// can be converted into a typedef declaration.
+    private func isTypedefConvertible(
+        _ decl: DeclarationExtractor.Declaration,
+        _ partialType: PartialType
+    ) -> Bool {
+
+        guard partialType.isTypedef else {
+            return false
+        }
+
+        return true
+    }
+
     private func typeNameNode(
         from type: ObjcType,
         ctxNode: ParserRuleContext,
@@ -380,65 +509,6 @@ public class DeclarationTranslator {
         return typeNameNode
     }
 
-    private func functionArgument(
-        from blockParameter: DeclarationExtractor.BlockParameter,
-        context: Context
-    ) -> FunctionParameter? {
-
-        let nodeFactory = context.nodeFactory
-        
-        switch blockParameter {
-        case .declaration(let declaration):
-            let decls = translate(declaration, context: context)
-            guard decls.count == 1 else {
-                return nil
-            }
-
-            let decl = decls.first
-
-            guard let ctxNode = ctxNode(for: declaration) else {
-                return nil
-            }
-            
-            let paramNode = FunctionParameter(
-                isInNonnullContext: nodeFactory.isInNonnullContext(ctxNode)
-            )
-            
-            nodeFactory.updateSourceLocation(for: paramNode, with: ctxNode)
-
-            if let identifier = decl?.identifierNode {
-                paramNode.addChild(identifier)
-            }
-            if let typeNode = decl?.typeNode {
-                paramNode.addChild(typeNode)
-            }
-
-            return paramNode
-
-        case .typeName(let typeName):
-            let paramNode = FunctionParameter(
-                isInNonnullContext: nodeFactory.isInNonnullContext(
-                    typeName.declarationNode.rule
-                )
-            )
-            
-            nodeFactory.updateSourceLocation(
-                for: paramNode,
-                with: typeName.declarationNode.rule
-            )
-
-            if let type = translateObjectiveCType(typeName, context: context) {
-                let typeNameNode = TypeNameNode(
-                    type: type,
-                    isInNonnullContext: paramNode.isInNonnullContext
-                )
-
-                paramNode.addChild(typeNameNode)
-            }
-
-            return paramNode
-        }
-    }
 
     private func functionArgument(
         from functionParam: DeclarationExtractor.FuncParameter,
@@ -515,27 +585,11 @@ public class DeclarationTranslator {
         return paramTypes.compactMap({ $0 })
     }
 
-    private func functionArgumentTypes(
-        from blockParameters: [DeclarationExtractor.BlockParameter],
-        context: Context
-    ) -> [ObjcType]? {
-
-        let paramTypes = blockParameters.map {
-            functionArgument(from: $0, context: context)?.type?.type
-        }
-
-        if paramTypes.contains(nil) {
-            return nil
-        }
-
-        return paramTypes.compactMap({ $0 })
-    }
-
     /// Translates a list of C struct/union fields into AST node declarations.
     private func structFields(
         _ fields: [DeclarationExtractor.StructFieldDeclaration]?,
         context: Context
-    ) -> [ObjcStructField] {
+    ) -> [ASTStructFieldDeclaration] {
 
         guard let fields else {
             return []
@@ -548,7 +602,7 @@ public class DeclarationTranslator {
     private func enumCases(
         _ enumerators: [DeclarationExtractor.EnumeratorDeclaration]?,
         context: Context
-    ) -> [ObjcEnumCase] {
+    ) -> [ASTEnumeratorDeclaration] {
 
         guard let enumerators else {
             return []
@@ -557,16 +611,19 @@ public class DeclarationTranslator {
         return enumerators.compactMap({ self.enumCase($0, context: context) })
     }
 
-    /// Translates a C struct/union field into an `ObjcStructField`.
+    /// Translates a C struct/union field into an `ASTStructFieldDeclaration`.
     private func structField(
         _ field: DeclarationExtractor.StructFieldDeclaration,
         context: Context
-    ) -> ObjcStructField? {
+    ) -> ASTStructFieldDeclaration? {
 
         guard let type = translateObjectiveCType(field.declaration, context: context) else {
             return nil
         }
         guard let ident = identifierNode(from: field.declaration.declaration, context: context) else {
+            return nil
+        }
+        guard let ctxNode = field.declarator ?? field.constantExpression else {
             return nil
         }
 
@@ -582,15 +639,16 @@ public class DeclarationTranslator {
         )
 
         node.updateSourceRange()
-
-        return node
+        
+        return ASTStructFieldDeclaration(node: node, rule: ctxNode)
     }
 
-    /// Translates a C struct/union enumerator into an `ObjcEnumCase`.
+    /// Translates a C struct/union enumerator into an `ASTEnumeratorDeclaration`.
     private func enumCase(
         _ enumerator: DeclarationExtractor.EnumeratorDeclaration,
         context: Context
-    ) -> ObjcEnumCase? {
+    ) -> ASTEnumeratorDeclaration? {
+
         guard let identCtx = enumerator.identifier.identifier() else {
             return nil
         }
@@ -608,7 +666,7 @@ public class DeclarationTranslator {
 
         node.updateSourceRange()
 
-        return node
+        return ASTEnumeratorDeclaration(node: node, rule: identCtx)
     }
 
     private func typeNameNode(
@@ -636,19 +694,11 @@ public class DeclarationTranslator {
         guard let declKind = declKind else {
             return nil
         }
-
-        switch declKind {
-        case .block(_, let base, _), .function(let base, _):
-            return identifierNode(from: base, context: context)
-
-        case .staticArray(let base, _, _), .pointer(let base, _):
-            return identifierNode(from: base, context: context)
-
-        case .identifier(_, let node):
-            let identifierNode = context.nodeFactory.makeIdentifier(from: node)
-
-            return identifierNode
+        guard let identifierCtx = declKind.identifierContext else {
+            return nil
         }
+
+        return context.nodeFactory.makeIdentifier(from: identifierCtx)
     }
 
     /// Returns the inner-most context node for a given declaration.
@@ -673,27 +723,7 @@ public class DeclarationTranslator {
         }
     }
 
-    private func nullability(
-        from nullabilitySpecifier: DeclarationExtractor.NullabilitySpecifier?
-    ) -> Nullability? {
-
-        guard let nullabilitySpecifier = nullabilitySpecifier else {
-            return nil
-        }
-
-        switch nullabilitySpecifier {
-        case .nonnull:
-            return .nonnull
-        case .nullResettable:
-            return .nullResettable
-        case .nullUnspecified:
-            return .unspecified
-        case .nullable:
-            return .nullable
-        }
-    }
-
-    private func _extractStaticLength(from rule: ObjectiveCParser.PrimaryExpressionContext?) -> Int? {
+    private func _extractStaticLength(from rule: ObjectiveCParser.ExpressionContext?) -> Int? {
         guard let constant = rule.flatMap(ConstantContextExtractor.extract(from:)) else {
             return nil
         }
@@ -716,76 +746,55 @@ public class DeclarationTranslator {
     // TODO: Collapse `functionPointer` and `block` into `variable` case.
     public enum ASTNodeDeclaration {
         case variable(
-            rule: ParserRuleContext,
-            nullability: Nullability?,
-            identifier: Identifier,
-            type: TypeNameNode,
-            initialValue: ObjectiveCParser.InitializerContext?
-        )
-        case enumDecl(
-            rule: ParserRuleContext,
-            identifier: Identifier?,
-            typeName: TypeNameNode?,
-            DeclarationExtractor.EnumSpecifier,
-            [ObjcEnumCase]
-        )
-        case structOrUnionDecl(
-            rule: ParserRuleContext,
-            identifier: Identifier?,
-            DeclarationExtractor.StructOrUnionSpecifier,
-            [ObjcStructField]
-        )
-        case function(
-            rule: ParserRuleContext,
-            identifier: Identifier,
-            parameters: [FunctionParameter],
-            returnType: TypeNameNode
-        )
-        case functionPointer(
-            rule: ParserRuleContext,
-            nullability: Nullability?,
-            identifier: Identifier,
-            parameters: [FunctionParameter],
-            returnType: TypeNameNode,
-            initialValue: ObjectiveCParser.InitializerContext?
+            ASTVariableDeclaration
         )
         case block(
-            rule: ParserRuleContext,
-            nullability: Nullability?,
-            identifier: Identifier,
-            parameters: [FunctionParameter],
-            returnType: TypeNameNode,
-            initialValue: ObjectiveCParser.InitializerContext?
+            ASTBlockDeclaration
         )
-        
+        case functionPointer(
+            ASTFunctionPointerDeclaration
+        )
+        case function(
+            ASTFunctionDefinition
+        )
+        case structOrUnionDecl(
+            ASTStructOrUnionDeclaration
+        )
+        case enumDecl(
+            ASTEnumDeclaration
+        )
         indirect case typedef(
-            rule: ParserRuleContext,
-            baseType: ASTNodeDeclaration,
-            typeNode: TypeNameNode,
-            alias: Identifier
+            ASTTypedefDeclaration
         )
 
         /// Gets the identifier associated with this node, if any.
         public var identifierNode: Identifier? {
             switch self {
-            case .block(_, _, let identifier, _, _, _),
-                .functionPointer(_, _, let identifier, _, _, _),
-                .function(_, let identifier, _, _),
-                .variable(_, _, let identifier, _, _),
-                .typedef(_, _, _, let identifier):
-                return identifier
-
-            case .enumDecl(_, let identifier, _, _, _),
-                .structOrUnionDecl(_, let identifier, _, _):
-                return identifier
+            case .variable(let decl):
+                return decl.identifier
+            case .block(let decl):
+                return decl.identifier
+            case .functionPointer(let decl):
+                return decl.identifier
+            case .function(let decl):
+                return decl.identifier
+            case .typedef(let decl):
+                return decl.alias
+            case .structOrUnionDecl(let decl):
+                return decl.identifier
+            case .enumDecl(let decl):
+                return decl.identifier
             }
         }
 
         /// Gets the type node associated with this node, if any.
         public var typeNode: TypeNameNode? {
             switch self {
-            case .variable(_, _, _, let type, _), .typedef(_, _, let type, _):
-                return type
+            case .variable(let decl):
+                return decl.type
+            
+            case .typedef(let decl):
+                return decl.typeNode
             
             case .block, .functionPointer, .function, .enumDecl, .structOrUnionDecl:
                 return nil
@@ -798,11 +807,12 @@ public class DeclarationTranslator {
         public var initializer: ObjectiveCParser.InitializerContext? {
             get {
                 switch self {
-                case .variable(_, _, _, _, let initialValue),
-                    .functionPointer(_, _, _, _, _, let initialValue),
-                    .block(_, _, _, _, _, let initialValue):
-
-                    return initialValue
+                case .variable(let decl):
+                    return decl.initialValue
+                case .block(let decl):
+                    return decl.initialValue
+                case .functionPointer(let decl):
+                    return decl.initialValue
 
                 case .enumDecl, .structOrUnionDecl, .typedef, .function:
                     return nil
@@ -810,32 +820,18 @@ public class DeclarationTranslator {
             }
             set {
                 switch self {
-                case .block(let rule, let nullability, let identifier, let parameters, let returnType, _):
+                case .block(let decl):
                     self = .block(
-                        rule: rule,
-                        nullability: nullability,
-                        identifier: identifier,
-                        parameters: parameters,
-                        returnType: returnType,
-                        initialValue: newValue
+                        decl.withInitializer(newValue)
                     )
 
-                case .functionPointer(let rule, let nullability, let identifier, let parameters, let returnType, _):
+                case .functionPointer(let decl):
                     self = .functionPointer(
-                        rule: rule,
-                        nullability: nullability,
-                        identifier: identifier,
-                        parameters: parameters,
-                        returnType: returnType,
-                        initialValue: newValue
+                        decl.withInitializer(newValue)
                     )
-                case .variable(let rule, let nullability, let identifier, let type, _):
+                case .variable(let decl):
                     self = .variable(
-                        rule: rule,
-                        nullability: nullability,
-                        identifier: identifier,
-                        type: type,
-                        initialValue: newValue
+                        decl.withInitializer(newValue)
                     )
                 case .enumDecl, .structOrUnionDecl, .typedef, .function:
                     break
@@ -845,47 +841,88 @@ public class DeclarationTranslator {
 
         public var objcType: ObjcType? {
             switch self {
-            case .variable(_, _, _, let type, _):
-                return type.type
+            case .variable(let decl):
+                var result = decl.type.type
+
+                if let nullability = decl.nullability {
+                    result = .nullabilitySpecified(specifier: nullability, result)
+                }
+                if let arcSpecifier = decl.arcSpecifier {
+                    result = .specified(specifiers: [.arcSpecifier(arcSpecifier)], result)
+                }
+
+                return result
             
-            case .typedef(_, _, _, let alias):
-                return .struct(alias.name)
+            case .typedef(let decl):
+                return decl.typeNode.type
             
-            case .function(_, let ident, let params, let retType), .functionPointer(_, _, let ident, let params, let retType, _):
-                if params.contains(where: { $0.type == nil }) {
+            case .function(let decl):
+                if decl.parameters.contains(where: { $0.type == nil }) {
                     return nil
                 }
 
-                return .functionPointer(name: ident.name, returnType: retType.type, parameters: params.compactMap {
+                return .functionPointer(name: decl.identifier.name, returnType: decl.returnType.type, parameters: decl.parameters.compactMap {
                     $0.type?.type
                 })
 
-            case .block(_, _, let ident, let params, let retType, _):
-                if params.contains(where: { $0.type == nil }) {
+            case .functionPointer(let decl):
+                if decl.parameters.contains(where: { $0.type == nil }) {
                     return nil
                 }
 
-                return .blockType(name: ident.name, returnType: retType.type, parameters: params.compactMap {
+                return .functionPointer(name: decl.identifier.name, returnType: decl.returnType.type, parameters: decl.parameters.compactMap {
                     $0.type?.type
                 })
+
+            case .block(let decl):
+                if decl.parameters.contains(where: { $0.type == nil }) {
+                    return nil
+                }
+
+                var partial: ObjcType = .blockType(name: decl.identifier.name, returnType: decl.returnType.type, parameters: decl.parameters.compactMap {
+                    $0.type?.type
+                }, nullabilitySpecifier: decl.nullability)
+
+                if let arcSpecifier = decl.arcSpecifier {
+                    partial = .specified(specifiers: [.arcSpecifier(arcSpecifier)], partial)
+                }
+                if decl.typeQualifiers.count > 0 {
+                    partial = .qualified(partial, qualifiers: decl.typeQualifiers)
+                }
+
+                return partial
             
-            case .enumDecl(_, let ident, _, _, _), .structOrUnionDecl(_, let ident, _, _):
-                return (ident?.name).map { .struct($0) }
+            case .structOrUnionDecl(let decl):
+                return (decl.identifier?.name).map { .typeName($0) }
+
+            case .enumDecl(let decl):
+                return (decl.identifier?.name).map { .typeName($0) }
             }
         }
 
         /// Gets the parser rule associated with this definition.
         public var contextRule: ParserRuleContext {
             switch self {
-            case .block(let rule, _, _, _, _, _),
-                .enumDecl(let rule, _, _, _, _),
-                .structOrUnionDecl(let rule, _, _, _),
-                .function(let rule, _, _, _),
-                .functionPointer(let rule, _, _, _, _, _),
-                .typedef(let rule, _, _, _),
-                .variable(let rule, _, _, _, _):
+            case .variable(let decl):
+                return decl.rule
 
-                return rule
+            case .block(let decl):
+                return decl.rule
+
+            case .functionPointer(let decl):
+                return decl.rule
+            
+            case .function(let decl):
+                return decl.rule
+
+            case .structOrUnionDecl(let decl):
+                return decl.rule
+
+            case .enumDecl(let decl):
+                return decl.rule
+
+            case .typedef(let decl):
+                return decl.rule
             }
         }
 
@@ -901,12 +938,128 @@ public class DeclarationTranslator {
         }
     }
 
-    /// Specifies a nullability of a declaration.
-    public enum Nullability {
-        case unspecified
-        case nonnull
-        case nullable
-        case nullResettable
+    /// General specifiers for variable declarations.
+    public struct ASTDeclarationSpecifiers {
+        /// Nullability specifiers for pointer/object types.
+        public var nullabilitySpecifier: ObjcNullabilitySpecifier?
+
+        /// ARC specifiers for Objective-C object types.
+        public var arcBehaviourSpecifier: ObjcArcBehaviorSpecifier?
+    }
+
+    /// Specifications for a variable declaration.
+    public struct ASTVariableDeclaration {
+        public var rule: ParserRuleContext
+        public var nullability: ObjcNullabilitySpecifier?
+        public var arcSpecifier: ObjcArcBehaviorSpecifier?
+        public var identifier: Identifier
+        public var type: TypeNameNode
+        public var initialValue: ObjectiveCParser.InitializerContext?
+        public var isStatic: Bool
+
+        public func withInitializer(_ value: ObjectiveCParser.InitializerContext?) -> Self {
+            var copy = self
+            copy.initialValue = value
+            return copy
+        }
+    }
+
+    // TODO: Consider collapsing into `ASTVariableDeclaration`
+    /// Specifications for a block declaration.
+    public struct ASTBlockDeclaration {
+        public var rule: ParserRuleContext
+        public var nullability: ObjcNullabilitySpecifier?
+        public var arcSpecifier: ObjcArcBehaviorSpecifier?
+        public var typeQualifiers: [ObjcTypeQualifier]
+        public var typePrefix: DeclarationExtractor.TypePrefix?
+        public var identifier: Identifier
+        public var parameters: [FunctionParameter]
+        public var returnType: TypeNameNode
+        public var initialValue: ObjectiveCParser.InitializerContext?
+        public var isStatic: Bool
+
+        public func withInitializer(_ value: ObjectiveCParser.InitializerContext?) -> Self {
+            var copy = self
+            copy.initialValue = value
+            return copy
+        }
+    }
+
+    // TODO: Collapse into `ASTVariableDeclaration`
+    /// Specifications for a function pointer declaration.
+    public struct ASTFunctionPointerDeclaration {
+        public var rule: ParserRuleContext
+        public var nullability: ObjcNullabilitySpecifier?
+        public var identifier: Identifier
+        public var parameters: [FunctionParameter]
+        public var returnType: TypeNameNode
+        public var initialValue: ObjectiveCParser.InitializerContext?
+        public var isStatic: Bool
+
+        public func withInitializer(_ value: ObjectiveCParser.InitializerContext?) -> Self {
+            var copy = self
+            copy.initialValue = value
+            return copy
+        }
+    }
+
+    /// Specifications for a function definition.
+    /// Does not include a function body.
+    public struct ASTFunctionDefinition {
+        public var rule: ParserRuleContext
+        public var identifier: Identifier
+        public var parameters: [FunctionParameter]
+        public var returnType: TypeNameNode
+        public var isVariadic: Bool
+    }
+
+    /// Specifications for a struct or union definition.
+    public struct ASTStructOrUnionDeclaration {
+        public var rule: ParserRuleContext
+        public var identifier: Identifier?
+        public var context: DeclarationExtractor.StructOrUnionSpecifier
+        public var fields: [ASTStructFieldDeclaration]
+    }
+
+    /// Contains information for a generated struct or union field.
+    public struct ASTStructFieldDeclaration {
+        /// The node for the field itself.
+        public var node: ObjcStructField
+
+        /// The context rule for this field declaration.
+        /// It is the innermost parser rule where queries against the source code
+        /// range can be used accurately to collect surrounding comments and
+        /// nonnull-contexts unambiguously.
+        public var rule: ParserRuleContext
+    }
+
+    /// Contains information for a generated enum field.
+    public struct ASTEnumDeclaration {
+        public var rule: ParserRuleContext
+        public var identifier: Identifier?
+        public var typeName: TypeNameNode?
+        public var context: DeclarationExtractor.EnumSpecifier
+        public var enumerators: [ASTEnumeratorDeclaration]
+    }
+
+    /// Contains information for a generated enumerator, or enum value.
+    public struct ASTEnumeratorDeclaration {
+        /// The node for the enumerator itself.
+        public var node: ObjcEnumCase
+
+        /// The context rule for this enumerator declaration.
+        /// It is the innermost parser rule where queries against the source code
+        /// range can be used accurately to collect surrounding comments and
+        /// nonnull-contexts unambiguously.
+        public var rule: ParserRuleContext
+    }
+
+    /// Specification for a typedef declaration node.
+    public struct ASTTypedefDeclaration {
+        public var rule: ParserRuleContext
+        public var baseType: ASTNodeDeclaration
+        public var typeNode: TypeNameNode
+        public var alias: Identifier
     }
 
     private struct PartialType {
@@ -922,11 +1075,55 @@ public class DeclarationTranslator {
         var isConst: Bool {
             declSpecifiers.typeQualifiers().contains(where: { $0.isConst })
         }
-        var isStructOrUnion: Bool {
+        var isStructOrUnionSpecifier: Bool {
             declSpecifiers.typeSpecifiers().contains(where: { $0.isStructOrUnionSpecifier })
         }
         var isEnumSpecifier: Bool {
             declSpecifiers.typeSpecifiers().contains(where: { $0.isEnumSpecifier })
+        }
+
+        /// Whether this type specifier specifies an opaque or anonymous struct/enum
+        /// declaration.
+        var isOpaqueOrAnonymousDeclaration: Bool {
+            isOpaqueStructOrUnion || isAnonymousStruct || isOpaqueEnum || isAnonymousEnum
+        }
+
+        /// Returns `true` if this partial type declares an opaque struct or union
+        /// (struct/union declaration that has no members list).
+        var isOpaqueStructOrUnion: Bool {
+            guard let structOrUnionSpecifier else {
+                return false
+            }
+
+            return structOrUnionSpecifier.fields == nil
+        }
+        /// Returns `true` if this partial type declares a struct or union that
+        /// has no associated identifier.
+        var isAnonymousStruct: Bool {
+            guard let structOrUnionSpecifier else {
+                return false
+            }
+
+            return structOrUnionSpecifier.identifier == nil
+        }
+
+        /// Returns `true` if this partial type declares an opaque enum (enum
+        /// declaration that has no members list).
+        var isOpaqueEnum: Bool {
+            guard let enumSpecifier else {
+                return false
+            }
+
+            return enumSpecifier.enumerators == nil
+        }
+        /// Returns `true` if this partial type declares an enum that has no
+        /// associated identifier.
+        var isAnonymousEnum: Bool {
+            guard let enumSpecifier else {
+                return false
+            }
+
+            return enumSpecifier.identifier == nil
         }
 
         var structOrUnionSpecifier: DeclarationExtractor.StructOrUnionSpecifier? {
@@ -940,23 +1137,11 @@ public class DeclarationTranslator {
             })?.asEnumSpecifier
         }
 
-        var nullability: Nullability? {
-            let specs = declSpecifiers.nullabilitySpecifiers()
-
-            if let last = specs.last {
-                switch last {
-                case .nonnull:
-                    return .nonnull
-                case .nullResettable:
-                    return .nullResettable
-                case .nullUnspecified:
-                    return .unspecified
-                case .nullable:
-                    return .nullable
-                }
-            }
-
-            return nil
+        var nullability: ObjcNullabilitySpecifier? {
+            declSpecifiers.nullabilitySpecifiers().last
+        }
+        var arcSpecifier: ObjcArcBehaviorSpecifier? {
+            declSpecifiers.arcSpecifiers().last
         }
 
         internal init(
@@ -975,11 +1160,17 @@ public class DeclarationTranslator {
             ) else {
                 return nil
             }
+            
+            result = Self.applyPointer(base: result, pointer)
 
-            if let pointer = pointer {
-                for _ in pointer.pointers {
-                    result = .pointer(result)
-                }
+            if let lastNullSpecifier = declSpecifiers.nullabilitySpecifiers().last {
+                result = .nullabilitySpecified(specifier: lastNullSpecifier, result)
+            }
+            if let lastArcSpecifier = declSpecifiers.arcSpecifiers().last {
+                result = .specified(specifiers: [.arcSpecifier(lastArcSpecifier)], result)
+            }
+            if !declSpecifiers.typeQualifiers().isEmpty {
+                result = .qualified(result, qualifiers: declSpecifiers.typeQualifiers())
             }
 
             return result
@@ -1054,8 +1245,12 @@ public class DeclarationTranslator {
             var result = base
 
             if let pointer = pointer {
-                for _ in pointer.pointers {
-                    result = .pointer(result)
+                for ptr in pointer.pointers {
+                    result = .pointer(
+                        result,
+                        qualifiers: ptr.typeQualifiers ?? [],
+                        nullabilitySpecifier: ptr.nullabilitySpecifier
+                    )
                 }
             }
 
@@ -1070,6 +1265,10 @@ func objcTypeFromSpecifiers(
     _ specifiers: [DeclarationExtractor.TypeSpecifier],
     genericTypeParsing: (DeclarationExtractor.GenericTypeParameter) -> ObjcType?
 ) -> ObjcType? {
+
+    if specifiers.isEmpty {
+        return nil
+    }
     
     struct SpecifierCombination {
         var type: ObjcType
@@ -1190,31 +1389,49 @@ func objcTypeFromSpecifiers(
 
     switch specifiers[0] {
     case .scalar(let name):
-        return .struct(name.description)
-
+        return .typeName(name.description)
+    
     case .typeName(let value):
         if let genericTypeList = value.genericTypes {
-            let genericTypes = genericTypeList.types.map(genericTypeParsing)
+            var genericTypes: [ObjcType] = []
 
-            if genericTypes.contains(nil) {
-                return nil
+            for genericType in genericTypeList.types {
+                guard let type = genericTypeParsing(genericType) else {
+                    return nil
+                }
+                
+                genericTypes.append(type)
             }
 
-            return .generic(value.name, parameters: genericTypes.compactMap({ $0 }))
+            if value.name == "id" {
+                return .id(protocols: genericTypes.map(\.description))
+            }
+
+            return .genericTypeName(
+                value.name,
+                parameters: genericTypes.map({ ObjcGenericTypeParameter(type: $0) })
+            )
         }
 
-        return .struct(value.name)
+        if value.name == "id" {
+            return .id()
+        }
+        if value.name == "instancetype" {
+            return .instancetype
+        }
+
+        return .typeName(value.name)
 
     case .structOrUnionSpecifier(let ctx):
         if let ident = ctx.identifier {
-            return .struct(ident.getText())
+            return .typeName(ident.getText())
         }
 
         return .anonymousStruct
     
     case .enumSpecifier(let ctx):
         if let ident = ctx.identifier {
-            return .struct(ident.getText())
+            return .typeName(ident.getText())
         }
 
         return .anonymousEnum

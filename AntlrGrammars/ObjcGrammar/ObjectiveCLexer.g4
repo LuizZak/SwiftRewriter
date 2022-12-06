@@ -166,7 +166,7 @@ STATIC_ASSERT_:           '_Static_assert';
 NULL_UNSPECIFIED:         'null_unspecified' | '__null_unspecified' | '_Null_unspecified';
 NULLABLE:                 'nullable' | '__nullable' | '_Nullable';
 NONNULL:                  'nonnull' | '__nonnull' | '_Nonnull';
-NULL_RESETTABLE:          'null_resettable';
+NULL_RESETTABLE:          'null_resettable' | '__null_resettable' | '_Null_resettable';
 
 // NS prefix
 

@@ -21,11 +21,19 @@ public struct StringCodeSource: CodeSource {
     }
     
     public func stringIndex(forCharOffset offset: Int) -> String.Index {
-        _indices[offset]
+        if offset == _indices.count {
+            return source.endIndex
+        }
+
+        return _indices[offset]
     }
     
     public func charOffset(forStringIndex index: String.Index) -> Int {
-        _indices.firstIndex(of: index) ?? 0
+        if index == source.endIndex {
+            return _indices.count
+        }
+
+        return _indices.firstIndex(of: index) ?? 0
     }
     
     public func utf8Index(forCharOffset offset: Int) -> Int {
@@ -50,5 +58,9 @@ public struct StringCodeSource: CodeSource {
         }
         
         return source.distance(from: offsets.lowerBound, to: index) + 1
+    }
+
+    public func sourceSubstring(_ range: SourceRange) -> Substring? {
+        range.substring(in: source)
     }
 }

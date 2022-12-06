@@ -10,7 +10,6 @@ public protocol IntentionCollectorDelegate: AnyObject {
     func reportForLazyParsing(intention: Intention)
     func reportForLazyResolving(intention: Intention)
     func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper
-    func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing
 }
 
 /// Represents a local context for constructing types with.
@@ -189,43 +188,25 @@ public class IntentionCollector {
         guard let ctx = context.findContext(ofType: FileGenerationIntention.self) else {
             return
         }
+        guard let identifier = node.identifier else {
+            return
+        }
         guard let type = node.type else {
             return
         }
-        if !node.typeDeclarators.isEmpty {
-            guard let name = node.typeDeclarators[0].identifier?.name else {
-                return
-            }
-            
-            let intent =
-                TypealiasIntention(originalObjcType: type.type, fromType: .void,
-                                   named: name)
-            recordSourceHistory(intention: intent, node: node)
-            intent.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
-            
-            ctx.addTypealias(intent)
-            
-            delegate?.reportForLazyResolving(intention: intent)
-            
-            return
-        }
+
+        let intent = TypealiasIntention(
+            originalObjcType: type.type,
+            fromType: .void,
+            named: identifier.name
+        )
         
-        // Attempt to interpret as a function pointer typealias
-        if let identifier = node.identifier, let typeNode = node.type {
-            
-            let intent =
-                TypealiasIntention(originalObjcType: typeNode.type,
-                                   fromType: .void,
-                                   named: identifier.name)
-            
-            recordSourceHistory(intention: intent, node: node)
-            intent.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
-            
-            ctx.addTypealias(intent)
-            
-            delegate?.reportForLazyResolving(intention: intent)
-            
-        }
+        recordSourceHistory(intention: intent, node: node)
+        intent.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
+        
+        ctx.addTypealias(intent)
+        
+        delegate?.reportForLazyResolving(intention: intent)
     }
     
     // MARK: - Global Variable
@@ -422,16 +403,20 @@ public class IntentionCollector {
                     }
                 } ?? []
         
-        let storage =
-            ValueStorage(type: swiftType, ownership: ownership, isConstant: false)
+        let storage = ValueStorage(
+            type: swiftType,
+            ownership: ownership,
+            isConstant: false
+        )
         
         // Protocol property
         if context.findContext(ofType: ProtocolGenerationIntention.self) != nil {
-            let prop =
-                ProtocolPropertyGenerationIntention(name: node.identifier?.name ?? "",
-                                                    storage: storage,
-                                                    objcAttributes: attributes,
-                                                    source: node)
+            let prop = ProtocolPropertyGenerationIntention(
+                name: node.identifier?.name ?? "",
+                storage: storage,
+                objcAttributes: attributes,
+                source: node
+            )
             prop.isOptional = node.isOptionalProperty
             prop.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
             prop.knownAttributes = knownAttributes
@@ -443,11 +428,12 @@ public class IntentionCollector {
             
             delegate?.reportForLazyResolving(intention: prop)
         } else {
-            let prop =
-                PropertyGenerationIntention(name: node.identifier?.name ?? "",
-                                            storage: storage,
-                                            objcAttributes: attributes,
-                                            source: node)
+            let prop = PropertyGenerationIntention(
+                name: node.identifier?.name ?? "",
+                storage: storage,
+                objcAttributes: attributes,
+                source: node
+            )
             prop.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
             prop.knownAttributes = knownAttributes
             
@@ -597,11 +583,12 @@ public class IntentionCollector {
         }
         
         let storage = ValueStorage(type: swiftType, ownership: ownership, isConstant: isConstant)
-        let ivar =
-            InstanceVariableGenerationIntention(name: node.identifier?.name ?? "",
-                                                storage: storage,
-                                                accessLevel: access,
-                                                source: node)
+        let ivar = InstanceVariableGenerationIntention(
+            name: node.identifier?.name ?? "",
+            storage: storage,
+            accessLevel: access,
+            source: node
+        )
         
         ivar.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
         
@@ -742,8 +729,11 @@ public class IntentionCollector {
         
         // Remaining identifiers are used as typealiases
         for identifier in nodeIdentifiers.dropFirst() {
-            let alias = TypealiasIntention(originalObjcType: .struct(structIntent.typeName),
-                                           fromType: .void, named: identifier.name)
+            let alias = TypealiasIntention(
+                originalObjcType: .typeName(structIntent.typeName),
+                fromType: .void,
+                named: identifier.name
+            )
             alias.inNonnullContext = delegate?.isNodeInNonnullContext(identifier) ?? false
             recordSourceHistory(intention: alias, node: identifier)
             
@@ -761,8 +751,6 @@ public class IntentionCollector {
                 shouldRecord = false
             }
             
-            let typeParser = delegate.typeParser(for: self)
-            
             let effectiveDeclarators =
                 (nodeIdentifiers.isEmpty ? Array(declarators.dropFirst()) : declarators)
             
@@ -774,15 +762,17 @@ public class IntentionCollector {
                 let objcType: ObjcType?
                 
                 if let pointer = declarator.pointerNode {
-                    objcType = typeParser.parseObjcType("\(structIntent.typeName)\(pointer.asString)")
+                    objcType = pointer.asPointerList.reduce(.typeName(structIntent.typeName)) { (type, _) -> ObjcType in
+                        .pointer(type)
+                    }
                 } else {
-                    objcType = .struct(structIntent.typeName)
+                    objcType = .typeName(structIntent.typeName)
                 }
                 
                 if var objcType = objcType {
                     if isOpaqueStruct && objcType.isPointer {
                         // TODO: Support pointer-to-opaque pointers
-                        objcType = ObjcType.struct("OpaquePointer")
+                        objcType = ObjcType.typeName("OpaquePointer")
                     }
                     
                     let inNonnull = delegate.isNodeInNonnullContext(declarator)
@@ -810,9 +800,11 @@ public class IntentionCollector {
                     
                     let inNonnull = delegate.isNodeInNonnullContext(declarator)
                     
-                    let alias = TypealiasIntention(originalObjcType: .struct("OpaquePointer"),
-                                                   fromType: .void,
-                                                   named: identifier.name)
+                    let alias = TypealiasIntention(
+                        originalObjcType: .typeName("OpaquePointer"),
+                        fromType: .void,
+                        named: identifier.name
+                    )
                     recordSourceHistory(intention: alias, node: identifier)
                     alias.inNonnullContext = inNonnull
                     
@@ -876,7 +868,7 @@ extension IntentionCollector {
     }
     
     private func convertComments(_ comments: [ObjcComment]) -> [String] {
-        return comments.map { $0.string.trimmingWhitespaces() }
+        return comments.map { $0.string.trimmingWhitespace() }
     }
     
 }

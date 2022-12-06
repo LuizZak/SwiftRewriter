@@ -268,24 +268,36 @@ class SwiftExprASTReaderTests: XCTestCase {
 
 extension SwiftExprASTReaderTests {
     
-    func assert(objcExpr: String,
-                parseWith: (ObjectiveCParser) throws -> ParserRuleContext = { parser in try parser.expression() },
-                readsAs expected: Expression,
-                file: StaticString = #filePath,
-                line: UInt = #line) {
+    func assert(
+        objcExpr: String,
+        parseWith: (ObjectiveCParser) throws -> ParserRuleContext = { parser in try parser.expression() },
+        readsAs expected: Expression,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
         
         let typeSystem = TypeSystem()
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
-        let typeParser = TypeParsing(state: SwiftExprASTReaderTests._state)
+        let source = StringCodeSource(source: objcExpr)
+        let typeParser = TypeParsing(
+            state: SwiftExprASTReaderTests._state,
+            source: source,
+            nonnullContextQuerier: NonnullContextQuerier(
+                nonnullMacroRegionsTokenRange: []
+            )
+        )
         
         let sut =
             SwiftExprASTReader(
                 typeMapper: typeMapper,
                 typeParser: typeParser,
-                context: SwiftASTReaderContext(typeSystem: typeSystem,
-                                               typeContext: nil,
-                                               comments: []),
-                delegate: nil)
+                context: SwiftASTReaderContext(
+                    typeSystem: typeSystem,
+                    typeContext: nil,
+                    comments: []
+                ),
+                delegate: nil
+            )
         
         do {
             let state = try SwiftExprASTReaderTests._state.makeMainParser(input: objcExpr)

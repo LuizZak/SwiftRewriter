@@ -8,20 +8,6 @@ import ObjcParserAntlr
 
 class DefinitionCollectorTests: XCTestCase {
 
-    func testCollect_singleDecl_variable_withInitializer() {
-        let tester = prepareTest(declaration: "short int a = 0;")
-
-        tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
-                        .assert(type: "signed short int")?
-                        .assert(name: "a")?
-                        .assert(expressionString: "0")
-                }
-        }
-    }
-
     func testCollect_singleDecl_variable_noInitializer() {
         let tester = prepareTest(declaration: "short int a;")
 
@@ -29,9 +15,148 @@ class DefinitionCollectorTests: XCTestCase {
             nodeList.assertCount(1)?
                 .asserter(forItemAt: 0) { intNode in
                     intNode.assert(isOfType: VariableDeclaration.self)?
-                        .assert(type: "signed short int")?
                         .assert(name: "a")?
+                        .assert(type: "signed short int")?
+                        .assert(isStatic: false)?
                         .assertNoInitializer()
+                }
+        }
+    }
+
+    func testCollect_singleDecl_variable_static() {
+        let tester = prepareTest(declaration: "static short int a;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { intNode in
+                    intNode.assert(isOfType: VariableDeclaration.self)?
+                        .assert(name: "a")?
+                        .assert(type: "signed short int")?
+                        .assert(isStatic: true)
+                }
+        }
+    }
+
+    func testCollect_singleDecl_variable_withInitializer() {
+        let tester = prepareTest(declaration: "short int a = 0;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { intNode in
+                    intNode.assert(isOfType: VariableDeclaration.self)?
+                        .assert(name: "a")?
+                        .assert(type: "signed short int")?
+                        .assert(expressionString: "0")
+                }
+        }
+    }
+
+    func testCollect_singleDecl_variable_const() {
+        let tester = prepareTest(declaration: "const char a;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { intNode in
+                    intNode.assert(isOfType: VariableDeclaration.self)?
+                        .assert(name: "a")?
+                        .assert(type: .qualified("char", qualifiers: [.const]))
+                }
+        }
+    }
+
+    func testCollect_singleDecl_variable_pointer() {
+        let tester = prepareTest(declaration: "short int *a;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { intNode in
+                    intNode.assert(isOfType: VariableDeclaration.self)?
+                        .assert(name: "a")?
+                        .assert(type: .pointer("signed short int"))?
+                        .assertNoInitializer()
+                }
+        }
+    }
+
+    func testCollect_singleDecl_variable_pointer_nullabilitySpecifier() {
+        let tester = prepareTest(declaration: "short int *_Nonnull a;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { intNode in
+                    intNode.assert(isOfType: VariableDeclaration.self)?
+                        .assert(name: "a")?
+                        .assert(type: .pointer("signed short int", nullabilitySpecifier: .nonnull))?
+                        .assertNoInitializer()
+                }
+        }
+    }
+
+    func testCollect_singleDecl_variable_pointer_constQualifier() {
+        let tester = prepareTest(declaration: "short int *const a;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { intNode in
+                    intNode.assert(isOfType: VariableDeclaration.self)?
+                        .assert(name: "a")?
+                        .assert(type: .pointer("signed short int", qualifiers: [.const]))?
+                        .assertNoInitializer()
+                }
+        }
+    }
+
+    func testCollect_singleDecl_variable_typeName_nullabilitySpecifier() {
+        let tester = prepareTest(declaration: "_Nonnull callback a;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { intNode in
+                    intNode.assert(isOfType: VariableDeclaration.self)?
+                        .assert(name: "a")?
+                        .assert(type: .nullabilitySpecified(specifier: .nonnull, "callback"))?
+                        .assertNoInitializer()
+                }
+        }
+    }
+
+    func testCollect_singleDecl_blockVariable() {
+        let tester = prepareTest(declaration: "void (^a)(int, char *p2);")
+
+        tester.assert { asserter in
+            asserter.assertCount(1)?
+                .asserter(forItemAt: 0) { decl in
+                    decl.assert(isOfType: VariableDeclaration.self)?
+                        .assert(name: "a")?
+                        .assert(
+                            type: .blockType(
+                                name: "a",
+                                returnType: .void,
+                                parameters: [
+                                    "signed int",
+                                    .pointer("char")
+                                ]
+                            )
+                        )
+                }
+        }
+    }
+
+    func testCollect_singleDecl_blockVariable_nullabilitySpecifier() {
+        let tester = prepareTest(declaration: "void (^_Nonnull a)();")
+
+        tester.assert { asserter in
+            asserter.assertCount(1)?
+                .asserter(forItemAt: 0) { decl in
+                    decl.assert(isOfType: VariableDeclaration.self)?
+                        .assert(name: "a")?
+                        .assert(
+                            type: .blockType(
+                                name: "a",
+                                returnType: .void,
+                                nullabilitySpecifier: .nonnull
+                            )
+                        )
                 }
         }
     }
@@ -63,6 +188,70 @@ class DefinitionCollectorTests: XCTestCase {
         }
     }
 
+    func testCollect_singleDecl_function() {
+        let tester = prepareTest(declaration: "void global(int p1, int*);")
+
+        tester.assert { nodeList in
+            nodeList.asserterForIterator()
+                .asserterForNext { intNode in
+                    intNode.assert(isOfType: FunctionDefinition.self)?
+                        .assert(returnType: "void")?
+                        .assert(name: "global")?
+                        .assertParameterCount(2)?
+                        .asserter(forParameterAt: 0) { p1 in
+                            p1.assert(name: "p1")?
+                                .assert(type: "signed int")
+                        }?
+                        .asserter(forParameterAt: 1) { p2 in
+                            p2.assertNoName()?
+                                .assert(type: .pointer("signed int"))
+                        }?
+                        .assert(isVariadic: false)
+                }?
+                .assertIsAtEnd()
+        }
+    }
+    
+    func testCollect_singleDecl_function_returnsComplexType() {
+        let tester = prepareTest(declaration: "NSArray<NSArray<NSString*>*> *_Nonnull global();")
+
+        tester.assert { asserter in
+            asserter.asserterForIterator()
+                .asserterForNext { decl in
+                    decl.assert(isOfType: FunctionDefinition.self)?
+                        .assert(
+                            returnType: .pointer(
+                                .genericTypeName(
+                                    "NSArray",
+                                    typeParameters: [
+                                        .genericTypeName(
+                                            "NSArray",
+                                            typeParameters: [
+                                                .pointer("NSString")
+                                            ]
+                                        ).wrapAsPointer
+                                    ]
+                                ),
+                                nullabilitySpecifier: .nonnull
+                            )
+                        )
+                }
+        }
+    }
+
+    func testCollect_singleDecl_function_variadicParameter() {
+        let tester = prepareTest(declaration: "short int a(int p1, ...);")
+
+        tester.assert { asserter in
+            asserter.asserterForIterator()
+                .asserterForNext { decl in
+                    decl.assert(isOfType: FunctionDefinition.self)?
+                        .assertParameterCount(1)?
+                        .assert(isVariadic: true)
+                }
+        }
+    }
+
     func testCollect_singleDecl_typedef() {
         let tester = prepareTest(declaration: "typedef short int A;")
 
@@ -70,8 +259,106 @@ class DefinitionCollectorTests: XCTestCase {
             nodeList.assertCount(1)?
                 .asserter(forItemAt: 0) { intNode in
                     intNode.assert(isOfType: TypedefNode.self)?
+                        .assertChildCount(2)?
                         .assert(type: "signed short int")?
                         .assert(name: "A")
+                }
+        }
+    }
+
+    func testCollect_singleDecl_typedef_block() {
+        let tester = prepareTest(declaration: "typedef void(^callback)();")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { intNode in
+                    intNode.assert(isOfType: TypedefNode.self)?
+                        .assertChildCount(2)?
+                        .assert(type: .blockType(name: "callback", returnType: .void))?
+                        .assert(name: "callback")
+                }
+        }
+    }
+
+    func testCollect_singleDecl_typedef_functionPointer_takingAnonymousBlockParameter() {
+        let tester = prepareTest(declaration: "typedef int (*callback)(void (^)(), void *);")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { intNode in
+                    intNode.assert(isOfType: TypedefNode.self)?
+                        .assertChildCount(2)?
+                        .assert(type: .functionPointer(
+                            name: "callback",
+                            returnType: "signed int",
+                            parameters: [
+                                .blockType(name: nil, returnType: .void),
+                                .pointer(.void)
+                            ]
+                        ))?
+                        .assert(name: "callback")
+                }
+        }
+    }
+
+    func testCollect_declaration_singleDecl_typedef_anonymousStruct_pointerOnly() {
+        let tester = prepareTest(declaration: "typedef struct { int field; } *A;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { aNode in
+                    aNode.assert(isOfType: TypedefNode.self)?
+                        .assertChildCount(2)?
+                        .assert(name: "A")?
+                        .assert(type: .pointer(.void))
+                }
+        }
+    }
+
+    func testCollect_declaration_singleDecl_typedef_opaqueStruct_pointerOnly() {
+        let tester = prepareTest(declaration: "typedef struct _A *A;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { aNode in
+                    aNode.assert(isOfType: TypedefNode.self)?
+                        .assertChildCount(2)?
+                        .assert(name: "A")?
+                        .assert(type: .pointer(.void))
+                }
+        }
+    }
+
+    func testCollect_declaration_singleDecl_typedef_opaqueStruct_pointerToPointer() {
+        let tester = prepareTest(declaration: "typedef struct _A **A;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { aNode in
+                    aNode.assert(isOfType: TypedefNode.self)?
+                        .assertChildCount(2)?
+                        .assert(name: "A")?
+                        .assert(type: .pointer(.pointer(.void)))
+                }
+        }
+    }
+
+    func testCollect_declaration_multiDecl_typedef_opaqueStruct_pointerAndName() {
+        let tester = prepareTest(declaration: "typedef struct _A A, *APtr;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(2)?
+                .asserter(forItemAt: 0) { aNode in
+                    aNode.assert(isOfType: TypedefNode.self)?
+                        .assertChildCount(2)?
+                        .assert(name: "A")?
+                        .assert(type: "_A")
+                }?
+                .asserter(forItemAt: 1) { aNode in
+                    aNode.assert(isOfType: TypedefNode.self)?
+                        .assertChildCount(2)?
+                        .assert(name: "APtr")?
+                        .assert(type: .pointer("A"))
                 }
         }
     }
@@ -83,6 +370,7 @@ class DefinitionCollectorTests: XCTestCase {
             nodeList.assertCount(1)?
                 .asserter(forItemAt: 0) { aStruct in
                     aStruct.assert(isOfType: ObjcStructDeclaration.self)?
+                        .assertChildCount(2)?
                         .assert(name: "AStruct")?
                         .assertFieldCount(1)?
                         .asserter(forFieldName: "field0") { field0 in
@@ -101,6 +389,7 @@ class DefinitionCollectorTests: XCTestCase {
             nodeList.assertCount(1)?
                 .asserter(forItemAt: 0) { aStruct in
                     aStruct.assert(isOfType: ObjcStructDeclaration.self)?
+                        .assertChildCount(2)?
                         .assert(name: "AStruct")?
                         .assertFieldCount(1)?
                         .asserter(forFieldName: "field0") { field0 in
@@ -129,6 +418,7 @@ class DefinitionCollectorTests: XCTestCase {
                 }?
                 .asserter(forItemAt: 1) { aStruct in
                     aStruct.assert(isOfType: TypedefNode.self)?
+                        .assertChildCount(2)?
                         .assert(name: "AStructPtr")?
                         .assert(type: .pointer("AStruct"))
                 }
@@ -254,6 +544,56 @@ class DefinitionCollectorTests: XCTestCase {
         }
     }
 
+    func testCollect_fieldDeclaration_singleDecl_variable_noInitializer() {
+        let tester = prepareTest(declaration: "short int a;")
+
+        tester.assertFieldDeclaration { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { intNode in
+                    intNode.assert(isOfType: VariableDeclaration.self)?
+                        .assert(type: "signed short int")?
+                        .assert(name: "a")?
+                        .assertNoInitializer()
+                }
+        }
+    }
+
+    func testCollect_fieldDeclaration_singleDecl_blockVariable() {
+        let tester = prepareTest(declaration: "void (^a)(int, char *p2);")
+
+        tester.assertFieldDeclaration { asserter in
+            asserter.assertCount(1)?
+                .asserter(forItemAt: 0) { decl in
+                    decl.assert(isOfType: VariableDeclaration.self)?
+                        .assert(name: "a")?
+                        .assert(
+                            type: .blockType(
+                                name: "a",
+                                returnType: .void,
+                                parameters: [
+                                    "signed int",
+                                    .pointer("char")
+                                ]
+                            )
+                        )
+                }
+        }
+    }
+
+    func testCollect_fieldDeclaration_singleDecl_variable_boolDecl() {
+        let tester = prepareTest(declaration: "BOOL value;")
+
+        tester.assertFieldDeclaration { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { intNode in
+                    intNode.assert(isOfType: VariableDeclaration.self)?
+                        .assert(type: "BOOL")?
+                        .assert(name: "value")?
+                        .assertNoInitializer()
+                }
+        }
+    }
+
     // MARK: - Delegate tests
 
     func testDelegate_noDeclarations() {
@@ -368,7 +708,7 @@ private extension DefinitionCollectorTests {
         return delegate
     }
 
-    class Tester: BaseParserTestFixture<ObjectiveCParser.DeclarationContext> {
+    class Tester: SingleRuleParserTestFixture<ObjectiveCParser.DeclarationContext> {
         var source: String
         var nodeFactory: ASTNodeFactory
         var delegate: DefinitionCollectorDelegate?
@@ -400,16 +740,45 @@ private extension DefinitionCollectorTests {
             sut.delegate = delegate
 
             do {
-                let parserRule = try parse(source)
+                let parserRule = try parse(source, file: file, line: line)
 
-                guard let result = sut.collect(from: parserRule) else {
-                    XCTFail(
-                        "Failed to collect definitions!",
-                        file: file,
-                        line: line
-                    )
-                    return
-                }
+                let result = sut.collect(from: parserRule)
+
+                try closure(.init(object: result))
+            } catch {
+                XCTFail(
+                    "Failed to parse from source string: \(source)\n\(error)",
+                    file: file,
+                    line: line
+                )
+            }
+        }
+        
+        /// Opens an assertion context for collecting declaration nodes from a
+        /// `ObjectiveCParser.FieldDeclarationContext` that is parsed from the
+        /// current input source.
+        func assertFieldDeclaration(
+            file: StaticString = #file,
+            line: UInt = #line,
+            _ closure: (Asserter<[ASTNode]>) throws -> Void
+        ) rethrows {
+
+            let sut = DefinitionCollector(
+                nonnullContextQuerier: nodeFactory.nonnullContextQuerier,
+                commentQuerier: nodeFactory.commentQuerier,
+                nodeFactory: nodeFactory
+            )
+            sut.delegate = delegate
+
+            do {
+                let parserRule = try parse(
+                    source,
+                    file: file,
+                    line: line,
+                    ruleDeriver: ObjectiveCParser.fieldDeclaration
+                )
+
+                let result = sut.collect(from: parserRule)
 
                 try closure(.init(object: result))
             } catch {

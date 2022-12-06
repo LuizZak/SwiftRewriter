@@ -1,5 +1,5 @@
 // Based on SwiftSyntax's own 'AbsolutePosition' structure
-public struct SourceLocation: Comparable, Codable {
+public struct SourceLocation: Comparable, Hashable, Codable {
     public static let invalid = SourceLocation(line: 0, column: 0, utf8Offset: 0)
     
     public var isValid: Bool {
@@ -14,6 +14,21 @@ public struct SourceLocation: Comparable, Codable {
         self.line = line
         self.column = column
         self.utf8Offset = utf8Offset
+    }
+
+    func length(to other: Self) -> SourceLength {
+        let start = min(self, other)
+        let end = max(self, other)
+
+        let lineOffset = end.line - start.line
+        let columnsAtLastLine = self > other ? self.column : other.column
+        let utf8Offset = end.utf8Offset - start.utf8Offset
+
+        return SourceLength(
+            newlines: lineOffset,
+            columnsAtLastLine: columnsAtLastLine,
+            utf8Length: utf8Offset
+        )
     }
     
     public static func < (lhs: SourceLocation, rhs: SourceLocation) -> Bool {

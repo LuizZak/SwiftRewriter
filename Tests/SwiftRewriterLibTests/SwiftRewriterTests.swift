@@ -584,7 +584,7 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func test() {
-                let msgSend: @convention(c) (UnsafeMutablePointer<structobjc_super>?, SEL) -> Void = { () -> Void in
+                let msgSend: @convention(c) (UnsafeMutablePointer<objc_super>?, SEL) -> Void = { () -> Void in
                 }
             }
             """)

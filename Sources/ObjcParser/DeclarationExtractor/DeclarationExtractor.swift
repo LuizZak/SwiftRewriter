@@ -29,6 +29,45 @@ public class DeclarationExtractor {
             return []
         }
 
+        return extract(fromSpecifiers: specifiers, initDeclaratorList: initDeclaratorList)
+    }
+
+    /// Extracts one or more declarations from a given field declaration context.
+    public func extract(
+        from fieldDeclaration: ObjectiveCParser.FieldDeclarationContext
+    ) -> [Declaration] {
+
+        clearContext()
+
+        collectSpecifiers(from: fieldDeclaration)
+
+        return declarations(from: fieldDeclaration, context: _context) ?? []
+    }
+
+    /// Extracts a declaration from a given type variable context.
+    public func extract(
+        from ctx: ObjectiveCParser.TypeVariableDeclaratorContext
+    ) -> Declaration? {
+
+        clearContext()
+
+        guard let declarationSpecifiers = ctx.declarationSpecifiers() else {
+            return nil
+        }
+        
+        collectSpecifiers(from: declarationSpecifiers)
+        collectTypePrefix(from: declarationSpecifiers)
+
+        return self.declaration(from: ctx)
+    }
+
+    /// Extracts one or more declarations from a given declaration specifier and
+    /// init declarator parser contexts
+    public func extract(
+        fromSpecifiers ctx: ObjectiveCParser.DeclarationSpecifiersContext,
+        initDeclaratorList: ObjectiveCParser.InitDeclaratorListContext
+    ) -> [Declaration] {
+
         var result: [Declaration] = []
 
         clearContext()
@@ -59,7 +98,7 @@ public class DeclarationExtractor {
                                 )
                             )
                         ],
-                        rule: specifiers
+                        rule: ctx
                     )
                 }
             }
@@ -68,7 +107,23 @@ public class DeclarationExtractor {
         return result
     }
 
-    /// Extracts an uninitialized declaration from a given declaration specifier.
+    /// Extracts a declaration from a given declaration specifier list and
+    /// declarator parser contexts.
+    public func extract(
+        fromSpecifiers ctx: ObjectiveCParser.DeclarationSpecifiersContext?,
+        declarator: ObjectiveCParser.DeclaratorContext
+    ) -> Declaration? {
+
+        clearContext()
+        
+        collectSpecifiers(from: ctx)
+        collectTypePrefix(from: ctx)
+
+        return declaration(from: declarator, context: _context)
+    }
+
+    /// Extracts an uninitialized declaration from a given declaration specifier
+    /// list.
     ///
     /// The declaration specifiers context must contain at least one unqualified
     /// identifier at the end of the specifiers list for it to be considered a
@@ -83,21 +138,6 @@ public class DeclarationExtractor {
         collectTypePrefix(from: ctx)
 
         return declaration(context: _context)
-    }
-
-    /// Extracts a declaration from a given declaration specifier and declarator
-    /// parser contexts.
-    public func extract(
-        fromSpecifiers ctx: ObjectiveCParser.DeclarationSpecifiersContext,
-        declarator: ObjectiveCParser.DeclaratorContext
-    ) -> Declaration? {
-
-        clearContext()
-        
-        collectSpecifiers(from: ctx)
-        collectTypePrefix(from: ctx)
-
-        return declaration(from: declarator, context: _context)
     }
 
     /// Extracts a type name from a given type name context.
@@ -115,6 +155,22 @@ public class DeclarationExtractor {
         collectTypePrefix(from: declarationSpecifiers)
 
         return typeName(from: ctx)
+    }
+
+    /// Extracts a type name from a given declaration specifier list and abstract
+    /// declarator
+    /// parser contexts.
+    public func extract(
+        fromSpecifiers ctx: ObjectiveCParser.DeclarationSpecifiersContext?,
+        abstractDeclarator: ObjectiveCParser.AbstractDeclaratorContext
+    ) -> TypeName? {
+
+        clearContext()
+        
+        collectSpecifiers(from: ctx)
+        collectTypePrefix(from: ctx)
+
+        return typeName(from: ctx, abstractDeclarator: abstractDeclarator)
     }
 
     /// Extracts one or more struct field declarations from a given struct
@@ -239,7 +295,7 @@ public class DeclarationExtractor {
             return nil
         }
 
-        guard let declList = ctx.structDeclaratorList() else {
+        guard let declList = ctx.fieldDeclaratorList() else {
             // Fallback to `specifierQualifierList SEMI` parser rule case
             guard let decl = declaration(context: context) else {
                 return nil
@@ -256,8 +312,8 @@ public class DeclarationExtractor {
 
         var result: [StructFieldDeclaration] = []
 
-        for decl in declList.structDeclarator() {
-            if let decl = declaration(from: decl, context: context) {
+        for decl in declList.fieldDeclarator() {
+            if let decl = structFieldDeclaration(from: decl, context: context) {
                 result.append(decl)
             }
         }
@@ -265,8 +321,8 @@ public class DeclarationExtractor {
         return result
     }
 
-    private func declaration(
-        from ctx: ObjectiveCParser.StructDeclaratorContext?,
+    private func structFieldDeclaration(
+        from ctx: ObjectiveCParser.FieldDeclaratorContext?,
         context: Context
     ) -> StructFieldDeclaration? {
 
@@ -306,6 +362,78 @@ public class DeclarationExtractor {
         }
 
         return nil
+    }
+
+    private func declarations(
+        from ctx: ObjectiveCParser.FieldDeclarationContext?,
+        context: Context
+    ) -> [Declaration]? {
+        
+        guard let ctx = ctx else {
+            return nil
+        }
+        guard let fieldDeclaratorList = ctx.fieldDeclaratorList() else {
+            return nil
+        }
+
+        return declarations(from: fieldDeclaratorList, context: context)
+    }
+
+    private func declarations(
+        from ctx: ObjectiveCParser.FieldDeclaratorListContext?,
+        context: Context
+    ) -> [Declaration]? {
+
+        guard let ctx = ctx else {
+            return nil
+        }
+
+        var result: [Declaration] = []
+
+        for decl in ctx.fieldDeclarator() {
+            if let decl = declaration(from: decl, context: context) {
+                result.append(decl)
+            }
+        }
+
+        return result
+    }
+
+    private func declaration(
+        from ctx: ObjectiveCParser.FieldDeclaratorContext?,
+        context: Context
+    ) -> Declaration? {
+
+        guard let ctx = ctx else {
+            return nil
+        }
+
+        let declarator = ctx.declarator()
+        let constantExpression = ctx.constantExpression()
+
+        var decl: Declaration?
+
+        switch (declarator, constantExpression) {
+        case (let declarator?, nil):
+            // `declarator` case
+            decl = declaration(from: declarator, context: context)
+        
+        case (let declarator?, _?):
+            // `declarator COLON constantExpression` case
+            decl = declaration(from: declarator, context: context)
+
+        case (nil, _?):
+            // `<none> COLON constantExpression` case
+            decl = declaration(context: context)
+            
+        case (nil, nil):
+            // Invalid case
+            return nil
+        }
+
+        decl?.constant = constantExpression
+
+        return decl
     }
 
     private func declaration(
@@ -372,9 +500,6 @@ public class DeclarationExtractor {
         let declKind = abstractDeclarationKind(
             from: abstractDeclarator?.directAbstractDeclarator()
         )
-        if pointer == nil && declKind == nil {
-            return nil
-        }
 
         return TypeName(
             specifiers: specifiers,
@@ -387,6 +512,9 @@ public class DeclarationExtractor {
     // MARK: - Specifier/type prefix collecting
 
     private func collectSpecifiers(from ctx: ObjectiveCParser.DeclarationContext?) {
+        collectSpecifiers(from: ctx?.declarationSpecifiers())
+    }
+    private func collectSpecifiers(from ctx: ObjectiveCParser.FieldDeclarationContext?) {
         collectSpecifiers(from: ctx?.declarationSpecifiers())
     }
     private func collectSpecifiers(from ctx: ObjectiveCParser.DeclarationSpecifiersContext?) {
@@ -474,6 +602,10 @@ public class DeclarationExtractor {
             return .identifier(lastIdent.getText(), lastIdent)
         }
 
+        let isBlock = rule.LP() != nil && rule.BITXOR() != nil
+        let isFunction = rule.LP() != nil && rule.BITXOR() == nil
+        let isStaticArray = rule.LBRACK() != nil
+
         if let declarator = rule.declarator() {
             guard let base = declarationKind(from: declarator.directDeclarator()) else {
                 return nil
@@ -493,37 +625,40 @@ public class DeclarationExtractor {
 
             return .identifier(identifier.getText(), identifier)
         }
-        if
-            rule.BITXOR() != nil,
-            let parameters = rule.blockParameters()
-        {
+        if isBlock, let parameters = rule.blockParameters() {
             let base = declarationKind(from: rule.directDeclarator())
-            let nullability = nullabilitySpecifier(from: rule.nullabilitySpecifier())
 
-            if let params = blockParameterList(from: parameters) {
+            let blockSpecifiers = blockSpecifiers(from: rule.blockDeclarationSpecifier()) ?? []
+
+            if let params = parameterList(from: parameters) {
                 return .block(
-                    nullability: nullability,
+                    specifiers: blockSpecifiers,
                     base: base,
                     arguments: params
                 )
             }
         }
-        if rule.LP() != nil, rule.BITXOR() == nil, let baseDeclarator = rule.directDeclarator() {
+        if isFunction, let baseDeclarator = rule.directDeclarator() {
             let parameters = parameterList(from: rule.parameterTypeList())
+            let isVariadic = rule.parameterTypeList()?.ELIPSIS() != nil
 
             if let base = declarationKind(from: baseDeclarator) {
-                return .function(base: base, parameters: parameters ?? [])
+                return .function(
+                    base: base,
+                    parameters: parameters ?? [],
+                    isVariadic: isVariadic
+                )
             }
         }
-        if rule.LBRACK() != nil {
+        if isStaticArray {
             let typeQualifiers = typeQualifierList(from: rule.typeQualifierList())
-            let primaryExpression = rule.primaryExpression()
+            let expression = rule.expression()
 
             if let base = declarationKind(from: rule.directDeclarator()) {
                 return .staticArray(
                     base: base,
                     typeQualifiers: typeQualifiers,
-                    length: primaryExpression
+                    length: expression
                 )
             }
         }
@@ -536,21 +671,29 @@ public class DeclarationExtractor {
             return nil
         }
 
-        if rule.LP() != nil {
-            let parameters = parameterList(from: rule.parameterTypeList())
-            let base = abstractDeclarationKind(from: rule.directAbstractDeclarator())
+        let isBlock = rule.LP() != nil && rule.BITXOR() != nil
+        let isFunction = rule.LP() != nil && rule.BITXOR() == nil && rule.abstractDeclarator() == nil
+        let isStaticArray = rule.LBRACK() != nil
 
-            return .function(base: base, parameters: parameters ?? [])
-        }
-        if rule.LBRACK() != nil {
+        if isFunction {
+            let base = abstractDeclarationKind(from: rule.directAbstractDeclarator())
+            let isVariadic = rule.parameterTypeList()?.ELIPSIS() != nil
+            let parameters = parameterList(from: rule.parameterTypeList())
+            return .function(base: base, parameters: parameters ?? [], isVariadic: isVariadic)
+        } else if isBlock {
+            let base = abstractDeclarationKind(from: rule.directAbstractDeclarator())
+            let blockSpecifiers = blockSpecifiers(from: rule.blockDeclarationSpecifier()) ?? []
+            let parameters = parameterList(from: rule.blockParameters())
+            return .block(base: base, specifiers: blockSpecifiers, parameters: parameters ?? [])
+        } else if isStaticArray {
             let typeQualifiers = typeQualifierList(from: rule.typeQualifierList())
-            let primaryExpression = rule.primaryExpression()
+            let expression = rule.expression()
 
             if let base = abstractDeclarationKind(from: rule.directAbstractDeclarator()) {
                 return .staticArray(
                     base: base,
                     typeQualifiers: typeQualifiers,
-                    length: primaryExpression
+                    length: expression
                 )
             }
         }
@@ -571,18 +714,33 @@ public class DeclarationExtractor {
             return nil
         }
 
-        return rule.parameterDeclaration().compactMap(parameter(from:))
+        let parameters = rule.parameterDeclaration().compactMap(parameter(from:))
+
+        // Handle '(void)' parameter list; should be equivalent to an empty parameter
+        // list.
+        if parameters.count == 1 {
+            switch parameters[0] {
+            case .typeName(let typeName) where typeName.pointer == nil && typeName.declaration == nil && typeName.specifiers.count == 1:
+                if typeName.specifiers[0].typeSpecifier?.scalarType == "void" {
+                    return []
+                }
+            default:
+                break
+            }
+        }
+
+        return parameters
     }
 
-    private func blockParameterList(from rule: ObjectiveCParser.BlockParametersContext?) -> [BlockParameter]? {
+    private func parameterList(from rule: ObjectiveCParser.BlockParametersContext?) -> [FuncParameter]? {
         guard let rule = rule else {
             return nil
         }
 
-        var params: [BlockParameter] = []
+        var params: [FuncParameter] = []
 
-        for param in rule.typeVariableDeclaratorOrName() {
-            if let param = blockParameter(from: param) {
+        for param in rule.parameterDeclaration() {
+            if let param = parameter(from: param) {
                 params.append(param)
             } else {
                 return nil
@@ -590,24 +748,6 @@ public class DeclarationExtractor {
         }
 
         return params
-    }
-
-    private func blockParameter(
-        from rule: ObjectiveCParser.TypeVariableDeclaratorOrNameContext?
-    ) -> BlockParameter? {
-
-        guard let rule = rule else {
-            return nil
-        }
-        
-        if let typeDecl = rule.typeVariableDeclarator() {
-            return self.declaration(from: typeDecl).map { .declaration($0) }
-        }
-        if let typeName = rule.typeName() {
-            return self.typeName(from: typeName).map { .typeName($0) }
-        }
-
-        return nil
     }
 
     private func parameter(
@@ -684,7 +824,10 @@ public class DeclarationExtractor {
         }
 
         if rule.MUL() != nil {
-            return .pointer(typeQualifierList(from: rule.typeQualifierList()))
+            return .pointer(
+                typeQualifierList(from: rule.typeQualifierList()),
+                nullabilitySpecifier(from: rule.nullabilitySpecifier())
+            )
         }
         /*
         if rule.BITXOR() != nil {
@@ -1022,7 +1165,7 @@ public class DeclarationExtractor {
         return .other(rule.getText())
     }
 
-    private func typeQualifierList(from rule: ObjectiveCParser.TypeQualifierListContext?) -> [TypeQualifier]? {
+    private func typeQualifierList(from rule: ObjectiveCParser.TypeQualifierListContext?) -> [ObjcTypeQualifier]? {
         guard let rule = rule else {
             return nil
         }
@@ -1030,7 +1173,7 @@ public class DeclarationExtractor {
         return rule.typeQualifier().compactMap(self.typeQualifier(from:))
     }
 
-    private func typeQualifier(from rule: ObjectiveCParser.TypeQualifierContext?) -> TypeQualifier? {
+    private func typeQualifier(from rule: ObjectiveCParser.TypeQualifierContext?) -> ObjcTypeQualifier? {
         guard let rule = rule else {
             return nil
         }
@@ -1053,10 +1196,10 @@ public class DeclarationExtractor {
             )
         }
 
-        return .other(rule.getText())
+        return nil
     }
 
-    private func protocolQualifier(from rule: ObjectiveCParser.ProtocolQualifierContext?) -> ProtocolQualifier? {
+    private func protocolQualifier(from rule: ObjectiveCParser.ProtocolQualifierContext?) -> ObjcProtocolQualifier? {
         guard let rule = rule else {
             return nil
         }
@@ -1083,7 +1226,7 @@ public class DeclarationExtractor {
         return nil
     }
 
-    private func functionSpecifier(from rule: ObjectiveCParser.FunctionSpecifierContext?) -> FunctionSpecifier? {
+    private func functionSpecifier(from rule: ObjectiveCParser.FunctionSpecifierContext?) -> ObjcFunctionSpecifier? {
         guard let rule = rule else {
             return nil
         }
@@ -1098,10 +1241,45 @@ public class DeclarationExtractor {
             return .stdCall
         }
 
-        return .other(rule.getText())
+        return nil
     }
 
-    private func arcSpecifier(from rule: ObjectiveCParser.ArcBehaviourSpecifierContext?) -> ArcSpecifier? {
+    private func blockSpecifiers(from rules: [ObjectiveCParser.BlockDeclarationSpecifierContext]) -> [BlockDeclarationSpecifier]? {
+        var results: [BlockDeclarationSpecifier] = []
+
+        for rule in rules {
+            if let spec = blockSpecifier(from: rule) {
+                results.append(spec)
+            } else {
+                return nil
+            }
+        }
+
+        return results
+    }
+
+    private func blockSpecifier(from rule: ObjectiveCParser.BlockDeclarationSpecifierContext?) -> BlockDeclarationSpecifier? {
+        guard let rule = rule else {
+            return nil
+        }
+
+        if let nullability = nullabilitySpecifier(from: rule.nullabilitySpecifier()) {
+            return .nullabilitySpecifier(nullability)
+        }
+        if let arcBehaviour = arcSpecifier(from: rule.arcBehaviourSpecifier()) {
+            return .arcBehaviourSpecifier(arcBehaviour)
+        }
+        if let typeQualifier = typeQualifier(from: rule.typeQualifier()) {
+            return .typeQualifier(typeQualifier)
+        }
+        if let typePrefix = typePrefix(from: rule.typePrefix()) {
+            return .typePrefix(typePrefix)
+        }
+
+        return nil
+    }
+
+    private func arcSpecifier(from rule: ObjectiveCParser.ArcBehaviourSpecifierContext?) -> ObjcArcBehaviorSpecifier? {
         guard let rule = rule else {
             return nil
         }
@@ -1122,7 +1300,7 @@ public class DeclarationExtractor {
         return nil
     }
 
-    private func nullabilitySpecifier(from rule: ObjectiveCParser.NullabilitySpecifierContext?) -> NullabilitySpecifier? {
+    private func nullabilitySpecifier(from rule: ObjectiveCParser.NullabilitySpecifierContext?) -> ObjcNullabilitySpecifier? {
         guard let rule = rule else {
             return nil
         }
@@ -1143,7 +1321,7 @@ public class DeclarationExtractor {
         return nil
     }
 
-    private func ibOutletQualifier(from rule: ObjectiveCParser.IbOutletQualifierContext?) -> IBOutletQualifier? {
+    private func ibOutletQualifier(from rule: ObjectiveCParser.IbOutletQualifierContext?) -> ObjcIBOutletQualifier? {
         guard let rule = rule else {
             return nil
         }
@@ -1204,7 +1382,7 @@ public class DeclarationExtractor {
 
 public extension DeclarationExtractor {
     /// A declaration that was detected during construction
-    struct Declaration {
+    struct Declaration: CustomStringConvertible {
         /// The type prefix that precedes a declaration.
         var typePrefix: TypePrefix?
 
@@ -1222,8 +1400,13 @@ public extension DeclarationExtractor {
         /// The syntax node containing this declaration.
         var declarationNode: DeclarationDeclNode
 
-        /// An initializer that was collected alongside this declaration.
+        /// An initializer that was collected alongside this declaration,
+        /// if it was present.
         var initializer: ObjectiveCParser.InitializerContext?
+        
+        /// A constante context that was collected alongside this declaration,
+        /// if it was present.
+        var constant: ObjectiveCParser.ConstantExpressionContext?
 
         /// Returns `true` if this declaration is of a variable declaration kind.
         var isVariableDeclaration: Bool {
@@ -1245,6 +1428,16 @@ public extension DeclarationExtractor {
         /// available.
         var identifierString: String? {
             declaration.identifierString
+        }
+
+        public var description: String {
+            var result = ""
+
+            result.joinIfPresent(typePrefix)
+            result.joinList(specifiers)
+            result.joinIfPresent(pointer)
+
+            return result
         }
     }
 
@@ -1307,7 +1500,7 @@ public extension DeclarationExtractor {
     }
 
     /// An abstract type name declaration
-    struct TypeName {
+    struct TypeName: CustomStringConvertible {
         /// A list of declaration specifiers for reference purposes.
         var specifiers: [DeclSpecifier]
 
@@ -1321,6 +1514,16 @@ public extension DeclarationExtractor {
         /// declarator part of the syntax, e.g. function parameters, pointer
         /// or array storage, etc.
         var declaration: AbstractDeclarationKind?
+
+        public var description: String {
+            var result = ""
+
+            result.joinList(specifiers)
+            result.joinIfPresent(pointer, separator: "")
+            result.joinIfPresent(declaration, separator: "")
+
+            return result
+        }
     }
 
     /// The source for a TypeName declaration
@@ -1349,21 +1552,25 @@ public extension DeclarationExtractor {
     }
 
     /// The kind for a detected declaration
-    enum DeclarationKind {
+    enum DeclarationKind: CustomStringConvertible {
         /// An identifier kind, e.g. for a variable.
-        case identifier(String, ObjectiveCParser.IdentifierContext)
+        case identifier(
+            String,
+            ObjectiveCParser.IdentifierContext
+        )
 
         /// A static pointer array.
         indirect case staticArray(
             base: DeclarationKind,
-            typeQualifiers: [TypeQualifier]? = nil,
-            length: ObjectiveCParser.PrimaryExpressionContext? = nil
+            typeQualifiers: [ObjcTypeQualifier]? = nil,
+            length: ObjectiveCParser.ExpressionContext? = nil
         )
         
         /// A function declaration.
         indirect case function(
             base: DeclarationKind?,
-            parameters: [FuncParameter]
+            parameters: [FuncParameter],
+            isVariadic: Bool
         )
 
         /// A declaration for a pointer that points to a declaration.
@@ -1374,9 +1581,9 @@ public extension DeclarationExtractor {
 
         /// A block declaration.
         indirect case block(
-            nullability: NullabilitySpecifier? = nil,
+            specifiers: [BlockDeclarationSpecifier],
             base: DeclarationKind? = nil,
-            arguments: [BlockParameter]
+            arguments: [FuncParameter]
         )
 
         /// Extracts the root identifier parser rule context for this declaration
@@ -1387,7 +1594,7 @@ public extension DeclarationExtractor {
                 return ctx
             case .staticArray(let base, _, _), .pointer(let base, _):
                 return base.identifierContext
-            case .function(let base, _), .block(_, let base, _):
+            case .function(let base, _, _), .block(_, let base, _):
                 return base?.identifierContext
             }
         }
@@ -1400,51 +1607,136 @@ public extension DeclarationExtractor {
                 return ident
             case .staticArray(let base, _, _), .pointer(let base, _):
                 return base.identifierString
-            case .function(let base, _), .block(_, let base, _):
+            case .function(let base, _, _), .block(_, let base, _):
                 return base?.identifierString
+            }
+        }
+
+        public var description: String {
+            var result = ""
+
+            switch self {
+            case .identifier(let name, _):
+                result = name
+
+            case .block(let nullability, let base, let arguments):
+                result.joinIfPresent(base)
+                result += " "
+                result += "(^"
+                result.joinIfPresent(nullability)
+                result += ")"
+                result += "("
+                result.joinList(arguments, separator: ", ")
+                result += ")"
+                
+            case .function(let base, let parameters, let isVariadic):
+                result.joinIfPresent(base)
+                result += "("
+                result.joinList(parameters, separator: ", ")
+                if isVariadic {
+                    result.join("...", separator: parameters.isEmpty ? "" : ", ")
+                }
+                result += ")"
+
+            case .pointer(let base, let pointer):
+                result.join(pointer)
+                result.joinIfPresent(base, separator: "")
+
+            case .staticArray(let base, let typeQualifiers, let length):
+                result.join(base)
+                result += "["
+                result.joinListIfPresent(typeQualifiers, separator: "")
+                result.joinIfPresent(length, separator: result.hasSuffix("[") ? "" : " ")
+                result += "]"
+            }
+
+            return result
+        }
+    }
+
+    /// A parameter for a function declaration.
+    indirect enum FuncParameter: CustomStringConvertible {
+        /// A named declaration
+        case declaration(Declaration)
+
+        /// A type name
+        case typeName(TypeName)
+
+        public var description: String {
+            switch self {
+            case .declaration(let decl):
+                return decl.description
+            
+            case .typeName(let typeName):
+                return typeName.description
             }
         }
     }
 
-    // TODO: Use the same enum for both function and block arguments.
-
-    /// A parameter for a function declaration.
-    indirect enum FuncParameter {
-        /// A named declaration
-        case declaration(Declaration)
-
-        /// A type name
-        case typeName(TypeName)
-    }
-
-    /// A parameter for a block declaration.
-    indirect enum BlockParameter {
-        /// A named declaration
-        case declaration(Declaration)
-
-        /// A type name
-        case typeName(TypeName)
-    }
-
     /// Declaration for abstract declarators, e.g. for generic type arguments
     /// of type specifiers.
-    enum AbstractDeclarationKind {
+    enum AbstractDeclarationKind: CustomStringConvertible {
         /// A static pointer array.
         indirect case staticArray(
             base: AbstractDeclarationKind?,
-            typeQualifiers: [TypeQualifier]? = nil,
-            length: ObjectiveCParser.PrimaryExpressionContext? = nil
+            typeQualifiers: [ObjcTypeQualifier]? = nil,
+            length: ObjectiveCParser.ExpressionContext? = nil
         )
 
         /// A function declaration.
         indirect case function(
             base: AbstractDeclarationKind?,
+            parameters: [FuncParameter],
+            isVariadic: Bool
+        )
+
+        /// A block declaration.
+        indirect case block(
+            base: AbstractDeclarationKind?,
+            specifiers: [BlockDeclarationSpecifier] = [],
             parameters: [FuncParameter]
         )
+
+        public var description: String {
+            var result = ""
+
+            switch self {
+            case .function(let base, let parameters, let isVariadic):
+                result.joinIfPresent(base)
+                result += "("
+                result += "*"
+                result += ")"
+                result += "("
+                result.joinList(parameters, separator: ", ")
+                if isVariadic {
+                    result.join("...", separator: parameters.isEmpty ? "" : ", ")
+                }
+                result += ")"
+            
+            case .block(let base, let specifiers, let parameters):
+                result.joinIfPresent(base)
+                result += "("
+                result += "^"
+                result.joinList(specifiers)
+                result += ")"
+                result += "("
+                result.joinList(parameters, separator: ", ")
+                result += ")"
+
+            case .staticArray(let base, let typeQualifiers, let length):
+                result.joinIfPresent(base)
+                result += "["
+                result.joinListIfPresent(typeQualifiers, separator: "")
+                result.joinIfPresent(length, separator: result.hasSuffix("[") ? "" : " ")
+                result += "]"
+            }
+
+            return result
+        }
     }
 
     /// An Objective-C type prefix
-    enum TypePrefix: CustomStringConvertible {
+    enum TypePrefix: Hashable, CustomStringConvertible {
         case bridge
         case bridgeRetained
         case bridgeTransfer
@@ -1477,9 +1769,13 @@ public extension DeclarationExtractor {
     }
 
     /// A pointer context
-    struct Pointer {
+    struct Pointer: CustomStringConvertible {
         /// A list of pointers that where present
         var pointers: [PointerEntry]
+
+        public var description: String {
+            pointers.map(\.description).joined()
+        }
 
         /// Prefix this list of pointers with another list of pointers.
         func prefix(with pointer: Self) -> Self {
@@ -1492,20 +1788,47 @@ public extension DeclarationExtractor {
         }
     }
     /// A pointer entry for a pointer context
-    enum PointerEntry {
-        case pointer([TypeQualifier]? = nil)
-        // case blocks([TypeQualifier]? = nil)
+    enum PointerEntry: CustomStringConvertible {
+        case pointer([ObjcTypeQualifier]? = nil, ObjcNullabilitySpecifier? = nil)
+        // case blocks([TypeQualifier]? = nil, NullabilitySpecifier? = nil)
+
+        public var description: String {
+            var result = "*"
+
+            if let qualifiers = typeQualifiers {
+                result.join(qualifiers.map(\.description).joined(separator: " "))
+            }
+            result.joinIfPresent(nullabilitySpecifier)
+
+            return result
+        }
+
+        /// Returns the type qualifiers for this pointer, if any is present.
+        public var typeQualifiers: [ObjcTypeQualifier]? {
+            switch self {
+            case .pointer(let qualifiers, _):
+                return qualifiers
+            }
+        }
+
+        /// Returns the nullability specifier for this pointer, if any is present.
+        public var nullabilitySpecifier: ObjcNullabilitySpecifier? {
+            switch self {
+            case .pointer(_, let nullability):
+                return nullability
+            }
+        }
     }
 
     /// A specifier for a C/Objective-C declaration
     enum DeclSpecifier: CustomStringConvertible {
         case storageSpecifier(StorageSpecifier)
         case typeSpecifier(TypeSpecifier)
-        case typeQualifier(TypeQualifier)
-        case functionSpecifier(FunctionSpecifier)
-        case arcSpecifier(ArcSpecifier)
-        case nullabilitySpecifier(NullabilitySpecifier)
-        case ibOutletQualifier(IBOutletQualifier)
+        case typeQualifier(ObjcTypeQualifier)
+        case functionSpecifier(ObjcFunctionSpecifier)
+        case arcSpecifier(ObjcArcBehaviorSpecifier)
+        case nullabilitySpecifier(ObjcNullabilitySpecifier)
+        case ibOutletQualifier(ObjcIBOutletQualifier)
 
         public var description: String {
             switch self {
@@ -1542,7 +1865,7 @@ public extension DeclarationExtractor {
                 return nil
             }
         }
-        public var typeQualifier: TypeQualifier? {
+        public var typeQualifier: GrammarModels.ObjcTypeQualifier? {
             switch self {
             case .typeQualifier(let value):
                 return value
@@ -1550,7 +1873,7 @@ public extension DeclarationExtractor {
                 return nil
             }
         }
-        public var functionSpecifier: FunctionSpecifier? {
+        public var functionSpecifier: ObjcFunctionSpecifier? {
             switch self {
             case .functionSpecifier(let value):
                 return value
@@ -1558,7 +1881,7 @@ public extension DeclarationExtractor {
                 return nil
             }
         }
-        public var arcSpecifier: ArcSpecifier? {
+        public var arcSpecifier: ObjcArcBehaviorSpecifier? {
             switch self {
             case .arcSpecifier(let value):
                 return value
@@ -1566,7 +1889,7 @@ public extension DeclarationExtractor {
                 return nil
             }
         }
-        public var nullabilitySpecifier: NullabilitySpecifier? {
+        public var nullabilitySpecifier: ObjcNullabilitySpecifier? {
             switch self {
             case .nullabilitySpecifier(let value):
                 return value
@@ -1574,7 +1897,7 @@ public extension DeclarationExtractor {
                 return nil
             }
         }
-        public var ibOutletQualifier: IBOutletQualifier? {
+        public var ibOutletQualifier: ObjcIBOutletQualifier? {
             switch self {
             case .ibOutletQualifier(let value):
                 return value
@@ -1790,169 +2113,6 @@ public extension DeclarationExtractor {
         }
     }
 
-    /// A C type name specifier context
-    struct TypeNameSpecifier: CustomStringConvertible {
-        var name: String
-        var identifier: ObjectiveCParser.IdentifierContext
-        var genericTypes: GenericTypeList? = nil
-
-        public var description: String {
-            var result = name
-
-            if let genericTypes = genericTypes {
-                result += "\(genericTypes)"
-            }
-            
-            return result
-        }
-    }
-
-    /// A C struct or union type specifier
-    struct StructOrUnionSpecifier {
-        var rule: ObjectiveCParser.StructOrUnionSpecifierContext
-        /// The identifier that represents the type name for this enum.
-        var identifier: ObjectiveCParser.IdentifierContext?
-
-        /// List of struct field declarations. Is `nil` if the original struct
-        /// did not feature a field declaration list, i.e. it's an anonymous
-        /// struct specifier.
-        var fields: [StructFieldDeclaration]?
-    }
-
-    /// A struct or union field declarator
-    struct StructFieldDeclaration {
-        /// The computed declaration for this field.
-        var declaration: Declaration
-
-        var declarator: ObjectiveCParser.DeclaratorContext?
-        var constantExpression: ObjectiveCParser.ConstantExpressionContext?
-    }
-
-    /// An enum type specifier
-    struct EnumSpecifier {
-        var rule: ObjectiveCParser.EnumSpecifierContext
-        var typeName: TypeName?
-        /// The identifier that represents the type name for this enum.
-        var identifier: ObjectiveCParser.IdentifierContext?
-
-        /// List of enumerator declarations. Is `nil` if the original enum did
-        /// not feature an enumerator declaration list, i.e. it's an anonymous
-        /// enum specifier.
-        var enumerators: [EnumeratorDeclaration]?
-    }
-
-    /// An enumerator declaration inside an enum declaration
-    struct EnumeratorDeclaration {
-        var identifier: ObjectiveCParser.EnumeratorIdentifierContext
-        var expression: ObjectiveCParser.ExpressionContext?
-    }
-
-    /// A C type qualifier
-    enum TypeQualifier: Hashable, CustomStringConvertible {
-        case const
-        case volatile
-        case restrict
-        case atomic
-        case protocolQualifier(ProtocolQualifier)
-        case other(String)
-
-        public var description: String {
-            switch self {
-            case .const:
-                return "const"
-            case .volatile:
-                return "volatile"
-            case .restrict:
-                return "restrict"
-            case .atomic:
-                return "_Atomic"
-            case .protocolQualifier(let value):
-                return value.description
-            case .other(let value):
-                return value
-            }
-        }
-
-        var isConst: Bool {
-            switch self {
-            case .const:
-                return true
-            default:
-                return false
-            }
-        }
-        var isVolatile: Bool {
-            switch self {
-            case .volatile:
-                return true
-            default:
-                return false
-            }
-        }
-        var isRestrict: Bool {
-            switch self {
-            case .restrict:
-                return true
-            default:
-                return false
-            }
-        }
-        var isAtomic: Bool {
-            switch self {
-            case .atomic:
-                return true
-            default:
-                return false
-            }
-        }
-        var isProtocolQualifier: Bool {
-            switch self {
-            case .protocolQualifier:
-                return true
-            default:
-                return false
-            }
-        }
-        var isOther: Bool {
-            switch self {
-            case .other:
-                return true
-            default:
-                return false
-            }
-        }
-    }
-
-    /// An Objective-C protocol type qualifier
-    enum ProtocolQualifier: Hashable, CustomStringConvertible {
-        case `in`
-        case out
-        case `inout`
-        case bycopy
-        case byref
-        case oneway
-        case other(String)
-
-        public var description: String {
-            switch self {
-                case .`in`:
-                    return "in"
-                case .out:
-                    return "out"
-                case .`inout`:
-                    return "inout"
-                case .bycopy:
-                    return "bycopy"
-                case .byref:
-                    return "byref"
-                case .oneway:
-                    return "oneway"
-                case .other(let value):
-                    return value
-            }
-        }
-    }
-
     /// A C scalar type
     enum ScalarType: Hashable, CustomStringConvertible {
         case void
@@ -2007,76 +2167,44 @@ public extension DeclarationExtractor {
         }
     }
 
-    /// A C function specifier
-    enum FunctionSpecifier: Hashable, CustomStringConvertible {
-        case inline
-        case noReturn
-        case stdCall
-        case other(String)
+    /// A C type name specifier context
+    struct TypeNameSpecifier: CustomStringConvertible {
+        var name: String
+        var identifier: ObjectiveCParser.IdentifierContext
+        var genericTypes: GenericTypeList? = nil
 
         public var description: String {
-            switch self {
-                case .inline:
-                    return "inline"
-                case .noReturn:
-                    return "_Noreturn"
-                case .stdCall:
-                    return "__stdcall"
-                case .other(let value):
-                    return value
-            }
-        }
-    }
+            var result = name
 
-    /// An Objective-C ARC specifier
-    enum ArcSpecifier: String, Hashable, CustomStringConvertible {
-        case `weak` = "__weak"
-        case strong = "__string"
-        case autoreleasing = "__autoreleasing"
-        case unsafeUnretained = "__unsafe_unretained"
-
-        public var description: String {
-            rawValue
-        }
-    }
-
-    /// An Objective-C nullability specifier
-    enum NullabilitySpecifier: String, Hashable, CustomStringConvertible {
-        case nullUnspecified = "null_unspecified"
-        case nullResettable = "null_resettable"
-        case nullable
-        case nonnull = "nonnull"
-
-        public var description: String {
-            rawValue
-        }
-    }
-
-    /// An Objective-C Interface Builder outlet qualifier
-    enum IBOutletQualifier: Hashable, CustomStringConvertible {
-        case ibCollection(String)
-        case ibOutlet
-
-        public var description: String {
-            switch self {
-            case .ibCollection(let value):
-                return "IBOutletCollection(\(value))"
-            case .ibOutlet:
-                return "IBOutlet"
-            }
+            result.joinIfPresent(genericTypes, separator: "")
+            
+            return result
         }
     }
 
     /// A generic type specifier for Objective-C
-    struct GenericTypeList {
+    struct GenericTypeList: CustomStringConvertible {
         /// A list of concretized Objective-C types for the type arguments.
         var types: [GenericTypeParameter]
+
+        public var description: String {
+            "<\(types.map(\.description).joined(separator: ", "))>"
+        }
     }
 
     /// A generic type specifier for Objective-C
-    struct GenericTypeParameter {
+    struct GenericTypeParameter: CustomStringConvertible {
         var kind: GenericTypeKind?
         var type: TypeName
+
+        public var description: String {
+            var result = ""
+
+            result.joinIfPresent(kind)
+            result.join(type)
+
+            return result
+        }
     }
 
     /// A specifier for a generic type entry for whether the type is covariant
@@ -2089,6 +2217,101 @@ public extension DeclarationExtractor {
             rawValue
         }
     }
+
+    /// A C struct or union type specifier
+    struct StructOrUnionSpecifier {
+        var rule: ObjectiveCParser.StructOrUnionSpecifierContext
+        /// The identifier that represents the type name for this enum.
+        var identifier: ObjectiveCParser.IdentifierContext?
+
+        /// List of struct field declarations. Is `nil` if the original struct
+        /// did not feature a field declaration list, i.e. it's an anonymous
+        /// struct specifier.
+        var fields: [StructFieldDeclaration]?
+    }
+
+    /// A struct or union field declarator
+    struct StructFieldDeclaration {
+        /// The computed declaration for this field.
+        var declaration: Declaration
+
+        var declarator: ObjectiveCParser.DeclaratorContext?
+        var constantExpression: ObjectiveCParser.ConstantExpressionContext?
+    }
+
+    /// An enum type specifier
+    struct EnumSpecifier {
+        var rule: ObjectiveCParser.EnumSpecifierContext
+        var typeName: TypeName?
+        /// The identifier that represents the type name for this enum.
+        var identifier: ObjectiveCParser.IdentifierContext?
+
+        /// List of enumerator declarations. Is `nil` if the original enum did
+        /// not feature an enumerator declaration list, i.e. it's an anonymous
+        /// enum specifier.
+        var enumerators: [EnumeratorDeclaration]?
+    }
+
+    /// An enumerator declaration inside an enum declaration
+    struct EnumeratorDeclaration {
+        var identifier: ObjectiveCParser.EnumeratorIdentifierContext
+        var expression: ObjectiveCParser.ExpressionContext?
+    }
+
+    // TODO: Promote this to a specifier in `ObjcType.blockType`.
+
+    enum BlockDeclarationSpecifier: CustomStringConvertible {
+        case nullabilitySpecifier(ObjcNullabilitySpecifier)
+        case arcBehaviourSpecifier(ObjcArcBehaviorSpecifier)
+        case typeQualifier(ObjcTypeQualifier)
+        case typePrefix(TypePrefix)
+
+        public var nullabilitySpecifier: ObjcNullabilitySpecifier? {
+            switch self {
+            case .nullabilitySpecifier(let value):
+                return value
+            default:
+                return nil
+            }
+        }
+        public var arcBehaviourSpecifier: ObjcArcBehaviorSpecifier? {
+            switch self {
+            case .arcBehaviourSpecifier(let value):
+                return value
+            default:
+                return nil
+            }
+        }
+        public var typeQualifier: ObjcTypeQualifier? {
+            switch self {
+            case .typeQualifier(let value):
+                return value
+            default:
+                return nil
+            }
+        }
+        public var typePrefix: TypePrefix? {
+            switch self {
+            case .typePrefix(let value):
+                return value
+            default:
+                return nil
+            }
+        }
+
+        public var description: String {
+            switch self {
+            case .arcBehaviourSpecifier(let value):
+                return value.description
+            case .nullabilitySpecifier(let value):
+                return value.description
+            case .typePrefix(let value):
+                return value.description
+            case .typeQualifier(let value):
+                return value.description
+            }
+        }
+    }
 }
 
 public extension Sequence where Element == DeclarationExtractor.DeclSpecifier {
@@ -2098,20 +2321,35 @@ public extension Sequence where Element == DeclarationExtractor.DeclSpecifier {
     func typeSpecifiers() -> [DeclarationExtractor.TypeSpecifier] {
         compactMap { $0.typeSpecifier }
     }
-    func typeQualifiers() -> [DeclarationExtractor.TypeQualifier] {
+    func typeQualifiers() -> [ObjcTypeQualifier] {
         compactMap { $0.typeQualifier }
     }
-    func functionSpecifiers() -> [DeclarationExtractor.FunctionSpecifier] {
+    func functionSpecifiers() -> [ObjcFunctionSpecifier] {
         compactMap { $0.functionSpecifier }
     }
-    func arcSpecifiers() -> [DeclarationExtractor.ArcSpecifier] {
+    func arcSpecifiers() -> [ObjcArcBehaviorSpecifier] {
         compactMap { $0.arcSpecifier }
     }
-    func nullabilitySpecifiers() -> [DeclarationExtractor.NullabilitySpecifier] {
+    func nullabilitySpecifiers() -> [ObjcNullabilitySpecifier] {
         compactMap { $0.nullabilitySpecifier }
     }
-    func ibOutletQualifiers() -> [DeclarationExtractor.IBOutletQualifier] {
+    func ibOutletQualifiers() -> [ObjcIBOutletQualifier] {
         compactMap { $0.ibOutletQualifier }
+    }
+}
+
+public extension Sequence where Element == DeclarationExtractor.BlockDeclarationSpecifier {
+    func nullabilitySpecifier() -> [ObjcNullabilitySpecifier] {
+        compactMap { $0.nullabilitySpecifier }
+    }
+    func arcBehaviourSpecifier() -> [ObjcArcBehaviorSpecifier] {
+        compactMap { $0.arcBehaviourSpecifier }
+    }
+    func typeQualifier() -> [ObjcTypeQualifier] {
+        compactMap { $0.typeQualifier }
+    }
+    func typePrefix() -> [DeclarationExtractor.TypePrefix] {
+        compactMap { $0.typePrefix }
     }
 }
 
@@ -2132,5 +2370,39 @@ private extension RuleContext {
         } while current != nil
 
         return false
+    }
+}
+
+private extension String {
+    mutating func join<T: CustomStringConvertible>(_ value: T, separator: String = " ") {
+        if !isEmpty && !hasSuffix(separator) {
+            self += separator
+        }
+
+        self += "\(value)"
+    }
+
+    /// Equivalent to `values.map(\.description).joined(separator: separator)`
+    mutating func joinList<T: CustomStringConvertible, S: Sequence>(_ values: S, separator: String = " ") where S.Element == T {
+        for entry in values {
+            join(entry, separator: separator)
+        }
+    }
+
+    /// Equivalent to `values.map(\.description).joined(separator: separator) ?? ""`
+    mutating func joinListIfPresent<T: CustomStringConvertible>(_ values: (any Sequence<T>)?, separator: String = " ") {
+        guard let values = values else {
+            return
+        }
+        
+        joinList(values, separator: separator)
+    }
+
+    mutating func joinIfPresent<T: CustomStringConvertible>(_ value: T?, separator: String = " ") {
+        guard let value = value else {
+            return
+        }
+
+        join(value, separator: separator)
     }
 }

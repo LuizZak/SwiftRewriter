@@ -100,7 +100,7 @@ extension Asserter where Object == Identifier {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.name, file: file, line: line) {
+        asserter(forKeyPath: \.name, file: file, line: line) {
             $0.assert(equals: name, message: message(), file: file, line: line)
         }
     }
@@ -120,7 +120,7 @@ extension Asserter where Object == TypeNameNode {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.type, file: file, line: line) {
+        asserter(forKeyPath: \.type, file: file, line: line) {
             $0.assert(equals: type, message: message(), file: file, line: line)
         }
     }
@@ -140,7 +140,7 @@ extension Asserter where Object == InitialExpression {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(
+        asserter(
             forKeyPath: \.constantExpression,
             file: file,
             line: line
@@ -165,7 +165,7 @@ extension Asserter where Object == ConstantExpressionNode {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(
+        asserter(
             forKeyPath: \.expression,
             file: file,
             line: line
@@ -190,7 +190,7 @@ extension Asserter where Object == ExpressionNode {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(
+        asserter(
             forKeyPath: \.expression,
             file: file,
             line: line
@@ -214,7 +214,7 @@ extension Asserter where Object == TypedefNode {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.identifier, file: file, line: line) {
+        asserter(forKeyPath: \.identifier, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(name: name, file: file, line: line)
         }
@@ -232,62 +232,9 @@ extension Asserter where Object == TypedefNode {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.type, file: file, line: line) {
+        asserter(forKeyPath: \.type, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(type: type, file: file, line: line)
-        }
-    }
-
-    /// Opens an asserter context for `BlockParametersNode` object within the
-    /// underlying `TypedefNode` being tested.
-    ///
-    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
-    /// further tests.
-    @discardableResult
-    func asserterForBlockParameters(
-        file: StaticString = #file,
-        line: UInt = #line,
-        _ closure: (Asserter<BlockParametersNode>) -> Void
-    ) -> Self? {
-
-        asserterConditional(forKeyPath: \.blockParameters, file: file, line: line) {
-            $0.assertNotNil(file: file, line: line)?
-                .inClosure(closure)
-        }
-    }
-
-    /// Opens an asserter context for `ObjcStructDeclaration` object within the
-    /// underlying `TypedefNode` being tested.
-    ///
-    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
-    /// further tests.
-    @discardableResult
-    func asserterForStructDeclaration(
-        file: StaticString = #file,
-        line: UInt = #line,
-        _ closure: (Asserter<ObjcStructDeclaration>) -> Void
-    ) -> Self? {
-
-        asserterConditional(forKeyPath: \.structDeclaration, file: file, line: line) {
-            $0.assertNotNil(file: file, line: line)?
-                .inClosure(closure)
-        }
-    }
-
-    /// Opens an asserter context for `[TypeDeclaratorNode]` object within the
-    /// underlying `TypedefNode` being tested.
-    ///
-    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
-    /// further tests.
-    @discardableResult
-    func asserterForTypeDeclarators(
-        file: StaticString = #file,
-        line: UInt = #line,
-        _ closure: (Asserter<[TypeDeclaratorNode]>) -> Void
-    ) -> Self? {
-
-        asserterConditional(forKeyPath: \.typeDeclarators, file: file, line: line) {
-            $0.inClosure(closure)
         }
     }
 }
@@ -305,7 +252,7 @@ extension Asserter where Object == VariableDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.identifier, file: file, line: line) {
+        asserter(forKeyPath: \.identifier, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(name: name, file: file, line: line)
         }
@@ -323,7 +270,7 @@ extension Asserter where Object == VariableDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.type, file: file, line: line) {
+        asserter(forKeyPath: \.type, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(type: type, file: file, line: line)
         }
@@ -342,13 +289,39 @@ extension Asserter where Object == VariableDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(
+        asserter(
             forKeyPath: \.initialExpression,
             file: file,
             line: line
         ) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(expressionString: expressionString, file: file, line: line)
+        }
+    }
+
+    /// Asserts that the underlying `VariableDeclaration` being tested has a
+    /// specified `isStatic` value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        isStatic: Bool,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserter(
+            forKeyPath: \.isStatic,
+            file: file,
+            line: line
+        ) {
+            $0.assert(
+                equals: isStatic,
+                message: "Expected variable '\(object.identifier?.name ?? "<nil>").isStatic' to be \(isStatic).",
+                file: file,
+                line: line
+            )
         }
     }
 
@@ -363,7 +336,7 @@ extension Asserter where Object == VariableDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(
+        asserter(
             forKeyPath: \.initialExpression,
             file: file,
             line: line
@@ -390,7 +363,7 @@ extension Asserter where Object == ObjcStructDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.identifier, file: file, line: line) {
+        asserter(forKeyPath: \.identifier, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(name: name, file: file, line: line)
         }
@@ -408,7 +381,7 @@ extension Asserter where Object == ObjcStructDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.body?.children, file: file, line: line) {
+        asserter(forKeyPath: \.body?.children, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assertCount(count, file: file, line: line)
         }
@@ -427,11 +400,11 @@ extension Asserter where Object == ObjcStructDeclaration {
         _ closure: (Asserter<ObjcStructField>) -> Void
     ) -> Self? {
 
-        return asserterConditional(forKeyPath: \.body?.fields, file: file, line: line) { fields in
+        return asserter(forKeyPath: \.body?.fields, file: file, line: line) { fields in
             fields
                 .assertNotNil(file: file, line: line)?
                 .asserterForFirstElement(
-                    message: "Expected to find a field with name \(name) in struct declaration \(object.identifier?.name ?? "<nil>").",
+                    message: "Expected to find a field with name '\(name)' in struct declaration '\(object.identifier?.name ?? "<nil>")'.",
                     file: file,
                     line: line
                 ) { field in
@@ -454,7 +427,7 @@ extension Asserter where Object == ObjcStructField {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.identifier, file: file, line: line) {
+        asserter(forKeyPath: \.identifier, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(name: name, file: file, line: line)
         }
@@ -472,7 +445,7 @@ extension Asserter where Object == ObjcStructField {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.type, file: file, line: line) {
+        asserter(forKeyPath: \.type, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(type: type, file: file, line: line)
         }
@@ -491,7 +464,7 @@ extension Asserter where Object == ObjcStructField {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(
+        asserter(
             forKeyPath: \.expression,
             file: file,
             line: line
@@ -515,7 +488,7 @@ extension Asserter where Object == ObjcEnumDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.identifier, file: file, line: line) {
+        asserter(forKeyPath: \.identifier, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(name: name, file: file, line: line)
         }
@@ -533,7 +506,7 @@ extension Asserter where Object == ObjcEnumDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.cases, file: file, line: line) {
+        asserter(forKeyPath: \.cases, file: file, line: line) {
             $0.assertCount(count, file: file, line: line)
         }
     }
@@ -553,7 +526,7 @@ extension Asserter where Object == ObjcEnumDeclaration {
 
         guard let field = object.cases.first(where: { $0.identifier?.name == name }) else {
             XCTFail(
-                "Expected to find an enumerator with name \(name) in enum declaration \(object.identifier?.name ?? "<nil>").",
+                "Expected to find an enumerator with name '\(name)' in enum declaration '\(object.identifier?.name ?? "<nil>")'.",
                 file: file,
                 line: line
             )
@@ -579,7 +552,7 @@ extension Asserter where Object == ObjcEnumDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.type, file: file, line: line) {
+        asserter(forKeyPath: \.type, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(type: typeName, file: file, line: line)
         }
@@ -596,7 +569,7 @@ extension Asserter where Object == ObjcEnumDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.type, file: file, line: line) {
+        asserter(forKeyPath: \.type, file: file, line: line) {
             $0.assertNil(file: file, line: line)
         }
     }
@@ -615,7 +588,7 @@ extension Asserter where Object == ObjcEnumCase {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(forKeyPath: \.identifier, file: file, line: line) {
+        asserter(forKeyPath: \.identifier, file: file, line: line) {
             $0.assertNotNil(file: file, line: line)?
                 .assert(name: name, file: file, line: line)
         }
@@ -634,7 +607,7 @@ extension Asserter where Object == ObjcEnumCase {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(
+        asserter(
             forKeyPath: \.expression,
             file: file,
             line: line
@@ -655,12 +628,185 @@ extension Asserter where Object == ObjcEnumCase {
         line: UInt = #line
     ) -> Self? {
 
-        asserterConditional(
+        asserter(
             forKeyPath: \.expression,
             file: file,
             line: line
         ) {
             $0.assertNil(file: file, line: line)
+        }
+    }
+}
+
+extension Asserter where Object == FunctionDefinition {
+    /// Asserts that the underlying `FunctionDefinition` being tested has an
+    /// identifier node with a specified `name` value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        name: String,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserter(forKeyPath: \.identifier, file: file, line: line) {
+            $0.assertNotNil(message: "Expected function to have identifier '\(name)', found nil", file: file, line: line)?
+                .assert(name: name, file: file, line: line)
+        }
+    }
+
+    /// Asserts that the underlying `FunctionDefinition` being tested has a
+    /// return type node with a specified `type` value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        returnType type: ObjcType,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserter(forKeyPath: \.returnType, file: file, line: line) {
+            $0.assertNotNil(message: "Expected function to have return type '\(type)', found nil", file: file, line: line)?
+                .assert(type: type, file: file, line: line)
+        }
+    }
+
+    /// Asserts that the underlying `FunctionDefinition` being tested is variadic
+    /// or not, depending on the value of the provided `isVariadic`.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        isVariadic: Bool,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        return asserter(forKeyPath: \.parameterList, file: file, line: line) { parameterList -> Asserter<ParameterList>? in
+            return parameterList
+                .assertNotNil(message: "Expected function to have parameter list, found nil", file: file, line: line)?
+                .asserter(forKeyPath: \.variadicParameter) { (vParam) -> Asserter<Bool>? in
+                    Asserter<Bool>(object: vParam.object != nil)
+                        .assert(equals: isVariadic, file: file, line: line)
+                }
+        }
+    }
+
+    /// Asserts that the underlying `FunctionDefinition` being tested has a
+    /// parameter list with a specified count of parameters.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertParameterCount(
+        _ count: Int,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserter(forKeyPath: \.parameterList, file: file, line: line) {
+            $0.assertNotNil(message: "Expected function to have parameter list, found nil", file: file, line: line)?
+                .asserter(forKeyPath: \.parameters) { parameters in
+                    parameters.assertCount(count, file: file, line: line)
+                }
+        }
+    }
+
+    /// Opens an asserter context for a specified parameter node index on the
+    /// underlying `FunctionDefinition` being tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserter(
+        forParameterAt index: Int,
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<FunctionParameter>) -> Void
+    ) -> Self? {
+
+        guard let parameterList = object.parameterList else {
+            XCTFail(
+                "Expected function node '\(object.identifier?.name ?? "<nil>")' to have a parameter list.",
+                file: file,
+                line: line
+            )
+            dumpObject()
+
+            return nil
+        }
+        guard parameterList.parameters.count > index else {
+            XCTFail(
+                "Expected function node '\(object.identifier?.name ?? "<nil>")' to have at least \(index) parameter(s) but found \(parameterList.parameters.count).",
+                file: file,
+                line: line
+            )
+            dumpObject()
+
+            return nil
+        }
+
+        closure(.init(object: parameterList.parameters[index]))
+
+        return self
+    }
+}
+
+extension Asserter where Object == FunctionParameter {
+    /// Asserts that the underlying `FunctionParameter` being tested has an
+    /// identifier node with a specified `name` value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        name: String,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserter(forKeyPath: \.identifier, file: file, line: line) {
+            $0.assertNotNil(message: "Expected parameter to have identifier '\(name)', found nil", file: file, line: line)?
+                .assert(name: name, file: file, line: line)
+        }
+    }
+
+    /// Asserts that the underlying `FunctionParameter` being tested has no
+    /// identifier node associated with it.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertNoName(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserter(forKeyPath: \.identifier, file: file, line: line) {
+            $0.assertNil(message: "Expected parameter to have no identifier", file: file, line: line)
+        }
+    }
+
+    /// Asserts that the underlying `FunctionParameter` being tested has a
+    /// type node with a specified `type` value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        type: ObjcType,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserter(forKeyPath: \.type, file: file, line: line) {
+            $0.assertNotNil(message: "Expected parameter to have type '\(type)', found nil", file: file, line: line)?
+                .assert(type: type, file: file, line: line)
         }
     }
 }

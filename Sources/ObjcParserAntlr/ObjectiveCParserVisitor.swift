@@ -80,12 +80,12 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#classImplementatioName}.
+	 * Visit a parse tree produced by {@link ObjectiveCParser#classImplementationName}.
 	- Parameters:
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitClassImplementatioName(_ ctx: ObjectiveCParser.ClassImplementatioNameContext) -> T {
+	open func visitClassImplementationName(_ ctx: ObjectiveCParser.ClassImplementationNameContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -130,12 +130,12 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#genericSuperclassSpecifier}.
+	 * Visit a parse tree produced by {@link ObjectiveCParser#genericClassParametersSpecifier}.
 	- Parameters:
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitGenericSuperclassSpecifier(_ ctx: ObjectiveCParser.GenericSuperclassSpecifierContext) -> T {
+	open func visitGenericClassParametersSpecifier(_ ctx: ObjectiveCParser.GenericClassParametersSpecifierContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -186,6 +186,16 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	- returns: the visitor result
 	 */
 	open func visitClassDeclarationList(_ ctx: ObjectiveCParser.ClassDeclarationListContext) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#classDeclaration}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitClassDeclaration(_ ctx: ObjectiveCParser.ClassDeclarationContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -420,16 +430,6 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#blockType}.
-	- Parameters:
-	  - ctx: the parse tree
-	- returns: the visitor result
-	 */
-	open func visitBlockType(_ ctx: ObjectiveCParser.BlockTypeContext) -> T {
-	 	fatalError(#function + " must be overridden")
-	}
-
-	/**
 	 * Visit a parse tree produced by {@link ObjectiveCParser#dictionaryExpression}.
 	- Parameters:
 	  - ctx: the parse tree
@@ -476,26 +476,6 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	- returns: the visitor result
 	 */
 	open func visitBlockParameters(_ ctx: ObjectiveCParser.BlockParametersContext) -> T {
-	 	fatalError(#function + " must be overridden")
-	}
-
-	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#typeVariableDeclaratorOrName}.
-	- Parameters:
-	  - ctx: the parse tree
-	- returns: the visitor result
-	 */
-	open func visitTypeVariableDeclaratorOrName(_ ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> T {
-	 	fatalError(#function + " must be overridden")
-	}
-
-	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#blockExpression_}.
-	- Parameters:
-	  - ctx: the parse tree
-	- returns: the visitor result
-	 */
-	open func visitBlockExpression_(_ ctx: ObjectiveCParser.BlockExpression_Context) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -940,6 +920,16 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#blockDeclarationSpecifier}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitBlockDeclarationSpecifier(_ ctx: ObjectiveCParser.BlockDeclarationSpecifierContext) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
 	 * Visit a parse tree produced by {@link ObjectiveCParser#typeName}.
 	- Parameters:
 	  - ctx: the parse tree
@@ -1080,12 +1070,12 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#structOrUnionSpecifier_}.
+	 * Visit a parse tree produced by {@link ObjectiveCParser#fieldDeclaration}.
 	- Parameters:
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitStructOrUnionSpecifier_(_ ctx: ObjectiveCParser.StructOrUnionSpecifier_Context) -> T {
+	open func visitFieldDeclaration(_ ctx: ObjectiveCParser.FieldDeclarationContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -1140,32 +1130,42 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#structDeclaratorList}.
+	 * Visit a parse tree produced by {@link ObjectiveCParser#enumSpecifier}.
 	- Parameters:
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitStructDeclaratorList(_ ctx: ObjectiveCParser.StructDeclaratorListContext) -> T {
+	open func visitEnumSpecifier(_ ctx: ObjectiveCParser.EnumSpecifierContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
 	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#structDeclarator}.
+	 * Visit a parse tree produced by {@link ObjectiveCParser#enumeratorList}.
 	- Parameters:
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitStructDeclarator(_ ctx: ObjectiveCParser.StructDeclaratorContext) -> T {
+	open func visitEnumeratorList(_ ctx: ObjectiveCParser.EnumeratorListContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
 	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#fieldDeclaration}.
+	 * Visit a parse tree produced by {@link ObjectiveCParser#enumerator}.
 	- Parameters:
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitFieldDeclaration(_ ctx: ObjectiveCParser.FieldDeclarationContext) -> T {
+	open func visitEnumerator(_ ctx: ObjectiveCParser.EnumeratorContext) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#enumeratorIdentifier}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitEnumeratorIdentifier(_ ctx: ObjectiveCParser.EnumeratorIdentifierContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -1360,52 +1360,12 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#enumSpecifier}.
+	 * Visit a parse tree produced by {@link ObjectiveCParser#vcSpecificModifier}.
 	- Parameters:
 	  - ctx: the parse tree
 	- returns: the visitor result
 	 */
-	open func visitEnumSpecifier(_ ctx: ObjectiveCParser.EnumSpecifierContext) -> T {
-	 	fatalError(#function + " must be overridden")
-	}
-
-	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#enumeratorList}.
-	- Parameters:
-	  - ctx: the parse tree
-	- returns: the visitor result
-	 */
-	open func visitEnumeratorList(_ ctx: ObjectiveCParser.EnumeratorListContext) -> T {
-	 	fatalError(#function + " must be overridden")
-	}
-
-	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#enumerator}.
-	- Parameters:
-	  - ctx: the parse tree
-	- returns: the visitor result
-	 */
-	open func visitEnumerator(_ ctx: ObjectiveCParser.EnumeratorContext) -> T {
-	 	fatalError(#function + " must be overridden")
-	}
-
-	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#enumeratorIdentifier}.
-	- Parameters:
-	  - ctx: the parse tree
-	- returns: the visitor result
-	 */
-	open func visitEnumeratorIdentifier(_ ctx: ObjectiveCParser.EnumeratorIdentifierContext) -> T {
-	 	fatalError(#function + " must be overridden")
-	}
-
-	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#vcSpecificModifer}.
-	- Parameters:
-	  - ctx: the parse tree
-	- returns: the visitor result
-	 */
-	open func visitVcSpecificModifer(_ ctx: ObjectiveCParser.VcSpecificModiferContext) -> T {
+	open func visitVcSpecificModifier(_ ctx: ObjectiveCParser.VcSpecificModifierContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 

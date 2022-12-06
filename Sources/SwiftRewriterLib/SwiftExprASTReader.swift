@@ -157,9 +157,12 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         // sizeof(<expr>) / sizeof(<type>)
         if ctx.SIZEOF() != nil {
-            if let typeSpecifier = ctx.typeSpecifier(),
-                let type = typeParser.parseObjcType(from: typeSpecifier) {
-                
+            // TODO: Re-implement sizeof type parsing using the new `TypeParsing` interface.
+            if
+                let typeSpecifier = ctx.typeSpecifier()//,
+                //let type = typeParser.parseObjcType(from: typeSpecifier)
+            {
+                let type = ObjcType.typeName(typeSpecifier.getText())
                 let swiftType = typeMapper.swiftType(forObjcType: type)
                 
                 return .sizeof(type: swiftType)
@@ -352,18 +355,17 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitBlockExpression(_ ctx: ObjectiveCParser.BlockExpressionContext) -> Expression? {
-        /*
-        let returnType = ctx.typeSpecifier().flatMap { typeSpecifier -> ObjcType? in
-            return typeParser.parseObjcType(from: typeSpecifier)
+        let returnType = ctx.typeName().flatMap { typeName -> ObjcType? in
+            return typeParser.parseObjcType(from: typeName)
         } ?? .void
-        
+
         let parameters: [BlockParameter]
         if let blockParameters = ctx.blockParameters() {
             let types = typeParser.parseObjcTypes(from: blockParameters)
-            let args = blockParameters.typeVariableDeclaratorOrName()
+            let parametersCtx = blockParameters.parameterDeclaration()
             
             parameters =
-                zip(args, types).map { (param, type) -> BlockParameter in
+                zip(parametersCtx, types).map { (param, type) -> BlockParameter in
                     guard let identifier = VarDeclarationIdentifierNameExtractor.extract(from: param) else {
                         return BlockParameter(name: "<unknown>", type: .void)
                     }
@@ -385,9 +387,6 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         let swiftReturnType = typeMapper.swiftType(forObjcType: returnType)
         
         return .block(parameters: parameters, return: swiftReturnType, body: body)
-        */
-        
-        return nil
     }
     
     public override func visitConstant(_ ctx: ObjectiveCParser.ConstantContext) -> Expression? {

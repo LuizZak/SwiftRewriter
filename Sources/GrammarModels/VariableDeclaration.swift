@@ -13,6 +13,9 @@ public class VariableDeclaration: ASTNode, InitializableNode {
     public var initialExpression: InitialExpression? {
         firstChild()
     }
+
+    /// Whether this variable was defined with a `static` storage modifier.
+    public var isStatic: Bool = false
     
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)

@@ -187,29 +187,73 @@ public class ASTNodeFactory {
         (node.location, node.length) = sourceLocationAndLength(for: rule)
     }
     
+    /// Returns the source location and length for a specified parser rule context
+    /// object.
     func sourceLocationAndLength(for rule: ParserRuleContext) -> (SourceLocation, SourceLength) {
         guard let startIndex = rule.start?.getStartIndex(), let endIndex = rule.stop?.getStopIndex() else {
             return (.invalid, .zero)
         }
         
         let sourceStartIndex = source.stringIndex(forCharOffset: startIndex)
-        let sourceEndIndex = source.stringIndex(forCharOffset: endIndex)
+        let sourceEndIndex = source.stringIndex(forCharOffset: endIndex + 1 /* ANTLR character ranges are inclusive */)
         
         let startLine = source.lineNumber(at: sourceStartIndex)
         let startColumn = source.columnNumber(at: sourceStartIndex)
         let endLine = source.lineNumber(at: sourceEndIndex)
         let endColumn = source.columnNumber(at: sourceEndIndex)
         
-        let location =
-            SourceLocation(line: startLine,
-                            column: startColumn,
-                            utf8Offset: startIndex)
+        let location = SourceLocation(
+            line: startLine,
+            column: startColumn,
+            utf8Offset: startIndex
+        )
         
-        let length =
-            SourceLength(newlines: endLine - startLine,
-                          columnsAtLastLine: endColumn,
-                          utf8Length: endIndex - startIndex)
+        let length = SourceLength(
+            newlines: endLine - startLine,
+            columnsAtLastLine: endColumn,
+            utf8Length: endIndex - startIndex
+        )
         
         return (location, length)
+    }
+    
+    /// Returns the source range for a specified parser rule context object.
+    func sourceRange(for rule: ParserRuleContext) -> SourceRange {
+        source.sourceRange(for: rule)
+    }
+}
+
+extension Source {
+    /// Returns the source range for a specified parser rule context object.
+    func sourceRange(for rule: ParserRuleContext) -> SourceRange {
+        guard let startIndex = rule.start?.getStartIndex(), let endIndex = rule.stop?.getStopIndex() else {
+            return .invalid
+        }
+
+        let sourceStartIndex = stringIndex(forCharOffset: startIndex)
+        let sourceEndIndex = stringIndex(forCharOffset: endIndex + 1 /* ANTLR character ranges are inclusive */)
+
+        let startLoc = sourceLocation(atStringIndex: sourceStartIndex)
+        let endLoc = sourceLocation(atStringIndex: sourceEndIndex)
+
+        return .range(start: startLoc, end: endLoc)
+    }
+
+    /// Returns the source range for a specified terminal node rule context object.
+    func sourceRange(for node: TerminalNode) -> SourceRange {
+        guard let symbol = node.getSymbol() else {
+            return .invalid
+        }
+        
+        let startIndex = symbol.getStartIndex()
+        let endIndex = symbol.getStopIndex()
+
+        let sourceStartIndex = stringIndex(forCharOffset: startIndex)
+        let sourceEndIndex = stringIndex(forCharOffset: endIndex + 1 /* ANTLR character ranges are inclusive */)
+
+        let startLoc = sourceLocation(atStringIndex: sourceStartIndex)
+        let endLoc = sourceLocation(atStringIndex: sourceEndIndex)
+
+        return .range(start: startLoc, end: endLoc)
     }
 }

@@ -35,11 +35,12 @@ public class ObjcParser {
     public var state: ObjcParserState
     
     // MARK: Internal members
-    let lexer: ObjcLexer
-    let source: CodeSource
     let context: NodeCreationContext
     
     public var diagnostics: Diagnostics
+
+    /// The source that is being parsed.
+    public let source: CodeSource
     
     /// The root global context note after parsing.
     public var rootNode: GlobalContextNode
@@ -81,25 +82,9 @@ public class ObjcParser {
     public init(source: CodeSource, state: ObjcParserState) {
         self.source = source
         self.state = state
-        lexer = ObjcLexer(source: source)
         context = NodeCreationContext()
         diagnostics = Diagnostics()
         rootNode = GlobalContextNode(isInNonnullContext: false)
-    }
-    
-    func startRange() -> RangeMarker {
-        lexer.startRange()
-    }
-    
-    /// Creates and returns a backtracking point which can be activated to rewind
-    /// the lexer to the point at which this method was called.
-    func backtracker() -> Backtrack {
-        lexer.backtracker()
-    }
-    
-    /// Current lexer's location as a `SourceLocation`.
-    func location() -> SourceLocation {
-        lexer.location()
     }
     
     func withTemporaryContext<T: InitializableNode>(
@@ -360,178 +345,6 @@ public class ObjcParser {
         }
     }
     
-    public func parseObjcType() throws -> ObjcType {
-        // Here we simplify the grammar for types as:
-        // TypeName: specifier* IDENTIFIER ('<' TypeName '>')? '*'? qualifier*
-        
-        var type: ObjcType
-        
-        var specifiers: [String] = []
-        while lexer.tokenType(matches: \.isTypeQualifier) {
-            let spec = lexer.nextToken().value
-            specifiers.append(String(spec))
-        }
-        
-        if lexer.tokenType(is: .id) {
-            lexer.skipToken()
-            
-            // '<' : Protocol list
-            if lexer.tokenType() == .operator(.lessThan) {
-                let types =
-                    _parseCommaSeparatedList(
-                        braces: .operator(.lessThan), .operator(.greaterThan),
-                        itemParser: { try lexer.advance(matching: \.tokenType.isIdentifier) })
-                
-                type = .id(protocols: types.map { String($0.value) })
-            } else {
-                type = .id()
-            }
-        } else if lexer.tokenType(matches: \.isIdentifier) {
-            var typeName = String(try lexer.advance(matching: \.tokenType.isIdentifier).value)
-            
-            // 'long long' support
-            if typeName == "long" && lexer.tokenType(is: .identifier("long")) {
-                typeName = try String(typeName + " " + lexer.advance(matching: \.tokenType.isIdentifier).value)
-            }
-            
-            // 'signed', 'unsigned' support
-            if specifiers == ["signed"] || specifiers == ["unsigned"] {
-                typeName = specifiers[0] + " \(typeName)"
-                specifiers.removeAll()
-            }
-            
-            // '<' : Generic type specifier
-            if lexer.tokenType() == .operator(.lessThan) {
-                let types =
-                    _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
-                                             itemParser: parseObjcType)
-                type = .generic(typeName, parameters: types)
-            } else if typeName == "instancetype" {
-                type = .instancetype
-            } else {
-                type = .struct(typeName)
-            }
-        } else if lexer.tokenType(is: .keyword(.void)) {
-            lexer.skipToken()
-            type = .void
-        } else {
-            throw lexer.lexer.syntaxError("Expected type name")
-        }
-        
-        // '*' : Pointer
-        if lexer.tokenType(is: .operator(.multiply)) {
-            lexer.skipToken()
-            type = .pointer(type)
-        }
-        
-        // Type qualifier
-        var qualifiers: [String] = []
-        while lexer.tokenType(matches: \.isTypeQualifier) {
-            let qual = lexer.nextToken().value
-            qualifiers.append(String(qual))
-        }
-        
-        if !qualifiers.isEmpty {
-            type = .qualified(type, qualifiers: qualifiers)
-        }
-        if !specifiers.isEmpty {
-            type = .specified(specifiers: specifiers, type)
-        }
-        
-        return type
-    }
-    
-    func parseTokenNode(_ tokenType: TokenType) throws {
-        try lexer.advance(overTokenType: tokenType)
-    }
-    
-    /// Starts parsing a comman-separated list of items using the specified braces
-    /// settings and an item-parsing closure.
-    ///
-    /// The method starts and ends by reading the opening and closing braces, and
-    /// always expects to successfully parse at least one item.
-    ///
-    /// The method performs error recovery for opening/closing braces and the
-    /// comma, but it is the responsibility of the `itemParser` closure to perform
-    /// its own error recovery during parsing.
-    ///
-    /// The caller can optionally specify whether to ignore adding tokens (for
-    /// opening brace/comma/closing brance tokens) to the context when parsing is
-    /// performed.
-    ///
-    /// - Parameters:
-    ///   - openBrace: Character that represents the opening brace, e.g. '(', '['
-    /// or '<'.
-    ///   - closeBrace: Character that represents the closing brace, e.g. ')', ']'
-    /// or '>'.
-    ///   - addTokensToContext: If true, when parsing tokens they are added to
-    /// the current `context` as `TokenNode`s.
-    ///   - itemParser: Block that is called to parse items on the list. Reporting
-    /// of errors as diagnostics must be made by this closure.
-    /// - Returns: An array of items returned by `itemParser` for each successful
-    /// parse performed.
-    internal func _parseCommaSeparatedList<T>(braces openBrace: TokenType,
-                                              _ closeBrace: TokenType,
-                                              itemParser: () throws -> T) -> [T] {
-        
-        do {
-            try parseTokenNode(openBrace)
-        } catch {
-            diagnostics.error("Expected \(openBrace) to open list",
-                              origin: source.filePath,
-                              location: location())
-        }
-        
-        var expectsItem = true
-        var items: [T] = []
-        while !lexer.isEof {
-            expectsItem = false
-            
-            // Item
-            do {
-                let item = try itemParser()
-                items.append(item)
-            } catch {
-                lexer.advance(until: { $0.tokenType == .comma || $0.tokenType == closeBrace })
-            }
-            
-            // Comma separator / close brace
-            do {
-                if lexer.tokenType(is: .comma) {
-                    try parseTokenNode(.comma)
-                    expectsItem = true
-                } else if lexer.tokenType(is: closeBrace) {
-                    break
-                } else {
-                    // Should match either comma or closing brace!
-                    throw LexerError.genericParseError
-                }
-            } catch {
-                // Panic!
-                diagnostics.error("Expected \(TokenType.comma) or \(closeBrace) after an item",
-                                 origin: source.filePath,
-                                 location: location())
-            }
-        }
-        
-        // Closed list after comma
-        if expectsItem {
-            diagnostics.error("Expected item after comma",
-                              origin: source.filePath,
-                              location: location())
-        }
-        
-        do {
-            try parseTokenNode(closeBrace)
-        } catch {
-            diagnostics.error("Expected \(closeBrace) to close list",
-                              origin: source.filePath,
-                              location: location())
-        }
-        
-        return items
-    }
-
     private static func parseObjcImports(in directives: [ObjcPreprocessorDirective]) -> [ObjcImportDecl] {
         var imports: [ObjcImportDecl] = []
 

@@ -179,15 +179,24 @@ class ExpressionPassTestCase: XCTestCase {
         
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
         
-        let context = SwiftASTReaderContext(typeSystem: typeSystem,
-                                            typeContext: nil,
-                                            comments: [])
+        let context = SwiftASTReaderContext(
+            typeSystem: typeSystem,
+            typeContext: nil,
+            comments: []
+        )
+        let source = StringCodeSource(source: exp)
         
-        let reader = SwiftExprASTReader(typeMapper: typeMapper,
-                                        typeParser: TypeParsing(state: ExpressionPassTestCase._state),
-                                        context: context,
-                                        delegate: nil)
-        
+        let reader = SwiftExprASTReader(
+            typeMapper: typeMapper,
+            typeParser: TypeParsing(
+                state: ExpressionPassTestCase._state,
+                source: source,
+                nonnullContextQuerier: NonnullContextQuerier(nonnullMacroRegionsTokenRange: [])
+            ),
+            context: context,
+            delegate: nil
+        )
+
         return expression.accept(reader)!
     }
     
@@ -209,7 +218,14 @@ class ExpressionPassTestCase: XCTestCase {
         }
         
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
-        let typeParser = TypeParsing(state: ExpressionPassTestCase._state)
+        let source = StringCodeSource(source: stmtString)
+        let typeParser = TypeParsing(
+            state: ExpressionPassTestCase._state,
+            source: source,
+            nonnullContextQuerier: NonnullContextQuerier(
+                nonnullMacroRegionsTokenRange: []
+            )
+        )
         
         let expReader =
             SwiftExprASTReader(
@@ -218,7 +234,8 @@ class ExpressionPassTestCase: XCTestCase {
                 context: SwiftASTReaderContext(typeSystem: typeSystem,
                                                typeContext: nil,
                                                comments: []),
-                delegate: nil)
+                delegate: nil
+            )
         
         let reader = SwiftStatementASTReader(expressionReader: expReader,
                                              context: expReader.context,

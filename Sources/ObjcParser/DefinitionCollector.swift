@@ -100,7 +100,8 @@ public class DefinitionCollector {
         self.nodeFactory = nodeFactory
     }
 
-    public func collect(from ctx: ObjectiveCParser.DeclarationContext) -> [ASTNode]? {
+    /// Collects definitions from a given declaration context parser rule.
+    public func collect(from ctx: ObjectiveCParser.DeclarationContext) -> [ASTNode] {
         var declarations: [ASTNode] = []
 
         let extractor = DeclarationExtractor()
@@ -118,13 +119,102 @@ public class DefinitionCollector {
         return declarations
     }
 
+    /// Collects definitions from a given field declaration context parser rule.
+    public func collect(from ctx: ObjectiveCParser.FieldDeclarationContext) -> [ASTNode] {
+        var declarations: [ASTNode] = []
+
+        let extractor = DeclarationExtractor()
+        let translator = DeclarationTranslator()
+
+        let decls = extractor.extract(from: ctx)
+        let nodeDecls = translator.translate(decls, context: .init(nodeFactory: nodeFactory))
+
+        for nodeDecl in nodeDecls {
+            if let nodes = processDeclaration(nodeDecl) {
+                declarations.append(contentsOf: nodes)
+            }
+        }
+        
+        return declarations
+    }
+
+    /// Collects a full function definition from a specified context.
+    ///
+    /// Returns `nil` if the conversion could not succeed due to missing or invalid
+    /// syntax configurations.
+    public func collectFunction(from ctx: ObjectiveCParser.FunctionDefinitionContext) -> FunctionDefinition? {
+        var declarations: [ASTNode] = []
+
+        guard let functionSignature = ctx.functionSignature() else {
+            return nil
+        }
+        guard let declarator = functionSignature.declarator() else {
+            return nil
+        }
+
+        let extractor = DeclarationExtractor()
+        let translator = DeclarationTranslator()
+
+        guard let decl = extractor.extract(
+            fromSpecifiers: functionSignature.declarationSpecifiers(),
+            declarator: declarator
+        ) else {
+            return nil
+        }
+
+        let nodeDecls = translator.translate(decl, context: .init(nodeFactory: nodeFactory))
+
+        for nodeDecl in nodeDecls {
+            if let nodes = processDeclaration(nodeDecl) {
+                declarations.append(contentsOf: nodes)
+            }
+        }
+
+        guard let funcDecl = declarations.first(where: { $0 is FunctionDefinition }) as? FunctionDefinition else {
+            return nil
+        }
+
+        if let compoundStatement = ctx.compoundStatement() {
+            let methodBody = nodeFactory.makeMethodBody(from: compoundStatement)
+
+            funcDecl.addChild(methodBody)
+        }
+        
+        return funcDecl
+    }
+
+    /// Collects definitions from any direct descendant of `ctx` that is a rule
+    /// of type `ObjectiveCParser.DeclarationContext`.
+    ///
+    /// - note: Function is non-recursive: only the first descendants of `ctx`
+    /// are inspected.
+    public func collect(fromChildrenOf ctx: ParserRuleContext) -> [ASTNode] {
+        var result: [ASTNode] = []
+        guard let children = ctx.children else {
+            return result
+        }
+
+        for childCtx in children {
+            guard let declCtx = childCtx as? ObjectiveCParser.DeclarationContext else {
+                continue
+            }
+
+            let declarations = collect(from: declCtx)
+            result.append(contentsOf: declarations)
+        }
+
+        return result
+    }
+
     private func processVariable(
         _ decl: DeclarationTranslator.ASTNodeDeclaration,
         rule: ParserRuleContext,
         identifier: Identifier,
         type: ObjcType?,
-        nullability: DeclarationTranslator.Nullability?,
+        nullability: ObjcNullabilitySpecifier?,
+        arcSpecifier: ObjcArcBehaviorSpecifier?,
         initialValue: ObjectiveCParser.InitializerContext?,
+        isStatic: Bool,
         notifyDelegate: Bool
     ) -> [ASTNode]? {
 
@@ -140,7 +230,9 @@ public class DefinitionCollector {
             identifier: identifier,
             typeNode: typeNode,
             nullability: nullability,
+            arcSpecifier: arcSpecifier,
             initialValue: initialValue,
+            isStatic: isStatic,
             notifyDelegate: notifyDelegate
         )
     }
@@ -150,12 +242,15 @@ public class DefinitionCollector {
         rule: ParserRuleContext,
         identifier: Identifier,
         typeNode: TypeNameNode,
-        nullability: DeclarationTranslator.Nullability?,
+        nullability: ObjcNullabilitySpecifier?,
+        arcSpecifier: ObjcArcBehaviorSpecifier?,
         initialValue: ObjectiveCParser.InitializerContext?,
+        isStatic: Bool,
         notifyDelegate: Bool
     ) -> [ASTNode]? {
 
         let node = VariableDeclaration(isInNonnullContext: identifier.isInNonnullContext)
+        node.isStatic = isStatic
 
         node.addChild(identifier)
         node.addChild(typeNode)
@@ -167,7 +262,6 @@ public class DefinitionCollector {
         }
 
         node.updateSourceRange()
-
         collectComments(node, rule)
 
         if notifyDelegate {
@@ -187,11 +281,27 @@ public class DefinitionCollector {
         identifier: Identifier,
         parameters: [FunctionParameter],
         returnType: TypeNameNode?,
+        isVariadic: Bool,
         notifyDelegate: Bool
     ) -> [ASTNode]? {
 
-        let node = FunctionDefinition(isInNonnullContext: identifier.isInNonnullContext)
+        let parameterList = ParameterList(isInNonnullContext: identifier.isInNonnullContext)
+        parameterList.addChildren(parameters)
+        if isVariadic {
+            let variadicParam = VariadicParameter(isInNonnullContext: identifier.isInNonnullContext)
+            parameterList.addChild(variadicParam)
+        }
 
+        let node = FunctionDefinition(isInNonnullContext: identifier.isInNonnullContext)
+        
+        node.addChild(identifier)
+        node.addChild(parameterList)
+
+        if let returnType = returnType {
+            node.addChild(returnType)
+        }
+
+        node.updateSourceRange()
         collectComments(node, rule)
 
         if notifyDelegate {
@@ -210,7 +320,7 @@ public class DefinitionCollector {
         rule: ParserRuleContext,
         identifier: Identifier?,
         structDecl: DeclarationExtractor.StructOrUnionSpecifier,
-        fields: [ObjcStructField],
+        fields: [DeclarationTranslator.ASTStructFieldDeclaration],
         notifyDelegate: Bool
     ) -> [ASTNode]? {
 
@@ -222,12 +332,16 @@ public class DefinitionCollector {
         }
 
         let bodyNode = ObjcStructDeclarationBody(isInNonnullContext: nonnull)
-        bodyNode.addChildren(fields)
+        bodyNode.addChildren(fields.map(\.node))
         node.addChild(bodyNode)
 
         node.updateSourceRange()
         collectComments(node, rule)
 
+        // Process comments for each field
+        for field in fields {
+            collectComments(field.node, field.rule)
+        }
 
         if notifyDelegate {
             delegate?.definitionCollector(
@@ -246,7 +360,7 @@ public class DefinitionCollector {
         identifier: Identifier?,
         typeName: TypeNameNode?,
         enumDecl: DeclarationExtractor.EnumSpecifier,
-        enumerators: [ObjcEnumCase],
+        enumerators: [DeclarationTranslator.ASTEnumeratorDeclaration],
         notifyDelegate: Bool
     ) -> [ASTNode]? {
 
@@ -260,11 +374,15 @@ public class DefinitionCollector {
             node.addChild(typeName)
         }
 
-        node.addChildren(enumerators)
+        node.addChildren(enumerators.map(\.node))
 
         node.updateSourceRange()
         collectComments(node, rule)
 
+        // Process comments for each enumerator
+        for enumerator in enumerators {
+            collectComments(enumerator.node, enumerator.rule)
+        }
         
         if notifyDelegate {
             delegate?.definitionCollector(
@@ -291,11 +409,6 @@ public class DefinitionCollector {
         let node = TypedefNode(isInNonnullContext: nonnull)
         node.addChild(alias)
         node.addChild(typeNode)
-
-        if let baseNodes = processDeclaration(baseDecl, notifyDelegate: false) {
-            node.addChildren(baseNodes)
-        }
-
         node.updateSourceRange()
         collectComments(node, rule)
 
@@ -320,77 +433,84 @@ public class DefinitionCollector {
         }
 
         switch decl {
-        case .variable(let rule, let nullability, let identifier, let type, let initialValue):
+        case .variable(let astDecl):
             return processVariable(
                 decl,
-                rule: rule,
-                identifier: identifier,
-                typeNode: type,
-                nullability: nullability,
-                initialValue: initialValue,
+                rule: astDecl.rule,
+                identifier: astDecl.identifier,
+                typeNode: astDecl.type,
+                nullability: astDecl.nullability,
+                arcSpecifier: astDecl.arcSpecifier,
+                initialValue: astDecl.initialValue,
+                isStatic: astDecl.isStatic,
                 notifyDelegate: notifyDelegate
             )
             
-        case .block(let rule, let nullability, let identifier, _, _, let initialValue):
+        case .block(let astDecl):
             return processVariable(
                 decl,
-                rule: rule,
-                identifier: identifier,
+                rule: astDecl.rule,
+                identifier: astDecl.identifier,
                 type: decl.objcType,
-                nullability: nullability,
-                initialValue: initialValue,
+                nullability: astDecl.nullability,
+                arcSpecifier: astDecl.arcSpecifier,
+                initialValue: astDecl.initialValue,
+                isStatic: astDecl.isStatic,
                 notifyDelegate: notifyDelegate
             )
             
-        case .functionPointer(let rule, let nullability, let identifier, _, _, let initialValue):
+        case .functionPointer(let astDecl):
             return processVariable(
                 decl,
-                rule: rule,
-                identifier: identifier,
+                rule: astDecl.rule,
+                identifier: astDecl.identifier,
                 type: decl.objcType,
-                nullability: nullability,
-                initialValue: initialValue,
+                nullability: astDecl.nullability,
+                arcSpecifier: nil,
+                initialValue: astDecl.initialValue,
+                isStatic: astDecl.isStatic,
                 notifyDelegate: notifyDelegate
             )
 
-        case .enumDecl(let rule, let identifier, let typeName, let enumDecl, let enumerators):
+        case .enumDecl(let astDecl):
             return processEnumDecl(
                 decl,
-                rule: rule,
-                identifier: identifier,
-                typeName: typeName,
-                enumDecl: enumDecl,
-                enumerators: enumerators,
+                rule: astDecl.rule,
+                identifier: astDecl.identifier,
+                typeName: astDecl.typeName,
+                enumDecl: astDecl.context,
+                enumerators: astDecl.enumerators,
                 notifyDelegate: notifyDelegate
             )
 
-        case .structOrUnionDecl(let rule, let identifier, let structDecl, let fields):
+        case .structOrUnionDecl(let astDecl):
             return processStructOrUnionDecl(
                 decl,
-                rule: rule,
-                identifier: identifier,
-                structDecl: structDecl,
-                fields: fields,
+                rule: astDecl.rule,
+                identifier: astDecl.identifier,
+                structDecl: astDecl.context,
+                fields: astDecl.fields,
                 notifyDelegate: notifyDelegate
             )
 
-        case .function(let rule, let identifier, let parameters, let returnType):
+        case .function(let astDecl):
             return processFunction(
                 decl,
-                rule: rule,
-                identifier: identifier,
-                parameters: parameters,
-                returnType: returnType,
+                rule: astDecl.rule,
+                identifier: astDecl.identifier,
+                parameters: astDecl.parameters,
+                returnType: astDecl.returnType,
+                isVariadic: astDecl.isVariadic,
                 notifyDelegate: notifyDelegate
             )
 
-        case .typedef(let rule, let baseType, let typeNode, let alias):
+        case .typedef(let astDecl):
             return processTypeAlias(
                 decl,
-                rule: rule,
-                baseDecl: baseType,
-                typeNode: typeNode,
-                alias: alias,
+                rule: astDecl.rule,
+                baseDecl: astDecl.baseType,
+                typeNode: astDecl.typeNode,
+                alias: astDecl.alias,
                 notifyDelegate: notifyDelegate
             )
         }
@@ -401,7 +521,57 @@ public class DefinitionCollector {
             contentsOf: commentQuerier.popClosestCommentsBefore(node: rule)
         )
         node.precedingComments.append(
-            contentsOf: commentQuerier.popCommentsOverlapping(node: rule)
+            contentsOf: commentQuerier.popCommentsInlineWith(node: rule)
         )
+    }
+}
+
+/// A delegate for `DefinitionCollector` that stores each type of definition in
+/// a separate array.
+public class ArrayDefinitionCollectorDelegate: DefinitionCollectorDelegate {
+    private(set) public var variables: [VariableDeclaration] = []
+    private(set) public var functions: [FunctionDefinition] = []
+    private(set) public var typedefNodes: [TypedefNode] = []
+    private(set) public var structDeclarations: [ObjcStructDeclaration] = []
+    private(set) public var enumDeclarations: [ObjcEnumDeclaration] = []
+
+    public func definitionCollector(
+        _ collector: DefinitionCollector,
+        didDetectVariable variable: VariableDeclaration,
+        from declaration: DeclarationTranslator.ASTNodeDeclaration
+    ) {
+        self.variables.append(variable)
+    }
+    
+    public func definitionCollector(
+        _ collector: DefinitionCollector,
+        didDetectFunction function: FunctionDefinition,
+        from declaration: DeclarationTranslator.ASTNodeDeclaration
+    ) {
+        self.functions.append(function)
+    }
+    
+    public func definitionCollector(
+        _ collector: DefinitionCollector,
+        didDetectTypedef typedefNode: TypedefNode,
+        from declaration: DeclarationTranslator.ASTNodeDeclaration
+    ) {
+        self.typedefNodes.append(typedefNode)
+    }
+    
+    public func definitionCollector(
+        _ collector: DefinitionCollector,
+        didDetectStruct structDecl: ObjcStructDeclaration,
+        from declaration: DeclarationTranslator.ASTNodeDeclaration
+    ) {
+        self.structDeclarations.append(structDecl)
+    }
+    
+    public func definitionCollector(
+        _ collector: DefinitionCollector,
+        didDetectEnum enumDecl: ObjcEnumDeclaration,
+        from declaration: DeclarationTranslator.ASTNodeDeclaration
+    ) {
+        self.enumDeclarations.append(enumDecl)
     }
 }

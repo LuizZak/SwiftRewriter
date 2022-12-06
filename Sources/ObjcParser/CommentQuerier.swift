@@ -8,6 +8,8 @@ public class CommentQuerier {
         self.allComments = allComments
     }
     
+    // TODO: Should rename these parameter labels from 'node' to 'rule' to reflect the parameter's type
+
     public func popClosestCommentBefore(node: ParserRuleContext) -> ObjcComment? {
         guard let start = node.getStart() else {
             return nil
@@ -26,6 +28,22 @@ public class CommentQuerier {
     public func popClosestCommentsBefore(node: ParserRuleContext) -> [ObjcComment] {
         var comments: [ObjcComment] = []
         while let comment = popClosestCommentBefore(node: node) {
+            comments.append(comment)
+        }
+        
+        return comments.reversed()
+    }
+
+    public func popCommentsInlineWith(node: ParserRuleContext) -> [ObjcComment] {
+        guard let start = node.getStart() else {
+            return []
+        }
+        
+        let location = start.sourceLocation()
+        
+        var comments: [ObjcComment] = []
+        for (i, comment) in allComments.enumerated().reversed() where comment.location.line == location.line {
+            allComments.remove(at: i)
             comments.append(comment)
         }
         

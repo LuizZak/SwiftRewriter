@@ -5,200 +5,126 @@ import ObjcParserAntlr
 // TODO: Add tests for this class
 public class TypeParsing {
     public typealias Parser = ObjectiveCParser
+
+    // TODO: Should probably refactor the translator so it exposes context-free type translation methods
+    /// Required for `DeclarationTranslator`
+    private let _nodeFactory: ASTNodeFactory
+    private let _translator: DeclarationTranslator
     
     public let state: ObjcParserState
     public let antlrSettings: AntlrSettings
     
-    public init(state: ObjcParserState, antlrSettings: AntlrSettings = .default) {
+    public init(
+        state: ObjcParserState,
+        source: Source,
+        nonnullContextQuerier: NonnullContextQuerier,
+        antlrSettings: AntlrSettings = .default
+    ) {
+        
         self.state = state
         self.antlrSettings = antlrSettings
+
+        _nodeFactory = ASTNodeFactory(
+            source: source,
+            nonnullContextQuerier: nonnullContextQuerier,
+            commentQuerier: CommentQuerier(allComments: [])
+        )
+        _translator = DeclarationTranslator()
     }
-    
-    // Helper for mapping Objective-C types from raw strings into a structured types
-    public func parseObjcType(_ source: String) -> ObjcType? {
-        let parser = ObjcParser(source: StringCodeSource(source: source), state: state)
-        parser.antlrSettings = antlrSettings
-        return try? parser.parseObjcType()
+
+    private func makeExtractor() -> DeclarationExtractor {
+        DeclarationExtractor()
+    }
+    private func toObjcType(_ decl: DeclarationExtractor.Declaration?) -> ObjcType? {
+        if let decl = decl {
+            return _translator.translateObjectiveCType(decl, context: .init(nodeFactory: _nodeFactory))
+        }
+
+        return nil
+    }
+    private func toObjcType(_ decl: DeclarationExtractor.GenericTypeParameter?) -> ObjcType? {
+        if let decl = decl {
+            return _translator.translateObjectiveCType(decl, context: .init(nodeFactory: _nodeFactory))
+        }
+
+        return nil
+    }
+    private func toObjcType(_ decl: DeclarationExtractor.TypeName?) -> ObjcType? {
+        if let decl = decl {
+            return _translator.translateObjectiveCType(decl, context: .init(nodeFactory: _nodeFactory))
+        }
+
+        return nil
+    }
+    private func toObjcTypes(_ decls: [DeclarationExtractor.Declaration]) -> [ObjcType] {
+        decls.map { decl in
+            _translator.translateObjectiveCType(decl, context: .init(nodeFactory: _nodeFactory)) ?? .void
+        }
     }
     
     // Helper for mapping Objective-C types from type declarations into structured
     // types.
     public func parseObjcTypes(in decl: Parser.FieldDeclarationContext) -> [ObjcType] {
-        return []
-        /*
-        var types: [ObjcType] = []
+        let ext = makeExtractor()
         
-        guard let specQualifier = decl.specifierQualifierList() else {
-            return []
-        }
-        guard let baseTypeString = specQualifier.typeSpecifier(0)?.getText() else {
-            return []
-        }
-        
-        guard let fieldDeclaratorList = decl.fieldDeclaratorList() else {
-            return []
-        }
-        
-        for fieldDeclarator in fieldDeclaratorList.fieldDeclarator() {
-            guard let declarator = fieldDeclarator.declarator() else {
-                continue
-            }
-            
-            let pointer = declarator.pointer()?.accept(VarDeclarationTypeStringExtractor())
-            
-            var typeName = "\(baseTypeString) \(pointer ?? "")"
-            
-            if !specQualifier.arcBehaviourSpecifier().isEmpty {
-                let arcSpecifiers =
-                    specQualifier.arcBehaviourSpecifier().map {
-                        $0.getText()
-                    }
-                
-                typeName = "\(arcSpecifiers.joined(separator: " ")) \(typeName)"
-            }
-            
-            if let type = parseObjcType(typeName) {
-                types.append(handleFixedArray(type, declarator: declarator))
-            }
-        }
-        
-        return types
-        */
+        return toObjcTypes(ext.extract(from: decl))
     }
     
     // Helper for mapping Objective-C types from type declarations into structured
     // types.
     public func parseObjcType(in decl: Parser.FieldDeclarationContext) -> ObjcType? {
-        /*
-        guard let specQualifier = decl.specifierQualifierList() else {
-            return nil
-        }
-        guard let declarator = decl.fieldDeclaratorList()?.fieldDeclarator(0)?.declarator() else {
-            return nil
-        }
-        
-        return parseObjcType(in: specQualifier, declarator: declarator)
-        */
-
-        return nil
+        parseObjcTypes(in: decl).first
     }
     
-    /*
-    public func parseObjcType(in specQual: Parser.SpecifierQualifierListContext) -> ObjcType? {
-        guard let typeName = VarDeclarationTypeStringExtractor.extract(from: specQual) else {
-            return nil
-        }
-        
-        return parseObjcType(typeName)
+    public func parseObjcType(in declarationSpecifiers: Parser.DeclarationSpecifiersContext) -> ObjcType? {
+        let ext = makeExtractor()
+
+        return toObjcType(ext.extract(fromSpecifiers: declarationSpecifiers))
     }
     
     public func parseObjcType(
-        in specifierQualifierList: Parser.SpecifierQualifierListContext,
+        in declarationSpecifiers: Parser.DeclarationSpecifiersContext,
         declarator: Parser.DeclaratorContext
     ) -> ObjcType? {
         
-        guard let specifiersString = VarDeclarationTypeStringExtractor.extract(from: specifierQualifierList) else {
-            return nil
-        }
+        let ext = makeExtractor()
         
-        let pointer = declarator.pointer()?.accept(VarDeclarationTypeStringExtractor())
-        
-        let typeString = "\(specifiersString) \(pointer ?? "")"
-        
-        guard let type = parseObjcType(typeString) else {
-            return nil
-        }
-        
-        // Block type
-        if let blockType = manageBlock(baseType: type,
-                                       qualifiers: TypeParsing.qualifiers(from: specifierQualifierList),
-                                       declarator: declarator) {
-            return blockType
-        }
-        
-        return handleFixedArray(type, declarator: declarator)
-    }
-    */
-    
-    public func parseObjcType(in declarationSpecifiers: Parser.DeclarationSpecifiersContext) -> ObjcType? {
-        guard let specifiersString = VarDeclarationTypeStringExtractor.extract(from: declarationSpecifiers) else {
-            return nil
-        }
-        
-        return parseObjcType(specifiersString)
+        return toObjcType(
+            ext.extract(fromSpecifiers: declarationSpecifiers, declarator: declarator)
+        )
     }
     
-    public func parseObjcType(in declarationSpecifiers: Parser.DeclarationSpecifiersContext,
-                              declarator: Parser.DeclaratorContext) -> ObjcType? {
+    public func parseObjcType(
+        in declarationSpecifiers: Parser.DeclarationSpecifiersContext,
+        abstractDeclarator: Parser.AbstractDeclaratorContext
+    ) -> ObjcType? {
         
-        guard let specifiersString = VarDeclarationTypeStringExtractor.extract(from: declarationSpecifiers) else {
-            return nil
-        }
+        let ext = makeExtractor()
         
-        let pointer = declarator.pointer()
-        
-        let typeString = "\(specifiersString) \(pointer?.getText() ?? "")"
-        
-        guard let type = parseObjcType(typeString) else {
-            return nil
-        }
-        
-        // Block type
-        if let blockType = manageBlock(baseType: type,
-                                       qualifiers: TypeParsing.qualifiers(from: declarationSpecifiers),
-                                       declarator: declarator) {
-            return blockType
-        }
-        
-        return handleFixedArray(type, declarator: declarator)
+        return toObjcType(
+            ext.extract(fromSpecifiers: declarationSpecifiers, abstractDeclarator: abstractDeclarator)
+        )
     }
     
-    private func manageBlock(baseType: ObjcType,
-                             qualifiers: [Parser.TypeQualifierContext],
-                             declarator: Parser.DeclaratorContext) -> ObjcType? {
-        var type = baseType
+    public func parseObjcTypes(
+        in declarationSpecifiers: Parser.DeclarationSpecifiersContext,
+        initDeclaratorList: Parser.InitDeclaratorListContext
+    ) -> [ObjcType] {
         
-        // Block type
-        if let directDeclarator = declarator.directDeclarator(),
-            let blockParameters = directDeclarator.blockParameters() {
-            
-            let isFunctionPointer = directDeclarator.MUL() != nil
-            let blockParameterTypes = parseObjcTypes(from: blockParameters)
-            let blockIdentifier = directDeclarator.identifier()
-            
-            if isFunctionPointer {
-                type = .functionPointer(name: blockIdentifier?.getText(),
-                                        returnType: type,
-                                        parameters: blockParameterTypes)
-            } else {
-                type = .blockType(name: blockIdentifier?.getText(),
-                                  returnType: type,
-                                  parameters: blockParameterTypes)
-            }
-            
-            // Verify qualifiers
-            if !qualifiers.isEmpty {
-                let qualifiers = qualifiers.map { $0.getText() }
-                type = .specified(specifiers: qualifiers, type)
-            }
-            // Verify nullability specifiers
-            if let nullabilitySpecifier = directDeclarator.nullabilitySpecifier() {
-                type = .qualified(type, qualifiers: [nullabilitySpecifier.getText()])
-            }
-            
-            return type
-        }
+        let ext = makeExtractor()
         
-        return nil
+        return toObjcTypes(
+            ext.extract(fromSpecifiers: declarationSpecifiers, initDeclaratorList: initDeclaratorList)
+        )
     }
     
     public func parseObjcTypes(from blockParameters: Parser.BlockParametersContext) -> [ObjcType] {
-        let typeVariableDeclaratorOrNames = blockParameters.typeVariableDeclaratorOrName()
+        let parameterDeclarations = blockParameters.parameterDeclaration()
         
         var paramTypes: [ObjcType] = []
         
-        for typeVariableDeclaratorOrName in typeVariableDeclaratorOrNames {
-            guard let paramType = parseObjcType(from: typeVariableDeclaratorOrName) else {
+        for parameterDeclaration in parameterDeclarations {
+            guard let paramType = parseObjcType(from: parameterDeclaration) else {
                 continue
             }
             
@@ -208,133 +134,34 @@ public class TypeParsing {
         return paramTypes
     }
     
-    public func parseObjcType(from typeContext: Parser.TypeVariableDeclaratorOrNameContext) -> ObjcType? {
-        if let typeName = typeContext.typeName(),
-            let type = parseObjcType(from: typeName) {
-            return type
-        } else if let typeVariableDecl = typeContext.typeVariableDeclarator() {
-            if typeVariableDecl.declarator()?.directDeclarator()?.blockParameters() != nil {
-                return parseObjcType(from: typeVariableDecl)
-            }
-            
-            if let type = parseObjcType(from: typeVariableDecl) {
-                return type
-            } else {
-                return nil
-            }
-        }
-        
-        guard let typeString = VarDeclarationTypeStringExtractor.extract(from: typeContext) else {
+    public func parseObjcType(from parameterContext: Parser.ParameterDeclarationContext) -> ObjcType? {
+        guard let declarationSpecifiers = parameterContext.declarationSpecifiers() else {
             return nil
         }
+
+        var type: ObjcType?
         
-        return parseObjcType(typeString)
+        if let declarator = parameterContext.declarator() {
+            type = parseObjcType(in: declarationSpecifiers, declarator: declarator)
+        } else if let abstractDeclarator = parameterContext.abstractDeclarator() {
+            type = parseObjcType(in: declarationSpecifiers, abstractDeclarator: abstractDeclarator)
+        } else {
+            type = parseObjcType(in: declarationSpecifiers)
+        }
+
+        return type
     }
     
     public func parseObjcType(from typeVariableDecl: Parser.TypeVariableDeclaratorContext) -> ObjcType? {
-        if let directDeclarator = typeVariableDecl.declarator()?.directDeclarator(),
-            let blockParameters = directDeclarator.blockParameters() {
-            
-            guard let declarationSpecifiers = typeVariableDecl.declarationSpecifiers() else {
-                return nil
-            }
-            
-            let isFunctionPointer = directDeclarator.MUL() != nil
-            let parameters = parseObjcTypes(from: blockParameters)
-            
-            guard let returnTypeName = VarDeclarationTypeStringExtractor.extract(from: declarationSpecifiers) else {
-                return nil
-            }
-            guard let returnType = parseObjcType(returnTypeName) else { return nil }
-            
-            let identifier = VarDeclarationIdentifierNameExtractor.extract(from: typeVariableDecl)
-            
-            var type: ObjcType
-                
-            if isFunctionPointer {
-                type = .functionPointer(name: identifier?.getText(),
-                                        returnType: returnType,
-                                        parameters: parameters)
-            } else {
-                type = .blockType(name: identifier?.getText(),
-                                  returnType: returnType,
-                                  parameters: parameters)
-            }
-            
-            if let nullability = directDeclarator.nullabilitySpecifier() {
-                type = .qualified(type, qualifiers: [nullability.getText()])
-            }
-            
-            return type
-        }
-        
-        guard let typeString = VarDeclarationTypeStringExtractor.extract(from: typeVariableDecl) else {
-            return nil
-        }
-        guard let type = parseObjcType(typeString) else {
-            return nil
-        }
-        
-        return type
-    }
-    
-    public func parseObjcType(from typeSpecifier: Parser.TypeSpecifierContext) -> ObjcType? {
-        guard let typeString = VarDeclarationTypeStringExtractor.extract(from: typeSpecifier) else {
-            return nil
-        }
-        guard let type = parseObjcType(typeString) else {
-            return nil
-        }
-        
-        return type
-    }
-    
-    public func parseObjcType(from blockType: Parser.BlockTypeContext) -> ObjcType? {
-        guard let returnTypeSpecifier = blockType.typeSpecifier(0) else {
-            return nil
-        }
-        guard let returnType = parseObjcType(from: returnTypeSpecifier) else {
-            return nil
-        }
-        
-        var parameterTypes: [ObjcType] = []
-        
-        if let blockParameters = blockType.blockParameters() {
-            for param in blockParameters.typeVariableDeclaratorOrName() {
-                guard let paramType = parseObjcType(from: param) else {
-                    continue
-                }
-                
-                parameterTypes.append(paramType)
-            }
-        }
-        
-        var type = ObjcType.blockType(name: nil, returnType: returnType, parameters: parameterTypes)
-        
-        if let nullability = blockType.nullabilitySpecifier().last {
-            type = .qualified(type, qualifiers: [nullability.getText()])
-        }
-        
-        return type
+        let ext = makeExtractor()
+
+        return toObjcType(ext.extract(from: typeVariableDecl))
     }
     
     public func parseObjcType(from typeName: Parser.TypeNameContext) -> ObjcType? {
-        return nil
-        /*
-        // Block type
-        if let blockType = typeName.blockType() {
-            return parseObjcType(from: blockType)
-        }
-        
-        guard let typeString = VarDeclarationTypeStringExtractor.extract(from: typeName) else {
-            return nil
-        }
-        guard let type = parseObjcType(typeString) else {
-            return nil
-        }
-        
-        return type
-        */
+        let ext = makeExtractor()
+
+        return toObjcType(ext.extract(fromTypeName: typeName))
     }
     
     public func parseObjcType(from ctx: Parser.FunctionPointerContext) -> ObjcType? {
@@ -360,8 +187,10 @@ public class TypeParsing {
                 let type: ObjcType?
                 
                 if let declarator = parameter.declarator() {
-                    type = parseObjcType(in: declarationSpecifier,
-                                         declarator: declarator)
+                    type = parseObjcType(
+                        in: declarationSpecifier,
+                        declarator: declarator
+                    )
                 } else {
                     type = parseObjcType(in: declarationSpecifier)
                 }
@@ -377,43 +206,27 @@ public class TypeParsing {
         }
         
         let functionPointerType: ObjcType =
-            .functionPointer(name: identifier.getText(),
-                             returnType: returnType,
-                             parameters: parameters)
+            .functionPointer(
+                name: identifier.getText(),
+                returnType: returnType,
+                parameters: parameters
+            )
         
         return functionPointerType
     }
-
-    private func handleFixedArray(_ type: ObjcType, declarator: Parser.DeclaratorContext) -> ObjcType {
-        guard let directDeclarator = declarator.directDeclarator() else {
-            return type
-        }
-        
-        var type = type
-        if let base = directDeclarator.directDeclarator() {
-            type = handleFixedArray(type, directDeclarator: base)
-        }
-        
-        return handleFixedArray(type, directDeclarator: directDeclarator)
-    }
     
-    private func handleFixedArray(_ type: ObjcType, directDeclarator: Parser.DirectDeclaratorContext) -> ObjcType {
-        var type = type
-        if let base = directDeclarator.directDeclarator() {
-            type = handleFixedArray(type, directDeclarator: base)
-        }
-        
-        guard directDeclarator.LBRACK() != nil else {
-            return type
-        }
+    public func parseObjcType(from blockExpression: Parser.BlockExpressionContext) -> ObjcType {
+        let returnTypeCtx = blockExpression.typeName()
+        let parametersCtx = blockExpression.blockParameters()
 
-        if let constant = extractConstant(from: directDeclarator.primaryExpression()) {
-            if let int = Int(constant.getText()) {
-                type = .fixedArray(type, length: int)
-            }
-        }
+        let returnType = returnTypeCtx.flatMap { parseObjcType(from: $0) } ?? .void
+        let parameters = parametersCtx.map { parseObjcTypes(from: $0) } ?? []
         
-        return type
+        return .blockType(
+            name: nil,
+            returnType: returnType,
+            parameters: parameters
+        )
     }
 
     private func extractConstant(from rule: Parser.PrimaryExpressionContext?) -> Parser.ConstantContext? {
@@ -426,12 +239,6 @@ public class TypeParsing {
 }
 
 extension TypeParsing {
-    /*
-    static func qualifiers(from spec: Parser.SpecifierQualifierListContext) -> [Parser.TypeQualifierContext] {
-        spec.typeQualifier()
-    }
-    */
-    
     static func qualifiers(from spec: Parser.DeclarationSpecifiersContext) -> [Parser.TypeQualifierContext] {
         spec.declarationSpecifier().compactMap {
             $0.typeQualifier()

@@ -35,7 +35,7 @@ public final class SwiftRewriter {
     
     /// Items to type-parse after parsing is complete, and all types have been
     /// gathered.
-    private var lazyParse: [LazyParseItem] = []
+    private var lazyParse: [(ObjcParser, LazyParseItem)] = []
     
     /// Items to type-resolve after parsing is complete, and all types have been
     /// gathered.
@@ -184,21 +184,31 @@ public final class SwiftRewriter {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
-        for item in lazyParse {
+        for (parser, item) in lazyParse {
             queue.addOperation {
                 autoreleasepool {
                     let delegate = InnerStatementASTReaderDelegate(parseItem: item)
 
                     let typeMapper = DefaultTypeMapper(typeSystem: self.typeSystem)
                     let state = SwiftRewriter._parserStatePool.pull()
-                    let typeParser = TypeParsing(state: state, antlrSettings: antlrSettings)
+                    let typeParser = TypeParsing(
+                        state: state,
+                        source: parser.source,
+                        nonnullContextQuerier: NonnullContextQuerier(
+                            nonnullMacroRegionsTokenRange: parser.nonnullMacroRegionsTokenRange
+                        ),
+                        antlrSettings: antlrSettings
+                    )
+
                     defer {
                         SwiftRewriter._parserStatePool.repool(state)
                     }
                     
-                    let reader = SwiftASTReader(typeMapper: typeMapper,
-                                                typeParser: typeParser,
-                                                typeSystem: self.typeSystem)
+                    let reader = SwiftASTReader(
+                        typeMapper: typeMapper,
+                        typeParser: typeParser,
+                        typeSystem: self.typeSystem
+                    )
                     reader.delegate = delegate
                     
                     switch item {
@@ -270,7 +280,7 @@ public final class SwiftRewriter {
                         source: nil)
                 
                 varDecl.storage.isConstant = true
-                varDecl.initialValue = declaration.expresion
+                varDecl.initialValue = declaration.expression
                 
                 let sourceName = (file.sourcePath as NSString).lastPathComponent
                 let history = """
@@ -308,7 +318,7 @@ public final class SwiftRewriter {
                     switch item {
                     case .extensionDecl(let ext):
                         let typeName =
-                            typeMapper.typeNameString(for: .pointer(.struct(ext.typeName)),
+                            typeMapper.typeNameString(for: .pointer(.typeName(ext.typeName)),
                                                       context: .alwaysNonnull)
                         
                         ext.typeName = typeName
@@ -605,10 +615,8 @@ public final class SwiftRewriter {
         }
         
         let typeMapper = DefaultTypeMapper(typeSystem: TypeSystem.defaultTypeSystem)
-        let typeParser = TypeParsing(state: state, antlrSettings: parser.antlrSettings)
         
-        let collectorDelegate =
-            CollectorDelegate(typeMapper: typeMapper, typeParser: typeParser)
+        let collectorDelegate = CollectorDelegate(typeMapper: typeMapper)
         
         if settings.stageDiagnostics.contains(.parsedAST) {
             parser.rootNode.printNode({ print($0) })
@@ -629,7 +637,9 @@ public final class SwiftRewriter {
         
         mutex.locking {
             parsers.append(parser)
-            lazyParse.append(contentsOf: collectorDelegate.lazyParse)
+            lazyParse.append(contentsOf: collectorDelegate.lazyParse.map {
+                (parser, $0)
+            })
             lazyResolve.append(contentsOf: collectorDelegate.lazyResolve)
             diagnostics.merge(with: parser.diagnostics)
             intentionCollection.addIntention(fileIntent)
@@ -795,14 +805,12 @@ private extension SwiftRewriter {
 fileprivate extension SwiftRewriter {
     class CollectorDelegate: IntentionCollectorDelegate {
         var typeMapper: TypeMapper
-        var typeParser: TypeParsing
         
         var lazyParse: [LazyParseItem] = []
         var lazyResolve: [LazyTypeResolveItem] = []
         
-        init(typeMapper: TypeMapper, typeParser: TypeParsing) {
+        init(typeMapper: TypeMapper) {
             self.typeMapper = typeMapper
-            self.typeParser = typeParser
         }
         
         func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
@@ -862,10 +870,6 @@ fileprivate extension SwiftRewriter {
         func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
             typeMapper
         }
-        
-        func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing {
-            typeParser
-        }
     }
 
     private class InnerStatementASTReaderDelegate: SwiftStatementASTReaderDelegate {
@@ -876,13 +880,17 @@ fileprivate extension SwiftRewriter {
             self.parseItem = parseItem
         }
 
-        func swiftStatementASTReader(reportAutoTypeDeclaration varDecl: VariableDeclarationsStatement,
-                                     declarationAtIndex index: Int) {
+        func swiftStatementASTReader(
+            reportAutoTypeDeclaration varDecl: VariableDeclarationsStatement,
+            declarationAtIndex index: Int
+        ) {
 
             autotypeDeclarations.append(
-                LazyAutotypeVarDeclResolve(parseItem: parseItem,
-                                           statement: varDecl,
-                                           index: index)
+                LazyAutotypeVarDeclResolve(
+                    parseItem: parseItem,
+                    statement: varDecl,
+                    index: index
+                )
             )
         }
     }
@@ -913,19 +921,18 @@ private struct LazyAutotypeVarDeclResolve {
     var index: Int
 }
 
-internal func _typeNullability(inType type: ObjcType) -> TypeNullability? {
+internal func _typeNullability(inType type: ObjcType) -> ObjcNullabilitySpecifier? {
     switch type {
-    case .specified(let specifiers, let type),
-         .qualified(let type, let specifiers):
+    case .specified(let specifiers, let type):
         
         // Struct types are never null.
-        if case .struct = type {
+        if case .typeName = type {
             return .nonnull
         }
         
-        if specifiers.contains("__weak") {
+        if specifiers.contains(.weak) {
             return .nullable
-        } else if specifiers.contains("__unsafe_unretained") {
+        } else if specifiers.contains(.unsafeUnretained) {
             return .nonnull
         }
         

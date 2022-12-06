@@ -62,7 +62,7 @@ classInterface
     ;
 
 classInterfaceName
-    : className (COLON superclassName genericSuperclassSpecifier?)? (LT protocolList GT)?
+    : className (COLON superclassName genericClassParametersSpecifier?)? (LT protocolList GT)?
     //| className (COLON genericSuperclassName)? (LT protocolList GT)?
     ;
 
@@ -74,12 +74,12 @@ categoryInterface
 
 classImplementation
     : IMPLEMENTATION
-       classImplementatioName instanceVariables? implementationDefinitionList?
+       classImplementationName instanceVariables? implementationDefinitionList?
       END
     ;
 
-classImplementatioName
-    : className (COLON superclassName genericSuperclassSpecifier?)?
+classImplementationName
+    : className (COLON superclassName genericClassParametersSpecifier?)?
     // | className (COLON genericSuperclassName)?
     ;
 
@@ -90,7 +90,7 @@ categoryImplementation
     ;
 
 className
-    : identifier ((LT protocolList GT) | genericTypeList)?
+    : identifier genericClassParametersSpecifier?
     ;
 
 superclassName
@@ -98,15 +98,15 @@ superclassName
     ;
 
 genericSuperclassName
-    : identifier genericSuperclassSpecifier
+    : identifier genericClassParametersSpecifier
     ;
 
-genericSuperclassSpecifier
+genericClassParametersSpecifier
     : LT (superclassTypeSpecifierWithPrefixes (COMMA superclassTypeSpecifierWithPrefixes)*)? GT
     ;
 
 superclassTypeSpecifierWithPrefixes
-    : typePrefix* typeSpecifier pointer?
+    : typePrefix* typeSpecifier pointer
     ;
 
 protocolDeclaration
@@ -125,7 +125,11 @@ protocolDeclarationList
     ;
 
 classDeclarationList
-    : CLASS className (COMMA className)* SEMI
+    : CLASS classDeclaration (COMMA classDeclaration)* SEMI
+    ;
+
+classDeclaration
+    : className (LT protocolList GT)?
     ;
 
 protocolList
@@ -141,25 +145,18 @@ propertyAttributesList
     ;
 
 propertyAttribute
-    : ATOMIC
-    | NONATOMIC
-    | STRONG
-    | WEAK
-    | RETAIN
-    | ASSIGN
+    : WEAK
     | UNSAFE_UNRETAINED
     | COPY
-    | READONLY
-    | READWRITE
-    | GETTER ASSIGNMENT identifier
-    | SETTER ASSIGNMENT identifier COLON
+    | GETTER ASSIGNMENT selectorName
+    | SETTER ASSIGNMENT selectorName
     | nullabilitySpecifier
-    //| identifier
+    | identifier
     ;
 
 protocolName
     : LT protocolList GT
-    | (COVARIANT | CONTRAVARIANT)?  identifier
+    | (COVARIANT | CONTRAVARIANT)? identifier
     ;
 
 instanceVariables
@@ -253,10 +250,6 @@ propertySynthesizeItem
     : identifier (ASSIGNMENT identifier)?
     ;
 
-blockType
-    : nullabilitySpecifier? typeSpecifier nullabilitySpecifier? LP BITXOR (nullabilitySpecifier | typeSpecifier)? RP blockParameters?
-    ;
-
 dictionaryExpression
     : AT LBRACE (dictionaryPair (COMMA dictionaryPair)* COMMA?)? RBRACE
     ;
@@ -275,21 +268,14 @@ boxExpression
     ;
 
 blockParameters
-    : typeVariableDeclaratorOrName
-    | LP ((typeVariableDeclaratorOrName | VOID) (COMMA typeVariableDeclaratorOrName)*)? RP
-    ;
-
-typeVariableDeclaratorOrName
-    : typeVariableDeclarator
-    | typeName
-    ;
-
-blockExpression_
-    : BITXOR typeSpecifier? nullabilitySpecifier? blockParameters? compoundStatement
+    : LP ((parameterDeclaration | VOID) (COMMA parameterDeclaration)*)? RP
     ;
 
 blockExpression
-    : BITXOR blockParameters? compoundStatement
+    : BITXOR compoundStatement
+    | BITXOR typeName blockParameters compoundStatement // Must have priority over typeName compoundStatement to ensure parameters aren't interpreted as an abstractDeclarator of the return type
+    | BITXOR typeName compoundStatement
+    | BITXOR blockParameters compoundStatement
     ;
 
 messageExpression
@@ -496,16 +482,23 @@ declarator
 directDeclarator
     :   identifier
     |   LP declarator RP
-    |   directDeclarator LBRACK typeQualifierList? primaryExpression? RBRACK
-    |   directDeclarator LBRACK STATIC typeQualifierList? primaryExpression RBRACK
-    |   directDeclarator LBRACK typeQualifierList STATIC primaryExpression RBRACK
+    |   directDeclarator LBRACK typeQualifierList? expression? RBRACK
+    |   directDeclarator LBRACK STATIC typeQualifierList? expression RBRACK
+    |   directDeclarator LBRACK typeQualifierList STATIC expression RBRACK
     |   directDeclarator LBRACK typeQualifierList? MUL RBRACK
     |   directDeclarator LP parameterTypeList? RP
     //|   directDeclarator LP identifierList? RP
-    |   LP BITXOR nullabilitySpecifier? directDeclarator? RP blockParameters
+    |   LP BITXOR blockDeclarationSpecifier* directDeclarator RP blockParameters
     |   identifier COLON DIGITS  // bit field
-    |   vcSpecificModifer identifier // Visual C Extension
-    |   LP vcSpecificModifer declarator RP // Visual C Extension
+    |   vcSpecificModifier identifier // Visual C Extension
+    |   LP vcSpecificModifier declarator RP // Visual C Extension
+    ;
+
+blockDeclarationSpecifier
+    : nullabilitySpecifier
+    | arcBehaviourSpecifier
+    | typeQualifier
+    | typePrefix
     ;
 
 typeName
@@ -525,17 +518,17 @@ abstractDeclarator
 
 directAbstractDeclarator
     :   LP abstractDeclarator RP gccDeclaratorExtension*
-    |   LBRACK typeQualifierList? primaryExpression? RBRACK
-    |   LBRACK STATIC typeQualifierList? primaryExpression RBRACK
-    |   LBRACK typeQualifierList STATIC primaryExpression RBRACK
+    |   LBRACK typeQualifierList? expression? RBRACK
+    |   LBRACK STATIC typeQualifierList? expression RBRACK
+    |   LBRACK typeQualifierList STATIC expression RBRACK
     |   LBRACK MUL RBRACK
     |   LP parameterTypeList? RP gccDeclaratorExtension*
-    |   directAbstractDeclarator LBRACK typeQualifierList? primaryExpression? RBRACK
-    |   directAbstractDeclarator LBRACK STATIC typeQualifierList? primaryExpression RBRACK
-    |   directAbstractDeclarator LBRACK typeQualifierList STATIC primaryExpression RBRACK
+    |   directAbstractDeclarator LBRACK typeQualifierList? expression? RBRACK
+    |   directAbstractDeclarator LBRACK STATIC typeQualifierList? expression RBRACK
+    |   directAbstractDeclarator LBRACK typeQualifierList STATIC expression RBRACK
     |   directAbstractDeclarator LBRACK MUL RBRACK
     |   directAbstractDeclarator LP parameterTypeList? RP gccDeclaratorExtension*
-    |   LP BITXOR nullabilitySpecifier? RP blockParameters
+    |   LP BITXOR blockDeclarationSpecifier* identifier? RP blockParameters
     ;
 
 abstractDeclaratorSuffix_
@@ -580,13 +573,13 @@ atomicTypeSpecifier
     :   ATOMIC_ LP typeName RP
     ;
 
-structOrUnionSpecifier_
-    : (STRUCT | UNION) attributeSpecifier* (identifier | identifier? LBRACE fieldDeclaration+ RBRACE)
+fieldDeclaration
+    : declarationSpecifiers fieldDeclaratorList macro? SEMI
     ;
 
 structOrUnionSpecifier
-    :   structOrUnion identifier? LBRACE structDeclarationList RBRACE
-    |   structOrUnion identifier
+    : structOrUnion attributeSpecifier* identifier? LBRACE structDeclarationList RBRACE
+    | structOrUnion attributeSpecifier* identifier
     ;
 
 structOrUnion
@@ -595,31 +588,35 @@ structOrUnion
     ;
 
 structDeclarationList
-    :   structDeclaration+
+    : structDeclaration+
     ;
 
 structDeclaration // The first two rules have priority order and cannot be simplified to one expression.
-    :   specifierQualifierList structDeclaratorList SEMI
-    |   specifierQualifierList SEMI
-    |   staticAssertDeclaration
+    : attributeSpecifier* specifierQualifierList fieldDeclaratorList SEMI
+    | attributeSpecifier* specifierQualifierList SEMI
+    | staticAssertDeclaration
     ;
 
 specifierQualifierList
-    :   (typeSpecifier | typeQualifier) specifierQualifierList?
+    : (typeSpecifier | typeQualifier) specifierQualifierList?
     ;
 
-structDeclaratorList
-    :   structDeclarator (COMMA structDeclarator)*
+// TODO: Fix the first alt on this syntax: It accepts invalid syntax like 'enum <ident>: <type> <ident> { <fields> }'.
+enumSpecifier
+    : ENUM (enumName=identifier? COLON typeName)? (identifier (LBRACE enumeratorList RBRACE)? | LBRACE enumeratorList RBRACE)
+    | (NS_OPTIONS | NS_ENUM) LP typeName COMMA enumName=identifier RP LBRACE enumeratorList RBRACE
     ;
 
-structDeclarator
-    :   declarator
-    |   declarator? COLON constantExpression
+enumeratorList
+    : enumerator (COMMA enumerator)* COMMA?
     ;
 
-fieldDeclaration
-    : declarationSpecifiers fieldDeclaratorList macro? SEMI
-    //| functionPointer SEMI
+enumerator
+    : enumeratorIdentifier (ASSIGNMENT expression)?
+    ;
+
+enumeratorIdentifier
+    : identifier
     ;
 
 ibOutletQualifier
@@ -755,28 +752,10 @@ fieldDeclaratorList
 
 fieldDeclarator
     : declarator
-    | declarator? COLON constant
+    | declarator? COLON constantExpression
     ;
 
-// TODO: Fix the first alt on this syntax: It accepts invalid syntax like 'enum <ident>: <type> <ident> { <fields> }'.
-enumSpecifier
-    : ENUM (identifier? COLON typeName)? (identifier (LBRACE enumeratorList RBRACE)? | LBRACE enumeratorList RBRACE)
-    | (NS_OPTIONS | NS_ENUM) LP typeName COMMA identifier RP LBRACE enumeratorList RBRACE
-    ;
-
-enumeratorList
-    : enumerator (COMMA enumerator)* COMMA?
-    ;
-
-enumerator
-    : enumeratorIdentifier (ASSIGNMENT expression)?
-    ;
-
-enumeratorIdentifier
-    : identifier
-    ;
-
-vcSpecificModifer
+vcSpecificModifier
     :   (CDECL
     |   CLRCALL
     |   STDCALL
@@ -808,11 +787,11 @@ pointer_
     ;
 
 pointer
-    :  pointerEntry+ // ^ - Blocks language extension
+    :  pointerEntry+
     ;
 
 pointerEntry
-    : (MUL) typeQualifierList? // ^ - Blocks language extension
+    : (MUL) typeQualifierList? nullabilitySpecifier?
     ;
 
 macro
@@ -1064,24 +1043,24 @@ identifier
     | NONATOMIC
     | RETAIN
 
-    | AUTORELEASING_QUALIFIER
+    //| AUTORELEASING_QUALIFIER
     //| BLOCK
-    | BRIDGE_RETAINED
-    | BRIDGE_TRANSFER
+    //| BRIDGE_RETAINED
+    //| BRIDGE_TRANSFER
     | COVARIANT
     | CONTRAVARIANT
     | DEPRECATED
     //| KINDOF
-    | UNUSED
+    //| UNUSED
 
     | NS_INLINE
     | NS_ENUM
     | NS_OPTIONS
 
-    | NULL_UNSPECIFIED
-    | NULLABLE
-    | NONNULL
-    | NULL_RESETTABLE
+    //| NULL_UNSPECIFIED
+    //| NULLABLE
+    //| NONNULL
+    //| NULL_RESETTABLE
 
     | ASSIGN
     | COPY
@@ -1090,11 +1069,11 @@ identifier
     | STRONG
     | READONLY
     | READWRITE
-    | WEAK
-    | UNSAFE_UNRETAINED
+    //| WEAK
+    //| UNSAFE_UNRETAINED
 
-    | IB_OUTLET
-    | IB_OUTLET_COLLECTION
+    //| IB_OUTLET
+    //| IB_OUTLET_COLLECTION
     | IB_INSPECTABLE
     | IB_DESIGNABLE
     ;

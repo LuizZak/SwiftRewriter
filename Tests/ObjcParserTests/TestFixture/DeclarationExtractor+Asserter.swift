@@ -6,6 +6,8 @@ import ObjcParserAntlr
 
 @testable import ObjcParser
 
+// MARK: -
+
 /// For generic assertions over both 'DeclarationExtractor.Declaration' and 'FunctionDeclWrapper'.
 protocol DeclarationConvertible {
     var decl: DeclarationExtractor.Declaration { get }
@@ -15,14 +17,16 @@ struct FunctionDeclWrapper: DeclarationConvertible {
     var decl: DeclarationExtractor.Declaration
     var base: DeclarationExtractor.DeclarationKind?
     var parameters: [DeclarationExtractor.FuncParameter]
+    var isVariadic: Bool
 
     init?(object: DeclarationExtractor.Declaration) {
         self.decl = object
 
         switch object.declaration {
-        case .function(let base, let parameters):
+        case .function(let base, let parameters, let isVariadic):
             self.base = base
             self.parameters = parameters
+            self.isVariadic = isVariadic
 
         default:
             return nil
@@ -32,16 +36,16 @@ struct FunctionDeclWrapper: DeclarationConvertible {
 
 struct BlockDeclWrapper: DeclarationConvertible {
     var decl: DeclarationExtractor.Declaration
-    var nullability: DeclarationExtractor.NullabilitySpecifier?
+    var specifiers: [DeclarationExtractor.BlockDeclarationSpecifier]
     var base: DeclarationExtractor.DeclarationKind?
-    var parameters: [DeclarationExtractor.BlockParameter]
+    var parameters: [DeclarationExtractor.FuncParameter]
 
     init?(object: DeclarationExtractor.Declaration) {
         self.decl = object
 
         switch object.declaration {
-        case .block(let nullability, let base, let parameters):
-            self.nullability = nullability
+        case .block(let specifiers, let base, let parameters):
+            self.specifiers = specifiers
             self.base = base
             self.parameters = parameters
 
@@ -54,8 +58,6 @@ struct BlockDeclWrapper: DeclarationConvertible {
 struct TypedefDeclWrapper: DeclarationConvertible {
     var decl: DeclarationExtractor.Declaration
     var name: String
-    //var identifier: ObjectiveCParser.IdentifierContext
-    //var baseType: DeclarationExtractor.Declaration
 
     init?(object: DeclarationExtractor.Declaration) {
         guard object.specifiers.storageSpecifiers().contains(where: { $0.isTypedef }) else {
@@ -67,18 +69,6 @@ struct TypedefDeclWrapper: DeclarationConvertible {
 
         self.decl = object
         self.name = name
-
-        /*
-        switch object.declaration {
-        case .typedef(let name, let identifier, let baseType):
-            self.name = name
-            self.identifier = identifier
-            self.baseType = baseType
-
-        default:
-            return nil
-        }
-        */
     }
 }
 
@@ -299,7 +289,7 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         ) { decl in
 
             switch decl.declaration {
-            case .function(let base, _) where base?.identifierString == name:
+            case .function(let base, _, _) where base?.identifierString == name:
                 return true
 
             default:
@@ -434,7 +424,7 @@ extension Asserter where Object: DeclarationConvertible {
         }
 
         XCTFail(
-            "Expected declaration to feature no initializer, found \(initializer)",
+            "Expected declaration to feature no initializer, found '\(initializer)'",
             line: line
         )
         dumpObject()
@@ -539,7 +529,7 @@ extension Asserter where Object: DeclarationConvertible {
     @discardableResult
     func assertIsFunctionPointer(name: String, file: StaticString = #file, line: UInt = #line) -> Self? {
         switch object.decl.declaration {
-        case .function(base: .pointer(.identifier(name, _), _), _):
+        case .function(base: .pointer(.identifier(name, _), _), _, _):
             return self
         
         default:
@@ -605,7 +595,7 @@ extension Asserter where Object: DeclarationConvertible {
 
         guard name == nil || name == typedef.name else {
             XCTFail(
-                "Expected to define a typedef with name \(name ?? "<nil>") but found \(typedef.name)",
+                "Expected to define a typedef with name '\(name ?? "<nil>")' but found '\(typedef.name)'",
                 file: file,
                 line: line
             )
@@ -776,6 +766,12 @@ extension Asserter where Object == FunctionDeclWrapper {
         return self
     }
 
+    /// Opens an assertion context for the `Declaration` that matches a given
+    /// name in the parameter list of the underlying function definition being
+    /// tested.
+    ///
+    /// Returns `nil` if no parameter was found with the provided name, otherwise
+    /// returns `self` for chaining further tests.
     @discardableResult
     func asserterForParameter(
         name: String,
@@ -808,6 +804,26 @@ extension Asserter where Object == FunctionDeclWrapper {
 
         return nil
     }
+
+    /// Opens an assertion context for the `FuncParameter` at a given index in
+    /// the parameter list of the underlying function definition being tested.
+    ///
+    /// Returns `self` for chaining further tests.
+    @discardableResult
+    func asserterForParameter(
+        atIndex index: Int,
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<DeclarationExtractor.FuncParameter>) -> Void = { _ in }
+    ) -> Self {
+
+        return asserterUnconditional(forKeyPath: \.parameters, file: file, line: line) { parameters in
+            parameters.asserter(forItemAt: index, file: file, line: line) { param in
+                param.inClosureUnconditional(closure)
+            }
+        }
+    }
+
 }
 
 extension Asserter where Object == BlockDeclWrapper {
@@ -828,6 +844,62 @@ extension Asserter where Object == BlockDeclWrapper {
         return self
     }
 
+    /// Opens an assertion context for the `Declaration` that matches a given
+    /// name in the parameter list of the underlying block declaration being
+    /// tested.
+    ///
+    /// Returns `nil` if no parameter was found with the provided name, otherwise
+    /// returns `self` for chaining further tests.
+    @discardableResult
+    func asserterForParameter(
+        name: String,
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<DeclarationExtractor.Declaration>) -> Void = { _ in }
+    ) -> Self? {
+
+        for param in object.parameters {
+            switch param {
+            case .declaration(let decl) where decl.identifierString == name:
+                let asserter = Asserter<DeclarationExtractor.Declaration>(object: decl)
+
+                closure(asserter)
+
+                return self
+            default:
+                break
+            }
+        }
+
+        XCTFail(
+            "Expected block declaration '\(object.decl.declaration.identifierString ?? "<nil>")' to feature a parameter named '\(name)'",
+            file: file,
+            line: line
+        )
+        dumpObject()
+
+        return nil
+    }
+
+    /// Opens an assertion context for the `FuncParameter` at a given index in
+    /// the parameter list of the underlying block declaration being tested.
+    ///
+    /// Returns `self` for chaining further tests.
+    @discardableResult
+    func asserterForParameter(
+        atIndex index: Int,
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<DeclarationExtractor.FuncParameter>) -> Void = { _ in }
+    ) -> Self {
+
+        return asserterUnconditional(forKeyPath: \.parameters, file: file, line: line) { parameters in
+            parameters.asserter(forItemAt: index, file: file, line: line) { param in
+                param.inClosureUnconditional(closure)
+            }
+        }
+    }
+
     @discardableResult
     func assert(
         returnTypeSpecifiers specifiers: [DeclarationExtractor.DeclSpecifier],
@@ -846,6 +918,212 @@ extension Asserter where Object == BlockDeclWrapper {
     ) -> Self? {
 
         assert(specifierStrings: specifierStrings, file: file, line: line)
+    }
+
+    /// Asserts that the underlying block declaration being tested has a given
+    /// ARC behaviour specifier.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        hasArcSpecifier arcSpecifier: ObjcArcBehaviorSpecifier,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        return asserter(forKeyPath: \.specifiers, file: file, line: line) { specifiers in
+            specifiers.assertContains(
+                message: "Expected block to contain ARC specifier '\(arcSpecifier)'",
+                file: file,
+                line: line
+            ) { element in
+                element.arcBehaviourSpecifier == arcSpecifier
+            }
+        }
+    }
+
+    /// Asserts that the underlying block declaration being tested has a given
+    /// type prefix.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        hasTypePrefix typePrefix: DeclarationExtractor.TypePrefix,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        return asserter(forKeyPath: \.specifiers, file: file, line: line) { specifiers in
+            specifiers.assertContains(
+                message: "Expected block to contain type prefix '\(typePrefix)'",
+                file: file,
+                line: line
+            ) { element in
+                element.typePrefix == typePrefix
+            }
+        }
+    }
+
+    /// Asserts that the underlying block declaration being tested has a given
+    /// nullability specifier.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        hasNullabilitySpecifier nullabilitySpecifier: ObjcNullabilitySpecifier,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        return asserter(forKeyPath: \.specifiers, file: file, line: line) { specifiers in
+            specifiers.assertContains(
+                message: "Expected block to contain nullability specifier '\(nullabilitySpecifier)'",
+                file: file,
+                line: line
+            ) { element in
+                element.nullabilitySpecifier == nullabilitySpecifier
+            }
+        }
+    }
+
+    /// Asserts that the underlying block declaration being tested has a given
+    /// type qualifier.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        hasTypeQualifier typeQualifier: ObjcTypeQualifier,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        return asserter(forKeyPath: \.specifiers, file: file, line: line) { specifiers in
+            specifiers.assertContains(
+                message: "Expected block to contain type qualifier '\(typeQualifier)'",
+                file: file,
+                line: line
+            ) { element in
+                element.typeQualifier == typeQualifier
+            }
+        }
+    }
+}
+
+extension Asserter where Object == DeclarationExtractor.FuncParameter {
+    /// Asserts that the underlying `FuncParameter` being tested is a type name
+    /// parameter kind.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertIsTypeName(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        switch object {
+        case .typeName:
+            return self
+        case .declaration:
+            XCTFail(
+                "Expected function parameter to be a type name, found a declaration instead.",
+                file: file,
+                line: line
+            )
+            dumpObject()
+
+            return nil
+        }
+    }
+
+    /// Asserts that the underlying `FuncParameter` being tested is a declaration
+    /// parameter kind.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertIsDeclaration(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        switch object {
+        case .declaration:
+            return self
+        case .typeName:
+            XCTFail(
+                "Expected function parameter to be a type name, found a declaration instead.",
+                file: file,
+                line: line
+            )
+            dumpObject()
+
+            return nil
+        }
+    }
+    
+    /// Opens an assertion context for the `TypeName` associated with the underlying
+    /// `FuncParameter` being tested.
+    ///
+    /// Returns `nil` if the underlying function parameter has no `TypeName`,
+    /// otherwise returns `self` for chaining further tests.
+    @discardableResult
+    func asserterForTypeName(
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<DeclarationExtractor.TypeName>) -> Void
+    ) -> Self? {
+
+        switch object {
+        case .typeName(let value):
+            Asserter<DeclarationExtractor.TypeName>(object: value)
+                .inClosureUnconditional(closure)
+
+            return self
+        case .declaration:
+            XCTFail(
+                "Expected function parameter to be a type name, found a declaration instead.",
+                file: file,
+                line: line
+            )
+            dumpObject()
+
+            return nil
+        }
+    }
+
+    /// Opens an assertion context for the `Declaration` associated with the
+    /// underlying `FuncParameter` being tested.
+    ///
+    /// Returns `nil` if the underlying function parameter has no `Declaration`,
+    /// otherwise returns `self` for chaining further tests.
+    @discardableResult
+    func asserterForDeclaration(
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<DeclarationExtractor.Declaration>) -> Void
+    ) -> Self? {
+
+        switch object {
+        case .declaration(let value):
+            Asserter<DeclarationExtractor.Declaration>(object: value)
+                .inClosureUnconditional(closure)
+            
+            return self
+        case .typeName:
+            XCTFail(
+                "Expected function parameter to be a declaration, found a type name instead.",
+                file: file,
+                line: line
+            )
+            dumpObject()
+
+            return nil
+        }
     }
 }
 
@@ -882,7 +1160,7 @@ extension Asserter where Object == DeclarationExtractor.StructOrUnionSpecifier {
 
         guard let field = object.fields?.first(where: { $0.declaration.declaration.identifierString == name }) else {
             XCTFail(
-                "Expected to find field named \(name) in struct definition '\(object.identifier?.getText() ?? "<nil>")'",
+                "Expected to find field named '\(name)' in struct definition '\(object.identifier?.getText() ?? "<nil>")'",
                 line: line
             )
 
@@ -928,7 +1206,7 @@ extension Asserter where Object == DeclarationExtractor.EnumSpecifier {
 
         guard let enumerator = object.enumerators?.first(where: { $0.identifier.getText() == name }) else {
             XCTFail(
-                "Expected to find enumerator named \(name) in enum definition '\(object.identifier?.getText() ?? "<nil>")'",
+                "Expected to find enumerator named '\(name)' in enum definition '\(object.identifier?.getText() ?? "<nil>")'",
                 line: line
             )
 
@@ -981,14 +1259,116 @@ extension Asserter where Object == DeclarationExtractor.EnumSpecifier {
     }
 }
 
-extension Asserter where Object: ParserRuleContext {
-    func assertString(matches exp: String, file: StaticString = #file, line: UInt = #line) {
-        let act = object.getText()
-        if act == exp {
-            return
+extension Asserter where Object == DeclarationExtractor.Pointer {
+    /// Asserts that the underlying `Pointer` being tested has a specified number
+    /// of pointer references within it.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertPointerCount(
+        _ count: Int,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserter(forKeyPath: \.pointers, file: file, line: line) {
+            $0.assertCount(count, file: file, line: line)
+        }
+    }
+
+    /// Asserts that the underlying `Pointer` being tested has a specified number
+    /// of pointer entries within it.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserterForPointerEntry(
+        _ count: Int,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserter(forKeyPath: \.pointers, file: file, line: line) {
+            $0.assertCount(count, file: file, line: line)
+        }
+    }
+
+    /// Opens an asserter context for a specified pointer entry index on the
+    /// underlying `Pointer` being tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserter(
+        forPointerEntryAt index: Int,
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<DeclarationExtractor.PointerEntry>) -> Void
+    ) -> Self? {
+
+        guard object.pointers.count > index else {
+            XCTFail(
+                "Expected pointer list to have at least \(index) parameter(s) but found \(object.pointers.count).",
+                file: file,
+                line: line
+            )
+            dumpObject()
+
+            return nil
         }
 
-        XCTFail("Expected initializer to be '\(exp)' but found '\(act)'", file: file, line: line)
-        dumpObject()
+        closure(.init(object: object.pointers[index]))
+
+        return self
+    }
+}
+
+extension Asserter where Object == DeclarationExtractor.PointerEntry {
+    /// Asserts that the underlying `PointerEntry` being tested has a set of type
+    /// qualifiers that when converted to strings matches a specified set of
+    /// string values.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        typeQualifierStrings expected: Set<String>?,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        switch object {
+        case .pointer(let qualifiers, _):
+            let qualifiersSet = qualifiers.map { Set($0.map(\.description)) }
+
+            if expected != qualifiersSet {
+                XCTAssertEqual(
+                    qualifiersSet,
+                    expected,
+                    file: file,
+                    line: line
+                )
+            }
+        }
+
+        return self
+    }
+
+    /// Asserts that the underlying `PointerEntry` being tested has a given
+    /// nullability specifier.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        nullabilitySpecifier expected: ObjcNullabilitySpecifier?,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        return asserter(forKeyPath: \.nullabilitySpecifier) {
+            $0.assert(equals: expected, file: file, line: line)
+        }
     }
 }
