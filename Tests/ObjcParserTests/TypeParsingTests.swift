@@ -41,7 +41,7 @@ class TypeParsingTests: XCTestCase {
     func testParseObjcType_typeVariableDeclaratorContext_blockType() {
         prepareTester(ObjectiveCParser.typeVariableDeclarator, { $0.parseObjcType(from: $1) }) { tester in
             tester.assert(
-                "NSInteger (^)()",
+                "NSInteger (^a)()",
                 parsesAs: .blockType(
                     name: nil,
                     returnType: .typeName("NSInteger")
@@ -53,7 +53,7 @@ class TypeParsingTests: XCTestCase {
     func testParseObjcType_declarationSpecifiers_declaratorContext_blockType() {
         prepareTester(ObjectiveCParser.typeVariableDeclarator, { $0.parseObjcType(in: $1.declarationSpecifiers()!, declarator: $1.declarator()!) }) { tester in
             tester.assert(
-                "NSInteger (^)()",
+                "NSInteger (^a)()",
                 parsesAs: .blockType(
                     name: nil,
                     returnType: .typeName("NSInteger")
@@ -65,7 +65,7 @@ class TypeParsingTests: XCTestCase {
     func testParseObjcType_declarationSpecifiers_declaratorContext_blockType_nullabilitySpecifier() {
         prepareTester(ObjectiveCParser.typeVariableDeclarator, { $0.parseObjcType(in: $1.declarationSpecifiers()!, declarator: $1.declarator()!) }) { tester in
             tester.assert(
-                "NSInteger (^_Nonnull)()",
+                "NSInteger (^_Nonnull a)()",
                 parsesAs: .blockType(
                     name: nil,
                     returnType: .typeName("NSInteger"),
