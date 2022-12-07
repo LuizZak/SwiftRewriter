@@ -86,11 +86,11 @@ public class PreprocessorDirectiveConverter {
         defer { parserStatePool.repool(state) }
         
         let astReader = SwiftASTReader(
+            parserStatePool: parserStatePool,
             typeMapper: DefaultTypeMapper(typeSystem: typeSystem),
             typeParser: TypeParsing(
                 state: state,
-                source: StringCodeSource(source: ctx.getText()),
-                nonnullContextQuerier: NonnullContextQuerier(nonnullMacroRegionsTokenRange: [])
+                source: StringCodeSource(source: ctx.getText())
             )
         )
         

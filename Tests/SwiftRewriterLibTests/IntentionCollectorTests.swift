@@ -350,6 +350,27 @@ class IntentionCollectorTests: XCTestCase {
         XCTAssertEqual(file.typealiasIntentions.first?.originalObjcType, .pointer(.void))
     }
     
+    func testQueryNonnullRegionsFromDelegate() throws {
+        let parser = ObjcParser(string: """
+            void *v1;
+            void *v2;
+            void *v3;
+            """
+        )
+        try parser.parse()
+        let rootNode = parser.rootNode
+        delegate.isNodeInNonnullContext_stub = { node in
+            node.location.line == 2 ? true : false
+        }
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.globalVariableIntentions.count, 3)
+        XCTAssertFalse(file.globalVariableIntentions[0].inNonnullContext)
+        XCTAssertTrue(file.globalVariableIntentions[1].inNonnullContext)
+        XCTAssertFalse(file.globalVariableIntentions[2].inNonnullContext)
+    }
+    
     func testCollectClassInterfaceComments() throws {
         testCommentCollection("""
             // A comment
@@ -485,6 +506,7 @@ class IntentionCollectorTests: XCTestCase {
 private class TestCollectorDelegate: IntentionCollectorDelegate {
     var context: IntentionBuildingContext
     var intentions: IntentionCollection
+    var isNodeInNonnullContext_stub: ((ASTNode) -> Bool)?
     
     var reportedForLazyParsing: [Intention] = []
     var reportedForLazyResolving: [Intention] = []
@@ -500,7 +522,7 @@ private class TestCollectorDelegate: IntentionCollectorDelegate {
     // MARK: -
     
     func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
-        return false
+        return isNodeInNonnullContext_stub?(node) ?? false
     }
     
     func reportForLazyParsing(intention: Intention) {

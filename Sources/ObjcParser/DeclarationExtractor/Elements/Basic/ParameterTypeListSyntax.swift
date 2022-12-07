@@ -12,9 +12,16 @@ extension ParameterTypeListSyntax: DeclarationSyntaxElementType {
         toChildrenList(parameterList)
     }
 }
-
 extension ParameterTypeListSyntax: CustomStringConvertible {
     public var description: String {
         return parameterList.description + (isVariadic ? ", ..." : "")
+    }
+}
+extension ParameterTypeListSyntax: ExpressibleByArrayLiteral {
+    public init(arrayLiteral elements: ParameterDeclarationSyntax...) {
+        self.init(
+            parameterList: .init(parameterDeclarations: elements),
+            isVariadic: false
+        )
     }
 }

@@ -17,3 +17,8 @@ extension ExpressionSyntax: CustomStringConvertible {
         expressionString
     }
 }
+extension ExpressionSyntax: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self.init(expressionString: value)
+    }
+}

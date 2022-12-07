@@ -109,6 +109,11 @@ extension StructDeclarationListSyntax: CustomStringConvertible {
         "{ " + structDeclaration.map(\.description).joined(separator: " ") + " }"
     }
 }
+extension StructDeclarationListSyntax: ExpressibleByArrayLiteral {
+    public init(arrayLiteral elements: StructDeclarationSyntax...) {
+        self.init(structDeclaration: elements)
+    }
+}
 
 extension StructDeclarationSyntax: DeclarationSyntaxElementType {
     public var children: [DeclarationSyntaxElementType] {

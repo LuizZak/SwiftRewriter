@@ -19,10 +19,14 @@ extension SpecifierQualifierListSyntax: DeclarationSyntaxElementType {
         specifierQualifiers
     }
 }
-
 extension SpecifierQualifierListSyntax: CustomStringConvertible {
     public var description: String {
         specifierQualifiers.map(\.description).joined(separator: " ")
+    }
+}
+extension SpecifierQualifierListSyntax: ExpressibleByArrayLiteral {
+    public init(arrayLiteral elements: TypeSpecifierQualifierSyntax...) {
+        self.init(specifierQualifiers: elements)
     }
 }
 
@@ -38,7 +42,6 @@ extension TypeSpecifierQualifierSyntax: DeclarationSyntaxElementType {
         }
     }
 }
-
 extension TypeSpecifierQualifierSyntax: CustomStringConvertible {
     public var description: String {
         switch self {

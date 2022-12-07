@@ -719,7 +719,10 @@ private extension DefinitionCollectorTests {
 
             nodeFactory = ASTNodeFactory(
                 source: StringCodeSource(source: source),
-                nonnullContextQuerier: NonnullContextQuerier(nonnullMacroRegionsTokenRange: []),
+                nonnullContextQuerier: NonnullContextQuerier(
+                    nonnullMacroRegionsTokenRange: [],
+                    nonnullMacroRegionsRanges: []
+                ),
                 commentQuerier: CommentQuerier(allComments: [])
             )
 

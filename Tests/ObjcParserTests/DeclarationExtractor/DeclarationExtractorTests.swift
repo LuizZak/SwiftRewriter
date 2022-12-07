@@ -13,6 +13,16 @@ class DeclarationExtractorTests: XCTestCase {
         _retainedParser = nil
     }
     
+    func testExtract_declaration_singleDecl_unusedPrefix() {
+        let tester = prepareTest(declaration: "__unused int a;")
+
+        tester.assert { (asserter: DeclarationsAsserter) in
+            asserter
+                .asserter(forVariable: "a")?
+                .assert(specifierStrings: ["int"])
+        }
+    }
+    
     func testExtract_declaration_singleDecl_withInitializer() {
         let tester = prepareTest(declaration: "short int a = 0;")
 
@@ -20,9 +30,24 @@ class DeclarationExtractorTests: XCTestCase {
             asserter
                 .asserter(forVariable: "a")?
                 .assert(specifierStrings: ["short", "int"])?
+                .asserterForSourceRange { sourceRange in
+                    sourceRange.assert(
+                        start: .init(line: 1, column: 11)
+                    )
+                }?
                 .assertInitializer { aInit in
                     aInit.assert(textEquals: "0")
                 }
+        }
+    }
+    
+    func testExtract_declaration_singleDecl_mixedTypePrefixAndSpecifiers() {
+        let tester = prepareTest(declaration: "nullable __kindof NSString *a;")
+
+        tester.assert { (asserter: DeclarationsAsserter) in
+            asserter
+                .asserter(forVariable: "a")?
+                .assert(specifierStrings: ["__kindof", "_Nullable", "NSString"])
         }
     }
 
@@ -254,7 +279,12 @@ class DeclarationExtractorTests: XCTestCase {
                 .assertVariable(name: "a")?
                 .assert(specifierStrings: ["int"])?
                 .assertIsStaticArray(count: nil)?
-                .assertIsNotPointer()
+                .assertIsNotPointer()?
+                .asserterForSourceRange { sourceRange in
+                    sourceRange.assert(
+                        start: .init(line: 1, column: 5)
+                    )
+                }
         }
     }
 
@@ -277,7 +307,12 @@ class DeclarationExtractorTests: XCTestCase {
             asserter
                 .assertBlock(name: "a")?
                 .assert(returnTypeSpecifierStrings: ["void"])?
-                .assertParameterCount(0)
+                .assertParameterCount(0)?
+                .asserterForSourceRange { sourceRange in
+                    sourceRange.assert(
+                        start: .init(line: 1, column: 8)
+                    )
+                }
         }
     }
 
@@ -357,7 +392,12 @@ class DeclarationExtractorTests: XCTestCase {
         tester.assert { (asserter: DeclarationsAsserter) in
             asserter.assertDefinedCount(1)?
                 .asserter(forDecl: "errorBlock") { decl in
-                    decl.assertIsTypeDef()
+                    decl.assertIsTypeDef()?
+                        .asserterForSourceRange { sourceRange in
+                            sourceRange.assert(
+                                start: .init(line: 1, column: 15)
+                            )
+                        }
                 }
         }
     }
@@ -384,13 +424,34 @@ class DeclarationExtractorTests: XCTestCase {
         }
     }
 
+    func testExtract_declaration_singleDecl_typedef_opaqueStruct() {
+        let tester = prepareTest(declaration: "typedef struct _A A;")
+
+        tester.assert { (asserter: DeclarationsAsserter) in
+            asserter.assertDefinedCount(1)?
+                .asserter(forDecl: "A") { aDecl in
+                    aDecl.assertIsTypeDef()?
+                        .asserterForSourceRange { sourceRange in
+                            sourceRange.assert(
+                                start: .init(line: 1, column: 19)
+                            )
+                        }
+                }
+        }
+    }
+
     func testExtract_declaration_singleDecl_typedef_opaqueStruct_pointerOnly() {
         let tester = prepareTest(declaration: "typedef struct _A *A;")
 
         tester.assert { (asserter: DeclarationsAsserter) in
             asserter.assertDefinedCount(1)?
                 .asserter(forDecl: "A") { aDecl in
-                    aDecl.assertIsTypeDef()
+                    aDecl.assertIsTypeDef()?
+                        .asserterForSourceRange { sourceRange in
+                            sourceRange.assert(
+                                start: .init(line: 1, column: 20)
+                            )
+                        }
                 }
         }
     }
@@ -402,6 +463,11 @@ class DeclarationExtractorTests: XCTestCase {
             asserter.assertDefinedCount(1)?
                 .asserter(forStruct: "AStruct") { aStruct in
                     aStruct.assertFieldCount(1)?
+                        .asserterForSourceRange { sourceRange in
+                            sourceRange.assert(
+                                start: .init(line: 1, column: 1)
+                            )
+                        }?
                         .assertField(name: "field")
                 }
         }
@@ -585,14 +651,16 @@ class DeclarationExtractorTests: XCTestCase {
 
 private extension DeclarationExtractorTests {
     func prepareTest(declaration: String) -> Tester {
-        Tester(source: declaration)
+        Tester(sourceString: declaration)
     }
     
     class Tester: BaseParserTestFixture {
-        var source: String
+        var sourceString: String
+        var source: Source
 
-        init(source: String) {
-            self.source = source
+        init(sourceString: String) {
+            self.sourceString = sourceString
+            self.source = StringCodeSource(source: sourceString)
 
             super.init()
         }
@@ -607,15 +675,27 @@ private extension DeclarationExtractorTests {
         ) rethrows {
 
             let sut = DeclarationExtractor()
+            let declParser = AntlrDeclarationParser(source: source)
 
             do {
                 let parserRule = try parse(
-                    source,
+                    sourceString,
                     file: file,
                     line: line,
                     ruleDeriver: ObjectiveCParser.declaration
                 )
-                let result = sut.extract(from: parserRule)
+
+                guard let decl = declParser.declaration(parserRule) else {
+                    XCTFail(
+                        "Failed to parse from source string: \(AntlrDeclarationParser.self) returned nil for AntlrDeclarationParser.declaration(_:)",
+                        file: file,
+                        line: line
+                    )
+
+                    return
+                }
+                
+                let result = sut.extract(from: decl)
 
                 try closure(.init(object: result))
             } catch {
@@ -637,16 +717,27 @@ private extension DeclarationExtractorTests {
         ) rethrows {
 
             let sut = DeclarationExtractor()
+            let declParser = AntlrDeclarationParser(source: source)
 
             do {
                 let parserRule = try parse(
-                    source,
+                    sourceString,
                     file: file,
                     line: line,
                     ruleDeriver: ObjectiveCParser.fieldDeclaration
                 )
 
-                let result = sut.extract(from: parserRule)
+                guard let decl = declParser.fieldDeclaration(parserRule) else {
+                    XCTFail(
+                        "Failed to parse from source string: \(AntlrDeclarationParser.self) returned nil for AntlrDeclarationParser.declaration(_:)",
+                        file: file,
+                        line: line
+                    )
+
+                    return
+                }
+
+                let result = sut.extract(from: decl)
 
                 try closure(.init(object: result))
             } catch {

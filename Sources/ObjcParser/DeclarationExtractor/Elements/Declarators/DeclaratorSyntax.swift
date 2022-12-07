@@ -16,3 +16,8 @@ extension DeclaratorSyntax: CustomStringConvertible {
         "\(pointer?.description ?? "")\(directDeclarator)"
     }
 }
+extension DeclaratorSyntax: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self.init(directDeclarator: .init(stringLiteral: value))
+    }
+}

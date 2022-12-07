@@ -52,7 +52,15 @@ public class ObjcParser {
     /// array keeps the index of the BEGIN/END token pairs so that later on the
     /// rewriter can leverage this information to infer nonnull contexts.
     public var nonnullMacroRegionsTokenRange: [(start: Int, end: Int)] = []
-    
+
+    /// When NS_ASSUME_NONNULL_BEGIN/END pairs are present on the source code, this
+    /// array keeps the index of the BEGIN/END source location pairs so that
+    /// later on the rewriter can leverage this information to infer nonnull
+    /// contexts.
+    ///
+    /// Alternative to `nonnullMacroRegionsTokenRange`.
+    public var nonnullMacroRegionsRanges: [SourceRange] = []
+
     /// Contains information about all C-style comments found while parsing the
     /// input file.
     public var comments: [ObjcComment] = []
@@ -67,12 +75,16 @@ public class ObjcParser {
         self.init(source: StringCodeSource(source: string, fileName: fileName))
     }
     
-    public convenience init(string: String,
-                            fileName: String = "",
-                            state: ObjcParserState) {
+    public convenience init(
+        string: String,
+        fileName: String = "",
+        state: ObjcParserState
+    ) {
         
-        self.init(source: StringCodeSource(source: string, fileName: fileName),
-                  state: state)
+        self.init(
+            source: StringCodeSource(source: string, fileName: fileName),
+            state: state
+        )
     }
     
     public convenience init(source: CodeSource) {
@@ -115,15 +127,20 @@ public class ObjcParser {
         
         try parseNSAssumeNonnullChannel(input: input)
         
-        let nonnullContextQuerier =
-            NonnullContextQuerier(nonnullMacroRegionsTokenRange: nonnullMacroRegionsTokenRange)
+        let nonnullContextQuerier = NonnullContextQuerier(
+            nonnullMacroRegionsTokenRange: nonnullMacroRegionsTokenRange,
+            nonnullMacroRegionsRanges: nonnullMacroRegionsRanges
+        )
         
-        let commentQuerier =
-            CommentQuerier(allComments: comments)
+        let commentQuerier = CommentQuerier(
+            allComments: comments
+        )
         
-        try parseMainChannel(input: input,
-                             nonnullContextQuerier: nonnullContextQuerier,
-                             commentQuerier: commentQuerier)
+        try parseMainChannel(
+            input: input,
+            nonnullContextQuerier: nonnullContextQuerier,
+            commentQuerier: commentQuerier
+        )
         
         // Go around the tree setting the source for the nodes and detecting
         // nodes within assume non-null ranges
@@ -196,31 +213,41 @@ public class ObjcParser {
             let endLine = src.lineNumber(at: end)
             let endColumn = src.columnOffset(at: end)
             
-            let location = SourceLocation(line: startLine,
-                                          column: startColumn,
-                                          utf8Offset: preprocessorRange.lowerBound)
-            let length = SourceLength(newlines: endLine - startLine,
-                                      columnsAtLastLine: startLine == endLine ? 0 : endColumn,
-                                      utf8Length: preprocessorRange.count)
+            let location = SourceLocation(
+                line: startLine,
+                column: startColumn,
+                utf8Offset: preprocessorRange.lowerBound
+            )
+            let length = SourceLength(
+                newlines: endLine - startLine,
+                columnsAtLastLine: startLine == endLine ? 0 : endColumn,
+                utf8Length: preprocessorRange.count
+            )
             
-            let directive = ObjcPreprocessorDirective(string: trimmed,
-                                                      range: preprocessorRange,
-                                                      location: location,
-                                                      length: length)
+            let directive = ObjcPreprocessorDirective(
+                string: trimmed,
+                range: preprocessorRange,
+                location: location,
+                length: length
+            )
             
             preprocessorDirectives.append(directive)
         }
         
         // Return proper code
-        let processed = ObjectiveCPreprocessor(commonTokenStream: parserState.tokens,
-                                               inputString: src)
+        let processed = ObjectiveCPreprocessor(
+            commonTokenStream: parserState.tokens,
+            inputString: src
+        )
         
         return processed.visitObjectiveCDocument(root) ?? ""
     }
     
-    private func parseMainChannel(input: String,
-                                  nonnullContextQuerier: NonnullContextQuerier,
-                                  commentQuerier: CommentQuerier) throws {
+    private func parseMainChannel(
+        input: String,
+        nonnullContextQuerier: NonnullContextQuerier,
+        commentQuerier: CommentQuerier
+    ) throws {
         
         // Make a pass with ANTLR before traversing the parse tree and collecting
         // known constructs
@@ -233,13 +260,14 @@ public class ObjcParser {
         
         let root = try tryParse(from: parser, { try $0.translationUnit() })
         
-        let listener =
-            ObjcParserListener(sourceString: src,
-                               source: source,
-                               state: state,
-                               antlrSettings: antlrSettings,
-                               nonnullContextQuerier: nonnullContextQuerier,
-                               commentQuerier: commentQuerier)
+        let listener = ObjcParserListener(
+            sourceString: src,
+            source: source,
+            state: state,
+            antlrSettings: antlrSettings,
+            nonnullContextQuerier: nonnullContextQuerier,
+            commentQuerier: commentQuerier
+        )
         
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)
@@ -247,6 +275,7 @@ public class ObjcParser {
         rootNode = listener.rootNode
     }
     
+    /*
     private func parsePreprocessorDirectivesChannel() throws {
         let src = source.fetchSource()
         
@@ -264,20 +293,32 @@ public class ObjcParser {
         let allTokens = tokens.getTokens()
         
         var lastBegin: Int?
+        var lastLoc: SourceLocation?
         
         for tok in allTokens {
             let tokType = tok.getType()
             if tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_BEGIN {
                 lastBegin = tok.getTokenIndex()
-            } else if tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_END {
                 
+                lastLoc = source.sourceLocation(for: tok)
+            } else if tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_END {
                 if let lastBeginIndex = lastBegin {
                     nonnullMacroRegionsTokenRange.append((start: lastBeginIndex, end: tok.getTokenIndex()))
                     lastBegin = nil
                 }
+
+                if let startLoc = lastLoc {
+                    let endLoc = source.sourceLocation(for: tok)
+                    nonnullMacroRegionsRanges.append(
+                        .range(start: startLoc, end: endLoc)
+                    )
+
+                    lastLoc = nil
+                }
             }
         }
     }
+    */
     
     private func parseNSAssumeNonnullChannel(input: String) throws {
         nonnullMacroRegionsTokenRange = []
@@ -288,16 +329,27 @@ public class ObjcParser {
         let allTokens = tokens.getTokens()
         
         var lastBegin: Int?
+        var lastLoc: SourceLocation?
         
         for tok in allTokens {
             switch tok.getType() {
             case ObjectiveCLexer.NS_ASSUME_NONNULL_BEGIN:
                 lastBegin = tok.getTokenIndex()
+                lastLoc = source.sourceLocation(for: tok)
                 
             case ObjectiveCLexer.NS_ASSUME_NONNULL_END:
                 if let lastBeginIndex = lastBegin {
                     nonnullMacroRegionsTokenRange.append((start: lastBeginIndex, end: tok.getTokenIndex()))
                     lastBegin = nil
+                }
+
+                if let startLoc = lastLoc {
+                    let endLoc = source.sourceLocation(for: tok)
+                    nonnullMacroRegionsRanges.append(
+                        .range(start: startLoc, end: endLoc)
+                    )
+
+                    lastLoc = nil
                 }
                 
             default:

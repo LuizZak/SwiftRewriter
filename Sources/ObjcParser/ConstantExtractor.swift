@@ -38,11 +38,51 @@ final class ConstantContextExtractor {
 
 private class _ConstantContextExtractorVisitor: ObjectiveCParserVisitor<ObjectiveCParser.ConstantContext?> {
     override func visitExpression(_ ctx: ObjectiveCParser.ExpressionContext) -> ObjectiveCParser.ConstantContext? {
-        if let result = ctx.castExpression()?.accept(self) {
-            return result
-        }
+        return ctx.assignmentExpression()?.accept(self) ?? nil
+    }
 
-        return nil
+    override func visitAssignmentExpression(_ ctx: ObjectiveCParser.AssignmentExpressionContext) -> ObjectiveCParser.ConstantContext? {
+        ctx.conditionalExpression()?.accept(self) ?? nil
+    }
+
+    override func visitConditionalExpression(_ ctx: ObjectiveCParser.ConditionalExpressionContext) -> ObjectiveCParser.ConstantContext? {
+        ctx.trueExpression != nil ? nil : (ctx.logicalOrExpression()?.accept(self) ?? nil)
+    }
+
+    override func visitLogicalOrExpression(_ ctx: ObjectiveCParser.LogicalOrExpressionContext) -> ObjectiveCParser.ConstantContext? {
+        return _visitIfOneItem(ctx.logicalAndExpression()) { $0.accept(self) }
+    }
+
+    override func visitLogicalAndExpression(_ ctx: ObjectiveCParser.LogicalAndExpressionContext) -> ObjectiveCParser.ConstantContext? {
+        return _visitIfOneItem(ctx.bitwiseOrExpression()) { $0.accept(self) }
+    }
+
+    override func visitBitwiseOrExpression(_ ctx: ObjectiveCParser.BitwiseOrExpressionContext) -> ObjectiveCParser.ConstantContext? {
+        return _visitIfOneItem(ctx.bitwiseXorExpression()) { $0.accept(self) }
+    }
+
+    override func visitBitwiseXorExpression(_ ctx: ObjectiveCParser.BitwiseXorExpressionContext) -> ObjectiveCParser.ConstantContext? {
+        return _visitIfOneItem(ctx.bitwiseAndExpression()) { $0.accept(self) }
+    }
+
+    override func visitBitwiseAndExpression(_ ctx: ObjectiveCParser.BitwiseAndExpressionContext) -> ObjectiveCParser.ConstantContext? {
+        return _visitIfOneItem(ctx.equalityExpression()) { $0.accept(self) }
+    }
+
+    override func visitEqualityExpression(_ ctx: ObjectiveCParser.EqualityExpressionContext) -> ObjectiveCParser.ConstantContext? {
+        return _visitIfOneItem(ctx.comparisonExpression()) { $0.accept(self) }
+    }
+
+    override func visitComparisonExpression(_ ctx: ObjectiveCParser.ComparisonExpressionContext) -> ObjectiveCParser.ConstantContext? {
+        return _visitIfOneItem(ctx.shiftExpression()) { $0.accept(self) }
+    }
+
+    override func visitAdditiveExpression(_ ctx: ObjectiveCParser.AdditiveExpressionContext) -> ObjectiveCParser.ConstantContext? {
+        return _visitIfOneItem(ctx.multiplicativeExpression()) { $0.accept(self) }
+    }
+
+    override func visitMultiplicativeExpression(_ ctx: ObjectiveCParser.MultiplicativeExpressionContext) -> ObjectiveCParser.ConstantContext? {
+        return _visitIfOneItem(ctx.castExpression()) { $0.accept(self) }
     }
 
     override func visitCastExpression(_ ctx: ObjectiveCParser.CastExpressionContext) -> ObjectiveCParser.ConstantContext? {
@@ -71,5 +111,16 @@ private class _ConstantContextExtractorVisitor: ObjectiveCParserVisitor<Objectiv
 
     override func visitConstant(_ ctx: ObjectiveCParser.ConstantContext) -> ObjectiveCParser.ConstantContext? {
         return ctx
+    }
+
+    private func _visitIfOneItem<T>(
+        _ ctx: [T],
+        _ visit: (T) -> ObjectiveCParser.ConstantContext??
+    ) -> ObjectiveCParser.ConstantContext? {
+        guard ctx.count == 1 else {
+            return nil
+        }
+
+        return visit(ctx[0]) ?? nil
     }
 }

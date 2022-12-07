@@ -16,3 +16,8 @@ extension IdentifierSyntax: CustomStringConvertible {
         identifier
     }
 }
+extension IdentifierSyntax: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self.init(identifier: value)
+    }
+}

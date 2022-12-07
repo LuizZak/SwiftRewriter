@@ -40,7 +40,6 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         typeParser = TypeParsing(
             state: state,
             source: source,
-            nonnullContextQuerier: nonnullContextQuerier,
             antlrSettings: antlrSettings
         )
         context = NodeCreationContext()
@@ -128,11 +127,6 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         mapper.addRuleMap(
             rule: O.ProtocolDeclarationContext.self,
             nodeType: ObjcProtocolDeclaration.self,
-            collectComments: true
-        )
-        mapper.addRuleMap(
-            rule: O.EnumDeclarationContext.self,
-            nodeType: ObjcEnumDeclaration.self,
             collectComments: true
         )
         /*
@@ -524,24 +518,6 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
     }
     
-    override func enterEnumDeclaration(_ ctx: ObjectiveCParser.EnumDeclarationContext) {
-        guard let enumSpecifier = ctx.enumSpecifier() else {
-            return
-        }
-        
-        guard let enumNode = context.currentContextNode(as: ObjcEnumDeclaration.self) else {
-            return
-        }
-        
-        let isObjcEnum = enumSpecifier.NS_ENUM() != nil || enumSpecifier.NS_OPTIONS() != nil
-        
-        enumNode.isOptionSet = enumSpecifier.NS_OPTIONS() != nil
-        
-        if let identifier = enumSpecifier.identifier(isObjcEnum ? 0 : 1) {
-            enumNode.addChild(nodeFactory.makeIdentifier(from: identifier))
-        }
-    }
-    
     override func enterEnumerator(_ ctx: ObjectiveCParser.EnumeratorContext) {
         guard let identifier = ctx.enumeratorIdentifier()?.identifier() else {
             return
@@ -749,7 +725,7 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         )
         nodeFactory.updateSourceLocation(for: node, with: ctx)
         property.addChild(node)
-        property.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
+        property.precedingComments = commentQuerier.popAllCommentsBefore(rule: ctx)
         
         if ctx.ibOutletQualifier() != nil {
             property.hasIbOutletSpecifier = true
@@ -890,7 +866,7 @@ private class GenericParseTreeContextMapper {
             nodeFactory.updateSourceLocation(for: node, with: rule)
             
             if collectComments {
-                node.precedingComments = commentQuerier.popClosestCommentsBefore(node: rule)
+                node.precedingComments = commentQuerier.popAllCommentsBefore(rule: rule)
             }
             
             context.pushContext(node: node)

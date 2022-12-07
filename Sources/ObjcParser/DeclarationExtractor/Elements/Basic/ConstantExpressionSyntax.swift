@@ -17,3 +17,8 @@ extension ConstantExpressionSyntax: CustomStringConvertible {
         constantExpressionString
     }
 }
+extension ConstantExpressionSyntax: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self.init(constantExpressionString: value)
+    }
+}

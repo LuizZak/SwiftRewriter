@@ -88,6 +88,10 @@ public class DefinitionCollector {
     var commentQuerier: CommentQuerier
     var nodeFactory: ASTNodeFactory
 
+    var source: Source {
+        nodeFactory.source
+    }
+
     public weak var delegate: DefinitionCollectorDelegate?
     
     public init(
@@ -102,13 +106,18 @@ public class DefinitionCollector {
 
     /// Collects definitions from a given declaration context parser rule.
     public func collect(from ctx: ObjectiveCParser.DeclarationContext) -> [ASTNode] {
+        let parser = AntlrDeclarationParser(source: source)
+        guard let syntax = parser.declaration(ctx) else {
+            return []
+        }
+
         var declarations: [ASTNode] = []
 
         let extractor = DeclarationExtractor()
         let translator = DeclarationTranslator()
 
-        let decls = extractor.extract(from: ctx)
-        let nodeDecls = translator.translate(decls, context: .init(nodeFactory: nodeFactory))
+        let decls = extractor.extract(from: syntax)
+        let nodeDecls = translator.translate(decls)
 
         for nodeDecl in nodeDecls {
             if let nodes = processDeclaration(nodeDecl) {
@@ -121,13 +130,18 @@ public class DefinitionCollector {
 
     /// Collects definitions from a given field declaration context parser rule.
     public func collect(from ctx: ObjectiveCParser.FieldDeclarationContext) -> [ASTNode] {
+        let parser = AntlrDeclarationParser(source: source)
+        guard let syntax = parser.fieldDeclaration(ctx) else {
+            return []
+        }
+
         var declarations: [ASTNode] = []
 
         let extractor = DeclarationExtractor()
         let translator = DeclarationTranslator()
 
-        let decls = extractor.extract(from: ctx)
-        let nodeDecls = translator.translate(decls, context: .init(nodeFactory: nodeFactory))
+        let decls = extractor.extract(from: syntax)
+        let nodeDecls = translator.translate(decls)
 
         for nodeDecl in nodeDecls {
             if let nodes = processDeclaration(nodeDecl) {
@@ -143,12 +157,17 @@ public class DefinitionCollector {
     /// Returns `nil` if the conversion could not succeed due to missing or invalid
     /// syntax configurations.
     public func collectFunction(from ctx: ObjectiveCParser.FunctionDefinitionContext) -> FunctionDefinition? {
-        var declarations: [ASTNode] = []
+        let parser = AntlrDeclarationParser(source: source)
 
         guard let functionSignature = ctx.functionSignature() else {
             return nil
         }
-        guard let declarator = functionSignature.declarator() else {
+        guard let declarator = parser.declarator(functionSignature.declarator()) else {
+            return nil
+        }
+        guard
+            let declarationSpecifiers = parser.declarationSpecifiers(functionSignature.declarationSpecifiers())
+        else {
             return nil
         }
 
@@ -156,14 +175,15 @@ public class DefinitionCollector {
         let translator = DeclarationTranslator()
 
         guard let decl = extractor.extract(
-            fromSpecifiers: functionSignature.declarationSpecifiers(),
+            fromSpecifiers: declarationSpecifiers,
             declarator: declarator
         ) else {
             return nil
         }
 
-        let nodeDecls = translator.translate(decl, context: .init(nodeFactory: nodeFactory))
+        let nodeDecls = translator.translate(decl)
 
+        var declarations: [ASTNode] = []
         for nodeDecl in nodeDecls {
             if let nodes = processDeclaration(nodeDecl) {
                 declarations.append(contentsOf: nodes)
@@ -208,12 +228,12 @@ public class DefinitionCollector {
 
     private func processVariable(
         _ decl: DeclarationTranslator.ASTNodeDeclaration,
-        rule: ParserRuleContext,
-        identifier: Identifier,
+        rule: DeclarationSyntaxElementType,
+        identifier: DeclarationTranslator.IdentifierInfo,
         type: ObjcType?,
         nullability: ObjcNullabilitySpecifier?,
         arcSpecifier: ObjcArcBehaviorSpecifier?,
-        initialValue: ObjectiveCParser.InitializerContext?,
+        initialValue: DeclarationTranslator.InitializerInfo?,
         isStatic: Bool,
         notifyDelegate: Bool
     ) -> [ASTNode]? {
@@ -222,13 +242,16 @@ public class DefinitionCollector {
             return nil
         }
 
-        let typeNode = TypeNameNode(type: type, isInNonnullContext: identifier.isInNonnullContext)
+        let typeNameInfo = DeclarationTranslator.TypeNameInfo(
+            sourceRange: rule.sourceRange,
+            type: type
+        )
 
         return processVariable(
             decl,
             rule: rule,
             identifier: identifier,
-            typeNode: typeNode,
+            typeNode: typeNameInfo,
             nullability: nullability,
             arcSpecifier: arcSpecifier,
             initialValue: initialValue,
@@ -239,25 +262,31 @@ public class DefinitionCollector {
 
     private func processVariable(
         _ decl: DeclarationTranslator.ASTNodeDeclaration,
-        rule: ParserRuleContext,
-        identifier: Identifier,
-        typeNode: TypeNameNode,
+        rule: DeclarationSyntaxElementType,
+        identifier: DeclarationTranslator.IdentifierInfo,
+        typeNode: DeclarationTranslator.TypeNameInfo,
         nullability: ObjcNullabilitySpecifier?,
         arcSpecifier: ObjcArcBehaviorSpecifier?,
-        initialValue: ObjectiveCParser.InitializerContext?,
+        initialValue: DeclarationTranslator.InitializerInfo?,
         isStatic: Bool,
         notifyDelegate: Bool
     ) -> [ASTNode]? {
 
-        let node = VariableDeclaration(isInNonnullContext: identifier.isInNonnullContext)
+        let isNonnull = nodeFactory.isInNonnullContext(identifier.sourceRange)
+
+        let node = VariableDeclaration(isInNonnullContext: isNonnull)
         node.isStatic = isStatic
 
-        node.addChild(identifier)
-        node.addChild(typeNode)
+        node.addChild(
+            makeIdentifier(identifier)
+        )
+        node.addChild(
+            makeTypeNameNode(typeNode)
+        )
 
-        if let expression = initialValue?.expression() {
+        if let initialValue {
             node.addChild(
-                nodeFactory.makeInitialExpression(from: expression)
+                makeInitialExpression(initialValue)
             )
         }
 
@@ -277,28 +306,36 @@ public class DefinitionCollector {
 
     private func processFunction(
         _ decl: DeclarationTranslator.ASTNodeDeclaration,
-        rule: ParserRuleContext,
-        identifier: Identifier,
-        parameters: [FunctionParameter],
-        returnType: TypeNameNode?,
+        rule: DeclarationSyntaxElementType,
+        identifier: DeclarationTranslator.IdentifierInfo,
+        parameters: [DeclarationTranslator.FunctionParameterInfo],
+        returnType: DeclarationTranslator.TypeNameInfo?,
         isVariadic: Bool,
         notifyDelegate: Bool
     ) -> [ASTNode]? {
 
-        let parameterList = ParameterList(isInNonnullContext: identifier.isInNonnullContext)
-        parameterList.addChildren(parameters)
+        let isNonnull = nodeFactory.isInNonnullContext(identifier.sourceRange)
+
+        let parameterList = ParameterList(isInNonnullContext: isNonnull)
+        parameterList.addChildren(
+            makeParameterList(parameters)
+        )
         if isVariadic {
-            let variadicParam = VariadicParameter(isInNonnullContext: identifier.isInNonnullContext)
+            let variadicParam = VariadicParameter(isInNonnullContext: isNonnull)
             parameterList.addChild(variadicParam)
         }
 
-        let node = FunctionDefinition(isInNonnullContext: identifier.isInNonnullContext)
+        let node = FunctionDefinition(isInNonnullContext: isNonnull)
         
-        node.addChild(identifier)
+        node.addChild(
+            makeIdentifier(identifier)
+        )
         node.addChild(parameterList)
 
-        if let returnType = returnType {
-            node.addChild(returnType)
+        if let returnType {
+            node.addChild(
+                makeTypeNameNode(returnType)
+            )
         }
 
         node.updateSourceRange()
@@ -317,30 +354,38 @@ public class DefinitionCollector {
 
     private func processStructOrUnionDecl(
         _ decl: DeclarationTranslator.ASTNodeDeclaration,
-        rule: ParserRuleContext,
-        identifier: Identifier?,
+        rule: DeclarationSyntaxElementType,
+        identifier: DeclarationTranslator.IdentifierInfo?,
         structDecl: DeclarationExtractor.StructOrUnionSpecifier,
         fields: [DeclarationTranslator.ASTStructFieldDeclaration],
         notifyDelegate: Bool
     ) -> [ASTNode]? {
 
-        let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
+        let nonnull = nodeFactory.isInNonnullContext(rule)
 
         let node = ObjcStructDeclaration(isInNonnullContext: nonnull)
-        if let identifier = identifier {
-            node.addChild(identifier)
+        nodeFactory.updateSourceLocation(for: node, with: rule)
+
+        if let identifier {
+            node.addChild(
+                makeIdentifier(identifier)
+            )
         }
 
+        let fieldNodes = fields.map(self.makeStructField(_:))
+
         let bodyNode = ObjcStructDeclarationBody(isInNonnullContext: nonnull)
-        bodyNode.addChildren(fields.map(\.node))
+        nodeFactory.updateSourceLocation(for: bodyNode, with: rule)
+        
+        bodyNode.addChildren(fieldNodes)
         node.addChild(bodyNode)
 
         node.updateSourceRange()
         collectComments(node, rule)
 
         // Process comments for each field
-        for field in fields {
-            collectComments(field.node, field.rule)
+        for (node, field) in zip(fieldNodes, fields) {
+            collectComments(node, field.rule)
         }
 
         if notifyDelegate {
@@ -356,32 +401,40 @@ public class DefinitionCollector {
 
     private func processEnumDecl(
         _ decl: DeclarationTranslator.ASTNodeDeclaration,
-        rule: ParserRuleContext,
-        identifier: Identifier?,
-        typeName: TypeNameNode?,
+        rule: DeclarationSyntaxElementType,
+        identifier: DeclarationTranslator.IdentifierInfo?,
+        typeName: DeclarationTranslator.TypeNameInfo?,
         enumDecl: DeclarationExtractor.EnumSpecifier,
         enumerators: [DeclarationTranslator.ASTEnumeratorDeclaration],
         notifyDelegate: Bool
     ) -> [ASTNode]? {
 
-        let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
+        let nonnull = nodeFactory.isInNonnullContext(rule)
+
+        let enumeratorNodes = enumerators.map(makeEnumerator(_:))
 
         let node = ObjcEnumDeclaration(isInNonnullContext: nonnull)
+        nodeFactory.updateSourceLocation(for: node, with: rule)
+        
         if let identifier = identifier {
-            node.addChild(identifier)
+            node.addChild(
+                makeIdentifier(identifier)
+            )
         }
         if let typeName = typeName {
-            node.addChild(typeName)
+            node.addChild(
+                makeTypeNameNode(typeName)
+            )
         }
 
-        node.addChildren(enumerators.map(\.node))
+        node.addChildren(enumeratorNodes)
 
         node.updateSourceRange()
         collectComments(node, rule)
 
         // Process comments for each enumerator
-        for enumerator in enumerators {
-            collectComments(enumerator.node, enumerator.rule)
+        for (enumeratorNode, enumerator) in zip(enumeratorNodes, enumerators) {
+            collectComments(enumeratorNode, enumerator.rule)
         }
         
         if notifyDelegate {
@@ -397,18 +450,24 @@ public class DefinitionCollector {
 
     private func processTypeAlias(
         _ decl: DeclarationTranslator.ASTNodeDeclaration,
-        rule: ParserRuleContext,
+        rule: DeclarationSyntaxElementType,
         baseDecl: DeclarationTranslator.ASTNodeDeclaration,
-        typeNode: TypeNameNode,
-        alias: Identifier,
+        typeNode: DeclarationTranslator.TypeNameInfo,
+        alias: DeclarationTranslator.IdentifierInfo,
         notifyDelegate: Bool
     ) -> [ASTNode]? {
 
-        let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
+        let nonnull = nodeFactory.isInNonnullContext(rule)
 
         let node = TypedefNode(isInNonnullContext: nonnull)
-        node.addChild(alias)
-        node.addChild(typeNode)
+        nodeFactory.updateSourceLocation(for: node, with: rule)
+
+        node.addChild(
+            makeIdentifier(alias)
+        )
+        node.addChild(
+            makeTypeNameNode(typeNode)
+        )
         node.updateSourceRange()
         collectComments(node, rule)
 
@@ -516,12 +575,139 @@ public class DefinitionCollector {
         }
     }
 
+    private func makeIdentifier(_ info: DeclarationTranslator.IdentifierInfo) -> Identifier {
+        return nodeFactory.makeIdentifier(
+            from: .init(sourceRange: info.sourceRange, identifier: info.name)
+        )
+    }
+
+    private func makeTypeNameNode(_ info: DeclarationTranslator.TypeNameInfo) -> TypeNameNode {
+        let isNonnull = nodeFactory.isInNonnullContext(info.sourceRange)
+
+        return TypeNameNode(
+            type: info.type,
+            isInNonnullContext: isNonnull,
+            location: info.sourceRange.start ?? .invalid,
+            length: info.sourceRange.length ?? .zero
+        )
+    }
+
+    private func makeExpression(_ info: DeclarationTranslator.ExpressionInfo) -> ExpressionNode {
+        switch info {
+        case .string(let range, let str):
+            return nodeFactory.makeExpression(
+                from: .init(sourceRange: range, expressionString: str)
+            )
+        case .antlr(_, let ctx):
+            return nodeFactory.makeExpression(from: ctx)
+        }
+    }
+
+    private func makeConstantExpression(_ info: DeclarationTranslator.ConstantExpressionInfo) -> ConstantExpressionNode {
+        switch info {
+        case .string(let range, let str):
+            return nodeFactory.makeConstantExpression(
+                from: .init(sourceRange: range, constantExpressionString: str)
+            )
+        case .antlr(_, let ctx):
+            return nodeFactory.makeConstantExpression(from: ctx)
+        }
+    }
+
+    private func makeInitialExpression(_ info: DeclarationTranslator.InitializerInfo) -> InitialExpression {
+        switch info {
+        case .string(let range, let str):
+            return nodeFactory.makeInitialExpression(
+                from: .init(sourceRange: range, expressionString: str)
+            )
+        case .antlr(_, let ctx):
+            return nodeFactory.makeInitialExpression(from: ctx)
+        }
+    }
+
+    private func makeStructField(_ info: DeclarationTranslator.ASTStructFieldDeclaration) -> ObjcStructField {
+        let nonnull = nodeFactory.isInNonnullContext(info.rule)
+
+        let node = ObjcStructField(isInNonnullContext: nonnull)
+        node.addChild(
+            makeTypeNameNode(info.type)
+        )
+
+        if let identifier = info.identifier {
+            node.addChild(
+                makeIdentifier(identifier)
+            )
+        }
+        if let constantExpression = info.constantExpression {
+            node.addChild(
+                makeConstantExpression(constantExpression)
+            )
+        }
+
+        nodeFactory.updateSourceLocation(for: node, with: info.rule)
+
+        return node
+    }
+
+    private func makeEnumerator(_ info: DeclarationTranslator.ASTEnumeratorDeclaration) -> ObjcEnumCase {
+        let nonnull = nodeFactory.isInNonnullContext(info.rule)
+
+        let node = ObjcEnumCase(isInNonnullContext: nonnull)
+
+        if let identifier = info.identifier {
+            node.addChild(
+                makeIdentifier(identifier)
+            )
+        }
+        if let expression = info.expression {
+            node.addChild(
+                makeExpression(expression)
+            )
+        }
+
+        nodeFactory.updateSourceLocation(for: node, with: info.rule)
+
+        return node
+    }
+
+    private func makeParameterList(_ parameterList: [DeclarationTranslator.FunctionParameterInfo]) -> [FunctionParameter] {
+        parameterList.map(makeParameter)
+    }
+
+    private func makeParameter(_ parameter: DeclarationTranslator.FunctionParameterInfo) -> FunctionParameter {
+        let nonnull = nodeFactory.isInNonnullContext(parameter.type.sourceRange)
+
+        let node = FunctionParameter(isInNonnullContext: nonnull)
+        node.addChild(
+            makeTypeNameNode(parameter.type)
+        )
+
+        if let identifier = parameter.identifier {
+            node.addChild(
+                makeIdentifier(identifier)
+            )
+        }
+
+        nodeFactory.updateSourceLocation(for: node, with: parameter.type.sourceRange)
+
+        return node
+    }
+
     private func collectComments(_ node: ASTNode, _ rule: ParserRuleContext) {
         node.precedingComments.append(
-            contentsOf: commentQuerier.popClosestCommentsBefore(node: rule)
+            contentsOf: nodeFactory.popComments(preceding: rule)
         )
         node.precedingComments.append(
-            contentsOf: commentQuerier.popCommentsInlineWith(node: rule)
+            contentsOf: nodeFactory.popComments(inLineWith: rule)
+        )
+    }
+
+    private func collectComments(_ node: ASTNode, _ rule: DeclarationSyntaxElementType) {
+        node.precedingComments.append(
+            contentsOf: nodeFactory.popComments(preceding: rule)
+        )
+        node.precedingComments.append(
+            contentsOf: nodeFactory.popComments(inLineWith: rule)
         )
     }
 }

@@ -2,13 +2,11 @@ import GrammarModels
 import Antlr4
 import ObjcParserAntlr
 
-// TODO: Add tests for this class
 public class TypeParsing {
     public typealias Parser = ObjectiveCParser
 
-    // TODO: Should probably refactor the translator so it exposes context-free type translation methods
-    /// Required for `DeclarationTranslator`
-    private let _nodeFactory: ASTNodeFactory
+    let source: Source
+
     private let _translator: DeclarationTranslator
     
     public let state: ObjcParserState
@@ -17,56 +15,58 @@ public class TypeParsing {
     public init(
         state: ObjcParserState,
         source: Source,
-        nonnullContextQuerier: NonnullContextQuerier,
         antlrSettings: AntlrSettings = .default
     ) {
         
+        self.source = source
         self.state = state
         self.antlrSettings = antlrSettings
 
-        _nodeFactory = ASTNodeFactory(
-            source: source,
-            nonnullContextQuerier: nonnullContextQuerier,
-            commentQuerier: CommentQuerier(allComments: [])
-        )
         _translator = DeclarationTranslator()
     }
 
     private func makeExtractor() -> DeclarationExtractor {
         DeclarationExtractor()
     }
+    private func makeParser() -> AntlrDeclarationParser {
+        return AntlrDeclarationParser(source: source)
+    }
+
     private func toObjcType(_ decl: DeclarationExtractor.Declaration?) -> ObjcType? {
         if let decl = decl {
-            return _translator.translateObjectiveCType(decl, context: .init(nodeFactory: _nodeFactory))
+            return _translator.translateObjectiveCType(decl)
         }
 
         return nil
     }
     private func toObjcType(_ decl: DeclarationExtractor.GenericTypeParameter?) -> ObjcType? {
         if let decl = decl {
-            return _translator.translateObjectiveCType(decl, context: .init(nodeFactory: _nodeFactory))
+            return _translator.translateObjectiveCType(decl)
         }
 
         return nil
     }
     private func toObjcType(_ decl: DeclarationExtractor.TypeName?) -> ObjcType? {
         if let decl = decl {
-            return _translator.translateObjectiveCType(decl, context: .init(nodeFactory: _nodeFactory))
+            return _translator.translateObjectiveCType(decl)
         }
 
         return nil
     }
     private func toObjcTypes(_ decls: [DeclarationExtractor.Declaration]) -> [ObjcType] {
         decls.map { decl in
-            _translator.translateObjectiveCType(decl, context: .init(nodeFactory: _nodeFactory)) ?? .void
+            _translator.translateObjectiveCType(decl) ?? .void
         }
     }
     
     // Helper for mapping Objective-C types from type declarations into structured
     // types.
     public func parseObjcTypes(in decl: Parser.FieldDeclarationContext) -> [ObjcType] {
-        let ext = makeExtractor()
+        guard let decl = makeParser().fieldDeclaration(decl) else {
+            return []
+        }
         
+        let ext = makeExtractor()
         return toObjcTypes(ext.extract(from: decl))
     }
     
@@ -77,8 +77,11 @@ public class TypeParsing {
     }
     
     public func parseObjcType(in declarationSpecifiers: Parser.DeclarationSpecifiersContext) -> ObjcType? {
-        let ext = makeExtractor()
+        guard let declarationSpecifiers = makeParser().declarationSpecifiers(declarationSpecifiers) else {
+            return nil
+        }
 
+        let ext = makeExtractor()
         return toObjcType(ext.extract(fromSpecifiers: declarationSpecifiers))
     }
     
@@ -86,6 +89,13 @@ public class TypeParsing {
         in declarationSpecifiers: Parser.DeclarationSpecifiersContext,
         declarator: Parser.DeclaratorContext
     ) -> ObjcType? {
+        
+        guard let declarationSpecifiers = makeParser().declarationSpecifiers(declarationSpecifiers) else {
+            return nil
+        }
+        guard let declarator = makeParser().declarator(declarator) else {
+            return nil
+        }
         
         let ext = makeExtractor()
         
@@ -98,9 +108,15 @@ public class TypeParsing {
         in declarationSpecifiers: Parser.DeclarationSpecifiersContext,
         abstractDeclarator: Parser.AbstractDeclaratorContext
     ) -> ObjcType? {
+
+        guard let declarationSpecifiers = makeParser().declarationSpecifiers(declarationSpecifiers) else {
+            return nil
+        }
+        guard let abstractDeclarator = makeParser().abstractDeclarator(abstractDeclarator) else {
+            return nil
+        }
         
         let ext = makeExtractor()
-        
         return toObjcType(
             ext.extract(fromSpecifiers: declarationSpecifiers, abstractDeclarator: abstractDeclarator)
         )
@@ -111,8 +127,14 @@ public class TypeParsing {
         initDeclaratorList: Parser.InitDeclaratorListContext
     ) -> [ObjcType] {
         
+        guard let declarationSpecifiers = makeParser().declarationSpecifiers(declarationSpecifiers) else {
+            return []
+        }
+        guard let initDeclaratorList = makeParser().initDeclaratorList(initDeclaratorList) else {
+            return []
+        }
+
         let ext = makeExtractor()
-        
         return toObjcTypes(
             ext.extract(fromSpecifiers: declarationSpecifiers, initDeclaratorList: initDeclaratorList)
         )
@@ -153,12 +175,20 @@ public class TypeParsing {
     }
     
     public func parseObjcType(from typeVariableDecl: Parser.TypeVariableDeclaratorContext) -> ObjcType? {
+        guard let typeVariableDecl = makeParser().typeVariable(typeVariableDecl) else {
+            return nil
+        }
+
         let ext = makeExtractor()
 
         return toObjcType(ext.extract(from: typeVariableDecl))
     }
     
     public func parseObjcType(from typeName: Parser.TypeNameContext) -> ObjcType? {
+        guard let typeName = makeParser().typeName(typeName) else {
+            return nil
+        }
+
         let ext = makeExtractor()
 
         return toObjcType(ext.extract(fromTypeName: typeName))

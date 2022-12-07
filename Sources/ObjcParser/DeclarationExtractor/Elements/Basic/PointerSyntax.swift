@@ -22,10 +22,14 @@ extension PointerSyntax: DeclarationSyntaxElementType {
         pointerEntries
     }
 }
-
 extension PointerSyntax: CustomStringConvertible {
     public var description: String {
         pointerEntries.map(\.description).joined()
+    }
+}
+extension PointerSyntax: ExpressibleByArrayLiteral {
+    public init(arrayLiteral elements: PointerSyntaxEntry...) {
+        self.init(pointerEntries: elements)
     }
 }
 
@@ -38,7 +42,6 @@ extension PointerSyntaxEntry: DeclarationSyntaxElementType {
         .init(union: children.map(\.sourceRange) + [.location(location)])
     }
 }
-
 extension PointerSyntaxEntry: CustomStringConvertible {
     public var description: String {
         switch (typeQualifiers, nullabilitySpecifier) {

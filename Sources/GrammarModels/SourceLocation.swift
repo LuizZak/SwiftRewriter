@@ -16,12 +16,14 @@ public struct SourceLocation: Comparable, Hashable, Codable {
         self.utf8Offset = utf8Offset
     }
 
-    func length(to other: Self) -> SourceLength {
+    /// Returns the source length that represents the number of lines and columns
+    /// between `self` and `other`.
+    public func length(to other: Self) -> SourceLength {
         let start = min(self, other)
         let end = max(self, other)
 
         let lineOffset = end.line - start.line
-        let columnsAtLastLine = self > other ? self.column : other.column
+        let columnsAtLastLine = end.column
         let utf8Offset = end.utf8Offset - start.utf8Offset
 
         return SourceLength(

@@ -13,3 +13,8 @@ extension InitDeclaratorListSyntax: CustomStringConvertible {
         initDeclarators.map(\.description).joined(separator: ", ")
     }
 }
+extension InitDeclaratorListSyntax: ExpressibleByArrayLiteral {
+    public init(arrayLiteral elements: InitDeclaratorSyntax...) {
+        self.init(initDeclarators: elements)
+    }
+}

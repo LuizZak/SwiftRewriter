@@ -63,12 +63,9 @@ struct TypedefDeclWrapper: DeclarationConvertible {
         guard object.specifiers.storageSpecifiers().contains(where: { $0.isTypedef }) else {
             return nil
         }
-        guard let name = object.declaration.identifierString else {
-            return nil
-        }
 
         self.decl = object
-        self.name = name
+        self.name = object.declaration.identifierString
     }
 }
 
@@ -255,7 +252,7 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
                 return true
             case .staticArray(let base, _, _) where base.identifierString == name:
                 return true
-            case .block(_, let base, _) where base?.identifierString == name:
+            case .block(_, let base, _) where base.identifierString == name:
                 return true
 
             default:
@@ -289,7 +286,7 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         ) { decl in
 
             switch decl.declaration {
-            case .function(let base, _, _) where base?.identifierString == name:
+            case .function(let base, _, _) where base.identifierString == name:
                 return true
 
             default:
@@ -323,7 +320,7 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         ) { decl in
 
             switch decl.declaration {
-            case .block(_, let base, _) where base?.identifierString == name:
+            case .block(_, let base, _) where base.identifierString == name:
                 return true
 
             default:
@@ -431,7 +428,7 @@ extension Asserter where Object: DeclarationConvertible {
     }
 
     @discardableResult
-    func assertHasInitializer(file: StaticString = #file, line: UInt = #line) -> Asserter<ObjectiveCParser.InitializerContext>? {
+    func assertHasInitializer(file: StaticString = #file, line: UInt = #line) -> Asserter<InitializerSyntax>? {
         return assertInitializer(file: file, line: line, { _ in })
     }
 
@@ -439,8 +436,8 @@ extension Asserter where Object: DeclarationConvertible {
     func assertInitializer(
         file: StaticString = #file,
         line: UInt = #line,
-        _ closure: (Asserter<ObjectiveCParser.InitializerContext>) -> Void
-    ) -> Asserter<ObjectiveCParser.InitializerContext>? {
+        _ closure: (Asserter<InitializerSyntax>) -> Void
+    ) -> Asserter<InitializerSyntax>? {
 
         guard let initializer = object.decl.initializer else {
             XCTFail("Expected declaration to feature initializer", file: file, line: line)
@@ -449,7 +446,7 @@ extension Asserter where Object: DeclarationConvertible {
             return nil
         }
 
-        let asserter = Asserter<ObjectiveCParser.InitializerContext>(object: initializer)
+        let asserter = Asserter<_>(object: initializer)
 
         closure(asserter)
 
@@ -462,9 +459,9 @@ extension Asserter where Object: DeclarationConvertible {
         case .staticArray(_, _, let length):
             if let count = count {
                 if let length = length {
-                    if length.getText() != count.description {
+                    if length.expressionString != count.description {
                         XCTAssertEqual(
-                            length.getText(),
+                            length.expressionString,
                             count.description,
                             "Expected declaration to be a static array of length \(count).",
                             file: file,
@@ -497,7 +494,7 @@ extension Asserter where Object: DeclarationConvertible {
     func assertIsNotPointer(file: StaticString = #file, line: UInt = #line) -> Self? {
         guard object.decl.pointer == nil else {
             XCTFail(
-                "Expected declaration '\(object.decl.declaration.identifierString ?? "<nil>")' to not be a pointer type",
+                "Expected declaration '\(object.decl.declaration.identifierString)' to not be a pointer type",
                 file: file,
                 line: line
             )
@@ -667,7 +664,7 @@ extension Asserter where Object: DeclarationConvertible {
 
         guard let pointer = object.decl.pointer else {
             XCTFail(
-                "Expected declaration '\(object.decl.declaration.identifierString ?? "<nil>")' to be a pointer type",
+                "Expected declaration '\(object.decl.declaration.identifierString)' to be a pointer type",
                 file: file,
                 line: line
             )
@@ -680,6 +677,23 @@ extension Asserter where Object: DeclarationConvertible {
         closure(asserter)
 
         return asserter
+    }
+
+    /// Opens an assertion context for the `SourceRange` of the underlying
+    /// `DeclarationExtractor.Declaration` being tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserterForSourceRange<Result>(
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<SourceRange>) -> Result?
+    ) -> Self? {
+
+        asserter(forKeyPath: \.decl.declarationNode.syntaxElement.sourceRange) { sourceRange in
+            sourceRange.inClosure(closure)
+        }
     }
 }
 
@@ -720,7 +734,7 @@ extension Asserter where Object == FunctionDeclWrapper {
             XCTAssertEqual(
                 object.parameters.count,
                 count,
-                "Unexpected parameter count for function definition '\(object.decl.declaration.identifierString ?? "<nil>")'",
+                "Unexpected parameter count for function definition '\(object.decl.declaration.identifierString)'",
                 file: file,
                 line: line
             )
@@ -796,7 +810,7 @@ extension Asserter where Object == FunctionDeclWrapper {
         }
 
         XCTFail(
-            "Expected function definition '\(object.decl.declaration.identifierString ?? "<nil>")' to feature a parameter named '\(name)'",
+            "Expected function definition '\(object.decl.declaration.identifierString)' to feature a parameter named '\(name)'",
             file: file,
             line: line
         )
@@ -824,6 +838,22 @@ extension Asserter where Object == FunctionDeclWrapper {
         }
     }
 
+    /// Opens an assertion context for the `SourceRange` of the underlying
+    /// `DeclarationExtractor.Declaration` being tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserterForSourceRange<Result>(
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<SourceRange>) -> Result?
+    ) -> Self? {
+
+        asserter(forKeyPath: \.decl.declarationNode.syntaxElement.sourceRange) { sourceRange in
+            sourceRange.inClosure(closure)
+        }
+    }
 }
 
 extension Asserter where Object == BlockDeclWrapper {
@@ -833,7 +863,7 @@ extension Asserter where Object == BlockDeclWrapper {
             XCTAssertEqual(
                 object.parameters.count,
                 count,
-                "Unexpected parameter count for block definition '\(object.decl.declaration.identifierString ?? "<nil>")'",
+                "Unexpected parameter count for block definition '\(object.decl.declaration.identifierString)'",
                 line: line
             )
             dumpObject()
@@ -872,7 +902,7 @@ extension Asserter where Object == BlockDeclWrapper {
         }
 
         XCTFail(
-            "Expected block declaration '\(object.decl.declaration.identifierString ?? "<nil>")' to feature a parameter named '\(name)'",
+            "Expected block declaration '\(object.decl.declaration.identifierString)' to feature a parameter named '\(name)'",
             file: file,
             line: line
         )
@@ -1011,6 +1041,23 @@ extension Asserter where Object == BlockDeclWrapper {
             }
         }
     }
+
+    /// Opens an assertion context for the `SourceRange` of the underlying
+    /// `DeclarationExtractor.Declaration` being tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserterForSourceRange<Result>(
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<SourceRange>) -> Result?
+    ) -> Self? {
+
+        asserter(forKeyPath: \.decl.declarationNode.syntaxElement.sourceRange) { sourceRange in
+            sourceRange.inClosure(closure)
+        }
+    }
 }
 
 extension Asserter where Object == DeclarationExtractor.FuncParameter {
@@ -1139,7 +1186,7 @@ extension Asserter where Object == DeclarationExtractor.StructOrUnionSpecifier {
             XCTAssertEqual(
                 object.fields?.count,
                 count,
-                "Unexpected field count for struct definition '\(object.identifier?.getText() ?? "<nil>")'",
+                "Unexpected field count for struct definition '\(object.identifier?.identifier ?? "<nil>")'",
                 line: line
             )
 
@@ -1160,7 +1207,7 @@ extension Asserter where Object == DeclarationExtractor.StructOrUnionSpecifier {
 
         guard let field = object.fields?.first(where: { $0.declaration.declaration.identifierString == name }) else {
             XCTFail(
-                "Expected to find field named '\(name)' in struct definition '\(object.identifier?.getText() ?? "<nil>")'",
+                "Expected to find field named '\(name)' in struct definition '\(object.identifier?.identifier ?? "<nil>")'",
                 line: line
             )
 
@@ -1170,6 +1217,23 @@ extension Asserter where Object == DeclarationExtractor.StructOrUnionSpecifier {
         }
 
         return .init(object: field)
+    }
+
+    /// Opens an assertion context for the `SourceRange` of the underlying
+    /// `DeclarationExtractor.Declaration` being tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserterForSourceRange<Result>(
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<SourceRange>) -> Result?
+    ) -> Self? {
+
+        asserter(forKeyPath: \.syntax.sourceRange) { sourceRange in
+            sourceRange.inClosure(closure)
+        }
     }
 }
 
@@ -1185,7 +1249,7 @@ extension Asserter where Object == DeclarationExtractor.EnumSpecifier {
             XCTAssertEqual(
                 object.enumerators?.count,
                 count,
-                "Unexpected enumerator count for enum definition '\(object.identifier?.getText() ?? "<nil>")'",
+                "Unexpected enumerator count for enum definition '\(object.identifier?.identifier ?? "<nil>")'",
                 line: line
             )
 
@@ -1204,9 +1268,9 @@ extension Asserter where Object == DeclarationExtractor.EnumSpecifier {
         line: UInt = #line
     ) -> Asserter<DeclarationExtractor.EnumeratorDeclaration>? {
 
-        guard let enumerator = object.enumerators?.first(where: { $0.identifier.getText() == name }) else {
+        guard let enumerator = object.enumerators?.first(where: { $0.identifier.identifier == name }) else {
             XCTFail(
-                "Expected to find enumerator named '\(name)' in enum definition '\(object.identifier?.getText() ?? "<nil>")'",
+                "Expected to find enumerator named '\(name)' in enum definition '\(object.identifier?.identifier ?? "<nil>")'",
                 line: line
             )
 
@@ -1256,6 +1320,23 @@ extension Asserter where Object == DeclarationExtractor.EnumSpecifier {
         }
 
         return self
+    }
+
+    /// Opens an assertion context for the `SourceRange` of the underlying
+    /// `DeclarationExtractor.Declaration` being tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserterForSourceRange<Result>(
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<SourceRange>) -> Result?
+    ) -> Self? {
+
+        asserter(forKeyPath: \.syntax.sourceRange) { sourceRange in
+            sourceRange.inClosure(closure)
+        }
     }
 }
 

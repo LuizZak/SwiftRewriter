@@ -223,6 +223,8 @@ AT:                       '@';
 // Operators
 
 ASSIGNMENT:               '=';
+LSHIFT:                   '<<';
+RSHIFT:                   '>>';
 GT:                       '>';
 LT:                       '<';
 BANG:                     '!';

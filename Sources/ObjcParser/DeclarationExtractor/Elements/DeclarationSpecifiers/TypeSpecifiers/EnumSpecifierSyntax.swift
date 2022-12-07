@@ -121,6 +121,11 @@ extension EnumeratorListSyntax: CustomStringConvertible {
         "{ " + enumerators.map(\.description).joined(separator: ", ") + " }"
     }
 }
+extension EnumeratorListSyntax: ExpressibleByArrayLiteral {
+    public init(arrayLiteral elements: EnumeratorSyntax...) {
+        self.init(enumerators: elements)
+    }
+}
 
 extension EnumeratorSyntax: DeclarationSyntaxElementType {
     public var children: [DeclarationSyntaxElementType] {

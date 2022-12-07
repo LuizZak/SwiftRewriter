@@ -14,9 +14,10 @@ class TypeParsingTests: XCTestCase {
     }
     
     func testParseObjcType_fieldDeclarationContext_multiple() {
-        let sut = makeSut(source: "int a, *b;")
+        let source = "int a, *b;"
+        let sut = makeSut(source: source)
         
-        withParserRule("int a, *b;", { try $0.fieldDeclaration() }) { rule in
+        withParserRule(source, { try $0.fieldDeclaration() }) { rule in
             XCTAssertEqual(
                 sut.parseObjcTypes(in: rule), [
                     .typeName("signed int"),
@@ -27,9 +28,10 @@ class TypeParsingTests: XCTestCase {
     }
     
     func testParseObjcType_fieldDeclarationContext_multiple_withArcBehavior() {
-        let sut = makeSut(source: "int a, *b;")
+        let source = "__weak NSObject *a;"
+        let sut = makeSut(source: source)
         
-        withParserRule("__weak NSObject *a;", { try $0.fieldDeclaration() }) { rule in
+        withParserRule(source, { try $0.fieldDeclaration() }) { rule in
             XCTAssertEqual(
                 sut.parseObjcTypes(in: rule), [
                     .pointer(.typeName("NSObject")).specifiedAsWeak
@@ -211,8 +213,7 @@ private extension TypeParsingTests {
 
         return TypeParsing(
             state: state,
-            source: StringCodeSource(source: source),
-            nonnullContextQuerier: NonnullContextQuerier(nonnullMacroRegionsTokenRange: [])
+            source: StringCodeSource(source: source)
         )
     }
     
@@ -239,8 +240,7 @@ private extension TypeParsingTests {
             let state = ObjcParserState()
             let sut = TypeParsing(
                 state: state,
-                source: StringCodeSource(source: string),
-                nonnullContextQuerier: NonnullContextQuerier(nonnullMacroRegionsTokenRange: [])
+                source: StringCodeSource(source: string)
             )
             
             withExtendedLifetime(parser) {

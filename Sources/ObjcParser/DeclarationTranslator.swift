@@ -2,10 +2,6 @@ import Antlr4
 import ObjcParserAntlr
 import GrammarModels
 
-// TODO: Refactor to remove `ASTNode` creation from this translation level and
-// TODO: leave that to `DefinitionCollector`, as this is causing problems down
-// TODO: the pipeline in the Swift AST/Expression generation layer.
-
 /// Converts a declaration from `DeclarationExtractor` to a proper `ASTNode`
 /// representing the declaration.
 public class DeclarationTranslator {
@@ -22,16 +18,13 @@ public class DeclarationTranslator {
     /// to be broken up into multiple separate declarations in order to be
     /// expressed more appropriately into AST nodes.
     public func translate(
-        _ decl: DeclarationExtractor.Declaration,
-        context: Context
+        _ decl: DeclarationExtractor.Declaration
     ) -> [ASTNodeDeclaration] {
 
-        let nodeFactory = context.nodeFactory
-
-        guard let baseType = baseType(from: decl.specifiers, pointer: decl.pointer, context: context) else {
+        guard let baseType = baseType(from: decl.specifiers, pointer: decl.pointer) else {
             return []
         }
-        guard let ctxNode = ctxNode(for: decl) else {
+        guard let ctxSyntax = ctxSyntax(for: decl) else {
             return []
         }
 
@@ -51,19 +44,18 @@ public class DeclarationTranslator {
 
             switch declKind {
             case .identifier(_, let identifier):
-                guard let identifierNode = identifierNode(from: decl.declaration, context: context) else {
+                guard let identifierNode = identifierNode(from: decl.declaration) else {
                     return nil
                 }
 
-                let typeNode = TypeNameNode(
-                    type: baseType,
-                    isInNonnullContext: nodeFactory.isInNonnullContext(identifier)
+                let typeNode = self.typeNameNode(
+                    from: baseType,
+                    syntax: identifier
                 )
-                nodeFactory.updateSourceLocation(for: typeNode, with: identifier)
 
                 result = .variable(
                     .init(
-                        rule: decl.declarationNode.rule,
+                        rule: decl.declarationNode.syntaxElement,
                         nullability: partialType.nullability,
                         arcSpecifier: partialType.arcSpecifier,
                         identifier: identifierNode,
@@ -98,22 +90,21 @@ public class DeclarationTranslator {
                 }
             
             case .block(let blockSpecifiers, _, let parameters):
-                guard let identifierNode = identifierNode(from: decl.declaration, context: context) else {
+                guard let identifierNode = identifierNode(from: decl.declaration) else {
                     return nil
                 }
 
                 let parameterNodes = parameters.compactMap { argument in
-                    self.functionArgument(from: argument, context: context)
+                    self.functionArgument(from: argument)
                 }
                 let returnTypeNode = self.typeNameNode(
                     from: baseType,
-                    ctxNode: ctxNode,
-                    context: context
+                    syntax: ctxSyntax
                 )
 
                 result = .block(
                     .init(
-                        rule: decl.declarationNode.rule,
+                        rule: decl.declarationNode.syntaxElement,
                         nullability: blockSpecifiers.nullabilitySpecifier().last ?? partialType.nullability,
                         arcSpecifier: blockSpecifiers.arcBehaviourSpecifier().last ?? partialType.arcSpecifier,
                         typeQualifiers: blockSpecifiers.typeQualifier(),
@@ -127,22 +118,21 @@ public class DeclarationTranslator {
                 )
             
             case .function(_, let parameters, let isVariadic):
-                guard let identifierNode = identifierNode(from: decl.declaration, context: context) else {
+                guard let identifierNode = identifierNode(from: decl.declaration) else {
                     return nil
                 }
                 
                 let parameterNodes = parameters.compactMap { argument in
-                    self.functionArgument(from: argument, context: context)
+                    self.functionArgument(from: argument)
                 }
                 let returnTypeNode = self.typeNameNode(
                     from: baseType,
-                    ctxNode: ctxNode,
-                    context: context
+                    syntax: ctxSyntax
                 )
 
                 result = .function(
                     .init(
-                        rule: decl.declarationNode.rule,
+                        rule: decl.declarationNode.syntaxElement,
                         identifier: identifierNode,
                         parameters: parameterNodes,
                         returnType: returnTypeNode,
@@ -151,20 +141,21 @@ public class DeclarationTranslator {
                 )
             
             case .staticArray(_, _, let length):
-                guard let identifierNode = identifierNode(from: decl.declaration, context: context) else {
+                guard let identifierNode = identifierNode(from: decl.declaration) else {
                     return nil
                 }
-                let constant = length.flatMap(ConstantContextExtractor.extract(from:))
+
+                let constant = _extractStaticLength(from: length)
 
                 var type: ObjcType? = baseType
                 type = partialType.makePointer { 
-                    translateObjectiveCType($0, context: context)
+                    translateObjectiveCType($0)
                 }
                 
                 // Promote to fixed array, if it provides an appropriate size
-                if let constant = constant, let int = Int(constant.getText()) {
-                    type = partialType.makeFixedArray(length: int) {
-                        translateObjectiveCType($0, context: context)
+                if let constant {
+                    type = partialType.makeFixedArray(length: constant) {
+                        translateObjectiveCType($0)
                     }
                 }
 
@@ -174,13 +165,12 @@ public class DeclarationTranslator {
 
                 let typeNameNode = typeNameNode(
                     from: type,
-                    ctxNode: ctxNode,
-                    context: context
+                    syntax: ctxSyntax
                 )
 
                 result = .variable(
                     .init(
-                        rule: decl.declarationNode.rule,
+                        rule: decl.declarationNode.syntaxElement,
                         nullability: partialType.nullability,
                         arcSpecifier: nil,
                         identifier: identifierNode,
@@ -195,19 +185,19 @@ public class DeclarationTranslator {
         }
 
         result = _applyDeclarator(decl.declaration)
-        result?.initializer = decl.initializer
+        result?.initializer = self.initializerInfo(from: decl.initializer)
 
         // Conversion into struct/enum/typedef
         if
             isStructConvertible(decl, partialType),
             let structOrUnionSpecifier = partialType.structOrUnionSpecifier,
-            let identifierNode = identifierNode(from: decl.declaration, context: context)
+            let identifierNode = identifierNode(from: decl.declaration)
         {
-            let fields = structFields(structOrUnionSpecifier.fields, context: context)
+            let fields = structFields(structOrUnionSpecifier.fields)
 
             result = .structOrUnionDecl(
                 .init(
-                    rule: decl.declarationNode.rule,
+                    rule: decl.declarationNode.syntaxElement,
                     identifier: identifierNode,
                     context: structOrUnionSpecifier,
                     fields: fields
@@ -216,14 +206,14 @@ public class DeclarationTranslator {
         } else if
             isEnumConvertible(decl, partialType),
             let enumSpecifier = partialType.enumSpecifier,
-            let identifierNode = identifierNode(from: decl.declaration, context: context)
+            let identifierNode = identifierNode(from: decl.declaration)
         {
-            let typeNameNode = typeNameNode(from: enumSpecifier.typeName, context: context)
-            let enumerators = enumCases(enumSpecifier.enumerators, context: context)
+            let typeNameNode = typeNameNode(from: enumSpecifier.typeName)
+            let enumerators = enumCases(enumSpecifier.enumerators)
 
             result = .enumDecl(
                 .init(
-                    rule: decl.declarationNode.rule,
+                    rule: decl.declarationNode.syntaxElement,
                     identifier: identifierNode,
                     typeName: typeNameNode,
                     context: enumSpecifier,
@@ -233,7 +223,7 @@ public class DeclarationTranslator {
         } else if
             isTypedefConvertible(decl, partialType),
             let result = result,
-            let identifierNode = identifierNode(from: decl.declaration, context: context),
+            let identifierNode = identifierNode(from: decl.declaration),
             var baseType = result.objcType
         {
             // Handle opaque/anonymous struct/enum declarations
@@ -241,12 +231,12 @@ public class DeclarationTranslator {
                 baseType = PartialType.applyPointer(base: .void, partialType.pointer)
             }
 
-            let typeNode = typeNameNode(from: baseType, ctxNode: ctxNode, context: context)
+            let typeNode = typeNameNode(from: baseType, syntax: ctxSyntax)
 
             return [
                 .typedef(
                     .init(
-                        rule: decl.declarationNode.rule,
+                        rule: decl.declarationNode.syntaxElement,
                         baseType: result,
                         typeNode: typeNode,
                         alias: identifierNode
@@ -264,11 +254,10 @@ public class DeclarationTranslator {
 
     /// Translates a list of C declarations into AST node declarations.
     public func translate(
-        _ decls: [DeclarationExtractor.Declaration],
-        context: Context
+        _ decls: [DeclarationExtractor.Declaration]
     ) -> [ASTNodeDeclaration] {
 
-        return decls.flatMap({ self.translate($0, context: context) })
+        return decls.flatMap({ self.translate($0) })
     }
     
     // TODO: Reduce duplication with translate() above.
@@ -276,12 +265,11 @@ public class DeclarationTranslator {
     /// Translates the C type of a declaration into an appropriate `ObjcType`
     /// instance.
     public func translateObjectiveCType(
-        _ decl: DeclarationExtractor.Declaration,
-        context: Context
+        _ decl: DeclarationExtractor.Declaration
     ) -> ObjcType? {
 
         let partialType = PartialType(decl.specifiers, pointer: decl.pointer)
-        guard let type = partialType.makeType({ translateObjectiveCType($0, context: context) }) else {
+        guard let type = partialType.makeType({ translateObjectiveCType($0) }) else {
             return nil
         }
 
@@ -299,7 +287,7 @@ public class DeclarationTranslator {
                 return type
 
             case .function(let base, let params, _):
-                guard let paramTypes = functionArgumentTypes(from: params, context: context) else {
+                guard let paramTypes = functionArgumentTypes(from: params) else {
                     return nil
                 }
 
@@ -328,7 +316,7 @@ public class DeclarationTranslator {
                 return _applyDeclarator(base, type: partial)
             
             case .block(let blockSpecifiers, let base, let params):
-                guard let paramTypes = functionArgumentTypes(from: params, context: context) else {
+                guard let paramTypes = functionArgumentTypes(from: params) else {
                     return nil
                 }
 
@@ -356,22 +344,20 @@ public class DeclarationTranslator {
     /// Translates the type of a generic parameter into an appropriate `ObjcType`
     /// instance.
     func translateObjectiveCType(
-        _ decl: DeclarationExtractor.GenericTypeParameter,
-        context: Context
+        _ decl: DeclarationExtractor.GenericTypeParameter
     ) -> ObjcType? {
 
-        return translateObjectiveCType(decl.type, context: context)
+        return translateObjectiveCType(decl.type)
     }
 
     /// Translates the type of a `TypeName` declaration into an appropriate
     /// `ObjcType` instance.
     public func translateObjectiveCType(
-        _ decl: DeclarationExtractor.TypeName,
-        context: Context
+        _ decl: DeclarationExtractor.TypeName
     ) -> ObjcType? {
 
         let partialType = PartialType(decl.specifiers, pointer: decl.pointer)
-        guard let type = partialType.makeType({ translateObjectiveCType($0, context: context) }) else {
+        guard let type = partialType.makeType({ translateObjectiveCType($0) }) else {
             return nil
         }
 
@@ -386,7 +372,7 @@ public class DeclarationTranslator {
 
             switch declKind {
             case .function(let base, let params, _):
-                guard let paramTypes = functionArgumentTypes(from: params, context: context) else {
+                guard let paramTypes = functionArgumentTypes(from: params) else {
                     return nil
                 }
 
@@ -399,7 +385,7 @@ public class DeclarationTranslator {
                 return _applyDeclarator(base, type: partial)
             
             case .block(let base, let specifiers, let params):
-                guard let paramTypes = functionArgumentTypes(from: params, context: context) else {
+                guard let paramTypes = functionArgumentTypes(from: params) else {
                     return nil
                 }
 
@@ -444,9 +430,6 @@ public class DeclarationTranslator {
         guard partialType.isStructOrUnionSpecifier else {
             return false
         }
-        guard decl.declaration.identifierContext != nil else {
-            return false
-        }
         guard !partialType.isOpaqueStructOrUnion else {
             return false
         }
@@ -465,9 +448,6 @@ public class DeclarationTranslator {
     ) -> Bool {
 
         guard partialType.isEnumSpecifier else {
-            return false
-        }
-        guard decl.declaration.identifierContext != nil else {
             return false
         }
         guard !partialType.isOpaqueEnum else {
@@ -494,88 +474,53 @@ public class DeclarationTranslator {
         return true
     }
 
-    private func typeNameNode(
-        from type: ObjcType,
-        ctxNode: ParserRuleContext,
-        context: Context
-    ) -> TypeNameNode {
-
-        let typeNameNode = TypeNameNode(
-            type: type,
-            isInNonnullContext: context.nodeFactory.isInNonnullContext(ctxNode)
-        )
-        context.nodeFactory.updateSourceLocation(for: typeNameNode, with: ctxNode)
-
-        return typeNameNode
-    }
-
-
     private func functionArgument(
-        from functionParam: DeclarationExtractor.FuncParameter,
-        context: Context
-    ) -> FunctionParameter? {
-
-        let nodeFactory = context.nodeFactory
+        from functionParam: DeclarationExtractor.FuncParameter
+    ) -> FunctionParameterInfo? {
 
         switch functionParam {
         case .declaration(let declaration):
-            let decls = translate(declaration, context: context)
+            let decls = translate(declaration)
 
             guard decls.count == 1, let decl = decls.first else {
                 return nil
             }
-            guard let ctxNode = ctxNode(for: declaration) else {
+
+            guard let type = decl.objcType else {
+                return nil
+            }
+            guard let identifier = decl.identifierNode else {
+                return nil
+            }
+            guard let ctxNode = ctxSyntax(for: declaration) else {
                 return nil
             }
 
-            let paramNode = FunctionParameter(
-                isInNonnullContext: nodeFactory.isInNonnullContext(ctxNode)
+            return .init(
+                type: .init(sourceRange: ctxNode.sourceRange, type: type),
+                identifier: identifier
             )
-
-            if let identifier = decl.identifierNode {
-                paramNode.addChild(identifier)
-            }
-            if let typeNameNode = decl.typeNode {
-                paramNode.addChild(typeNameNode)
-            } else if let type = decl.objcType {
-                let typeNameNode = typeNameNode(from: type, ctxNode: ctxNode, context: context)
-                paramNode.addChild(typeNameNode)
-            }
-
-            return paramNode
         
         case .typeName(let typeName):
-            let paramNode = FunctionParameter(
-                isInNonnullContext: nodeFactory.isInNonnullContext(
-                    typeName.declarationNode.rule
-                )
-            )
-            
-            nodeFactory.updateSourceLocation(
-                for: paramNode,
-                with: typeName.declarationNode.rule
-            )
-
-            if let type = translateObjectiveCType(typeName, context: context) {
-                let typeNameNode = TypeNameNode(
-                    type: type,
-                    isInNonnullContext: paramNode.isInNonnullContext
-                )
-
-                paramNode.addChild(typeNameNode)
+            guard let type = translateObjectiveCType(typeName) else {
+                return nil
             }
+            
+            let typeNameNode = typeNameNode(
+                from: type,
+                syntax: typeName.declarationNode.syntaxElement
+            )
 
-            return paramNode
+            return .init(type: typeNameNode)
         }
     }
 
     private func functionArgumentTypes(
-        from declarations: [DeclarationExtractor.FuncParameter],
-        context: Context
+        from declarations: [DeclarationExtractor.FuncParameter]
     ) -> [ObjcType]? {
 
         let paramTypes = declarations.map {
-            functionArgument(from: $0, context: context)?.type?.type
+            functionArgument(from: $0)?.type.type
         }
 
         if paramTypes.contains(nil) {
@@ -587,131 +532,158 @@ public class DeclarationTranslator {
 
     /// Translates a list of C struct/union fields into AST node declarations.
     private func structFields(
-        _ fields: [DeclarationExtractor.StructFieldDeclaration]?,
-        context: Context
+        _ fields: [DeclarationExtractor.StructFieldDeclaration]?
     ) -> [ASTStructFieldDeclaration] {
 
         guard let fields else {
             return []
         }
 
-        return fields.compactMap({ self.structField($0, context: context) })
+        return fields.compactMap({ self.structField($0) })
     }
 
     /// Translates a list of C enum enumerators into AST node declarations.
     private func enumCases(
-        _ enumerators: [DeclarationExtractor.EnumeratorDeclaration]?,
-        context: Context
+        _ enumerators: [DeclarationExtractor.EnumeratorDeclaration]?
     ) -> [ASTEnumeratorDeclaration] {
 
         guard let enumerators else {
             return []
         }
 
-        return enumerators.compactMap({ self.enumCase($0, context: context) })
+        return enumerators.compactMap({ self.enumCase($0) })
     }
 
     /// Translates a C struct/union field into an `ASTStructFieldDeclaration`.
     private func structField(
-        _ field: DeclarationExtractor.StructFieldDeclaration,
-        context: Context
+        _ field: DeclarationExtractor.StructFieldDeclaration
     ) -> ASTStructFieldDeclaration? {
 
-        guard let type = translateObjectiveCType(field.declaration, context: context) else {
+        guard let type = translateObjectiveCType(field.declaration) else {
             return nil
         }
-        guard let ident = identifierNode(from: field.declaration.declaration, context: context) else {
+        guard let ident = identifierNode(from: field.declaration.declaration) else {
             return nil
         }
-        guard let ctxNode = field.declarator ?? field.constantExpression else {
+        guard let ctxSyntax: DeclarationSyntaxElementType = field.declarator ?? field.constantExpression else {
             return nil
         }
 
-        let node = ObjcStructField(isInNonnullContext: ident.isInNonnullContext)
-
-        node.addChild(ident)
-        node.addChild(
-            typeNameNode(
-                from: type,
-                ctxNode: field.declaration.declarationNode.rule,
-                context: context
-            )
+        return ASTStructFieldDeclaration(
+            identifier: ident,
+            type: typeNameNode(from: type, syntax: ctxSyntax),
+            constantExpression: constantExpressionInfo(from: field.constantExpression),
+            rule: ctxSyntax
         )
-
-        node.updateSourceRange()
-        
-        return ASTStructFieldDeclaration(node: node, rule: ctxNode)
     }
 
     /// Translates a C struct/union enumerator into an `ASTEnumeratorDeclaration`.
     private func enumCase(
-        _ enumerator: DeclarationExtractor.EnumeratorDeclaration,
-        context: Context
+        _ enumerator: DeclarationExtractor.EnumeratorDeclaration
     ) -> ASTEnumeratorDeclaration? {
 
-        guard let identCtx = enumerator.identifier.identifier() else {
-            return nil
-        }
+        let identCtx = enumerator.identifier
 
-        let ident = context.nodeFactory.makeIdentifier(from: identCtx)
-
-        let node = ObjcEnumCase(isInNonnullContext: ident.isInNonnullContext)
-        node.addChild(ident)
-
-        if let expression = enumerator.expression {
-            node.addChild(
-                context.nodeFactory.makeExpression(from: expression)
-            )
-        }
-
-        node.updateSourceRange()
-
-        return ASTEnumeratorDeclaration(node: node, rule: identCtx)
+        return ASTEnumeratorDeclaration(
+            identifier: identifierNode(from: enumerator.identifier),
+            expression: expressionInfo(from: enumerator.expression),
+            rule: identCtx
+        )
     }
 
     private func typeNameNode(
-        from typeName: DeclarationExtractor.TypeName?,
-        context: Context
-    ) -> TypeNameNode? {
+        from type: ObjcType,
+        syntax: DeclarationSyntaxElementType
+    ) -> TypeNameInfo {
 
-        guard let typeName = typeName, let type = translateObjectiveCType(typeName, context: context) else {
+        return TypeNameInfo(
+            sourceRange: syntax.sourceRange,
+            type: type
+        )
+    }
+
+    private func typeNameNode(
+        from typeName: DeclarationExtractor.TypeName?
+    ) -> TypeNameInfo? {
+
+        guard let typeName = typeName, let type = translateObjectiveCType(typeName) else {
             return nil
         }
-        let ruleCtx = typeName.declarationNode.rule
 
-        let nonnull = context.nodeFactory.isInNonnullContext(ruleCtx)
-        let typeNode = TypeNameNode(type: type, isInNonnullContext: nonnull)
-        context.nodeFactory.updateSourceLocation(for: typeNode, with: ruleCtx)
+        let syntaxElement = typeName.declarationNode.syntaxElement
 
-        return typeNode
+        return TypeNameInfo(sourceRange: syntaxElement.sourceRange, type: type)
     }
 
     private func identifierNode(
-        from declKind: DeclarationExtractor.DeclarationKind?,
-        context: Context
-    ) -> Identifier? {
+        from declKind: DeclarationExtractor.DeclarationKind?
+    ) -> IdentifierInfo? {
 
         guard let declKind = declKind else {
             return nil
         }
-        guard let identifierCtx = declKind.identifierContext else {
+
+        let identifierCtx = declKind.identifierSyntax
+
+        return .init(sourceRange: identifierCtx.sourceRange, name: identifierCtx.identifier)
+    }
+
+    private func expressionInfo(
+        from syntax: ExpressionSyntax?
+    ) -> ExpressionInfo? {
+
+        guard let syntax else {
             return nil
         }
 
-        return context.nodeFactory.makeIdentifier(from: identifierCtx)
+        return ExpressionInfo.string(syntax.sourceRange, syntax.expressionString)
     }
 
-    /// Returns the inner-most context node for a given declaration.
-    /// Is the direct declarator node if present, otherwise it is the identifier
-    /// context for non-initialized declarations, or `nil`, if neither is present.
-    private func ctxNode(for decl: DeclarationExtractor.Declaration) -> ParserRuleContext? {
-        return decl.declarationNode.rule
+    private func initializerInfo(
+        from syntax: InitializerSyntax?
+    ) -> InitializerInfo? {
+
+        guard let syntax else {
+            return nil
+        }
+
+        switch syntax {
+        case .expression(let exp):
+            return .string(exp.sourceRange, exp.expressionString)
+        }
+    }
+
+    private func constantExpressionInfo(
+        from syntax: ConstantExpressionSyntax?
+    ) -> ConstantExpressionInfo? {
+        
+        guard let syntax else {
+            return nil
+        }
+
+        return ConstantExpressionInfo.string(syntax.sourceRange, syntax.constantExpressionString)
+    }
+
+    private func identifierNode(from syntax: IdentifierSyntax?) -> IdentifierInfo? {
+
+        guard let syntax = syntax else {
+            return nil
+        }
+
+        return .init(sourceRange: syntax.sourceRange, name: syntax.identifier)
+    }
+
+    /// Returns the inner-most context syntax element for a given declaration.
+    /// Is the direct declarator syntax element if present, otherwise it is the
+    /// identifier context for non-initialized declarations, or `nil`, if neither
+    /// is present.
+    private func ctxSyntax(for decl: DeclarationExtractor.Declaration) -> DeclarationSyntaxElementType? {
+        return decl.declarationNode.syntaxElement
     }
 
     private func baseType(
         from declSpecifiers: [DeclarationExtractor.DeclSpecifier],
-        pointer: DeclarationExtractor.Pointer?,
-        context: Context
+        pointer: DeclarationExtractor.Pointer?
     ) -> ObjcType? {
         guard !declSpecifiers.isEmpty else {
             return nil
@@ -719,8 +691,16 @@ public class DeclarationTranslator {
 
         let partialType = PartialType(declSpecifiers, pointer: pointer)
         return partialType.makeType {
-            translateObjectiveCType($0, context: context)
+            translateObjectiveCType($0)
         }
+    }
+
+    private func _extractStaticLength(from syntax: ExpressionSyntax?) -> Int? {
+        guard let string = syntax?.expressionString else {
+            return nil
+        }
+
+        return Int(string)
     }
 
     private func _extractStaticLength(from rule: ObjectiveCParser.ExpressionContext?) -> Int? {
@@ -729,16 +709,6 @@ public class DeclarationTranslator {
         }
 
         return Int(constant.getText())
-    }
-
-    /// Context for creation of declarations
-    public struct Context {
-        /// Factory for creating AST nodes out of ANTLR parser rules.
-        public var nodeFactory: ASTNodeFactory 
-
-        public init(nodeFactory: ASTNodeFactory) {
-            self.nodeFactory = nodeFactory
-        }
     }
 
     /// A declaration that has been converted into a mode that is suitable to
@@ -768,7 +738,7 @@ public class DeclarationTranslator {
         )
 
         /// Gets the identifier associated with this node, if any.
-        public var identifierNode: Identifier? {
+        public var identifierNode: IdentifierInfo? {
             switch self {
             case .variable(let decl):
                 return decl.identifier
@@ -788,7 +758,7 @@ public class DeclarationTranslator {
         }
 
         /// Gets the type node associated with this node, if any.
-        public var typeNode: TypeNameNode? {
+        public var typeNode: TypeNameInfo? {
             switch self {
             case .variable(let decl):
                 return decl.type
@@ -804,7 +774,7 @@ public class DeclarationTranslator {
         /// Gets or sets the initializer for this declaration.
         /// In case this is not a declaration that supports initializers, nothing
         /// is done.
-        public var initializer: ObjectiveCParser.InitializerContext? {
+        public var initializer: InitializerInfo? {
             get {
                 switch self {
                 case .variable(let decl):
@@ -857,30 +827,18 @@ public class DeclarationTranslator {
                 return decl.typeNode.type
             
             case .function(let decl):
-                if decl.parameters.contains(where: { $0.type == nil }) {
-                    return nil
-                }
-
                 return .functionPointer(name: decl.identifier.name, returnType: decl.returnType.type, parameters: decl.parameters.compactMap {
-                    $0.type?.type
+                    $0.type.type
                 })
 
             case .functionPointer(let decl):
-                if decl.parameters.contains(where: { $0.type == nil }) {
-                    return nil
-                }
-
                 return .functionPointer(name: decl.identifier.name, returnType: decl.returnType.type, parameters: decl.parameters.compactMap {
-                    $0.type?.type
+                    $0.type.type
                 })
 
             case .block(let decl):
-                if decl.parameters.contains(where: { $0.type == nil }) {
-                    return nil
-                }
-
                 var partial: ObjcType = .blockType(name: decl.identifier.name, returnType: decl.returnType.type, parameters: decl.parameters.compactMap {
-                    $0.type?.type
+                    $0.type.type
                 }, nullabilitySpecifier: decl.nullability)
 
                 if let arcSpecifier = decl.arcSpecifier {
@@ -901,7 +859,7 @@ public class DeclarationTranslator {
         }
 
         /// Gets the parser rule associated with this definition.
-        public var contextRule: ParserRuleContext {
+        public var contextRule: DeclarationSyntaxElementType {
             switch self {
             case .variable(let decl):
                 return decl.rule
@@ -949,15 +907,15 @@ public class DeclarationTranslator {
 
     /// Specifications for a variable declaration.
     public struct ASTVariableDeclaration {
-        public var rule: ParserRuleContext
+        public var rule: DeclarationSyntaxElementType
         public var nullability: ObjcNullabilitySpecifier?
         public var arcSpecifier: ObjcArcBehaviorSpecifier?
-        public var identifier: Identifier
-        public var type: TypeNameNode
-        public var initialValue: ObjectiveCParser.InitializerContext?
+        public var identifier: IdentifierInfo
+        public var type: TypeNameInfo
+        public var initialValue: InitializerInfo?
         public var isStatic: Bool
 
-        public func withInitializer(_ value: ObjectiveCParser.InitializerContext?) -> Self {
+        public func withInitializer(_ value: InitializerInfo?) -> Self {
             var copy = self
             copy.initialValue = value
             return copy
@@ -967,18 +925,18 @@ public class DeclarationTranslator {
     // TODO: Consider collapsing into `ASTVariableDeclaration`
     /// Specifications for a block declaration.
     public struct ASTBlockDeclaration {
-        public var rule: ParserRuleContext
+        public var rule: DeclarationSyntaxElementType
         public var nullability: ObjcNullabilitySpecifier?
         public var arcSpecifier: ObjcArcBehaviorSpecifier?
         public var typeQualifiers: [ObjcTypeQualifier]
         public var typePrefix: DeclarationExtractor.TypePrefix?
-        public var identifier: Identifier
-        public var parameters: [FunctionParameter]
-        public var returnType: TypeNameNode
-        public var initialValue: ObjectiveCParser.InitializerContext?
+        public var identifier: IdentifierInfo
+        public var parameters: [FunctionParameterInfo]
+        public var returnType: TypeNameInfo
+        public var initialValue: InitializerInfo?
         public var isStatic: Bool
 
-        public func withInitializer(_ value: ObjectiveCParser.InitializerContext?) -> Self {
+        public func withInitializer(_ value: InitializerInfo?) -> Self {
             var copy = self
             copy.initialValue = value
             return copy
@@ -988,15 +946,15 @@ public class DeclarationTranslator {
     // TODO: Collapse into `ASTVariableDeclaration`
     /// Specifications for a function pointer declaration.
     public struct ASTFunctionPointerDeclaration {
-        public var rule: ParserRuleContext
+        public var rule: DeclarationSyntaxElementType
         public var nullability: ObjcNullabilitySpecifier?
-        public var identifier: Identifier
-        public var parameters: [FunctionParameter]
-        public var returnType: TypeNameNode
-        public var initialValue: ObjectiveCParser.InitializerContext?
+        public var identifier: IdentifierInfo
+        public var parameters: [FunctionParameterInfo]
+        public var returnType: TypeNameInfo
+        public var initialValue: InitializerInfo?
         public var isStatic: Bool
 
-        public func withInitializer(_ value: ObjectiveCParser.InitializerContext?) -> Self {
+        public func withInitializer(_ value: InitializerInfo?) -> Self {
             var copy = self
             copy.initialValue = value
             return copy
@@ -1006,17 +964,17 @@ public class DeclarationTranslator {
     /// Specifications for a function definition.
     /// Does not include a function body.
     public struct ASTFunctionDefinition {
-        public var rule: ParserRuleContext
-        public var identifier: Identifier
-        public var parameters: [FunctionParameter]
-        public var returnType: TypeNameNode
+        public var rule: DeclarationSyntaxElementType
+        public var identifier: IdentifierInfo
+        public var parameters: [FunctionParameterInfo]
+        public var returnType: TypeNameInfo
         public var isVariadic: Bool
     }
 
     /// Specifications for a struct or union definition.
     public struct ASTStructOrUnionDeclaration {
-        public var rule: ParserRuleContext
-        public var identifier: Identifier?
+        public var rule: DeclarationSyntaxElementType
+        public var identifier: IdentifierInfo?
         public var context: DeclarationExtractor.StructOrUnionSpecifier
         public var fields: [ASTStructFieldDeclaration]
     }
@@ -1024,20 +982,24 @@ public class DeclarationTranslator {
     /// Contains information for a generated struct or union field.
     public struct ASTStructFieldDeclaration {
         /// The node for the field itself.
-        public var node: ObjcStructField
+        //public var node: StructDeclarationSyntax
+
+        public var identifier: IdentifierInfo?
+        public var type: TypeNameInfo
+        public var constantExpression: ConstantExpressionInfo?
 
         /// The context rule for this field declaration.
         /// It is the innermost parser rule where queries against the source code
         /// range can be used accurately to collect surrounding comments and
         /// nonnull-contexts unambiguously.
-        public var rule: ParserRuleContext
+        public var rule: DeclarationSyntaxElementType
     }
 
     /// Contains information for a generated enum field.
     public struct ASTEnumDeclaration {
-        public var rule: ParserRuleContext
-        public var identifier: Identifier?
-        public var typeName: TypeNameNode?
+        public var rule: DeclarationSyntaxElementType
+        public var identifier: IdentifierInfo?
+        public var typeName: TypeNameInfo?
         public var context: DeclarationExtractor.EnumSpecifier
         public var enumerators: [ASTEnumeratorDeclaration]
     }
@@ -1045,22 +1007,62 @@ public class DeclarationTranslator {
     /// Contains information for a generated enumerator, or enum value.
     public struct ASTEnumeratorDeclaration {
         /// The node for the enumerator itself.
-        public var node: ObjcEnumCase
+        //public var node: ObjcEnumCase
+        
+        public var identifier: IdentifierInfo?
+        public var expression: ExpressionInfo?
 
         /// The context rule for this enumerator declaration.
         /// It is the innermost parser rule where queries against the source code
         /// range can be used accurately to collect surrounding comments and
         /// nonnull-contexts unambiguously.
-        public var rule: ParserRuleContext
+        public var rule: DeclarationSyntaxElementType
     }
 
     /// Specification for a typedef declaration node.
     public struct ASTTypedefDeclaration {
-        public var rule: ParserRuleContext
+        public var rule: DeclarationSyntaxElementType
         public var baseType: ASTNodeDeclaration
-        public var typeNode: TypeNameNode
-        public var alias: Identifier
+        public var typeNode: TypeNameInfo
+        public var alias: IdentifierInfo
     }
+
+    /// Final identifier produced by translating from a raw declaration.
+    public struct IdentifierInfo {
+        public var sourceRange: SourceRange
+        public var name: String
+    }
+
+    /// Final type information produced by translating from a raw declaration.
+    public struct TypeNameInfo {
+        public var sourceRange: SourceRange
+        public var type: ObjcType
+    }
+
+    /// Final function parameter information produced by translating from a raw
+    /// declaration.
+    public struct FunctionParameterInfo {
+        public var type: TypeNameInfo
+        public var identifier: IdentifierInfo?
+    }
+
+    /// Allows for switching between storing syntax as a raw ANTLR parser rule or
+    /// as a string that when parsed into `T` has an equivalent AST representation.
+    public enum SyntaxStorageMode<T: ParserRuleContext> {
+        case antlr(SourceRange, T)
+        case string(SourceRange, String)
+
+        public var sourceRange: SourceRange {
+            switch self {
+            case .antlr(let sourceRange, _), .string(let sourceRange, _):
+                return sourceRange
+            }
+        }
+    }
+
+    public typealias ExpressionInfo = SyntaxStorageMode<ObjectiveCParser.ExpressionContext>
+    public typealias InitializerInfo = SyntaxStorageMode<ObjectiveCParser.ExpressionContext>
+    public typealias ConstantExpressionInfo = SyntaxStorageMode<ObjectiveCParser.ConstantExpressionContext>
 
     private struct PartialType {
         var declSpecifiers: [DeclarationExtractor.DeclSpecifier]
@@ -1424,16 +1426,19 @@ func objcTypeFromSpecifiers(
 
     case .structOrUnionSpecifier(let ctx):
         if let ident = ctx.identifier {
-            return .typeName(ident.getText())
+            return .typeName(ident.identifier)
         }
 
         return .anonymousStruct
     
     case .enumSpecifier(let ctx):
         if let ident = ctx.identifier {
-            return .typeName(ident.getText())
+            return .typeName(ident.identifier)
         }
 
         return .anonymousEnum
+    
+    case .typeof:
+        return nil
     }
 }

@@ -40,6 +40,48 @@ class ObjcParserTests: XCTestCase {
         """
         _=parserTest(source)
     }
+
+    func testParse_detectsNonnullRegions_declarations() {
+        let node = parserTest("""
+            int a;
+            NS_ASSUME_NONNULL_BEGIN
+            int b;
+            NS_ASSUME_NONNULL_END
+            int c;
+            """)
+        
+        Asserter(object: node).assertChildCount(3)?
+            .asserter(forChildAt: 0) { node in
+                node.assert(isInNonnullContext: false)
+            }?
+            .asserter(forChildAt: 1) { node in
+                node.assert(isInNonnullContext: true)
+            }?
+            .asserter(forChildAt: 2) { node in
+                node.assert(isInNonnullContext: false)
+            }
+    }
+
+    func testParse_detectsNonnullRegions_functionDefinitions() {
+        let node = parserTest("""
+            void a() { }
+            NS_ASSUME_NONNULL_BEGIN
+            void b() { }
+            NS_ASSUME_NONNULL_END
+            void c() { }
+            """)
+        
+        Asserter(object: node).assertChildCount(3)?
+            .asserter(forChildAt: 0) { node in
+                node.assert(isInNonnullContext: false)
+            }?
+            .asserter(forChildAt: 1) { node in
+                node.assert(isInNonnullContext: true)
+            }?
+            .asserter(forChildAt: 2) { node in
+                node.assert(isInNonnullContext: false)
+            }
+    }
     
     func testParseGlobalVariables() {
         let node = parserTest("""

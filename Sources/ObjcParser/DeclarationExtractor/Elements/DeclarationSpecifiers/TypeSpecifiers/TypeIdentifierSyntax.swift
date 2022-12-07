@@ -13,3 +13,8 @@ extension TypeIdentifierSyntax: CustomStringConvertible {
         "\(identifier)"
     }
 }
+extension TypeIdentifierSyntax: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self.init(identifier: .init(identifier: value))
+    }
+}

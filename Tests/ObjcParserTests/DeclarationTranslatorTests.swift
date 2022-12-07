@@ -7,6 +7,15 @@ import ObjcParserAntlr
 @testable import ObjcParser
 
 class DeclarationTranslatorTests: XCTestCase {
+    
+    func testTranslate_singleDecl_mixedTypePrefixAndSpecifiers() {
+        let tester = prepareTest(declaration: "nullable __kindof NSString *a;")
+
+        tester.assert { asserter in
+            asserter.assertVariable(name: "a")
+        }
+    }
+
     func testTranslate_singleDecl_variable_noInitializer() {
         let tester = prepareTest(declaration: "short int a;")
 
@@ -117,7 +126,7 @@ class DeclarationTranslatorTests: XCTestCase {
         }
     }
 
-    func testTranslate_declaration_singleDecl_blockDecl_nullabilitySpecifier() {
+    func testTranslate_singleDecl_blockDecl_nullabilitySpecifier() {
         let tester = prepareTest(declaration: "void (^_Nonnull a)();")
 
         tester.assert { asserter in
@@ -128,7 +137,7 @@ class DeclarationTranslatorTests: XCTestCase {
     }
 
     /*
-    func testTranslate_declaration_singleDecl_blockDecl_typePrefix() {
+    func testTranslate_singleDecl_blockDecl_typePrefix() {
         let tester = prepareTest(declaration: "void (^__block a)();")
 
         tester.assert { asserter in
@@ -139,7 +148,7 @@ class DeclarationTranslatorTests: XCTestCase {
     }
     */
 
-    func testTranslate_declaration_singleDecl_blockDecl_typeQualifier() {
+    func testTranslate_singleDecl_blockDecl_typeQualifier() {
         let tester = prepareTest(declaration: "void (^const a)();")
 
         tester.assert { asserter in
@@ -361,11 +370,16 @@ class DeclarationTranslatorTests: XCTestCase {
                             .pointer("void")
                         ]
                     )
-                )
+                )?
+                .asserter(forKeyPath: \.rule.sourceRange) { sourceRange in
+                    sourceRange.assert(
+                        start: .init(line: 1, column: 14)
+                    )
+                }
         }
     }
 
-    func testTranslate_declaration_singleDecl_typedef_anonymousStruct_pointerOnly() {
+    func testTranslate_singleDecl_typedef_anonymousStruct_pointerOnly() {
         let tester = prepareTest(declaration: "typedef struct { int field; } *A;")
 
         tester.assert { asserter in
@@ -375,7 +389,7 @@ class DeclarationTranslatorTests: XCTestCase {
         }
     }
 
-    func testTranslate_declaration_singleDecl_typedef_opaqueStruct_pointerOnly() {
+    func testTranslate_singleDecl_typedef_opaqueStruct_pointerOnly() {
         let tester = prepareTest(declaration: "typedef struct _A *A;")
 
         tester.assert { asserter in
@@ -385,7 +399,7 @@ class DeclarationTranslatorTests: XCTestCase {
         }
     }
 
-    func testTranslate_declaration_singleDecl_typedef_opaqueStruct_pointerToPointer() {
+    func testTranslate_singleDecl_typedef_opaqueStruct_pointerToPointer() {
         let tester = prepareTest(declaration: "typedef struct _A **A;")
 
         tester.assert { asserter in
@@ -395,7 +409,7 @@ class DeclarationTranslatorTests: XCTestCase {
         }
     }
 
-    func testTranslate_declaration_multiDecl_typedef_opaqueStruct_pointerAndName() {
+    func testTranslate_multiDecl_typedef_opaqueStruct_pointerAndName() {
         let tester = prepareTest(declaration: "typedef struct _A A, *APtr;")
 
         tester.assert { asserter in
@@ -634,21 +648,16 @@ class DeclarationTranslatorTests: XCTestCase {
 
 private extension DeclarationTranslatorTests {
     func prepareTest(declaration: String) -> Tester {
-        Tester(source: declaration)
+        Tester(sourceString: declaration)
     }
     
     class Tester: SingleRuleParserTestFixture<ObjectiveCParser.DeclarationContext> {
-        var source: String
-        var nodeFactory: ASTNodeFactory
+        var sourceString: String
+        var source: Source
 
-        init(source: String) {
-            self.source = source
-
-            nodeFactory = ASTNodeFactory(
-                source: StringCodeSource(source: source),
-                nonnullContextQuerier: NonnullContextQuerier(nonnullMacroRegionsTokenRange: []),
-                commentQuerier: CommentQuerier(allComments: [])
-            )
+        init(sourceString: String) {
+            self.sourceString = sourceString
+            self.source = StringCodeSource(source: sourceString)
 
             super.init(ruleDeriver: ObjectiveCParser.declaration)
         }
@@ -660,14 +669,27 @@ private extension DeclarationTranslatorTests {
         ) rethrows {
 
             let extractor = DeclarationExtractor()
+            let declParser = AntlrDeclarationParser(source: source)
             let sut = DeclarationTranslator()
-            let context = DeclarationTranslator.Context(nodeFactory: nodeFactory)
 
             do {
-                let parserRule = try parse(source, file: file, line: line)
-                let declarations = extractor.extract(from: parserRule)
+                let parserRule = try parse(sourceString, file: file, line: line)
 
-                let result = declarations.flatMap { decl in sut.translate(decl, context: context) }
+                guard let decl = declParser.declaration(parserRule) else {
+                    XCTFail(
+                        "Failed to parse from source string: \(AntlrDeclarationParser.self) returned nil for AntlrDeclarationParser.declaration(_:)",
+                        file: file,
+                        line: line
+                    )
+
+                    return
+                }
+
+                let declarations = extractor.extract(from: decl)
+
+                let result = declarations.flatMap { decl in
+                    sut.translate(decl)
+                }
 
                 try closure(.init(object: result))
             } catch {

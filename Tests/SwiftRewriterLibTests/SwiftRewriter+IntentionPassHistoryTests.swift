@@ -113,16 +113,16 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
             typealias node234 = node234_Tag
             // [Creation] A.h line 5 column 28
             typealias tree234 = tree234_Tag
-            // [Creation] A.h line 6 column 1
+            // [Creation] A.h line 6 column 14
             typealias cmpfn234 = @convention(c) (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> CInt
-            // [Creation] A.h line 7 column 1
+            // [Creation] A.h line 7 column 16
             typealias copyfn234 = @convention(c) (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer?
 
             // [Creation] A.c line 24 column 1
             struct tree234_Tag {
-                // [Creation] A.c line 25 column 5
+                // [Creation] A.c line 25 column 13
                 var root: UnsafeMutablePointer<node234>!
-                // [Creation] A.c line 26 column 5
+                // [Creation] A.c line 26 column 14
                 var cmp: cmpfn234!
 
                 // [Creation] Synthesizing parameterless constructor for struct
@@ -138,13 +138,13 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
             }
             // [Creation] A.c line 28 column 1
             struct node234_Tag {
-                // [Creation] A.c line 29 column 5
+                // [Creation] A.c line 29 column 13
                 var parent: UnsafeMutablePointer<node234>!
-                // [Creation] A.c line 30 column 5
+                // [Creation] A.c line 30 column 13
                 var kids: (UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!)
-                // [Creation] A.c line 31 column 5
+                // [Creation] A.c line 31 column 9
                 var counts: (CInt, CInt, CInt, CInt)
-                // [Creation] A.c line 32 column 5
+                // [Creation] A.c line 32 column 10
                 var elems: (UnsafeMutableRawPointer!, UnsafeMutableRawPointer!, UnsafeMutableRawPointer!)
 
                 // [Creation] Synthesizing parameterless constructor for struct

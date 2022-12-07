@@ -151,7 +151,7 @@ class BaseGlobalsProviderTestCase: XCTestCase {
                     
                     but found signature
                     
-                    \(typeString.makeDifferenceMarkString(against: signature))
+                    \(signature.makeDifferenceMarkString(against: typeString))
                     """,
                     file: file, line: line)
         }

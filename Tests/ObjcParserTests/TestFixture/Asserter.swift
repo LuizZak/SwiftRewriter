@@ -2,11 +2,12 @@ import XCTest
 
 /// Scaffolding object used by test fixtures to create DSL testing utilities
 /// for common testing procedures.
-struct Asserter<Object> {
+public struct Asserter<Object> {
     /// The object that is being tested upon.
-    var object: Object
+    public var object: Object
 
-    func dumpObject(maxDepth: Int = 3) {
+    /// Dumps `object` to the stdout.
+    public func dumpObject(maxDepth: Int = 3) {
         var buffer = ""
         dump(object, to: &buffer, maxDepth: maxDepth)
 
@@ -19,7 +20,7 @@ struct Asserter<Object> {
     ///
     /// Returns `nil` if `closure` returns `nil`, otherwise returns `self` for
     /// chaining further tests.
-    func inClosure<Return>(_ closure: (Self) -> Return?) -> Self? {
+    public func inClosure<Return>(_ closure: (Self) -> Return?) -> Self? {
         if closure(self) == nil {
             return nil
         }
@@ -31,7 +32,7 @@ struct Asserter<Object> {
     ///
     /// Returns `self` for further chaining.
     @discardableResult
-    func inClosureUnconditional(_ closure: (Self) -> Void) -> Self {
+    public func inClosureUnconditional(_ closure: (Self) -> Void) -> Self {
         closure(self)
 
         return self
@@ -40,7 +41,7 @@ struct Asserter<Object> {
 
 // MARK: - Standard library assertion extensions
 
-extension Asserter {
+public extension Asserter {
     /// Asserts that the underlying object being tested can be casted to `T`.
     ///
     /// Returns `nil` if the test failed, otherwise returns an `Asserter<T>` for
@@ -158,7 +159,7 @@ extension Asserter {
     }
 }
 
-extension Asserter where Object: Equatable {
+public extension Asserter where Object: Equatable {
     /// Asserts that the underlying `Equatable` object being tested tests true
     /// under equality against a given instance of the same type.
     ///
@@ -206,7 +207,7 @@ extension Asserter where Object: Equatable {
     }
 }
 
-extension Asserter where Object == Bool {
+public extension Asserter where Object == Bool {
     /// Asserts that the underlying `Bool` being tested is true.
     ///
     /// Returns `nil` if the test failed, otherwise returns `self` for chaining
@@ -258,7 +259,7 @@ extension Asserter where Object == Bool {
     }
 }
 
-extension Asserter where Object: Sequence {
+public extension Asserter where Object: Sequence {
     /// Creates a new leaf testing asserter for testing the iterator of the
     /// underlying `Sequence` being tested.
     ///
@@ -333,7 +334,7 @@ extension Asserter where Object: Sequence {
     }
 }
 
-extension Asserter where Object: IteratorProtocol {
+public extension Asserter where Object: IteratorProtocol {
     /// Opens an asserter context for the next item emitted by the underlying
     /// `IteratorProtocol` being tested.
     ///
@@ -389,7 +390,7 @@ extension Asserter where Object: IteratorProtocol {
     }
 }
 
-extension Asserter where Object: Collection, Object.Index == Int {
+public extension Asserter where Object: Collection, Object.Index == Int {
     /// Asserts that the underlying `Collection` being tested is empty.
     ///
     /// Returns `nil` if the test failed, otherwise returns `self` for chaining

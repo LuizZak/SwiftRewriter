@@ -22,6 +22,14 @@ class AntlrDeclarationParser {
 
         return .init(declarationSpecifiers: declarationSpecifiers)
     }
+    
+    func typeVariable(_ ctx: ObjectiveCParser.TypeVariableDeclaratorContext?) -> TypeVariableDeclaratorSyntax? {
+        guard let ctx else { return nil }
+        guard let declarationSpecifiers = declarationSpecifiers(ctx.declarationSpecifiers()) else { return nil }
+        guard let declarator = declarator(ctx.declarator()) else { return nil }
+
+        return .init(declarationSpecifiers: declarationSpecifiers, declarator: declarator)
+    }
 
     func declaration(_ ctx: ObjectiveCParser.DeclarationContext?) -> DeclarationSyntax? {
         guard let ctx else { return nil }
@@ -282,7 +290,6 @@ class AntlrDeclarationParser {
         }
 
         return .init(
-            typePrefix: typePrefix(ctx.typePrefix()),
             declarationSpecifier: specifiers
         )
     }
@@ -313,6 +320,9 @@ class AntlrDeclarationParser {
         }
         if let ibOutletQualifier = ibOutletQualifier(ctx.ibOutletQualifier()) {
             return .ibOutlet(ibOutletQualifier)
+        }
+        if let typePrefix = typePrefix(ctx.typePrefix()) {
+            return .typePrefix(typePrefix)
         }
 
         return nil
@@ -691,7 +701,6 @@ class AntlrDeclarationParser {
             return .nsOptionsOrNSEnum(nsOptionsOrNSEnum, typeName, enumName, enumeratorList)
         } else if ctx.ENUM() != nil {
             // Weed out invalid combinations of rules
-            if typeName == nil && enumName == nil { return nil }
             if enumName == nil && enumeratorList == nil { return nil }
             
             if ctx.enumeratorList() != nil {

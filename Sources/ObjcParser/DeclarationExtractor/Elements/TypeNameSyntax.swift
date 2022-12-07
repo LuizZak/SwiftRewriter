@@ -18,3 +18,10 @@ extension TypeNameSyntax: CustomStringConvertible {
         return "\(declarationSpecifiers)"
     }
 }
+extension TypeNameSyntax: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self.init(declarationSpecifiers: [
+            .typeSpecifier(.init(stringLiteral: value))
+        ])
+    }
+}

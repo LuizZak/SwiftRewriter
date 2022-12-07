@@ -1,5 +1,3 @@
-import ObjcParserAntlr
-
 /// A syntax node for an Objective-C class interface (`@interface`) declaration.
 public class ObjcClassInterface: ASTNode, InitializableNode {
     public var identifier: Identifier? {

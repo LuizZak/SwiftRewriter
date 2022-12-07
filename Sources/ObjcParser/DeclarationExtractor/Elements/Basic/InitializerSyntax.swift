@@ -15,12 +15,16 @@ extension InitializerSyntax: DeclarationSyntaxElementType {
         }
     }
 }
-
 extension InitializerSyntax: CustomStringConvertible {
     public var description: String {
         switch self {
         case .expression(let value):
             return value.description
         }
+    }
+}
+extension InitializerSyntax: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = .expression(.init(expressionString: value))
     }
 }

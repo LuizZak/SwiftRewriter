@@ -73,3 +73,8 @@ extension DirectDeclaratorSyntax: CustomStringConvertible {
         }
     }
 }
+extension DirectDeclaratorSyntax: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = .identifier(.init(stringLiteral: value))
+    }
+}

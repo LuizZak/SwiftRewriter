@@ -2,6 +2,28 @@ import XCTest
 import GrammarModels
 
 extension Asserter where Object: ASTNode {
+    /// Asserts that the underlying `ASTNode` being tested has a specified
+    /// `isInNonnullContext` value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        isInNonnullContext inNonnullContext: Bool,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+        
+        asserter(forKeyPath: \.isInNonnullContext, file: file, line: line) { prop in
+            prop.assert(
+                equals: inNonnullContext,
+                message: "Expected node \(object.shortDescription) to have isInNonnullContext value of \(inNonnullContext)",
+                file: file,
+                line: line
+            )
+        }
+    }
+
     /// Asserts that the underlying `ASTNode` being tested has a specified count
     /// of children nodes.
     ///
@@ -141,7 +163,7 @@ extension Asserter where Object == InitialExpression {
     ) -> Self? {
 
         asserter(
-            forKeyPath: \.constantExpression,
+            forKeyPath: \.expression,
             file: file,
             line: line
         ) {
@@ -165,13 +187,22 @@ extension Asserter where Object == ConstantExpressionNode {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(
+        return asserter(
             forKeyPath: \.expression,
             file: file,
             line: line
-        ) {
-            $0.assertNotNil(file: file, line: line)?
-                .assert(expressionString: expressionString, message: message(), file: file, line: line)
+        ) { asserter in
+
+            asserter.assertNotNil(file: file, line: line)?.inClosure { asserter -> Any? in
+                switch asserter.object {
+                case .antlr(let ctx):
+                    return Asserter<_>(object: ctx)
+                        .assert(textEquals: expressionString, file: file, line: line)
+                case .string(let str):
+                    return Asserter<_>(object: str)
+                        .assert(equals: expressionString, file: file, line: line)
+                }
+            }
         }
     }
 }
@@ -190,13 +221,22 @@ extension Asserter where Object == ExpressionNode {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(
+        return asserter(
             forKeyPath: \.expression,
             file: file,
             line: line
-        ) {
-            $0.assertNotNil(file: file, line: line)?
-                .assert(textEquals: expressionString, message: message(), file: file, line: line)
+        ) { asserter in
+
+            asserter.assertNotNil(file: file, line: line)?.inClosure { asserter -> Any? in
+                switch asserter.object {
+                case .antlr(let ctx):
+                    return Asserter<_>(object: ctx)
+                        .assert(textEquals: expressionString, file: file, line: line)
+                case .string(let str):
+                    return Asserter<_>(object: str)
+                        .assert(equals: expressionString, file: file, line: line)
+                }
+            }
         }
     }
 }

@@ -19,17 +19,29 @@ public class ASTNodeFactory {
         self.nonnullContextQuerier = nonnullContextQuerier
         self.commentQuerier = commentQuerier
     }
-    
+
     public func isInNonnullContext(_ context: ParserRuleContext) -> Bool {
         nonnullContextQuerier.isInNonnullContext(context)
     }
-    
-    public func comments(preceeding context: ParserRuleContext) -> [ObjcComment] {
-        commentQuerier.popClosestCommentsBefore(node: context)
+
+    public func isInNonnullContext(_ location: SourceLocation) -> Bool {
+        nonnullContextQuerier.isInNonnullContext(location)
+    }
+
+    public func isInNonnullContext(_ range: SourceRange) -> Bool {
+        nonnullContextQuerier.isInNonnullContext(range)
     }
     
-    public func comments(overlapping context: ParserRuleContext) -> [ObjcComment] {
-        commentQuerier.popCommentsOverlapping(node: context)
+    public func popComments(preceding context: ParserRuleContext) -> [ObjcComment] {
+        commentQuerier.popAllCommentsBefore(rule: context)
+    }
+    
+    public func popComments(overlapping context: ParserRuleContext) -> [ObjcComment] {
+        commentQuerier.popCommentsOverlapping(rule: context)
+    }
+    
+    public func popComments(inLineWith context: ParserRuleContext) -> [ObjcComment] {
+        commentQuerier.popCommentsInlineWith(rule: context)
     }
     
     public func makeIdentifier(from context: Parser.IdentifierContext) -> Identifier {
@@ -102,8 +114,10 @@ public class ASTNodeFactory {
     }
     
     public func makeNullabilitySpecifier(from rule: Parser.NullabilitySpecifierContext) -> NullabilitySpecifier {
-        let spec = NullabilitySpecifier(name: rule.getText(),
-                                        isInNonnullContext: isInNonnullContext(rule))
+        let spec = NullabilitySpecifier(
+            name: rule.getText(),
+            isInNonnullContext: isInNonnullContext(rule)
+        )
         updateSourceLocation(for: spec, with: rule)
         
         return spec
@@ -113,7 +127,7 @@ public class ASTNodeFactory {
         let methodBody = MethodBody(isInNonnullContext: isInNonnullContext(rule))
         updateSourceLocation(for: methodBody, with: rule)
         methodBody.statements = rule.compoundStatement()
-        methodBody.comments = comments(overlapping: rule)
+        methodBody.comments = popComments(overlapping: rule)
         
         return methodBody
     }
@@ -125,7 +139,7 @@ public class ASTNodeFactory {
         let body = MethodBody(isInNonnullContext: nonnull)
         body.statements = rule
         updateSourceLocation(for: body, with: rule)
-        body.comments = comments(overlapping: rule)
+        body.comments = popComments(overlapping: rule)
         
         return body
     }
@@ -134,17 +148,14 @@ public class ASTNodeFactory {
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
         
         let enumCase = ObjcEnumCase(isInNonnullContext: nonnull)
-        enumCase.precedingComments = comments(preceeding: rule)
+        enumCase.precedingComments = popComments(preceding: rule)
         updateSourceLocation(for: enumCase, with: rule)
         
         let identifierNode = makeIdentifier(from: identifier)
         enumCase.addChild(identifierNode)
         
         if let expression = rule.expression() {
-            let expressionNode = ExpressionNode(isInNonnullContext: nonnull)
-            expressionNode.expression = expression
-            updateSourceLocation(for: expressionNode, with: expression)
-            enumCase.addChild(expressionNode)
+            enumCase.addChild(makeExpression(from: expression))
         }
         
         return enumCase
@@ -154,18 +165,18 @@ public class ASTNodeFactory {
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
         
         let node = InitialExpression(isInNonnullContext: nonnull)
-        node.addChild(makeConstantExpression(from: rule))
+        node.addChild(makeExpression(from: rule))
 
         updateSourceLocation(for: node, with: rule)
 
         return node
     }
 
-    public func makeConstantExpression(from rule: Parser.ExpressionContext) -> ConstantExpressionNode {
+    public func makeConstantExpression(from rule: Parser.ConstantExpressionContext) -> ConstantExpressionNode {
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
 
         let node = ConstantExpressionNode(isInNonnullContext: nonnull)
-        node.addChild(makeExpression(from: rule))
+        node.expression = .antlr(rule)
 
         updateSourceLocation(for: node, with: rule)
 
@@ -176,7 +187,7 @@ public class ASTNodeFactory {
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
 
         let node = ExpressionNode(isInNonnullContext: nonnull)
-        node.expression = rule
+        node.expression = .antlr(rule)
 
         updateSourceLocation(for: node, with: rule)
 
@@ -220,40 +231,5 @@ public class ASTNodeFactory {
     /// Returns the source range for a specified parser rule context object.
     func sourceRange(for rule: ParserRuleContext) -> SourceRange {
         source.sourceRange(for: rule)
-    }
-}
-
-extension Source {
-    /// Returns the source range for a specified parser rule context object.
-    func sourceRange(for rule: ParserRuleContext) -> SourceRange {
-        guard let startIndex = rule.start?.getStartIndex(), let endIndex = rule.stop?.getStopIndex() else {
-            return .invalid
-        }
-
-        let sourceStartIndex = stringIndex(forCharOffset: startIndex)
-        let sourceEndIndex = stringIndex(forCharOffset: endIndex + 1 /* ANTLR character ranges are inclusive */)
-
-        let startLoc = sourceLocation(atStringIndex: sourceStartIndex)
-        let endLoc = sourceLocation(atStringIndex: sourceEndIndex)
-
-        return .range(start: startLoc, end: endLoc)
-    }
-
-    /// Returns the source range for a specified terminal node rule context object.
-    func sourceRange(for node: TerminalNode) -> SourceRange {
-        guard let symbol = node.getSymbol() else {
-            return .invalid
-        }
-        
-        let startIndex = symbol.getStartIndex()
-        let endIndex = symbol.getStopIndex()
-
-        let sourceStartIndex = stringIndex(forCharOffset: startIndex)
-        let sourceEndIndex = stringIndex(forCharOffset: endIndex + 1 /* ANTLR character ranges are inclusive */)
-
-        let startLoc = sourceLocation(atStringIndex: sourceStartIndex)
-        let endLoc = sourceLocation(atStringIndex: sourceEndIndex)
-
-        return .range(start: startLoc, end: endLoc)
     }
 }

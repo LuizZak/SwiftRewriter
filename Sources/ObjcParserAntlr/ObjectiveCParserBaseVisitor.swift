@@ -352,13 +352,6 @@ open class ObjectiveCParserBaseVisitor<T>: AbstractParseTreeVisitor<T> {
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	open func visitMessageExpression(_ ctx: ObjectiveCParser.MessageExpressionContext) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
 	open func visitReceiver(_ ctx: ObjectiveCParser.ReceiverContext) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
@@ -549,55 +542,6 @@ open class ObjectiveCParserBaseVisitor<T>: AbstractParseTreeVisitor<T> {
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	open func visitFunctionPointerParameterDeclaration(_ ctx: ObjectiveCParser.FunctionPointerParameterDeclarationContext) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	open func visitFunctionCallExpression(_ ctx: ObjectiveCParser.FunctionCallExpressionContext) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	open func visitEnumDeclaration(_ ctx: ObjectiveCParser.EnumDeclarationContext) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	open func visitVarDeclaration_(_ ctx: ObjectiveCParser.VarDeclaration_Context) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	open func visitTypedefDeclaration_(_ ctx: ObjectiveCParser.TypedefDeclaration_Context) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	open func visitTypeDeclaratorList(_ ctx: ObjectiveCParser.TypeDeclaratorListContext) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	open func visitDeclarationSpecifiers_(_ ctx: ObjectiveCParser.DeclarationSpecifiers_Context) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	open func visitDeclarationSpecifier__(_ ctx: ObjectiveCParser.DeclarationSpecifier__Context) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -885,13 +829,6 @@ open class ObjectiveCParserBaseVisitor<T>: AbstractParseTreeVisitor<T> {
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	open func visitProtocolQualifier(_ ctx: ObjectiveCParser.ProtocolQualifierContext) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	open func visitTypeSpecifier_(_ ctx: ObjectiveCParser.TypeSpecifier_Context) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1199,6 +1136,118 @@ open class ObjectiveCParserBaseVisitor<T>: AbstractParseTreeVisitor<T> {
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	open func visitConditionalExpression(_ ctx: ObjectiveCParser.ConditionalExpressionContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitLogicalOrExpression(_ ctx: ObjectiveCParser.LogicalOrExpressionContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitLogicalAndExpression(_ ctx: ObjectiveCParser.LogicalAndExpressionContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitBitwiseOrExpression(_ ctx: ObjectiveCParser.BitwiseOrExpressionContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitBitwiseXorExpression(_ ctx: ObjectiveCParser.BitwiseXorExpressionContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitBitwiseAndExpression(_ ctx: ObjectiveCParser.BitwiseAndExpressionContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitEqualityExpression(_ ctx: ObjectiveCParser.EqualityExpressionContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitEqualityOperator(_ ctx: ObjectiveCParser.EqualityOperatorContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitComparisonExpression(_ ctx: ObjectiveCParser.ComparisonExpressionContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitComparisonOperator(_ ctx: ObjectiveCParser.ComparisonOperatorContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitShiftExpression(_ ctx: ObjectiveCParser.ShiftExpressionContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitShiftOperator(_ ctx: ObjectiveCParser.ShiftOperatorContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitAdditiveExpression(_ ctx: ObjectiveCParser.AdditiveExpressionContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitAdditiveOperator(_ ctx: ObjectiveCParser.AdditiveOperatorContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitMultiplicativeExpression(_ ctx: ObjectiveCParser.MultiplicativeExpressionContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitMultiplicativeOperator(_ ctx: ObjectiveCParser.MultiplicativeOperatorContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	open func visitCastExpression(_ ctx: ObjectiveCParser.CastExpressionContext) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
@@ -1241,6 +1290,13 @@ open class ObjectiveCParserBaseVisitor<T>: AbstractParseTreeVisitor<T> {
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	open func visitPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	open func visitPostfixExpr(_ ctx: ObjectiveCParser.PostfixExprContext) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
@@ -1262,7 +1318,7 @@ open class ObjectiveCParserBaseVisitor<T>: AbstractParseTreeVisitor<T> {
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	open func visitPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) -> T? { return visitChildren(ctx) }
+	open func visitMessageExpression(_ ctx: ObjectiveCParser.MessageExpressionContext) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
 	 *

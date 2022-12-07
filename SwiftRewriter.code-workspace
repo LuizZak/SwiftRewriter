@@ -163,6 +163,7 @@
 			"MSVC",
 			"nonnull",
 			"noreturn",
+			"repool",
 			"stdcall",
 			"sugarize",
 			"swiftpm",

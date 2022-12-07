@@ -19,3 +19,8 @@ extension TypeQualifierListSyntax: CustomStringConvertible {
         typeQualifiers.map(\.description).joined(separator: " ")
     }
 }
+extension TypeQualifierListSyntax: ExpressibleByArrayLiteral {
+    public init(arrayLiteral elements: TypeQualifierSyntax...) {
+        self.init(typeQualifiers: elements)
+    }
+}

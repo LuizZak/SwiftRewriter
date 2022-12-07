@@ -1,28 +1,28 @@
-/// An anonymous syntax visitor that reports visits to `SyntaxNode` objects to
-/// an external listener closure.
-public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisitor {
+/// A base class for creating syntax node visitors that contains boilerplate
+/// visiting code.
+///
+/// Inheriting from this class and overriding each `visit<>` call intercepts the
+/// traversal into the syntax nodes, and allows customization of said traversal.
+/// Calling `node.accept(self)` resumes crawling into a syntax node.
+open class BaseSyntaxNodeVisitor: ExpressionVisitor, StatementVisitor {
     public typealias ExprResult = Void
     public typealias StmtResult = Void
-    
-    public let listener: (SyntaxNode) -> Void
-    
-    public init(listener: @escaping (SyntaxNode) -> Void) {
-        self.listener = listener
+
+    public init() {
+        
     }
     
     /// Visits an expression node
     ///
     /// - Parameter exp: An Expression to visit
-    public func visitExpression(_ exp: Expression) {
+    open func visitExpression(_ exp: Expression) {
         exp.accept(self)
     }
     
     /// Visits an assignment operation node
     ///
     /// - Parameter exp: An AssignmentExpression to visit
-    public func visitAssignment(_ exp: AssignmentExpression) {
-        listener(exp)
-        
+    open func visitAssignment(_ exp: AssignmentExpression) {
         visitExpression(exp.lhs)
         visitExpression(exp.rhs)
     }
@@ -30,9 +30,7 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a binary operation node
     ///
     /// - Parameter exp: A BinaryExpression to visit
-    public func visitBinary(_ exp: BinaryExpression) {
-        listener(exp)
-        
+    open func visitBinary(_ exp: BinaryExpression) {
         visitExpression(exp.lhs)
         visitExpression(exp.rhs)
     }
@@ -40,18 +38,14 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a unary operation node
     ///
     /// - Parameter exp: A UnaryExpression to visit
-    public func visitUnary(_ exp: UnaryExpression) {
-        listener(exp)
-        
+    open func visitUnary(_ exp: UnaryExpression) {
         visitExpression(exp.exp)
     }
     
     /// Visits a sizeof expression
     ///
     /// - Parameter exp: A SizeOfExpression to visit
-    public func visitSizeOf(_ exp: SizeOfExpression) {
-        listener(exp)
-        
+    open func visitSizeOf(_ exp: SizeOfExpression) {
         switch exp.value {
         case .expression(let innerExp):
             visitExpression(innerExp)
@@ -63,18 +57,14 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a prefix operation node
     ///
     /// - Parameter exp: A PrefixExpression to visit
-    public func visitPrefix(_ exp: PrefixExpression) {
-        listener(exp)
-        
+    open func visitPrefix(_ exp: PrefixExpression) {
         visitExpression(exp.exp)
     }
     
     /// Visits a postfix operation node
     ///
     /// - Parameter exp: A PostfixExpression to visit
-    public func visitPostfix(_ exp: PostfixExpression) {
-        listener(exp)
-        
+    open func visitPostfix(_ exp: PostfixExpression) {
         visitExpression(exp.exp)
         
         switch exp.op {
@@ -92,50 +82,42 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a constant node
     ///
     /// - Parameter exp: A ConstantExpression to visit
-    public func visitConstant(_ exp: ConstantExpression) {
-        listener(exp)
+    open func visitConstant(_ exp: ConstantExpression) {
+        
     }
     
     /// Visits a parenthesized expression node
     ///
     /// - Parameter exp: A ParensExpression to visit
-    public func visitParens(_ exp: ParensExpression) {
-        listener(exp)
-        
+    open func visitParens(_ exp: ParensExpression) {
         visitExpression(exp.exp)
     }
     
     /// Visits an identifier node
     ///
     /// - Parameter exp: An IdentifierExpression to visit
-    public func visitIdentifier(_ exp: IdentifierExpression) {
-        listener(exp)
+    open func visitIdentifier(_ exp: IdentifierExpression) {
+
     }
     
     /// Visits a type-casting expression node
     ///
     /// - Parameter exp: A CastExpression to visit
-    public func visitCast(_ exp: CastExpression) {
-        listener(exp)
-        
+    open func visitCast(_ exp: CastExpression) {
         visitExpression(exp.exp)
     }
     
     /// Visits an array literal node
     ///
     /// - Parameter exp: An ArrayLiteralExpression to visit
-    public func visitArray(_ exp: ArrayLiteralExpression) {
-        listener(exp)
-        
+    open func visitArray(_ exp: ArrayLiteralExpression) {
         exp.items.forEach(visitExpression)
     }
     
     /// Visits a dictionary literal node
     ///
     /// - Parameter exp: A DictionaryLiteralExpression to visit
-    public func visitDictionary(_ exp: DictionaryLiteralExpression) {
-        listener(exp)
-        
+    open func visitDictionary(_ exp: DictionaryLiteralExpression) {
         exp.pairs.forEach { pair in
             visitExpression(pair.key)
             visitExpression(pair.value)
@@ -145,18 +127,14 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a block expression
     ///
     /// - Parameter exp: A BlockLiteralExpression to visit
-    public func visitBlock(_ exp: BlockLiteralExpression) {
-        listener(exp)
-        
+    open func visitBlock(_ exp: BlockLiteralExpression) {
         visitStatement(exp.body)
     }
     
     /// Visits a ternary operation node
     ///
     /// - Parameter exp: A TernaryExpression to visit
-    public func visitTernary(_ exp: TernaryExpression) {
-        listener(exp)
-        
+    open func visitTernary(_ exp: TernaryExpression) {
         visitExpression(exp.exp)
         visitExpression(exp.ifTrue)
         visitExpression(exp.ifFalse)
@@ -166,9 +144,7 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     ///
     /// - Parameter exp: A tuple expression to visit
     /// - Returns: Result of visiting this tuple node
-    public func visitTuple(_ exp: TupleExpression) {
-        listener(exp)
-        
+    open func visitTuple(_ exp: TupleExpression) {
         exp.elements.forEach(visitExpression)
     }
     
@@ -176,21 +152,21 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     ///
     /// - Parameter exp: A selector reference expression to visit
     /// - Returns: Result of visiting this tuple node
-    public func visitSelector(_ exp: SelectorExpression) {
-        listener(exp)
+    open func visitSelector(_ exp: SelectorExpression) {
+        
     }
     
     /// Visits an unknown expression node
     ///
     /// - Parameter exp: An UnknownExpression to visit
-    public func visitUnknown(_ exp: UnknownExpression) {
-        listener(exp)
+    open func visitUnknown(_ exp: UnknownExpression) {
+        
     }
     
     /// Visits a pattern from an expression
     ///
     /// - Parameter ptn: A Pattern to visit
-    public func visitPattern(_ ptn: Pattern) {
+    open func visitPattern(_ ptn: Pattern) {
         switch ptn {
         case .expression(let exp):
             visitExpression(exp)
@@ -206,25 +182,21 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a statement node
     ///
     /// - Parameter stmt: A Statement to visit
-    public func visitStatement(_ stmt: Statement) {
+    open func visitStatement(_ stmt: Statement) {
         stmt.accept(self)
     }
     
     /// Visits a compound statement with this visitor
     ///
     /// - Parameter stmt: A CompoundStatement to visit
-    public func visitCompound(_ stmt: CompoundStatement) {
-        listener(stmt)
-        
+    open func visitCompound(_ stmt: CompoundStatement) {
         stmt.statements.forEach(visitStatement)
     }
     
     /// Visits an `if` statement with this visitor
     ///
     /// - Parameter stmt: An IfStatement to visit
-    public func visitIf(_ stmt: IfStatement) {
-        listener(stmt)
-        
+    open func visitIf(_ stmt: IfStatement) {
         visitExpression(stmt.exp)
         visitStatement(stmt.body)
         stmt.elseBody.map(visitStatement)
@@ -233,9 +205,7 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a `switch` statement with this visitor
     ///
     /// - Parameter stmt: A SwitchStatement to visit
-    public func visitSwitch(_ stmt: SwitchStatement) {
-        listener(stmt)
-        
+    open func visitSwitch(_ stmt: SwitchStatement) {
         visitExpression(stmt.exp)
         
         stmt.cases.forEach {
@@ -250,9 +220,7 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a `while` statement with this visitor
     ///
     /// - Parameter stmt: A WhileStatement to visit
-    public func visitWhile(_ stmt: WhileStatement) {
-        listener(stmt)
-        
+    open func visitWhile(_ stmt: WhileStatement) {
         visitExpression(stmt.exp)
         visitStatement(stmt.body)
     }
@@ -260,9 +228,7 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a `do/while` statement with this visitor
     ///
     /// - Parameter stmt: A DoWhileStatement to visit
-    public func visitDoWhile(_ stmt: DoWhileStatement) {
-        listener(stmt)
-        
+    open func visitDoWhile(_ stmt: DoWhileStatement) {
         visitExpression(stmt.exp)
         visitStatement(stmt.body)
     }
@@ -270,9 +236,7 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a `for` loop statement with this visitor
     ///
     /// - Parameter stmt: A ForStatement to visit
-    public func visitFor(_ stmt: ForStatement) {
-        listener(stmt)
-        
+    open func visitFor(_ stmt: ForStatement) {
         visitPattern(stmt.pattern)
         visitExpression(stmt.exp)
         visitStatement(stmt.body)
@@ -281,66 +245,56 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits a `do` statement node
     ///
     /// - Parameter stmt: A DoStatement to visit
-    public func visitDo(_ stmt: DoStatement) {
-        listener(stmt)
-        
+    open func visitDo(_ stmt: DoStatement) {
         visitStatement(stmt.body)
     }
     
     /// Visits a `defer` statement node
     ///
     /// - Parameter stmt: A DeferStatement to visit
-    public func visitDefer(_ stmt: DeferStatement) {
-        listener(stmt)
-        
+    open func visitDefer(_ stmt: DeferStatement) {
         visitStatement(stmt.body)
     }
     
     /// Visits a return statement
     ///
     /// - Parameter stmt: A ReturnStatement to visit
-    public func visitReturn(_ stmt: ReturnStatement) {
-        listener(stmt)
-        
+    open func visitReturn(_ stmt: ReturnStatement) {
         stmt.exp.map(visitExpression)
     }
     
     /// Visits a break statement
     ///
     /// - Parameter stmt: A BreakStatement to visit
-    public func visitBreak(_ stmt: BreakStatement) {
-        listener(stmt)
+    open func visitBreak(_ stmt: BreakStatement) {
+        
     }
 
     /// Visits a fallthrough statement
     ///
     /// - Parameter stmt: A FallthroughStatement to visit
-    public func visitFallthrough(_ stmt: FallthroughStatement) {
-        listener(stmt)
+    open func visitFallthrough(_ stmt: FallthroughStatement) {
+        
     }
 
     /// Visits a continue statement
     ///
     /// - Parameter stmt: A ContinueStatement to visit
-    public func visitContinue(_ stmt: ContinueStatement) {
-        listener(stmt)
+    open func visitContinue(_ stmt: ContinueStatement) {
+        
     }
     
     /// Visits an expression sequence statement
     ///
     /// - Parameter stmt: An ExpressionsStatement to visit
-    public func visitExpressions(_ stmt: ExpressionsStatement) {
-        listener(stmt)
-        
+    open func visitExpressions(_ stmt: ExpressionsStatement) {
         stmt.expressions.forEach(visitExpression)
     }
     
     /// Visits a variable declaration statement
     ///
     /// - Parameter stmt: A VariableDeclarationsStatement to visit
-    public func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) {
-        listener(stmt)
-        
+    open func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) {
         for i in 0..<stmt.decl.count {
             stmt.decl[i].initialization.map(visitExpression)
         }
@@ -349,7 +303,7 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     /// Visits an unknown statement node
     ///
     /// - Parameter stmt: An UnknownStatement to visit
-    public func visitUnknown(_ stmt: UnknownStatement) {
-        listener(stmt)
+    open func visitUnknown(_ stmt: UnknownStatement) {
+        
     }
 }

@@ -33,11 +33,11 @@ public final class ASTRewriterPassApplier {
     public init(passes: [ASTRewriterPass.Type],
                 typeSystem: TypeSystem,
                 globals: DefinitionsSource,
-                numThreds: Int = 8) {
+                numThreads: Int = 8) {
         
         self.passes = passes
         self.typeSystem = typeSystem
-        self.numThreads = numThreds
+        self.numThreads = numThreads
         self.globals = globals
     }
     

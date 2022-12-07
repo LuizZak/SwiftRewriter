@@ -229,8 +229,54 @@ public class DefaultTypeMapper: TypeMapper {
         self.typeSystem = typeSystem
     }
     
+    public func swiftType(forObjcType type: ObjcType, context: TypeMappingContext) -> SwiftType {
+        sugarizeSwiftType(_internalSwiftType(forObjcType: type, context: context))
+    }
+    
     public func typeNameString(for swiftType: SwiftType) -> String {
         innerTypeNameString(for: swiftType, isBlockContext: false)
+    }
+    
+    public func typeNameString(for composition: ProtocolCompositionComponent) -> String {
+        switch composition {
+        case .nested(let types):
+            return types.map { typeNameString(for: $0) }.joined(separator: ".")
+            
+        case .nominal(let nominal):
+            return typeNameString(for: nominal)
+        }
+    }
+    
+    public func typeNameString(for nominal: NominalSwiftType) -> String {
+        switch nominal {
+        case .typeName(let name):
+            return name
+            
+        case let .generic(type, parameters):
+            return type + "<" + parameters.map(typeNameString(for:)).joined(separator: ", ") + ">"
+        }
+    }
+    
+    public func typeNameString(for objcType: ObjcType, context: TypeMappingContext) -> String {
+        let type = swiftType(forObjcType: objcType, context: context)
+        return typeNameString(for: type)
+    }
+    
+    /// Transforms a given SwiftType into a sugarized version of the type, converting
+    /// array and dictionary into the sugar equivalents
+    public func sugarizeSwiftType(_ type: SwiftType) -> SwiftType {
+        switch type {
+            
+        // Simplify known generic types
+        case .nominal(.generic("Array", let parameters)) where parameters.count == 1:
+            return .array(parameters[0])
+            
+        case .nominal(.generic("Dictionary", let parameters)) where parameters.count == 2:
+            return .dictionary(key: parameters[0], value: parameters[1])
+            
+        default:
+            return type
+        }
     }
     
     private func innerTypeNameString(
@@ -313,35 +359,6 @@ public class DefaultTypeMapper: TypeMapper {
         }
     }
     
-    public func typeNameString(for composition: ProtocolCompositionComponent) -> String {
-        switch composition {
-        case .nested(let types):
-            return types.map { typeNameString(for: $0) }.joined(separator: ".")
-            
-        case .nominal(let nominal):
-            return typeNameString(for: nominal)
-        }
-    }
-    
-    public func typeNameString(for nominal: NominalSwiftType) -> String {
-        switch nominal {
-        case .typeName(let name):
-            return name
-            
-        case let .generic(type, parameters):
-            return type + "<" + parameters.map(typeNameString(for:)).joined(separator: ", ") + ">"
-        }
-    }
-    
-    public func typeNameString(for objcType: ObjcType, context: TypeMappingContext) -> String {
-        let type = swiftType(forObjcType: objcType, context: context)
-        return typeNameString(for: type)
-    }
-    
-    public func swiftType(forObjcType type: ObjcType, context: TypeMappingContext) -> SwiftType {
-        sugarizeSwiftType(_internalSwiftType(forObjcType: type, context: context))
-    }
-    
     private func _internalSwiftType(forObjcType type: ObjcType, context: TypeMappingContext) -> SwiftType {
         switch type {
         case .void:
@@ -421,23 +438,6 @@ public class DefaultTypeMapper: TypeMapper {
             }
             
             return swiftTuple(type: inner, count: length, context: context)
-        }
-    }
-    
-    /// Transforms a given SwiftType into a sugarized version of the type, converting
-    /// array and dictionary into the sugar equivalents
-    public func sugarizeSwiftType(_ type: SwiftType) -> SwiftType {
-        switch type {
-            
-        // Simplify known generic types
-        case .nominal(.generic("Array", let parameters)) where parameters.count == 1:
-            return .array(parameters[0])
-            
-        case .nominal(.generic("Dictionary", let parameters)) where parameters.count == 2:
-            return .dictionary(key: parameters[0], value: parameters[1])
-            
-        default:
-            return type
         }
     }
     

@@ -36,6 +36,13 @@ class SwiftExprASTReaderTests: XCTestCase {
         assert(objcExpr: "value ? ifTrue : ifFalse",
                readsAs: .ternary(.identifier("value"), true: .identifier("ifTrue"), false: .identifier("ifFalse")))
     }
+
+    func testTernaryExpression_nullCoalesce() {
+        assert(
+            objcExpr: "aNullableValue ?: anotherValue;",
+            readsAs: .identifier("aNullableValue").binary(op: .nullCoalesce, rhs: .identifier("anotherValue"))
+        )
+    }
     
     func testFunctionCall() {
         assert(objcExpr: "print()",
@@ -100,6 +107,13 @@ class SwiftExprASTReaderTests: XCTestCase {
         assert(objcExpr: "@selector(abc::def::)",
                readsAs: Expression.selector(FunctionIdentifier(name: "abc", argumentLabels: [nil, nil, "def", nil])))
     }
+
+    func testAssignment() {
+        assert(
+            objcExpr: "a = b",
+            readsAs: .identifier("a").assignment(op: .assign, rhs: .identifier("b"))
+        )
+    }
     
     func testAssignmentWithMethodCall() {
         let exp = Expression
@@ -145,6 +159,20 @@ class SwiftExprASTReaderTests: XCTestCase {
         
         assert(objcExpr: "i >> 10",
                readsAs: .binary(lhs: .identifier("i"), op: .bitwiseShiftRight, rhs: .constant(10)))
+    }
+
+    func testChainedBinaryOperations() {
+        assert(
+            objcExpr: "1 + 2 + 3",
+            readsAs: .binary(lhs: .constant(1), op: .add, rhs: .constant(2)).binary(op: .add, rhs: .constant(3))
+        )
+    }
+
+    func testChainedBinaryOperations_respectsPrecedence() {
+        assert(
+            objcExpr: "1 + 2 * 3",
+            readsAs: .constant(1).binary(op: .add, rhs: .constant(2).binary(op: .multiply, rhs: .constant(3)))
+        )
     }
     
     func testPostfixIncrementDecrement() {
@@ -281,10 +309,7 @@ extension SwiftExprASTReaderTests {
         let source = StringCodeSource(source: objcExpr)
         let typeParser = TypeParsing(
             state: SwiftExprASTReaderTests._state,
-            source: source,
-            nonnullContextQuerier: NonnullContextQuerier(
-                nonnullMacroRegionsTokenRange: []
-            )
+            source: source
         )
         
         let sut =
@@ -308,23 +333,38 @@ extension SwiftExprASTReaderTests {
             let result = expr.accept(sut)
             
             if result != expected {
-                var resStr = "nil"
+                var resStr = ""
                 var expStr = ""
+                var suffix = ""
                 
                 if let result = result {
-                    dump(result, to: &resStr)
+                    print(result, to: &resStr)
+                } else {
+                    resStr = "<nil>"
                 }
-                dump(expected, to: &expStr)
+                print(expected, to: &expStr)
+
+                // If both strings are the same, use `dump()` to disambiguate
+                // both values
+                if resStr == expStr {
+                    suffix += "\nResult:\n"
+                    dump(result, to: &suffix)
+                    suffix += "\nExpected:\n"
+                    dump(expected, to: &suffix)
+                }
                 
-                XCTFail("""
-                        Failed: Expected to read Objective-C expression
-                        \(objcExpr)
-                        as
-                        \(expStr)
-                        but read as
-                        \(resStr)
-                        """,
-                        file: file, line: line)
+                XCTFail(
+                    """
+                    Failed: Expected to read Objective-C expression
+                    \(objcExpr)
+                    as
+                    \(expStr)
+                    but read as
+                    \(resStr)\(suffix)
+                    """,
+                    file: file,
+                    line: line
+                )
             }
         } catch {
             XCTFail("Unexpected error(s) parsing objective-c: \(error)",

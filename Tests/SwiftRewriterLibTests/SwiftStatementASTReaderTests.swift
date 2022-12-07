@@ -19,7 +19,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
 
         delegate = nil
     }
-    
+
     func testIfStatement() {
         assert(objcStmt: "if(abc) { }",
                readsAs: .if(.identifier("abc"), body: .empty)
@@ -297,27 +297,151 @@ class SwiftStatementASTReaderTests: XCTestCase {
     }
     
     func testDeclaration_uninitialized() {
-        assert(objcStmt: "CGFloat value;",
-               parseBlock: { try $0.declaration() },
-               readsAs: .variableDeclaration(identifier: "value",
-                                             type: .typeName("CGFloat"),
-                                             initialization: nil))
+        assert(
+            objcStmt: "CGFloat value;",
+            parseBlock: { try $0.declaration() },
+            readsAs: .variableDeclaration(
+                identifier: "value",
+                type: .typeName("CGFloat"),
+                initialization: nil
+            )
+        )
+    }
+    
+    func testDeclaration_usesTypeMapper() {
+        assert(
+            objcStmt: "NSString *str = nil;",
+            parseBlock: { try $0.declaration() },
+            readsAs: .variableDeclaration(
+                identifier: "str",
+                type: .nullabilityUnspecified(.string),
+                initialization: .constant(.nil)
+            )
+        )
+    }
+    
+    func testStatement_convertsToDeclarationIfTopLevelMultiplicationExpression() {
+        assert(
+            objcStmt: "NSObject *object;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "object",
+                type: .nullabilityUnspecified("NSObject"),
+                initialization: nil
+            )
+        )
+    }
+    
+    func testStatement_convertsToDeclarationIfTopLevelMultiplicationExpression_usesTypeMapper() {
+        assert(
+            objcStmt: "NSString *str;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "str",
+                type: .nullabilityUnspecified(.string),
+                initialization: nil
+            )
+        )
+    }
+    
+    func testStatement_convertsToDeclarationIfTopLevelComparisonExpression() {
+        assert(
+            objcStmt: "id<Protocol> local;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "local",
+                type: .nullabilityUnspecified("Protocol"),
+                initialization: nil
+            )
+        )
+    }
+    
+    func testStatement_convertsToDeclarationIfTopLevelComparisonExpression_multipleProtocols() {
+        assert(
+            objcStmt: "id<Protocol1, Protocol2> local;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "local",
+                type: .nullabilityUnspecified(.protocolComposition(
+                    ["Protocol1", "Protocol2"]
+                )),
+                initialization: nil
+            )
+        )
+        assert(
+            objcStmt: "id<Protocol1, Protocol2, Protocol3> local;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "local",
+                type: .nullabilityUnspecified(.protocolComposition(
+                    ["Protocol1", "Protocol2", "Protocol3"]
+                )),
+                initialization: nil
+            )
+        )
+    }
+    
+    func testStatement_convertsToDeclarationIfTopLevelComparisonExpression_multipleDeclarators() {
+        assert(
+            objcStmt: "id<Protocol> local1, local2;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclarations([
+                .init(
+                    identifier: "local1",
+                    type: .nullabilityUnspecified("Protocol"),
+                    initialization: nil
+                ),
+                .init(
+                    identifier: "local2",
+                    type: .nullabilityUnspecified("Protocol"),
+                    initialization: nil
+                ),
+            ])
+        )
+        assert(
+            objcStmt: "id<Protocol1, Protocol2> local1, local2;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclarations([
+                .init(
+                    identifier: "local1",
+                    type: .nullabilityUnspecified(.protocolComposition(
+                        ["Protocol1", "Protocol2"]
+                    )),
+                    initialization: nil
+                ),
+                .init(
+                    identifier: "local2",
+                    type: .nullabilityUnspecified(.protocolComposition(
+                        ["Protocol1", "Protocol2"]
+                    )),
+                    initialization: nil
+                ),
+            ])
+        )
     }
     
     func testBlockDeclaration() {
-        assert(objcStmt: "void(^callback)();",
-               parseBlock: { try $0.declaration() },
-               readsAs: .variableDeclaration(identifier: "callback",
-                                             type: .nullabilityUnspecified(.swiftBlock(returnType: .void, parameters: [])),
-                                             initialization: nil))
+        assert(
+            objcStmt: "void(^callback)();",
+            parseBlock: { try $0.declaration() },
+            readsAs: .variableDeclaration(
+                identifier: "callback",
+                type: .nullabilityUnspecified(.swiftBlock(returnType: .void, parameters: [])),
+                initialization: nil
+            )
+        )
     }
 
     func testBlockDeclaration_nullabilitySpecifier() {
-        assert(objcStmt: "void(^_Nonnull callback)();",
-               parseBlock: { try $0.declaration() },
-               readsAs: .variableDeclaration(identifier: "callback",
-                                             type: .swiftBlock(returnType: .void, parameters: []),
-                                             initialization: nil))
+        assert(
+            objcStmt: "void(^_Nonnull callback)();",
+            parseBlock: { try $0.declaration() },
+            readsAs: .variableDeclaration(
+                identifier: "callback",
+                type: .swiftBlock(returnType: .void, parameters: []),
+                initialization: nil
+            )
+        )
     }
 
     func testReportAutotypeDeclaration() {
@@ -501,10 +625,7 @@ extension SwiftStatementASTReaderTests {
         let source = StringCodeSource(source: objcStmt)
         let typeParser = TypeParsing(
             state: SwiftStatementASTReaderTests._state,
-            source: source,
-            nonnullContextQuerier: NonnullContextQuerier(
-                nonnullMacroRegionsTokenRange: []
-            )
+            source: source
         )
         
         let expReader =

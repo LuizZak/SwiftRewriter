@@ -278,10 +278,6 @@ blockExpression
     | BITXOR blockParameters compoundStatement
     ;
 
-messageExpression
-    : LBRACK receiver messageSelector RBRACK
-    ;
-
 receiver
     : expression
     | genericTypeSpecifier
@@ -404,49 +400,6 @@ functionPointerParameterDeclaration
     | VOID
     ;
 
-functionCallExpression
-    : attributeSpecifier? identifier attributeSpecifier? LP directDeclarator RP SEMI
-    ;
-
-enumDeclaration
-    : attributeSpecifier? TYPEDEF? enumSpecifier identifier? SEMI
-    ;
-
-varDeclaration_
-    : (declarationSpecifiers initDeclaratorList | declarationSpecifiers) SEMI
-    ;
-
-typedefDeclaration_
-    : attributeSpecifier? TYPEDEF (declarationSpecifiers typeDeclaratorList | declarationSpecifiers) macro? SEMI
-    | attributeSpecifier? TYPEDEF functionPointer SEMI
-    ;
-
-typeDeclaratorList
-    : declarator (COMMA declarator)*
-    ;
-
-declarationSpecifiers_
-    : (storageClassSpecifier
-    | attributeSpecifier
-    | arcBehaviourSpecifier
-    | nullabilitySpecifier
-    | ibOutletQualifier
-    | typePrefix
-    | typeQualifier
-    | typeSpecifier)+
-    ;
-
-declarationSpecifier__
-    : storageClassSpecifier
-    | typeSpecifier
-    | typeQualifier
-    | functionSpecifier
-    | alignmentSpecifier
-    | arcBehaviourSpecifier
-    | nullabilitySpecifier
-    | ibOutletQualifier
-    ;
-
 declarationSpecifier
     : storageClassSpecifier
     | typeSpecifier
@@ -456,10 +409,11 @@ declarationSpecifier
     | arcBehaviourSpecifier
     | nullabilitySpecifier
     | ibOutletQualifier
+    | typePrefix
     ;
 
 declarationSpecifiers
-    : typePrefix? declarationSpecifier+
+    : declarationSpecifier+
     ;
 
 declaration
@@ -656,6 +610,7 @@ typePrefix
     | INLINE
     | NS_INLINE
     | KINDOF
+    | UNUSED
     ;
 
 typeQualifier
@@ -667,16 +622,16 @@ typeQualifier
     ;
 
 functionSpecifier
-    :   (INLINE
-    |   NORETURN_
-    |   INLINE__ // GCC extension
-    |   STDCALL)
-    |   gccAttributeSpecifier
-    |   DECLSPEC LP identifier RP
+    : (INLINE
+    | NORETURN_
+    | INLINE__ // GCC extension
+    | STDCALL)
+    | gccAttributeSpecifier
+    | DECLSPEC LP identifier RP
     ;
 
 alignmentSpecifier
-    :   ALIGNAS_ LP (typeName | constantExpression) RP
+    : ALIGNAS_ LP (typeName | constantExpression) RP
     ;
 
 protocolQualifier
@@ -688,24 +643,15 @@ protocolQualifier
     | ONEWAY
     ;
 
-typeSpecifier_
-    : scalarTypeSpecifier pointer?
-    | typeofTypeSpecifier
-    | KINDOF? genericTypeSpecifier pointer?
-    | structOrUnionSpecifier pointer?
-    | enumSpecifier
-    | KINDOF? identifier pointer?
-    ;
-
 typeSpecifier
-    :   scalarTypeSpecifier
-    |   EXTENSION LP (M128 | M128D | M128I) RP
-    |   genericTypeSpecifier
-    |   atomicTypeSpecifier
-    |   structOrUnionSpecifier
-    |   enumSpecifier
-    |   typedefName
-    |   typeofTypeSpecifier
+    : scalarTypeSpecifier
+    | EXTENSION LP (M128 | M128D | M128I) RP
+    | genericTypeSpecifier
+    | atomicTypeSpecifier
+    | structOrUnionSpecifier
+    | enumSpecifier
+    | typedefName
+    | typeofTypeSpecifier
     ;
 
 typeofTypeSpecifier
@@ -756,30 +702,30 @@ fieldDeclarator
     ;
 
 vcSpecificModifier
-    :   (CDECL
-    |   CLRCALL
-    |   STDCALL
-    |   FASTCALL
-    |   THISCALL
-    |   VECTORCALL)
+    : (CDECL
+    | CLRCALL
+    | STDCALL
+    | FASTCALL
+    | THISCALL
+    | VECTORCALL)
     ;
 
 gccDeclaratorExtension
-    :   ASM LP stringLiteral+ RP
-    |   gccAttributeSpecifier
+    : ASM LP stringLiteral+ RP
+    | gccAttributeSpecifier
     ;
 
 gccAttributeSpecifier
-    :   ATTRIBUTE LP LP gccAttributeList RP RP
+    : ATTRIBUTE LP LP gccAttributeList RP RP
     ;
 
 gccAttributeList
-    :   gccAttribute? (COMMA gccAttribute?)*
+    : gccAttribute? (COMMA gccAttribute?)*
     ;
 
 gccAttribute
-    :   ~(COMMA | LP | RP) // relaxed def for "identifier or reserved word"
-        (LP argumentExpressionList? RP)?
+    : ~(COMMA | LP | RP) // relaxed def for "identifier or reserved word"
+      (LP argumentExpressionList? RP)?
     ;
 
 pointer_
@@ -787,7 +733,7 @@ pointer_
     ;
 
 pointer
-    :  pointerEntry+
+    : pointerEntry+
     ;
 
 pointerEntry
@@ -817,7 +763,7 @@ initializerList
     ;
 
 staticAssertDeclaration
-    :   STATIC_ASSERT_ LP constantExpression COMMA stringLiteral+ RP SEMI
+    : STATIC_ASSERT_ LP constantExpression COMMA stringLiteral+ RP SEMI
     ;
 
 statement
@@ -908,36 +854,97 @@ expressions
     ;
 
 expression
-    : castExpression
-
-    | expression op=(MUL | DIV | MOD) expression
-    | expression op=(ADD | SUB) expression
-    | expression (LT LT | GT GT) expression
-    | expression op=(LE | GE | LT | GT) expression
-    | expression op=(NOTEQUAL | EQUAL) expression
-    | expression op=BITAND expression
-    | expression op=BITXOR expression
-    | expression op=BITOR expression
-    | expression op=AND expression
-    | expression op=OR expression
-
-    | expression QUESTION trueExpression=expression? COLON falseExpression=expression
-
-    | assignmentExpression
+    : assignmentExpression
+    //| expression QUESTION trueExpression=expression? COLON falseExpression=expression
     | LP compoundStatement RP
     ;
 
+/*
+binaryExpression
+    : castExpression op=(MUL | DIV | MOD) castExpression #MultiplicativeExpression
+    | castExpression op=(ADD | SUB) castExpression #AdditiveExpression
+    | castExpression (LT LT | GT GT) castExpression #ShiftExpression
+    | castExpression op=(LE | GE | LT | GT) castExpression #ComparativeExpression
+    | castExpression op=(NOTEQUAL | EQUAL) castExpression #EqualityExpression
+    | castExpression op=BITAND castExpression #BitwiseAndExpression
+    | castExpression op=BITXOR castExpression #BitwiseXorExpression
+    | castExpression op=BITOR castExpression #BitwiseOrExpression
+    | castExpression op=AND castExpression #LogicalAndExpression
+    | castExpression op=OR castExpression #LogicalOrExpression
+    ;
+*/
+
 assignmentExpression
-    : unaryExpression assignmentOperator expression
+    : conditionalExpression
+    | unaryExpression assignmentOperator expression
     ;
 
 assignmentOperator
     : ASSIGNMENT | MUL_ASSIGN | DIV_ASSIGN | MOD_ASSIGN | ADD_ASSIGN | SUB_ASSIGN | LSHIFT_ASSIGN | RSHIFT_ASSIGN | AND_ASSIGN | XOR_ASSIGN | OR_ASSIGN
     ;
 
+conditionalExpression
+    : logicalOrExpression (QUESTION trueExpression=expression? COLON falseExpression=conditionalExpression)?
+    ;
+
+logicalOrExpression
+    : logicalAndExpression (OR logicalAndExpression)*
+    ;
+
+logicalAndExpression
+    : bitwiseOrExpression (AND bitwiseOrExpression)*
+    ;
+
+bitwiseOrExpression
+    : bitwiseXorExpression (BITOR bitwiseXorExpression)*
+    ;
+
+bitwiseXorExpression
+    : bitwiseAndExpression (BITXOR bitwiseAndExpression)*
+    ;
+
+bitwiseAndExpression
+    : equalityExpression (BITAND equalityExpression)*
+    ;
+
+equalityExpression
+    : comparisonExpression (equalityOperator comparisonExpression)*
+    ;
+equalityOperator
+    : EQUAL | NOTEQUAL
+    ;
+
+comparisonExpression
+    : shiftExpression (comparisonOperator shiftExpression)*
+    ;
+comparisonOperator
+    : LT | GT | LE | GE
+    ;
+
+shiftExpression
+    : additiveExpression (shiftOperator additiveExpression)*
+    ;
+shiftOperator
+    : LSHIFT | RSHIFT
+    ;
+
+additiveExpression
+    : multiplicativeExpression (additiveOperator multiplicativeExpression)*
+    ;
+additiveOperator
+    : ADD | SUB
+    ;
+
+multiplicativeExpression
+    : castExpression (multiplicativeOperator castExpression)*
+    ;
+multiplicativeOperator
+    : MUL | DIV | MOD
+    ;
+
 castExpression
-    : unaryExpression
-    | EXTENSION? LP typeName RP castExpression
+    : EXTENSION? LP typeName RP castExpression
+    | unaryExpression
     | DIGITS // for
     ;
 
@@ -973,6 +980,21 @@ postfixExpression
     | postfixExpression (DOT | STRUCTACCESS) identifier postfixExpr*  // TODO: get rid of property and postfix expression.
     ;
 
+primaryExpression
+    : identifier
+    | constant
+    | stringLiteral
+    | LP expression RP
+    | messageExpression
+    | selectorExpression
+    | protocolExpression
+    | encodeExpression
+    | dictionaryExpression
+    | arrayExpression
+    | boxExpression
+    | blockExpression
+    ;
+
 postfixExpr
     : LBRACK expression RBRACK
     | LP argumentExpressionList? RP
@@ -988,19 +1010,8 @@ argumentExpression
     | genericTypeSpecifier
     ;
 
-primaryExpression
-    : identifier
-    | constant
-    | stringLiteral
-    | LP expression RP
-    | messageExpression
-    | selectorExpression
-    | protocolExpression
-    | encodeExpression
-    | dictionaryExpression
-    | arrayExpression
-    | boxExpression
-    | blockExpression
+messageExpression
+    : LBRACK receiver messageSelector RBRACK
     ;
 
 constant

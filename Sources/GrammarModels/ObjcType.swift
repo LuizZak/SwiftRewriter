@@ -469,7 +469,7 @@ public extension ObjcType {
 }
 
 /// C/Objective-C function specifier.
-public enum ObjcFunctionSpecifier: String, Hashable, Codable, CustomStringConvertible {
+public enum ObjcFunctionSpecifier: Hashable, Codable, CustomStringConvertible {
     /// "inline" C specifier.
     case inline
 
@@ -480,6 +480,9 @@ public enum ObjcFunctionSpecifier: String, Hashable, Codable, CustomStringConver
     /// APIs.
     case stdCall
 
+    /// A __declspec(<identifier>) function specifier.
+    case declspec(String)
+
     public var description: String {
         switch self {
         case .inline:
@@ -488,6 +491,8 @@ public enum ObjcFunctionSpecifier: String, Hashable, Codable, CustomStringConver
             return "_Noreturn"
         case .stdCall:
             return "__stdcall"
+        case .declspec(let value):
+            return "__declspec(\(value))"
         }
     }
 }

@@ -439,7 +439,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
             
             Diff:
             
-            \(expected.makeDifferenceMarkString(against: string))
+            \(string.makeDifferenceMarkString(against: expected))
             """
         )
     }

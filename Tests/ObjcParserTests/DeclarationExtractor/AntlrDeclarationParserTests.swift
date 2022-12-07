@@ -7,6 +7,41 @@ import GrammarModels
 
 class AntlrDeclarationParserTests: XCTestCase {
 
+    func testDeclaration_functionTakingNamedBlock() {
+        let result = self.runParser(
+            "NSString* g(void(^block)());",
+            ObjectiveCParser.declaration,
+            AntlrDeclarationParser.declaration(_:)
+        )
+
+        assertEqual(
+            maxDepth: 100,
+            result,
+            .init(
+                declarationSpecifiers: [
+                    .typeSpecifier("NSString")
+                ],
+                initDeclaratorList: [
+                    .init(declarator: .init(
+                        pointer: [.init()],
+                        directDeclarator: .functionDeclarator(
+                            .init(
+                                directDeclarator: "g",
+                                parameterTypeList: [
+                                .declarator(
+                                    [.typeSpecifier("void")],
+                                    .init(directDeclarator: .blockDeclarator(
+                                        .init(directDeclarator: "block", parameterList: [])
+                                    ))
+                                )
+                            ])
+                        )
+                    ))
+                ]
+            )
+        )
+    }
+
     func testTypeName() {
         let test = self.prepareParser(
             ObjectiveCParser.typeName,
@@ -590,17 +625,25 @@ class AntlrDeclarationParserTests: XCTestCase {
         )
 
         assertEqual(
-            test("unsigned int"),
+            test("unsigned const int"),
             .init(declarationSpecifier: [
                 .typeSpecifier("unsigned"),
+                .typeQualifier(.const()),
                 .typeSpecifier("int"),
             ])
         )
-        // Type prefix
         assertEqual(
             test("__block int"),
-            .init(typePrefix: .block(), declarationSpecifier: [
+            .init(declarationSpecifier: [
+                .typePrefix(.block()),
                 .typeSpecifier("int"),
+            ])
+        )
+        assertEqual(
+            test("int __block"),
+            .init(declarationSpecifier: [
+                .typeSpecifier("int"),
+                .typePrefix(.block()),
             ])
         )
     }
@@ -1311,6 +1354,43 @@ class AntlrDeclarationParserTests: XCTestCase {
         )
     }
 
+    func testEnumSpecifier_enum_noType_anonymous_withEnumeratorList() {
+        let result = runParser(
+            """
+            enum {
+                CASE0,
+                CASE1 = 1,
+                CASE2,
+            }
+            """,
+            ObjectiveCParser.enumSpecifier,
+            AntlrDeclarationParser.enumSpecifier
+        )
+
+        assertEqual(
+            result,
+            .cEnum(
+                nil,
+                nil,
+                .declared(
+                    nil,
+                    .init(enumerators: [
+                        .init(
+                            enumeratorIdentifier: "CASE0"
+                        ),
+                        .init(
+                            enumeratorIdentifier: "CASE1",
+                            expression: "1"
+                        ),
+                        .init(
+                            enumeratorIdentifier: "CASE2"
+                        ),
+                    ])
+                )
+            )
+        )
+    }
+
     func testEnumSpecifier_enum_noType_withEnumeratorList() {
         let result = runParser(
             """
@@ -1694,6 +1774,7 @@ private extension AntlrDeclarationParserTests {
     }
 
     func assertEqual<T: Equatable & DeclarationSyntaxElementType>(
+        maxDepth: Int = 3,
         _ lhs: T?,
         _ rhs: T?,
         file: StaticString = #file,
@@ -1706,7 +1787,6 @@ private extension AntlrDeclarationParserTests {
 
         var lhsString = ""
         var rhsString = ""
-        let maxDepth: Int = 3
 
         dump(lhs, to: &lhsString, maxDepth: maxDepth)
         dump(rhs, to: &rhsString, maxDepth: maxDepth)
@@ -1811,153 +1891,5 @@ private class TestAntlrDeclarationParser: AntlrDeclarationParser {
         }
 
         return rule.getText()
-    }
-}
-
-// MARK: - Test utils extensions
-
-extension IdentifierSyntax: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        self.init(identifier: value)
-    }
-}
-
-extension TypeIdentifierSyntax: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        self.init(identifier: .init(identifier: value))
-    }
-}
-
-extension TypeSpecifierSyntax: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        switch value {
-        case "void":
-            self = .scalar(.void())
-        case "unsigned":
-            self = .scalar(.unsigned())
-        case "char":
-            self = .scalar(.char())
-        case "double":
-            self = .scalar(.double())
-        case "float":
-            self = .scalar(.float())
-        case "int":
-            self = .scalar(.int())
-        case "long":
-            self = .scalar(.long())
-        case "short":
-            self = .scalar(.short())
-        case "signed":
-            self = .scalar(.signed())
-        case "_bool":
-            self = .scalar(._bool())
-        case "bool":
-            self = .scalar(.bool())
-        case "complex":
-            self = .scalar(.complex())
-        case "m128":
-            self = .scalar(.m128())
-        case "m128d":
-            self = .scalar(.m128d())
-        case "m128i":
-            self = .scalar(.m128i())
-        default:
-            self = .typeIdentifier(.init(identifier: .init(identifier: value)))
-        }
-    }
-}
-
-extension TypeNameSyntax: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        self.init(declarationSpecifiers: [
-            .typeSpecifier(.init(stringLiteral: value))
-        ])
-    }
-}
-
-extension DeclaratorSyntax: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        self.init(directDeclarator: .init(stringLiteral: value))
-    }
-}
-
-extension DirectDeclaratorSyntax: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        self = .identifier(.init(stringLiteral: value))
-    }
-}
-
-extension ExpressionSyntax: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        self.init(expressionString: value)
-    }
-}
-
-extension ConstantExpressionSyntax: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        self.init(constantExpressionString: value)
-    }
-}
-
-extension InitializerSyntax: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        self = .expression(.init(expressionString: value))
-    }
-}
-
-extension InitDeclaratorListSyntax: ExpressibleByArrayLiteral {
-    public init(arrayLiteral elements: InitDeclaratorSyntax...) {
-        self.init(initDeclarators: elements)
-    }
-}
-
-extension PointerSyntax: ExpressibleByArrayLiteral {
-    public init(arrayLiteral elements: PointerSyntaxEntry...) {
-        self.init(pointerEntries: elements)
-    }
-}
-
-extension StructDeclarationListSyntax: ExpressibleByArrayLiteral {
-    public init(arrayLiteral elements: StructDeclarationSyntax...) {
-        self.init(structDeclaration: elements)
-    }
-}
-
-extension EnumeratorListSyntax: ExpressibleByArrayLiteral {
-    public init(arrayLiteral elements: EnumeratorSyntax...) {
-        self.init(enumerators: elements)
-    }
-}
-
-extension SpecifierQualifierListSyntax: ExpressibleByArrayLiteral {
-    public init(arrayLiteral elements: TypeSpecifierQualifierSyntax...) {
-        self.init(specifierQualifiers: elements)
-    }
-}
-
-extension TypeQualifierListSyntax: ExpressibleByArrayLiteral {
-    public init(arrayLiteral elements: TypeQualifierSyntax...) {
-        self.init(typeQualifiers: elements)
-    }
-}
-
-extension ParameterTypeListSyntax: ExpressibleByArrayLiteral {
-    public init(arrayLiteral elements: ParameterDeclarationSyntax...) {
-        self.init(
-            parameterList: .init(parameterDeclarations: elements),
-            isVariadic: false
-        )
-    }
-}
-
-extension ParameterListSyntax: ExpressibleByArrayLiteral {
-    public init(arrayLiteral elements: ParameterDeclarationSyntax...) {
-        self.init(parameterDeclarations: elements)
-    }
-}
-
-extension DeclarationSpecifiersSyntax: ExpressibleByArrayLiteral {
-    public init(arrayLiteral elements: DeclarationSpecifierSyntax...) {
-        self.init(typePrefix: nil, declarationSpecifier: elements)
     }
 }

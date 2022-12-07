@@ -639,19 +639,6 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func enterMessageExpression(_ ctx: ObjectiveCParser.MessageExpressionContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitMessageExpression(_ ctx: ObjectiveCParser.MessageExpressionContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	open func enterReceiver(_ ctx: ObjectiveCParser.ReceiverContext) { }
 	/**
 	 * {@inheritDoc}
@@ -1010,97 +997,6 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitFunctionPointerParameterDeclaration(_ ctx: ObjectiveCParser.FunctionPointerParameterDeclarationContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterFunctionCallExpression(_ ctx: ObjectiveCParser.FunctionCallExpressionContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitFunctionCallExpression(_ ctx: ObjectiveCParser.FunctionCallExpressionContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterEnumDeclaration(_ ctx: ObjectiveCParser.EnumDeclarationContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitEnumDeclaration(_ ctx: ObjectiveCParser.EnumDeclarationContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterVarDeclaration_(_ ctx: ObjectiveCParser.VarDeclaration_Context) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitVarDeclaration_(_ ctx: ObjectiveCParser.VarDeclaration_Context) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterTypedefDeclaration_(_ ctx: ObjectiveCParser.TypedefDeclaration_Context) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitTypedefDeclaration_(_ ctx: ObjectiveCParser.TypedefDeclaration_Context) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterTypeDeclaratorList(_ ctx: ObjectiveCParser.TypeDeclaratorListContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitTypeDeclaratorList(_ ctx: ObjectiveCParser.TypeDeclaratorListContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterDeclarationSpecifiers_(_ ctx: ObjectiveCParser.DeclarationSpecifiers_Context) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitDeclarationSpecifiers_(_ ctx: ObjectiveCParser.DeclarationSpecifiers_Context) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterDeclarationSpecifier__(_ ctx: ObjectiveCParser.DeclarationSpecifier__Context) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitDeclarationSpecifier__(_ ctx: ObjectiveCParser.DeclarationSpecifier__Context) { }
 
 	/**
 	 * {@inheritDoc}
@@ -1634,19 +1530,6 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitProtocolQualifier(_ ctx: ObjectiveCParser.ProtocolQualifierContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterTypeSpecifier_(_ ctx: ObjectiveCParser.TypeSpecifier_Context) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitTypeSpecifier_(_ ctx: ObjectiveCParser.TypeSpecifier_Context) { }
 
 	/**
 	 * {@inheritDoc}
@@ -2212,6 +2095,214 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	open func enterConditionalExpression(_ ctx: ObjectiveCParser.ConditionalExpressionContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitConditionalExpression(_ ctx: ObjectiveCParser.ConditionalExpressionContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterLogicalOrExpression(_ ctx: ObjectiveCParser.LogicalOrExpressionContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitLogicalOrExpression(_ ctx: ObjectiveCParser.LogicalOrExpressionContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterLogicalAndExpression(_ ctx: ObjectiveCParser.LogicalAndExpressionContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitLogicalAndExpression(_ ctx: ObjectiveCParser.LogicalAndExpressionContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterBitwiseOrExpression(_ ctx: ObjectiveCParser.BitwiseOrExpressionContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitBitwiseOrExpression(_ ctx: ObjectiveCParser.BitwiseOrExpressionContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterBitwiseXorExpression(_ ctx: ObjectiveCParser.BitwiseXorExpressionContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitBitwiseXorExpression(_ ctx: ObjectiveCParser.BitwiseXorExpressionContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterBitwiseAndExpression(_ ctx: ObjectiveCParser.BitwiseAndExpressionContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitBitwiseAndExpression(_ ctx: ObjectiveCParser.BitwiseAndExpressionContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterEqualityExpression(_ ctx: ObjectiveCParser.EqualityExpressionContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitEqualityExpression(_ ctx: ObjectiveCParser.EqualityExpressionContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterEqualityOperator(_ ctx: ObjectiveCParser.EqualityOperatorContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitEqualityOperator(_ ctx: ObjectiveCParser.EqualityOperatorContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterComparisonExpression(_ ctx: ObjectiveCParser.ComparisonExpressionContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitComparisonExpression(_ ctx: ObjectiveCParser.ComparisonExpressionContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterComparisonOperator(_ ctx: ObjectiveCParser.ComparisonOperatorContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitComparisonOperator(_ ctx: ObjectiveCParser.ComparisonOperatorContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterShiftExpression(_ ctx: ObjectiveCParser.ShiftExpressionContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitShiftExpression(_ ctx: ObjectiveCParser.ShiftExpressionContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterShiftOperator(_ ctx: ObjectiveCParser.ShiftOperatorContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitShiftOperator(_ ctx: ObjectiveCParser.ShiftOperatorContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterAdditiveExpression(_ ctx: ObjectiveCParser.AdditiveExpressionContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitAdditiveExpression(_ ctx: ObjectiveCParser.AdditiveExpressionContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterAdditiveOperator(_ ctx: ObjectiveCParser.AdditiveOperatorContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitAdditiveOperator(_ ctx: ObjectiveCParser.AdditiveOperatorContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterMultiplicativeExpression(_ ctx: ObjectiveCParser.MultiplicativeExpressionContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitMultiplicativeExpression(_ ctx: ObjectiveCParser.MultiplicativeExpressionContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterMultiplicativeOperator(_ ctx: ObjectiveCParser.MultiplicativeOperatorContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitMultiplicativeOperator(_ ctx: ObjectiveCParser.MultiplicativeOperatorContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	open func enterCastExpression(_ ctx: ObjectiveCParser.CastExpressionContext) { }
 	/**
 	 * {@inheritDoc}
@@ -2290,6 +2381,19 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	open func enterPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	open func enterPostfixExpr(_ ctx: ObjectiveCParser.PostfixExprContext) { }
 	/**
 	 * {@inheritDoc}
@@ -2329,13 +2433,13 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func enterPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) { }
+	open func enterMessageExpression(_ ctx: ObjectiveCParser.MessageExpressionContext) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func exitPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) { }
+	open func exitMessageExpression(_ ctx: ObjectiveCParser.MessageExpressionContext) { }
 
 	/**
 	 * {@inheritDoc}

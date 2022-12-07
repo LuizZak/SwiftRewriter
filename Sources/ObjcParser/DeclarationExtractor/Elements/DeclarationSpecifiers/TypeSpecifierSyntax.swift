@@ -65,3 +65,41 @@ extension TypeSpecifierSyntax: CustomStringConvertible {
         }
     }
 }
+extension TypeSpecifierSyntax: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        switch value {
+        case "void":
+            self = .scalar(.void())
+        case "unsigned":
+            self = .scalar(.unsigned())
+        case "char":
+            self = .scalar(.char())
+        case "double":
+            self = .scalar(.double())
+        case "float":
+            self = .scalar(.float())
+        case "int":
+            self = .scalar(.int())
+        case "long":
+            self = .scalar(.long())
+        case "short":
+            self = .scalar(.short())
+        case "signed":
+            self = .scalar(.signed())
+        case "_bool":
+            self = .scalar(._bool())
+        case "bool":
+            self = .scalar(.bool())
+        case "complex":
+            self = .scalar(.complex())
+        case "m128":
+            self = .scalar(.m128())
+        case "m128d":
+            self = .scalar(.m128d())
+        case "m128i":
+            self = .scalar(.m128i())
+        default:
+            self = .typeIdentifier(.init(identifier: .init(identifier: value)))
+        }
+    }
+}

@@ -357,6 +357,23 @@ extension Asserter where Object == DeclarationTranslator.ASTNodeDeclaration {
 
         return nil
     }
+
+    /// Opens an assertion context for the context syntax element of the underlying
+    /// `ASTNodeDeclaration` being tested.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserterForContext<Return>(
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<DeclarationSyntaxElementType>) -> Return?
+    ) -> Self? {
+        
+        inClosure { asserter in
+            Asserter<_>(object: asserter.object.contextRule).inClosure(closure)
+        }
+    }
 }
 
 extension Asserter where Object == DeclarationTranslator.ASTVariableDeclaration {
@@ -885,9 +902,9 @@ extension Asserter where Object == DeclarationTranslator.ASTFunctionDefinition {
         }
 
         let parameter = object.parameters[index]
-        guard parameter.type?.type == type else {
+        guard parameter.type.type == type else {
             XCTFail(
-                "Expected parameter \(index) of function '\(object.identifier.name)' to have type '\(type)' but found '\(parameter.type?.type.description ?? "<nil>")'.",
+                "Expected parameter \(index) of function '\(object.identifier.name)' to have type '\(type)' but found '\(parameter.type.type.description)'.",
                 file: file,
                 line: line
             )
@@ -932,7 +949,7 @@ extension Asserter where Object == DeclarationTranslator.ASTStructOrUnionDeclara
         line: UInt = #line
     ) -> Self? {
 
-        guard let field = object.fields.first(where: { $0.node.identifier?.name == name }) else {
+        guard let field = object.fields.first(where: { $0.identifier?.name == name }) else {
             XCTFail(
                 "Expected to find a field named '\(name)' in struct declaration '\(object.identifier?.name ?? "<anonymous>")'.",
                 file: file,
@@ -943,10 +960,10 @@ extension Asserter where Object == DeclarationTranslator.ASTStructOrUnionDeclara
             return nil
         }
 
-        let fieldType = field.node.type?.type
+        let fieldType = field.type.type
         if let type, type != fieldType {
             XCTFail(
-                "Expected struct field '\(name)' in struct declaration '\(object.identifier?.name ?? "<anonymous>")' to have type '\(type)', but found '\(fieldType ?? "<nil>")'.",
+                "Expected struct field '\(name)' in struct declaration '\(object.identifier?.name ?? "<anonymous>")' to have type '\(type)', but found '\(fieldType)'.",
                 file: file,
                 line: line
             )
@@ -989,7 +1006,7 @@ extension Asserter where Object == DeclarationTranslator.ASTEnumDeclaration {
         line: UInt = #line
     ) -> Self? {
 
-        guard let enumerator = object.enumerators.first(where: { $0.node.identifier?.name == name }) else {
+        guard let enumerator = object.enumerators.first(where: { $0.identifier?.name == name }) else {
             XCTFail(
                 "Expected to find an enumerator named '\(name)' in enum declaration '\(object.identifier?.name ?? "<anonymous>")'.",
                 file: file,
@@ -1000,14 +1017,13 @@ extension Asserter where Object == DeclarationTranslator.ASTEnumDeclaration {
             return nil
         }
         
-        let enumExp = enumerator.node.expression?.expression?.getText()
-        if let expressionString, enumExp != expressionString {
-            XCTFail(
-                "Expected enumerator '\(name)' in enum declaration '\(object.identifier?.name ?? "<anonymous>")' to have an expression '\(expressionString)', but found '\(enumExp ?? "<nil>")'.",
-                file: file,
-                line: line
-            )
-            dumpObject()
+        let enumExp = enumerator.expression
+        if let expressionString {
+            return inClosure { asserter in
+                Asserter<_>(object: enumExp)
+                    .assertNotNil(file: file, line: line)?
+                    .assert(textEquals: expressionString, file: file, line: line)
+            }
         }
 
         return self
@@ -1034,5 +1050,39 @@ extension Asserter where Object == DeclarationTranslator.ASTEnumDeclaration {
         }
 
         return self
+    }
+}
+
+extension Asserter {
+    /// Asserts that the underlying `DeclarationTranslator.SyntaxStorageMode<T>`
+    /// object being tested has a textual value from the underlying source code
+    /// that matches a given string.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert<T>(
+        textEquals expected: String,
+        message: @autoclosure () -> String = "",
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? where Object == DeclarationTranslator.SyntaxStorageMode<T> {
+        
+        inClosure { asserter -> Any? in
+            switch asserter.object {
+            case .antlr(_, let rule):
+                return Asserter<_>(object: rule)
+                    .assert(
+                        textEquals: expected,
+                        message: message(),
+                        file: file,
+                        line: line
+                    )
+
+            case .string(_, let source):
+                return Asserter<_>(object: source)
+                    .assert(equals: expected, file: file, line: line)
+            }
+        }
     }
 }
