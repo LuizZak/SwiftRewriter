@@ -22,11 +22,19 @@ public struct StringCodeSource: CodeSource {
     }
     
     public func stringIndex(forCharOffset offset: Int) -> String.UnicodeScalarView.Index {
-        _indices[offset]
+        if offset == _indices.count {
+            return source.endIndex
+        }
+
+        return _indices[offset]
     }
     
     public func charOffset(forStringIndex index: String.UnicodeScalarView.Index) -> Int {
-        _indices.firstIndex(of: index) ?? 0
+        if index == source.endIndex {
+            return _indices.count
+        }
+
+        return _indices.firstIndex(of: index) ?? 0
     }
     
     public func utf8Index(forCharOffset offset: Int) -> Int {
@@ -65,5 +73,9 @@ public struct StringCodeSource: CodeSource {
         let end = stringIndex(forCharOffset: range.upperBound)
 
         return source[start..<end]
+    }
+    
+    public func sourceSubstring(_ range: SourceRange) -> Substring? {
+        range.substring(in: source)
     }
 }

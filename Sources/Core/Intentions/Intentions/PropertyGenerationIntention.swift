@@ -111,30 +111,36 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         }
     }
     
-    public convenience init(name: String,
-                            type: SwiftType,
-                            objcAttributes: [ObjcPropertyAttribute],
-                            accessLevel: AccessLevel = .internal,
-                            source: ASTNode? = nil) {
+    public convenience init(
+        name: String,
+        type: SwiftType,
+        objcAttributes: [ObjcPropertyAttribute],
+        accessLevel: AccessLevel = .internal,
+        source: ASTNode? = nil
+    ) {
         
-        let storage =
-            ValueStorage(
-                type: type,
-                ownership: .strong,
-                isConstant: false)
+        let storage = ValueStorage(
+            type: type,
+            ownership: .strong,
+            isConstant: false
+        )
         
-        self.init(name: name,
-                  storage: storage,
-                  objcAttributes: objcAttributes,
-                  accessLevel: accessLevel,
-                  source: source)
+        self.init(
+            name: name,
+            storage: storage,
+            objcAttributes: objcAttributes,
+            accessLevel: accessLevel,
+            source: source
+        )
     }
     
-    public init(name: String,
-                storage: ValueStorage,
-                objcAttributes: [ObjcPropertyAttribute],
-                accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+    public init(
+        name: String,
+        storage: ValueStorage,
+        objcAttributes: [ObjcPropertyAttribute],
+        accessLevel: AccessLevel = .internal,
+        source: ASTNode? = nil
+    ) {
         
         self.name = name
         self.storage = storage

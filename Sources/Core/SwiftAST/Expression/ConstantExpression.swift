@@ -235,6 +235,9 @@ public enum Constant: Codable, Equatable {
         .int(value, .hexadecimal)
     }
     
+    /// Defines how a raw integer value constant is displayed.
+    /// Does not affect the stored integer constant value, only the display
+    /// format.
     public enum IntegerType: String, Codable {
         case decimal
         case binary

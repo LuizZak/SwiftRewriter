@@ -4,50 +4,66 @@ import ObjcParserAntlr
 import ObjcGrammarModels
 import GrammarModelBase
 
-class ObjcASTNodeFactory {
-    typealias Parser = ObjectiveCParser
+public class ObjcASTNodeFactory {
+    public typealias Parser = ObjectiveCParser
     
     let source: Source
     let nonnullContextQuerier: NonnullContextQuerier
     let commentQuerier: CommentQuerier
     
-    init(source: Source,
-         nonnullContextQuerier: NonnullContextQuerier,
-         commentQuerier: CommentQuerier) {
+    public init(
+        source: Source,
+        nonnullContextQuerier: NonnullContextQuerier,
+        commentQuerier: CommentQuerier
+    ) {
         
         self.source = source
         self.nonnullContextQuerier = nonnullContextQuerier
         self.commentQuerier = commentQuerier
     }
-    
-    func isInNonnullContext(_ context: ParserRuleContext) -> Bool {
+
+    public func isInNonnullContext(_ context: ParserRuleContext) -> Bool {
         nonnullContextQuerier.isInNonnullContext(context)
     }
-    
-    func comments(preceeding context: ParserRuleContext) -> [RawCodeComment] {
-        commentQuerier.popClosestCommentsBefore(node: context)
+
+    public func isInNonnullContext(_ location: SourceLocation) -> Bool {
+        nonnullContextQuerier.isInNonnullContext(location)
+    }
+
+    public func isInNonnullContext(_ range: SourceRange) -> Bool {
+        nonnullContextQuerier.isInNonnullContext(range)
     }
     
-    func comments(overlapping context: ParserRuleContext) -> [RawCodeComment] {
-        commentQuerier.popCommentsOverlapping(node: context)
+    public func popComments(preceding context: ParserRuleContext) -> [RawCodeComment] {
+        commentQuerier.popAllCommentsBefore(rule: context)
     }
     
-    func makeIdentifier(from context: Parser.IdentifierContext) -> ObjcIdentifierNode {
+    public func popComments(overlapping context: ParserRuleContext) -> [RawCodeComment] {
+        commentQuerier.popCommentsOverlapping(rule: context)
+    }
+    
+    public func popComments(inLineWith context: ParserRuleContext) -> [RawCodeComment] {
+        commentQuerier.popCommentsInlineWith(rule: context)
+    }
+    
+    public func makeIdentifier(from context: Parser.IdentifierContext) -> ObjcIdentifierNode {
         let nonnull = isInNonnullContext(context)
         let node = ObjcIdentifierNode(name: context.getText(), isInNonnullContext: nonnull)
         updateSourceLocation(for: node, with: context)
         return node
     }
     
-    func makeSuperclassName(from context: Parser.SuperclassNameContext) -> ObjcSuperclassNameNode {
+    public func makeSuperclassName(from context: Parser.SuperclassNameContext) -> ObjcSuperclassNameNode {
         let nonnull = isInNonnullContext(context)
         let node = ObjcSuperclassNameNode(name: context.getText(), isInNonnullContext: nonnull)
         updateSourceLocation(for: node, with: context)
         return node
     }
     
-    func makeSuperclassName(from context: Parser.GenericSuperclassNameContext,
-                            identifier: Parser.IdentifierContext) -> ObjcSuperclassNameNode {
+    public func makeSuperclassName(
+        from context: Parser.GenericSuperclassNameContext,
+        identifier: Parser.IdentifierContext
+    ) -> ObjcSuperclassNameNode {
         
         let nonnull = isInNonnullContext(context)
         let node = ObjcSuperclassNameNode(name: identifier.getText(), isInNonnullContext: nonnull)
@@ -55,7 +71,7 @@ class ObjcASTNodeFactory {
         return node
     }
     
-    func makeProtocolReferenceList(from context: Parser.ProtocolListContext) -> ObjcProtocolReferenceListNode {
+    public func makeProtocolReferenceList(from context: Parser.ProtocolListContext) -> ObjcProtocolReferenceListNode {
         let protocolListNode =
             ObjcProtocolReferenceListNode(isInNonnullContext: isInNonnullContext(context))
         
@@ -74,16 +90,20 @@ class ObjcASTNodeFactory {
         return protocolListNode
     }
     
-    func makePointer(from context: ObjectiveCParser.PointerContext) -> ObjcPointerNode {
+    public func makePointer(from context: ObjectiveCParser.PointerContext) -> ObjcPointerNode {
         let node = ObjcPointerNode(isInNonnullContext: isInNonnullContext(context))
         updateSourceLocation(for: node, with: context)
-        if let pointer = context.pointer() {
-            node.addChild(makePointer(from: pointer))
+        
+        for pointerEntry in context.pointerEntry().dropFirst() {
+            if pointerEntry.MUL() != nil {
+                node.addChild(makePointer(from: context))
+            }
         }
+
         return node
     }
     
-    func makeTypeDeclarator(from context: ObjectiveCParser.DeclaratorContext) -> ObjcTypeDeclaratorNode {
+    public func makeTypeDeclarator(from context: ObjectiveCParser.DeclaratorContext) -> ObjcTypeDeclaratorNode {
         let node = ObjcTypeDeclaratorNode(isInNonnullContext: isInNonnullContext(context))
         updateSourceLocation(for: node, with: context)
         if let identifierNode = context.directDeclarator()?.identifier().map(makeIdentifier) {
@@ -95,82 +115,123 @@ class ObjcASTNodeFactory {
         return node
     }
     
-    func makeNullabilitySpecifier(from rule: Parser.NullabilitySpecifierContext) -> ObjcNullabilitySpecifierNode {
-        let spec = ObjcNullabilitySpecifierNode(name: rule.getText(),
-                                        isInNonnullContext: isInNonnullContext(rule))
+    public func makeNullabilitySpecifier(from rule: Parser.NullabilitySpecifierContext) -> ObjcNullabilitySpecifierNode {
+        let spec = ObjcNullabilitySpecifierNode(
+            name: rule.getText(),
+            isInNonnullContext: isInNonnullContext(rule)
+        )
         updateSourceLocation(for: spec, with: rule)
         
         return spec
     }
     
-    func makeMethodBody(from rule: Parser.MethodDefinitionContext) -> ObjcMethodBodyNode {
+    public func makeMethodBody(from rule: Parser.MethodDefinitionContext) -> ObjcMethodBodyNode {
         let methodBody = ObjcMethodBodyNode(isInNonnullContext: isInNonnullContext(rule))
         updateSourceLocation(for: methodBody, with: rule)
         methodBody.statements = rule.compoundStatement()
-        methodBody.comments = comments(overlapping: rule)
+        methodBody.comments = popComments(overlapping: rule)
         
         return methodBody
     }
     
-    func makeMethodBody(from rule: Parser.CompoundStatementContext) -> ObjcMethodBodyNode {
+    public func makeMethodBody(from rule: Parser.CompoundStatementContext) -> ObjcMethodBodyNode {
         
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
         
         let body = ObjcMethodBodyNode(isInNonnullContext: nonnull)
         body.statements = rule
         updateSourceLocation(for: body, with: rule)
-        body.comments = comments(overlapping: rule)
+        body.comments = popComments(overlapping: rule)
         
         return body
     }
     
-    func makeEnumCase(from rule: Parser.EnumeratorContext, identifier: Parser.IdentifierContext) -> ObjcEnumCaseNode {
+    public func makeEnumCase(from rule: Parser.EnumeratorContext, identifier: Parser.IdentifierContext) -> ObjcEnumCaseNode {
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
         
         let enumCase = ObjcEnumCaseNode(isInNonnullContext: nonnull)
-        enumCase.precedingComments = comments(preceeding: rule)
+        enumCase.precedingComments = popComments(preceding: rule)
         updateSourceLocation(for: enumCase, with: rule)
         
         let identifierNode = makeIdentifier(from: identifier)
         enumCase.addChild(identifierNode)
         
         if let expression = rule.expression() {
-            let expressionNode = ObjcExpressionNode(isInNonnullContext: nonnull)
-            expressionNode.expression = expression
-            updateSourceLocation(for: expressionNode, with: expression)
-            enumCase.addChild(expressionNode)
+            enumCase.addChild(makeExpression(from: expression))
         }
         
         return enumCase
     }
+
+    public func makeInitialExpression(from rule: Parser.ExpressionContext) -> ObjcInitialExpressionNode {
+        let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
+        
+        let node = ObjcInitialExpressionNode(isInNonnullContext: nonnull)
+        node.addChild(makeExpression(from: rule))
+
+        updateSourceLocation(for: node, with: rule)
+
+        return node
+    }
+
+    public func makeConstantExpression(from rule: Parser.ConstantExpressionContext) -> ObjcConstantExpressionNode {
+        let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
+
+        let node = ObjcConstantExpressionNode(isInNonnullContext: nonnull)
+        node.expression = .antlr(rule)
+
+        updateSourceLocation(for: node, with: rule)
+
+        return node
+    }
+
+    public func makeExpression(from rule: Parser.ExpressionContext) -> ObjcExpressionNode {
+        let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
+
+        let node = ObjcExpressionNode(isInNonnullContext: nonnull)
+        node.expression = .antlr(rule)
+
+        updateSourceLocation(for: node, with: rule)
+
+        return node
+    }
     
-    func updateSourceLocation(for node: ObjcASTNode, with rule: ParserRuleContext) {
+    public func updateSourceLocation(for node: ObjcASTNode, with rule: ParserRuleContext) {
         (node.location, node.length) = sourceLocationAndLength(for: rule)
     }
     
+    /// Returns the source location and length for a specified parser rule context
+    /// object.
     func sourceLocationAndLength(for rule: ParserRuleContext) -> (SourceLocation, SourceLength) {
         guard let startIndex = rule.start?.getStartIndex(), let endIndex = rule.stop?.getStopIndex() else {
             return (.invalid, .zero)
         }
         
         let sourceStartIndex = source.stringIndex(forCharOffset: startIndex)
-        let sourceEndIndex = source.stringIndex(forCharOffset: endIndex)
+        let sourceEndIndex = source.stringIndex(forCharOffset: endIndex + 1 /* ANTLR character ranges are inclusive */)
         
         let startLine = source.lineNumber(at: sourceStartIndex)
         let startColumn = source.columnNumber(at: sourceStartIndex)
         let endLine = source.lineNumber(at: sourceEndIndex)
         let endColumn = source.columnNumber(at: sourceEndIndex)
         
-        let location =
-            SourceLocation(line: startLine,
-                            column: startColumn,
-                            utf8Offset: startIndex)
+        let location = SourceLocation(
+            line: startLine,
+            column: startColumn,
+            utf8Offset: startIndex
+        )
         
-        let length =
-            SourceLength(newlines: endLine - startLine,
-                          columnsAtLastLine: endColumn,
-                          utf8Length: endIndex - startIndex)
+        let length = SourceLength(
+            newlines: endLine - startLine,
+            columnsAtLastLine: endColumn,
+            utf8Length: endIndex - startIndex
+        )
         
         return (location, length)
+    }
+    
+    /// Returns the source range for a specified parser rule context object.
+    func sourceRange(for rule: ParserRuleContext) -> SourceRange {
+        source.sourceRange(for: rule)
     }
 }

@@ -1,8 +1,8 @@
-import GlobalsProviders
-import KnownType
-import SwiftAST
-import TypeSystem
 import XCTest
+import SwiftAST
+import KnownType
+import GlobalsProviders
+import TypeSystem
 
 let cInt = SwiftType.typeName("CInt")
 let cFloat = SwiftType.typeName("CFloat")
@@ -206,7 +206,7 @@ class BaseGlobalsProviderTestCase: XCTestCase {
 
                 but found signature
 
-                \(typeString.makeDifferenceMarkString(against: signature))
+                \(signature.makeDifferenceMarkString(against: typeString))
                 """,
                 file: file,
                 line: line

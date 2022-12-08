@@ -22,108 +22,296 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         self.delegate = delegate
     }
     
+    public override func visitRangeExpression(_ ctx: ObjectiveCParser.RangeExpressionContext) -> Expression? {
+        let expressions = ctx.expression()
+        guard !expressions.isEmpty else {
+            return makeUnknownNode(ctx)
+        }
+        
+        guard expressions.count > 1 else {
+            return expressions[0].accept(self)
+        }
+        
+        guard
+            let exp1 = expressions[0].accept(self),
+            let exp2 = expressions[1].accept(self)
+        else {
+            return makeUnknownNode(ctx)
+        }
+
+        return exp1.binary(op: .closedRange, rhs: exp2)
+    }
+    
     public override func visitExpression(_ ctx: ObjectiveCParser.ExpressionContext) -> Expression? {
-        if let cast = ctx.castExpression() {
-            return cast.accept(self)
-        }
-        // Ternary expression
-        if ctx.QUESTION() != nil {
-            guard let predicate = ctx.expression(0)?.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
-            }
-            
-            let ifTrue = ctx.trueExpression?.accept(self)
-            
-            guard let ifFalse = ctx.falseExpression?.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
-            }
-            
-            if let ifTrue = ifTrue {
-                return .ternary(predicate, true: ifTrue, false: ifFalse)
-            } else {
-                return predicate.binary(op: .nullCoalesce, rhs: ifFalse)
-            }
-        }
         // Assignment expression
-        if let assignmentExpression = ctx.assignmentExpression {
-            guard let unaryExpr = ctx.unaryExpression()?.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
-            }
-            guard let assignExpr = assignmentExpression.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
-            }
-            guard let assignOp = ctx.assignmentOperator() else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
-            }
-            guard let op = swiftOperator(from: assignOp.getText()) else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
-            }
-            
-            return unaryExpr.assignment(op: op, rhs: assignExpr)
-        }
-        // Binary expression
-        if ctx.expression().count == 2 {
-            guard let lhs = ctx.expression(0)?.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
-            }
-            guard let rhs = ctx.expression(1)?.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
-            }
-            
-            // << / >>
-            if ctx.LT().count == 2 {
-                return lhs.binary(op: .bitwiseShiftLeft, rhs: rhs)
-            }
-            if ctx.GT().count == 2 {
-                return lhs.binary(op: .bitwiseShiftRight, rhs: rhs)
-            }
-            
-            guard let op = ctx.op?.getText() else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
-            }
-            
-            if let op = SwiftOperator(rawValue: op) {
-                return lhs.binary(op: op, rhs: rhs)
-            }
+        if let assignmentExpression = ctx.assignmentExpression() {
+            return assignmentExpression.accept(self)
         }
         // Nested expression
         if let compound = ctx.compoundStatement() {
             let visitor = compoundStatementVisitor()
             guard let statement = compound.accept(visitor) else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
+                return makeUnknownNode(ctx)
             }
             
             return .block(body: statement).call()
         }
         
-        return .unknown(UnknownASTContext(context: ctx.getText()))
+        return makeUnknownNode(ctx)
     }
-    
-    public override func visitRangeExpression(_ ctx: ObjectiveCParser.RangeExpressionContext) -> Expression? {
-        let constantExpressions = ctx.expression()
-        
-        if constantExpressions.count == 1 {
-            return constantExpressions[0].accept(self)
+
+    public override func visitAssignmentExpression(_ ctx: ObjectiveCParser.AssignmentExpressionContext) -> Expression? {
+        if let conditional = ctx.conditionalExpression() {
+            return conditional.accept(self)
         }
-        if constantExpressions.count == 2,
-            let exp1 = constantExpressions[0].accept(self),
-            let exp2 = constantExpressions[1].accept(self) {
-            
-            return exp1.binary(op: .closedRange, rhs: exp2)
+
+        guard let lhs = ctx.unaryExpression()?.accept(self) else {
+            return makeUnknownNode(ctx)
         }
-        
-        return .unknown(UnknownASTContext(context: ctx.getText()))
+        guard let rhs = ctx.expression()?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        guard let assignOp = ctx.assignmentOperator() else {
+            return makeUnknownNode(ctx)
+        }
+        guard let op = swiftOperator(from: assignOp.getText()) else {
+            return makeUnknownNode(ctx)
+        }
+
+        return lhs.assignment(op: op, rhs: rhs)
     }
-    
-    public override func visitConstantExpression(_ ctx: ObjectiveCParser.ConstantExpressionContext) -> Expression? {
-        if let identifier = ctx.identifier() {
-            return identifier.accept(self)
+
+    public override func visitConditionalExpression(_ ctx: ObjectiveCParser.ConditionalExpressionContext) -> Expression? {
+        guard let logicalOrExpression = ctx.logicalOrExpression()?.accept(self) else {
+            return makeUnknownNode(ctx)
         }
-        if let constant = ctx.constant() {
-            return constant.accept(self)
+
+        guard ctx.QUESTION() != nil else {
+            return logicalOrExpression
+        }
+        guard let falseExpression = ctx.falseExpression?.accept(self) else {
+            return makeUnknownNode(ctx) 
+        }
+
+        if let trueExpression = ctx.trueExpression?.accept(self) {
+            return .ternary(logicalOrExpression, true: trueExpression, false: falseExpression)
+        }
+
+        return logicalOrExpression.binary(op: .nullCoalesce, rhs: falseExpression)
+    }
+
+    public override func visitLogicalOrExpression(_ ctx: ObjectiveCParser.LogicalOrExpressionContext) -> Expression? {
+        return reduceBinary(ctx.logicalAndExpression(), operator: .or) {
+            $0.accept(self)
+        }
+
+        /*
+        guard let lhs = ctx.castExpression(0)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        guard let rhs = ctx.castExpression(1)?.accept(self) else {
+            return makeUnknownNode(ctx)
         }
         
-        return .unknown(UnknownASTContext(context: ctx.getText()))
+        return lhs.binary(op: .or, rhs: rhs)
+        */
+    }
+
+    public override func visitLogicalAndExpression(_ ctx: ObjectiveCParser.LogicalAndExpressionContext) -> Expression? {
+        return reduceBinary(ctx.bitwiseOrExpression(), operator: .and) {
+            $0.accept(self)
+        }
+
+        /*
+        guard let lhs = ctx.castExpression(0)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        guard let rhs = ctx.castExpression(1)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        
+        return lhs.binary(op: .and, rhs: rhs)
+        */
+    }
+
+    public override func visitBitwiseOrExpression(_ ctx: ObjectiveCParser.BitwiseOrExpressionContext) -> Expression? {
+        return reduceBinary(ctx.bitwiseXorExpression(), operator: .bitwiseOr) {
+            $0.accept(self)
+        }
+
+        /*
+        guard let lhs = ctx.castExpression(0)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        guard let rhs = ctx.castExpression(1)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        
+        return lhs.binary(op: .bitwiseOr, rhs: rhs)
+        */
+    }
+
+    public override func visitBitwiseXorExpression(_ ctx: ObjectiveCParser.BitwiseXorExpressionContext) -> Expression? {
+        return reduceBinary(ctx.bitwiseAndExpression(), operator: .bitwiseXor) {
+            $0.accept(self)
+        }
+
+        /*
+        guard let lhs = ctx.castExpression(0)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        guard let rhs = ctx.castExpression(1)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        
+        return lhs.binary(op: .bitwiseXor, rhs: rhs)
+        */
+    }
+
+    public override func visitBitwiseAndExpression(_ ctx: ObjectiveCParser.BitwiseAndExpressionContext) -> Expression? {
+        return reduceBinary(ctx.equalityExpression(), operator: .bitwiseAnd) {
+            $0.accept(self)
+        }
+
+        /*
+        guard let lhs = ctx.castExpression(0)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        guard let rhs = ctx.castExpression(1)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        
+        return lhs.binary(op: .bitwiseAnd, rhs: rhs)
+        */
+    }
+
+    public override func visitEqualityExpression(_ ctx: ObjectiveCParser.EqualityExpressionContext) -> Expression? {
+        return reduceBinary(ctx.comparisonExpression(), opRule: ctx.equalityOperator) {
+            $0.accept(self)
+        }
+
+        /*
+        guard let lhs = ctx.castExpression(0)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        guard let rhs = ctx.castExpression(1)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        
+        if ctx.NOTEQUAL() != nil {
+            return lhs.binary(op: .unequals, rhs: rhs)
+        }
+        if ctx.EQUAL() != nil {
+            return lhs.binary(op: .equals, rhs: rhs)
+        }
+
+        return makeUnknownNode(ctx)
+        */
+    }
+
+    public override func visitComparisonExpression(_ ctx: ObjectiveCParser.ComparisonExpressionContext) -> Expression? {
+        return reduceBinary(ctx.shiftExpression(), opRule: ctx.comparisonOperator) {
+            $0.accept(self)
+        }
+
+        /*
+        guard let lhs = ctx.castExpression(0)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        guard let rhs = ctx.castExpression(1)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        
+        if ctx.LE() != nil {
+            return lhs.binary(op: .lessThanOrEqual, rhs: rhs)
+        }
+        if ctx.GE() != nil {
+            return lhs.binary(op: .greaterThanOrEqual, rhs: rhs)
+        }
+        if ctx.LT() != nil {
+            return lhs.binary(op: .lessThan, rhs: rhs)
+        }
+        if ctx.GT() != nil {
+            return lhs.binary(op: .greaterThan, rhs: rhs)
+        }
+
+        return makeUnknownNode(ctx)
+        */
+    }
+
+    public override func visitShiftExpression(_ ctx: ObjectiveCParser.ShiftExpressionContext) -> Expression? {
+        return reduceBinary(ctx.additiveExpression(), opRule: ctx.shiftOperator) {
+            $0.accept(self)
+        }
+
+        /*
+        guard let lhs = ctx.castExpression(0)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        guard let rhs = ctx.castExpression(1)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        
+        if !ctx.LT().isEmpty {
+            return lhs.binary(op: .bitwiseShiftLeft, rhs: rhs)
+        }
+        if !ctx.GT().isEmpty {
+            return lhs.binary(op: .bitwiseShiftRight, rhs: rhs)
+        }
+
+        return makeUnknownNode(ctx)
+        */
+    }
+
+    public override func visitAdditiveExpression(_ ctx: ObjectiveCParser.AdditiveExpressionContext) -> Expression? {
+        return reduceBinary(ctx.multiplicativeExpression(), opRule: ctx.additiveOperator) {
+            $0.accept(self)
+        }
+
+        /*
+        guard let lhs = ctx.castExpression(0)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        guard let rhs = ctx.castExpression(1)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        
+        if ctx.ADD() != nil {
+            return lhs.binary(op: .add, rhs: rhs)
+        }
+        if ctx.SUB() != nil {
+            return lhs.binary(op: .subtract, rhs: rhs)
+        }
+
+        return makeUnknownNode(ctx)
+        */
+    }
+
+    public override func visitMultiplicativeExpression(_ ctx: ObjectiveCParser.MultiplicativeExpressionContext) -> Expression? {
+        return reduceBinary(ctx.castExpression(), opRule: ctx.multiplicativeOperator) {
+            $0.accept(self)
+        }
+
+        /*
+        guard let lhs = ctx.castExpression(0)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        guard let rhs = ctx.castExpression(1)?.accept(self) else {
+            return makeUnknownNode(ctx)
+        }
+        
+        if ctx.MUL() != nil {
+            return lhs.binary(op: .multiply, rhs: rhs)
+        }
+        if ctx.DIV() != nil {
+            return lhs.binary(op: .divide, rhs: rhs)
+        }
+        if ctx.MOD() != nil {
+            return lhs.binary(op: .mod, rhs: rhs)
+        }
+
+        return makeUnknownNode(ctx)
+        */
     }
     
     public override func visitCastExpression(_ ctx: ObjectiveCParser.CastExpressionContext) -> Expression? {
@@ -138,7 +326,18 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
             return exp.casted(to: swiftType)
         }
         
-        return .unknown(UnknownASTContext(context: ctx.getText()))
+        return makeUnknownNode(ctx)
+    }
+    
+    public override func visitConstantExpression(_ ctx: ObjectiveCParser.ConstantExpressionContext) -> Expression? {
+        if let identifier = ctx.identifier() {
+            return identifier.accept(self)
+        }
+        if let constant = ctx.constant() {
+            return constant.accept(self)
+        }
+        
+        return makeUnknownNode(ctx)
     }
     
     public override func visitUnaryExpression(_ ctx: ObjectiveCParser.UnaryExpressionContext) -> Expression? {
@@ -150,16 +349,19 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         }
         if let op = ctx.unaryOperator(), let exp = ctx.castExpression()?.accept(self) {
             guard let swiftOp = SwiftOperator(rawValue: op.getText()) else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
+                return makeUnknownNode(ctx)
             }
             
             return .unary(op: swiftOp, exp)
         }
         // sizeof(<expr>) / sizeof(<type>)
         if ctx.SIZEOF() != nil {
-            if let typeSpecifier = ctx.typeSpecifier(),
-                let type = typeParser.parseObjcType(from: typeSpecifier) {
-                
+            // TODO: Re-implement sizeof type parsing using the new `TypeParsing` interface.
+            if
+                let typeSpecifier = ctx.typeSpecifier()//,
+                //let type = typeParser.parseObjcType(from: typeSpecifier)
+            {
+                let type = ObjcType.typeName(typeSpecifier.getText())
                 let swiftType = typeMapper.swiftType(forObjcType: type)
                 
                 return .sizeof(type: swiftType)
@@ -176,21 +378,21 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         
         if let primary = ctx.primaryExpression() {
             guard let prim = primary.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
+                return makeUnknownNode(ctx)
             }
             
             result = prim
         } else if let postfixExpression = ctx.postfixExpression() {
             guard let postfix = postfixExpression.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
+                return makeUnknownNode(ctx)
             }
             guard let identifier = ctx.identifier() else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
+                return makeUnknownNode(ctx)
             }
             
             result = .postfix(postfix, .member(identifier.getText()))
         } else {
-            return .unknown(UnknownASTContext(context: ctx.getText()))
+            return makeUnknownNode(ctx)
         }
         
         for post in ctx.postfixExpr() {
@@ -229,19 +431,42 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         return result
     }
     
+    public override func visitArgumentExpression(_ ctx: ObjectiveCParser.ArgumentExpressionContext) -> Expression? {
+        acceptFirst(from: ctx.expression)
+    }
+    
+    public override func visitPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) -> Expression? {
+        if ctx.LP() != nil, let exp = ctx.expression()?.accept(self) {
+            return .parens(exp)
+        }
+        
+        return
+            acceptFirst(
+                from: ctx.constant,
+                    ctx.stringLiteral,
+                    ctx.identifier,
+                    ctx.messageExpression,
+                    ctx.arrayExpression,
+                    ctx.dictionaryExpression,
+                    ctx.boxExpression,
+                    ctx.selectorExpression,
+                    ctx.blockExpression
+            ) ?? makeUnknownNode(ctx)
+    }
+    
     public override func visitMessageExpression(_ ctx: ObjectiveCParser.MessageExpressionContext) -> Expression? {
         guard let receiverExpression = ctx.receiver()?.expression() else {
-            return .unknown(UnknownASTContext(context: ctx.getText()))
+            return makeUnknownNode(ctx)
         }
         guard let receiver = receiverExpression.accept(self) else {
-            return .unknown(UnknownASTContext(context: ctx.getText()))
+            return makeUnknownNode(ctx)
         }
         
         if let identifier = ctx.messageSelector()?.selector()?.identifier()?.getText() {
             return receiver.dot(identifier).call()
         }
         guard let keywordArguments = ctx.messageSelector()?.keywordArgument() else {
-            return .unknown(UnknownASTContext(context: ctx.getText()))
+            return makeUnknownNode(ctx)
         }
         
         var name: String = ""
@@ -254,7 +479,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
                 // First keyword is always the method's name, Swift doesn't support
                 // 'nameless' methods!
                 if keyword.selector() == nil {
-                    return .unknown(UnknownASTContext(context: ctx.getText()))
+                    return makeUnknownNode(ctx)
                 }
                 
                 name = selectorText
@@ -262,7 +487,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
             
             for keywordArgumentType in keyword.keywordArgumentType() {
                 guard let expressions = keywordArgumentType.expressions() else {
-                    return .unknown(UnknownASTContext(context: ctx.getText()))
+                    return makeUnknownNode(ctx)
                 }
                 
                 for (expIndex, expression) in expressions.expression().enumerated() {
@@ -282,28 +507,6 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         }
         
         return receiver.dot(name).call(arguments)
-    }
-    
-    public override func visitArgumentExpression(_ ctx: ObjectiveCParser.ArgumentExpressionContext) -> Expression? {
-        acceptFirst(from: ctx.expression)
-    }
-    
-    public override func visitPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) -> Expression? {
-        if ctx.LP() != nil, let exp = ctx.expression()?.accept(self) {
-            return .parens(exp)
-        }
-        
-        return
-            acceptFirst(from: ctx.constant,
-                        ctx.stringLiteral,
-                        ctx.identifier,
-                        ctx.messageExpression,
-                        ctx.arrayExpression,
-                        ctx.dictionaryExpression,
-                        ctx.boxExpression,
-                        ctx.selectorExpression,
-                        ctx.blockExpression
-                ) ?? .unknown(UnknownASTContext(context: ctx.getText()))
     }
     
     public override func visitArrayExpression(_ ctx: ObjectiveCParser.ArrayExpressionContext) -> Expression? {
@@ -352,17 +555,17 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
     }
     
     public override func visitBlockExpression(_ ctx: ObjectiveCParser.BlockExpressionContext) -> Expression? {
-        let returnType = ctx.typeSpecifier().flatMap { typeSpecifier -> ObjcType? in
-            return typeParser.parseObjcType(from: typeSpecifier)
+        let returnType = ctx.typeName().flatMap { typeName -> ObjcType? in
+            return typeParser.parseObjcType(from: typeName)
         } ?? .void
-        
+
         let parameters: [BlockParameter]
         if let blockParameters = ctx.blockParameters() {
             let types = typeParser.parseObjcTypes(from: blockParameters)
-            let args = blockParameters.typeVariableDeclaratorOrName()
+            let parametersCtx = blockParameters.parameterDeclaration()
             
             parameters =
-                zip(args, types).map { (param, type) -> BlockParameter in
+                zip(parametersCtx, types).map { (param, type) -> BlockParameter in
                     guard let identifier = VarDeclarationIdentifierNameExtractor.extract(from: param) else {
                         return BlockParameter(name: "<unknown>", type: .void)
                     }
@@ -378,7 +581,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         let compoundVisitor = self.compoundStatementVisitor()
         
         guard let body = ctx.compoundStatement()?.accept(compoundVisitor) else {
-            return .unknown(UnknownASTContext(context: ctx.getText()))
+            return makeUnknownNode(ctx)
         }
         
         let swiftReturnType = typeMapper.swiftType(forObjcType: returnType)
@@ -445,10 +648,10 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
     
     public override func visitSelectorExpression(_ ctx: ObjectiveCParser.SelectorExpressionContext) -> Expression? {
         guard let selectorName = ctx.selectorName() else {
-            return .unknown(UnknownASTContext(context: ctx.getText()))
+            return makeUnknownNode(ctx)
         }
         guard let sel = convertSelectorToIdentifier(selectorName) else {
-            return .unknown(UnknownASTContext(context: ctx.getText()))
+            return makeUnknownNode(ctx)
         }
         
         return .selector(sel)
@@ -461,6 +664,12 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
     public override func visitIdentifier(_ ctx: ObjectiveCParser.IdentifierContext) -> Expression? {
         .identifier(ctx.getText())
     }
+
+    // MARK: - Internals
+
+    private func makeUnknownNode(_ ctx: ParserRuleContext) -> UnknownExpression {
+        return .unknown(UnknownASTContext(context: "/*\(ctx.getText())*/"))
+    }
     
     private func acceptFirst(from rules: () -> ParserRuleContext?...) -> Expression? {
         for rule in rules {
@@ -471,14 +680,107 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         
         return nil
     }
+
+    /// Helper for reducing binary expressions expressed as one-or-more parser
+    /// rules.
+    /// Every subsequent expression past the first index on `fullList` is joined
+    /// with the previous one as a binary expression.
+    ///
+    /// If `parser` fails to parse the first element of `fullList`, `nil` is
+    /// returned, instead.
+    ///
+    /// Is a convenience over `reduceBinary(_:_:opDeriver:parser:)` where
+    /// `opDeriver` is replaced with a constant operator instead of being derived
+    /// based on iteration index.
+    private func reduceBinary<T: ParserRuleContext>(
+        _ fullList: [T],
+        operator op: SwiftOperator,
+        parser: (T) -> Expression?
+    ) -> Expression {
+        
+        return reduceBinary(
+            fullList,
+            opDeriver: { _ in op },
+            parser: parser
+        )
+    }
+
+    /// Helper for reducing binary expressions expressed as one-or-more parser
+    /// rules.
+    /// Every subsequent expression past the first index on `fullList` is joined
+    /// with the previous one as a binary expression.
+    ///
+    /// If `parser` fails to parse the first element of `fullList`, `nil` is
+    /// returned, instead.
+    ///
+    /// Is a convenience over `reduceBinary(_:_:opDeriver:parser:)` where
+    /// `opDeriver` is replaced with a closure that accepts an index and returns
+    /// an optional parser rule context that represents an operator to parse.
+    /// If `opRule` returns `nil` or a `SwiftOperator` fails to be parsed from
+    /// its `.getText()` call, the binary reduction stops and the current
+    /// accumulated result is returned.
+    private func reduceBinary<T: ParserRuleContext>(
+        _ fullList: [T],
+        opRule: (Int) -> ParserRuleContext?,
+        parser: (T) -> Expression?
+    ) -> Expression {
+        
+        return reduceBinary(
+            fullList,
+            opDeriver: { index in opRule(index).flatMap({ swiftOperator(from: $0.getText()) }) },
+            parser: parser
+        )
+    }
+
+    /// Helper for reducing binary expressions expressed as one-or-more parser
+    /// rules.
+    /// Every subsequent expression past the first index on `fullList` is joined
+    /// with the previous one as a binary expression.
+    ///
+    /// If `parser` fails to parse the first element of `fullList`, `nil` is
+    /// returned, instead.
+    ///
+    /// `fullList` must contemplate `initial` as its first index.
+    /// `opDeriver` passes a zero-based index for every sequential element past
+    /// `initial` on `fullList`.
+    private func reduceBinary<T: ParserRuleContext>(
+        _ fullList: [T],
+        opDeriver: (Int) -> SwiftOperator?,
+        parser: (T) -> Expression?
+    ) -> Expression {
+
+        guard !fullList.isEmpty else {
+            return .unknown(UnknownASTContext(context: "/*<invalid empty expression list>*/"))
+        }
+
+        guard var result = parser(fullList[0]) else {
+            return makeUnknownNode(fullList[0])
+        }
+        
+        guard fullList.count > 1 else {
+            return result
+        }
+
+        for (index, rule) in fullList.dropFirst().enumerated() {
+            guard let op = opDeriver(index) else {
+                return result
+            }
+            guard let rhs = parser(rule) else {
+                return result
+            }
+
+            result = result.binary(op: op, rhs: rhs)
+        }
+
+        return result
+    }
     
     private func compoundStatementVisitor() -> ObjectiveCStatementASTReader.CompoundStatementVisitor {
-        ObjectiveCStatementASTReader
-            .CompoundStatementVisitor(
-                expressionReader: self,
-                context: context,
-                delegate: delegate
-            )
+        .init(
+            expressionReader: self,
+            context: context,
+            delegate: delegate
+        )
     }
     
     private class FunctionArgumentVisitor: ObjectiveCParserBaseVisitor<FunctionArgument> {
@@ -497,7 +799,9 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
                 return .unlabeled(expEnum)
             }
             
-            return .unlabeled(.unknown(UnknownASTContext(context: ctx.getText())))
+            return .unlabeled(
+                expressionReader.makeUnknownNode(ctx)
+            )
         }
     }
 }

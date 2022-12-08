@@ -40,8 +40,21 @@ public indirect enum ProtocolCompositionComponent: Hashable {
 /// A tuple swift type, which either represents an empty tuple or two or more
 /// Swift types.
 public enum TupleSwiftType: Hashable {
-    indirect case types(TwoOrMore<SwiftType>)
+    /// An empty tuple type, or `Void`.
     case empty
+    /// A tuple type containing two or more types.
+    indirect case types(TwoOrMore<SwiftType>)
+}
+
+extension TupleSwiftType: ExpressibleByArrayLiteral {
+    /// - precondition: `elements.isEmpty || elements.count >= 2`
+    public init(arrayLiteral elements: SwiftType...) {
+        if elements.isEmpty {
+            self = .empty
+        }
+
+        self = .types(.fromCollection(elements))
+    }
 }
 
 /// An attribute for block types.
@@ -284,6 +297,7 @@ public extension SwiftType {
         .nominal(.typeName(name))
     }
     
+    /// Convenience for `SwiftType.nominal(.generic(name, parameters: parameters))`
     static func generic(_ name: String, parameters: GenericArgumentSwiftType) -> SwiftType {
         .nominal(.generic(name, parameters: parameters))
     }
@@ -382,6 +396,12 @@ extension ProtocolCompositionComponent: CustomStringConvertible {
     
     public static func typeName(_ name: String) -> ProtocolCompositionComponent {
         .nominal(.typeName(name))
+    }
+}
+
+extension ProtocolCompositionComponent: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = .typeName(value)
     }
 }
 
@@ -542,9 +562,10 @@ public struct TwoOrMore<T> {
     /// The collection must have at least two elements.
     ///
     /// - precondition: `collection.count >= 2`
-    public static func fromCollection<C>(_ collection: C) -> TwoOrMore
-        where C: BidirectionalCollection, C.Element == T, C.Index == Int {
-            
+    public static func fromCollection<C>(
+        _ collection: C
+    ) -> TwoOrMore where C: BidirectionalCollection, C.Element == T, C.Index == Int {
+        
         precondition(collection.count >= 2)
         
         return TwoOrMore(first: collection[0], second: collection[1], remaining: Array(collection.dropFirst(2)))

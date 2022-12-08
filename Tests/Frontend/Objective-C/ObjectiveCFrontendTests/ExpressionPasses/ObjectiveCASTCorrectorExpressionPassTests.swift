@@ -7,6 +7,7 @@ import TypeSystem
 import ObjcParserAntlr
 import TestCommons
 import XCTest
+import Utils
 
 @testable import ObjectiveCFrontend
 
@@ -26,6 +27,7 @@ final class ObjectiveCExpressionPassTestAdapter: ExpressionPassTestCaseAdapter {
 
     func parseExpression(
         _ parser: Parser,
+        source: Source,
         typeSystem: TypeSystem,
         intentionContext: FunctionBodyCarryingIntention?,
         container: StatementContainer?
@@ -42,7 +44,7 @@ final class ObjectiveCExpressionPassTestAdapter: ExpressionPassTestCaseAdapter {
 
         let reader = ObjectiveCExprASTReader(
             typeMapper: typeMapper,
-            typeParser: ObjcTypeParser(state: Self._state),
+            typeParser: ObjcTypeParser(state: Self._state, source: source),
             context: context,
             delegate: nil
         )
@@ -52,6 +54,7 @@ final class ObjectiveCExpressionPassTestAdapter: ExpressionPassTestCaseAdapter {
 
     func parseStatement(
         _ parser: Parser,
+        source: Source,
         typeSystem: TypeSystem,
         intentionContext: FunctionBodyCarryingIntention?,
         container: StatementContainer?
@@ -59,7 +62,7 @@ final class ObjectiveCExpressionPassTestAdapter: ExpressionPassTestCaseAdapter {
         let stmt = try parser.statement()
 
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
-        let typeParser = ObjcTypeParser(state: Self._state)
+        let typeParser = ObjcTypeParser(state: Self._state, source: source)
 
         let expReader =
             ObjectiveCExprASTReader(

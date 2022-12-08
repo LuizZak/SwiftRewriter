@@ -88,5 +88,5 @@ public final class ObjcMethodTypeNode: ObjcASTNode, ObjcInitializableNode {
 }
 
 public final class ObjcNullabilitySpecifierNode: ObjcIdentifierNode {
-    
+    public var nullabilitySpecifier: ObjcNullabilitySpecifier = .nullUnspecified
 }

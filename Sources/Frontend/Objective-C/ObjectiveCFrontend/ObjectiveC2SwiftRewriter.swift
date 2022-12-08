@@ -38,7 +38,7 @@ public final class ObjectiveC2SwiftRewriter {
     
     /// Items to type-parse after parsing is complete, and all types have been
     /// gathered.
-    private var lazyParse: [ObjectiveCLazyParseItem] = []
+    private var lazyParse: [(ObjcParser, ObjectiveCLazyParseItem)] = []
     
     /// Items to type-resolve after parsing is complete, and all types have been
     /// gathered.
@@ -189,21 +189,28 @@ public final class ObjectiveC2SwiftRewriter {
         let queue = ConcurrentOperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
-        for item in lazyParse {
+        for (parser, item) in lazyParse {
             queue.addOperation {
                 autoreleasepool {
                     let delegate = InnerStatementASTReaderDelegate(parseItem: item)
 
                     let typeMapper = DefaultTypeMapper(typeSystem: self.typeSystem)
                     let state = ObjectiveC2SwiftRewriter._parserStatePool.pull()
-                    let typeParser = ObjcTypeParser(state: state, antlrSettings: antlrSettings)
+                    let typeParser = ObjcTypeParser(state: state,
+                        source: parser.source,
+                        antlrSettings: antlrSettings
+                    )
+
                     defer {
                         ObjectiveC2SwiftRewriter._parserStatePool.repool(state)
                     }
                     
-                    let reader = ObjectiveCASTReader(typeMapper: typeMapper,
-                                                typeParser: typeParser,
-                                                typeSystem: self.typeSystem)
+                    let reader = ObjectiveCASTReader(
+                        parserStatePool: self.parserStatePool,
+                        typeMapper: typeMapper,
+                        typeParser: typeParser,
+                        typeSystem: self.typeSystem
+                    )
                     reader.delegate = delegate
                     
                     switch item {
@@ -248,7 +255,7 @@ public final class ObjectiveC2SwiftRewriter {
                             )
                         
                     case .globalVar(let v, _):
-                        guard let expression = v.typedSource?.constantExpression?.expression?.expression else {
+                        guard let expression = v.typedSource?.expression?.expression else {
                             return
                         }
                         
@@ -275,25 +282,25 @@ public final class ObjectiveC2SwiftRewriter {
         
         for file in intentionCollection.fileIntentions() {
             for comment in file.headerComments {
-                let converter =
-                    CPreprocessorDirectiveConverter(
-                        parserStatePool: parserStatePool,
-                        typeSystem: typeSystem,
-                        typeResolverInvoker: resolver)
+                let converter = CPreprocessorDirectiveConverter(
+                    parserStatePool: parserStatePool,
+                    typeSystem: typeSystem,
+                    typeResolverInvoker: resolver
+                )
                 
                 guard let declaration = converter.convert(directive: comment, inFile: file) else {
                     continue
                 }
                 
-                let varDecl =
-                    GlobalVariableGenerationIntention(
-                        name: declaration.name,
-                        type: declaration.type,
-                        // TODO: Abstract detection of .m/.c translation unit files
-                        // here so we can properly generalize to any translation
-                        // unit file kind
-                        accessLevel: file.sourcePath.hasSuffix("m") ? .private : .internal,
-                        source: nil)
+                let varDecl = GlobalVariableGenerationIntention(
+                    name: declaration.name,
+                    type: declaration.type,
+                    // TODO: Abstract detection of .m/.c translation unit files
+                    // here so we can properly generalize to any translation
+                    // unit file kind
+                    accessLevel: file.sourcePath.hasSuffix("m") ? .private : .internal,
+                    source: nil
+                )
                 
                 varDecl.storage.isConstant = true
                 varDecl.initialValue = declaration.expression
@@ -331,29 +338,33 @@ public final class ObjectiveC2SwiftRewriter {
             queue.addOperation {
                 autoreleasepool {
                     switch item {
-                    case .extensionDecl(let ext):
-                        let typeName =
-                            typeMapper.typeNameString(for: .pointer(.struct(ext.typeName)),
-                                                      context: .alwaysNonnull)
+                    case .extensionDecl(let decl):
+                        let typeName = typeMapper.typeNameString(
+                            for: .pointer(.typeName(decl.typeName)),
+                            context: .alwaysNonnull
+                        )
                         
-                        ext.typeName = typeName
+                        decl.typeName = typeName
                         
-                    case .typealias(let ta):
-                        guard let originalObjcType = ta.metadata.originalObjcType else {
+                    case .typealias(let decl):
+                        guard let originalObjcType = decl.metadata.originalObjcType else {
                             break
                         }
 
-                        let nullability =
-                            _typeNullability(inType: originalObjcType)
+                        let nullability = _typeNullability(
+                            inType: originalObjcType
+                        )
                         
-                        let ctx =
-                            TypeMappingContext(explicitNullability: nullability,
-                                               inNonnull: ta.inNonnullContext)
+                        let ctx = TypeMappingContext(
+                            explicitNullability: nullability,
+                            inNonnull: decl.inNonnullContext
+                        )
                         
-                        ta.fromType =
-                            typeMapper.swiftType(forObjcType: originalObjcType,
-                                                 context: ctx.withExplicitNullability(.nonnull))
-                        _ = ta.fromType
+                        decl.fromType = typeMapper.swiftType(
+                            forObjcType: originalObjcType,
+                            context: ctx.withExplicitNullability(.nonnull)
+                        )
+
                     default:
                         break
                     }
@@ -380,50 +391,64 @@ public final class ObjectiveC2SwiftRewriter {
                         guard let node = prop.propertySource else { return }
                         guard let type = node.type?.type else { return }
                         
-                        let context =
-                            TypeMappingContext(modifiers: node.attributesList,
-                                               inNonnull: prop.inNonnullContext)
+                        let context = TypeMappingContext(
+                            modifiers: node.attributesList,
+                            inNonnull: prop.inNonnullContext
+                        )
                         
-                        prop.storage.type = typeMapper.swiftType(forObjcType: type,
-                                                                 context: context)
+                        prop.storage.type = typeMapper.swiftType(
+                            forObjcType: type,
+                            context: context
+                        )
                         
                     case let .method(method):
                         guard let node = method.typedSource else { return }
                         
                         let instancetype = (method.type?.typeName).map { SwiftType.typeName($0) }
                         
-                        let signGen = ObjectiveCMethodSignatureConverter(typeMapper: typeMapper,
-                                                              inNonnullContext: method.inNonnullContext,
-                                                              instanceTypeAlias: instancetype)
+                        let signGen = ObjectiveCMethodSignatureConverter(
+                            typeMapper: typeMapper,
+                            inNonnullContext: method.inNonnullContext,
+                            instanceTypeAlias: instancetype
+                        )
+                        
                         method.signature = signGen.generateDefinitionSignature(from: node)
                         
-                    case let .ivar(ivar):
-                        guard let node = ivar.typedSource else { return }
+                    case let .ivar(decl):
+                        guard let node = decl.typedSource else { return }
                         guard let type = node.type?.type else { return }
                         
-                        ivar.storage.type =
-                            typeMapper.swiftType(forObjcType: type,
-                                                 context: .init(inNonnull: ivar.inNonnullContext))
+                        decl.storage.type = typeMapper.swiftType(
+                            forObjcType: type,
+                            context: .init(inNonnull: decl.inNonnullContext)
+                        )
                         
-                    case let .globalVar(gvar):
-                        guard let node = gvar.variableSource else { return }
+                    case let .globalVar(decl):
+                        guard let node = decl.variableSource else { return }
                         guard let type = node.type?.type else { return }
                         
-                        gvar.storage.type =
-                            typeMapper.swiftType(forObjcType: type,
-                                                 context: .init(inNonnull: gvar.inNonnullContext))
+                        decl.storage.type = typeMapper.swiftType(
+                            forObjcType: type,
+                            context: .init(inNonnull: decl.inNonnullContext)
+                        )
                         
                     case let .enumDecl(en):
                         guard let type = en.typedSource?.type else { return }
                         
-                        en.rawValueType = typeMapper.swiftType(forObjcType: type.type, context: .alwaysNonnull)
+                        en.rawValueType = typeMapper.swiftType(
+                            forObjcType: type.type,
+                            context: .alwaysNonnull
+                        )
                         
                     case .globalFunc(let fn):
                         guard let node = fn.typedSource else { return }
                         
-                        let signGen = ObjectiveCMethodSignatureConverter(typeMapper: typeMapper,
-                                                              inNonnullContext: fn.inNonnullContext,
-                                                              instanceTypeAlias: nil)
+                        let signGen = ObjectiveCMethodSignatureConverter(
+                            typeMapper: typeMapper,
+                            inNonnullContext: fn.inNonnullContext,
+                            instanceTypeAlias: nil
+                        )
+                        
                         fn.signature = signGen.generateDefinitionSignature(from: node)
                         
                     case .extensionDecl, .typealias:
@@ -516,14 +541,13 @@ public final class ObjectiveC2SwiftRewriter {
         
         var requiresResolve = false
         
-        let context =
-            IntentionPassContext(
-                typeSystem: typeSystem,
-                typeMapper: typeMapper,
-                typeResolverInvoker: typeResolverInvoker,
-                numThreads: settings.numThreads,
-                notifyChange: { requiresResolve = true }
-            )
+        let context = IntentionPassContext(
+            typeSystem: typeSystem,
+            typeMapper: typeMapper,
+            typeResolverInvoker: typeResolverInvoker,
+            numThreads: settings.numThreads,
+            notifyChange: { requiresResolve = true }
+        )
         
         let intentionPasses =
             [MandatoryIntentionPass(phase: .beforeOtherIntentions)]
@@ -543,9 +567,11 @@ public final class ObjectiveC2SwiftRewriter {
                     }
                     
                     let totalPadLength = intentionPasses.count.description.count
-                    let progressString = String(format: "[%0\(totalPadLength)d/%d]",
-                                                i + 1,
-                                                intentionPasses.count)
+                    let progressString = String(
+                        format: "[%0\(totalPadLength)d/%d]",
+                        i + 1,
+                        intentionPasses.count
+                    )
                     
                     print("\(progressString): \(type(of: pass))")
                 }
@@ -555,11 +581,10 @@ public final class ObjectiveC2SwiftRewriter {
                 printDiagnosedFiles(step: "After intention pass \(type(of: pass))")
                 
                 if requiresResolve {
-                    typeResolverInvoker
-                        .resolveAllExpressionTypes(
-                            in: intentionCollection,
-                            force: true
-                        )
+                    typeResolverInvoker.resolveAllExpressionTypes(
+                        in: intentionCollection,
+                        force: true
+                    )
                 }
             }
         }
@@ -569,21 +594,21 @@ public final class ObjectiveC2SwiftRewriter {
         }
         
         // Resolve all expressions again
-        typeResolverInvoker
-            .resolveAllExpressionTypes(in: intentionCollection,
-                                       force: true)
+        typeResolverInvoker.resolveAllExpressionTypes(
+            in: intentionCollection,
+            force: true
+        )
         
         let syntaxPasses =
             [MandatorySyntaxNodePass.self]
                 + astRewriterPassSources.syntaxNodePasses
         
-        let applier =
-            ASTRewriterPassApplier(
-                passes: syntaxPasses,
-                typeSystem: typeSystem,
-                globals: globals,
-                numThreads: settings.numThreads
-            )
+        let applier = ASTRewriterPassApplier(
+            passes: syntaxPasses,
+            typeSystem: typeSystem,
+            globals: globals,
+            numThreads: settings.numThreads
+        )
         
         let progressDelegate = ASTRewriterDelegate()
         if settings.verbose {
@@ -688,10 +713,8 @@ public final class ObjectiveC2SwiftRewriter {
         }
         
         let typeMapper = DefaultTypeMapper(typeSystem: TypeSystem.defaultTypeSystem)
-        let typeParser = ObjcTypeParser(state: state, antlrSettings: parser.antlrSettings)
         
-        let collectorDelegate =
-            CollectorDelegate(typeMapper: typeMapper, typeParser: typeParser)
+        let collectorDelegate = CollectorDelegate(typeMapper: typeMapper)
         
         if settings.stageDiagnostics.contains(.parsedAST) {
             parser.rootNode.printNode({ print($0) })
@@ -719,7 +742,9 @@ public final class ObjectiveC2SwiftRewriter {
         
         mutex.locking {
             parsers.append(parser)
-            lazyParse.append(contentsOf: collectorDelegate.lazyParse)
+            lazyParse.append(contentsOf: collectorDelegate.lazyParse.map {
+                (parser, $0)
+            })
             lazyResolve.append(contentsOf: collectorDelegate.lazyResolve)
             diagnostics.merge(with: parser.diagnostics)
             intentionCollection.addIntention(fileIntent)
@@ -771,12 +796,11 @@ public final class ObjectiveC2SwiftRewriter {
             globals.addSource(provider.definitionsSource())
         }
 
-        let typeResolverInvoker =
-            DefaultTypeResolverInvoker(
-                globals: globals,
-                typeSystem: typeSystem,
-                numThreads: settings.numThreads
-            )
+        let typeResolverInvoker = DefaultTypeResolverInvoker(
+            globals: globals,
+            typeSystem: typeSystem,
+            numThreads: settings.numThreads
+        )
         
         return typeResolverInvoker
     }
@@ -852,9 +876,11 @@ private extension ObjectiveC2SwiftRewriter {
     class ASTRewriterDelegate: ASTRewriterPassApplierProgressDelegate {
         private var didPrintLine = false
         
-        func astWriterPassApplier(_ passApplier: ASTRewriterPassApplier,
-                                  applyingPassType passType: ASTRewriterPass.Type,
-                                  toFile file: FileGenerationIntention) {
+        func astWriterPassApplier(
+            _ passApplier: ASTRewriterPassApplier,
+            applyingPassType passType: ASTRewriterPass.Type,
+            toFile file: FileGenerationIntention
+        ) {
             
             // Clear previous line and re-print, instead of bogging down the
             // terminal with loads of prints
@@ -863,9 +889,11 @@ private extension ObjectiveC2SwiftRewriter {
             }
             
             let totalPadLength = passApplier.progress.total.description.count
-            let progressString = String(format: "[%0\(totalPadLength)d/%d]",
-                                        passApplier.progress.current,
-                                        passApplier.progress.total)
+            let progressString = String(
+                format: "[%0\(totalPadLength)d/%d]",
+                passApplier.progress.current,
+                passApplier.progress.total
+            )
             
             print("\(progressString): \((file.targetPath as NSString).lastPathComponent)")
             
@@ -879,10 +907,12 @@ private extension ObjectiveC2SwiftRewriter {
     class InnerSwiftWriterDelegate: SwiftWriterProgressListener {
         private var didPrintLine = false
         
-        func swiftWriterReportProgress(_ writer: SwiftWriter,
-                                       filesEmitted: Int,
-                                       totalFiles: Int,
-                                       latestFile: FileGenerationIntention) {
+        func swiftWriterReportProgress(
+            _ writer: SwiftWriter,
+            filesEmitted: Int,
+            totalFiles: Int,
+            latestFile: FileGenerationIntention
+        ) {
             
             // Clear previous line and re-print, instead of bogging down the
             // terminal with loads of prints
@@ -891,9 +921,11 @@ private extension ObjectiveC2SwiftRewriter {
             }
             
             let totalPadLength = totalFiles.description.count
-            let progressString = String(format: "[%0\(totalPadLength)d/%d]",
-                                        filesEmitted,
-                                        totalFiles)
+            let progressString = String(
+                format: "[%0\(totalPadLength)d/%d]",
+                filesEmitted,
+                totalFiles
+            )
             
             print("\(progressString): \((latestFile.targetPath as NSString).lastPathComponent)")
             
@@ -906,14 +938,12 @@ private extension ObjectiveC2SwiftRewriter {
 fileprivate extension ObjectiveC2SwiftRewriter {
     class CollectorDelegate: ObjectiveCIntentionCollectorDelegate {
         var typeMapper: TypeMapper
-        var typeParser: ObjcTypeParser
         
         var lazyParse: [ObjectiveCLazyParseItem] = []
         var lazyResolve: [ObjectiveCLazyTypeResolveItem] = []
         
-        init(typeMapper: TypeMapper, typeParser: ObjcTypeParser) {
+        init(typeMapper: TypeMapper) {
             self.typeMapper = typeMapper
-            self.typeParser = typeParser
         }
         
         func isNodeInNonnullContext(_ node: ObjcASTNode) -> Bool {
@@ -930,10 +960,6 @@ fileprivate extension ObjectiveC2SwiftRewriter {
         
         func typeMapper(for intentionCollector: ObjectiveCIntentionCollector) -> TypeMapper {
             typeMapper
-        }
-        
-        func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> ObjcTypeParser {
-            typeParser
         }
     }
 
@@ -969,19 +995,18 @@ private struct LazyAutotypeVarDeclResolve {
     var index: Int
 }
 
-internal func _typeNullability(inType type: ObjcType) -> TypeNullability? {
+internal func _typeNullability(inType type: ObjcType) -> ObjcNullabilitySpecifier? {
     switch type {
-    case .specified(let specifiers, let type),
-         .qualified(let type, let specifiers):
+    case .specified(let specifiers, let type):
         
         // Struct types are never null.
-        if case .struct = type {
+        if case .typeName = type {
             return .nonnull
         }
         
-        if specifiers.contains("__weak") {
+        if specifiers.contains(.weak) {
             return .nullable
-        } else if specifiers.contains("__unsafe_unretained") {
+        } else if specifiers.contains(.unsafeUnretained) {
             return .nonnull
         }
         

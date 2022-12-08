@@ -5,6 +5,7 @@ import ObjcParser
 import ObjcParserAntlr
 import TypeSystem
 import SwiftRewriterLib
+import Utils
 
 /// Converts preprocessor directives into global variable declarations, in case
 /// they represent simple constants.
@@ -13,17 +14,21 @@ public class CPreprocessorDirectiveConverter {
     let typeSystem: TypeSystem
     let typeResolverInvoker: TypeResolverInvoker
     
-    public init(parserStatePool: ObjcParserStatePool,
-                typeSystem: TypeSystem,
-                typeResolverInvoker: TypeResolverInvoker) {
+    public init(
+        parserStatePool: ObjcParserStatePool,
+        typeSystem: TypeSystem,
+        typeResolverInvoker: TypeResolverInvoker
+    ) {
         
         self.parserStatePool = parserStatePool
         self.typeSystem = typeSystem
         self.typeResolverInvoker = typeResolverInvoker
     }
     
-    public func convert(directive directiveString: String,
-                        inFile file: FileGenerationIntention) -> DirectiveDeclaration? {
+    public func convert(
+        directive directiveString: String,
+        inFile file: FileGenerationIntention
+    ) -> DirectiveDeclaration? {
         
         guard let directive = processDirective(directiveString) else {
             return nil
@@ -48,9 +53,11 @@ public class CPreprocessorDirectiveConverter {
             return nil
         }
         
-        return DirectiveDeclaration(name: directive.identifier,
-                                    type: declaration.type,
-                                    expression: declaration.expression)
+        return DirectiveDeclaration(
+            name: directive.identifier,
+            type: declaration.type,
+            expression: declaration.expression
+        )
     }
     
     func processDirective(_ directive: String) -> Directive? {
@@ -82,8 +89,14 @@ public class CPreprocessorDirectiveConverter {
         let state = parserStatePool.pull()
         defer { parserStatePool.repool(state) }
         
-        let astReader = ObjectiveCASTReader(typeMapper: DefaultTypeMapper(typeSystem: typeSystem),
-                                       typeParser: ObjcTypeParser(state: state))
+        let astReader = ObjectiveCASTReader(
+            parserStatePool: parserStatePool,
+            typeMapper: DefaultTypeMapper(typeSystem: typeSystem),
+            typeParser: ObjcTypeParser(
+                state: state,
+                source: StringCodeSource(source: ctx.getText())
+            )
+        )
         
         return astReader.parseExpression(expression: ctx)
     }

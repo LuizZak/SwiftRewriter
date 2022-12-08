@@ -26,6 +26,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+// Partly based on a C22 draft: https://www.open-std.org/JTC1/SC22/WG14/www/docs/n3054.pdf
+
 parser grammar ObjectiveCParser;
 
 options { tokenVocab=ObjectiveCLexer; }
@@ -36,7 +38,7 @@ translationUnit
 
 topLevelDeclaration
     : importDeclaration
-    | functionDeclaration
+    //| functionDeclaration
     | declaration
     | classInterface
     | classImplementation
@@ -60,8 +62,8 @@ classInterface
     ;
 
 classInterfaceName
-    : className (COLON superclassName)? (LT protocolList GT)?
-    | className (COLON genericSuperclassName)? (LT protocolList GT)?
+    : className (COLON superclassName genericClassParametersSpecifier?)? (LT protocolList GT)?
+    //| className (COLON genericSuperclassName)? (LT protocolList GT)?
     ;
 
 categoryInterface
@@ -72,23 +74,23 @@ categoryInterface
 
 classImplementation
     : IMPLEMENTATION
-       classImplementatioName instanceVariables? implementationDefinitionList?
+       classImplementationName instanceVariables? implementationDefinitionList?
       END
     ;
 
-classImplementatioName
-    : className (COLON superclassName)?
-    | className (COLON genericSuperclassName)?
+classImplementationName
+    : className (COLON superclassName genericClassParametersSpecifier?)?
+    // | className (COLON genericSuperclassName)?
     ;
 
 categoryImplementation
     : IMPLEMENTATION
-       categoryName=className LP identifier RP implementationDefinitionList?
+       categoryName=className LP identifier? RP implementationDefinitionList?
       END
     ;
 
 className
-    : identifier ((LT protocolList GT) | genericsSpecifier)?
+    : identifier genericClassParametersSpecifier?
     ;
 
 superclassName
@@ -96,19 +98,15 @@ superclassName
     ;
 
 genericSuperclassName
-    : identifier genericSuperclassSpecifier
+    : identifier genericClassParametersSpecifier
     ;
 
-genericTypeSpecifier
-    : identifier ((LT protocolList GT) | genericsSpecifier)
-    ;
-
-genericSuperclassSpecifier
+genericClassParametersSpecifier
     : LT (superclassTypeSpecifierWithPrefixes (COMMA superclassTypeSpecifierWithPrefixes)*)? GT
     ;
 
 superclassTypeSpecifierWithPrefixes
-    : typePrefix* typeSpecifier pointer?
+    : typePrefix* typeSpecifier pointer
     ;
 
 protocolDeclaration
@@ -127,7 +125,11 @@ protocolDeclarationList
     ;
 
 classDeclarationList
-    : CLASS className (COMMA className)* SEMI
+    : CLASS classDeclaration (COMMA classDeclaration)* SEMI
+    ;
+
+classDeclaration
+    : className (LT protocolList GT)?
     ;
 
 protocolList
@@ -143,25 +145,18 @@ propertyAttributesList
     ;
 
 propertyAttribute
-    : ATOMIC
-    | NONATOMIC
-    | STRONG
-    | WEAK
-    | RETAIN
-    | ASSIGN
+    : WEAK
     | UNSAFE_UNRETAINED
     | COPY
-    | READONLY
-    | READWRITE
-    | GETTER ASSIGNMENT identifier
-    | SETTER ASSIGNMENT identifier COLON
+    | GETTER ASSIGNMENT selectorName
+    | SETTER ASSIGNMENT selectorName
     | nullabilitySpecifier
     | identifier
     ;
 
 protocolName
     : LT protocolList GT
-    | (COVARIANT | CONTRAVARIANT)?  identifier
+    | (COVARIANT | CONTRAVARIANT)? identifier
     ;
 
 instanceVariables
@@ -255,18 +250,6 @@ propertySynthesizeItem
     : identifier (ASSIGNMENT identifier)?
     ;
 
-blockType
-    : nullabilitySpecifier? typeSpecifier nullabilitySpecifier? LP '^' (nullabilitySpecifier | typeSpecifier)? RP blockParameters?
-    ;
-
-genericsSpecifier
-    : LT (typeSpecifierWithPrefixes (COMMA typeSpecifierWithPrefixes)*)? GT
-    ;
-
-typeSpecifierWithPrefixes
-    : typePrefix* typeSpecifier pointer?
-    ;
-
 dictionaryExpression
     : AT LBRACE (dictionaryPair (COMMA dictionaryPair)* COMMA?)? RBRACE
     ;
@@ -285,20 +268,14 @@ boxExpression
     ;
 
 blockParameters
-    : LP ((typeVariableDeclaratorOrName | VOID) (COMMA typeVariableDeclaratorOrName)*)? RP
-    ;
-
-typeVariableDeclaratorOrName
-    : typeVariableDeclarator
-    | typeName
+    : LP ((parameterDeclaration | VOID) (COMMA parameterDeclaration)*)? RP
     ;
 
 blockExpression
-    : '^' typeSpecifier? nullabilitySpecifier? blockParameters? compoundStatement
-    ;
-
-messageExpression
-    : LBRACK receiver messageSelector RBRACK
+    : BITXOR compoundStatement
+    | BITXOR typeName blockParameters compoundStatement // Must have priority over typeName compoundStatement to ensure parameters aren't interpreted as an abstractDeclarator of the return type
+    | BITXOR typeName compoundStatement
+    | BITXOR blockParameters compoundStatement
     ;
 
 receiver
@@ -370,7 +347,11 @@ functionDefinition
     ;
 
 functionSignature
-    : declarationSpecifiers? identifier (LP parameterList? RP) attributeSpecifier?
+    : declarationSpecifiers? declarator declarationList?
+    ;
+
+declarationList
+    : declaration+
     ;
 
 attribute
@@ -401,16 +382,9 @@ attributeParameterAssignment
     : attributeName ASSIGNMENT (constant | attributeName | stringLiteral)
     ;
 
-declaration
-    : functionCallExpression
-    | functionPointer SEMI
-    | enumDeclaration
-    | varDeclaration
-    | typedefDeclaration
-    ;
-
+// TODO: Replace usages of functionPointer with declaration
 functionPointer
-    : declarationSpecifiers LP '*' identifier? RP LP functionPointerParameterList? RP
+    : declarationSpecifiers LP MUL identifier? RP LP functionPointerParameterList? RP
     ;
 
 functionPointerParameterList
@@ -426,40 +400,25 @@ functionPointerParameterDeclaration
     | VOID
     ;
 
-functionCallExpression
-    : attributeSpecifier? identifier attributeSpecifier? LP directDeclarator RP SEMI
-    ;
-
-enumDeclaration
-    : attributeSpecifier? TYPEDEF? enumSpecifier identifier? SEMI
-    ;
-
-varDeclaration
-    : (declarationSpecifiers initDeclaratorList | declarationSpecifiers) SEMI
-    ;
-
-typedefDeclaration
-    : attributeSpecifier? TYPEDEF (declarationSpecifiers typeDeclaratorList | declarationSpecifiers) macro? SEMI
-    | attributeSpecifier? TYPEDEF functionPointer SEMI
-    ;
-
-typeDeclaratorList
-    : declarator (COMMA declarator)*
-    ;
-
-declarationSpecifiers
-    : (storageClassSpecifier
-    | attributeSpecifier
+declarationSpecifier
+    : storageClassSpecifier
+    | typeSpecifier
+    | typeQualifier
+    | functionSpecifier
+    | alignmentSpecifier
     | arcBehaviourSpecifier
     | nullabilitySpecifier
     | ibOutletQualifier
     | typePrefix
-    | typeQualifier
-    | typeSpecifier)+
     ;
 
-attributeSpecifier
-    : '__attribute__' LP LP attribute (COMMA attribute)* RP RP
+declarationSpecifiers
+    : declarationSpecifier+
+    ;
+
+declaration
+    : declarationSpecifiers initDeclaratorList? SEMI
+    | staticAssertDeclaration
     ;
 
 initDeclaratorList
@@ -470,22 +429,148 @@ initDeclarator
     : declarator (ASSIGNMENT initializer)?
     ;
 
-structOrUnionSpecifier
-    : (STRUCT | UNION) attributeSpecifier* (identifier | identifier? LBRACE fieldDeclaration+ RBRACE)
+declarator
+    : pointer? directDeclarator gccDeclaratorExtension*
+    ;
+
+directDeclarator
+    :   identifier
+    |   LP declarator RP
+    |   directDeclarator LBRACK typeQualifierList? expression? RBRACK
+    |   directDeclarator LBRACK STATIC typeQualifierList? expression RBRACK
+    |   directDeclarator LBRACK typeQualifierList STATIC expression RBRACK
+    |   directDeclarator LBRACK typeQualifierList? MUL RBRACK
+    |   directDeclarator LP parameterTypeList? RP
+    //|   directDeclarator LP identifierList? RP
+    |   LP BITXOR blockDeclarationSpecifier* directDeclarator RP blockParameters
+    |   identifier COLON DIGITS  // bit field
+    |   vcSpecificModifier identifier // Visual C Extension
+    |   LP vcSpecificModifier declarator RP // Visual C Extension
+    ;
+
+blockDeclarationSpecifier
+    : nullabilitySpecifier
+    | arcBehaviourSpecifier
+    | typeQualifier
+    | typePrefix
+    ;
+
+typeName
+    : declarationSpecifiers abstractDeclarator?
+    ;
+
+abstractDeclarator_
+    : pointer abstractDeclarator_?
+    | LP abstractDeclarator? RP abstractDeclaratorSuffix_+
+    | (LBRACK constantExpression? RBRACK)+
+    ;
+
+abstractDeclarator
+    : pointer
+    | pointer? directAbstractDeclarator gccDeclaratorExtension*
+    ;
+
+directAbstractDeclarator
+    :   LP abstractDeclarator RP gccDeclaratorExtension*
+    |   LBRACK typeQualifierList? expression? RBRACK
+    |   LBRACK STATIC typeQualifierList? expression RBRACK
+    |   LBRACK typeQualifierList STATIC expression RBRACK
+    |   LBRACK MUL RBRACK
+    |   LP parameterTypeList? RP gccDeclaratorExtension*
+    |   directAbstractDeclarator LBRACK typeQualifierList? expression? RBRACK
+    |   directAbstractDeclarator LBRACK STATIC typeQualifierList? expression RBRACK
+    |   directAbstractDeclarator LBRACK typeQualifierList STATIC expression RBRACK
+    |   directAbstractDeclarator LBRACK MUL RBRACK
+    |   directAbstractDeclarator LP parameterTypeList? RP gccDeclaratorExtension*
+    |   LP BITXOR blockDeclarationSpecifier* identifier? RP blockParameters
+    ;
+
+abstractDeclaratorSuffix_
+    : LBRACK constantExpression? RBRACK
+    | LP parameterDeclarationList_? RP
+    ;
+
+parameterTypeList
+    : parameterList (COMMA ELIPSIS)?
+    ;
+
+parameterList
+    : parameterDeclaration (COMMA parameterDeclaration)*
+    ;
+
+parameterDeclarationList_
+    : parameterDeclaration (COMMA parameterDeclaration)*
+    ;
+
+parameterDeclaration
+    : declarationSpecifiers declarator
+    | declarationSpecifiers abstractDeclarator?
+    ;
+
+typeQualifierList
+    : typeQualifier+
+    ;
+
+identifierList
+    :   identifier (COMMA identifier)*
+    ;
+
+declaratorSuffix
+    : LBRACK constantExpression? RBRACK
+    ;
+
+attributeSpecifier
+    : ATTRIBUTE LP LP attribute (COMMA attribute)* RP RP
+    ;
+
+atomicTypeSpecifier
+    :   ATOMIC_ LP typeName RP
     ;
 
 fieldDeclaration
-    : specifierQualifierList fieldDeclaratorList macro? SEMI
-    | functionPointer SEMI
+    : declarationSpecifiers fieldDeclaratorList macro? SEMI
+    ;
+
+structOrUnionSpecifier
+    : structOrUnion attributeSpecifier* identifier? LBRACE structDeclarationList RBRACE
+    | structOrUnion attributeSpecifier* identifier
+    ;
+
+structOrUnion
+    : STRUCT
+    | UNION
+    ;
+
+structDeclarationList
+    : structDeclaration+
+    ;
+
+structDeclaration // The first two rules have priority order and cannot be simplified to one expression.
+    : attributeSpecifier* specifierQualifierList fieldDeclaratorList SEMI
+    | attributeSpecifier* specifierQualifierList SEMI
+    | staticAssertDeclaration
     ;
 
 specifierQualifierList
-    : (arcBehaviourSpecifier
-    | nullabilitySpecifier
-    | ibOutletQualifier
-    | typePrefix
-    | typeQualifier
-    | typeSpecifier)+
+    : (typeSpecifier | typeQualifier) specifierQualifierList?
+    ;
+
+// TODO: Fix the first alt on this syntax: It accepts invalid syntax like 'enum <ident>: <type> <ident> { <fields> }'.
+enumSpecifier
+    : ENUM (enumName=identifier? COLON typeName)? (identifier (LBRACE enumeratorList RBRACE)? | LBRACE enumeratorList RBRACE)
+    | (NS_OPTIONS | NS_ENUM) LP typeName COMMA enumName=identifier RP LBRACE enumeratorList RBRACE
+    ;
+
+enumeratorList
+    : enumerator (COMMA enumerator)* COMMA?
+    ;
+
+enumerator
+    : enumeratorIdentifier (ASSIGNMENT expression)?
+    ;
+
+enumeratorIdentifier
+    : identifier
     ;
 
 ibOutletQualifier
@@ -509,9 +594,12 @@ nullabilitySpecifier
 
 storageClassSpecifier
     : AUTO
+    | CONSTEXPR
+    | EXTERN
     | REGISTER
     | STATIC
-    | EXTERN
+    | THREAD_LOCAL_
+    | TYPEDEF
     ;
 
 typePrefix
@@ -522,13 +610,28 @@ typePrefix
     | INLINE
     | NS_INLINE
     | KINDOF
+    | UNUSED
     ;
 
 typeQualifier
     : CONST
     | VOLATILE
     | RESTRICT
+    | ATOMIC_
     | protocolQualifier
+    ;
+
+functionSpecifier
+    : (INLINE
+    | NORETURN_
+    | INLINE__ // GCC extension
+    | STDCALL)
+    | gccAttributeSpecifier
+    | DECLSPEC LP identifier RP
+    ;
+
+alignmentSpecifier
+    : ALIGNAS_ LP (typeName | constantExpression) RP
     ;
 
 protocolQualifier
@@ -541,12 +644,34 @@ protocolQualifier
     ;
 
 typeSpecifier
-    : scalarTypeSpecifier pointer?
-    | typeofExpression
-    | KINDOF? genericTypeSpecifier pointer?
-    | structOrUnionSpecifier pointer?
+    : scalarTypeSpecifier
+    | EXTENSION LP (M128 | M128D | M128I) RP
+    | genericTypeSpecifier
+    | atomicTypeSpecifier
+    | structOrUnionSpecifier
     | enumSpecifier
-    | KINDOF? identifier pointer?
+    | typedefName
+    | typeofTypeSpecifier
+    ;
+
+typeofTypeSpecifier
+    : TYPEOF (LP expression RP) // GCC extension
+    ;
+
+typedefName
+    : identifier
+    ;
+
+genericTypeSpecifier
+    : identifier genericTypeList
+    ;
+
+genericTypeList
+    : LT (genericTypeParameter (COMMA genericTypeParameter)*)? GT
+    ;
+
+genericTypeParameter
+    : (COVARIANT | CONTRAVARIANT)? typeName
     ;
 
 scalarTypeSpecifier
@@ -559,10 +684,12 @@ scalarTypeSpecifier
     | DOUBLE
     | SIGNED
     | UNSIGNED
-    ;
-
-typeofExpression
-    : TYPEOF (LP expression RP)
+    | BOOL_
+    | CBOOL
+    | COMPLEX
+    | M128
+    | M128D
+    | M128I
     ;
 
 fieldDeclaratorList
@@ -571,46 +698,50 @@ fieldDeclaratorList
 
 fieldDeclarator
     : declarator
-    | declarator? COLON constant
+    | declarator? COLON constantExpression
     ;
 
-enumSpecifier
-    : ENUM (identifier? COLON typeName)? (identifier (LBRACE enumeratorList RBRACE)? | LBRACE enumeratorList RBRACE)
-    | (NS_OPTIONS | NS_ENUM) LP typeName COMMA identifier RP LBRACE enumeratorList RBRACE
+vcSpecificModifier
+    : (CDECL
+    | CLRCALL
+    | STDCALL
+    | FASTCALL
+    | THISCALL
+    | VECTORCALL)
     ;
 
-enumeratorList
-    : enumerator (COMMA enumerator)* COMMA?
+gccDeclaratorExtension
+    : ASM LP stringLiteral+ RP
+    | gccAttributeSpecifier
     ;
 
-enumerator
-    : enumeratorIdentifier (ASSIGNMENT expression)?
+gccAttributeSpecifier
+    : ATTRIBUTE LP LP gccAttributeList RP RP
     ;
 
-enumeratorIdentifier
-    : identifier
+gccAttributeList
+    : gccAttribute? (COMMA gccAttribute?)*
     ;
 
-directDeclarator
-    : (identifier | LP declarator RP) declaratorSuffix* attributeSpecifier?
-    | LP BITXOR nullabilitySpecifier? identifier? RP blockParameters
-    | LP MUL nullabilitySpecifier? identifier? RP blockParameters
+gccAttribute
+    : ~(COMMA | LP | RP) // relaxed def for "identifier or reserved word"
+      (LP argumentExpressionList? RP)?
     ;
 
-declaratorSuffix
-    : LBRACK constantExpression? RBRACK
-    ;
-
-parameterList
-    : parameterDeclarationList (COMMA ELIPSIS)?
+pointer_
+    : MUL declarationSpecifiers? pointer?
     ;
 
 pointer
-    : '*' declarationSpecifiers? pointer?
+    : pointerEntry+
+    ;
+
+pointerEntry
+    : (MUL) typeQualifierList? nullabilitySpecifier?
     ;
 
 macro
-    : identifier (LP primaryExpression (COMMA primaryExpression)* RP)?
+    : identifier (LP (COMMA | macroArguments+=~RP)+ RP)?
     ;
 
 arrayInitializer
@@ -622,7 +753,7 @@ structInitializer
     ;
 
 structInitializerItem
-    : '.' expression
+    : DOT expression
     | structInitializer
     | arrayInitializer
     ;
@@ -631,34 +762,8 @@ initializerList
     : initializer (COMMA initializer)* COMMA?
     ;
 
-typeName
-    : specifierQualifierList abstractDeclarator?
-    | blockType
-    ;
-
-abstractDeclarator
-    : pointer abstractDeclarator?
-    | LP abstractDeclarator? RP abstractDeclaratorSuffix+
-    | (LBRACK constantExpression? RBRACK)+
-    ;
-
-abstractDeclaratorSuffix
-    : LBRACK constantExpression? RBRACK
-    | LP parameterDeclarationList? RP
-    ;
-
-parameterDeclarationList
-    : parameterDeclaration (COMMA parameterDeclaration)*
-    ;
-
-parameterDeclaration
-    : declarationSpecifiers declarator
-    | functionPointer
-    | VOID
-    ;
-
-declarator
-    : pointer? directDeclarator
+staticAssertDeclaration
+    : STATIC_ASSERT_ LP constantExpression COMMA stringLiteral+ RP SEMI
     ;
 
 statement
@@ -684,7 +789,7 @@ rangeExpression
     ;
 
 compoundStatement
-    : LBRACE (declaration | statement)* RBRACE
+    : LBRACE (statement | declaration)* RBRACE
     ;
 
 selectionStatement
@@ -749,32 +854,98 @@ expressions
     ;
 
 expression
-    : castExpression
-
-    | expression op=(MUL | DIV | MOD) expression
-    | expression op=(ADD | SUB) expression
-    | expression (LT LT | GT GT) expression
-    | expression op=(LE | GE | LT | GT) expression
-    | expression op=(NOTEQUAL | EQUAL) expression
-    | expression op=BITAND expression
-    | expression op=BITXOR expression
-    | expression op=BITOR expression
-    | expression op=AND expression
-    | expression op=OR expression
-
-    | expression QUESTION trueExpression=expression? COLON falseExpression=expression
-
-    | unaryExpression assignmentOperator assignmentExpression=expression
+    : assignmentExpression
+    //| expression QUESTION trueExpression=expression? COLON falseExpression=expression
     | LP compoundStatement RP
     ;
 
+/*
+binaryExpression
+    : castExpression op=(MUL | DIV | MOD) castExpression #MultiplicativeExpression
+    | castExpression op=(ADD | SUB) castExpression #AdditiveExpression
+    | castExpression (LT LT | GT GT) castExpression #ShiftExpression
+    | castExpression op=(LE | GE | LT | GT) castExpression #ComparativeExpression
+    | castExpression op=(NOTEQUAL | EQUAL) castExpression #EqualityExpression
+    | castExpression op=BITAND castExpression #BitwiseAndExpression
+    | castExpression op=BITXOR castExpression #BitwiseXorExpression
+    | castExpression op=BITOR castExpression #BitwiseOrExpression
+    | castExpression op=AND castExpression #LogicalAndExpression
+    | castExpression op=OR castExpression #LogicalOrExpression
+    ;
+*/
+
+assignmentExpression
+    : conditionalExpression
+    | unaryExpression assignmentOperator expression
+    ;
+
 assignmentOperator
-    : ASSIGNMENT | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|='
+    : ASSIGNMENT | MUL_ASSIGN | DIV_ASSIGN | MOD_ASSIGN | ADD_ASSIGN | SUB_ASSIGN | LSHIFT_ASSIGN | RSHIFT_ASSIGN | AND_ASSIGN | XOR_ASSIGN | OR_ASSIGN
+    ;
+
+conditionalExpression
+    : logicalOrExpression (QUESTION trueExpression=expression? COLON falseExpression=conditionalExpression)?
+    ;
+
+logicalOrExpression
+    : logicalAndExpression (OR logicalAndExpression)*
+    ;
+
+logicalAndExpression
+    : bitwiseOrExpression (AND bitwiseOrExpression)*
+    ;
+
+bitwiseOrExpression
+    : bitwiseXorExpression (BITOR bitwiseXorExpression)*
+    ;
+
+bitwiseXorExpression
+    : bitwiseAndExpression (BITXOR bitwiseAndExpression)*
+    ;
+
+bitwiseAndExpression
+    : equalityExpression (BITAND equalityExpression)*
+    ;
+
+equalityExpression
+    : comparisonExpression (equalityOperator comparisonExpression)*
+    ;
+equalityOperator
+    : EQUAL | NOTEQUAL
+    ;
+
+comparisonExpression
+    : shiftExpression (comparisonOperator shiftExpression)*
+    ;
+comparisonOperator
+    : LT | GT | LE | GE
+    ;
+
+shiftExpression
+    : additiveExpression (shiftOperator additiveExpression)*
+    ;
+shiftOperator
+    : LSHIFT | RSHIFT
+    ;
+
+additiveExpression
+    : multiplicativeExpression (additiveOperator multiplicativeExpression)*
+    ;
+additiveOperator
+    : ADD | SUB
+    ;
+
+multiplicativeExpression
+    : castExpression (multiplicativeOperator castExpression)*
+    ;
+multiplicativeOperator
+    : MUL | DIV | MOD
     ;
 
 castExpression
-    : unaryExpression
-    | (LP typeName RP) (castExpression | initializer)
+    : EXTENSION? LP typeName RP castExpression
+    | unaryExpression
+    | DIGITS // for
     ;
 
 initializer
@@ -796,33 +967,17 @@ unaryExpression
     ;
 
 unaryOperator
-    : '&'
-    | '*'
+    : BITAND
+    | MUL
     | ADD
     | SUB
-    | '~'
+    | TILDE
     | BANG
     ;
 
 postfixExpression
     : primaryExpression postfixExpr*
     | postfixExpression (DOT | STRUCTACCESS) identifier postfixExpr*  // TODO: get rid of property and postfix expression.
-    ;
-
-postfixExpr
-    : LBRACK expression RBRACK
-    | LP argumentExpressionList? RP
-    | LP (COMMA | macroArguments+=~RP)+ RP
-    | op=(INC | DEC)
-    ;
-
-argumentExpressionList
-    : argumentExpression (COMMA argumentExpression)*
-    ;
-
-argumentExpression
-    : expression
-    | genericTypeSpecifier
     ;
 
 primaryExpression
@@ -838,6 +993,25 @@ primaryExpression
     | arrayExpression
     | boxExpression
     | blockExpression
+    ;
+
+postfixExpr
+    : LBRACK expression RBRACK
+    | LP argumentExpressionList? RP
+    | op=(INC | DEC)
+    ;
+
+argumentExpressionList
+    : argumentExpression (COMMA argumentExpression)*
+    ;
+
+argumentExpression
+    : expression
+    | genericTypeSpecifier
+    ;
+
+messageExpression
+    : LBRACK receiver messageSelector RBRACK
     ;
 
 constant
@@ -880,24 +1054,24 @@ identifier
     | NONATOMIC
     | RETAIN
 
-    | AUTORELEASING_QUALIFIER
-    | BLOCK
-    | BRIDGE_RETAINED
-    | BRIDGE_TRANSFER
+    //| AUTORELEASING_QUALIFIER
+    //| BLOCK
+    //| BRIDGE_RETAINED
+    //| BRIDGE_TRANSFER
     | COVARIANT
     | CONTRAVARIANT
     | DEPRECATED
-    | KINDOF
-    | UNUSED
+    //| KINDOF
+    //| UNUSED
 
     | NS_INLINE
     | NS_ENUM
     | NS_OPTIONS
 
-    | NULL_UNSPECIFIED
-    | NULLABLE
-    | NONNULL
-    | NULL_RESETTABLE
+    //| NULL_UNSPECIFIED
+    //| NULLABLE
+    //| NONNULL
+    //| NULL_RESETTABLE
 
     | ASSIGN
     | COPY
@@ -906,11 +1080,11 @@ identifier
     | STRONG
     | READONLY
     | READWRITE
-    | WEAK
-    | UNSAFE_UNRETAINED
+    //| WEAK
+    //| UNSAFE_UNRETAINED
 
-    | IB_OUTLET
-    | IB_OUTLET_COLLECTION
+    //| IB_OUTLET
+    //| IB_OUTLET_COLLECTION
     | IB_INSPECTABLE
     | IB_DESIGNABLE
     ;

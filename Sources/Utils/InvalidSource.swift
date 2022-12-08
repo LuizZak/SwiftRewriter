@@ -45,4 +45,8 @@ public struct InvalidSource: Source {
     public func substring(inCharRange range: Range<Int>) -> Substring? {
         nil
     }
+
+    public func sourceSubstring(_ range: SourceRange) -> Substring? {
+        nil
+    }
 }

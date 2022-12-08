@@ -19,11 +19,13 @@ public class ObjectiveCMethodSignatureConverter {
     /// a class-type function definition.
     public func generateDefinitionSignature(from objcMethod: ObjcMethodDefinitionNode) -> FunctionSignature {
         var sign =
-            FunctionSignature(name: "__",
-                              parameters: [],
-                              returnType: SwiftType.anyObject.asNullabilityUnspecified,
-                              isStatic: objcMethod.isClassMethod,
-                              isMutating: false)
+            FunctionSignature(
+                name: "__",
+                parameters: [],
+                returnType: .anyObject.asNullabilityUnspecified,
+                isStatic: objcMethod.isClassMethod,
+                isMutating: false
+            )
         
         if let sel = objcMethod.methodSelector?.selector {
             switch sel {
@@ -34,11 +36,11 @@ public class ObjectiveCMethodSignatureConverter {
             }
         }
         
-        var nullability = TypeNullability.unspecified
+        var nullability = ObjcNullabilitySpecifier.nullUnspecified
         
         // Nullability specifiers (from e.g. `... arg:(nullable NSString*)paramName ...`
         if let nullSpecs = objcMethod.returnType?.nullabilitySpecifiers {
-            nullability = nullabilityFrom(specifiers: nullSpecs) ?? .unspecified
+            nullability = nullabilityFrom(specifiers: nullSpecs) ?? .nullUnspecified
         }
         
         if let type = objcMethod.returnType?.type?.type {
@@ -93,8 +95,10 @@ public class ObjectiveCMethodSignatureConverter {
     
     // MARK: - Private Members
     
-    private func processKeywords(_ keywords: [ObjcKeywordDeclaratorNode],
-                                 _ target: inout FunctionSignature) {
+    private func processKeywords(
+        _ keywords: [ObjcKeywordDeclaratorNode],
+        _ target: inout FunctionSignature
+    ) {
         
         guard !keywords.isEmpty else {
             return
@@ -106,7 +110,7 @@ public class ObjectiveCMethodSignatureConverter {
         for (i, kw) in keywords.enumerated() {
             var label = kw.selector?.name
             let identifier = kw.identifier?.name ?? "_\(i)"
-            var nullability: TypeNullability?
+            var nullability: ObjcNullabilitySpecifier?
             let type = kw.type?.type?.type ?? ObjcType.id()
             
             // The first label name is always empty.
@@ -133,20 +137,11 @@ public class ObjectiveCMethodSignatureConverter {
         }
     }
     
-    private func nullabilityFrom(specifiers: [ObjcNullabilitySpecifierNode]) -> TypeNullability? {
+    private func nullabilityFrom(specifiers: [ObjcNullabilitySpecifierNode]) -> ObjcNullabilitySpecifier? {
         guard let last = specifiers.last else {
             return inNonnullContext ? .nonnull : nil
         }
-        
-        switch last.name {
-        case "nonnull":
-            return .nonnull
-        case "nullable":
-            return .nullable
-        case "null_unspecified":
-            return .unspecified
-        default:
-            return inNonnullContext ? .nonnull : nil
-        }
+
+        return last.nullabilitySpecifier
     }
 }

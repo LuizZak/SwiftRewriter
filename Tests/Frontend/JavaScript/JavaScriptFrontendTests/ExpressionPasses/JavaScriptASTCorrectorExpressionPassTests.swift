@@ -27,6 +27,7 @@ final class JavaScriptExpressionPassTestAdapter: ExpressionPassTestCaseAdapter {
 
     func parseExpression(
         _ parser: Parser,
+        source: Source,
         typeSystem: TypeSystem,
         intentionContext: FunctionBodyCarryingIntention?,
         container: StatementContainer?
@@ -51,6 +52,7 @@ final class JavaScriptExpressionPassTestAdapter: ExpressionPassTestCaseAdapter {
 
     func parseStatement(
         _ parser: Parser,
+        source: Source,
         typeSystem: TypeSystem,
         intentionContext: FunctionBodyCarryingIntention?,
         container: StatementContainer?

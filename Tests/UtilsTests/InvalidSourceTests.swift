@@ -43,7 +43,15 @@ class SourceTests: XCTestCase {
                 return 0
             }
 
+            func sourceLocation(atStringIndex index: String.Index) -> SourceLocation {
+                return .invalid
+            }
+
             func substring(inCharRange range: Range<Int>) -> Substring? {
+                return nil
+            }
+
+            func sourceSubstring(_ range: SourceRange) -> Substring? {
                 return nil
             }
         }

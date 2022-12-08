@@ -1,5 +1,5 @@
-import SwiftAST
 import XCTest
+import SwiftAST
 
 @testable import ObjectiveCFrontend
 

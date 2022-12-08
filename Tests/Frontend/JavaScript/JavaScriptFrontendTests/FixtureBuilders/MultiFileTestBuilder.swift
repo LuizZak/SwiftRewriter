@@ -127,7 +127,7 @@ class MultiFileTestBuilder {
 
                     Diff:
 
-                    \(expectedSwift.makeDifferenceMarkString(against: buffer))
+                    \(buffer.makeDifferenceMarkString(against: expectedSwift))
                     """,
                     file: file,
                     line: line
@@ -254,7 +254,7 @@ class CompiledMultiFileTestResults {
 
                 Diff:
 
-                \(expectedSwift.makeDifferenceMarkString(against: actualSwift))
+                \(actualSwift.makeDifferenceMarkString(against: expectedSwift))
                 """,
                 file: match.expectedFile._file,
                 line: match.expectedFile._line

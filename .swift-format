@@ -7,5 +7,6 @@
     "maximumBlankLines": 1,
     "respectsExistingLineBreaks": true,
     "lineBreakBeforeControlFlowKeywords": true,
-    "lineBreakBeforeEachArgument": true
+    "lineBreakBeforeEachArgument": true,
+    "prioritizeKeepingFunctionOutputTogether": true
 }

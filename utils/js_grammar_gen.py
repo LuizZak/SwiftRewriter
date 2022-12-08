@@ -15,7 +15,7 @@ from antlr_grammar_gen import (
 from console_color import ConsoleColor
 
 
-def generate_js_antlr_grammar():
+def generate_js_antlr_grammar(antlr_v: str | None = None):
     base_path = grammars_path("JsGrammar")
 
     print(
@@ -28,7 +28,7 @@ def generate_js_antlr_grammar():
         base_path.joinpath("JavaScriptParser.g4"),
     ]
 
-    generate_antlr_grammar(output_path, grammar_files)
+    generate_antlr_grammar(output_path, grammar_files, antlr_v)
 
     # Copy -LexerBase.swift/-ParserBase.swift to generated folder
     lexer_file_name = "JavaScriptLexerBase.swift"

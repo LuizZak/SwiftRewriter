@@ -61,8 +61,8 @@ public final class ObjectiveCASTReaderContext {
         localsStack.removeLast()
     }
     
-    public func popClosestCommentBefore(node: ParserRuleContext) -> RawCodeComment? {
-        guard let start = node.getStart() else {
+    public func popClosestCommentBefore(rule: ParserRuleContext) -> RawCodeComment? {
+        guard let start = rule.getStart() else {
             return nil
         }
         
@@ -76,9 +76,9 @@ public final class ObjectiveCASTReaderContext {
         return nil
     }
     
-    public func popClosestCommentsBefore(node: ParserRuleContext) -> [RawCodeComment] {
+    public func popClosestCommentsBefore(rule: ParserRuleContext) -> [RawCodeComment] {
         var comments: [RawCodeComment] = []
-        while let comment = popClosestCommentBefore(node: node) {
+        while let comment = popClosestCommentBefore(rule: rule) {
             comments.append(comment)
         }
         

@@ -266,11 +266,10 @@ public class FoundationExpressionPass: BaseExpressionPass {
         
         let mapper = DefaultTypeMapper(typeSystem: typeSystem)
         
-        let newType =
-            mapper.swiftType(
-                forObjcType: .pointer(.struct(ident)),
-                context: .alwaysNonnull
-            )
+        let newType = mapper.swiftType(
+            forObjcType: .pointer(.typeName(ident)),
+            context: .alwaysNonnull
+        )
         
         let typeName = mapper.typeNameString(for: newType)
         

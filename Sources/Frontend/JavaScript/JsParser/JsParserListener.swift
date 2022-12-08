@@ -129,7 +129,7 @@ internal class JsParserListener: JavaScriptParserBaseListener {
                         expression: singleExpression
                     )
             
-            node.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
+            node.precedingComments = commentQuerier.popAllCommentsBefore(rule: ctx)
 
             classNode.addChild(node)
         }
@@ -156,7 +156,7 @@ internal class JsParserListener: JavaScriptParserBaseListener {
             context.pushContext(node: methodNode)
 
             nodeFactory.updateSourceLocation(for: methodNode, with: ctx)
-            methodNode.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
+            methodNode.precedingComments = commentQuerier.popAllCommentsBefore(rule: ctx)
 
             if let methodName = methodName {
                 let identifierNode = nodeFactory.makeIdentifier(from: methodName)
@@ -173,7 +173,7 @@ internal class JsParserListener: JavaScriptParserBaseListener {
         context.pushContext(node: methodNode)
 
         nodeFactory.updateSourceLocation(for: methodNode, with: ctx)
-        methodNode.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
+        methodNode.precedingComments = commentQuerier.popAllCommentsBefore(rule: ctx)
 
         if let methodName = methodName {
             let identifierNode = nodeFactory.makeIdentifier(from: methodName)
@@ -255,7 +255,7 @@ internal class JsParserListener: JavaScriptParserBaseListener {
                 varModifier: varModifier
             )
         
-        variableDeclarationListNode.precedingComments = commentQuerier.popClosestCommentsBefore(node: ctx)
+        variableDeclarationListNode.precedingComments = commentQuerier.popAllCommentsBefore(rule: ctx)
 
         for variableDeclaration in variableDeclarationList.variableDeclaration() {
             // TODO: Support different assignable types?
@@ -399,7 +399,7 @@ private class GenericParseTreeContextMapper {
             nodeFactory.updateSourceLocation(for: node, with: rule)
             
             if collectComments {
-                node.precedingComments = commentQuerier.popClosestCommentsBefore(node: rule)
+                node.precedingComments = commentQuerier.popAllCommentsBefore(rule: rule)
             }
             
             context.pushContext(node: node)

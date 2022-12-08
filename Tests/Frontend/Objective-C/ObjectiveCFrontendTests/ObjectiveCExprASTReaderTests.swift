@@ -4,6 +4,7 @@ import ObjcParserAntlr
 import SwiftAST
 import TypeSystem
 import XCTest
+import Utils
 
 @testable import ObjectiveCFrontend
 
@@ -219,7 +220,21 @@ class ObjectiveCExprASTReaderTests: XCTestCase {
             readsAs: .binary(lhs: .identifier("i"), op: .bitwiseShiftRight, rhs: .constant(10))
         )
     }
+    
+    func testChainedBinaryOperations() {
+        assert(
+            objcExpr: "1 + 2 + 3",
+            readsAs: .binary(lhs: .constant(1), op: .add, rhs: .constant(2)).binary(op: .add, rhs: .constant(3))
+        )
+    }
 
+    func testChainedBinaryOperations_respectsPrecedence() {
+        assert(
+            objcExpr: "1 + 2 * 3",
+            readsAs: .constant(1).binary(op: .add, rhs: .constant(2).binary(op: .multiply, rhs: .constant(3)))
+        )
+    }
+    
     func testPostfixIncrementDecrement() {
         assert(
             objcExpr: "i++",
@@ -404,7 +419,11 @@ extension ObjectiveCExprASTReaderTests {
 
         let typeSystem = TypeSystem()
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
-        let typeParser = ObjcTypeParser(state: ObjectiveCExprASTReaderTests._state)
+        let source = StringCodeSource(source: objcExpr)
+        let typeParser = ObjcTypeParser(
+            state: ObjectiveCExprASTReaderTests._state,
+            source: source
+        )
 
         let sut =
             ObjectiveCExprASTReader(
@@ -429,12 +448,22 @@ extension ObjectiveCExprASTReaderTests {
             if result != expected {
                 var resStr = "nil"
                 var expStr = ""
+                var suffix = ""
 
                 if let result = result {
                     dump(result, to: &resStr)
                 }
                 dump(expected, to: &expStr)
 
+                // If both strings are the same, use `dump()` to disambiguate
+                // both values
+                if resStr == expStr {
+                    suffix += "\nResult:\n"
+                    dump(result, to: &suffix)
+                    suffix += "\nExpected:\n"
+                    dump(expected, to: &suffix)
+                }
+                
                 XCTFail(
                     """
                     Failed: Expected to read Objective-C expression
@@ -442,7 +471,7 @@ extension ObjectiveCExprASTReaderTests {
                     as
                     \(expStr)
                     but read as
-                    \(resStr)
+                    \(resStr)\(suffix)
                     """,
                     file: file,
                     line: line

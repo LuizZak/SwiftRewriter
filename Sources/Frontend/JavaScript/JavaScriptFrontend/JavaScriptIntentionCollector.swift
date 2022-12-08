@@ -5,6 +5,7 @@ import SwiftAST
 import KnownType
 import Intentions
 import TypeSystem
+import Utils
 
 // TODO: Move lazy parse object reporting to use a `JavaScriptLazyParseItem` like
 // TODO: the Objective-C frontend does.
@@ -326,7 +327,7 @@ extension JavaScriptIntentionCollector {
     }
     
     private func convertComments(_ comments: [RawCodeComment]) -> [String] {
-        return comments.map { $0.string.trimmingWhitespaces() }
+        return comments.map { $0.string.trimmingWhitespace() }
     }
 }
 

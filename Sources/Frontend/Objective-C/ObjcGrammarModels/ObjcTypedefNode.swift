@@ -3,17 +3,8 @@ public class ObjcTypedefNode: ObjcASTNode, ObjcInitializableNode {
     public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
-    public var structDeclaration: ObjcStructDeclarationNode? {
-        firstChild()
-    }
     public var type: ObjcTypeNameNode? {
         firstChild()
-    }
-    public var blockParameters: ObjcBlockParametersNode? {
-        firstChild()
-    }
-    public var typeDeclarators: [ObjcTypeDeclaratorNode] {
-        childrenMatching()
     }
     
     public required init(isInNonnullContext: Bool) {

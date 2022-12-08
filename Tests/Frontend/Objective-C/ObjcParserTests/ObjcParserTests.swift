@@ -38,6 +38,75 @@ class ObjcParserTests: XCTestCase {
         _ = parserTest(source)
     }
 
+    func testParse_detectsNonnullRegions_declarations() {
+        let node = parserTest("""
+            int a;
+            NS_ASSUME_NONNULL_BEGIN
+            int b;
+            NS_ASSUME_NONNULL_END
+            int c;
+            """)
+        
+        Asserter(object: node).assertChildCount(3)?
+            .asserter(forChildAt: 0) { node in
+                node.assert(isOfType: ObjcASTNode.self)?
+                    .assert(isInNonnullContext: false)
+            }?
+            .asserter(forChildAt: 1) { node in
+                node.assert(isOfType: ObjcASTNode.self)?
+                    .assert(isInNonnullContext: true)
+            }?
+            .asserter(forChildAt: 2) { node in
+                node.assert(isOfType: ObjcASTNode.self)?
+                    .assert(isInNonnullContext: false)
+            }
+    }
+
+    func testParse_detectsNonnullRegions_functionDefinitions() {
+        let node = parserTest("""
+            void a() { }
+            NS_ASSUME_NONNULL_BEGIN
+            void b() { }
+            NS_ASSUME_NONNULL_END
+            void c() { }
+            """)
+        
+        Asserter(object: node).assertChildCount(3)?
+            .asserter(forChildAt: 0) { node in
+                node.assert(isOfType: ObjcASTNode.self)?
+                    .assert(isInNonnullContext: false)
+            }?
+            .asserter(forChildAt: 1) { node in
+                node.assert(isOfType: ObjcASTNode.self)?
+                    .assert(isInNonnullContext: true)
+            }?
+            .asserter(forChildAt: 2) { node in
+                node.assert(isOfType: ObjcASTNode.self)?
+                    .assert(isInNonnullContext: false)
+            }
+    }
+    
+    func testParseGlobalVariables() {
+        let node = parserTest("""
+            int aGlobal;
+            NSString *_Nonnull anotherGlobal;
+            """)
+        
+        Asserter(object: node).inClosureUnconditional { asserter in
+            asserter.assertChildCount(2)?
+                .asserter(forChildAt: 0) { kMethodKey in
+                    kMethodKey.assert(isOfType: ObjcVariableDeclarationNode.self)?
+                        .assert(name: "aGlobal")?
+                        .assert(type: "signed int")
+                }?
+                .asserter(forChildAt: 1) { kMethodKey in
+                    kMethodKey.assert(isOfType: ObjcVariableDeclarationNode.self)?
+                        .assert(name: "anotherGlobal")?
+                        .assert(type: .pointer("NSString", nullabilitySpecifier: .nonnull))
+                }
+        }
+    }
+    
     func testParseReturnTypeAnnotationInBlock() {
         let source = """
             @implementation A
@@ -74,6 +143,72 @@ class ObjcParserTests: XCTestCase {
         _ = parserTest(source)
     }
 
+    func testParseInterfaceProtocolSpecification() {
+        let source = """
+        @interface MyClass <UITableViewDelegate>
+        @end
+        """
+        let clsDecl: ObjcClassInterfaceNode? = parserTest(source).firstChild()
+
+        XCTAssertNotNil(clsDecl)
+        XCTAssertNotNil(clsDecl?.protocolList)
+        XCTAssertNotNil(clsDecl?.protocolList?.protocols.first)
+
+        XCTAssertEqual(clsDecl?.protocolList?.protocols.first?.name, "UITableViewDelegate")
+    }
+    
+    func testParseInterfaceProtocolSpecification_withSuperclass() {
+        let source = """
+        @interface MyClass : UIView <UITableViewDelegate>
+        @end
+        """
+        let clsDecl: ObjcClassInterfaceNode? = parserTest(source).firstChild()
+
+        XCTAssertNotNil(clsDecl)
+        XCTAssertNotNil(clsDecl?.superclass)
+        XCTAssertNotNil(clsDecl?.protocolList)
+        XCTAssertNotNil(clsDecl?.protocolList?.protocols.first)
+
+        XCTAssertEqual(clsDecl?.superclass?.name, "UIView")
+        XCTAssertEqual(clsDecl?.protocolList?.protocols.first?.name, "UITableViewDelegate")
+    }
+    
+    func testParseInterfaceProtocolSpecification_withGenericSuperclass() {
+        let source = """
+        @interface MyClass : NSArray<NSString*> <UITableViewDelegate>
+        @end
+        """
+        let clsDecl: ObjcClassInterfaceNode? = parserTest(source).firstChild()
+
+        XCTAssertNotNil(clsDecl)
+        XCTAssertNotNil(clsDecl?.superclass)
+        XCTAssertNotNil(clsDecl?.protocolList)
+        XCTAssertNotNil(clsDecl?.protocolList?.protocols.first)
+
+        XCTAssertEqual(clsDecl?.superclass?.name, "NSArray")
+        XCTAssertEqual(clsDecl?.protocolList?.protocols.first?.name, "UITableViewDelegate")
+    }
+    
+    func testParsePropertyAttributes() throws {
+        let source = """
+            @interface Foo
+            @property (class) BOOL property1;
+            @property (getter=property2Getter, setter=property2Setter:) BOOL property2;
+            @end
+            """
+        
+        let clsDecl: ObjcClassInterfaceNode? = parserTest(source).firstChild()
+        
+        XCTAssertNotNil(clsDecl)
+        XCTAssertNotNil(clsDecl?.properties)
+        XCTAssertEqual(clsDecl?.properties.count, 2)
+        XCTAssertEqual(clsDecl?.properties[0].attributesList?.attributes.count, 1)
+        XCTAssertEqual(clsDecl?.properties[0].attributesList?.attributes[0].attribute, .keyword("class"))
+        XCTAssertEqual(clsDecl?.properties[1].attributesList?.attributes.count, 2)
+        XCTAssertEqual(clsDecl?.properties[1].attributesList?.attributes[0].attribute, .getter("property2Getter"))
+        XCTAssertEqual(clsDecl?.properties[1].attributesList?.attributes[1].attribute, .setter("property2Setter:"))
+    }
+    
     func testParseFunctionDefinition() {
         let node = parserTest(
             """
@@ -91,7 +226,7 @@ class ObjcParserTests: XCTestCase {
         XCTAssertEqual(funcDecl?.identifier?.name, "global")
         XCTAssertEqual(funcDecl?.returnType?.type, .void)
         XCTAssertEqual(funcDecl?.parameterList?.parameters.count, 1)
-        XCTAssertEqual(funcDecl?.parameterList?.parameters.first?.type?.type, .struct("int"))
+        XCTAssertEqual(funcDecl?.parameterList?.parameters.first?.type?.type, .typeName("signed int"))
         XCTAssertEqual(funcDecl?.parameterList?.parameters.first?.identifier?.name, "a")
     }
 
@@ -113,10 +248,10 @@ class ObjcParserTests: XCTestCase {
         XCTAssertEqual(funcDecl?.returnType?.type, .void)
         XCTAssertEqual(funcDecl?.parameterList?.parameters.count, 0)
     }
-
-    func testParseReturnlessFunctionDefinition() {
-        let node = parserTest(
-            """
+    
+    // TODO: Consider implementing return-less function definition for compatibility reasons later
+    func x_testParseReturnlessFunctionDefinition() {
+        let node = parserTest("""
             global(int a);
             """
         )
@@ -130,7 +265,7 @@ class ObjcParserTests: XCTestCase {
 
         XCTAssertEqual(funcDecl?.identifier?.name, "global")
         XCTAssertEqual(funcDecl?.parameterList?.parameters.count, 1)
-        XCTAssertEqual(funcDecl?.parameterList?.parameters.first?.type?.type, .struct("int"))
+        XCTAssertEqual(funcDecl?.parameterList?.parameters.first?.type?.type, .typeName("signed int"))
         XCTAssertEqual(funcDecl?.parameterList?.parameters.first?.identifier?.name, "a")
     }
 
@@ -151,27 +286,19 @@ class ObjcParserTests: XCTestCase {
         XCTAssertEqual(funcDecl?.identifier?.name, "global")
         XCTAssertEqual(
             funcDecl?.returnType?.type,
-            .qualified(
-                .pointer(
-                    .generic(
-                        "NSArray",
-                        parameters: [
-                            .pointer(
-                                .generic(
-                                    "NSArray",
-                                    parameters: [
-                                        .pointer(.struct("NSString"))
-                                    ]
-                                )
-                            )
-                        ]
-                    )
-                ),
-                qualifiers: ["_Nonnull"]
+            .pointer(
+                .genericTypeName(
+                    "NSArray",
+                    typeParameters: [
+                    .genericTypeName("NSArray", typeParameters: [
+                        .typeName("NSString").wrapAsPointer
+                    ]).wrapAsPointer
+                ]),
+                nullabilitySpecifier: .nonnull
             )
         )
     }
-
+    
     func testParseComplexParameterTypeFunctionDefinition() {
         let node = parserTest(
             """
@@ -191,27 +318,19 @@ class ObjcParserTests: XCTestCase {
         XCTAssertEqual(funcDecl?.parameterList?.parameters.count, 1)
         XCTAssertEqual(
             funcDecl?.parameterList?.parameters.first?.type?.type,
-            .qualified(
-                .pointer(
-                    .generic(
-                        "NSArray",
-                        parameters: [
-                            .pointer(
-                                .generic(
-                                    "NSArray",
-                                    parameters: [
-                                        .pointer(.struct("NSString"))
-                                    ]
-                                )
-                            )
-                        ]
-                    )
-                ),
-                qualifiers: ["_Nonnull"]
+            .pointer(
+                .genericTypeName(
+                    "NSArray",
+                    typeParameters: [
+                    .genericTypeName("NSArray", typeParameters: [
+                        .typeName("NSString").wrapAsPointer
+                    ]).wrapAsPointer
+                ]),
+                nullabilitySpecifier: .nonnull
             )
         )
     }
-
+    
     func testParseVariadicParameterInFunctionDefinition() {
         let node = parserTest(
             """
@@ -307,22 +426,35 @@ class ObjcParserTests: XCTestCase {
     }
 
     func testParseStructDeclaration() {
-        let node = parserTest(
-            """
+        let node = parserTest("""
+            struct A {
+                int field;
+            };
+            """)
+        
+        let structNode: ObjcStructDeclarationNode? = node.firstChild()
+        let fields = structNode?.body?.fields
+        
+        XCTAssertNotNil(structNode)
+        XCTAssertNotNil(fields?[0])
+        XCTAssertEqual(fields?[0].identifier?.name, "field")
+        XCTAssertEqual(fields?[0].type?.type, ObjcType.typeName("signed int"))
+    }
+    
+    func testParseStructDeclaration_typedef() {
+        let node = parserTest("""
             typedef struct {
                 int field;
             } A;
-            """
-        )
-
-        let defNode: ObjcTypedefNode? = node.firstChild()
-        let structNode: ObjcStructDeclarationNode? = defNode?.firstChild()
+            """)
+        
+        let structNode: ObjcStructDeclarationNode? = node.firstChild()
         let fields = structNode?.body?.fields
 
         XCTAssertNotNil(structNode)
         XCTAssertNotNil(fields?[0])
         XCTAssertEqual(fields?[0].identifier?.name, "field")
-        XCTAssertEqual(fields?[0].type?.type, ObjcType.struct("int"))
+        XCTAssertEqual(fields?[0].type?.type, ObjcType.typeName("signed int"))
     }
 
     func testParseIBOutletProperty() {
@@ -429,7 +561,31 @@ class ObjcParserTests: XCTestCase {
             """
         )
     }
-
+    
+    func testParseStaticVariablesInClassInterface() {
+        let node = parserTest("""
+            @interface MyClass
+            static NSString *const _Nonnull kMethodKey = @"method";
+            static NSString *_Nonnull kCodeOperatorKey = @"codigo_operador";
+            @end
+            """)
+        
+        Asserter(object: node).inClosureUnconditional { asserter in
+            asserter.assertChildCount(3)?
+                .asserter(forChildAt: 0) { kMethodKey in
+                    kMethodKey.assert(isOfType: ObjcClassInterfaceNode.self)
+                }?
+                .asserter(forChildAt: 1) { kMethodKey in
+                    kMethodKey.assert(isOfType: ObjcVariableDeclarationNode.self)?
+                        .assert(name: "kMethodKey")
+                }?
+                .asserter(forChildAt: 2) { kMethodKey in
+                    kMethodKey.assert(isOfType: ObjcVariableDeclarationNode.self)?
+                        .assert(name: "kCodeOperatorKey")
+                }
+        }
+    }
+    
     func testParseGlobalFunctionPointer() {
         _ = parserTest(
             """
@@ -478,7 +634,39 @@ class ObjcParserTests: XCTestCase {
             """
         )
     }
-
+    
+    func testParseTypedefBlock() {
+        let node = parserTest("""
+            typedef void(^callback)();
+            """)
+        
+        let typedefNode: ObjcTypedefNode? = node.firstChild()
+        
+        XCTAssertEqual(node.children.count, 1)
+        XCTAssertNotNil(typedefNode)
+        XCTAssertEqual(typedefNode?.identifier?.name, "callback")
+        XCTAssertEqual(
+            typedefNode?.type?.type,
+            .blockType(name: "callback", returnType: .void)
+        )
+    }
+    
+    func testParseTypedefFunctionPointer() {
+        let node = parserTest("""
+            typedef void(*callback)();
+            """)
+        
+        let typedefNode: ObjcTypedefNode? = node.firstChild()
+        
+        XCTAssertEqual(node.children.count, 1)
+        XCTAssertNotNil(typedefNode)
+        XCTAssertEqual(typedefNode?.identifier?.name, "callback")
+        XCTAssertEqual(
+            typedefNode?.type?.type,
+            .functionPointer(name: "callback", returnType: .void)
+        )
+    }
+    
     func testParseAttributesInStructDeclaration() {
         _ = parserTest(
             """
@@ -499,7 +687,14 @@ class ObjcParserTests: XCTestCase {
             """
         )
     }
-
+    
+    func testParseTypeofSpecifier() {
+        _=parserTest("""
+            __typeof__(0) a;
+            __typeof__(0 + 1) *b;
+            """)
+    }
+    
     func testParseVariableDeclarationOfPointerToFunction() {
         _ = parserTest(
             """
@@ -568,6 +763,26 @@ class ObjcParserTests: XCTestCase {
         XCTAssertFalse(sut.importDirectives[1].isSystemImport)
     }
 
+    func testParseCFunctionArrayArguments() throws {
+        let sut = ObjcParser(string: """
+            void aFunction(unsigned n, int args[]) {
+
+            }
+            """)
+
+        try sut.parse()
+
+        let funcDecl = try XCTUnwrap(sut.rootNode.functionDefinitions.first)
+        let parameterList = try XCTUnwrap(funcDecl.parameterList)
+
+        XCTAssertEqual(funcDecl.identifier?.name, "aFunction")
+        XCTAssertEqual(parameterList.parameters.count, 2)
+        XCTAssertEqual(parameterList.parameters[0].type?.type, .typeName("unsigned int"))
+        XCTAssertEqual(parameterList.parameters[0].identifier?.name, "n")
+        XCTAssertEqual(parameterList.parameters[1].type?.type, .pointer("signed int"))
+        XCTAssertEqual(parameterList.parameters[1].identifier?.name, "args")
+    }
+    
     func testCommentRanges() throws {
         let string = """
             // A comment
@@ -713,9 +928,7 @@ class ObjcParserTests: XCTestCase {
             typedef struct {
                 int a;
             } A;
-            """,
-            \.typedefNodes[0]
-        )
+            """, \.structDeclarations[0])
     }
 
     func testCollectCommentsPrecedingMethodDefinition() {
@@ -859,6 +1072,13 @@ extension ObjcParserTests {
             let sut = ObjcParser(string: source)
 
             try sut.parse()
+
+            if !sut.diagnostics.errors.isEmpty {
+                XCTFail(
+                    "Failed to parse sample: \(sut.diagnostics.diagnosticsSummary())"
+                )
+                return
+            }
 
             let global = sut.rootNode
             let decl = global[keyPath: keyPath]

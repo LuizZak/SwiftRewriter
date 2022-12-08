@@ -40,7 +40,7 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
 
         let param1 = ObjcFunctionParameterNode(isInNonnullContext: false)
         param1.addChild(ObjcIdentifierNode(name: "a", isInNonnullContext: false))
-        param1.addChild(ObjcTypeNameNode(type: .struct("NSInteger"), isInNonnullContext: false))
+        param1.addChild(ObjcTypeNameNode(type: .typeName("NSInteger"), isInNonnullContext: false))
         parameters.addChild(param1)
 
         // Act
@@ -60,6 +60,20 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
         )
     }
 
+    func testCollectGlobalConst() throws {
+        let parser = ObjcParser(string: """
+            const int global;
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.globalVariableIntentions.count, 1)
+        XCTAssertEqual(file.globalVariableIntentions.first?.name, "global")
+        XCTAssertEqual(file.globalVariableIntentions.first?.isConstant, true)
+    }
+    
     func testCollectFunctionDefinitionBody() throws {
         let parser = ObjcParser(string: "void global() { stmt(); }")
         try parser.parse()
@@ -76,6 +90,201 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
         )
     }
 
+    func testCollectPointerGlobalConst() throws {
+        let parser = ObjcParser(string: """
+            int *const global;
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.globalVariableIntentions.count, 1)
+        XCTAssertEqual(file.globalVariableIntentions.first?.name, "global")
+        XCTAssertEqual(file.globalVariableIntentions.first?.isConstant, true)
+    }
+
+    func testCollectTypedefBlock() throws {
+        let parser = ObjcParser(string: """
+            typedef void(^callback)();
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(delegate.reportedForLazyResolving.count, 1)
+        XCTAssertEqual(file.globalVariableIntentions.count, 0)
+        XCTAssertEqual(file.globalFunctionIntentions.count, 0)
+        XCTAssertEqual(file.typealiasIntentions.count, 1)
+        XCTAssertEqual(file.typealiasIntentions.first?.name, "callback")
+        XCTAssertEqual(file.typealiasIntentions.first?.fromType, .void)
+        XCTAssertEqual(
+            file.typealiasIntentions.first?.originalObjcType,
+            .blockType(name: "callback", returnType: .void)
+        )
+    }
+
+    func testCollectTypedefFunctionPointer() throws {
+        let parser = ObjcParser(string: """
+            typedef void(*callback)();
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(delegate.reportedForLazyResolving.count, 1)
+        XCTAssertEqual(file.globalVariableIntentions.count, 0)
+        XCTAssertEqual(file.globalFunctionIntentions.count, 0)
+        XCTAssertEqual(file.typealiasIntentions.count, 1)
+        XCTAssertEqual(file.typealiasIntentions.first?.name, "callback")
+        XCTAssertEqual(file.typealiasIntentions.first?.fromType, .void)
+        XCTAssertEqual(
+            file.typealiasIntentions.first?.originalObjcType,
+            .functionPointer(name: "callback", returnType: .void)
+        )
+    }
+
+    func testCollectSuperclass() throws {
+        let parser = ObjcParser(string: """
+            @interface MyClass : UIView
+            @end
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.classIntentions[0].typeName, "MyClass")
+        XCTAssertEqual(file.classIntentions[0].superclassName, "UIView")
+    }
+
+    func testCollectGenericSuperclass() throws {
+        let parser = ObjcParser(string: """
+            @interface MyClass : NSArray<NSString*>
+            @end
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.classIntentions[0].typeName, "MyClass")
+        XCTAssertEqual(file.classIntentions[0].superclassName, "NSArray")
+    }
+
+    func testCollectProtocolSpecification() throws {
+        let parser = ObjcParser(string: """
+            @interface MyClass <UITableViewDelegate>
+            @end
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.classIntentions[0].typeName, "MyClass")
+        XCTAssertNil(file.classIntentions[0].superclassName)
+        XCTAssertEqual(file.classIntentions[0].protocols.count, 1)
+        XCTAssertEqual(file.classIntentions[0].protocols.first?.protocolName, "UITableViewDelegate")
+    }
+
+    func testCollectProtocolSpecification_withSuperclass() throws {
+        let parser = ObjcParser(string: """
+            @interface MyClass : UIView <UITableViewDelegate>
+            @end
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.classIntentions[0].typeName, "MyClass")
+        XCTAssertEqual(file.classIntentions[0].superclassName, "UIView")
+        XCTAssertEqual(file.classIntentions[0].protocols.count, 1)
+        XCTAssertEqual(file.classIntentions[0].protocols.first?.protocolName, "UITableViewDelegate")
+    }
+    
+    func testCollectProperty() throws {
+        let parser = ObjcParser(string: """
+            @interface Foo
+            @property BOOL property;
+            @end
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.classIntentions[0].properties.count, 1)
+        XCTAssertEqual(file.classIntentions[0].properties.first?.name, "property")
+        XCTAssertEqual(file.classIntentions[0].properties.first?.isClassProperty, false)
+        XCTAssertEqual(file.classIntentions[0].properties.first?.type, .anyObject) // Initially .anyObject, is processed afterwards by a delegate
+    }
+    
+    func testCollectProperty_classProperty() throws {
+        let parser = ObjcParser(string: """
+            @interface Foo
+            @property (class) BOOL property;
+            @end
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.classIntentions[0].properties.count, 1)
+        XCTAssertEqual(file.classIntentions[0].properties.first?.isClassProperty, true)
+    }
+    
+    func testCollectProperty_weak() throws {
+        let parser = ObjcParser(string: """
+            @interface Foo
+            @property (weak) NSString *property;
+            @end
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.classIntentions[0].properties.count, 1)
+        XCTAssertEqual(file.classIntentions[0].properties.first?.storage.ownership, .weak)
+    }
+    
+    func testCollectProperty_getter() throws {
+        let parser = ObjcParser(string: """
+            @interface Foo
+            @property (getter=propertyGetter) NSString *property;
+            @end
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.classIntentions[0].properties.count, 1)
+        XCTAssertEqual(file.classIntentions[0].properties.first?.objcAttributes.count, 1)
+        XCTAssertEqual(file.classIntentions[0].properties.first?.objcAttributes[0], .getterName("propertyGetter"))
+    }
+    
+    func testCollectProperty_setter() throws {
+        let parser = ObjcParser(string: """
+            @interface Foo
+            @property (setter=propertySetter:) NSString *property;
+            @end
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.classIntentions[0].properties.count, 1)
+        XCTAssertEqual(file.classIntentions[0].properties.first?.objcAttributes.count, 1)
+        XCTAssertEqual(file.classIntentions[0].properties.first?.objcAttributes[0], .setterName("propertySetter:"))
+    }
+    
     func testCollectPropertyIBOutletAttribute() throws {
         let parser = ObjcParser(
             string: """
@@ -114,6 +323,22 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
         )
     }
 
+    func testCollectStaticDeclarationsInClassInterface() throws {
+        let parser = ObjcParser(string: """
+            @interface MyClass
+            static NSString *const _Nonnull kMethodKey = @"method";
+            static NSString *_Nonnull kCodeOperatorKey = @"codigo_operador";
+            @end
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.globalVariableIntentions.count, 2)
+        XCTAssertEqual(file.classIntentions.first?.properties.count, 0)
+    }
+    
     func testCollectStructDeclaration() throws {
         let parser = ObjcParser(
             string: """
@@ -146,9 +371,30 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
         XCTAssertEqual(file.typealiasIntentions.count, 1)
         XCTAssertEqual(file.typealiasIntentions.first?.name, "A")
         XCTAssertEqual(file.typealiasIntentions.first?.fromType, .void)
-        XCTAssertEqual(file.typealiasIntentions.first?.originalObjcType, .struct("OpaquePointer"))
+        XCTAssertEqual(file.typealiasIntentions.first?.originalObjcType, .pointer(.incompleteStruct("_A")))
     }
 
+    func testQueryNonnullRegionsFromDelegate() throws {
+        let parser = ObjcParser(string: """
+            void *v1;
+            void *v2;
+            void *v3;
+            """
+        )
+        try parser.parse()
+        let rootNode = parser.rootNode
+        delegate.isNodeInNonnullContext_stub = { node in
+            node.location.line == 2 ? true : false
+        }
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.globalVariableIntentions.count, 3)
+        XCTAssertFalse(file.globalVariableIntentions[0].inNonnullContext)
+        XCTAssertTrue(file.globalVariableIntentions[1].inNonnullContext)
+        XCTAssertFalse(file.globalVariableIntentions[2].inNonnullContext)
+    }
+    
     func testCollectClassInterfaceComments() throws {
         testCommentCollection(
             """
@@ -322,8 +568,10 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
 private class TestCollectorDelegate: ObjectiveCIntentionCollectorDelegate {
     var context: ObjectiveCIntentionCollector.Context
     var intentions: IntentionCollection
+    var isNodeInNonnullContext_stub: ((ObjcASTNode) -> Bool)?
 
     var reportedForLazyParsing: [ObjectiveCLazyParseItem] = []
+    var reportedForLazyResolving: [ObjectiveCLazyTypeResolveItem] = []
 
     init(file: FileGenerationIntention) {
         context = ObjectiveCIntentionCollector.Context()
@@ -336,7 +584,7 @@ private class TestCollectorDelegate: ObjectiveCIntentionCollectorDelegate {
     // MARK: -
 
     func isNodeInNonnullContext(_ node: ObjcASTNode) -> Bool {
-        return false
+        return isNodeInNonnullContext_stub?(node) ?? false
     }
 
     func reportForLazyParsing(_ item: ObjectiveCLazyParseItem) {
@@ -344,15 +592,11 @@ private class TestCollectorDelegate: ObjectiveCIntentionCollectorDelegate {
     }
 
     func reportForLazyResolving(_ item: ObjectiveCLazyTypeResolveItem) {
-
+        reportedForLazyResolving.append(item)
     }
 
     func typeMapper(for intentionCollector: ObjectiveCIntentionCollector) -> TypeMapper {
         return DefaultTypeMapper(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
-    }
-
-    func typeParser(for intentionCollector: ObjectiveCIntentionCollector) -> ObjcTypeParser {
-        return ObjcTypeParser(state: ObjcParserState())
     }
 }
 

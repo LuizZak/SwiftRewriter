@@ -1,7 +1,7 @@
-import KnownType
-import SwiftAST
-import TestCommons
 import XCTest
+import SwiftAST
+import KnownType
+import TestCommons
 import ObjcGrammarModels
 
 @testable import Intentions
@@ -96,7 +96,7 @@ class IntentionSerializerTests: XCTestCase {
             }
             .createFile(named: "B.swift") { file in
                 file.createStruct(withName: "Struct")
-                    .createTypealias(withName: "Typealias", type: .struct("NSInteger"))
+                    .createTypealias(withName: "Typealias", type: .typeName("NSInteger"))
                     .createEnum(withName: "Enum", rawValue: .int) { type in
                         type.createCase(name: "first")
                         type.createCase(

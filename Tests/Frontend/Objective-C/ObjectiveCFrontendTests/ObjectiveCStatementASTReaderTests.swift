@@ -115,6 +115,25 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
         )
     }
 
+    func testFor_uninitializedIterator() {
+        assert(
+            objcStmt: "for(NSInteger i; i < 10; i++) { }",
+            readsAs: .compound([
+                .variableDeclaration(identifier: "i", type: .int, initialization: nil),
+                .while(
+                    .binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
+                    body: [
+                        .defer([
+                            .expression(
+                                .assignment(lhs: .identifier("i"), op: .addAssign, rhs: .constant(1))
+                            )
+                        ])
+                    ]
+                )
+            ])
+        )
+    }
+
     func testForConvertingToWhile() {
         // In some cases, the parser has to unwrap for loops that cannot be cleanly
         // converted into `for-in` statements into equivalent while loops.
@@ -399,6 +418,187 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
         )
     }
 
+    func testDeclaration_uninitialized() {
+        assert(
+            objcStmt: "CGFloat value;",
+            parseBlock: { try $0.declaration() },
+            readsAs: .variableDeclaration(
+                identifier: "value",
+                type: .typeName("CGFloat"),
+                initialization: nil
+            )
+        )
+    }
+    
+    func testDeclaration_usesTypeMapper() {
+        assert(
+            objcStmt: "NSString *str = nil;",
+            parseBlock: { try $0.declaration() },
+            readsAs: .variableDeclaration(
+                identifier: "str",
+                type: .nullabilityUnspecified(.string),
+                initialization: .constant(.nil)
+            )
+        )
+    }
+    
+    func testStatement_convertsToDeclarationIfTopLevelMultiplicationExpression() {
+        assert(
+            objcStmt: "NSObject *object;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "object",
+                type: .nullabilityUnspecified("NSObject"),
+                initialization: nil
+            )
+        )
+        assert(
+            objcStmt: "AType *object;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "object",
+                type: .nullabilityUnspecified(
+                    .generic("UnsafeMutablePointer", parameters: ["AType"])
+                ),
+                initialization: nil
+            )
+        )
+        assert(
+            objcStmt: "AType *a, b;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclarations([
+                .init(
+                    identifier: "a",
+                    type: .nullabilityUnspecified(
+                        .generic("UnsafeMutablePointer", parameters: ["AType"])
+                    ),
+                    initialization: nil
+                ),
+                .init(
+                    identifier: "b",
+                    type: "AType",
+                    initialization: nil
+                ),
+            ])
+        )
+        assert(
+            objcStmt: "AType *object[2];",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "object",
+                type: .nullabilityUnspecified(
+                    .generic(
+                        "UnsafeMutablePointer",
+                        parameters: [.tuple(["AType", "AType"])]
+                    )
+                ),
+                initialization: nil
+            )
+        )
+        assert(
+            objcStmt: "AType *object[2];",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "object",
+                type: .nullabilityUnspecified(
+                    .generic(
+                        "UnsafeMutablePointer",
+                        parameters: [.tuple(["AType", "AType"])]
+                    )
+                ),
+                initialization: nil
+            )
+        )
+    }
+    
+    func testStatement_convertsToDeclarationIfTopLevelMultiplicationExpression_usesTypeMapper() {
+        assert(
+            objcStmt: "NSString *str;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "str",
+                type: .nullabilityUnspecified(.string),
+                initialization: nil
+            )
+        )
+    }
+    
+    func testStatement_convertsToDeclarationIfTopLevelComparisonExpression() {
+        assert(
+            objcStmt: "id<Protocol> local;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "local",
+                type: .nullabilityUnspecified("Protocol"),
+                initialization: nil
+            )
+        )
+    }
+    
+    func testStatement_convertsToDeclarationIfTopLevelComparisonExpression_multipleProtocols() {
+        assert(
+            objcStmt: "id<Protocol1, Protocol2> local;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "local",
+                type: .nullabilityUnspecified(.protocolComposition(
+                    ["Protocol1", "Protocol2"]
+                )),
+                initialization: nil
+            )
+        )
+        assert(
+            objcStmt: "id<Protocol1, Protocol2, Protocol3> local;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "local",
+                type: .nullabilityUnspecified(.protocolComposition(
+                    ["Protocol1", "Protocol2", "Protocol3"]
+                )),
+                initialization: nil
+            )
+        )
+    }
+    
+    func testStatement_convertsToDeclarationIfTopLevelComparisonExpression_multipleDeclarators() {
+        assert(
+            objcStmt: "id<Protocol> local1, local2;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclarations([
+                .init(
+                    identifier: "local1",
+                    type: .nullabilityUnspecified("Protocol"),
+                    initialization: nil
+                ),
+                .init(
+                    identifier: "local2",
+                    type: .nullabilityUnspecified("Protocol"),
+                    initialization: nil
+                ),
+            ])
+        )
+        assert(
+            objcStmt: "id<Protocol1, Protocol2> local1, local2;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclarations([
+                .init(
+                    identifier: "local1",
+                    type: .nullabilityUnspecified(.protocolComposition(
+                        ["Protocol1", "Protocol2"]
+                    )),
+                    initialization: nil
+                ),
+                .init(
+                    identifier: "local2",
+                    type: .nullabilityUnspecified(.protocolComposition(
+                        ["Protocol1", "Protocol2"]
+                    )),
+                    initialization: nil
+                ),
+            ])
+        )
+    }
+    
     func testBlockDeclaration() {
         assert(
             objcStmt: "void(^callback)();",
@@ -409,7 +609,9 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
                 initialization: nil
             )
         )
+    }
 
+    func testBlockDeclaration_nullabilitySpecifier() {
         assert(
             objcStmt: "void(^_Nonnull callback)();",
             parseBlock: { try $0.declaration() },
@@ -645,7 +847,11 @@ extension ObjectiveCStatementASTReaderTests {
 
         let typeSystem = TypeSystem()
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
-        let typeParser = ObjcTypeParser(state: ObjectiveCStatementASTReaderTests._state)
+        let source = StringCodeSource(source: objcStmt)
+        let typeParser = ObjcTypeParser(
+            state: ObjectiveCStatementASTReaderTests._state,
+            source: source
+        )
 
         let expReader =
             ObjectiveCExprASTReader(

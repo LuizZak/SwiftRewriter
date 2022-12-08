@@ -38,7 +38,7 @@ public class NodeCreationContext {
     }
     
     /// Gets the current context node as a given node type.
-    /// Returns nil, if `topmostNode` is nil or if it cannot be cast to `T`.
+    /// Returns nil, if `topmostNode` is nil or if it cannot be cast into `T`.
     public func currentContextNode<T: ObjcASTNode>(as node: T.Type = T.self) -> T? {
         topmostNode as? T
     }

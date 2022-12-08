@@ -22,6 +22,7 @@ public protocol ExpressionPassTestCaseAdapter {
     
     func parseExpression(
         _ parser: Parser,
+        source: Source,
         typeSystem: TypeSystem,
         intentionContext: FunctionBodyCarryingIntention?,
         container: StatementContainer?
@@ -29,6 +30,7 @@ public protocol ExpressionPassTestCaseAdapter {
 
     func parseStatement(
         _ parser: Parser,
+        source: Source,
         typeSystem: TypeSystem,
         intentionContext: FunctionBodyCarryingIntention?,
         container: StatementContainer?
@@ -244,14 +246,16 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
         defer {
             _ = stream  // Keep alive!
         }
+        let source = StringCodeSource(source: exp)
         let diag = AntlrDiagnosticsErrorListener(
-            source: StringCodeSource(source: exp),
+            source: source,
             diagnostics: Diagnostics()
         )
         parser.addErrorListener(diag)
 
         let expression = try! adapter.parseExpression(
             parser,
+            source: source,
             typeSystem: typeSystem,
             intentionContext: intentionContext,
             container: container
@@ -278,14 +282,16 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
         defer {
             _ = stream  // Keep alive!
         }
+        let source = StringCodeSource(source: stmtString)
         let diag = AntlrDiagnosticsErrorListener(
-            source: StringCodeSource(source: stmtString),
+            source: source,
             diagnostics: Diagnostics()
         )
         parser.addErrorListener(diag)
 
         let statement = try! adapter.parseStatement(
             parser,
+            source: source,
             typeSystem: typeSystem,
             intentionContext: intentionContext,
             container: container

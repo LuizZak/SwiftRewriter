@@ -72,14 +72,14 @@ class DefaultTypeMapperTests: XCTestCase {
     }
 
     func testConvertNSObjectSubclassPointersAsInstanceTypes() {
-        expect(.pointer(.struct("NSNumber")), toConvertTo: "NSNumber")
-        expect(.pointer(.struct("NSInteger")), toConvertTo: "UnsafeMutablePointer<Int>")
-        expect(.pointer(.struct("NSUInteger")), toConvertTo: "UnsafeMutablePointer<UInt>")
-        expect(.pointer(.struct("NSUInteger")), toConvertTo: "UnsafeMutablePointer<UInt>")
-        expect(.pointer(.struct("UIButtonType")), toConvertTo: "UnsafeMutablePointer<UIButtonType>")
+        expect(.pointer(.typeName("NSNumber")), toConvertTo: "NSNumber")
+        expect(.pointer(.typeName("NSInteger")), toConvertTo: "UnsafeMutablePointer<Int>")
+        expect(.pointer(.typeName("NSUInteger")), toConvertTo: "UnsafeMutablePointer<UInt>")
+        expect(.pointer(.typeName("NSUInteger")), toConvertTo: "UnsafeMutablePointer<UInt>")
+        expect(.pointer(.typeName("UIButtonType")), toConvertTo: "UnsafeMutablePointer<UIButtonType>")
 
         expect(
-            .pointer(.struct("char")),
+            .pointer(.typeName("char")),
             withExplicitNullability: .nullable,
             toConvertTo: "UnsafeMutablePointer<CChar>?"
         )
@@ -87,10 +87,10 @@ class DefaultTypeMapperTests: XCTestCase {
 
     func testPrimitiveTypes() {
         // Objective-C/Foundation/CoreGraphics types
-        expect(.struct("NSInteger"), toConvertTo: "Int")
-        expect(.struct("NSUInteger"), toConvertTo: "UInt")
-        expect(.struct("BOOL"), toConvertTo: "Bool")
-        expect(.struct("CGColor"), toConvertTo: "CGColor")
+        expect(.typeName("NSInteger"), toConvertTo: "Int")
+        expect(.typeName("NSUInteger"), toConvertTo: "UInt")
+        expect(.typeName("BOOL"), toConvertTo: "Bool")
+        expect(.typeName("CGColor"), toConvertTo: "CGColor")
     }
 
     func testCScalarTypes() {
@@ -153,58 +153,79 @@ class DefaultTypeMapperTests: XCTestCase {
         */
 
         // C scalar types
-        expect(.struct("char"), toConvertTo: "CChar")
-        expect(.struct("signed"), toConvertTo: "CInt")
-        expect(.struct("unsigned"), toConvertTo: "CUnsignedInt")
-        expect(.struct("unsigned char"), toConvertTo: "CUnsignedChar")
-        expect(.struct("unsigned short"), toConvertTo: "CUnsignedShort")
-        expect(.struct("unsigned int"), toConvertTo: "CUnsignedInt")
-        expect(.struct("unsigned long"), toConvertTo: "CUnsignedLong")
-        expect(.struct("unsigned long long"), toConvertTo: "CUnsignedLongLong")
-        expect(.struct("signed char"), toConvertTo: "CSignedChar")
-        expect(.struct("short"), toConvertTo: "CShort")
-        expect(.struct("int"), toConvertTo: "CInt")
-        expect(.struct("long"), toConvertTo: "CLong")
-        expect(.struct("long long"), toConvertTo: "CLongLong")
-        expect(.struct("float"), toConvertTo: "CFloat")
-        expect(.struct("double"), toConvertTo: "CDouble")
-        expect(.struct("wchar_t"), toConvertTo: "CWideChar")
-        expect(.struct("char16_t"), toConvertTo: "CChar16")
-        expect(.struct("char32_t"), toConvertTo: "CChar32")
-        expect(.struct("Bool"), toConvertTo: "CBool")
+        expect(.typeName("char"), toConvertTo: "CChar")
+
+        expect(.typeName("signed char"), toConvertTo: "CSignedChar")
+
+        expect(.typeName("short"), toConvertTo: "CShort")
+        expect(.typeName("short int"), toConvertTo: "CShort")
+        expect(.typeName("signed short int"), toConvertTo: "CShort")
+
+        expect(.typeName("int"), toConvertTo: "CInt")
+        expect(.typeName("signed"), toConvertTo: "CInt")
+        expect(.typeName("signed int"), toConvertTo: "CInt")
+
+        expect(.typeName("long"), toConvertTo: "CLong")
+        expect(.typeName("long int"), toConvertTo: "CLong")
+        expect(.typeName("signed long int"), toConvertTo: "CLong")
+        expect(.typeName("long long"), toConvertTo: "CLongLong")
+        expect(.typeName("long long int"), toConvertTo: "CLongLong")
+        expect(.typeName("signed long long int"), toConvertTo: "CLongLong")
+
+        expect(.typeName("unsigned char"), toConvertTo: "CUnsignedChar")
+
+        expect(.typeName("unsigned short"), toConvertTo: "CUnsignedShort")
+        expect(.typeName("unsigned short int"), toConvertTo: "CUnsignedShort")
+
+        expect(.typeName("unsigned"), toConvertTo: "CUnsignedInt")
+        expect(.typeName("unsigned int"), toConvertTo: "CUnsignedInt")
+
+        expect(.typeName("unsigned long"), toConvertTo: "CUnsignedLong")
+        expect(.typeName("unsigned long int"), toConvertTo: "CUnsignedLong")
+
+        expect(.typeName("unsigned long long"), toConvertTo: "CUnsignedLongLong")
+        expect(.typeName("unsigned long long int"), toConvertTo: "CUnsignedLongLong")
+
+        expect(.typeName("float"), toConvertTo: "CFloat")
+        expect(.typeName("double"), toConvertTo: "CDouble")
+        expect(.typeName("wchar_t"), toConvertTo: "CWideChar")
+        expect(.typeName("char16_t"), toConvertTo: "CChar16")
+        expect(.typeName("char32_t"), toConvertTo: "CChar32")
+        expect(.typeName("Bool"), toConvertTo: "CBool")
 
         // Pointer of C scalar types
-        expect(.pointer(.struct("char")), toConvertTo: "UnsafeMutablePointer<CChar>")
-        expect(.pointer(.struct("signed")), toConvertTo: "UnsafeMutablePointer<CInt>")
-        expect(.pointer(.struct("unsigned")), toConvertTo: "UnsafeMutablePointer<CUnsignedInt>")
+        expect(.pointer(.typeName("char")), toConvertTo: "UnsafeMutablePointer<CChar>")
+        expect(.pointer(.typeName("signed")), toConvertTo: "UnsafeMutablePointer<CInt>")
+        expect(.pointer(.typeName("unsigned")), toConvertTo: "UnsafeMutablePointer<CUnsignedInt>")
         expect(
-            .pointer(.struct("unsigned char")),
+            .pointer(.typeName("unsigned char")),
             toConvertTo: "UnsafeMutablePointer<CUnsignedChar>"
         )
         expect(
-            .pointer(.struct("unsigned short")),
-            toConvertTo: "UnsafeMutablePointer<CUnsignedShort>"
-        )
-        expect(.pointer(.struct("unsigned int")), toConvertTo: "UnsafeMutablePointer<CUnsignedInt>")
+            .pointer(.typeName("unsigned short")),
+            toConvertTo: "UnsafeMutablePointer<CUnsignedShort>")
         expect(
-            .pointer(.struct("unsigned long")),
+            .pointer(.typeName("unsigned int")),
+            toConvertTo: "UnsafeMutablePointer<CUnsignedInt>")
+        expect(
+            .pointer(.typeName("unsigned long")),
             toConvertTo: "UnsafeMutablePointer<CUnsignedLong>"
         )
         expect(
-            .pointer(.struct("unsigned long long")),
+            .pointer(.typeName("unsigned long long")),
             toConvertTo: "UnsafeMutablePointer<CUnsignedLongLong>"
         )
-        expect(.pointer(.struct("signed char")), toConvertTo: "UnsafeMutablePointer<CSignedChar>")
-        expect(.pointer(.struct("short")), toConvertTo: "UnsafeMutablePointer<CShort>")
-        expect(.pointer(.struct("int")), toConvertTo: "UnsafeMutablePointer<CInt>")
-        expect(.pointer(.struct("long")), toConvertTo: "UnsafeMutablePointer<CLong>")
-        expect(.pointer(.struct("long long")), toConvertTo: "UnsafeMutablePointer<CLongLong>")
-        expect(.pointer(.struct("float")), toConvertTo: "UnsafeMutablePointer<CFloat>")
-        expect(.pointer(.struct("double")), toConvertTo: "UnsafeMutablePointer<CDouble>")
-        expect(.pointer(.struct("wchar_t")), toConvertTo: "UnsafeMutablePointer<CWideChar>")
-        expect(.pointer(.struct("char16_t")), toConvertTo: "UnsafeMutablePointer<CChar16>")
-        expect(.pointer(.struct("char32_t")), toConvertTo: "UnsafeMutablePointer<CChar32>")
-        expect(.pointer(.struct("Bool")), toConvertTo: "UnsafeMutablePointer<CBool>")
+        expect(.pointer(.typeName("signed char")), toConvertTo: "UnsafeMutablePointer<CSignedChar>")
+        expect(.pointer(.typeName("short")), toConvertTo: "UnsafeMutablePointer<CShort>")
+        expect(.pointer(.typeName("int")), toConvertTo: "UnsafeMutablePointer<CInt>")
+        expect(.pointer(.typeName("long")), toConvertTo: "UnsafeMutablePointer<CLong>")
+        expect(.pointer(.typeName("long long")), toConvertTo: "UnsafeMutablePointer<CLongLong>")
+        expect(.pointer(.typeName("float")), toConvertTo: "UnsafeMutablePointer<CFloat>")
+        expect(.pointer(.typeName("double")), toConvertTo: "UnsafeMutablePointer<CDouble>")
+        expect(.pointer(.typeName("wchar_t")), toConvertTo: "UnsafeMutablePointer<CWideChar>")
+        expect(.pointer(.typeName("char16_t")), toConvertTo: "UnsafeMutablePointer<CChar16>")
+        expect(.pointer(.typeName("char32_t")), toConvertTo: "UnsafeMutablePointer<CChar32>")
+        expect(.pointer(.typeName("Bool")), toConvertTo: "UnsafeMutablePointer<CBool>")
     }
 
     func testMapSimpleTypes() {
@@ -237,7 +258,7 @@ class DefaultTypeMapperTests: XCTestCase {
         )
 
         expect(
-            .specified(specifiers: ["__weak"], .id()),
+            .specified(specifiers: [.weak], .id()),
             withExplicitNullability: nil,
             toConvertTo: "AnyObject?"
         )
@@ -245,23 +266,23 @@ class DefaultTypeMapperTests: XCTestCase {
 
     func testQualifiedAndSpecifiedTypesDontMapIntoPointersAutomatically() {
         expect(
-            .specified(specifiers: ["const"], .struct("NSInteger")),
+            .qualified(.typeName("NSInteger"), qualifiers: [.const]),
             toConvertTo: "Int"
         )
 
         expect(
-            .specified(specifiers: ["const"], .struct("NSInteger")),
+            .qualified(.typeName("NSInteger"), qualifiers: [.const]),
             withExplicitNullability: nil,
             toConvertTo: "Int"
         )
 
         expect(
-            .qualified(.struct("NSInteger"), qualifiers: ["const"]),
+            .qualified(.typeName("NSInteger"), qualifiers: [.const]),
             toConvertTo: "Int"
         )
 
         expect(
-            .qualified(.struct("NSInteger"), qualifiers: ["const"]),
+            .qualified(.typeName("NSInteger"), qualifiers: [.const]),
             withExplicitNullability: nil,
             toConvertTo: "Int"
         )
@@ -269,68 +290,105 @@ class DefaultTypeMapperTests: XCTestCase {
 
     /// Test we properly map NS- types into equivalent Swift types (as of Swift 4.1).
     func testMapNSTypes() {
-        expect(.pointer(.struct("NSDate")), toConvertTo: "Date")
-        expect(.pointer(.struct("NSString")), toConvertTo: "String")
-        expect(.pointer(.struct("NSObject")), toConvertTo: "NSObject")
-        expect(.pointer(.struct("NSCalendar")), toConvertTo: "Calendar")
-        expect(.pointer(.struct("NSURL")), toConvertTo: "URL")
-        expect(.pointer(.struct("NSURLComponents")), toConvertTo: "URLComponents")
-        expect(.pointer(.struct("NSError")), toConvertTo: "Error")
-        expect(.pointer(.struct("NSIndexPath")), toConvertTo: "IndexPath")
-        expect(.pointer(.struct("NSIndexSet")), toConvertTo: "IndexSet")
-        expect(.pointer(.struct("NSNotificationCenter")), toConvertTo: "NotificationCenter")
-        expect(.pointer(.struct("NSNotification")), toConvertTo: "Notification")
-        expect(.pointer(.struct("NSTimeZone")), toConvertTo: "TimeZone")
-        expect(.pointer(.struct("NSLocale")), toConvertTo: "Locale")
-        expect(.pointer(.struct("NSDateFormatter")), toConvertTo: "DateFormatter")
-        expect(.pointer(.struct("NSNumberFormatter")), toConvertTo: "NumberFormatter")
+        expect(.pointer(.typeName("NSDate")), toConvertTo: "Date")
+        expect(.pointer(.typeName("NSString")), toConvertTo: "String")
+        expect(.pointer(.typeName("NSObject")), toConvertTo: "NSObject")
+        expect(.pointer(.typeName("NSCalendar")), toConvertTo: "Calendar")
+        expect(.pointer(.typeName("NSURL")), toConvertTo: "URL")
+        expect(.pointer(.typeName("NSURLComponents")), toConvertTo: "URLComponents")
+        expect(.pointer(.typeName("NSError")), toConvertTo: "Error")
+        expect(.pointer(.typeName("NSIndexPath")), toConvertTo: "IndexPath")
+        expect(.pointer(.typeName("NSIndexSet")), toConvertTo: "IndexSet")
+        expect(.pointer(.typeName("NSNotificationCenter")), toConvertTo: "NotificationCenter")
+        expect(.pointer(.typeName("NSNotification")), toConvertTo: "Notification")
+        expect(.pointer(.typeName("NSTimeZone")), toConvertTo: "TimeZone")
+        expect(.pointer(.typeName("NSLocale")), toConvertTo: "Locale")
+        expect(.pointer(.typeName("NSDateFormatter")), toConvertTo: "DateFormatter")
+        expect(.pointer(.typeName("NSNumberFormatter")), toConvertTo: "NumberFormatter")
 
-        expect(.struct("NSTimeInterval"), toConvertTo: "TimeInterval")
-        expect(.struct("NSComparisonResult"), toConvertTo: "ComparisonResult")
-        expect(.struct("NSInteger"), toConvertTo: "Int")
-        expect(.struct("NSUInteger"), toConvertTo: "UInt")
+        expect(.typeName("NSTimeInterval"), toConvertTo: "TimeInterval")
+        expect(.typeName("NSComparisonResult"), toConvertTo: "ComparisonResult")
+        expect(.typeName("NSInteger"), toConvertTo: "Int")
+        expect(.typeName("NSUInteger"), toConvertTo: "UInt")
+    }
+
+    func testPointer() {
+        expect(.pointer("NSObject"), toConvertTo: "NSObject")
+    }
+
+    func testPointer_withNullabilitySpecifier() {
+        expect(
+            .pointer("NSObject", nullabilitySpecifier: .nonnull),
+            toConvertTo: "NSObject"
+        )
+        expect(
+            .pointer("NSObject", nullabilitySpecifier: .nullable),
+            toConvertTo: "NSObject?"
+        )
+        expect(
+            .pointer("NSObject", nullabilitySpecifier: .nullResettable),
+            toConvertTo: "NSObject!"
+        )
+        expect(
+            .pointer("NSObject", nullabilitySpecifier: .nullResettable),
+            toConvertTo: "NSObject!"
+        )
+    }
+
+    func testAnonymousStruct() {
+        expect(.anonymousStruct, toConvertTo: "Any")
+        expect(.pointer(.anonymousStruct), toConvertTo: "OpaquePointer")
+    }
+
+    func testAnonymousEnum() {
+        expect(.anonymousEnum, toConvertTo: "Any")
+    }
+
+    func testIncompleteStruct() {
+        expect(.incompleteStruct("A"), toConvertTo: "A")
+        expect(.pointer(.incompleteStruct("A")), toConvertTo: "OpaquePointer")
     }
 
     func testNSArray() {
         expect(
-            .pointer(.generic("NSArray", parameters: [.pointer(.struct("NSObject"))])),
+            .pointer(.genericTypeName("NSArray", typeParameters: [.pointer(.typeName("NSObject"))])),
+            toConvertTo: "[NSObject]"
+        )
+        expect(
+            .pointer(.genericTypeName("NSArray", parameters: [.init(variance: .covariant, type: .pointer(.typeName("NSObject")))])),
             toConvertTo: "[NSObject]"
         )
 
         expect(
-            .pointer(.generic("NSArray", parameters: [.pointer(.struct("NSString"))])),
+            .pointer(.genericTypeName("NSArray", typeParameters: [.pointer(.typeName("NSString"))])),
             toConvertTo: "[String]"
         )
 
         expect(
-            .pointer(.generic("NSArray", parameters: [])),
+            .pointer(.genericTypeName("NSArray", typeParameters: [])),
             toConvertTo: "NSArray"
         )
         expect(
-            .pointer(.struct("NSArray")),
+            .pointer(.typeName("NSArray")),
             toConvertTo: "NSArray"
         )
     }
 
     func testNestedNSArray() {
         expect(
-            .pointer(
-                .generic(
-                    "NSArray",
-                    parameters: [
-                        .pointer(
-                            .generic(
-                                "NSArray",
-                                parameters: [
-                                    .pointer(
-                                        .struct("NSObject")
-                                    )
-                                ]
+            .genericTypeName(
+                "NSArray",
+                typeParameters: [
+                    .genericTypeName(
+                        "NSArray",
+                        typeParameters: [
+                            .pointer(
+                                .typeName("NSObject")
                             )
-                        )
-                    ]
-                )
-            ),
+                        ]
+                    ).wrapAsPointer
+                ]
+            ).wrapAsPointer,
             toConvertTo: "[[NSObject]]"
         )
     }
@@ -338,16 +396,16 @@ class DefaultTypeMapperTests: XCTestCase {
     func testNSDictionary() {
         expect(
             .pointer(
-                .generic(
+                .genericTypeName(
                     "NSDictionary",
-                    parameters: [.pointer(.struct("NSString")), .pointer(.struct("NSObject"))]
+                    typeParameters: [.pointer(.typeName("NSString")), .pointer(.typeName("NSObject"))]
                 )
             ),
             toConvertTo: "[String: NSObject]"
         )
 
         expect(
-            .pointer(.generic("NSDictionary", parameters: [.pointer(.struct("NSString"))])),
+            .pointer(.genericTypeName("NSDictionary", typeParameters: [.pointer(.typeName("NSString"))])),
             toConvertTo: "NSDictionary<String>"
         )
     }
@@ -356,21 +414,21 @@ class DefaultTypeMapperTests: XCTestCase {
     /// not fully compatible with Swift's array...
     func testNSMutableArray() {
         expect(
-            .pointer(.generic("NSMutableArray", parameters: [.pointer(.struct("NSObject"))])),
+            .pointer(.genericTypeName("NSMutableArray", typeParameters: [.pointer(.typeName("NSObject"))])),
             toConvertTo: "NSMutableArray"
         )
 
         expect(
-            .pointer(.generic("NSMutableArray", parameters: [.pointer(.struct("NSString"))])),
+            .pointer(.genericTypeName("NSMutableArray", typeParameters: [.pointer(.typeName("NSString"))])),
             toConvertTo: "NSMutableArray"
         )
 
         expect(
-            .pointer(.generic("NSMutableArray", parameters: [])),
+            .pointer(.genericTypeName("NSMutableArray", typeParameters: [])),
             toConvertTo: "NSMutableArray"
         )
         expect(
-            .pointer(.struct("NSMutableArray")),
+            .pointer(.typeName("NSMutableArray")),
             toConvertTo: "NSMutableArray"
         )
     }
@@ -379,9 +437,9 @@ class DefaultTypeMapperTests: XCTestCase {
     func testNSMutableDictionary() {
         expect(
             .pointer(
-                .generic(
+                .genericTypeName(
                     "NSMutableDictionary",
-                    parameters: [.pointer(.struct("NSString")), .pointer(.struct("NSObject"))]
+                    typeParameters: [.pointer(.typeName("NSString")), .pointer(.typeName("NSObject"))]
                 )
             ),
             toConvertTo: "NSMutableDictionary"
@@ -390,29 +448,34 @@ class DefaultTypeMapperTests: XCTestCase {
 
     func testNSMutableDictionaryWithSingleTypeParameter() {
         expect(
-            .pointer(.generic("NSMutableDictionary", parameters: [.pointer(.struct("NSString"))])),
+            .pointer(
+                .genericTypeName(
+                    "NSMutableDictionary",
+                    typeParameters: [.pointer(.typeName("NSString"))]
+                )
+            ),
             toConvertTo: "NSMutableDictionary<String>"
         )
     }
 
     func testNestedTypeInGenericIsAlwaysReadAsObjectType() {
         expect(
-            ObjcType.generic("A", parameters: [.pointer(.struct("B"))]),
+            ObjcType.genericTypeName("A", typeParameters: [.pointer(.typeName("B"))]),
             toConvertTo: "A<B>"
         )
         expect(
-            ObjcType.generic("A", parameters: [.pointer(.struct("B")), .pointer(.struct("C"))]),
+            ObjcType.genericTypeName("A", typeParameters: [.pointer(.typeName("B")), .pointer(.typeName("C"))]),
             toConvertTo: "A<B, C>"
         )
     }
 
     func testConcreteTypesWithProtocol() {
         expect(
-            .pointer(.generic("UIView", parameters: [.struct("UIDelegate")])),
+            .pointer(.genericTypeName("UIView", typeParameters: [.typeName("UIDelegate")])),
             toConvertTo: "UIView & UIDelegate"
         )
         expect(
-            .pointer(.generic("UIView", parameters: [.struct("UIDelegate")])),
+            .pointer(.genericTypeName("UIView", typeParameters: [.typeName("UIDelegate")])),
             withExplicitNullability: .nullable,
             toConvertTo: "(UIView & UIDelegate)?"
         )
@@ -427,7 +490,7 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(
             .blockType(
                 name: "block",
-                returnType: .struct("NSInteger"),
+                returnType: .typeName("NSInteger"),
                 parameters: []
             ),
             toConvertTo: "() -> Int"
@@ -436,10 +499,10 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(
             .blockType(
                 name: "block",
-                returnType: .struct("NSInteger"),
+                returnType: .typeName("NSInteger"),
                 parameters: [
-                    .pointer(.struct("NSString")),
-                    .pointer(.struct("NSString")),
+                    .pointer(.typeName("NSString")),
+                    .pointer(.typeName("NSString")),
                 ]
             ),
             withExplicitNullability: nil,
@@ -449,10 +512,10 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(
             .blockType(
                 name: "block",
-                returnType: .struct("NSInteger"),
+                returnType: .typeName("NSInteger"),
                 parameters: [
-                    .pointer(.struct("NSString")),
-                    .pointer(.struct("NSString")),
+                    .pointer(.typeName("NSString")),
+                    .pointer(.typeName("NSString")),
                 ]
             ),
             inNonnullContext: true,
@@ -462,12 +525,11 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(
             .blockType(
                 name: "block",
-                returnType: .struct("NSInteger"),
+                returnType: .typeName("NSInteger"),
                 parameters: [
-                    .qualified(.pointer(.struct("NSString")), qualifiers: ["_Nullable"]),
-                    .pointer(.struct("NSString")),
-                ]
-            ),
+                    .pointer(.typeName("NSString"), nullabilitySpecifier: .nullable),
+                    .pointer(.typeName("NSString")),
+                ]),
             withExplicitNullability: nil,
             toConvertTo: "((String?, String?) -> Int)!"
         )
@@ -475,12 +537,11 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(
             .blockType(
                 name: "block",
-                returnType: .struct("NSInteger"),
+                returnType: .typeName("NSInteger"),
                 parameters: [
-                    .specified(specifiers: ["nonnull"], .pointer(.struct("NSString"))),
-                    .pointer(.struct("NSString")),
-                ]
-            ),
+                    .pointer(.typeName("NSString"), nullabilitySpecifier: .nonnull),
+                    .pointer(.typeName("NSString")),
+                ]),
             withExplicitNullability: nil,
             toConvertTo: "((String, String?) -> Int)!"
         )
@@ -488,12 +549,11 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(
             .blockType(
                 name: "block",
-                returnType: .struct("NSInteger"),
+                returnType: .typeName("NSInteger"),
                 parameters: [
-                    .specified(specifiers: ["nonnull"], .pointer(.struct("NSString"))),
-                    .specified(specifiers: ["nullable"], .pointer(.struct("NSString"))),
-                ]
-            ),
+                    .pointer(.typeName("NSString"), nullabilitySpecifier: .nonnull),
+                    .pointer(.typeName("NSString"), nullabilitySpecifier: .nullable),
+                ]),
             withExplicitNullability: .nonnull,
             toConvertTo: "(String, String?) -> Int"
         )
@@ -501,10 +561,10 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(
             .blockType(
                 name: "block",
-                returnType: .struct("NSInteger"),
+                returnType: .typeName("NSInteger"),
                 parameters: [
-                    .pointer(.struct("NSString")),
-                    .pointer(.struct("NSString")),
+                    .pointer(.typeName("NSString")),
+                    .pointer(.typeName("NSString")),
                 ]
             ),
             withExplicitNullability: .nonnull,
@@ -514,12 +574,45 @@ class DefaultTypeMapperTests: XCTestCase {
 
     func testNullableBlock() {
         expect(
-            .qualified(
-                .blockType(name: "block", returnType: .void, parameters: []),
-                qualifiers: ["_Nullable"]
+            .nullabilitySpecified(
+                specifier: .nullable,
+                .blockType(
+                    name: "block", returnType: .void, parameters: []
+                )
             ),
             withExplicitNullability: nil,
             toConvertTo: "(() -> Void)?"
+        )
+    }
+
+    func testNullableBlock_blockTypeNullability() {
+        expect(
+            .blockType(
+                name: "block", returnType: .void, parameters: [], nullabilitySpecifier: .nullable
+            ),
+            withExplicitNullability: nil,
+            toConvertTo: "(() -> Void)?"
+        )
+        expect(
+            .blockType(
+                name: "block", returnType: .void, parameters: [], nullabilitySpecifier: .nonnull
+            ),
+            withExplicitNullability: nil,
+            toConvertTo: "() -> Void"
+        )
+        expect(
+            .blockType(
+                name: "block", returnType: .void, parameters: [], nullabilitySpecifier: .nullResettable
+            ),
+            withExplicitNullability: nil,
+            toConvertTo: "(() -> Void)!"
+        )
+        expect(
+            .blockType(
+                name: "block", returnType: .void, parameters: [], nullabilitySpecifier: .nullUnspecified
+            ),
+            withExplicitNullability: nil,
+            toConvertTo: "(() -> Void)!"
         )
     }
 
@@ -530,12 +623,24 @@ class DefaultTypeMapperTests: XCTestCase {
         )
 
         expect(
-            .qualified(
-                .struct("callback"),
-                qualifiers: ["_Nullable"]
-            ),
+            .nullabilitySpecified(specifier: .nullable, "callback"),
             withExplicitNullability: nil,
             toConvertTo: "callback?"
+        )
+        expect(
+            .nullabilitySpecified(specifier: .nonnull, "callback"),
+            withExplicitNullability: nil,
+            toConvertTo: "callback"
+        )
+        expect(
+            .nullabilitySpecified(specifier: .nullUnspecified, "callback"),
+            withExplicitNullability: nil,
+            toConvertTo: "callback!"
+        )
+        expect(
+            .nullabilitySpecified(specifier: .nullResettable, "callback"),
+            withExplicitNullability: nil,
+            toConvertTo: "callback!"
         )
     }
 
@@ -553,16 +658,16 @@ class DefaultTypeMapperTests: XCTestCase {
     func testQualifiedWithinSpecified() {
         expect(
             .specified(
-                specifiers: ["static"],
-                .qualified(.pointer(.struct("NSString")), qualifiers: ["_Nullable"])
+                specifiers: [.weak],
+                .qualified(.pointer(.typeName("NSString")), qualifiers: [.atomic])
             ),
             withExplicitNullability: nil,
             toConvertTo: "String?"
         )
         expect(
             .specified(
-                specifiers: ["__weak"],
-                .qualified(.pointer(.struct("NSString")), qualifiers: ["const"])
+                specifiers: [.weak],
+                .qualified(.pointer(.typeName("NSString")), qualifiers: [.const])
             ),
             withExplicitNullability: nil,
             toConvertTo: "String?"
@@ -571,8 +676,19 @@ class DefaultTypeMapperTests: XCTestCase {
 
     func testFixedArray() {
         expect(
-            .fixedArray(.struct("char"), length: 3),
+            .fixedArray(.typeName("char"), length: 3),
             toConvertTo: "(CChar, CChar, CChar)"
+        )
+    }
+
+    func testPointerToFixedArray() {
+        expect(
+            .pointer(
+                .fixedArray(.typeName("char"), length: 3)
+            ),
+            inNonnullContext: false,
+            withExplicitNullability: nil,
+            toConvertTo: "UnsafeMutablePointer<(CChar, CChar, CChar)>!"
         )
     }
 
@@ -582,13 +698,33 @@ class DefaultTypeMapperTests: XCTestCase {
             toConvertTo: "UnsafeMutableRawPointer"
         )
     }
+
+    func testFunctionPointer() {
+        expect(
+            .functionPointer(name: "a", returnType: "int"),
+            toConvertTo: "@convention(c) () -> CInt"
+        )
+    }
+
+    func testFunctionPointerTakingPointers() {
+        expect(
+            .functionPointer(
+                name: "a",
+                returnType: "int",
+                parameters: [
+                    .pointer(.void)
+                ]
+            ),
+            toConvertTo: "@convention(c) (UnsafeMutableRawPointer?) -> CInt"
+        )
+    }
 }
 
 extension DefaultTypeMapperTests {
     private func expect(
         _ type: ObjcType,
         inNonnullContext: Bool = false,
-        withExplicitNullability nullability: TypeNullability? = .nonnull,
+        withExplicitNullability nullability: ObjcNullabilitySpecifier? = .nonnull,
         toConvertTo expected: String,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -643,7 +779,7 @@ extension DefaultTypeMapperTests {
     private func typeMapperConvert(
         _ type: ObjcType,
         inNonnullContext: Bool,
-        nullability: TypeNullability?,
+        nullability: ObjcNullabilitySpecifier?,
         typeSystem: TypeSystem
     ) -> String {
 

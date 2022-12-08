@@ -27,6 +27,9 @@ public final class ObjcGlobalContextNode: ObjcASTNode, ObjcInitializableNode {
     public var enumDeclarations: [ObjcEnumDeclarationNode] {
         childrenMatching()
     }
+    public var structDeclarations: [ObjcStructDeclarationNode] {
+        childrenMatching()
+    }
     
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)

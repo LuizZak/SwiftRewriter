@@ -6,14 +6,24 @@ open class ASTNode {
     public var location: SourceLocation
     /// The total length of this node's span in the original source code
     public var length: SourceLength
+
+    /// Returns the `SourceRange` that encompasses the source range of this AST
+    /// node base on its `location` and `length` properties.
+    public var sourceRange: SourceRange {
+        SourceRange.range(
+            start: location,
+            end: location + length
+        )
+    }
     
     /// Original source for this node.
     public var originalSource: Source?
     
     /// Overridden by subclasses to provide custom short descriptions to be used
     /// when printing AST nodes for diagnostics
+    /// Defaults to the dynamic type name of the node instance.
     open var shortDescription: String {
-        ""
+        "\(type(of: self))"
     }
     
     /// Children nodes associated with this node
@@ -150,10 +160,11 @@ open class ASTNode {
         }
         
         self.location = startNode.location
-        self.length =
-            SourceLength(newlines: endNode.location.line - startNode.location.line,
-                         columnsAtLastLine: endNode.location.column,
-                         utf8Length: endNode.location.utf8Offset - startNode.location.utf8Offset)
+        self.length = SourceLength(
+            newlines: endNode.location.line - startNode.location.line,
+            columnsAtLastLine: endNode.location.column,
+            utf8Length: endNode.location.utf8Offset - startNode.location.utf8Offset
+        )
     }
 }
 

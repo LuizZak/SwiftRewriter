@@ -1,8 +1,8 @@
+import XCTest
 import ObjcGrammarModels
 import SwiftAST
 import SwiftRewriterLib
 import TestCommons
-import XCTest
 
 @testable import IntentionPasses
 
@@ -424,7 +424,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
             .createFile(named: "A.h") { file in
-                file.createTypealias(withName: "Abc", type: .struct("NSInteger"))
+                file.createTypealias(withName: "Abc", type: .typeName("NSInteger"))
             }.createFile(named: "A.m")
             .build()
         let sut = FileTypeMergingIntentionPass()
@@ -616,7 +616,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                         type: .blockType(
                             name: "ABlock",
                             returnType: .void,
-                            parameters: [.pointer(.struct("A"))]
+                            parameters: [.pointer(.typeName("A"))]
                         )
                     )
                     .endNonnullContext()
