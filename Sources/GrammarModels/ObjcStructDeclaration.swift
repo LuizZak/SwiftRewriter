@@ -19,9 +19,11 @@ public final class ObjcStructDeclarationBody: ASTNode, InitializableNode {
         childrenMatching()
     }
     
+    /*
     public var identifier: Identifier? {
         firstChild()
     }
+    */
     
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)
@@ -29,6 +31,10 @@ public final class ObjcStructDeclarationBody: ASTNode, InitializableNode {
 }
 
 public final class ObjcStructField: IVarDeclaration {
+    public var expression: ConstantExpressionNode? {
+        firstChild()
+    }
+
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)
     }

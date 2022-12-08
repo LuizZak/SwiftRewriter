@@ -1,5 +1,5 @@
 // Based on SwiftSyntax's own `SourceLength` structure
-public struct SourceLength: Codable {
+public struct SourceLength: Codable, Equatable {
     /// A zero-length source length
     public static let zero: SourceLength =
         SourceLength(newlines: 0, columnsAtLastLine: 0, utf8Length: 0)

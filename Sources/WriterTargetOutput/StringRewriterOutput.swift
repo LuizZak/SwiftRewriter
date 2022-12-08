@@ -56,7 +56,7 @@ public final class StringRewriterOutput: RewriterOutputTarget {
     }
     
     public func onAfterOutput() {
-        buffer = buffer.trimmingWhitespaces()
+        buffer = buffer.trimmingWhitespace()
         
         callChangeCallback()
     }

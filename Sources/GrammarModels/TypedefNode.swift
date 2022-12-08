@@ -3,17 +3,8 @@ public class TypedefNode: ASTNode, InitializableNode {
     public var identifier: Identifier? {
         firstChild()
     }
-    public var structDeclaration: ObjcStructDeclaration? {
-        firstChild()
-    }
     public var type: TypeNameNode? {
         firstChild()
-    }
-    public var blockParameters: BlockParametersNode? {
-        firstChild()
-    }
-    public var typeDeclarators: [TypeDeclaratorNode] {
-        childrenMatching()
     }
     
     public required init(isInNonnullContext: Bool) {

@@ -2,7 +2,7 @@ import SwiftRewriterLib
 import SwiftAST
 import XCTest
 
-class SwiftRewriterNullabilityTests: XCTestCase {
+class SwiftRewriter_NullabilityTests: XCTestCase {
     
     func testNonNilInitializedImplicitUnwrappedVariableKeepsNullabilityInCaseNilIsAssignedLater() {
         // We use initial values of locals to help with determining whether or

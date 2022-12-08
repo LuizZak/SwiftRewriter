@@ -81,7 +81,7 @@ class IntentionSerializerTests: XCTestCase {
             }
             .createFile(named: "B.swift") { file in
                 file.createStruct(withName: "Struct")
-                    .createTypealias(withName: "Typealias", type: .struct("NSInteger"))
+                    .createTypealias(withName: "Typealias", type: .typeName("NSInteger"))
                     .createEnum(withName: "Enum", rawValue: .int) { type in
                         type.createCase(name: "first")
                         type.createCase(name: "second",

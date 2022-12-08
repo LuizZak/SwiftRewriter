@@ -1,4 +1,4 @@
-/// An anomymous syntax visitor that reports visits to `SyntaxNode` objects to
+/// An anonymous syntax visitor that reports visits to `SyntaxNode` objects to
 /// an external listener closure.
 public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisitor {
     public typealias ExprResult = Void

@@ -179,15 +179,23 @@ class ExpressionPassTestCase: XCTestCase {
         
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
         
-        let context = SwiftASTReaderContext(typeSystem: typeSystem,
-                                            typeContext: nil,
-                                            comments: [])
+        let context = SwiftASTReaderContext(
+            typeSystem: typeSystem,
+            typeContext: nil,
+            comments: []
+        )
+        let source = StringCodeSource(source: exp)
         
-        let reader = SwiftExprASTReader(typeMapper: typeMapper,
-                                        typeParser: TypeParsing(state: ExpressionPassTestCase._state),
-                                        context: context,
-                                        delegate: nil)
-        
+        let reader = SwiftExprASTReader(
+            typeMapper: typeMapper,
+            typeParser: TypeParsing(
+                state: ExpressionPassTestCase._state,
+                source: source
+            ),
+            context: context,
+            delegate: nil
+        )
+
         return expression.accept(reader)!
     }
     
@@ -196,33 +204,46 @@ class ExpressionPassTestCase: XCTestCase {
         defer {
             _=stream // Keep alive!
         }
-        let diag = DiagnosticsErrorListener(source: StringCodeSource(source: stmtString),
-                                            diagnostics: Diagnostics())
+        let diag = DiagnosticsErrorListener(
+            source: StringCodeSource(source: stmtString),
+            diagnostics: Diagnostics()
+        )
         parser.addErrorListener(diag)
         
         let stmt = try! parser.statement()
         
         if !diag.diagnostics.diagnostics.isEmpty {
             let summary = diag.diagnostics.diagnosticsSummary()
-            XCTFail("Unexpected diagnostics while parsing statement:\n\(summary)",
-                    file: file, line: line)
+            XCTFail(
+                "Unexpected diagnostics while parsing statement:\n\(summary)",
+                file: file,
+                line: line
+            )
         }
         
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
-        let typeParser = TypeParsing(state: ExpressionPassTestCase._state)
+        let source = StringCodeSource(source: stmtString)
+        let typeParser = TypeParsing(
+            state: ExpressionPassTestCase._state,
+            source: source
+        )
         
-        let expReader =
-            SwiftExprASTReader(
-                typeMapper: typeMapper,
-                typeParser: typeParser,
-                context: SwiftASTReaderContext(typeSystem: typeSystem,
-                                               typeContext: nil,
-                                               comments: []),
-                delegate: nil)
+        let expReader = SwiftExprASTReader(
+            typeMapper: typeMapper,
+            typeParser: typeParser,
+            context: SwiftASTReaderContext(
+                typeSystem: typeSystem,
+                typeContext: nil,
+                comments: []
+            ),
+            delegate: nil
+        )
         
-        let reader = SwiftStatementASTReader(expressionReader: expReader,
-                                             context: expReader.context,
-                                             delegate: nil)
+        let reader = SwiftStatementASTReader(
+            expressionReader: expReader,
+            context: expReader.context,
+            delegate: nil
+        )
         
         return stmt.accept(reader)!
     }
@@ -241,9 +262,11 @@ class ExpressionPassTestCase: XCTestCase {
             self?.notified = true
         }
         
-        return ASTRewriterPassContext(typeSystem: typeSystem,
-                                      notifyChangedTree: block,
-                                      source: intentionContext,
-                                      functionBodyIntention: functionBodyContext)
+        return ASTRewriterPassContext(
+            typeSystem: typeSystem,
+            notifyChangedTree: block,
+            source: intentionContext,
+            functionBodyIntention: functionBodyContext
+        )
     }
 }

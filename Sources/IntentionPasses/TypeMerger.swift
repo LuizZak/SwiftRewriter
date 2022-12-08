@@ -487,11 +487,11 @@ class TypeMerger {
         if !type1.isNullabilityUnspecified && type2.isNullabilityUnspecified {
             let type1NonnullDeep =
                 SwiftType.asNonnullDeep(type1Unaliased.deepUnwrapped,
-                                        removeUnspecifiedsOnly: true)
+                                        removeUnspecifiedOnly: true)
             
             let type2NonnullDeep =
                 SwiftType.asNonnullDeep(type2Unaliased.deepUnwrapped,
-                                        removeUnspecifiedsOnly: true)
+                                        removeUnspecifiedOnly: true)
             
             if type1NonnullDeep == type2NonnullDeep {
                 type2 = type2NonnullDeep.withSameOptionalityAs(type1)

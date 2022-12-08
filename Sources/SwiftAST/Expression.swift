@@ -11,8 +11,7 @@ public protocol ExpressionComponent {
     var subExpressions: [Expression] { get }
 }
 
-public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable,
-                         CustomStringConvertible, CustomReflectable {
+public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, CustomStringConvertible {
     
     /// `true` if this expression sub-tree contains only literal-based sub-expressions.
     /// Literal based sub-expressions include: `.constant`, as well as `.binary`,
@@ -43,10 +42,6 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable,
     
     open var description: String {
         "\(type(of: self))"
-    }
-    
-    open var customMirror: Mirror {
-        Mirror(reflecting: "")
     }
     
     /// Returns an array of sub-expressions contained within this expression, in
@@ -121,7 +116,7 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable,
     
     @inlinable
     open override func copy() -> Expression {
-        fatalError("Must be overriden by subclasses")
+        fatalError("Must be overridden by subclasses")
     }
     
     open func isEqual(to other: Expression) -> Bool {

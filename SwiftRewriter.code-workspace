@@ -155,7 +155,20 @@
 		"ShortcutMenuBar.userButton03Command": "workbench.action.tasks.runTask|Test (release)",
 		"cSpell.words": [
 			"Antlr",
-			"swiftpm"
+			"constexpr",
+			"declspec",
+			"Initializable",
+			"instancetype",
+			"kindof",
+			"MSVC",
+			"nonnull",
+			"noreturn",
+			"repool",
+			"stdcall",
+			"sugarize",
+			"swiftpm",
+			"typealiases",
+			"Unretained"
 		],
 	},
 	"extensions": {

@@ -6,15 +6,19 @@ public class TypeNameNode: ASTNode {
         type.description
     }
     
-    public init(type: ObjcType,
-                isInNonnullContext: Bool,
-                location: SourceLocation = .invalid,
-                length: SourceLength = .zero) {
+    public init(
+        type: ObjcType,
+        isInNonnullContext: Bool,
+        location: SourceLocation = .invalid,
+        length: SourceLength = .zero
+    ) {
     
         self.type = type
         
-        super.init(isInNonnullContext: isInNonnullContext,
-                   location: location,
-                   length: length)
+        super.init(
+            isInNonnullContext: isInNonnullContext,
+            location: location,
+            length: length
+        )
     }
 }

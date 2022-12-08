@@ -59,8 +59,8 @@ public final class SwiftASTReaderContext {
         localsStack.removeLast()
     }
     
-    public func popClosestCommentBefore(node: ParserRuleContext) -> ObjcComment? {
-        guard let start = node.getStart() else {
+    public func popClosestCommentBefore(rule: ParserRuleContext) -> ObjcComment? {
+        guard let start = rule.getStart() else {
             return nil
         }
         
@@ -74,9 +74,9 @@ public final class SwiftASTReaderContext {
         return nil
     }
     
-    public func popClosestCommentsBefore(node: ParserRuleContext) -> [ObjcComment] {
+    public func popClosestCommentsBefore(rule: ParserRuleContext) -> [ObjcComment] {
         var comments: [ObjcComment] = []
-        while let comment = popClosestCommentBefore(node: node) {
+        while let comment = popClosestCommentBefore(rule: rule) {
             comments.append(comment)
         }
         

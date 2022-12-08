@@ -33,8 +33,8 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
                 .createFile(named: "Aliases") { type in
-                    type.createTypealias(withName: "AliasedInt", type: .struct("NSInteger"))
-                        .createTypealias(withName: "OtherAliasedInt", type: .struct("NSInteger"))
+                    type.createTypealias(withName: "AliasedInt", type: .typeName("NSInteger"))
+                        .createTypealias(withName: "OtherAliasedInt", type: .typeName("NSInteger"))
                 }
                 .createFileWithClass(named: "A") { type in
                     type.createProperty(named:  "a", type: .int)

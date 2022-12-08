@@ -4,7 +4,7 @@ indirect public enum SwiftType: Hashable {
     case nominal(NominalSwiftType)
     case protocolComposition(ProtocolCompositionSwiftType)
     case tuple(TupleSwiftType)
-    case block(returnType: SwiftType, parameters: [SwiftType], attributes: Set<BlockTypeAttribute>)
+    case block(returnType: SwiftType, parameters: [SwiftType], attributes: Set<BlockTypeAttribute> = [])
     case metatype(for: SwiftType)
     case optional(SwiftType)
     case implicitUnwrappedOptional(SwiftType)
@@ -40,8 +40,21 @@ public enum ProtocolCompositionComponent: Hashable {
 /// A tuple swift type, which either represents an empty tuple or two or more
 /// Swift types.
 public enum TupleSwiftType: Hashable {
-    case types(TwoOrMore<SwiftType>)
+    /// An empty tuple type, or `Void`.
     case empty
+    /// A tuple type containing two or more types.
+    case types(TwoOrMore<SwiftType>)
+}
+
+extension TupleSwiftType: ExpressibleByArrayLiteral {
+    /// - precondition: `elements.isEmpty || elements.count >= 2`
+    public init(arrayLiteral elements: SwiftType...) {
+        if elements.isEmpty {
+            self = .empty
+        }
+
+        self = .types(.fromCollection(elements))
+    }
 }
 
 /// An attribute for block types.
@@ -280,65 +293,99 @@ public extension SwiftType {
         }
     }
     
+    /// Alias for `SwiftType.tuple(.empty)`.
     static let void = SwiftType.tuple(.empty)
+
+    /// Alias for `SwiftType.typeName("Int")`.
     static let int = SwiftType.typeName("Int")
+
+    /// Alias for `SwiftType.typeName("UInt")`.
     static let uint = SwiftType.typeName("UInt")
+
+    /// Alias for `SwiftType.typeName("String")`.
     static let string = SwiftType.typeName("String")
+
+    /// Alias for `SwiftType.typeName("Bool")`.
     static let bool = SwiftType.typeName("Bool")
+
+    /// Alias for `SwiftType.typeName("Float")`.
     static let float = SwiftType.typeName("Float")
+
+    /// Alias for `SwiftType.typeName("Double")`.
     static let double = SwiftType.typeName("Double")
+
+    /// Alias for `SwiftType.typeName("CGFloat")`.
     static let cgFloat = SwiftType.typeName("CGFloat")
+
+    /// Alias for `SwiftType.typeName("Any")`.
     static let any = SwiftType.typeName("Any")
+
+    /// Alias for `SwiftType.typeName("AnyObject")`.
     static let anyObject = SwiftType.typeName("AnyObject")
-    
+
+    /// Alias for `SwiftType.typeName("Selector")`.
     static let selector = SwiftType.typeName("Selector")
-    
+
+    /// Alias for `SwiftType.typeName("NSArray")`.
     static let nsArray = SwiftType.typeName("NSArray")
+
+    /// Alias for `SwiftType.typeName("NSDictionary")`.
     static let nsDictionary = SwiftType.typeName("NSDictionary")
     
     /// A special type name to use to represent instancetype's from Objective-C.
+    /// Alias for `SwiftType.typeName("__instancetype")`.
     static let instancetype = SwiftType.typeName("__instancetype")
     
-    /// A special type used in place of definitions with improper typing
+    /// A special type used in place of definitions with improper typing.
+    /// Alias for `SwiftType.typeName("<<error type>>")`.
     static let errorType = SwiftType.typeName("<<error type>>")
     
+    /// Convenience for `SwiftType.nominal(.generic("Range", parameters: [operand]))`
     static func openRange(_ operand: SwiftType) -> SwiftType {
-        .nominal(.generic("Range", parameters: .one(operand)))
+        .nominal(.generic("Range", parameters: [operand]))
     }
     
+    /// Convenience for `SwiftType.nominal(.generic("ClosedRange", parameters: [operand]))`
     static func closedRange(_ operand: SwiftType) -> SwiftType {
-        .nominal(.generic("ClosedRange", parameters: .one(operand)))
+        .nominal(.generic("ClosedRange", parameters: [operand]))
     }
     
+    /// Convenience for `SwiftType.nominal(.typeName(name))`
     static func typeName(_ name: String) -> SwiftType {
         .nominal(.typeName(name))
     }
     
+    /// Convenience for `SwiftType.nominal(.generic(name, parameters: parameters))`
     static func generic(_ name: String, parameters: GenericArgumentSwiftType) -> SwiftType {
         .nominal(.generic(name, parameters: parameters))
     }
     
-    static func swiftBlock(returnType: SwiftType,
-                           parameters: [SwiftType] = []) -> SwiftType {
+    /// Convenience for `SwiftType.block(returnType: returnType, parameters: parameters, attributes: [])`
+    static func swiftBlock(
+        returnType: SwiftType,
+        parameters: [SwiftType] = []
+    ) -> SwiftType {
         
         .block(returnType: returnType, parameters: parameters, attributes: [])
     }
     
-    /// Returns a type that is the same as the input, but with any .optional or
-    /// .implicitUnwrappedOptional types unwrapped to non optional, inclusing
+    /// Returns a type that is the same as the input, but with any `.optional` or
+    /// `.implicitUnwrappedOptional` types unwrapped to non optional, including
     /// block parameters.
     ///
     /// - Parameters:
     ///   - type: The input type
-    ///   - removeImplicitsOnly: Whether to only remove implicit unwrapped optionals,
+    ///   - removeUnspecifiedOnly: Whether to only remove implicit unwrapped optionals,
     /// keeping optionals in place.
     /// - Returns: The deeply unwrapped version of the input type.
-    static func asNonnullDeep(_ type: SwiftType,
-                              removeUnspecifiedsOnly: Bool = false) -> SwiftType {
+    static func asNonnullDeep(
+        _ type: SwiftType,
+        removeUnspecifiedOnly: Bool = false
+    ) -> SwiftType {
         
         var result: SwiftType = type
         
-        if removeUnspecifiedsOnly {
+        if removeUnspecifiedOnly {
             if case .nullabilityUnspecified(let inner) = type {
                 result = inner
             }
@@ -348,17 +395,20 @@ public extension SwiftType {
         
         switch result {
         case let .block(returnType, parameters, attributes):
-            let returnType =
-                asNonnullDeep(returnType,
-                              removeUnspecifiedsOnly: removeUnspecifiedsOnly)
+            let returnType = asNonnullDeep(
+                returnType,
+                removeUnspecifiedOnly: removeUnspecifiedOnly
+            )
             
             let parameters = parameters.map {
-                asNonnullDeep($0, removeUnspecifiedsOnly: removeUnspecifiedsOnly)
+                asNonnullDeep($0, removeUnspecifiedOnly: removeUnspecifiedOnly)
             }
             
-            result = .block(returnType: returnType,
-                            parameters: parameters,
-                            attributes: attributes)
+            result = .block(
+                returnType: returnType,
+                parameters: parameters,
+                attributes: attributes
+            )
             
         default:
             break
@@ -401,6 +451,12 @@ extension ProtocolCompositionComponent: CustomStringConvertible {
     
     public static func typeName(_ name: String) -> ProtocolCompositionComponent {
         .nominal(.typeName(name))
+    }
+}
+
+extension ProtocolCompositionComponent: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = .typeName(value)
     }
 }
 
@@ -561,9 +617,10 @@ public struct TwoOrMore<T> {
     /// The collection must have at least two elements.
     ///
     /// - precondition: `collection.count >= 2`
-    public static func fromCollection<C>(_ collection: C) -> TwoOrMore
-        where C: BidirectionalCollection, C.Element == T, C.Index == Int {
-            
+    public static func fromCollection<C>(
+        _ collection: C
+    ) -> TwoOrMore where C: BidirectionalCollection, C.Element == T, C.Index == Int {
+        
         precondition(collection.count >= 2)
         
         return TwoOrMore(first: collection[0], second: collection[1], remaining: Array(collection.dropFirst(2)))

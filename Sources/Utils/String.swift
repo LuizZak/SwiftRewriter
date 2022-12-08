@@ -227,7 +227,7 @@ public extension String {
 }
 
 public extension String {
-    func trimmingWhitespaces() -> String {
+    func trimmingWhitespace() -> String {
         return trimWhitespace(self)
     }
 }
