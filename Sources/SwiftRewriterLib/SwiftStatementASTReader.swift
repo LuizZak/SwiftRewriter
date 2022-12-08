@@ -646,36 +646,67 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             _ ctx: ObjectiveCParser.ExpressionsContext
         ) -> Statement? {
             let expressions = ctx.expression()
-            guard expressions.count == 1 else {
+            guard !expressions.isEmpty else {
                 return nil
             }
 
-            guard let parsedExp = expressions[0].accept(expressionReader) else {
+            // Ensure all expressions can be properly parsed first
+            let parsedExps = expressions.compactMap { $0.accept(expressionReader) }
+            guard parsedExps.count == expressions.count else {
                 return nil
             }
+
+            let parsedExp = parsedExps[0]
 
             guard let binaryExpression = parsedExp.asBinary, binaryExpression.op == .multiply else {
                 return nil
             }
             
+            guard let typeName = binaryExpression.lhs.asIdentifier else {
+                return nil
+            }
+            let baseTypeName: ObjcType = .typeName(typeName.identifier)
+
             guard
-                let typeName = binaryExpression.lhs.asIdentifier,
-                let identifier = binaryExpression.rhs.asIdentifier
+                let firstDeclarator = asObjcTypeDeclarator(binaryExpression.rhs, baseType: baseTypeName)
             else {
                 return nil
             }
 
-            let declaration = self.declaration(
-                objcType: .nullabilitySpecified(
-                    specifier: .nullUnspecified,
-                    .pointer(.typeName(typeName.identifier))
-                ),
-                identifier: identifier.identifier
-            )
+            // For every subsequent expression past the first comma, consider
+            // the transformation only if they are all type-convertible to
+            // Objective-C.
+            guard parsedExps.dropFirst().allSatisfy({ asObjcTypeDeclarator($0, baseType: baseTypeName) != nil }) else {
+                return nil
+            }
 
-            context.define(localNamed: identifier.identifier, storage: declaration.storage)
+            var declarations: [StatementVariableDeclaration] = []
 
-            let varDeclStmt = Statement.variableDeclarations([declaration])
+            let declarators: [(String, ObjcType)] =
+                [firstDeclarator]
+                    + parsedExps.compactMap({ asObjcTypeDeclarator($0, baseType: baseTypeName) })
+            
+            for (i, (identifier, baseType)) in declarators.enumerated() {
+                // First identifier is a pointer to 'typeName', the remaining
+                // identifiers are all values of type 'typeName'
+                var type: ObjcType = baseType
+                if i == 0 {
+                    type = .nullabilitySpecified(
+                        specifier: .nullUnspecified,
+                        .pointer(type)
+                    )
+                }
+
+                let declaration = self.declaration(
+                    objcType: type,
+                    identifier: identifier
+                )
+
+                context.define(localNamed: identifier, storage: declaration.storage)
+                declarations.append(declaration)
+            }
+
+            let varDeclStmt = Statement.variableDeclarations(declarations)
             
             varDeclStmt.comments = context
                 .popClosestCommentsBefore(rule: ctx)
@@ -690,9 +721,9 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             return varDeclStmt
         }
         
-        /// Tries to map a top-level expression if it matches the form `id<A> a`
-        /// or `id<A, B> a` as a declaration of a variable with a type of a protocol
-        /// composition.
+        /// Tries to map a top-level expression if it matches the form `id < A > a`
+        /// or `id < A, B > a` etc. as a declaration of a variable with a type of
+        /// a protocol composition.
         private func tryMapIdProtocolList(
             _ ctx: ObjectiveCParser.ExpressionsContext
         ) -> Statement? {
@@ -850,6 +881,45 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
                 )
             }
         }
+
+        /// Attempts to convert a Swift expression into an Objective-C declarator
+        /// based on how that expression tokenizes in C.
+        ///
+        /// Requires that the expression tree ends in at least one identifier
+        /// so that can be used as a base declarator identifier.
+        private func asObjcTypeDeclarator(_ exp: Expression, baseType: ObjcType) -> (String, ObjcType)? {
+            switch exp {
+            case let exp as IdentifierExpression:
+                // <identifier declarator>
+                return (exp.identifier, baseType)
+
+            case let exp as PostfixExpression:
+                guard let (ident, superType) = asObjcTypeDeclarator(exp.exp, baseType: baseType) else {
+                    return nil
+                }
+                
+                switch exp.op {
+                // <base declarator>[<fixed array size (integer)>]
+                case let subOp as SubscriptPostfix:
+                    guard subOp.subExpressions.count == 1 else {
+                        return nil
+                    }
+                    guard let sub = subOp.subExpressions[0].asConstant else {
+                        return nil
+                    }
+                    guard let integerValue = sub.constant.integerValue, integerValue >= 0 else {
+                        return nil
+                    }
+
+                    return (ident, .fixedArray(superType, length: integerValue))
+
+                default:
+                    return nil
+                }
+            default:
+                return nil
+            }
+        }
     }
 }
 
@@ -891,11 +961,12 @@ private class ForStatementGenerator {
         
         // Try to come up with a clean for-in loop with a range
         if let initExpr = initExpr, let condition = condition, let iteration = iteration {
-            let result =
-                genSimplifiedFor(initExpr: initExpr,
-                                 condition: condition,
-                                 iteration: iteration,
-                                 body: compoundStatement)
+            let result = genSimplifiedFor(
+                initExpr: initExpr,
+                condition: condition,
+                iteration: iteration,
+                body: compoundStatement
+            )
             
             if let result = result {
                 return result
@@ -905,11 +976,13 @@ private class ForStatementGenerator {
         return genWhileLoop(initExpr, condition, iteration, compoundStatement, ctx)
     }
     
-    private func genWhileLoop(_ initExpr: Statement?,
-                              _ condition: Expression?,
-                              _ iteration: Statement?,
-                              _ compoundStatement: CompoundStatement,
-                              _ ctx: ForStatementGenerator.Parser.ForStatementContext) -> Statement {
+    private func genWhileLoop(
+        _ initExpr: Statement?,
+        _ condition: Expression?,
+        _ iteration: Statement?,
+        _ compoundStatement: CompoundStatement,
+        _ ctx: ForStatementGenerator.Parser.ForStatementContext
+    ) -> Statement {
         
         // Come up with a while loop, now
         
@@ -921,8 +994,10 @@ private class ForStatementGenerator {
         
         body.statements.append(contentsOf: compoundStatement.statements.map { $0.copy() })
         
-        let whileBody = Statement.while(condition ?? .constant(true),
-                                        body: body)
+        let whileBody = Statement.while(
+            condition ?? .constant(true),
+            body: body
+        )
         
         // Loop init (pre-loop)
         let bodyWithWhile: Statement
@@ -945,10 +1020,12 @@ private class ForStatementGenerator {
         return bodyWithWhile
     }
     
-    private func genSimplifiedFor(initExpr: Statement,
-                                  condition: Expression,
-                                  iteration: Statement,
-                                  body compoundStatement: CompoundStatement) -> Statement? {
+    private func genSimplifiedFor(
+        initExpr: Statement,
+        condition: Expression,
+        iteration: Statement,
+        body compoundStatement: CompoundStatement
+    ) -> Statement? {
         
         // Search for inits like 'int i = <value>'
         guard let decl = initExpr.asVariableDeclaration?.decl, decl.count == 1 else {

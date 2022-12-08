@@ -345,7 +345,7 @@ class DefaultTypeMapperTests: XCTestCase {
     }
 
     func testIncompleteStruct() {
-        expect(.incompleteStruct("A"), toConvertTo: "Any")
+        expect(.incompleteStruct("A"), toConvertTo: "A")
         expect(.pointer(.incompleteStruct("A")), toConvertTo: "OpaquePointer")
     }
 
@@ -686,10 +686,41 @@ class DefaultTypeMapperTests: XCTestCase {
         )
     }
 
+    func testPointerToFixedArray() {
+        expect(
+            .pointer(
+                .fixedArray(.typeName("char"), length: 3)
+            ),
+            inNonnullContext: false,
+            withExplicitNullability: nil,
+            toConvertTo: "UnsafeMutablePointer<(CChar, CChar, CChar)>!"
+        )
+    }
+
     func testPointerToVoid() {
         expect(
             .pointer(.void),
             toConvertTo: "UnsafeMutableRawPointer"
+        )
+    }
+
+    func testFunctionPointer() {
+        expect(
+            .functionPointer(name: "a", returnType: "int"),
+            toConvertTo: "@convention(c) () -> CInt"
+        )
+    }
+
+    func testFunctionPointerTakingPointers() {
+        expect(
+            .functionPointer(
+                name: "a",
+                returnType: "int",
+                parameters: [
+                    .pointer(.void)
+                ]
+            ),
+            toConvertTo: "@convention(c) (UnsafeMutableRawPointer?) -> CInt"
         )
     }
 }

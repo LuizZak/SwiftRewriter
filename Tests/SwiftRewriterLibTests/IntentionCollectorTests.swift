@@ -347,7 +347,7 @@ class IntentionCollectorTests: XCTestCase {
         XCTAssertEqual(file.typealiasIntentions.count, 1)
         XCTAssertEqual(file.typealiasIntentions.first?.name, "A")
         XCTAssertEqual(file.typealiasIntentions.first?.fromType, .void)
-        XCTAssertEqual(file.typealiasIntentions.first?.originalObjcType, .pointer(.void))
+        XCTAssertEqual(file.typealiasIntentions.first?.originalObjcType, .pointer(.incompleteStruct("_A")))
     }
     
     func testQueryNonnullRegionsFromDelegate() throws {

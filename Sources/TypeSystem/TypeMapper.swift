@@ -386,8 +386,8 @@ public class DefaultTypeMapper: TypeMapper {
         case let .genericTypeName(name, parameters):
             return swiftType(forGenericObjcType: name, parameters: parameters, context: context)
             
-        case .incompleteStruct:
-            return "Any"
+        case .incompleteStruct(let name):
+            return swiftType(forObjcStructType: name, context: context)
 
         case .pointer(let type, _, let nullability):
             let type = swiftType(forObjcPointerType: type, context: context)
@@ -553,14 +553,12 @@ public class DefaultTypeMapper: TypeMapper {
     
     private func swiftType(forObjcPointerType type: ObjcType, context: TypeMappingContext) -> SwiftType {
         let final: SwiftType
-        
+
         if case .incompleteStruct = type {
-            return "OpaquePointer"
-        }
-        if type == .anonymousStruct {
-            return "OpaquePointer"
-        }
-        if case .typeName(let inner) = type {
+            final = "OpaquePointer"
+        } else if type == .anonymousStruct {
+            final = "OpaquePointer"
+        } else if case .typeName(let inner) = type {
             if let ptr = DefaultTypeMapper._pointerMappings[inner] {
                 final = ptr
                 
@@ -581,17 +579,15 @@ public class DefaultTypeMapper: TypeMapper {
                 
                 final = .generic("UnsafeMutablePointer", parameters: [pointeeType])
             }
+        } else if case .void = type {
+            final = .typeName("UnsafeMutableRawPointer")
+        } else if case .fixedArray(let base, let length) = type {
+            let pointee = swiftTuple(type: base, count: length, context: context)
             
-            return swiftType(type: final, withNullability: context.nullability())
+            final = .generic("UnsafeMutablePointer", parameters: [pointee])
+        } else {
+            final = swiftType(forObjcType: type, context: context)
         }
-        if case .void = type {
-            return swiftType(
-                type: .typeName("UnsafeMutableRawPointer"),
-                withNullability: context.nullability()
-            )
-        }
-        
-        final = swiftType(forObjcType: type, context: context)
         
         return swiftType(type: final, withNullability: context.nullability())
     }
@@ -675,7 +671,9 @@ public class DefaultTypeMapper: TypeMapper {
         if parameters == [.void] {
             swiftParameters = []
         } else {
-            swiftParameters = parameters.map { swiftType(forObjcType: $0, context: ctx) }
+            swiftParameters = parameters.map {
+                swiftType(forObjcType: $0, context: ctx)
+            }
         }
         
         let type: SwiftType =

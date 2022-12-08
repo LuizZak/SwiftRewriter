@@ -330,6 +330,63 @@ class SwiftStatementASTReaderTests: XCTestCase {
                 initialization: nil
             )
         )
+        assert(
+            objcStmt: "AType *object;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "object",
+                type: .nullabilityUnspecified(
+                    .generic("UnsafeMutablePointer", parameters: ["AType"])
+                ),
+                initialization: nil
+            )
+        )
+        assert(
+            objcStmt: "AType *a, b;",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclarations([
+                .init(
+                    identifier: "a",
+                    type: .nullabilityUnspecified(
+                        .generic("UnsafeMutablePointer", parameters: ["AType"])
+                    ),
+                    initialization: nil
+                ),
+                .init(
+                    identifier: "b",
+                    type: "AType",
+                    initialization: nil
+                ),
+            ])
+        )
+        assert(
+            objcStmt: "AType *object[2];",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "object",
+                type: .nullabilityUnspecified(
+                    .generic(
+                        "UnsafeMutablePointer",
+                        parameters: [.tuple(["AType", "AType"])]
+                    )
+                ),
+                initialization: nil
+            )
+        )
+        assert(
+            objcStmt: "AType *object[2];",
+            parseBlock: { try $0.statement() },
+            readsAs: .variableDeclaration(
+                identifier: "object",
+                type: .nullabilityUnspecified(
+                    .generic(
+                        "UnsafeMutablePointer",
+                        parameters: [.tuple(["AType", "AType"])]
+                    )
+                ),
+                initialization: nil
+            )
+        )
     }
     
     func testStatement_convertsToDeclarationIfTopLevelMultiplicationExpression_usesTypeMapper() {

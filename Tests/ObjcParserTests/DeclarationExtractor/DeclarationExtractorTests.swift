@@ -495,7 +495,7 @@ class DeclarationExtractorTests: XCTestCase {
             asserter.assertDefinedCount(1)?
                 .asserter(forDecl: "C") { cDecl in
                     cDecl.assert(specifierStrings: ["typedef", "struct A { int b; }"])
-                }?
+                }? 
                 .asserter(forStruct: "C") { aStruct in
                     aStruct
                         .assertField(name: "b")

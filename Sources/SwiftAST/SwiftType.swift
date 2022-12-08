@@ -40,8 +40,21 @@ public enum ProtocolCompositionComponent: Hashable {
 /// A tuple swift type, which either represents an empty tuple or two or more
 /// Swift types.
 public enum TupleSwiftType: Hashable {
-    case types(TwoOrMore<SwiftType>)
+    /// An empty tuple type, or `Void`.
     case empty
+    /// A tuple type containing two or more types.
+    case types(TwoOrMore<SwiftType>)
+}
+
+extension TupleSwiftType: ExpressibleByArrayLiteral {
+    /// - precondition: `elements.isEmpty || elements.count >= 2`
+    public init(arrayLiteral elements: SwiftType...) {
+        if elements.isEmpty {
+            self = .empty
+        }
+
+        self = .types(.fromCollection(elements))
+    }
 }
 
 /// An attribute for block types.
@@ -604,9 +617,10 @@ public struct TwoOrMore<T> {
     /// The collection must have at least two elements.
     ///
     /// - precondition: `collection.count >= 2`
-    public static func fromCollection<C>(_ collection: C) -> TwoOrMore
-        where C: BidirectionalCollection, C.Element == T, C.Index == Int {
-            
+    public static func fromCollection<C>(
+        _ collection: C
+    ) -> TwoOrMore where C: BidirectionalCollection, C.Element == T, C.Index == Int {
+        
         precondition(collection.count >= 2)
         
         return TwoOrMore(first: collection[0], second: collection[1], remaining: Array(collection.dropFirst(2)))
