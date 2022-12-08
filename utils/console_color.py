@@ -21,14 +21,14 @@ class ConsoleColor(str, Enum):
     CYAN = "cyan"
     WHITE = "white"
 
-    def __call__(self, *args: str, **kwds: str) -> Any:
+    def __call__(self, *args: Any, **kwds: str) -> Any:
         if bold := kwds.get("bold"):
             return colored(bold, color=self, style=ConsoleStyle.BOLD)
         if underlined := kwds.get("underlined"):
             return colored(underlined, color=self, style=ConsoleStyle.UNDERLINE)
         
         if len(args) > 0:
-            return colored(*args, color=self)
+            return colored(*map(lambda a : str(a), args), color=self)
         else:
             return ""
 
