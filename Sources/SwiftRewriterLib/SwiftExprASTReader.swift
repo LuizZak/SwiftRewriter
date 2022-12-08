@@ -104,214 +104,60 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         return reduceBinary(ctx.logicalAndExpression(), operator: .or) {
             $0.accept(self)
         }
-
-        /*
-        guard let lhs = ctx.castExpression(0)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        guard let rhs = ctx.castExpression(1)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        
-        return lhs.binary(op: .or, rhs: rhs)
-        */
     }
 
     public override func visitLogicalAndExpression(_ ctx: ObjectiveCParser.LogicalAndExpressionContext) -> Expression? {
         return reduceBinary(ctx.bitwiseOrExpression(), operator: .and) {
             $0.accept(self)
         }
-
-        /*
-        guard let lhs = ctx.castExpression(0)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        guard let rhs = ctx.castExpression(1)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        
-        return lhs.binary(op: .and, rhs: rhs)
-        */
     }
 
     public override func visitBitwiseOrExpression(_ ctx: ObjectiveCParser.BitwiseOrExpressionContext) -> Expression? {
         return reduceBinary(ctx.bitwiseXorExpression(), operator: .bitwiseOr) {
             $0.accept(self)
         }
-
-        /*
-        guard let lhs = ctx.castExpression(0)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        guard let rhs = ctx.castExpression(1)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        
-        return lhs.binary(op: .bitwiseOr, rhs: rhs)
-        */
     }
 
     public override func visitBitwiseXorExpression(_ ctx: ObjectiveCParser.BitwiseXorExpressionContext) -> Expression? {
         return reduceBinary(ctx.bitwiseAndExpression(), operator: .bitwiseXor) {
             $0.accept(self)
         }
-
-        /*
-        guard let lhs = ctx.castExpression(0)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        guard let rhs = ctx.castExpression(1)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        
-        return lhs.binary(op: .bitwiseXor, rhs: rhs)
-        */
     }
 
     public override func visitBitwiseAndExpression(_ ctx: ObjectiveCParser.BitwiseAndExpressionContext) -> Expression? {
         return reduceBinary(ctx.equalityExpression(), operator: .bitwiseAnd) {
             $0.accept(self)
         }
-
-        /*
-        guard let lhs = ctx.castExpression(0)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        guard let rhs = ctx.castExpression(1)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        
-        return lhs.binary(op: .bitwiseAnd, rhs: rhs)
-        */
     }
 
     public override func visitEqualityExpression(_ ctx: ObjectiveCParser.EqualityExpressionContext) -> Expression? {
         return reduceBinary(ctx.comparisonExpression(), opRule: ctx.equalityOperator) {
             $0.accept(self)
         }
-
-        /*
-        guard let lhs = ctx.castExpression(0)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        guard let rhs = ctx.castExpression(1)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        
-        if ctx.NOTEQUAL() != nil {
-            return lhs.binary(op: .unequals, rhs: rhs)
-        }
-        if ctx.EQUAL() != nil {
-            return lhs.binary(op: .equals, rhs: rhs)
-        }
-
-        return makeUnknownNode(ctx)
-        */
     }
 
     public override func visitComparisonExpression(_ ctx: ObjectiveCParser.ComparisonExpressionContext) -> Expression? {
         return reduceBinary(ctx.shiftExpression(), opRule: ctx.comparisonOperator) {
             $0.accept(self)
         }
-
-        /*
-        guard let lhs = ctx.castExpression(0)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        guard let rhs = ctx.castExpression(1)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        
-        if ctx.LE() != nil {
-            return lhs.binary(op: .lessThanOrEqual, rhs: rhs)
-        }
-        if ctx.GE() != nil {
-            return lhs.binary(op: .greaterThanOrEqual, rhs: rhs)
-        }
-        if ctx.LT() != nil {
-            return lhs.binary(op: .lessThan, rhs: rhs)
-        }
-        if ctx.GT() != nil {
-            return lhs.binary(op: .greaterThan, rhs: rhs)
-        }
-
-        return makeUnknownNode(ctx)
-        */
     }
 
     public override func visitShiftExpression(_ ctx: ObjectiveCParser.ShiftExpressionContext) -> Expression? {
         return reduceBinary(ctx.additiveExpression(), opRule: ctx.shiftOperator) {
             $0.accept(self)
         }
-
-        /*
-        guard let lhs = ctx.castExpression(0)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        guard let rhs = ctx.castExpression(1)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        
-        if !ctx.LT().isEmpty {
-            return lhs.binary(op: .bitwiseShiftLeft, rhs: rhs)
-        }
-        if !ctx.GT().isEmpty {
-            return lhs.binary(op: .bitwiseShiftRight, rhs: rhs)
-        }
-
-        return makeUnknownNode(ctx)
-        */
     }
 
     public override func visitAdditiveExpression(_ ctx: ObjectiveCParser.AdditiveExpressionContext) -> Expression? {
         return reduceBinary(ctx.multiplicativeExpression(), opRule: ctx.additiveOperator) {
             $0.accept(self)
         }
-
-        /*
-        guard let lhs = ctx.castExpression(0)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        guard let rhs = ctx.castExpression(1)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        
-        if ctx.ADD() != nil {
-            return lhs.binary(op: .add, rhs: rhs)
-        }
-        if ctx.SUB() != nil {
-            return lhs.binary(op: .subtract, rhs: rhs)
-        }
-
-        return makeUnknownNode(ctx)
-        */
     }
 
     public override func visitMultiplicativeExpression(_ ctx: ObjectiveCParser.MultiplicativeExpressionContext) -> Expression? {
         return reduceBinary(ctx.castExpression(), opRule: ctx.multiplicativeOperator) {
             $0.accept(self)
         }
-
-        /*
-        guard let lhs = ctx.castExpression(0)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        guard let rhs = ctx.castExpression(1)?.accept(self) else {
-            return makeUnknownNode(ctx)
-        }
-        
-        if ctx.MUL() != nil {
-            return lhs.binary(op: .multiply, rhs: rhs)
-        }
-        if ctx.DIV() != nil {
-            return lhs.binary(op: .divide, rhs: rhs)
-        }
-        if ctx.MOD() != nil {
-            return lhs.binary(op: .mod, rhs: rhs)
-        }
-
-        return makeUnknownNode(ctx)
-        */
     }
     
     public override func visitCastExpression(_ ctx: ObjectiveCParser.CastExpressionContext) -> Expression? {
