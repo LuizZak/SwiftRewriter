@@ -136,18 +136,6 @@ class DeclarationTranslatorTests: XCTestCase {
         }
     }
 
-    /*
-    func testTranslate_singleDecl_blockDecl_typePrefix() {
-        let tester = prepareTest(declaration: "void (^__block a)();")
-
-        tester.assert { asserter in
-            asserter.assertCount(1)?
-                .assertBlock(name: "a")?
-                .assert(hasTypePrefix: .block)
-        }
-    }
-    */
-
     func testTranslate_singleDecl_blockDecl_typeQualifier() {
         let tester = prepareTest(declaration: "void (^const a)();")
 
@@ -385,7 +373,21 @@ class DeclarationTranslatorTests: XCTestCase {
         tester.assert { asserter in
             asserter.assertCount(1)?
                 .assertTypedef(name: "A")?
-                .assert(type: .pointer(.void))
+                .assert(type: .pointer(.anonymousStruct))
+        }
+    }
+
+    func testTranslate_singleDecl_typedef_namedStruct_pointerOnly() {
+        let tester = prepareTest(declaration: "typedef struct a { int b; } *c;")
+
+        tester.assert { asserter in
+            asserter.assertCount(2)
+            
+            asserter
+                .assertTypedef(name: "c")?
+                .assert(type: .pointer(.typeName("a")))
+            asserter
+                .assertStructOrUnion(name: "a")
         }
     }
 
@@ -395,7 +397,7 @@ class DeclarationTranslatorTests: XCTestCase {
         tester.assert { asserter in
             asserter.assertCount(1)?
                 .assertTypedef(name: "A")?
-                .assert(type: .pointer(.void))
+                .assert(type: .pointer(.incompleteStruct("_A")))
         }
     }
 
@@ -405,7 +407,7 @@ class DeclarationTranslatorTests: XCTestCase {
         tester.assert { asserter in
             asserter.assertCount(1)?
                 .assertTypedef(name: "A")?
-                .assert(type: .pointer(.pointer(.void)))
+                .assert(type: .pointer(.pointer(.incompleteStruct("_A"))))
         }
     }
 
@@ -416,7 +418,7 @@ class DeclarationTranslatorTests: XCTestCase {
             asserter.assertCount(2)
             asserter
                 .assertTypedef(name: "A")?
-                .assert(type: "_A")
+                .assert(type: .incompleteStruct("_A"))
             asserter
                 .assertTypedef(name: "APtr")?
                 .assert(type: .pointer("A"))
@@ -516,6 +518,16 @@ class DeclarationTranslatorTests: XCTestCase {
                             isVariadic.assertIsTrue()
                         }
                 }
+        }
+    }
+
+    func testTranslate_singleDecl_incompleteStruct() {
+        let tester = prepareTest(declaration: "struct a b;")
+
+        tester.assert { asserter in
+            asserter.assertCount(1)?
+                .assertVariable(name: "b")?
+                .assert(type: .incompleteStruct("a"))
         }
     }
 

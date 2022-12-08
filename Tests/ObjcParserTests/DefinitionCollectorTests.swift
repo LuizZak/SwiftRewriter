@@ -301,6 +301,20 @@ class DefinitionCollectorTests: XCTestCase {
         }
     }
 
+    func testCollect_declaration_singleDecl_typedef_namedStruct_pointerOnly() {
+        let tester = prepareTest(declaration: "typedef struct a { int b; } *c;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(2)?
+                .asserter(forItemAt: 0) { aNode in
+                    aNode.assert(isOfType: TypedefNode.self)?
+                        .assertChildCount(2)?
+                        .assert(name: "A")?
+                        .assert(type: .pointer(.void))
+                }
+        }
+    }
+
     func testCollect_declaration_singleDecl_typedef_anonymousStruct_pointerOnly() {
         let tester = prepareTest(declaration: "typedef struct { int field; } *A;")
 
@@ -324,7 +338,7 @@ class DefinitionCollectorTests: XCTestCase {
                     aNode.assert(isOfType: TypedefNode.self)?
                         .assertChildCount(2)?
                         .assert(name: "A")?
-                        .assert(type: .pointer(.void))
+                        .assert(type: .pointer(.incompleteStruct("_A")))
                 }
         }
     }
@@ -378,6 +392,20 @@ class DefinitionCollectorTests: XCTestCase {
                                 .assert(name: "field0")?
                                 .assert(type: "signed int")
                         }
+                }
+        }
+    }
+    func testCollect_singleDecl_struct_incomplete() {
+        let tester = prepareTest(declaration: "struct a b;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?
+                .asserter(forItemAt: 0) { intNode in
+                    intNode.assert(isOfType: VariableDeclaration.self)?
+                        .assert(name: "b")?
+                        .assert(type: .incompleteStruct("a"))?
+                        .assert(isStatic: false)?
+                        .assertNoInitializer()
                 }
         }
     }

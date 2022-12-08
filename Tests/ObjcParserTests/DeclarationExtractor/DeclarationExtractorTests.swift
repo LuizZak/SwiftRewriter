@@ -18,7 +18,7 @@ class DeclarationExtractorTests: XCTestCase {
 
         tester.assert { (asserter: DeclarationsAsserter) in
             asserter
-                .asserter(forVariable: "a")?
+                .assertVariable(name: "a")?
                 .assert(specifierStrings: ["int"])
         }
     }
@@ -28,7 +28,7 @@ class DeclarationExtractorTests: XCTestCase {
 
         tester.assert { (asserter: DeclarationsAsserter) in
             asserter
-                .asserter(forVariable: "a")?
+                .assertVariable(name: "a")?
                 .assert(specifierStrings: ["short", "int"])?
                 .asserterForSourceRange { sourceRange in
                     sourceRange.assert(
@@ -46,7 +46,7 @@ class DeclarationExtractorTests: XCTestCase {
 
         tester.assert { (asserter: DeclarationsAsserter) in
             asserter
-                .asserter(forVariable: "a")?
+                .assertVariable(name: "a")?
                 .assert(specifierStrings: ["__kindof", "_Nullable", "NSString"])
         }
     }
@@ -101,7 +101,7 @@ class DeclarationExtractorTests: XCTestCase {
 
         tester.assert { (asserter: DeclarationsAsserter) in
             asserter
-                .asserter(forVariable: "a")?
+                .assertVariable(name: "a")?
                 .assert(specifierStrings: ["short", "int"])?
                 .asserterForPointer { ptr in
                     XCTAssertEqual(ptr.object.pointers.count, 1)
@@ -115,7 +115,7 @@ class DeclarationExtractorTests: XCTestCase {
 
         tester.assert { (asserter: DeclarationsAsserter) in
             asserter
-                .asserter(forVariable: "a")?
+                .assertVariable(name: "a")?
                 .assert(specifierStrings: ["NSObject"])?
                 .asserterForPointer { ptr in
                     ptr.assertPointerCount(1)?.asserter(forPointerEntryAt: 0) { ptr in
@@ -131,7 +131,7 @@ class DeclarationExtractorTests: XCTestCase {
 
         tester.assert { (asserter: DeclarationsAsserter) in
             asserter
-                .asserter(forVariable: "a")?
+                .assertVariable(name: "a")?
                 .assert(specifierStrings: ["__weak", "NSObject"])?
                 .asserterForPointer { ptr in
                     ptr.assertPointerCount(1)?.asserter(forPointerEntryAt: 0) { ptr in
@@ -147,7 +147,7 @@ class DeclarationExtractorTests: XCTestCase {
 
         tester.assert { (asserter: DeclarationsAsserter) in
             asserter
-                .asserter(forVariable: "a")?
+                .assertVariable(name: "a")?
                 .assert(specifierStrings: ["NSArray<NSArray<NSString*>*>"])?
                 .asserterForPointer { ptr in
                     XCTAssertEqual(ptr.object.pointers.count, 1)
@@ -160,15 +160,18 @@ class DeclarationExtractorTests: XCTestCase {
 
         tester.assert { (asserter: DeclarationsAsserter) in
             asserter
-                .asserter(forVariable: "a")?
-                .assert(specifierStrings: ["short", "int"])?
-                .assertInitializer { aInit in
-                    aInit.assert(textEquals: "0")
+                .asserter(forVariable: "a") { aVar in
+                    aVar
+                        .assert(specifierStrings: ["short", "int"])?
+                        .assertInitializer { aInit in
+                            aInit.assert(textEquals: "0")
+                        }
+                }?
+                .asserter(forVariable: "b") { aVar in
+                    aVar
+                        .assert(specifierStrings: ["short", "int"])?
+                        .assertNoInitializer()
                 }
-            asserter
-                .assertVariable(name: "b")?
-                .assert(specifierStrings: ["short", "int"])?
-                .assertNoInitializer()
         }
     }
 
@@ -424,7 +427,7 @@ class DeclarationExtractorTests: XCTestCase {
         }
     }
 
-    func testExtract_declaration_singleDecl_typedef_opaqueStruct() {
+    func testExtract_declaration_singleDecl_typedef_incompleteStruct() {
         let tester = prepareTest(declaration: "typedef struct _A A;")
 
         tester.assert { (asserter: DeclarationsAsserter) in
@@ -440,7 +443,7 @@ class DeclarationExtractorTests: XCTestCase {
         }
     }
 
-    func testExtract_declaration_singleDecl_typedef_opaqueStruct_pointerOnly() {
+    func testExtract_declaration_singleDecl_typedef_incompleteStruct_pointerOnly() {
         let tester = prepareTest(declaration: "typedef struct _A *A;")
 
         tester.assert { (asserter: DeclarationsAsserter) in
@@ -481,6 +484,21 @@ class DeclarationExtractorTests: XCTestCase {
                 .asserter(forStruct: "AStruct") { aStruct in
                     aStruct
                         .assertField(name: "field")
+                }
+        }
+    }
+
+    func testExtract_declaration_singleDecl_struct_typedef_named() {
+        let tester = prepareTest(declaration: "typedef struct A { int b; } C;")
+
+        tester.assert { (asserter: DeclarationsAsserter) in
+            asserter.assertDefinedCount(1)?
+                .asserter(forDecl: "C") { cDecl in
+                    cDecl.assert(specifierStrings: ["typedef", "struct A { int b; }"])
+                }?
+                .asserter(forStruct: "C") { aStruct in
+                    aStruct
+                        .assertField(name: "b")
                 }
         }
     }

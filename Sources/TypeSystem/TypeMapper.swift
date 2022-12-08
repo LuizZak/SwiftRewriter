@@ -376,7 +376,7 @@ public class DefaultTypeMapper: TypeMapper {
         
         case .anonymousEnum, .anonymousStruct:
             return swiftType(type: .any, withNullability: context.nullability())
-            
+        
         case .typeName(let str):
             return swiftType(forObjcStructType: str, context: context)
             
@@ -386,6 +386,9 @@ public class DefaultTypeMapper: TypeMapper {
         case let .genericTypeName(name, parameters):
             return swiftType(forGenericObjcType: name, parameters: parameters, context: context)
             
+        case .incompleteStruct:
+            return "Any"
+
         case .pointer(let type, _, let nullability):
             let type = swiftType(forObjcPointerType: type, context: context)
 
@@ -551,6 +554,12 @@ public class DefaultTypeMapper: TypeMapper {
     private func swiftType(forObjcPointerType type: ObjcType, context: TypeMappingContext) -> SwiftType {
         let final: SwiftType
         
+        if case .incompleteStruct = type {
+            return "OpaquePointer"
+        }
+        if type == .anonymousStruct {
+            return "OpaquePointer"
+        }
         if case .typeName(let inner) = type {
             if let ptr = DefaultTypeMapper._pointerMappings[inner] {
                 final = ptr
@@ -574,7 +583,8 @@ public class DefaultTypeMapper: TypeMapper {
             }
             
             return swiftType(type: final, withNullability: context.nullability())
-        } else if case .void = type {
+        }
+        if case .void = type {
             return swiftType(
                 type: .typeName("UnsafeMutableRawPointer"),
                 withNullability: context.nullability()

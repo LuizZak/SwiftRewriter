@@ -226,8 +226,8 @@ public class DeclarationTranslator {
             let identifierNode = identifierNode(from: decl.declaration),
             var baseType = result.objcType
         {
-            // Handle opaque/anonymous struct/enum declarations
-            if partialType.pointer != nil && partialType.isOpaqueOrAnonymousDeclaration {
+            // Handle opaque/anonymous enum declarations
+            if partialType.pointer != nil && (partialType.isAnonymousEnum || partialType.isOpaqueEnum) {
                 baseType = PartialType.applyPointer(base: .void, partialType.pointer)
             }
 
@@ -1425,12 +1425,15 @@ func objcTypeFromSpecifiers(
         return .typeName(value.name)
 
     case .structOrUnionSpecifier(let ctx):
-        if let ident = ctx.identifier {
-            return .typeName(ident.identifier)
+        guard let ident = ctx.identifier else {
+            return .anonymousStruct
+        }
+        if ctx.fields == nil {
+            return .incompleteStruct(ident.identifier)
         }
 
-        return .anonymousStruct
-    
+        return .typeName(ident.identifier)
+
     case .enumSpecifier(let ctx):
         if let ident = ctx.identifier {
             return .typeName(ident.identifier)

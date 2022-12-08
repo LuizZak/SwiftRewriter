@@ -335,6 +335,20 @@ class DefaultTypeMapperTests: XCTestCase {
         )
     }
 
+    func testAnonymousStruct() {
+        expect(.anonymousStruct, toConvertTo: "Any")
+        expect(.pointer(.anonymousStruct), toConvertTo: "OpaquePointer")
+    }
+
+    func testAnonymousEnum() {
+        expect(.anonymousEnum, toConvertTo: "Any")
+    }
+
+    func testIncompleteStruct() {
+        expect(.incompleteStruct("A"), toConvertTo: "Any")
+        expect(.pointer(.incompleteStruct("A")), toConvertTo: "OpaquePointer")
+    }
+
     func testNSArray() {
         expect(
             .pointer(.genericTypeName("NSArray", typeParameters: [.pointer(.typeName("NSObject"))])),

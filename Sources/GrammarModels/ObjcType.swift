@@ -21,6 +21,9 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
 
     /// An anonymous enum type.
     case anonymousEnum
+
+    /// An incomplete named struct.
+    case incompleteStruct(String)
     
     /// A composed pointer, like `NSObject*` or `int*`.
     /// May be an objc class or a typename pointer.
@@ -87,6 +90,9 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
         
         case .anonymousEnum:
             return "enum"
+        
+        case .incompleteStruct(let name):
+            return "struct \(name)"
             
         case let .genericTypeName(cl, parameters):
             let typeNames = parameters.map(\.description).joined(separator: ", ")
@@ -164,7 +170,7 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
             .qualified(let type, _):
             return type.isPointer
             
-        case .anonymousEnum, .anonymousStruct, .void, .typeName, .genericTypeName:
+        case .anonymousEnum, .anonymousStruct, .incompleteStruct, .void, .typeName, .genericTypeName:
             return false
         }
     }

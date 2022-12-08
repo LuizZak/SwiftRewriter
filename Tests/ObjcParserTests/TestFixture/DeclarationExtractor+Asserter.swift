@@ -156,7 +156,25 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         line: UInt = #line
     ) -> Asserter<DeclarationExtractor.Declaration>? {
 
-        return asserter(forVariable: name, file: file, line: line) { _ in }
+        for decl in object {
+            switch decl.declaration {
+            case .identifier, .staticArray, .block:
+                if decl.identifierString == name {
+                    return Asserter<DeclarationExtractor.Declaration>(object: decl)
+                }
+            default:
+                break
+            }
+        }
+
+        XCTFail(
+            "Expected to define a variable with name \(name)",
+            file: file,
+            line: line
+        )
+        dumpObject()
+
+        return nil
     }
 
     /// Asserts that there is at least one variable with a specified name and
@@ -173,9 +191,8 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         line: UInt = #line
     ) -> Asserter<DeclarationExtractor.Declaration>? {
 
-        return asserter(forVariable: name, file: file, line: line) { assert in
-            assert.assert(specifiers: specifiers, file: file, line: line)
-        }
+        return assertVariable(name: name, file: file, line: line)?
+            .assert(specifiers: specifiers, file: file, line: line)
     }
 
     /// Asserts that there is at least one variable with a specified name and
@@ -192,14 +209,28 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         line: UInt = #line
     ) -> Asserter<DeclarationExtractor.Declaration>? {
 
-        return asserter(forVariable: name, file: file, line: line) { assert in
-            assert.assert(specifierStrings: specifierStrings, file: file, line: line)
-        }
+        return assertVariable(name: name, file: file, line: line)?
+            .assert(specifierStrings: specifierStrings, file: file, line: line)
     }
 
     @discardableResult
     func assertFunction(name: String, file: StaticString = #file, line: UInt = #line) -> Asserter<FunctionDeclWrapper>? {
-        return asserter(forFunction: name, file: file, line: line)
+        for decl in object {
+            guard let wrapper = FunctionDeclWrapper(object: decl), wrapper.decl.identifierString == name else {
+                continue
+            }
+
+            return Asserter<FunctionDeclWrapper>(object: wrapper)
+        }
+
+        XCTFail(
+            "Expected to define a function with name \(name)",
+            file: file,
+            line: line
+        )
+        dumpObject()
+
+        return nil
     }
 
     @discardableResult
@@ -210,14 +241,28 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         line: UInt = #line
     ) -> Asserter<FunctionDeclWrapper>? {
 
-        return asserter(forFunction: name, file: file, line: line) { assert in
-            assert.assert(specifierStrings: specifierStrings, file: file, line: line)
-        }
+        return assertFunction(name: name, file: file, line: line)?
+            .assert(specifierStrings: specifierStrings, file: file, line: line)
     }
 
     @discardableResult
     func assertBlock(name: String, file: StaticString = #file, line: UInt = #line) -> Asserter<BlockDeclWrapper>? {
-        return asserter(forBlock: name, file: file, line: line)
+        for decl in object {
+            guard let wrapper = BlockDeclWrapper(object: decl), wrapper.decl.identifierString == name else {
+                continue
+            }
+
+            return Asserter<BlockDeclWrapper>(object: wrapper)
+        }
+
+        XCTFail(
+            "Expected to define a block with name \(name)",
+            file: file,
+            line: line
+        )
+        dumpObject()
+
+        return nil
     }
 
     @discardableResult
@@ -228,9 +273,8 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         line: UInt = #line
     ) -> Asserter<BlockDeclWrapper>? {
 
-        return asserter(forBlock: name, file: file, line: line) { assert in
-            assert.assert(specifierStrings: specifierStrings, file: file, line: line)
-        }
+        return assertBlock(name: name, file: file, line: line)?
+            .assert(specifierStrings: specifierStrings, file: file, line: line)
     }
 
     @discardableResult
@@ -239,7 +283,7 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         file: StaticString = #file,
         line: UInt = #line,
         _ closure: (Asserter<DeclarationExtractor.Declaration>) -> Void = { _ in }
-    ) -> Asserter<DeclarationExtractor.Declaration>? {
+    ) -> Self? {
 
         let decl = _assertOneOrMore(
             message: "Expected to define at least one variable '\(name)'",
@@ -265,7 +309,7 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
 
             closure(asserter)
 
-            return asserter
+            return self
         }
 
         return nil
@@ -277,7 +321,7 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         file: StaticString = #file,
         line: UInt = #line,
         _ closure: (Asserter<FunctionDeclWrapper>) -> Void = { _ in }
-    ) -> Asserter<FunctionDeclWrapper>? {
+    ) -> Self? {
 
         let decl = _assertOneOrMore(
             message: "Expected to define at least one function '\(name)'",
@@ -299,7 +343,7 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
 
             closure(asserter)
 
-            return asserter
+            return self
         }
 
         return nil
@@ -311,7 +355,7 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         file: StaticString = #file,
         line: UInt = #line,
         _ closure: (Asserter<BlockDeclWrapper>) -> Void = { _ in }
-    ) -> Asserter<BlockDeclWrapper>? {
+    ) -> Self? {
 
         let decl = _assertOneOrMore(
             message: "Expected to define at least one block '\(name)'",
@@ -333,7 +377,7 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
 
             closure(asserter)
 
-            return asserter
+            return self
         }
 
         return nil
@@ -345,7 +389,7 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         file: StaticString = #file,
         line: UInt = #line,
         _ closure: (Asserter<DeclarationExtractor.StructOrUnionSpecifier>) -> Void = { _ in }
-    ) -> DeclarationExtractor.StructOrUnionSpecifier? {
+    ) -> Self? {
 
         let decl = _assertOneOrMore(
             message: "Expected to define at least one struct with identifier '\(name)'",
@@ -359,6 +403,8 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         
         if let decl = decl?.specifiers.typeSpecifiers().first(where: { $0.isStructOrUnionSpecifier })?.asStructOrUnionSpecifier {
             closure(.init(object: decl))
+
+            return self
         }
 
         return nil
@@ -370,7 +416,7 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         file: StaticString = #file,
         line: UInt = #line,
         _ closure: (Asserter<DeclarationExtractor.EnumSpecifier>) -> Void = { _ in }
-    ) -> DeclarationExtractor.EnumSpecifier? {
+    ) -> Self? {
 
         let decl = _assertOneOrMore(
             message: "Expected to define at least one enum with identifier '\(name)'",
@@ -384,6 +430,8 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         
         if let decl = decl?.specifiers.typeSpecifiers().first(where: { $0.isEnumSpecifier })?.asEnumSpecifier {
             closure(.init(object: decl))
+
+            return self
         }
 
         return nil
@@ -395,7 +443,7 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         file: StaticString = #file,
         line: UInt = #line,
         _ closure: (Asserter<DeclarationExtractor.Declaration>) -> Void = { _ in }
-    ) -> DeclarationExtractor.Declaration? {
+    ) -> Self? {
 
         let decl = _assertOneOrMore(
             message: "Expected to define at least one declaration with identifier '\(name)'",
@@ -408,9 +456,11 @@ extension Asserter where Object == [DeclarationExtractor.Declaration] {
         
         if let decl = decl {
             closure(.init(object: decl))
+
+            return self
         }
 
-        return decl
+        return nil
     }
 }
 
@@ -1208,6 +1258,7 @@ extension Asserter where Object == DeclarationExtractor.StructOrUnionSpecifier {
         guard let field = object.fields?.first(where: { $0.declaration.declaration.identifierString == name }) else {
             XCTFail(
                 "Expected to find field named '\(name)' in struct definition '\(object.identifier?.identifier ?? "<nil>")'",
+                file: file,
                 line: line
             )
 
