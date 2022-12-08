@@ -80,7 +80,7 @@ class MyClass: NSObject {
 
 #### Requirements
 
-Xcode 14 & Swift 5.7.1
+Xcode 14.1 & Swift 5.7.1
 
 #### Usage
 
