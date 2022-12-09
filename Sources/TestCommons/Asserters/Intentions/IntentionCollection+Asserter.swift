@@ -62,4 +62,87 @@ public extension Asserter where Object == IntentionCollection {
             $0.assertCount(fileCount, file: file, line: line)
         }
     }
+
+    // MARK: Full file list search helpers
+    
+    /// Opens an asserter context for a type with a given name in the underlying
+    /// `IntentionCollection` object being tested, looking at each file until
+    /// a type with a specified name is found.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserter<Result>(
+        forTypeNamed typeName: String,
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<TypeGenerationIntention>) -> Result?
+    ) -> Self? {
+        
+        let types = object.typeIntentions()
+
+        return asserter(for: types) { types in
+            types.asserterForFirstElement(
+                message: #"Could not find class with name "\#(typeName)""#,
+                file: file,
+                line: line
+            ) {
+                $0.typeName == typeName
+            }?.inClosure(closure)
+        }.map(self)
+    }
+
+    /// Opens an asserter context for a class with a given name in the underlying
+    /// `IntentionCollection` object being tested, looking at each file until
+    /// a class with a specified name is found.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserter<Result>(
+        forClassNamed typeName: String,
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<ClassGenerationIntention>) -> Result?
+    ) -> Self? {
+
+        let classes = object.classIntentions()
+
+        return asserter(for: classes) { types in
+            types.asserterForFirstElement(
+                message: #"Could not find class with name "\#(typeName)""#,
+                file: file,
+                line: line
+            ) {
+                $0.typeName == typeName
+            }?.inClosure(closure)
+        }.map(self)
+    }
+
+    /// Opens an asserter context for a global function with a given name in the
+    /// underlying `IntentionCollection` object being tested, looking at each
+    /// file until a global function with a specified name is found.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserter<Result>(
+        forGlobalFunctionNamed name: String,
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<GlobalFunctionGenerationIntention>) -> Result?
+    ) -> Self? {
+
+        let globalFunctions = object.globalFunctions()
+
+        return asserter(for: globalFunctions) { functions in
+            functions.asserterForFirstElement(
+                message: #"Could not find class with name "\#(name)""#,
+                file: file,
+                line: line
+            ) {
+                $0.name == name
+            }?.inClosure(closure)
+        }.map(self)
+    }
 }

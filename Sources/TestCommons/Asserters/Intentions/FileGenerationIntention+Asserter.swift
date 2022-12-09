@@ -157,8 +157,8 @@ public extension Asserter where Object == FileGenerationIntention {
         _ closure: (Asserter<ClassGenerationIntention>) -> Result?
     ) -> Self? {
         
-        asserter(for: object.classIntentions) { types in
-            types.asserterForFirstElement(
+        asserter(for: object.classIntentions) { classes in
+            classes.asserterForFirstElement(
                 message: #"Could not find class with name "\#(typeName)""#,
                 file: file,
                 line: line
@@ -181,8 +181,8 @@ public extension Asserter where Object == FileGenerationIntention {
         _ closure: (Asserter<GlobalFunctionGenerationIntention>) -> Result?
     ) -> Self? {
 
-        asserter(for: object.globalFunctionIntentions) { types in
-            types.asserterForFirstElement(
+        asserter(for: object.globalFunctionIntentions) { functions in
+            functions.asserterForFirstElement(
                 message: #"Could not find class with name "\#(name)""#,
                 file: file,
                 line: line

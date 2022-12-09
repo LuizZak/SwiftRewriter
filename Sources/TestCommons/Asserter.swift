@@ -58,7 +58,7 @@ public struct Asserter<Object> {
     /// Always returns `nil`.
     @discardableResult
     public func assertFailed<Result>(
-        message: String = "",
+        message: String = "assertFailed",
         file: StaticString,
         line: UInt
     ) -> Result? {
@@ -71,7 +71,7 @@ public struct Asserter<Object> {
 
     /// Raises an unconditional test assertion failure.
     public func assertFailed(
-        message: String = "",
+        message: String = "assertFailed",
         file: StaticString,
         line: UInt
     ) {
@@ -150,8 +150,6 @@ public extension Asserter {
         file: StaticString = #file,
         line: UInt = #line
     ) -> Asserter<T>? {
-
-        assertFailed(file: file, line: line)
 
         guard let value = object as? T else {
             return assertFailed(

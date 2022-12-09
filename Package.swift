@@ -114,7 +114,7 @@ let package = Package(
         .target(
             name: "TestCommons",
             dependencies: [
-                "Antlr4", "SwiftAST", "SwiftSyntaxSupport", "SwiftRewriterLib",
+                "Antlr4", "MiniLexer", "SwiftAST", "SwiftSyntaxSupport", "SwiftRewriterLib",
                 "Intentions", "KnownType", "GrammarModels", "Utils", "TypeSystem"
             ])
 
