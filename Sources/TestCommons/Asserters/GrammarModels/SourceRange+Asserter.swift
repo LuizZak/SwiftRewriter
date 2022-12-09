@@ -26,10 +26,11 @@ public extension Asserter {
         }
 
         guard object?.line == expected?.line && object?.column == expected?.column else {
-            XCTAssertEqual(object, expected, message(), file: file, line: line)
-            dumpObject()
-
-            return nil
+            return assertFailed(
+                message: #"assert(equals:) failed: ("\#(object as Any)") != ("\#(expected as Any)"). \#(message())"#,
+                file: file,
+                line: line
+            )
         }
 
         return self
@@ -60,10 +61,11 @@ public extension Asserter where Object == SourceLocation {
         }
 
         guard object.line == expected.line && object.column == expected.column else {
-            XCTAssertEqual(object, expected, message(), file: file, line: line)
-            dumpObject()
-
-            return nil
+            return assertFailed(
+                message: #"assert(equals:) failed: ("\#(object)") != ("\#(expected)"). \#(message())"#,
+                file: file,
+                line: line
+            )
         }
 
         return self

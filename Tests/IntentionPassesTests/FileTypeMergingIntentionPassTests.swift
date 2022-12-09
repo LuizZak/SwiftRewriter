@@ -45,24 +45,24 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         let sut = FileTypeMergingIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-        
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files[0].sourcePath, "A.m")
-        XCTAssertEqual(files[0].classIntentions.count, 1)
-        XCTAssertEqual(files[0].extensionIntentions.count, 1)
-        XCTAssertEqual(files[0].extensionIntentions[0].typeName, "A")
-        XCTAssertEqual(files[0].classIntentions[0].precedingComments, [
-            "// Header comment",
-            "// Implementation comment"
-        ])
-        XCTAssertEqual(files[0].classIntentions[0].typeName, "A")
-        XCTAssertEqual(files[0].classIntentions[0].methods[0].precedingComments, [
-            "// Implementation comment"
-        ])
-        XCTAssertEqual(files[0].classIntentions[0].methods[1].precedingComments, [
-            "// Header comment"
-        ])
+
+        Asserter(object: intentions).asserterForFiles { files in
+            files.assertCount(1)
+            files[0]?.assert(sourcePath: "A.m")
+            files[0]?.asserter(forClassNamed: "A") { type in
+                type.assert(precedingComments: [
+                    "// Header comment",
+                    "// Implementation comment"
+                ])
+
+                type[\.methods][0]?.assert(precedingComments: [
+                    "// Implementation comment"
+                ])
+                type[\.methods][1]?.assert(precedingComments: [
+                    "// Header comment"
+                ])
+            }
+        }
     }
     
     func testMergingTypesSortsMethodsFromImplementationAboveMethodsFromInterface() {
@@ -89,10 +89,15 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files[0].classIntentions[0].methods.count, 2)
-        XCTAssertEqual(files[0].classIntentions[0].methods[0].name, "fromImplementation")
-        XCTAssertEqual(files[0].classIntentions[0].methods[1].name, "fromHeader")
+        Asserter(object: intentions).asserterForFiles { files in
+            files.assertCount(1)
+            files[0]?.assert(sourcePath: "A.m")
+            files[0]?.asserter(forTypeNamed: "A") { type in
+                let methods = type[\.methods]
+                methods[0]?.assert(name: "fromImplementation")
+                methods[1]?.assert(name: "fromHeader")
+            }
+        }
     }
     
     func testKeepsInterfaceFilesWithNoMatchingImplementationFileAlone() {
@@ -108,9 +113,10 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files[0].sourcePath, "A.h")
+        Asserter(object: intentions).asserterForFiles { files in
+            files.assertCount(1)
+            files[0]?.assert(sourcePath: "A.h")
+        }
     }
     
     func testMovesClassesFromHeaderToImplementationWithMismatchesFileNames() {
@@ -137,13 +143,15 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files[0].sourcePath, "B.m")
-        XCTAssertEqual(files[0].classIntentions.count, 1)
-        XCTAssertEqual(files[0].classIntentions[0].methods.count, 2)
-        XCTAssertEqual(files[0].classIntentions[0].methods[0].name, "fromImplementation")
-        XCTAssertEqual(files[0].classIntentions[0].methods[1].name, "fromHeader")
+        Asserter(object: intentions).asserterForFiles { files in
+            files.assertCount(1)
+            files[0]?.assert(sourcePath: "B.m")
+            files[0]?.asserter(forTypeNamed: "A") { type in
+                let methods = type[\.methods]
+                methods[0]?.assert(name: "fromImplementation")
+                methods[1]?.assert(name: "fromHeader")
+            }
+        }
     }
     
     func testMergeFromSameFile() {
@@ -170,13 +178,15 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files[0].sourcePath, "A.m")
-        XCTAssertEqual(files[0].classIntentions.count, 1)
-        XCTAssertEqual(files[0].classIntentions[0].methods.count, 2)
-        XCTAssertEqual(files[0].classIntentions[0].methods[0].name, "amImplementation")
-        XCTAssertEqual(files[0].classIntentions[0].methods[1].name, "amInterface")
+        Asserter(object: intentions).asserterForFiles { files in
+            files.assertCount(1)
+            files[0]?.assert(sourcePath: "A.m")
+            files[0]?.asserter(forTypeNamed: "A") { type in
+                let methods = type[\.methods]
+                methods[0]?.assert(name: "amImplementation")
+                methods[1]?.assert(name: "amInterface")
+            }
+        }
     }
     
     func testMergeKeepsEmptyFilesWithPreprocessorDirectives() {
@@ -189,8 +199,8 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
+        Asserter(object: intentions)
+            .assert(fileCount: 1)
     }
     
     func testHistoryTracking() {
@@ -217,13 +227,16 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(
-            files[0].classIntentions[0].history.summary,
-            """
-            [TypeMerge:FileTypeMergingIntentionPass] Creating definition for newly found method A.fromHeader()
-            """
-            )
+        Asserter(object: intentions).asserterForFiles { files in
+            files.assertCount(1)
+            files[0]?.asserter(forTypeNamed: "A") { type in
+                type[\.history.summary].assert(equals:
+                    """
+                    [TypeMerge:FileTypeMergingIntentionPass] Creating definition for newly found method A.fromHeader()
+                    """
+                )
+            }
+        }
     }
     
     func testMergeDirectivesIntoImplementationFile() {
@@ -241,11 +254,15 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files[0].sourcePath, "A.m")
-        XCTAssertEqual(files[0].preprocessorDirectives.map(\.string), ["#directive1", "#directive2"])
-        XCTAssertEqual(files[0].classIntentions.count, 1)
+        Asserter(object: intentions).asserterForFiles { files in
+            files.assertCount(1)
+            files[0]?.asserterForTypes {
+                $0.assertCount(1)
+            }
+            files[0]?.assert(preprocessorDirectives: [
+                "#directive1", "#directive2"
+            ])
+        }
     }
     
     func testMergeFunctionDefinitionsToDeclarations() {
@@ -270,57 +287,69 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files[0].sourcePath, "A.m")
-        XCTAssertEqual(files[0].globalFunctionIntentions.count, 1)
-        XCTAssertEqual(files[0].globalFunctionIntentions.first?.signature,
-                       FunctionSignature(name: "a", parameters: [],
-                                         returnType: .typeName("A"),
-                                         isStatic: false)
-                       )
-        XCTAssertEqual(files[0].globalFunctionIntentions.first?.functionBody?.body,
-                       [.expression(Expression.identifier("a").call())])
-        XCTAssertEqual(files[0].globalFunctionIntentions.first?.precedingComments, [
-            "// Header comments",
-            "// Implementation comments"
-        ])
+        Asserter(object: intentions).asserterForFiles { files in
+            files.assertCount(1)
+            files[0]?.assert(sourcePath: "A.m")?.asserterForGlobalFunctions { globals in
+                globals.assertCount(1)
+                let global = globals[0]
+                global?.assert(signature:
+                    .init(
+                        name: "a",
+                        parameters: [],
+                        returnType: .typeName("A"),
+                        isStatic: false
+                    )
+                )?.assert(functionBody: [
+                    .expression(Expression.identifier("a").call())
+                ])?.assert(precedingComments: [
+                    "// Header comments",
+                    "// Implementation comments"
+                ])
+            }
+        }
     }
     
     func testDontMergeSimilarButNotActuallyMatchingGlobalFunctions() {
         let intentions =
             IntentionCollectionBuilder()
                 .createFile(named: "A.h") { file in
-                    file.createGlobalFunction(withName: "a",
-                                              parameters: [
-                                                ParameterSignature(label: nil, name: "a", type: .int)
-                                              ])
+                    file.createGlobalFunction(
+                        withName: "a",
+                        parameters: [
+                            ParameterSignature(label: nil, name: "a", type: .int)
+                        ]
+                    )
                 }
                 .createFile(named: "A.m") { file in
-                    file.createGlobalFunction(withName: "a",
-                                              body: [
-                                                .expression(
-                                                    Expression
-                                                        .identifier("a")
-                                                        .call()
-                                                )])
+                    file.createGlobalFunction(
+                        withName: "a",
+                        body: [
+                            .expression(
+                                Expression
+                                    .identifier("a")
+                                    .call()
+                            )
+                        ]
+                    )
                 }.build()
         let sut = FileTypeMergingIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        let functions = files[0].globalFunctionIntentions
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files[0].sourcePath, "A.m")
-        XCTAssertEqual(functions.count, 2)
-        
-        // a()
-        XCTAssertEqual(functions[0].functionBody?.body,
-                       [.expression(Expression.identifier("a").call())])
-        
-        // a(int)
-        XCTAssertNil(functions[1].functionBody?.body)
+        Asserter(object: intentions).asserterForFiles { files in
+            files.assertCount(1)
+            files[0]?.assert(sourcePath: "A.m")?.asserterForGlobalFunctions { globals in
+                globals.assertCount(2)
+                // a()
+                globals[0]?.assert(functionBody: [
+                    .expression(Expression.identifier("a").call())
+                ])
+                // a(int)
+                globals[1]?.asserterForFunctionBody {
+                    $0.assertNil()
+                }
+            }
+        }
     }
     
     func testDoesntMergeStaticAndNonStaticSelectors() {
@@ -346,6 +375,13 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         let files = intentions.fileIntentions()
         let methods = files[0].classIntentions[0].methods
         XCTAssertEqual(methods.count, 2)
+
+        Asserter(object: intentions).asserterForFiles { files in
+            let file = files.assertCount(1)?[0]?.assert(sourcePath: "A.m")
+            file?.asserter(forClassNamed: "A") { type in
+                type[\.methods].assertCount(2)
+            }
+        }
     }
     
     func testProperMergeOfStaticSelectors() {
@@ -374,13 +410,15 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        let methods = files[0].classIntentions[0].methods
-        XCTAssertEqual(methods[0].precedingComments, [
-            "// Header comment",
-            "// Implementation comment"
-        ])
-        XCTAssertEqual(methods.count, 1)
+        Asserter(object: intentions).asserterForFiles { files in
+            let file = files.assertCount(1)?[0]?.assert(sourcePath: "A.m")
+            file?.asserter(forClassNamed: "A") { type in
+                type[\.methods][0]?.assert(precedingComments: [
+                    "// Header comment",
+                    "// Implementation comment"
+                ])
+            }
+        }
     }
     
     func testMovesTypealiasesToImplementationWhenAvailable() {
@@ -394,10 +432,10 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files.first?.sourcePath, "A.m")
-        XCTAssertEqual(files.first?.typealiasIntentions.count, 1)
+        Asserter(object: intentions).asserterForFiles { files in
+            let file = files.assertCount(1)?[0]?.assert(sourcePath: "A.m")
+            file?[\.typealiasIntentions].assertCount(1)
+        }
     }
     
     func testMovesEnumsToImplementationWhenAvailable() {
@@ -411,10 +449,10 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files.first?.sourcePath, "A.m")
-        XCTAssertEqual(files.first?.enumIntentions.count, 1)
+        Asserter(object: intentions).asserterForFiles { files in
+            let file = files.assertCount(1)?[0]?.assert(sourcePath: "A.m")
+            file?[\.enumIntentions].assertCount(1)
+        }
     }
     
     func testMovesProtocolsToImplementationWhenAvailable() {
@@ -428,10 +466,10 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files.first?.sourcePath, "A.m")
-        XCTAssertEqual(files.first?.protocolIntentions.count, 1)
+        Asserter(object: intentions).asserterForFiles { files in
+            let file = files.assertCount(1)?[0]?.assert(sourcePath: "A.m")
+            file?[\.protocolIntentions].assertCount(1)
+        }
     }
     
     func testMovesGlobalVariablesToImplementationWhenAvailable() {
@@ -445,10 +483,10 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files.first?.sourcePath, "A.m")
-        XCTAssertEqual(files.first?.globalVariableIntentions.count, 1)
+        Asserter(object: intentions).asserterForFiles { files in
+            let file = files.assertCount(1)?[0]?.assert(sourcePath: "A.m")
+            file?[\.globalVariableIntentions].assertCount(1)
+        }
     }
     
     func testDontDuplicateGlobalVariableDeclarationsWhenMovingFromHeaderToImplementation() {
@@ -464,10 +502,10 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files.first?.sourcePath, "A.m")
-        XCTAssertEqual(files.first?.globalVariableIntentions.count, 1)
+        Asserter(object: intentions).asserterForFiles { files in
+            let file = files.assertCount(1)?[0]?.assert(sourcePath: "A.m")
+            file?[\.globalVariableIntentions].assertCount(1)
+        }
     }
     
     func testMovesGlobalFunctionsToImplementationWhenAvailable() {
@@ -481,10 +519,10 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files.first?.sourcePath, "A.m")
-        XCTAssertEqual(files.first?.globalFunctionIntentions.count, 1)
+        Asserter(object: intentions).asserterForFiles { files in
+            let file = files.assertCount(1)?[0]?.assert(sourcePath: "A.m")
+            file?[\.globalFunctionIntentions].assertCount(1)
+        }
     }
     
     func testMovesStructsToImplementationWhenAvailable() {
@@ -498,10 +536,10 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files.first?.sourcePath, "A.m")
-        XCTAssertEqual(files.first?.structIntentions.count, 1)
+        Asserter(object: intentions).asserterForFiles { files in
+            let file = files.assertCount(1)?[0]?.assert(sourcePath: "A.m")
+            file?[\.structIntentions].assertCount(1)
+        }
     }
     
     func testDontDuplicateGlobalFunctionsDeclarationsWhenMovingFromHeaderToImplementation() {
@@ -518,10 +556,10 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 1)
-        XCTAssertEqual(files.first?.sourcePath, "A.m")
-        XCTAssertEqual(files.first?.globalFunctionIntentions.count, 1)
+        Asserter(object: intentions).asserterForFiles { files in
+            let file = files.assertCount(1)?[0]?.assert(sourcePath: "A.m")
+            file?[\.globalFunctionIntentions].assertCount(1)
+        }
     }
     
     func testMergeBlockParameterNullability() {
@@ -553,9 +591,21 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let cls = intentions.fileIntentions()[0].typeIntentions[0]
-        XCTAssertEqual(cls.methods[0].parameters[0].type,
-                       .swiftBlock(returnType: .void, parameters: [.typeName("A")]))
+        Asserter(object: intentions).asserterForFiles { files in
+            let file = files.assertCount(1)?[0]?.assert(sourcePath: "A.m")
+            
+            file?.asserter(forTypeNamed: "A") { type in
+                let method = type[\.methods].assertCount(1)?[0]
+                method?.asserter(forParameterAt: 0) { param in
+                    param.assert(type:
+                        .swiftBlock(
+                            returnType: .void,
+                            parameters: [.typeName("A")]
+                        )
+                    )
+                }
+            }
+        }
     }
     
     func testKeepsAliasInMergedBlockSignatures() {
@@ -599,8 +649,17 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let cls = intentions.fileIntentions()[1].typeIntentions[0]
-        XCTAssertEqual(cls.methods[0].parameters[0].type, "ABlock")
+        Asserter(object: intentions).inClosureUnconditional { intentions in
+            intentions.assert(fileCount: 2)
+            intentions.asserter(forTargetPathFile: "A.m") { file in
+                file.asserter(forTypeNamed: "A") { type in
+                    let method = type[\.methods].assertCount(1)?[0]
+                    method?.asserter(forParameterAt: 0) { param in
+                        param.assert(type: "ABlock")
+                    }
+                }
+            }
+        }
     }
     
     func testMergeStructTypeDefinitions() {
@@ -623,11 +682,13 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let file = intentions.fileIntentions()[0]
-        XCTAssertEqual(intentions.fileIntentions().count, 1)
-        XCTAssert(file.sourcePath.hasSuffix(".m"))
-        XCTAssertEqual(file.structIntentions.count, 1)
-        XCTAssertEqual(file.structIntentions[0].instanceVariables.count, 1)
+        Asserter(object: intentions).asserterForFiles { files in
+            let file = files.assertCount(1)?[0]?.assert(sourcePath: "A.m")
+            file?.assertTrue{ $0.sourcePath.hasSuffix(".m") }
+
+            let structDecl = file?[\.structIntentions].assertCount(1)?[0]
+            structDecl?[\.instanceVariables].assertCount(1)
+        }
     }
     
     func testMergeExtensions() {
@@ -659,11 +720,16 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let files = intentions.fileIntentions()
-        XCTAssertEqual(files[0].extensionIntentions[0].methods.count, 1)
-        XCTAssertEqual(files[0].extensionIntentions[0].methods[0].name, "test")
-        XCTAssertEqual(files[0].extensionIntentions[0].methods[0].signature,
-                       FunctionSignature(name: "test",
-                                         parameters: [ParameterSignature(name: "test", type: .string)]))
+        Asserter(object: intentions).asserterForFiles { files in
+            let file = files.assertCount(1)?[0]?.assert(sourcePath: "A.m")
+            let extensionDecl = file?[\.extensionIntentions][0]
+            let method = extensionDecl?[\.methods][0]
+            method?.assert(signature: 
+                .init(
+                    name: "test",
+                    parameters: [ParameterSignature(name: "test", type: .string)]
+                )
+            )
+        }
     }
 }

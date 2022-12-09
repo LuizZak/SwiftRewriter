@@ -168,7 +168,8 @@
 			"sugarize",
 			"swiftpm",
 			"typealiases",
-			"Unretained"
+			"Unretained",
+			"whitespaces"
 		],
 	},
 	"extensions": {

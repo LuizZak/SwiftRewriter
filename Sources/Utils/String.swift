@@ -227,23 +227,43 @@ public extension String {
 }
 
 public extension String {
+    /// Returns a copy of this string with no leading or trailing whitespace
+    /// characters.
+    ///
+    /// The set of tested whitespace characters used is provided by
+    /// `CharacterSet.whitespacesAndNewlines`.
     func trimmingWhitespace() -> String {
         return trimWhitespace(self)
     }
+
+    /// Returns a copy of this string with no leading whitespace characters.
+    ///
+    /// The set of tested whitespace characters used is provided by
+    /// `CharacterSet.whitespacesAndNewlines`.
+    func trimmingWhitespaceLead() -> String {
+        return trimWhitespaceLead(self)
+    }
+
+    /// Returns a copy of this string with no trailing whitespace characters.
+    ///
+    /// The set of tested whitespace characters used is provided by
+    /// `CharacterSet.whitespacesAndNewlines`.
+    func trimmingWhitespaceTrail() -> String {
+        return trimWhitespaceTrail(self)
+    }
 }
 
-public func trimWhitespace(_ string: String) -> String {
+public func trimWhitespaceLead(_ string: String) -> String {
     if string.isEmpty {
         return string
     }
     
     var leading: String.Index = string.startIndex
-    var trailing: String.Index = string.index(before: string.endIndex)
     
-    let whitespace: Set<Character> = [" ", "\t", "\n", "\r"]
+    let charSet = CharacterSet.whitespacesAndNewlines
     
     while leading != string.endIndex {
-        if whitespace.contains(string[leading]) {
+        if charSet.contains(string.unicodeScalars[leading]) {
             string.formIndex(after: &leading)
         } else {
             break
@@ -253,14 +273,30 @@ public func trimWhitespace(_ string: String) -> String {
     if leading == string.endIndex {
         return ""
     }
+
+    return String(string[leading...])
+}
+
+public func trimWhitespaceTrail(_ string: String) -> String {
+    if string.isEmpty {
+        return string
+    }
     
-    while trailing != string.startIndex {
-        if whitespace.contains(string[trailing]) {
+    var trailing: String.Index = string.endIndex
+    
+    let charSet = CharacterSet.whitespacesAndNewlines
+    
+    while trailing > string.startIndex {
+        if charSet.contains(string.unicodeScalars[string.unicodeScalars.index(before: trailing)]) {
             string.formIndex(before: &trailing)
         } else {
             break
         }
     }
     
-    return String(string[leading...trailing])
+    return String(string[..<trailing])
+}
+
+public func trimWhitespace(_ string: String) -> String {
+    trimWhitespaceTrail(trimWhitespaceLead(string))
 }

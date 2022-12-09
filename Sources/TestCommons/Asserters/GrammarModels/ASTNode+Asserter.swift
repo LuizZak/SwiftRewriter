@@ -36,14 +36,11 @@ public extension Asserter where Object: ASTNode {
         line: UInt = #line
     ) -> Self? {
         guard object.children.count == count else {
-            XCTFail(
-                "Expected node '\(object.shortDescription)' to have \(count) child(ren) but found \(object.children.count).",
+            return assertFailed(
+                message: #"assertChildCount failed: expected \#(count) child(ren), found \#(object.children.count)."#,
                 file: file,
                 line: line
             )
-            dumpObject()
-
-            return nil
         }
 
         return self
@@ -63,14 +60,11 @@ public extension Asserter where Object: ASTNode {
     ) -> Self? {
 
         guard object.children.count > index else {
-            XCTFail(
-                "Expected node '\(object.shortDescription)' to have at least \(index) child(ren) but found \(object.children.count).",
+            return assertFailed(
+                message: #"asserter(forChildAt: \#(index)) failed: node has less than \#(index) child(ren)."#,
                 file: file,
                 line: line
             )
-            dumpObject()
-
-            return nil
         }
 
         closure(.init(object: object.children[index]))
@@ -92,14 +86,11 @@ public extension Asserter where Object: ASTNode {
     ) -> Self? {
 
         guard let child: T = object.firstChild() else {
-            XCTFail(
-                "Expected node '\(object.shortDescription)' to have at least one \(T.self)-typed child.",
+            return assertFailed(
+                message: #"asserter(forFirstChildOfType:) failed: No child of type ("\#(T.self)") found.."#,
                 file: file,
                 line: line
             )
-            dumpObject()
-
-            return nil
         }
 
         closure(.init(object: child))
@@ -565,14 +556,11 @@ public extension Asserter where Object == ObjcEnumDeclaration {
     ) -> Self? {
 
         guard let field = object.cases.first(where: { $0.identifier?.name == name }) else {
-            XCTFail(
-                "Expected to find an enumerator with name '\(name)' in enum declaration '\(object.identifier?.name ?? "<nil>")'.",
+            return assertFailed(
+                message: #"asserter(forEnumeratorName:) failed: No enumerator named "\#(name)" found."#,
                 file: file,
                 line: line
             )
-            dumpObject()
-
-            return nil
         }
 
         closure(.init(object: field))
@@ -771,24 +759,18 @@ public extension Asserter where Object == FunctionDefinition {
     ) -> Self? {
 
         guard let parameterList = object.parameterList else {
-            XCTFail(
-                "Expected function node '\(object.identifier?.name ?? "<nil>")' to have a parameter list.",
+            return assertFailed(
+                message: #"asserter(forParameterAt:) failed: `parameterList` node is nil."#,
                 file: file,
                 line: line
             )
-            dumpObject()
-
-            return nil
         }
         guard parameterList.parameters.count > index else {
-            XCTFail(
-                "Expected function node '\(object.identifier?.name ?? "<nil>")' to have at least \(index) parameter(s) but found \(parameterList.parameters.count).",
+            return assertFailed(
+                message: #"asserter(forParameterAt: \#(index)) failed: parameter list has less than \#(index) parameter(s)."#,
                 file: file,
                 line: line
             )
-            dumpObject()
-
-            return nil
         }
 
         closure(.init(object: parameterList.parameters[index]))
