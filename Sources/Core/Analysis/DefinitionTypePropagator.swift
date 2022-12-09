@@ -11,7 +11,7 @@ public class DefinitionTypePropagator {
     let typeResolver: LocalTypeResolverInvoker
 
     /// Delegate to be invoked during type resolution to allow for external
-    ///type suggestions according to definition usages.
+    /// type suggestions according to definition usages.
     public weak var delegate: DefinitionTypePropagatorDelegate?
 
     public init(
