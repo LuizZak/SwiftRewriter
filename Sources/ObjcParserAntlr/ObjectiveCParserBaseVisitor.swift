@@ -93,13 +93,6 @@ open class ObjectiveCParserBaseVisitor<T>: AbstractParseTreeVisitor<T> {
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	open func visitGenericSuperclassName(_ ctx: ObjectiveCParser.GenericSuperclassNameContext) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
 	open func visitGenericClassParametersSpecifier(_ ctx: ObjectiveCParser.GenericClassParametersSpecifierContext) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
@@ -611,13 +604,6 @@ open class ObjectiveCParserBaseVisitor<T>: AbstractParseTreeVisitor<T> {
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	open func visitAbstractDeclarator_(_ ctx: ObjectiveCParser.AbstractDeclarator_Context) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
 	open func visitAbstractDeclarator(_ ctx: ObjectiveCParser.AbstractDeclaratorContext) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
@@ -626,13 +612,6 @@ open class ObjectiveCParserBaseVisitor<T>: AbstractParseTreeVisitor<T> {
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	open func visitDirectAbstractDeclarator(_ ctx: ObjectiveCParser.DirectAbstractDeclaratorContext) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	open func visitAbstractDeclaratorSuffix_(_ ctx: ObjectiveCParser.AbstractDeclaratorSuffix_Context) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -668,20 +647,6 @@ open class ObjectiveCParserBaseVisitor<T>: AbstractParseTreeVisitor<T> {
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	open func visitTypeQualifierList(_ ctx: ObjectiveCParser.TypeQualifierListContext) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	open func visitIdentifierList(_ ctx: ObjectiveCParser.IdentifierListContext) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	open func visitDeclaratorSuffix(_ ctx: ObjectiveCParser.DeclaratorSuffixContext) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -927,13 +892,6 @@ open class ObjectiveCParserBaseVisitor<T>: AbstractParseTreeVisitor<T> {
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	open func visitGccAttribute(_ ctx: ObjectiveCParser.GccAttributeContext) -> T? { return visitChildren(ctx) }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	open func visitPointer_(_ ctx: ObjectiveCParser.Pointer_Context) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -58,17 +58,6 @@ public class ASTNodeFactory {
         return node
     }
     
-    public func makeSuperclassName(
-        from context: Parser.GenericSuperclassNameContext,
-        identifier: Parser.IdentifierContext
-    ) -> SuperclassName {
-        
-        let nonnull = isInNonnullContext(context)
-        let node = SuperclassName(name: identifier.getText(), isInNonnullContext: nonnull)
-        updateSourceLocation(for: node, with: context)
-        return node
-    }
-    
     public func makeProtocolReferenceList(from context: Parser.ProtocolListContext) -> ProtocolReferenceList {
         let protocolListNode =
             ProtocolReferenceList(isInNonnullContext: isInNonnullContext(context))
