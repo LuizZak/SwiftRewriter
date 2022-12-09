@@ -120,6 +120,27 @@ public extension Asserter where Object == FileGenerationIntention {
         }
     }
 
+    /// Asserts that the underlying `FileGenerationIntention` object being tested
+    /// has a `importDirectives` that match a specified value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        importDirectives: [String],
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserter(forKeyPath: \.importDirectives, file: file, line: line) {
+            $0.assert(
+                equals: importDirectives,
+                file: file,
+                line: line
+            )
+        }
+    }
+
     /// Opens an asserter context for a type with a given name in the underlying
     /// `FileGenerationIntention` object being tested.
     ///
