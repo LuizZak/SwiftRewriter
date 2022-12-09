@@ -158,19 +158,6 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func enterGenericSuperclassName(_ ctx: ObjectiveCParser.GenericSuperclassNameContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitGenericSuperclassName(_ ctx: ObjectiveCParser.GenericSuperclassNameContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	open func enterGenericClassParametersSpecifier(_ ctx: ObjectiveCParser.GenericClassParametersSpecifierContext) { }
 	/**
 	 * {@inheritDoc}
@@ -1120,19 +1107,6 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func enterAbstractDeclarator_(_ ctx: ObjectiveCParser.AbstractDeclarator_Context) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitAbstractDeclarator_(_ ctx: ObjectiveCParser.AbstractDeclarator_Context) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	open func enterAbstractDeclarator(_ ctx: ObjectiveCParser.AbstractDeclaratorContext) { }
 	/**
 	 * {@inheritDoc}
@@ -1153,19 +1127,6 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitDirectAbstractDeclarator(_ ctx: ObjectiveCParser.DirectAbstractDeclaratorContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterAbstractDeclaratorSuffix_(_ ctx: ObjectiveCParser.AbstractDeclaratorSuffix_Context) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitAbstractDeclaratorSuffix_(_ ctx: ObjectiveCParser.AbstractDeclaratorSuffix_Context) { }
 
 	/**
 	 * {@inheritDoc}
@@ -1231,32 +1192,6 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitTypeQualifierList(_ ctx: ObjectiveCParser.TypeQualifierListContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterIdentifierList(_ ctx: ObjectiveCParser.IdentifierListContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitIdentifierList(_ ctx: ObjectiveCParser.IdentifierListContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterDeclaratorSuffix(_ ctx: ObjectiveCParser.DeclaratorSuffixContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitDeclaratorSuffix(_ ctx: ObjectiveCParser.DeclaratorSuffixContext) { }
 
 	/**
 	 * {@inheritDoc}
@@ -1712,19 +1647,6 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitGccAttribute(_ ctx: ObjectiveCParser.GccAttributeContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func enterPointer_(_ ctx: ObjectiveCParser.Pointer_Context) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitPointer_(_ ctx: ObjectiveCParser.Pointer_Context) { }
 
 	/**
 	 * {@inheritDoc}

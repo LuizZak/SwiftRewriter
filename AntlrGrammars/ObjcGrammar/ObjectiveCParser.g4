@@ -38,7 +38,6 @@ translationUnit
 
 topLevelDeclaration
     : importDeclaration
-    //| functionDeclaration
     | declaration
     | classInterface
     | classImplementation
@@ -63,7 +62,6 @@ classInterface
 
 classInterfaceName
     : className (COLON superclassName genericClassParametersSpecifier?)? (LT protocolList GT)?
-    //| className (COLON genericSuperclassName)? (LT protocolList GT)?
     ;
 
 categoryInterface
@@ -80,7 +78,6 @@ classImplementation
 
 classImplementationName
     : className (COLON superclassName genericClassParametersSpecifier?)?
-    // | className (COLON genericSuperclassName)?
     ;
 
 categoryImplementation
@@ -95,10 +92,6 @@ className
 
 superclassName
     : identifier
-    ;
-
-genericSuperclassName
-    : identifier genericClassParametersSpecifier
     ;
 
 genericClassParametersSpecifier
@@ -441,7 +434,6 @@ directDeclarator
     |   directDeclarator LBRACK typeQualifierList STATIC expression RBRACK
     |   directDeclarator LBRACK typeQualifierList? MUL RBRACK
     |   directDeclarator LP parameterTypeList? RP
-    //|   directDeclarator LP identifierList? RP
     |   LP BITXOR blockDeclarationSpecifier* directDeclarator RP blockParameters
     |   identifier COLON DIGITS  // bit field
     |   vcSpecificModifier identifier // Visual C Extension
@@ -457,12 +449,6 @@ blockDeclarationSpecifier
 
 typeName
     : declarationSpecifiers abstractDeclarator?
-    ;
-
-abstractDeclarator_
-    : pointer abstractDeclarator_?
-    | LP abstractDeclarator? RP abstractDeclaratorSuffix_+
-    | (LBRACK constantExpression? RBRACK)+
     ;
 
 abstractDeclarator
@@ -485,11 +471,6 @@ directAbstractDeclarator
     |   LP BITXOR blockDeclarationSpecifier* identifier? RP blockParameters
     ;
 
-abstractDeclaratorSuffix_
-    : LBRACK constantExpression? RBRACK
-    | LP parameterDeclarationList_? RP
-    ;
-
 parameterTypeList
     : parameterList (COMMA ELIPSIS)?
     ;
@@ -498,6 +479,7 @@ parameterList
     : parameterDeclaration (COMMA parameterDeclaration)*
     ;
 
+// TODO: For some reason, ANTLR 4.11.1 starts to fail parsing stand alone `parameterDeclaration` if this parser rule is removed; consider filing a bug report later.
 parameterDeclarationList_
     : parameterDeclaration (COMMA parameterDeclaration)*
     ;
@@ -511,20 +493,12 @@ typeQualifierList
     : typeQualifier+
     ;
 
-identifierList
-    :   identifier (COMMA identifier)*
-    ;
-
-declaratorSuffix
-    : LBRACK constantExpression? RBRACK
-    ;
-
 attributeSpecifier
     : ATTRIBUTE LP LP attribute (COMMA attribute)* RP RP
     ;
 
 atomicTypeSpecifier
-    :   ATOMIC_ LP typeName RP
+    : ATOMIC_ LP typeName RP
     ;
 
 fieldDeclaration
@@ -728,10 +702,6 @@ gccAttribute
       (LP argumentExpressionList? RP)?
     ;
 
-pointer_
-    : MUL declarationSpecifiers? pointer?
-    ;
-
 pointer
     : pointerEntry+
     ;
@@ -855,24 +825,8 @@ expressions
 
 expression
     : assignmentExpression
-    //| expression QUESTION trueExpression=expression? COLON falseExpression=expression
     | LP compoundStatement RP
     ;
-
-/*
-binaryExpression
-    : castExpression op=(MUL | DIV | MOD) castExpression #MultiplicativeExpression
-    | castExpression op=(ADD | SUB) castExpression #AdditiveExpression
-    | castExpression (LT LT | GT GT) castExpression #ShiftExpression
-    | castExpression op=(LE | GE | LT | GT) castExpression #ComparativeExpression
-    | castExpression op=(NOTEQUAL | EQUAL) castExpression #EqualityExpression
-    | castExpression op=BITAND castExpression #BitwiseAndExpression
-    | castExpression op=BITXOR castExpression #BitwiseXorExpression
-    | castExpression op=BITOR castExpression #BitwiseOrExpression
-    | castExpression op=AND castExpression #LogicalAndExpression
-    | castExpression op=OR castExpression #LogicalOrExpression
-    ;
-*/
 
 assignmentExpression
     : conditionalExpression
@@ -1054,24 +1008,13 @@ identifier
     | NONATOMIC
     | RETAIN
 
-    //| AUTORELEASING_QUALIFIER
-    //| BLOCK
-    //| BRIDGE_RETAINED
-    //| BRIDGE_TRANSFER
     | COVARIANT
     | CONTRAVARIANT
     | DEPRECATED
-    //| KINDOF
-    //| UNUSED
 
     | NS_INLINE
     | NS_ENUM
     | NS_OPTIONS
-
-    //| NULL_UNSPECIFIED
-    //| NULLABLE
-    //| NONNULL
-    //| NULL_RESETTABLE
 
     | ASSIGN
     | COPY
@@ -1080,11 +1023,7 @@ identifier
     | STRONG
     | READONLY
     | READWRITE
-    //| WEAK
-    //| UNSAFE_UNRETAINED
 
-    //| IB_OUTLET
-    //| IB_OUTLET_COLLECTION
     | IB_INSPECTABLE
     | IB_DESIGNABLE
     ;

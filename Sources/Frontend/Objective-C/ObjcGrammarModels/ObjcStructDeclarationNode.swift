@@ -19,12 +19,6 @@ public final class ObjcStructDeclarationBodyNode: ObjcASTNode, ObjcInitializable
         childrenMatching()
     }
     
-    /*
-    public var identifier: ObjcIdentifierNode? {
-        firstChild()
-    }
-    */
-    
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)
     }

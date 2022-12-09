@@ -118,34 +118,11 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             rule: O.InstanceVariablesContext.self,
             nodeType: ObjcIVarsListNode.self
         )
-        /*
-        mapper.addRuleMap(
-            rule: O.TypedefDeclarationContext.self,
-            nodeType: ObjcTypedefNode.self,
-            collectComments: true
-        )
-        mapper.addRuleMap(
-            rule: O.BlockParametersContext.self,
-            nodeType: ObjcBlockParametersNode.self
-        )
-        */
         mapper.addRuleMap(
             rule: O.ProtocolDeclarationContext.self,
             nodeType: ObjcProtocolDeclarationNode.self,
             collectComments: true
         )
-        /*
-        mapper.addRuleMap(
-            rule: O.FunctionDeclarationContext.self,
-            nodeType: ObjcFunctionDefinitionNode.self,
-            collectComments: true
-        )
-        mapper.addRuleMap(
-            rule: O.FunctionDefinitionContext.self,
-            nodeType: ObjcFunctionDefinitionNode.self,
-            collectComments: true
-        )
-        */
         mapper.addRuleMap(
             rule: O.PropertyImplementationContext.self,
             nodeType: ObjcPropertyImplementationNode.self
@@ -414,18 +391,6 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         context.popContext() // ObjcPropertyDefinitionNode
     }
     
-    /*
-    override func enterTypeName(_ ctx: ObjectiveCParser.TypeNameContext) {
-        guard let type = typeParser.parseObjcType(from: ctx) else {
-            return
-        }
-        
-        let node = ObjcTypeNameNode(type: type, isInNonnullContext: isInNonnullContext(ctx))
-        nodeFactory.updateSourceLocation(for: node, with: ctx)
-        context.addChildNode(node)
-    }
-    */
-    
     override func enterGenericTypeSpecifier(_ ctx: ObjectiveCParser.GenericTypeSpecifierContext) {
         mapper.pushTemporaryException(forRuleType: ObjectiveCParser.ProtocolListContext.self)
     }
@@ -531,22 +496,6 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             
         context.addChildNode(enumCase)
     }
-    
-    /*
-    override func enterBlockParameters(_ ctx: ObjectiveCParser.BlockParametersContext) {
-        for parameterDeclaration in ctx.parameterDeclaration() {
-            guard let type = typeParser.parseObjcType(from: parameterDeclaration) else {
-                continue
-            }
-            
-            let typeNameNode =
-                ObjcTypeNameNode(type: type,
-                             isInNonnullContext: isInNonnullContext(parameterDeclaration))
-            nodeFactory.updateSourceLocation(for: typeNameNode, with: parameterDeclaration)
-            context.addChildNode(typeNameNode)
-        }
-    }
-    */
     
     // MARK: - Function Declaration/Definition
     override func enterFunctionDefinition(_ ctx: ObjectiveCParser.FunctionDefinitionContext) {

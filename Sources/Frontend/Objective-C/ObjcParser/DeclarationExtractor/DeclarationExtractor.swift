@@ -496,14 +496,6 @@ public class DeclarationExtractor {
         setDeclSpecifiers(declSpecifiers, syntax: ctx)
     }
 
-    /*
-    private func collectTypePrefix(from ctx: DeclarationSyntax?) {
-        collectTypePrefix(from: ctx?.declarationSpecifiers)
-    }
-    private func collectTypePrefix(from ctx: DeclarationSpecifiersSyntax?) {
-        collectTypePrefix(from: ctx?.typePrefix)
-    }
-    */
     private func collectTypePrefix(from ctx: TypePrefixSyntax?) {
         guard let ctx = ctx else {
             return

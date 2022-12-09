@@ -267,51 +267,6 @@ public class ObjcParser {
         rootNode = listener.rootNode
     }
     
-    /*
-    private func parsePreprocessorDirectivesChannel() throws {
-        let src = source.fetchSource()
-        
-        let parser = try state.makeMainParser(input: src)
-        parser.lexer.setChannel(ObjectiveCLexer.DIRECTIVE_CHANNEL)
-        defer {
-            // Don't forget to reset token channel, as this state may be shared
-            // with other parsers later on
-            parser.lexer.setChannel(ObjectiveCLexer.DEFAULT_TOKEN_CHANNEL)
-        }
-        
-        let tokens = parser.tokens
-        try tokens.fill()
-        
-        let allTokens = tokens.getTokens()
-        
-        var lastBegin: Int?
-        var lastLoc: SourceLocation?
-        
-        for tok in allTokens {
-            let tokType = tok.getType()
-            if tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_BEGIN {
-                lastBegin = tok.getTokenIndex()
-                
-                lastLoc = source.sourceLocation(for: tok)
-            } else if tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_END {
-                if let lastBeginIndex = lastBegin {
-                    nonnullMacroRegionsTokenRange.append((start: lastBeginIndex, end: tok.getTokenIndex()))
-                    lastBegin = nil
-                }
-
-                if let startLoc = lastLoc {
-                    let endLoc = source.sourceLocation(for: tok)
-                    nonnullMacroRegionsRanges.append(
-                        .range(start: startLoc, end: endLoc)
-                    )
-
-                    lastLoc = nil
-                }
-            }
-        }
-    }
-    */
-    
     private func parseNSAssumeNonnullChannel(input: String) throws {
         nonnullMacroRegionsTokenRange = []
         
