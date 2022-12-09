@@ -2,7 +2,7 @@ import XCTest
 
 import GrammarModels
 
-extension Asserter {
+public extension Asserter {
     /// Asserts that the underlying `SourceLocation` object being tested matches
     /// a given value.
     ///
@@ -36,7 +36,7 @@ extension Asserter {
     }
 }
 
-extension Asserter where Object == SourceLocation {
+public extension Asserter where Object == SourceLocation {
     /// Asserts that the underlying `SourceLocation` object being tested matches
     /// a given value.
     ///
@@ -70,7 +70,7 @@ extension Asserter where Object == SourceLocation {
     }
 }
 
-extension Asserter where Object == SourceRange {
+public extension Asserter where Object == SourceRange {
     /// Asserts that the underlying `SourceRange` object being tested has a
     /// `.start` property that matches a specified value.
     ///
@@ -122,7 +122,9 @@ extension Asserter where Object == SourceRange {
     }
 }
 
-extension SourceLocation {
+public extension SourceLocation {
+    /// Helper initializer provided for tests to ignore `utf8Offset` values during
+    /// assertions with an `Asserter<T>`.
     init(line: Int, column: Int) {
         self.init(line: line, column: column, utf8Offset: 0)
     }

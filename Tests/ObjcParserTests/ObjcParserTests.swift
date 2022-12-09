@@ -1,6 +1,8 @@
 import XCTest
-@testable import ObjcParser
+import TestCommons
 import GrammarModels
+
+@testable import ObjcParser
 
 class ObjcParserTests: XCTestCase {
     static var allTests = [

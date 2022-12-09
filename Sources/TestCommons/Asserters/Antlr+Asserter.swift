@@ -1,7 +1,7 @@
 import XCTest
 import Antlr4
 
-extension Asserter where Object: ParserRuleContext {
+public extension Asserter where Object: ParserRuleContext {
     /// Asserts that the underlying `ParserRuleContext` object being tested has
     /// a textual value from the underlying source code that matches a given
     /// string.

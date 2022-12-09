@@ -6,6 +6,10 @@ public struct Asserter<Object> {
     /// The object that is being tested upon.
     public var object: Object
 
+    public init(object: Object) {
+        self.object = object
+    }
+
     /// Dumps `object` to the stdout.
     public func dumpObject(maxDepth: Int = 3) {
         var buffer = ""

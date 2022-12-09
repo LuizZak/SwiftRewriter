@@ -1,7 +1,7 @@
 import XCTest
 import GrammarModels
 
-extension Asserter where Object: ASTNode {
+public extension Asserter where Object: ASTNode {
     /// Asserts that the underlying `ASTNode` being tested has a specified
     /// `isInNonnullContext` value.
     ///
@@ -108,7 +108,7 @@ extension Asserter where Object: ASTNode {
     }
 }
 
-extension Asserter where Object == Identifier {
+public extension Asserter where Object == Identifier {
     /// Asserts that the underlying `Identifier` being tested has the specified
     /// `name` value.
     ///
@@ -128,7 +128,7 @@ extension Asserter where Object == Identifier {
     }
 }
 
-extension Asserter where Object == TypeNameNode {
+public extension Asserter where Object == TypeNameNode {
     /// Asserts that the underlying `TypeNameNode` being tested has the specified
     /// `type` value.
     ///
@@ -148,7 +148,7 @@ extension Asserter where Object == TypeNameNode {
     }
 }
 
-extension Asserter where Object == InitialExpression {
+public extension Asserter where Object == InitialExpression {
     /// Asserts that the underlying `InitialExpression` being tested has a parser
     /// rule expression that matches a specified string value exactly.
     ///
@@ -173,7 +173,7 @@ extension Asserter where Object == InitialExpression {
     }
 }
 
-extension Asserter where Object == ConstantExpressionNode {
+public extension Asserter where Object == ConstantExpressionNode {
     /// Asserts that the underlying `ConstantExpressionNode` being tested has a
     /// parser rule expression that matches a specified string value exactly.
     ///
@@ -207,7 +207,7 @@ extension Asserter where Object == ConstantExpressionNode {
     }
 }
 
-extension Asserter where Object == ExpressionNode {
+public extension Asserter where Object == ExpressionNode {
     /// Asserts that the underlying `ExpressionNode` being tested has a
     /// parser rule expression that matches a specified string value exactly.
     ///
@@ -241,7 +241,7 @@ extension Asserter where Object == ExpressionNode {
     }
 }
 
-extension Asserter where Object == TypedefNode {
+public extension Asserter where Object == TypedefNode {
     /// Asserts that the underlying `TypedefNode` being tested has an identifier
     /// node with a specified `name` value.
     ///
@@ -279,7 +279,7 @@ extension Asserter where Object == TypedefNode {
     }
 }
 
-extension Asserter where Object == VariableDeclaration {
+public extension Asserter where Object == VariableDeclaration {
     /// Asserts that the underlying `VariableDeclaration` being tested has an
     /// identifier node with a specified `name` value.
     ///
@@ -390,7 +390,7 @@ extension Asserter where Object == VariableDeclaration {
     }
 }
 
-extension Asserter where Object == ObjcStructDeclaration {
+public extension Asserter where Object == ObjcStructDeclaration {
     /// Asserts that the underlying `ObjcStructDeclaration` being tested has an
     /// identifier node with a specified `name` value.
     ///
@@ -454,7 +454,7 @@ extension Asserter where Object == ObjcStructDeclaration {
     }
 }
 
-extension Asserter where Object == ObjcStructField {
+public extension Asserter where Object == ObjcStructField {
     /// Asserts that the underlying `ObjcStructField` being tested has an identifier
     /// node with a specified `name` value.
     ///
@@ -515,7 +515,7 @@ extension Asserter where Object == ObjcStructField {
     }
 }
 
-extension Asserter where Object == ObjcEnumDeclaration {
+public extension Asserter where Object == ObjcEnumDeclaration {
     /// Asserts that the underlying `ObjcEnumDeclaration` being tested has an
     /// identifier node with a specified `name` value.
     ///
@@ -615,7 +615,7 @@ extension Asserter where Object == ObjcEnumDeclaration {
     }
 }
 
-extension Asserter where Object == ObjcEnumCase {
+public extension Asserter where Object == ObjcEnumCase {
     /// Asserts that the underlying `ObjcEnumCase` being tested has an identifier
     /// node with a specified `name` value.
     ///
@@ -678,7 +678,7 @@ extension Asserter where Object == ObjcEnumCase {
     }
 }
 
-extension Asserter where Object == FunctionDefinition {
+public extension Asserter where Object == FunctionDefinition {
     /// Asserts that the underlying `FunctionDefinition` being tested has an
     /// identifier node with a specified `name` value.
     ///
@@ -797,7 +797,7 @@ extension Asserter where Object == FunctionDefinition {
     }
 }
 
-extension Asserter where Object == FunctionParameter {
+public extension Asserter where Object == FunctionParameter {
     /// Asserts that the underlying `FunctionParameter` being tested has an
     /// identifier node with a specified `name` value.
     ///
