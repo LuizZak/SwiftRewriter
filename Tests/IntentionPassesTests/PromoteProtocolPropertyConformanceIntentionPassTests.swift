@@ -30,12 +30,17 @@ class PromoteProtocolPropertyConformanceIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.fileIntentions()[1].typeIntentions[0]
-        XCTAssertEqual(intentions.fileIntentions()[1].sourcePath, "A.m")
-        XCTAssertEqual(type.methods.count, 0)
-        XCTAssertEqual(type.properties.count, 1)
-        XCTAssertEqual(type.properties.first?.type, .int)
-        XCTAssertEqual(type.properties.first?.getter?.body, [.return(.constant(0))])
+        Asserter(object: intentions).asserter(forTargetPathFile: "A.m") { file in
+            file.asserter(forTypeNamed: "String") { type in
+                let property = type[\.properties].assertCount(1)?[0]
+
+                property?
+                    .assert(type: .int)?
+                    .assert(getterBody: [
+                        .return(.constant(0))
+                    ])
+            }
+        }
     }
     
     func testLookThroughNullabilityInSignatureOfMethodAndProperty() {
@@ -62,12 +67,17 @@ class PromoteProtocolPropertyConformanceIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.fileIntentions()[1].typeIntentions[0]
-        XCTAssertEqual(intentions.fileIntentions()[1].sourcePath, "A.m")
-        XCTAssertEqual(type.methods.count, 0)
-        XCTAssertEqual(type.properties.count, 1)
-        XCTAssertEqual(type.properties.first?.type, .optional("A"))
-        XCTAssertEqual(type.properties.first?.getter?.body, [.return(.constant(0))])
+        Asserter(object: intentions).asserter(forTargetPathFile: "A.m") { file in
+            file.asserter(forTypeNamed: "String") { type in
+                let property = type[\.properties].assertCount(1)?[0]
+
+                property?
+                    .assert(type: .optional("A"))?
+                    .assert(getterBody: [
+                        .return(.constant(0))
+                    ])
+            }
+        }
     }
     
     func testDontDuplicatePropertyImplementations() {
@@ -99,10 +109,12 @@ class PromoteProtocolPropertyConformanceIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.fileIntentions()[1].typeIntentions[0]
-        XCTAssertEqual(intentions.fileIntentions()[1].sourcePath, "A.m")
-        XCTAssertEqual(type.methods.count, 1)
-        XCTAssertEqual(type.properties.count, 0)
+        Asserter(object: intentions).asserter(forTargetPathFile: "A.m") { file in
+            file.asserter(forTypeNamed: "B") { type in
+                type[\.methods].assertCount(1)
+                type[\.properties].assertCount(0)
+            }
+        }
     }
     
     func testDontDuplicatePropertyImplementations_2() {
@@ -128,9 +140,11 @@ class PromoteProtocolPropertyConformanceIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.fileIntentions()[0].classIntentions[0]
-        XCTAssertEqual(intentions.fileIntentions()[0].sourcePath, "A.m")
-        XCTAssertEqual(type.methods.count, 1)
-        XCTAssertEqual(type.properties.count, 1)
+        Asserter(object: intentions).asserter(forTargetPathFile: "A.m") { file in
+            file.asserter(forTypeNamed: "B") { type in
+                type[\.methods].assertCount(1)
+                type[\.properties].assertCount(1)
+            }
+        }
     }
 }
