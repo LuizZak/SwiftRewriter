@@ -30,7 +30,7 @@ class InitAnalysisIntentionPassTests: XCTestCase {
     }
     
     func testInitThatReturnsNil() {
-        testFlagsBody(as: .failable, [
+        testFlagsBody(as: .fallible, [
             .return(.constant(.nil))
         ])
     }
@@ -46,7 +46,7 @@ class InitAnalysisIntentionPassTests: XCTestCase {
     }
     
     func testIgnoreWithinIfWithNilCheckSelf() {
-        // Tests that the following case does not trigger the failable init detector:
+        // Tests that the following case does not trigger the fallible init detector:
         //
         // if(self == nil) {
         //     return nil;
@@ -61,7 +61,7 @@ class InitAnalysisIntentionPassTests: XCTestCase {
     }
     
     func testIgnoreWithinIfWithNilCheckSelfEqualsSuperInit() {
-        // Tests that the following case does not trigger the failable init detector:
+        // Tests that the following case does not trigger the fallible init detector:
         //
         // if(!(self = [super init])) {
         //     return nil;
@@ -83,7 +83,7 @@ class InitAnalysisIntentionPassTests: XCTestCase {
     }
     
     func testIgnoreWithinIfWithNilCheckSelfEqualsSelfInit() {
-        // Tests that the following case does not trigger the failable init detector:
+        // Tests that the following case does not trigger the fallible init detector:
         //
         // if(!(self = [self init])) {
         //     return nil;
@@ -136,8 +136,8 @@ private extension InitAnalysisIntentionPassTests {
     
     func flagsFromConstructor(_ ctor: InitGenerationIntention) -> InitFlags {
         var flags: InitFlags = []
-        if ctor.isFailable {
-            flags.insert(.failable)
+        if ctor.isFallible {
+            flags.insert(.fallible)
         }
         if ctor.isConvenience {
             flags.insert(.convenience)
@@ -155,8 +155,8 @@ private extension InitAnalysisIntentionPassTests {
             if self.contains(.none) {
                 descs.append("none")
             }
-            if self.contains(.failable) {
-                descs.append("failable")
+            if self.contains(.fallible) {
+                descs.append("fallible")
             }
             if self.contains(.convenience) {
                 descs.append("convenience")
@@ -166,7 +166,7 @@ private extension InitAnalysisIntentionPassTests {
         }
         
         static let none = InitFlags([])
-        static let failable = InitFlags(rawValue: 1)
+        static let fallible = InitFlags(rawValue: 1)
         static let convenience = InitFlags(rawValue: 2)
     }
 }

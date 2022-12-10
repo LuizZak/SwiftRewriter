@@ -114,8 +114,8 @@ let package = Package(
         .target(
             name: "TestCommons",
             dependencies: [
-                "SwiftAST", "SwiftSyntaxSupport", "SwiftRewriterLib", "Intentions",
-                "KnownType", "GrammarModels", "Utils", "TypeSystem"
+                "Antlr4", "MiniLexer", "SwiftAST", "SwiftSyntaxSupport", "SwiftRewriterLib",
+                "Intentions", "KnownType", "GrammarModels", "Utils", "TypeSystem"
             ])
 
     ] + /* Tests */ [
@@ -127,7 +127,7 @@ let package = Package(
             dependencies: ["WriterTargetOutput", "TestCommons"]),
         .testTarget(
             name: "ObjcParserTests",
-            dependencies: ["GrammarModels", "ObjcParser"]),
+            dependencies: ["GrammarModels", "ObjcParser", "TestCommons"]),
         .testTarget(
             name: "GrammarModelsTests",
             dependencies: ["GrammarModels"]),

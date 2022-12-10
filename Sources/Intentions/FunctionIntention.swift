@@ -16,8 +16,11 @@ public protocol ParameterizedFunctionIntention: FunctionIntention {
 }
 
 /// Defines a protocol for intentions that feature full function signatures
-public protocol SignatureFunctionIntention: FunctionIntention {
+public protocol SignatureFunctionIntention: ParameterizedFunctionIntention {
     var signature: FunctionSignature { get }
+}
+extension SignatureFunctionIntention {
+    public var parameters: [ParameterSignature] { signature.parameters }
 }
 
 /// Defines a protocol for intentions that feature full function signatures which
@@ -25,3 +28,14 @@ public protocol SignatureFunctionIntention: FunctionIntention {
 public protocol MutableSignatureFunctionIntention: SignatureFunctionIntention {
     var signature: FunctionSignature { get set }
 }
+extension MutableSignatureFunctionIntention {
+    public var parameters: [ParameterSignature] {
+        get {
+            signature.parameters
+        }
+        set {
+            signature.parameters = newValue
+        }
+    }
+}
+

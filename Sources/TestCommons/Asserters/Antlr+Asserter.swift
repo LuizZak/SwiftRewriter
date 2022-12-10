@@ -1,7 +1,7 @@
 import XCTest
 import Antlr4
 
-extension Asserter where Object: ParserRuleContext {
+public extension Asserter where Object: ParserRuleContext {
     /// Asserts that the underlying `ParserRuleContext` object being tested has
     /// a textual value from the underlying source code that matches a given
     /// string.
@@ -18,10 +18,11 @@ extension Asserter where Object: ParserRuleContext {
         
         let text = object.getText()
         guard text == expected else {
-            XCTAssertEqual(text, expected, message(), file: file, line: line)
-            dumpObject()
-
-            return nil
+            return assertFailed(
+                message: #"assert(textEquals:) failed: ("\#(text)") != ("\#(expected)"). \#(message())"#,
+                file: file,
+                line: line
+            )
         }
 
         return self

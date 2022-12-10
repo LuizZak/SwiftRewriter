@@ -275,6 +275,8 @@ class StringTests: XCTestCase {
     func testTrimWhitespace() {
         XCTAssertEqual(trimWhitespace(""), "")
         XCTAssertEqual(trimWhitespace("  "), "")
+        XCTAssertEqual(trimWhitespace("a "), "a")
+        XCTAssertEqual(trimWhitespace(" a"), "a")
         XCTAssertEqual(trimWhitespace("abc"), "abc")
         XCTAssertEqual(trimWhitespace("abc "), "abc")
         XCTAssertEqual(trimWhitespace(" abc"), "abc")
@@ -282,6 +284,34 @@ class StringTests: XCTestCase {
         XCTAssertEqual(trimWhitespace("\nabc\n"), "abc")
         XCTAssertEqual(trimWhitespace("\n abc def \t "), "abc def")
         XCTAssertEqual(trimWhitespace("  abc def "), "abc def")
+    }
+
+    func testTrimWhitespaceLead() {
+        XCTAssertEqual(trimWhitespaceLead(""), "")
+        XCTAssertEqual(trimWhitespaceLead("  "), "")
+        XCTAssertEqual(trimWhitespaceLead("a "), "a ")
+        XCTAssertEqual(trimWhitespaceLead(" a"), "a")
+        XCTAssertEqual(trimWhitespaceLead("abc"), "abc")
+        XCTAssertEqual(trimWhitespaceLead("abc "), "abc ")
+        XCTAssertEqual(trimWhitespaceLead(" abc"), "abc")
+        XCTAssertEqual(trimWhitespaceLead("  abc "), "abc ")
+        XCTAssertEqual(trimWhitespaceLead("\nabc\n"), "abc\n")
+        XCTAssertEqual(trimWhitespaceLead("\n abc def \t "), "abc def \t ")
+        XCTAssertEqual(trimWhitespaceLead("  abc def "), "abc def ")
+    }
+
+    func testTrimWhitespaceTrail() {
+        XCTAssertEqual(trimWhitespaceTrail(""), "")
+        XCTAssertEqual(trimWhitespaceTrail("  "), "")
+        XCTAssertEqual(trimWhitespaceTrail("a "), "a")
+        XCTAssertEqual(trimWhitespaceTrail(" a"), " a")
+        XCTAssertEqual(trimWhitespaceTrail("abc"), "abc")
+        XCTAssertEqual(trimWhitespaceTrail("abc "), "abc")
+        XCTAssertEqual(trimWhitespaceTrail(" abc"), " abc")
+        XCTAssertEqual(trimWhitespaceTrail("  abc "), "  abc")
+        XCTAssertEqual(trimWhitespaceTrail("\nabc\n"), "\nabc")
+        XCTAssertEqual(trimWhitespaceTrail("\n abc def \t "), "\n abc def")
+        XCTAssertEqual(trimWhitespaceTrail("  abc def "), "  abc def")
     }
 }
 

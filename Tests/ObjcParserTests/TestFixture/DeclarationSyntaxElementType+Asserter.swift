@@ -1,5 +1,6 @@
 import XCTest
 
+import TestCommons
 import GrammarModels
 import ObjcParser
 

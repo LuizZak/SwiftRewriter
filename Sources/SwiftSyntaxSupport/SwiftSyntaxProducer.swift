@@ -766,7 +766,7 @@ extension SwiftSyntaxProducer {
             
             builder.useInitKeyword(makeStartToken(SyntaxFactory.makeInitKeyword))
             
-            if intention.isFailable {
+            if intention.isFallible {
                 builder.useOptionalMark(SyntaxFactory.makeInfixQuestionMarkToken())
             }
             

@@ -246,7 +246,7 @@ public final class SwiftClassInterfaceParser {
             typeBuilder =
                 typeBuilder.constructor(withParameters: initDecl.parameters,
                                         attributes: knownAttributes,
-                                        isFailable: initDecl.isFailable)
+                                        isFallible: initDecl.isFallible)
 
         case .subscript:
             let subscriptDecl = try parseSubscriptDeclaration(from: tokenizer)
@@ -377,19 +377,19 @@ public final class SwiftClassInterfaceParser {
     private static func parseInitializerDeclaration(from tokenizer: Tokenizer) throws -> InitializerDeclaration {
         try tokenizer.advance(overTokenType: ._init)
         
-        var isFailable = false
+        var isFallible = false
         
         if tokenizer.tokenType(is: .qmark) {
             tokenizer.skipToken()
             
-            isFailable = true
+            isFallible = true
         }
         
         let parameters =
             try FunctionSignatureParser.parseParameters(from: tokenizer.lexer)
         
         return InitializerDeclaration(parameters: parameters,
-                                      isFailable: isFailable)
+                                      isFallible: isFallible)
     }
 
     /// ```
@@ -829,7 +829,7 @@ public final class SwiftClassInterfaceParser {
     
     private struct InitializerDeclaration {
         var parameters: [ParameterSignature]
-        var isFailable: Bool
+        var isFallible: Bool
     }
 
     private struct SubscriptDeclaration {

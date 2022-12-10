@@ -167,8 +167,10 @@
 			"stdcall",
 			"sugarize",
 			"swiftpm",
+			"synthesizations",
 			"typealiases",
-			"Unretained"
+			"Unretained",
+			"whitespaces"
 		],
 	},
 	"extensions": {

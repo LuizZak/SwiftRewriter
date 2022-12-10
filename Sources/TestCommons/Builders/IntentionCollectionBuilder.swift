@@ -3,6 +3,7 @@ import SwiftAST
 import KnownType
 import Intentions
 import TypeSystem
+import MiniLexer
 
 /// An empty initializer used as default argument of initializer closure parameters
 /// for `IntentionCollectionBuilder` and related classes.
@@ -11,6 +12,23 @@ import TypeSystem
 @inlinable
 public func emptyInit<T>(_: T) {
     
+}
+
+private func _isValidTypeIdentifier(_ str: String) -> Bool {
+    do {
+        let lexer = Lexer(input: str)
+        try lexer.advance(validatingCurrent: Lexer.isLetter)
+        lexer.advance(while: Lexer.isAlphanumeric)
+        lexer.skipWhitespace()
+
+        if !lexer.isEof() {
+            return false
+        }
+
+        return true
+    } catch {
+        return false
+    }
 }
 
 public class IntentionCollectionBuilder {
@@ -23,7 +41,15 @@ public class IntentionCollectionBuilder {
     @discardableResult
     public func createFileWithClass(
         named name: String,
-        initializer: (TypeBuilder<ClassGenerationIntention>) -> Void = emptyInit) -> IntentionCollectionBuilder {
+        file: StaticString = #file,
+        line: UInt = #line,
+        initializer: (TypeBuilder<ClassGenerationIntention>) -> Void = emptyInit
+    ) -> IntentionCollectionBuilder {
+
+        // Sanitize type name and issue a warning for invalid type names
+        if !_isValidTypeIdentifier(name) {
+            print(#"\#(file):\#(line): warning: ("\#(name)") is not a valid Swift class name identifier!"#)
+        }
         
         createFile(named: "\(name).swift") { builder in
             builder.createClass(withName: name, initializer: initializer)

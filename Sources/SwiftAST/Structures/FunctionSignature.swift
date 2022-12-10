@@ -25,12 +25,12 @@ public struct FunctionSignature: Hashable {
         _asIdentifier
     }
     
-    /// The cannonical selector signature for this function signature.
+    /// The canonical selector signature for this function signature.
     public var asSelector: SelectorSignature {
         _asSelector
     }
     
-    // TODO: Support suplying type attributes for function signatures
+    // TODO: Support supplying type attributes for function signatures
     /// Returns a `SwiftType.block`-equivalent type for this function signature
     public var swiftClosureType: SwiftType {
         .swiftBlock(returnType: returnType,
@@ -72,7 +72,7 @@ public struct FunctionSignature: Hashable {
     }
     
     /// Returns a set of possible selector signature variations for this function
-    /// signature when permutating over default argument type variations.
+    /// signature when permuting over default argument type variations.
     ///
     /// e.g.: Given the following signature:
     ///
@@ -80,7 +80,7 @@ public struct FunctionSignature: Hashable {
     /// foo(bar: Int, baz: Int = default, _ zaz: Int = default)
     /// ```
     ///
-    /// permutated selector signature set returned by this method would be:
+    /// permuted selector signature set returned by this method would be:
     ///
     /// ```
     /// foo:bar:
@@ -144,7 +144,7 @@ public struct FunctionSignature: Hashable {
     }
     
     /// Returns a set of possible function identifier signature variations for
-    /// this function signature when permutating over default argument type variations.
+    /// this function signature when permuting over default argument type variations.
     ///
     /// e.g.: Given the following signature:
     ///
@@ -152,7 +152,7 @@ public struct FunctionSignature: Hashable {
     /// foo(bar: Int, baz: Int = default, _ zaz: Int = default)
     /// ```
     ///
-    /// permutated identifier signature set returned by this method would be:
+    /// permuted identifier signature set returned by this method would be:
     ///
     /// ```
     /// foo(bar:)

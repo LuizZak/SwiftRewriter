@@ -77,7 +77,7 @@ extension KnownTypeBuilder {
         }
         for ctor in type.knownConstructors {
             let intent = InitGenerationIntention(parameters: ctor.parameters)
-            intent.isFailable = ctor.isFailable
+            intent.isFallible = ctor.isFallible
             intent.isConvenience = ctor.isConvenience
         }
         

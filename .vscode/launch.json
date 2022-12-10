@@ -7,7 +7,7 @@
             "program": "${workspaceFolder:SwiftRewriter}/.build/debug/SwiftRewriter",
             "args": [],
             "cwd": "${workspaceFolder:SwiftRewriter}",
-            "preLaunchTask": "swift: Build Debug SwiftRewriter"
+            "preLaunchTask": "swift: Build Debug SwiftRewriter",
         },
         {
             "type": "lldb",
@@ -16,7 +16,15 @@
             "program": "${workspaceFolder:SwiftRewriter}/.build/release/SwiftRewriter",
             "args": [],
             "cwd": "${workspaceFolder:SwiftRewriter}",
-            "preLaunchTask": "swift: Build Release SwiftRewriter"
-        }
+            "preLaunchTask": "swift: Build Release SwiftRewriter",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Test SwiftRewriter",
+            "program": "${workspaceFolder:SwiftRewriter}/.build/debug/SwiftRewriterPackageTests.xctest",
+            "cwd": "${workspaceFolder:SwiftRewriter}",
+            "preLaunchTask": "swift: Build Debug SwiftRewriter",
+        },
     ]
 }

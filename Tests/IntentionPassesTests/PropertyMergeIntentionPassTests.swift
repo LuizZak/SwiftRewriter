@@ -11,19 +11,14 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 .createFileWithClass(named: "A") { builder in
                     builder.ext_makePropertyWithGetterSetter(named: "a")
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case .property:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertIsEmpty()
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assertIsPropertyMode()
         }
     }
     
@@ -41,19 +36,14 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                         .createMethod(named: "a", returnType: .typeName("AliasedInt"))
                         .createMethod(named: "setA", parameters: [ParameterSignature(label: nil, name: "a", type: .typeName("OtherAliasedInt"))])
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case .property:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertIsEmpty()
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assertIsPropertyMode()
         }
     }
     
@@ -67,19 +57,14 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                         .createMethod(named: "a", returnType: .string)
                         .createMethod(named: "setA", returnType: .cgFloat)
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-        
-        XCTAssertEqual(cls.methods.count, 2)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case .asField:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(2)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assertIsStoredFieldMode()
         }
     }
     
@@ -92,22 +77,21 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 .createFileWithClass(named: "A") { builder in
                     builder.ext_makePropertyWithSetter(named: "a", type: .int)
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables[0].name, "_a")
-        XCTAssertEqual(cls.instanceVariables[0].type, .int)
-        switch cls.properties[0].mode {
-        case let .property(getter, _):
-            XCTAssertEqual(getter.body, [.return(.identifier("_a"))])
-            
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.instanceVariables].assertCount(1)
+            type[\.instanceVariables][0]?.assert(name: "_a")
+            type[\.instanceVariables][0]?.assert(type: .int)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(getterBody: [
+                    .return(.identifier("_a"))
+                ])
         }
     }
     
@@ -130,6 +114,12 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             break
         default:
             XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        }
+
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assertIsComputedMode()
         }
     }
     
@@ -158,27 +148,24 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                                 ])
                         }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case let .property(getter, setter):
-            XCTAssertEqual(getter.body, [.return(.identifier("innerA"))])
-            XCTAssertEqual(setter.body.body, [
-                .expression(
-                    Expression
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(getterBody: [
+                    .return(.identifier("innerA"))
+                ])?
+                .assert(setterBody: [
+                    .expression(
                         .identifier("innerA")
-                        .assignment(op: .assign, rhs: .identifier("a")))
+                        .assignment(op: .assign, rhs: .identifier("a"))
+                    )
                 ])
-            
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
         }
     }
     
@@ -192,19 +179,14 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                                 .ext_makeReadonlyPropertyWithGetter(named: "a")
                         }
                 }.build()
-        let cls = intentions.extensionIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case .computed:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        Asserter(object: intentions).asserter(forClassExtensionNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assertIsComputedMode()
         }
     }
     
@@ -216,22 +198,22 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 .createFileWithClass(named: "A") { (builder) in
                     builder.ext_makePropertyWithGetterSetter(named: "a")
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(
-            cls.history.summary,
-            """
-            [PropertyMergeIntentionPass:1] Removed method A.a() -> Int since deduced it is a getter for property A.a: Int
-            [PropertyMergeIntentionPass:1] Removed method A.setA(_ a: Int) since deduced it is a setter for property A.a: Int
-            """
-        )
-        XCTAssertEqual(
-            cls.properties[0].history.summary,
-            "[PropertyMergeIntentionPass:1] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
-        )
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                """
+                [PropertyMergeIntentionPass:1] Removed method A.a() -> Int since deduced it is a getter for property A.a: Int
+                [PropertyMergeIntentionPass:1] Removed method A.setA(_ a: Int) since deduced it is a setter for property A.a: Int
+                """
+            )
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assert(historySummary:
+                "[PropertyMergeIntentionPass:1] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
+            )
+        }
     }
     
     func testSynthesizeBackingFieldWhenUsageOfBackingFieldIsDetected() {
@@ -246,40 +228,41 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             ])
                         }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables[0].name, "_a")
-        XCTAssertEqual(cls.properties.count, 1)
-        
-        switch cls.properties[0].mode {
-        case let .property(get, set):
-            XCTAssertEqual(get.body, [.return(Expression.identifier("self").dot("_a"))])
-            XCTAssertEqual(set.valueIdentifier, "newValue")
-            XCTAssertEqual(set.body.body, [.expression(.assignment(lhs: Expression.identifier("self").dot("_a"),
-                                                                   op: .assign,
-                                                                   rhs: .identifier("newValue")))])
-        default:
-            XCTFail("Expected to synthesize getter/setter with backing field.")
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                """
+                [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                that the backing field of A.a: Int (_a) was being used in A.b().
+                """
+            )
+            type[\.methods].assertCount(1)
+            type[\.instanceVariables].assertCount(1)
+            type[\.instanceVariables][0]?.assert(name: "_a")
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assert(getterBody: [
+                    .return(.identifier("self").dot("_a"))
+                ])?
+                .assert(setterValueIdentifier: "newValue")?
+                .assert(setterBody: [
+                    .expression(
+                        .identifier("self").dot("_a").assignment(
+                            op: .assign,
+                            rhs: .identifier("newValue")
+                        )
+                    )
+                ])?
+                .assert(historySummary:
+                    """
+                    [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                    that the backing field of A.a: Int (_a) was being used in A.b().
+                    """
+                )
         }
-        
-        XCTAssertEqual(
-            cls.history.summary,
-            """
-            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int (_a) was being used in A.b().
-            """
-        )
-        XCTAssertEqual(
-            cls.properties[0].history.summary,
-            """
-            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int (_a) was being used in A.b().
-            """
-        )
     }
     
     func testSynthesizeBackingFieldWhenUsageOfBackingFieldIsDetectedInDeinit() {
@@ -294,40 +277,40 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             ])
                         }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables[0].name, "_a")
-        XCTAssertEqual(cls.properties.count, 1)
-        
-        switch cls.properties[0].mode {
-        case let .property(get, set):
-            XCTAssertEqual(get.body, [.return(Expression.identifier("self").dot("_a"))])
-            XCTAssertEqual(set.valueIdentifier, "newValue")
-            XCTAssertEqual(set.body.body, [.expression(.assignment(lhs: Expression.identifier("self").dot("_a"),
-                                                                   op: .assign,
-                                                                   rhs: .identifier("newValue")))])
-        default:
-            XCTFail("Expected to synthesize getter/setter with backing field.")
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                """
+                [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                that the backing field of A.a: Int (_a) was being used in A.deinit.
+                """
+            )
+            type[\.instanceVariables].assertCount(1)
+            type[\.instanceVariables][0]?.assert(name: "_a")
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assert(getterBody: [
+                    .return(.identifier("self").dot("_a"))
+                ])?
+                .assert(setterValueIdentifier: "newValue")?
+                .assert(setterBody: [
+                    .expression(
+                        .identifier("self").dot("_a").assignment(
+                            op: .assign,
+                            rhs: .identifier("newValue")
+                        )
+                    )
+                ])?
+                .assert(historySummary:
+                    """
+                    [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                    that the backing field of A.a: Int (_a) was being used in A.deinit.
+                    """
+                )
         }
-        
-        XCTAssertEqual(
-            cls.history.summary,
-            """
-            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int (_a) was being used in A.deinit.
-            """
-        )
-        XCTAssertEqual(
-            cls.properties[0].history.summary,
-            """
-            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int (_a) was being used in A.deinit.
-            """
-        )
     }
     
     /// If a property is marked as `readonly` in Objective-C, don't synthesize
@@ -349,36 +332,32 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                                 ])
                     }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables.first?.name, "_a")
-        XCTAssertEqual(cls.properties.count, 1)
-        
-        switch cls.properties.first?.mode {
-        case .computed(let get)?:
-            XCTAssertEqual(get.body, [.return(.postfix(.identifier("self"), .member("_a")))])
-        default:
-            XCTFail("Expected to synthesize getter/setter with backing field.")
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                """
+                [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                that the backing field of A.a: Int (_a) was being used in A.b().
+                """
+            )
+            type[\.instanceVariables].assertCount(1)
+            type[\.instanceVariables][0]?.assert(name: "_a")
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsComputedMode()?
+                .assert(getterBody: [
+                    .return(.identifier("self").dot("_a"))
+                ])?
+                .assert(historySummary:
+                    """
+                    [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                    that the backing field of A.a: Int (_a) was being used in A.b().
+                    """
+                )
         }
-        
-        XCTAssertEqual(
-            cls.history.summary,
-            """
-            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int (_a) was being used in A.b().
-            """
-        )
-        XCTAssertEqual(
-            cls.properties[0].history.summary,
-            """
-            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int (_a) was being used in A.b().
-            """
-        )
     }
     
     /// Test that backing field usage detection can detect indirect references to
@@ -407,20 +386,31 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                                 ])
                         }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables.first?.name, "_a")
-        XCTAssertEqual(cls.properties.count, 1)
-        
-        switch cls.properties.first?.mode {
-        case .computed(let get)?:
-            XCTAssertEqual(get.body, [.return(.postfix(.identifier("self"), .member("_a")))])
-        default:
-            XCTFail("Expected to synthesize getter/setter with backing field.")
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                """
+                [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                that the backing field of A.a: Int (_a) was being used in A.b().
+                """
+            )
+            type[\.instanceVariables].assertCount(1)
+            type[\.instanceVariables][0]?.assert(name: "_a")
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsComputedMode()?
+                .assert(getterBody: [
+                    .return(.identifier("self").dot("_a"))
+                ])?
+                .assert(historySummary:
+                    """
+                    [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                    that the backing field of A.a: Int (_a) was being used in A.b().
+                    """
+                )
         }
     }
     
@@ -440,24 +430,39 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             }
                         }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables[0].name, "_a")
-        XCTAssertEqual(cls.properties.count, 1)
-        
-        switch cls.properties[0].mode {
-        case let .property(get, set):
-            XCTAssertEqual(get.body, [.return(.postfix(.identifier("self"), .member("_a")))])
-            XCTAssertEqual(set.valueIdentifier, "newValue")
-            XCTAssertEqual(set.body.body, [.expression(.assignment(lhs: .postfix(.identifier("self"), .member("_a")),
-                                                                   op: .assign,
-                                                                   rhs: .identifier("newValue")))])
-        default:
-            XCTFail("Expected to synthesize getter/setter with backing field.")
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                """
+                [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                that the backing field of A.a: Int (_a) was being used in A.method().
+                """
+            )
+            type[\.instanceVariables].assertCount(1)
+            type[\.instanceVariables][0]?.assert(name: "_a")
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(getterBody: [
+                    .return(.identifier("self").dot("_a"))
+                ])?
+                .assert(setterBody: [
+                    .expression(
+                        .postfix(.identifier("self"), .member("_a")).assignment(
+                            op: .assign,
+                            rhs: .identifier("newValue")
+                        )
+                    )
+                ])?
+                .assert(historySummary:
+                    """
+                    [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                    that the backing field of A.a: Int (_a) was being used in A.method().
+                    """
+                )
         }
     }
     
@@ -478,26 +483,22 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             ])
                     }
                 }.build()
-        let cls = intentions.classIntentions()[0]
+        
         let sut = PropertyMergeIntentionPass()
         let context = makeContext(intentions: intentions)
         context.typeResolverInvoker.resolveAllExpressionTypes(in: intentions, force: true)
         
         sut.apply(on: intentions, context: context)
         
-        XCTAssertEqual(cls.instanceVariables.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        
-        switch cls.properties[0].mode {
-        case .asField:
-            // All good
-            break
-        default:
-            XCTFail("Expected to not synthesize getter/setter with backing field.")
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assertIsHistoryEmpty()
+
+            type[\.instanceVariables].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsStoredFieldMode()?
+                .assertIsHistoryEmpty()
         }
-        
-        XCTAssertEqual(cls.history.summary, "<empty>")
-        XCTAssertEqual(cls.properties[0].history.summary, "<empty>")
     }
     
     /// Test that we don't perform type merging when properties and methods don't
@@ -519,27 +520,22 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             ParameterSignature(label: nil, name: "a", type: .int)
                         ], isStatic: true)
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.methods.count, 4)
-        XCTAssertEqual(cls.properties.count, 2)
-        switch cls.properties[0].mode {
-        case .asField:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
-        }
-        
-        switch cls.properties[1].mode {
-        case .asField:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assertIsHistoryEmpty()
+
+            type[\.methods].assertCount(4)
+            type[\.instanceVariables].assertCount(0)
+            type[\.properties].assertCount(2)
+            type[\.properties][0]?
+                .assertIsStoredFieldMode()?
+                .assertIsHistoryEmpty()
+            type[\.properties][1]?
+                .assertIsStoredFieldMode()?
+                .assertIsHistoryEmpty()
         }
     }
     
@@ -556,19 +552,21 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                                 ])
                         }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case .property:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assertIsHistoryEmpty()
+
+            type[\.methods].assertCount(0)
+            type[\.instanceVariables].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(historySummary:
+                    "[PropertyMergeIntentionPass:1] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
+                )
         }
     }
     
@@ -587,19 +585,21 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             ])
                     }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case .property:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assertIsHistoryEmpty()
+
+            type[\.methods].assertCount(0)
+            type[\.instanceVariables].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(historySummary:
+                    "[PropertyMergeIntentionPass:1] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
+                )
         }
     }
     
@@ -633,23 +633,32 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             }
                         }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-        
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case let .property(getter, setter):
-            
-            XCTAssertEqual(getter.body, [.expression(.identifier("test"))])
-            XCTAssertEqual(setter.body.body, [.expression(.identifier("test"))])
-            
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                """
+                [PropertyMergeIntentionPass:1] Removed method A.a() -> Int since deduced it is a getter for property A.a: Int
+                [PropertyMergeIntentionPass:1] Removed method A.setA(_ a: Int) since deduced it is a setter for property A.a: Int
+                """
+            )
+
+            type[\.methods].assertCount(0)
+            type[\.instanceVariables].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(getterBody: [
+                    .expression(.identifier("test"))
+                ])?
+                .assert(setterBody: [
+                    .expression(.identifier("test"))
+                ])?
+                .assert(historySummary:
+                    "[PropertyMergeIntentionPass:1] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
+                )
         }
     }
     
@@ -674,35 +683,37 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             }.createSynthesize(propertyName: "a", variableName: "backing")
                     }
                 }.build()
-        let type = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(type.instanceVariables.count, 1) // Shouldn't synthesize backing field since we already provide a backing field to use
-        let property = type.properties[0]
-        switch property.mode {
-        case let .property(get, set):
-            XCTAssertEqual(
-                get.body, [
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                "[PropertyMergeIntentionPass:1] Merged found setter method A.setA(_ a: Int) into property A.a: Int and creating a getter body returning existing backing field backing"
+            )
+
+            type[\.methods].assertCount(0)
+            type[\.instanceVariables].assertCount(1) // Shouldn't synthesize backing field since we already provide a backing field to use
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(getterBody: [
                     // return backing
-                    .return(Expression.identifier("backing"))
-                ])
-            
-            XCTAssertEqual(
-                set.body.body, [
+                    .return(.identifier("backing"))
+                ])?
+                .assert(setterBody: [
                     // self.backing = a
                     .expression(
-                        Expression
-                            .identifier("self").dot("backing")
-                            .assignment(op: .assign, rhs: .identifier("a"))
+                        .identifier("self").dot("backing")
+                            .assignment(
+                                op: .assign,
+                                rhs: .identifier("a")
+                            )
                     )
-                ])
-            
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(property.mode)")
+                ])?
+                .assert(historySummary:
+                    "[PropertyMergeIntentionPass:1] Merged found setter method A.setA(_ a: Int) into property A.a: Int and creating a getter body returning existing backing field backing"
+                )
         }
     }
     
@@ -721,13 +732,36 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             ])
                     }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables.first?.name, "b")
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                "[PropertyMergeIntentionPass:1] Created field A.b: Int as it was detected that the backing field of A.a: Int (b) was being used in A.method()."
+            )
+
+            type[\.methods].assertCount(1)
+            type[\.instanceVariables].assertCount(1)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(getterBody: [
+                    .return(.identifier("self").dot("b"))
+                ])?
+                .assert(setterBody: [
+                    .expression(
+                        .identifier("self").dot("b")
+                            .assignment(
+                                op: .assign,
+                                rhs: .identifier("newValue")
+                            )
+                    )
+                ])?
+                .assert(historySummary:
+                    "[PropertyMergeIntentionPass:1] Created field A.b: Int as it was detected that the backing field of A.a: Int (b) was being used in A.method()."
+                )
+        }
     }
     
     /// Tests that when examining method bodies for backing field usages we take
@@ -752,6 +786,13 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
         XCTAssertEqual(cls.instanceVariables.count, 0)
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assertIsHistoryEmpty()
+
+            type[\.methods].assertCount(1)
+            type[\.instanceVariables].assertCount(0)
+        }
     }
     
     /// Tests that when examining method bodies for backing field usages we take
@@ -765,29 +806,33 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 .createFile(named: "A.h") { file in
                     file.createExtension(forClassNamed: "A") { type in
                         type.createMethod(named: "setA", parameters: [ParameterSignature(label: nil, name: "a", type: .int)]) { method in
-                                    method.setBody([
-                                        .expression(Expression
-                                            .identifier("self")
-                                            .dot("b")
-                                            .assignment(op: .assign, rhs: .identifier("a"))
-                                        )
-                                    ])
-                                }
-                            }.createClass(withName: "A") { type in
-                                type.createProperty(named: "a", type: .int)
-                                    .createSynthesize(propertyName: "a", variableName: "b")
-                            }
+                            method.setBody([
+                                .expression(Expression
+                                    .identifier("self")
+                                    .dot("b")
+                                    .assignment(op: .assign, rhs: .identifier("a"))
+                                )
+                            ])
+                        }
+                    }.createClass(withName: "A") { type in
+                        type.createProperty(named: "a", type: .int)
+                            .createSynthesize(propertyName: "a", variableName: "b")
+                    }
                 }.build()
-        let cls = intentions.classIntentions()[0]
-        let ext = intentions.extensionIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(ext.instanceVariables.count, 0)
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables.first?.name, "b")
-        XCTAssertEqual(cls.instanceVariables.first?.type, .int)
+        Asserter(object: intentions)
+            .asserter(forClassExtensionNamed: "A") { type in
+                type[\.instanceVariables].assertCount(0)
+            }?
+            .asserter(forClassNamed: "A") { type in
+                type[\.instanceVariables].assertCount(1)
+                type[\.instanceVariables][0]?
+                    .assert(name: "b")?
+                    .assert(type: .int)
+            }
     }
     
     /// Tests that when looking for explicit usages of backing fields for properties
@@ -805,20 +850,15 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             ])
                     }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.instanceVariables.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        XCTAssertEqual(cls.properties.first?.setterAccessLevel, .private)
-        switch cls.properties.first?.mode {
-        case .asField?:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties.first?.mode as Any)")
+        Asserter(object: intentions) .asserter(forClassNamed: "A") { type in
+            type[\.instanceVariables].assertCount(0)
+            type[\.properties][0]?
+                .assert(setterAccessLevel: .private)?
+                .assertIsStoredFieldMode()
         }
     }
     
@@ -837,20 +877,15 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             ])
                     }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.instanceVariables.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        XCTAssertNil(cls.properties.first?.setterAccessLevel)
-        switch cls.properties.first?.mode {
-        case .asField?:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties.first?.mode as Any)")
+        Asserter(object: intentions) .asserter(forClassNamed: "A") { type in
+            type[\.instanceVariables].assertCount(0)
+            type[\.properties][0]?
+                .assert(setterAccessLevel: nil)?
+                .assertIsStoredFieldMode()
         }
     }
     
@@ -878,21 +913,28 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let cls = intentions.classIntentions()[0]
-        XCTAssertEqual(intentions.extensionIntentions()[0].properties.count, 0)
-        XCTAssertEqual(intentions.classIntentions()[0].properties.count, 1)
-        switch cls.properties.first?.mode {
-        case let .property(getter, setter)?:
-            
-            XCTAssertEqual(getter.body, [.return(Expression.identifier("self").dot("b"))])
-            XCTAssertEqual(setter.valueIdentifier, "a")
-            XCTAssertEqual(setter.body.body, [.expression(Expression.identifier("self").dot("b").assignment(op: .assign, rhs: .identifier("a")))])
-            
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties.first?.mode as Any)")
-        }
+        Asserter(object: intentions)
+            .asserter(forClassExtensionNamed: "A") { type in
+                type[\.properties].assertCount(0)
+            }?
+            .asserter(forClassNamed: "A") { type in
+                type[\.instanceVariables].assertCount(0)
+                type[\.properties][0]?
+                    .assertIsPropertyMode()?
+                    .assert(setterValueIdentifier: "a")?
+                    .assert(getterBody: [
+                        .return(.identifier("self").dot("b"))
+                    ])?
+                    .assert(setterBody: [
+                        .expression(
+                            .identifier("self").dot("b")
+                                .assignment(
+                                    op: .assign,
+                                    rhs: .identifier("a")
+                                )
+                        )
+                    ])
+            }
     }
     
     /// Tests that property merging ignores nullability across accessor types
@@ -918,21 +960,28 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let cls = intentions.classIntentions()[0]
-        XCTAssertEqual(intentions.extensionIntentions()[0].properties.count, 0)
-        XCTAssertEqual(intentions.classIntentions()[0].properties.count, 1)
-        switch cls.properties.first?.mode {
-        case let .property(getter, setter)?:
-            
-            XCTAssertEqual(getter.body, [.return(Expression.identifier("self").dot("b"))])
-            XCTAssertEqual(setter.valueIdentifier, "a")
-            XCTAssertEqual(setter.body.body, [.expression(Expression.identifier("self").dot("b").assignment(op: .assign, rhs: .identifier("a")))])
-            
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties.first?.mode as Any)")
-        }
+        Asserter(object: intentions)
+            .asserter(forClassExtensionNamed: "A") { type in
+                type[\.properties].assertCount(0)
+            }?
+            .asserter(forClassNamed: "A") { type in
+                type[\.instanceVariables].assertCount(0)
+                type[\.properties][0]?
+                    .assertIsPropertyMode()?
+                    .assert(setterValueIdentifier: "a")?
+                    .assert(getterBody: [
+                        .return(.identifier("self").dot("b"))
+                    ])?
+                    .assert(setterBody: [
+                        .expression(
+                            .identifier("self").dot("b")
+                                .assignment(
+                                    op: .assign,
+                                    rhs: .identifier("a")
+                                )
+                        )
+                    ])
+            }
     }
     
     func testMergePropertyFromExtension() {
@@ -952,11 +1001,13 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let file = intentions.intentionFor(fileNamed: "A.m")!
-        let type = file.extensionIntentions[0]
-        XCTAssertEqual(type.methods.count, 0)
-        XCTAssertEqual(type.properties.count, 1)
-        XCTAssertEqual(type.properties[0].getter?.body, [.return(.constant(0))])
+        Asserter(object: intentions).asserter(forClassExtensionNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assert(getterBody: [
+                .return(.constant(0))
+            ])
+        }
     }
     
     func testMergeKeepsComments() {
@@ -971,15 +1022,18 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             m.addComment("// Getter comment")
                         }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.properties[0].precedingComments, [
-            "// Property comment",
-            "// Getter comment"
-        ])
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assert(precedingComments: [
+                "// Property comment",
+                "// Getter comment",
+            ])
+        }
     }
     
     func testMergeKeepsCommentsGetterAndSetter() {
@@ -997,16 +1051,19 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             m.addComment("// Setter comment")
                         }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.properties[0].precedingComments, [
-            "// Property comment",
-            "// Getter comment",
-            "// Setter comment"
-        ])
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assert(precedingComments: [
+                "// Property comment",
+                "// Getter comment",
+                "// Setter comment",
+            ])
+        }
     }
     
     func testMergeKeepsCommentsSetterOnly() {
@@ -1021,15 +1078,18 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             m.addComment("// Setter comment")
                         }
                 }.build()
-        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.properties[0].precedingComments, [
-            "// Property comment",
-            "// Setter comment"
-        ])
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assert(precedingComments: [
+                "// Property comment",
+                "// Setter comment",
+            ])
+        }
     }
 }
 
@@ -1038,25 +1098,37 @@ class PropertyMergeIntentionPassTests: XCTestCase {
 private extension TypeBuilder {
     @discardableResult
     func ext_makeReadonlyPropertyWithGetter(named name: String, type: SwiftType = .int) -> TypeBuilder<T> {
-        return
-            self.createProperty(named: name, type: .int, objcAttributes: [.attribute("readonly")])
-                .createMethod(named: name, returnType: .int)
+        return self
+            .createProperty(
+                named: name,
+                type: .int,
+                objcAttributes: [.attribute("readonly")]
+            )
+            .createMethod(named: name, returnType: .int)
     }
     
     @discardableResult
     func ext_makePropertyWithGetterSetter(named name: String, type: SwiftType = .int) -> TypeBuilder<T> {
-        return
-            self.createProperty(named: name, type: type)
-                .createMethod(named: "set\(name.uppercasedFirstLetter)",
-                              parameters: [ParameterSignature(label: nil, name: name, type: type)])
-                .createMethod(named: name, returnType: type)
+        return self
+            .createProperty(named: name, type: type)
+            .createMethod(
+                named: "set\(name.uppercasedFirstLetter)",
+                parameters: [
+                    .init(label: nil, name: name, type: type)
+                ]
+            )
+            .createMethod(named: name, returnType: type)
     }
     
     @discardableResult
     func ext_makePropertyWithSetter(named name: String, type: SwiftType = .int) -> TypeBuilder<T> {
-        return
-            self.createProperty(named: name, type: type)
-                .createMethod(named: "set\(name.uppercasedFirstLetter)",
-                    parameters: [ParameterSignature(label: nil, name: name, type: type)])
+        return self
+            .createProperty(named: name, type: type)
+            .createMethod(
+                named: "set\(name.uppercasedFirstLetter)",
+                parameters: [
+                    .init(label: nil, name: name, type: type)
+                ]
+            )
     }
 }

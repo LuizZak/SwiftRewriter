@@ -283,9 +283,9 @@ class TypeFormatter_ExtTests: XCTestCase {
         XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
     }
     
-    func testAsStringFailableInitializer() {
+    func testAsStringFallibleInitializer() {
         let initializer = InitGenerationIntention(parameters: [])
-        initializer.isFailable = true
+        initializer.isFallible = true
         
         let result = TypeFormatter.asString(initializer: initializer)
         let expected = """
