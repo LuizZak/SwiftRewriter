@@ -244,6 +244,7 @@
 			"swiftrewriter",
 			"swiftwriter",
 			"synthesization",
+			"synthesizations",
 			"Trivias",
 			"typealiases",
 			"uniquing",

@@ -4,6 +4,7 @@ import GrammarModelBase
 import ObjcGrammarModels
 import ObjcParser
 import ObjcParserAntlr
+import TestCommons
 import Utils
 
 @testable import ObjcParser

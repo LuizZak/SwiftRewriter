@@ -287,9 +287,10 @@ let package = Package(
         .target(
             name: "TestCommons",
             dependencies: [
-                "SwiftAST", "SwiftSyntaxSupport", "SwiftRewriterLib", "Intentions",
+                .product(name: "Antlr4", package: "antlr4-swift"), "SwiftAST",
+                "SwiftSyntaxSupport", "SwiftRewriterLib", "Intentions",
                 "KnownType", "ObjcGrammarModels", "Utils", "TypeSystem",
-                "ObjectiveCFrontend",
+                "ObjectiveCFrontend", "MiniLexer",
             ],
             path: "Sources/TestCommons"
         ),
@@ -323,6 +324,7 @@ let package = Package(
             dependencies: [
                 "ObjcGrammarModels",
                 "ObjcParser",
+                "TestCommons",
             ],
             path: "Tests/Frontend/Objective-C/ObjcParserTests"
         ),

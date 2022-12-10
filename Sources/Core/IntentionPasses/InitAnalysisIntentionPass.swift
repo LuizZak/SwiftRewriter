@@ -78,7 +78,7 @@ public class InitAnalysisIntentionPass: IntentionPass {
         }
         
         // Check if we're not in one of the following patterns, which indicate
-        // an early exit that is not neccessarily from a fallible initializer
+        // an early exit that is not necessarily from a fallible initializer
         
         // 1.:
         // if(self == nil) {

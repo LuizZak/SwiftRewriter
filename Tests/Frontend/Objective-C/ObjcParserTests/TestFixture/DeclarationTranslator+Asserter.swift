@@ -1,4 +1,5 @@
 import XCTest
+import TestCommons
 import Antlr4
 import ObjcParserAntlr
 import GrammarModelBase
@@ -7,7 +8,7 @@ import ObjcParser
 
 // MARK: - Test Internals
 
-extension Asserter where Object == [DeclarationTranslator.ASTNodeDeclaration] {
+public extension Asserter where Object == [DeclarationTranslator.ASTNodeDeclaration] {
     /// Asserts that there are no translated declarations available.
     @discardableResult
     func assertNoDeclarations(file: StaticString = #file, line: UInt = #line) -> Self? {
@@ -187,7 +188,7 @@ extension Asserter where Object == [DeclarationTranslator.ASTNodeDeclaration] {
     }
 }
 
-extension Asserter where Object == DeclarationTranslator.ASTNodeDeclaration {
+public extension Asserter where Object == DeclarationTranslator.ASTNodeDeclaration {
     @discardableResult
     func assertHasInitializer(
         file: StaticString = #file,
@@ -377,7 +378,7 @@ extension Asserter where Object == DeclarationTranslator.ASTNodeDeclaration {
     }
 }
 
-extension Asserter where Object == DeclarationTranslator.ASTVariableDeclaration {
+public extension Asserter where Object == DeclarationTranslator.ASTVariableDeclaration {
     @discardableResult
     func assertHasInitializer(
         file: StaticString = #file,
@@ -520,7 +521,7 @@ extension Asserter where Object == DeclarationTranslator.ASTVariableDeclaration 
     }
 }
 
-extension Asserter where Object == DeclarationTranslator.ASTBlockDeclaration {
+public extension Asserter where Object == DeclarationTranslator.ASTBlockDeclaration {
     @discardableResult
     func assertHasInitializer(
         file: StaticString = #file,
@@ -667,7 +668,7 @@ extension Asserter where Object == DeclarationTranslator.ASTBlockDeclaration {
     }
 }
 
-extension Asserter where Object == DeclarationTranslator.ASTFunctionPointerDeclaration {
+public extension Asserter where Object == DeclarationTranslator.ASTFunctionPointerDeclaration {
     @discardableResult
     func assertHasInitializer(
         file: StaticString = #file,
@@ -763,7 +764,7 @@ extension Asserter where Object == DeclarationTranslator.ASTFunctionPointerDecla
     }
 }
 
-extension Asserter where Object == DeclarationTranslator.ASTTypedefDeclaration {
+public extension Asserter where Object == DeclarationTranslator.ASTTypedefDeclaration {
     @discardableResult
     func assert(
         name: String,
@@ -809,7 +810,7 @@ extension Asserter where Object == DeclarationTranslator.ASTTypedefDeclaration {
     }
 }
 
-extension Asserter where Object == DeclarationTranslator.ASTFunctionDefinition {
+public extension Asserter where Object == DeclarationTranslator.ASTFunctionDefinition {
     @discardableResult
     func assertReturnType(
         _ type: ObjcType,
@@ -918,7 +919,7 @@ extension Asserter where Object == DeclarationTranslator.ASTFunctionDefinition {
     }
 }
 
-extension Asserter where Object == DeclarationTranslator.ASTStructOrUnionDeclaration {
+public extension Asserter where Object == DeclarationTranslator.ASTStructOrUnionDeclaration {
     @discardableResult
     func assertFieldCount(
         _ count: Int,
@@ -975,7 +976,7 @@ extension Asserter where Object == DeclarationTranslator.ASTStructOrUnionDeclara
     }
 }
 
-extension Asserter where Object == DeclarationTranslator.ASTEnumDeclaration {
+public extension Asserter where Object == DeclarationTranslator.ASTEnumDeclaration {
     @discardableResult
     func assertEnumeratorCount(
         _ count: Int,
@@ -1054,7 +1055,7 @@ extension Asserter where Object == DeclarationTranslator.ASTEnumDeclaration {
     }
 }
 
-extension Asserter {
+public extension Asserter {
     /// Asserts that the underlying `DeclarationTranslator.SyntaxStorageMode<T>`
     /// object being tested has a textual value from the underlying source code
     /// that matches a given string.

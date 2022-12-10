@@ -24,21 +24,13 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
 
     /// Returns the getter body for this subscript generation intention.
     public var getter: FunctionBodyIntention {
-        switch mode {
-        case .getter(let body),
-            .getterAndSetter(let body, _):
-            return body
-        }
+        mode.getter
     }
     
-    /// If this subscript features a setter, returns the settings for that setter.
-    public var setter: Setter? {
-        switch mode {
-        case .getterAndSetter(_, let setter):
-            return setter
-        default:
-            return nil
-        }
+    /// If this subscript features a setter, returns the settings for the setter,
+    /// including its body.
+    public var setter: SubscriptGenerationIntention.Setter? {
+        mode.setter
     }
     
     public init(
@@ -197,6 +189,26 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
             case let .getterAndSetter(getter, setter):
                 getter.parent = intention
                 setter.body.parent = intention
+            }
+        }
+
+        /// Returns `true` if this `Mode` value is a `.getter` case.
+        public var isGetterOnly: Bool {
+            switch self {
+            case .getter:
+                return true
+            case .getterAndSetter:
+                return false
+            }
+        }
+
+        /// Returns `true` if this `Mode` value is a `.getterAndSetter` case.
+        public var isGetterAndSetter: Bool {
+            switch self {
+            case .getterAndSetter:
+                return true
+            case .getter:
+                return false
             }
         }
         

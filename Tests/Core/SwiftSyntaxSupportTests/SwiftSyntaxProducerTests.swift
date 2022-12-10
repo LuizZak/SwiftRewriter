@@ -895,7 +895,7 @@ extension SwiftSyntaxProducerTests {
 
 // MARK: - Init writing
 extension SwiftSyntaxProducerTests {
-
+    
     func testWriteFallibleInit() {
         let initMethod = InitGenerationIntention(parameters: [])
         initMethod.isFallible = true

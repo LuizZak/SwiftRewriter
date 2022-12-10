@@ -16,8 +16,11 @@ class ImportDirectiveIntentionPassTests: XCTestCase {
         let sut = ImportDirectiveIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        let file = intentions.fileIntentions()[0]
-        XCTAssertEqual(file.importDirectives, ["UIKit", "Foundation", "Framework"])
+        
+        Asserter(object: intentions).asserter(forTargetPathFile: "file") { file in
+            file.assert(importDirectives: [
+                "UIKit", "Foundation", "Framework"
+            ])
+        }
     }
 }

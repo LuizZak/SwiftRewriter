@@ -166,7 +166,7 @@ public struct FunctionSignature: Hashable {
     /// foo(bar: Int, baz: Int = default, _ zaz: Int = default)
     /// ```
     ///
-    /// permuting selector signature set returned by this method would be:
+    /// permuted selector signature set returned by this method would be:
     ///
     /// ```
     /// foo:bar:
@@ -238,7 +238,7 @@ public struct FunctionSignature: Hashable {
     /// foo(bar: Int, baz: Int = default, _ zaz: Int = default)
     /// ```
     ///
-    /// permuting identifier signature set returned by this method would be:
+    /// permuted identifier signature set returned by this method would be:
     ///
     /// ```
     /// foo(bar:)

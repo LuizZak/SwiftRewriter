@@ -18,11 +18,10 @@ public struct KnownTypeBuilder {
     }
     
     public init(from existingType: KnownType, file: StaticString = #filePath, line: UInt = #line) {
-        var type =
-            BuildingKnownType(
-                typeName: existingType.typeName,
-                supertype: (existingType.supertype?.asTypeName).map(KnownTypeReference.typeName)
-            )
+        var type = BuildingKnownType(
+            typeName: existingType.typeName,
+            supertype: (existingType.supertype?.asTypeName).map(KnownTypeReference.typeName)
+        )
         
         type.semantics = existingType.semantics
         type.kind = existingType.kind
@@ -59,17 +58,16 @@ public struct KnownTypeBuilder {
             )
         }
         for prop in existingType.knownProperties {
-            self =
-                self.property(
-                    named: prop.name,
-                    storage: prop.storage,
-                    isStatic: prop.isStatic,
-                    optional: prop.optional,
-                    accessor: prop.accessor,
-                    attributes: prop.knownAttributes,
-                    isEnumCase: prop.isEnumCase,
-                    semantics: prop.semantics
-                )
+            self = self.property(
+                named: prop.name,
+                storage: prop.storage,
+                isStatic: prop.isStatic,
+                optional: prop.optional,
+                accessor: prop.accessor,
+                attributes: prop.knownAttributes,
+                isEnumCase: prop.isEnumCase,
+                semantics: prop.semantics
+            )
         }
         for prot in existingType.knownProtocolConformances {
             self = self.protocolConformance(protocolName: prot.protocolName)
@@ -105,11 +103,10 @@ public struct KnownTypeBuilder {
         line: Int = #line
     ) {
         
-        var type =
-            BuildingKnownType(
-                typeName: typeName,
-                supertype: supertype?.asKnownTypeReference
-            )
+        var type = BuildingKnownType(
+            typeName: typeName,
+            supertype: supertype?.asKnownTypeReference
+        )
         
         type.kind = kind
         type.origin = "Synthesized with \(KnownTypeBuilder.self) at \(file) line \(line)"
@@ -192,8 +189,10 @@ public struct KnownTypeBuilder {
         annotations: [String] = []
     ) -> KnownTypeBuilder {
         
-        assert(!type.knownConstructors.contains(where: \.parameters.isEmpty),
-               "An empty constructor is already provided")
+        assert(
+            !type.knownConstructors.contains(where: \.parameters.isEmpty),
+            "An empty constructor is already provided"
+        )
         
         return constructor(
             withParameters: [],
@@ -211,10 +210,9 @@ public struct KnownTypeBuilder {
         annotations: [String] = []
     ) -> KnownTypeBuilder {
         
-        let parameters =
-            shortParams.map { tuple in
-                ParameterSignature(name: tuple.label, type: tuple.type)
-            }
+        let parameters = shortParams.map { tuple in
+            ParameterSignature(name: tuple.label, type: tuple.type)
+        }
         
         return constructor(
             withParameters: parameters,
@@ -266,9 +264,8 @@ public struct KnownTypeBuilder {
         annotations: [String] = []
     ) -> KnownTypeBuilder {
         
-        let parameters =
-            shortParams.map { tuple in
-                ParameterSignature(name: tuple.label, type: tuple.type)
+        let parameters = shortParams.map { tuple in
+            ParameterSignature(name: tuple.label, type: tuple.type)
         }
         
         let signature = FunctionSignature(
@@ -349,14 +346,13 @@ public struct KnownTypeBuilder {
         
         let params = try! FunctionSignatureParser.parseParameters(from: signature)
         
-        let signature =
-            FunctionSignature(
-                name: name,
-                parameters: params,
-                returnType: returnType,
-                isStatic: isStatic,
-                isMutating: isMutating
-            )
+        let signature = FunctionSignature(
+            name: name,
+            parameters: params,
+            returnType: returnType,
+            isStatic: isStatic,
+            isMutating: isMutating
+        )
         
         return method(
             withSignature: signature,
@@ -422,21 +418,20 @@ public struct KnownTypeBuilder {
             return self
         }
         
-        let property =
-            BuildingKnownProperty(
-                ownerType: type.asKnownTypeReference,
-                name: name,
-                storage: storage,
-                attributes: propertyAttributes,
-                isStatic: isStatic,
-                optional: optional,
-                accessor: accessor,
-                knownAttributes: attributes,
-                isEnumCase: isEnumCase,
-                semantics: semantics,
-                annotations: annotations,
-                expression: expression
-            )
+        let property = BuildingKnownProperty(
+            ownerType: type.asKnownTypeReference,
+            name: name,
+            storage: storage,
+            attributes: propertyAttributes,
+            isStatic: isStatic,
+            optional: optional,
+            accessor: accessor,
+            knownAttributes: attributes,
+            isEnumCase: isEnumCase,
+            semantics: semantics,
+            annotations: annotations,
+            expression: expression
+        )
 
         new.type.properties.append(property)
         
@@ -485,21 +480,20 @@ public struct KnownTypeBuilder {
             return self
         }
         
-        let property =
-            BuildingKnownProperty(
-                ownerType: type.asKnownTypeReference,
-                name: name,
-                storage: storage,
-                attributes: [],
-                isStatic: isStatic,
-                optional: false,
-                accessor: .getterAndSetter,
-                knownAttributes: attributes,
-                isEnumCase: false,
-                semantics: semantics,
-                annotations: annotations,
-                expression: nil
-            )
+        let property = BuildingKnownProperty(
+            ownerType: type.asKnownTypeReference,
+            name: name,
+            storage: storage,
+            attributes: [],
+            isStatic: isStatic,
+            optional: false,
+            accessor: .getterAndSetter,
+            knownAttributes: attributes,
+            isEnumCase: false,
+            semantics: semantics,
+            annotations: annotations,
+            expression: nil
+        )
         
         new.type.fields.append(property)
         
@@ -543,12 +537,11 @@ public struct KnownTypeBuilder {
         
         var new = clone()
         
-        let signature =
-            SubscriptSignature(
-                parameters: parameters,
-                returnType: returnType,
-                isStatic: isStatic
-            )
+        let signature = SubscriptSignature(
+            parameters: parameters,
+            returnType: returnType,
+            isStatic: isStatic
+        )
         
         let sub = BuildingKnownSubscript(
             isStatic: isStatic,
@@ -592,13 +585,17 @@ public struct KnownTypeBuilder {
     }
     
     public func enumRawValue(type rawValueType: SwiftType) -> KnownTypeBuilder {
-        precondition(type.kind == .enum,
-                     "cannot add enum raw value to non-enum type kind \(type.kind)")
+        precondition(
+            type.kind == .enum,
+            "cannot add enum raw value to non-enum type kind \(type.kind)"
+        )
         
         var new = clone()
         
-        new.type.setKnownTrait(KnownTypeTraits.enumRawValue,
-                               value: .swiftType(rawValueType))
+        new.type.setKnownTrait(
+            KnownTypeTraits.enumRawValue,
+            value: .swiftType(rawValueType)
+        )
         
         return new
     }
@@ -609,33 +606,33 @@ public struct KnownTypeBuilder {
         semantics: Set<Semantic> = []
     ) -> KnownTypeBuilder {
         
-        precondition(type.kind == .enum,
-                     "cannot add enum case to non-enum type kind \(type.kind)")
+        precondition(
+            type.kind == .enum,
+            "cannot add enum case to non-enum type kind \(type.kind)"
+        )
         
         var new = clone()
         
-        let storage =
-            ValueStorage(
-                type: type.asSwiftType,
-                ownership: .strong,
-                isConstant: true
-            )
+        let storage = ValueStorage(
+            type: type.asSwiftType,
+            ownership: .strong,
+            isConstant: true
+        )
         
-        let cs =
-            BuildingKnownProperty(
-                ownerType: type.asKnownTypeReference,
-                name: name,
-                storage: storage,
-                attributes: [],
-                isStatic: true,
-                optional: false,
-                accessor: .getter,
-                knownAttributes: [],
-                isEnumCase: true,
-                semantics: semantics,
-                annotations: [],
-                expression: rawValue
-            )
+        let cs = BuildingKnownProperty(
+            ownerType: type.asKnownTypeReference,
+            name: name,
+            storage: storage,
+            attributes: [],
+            isStatic: true,
+            optional: false,
+            accessor: .getter,
+            knownAttributes: [],
+            isEnumCase: true,
+            semantics: semantics,
+            annotations: [],
+            expression: rawValue
+        )
         
         new.type.properties.append(cs)
         
@@ -956,9 +953,15 @@ final class BuildingKnownMethod: KnownMethod, Codable {
     var semantics: Set<Semantic>
     var annotations: [String]
     
-    init(ownerType: KnownTypeReference?, body: KnownMethodBody?,
-         signature: FunctionSignature, optional: Bool, knownAttributes: [KnownAttribute],
-         semantics: Set<Semantic>, annotations: [String]) {
+    init(
+        ownerType: KnownTypeReference?,
+        body: KnownMethodBody?,
+        signature: FunctionSignature,
+        optional: Bool,
+        knownAttributes: [KnownAttribute],
+        semantics: Set<Semantic>,
+        annotations: [String]
+    ) {
         
         self.ownerType = ownerType
         self.body = body
@@ -993,11 +996,20 @@ final class BuildingKnownProperty: KnownProperty, Codable {
     var annotations: [String]
     var expression: Expression?
     
-    init(ownerType: KnownTypeReference?, name: String, storage: ValueStorage,
-         attributes: [ObjcPropertyAttribute], isStatic: Bool, optional: Bool,
-         accessor: KnownPropertyAccessor, knownAttributes: [KnownAttribute],
-         isEnumCase: Bool, semantics: Set<Semantic>, annotations: [String],
-         expression: Expression?) {
+    init(
+        ownerType: KnownTypeReference?,
+        name: String,
+        storage: ValueStorage,
+        attributes: [ObjcPropertyAttribute],
+        isStatic: Bool,
+        optional: Bool,
+        accessor: KnownPropertyAccessor,
+        knownAttributes: [KnownAttribute],
+        isEnumCase: Bool,
+        semantics: Set<Semantic>,
+        annotations: [String],
+        expression: Expression?
+    ) {
         
         self.ownerType = ownerType
         self.name = name

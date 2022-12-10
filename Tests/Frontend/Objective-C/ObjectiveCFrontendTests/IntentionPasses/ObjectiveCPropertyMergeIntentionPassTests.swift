@@ -10,22 +10,17 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
     func testMergeGetterAndSetter() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A") { builder in
-                builder.ext_makePropertyWithGetterSetter(named: "a")
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                .createFileWithClass(named: "A") { builder in
+                    builder.ext_makePropertyWithGetterSetter(named: "a")
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case .property:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertIsEmpty()
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assertIsPropertyMode()
         }
     }
 
@@ -34,37 +29,23 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
     func testMergeGetterAndSetterWithTypeAliases() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFile(named: "Aliases") { type in
-                type.createTypealias(withName: "AliasedInt", type: .typeName("NSInteger"))
-                    .createTypealias(withName: "OtherAliasedInt", type: .typeName("NSInteger"))
-            }
-            .createFileWithClass(named: "A") { type in
-                type.createProperty(named: "a", type: .int)
-                    .createMethod(named: "a", returnType: .typeName("AliasedInt"))
-                    .createMethod(
-                        named: "setA",
-                        parameters: [
-                            ParameterSignature(
-                                label: nil,
-                                name: "a",
-                                type: .typeName("OtherAliasedInt")
-                            )
-                        ]
-                    )
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                .createFile(named: "Aliases") { type in
+                    type.createTypealias(withName: "AliasedInt", type: .typeName("NSInteger"))
+                        .createTypealias(withName: "OtherAliasedInt", type: .typeName("NSInteger"))
+                }
+                .createFileWithClass(named: "A") { type in
+                    type.createProperty(named:  "a", type: .int)
+                        .createMethod(named: "a", returnType: .typeName("AliasedInt"))
+                        .createMethod(named: "setA", parameters: [ParameterSignature(label: nil, name: "a", type: .typeName("OtherAliasedInt"))])
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case .property:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertIsEmpty()
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assertIsPropertyMode()
         }
     }
 
@@ -73,24 +54,19 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
     func testDontMergeGetterAndSetterWithDifferentTypes() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A") { type in
-                type.createProperty(named: "a", type: .int)
-                    .createMethod(named: "a", returnType: .string)
-                    .createMethod(named: "setA", returnType: .cgFloat)
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                .createFileWithClass(named: "A") { type in
+                    type.createProperty(named:  "a", type: .int)
+                        .createMethod(named: "a", returnType: .string)
+                        .createMethod(named: "setA", returnType: .cgFloat)
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
-        XCTAssertEqual(cls.methods.count, 2)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case .asField:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(2)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assertIsStoredFieldMode()
         }
     }
 
@@ -100,25 +76,24 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
     func testMergeSetterOverrideProducesBackingField() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A") { builder in
-                builder.ext_makePropertyWithSetter(named: "a", type: .int)
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                .createFileWithClass(named: "A") { builder in
+                    builder.ext_makePropertyWithSetter(named: "a", type: .int)
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables[0].name, "_a")
-        XCTAssertEqual(cls.instanceVariables[0].type, .int)
-        switch cls.properties[0].mode {
-        case let .property(getter, _):
-            XCTAssertEqual(getter.body, [.return(.identifier("_a"))])
-
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.instanceVariables].assertCount(1)
+            type[\.instanceVariables][0]?.assert(name: "_a")
+            type[\.instanceVariables][0]?.assert(type: .int)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(getterBody: [
+                    .return(.identifier("_a"))
+                ])
         }
     }
 
@@ -142,91 +117,78 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
         default:
             XCTFail("Unexpected property mode \(cls.properties[0].mode)")
         }
-    }
 
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assertIsComputedMode()
+        }
+    }
+    
     /// Make sure when merging properties we respect the getter and setter bodies,
     /// in case of readonly properties which feature candidate getter and setters.
     func testMergeReadonlyRespectsCustomizedGetterWithNonRelatedSetter() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A") { builder in
-                builder
-                    .createInstanceVariable(named: "innerA", type: .int)
-                    .createProperty(
-                        named: "a",
-                        type: .int,
-                        objcAttributes: [.attribute("readonly")]
-                    )
-                    .createMethod(named: "a", returnType: .int) { method in
-                        method.setBody([
-                            .return(.identifier("innerA"))
-                        ])
-                    }.createMethod(
-                        named: "setA",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "a", type: .int)
-                        ]
-                    ) { method in
-                        method.setBody([
-                            .expression(
-                                Expression
-                                    .identifier("innerA")
-                                    .assignment(op: .assign, rhs: .identifier("a"))
-                            )
-                        ])
-                    }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                .createFileWithClass(named: "A") { builder in
+                    builder
+                        .createInstanceVariable(named: "innerA", type: .int)
+                        .createProperty(named: "a", type: .int,
+                                        objcAttributes: [.attribute("readonly")])
+                        .createMethod(named: "a", returnType: .int) { method in
+                            method.setBody([
+                                .return(.identifier("innerA"))
+                            ])
+                        }.createMethod(named: "setA",
+                                       parameters: [
+                                        ParameterSignature(label: nil, name: "a", type: .int)]) { method in
+                            method.setBody([
+                                .expression(
+                                    Expression
+                                        .identifier("innerA")
+                                        .assignment(op: .assign, rhs: .identifier("a")))
+                                ])
+                        }
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case let .property(getter, setter):
-            XCTAssertEqual(getter.body, [.return(.identifier("innerA"))])
-            XCTAssertEqual(
-                setter.body.body,
-                [
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(getterBody: [
+                    .return(.identifier("innerA"))
+                ])?
+                .assert(setterBody: [
                     .expression(
-                        Expression
-                            .identifier("innerA")
-                            .assignment(op: .assign, rhs: .identifier("a"))
+                        .identifier("innerA")
+                        .assignment(op: .assign, rhs: .identifier("a"))
                     )
-                ]
-            )
-
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+                ])
         }
     }
 
     func testMergeInCategories() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFile(named: "A") { file in
-                file.createClass(withName: "A")
-                    .createExtension(forClassNamed: "A") { builder in
-                        builder
-                            .ext_makeReadonlyPropertyWithGetter(named: "a")
-                    }
-            }.build()
-        let cls = intentions.extensionIntentions()[0]
+                .createFile(named: "A") { file in
+                    file.createClass(withName: "A")
+                        .createExtension(forClassNamed: "A") { builder in
+                            builder
+                                .ext_makeReadonlyPropertyWithGetter(named: "a")
+                        }
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case .computed:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        
+        Asserter(object: intentions).asserter(forClassExtensionNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assertIsComputedMode()
         }
     }
 
@@ -235,145 +197,124 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
     func testHistoryTrackingMergingGetterSetterMethods() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A") { (builder) in
-                builder.ext_makePropertyWithGetterSetter(named: "a")
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                .createFileWithClass(named: "A") { (builder) in
+                    builder.ext_makePropertyWithGetterSetter(named: "a")
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(
-            cls.history.summary,
-            """
-            [ObjectiveCPropertyMergeIntentionPass:1] Removed method A.a() -> Int since deduced it is a getter for property A.a: Int
-            [ObjectiveCPropertyMergeIntentionPass:1] Removed method A.setA(_ a: Int) since deduced it is a setter for property A.a: Int
-            """
-        )
-        XCTAssertEqual(
-            cls.properties[0].history.summary,
-            "[ObjectiveCPropertyMergeIntentionPass:1] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
-        )
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                """
+                [ObjectiveCPropertyMergeIntentionPass:1] Removed method A.a() -> Int since deduced it is a getter for property A.a: Int
+                [ObjectiveCPropertyMergeIntentionPass:1] Removed method A.setA(_ a: Int) since deduced it is a setter for property A.a: Int
+                """
+            )
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assert(historySummary:
+                "[ObjectiveCPropertyMergeIntentionPass:1] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
+            )
+        }
     }
-
+    
     func testSynthesizeBackingFieldWhenUsageOfBackingFieldIsDetected() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A") { (builder) in
-                builder
-                    .createProperty(named: "a", type: .int)
-                    .createVoidMethod(named: "b") { method in
-                        method.setBody([
-                            .expression(
-                                .assignment(lhs: .identifier("_a"), op: .assign, rhs: .constant(1))
-                            )
-                        ])
-                    }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                .createFileWithClass(named: "A") { (builder) in
+                    builder
+                        .createProperty(named: "a", type: .int)
+                        .createVoidMethod(named: "b") { method in
+                            method.setBody([
+                                .expression(.assignment(lhs: .identifier("_a"), op: .assign, rhs: .constant(1)))
+                            ])
+                        }
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables[0].name, "_a")
-        XCTAssertEqual(cls.properties.count, 1)
-
-        switch cls.properties[0].mode {
-        case let .property(get, set):
-            XCTAssertEqual(get.body, [.return(Expression.identifier("self").dot("_a"))])
-            XCTAssertEqual(set.valueIdentifier, "newValue")
-            XCTAssertEqual(
-                set.body.body,
-                [
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                """
+                [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                that the backing field of A.a: Int (_a) was being used in A.b().
+                """
+            )
+            type[\.methods].assertCount(1)
+            type[\.instanceVariables].assertCount(1)
+            type[\.instanceVariables][0]?.assert(name: "_a")
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assert(getterBody: [
+                    .return(.identifier("self").dot("_a"))
+                ])?
+                .assert(setterValueIdentifier: "newValue")?
+                .assert(setterBody: [
                     .expression(
-                        .assignment(
-                            lhs: Expression.identifier("self").dot("_a"),
+                        .identifier("self").dot("_a").assignment(
                             op: .assign,
                             rhs: .identifier("newValue")
                         )
                     )
-                ]
-            )
-        default:
-            XCTFail("Expected to synthesize getter/setter with backing field.")
+                ])?
+                .assert(historySummary:
+                    """
+                    [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                    that the backing field of A.a: Int (_a) was being used in A.b().
+                    """
+                )
         }
-
-        XCTAssertEqual(
-            cls.history.summary,
-            """
-            [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int (_a) was being used in A.b().
-            """
-        )
-        XCTAssertEqual(
-            cls.properties[0].history.summary,
-            """
-            [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int (_a) was being used in A.b().
-            """
-        )
     }
-
+    
     func testSynthesizeBackingFieldWhenUsageOfBackingFieldIsDetectedInDeinit() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A") { (builder) in
-                builder
-                    .createProperty(named: "a", type: .int)
-                    .createDeinit { method in
-                        method.setBody([
-                            .expression(
-                                .assignment(lhs: .identifier("_a"), op: .assign, rhs: .constant(1))
-                            )
-                        ])
-                    }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                .createFileWithClass(named: "A") { (builder) in
+                    builder
+                        .createProperty(named: "a", type: .int)
+                        .createDeinit { method in
+                            method.setBody([
+                                .expression(.assignment(lhs: .identifier("_a"), op: .assign, rhs: .constant(1)))
+                            ])
+                        }
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables[0].name, "_a")
-        XCTAssertEqual(cls.properties.count, 1)
-
-        switch cls.properties[0].mode {
-        case let .property(get, set):
-            XCTAssertEqual(get.body, [.return(Expression.identifier("self").dot("_a"))])
-            XCTAssertEqual(set.valueIdentifier, "newValue")
-            XCTAssertEqual(
-                set.body.body,
-                [
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                """
+                [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                that the backing field of A.a: Int (_a) was being used in A.deinit.
+                """
+            )
+            type[\.instanceVariables].assertCount(1)
+            type[\.instanceVariables][0]?.assert(name: "_a")
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assert(getterBody: [
+                    .return(.identifier("self").dot("_a"))
+                ])?
+                .assert(setterValueIdentifier: "newValue")?
+                .assert(setterBody: [
                     .expression(
-                        .assignment(
-                            lhs: Expression.identifier("self").dot("_a"),
+                        .identifier("self").dot("_a").assignment(
                             op: .assign,
                             rhs: .identifier("newValue")
                         )
                     )
-                ]
-            )
-        default:
-            XCTFail("Expected to synthesize getter/setter with backing field.")
+                ])?
+                .assert(historySummary:
+                    """
+                    [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                    that the backing field of A.a: Int (_a) was being used in A.deinit.
+                    """
+                )
         }
-
-        XCTAssertEqual(
-            cls.history.summary,
-            """
-            [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int (_a) was being used in A.deinit.
-            """
-        )
-        XCTAssertEqual(
-            cls.properties[0].history.summary,
-            """
-            [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int (_a) was being used in A.deinit.
-            """
-        )
     }
-
+    
     /// If a property is marked as `readonly` in Objective-C, don't synthesize
     /// a setter during backing-field search
     func testSynthesizesReadOnlyBackingFieldIfPropertyIsReadOnly() {
@@ -397,39 +338,35 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
                             )
                         ])
                     }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables.first?.name, "_a")
-        XCTAssertEqual(cls.properties.count, 1)
-
-        switch cls.properties.first?.mode {
-        case .computed(let get)?:
-            XCTAssertEqual(get.body, [.return(.postfix(.identifier("self"), .member("_a")))])
-        default:
-            XCTFail("Expected to synthesize getter/setter with backing field.")
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                """
+                [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                that the backing field of A.a: Int (_a) was being used in A.b().
+                """
+            )
+            type[\.instanceVariables].assertCount(1)
+            type[\.instanceVariables][0]?.assert(name: "_a")
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsComputedMode()?
+                .assert(getterBody: [
+                    .return(.identifier("self").dot("_a"))
+                ])?
+                .assert(historySummary:
+                    """
+                    [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                    that the backing field of A.a: Int (_a) was being used in A.b().
+                    """
+                )
         }
-
-        XCTAssertEqual(
-            cls.history.summary,
-            """
-            [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int (_a) was being used in A.b().
-            """
-        )
-        XCTAssertEqual(
-            cls.properties[0].history.summary,
-            """
-            [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int (_a) was being used in A.b().
-            """
-        )
     }
-
+    
     /// Test that backing field usage detection can detect indirect references to
     /// the backing field by looking into member lookups for local variables that
     /// are the exact type as self (e.g. `strongSelf->_field`).
@@ -439,46 +376,48 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
 
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A") { (builder) in
-                builder
-                    .createProperty(
-                        named: "a",
-                        type: .int,
-                        objcAttributes: [.attribute("readonly")]
-                    )
-                    .createVoidMethod(named: "b") { method in
-                        method.setBody([
-                            .variableDeclarations([
-                                StatementVariableDeclaration(
-                                    identifier: "sSelf",
-                                    type: .typeName("A")
-                                )
-                            ]
-                            ),
-                            .expression(
-                                .assignment(
-                                    lhs: sSelf.dot("_a"),
-                                    op: .assign,
-                                    rhs: .constant(1)
-                                )
-                            ),
-                        ])
-                    }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                .createFileWithClass(named: "A") { (builder) in
+                    builder
+                        .createProperty(named: "a",
+                                        type: .int,
+                                        objcAttributes: [.attribute("readonly")])
+                        .createVoidMethod(named: "b") { method in
+                            method.setBody([
+                                .variableDeclarations([
+                                    StatementVariableDeclaration(identifier: "sSelf", type: .typeName("A"))]
+                                ),
+                                .expression(
+                                    .assignment(lhs: sSelf.dot("_a"),
+                                                op: .assign,
+                                                rhs: .constant(1)))
+                                ])
+                        }
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables.first?.name, "_a")
-        XCTAssertEqual(cls.properties.count, 1)
-
-        switch cls.properties.first?.mode {
-        case .computed(let get)?:
-            XCTAssertEqual(get.body, [.return(.postfix(.identifier("self"), .member("_a")))])
-        default:
-            XCTFail("Expected to synthesize getter/setter with backing field.")
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                """
+                [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                that the backing field of A.a: Int (_a) was being used in A.b().
+                """
+            )
+            type[\.instanceVariables].assertCount(1)
+            type[\.instanceVariables][0]?.assert(name: "_a")
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsComputedMode()?
+                .assert(getterBody: [
+                    .return(.identifier("self").dot("_a"))
+                ])?
+                .assert(historySummary:
+                    """
+                    [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                    that the backing field of A.a: Int (_a) was being used in A.b().
+                    """
+                )
         }
     }
 
@@ -487,44 +426,50 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
     func testSynthesizeBackingFieldInCategoryExtensions() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFile(named: "A.h") { file in
-                file.createClass(withName: "A") { type in
-                    type.createProperty(named: "a", type: .int)
-                }.createExtension(forClassNamed: "A") { type in
-                    type.createMethod(named: "method") { method in
-                        method.setBody([
-                            .expression(Expression.identifier("self").dot("_a"))
-                        ])
-                    }
-                }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                .createFile(named: "A.h") { file in
+                    file.createClass(withName: "A") { type in
+                            type.createProperty(named: "a", type: .int)
+                        }.createExtension(forClassNamed: "A") { type in
+                            type.createMethod(named: "method") { method in
+                                method.setBody([
+                                    .expression(Expression.identifier("self").dot("_a"))
+                                ])
+                            }
+                        }
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables[0].name, "_a")
-        XCTAssertEqual(cls.properties.count, 1)
-
-        switch cls.properties[0].mode {
-        case let .property(get, set):
-            XCTAssertEqual(get.body, [.return(.postfix(.identifier("self"), .member("_a")))])
-            XCTAssertEqual(set.valueIdentifier, "newValue")
-            XCTAssertEqual(
-                set.body.body,
-                [
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                """
+                [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                that the backing field of A.a: Int (_a) was being used in A.method().
+                """
+            )
+            type[\.instanceVariables].assertCount(1)
+            type[\.instanceVariables][0]?.assert(name: "_a")
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(getterBody: [
+                    .return(.identifier("self").dot("_a"))
+                ])?
+                .assert(setterBody: [
                     .expression(
-                        .assignment(
-                            lhs: .postfix(.identifier("self"), .member("_a")),
+                        .postfix(.identifier("self"), .member("_a")).assignment(
                             op: .assign,
                             rhs: .identifier("newValue")
                         )
                     )
-                ]
-            )
-        default:
-            XCTFail("Expected to synthesize getter/setter with backing field.")
+                ])?
+                .assert(historySummary:
+                    """
+                    [ObjectiveCPropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+                    that the backing field of A.a: Int (_a) was being used in A.method().
+                    """
+                )
         }
     }
 
@@ -546,27 +491,23 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
                             ),
                         ])
                     }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                }.build()
+        
         let sut = ObjectiveCPropertyMergeIntentionPass()
         let context = makeContext(intentions: intentions)
         context.typeResolverInvoker.resolveAllExpressionTypes(in: intentions, force: true)
 
         sut.apply(on: intentions, context: context)
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assertIsHistoryEmpty()
 
-        XCTAssertEqual(cls.instanceVariables.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-
-        switch cls.properties[0].mode {
-        case .asField:
-            // All good
-            break
-        default:
-            XCTFail("Expected to not synthesize getter/setter with backing field.")
+            type[\.instanceVariables].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsStoredFieldMode()?
+                .assertIsHistoryEmpty()
         }
-
-        XCTAssertEqual(cls.history.summary, "<empty>")
-        XCTAssertEqual(cls.properties[0].history.summary, "<empty>")
     }
 
     /// Test that we don't perform type merging when properties and methods don't
@@ -591,63 +532,55 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
                         named: "setB",
                         parameters: [
                             ParameterSignature(label: nil, name: "a", type: .int)
-                        ],
-                        isStatic: true
-                    )
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                        ], isStatic: true)
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assertIsHistoryEmpty()
 
-        XCTAssertEqual(cls.methods.count, 4)
-        XCTAssertEqual(cls.properties.count, 2)
-        switch cls.properties[0].mode {
-        case .asField:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
-        }
-
-        switch cls.properties[1].mode {
-        case .asField:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+            type[\.methods].assertCount(4)
+            type[\.instanceVariables].assertCount(0)
+            type[\.properties].assertCount(2)
+            type[\.properties][0]?
+                .assertIsStoredFieldMode()?
+                .assertIsHistoryEmpty()
+            type[\.properties][1]?
+                .assertIsStoredFieldMode()?
+                .assertIsHistoryEmpty()
         }
     }
 
     func testMergesPropertyAndAccessorMethodsBetweenExtensionsWithinFile() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFile(named: "A.h") { (file) in
-                file.createClass(withName: "A") { type in
-                    type.createProperty(named: "a", type: .int)
-                }.createExtension(forClassNamed: "A") { ext in
-                    ext.createMethod(named: "a", returnType: .int)
-                        .createMethod(
-                            named: "setA",
-                            parameters: [
-                                ParameterSignature(label: nil, name: "a", type: .int)
-                            ]
-                        )
-                }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                .createFile(named: "A.h") { (file) in
+                    file.createClass(withName: "A") { type in
+                            type.createProperty(named: "a", type: .int)
+                        }.createExtension(forClassNamed: "A") { ext in
+                            ext.createMethod(named: "a", returnType: .int)
+                                .createMethod(named: "setA", parameters: [
+                                    ParameterSignature(label: nil, name: "a", type: .int)
+                                ])
+                        }
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assertIsHistoryEmpty()
 
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case .property:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+            type[\.methods].assertCount(0)
+            type[\.instanceVariables].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(historySummary:
+                    "[ObjectiveCPropertyMergeIntentionPass:1] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
+                )
         }
     }
 
@@ -665,23 +598,24 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
                             named: "setA",
                             parameters: [
                                 ParameterSignature(label: nil, name: "a", type: .int)
-                            ]
-                        )
-                }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                            ])
+                    }
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assertIsHistoryEmpty()
 
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case .property:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+            type[\.methods].assertCount(0)
+            type[\.instanceVariables].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(historySummary:
+                    "[ObjectiveCPropertyMergeIntentionPass:1] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
+                )
         }
     }
 
@@ -693,47 +627,54 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
     func testDontOverwriteImplementationsWhileVisitingCategoriesOfType() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFile(named: "A.h") { (file) in
-                file.createClass(withName: "A") { type in
-                    type.createProperty(named: "a", type: .int)
-                        .createMethod(named: "a", returnType: .int) { member in
-                            member.setBody([.expression(.identifier("test"))])
+                .createFile(named: "A.h") { (file) in
+                    file.createClass(withName: "A") { type in
+                        type.createProperty(named: "a", type: .int)
+                            .createMethod(named: "a", returnType: .int) { member in
+                                member.setBody([.expression(.identifier("test"))])
+                            }
+                            .createMethod(named: "setA",
+                                          parameters: [ParameterSignature(label: nil, name: "a", type: .int)]) { member in
+                                            member.setBody([.expression(.identifier("test"))])
+                                        }
+                        }.createExtension(forClassNamed: "A") { ext in
+                            ext.createMethod(named: "work") { work in
+                                work.setBody([
+                                    .expression(
+                                        Expression
+                                            .identifier("self")
+                                            .dot("_a")
+                                    )
+                                ])
+                            }
                         }
-                        .createMethod(
-                            named: "setA",
-                            parameters: [ParameterSignature(label: nil, name: "a", type: .int)]
-                        ) { member in
-                            member.setBody([.expression(.identifier("test"))])
-                        }
-                }.createExtension(forClassNamed: "A") { ext in
-                    ext.createMethod(named: "work") { work in
-                        work.setBody([
-                            .expression(
-                                Expression
-                                    .identifier("self")
-                                    .dot("_a")
-                            )
-                        ])
-                    }
-                }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
-        XCTAssertEqual(cls.methods.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        switch cls.properties[0].mode {
-        case let .property(getter, setter):
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                """
+                [ObjectiveCPropertyMergeIntentionPass:1] Removed method A.a() -> Int since deduced it is a getter for property A.a: Int
+                [ObjectiveCPropertyMergeIntentionPass:1] Removed method A.setA(_ a: Int) since deduced it is a setter for property A.a: Int
+                """
+            )
 
-            XCTAssertEqual(getter.body, [.expression(.identifier("test"))])
-            XCTAssertEqual(setter.body.body, [.expression(.identifier("test"))])
-
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+            type[\.methods].assertCount(0)
+            type[\.instanceVariables].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(getterBody: [
+                    .expression(.identifier("test"))
+                ])?
+                .assert(setterBody: [
+                    .expression(.identifier("test"))
+                ])?
+                .assert(historySummary:
+                    "[ObjectiveCPropertyMergeIntentionPass:1] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
+                )
         }
     }
 
@@ -742,58 +683,53 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
     func testPropertyMergingRespectsExistingPropertySynthesization() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFile(named: "A.h") { file in
-                file.createClass(withName: "A") { type in
-                    type.createInstanceVariable(named: "backing", type: .int)
-                        .createProperty(named: "a", type: .int)
-                        .createMethod(
-                            named: "setA",
-                            parameters: [ParameterSignature(label: nil, name: "a", type: .int)]
-                        ) { method in
-                            method.setBody([
-                                // self.backing = a
-                                .expression(
-                                    Expression
-                                        .identifier("self").dot("backing")
-                                        .assignment(op: .assign, rhs: .identifier("a"))
-                                )
-                            ])
-                        }.createSynthesize(propertyName: "a", variableName: "backing")
-                }
-            }.build()
-        let type = intentions.classIntentions()[0]
+                .createFile(named: "A.h") { file in
+                    file.createClass(withName: "A") { type in
+                        type.createInstanceVariable(named: "backing", type: .int)
+                            .createProperty(named: "a", type: .int)
+                            .createMethod(named: "setA", parameters: [ParameterSignature(label: nil, name: "a", type: .int)]) { method in
+                                method.setBody([
+                                    // self.backing = a
+                                    .expression(
+                                        Expression
+                                            .identifier("self").dot("backing")
+                                            .assignment(op: .assign, rhs: .identifier("a"))
+                                    )
+                                ])
+                            }.createSynthesize(propertyName: "a", variableName: "backing")
+                    }
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(type.instanceVariables.count, 1)  // Shouldn't synthesize backing field since we already provide a backing field to use
-        let property = type.properties[0]
-        switch property.mode {
-        case let .property(get, set):
-            XCTAssertEqual(
-                get.body,
-                [
-                    // return backing
-                    .return(Expression.identifier("backing"))
-                ]
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                "[ObjectiveCPropertyMergeIntentionPass:1] Merged found setter method A.setA(_ a: Int) into property A.a: Int and creating a getter body returning existing backing field backing"
             )
 
-            XCTAssertEqual(
-                set.body.body,
-                [
+            type[\.methods].assertCount(0)
+            type[\.instanceVariables].assertCount(1) // Shouldn't synthesize backing field since we already provide a backing field to use
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(getterBody: [
+                    // return backing
+                    .return(.identifier("backing"))
+                ])?
+                .assert(setterBody: [
                     // self.backing = a
                     .expression(
-                        Expression
-                            .identifier("self").dot("backing")
-                            .assignment(op: .assign, rhs: .identifier("a"))
+                        .identifier("self").dot("backing")
+                            .assignment(
+                                op: .assign,
+                                rhs: .identifier("a")
+                            )
                     )
-                ]
-            )
-
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(property.mode)")
+                ])?
+                .assert(historySummary:
+                    "[ObjectiveCPropertyMergeIntentionPass:1] Merged found setter method A.setA(_ a: Int) into property A.a: Int and creating a getter body returning existing backing field backing"
+                )
         }
     }
 
@@ -811,16 +747,39 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
                             .expression(Expression.identifier("self").dot("b"))
                         ])
                     }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assert(historySummary:
+                "[ObjectiveCPropertyMergeIntentionPass:1] Created field A.b: Int as it was detected that the backing field of A.a: Int (b) was being used in A.method()."
+            )
 
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables.first?.name, "b")
+            type[\.methods].assertCount(1)
+            type[\.instanceVariables].assertCount(1)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?
+                .assertIsPropertyMode()?
+                .assert(getterBody: [
+                    .return(.identifier("self").dot("b"))
+                ])?
+                .assert(setterBody: [
+                    .expression(
+                        .identifier("self").dot("b")
+                            .assignment(
+                                op: .assign,
+                                rhs: .identifier("newValue")
+                            )
+                    )
+                ])?
+                .assert(historySummary:
+                    "[ObjectiveCPropertyMergeIntentionPass:1] Created field A.b: Int as it was detected that the backing field of A.a: Int (b) was being used in A.method()."
+                )
+        }
     }
-
+    
     /// Tests that when examining method bodies for backing field usages we take
     /// into account any existing `@synthesize` declarations for the property and
     /// use the resulting name for the usage lookup (take 2; avoiding creating
@@ -843,8 +802,15 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
         XCTAssertEqual(cls.instanceVariables.count, 0)
-    }
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type.assertIsHistoryEmpty()
 
+            type[\.methods].assertCount(1)
+            type[\.instanceVariables].assertCount(0)
+        }
+    }
+    
     /// Tests that when examining method bodies for backing field usages we take
     /// into account any existing `@synthesize` declarations for the property and
     /// use the resulting name for the usage lookup (take 3; avoiding creating
@@ -855,38 +821,38 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
     {
         let intentions =
             IntentionCollectionBuilder()
-            .createFile(named: "A.h") { file in
-                file.createExtension(forClassNamed: "A") { type in
-                    type.createMethod(
-                        named: "setA",
-                        parameters: [ParameterSignature(label: nil, name: "a", type: .int)]
-                    ) { method in
-                        method.setBody([
-                            .expression(
-                                Expression
+                .createFile(named: "A.h") { file in
+                    file.createExtension(forClassNamed: "A") { type in
+                        type.createMethod(named: "setA", parameters: [ParameterSignature(label: nil, name: "a", type: .int)]) { method in
+                            method.setBody([
+                                .expression(Expression
                                     .identifier("self")
                                     .dot("b")
                                     .assignment(op: .assign, rhs: .identifier("a"))
-                            )
-                        ])
+                                )
+                            ])
+                        }
+                    }.createClass(withName: "A") { type in
+                        type.createProperty(named: "a", type: .int)
+                            .createSynthesize(propertyName: "a", variableName: "b")
                     }
-                }.createClass(withName: "A") { type in
-                    type.createProperty(named: "a", type: .int)
-                        .createSynthesize(propertyName: "a", variableName: "b")
-                }
-            }.build()
-        let cls = intentions.classIntentions()[0]
-        let ext = intentions.extensionIntentions()[0]
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(ext.instanceVariables.count, 0)
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables.first?.name, "b")
-        XCTAssertEqual(cls.instanceVariables.first?.type, .int)
+        
+        Asserter(object: intentions)
+            .asserter(forClassExtensionNamed: "A") { type in
+                type[\.instanceVariables].assertCount(0)
+            }?
+            .asserter(forClassNamed: "A") { type in
+                type[\.instanceVariables].assertCount(1)
+                type[\.instanceVariables][0]?
+                    .assert(name: "b")?
+                    .assert(type: .int)
+            }
     }
-
+    
     /// Tests that when looking for explicit usages of backing fields for properties
     /// we ignore any property that has a backing field matching the property's
     /// name on a `@synthesize` declaration.
@@ -903,21 +869,16 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
                             .expression(Expression.identifier("self").dot("a"))
                         ])
                     }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.instanceVariables.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        XCTAssertEqual(cls.properties.first?.setterAccessLevel, .private)
-        switch cls.properties.first?.mode {
-        case .asField?:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties.first?.mode as Any)")
+        
+        Asserter(object: intentions) .asserter(forClassNamed: "A") { type in
+            type[\.instanceVariables].assertCount(0)
+            type[\.properties][0]?
+                .assert(setterAccessLevel: .private)?
+                .assertIsStoredFieldMode()
         }
     }
 
@@ -935,21 +896,16 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
                             .expression(Expression.identifier("self").dot("a"))
                         ])
                     }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.instanceVariables.count, 0)
-        XCTAssertEqual(cls.properties.count, 1)
-        XCTAssertNil(cls.properties.first?.setterAccessLevel)
-        switch cls.properties.first?.mode {
-        case .asField?:
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties.first?.mode as Any)")
+        
+        Asserter(object: intentions) .asserter(forClassNamed: "A") { type in
+            type[\.instanceVariables].assertCount(0)
+            type[\.properties][0]?
+                .assert(setterAccessLevel: nil)?
+                .assertIsStoredFieldMode()
         }
     }
 
@@ -986,32 +942,29 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
         let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        let cls = intentions.classIntentions()[0]
-        XCTAssertEqual(intentions.extensionIntentions()[0].properties.count, 0)
-        XCTAssertEqual(intentions.classIntentions()[0].properties.count, 1)
-        switch cls.properties.first?.mode {
-        case let .property(getter, setter)?:
-
-            XCTAssertEqual(getter.body, [.return(Expression.identifier("self").dot("b"))])
-            XCTAssertEqual(setter.valueIdentifier, "a")
-            XCTAssertEqual(
-                setter.body.body,
-                [
-                    .expression(
-                        Expression.identifier("self").dot("b").assignment(
-                            op: .assign,
-                            rhs: .identifier("a")
+        
+        Asserter(object: intentions)
+            .asserter(forClassExtensionNamed: "A") { type in
+                type[\.properties].assertCount(0)
+            }?
+            .asserter(forClassNamed: "A") { type in
+                type[\.instanceVariables].assertCount(0)
+                type[\.properties][0]?
+                    .assertIsPropertyMode()?
+                    .assert(setterValueIdentifier: "a")?
+                    .assert(getterBody: [
+                        .return(.identifier("self").dot("b"))
+                    ])?
+                    .assert(setterBody: [
+                        .expression(
+                            .identifier("self").dot("b")
+                                .assignment(
+                                    op: .assign,
+                                    rhs: .identifier("a")
+                                )
                         )
-                    )
-                ]
-            )
-
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties.first?.mode as Any)")
-        }
+                    ])
+            }
     }
 
     /// Tests that property merging ignores nullability across accessor types
@@ -1053,32 +1006,29 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
         let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        let cls = intentions.classIntentions()[0]
-        XCTAssertEqual(intentions.extensionIntentions()[0].properties.count, 0)
-        XCTAssertEqual(intentions.classIntentions()[0].properties.count, 1)
-        switch cls.properties.first?.mode {
-        case let .property(getter, setter)?:
-
-            XCTAssertEqual(getter.body, [.return(Expression.identifier("self").dot("b"))])
-            XCTAssertEqual(setter.valueIdentifier, "a")
-            XCTAssertEqual(
-                setter.body.body,
-                [
-                    .expression(
-                        Expression.identifier("self").dot("b").assignment(
-                            op: .assign,
-                            rhs: .identifier("a")
+        
+        Asserter(object: intentions)
+            .asserter(forClassExtensionNamed: "A") { type in
+                type[\.properties].assertCount(0)
+            }?
+            .asserter(forClassNamed: "A") { type in
+                type[\.instanceVariables].assertCount(0)
+                type[\.properties][0]?
+                    .assertIsPropertyMode()?
+                    .assert(setterValueIdentifier: "a")?
+                    .assert(getterBody: [
+                        .return(.identifier("self").dot("b"))
+                    ])?
+                    .assert(setterBody: [
+                        .expression(
+                            .identifier("self").dot("b")
+                                .assignment(
+                                    op: .assign,
+                                    rhs: .identifier("a")
+                                )
                         )
-                    )
-                ]
-            )
-
-            // Success
-            break
-        default:
-            XCTFail("Unexpected property mode \(cls.properties.first?.mode as Any)")
-        }
+                    ])
+            }
     }
 
     func testMergePropertyFromExtension() {
@@ -1097,106 +1047,96 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
         let sut = ObjectiveCPropertyMergeIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        let file = intentions.intentionFor(fileNamed: "A.m")!
-        let type = file.extensionIntentions[0]
-        XCTAssertEqual(type.methods.count, 0)
-        XCTAssertEqual(type.properties.count, 1)
-        XCTAssertEqual(type.properties[0].getter?.body, [.return(.constant(0))])
+        
+        Asserter(object: intentions).asserter(forClassExtensionNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assert(getterBody: [
+                .return(.constant(0))
+            ])
+        }
     }
-
+    
     func testMergeKeepsComments() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A") { builder in
-                builder
-                    .createProperty(
-                        named: "a",
-                        type: .int,
-                        objcAttributes: [.attribute("readonly")]
-                    ) { prop in
-                        prop.addComment("// Property comment")
-                    }
-                    .createMethod(named: "a", returnType: .int) { m in
-                        m.addComment("// Getter comment")
-                    }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                .createFileWithClass(named: "A") { builder in
+                    builder
+                        .createProperty(named: "a", type: .int, objcAttributes: [.attribute("readonly")]) { prop in
+                            prop.addComment("// Property comment")
+                        }
+                        .createMethod(named: "a", returnType: .int) { m in
+                            m.addComment("// Getter comment")
+                        }
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(
-            cls.properties[0].precedingComments,
-            [
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assert(precedingComments: [
                 "// Property comment",
                 "// Getter comment",
-            ]
-        )
+            ])
+        }
     }
-
+    
     func testMergeKeepsCommentsGetterAndSetter() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A") { builder in
-                builder
-                    .createProperty(
-                        named: "a",
-                        type: .int,
-                        objcAttributes: [.attribute("readonly")]
-                    ) { prop in
-                        prop.addComment("// Property comment")
-                    }
-                    .createMethod(named: "a", returnType: .int) { m in
-                        m.addComment("// Getter comment")
-                    }
-                    .createMethod("setA(_ a: Int)") { m in
-                        m.addComment("// Setter comment")
-                    }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                .createFileWithClass(named: "A") { builder in
+                    builder
+                        .createProperty(named: "a", type: .int, objcAttributes: [.attribute("readonly")]) { prop in
+                            prop.addComment("// Property comment")
+                        }
+                        .createMethod(named: "a", returnType: .int) { m in
+                            m.addComment("// Getter comment")
+                        }
+                        .createMethod("setA(_ a: Int)") { m in
+                            m.addComment("// Setter comment")
+                        }
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(
-            cls.properties[0].precedingComments,
-            [
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assert(precedingComments: [
                 "// Property comment",
                 "// Getter comment",
                 "// Setter comment",
-            ]
-        )
+            ])
+        }
     }
-
+    
     func testMergeKeepsCommentsSetterOnly() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A") { builder in
-                builder
-                    .createProperty(
-                        named: "a",
-                        type: .int,
-                        objcAttributes: [.attribute("readonly")]
-                    ) { prop in
-                        prop.addComment("// Property comment")
-                    }
-                    .createMethod("setA(_ a: Int)") { m in
-                        m.addComment("// Setter comment")
-                    }
-            }.build()
-        let cls = intentions.classIntentions()[0]
+                .createFileWithClass(named: "A") { builder in
+                    builder
+                        .createProperty(named: "a", type: .int, objcAttributes: [.attribute("readonly")]) { prop in
+                            prop.addComment("// Property comment")
+                        }
+                        .createMethod("setA(_ a: Int)") { m in
+                            m.addComment("// Setter comment")
+                        }
+                }.build()
         let sut = ObjectiveCPropertyMergeIntentionPass()
-
+        
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(
-            cls.properties[0].precedingComments,
-            [
+        
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.properties].assertCount(1)
+            type[\.properties][0]?.assert(precedingComments: [
                 "// Property comment",
                 "// Setter comment",
-            ]
-        )
+            ])
+        }
     }
 }
 
@@ -1204,36 +1144,38 @@ class ObjectiveCObjectiveCPropertyMergeIntentionPassTests: XCTestCase {
 
 extension TypeBuilder {
     @discardableResult
-    fileprivate func ext_makeReadonlyPropertyWithGetter(named name: String, type: SwiftType = .int)
-        -> TypeBuilder<T>
-    {
-        return
-            self.createProperty(named: name, type: .int, objcAttributes: [.attribute("readonly")])
+    func ext_makeReadonlyPropertyWithGetter(named name: String, type: SwiftType = .int) -> TypeBuilder<T> {
+        return self
+            .createProperty(
+                named: name,
+                type: .int,
+                objcAttributes: [.attribute("readonly")]
+            )
             .createMethod(named: name, returnType: .int)
     }
 
     @discardableResult
-    fileprivate func ext_makePropertyWithGetterSetter(named name: String, type: SwiftType = .int)
-        -> TypeBuilder<T>
-    {
-        return
-            self.createProperty(named: name, type: type)
+    func ext_makePropertyWithGetterSetter(named name: String, type: SwiftType = .int) -> TypeBuilder<T> {
+        return self
+            .createProperty(named: name, type: type)
             .createMethod(
                 named: "set\(name.uppercasedFirstLetter)",
-                parameters: [ParameterSignature(label: nil, name: name, type: type)]
+                parameters: [
+                    .init(label: nil, name: name, type: type)
+                ]
             )
             .createMethod(named: name, returnType: type)
     }
 
     @discardableResult
-    fileprivate func ext_makePropertyWithSetter(named name: String, type: SwiftType = .int)
-        -> TypeBuilder<T>
-    {
-        return
-            self.createProperty(named: name, type: type)
+    func ext_makePropertyWithSetter(named name: String, type: SwiftType = .int) -> TypeBuilder<T> {
+        return self
+            .createProperty(named: name, type: type)
             .createMethod(
                 named: "set\(name.uppercasedFirstLetter)",
-                parameters: [ParameterSignature(label: nil, name: name, type: type)]
+                parameters: [
+                    .init(label: nil, name: name, type: type)
+                ]
             )
     }
 }

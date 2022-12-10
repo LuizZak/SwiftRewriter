@@ -11,51 +11,56 @@ class StoredPropertyToNominalTypesIntentionPassTests: XCTestCase {
     func testMovePropertyFromExtensionToMainDeclaration() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFile(named: "A") { file in
-                file.createClass(withName: "A")
-                file.createExtension(forClassNamed: "A") { builder in
-                    builder.createProperty(named: "a", type: .int)
-                        .createInstanceVariable(named: "b", type: .int)
-                }
-            }.build()
-        let cls = intentions.classIntentions()[0]
-        let ext = intentions.extensionIntentions()[0]
+                .createFile(named: "A") { file in
+                    file.createClass(withName: "A")
+                    file.createExtension(forClassNamed: "A") { builder in
+                        builder.createProperty(named: "a", type: .int)
+                            .createInstanceVariable(named: "b", type: .int)
+                    }
+                }.build()
         let sut = StoredPropertyToNominalTypesIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.properties.count, 1)
-        XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(ext.properties.count, 0)
-        XCTAssertEqual(ext.instanceVariables.count, 0)
+        
+        Asserter(object: intentions)
+            .asserter(forClassNamed: "A") { type in
+                type[\.properties].assertCount(1)
+                type[\.instanceVariables].assertCount(1)
+            }?
+            .asserter(forClassExtensionNamed: "A") { extType in
+                extType[\.properties].assertCount(0)
+                extType[\.instanceVariables].assertCount(0)
+            }
     }
 
     func testDontMovePropertyWithFullGetterAndSetterDefinitions() {
-        let mode =
-            PropertyGenerationIntention
-            .Mode.property(
+        let mode: PropertyGenerationIntention.Mode =
+            .property(
                 get: FunctionBodyIntention(body: []),
                 set: .init(valueIdentifier: "abc", body: FunctionBodyIntention(body: []))
             )
-
+        
         let intentions =
             IntentionCollectionBuilder()
-            .createFile(named: "A") { file in
-                file.createClass(withName: "A")
-                file.createExtension(forClassNamed: "A") { builder in
-                    builder.createProperty(named: "a", type: .int, mode: mode)
-                }
-            }.build()
-        let cls = intentions.classIntentions()[0]
-        let ext = intentions.extensionIntentions()[0]
+                .createFile(named: "A") { file in
+                    file.createClass(withName: "A")
+                    file.createExtension(forClassNamed: "A") { builder in
+                        builder.createProperty(named: "a", type: .int, mode: mode)
+                    }
+                }.build()
         let sut = StoredPropertyToNominalTypesIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.properties.count, 0)
-        XCTAssertEqual(cls.instanceVariables.count, 0)
-        XCTAssertEqual(ext.properties.count, 1)
-        XCTAssertEqual(ext.instanceVariables.count, 0)
+        
+        Asserter(object: intentions)
+            .asserter(forClassNamed: "A") { type in
+                type[\.properties].assertCount(0)
+                type[\.instanceVariables].assertCount(0)
+            }?
+            .asserter(forClassExtensionNamed: "A") { extType in
+                extType[\.properties].assertCount(1)
+                extType[\.instanceVariables].assertCount(0)
+            }
     }
 
     func testDontMoveReadonlyPropertyWithGetterDefinition() {
@@ -63,26 +68,29 @@ class StoredPropertyToNominalTypesIntentionPassTests: XCTestCase {
 
         let intentions =
             IntentionCollectionBuilder()
-            .createFile(named: "A") { file in
-                file.createClass(withName: "A")
-                file.createExtension(forClassNamed: "A") { builder in
-                    builder.createProperty(
-                        named: "a",
-                        type: .int,
-                        mode: mode,
-                        objcAttributes: [.attribute("readonly")]
-                    )
-                }
-            }.build()
-        let cls = intentions.classIntentions()[0]
-        let ext = intentions.extensionIntentions()[0]
+                .createFile(named: "A") { file in
+                    file.createClass(withName: "A")
+                    file.createExtension(forClassNamed: "A") { builder in
+                        builder.createProperty(
+                            named: "a",
+                            type: .int,
+                            mode: mode,
+                            objcAttributes: [.attribute("readonly")]
+                        )
+                    }
+                }.build()
         let sut = StoredPropertyToNominalTypesIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(cls.properties.count, 0)
-        XCTAssertEqual(cls.instanceVariables.count, 0)
-        XCTAssertEqual(ext.properties.count, 1)
-        XCTAssertEqual(ext.instanceVariables.count, 0)
+        
+        Asserter(object: intentions)
+            .asserter(forClassNamed: "A") { type in
+                type[\.properties].assertCount(0)
+                type[\.instanceVariables].assertCount(0)
+            }?
+            .asserter(forClassExtensionNamed: "A") { extType in
+                extType[\.properties].assertCount(1)
+                extType[\.instanceVariables].assertCount(0)
+            }
     }
 }

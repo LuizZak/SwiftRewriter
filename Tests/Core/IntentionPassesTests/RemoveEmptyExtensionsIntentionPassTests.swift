@@ -13,8 +13,10 @@ class RemoveEmptyExtensionsIntentionPassTests: XCTestCase {
         let sut = RemoveEmptyExtensionsIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssert(intentions.extensionIntentions().isEmpty)
+        
+        Asserter(object: intentions).asserter(forTargetPathFile: "A.h") { file in
+            file[\.extensionIntentions].assertIsEmpty()
+        }
     }
 
     func testRemoveEmptyExtensionsWithName() {
@@ -25,8 +27,10 @@ class RemoveEmptyExtensionsIntentionPassTests: XCTestCase {
         let sut = RemoveEmptyExtensionsIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssert(intentions.extensionIntentions().isEmpty)
+        
+        Asserter(object: intentions).asserter(forTargetPathFile: "A.h") { file in
+            file[\.extensionIntentions].assertIsEmpty()
+        }
     }
 
     func testDontRemoveExtensionsImplementingProtocols() {
@@ -39,8 +43,10 @@ class RemoveEmptyExtensionsIntentionPassTests: XCTestCase {
         let sut = RemoveEmptyExtensionsIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(intentions.extensionIntentions().count, 1)
+        
+        Asserter(object: intentions).asserter(forTargetPathFile: "A.h") { file in
+            file[\.extensionIntentions].assertIsNotEmpty()
+        }
     }
 
     func testDontRemoveInhabitedExtensions() {
@@ -53,7 +59,9 @@ class RemoveEmptyExtensionsIntentionPassTests: XCTestCase {
         let sut = RemoveEmptyExtensionsIntentionPass()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(intentions.extensionIntentions().count, 1)
+        
+        Asserter(object: intentions).asserter(forTargetPathFile: "A.h") { file in
+            file[\.extensionIntentions].assertIsNotEmpty()
+        }
     }
 }
