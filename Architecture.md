@@ -86,7 +86,7 @@ File intentions
 
 An `IntentionCollection` class is provided that serves as a root for all `FileGenerationIntention`s, which will ultimately be used to generate the final Swift code.
 
-Supplementary context and historical tracking is available to allow inspection of the origin of all intentions, including manipulations by intention modifying steps described bellow.
+Supplementary context and historical tracking is provided by an `IntentionHistory` protocol and exposed by a `Historic` protocol which all intentions conform to, allowing intention passes later on to record changes that where made to intentions for inspection, in case users wish to do so by outputting these histories alongside each declaration in the final code later.
 
 ---
 ## 3. Type resolving
