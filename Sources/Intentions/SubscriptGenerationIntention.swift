@@ -22,11 +22,24 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
         }
     }
     
-    public init(parameters: [ParameterSignature],
-                returnType: SwiftType,
-                mode: Mode,
-                accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+    /// Returns the getter for this subscript generation intention.
+    public var getter: FunctionBodyIntention? {
+        mode.getter
+    }
+    
+    /// If this subscript features a setter, returns the settings for the setter,
+    /// including its body.
+    public var setter: PropertyGenerationIntention.Setter? {
+        mode.setter
+    }
+    
+    public init(
+        parameters: [ParameterSignature],
+        returnType: SwiftType,
+        mode: Mode,
+        accessLevel: AccessLevel = .internal,
+        source: ASTNode? = nil
+    ) {
         
         self.parameters = parameters
         self.returnType = returnType
@@ -127,6 +140,26 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
             case let .getterAndSetter(getter, setter):
                 getter.parent = intention
                 setter.body.parent = intention
+            }
+        }
+
+        /// Returns `true` if this `Mode` value is a `.getter` case.
+        public var isGetterOnly: Bool {
+            switch self {
+            case .getter:
+                return true
+            case .getterAndSetter:
+                return false
+            }
+        }
+
+        /// Returns `true` if this `Mode` value is a `.getterAndSetter` case.
+        public var isGetterAndSetter: Bool {
+            switch self {
+            case .getterAndSetter:
+                return true
+            case .getter:
+                return false
             }
         }
         

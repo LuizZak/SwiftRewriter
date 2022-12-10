@@ -127,7 +127,7 @@ public extension Asserter where Object: PropertyGenerationIntention {
     ) -> Self? {
         
         assertTrue(
-            message: "assertIsStoredFieldMode: Expected property \(object.name) to be a field.",
+            message: "assertIsStoredFieldMode failed: Expected property \(object.name) to be a field.",
             file: file,
             line: line
         ) { prop in
@@ -147,7 +147,7 @@ public extension Asserter where Object: PropertyGenerationIntention {
     ) -> Self? {
         
         assertTrue(
-            message: "assertIsComputedMode: Expected property \(object.name) to be a computed property.",
+            message: "assertIsComputedMode failed: Expected property \(object.name) to be a computed property.",
             file: file,
             line: line
         ) { prop in
@@ -167,7 +167,7 @@ public extension Asserter where Object: PropertyGenerationIntention {
     ) -> Self? {
         
         assertTrue(
-            message: "assertIsPropertyMode: Expected property \(object.name) to be a getter/setter property.",
+            message: "assertIsPropertyMode failed: Expected property \(object.name) to be a getter/setter property.",
             file: file,
             line: line
         ) { prop in

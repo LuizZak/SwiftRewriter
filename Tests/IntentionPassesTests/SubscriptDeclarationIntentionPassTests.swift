@@ -21,15 +21,20 @@ class SubscriptDeclarationIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.classIntentions()[0]
-        XCTAssert(type.methods.isEmpty)
-        XCTAssertEqual(type.subscripts.count, 1)
-        XCTAssertEqual(type.subscripts.first?.accessLevel, .private)
-        XCTAssertEqual(type.subscripts.first?.parameters, [ParameterSignature(name: "index", type: .uint)])
-        XCTAssertEqual(type.subscripts.first?.returnType, "NSObject")
-        XCTAssertEqual(type.subscripts.first?.mode.getter.body, [
-            .return(.identifier("value"))
-        ])
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertIsEmpty()
+            type[\.subscripts].assertCount(1)
+            type[\.subscripts][0]?
+                .assert(accessLevel: .private)?
+                .assert(returnType: "NSObject")?
+                .assertIsGetterOnly()?
+                .assert(parameters: [
+                    .init(name: "index", type: .uint)
+                ])?
+                .assert(getterBody: [
+                    .return(.identifier("value"))
+                ])
+        }
     }
     
     func testConvertSubscriptGetterHistoryTracking() {
@@ -44,12 +49,14 @@ class SubscriptDeclarationIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.classIntentions()[0]
-        
-        diffTest(expected: """
-            [Test] Method description
-            [Creation] Creating subscript declaration from objectAtIndexSubscript(_:) method
-            """).diff(type.subscripts[0].history.summary)
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.subscripts][0]?.assert(historySummary:
+                """
+                [Test] Method description
+                [Creation] Creating subscript declaration from objectAtIndexSubscript(_:) method
+                """
+            )
+        }
     }
     
     func testConvertSubscriptGetterAndSetter() {
@@ -70,19 +77,24 @@ class SubscriptDeclarationIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.classIntentions()[0]
-        XCTAssert(type.methods.isEmpty)
-        XCTAssertEqual(type.subscripts.count, 1)
-        XCTAssertEqual(type.subscripts.first?.accessLevel, .private)
-        XCTAssertEqual(type.subscripts.first?.parameters, [ParameterSignature(name: "index", type: .uint)])
-        XCTAssertEqual(type.subscripts.first?.returnType, "NSObject")
-        XCTAssertEqual(type.subscripts.first?.mode.getter.body, [
-            .return(.identifier("value"))
-        ])
-        XCTAssertEqual(type.subscripts.first?.mode.setter?.valueIdentifier, "object")
-        XCTAssertEqual(type.subscripts.first?.mode.setter?.body.body, [
-            .expression(.identifier("object"))
-        ])
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertIsEmpty()
+            type[\.subscripts].assertCount(1)
+            type[\.subscripts][0]?
+                .assert(accessLevel: .private)?
+                .assert(returnType: "NSObject")?
+                .assertIsGetterAndSetter()?
+                .assert(parameters: [
+                    .init(name: "index", type: .uint)
+                ])?
+                .assert(getterBody: [
+                    .return(.identifier("value"))
+                ])?
+                .assert(setterBody: [
+                    .expression(.identifier("object"))
+                ])?
+                .assert(setterValueIdentifier: "object")
+        }
     }
     
     func testConvertSubscriptGetterAndSetterHistoryTracking() {
@@ -105,13 +117,15 @@ class SubscriptDeclarationIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.classIntentions()[0]
-        
-        diffTest(expected: """
-            [Test] Getter history
-            [Test] Setter history
-            [Creation] Creating subscript declaration from objectAtIndexSubscript(_:) and setObject(_:atIndexedSubscript:) pair
-            """).diff(type.subscripts[0].history.summary)
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.subscripts][0]?.assert(historySummary:
+                """
+                [Test] Getter history
+                [Test] Setter history
+                [Creation] Creating subscript declaration from objectAtIndexSubscript(_:) and setObject(_:atIndexedSubscript:) pair
+                """
+            )
+        }
     }
     
     func testDontConvertSubscriptWithSetterOnly() {
@@ -125,9 +139,10 @@ class SubscriptDeclarationIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.classIntentions()[0]
-        XCTAssertEqual(type.methods.count, 1)
-        XCTAssert(type.subscripts.isEmpty)
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(1)
+            type[\.subscripts].assertIsEmpty()
+        }
     }
     
     func testDontConvertGetterWithVoidReturnType() {
@@ -139,9 +154,10 @@ class SubscriptDeclarationIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.classIntentions()[0]
-        XCTAssertEqual(type.methods.count, 1)
-        XCTAssert(type.subscripts.isEmpty)
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(1)
+            type[\.subscripts].assertIsEmpty()
+        }
     }
     
     func testDontMergeGetterWithSetterWithDifferentObjectParameter() {
@@ -162,16 +178,20 @@ class SubscriptDeclarationIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.classIntentions()[0]
-        XCTAssertEqual(type.methods.count, 1)
-        XCTAssertEqual(type.subscripts.count, 1)
-        XCTAssertEqual(type.subscripts.first?.accessLevel, .private)
-        XCTAssertEqual(type.subscripts.first?.parameters, [ParameterSignature(name: "index", type: .uint)])
-        XCTAssertEqual(type.subscripts.first?.returnType, "NSObject")
-        XCTAssertEqual(type.subscripts.first?.mode.getter.body, [
-            .return(.identifier("value"))
-        ])
-        XCTAssertNil(type.subscripts.first?.mode.setter)
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(1)
+            type[\.subscripts].assertCount(1)
+            type[\.subscripts][0]?
+                .assert(accessLevel: .private)?
+                .assertIsGetterOnly()?
+                .assert(returnType: "NSObject")?
+                .assert(parameters: [
+                    .init(name: "index", type: .uint)
+                ])?
+                .assert(getterBody: [
+                    .return(.identifier("value"))
+                ])
+        }
     }
     
     func testDontMergeGetterWithSetterWithDifferentIndexParameters() {
@@ -192,16 +212,20 @@ class SubscriptDeclarationIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.classIntentions()[0]
-        XCTAssertEqual(type.methods.count, 1)
-        XCTAssertEqual(type.subscripts.count, 1)
-        XCTAssertEqual(type.subscripts.first?.accessLevel, .private)
-        XCTAssertEqual(type.subscripts.first?.parameters, [ParameterSignature(name: "index", type: "NSString")])
-        XCTAssertEqual(type.subscripts.first?.returnType, "NSObject")
-        XCTAssertEqual(type.subscripts.first?.mode.getter.body, [
-            .return(.identifier("value"))
-        ])
-        XCTAssertNil(type.subscripts.first?.mode.setter)
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(1)
+            type[\.subscripts].assertCount(1)
+            type[\.subscripts][0]?
+                .assert(accessLevel: .private)?
+                .assertIsGetterOnly()?
+                .assert(returnType: "NSObject")?
+                .assert(parameters: [
+                    .init(name: "index", type: "NSString")
+                ])?
+                .assert(getterBody: [
+                    .return(.identifier("value"))
+                ])
+        }
     }
     
     func testDontMergeGetterWithSetterWithNonVoidReturnType() {
@@ -222,16 +246,20 @@ class SubscriptDeclarationIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.classIntentions()[0]
-        XCTAssertEqual(type.methods.count, 1)
-        XCTAssertEqual(type.subscripts.count, 1)
-        XCTAssertEqual(type.subscripts.first?.accessLevel, .private)
-        XCTAssertEqual(type.subscripts.first?.parameters, [ParameterSignature(name: "index", type: .uint)])
-        XCTAssertEqual(type.subscripts.first?.returnType, "NSObject")
-        XCTAssertEqual(type.subscripts.first?.mode.getter.body, [
-            .return(.identifier("value"))
-        ])
-        XCTAssertNil(type.subscripts.first?.mode.setter)
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(1)
+            type[\.subscripts].assertCount(1)
+            type[\.subscripts][0]?
+                .assert(accessLevel: .private)?
+                .assertIsGetterOnly()?
+                .assert(returnType: "NSObject")?
+                .assert(parameters: [
+                    .init(name: "index", type: .uint)
+                ])?
+                .assert(getterBody: [
+                    .return(.identifier("value"))
+                ])
+        }
     }
     
     func testConvertSubscriptGetterKeepsComments() {
@@ -250,10 +278,14 @@ class SubscriptDeclarationIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.classIntentions()[0]
-        XCTAssertEqual(type.subscripts[0].precedingComments, [
-            "// A comment"
-        ])
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.subscripts].assertCount(1)
+            type[\.subscripts][0]?
+                .assert(precedingComments: [
+                    "// A comment",
+                ])
+        }
     }
     
     func testConvertSubscriptGetterSetterKeepsComments() {
@@ -274,10 +306,14 @@ class SubscriptDeclarationIntentionPassTests: XCTestCase {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.classIntentions()[0]
-        XCTAssertEqual(type.subscripts[0].precedingComments, [
-            "// Getter comment",
-            "// Setter comment"
-        ])
+        Asserter(object: intentions).asserter(forClassNamed: "A") { type in
+            type[\.methods].assertCount(0)
+            type[\.subscripts].assertCount(1)
+            type[\.subscripts][0]?
+                .assert(precedingComments: [
+                    "// Getter comment",
+                    "// Setter comment",
+                ])
+        }
     }
 }
