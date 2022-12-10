@@ -19,8 +19,9 @@ An overview of the steps taken is described bellow.
 
 ##### summary
 - [ANTLR](http://www.antlr.org/) used as main parser generator;
+- `ObjcParser` target contains an `ObjcParser` class that performs code parsing.
 - `ASTNode` class used as abstraction over ANTLR for next steps;
-- Statement and expressions are not parsed in this step.
+    - Statement and expressions are not parsed in this step yet.
 ---
 
 A mixture of tooled and manual parsing is used on input .h/.m files to parse.
