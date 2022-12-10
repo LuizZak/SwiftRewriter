@@ -145,7 +145,7 @@ public protocol KnownConstructor: SemanticalObject, AttributeTaggeableObject {
     var parameters: [ParameterSignature] { get }
     
     /// Gets whether this initializer can fail (i.e. return nil)
-    var isFailable: Bool { get }
+    var isFallible: Bool { get }
     
     /// Gets whether this initializer is a convenience initializer
     var isConvenience: Bool { get }

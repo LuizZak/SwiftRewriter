@@ -208,7 +208,7 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
             )
     }
 
-    func testConvertNullableReturnInitsIntoFailableInits() {
+    func testConvertNullableReturnInitsIntoFallibleInits() {
         let sut = SwiftifyMethodSignaturesIntentionPass()
 
         testThat(typeName: "Squeak", sut: sut)
