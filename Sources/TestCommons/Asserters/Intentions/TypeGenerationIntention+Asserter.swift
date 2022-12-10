@@ -1,6 +1,7 @@
 import XCTest
 import SwiftAST
 import Intentions
+import KnownType
 
 public extension Asserter where Object: TypeGenerationIntention {
     /// Asserts that the underlying `TypeGenerationIntention` object being tested
@@ -34,6 +35,23 @@ public extension Asserter where Object: TypeGenerationIntention {
 
         asserter(forKeyPath: \.isExtension) {
             $0.assert(equals: isExtension, file: file, line: line)
+        }
+    }
+
+    /// Asserts that the underlying `TypeGenerationIntention` object being tested
+    /// has its `supertype` property be a specified value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        supertype: KnownTypeReference?,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        asserter(forKeyPath: \.supertype) {
+            $0.assert(equals: supertype, file: file, line: line)
         }
     }
 

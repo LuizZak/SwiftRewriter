@@ -189,6 +189,33 @@ public extension Asserter where Object == FileGenerationIntention {
         }.map(self)
     }
 
+    /// Opens an asserter context for a class extension with a given type name
+    /// in the underlying `FileGenerationIntention` object being tested.
+    /// Optionally a category name can be specified to return only extensions
+    /// with a matching `categoryName` property.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserter<Result>(
+        forClassExtensionNamed typeName: String,
+        categoryName: String? = nil,
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<ClassExtensionGenerationIntention>) -> Result?
+    ) -> Self? {
+
+        return asserter(forKeyPath: \.extensionIntentions) { types in
+            types.asserterForFirstElement(
+                message: #"Could not find class extension with name "\#(typeName)" and category name "\#(categoryName ?? "<any>")""#,
+                file: file,
+                line: line
+            ) {
+                $0.typeName == typeName && (categoryName == nil || $0.categoryName == categoryName)
+            }?.inClosure(closure)
+        }
+    }
+
     /// Opens an asserter context for a global function with a given name in the
     /// underlying `FileGenerationIntention` object being tested.
     ///
