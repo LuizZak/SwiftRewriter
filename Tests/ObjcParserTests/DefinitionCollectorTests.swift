@@ -13,14 +13,13 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "short int a;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
-                        .assert(name: "a")?
-                        .assert(type: "signed short int")?
-                        .assert(isStatic: false)?
-                        .assertNoInitializer()
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: VariableDeclaration.self)?
+                    .assert(name: "a")?
+                    .assert(type: "signed short int")?
+                    .assert(isStatic: false)?
+                    .assertNoInitializer()
+            }
         }
     }
 
@@ -28,13 +27,12 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "static short int a;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
-                        .assert(name: "a")?
-                        .assert(type: "signed short int")?
-                        .assert(isStatic: true)
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: VariableDeclaration.self)?
+                    .assert(name: "a")?
+                    .assert(type: "signed short int")?
+                    .assert(isStatic: true)
+            }
         }
     }
 
@@ -42,13 +40,12 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "short int a = 0;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
-                        .assert(name: "a")?
-                        .assert(type: "signed short int")?
-                        .assert(expressionString: "0")
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: VariableDeclaration.self)?
+                    .assert(name: "a")?
+                    .assert(type: "signed short int")?
+                    .assert(expressionString: "0")
+            }
         }
     }
 
@@ -56,12 +53,11 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "const char a;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
-                        .assert(name: "a")?
-                        .assert(type: .qualified("char", qualifiers: [.const]))
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: VariableDeclaration.self)?
+                    .assert(name: "a")?
+                    .assert(type: .qualified("char", qualifiers: [.const]))
+            }
         }
     }
 
@@ -69,13 +65,12 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "short int *a;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
-                        .assert(name: "a")?
-                        .assert(type: .pointer("signed short int"))?
-                        .assertNoInitializer()
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: VariableDeclaration.self)?
+                    .assert(name: "a")?
+                    .assert(type: .pointer("signed short int"))?
+                    .assertNoInitializer()
+            }
         }
     }
 
@@ -83,13 +78,12 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "short int *_Nonnull a;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
-                        .assert(name: "a")?
-                        .assert(type: .pointer("signed short int", nullabilitySpecifier: .nonnull))?
-                        .assertNoInitializer()
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: VariableDeclaration.self)?
+                    .assert(name: "a")?
+                    .assert(type: .pointer("signed short int", nullabilitySpecifier: .nonnull))?
+                    .assertNoInitializer()
+            }
         }
     }
 
@@ -97,13 +91,12 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "short int *const a;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
-                        .assert(name: "a")?
-                        .assert(type: .pointer("signed short int", qualifiers: [.const]))?
-                        .assertNoInitializer()
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: VariableDeclaration.self)?
+                    .assert(name: "a")?
+                    .assert(type: .pointer("signed short int", qualifiers: [.const]))?
+                    .assertNoInitializer()
+            }
         }
     }
 
@@ -111,13 +104,12 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "_Nonnull callback a;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
-                        .assert(name: "a")?
-                        .assert(type: .nullabilitySpecified(specifier: .nonnull, "callback"))?
-                        .assertNoInitializer()
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: VariableDeclaration.self)?
+                    .assert(name: "a")?
+                    .assert(type: .nullabilitySpecified(specifier: .nonnull, "callback"))?
+                    .assertNoInitializer()
+            }
         }
     }
 
@@ -125,21 +117,20 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "void (^a)(int, char *p2);")
 
         tester.assert { asserter in
-            asserter.assertCount(1)?
-                .asserter(forItemAt: 0) { decl in
-                    decl.assert(isOfType: VariableDeclaration.self)?
-                        .assert(name: "a")?
-                        .assert(
-                            type: .blockType(
-                                name: "a",
-                                returnType: .void,
-                                parameters: [
-                                    "signed int",
-                                    .pointer("char")
-                                ]
-                            )
+            asserter.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: VariableDeclaration.self)?
+                    .assert(name: "a")?
+                    .assert(
+                        type: .blockType(
+                            name: "a",
+                            returnType: .void,
+                            parameters: [
+                                "signed int",
+                                .pointer("char")
+                            ]
                         )
-                }
+                    )
+            }
         }
     }
 
@@ -147,18 +138,17 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "void (^_Nonnull a)();")
 
         tester.assert { asserter in
-            asserter.assertCount(1)?
-                .asserter(forItemAt: 0) { decl in
-                    decl.assert(isOfType: VariableDeclaration.self)?
-                        .assert(name: "a")?
-                        .assert(
-                            type: .blockType(
-                                name: "a",
-                                returnType: .void,
-                                nullabilitySpecifier: .nonnull
-                            )
+            asserter.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: VariableDeclaration.self)?
+                    .assert(name: "a")?
+                    .assert(
+                        type: .blockType(
+                            name: "a",
+                            returnType: .void,
+                            nullabilitySpecifier: .nonnull
                         )
-                }
+                    )
+            }
         }
     }
 
@@ -167,20 +157,20 @@ class DefinitionCollectorTests: XCTestCase {
 
         tester.assert { nodeList in
             nodeList.asserterForIterator()
-                .asserterForNext { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
+                .asserterForNext { decl in
+                    decl.assert(isOfType: VariableDeclaration.self)?
                         .assert(type: "signed short int")?
                         .assert(name: "a")?
                         .assertNoInitializer()
                 }?
-                .asserterForNext { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
+                .asserterForNext { decl in
+                    decl.assert(isOfType: VariableDeclaration.self)?
                         .assert(type: .pointer("signed short int"))?
                         .assert(name: "b")?
                         .assert(expressionString: "NULL")
                 }?
-                .asserterForNext { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
+                .asserterForNext { decl in
+                    decl.assert(isOfType: VariableDeclaration.self)?
                         .assert(type: .fixedArray("signed short int", length: 5))?
                         .assert(name: "c")?
                         .assertNoInitializer()
@@ -193,23 +183,21 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "void global(int p1, int*);")
 
         tester.assert { nodeList in
-            nodeList.asserterForIterator()
-                .asserterForNext { intNode in
-                    intNode.assert(isOfType: FunctionDefinition.self)?
-                        .assert(returnType: "void")?
-                        .assert(name: "global")?
-                        .assertParameterCount(2)?
-                        .asserter(forParameterAt: 0) { p1 in
-                            p1.assert(name: "p1")?
-                                .assert(type: "signed int")
-                        }?
-                        .asserter(forParameterAt: 1) { p2 in
-                            p2.assertNoName()?
-                                .assert(type: .pointer("signed int"))
-                        }?
-                        .assert(isVariadic: false)
-                }?
-                .assertIsAtEnd()
+            nodeList.asserterForIterator().asserterForNext { decl in
+                decl.assert(isOfType: FunctionDefinition.self)?
+                    .assert(returnType: "void")?
+                    .assert(name: "global")?
+                    .assertParameterCount(2)?
+                    .asserter(forParameterAt: 0) { p1 in
+                        p1.assert(name: "p1")?
+                            .assert(type: "signed int")
+                    }?
+                    .asserter(forParameterAt: 1) { p2 in
+                        p2.assertNoName()?
+                            .assert(type: .pointer("signed int"))
+                    }?
+                    .assert(isVariadic: false)
+            }?.assertIsAtEnd()
         }
     }
     
@@ -217,26 +205,25 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "NSArray<NSArray<NSString*>*> *_Nonnull global();")
 
         tester.assert { asserter in
-            asserter.asserterForIterator()
-                .asserterForNext { decl in
-                    decl.assert(isOfType: FunctionDefinition.self)?
-                        .assert(
-                            returnType: .pointer(
-                                .genericTypeName(
-                                    "NSArray",
-                                    typeParameters: [
-                                        .genericTypeName(
-                                            "NSArray",
-                                            typeParameters: [
-                                                .pointer("NSString")
-                                            ]
-                                        ).wrapAsPointer
-                                    ]
-                                ),
-                                nullabilitySpecifier: .nonnull
-                            )
+            asserter.asserterForIterator().asserterForNext { decl in
+                decl.assert(isOfType: FunctionDefinition.self)?
+                    .assert(
+                        returnType: .pointer(
+                            .genericTypeName(
+                                "NSArray",
+                                typeParameters: [
+                                    .genericTypeName(
+                                        "NSArray",
+                                        typeParameters: [
+                                            .pointer("NSString")
+                                        ]
+                                    ).wrapAsPointer
+                                ]
+                            ),
+                            nullabilitySpecifier: .nonnull
                         )
-                }
+                    )
+            }?.assertIsAtEnd()
         }
     }
 
@@ -244,12 +231,11 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "short int a(int p1, ...);")
 
         tester.assert { asserter in
-            asserter.asserterForIterator()
-                .asserterForNext { decl in
-                    decl.assert(isOfType: FunctionDefinition.self)?
-                        .assertParameterCount(1)?
-                        .assert(isVariadic: true)
-                }
+            asserter.asserterForIterator().asserterForNext { decl in
+                decl.assert(isOfType: FunctionDefinition.self)?
+                    .assertParameterCount(1)?
+                    .assert(isVariadic: true)
+            }?.assertIsAtEnd()
         }
     }
 
@@ -257,13 +243,12 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "typedef short int A;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: TypedefNode.self)?
-                        .assertChildCount(2)?
-                        .assert(type: "signed short int")?
-                        .assert(name: "A")
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: TypedefNode.self)?
+                    .assertChildCount(2)?
+                    .assert(type: "signed short int")?
+                    .assert(name: "A")
+            }
         }
     }
 
@@ -271,13 +256,12 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "typedef void(^callback)();")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: TypedefNode.self)?
-                        .assertChildCount(2)?
-                        .assert(type: .blockType(name: "callback", returnType: .void))?
-                        .assert(name: "callback")
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: TypedefNode.self)?
+                    .assertChildCount(2)?
+                    .assert(type: .blockType(name: "callback", returnType: .void))?
+                    .assert(name: "callback")
+            }
         }
     }
 
@@ -285,20 +269,19 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "typedef int (*callback)(void (^)(), void *);")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: TypedefNode.self)?
-                        .assertChildCount(2)?
-                        .assert(type: .functionPointer(
-                            name: "callback",
-                            returnType: "signed int",
-                            parameters: [
-                                .blockType(name: nil, returnType: .void),
-                                .pointer(.void)
-                            ]
-                        ))?
-                        .assert(name: "callback")
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: TypedefNode.self)?
+                    .assertChildCount(2)?
+                    .assert(type: .functionPointer(
+                        name: "callback",
+                        returnType: "signed int",
+                        parameters: [
+                            .blockType(name: nil, returnType: .void),
+                            .pointer(.void)
+                        ]
+                    ))?
+                    .assert(name: "callback")
+            }
         }
     }
 
@@ -307,13 +290,12 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "typedef struct a { int b; } *c;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(2)?
-                .asserter(forItemAt: 0) { aNode in
-                    aNode.assert(isOfType: TypedefNode.self)?
-                        .assertChildCount(2)?
-                        .assert(name: "A")?
-                        .assert(type: .pointer(.void))
-                }
+            nodeList.assertCount(2)?.asserter(forItemAt: 0) { aNode in
+                aNode.assert(isOfType: TypedefNode.self)?
+                    .assertChildCount(2)?
+                    .assert(name: "A")?
+                    .assert(type: .pointer(.void))
+            }
         }
     }
 
@@ -321,13 +303,12 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "typedef struct { int field; } *A;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { aNode in
-                    aNode.assert(isOfType: TypedefNode.self)?
-                        .assertChildCount(2)?
-                        .assert(name: "A")?
-                        .assert(type: .pointer(.anonymousStruct))
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { aNode in
+                aNode.assert(isOfType: TypedefNode.self)?
+                    .assertChildCount(2)?
+                    .assert(name: "A")?
+                    .assert(type: .pointer(.anonymousStruct))
+            }
         }
     }
 
@@ -335,13 +316,12 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "typedef struct _A *A;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { aNode in
-                    aNode.assert(isOfType: TypedefNode.self)?
-                        .assertChildCount(2)?
-                        .assert(name: "A")?
-                        .assert(type: .pointer(.incompleteStruct("_A")))
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { aNode in
+                aNode.assert(isOfType: TypedefNode.self)?
+                    .assertChildCount(2)?
+                    .assert(name: "A")?
+                    .assert(type: .pointer(.incompleteStruct("_A")))
+            }
         }
     }
 
@@ -349,13 +329,12 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "typedef struct _A **A;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { aNode in
-                    aNode.assert(isOfType: TypedefNode.self)?
-                        .assertChildCount(2)?
-                        .assert(name: "A")?
-                        .assert(type: .pointer(.pointer(.incompleteStruct("_A"))))
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { aNode in
+                aNode.assert(isOfType: TypedefNode.self)?
+                    .assertChildCount(2)?
+                    .assert(name: "A")?
+                    .assert(type: .pointer(.pointer(.incompleteStruct("_A"))))
+            }
         }
     }
 
@@ -383,32 +362,31 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "struct AStruct { int field0; };")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { aStruct in
-                    aStruct.assert(isOfType: ObjcStructDeclaration.self)?
-                        .assertChildCount(2)?
-                        .assert(name: "AStruct")?
-                        .assertFieldCount(1)?
-                        .asserter(forFieldName: "field0") { field0 in
-                            field0
-                                .assert(name: "field0")?
-                                .assert(type: "signed int")
-                        }
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { aStruct in
+                aStruct
+                    .assert(isOfType: ObjcStructDeclaration.self)?
+                    .assertChildCount(2)?
+                    .assert(name: "AStruct")?
+                    .assertFieldCount(1)?
+                    .asserter(forFieldName: "field0") { field0 in
+                        field0
+                            .assert(name: "field0")?
+                            .assert(type: "signed int")
+                    }
+            }
         }
     }
     func testCollect_singleDecl_struct_incomplete() {
         let tester = prepareTest(declaration: "struct a b;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
-                        .assert(name: "b")?
-                        .assert(type: .incompleteStruct("a"))?
-                        .assert(isStatic: false)?
-                        .assertNoInitializer()
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: VariableDeclaration.self)?
+                    .assert(name: "b")?
+                    .assert(type: .incompleteStruct("a"))?
+                    .assert(isStatic: false)?
+                    .assertNoInitializer()
+            }
         }
     }
 
@@ -416,18 +394,18 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "typedef struct { int field0; } AStruct;")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { aStruct in
-                    aStruct.assert(isOfType: ObjcStructDeclaration.self)?
-                        .assertChildCount(2)?
-                        .assert(name: "AStruct")?
-                        .assertFieldCount(1)?
-                        .asserter(forFieldName: "field0") { field0 in
-                            field0
-                                .assert(name: "field0")?
-                                .assert(type: "signed int")
-                        }
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { aStruct in
+                aStruct
+                    .assert(isOfType: ObjcStructDeclaration.self)?
+                    .assertChildCount(2)?
+                    .assert(name: "AStruct")?
+                    .assertFieldCount(1)?
+                    .asserter(forFieldName: "field0") { field0 in
+                        field0
+                            .assert(name: "field0")?
+                            .assert(type: "signed int")
+                    }
+            }
         }
     }
 
@@ -437,7 +415,8 @@ class DefinitionCollectorTests: XCTestCase {
         tester.assert { nodeList in
             nodeList.assertCount(2)?
                 .asserter(forItemAt: 0) { aStruct in
-                    aStruct.assert(isOfType: ObjcStructDeclaration.self)?
+                    aStruct
+                        .assert(isOfType: ObjcStructDeclaration.self)?
                         .assert(name: "AStruct")?
                         .assertFieldCount(1)?
                         .asserter(forFieldName: "field0") { field0 in
@@ -447,7 +426,8 @@ class DefinitionCollectorTests: XCTestCase {
                         }
                 }?
                 .asserter(forItemAt: 1) { aStruct in
-                    aStruct.assert(isOfType: TypedefNode.self)?
+                    aStruct
+                        .assert(isOfType: TypedefNode.self)?
                         .assertChildCount(2)?
                         .assert(name: "AStructPtr")?
                         .assert(type: .pointer("AStruct"))
@@ -483,7 +463,7 @@ class DefinitionCollectorTests: XCTestCase {
                     funcRet.assert(isOfType: TypedefNode.self)?
                         .assert(name: "AFuncRet")?
                         .assert(type: .functionPointer(name: "AFuncRet", returnType: "A"))
-                }
+                }?.assertIsAtEnd()
         }
     }
 
@@ -491,28 +471,27 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "enum AnEnum { CASE0 = 0, CASE1 = 1, CASE2 };")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: ObjcEnumDeclaration.self)?
-                        .assert(name: "AnEnum")?
-                        .assertNoTypeName()?
-                        .assertEnumeratorCount(3)?
-                        .asserter(forEnumeratorName: "CASE0") { case0 in
-                            case0
-                                .assert(name: "CASE0")?
-                                .assert(expressionString: "0")
-                        }?
-                        .asserter(forEnumeratorName: "CASE1") { case0 in
-                            case0
-                                .assert(name: "CASE1")?
-                                .assert(expressionString: "1")
-                        }?
-                        .asserter(forEnumeratorName: "CASE2") { case0 in
-                            case0
-                                .assert(name: "CASE2")?
-                                .assertNoExpression()
-                        }
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: ObjcEnumDeclaration.self)?
+                    .assert(name: "AnEnum")?
+                    .assertNoTypeName()?
+                    .assertEnumeratorCount(3)?
+                    .asserter(forEnumeratorName: "CASE0") { case0 in
+                        case0
+                            .assert(name: "CASE0")?
+                            .assert(expressionString: "0")
+                    }?
+                    .asserter(forEnumeratorName: "CASE1") { case0 in
+                        case0
+                            .assert(name: "CASE1")?
+                            .assert(expressionString: "1")
+                    }?
+                    .asserter(forEnumeratorName: "CASE2") { case0 in
+                        case0
+                            .assert(name: "CASE2")?
+                            .assertNoExpression()
+                    }
+            }
         }
     }
 
@@ -520,28 +499,27 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "typedef NS_ENUM(NSInteger, AnEnum) { CASE0 = 0, CASE1 = 1, CASE2 };")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: ObjcEnumDeclaration.self)?
-                        .assert(name: "AnEnum")?
-                        .assert(typeName: "NSInteger")?
-                        .assertEnumeratorCount(3)?
-                        .asserter(forEnumeratorName: "CASE0") { case0 in
-                            case0
-                                .assert(name: "CASE0")?
-                                .assert(expressionString: "0")
-                        }?
-                        .asserter(forEnumeratorName: "CASE1") { case0 in
-                            case0
-                                .assert(name: "CASE1")?
-                                .assert(expressionString: "1")
-                        }?
-                        .asserter(forEnumeratorName: "CASE2") { case0 in
-                            case0
-                                .assert(name: "CASE2")?
-                                .assertNoExpression()
-                        }
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: ObjcEnumDeclaration.self)?
+                    .assert(name: "AnEnum")?
+                    .assert(typeName: "NSInteger")?
+                    .assertEnumeratorCount(3)?
+                    .asserter(forEnumeratorName: "CASE0") { case0 in
+                        case0
+                            .assert(name: "CASE0")?
+                            .assert(expressionString: "0")
+                    }?
+                    .asserter(forEnumeratorName: "CASE1") { case0 in
+                        case0
+                            .assert(name: "CASE1")?
+                            .assert(expressionString: "1")
+                    }?
+                    .asserter(forEnumeratorName: "CASE2") { case0 in
+                        case0
+                            .assert(name: "CASE2")?
+                            .assertNoExpression()
+                    }
+            }
         }
     }
 
@@ -549,28 +527,27 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "typedef NS_OPTIONS(NSInteger, AnEnum) { CASE0 = 0, CASE1 = 1, CASE2 };")
 
         tester.assert { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: ObjcEnumDeclaration.self)?
-                        .assert(name: "AnEnum")?
-                        .assert(typeName: "NSInteger")?
-                        .assertEnumeratorCount(3)?
-                        .asserter(forEnumeratorName: "CASE0") { case0 in
-                            case0
-                                .assert(name: "CASE0")?
-                                .assert(expressionString: "0")
-                        }?
-                        .asserter(forEnumeratorName: "CASE1") { case0 in
-                            case0
-                                .assert(name: "CASE1")?
-                                .assert(expressionString: "1")
-                        }?
-                        .asserter(forEnumeratorName: "CASE2") { case0 in
-                            case0
-                                .assert(name: "CASE2")?
-                                .assertNoExpression()
-                        }
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: ObjcEnumDeclaration.self)?
+                    .assert(name: "AnEnum")?
+                    .assert(typeName: "NSInteger")?
+                    .assertEnumeratorCount(3)?
+                    .asserter(forEnumeratorName: "CASE0") { case0 in
+                        case0
+                            .assert(name: "CASE0")?
+                            .assert(expressionString: "0")
+                    }?
+                    .asserter(forEnumeratorName: "CASE1") { case0 in
+                        case0
+                            .assert(name: "CASE1")?
+                            .assert(expressionString: "1")
+                    }?
+                    .asserter(forEnumeratorName: "CASE2") { case0 in
+                        case0
+                            .assert(name: "CASE2")?
+                            .assertNoExpression()
+                    }
+            }
         }
     }
 
@@ -578,13 +555,12 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "short int a;")
 
         tester.assertFieldDeclaration { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
-                        .assert(type: "signed short int")?
-                        .assert(name: "a")?
-                        .assertNoInitializer()
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: VariableDeclaration.self)?
+                    .assert(type: "signed short int")?
+                    .assert(name: "a")?
+                    .assertNoInitializer()
+            }
         }
     }
 
@@ -592,21 +568,20 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "void (^a)(int, char *p2);")
 
         tester.assertFieldDeclaration { asserter in
-            asserter.assertCount(1)?
-                .asserter(forItemAt: 0) { decl in
-                    decl.assert(isOfType: VariableDeclaration.self)?
-                        .assert(name: "a")?
-                        .assert(
-                            type: .blockType(
-                                name: "a",
-                                returnType: .void,
-                                parameters: [
-                                    "signed int",
-                                    .pointer("char")
-                                ]
-                            )
+            asserter.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: VariableDeclaration.self)?
+                    .assert(name: "a")?
+                    .assert(
+                        type: .blockType(
+                            name: "a",
+                            returnType: .void,
+                            parameters: [
+                                "signed int",
+                                .pointer("char")
+                            ]
                         )
-                }
+                    )
+            }
         }
     }
 
@@ -614,13 +589,12 @@ class DefinitionCollectorTests: XCTestCase {
         let tester = prepareTest(declaration: "BOOL value;")
 
         tester.assertFieldDeclaration { nodeList in
-            nodeList.assertCount(1)?
-                .asserter(forItemAt: 0) { intNode in
-                    intNode.assert(isOfType: VariableDeclaration.self)?
-                        .assert(type: "BOOL")?
-                        .assert(name: "value")?
-                        .assertNoInitializer()
-                }
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: VariableDeclaration.self)?
+                    .assert(type: "BOOL")?
+                    .assert(name: "value")?
+                    .assertNoInitializer()
+            }
         }
     }
 
