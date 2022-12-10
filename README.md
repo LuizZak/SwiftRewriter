@@ -7,7 +7,7 @@
 
 [![codecov](https://codecov.io/gh/LuizZak/SwiftRewriter/branch/master/graph/badge.svg?token=xoSZNXwFLG)](https://codecov.io/gh/LuizZak/SwiftRewriter)
 
-A program that aims to aid in automatization of conversion of Objective-C code into equivalent Swift code.
+A source-to-source compiler for expediting Objective-C-to-Swift source conversion.
 
 An experimental WIP JavaScript frontend is also available.
 
@@ -52,7 +52,7 @@ MyClass.m:
 Running SwiftRewriter as shown:
 
 ```bash
-$ swift run SwiftRewriter files --colorize --target stdout MyClass.h MyClass.m
+$ swift run SwiftRewriter objc files --colorize --target stdout MyClass.h MyClass.m
 ```
 
 will produce the following Swift file in the standard output:
@@ -87,13 +87,13 @@ Xcode 14.1 & Swift 5.7.1
 - From the working directory execute as follows:
 
 ```bash
-$ swift run -c=release SwiftRewriter files --colorize --target stdout /path/to/MyClass.h /path/to/MyClass.m
+$ swift run -c=release SwiftRewriter objc files --colorize --target stdout /path/to/MyClass.h /path/to/MyClass.m
 ```
 
 - To convert a directory containing Objective-C files (recursively), saving resulting .swift files to disk, execute as follows:
 
 ```bash
-$ swift run -c=release SwiftRewriter path /path/to/project/
+$ swift run -c=release SwiftRewriter objc path /path/to/project/
 ```
 
 - Run `swift run SwiftRewriter --help` to print the full reference of command line arguments SwiftRewriter accepts. Reference also available bellow (for `path` subcommand):
