@@ -57,6 +57,7 @@ Unlike high level constructs such as classes and global definitions, no intermed
 
 ##### summary
 - `Intention` protocol for representing Swift declarations that will be generated;
+    - aka an 'intention' to generate a Swift construct, and not a Swift construct itself.
 - `Intentions` target contains all declarations used by SwiftRewriter;
     - Granularity stops at statements and expressions: those are represented by `SwiftAST` constructs instead.
 - `IntentionCollection` bundles all `Intentions`.
