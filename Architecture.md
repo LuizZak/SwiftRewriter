@@ -14,7 +14,14 @@ All of these steps are encapsulated and run by `SwiftRewriter` within the `Swift
 
 An overview of the steps taken is described bellow.
 
-#### 1. Objective-C parsing
+---
+## 1. Objective-C parsing
+
+##### summary
+- [ANTLR](http://www.antlr.org/) used as main parser generator;
+- `ASTNode` class used as abstraction over ANTLR for next steps;
+- Statement and expressions are not parsed in this step.
+---
 
 A mixture of tooled and manual parsing is used on input .h/.m files to parse.
 
@@ -22,7 +29,7 @@ The input source code is provided via an `InputSourcesProvider`-implementer prov
 
 The source code is then processed by `SourcePreprocessor` objects provided to `SwiftRewriter.init`. These pre-processors have access to the raw string data for the files, and can be used to apply transformations such as comment removal or preprocessor expansion before actual parsing is done for each file.
 
-For the tooled part, [ANTLR](http://www.antlr.org/) is used to do the heavy lifting and parse all the input source code, and a couple of more fine-grained parsing steps are performed manually with `ObjcParser` (mainly Objective-C type signature parsing).
+For the tooled part, [ANTLR](http://www.antlr.org/) is used to do the heavy lifting and parse all the input source code.
 
 All input parsing for a single file can be done with just an `ObjcParser` instance.
 
@@ -30,15 +37,30 @@ Since trees produced by ANTLR are too heavyweight and reflect a lot of the compl
 
 The source code for the AST class structure used is found inside the `GrammarModels` target, and is used throughout the rest of the process to inspect the input AST.
 
-#### 2. Statements parsing
+---
+## 2. Statements parsing
+
+##### summary
+- `SwiftAST` target for the Swift statement/expression syntax representation;
+    - `SyntaxNode` is the analogous `ASTNode` but for statement and expressions, instead of types and declarations.
+- ANTLR syntax is parsed directly into `SwiftAST` for function bodies.
+---
 
 Parsing of Objective-C method bodies is postponed to after all files are parsed. This helps ensure we can produce a statement tree that has full visibility of all symbols and classes. This is relevant for the initial type-parsing and typealias generation steps.
 
 Statements are parsed into a customized AST for representing Swift grammars, contained within the `SwiftAST` target.
 
-- Unlike high level constructs such as classes and global definitions, no intermediary representation is used to represent statement AST's between Objective-C and Swift, and the source code is translated directly from the ANTLR-produced tree for the Objective-C code into a Swift AST structure, for all method bodies.
+Unlike high level constructs such as classes and global definitions, no intermediary representation is used to represent statement AST's between Objective-C and Swift, and the source code is translated directly from the ANTLR-produced tree for the Objective-C code into a Swift AST structure, for all method bodies.
 
-#### 2.1 Intention generation
+---
+## 2.1 Intention generation
+
+##### summary
+- `Intention` protocol for representing Swift declarations that will be generated;
+- `Intentions` target contains all declarations used by SwiftRewriter;
+    - Granularity stops at statements and expressions: those are represented by `SwiftAST` constructs instead.
+- `IntentionCollection` bundles all `Intentions`.
+---
 
 The complete grammar tree is then analyzed and grouped up into sets of objects that encapsulate the intent of creating matching Swift source code for each object from the original Objective-C source code. These structures are aptly named `Intentions`. Many intention types are used to represent the final Swift source code that the tool will generate.
 
@@ -61,25 +83,48 @@ File intentions
  └ ... etc
 ```
 
+An `IntentionCollection` class is provided that serves as a root for all `FileGenerationIntention`s, which will ultimately be used to generate the final Swift code.
+
 Supplementary context and historical tracking is available to allow inspection of the origin of all intentions, including manipulations by intention modifying steps described bellow.
 
-#### 3. Type resolving
+---
+## 3. Type resolving
+
+##### summary
+- `TypeSystem` target provided for building type systems;
+    - `ExpressionTypeResolver` used as main type resolution class.
+    - `TypeResolverInvoker` used for doing type resolution across all functions and types in an `IntentionCollection`.
+---
 
 The code is inspected with a type resolver (`ExpressionTypeResolver`) to assign each expression in each statement a type. This must be done so that AST rewriting passes that are applied later have access to semantic context for expressions.
 
+To ease in analysis of multiple statements spanning multiple function bodies across known declarations, a `DefaultTypeResolverInvoker` is provided that can invoke type resolution for all statements and expressions in the code contained in intentions via either an `IntentionCollection` or individual `Intention` types such as method or initializer generation intentions.
+
 This step is redone many times later during intention and AST rewriting steps to keep the typing information data up to date with respect to source-code transformations.
 
-#### 4. Intention rewriting
+---
+## 4. Intention rewriting
+
+##### summary
+- `IntentionPass` protocol represents granular `Intention` transformations;
+- Intention passes take turns receiving an `IntentionCollection` with all Swift declarations and modifying it at will before passing it on to the next intention pass;
+---
 
 The final collection of intentions is passed to special steps that are free to change the structure of the generated intentions before actual outputting is performed.
 
-These steps are represented by an `IntentionPass` protocol, which is fed to a `SwiftRewriter` via an instance of `IntentionPassSource`. These intention passes are then fed the entire source code represented by the intermediary intention collection. Intention passes are free to delete, merge, rename, or create new source-generation intentions.
+These steps are represented by an `IntentionPass` protocol, which is fed to a `SwiftRewriter` via an instance of `IntentionPassSource`. These intention passes are then fed the entire source code represented by the intermediary `IntentionCollection` structure. Intention passes are free to delete, merge, rename, or create new source-generation intentions.
 
-This is the step of the process in which external code-altering processors are allowed to change the resulting program's structure at a higher level. Actual method body rewriting should be done in a separate step (see [AST rewriting](#ASTRewriting)).
+This is the step of the process in which external code-altering processors are allowed to change the resulting program's structure at a higher level. Actual method body rewriting should be done in a separate step (see [AST Rewriting](#ASTRewriting)).
 
 - Intention passes are applied serially, in the same order as the `IntentionPassSource` provides them. Type resolution is invoked between each intention pass to keep the typing information up-to-date with respect to general source code transformations.
 
-#### 5. AST Rewriting
+---
+## 5. AST Rewriting
+
+##### summary
+- `ASTRewriterPass` is the analogous `IntentionPass` but for `SwiftAST` constructs;
+    - Expression and statements are not represented by `Intention` protocol and require this separate rewriting step.
+---
 
 After intention rewriting has finished altering the program's structure, special AST rewriters used solely for method bodies are applied to all methods. This allows external objects to modify the Swift AST before the final code is generated.
 
@@ -91,13 +136,21 @@ Expression passes are provided via an `ASTRewriterPassSource` protocol provided 
 - Expression types are resolved again after each individual rewriter pass finishes modifying the method's body, before the AST is handed to the next pass.
     - Rewriter passes must notify when changes are made via `ASTRewriterPassContext.notifyChangedTree` to allow type resolution to kick in in between rewriter passes.
 
-#### 6. Post-rewriting formatting
+---
+## 6. Post-rewriting formatting
 
-At this point, a syntax tree produced by [`swift-syntax`](https://github.com/apple/swift-syntax) is produced and passed to intermediary syntax rewriters that implement `SwiftSyntaxRewriterPass`, which refine the final AST before output.
+##### summary
+- [`SwiftSyntax`](https://github.com/apple/swift-syntax) is used to generate final code representation from each intention in an `IntentionCollection`;
+- `SwiftSyntaxRewriterPass` is the analogous `IntentionPass`/`ASTRewriterPass` but for the final Swift code before output.
+---
+
+At this point, a syntax tree produced by [`swift-syntax`](https://github.com/apple/swift-syntax) is produced base on all declarations in all files in an `IntentionCollection`, and each `SourceFileSyntax` is then passed to intermediary syntax rewriters that implement `SwiftSyntaxRewriterPass`, which refine the final AST before output.
 
 All syntax rewriters are contained in the target named `SwiftSyntaxRewriterPasses`.
 
-#### 7. Code output
+---
+## 7. Code output
+---
 
 At the final step, the code is output to an implementer of `WriterOutput` fed to `SwiftRewriter.init`.
 
