@@ -11,23 +11,25 @@ The tool splits the conversion process into six discrete steps, which are, whene
 ```
 ┌─────────────┐ ┌──────────────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌────────────────┐ ┌──────────┐
 │      1.     │ │          2.          │ │      3.     │ │      4.     │ │      5.     │ │       6.       │ │    7.    │
-│ Objective-C ├─┤ Statements parsing/  ├─┤    Type     ├─┤  Intention  ├─┤     AST     ├─┤ Post-rewriting ├─┤   Code   │
+│ Source lang ├─┤ Statements parsing/  ├─┤    Type     ├─┤  Intention  ├─┤     AST     ├─┤ Post-rewriting ├─┤   Code   │
 │   parsing   │ │ Intention generation │ │  resolving  │ │  rewriting  │ │  rewriting  │ │   formatting   │ │  output  │
 └─────────────┘ └──────────────────────┘ └─────────────┘ └─────────────┘ └─────────────┘ └────────────────┘ └──────────┘
 ```
 
-All of these steps are encapsulated and run by `SwiftRewriter` within the `SwiftRewriterLib` target.
+All of these steps are encapsulated and run by `ObjectiveC2SwiftRewriter` and `JavaScript2SwiftRewriter` within each frontend's main target.
 
 An overview of the steps taken is described bellow.
 
 ---
-## 1. Objective-C parsing
+## 1. Source lang parsing
 
 ##### summary
 - [ANTLR](http://www.antlr.org/) used as main parser generator;
-- `ObjcParser` target contains an `ObjcParser` class that performs code parsing.
+    - `ObjcParser` target contains an `ObjcParser` class that performs Objective-C code parsing.
+    - `JsParser` target contains a `JsParser` class that performs code JavaScript code parsing.
 - `ASTNode` class used as abstraction over ANTLR for next steps;
-    - Statement and expressions are not parsed in this step yet.
+    - Statement and expressions are not parsed in this step yet;
+    - Each language has its own target implementing appropriate `ASTNode` subclasses.
 ---
 
 A mixture of tooled and manual parsing is used on input .h/.m files to parse.
@@ -38,11 +40,11 @@ The source code is then processed by `SourcePreprocessor` objects provided to `S
 
 For the tooled part, [ANTLR](http://www.antlr.org/) is used to do the heavy lifting and parse all the input source code.
 
-All input parsing for a single file can be done with just an `ObjcParser` instance.
+All input parsing for a single file can be done with just an `ObjcParser` or `JsParser` instance, depending on the input language.
 
-Since trees produced by ANTLR are too heavyweight and reflect a lot of the complexity of Objective-C's grammar (which itself is complex due to the necessity to parse virtually any valid Objective-C source code), the produced AST is converted into a customized AST representation that is more useful for manipulation, rooted into a base `ASTNode` class.
+Since trees produced by ANTLR are too heavyweight and reflect a lot of the complexity of the source language's grammar, the produced AST is converted into a customized AST representation that is more useful for manipulation, rooted into a base `ASTNode` class.
 
-The source code for the AST class structure used is found inside the `ObjcGrammarModels` target, and is used throughout the rest of the process to inspect the input AST.
+The source code for the AST class structure used is found inside the `ObjcGrammarModels` and `JsGrammarModels` targets, and is used throughout the rest of the process to inspect the input AST.
 
 ---
 ## 2. Statements parsing
@@ -53,11 +55,11 @@ The source code for the AST class structure used is found inside the `ObjcGramma
 - ANTLR syntax is parsed directly into `SwiftAST` for function bodies.
 ---
 
-Parsing of Objective-C method bodies is postponed to after all files are parsed. This helps ensure we can produce a statement tree that has full visibility of all symbols and classes. This is relevant for the initial type-parsing and typealias generation steps.
+Parsing of source language method bodies is postponed to after all files are parsed. This helps ensure we can produce a statement tree that has full visibility of all symbols and classes. This is relevant for the initial type-parsing and typealias generation steps.
 
 Statements are parsed into a customized AST for representing Swift grammars, contained within the `SwiftAST` target.
 
-Unlike high level constructs such as classes and global definitions, no intermediary representation is used to represent statement AST's between Objective-C and Swift, and the source code is translated directly from the ANTLR-produced tree for the Objective-C code into a Swift AST structure, for all method bodies.
+Unlike high level constructs such as classes and global definitions, no intermediary representation is used to represent statement AST's between source language and Swift, and the source code is translated directly from the ANTLR-produced tree for the source language code into a Swift AST structure, for all method bodies.
 
 ---
 ## 2.1 Intention generation
@@ -70,7 +72,7 @@ Unlike high level constructs such as classes and global definitions, no intermed
 - `IntentionCollection` used to bundle and pass around all generated `Intentions` that will be used to create code later.
 ---
 
-The complete grammar tree is then analyzed and grouped up into sets of objects that encapsulate the intent of creating matching Swift source code for each object from the original Objective-C source code. These structures are aptly named `Intentions`. Many intention types are used to represent the final Swift source code that the tool will generate.
+The complete grammar tree is then analyzed and grouped up into sets of objects that encapsulate the intent of creating matching Swift source code for each object from the original source language. These structures are aptly named `Intentions`. Many intention types are used to represent the final Swift source code that the tool will generate.
 
 Source code statements/expressions are not split into individual intentions; these constructs remains encapsulated behind SwiftAST trees, which are contained within `FunctionBodyIntention` instances, one for each method body.
 
