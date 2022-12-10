@@ -119,6 +119,33 @@ public extension Asserter where Object == IntentionCollection {
         }.map(self)
     }
 
+    /// Opens an asserter context for a class extension with a given type name
+    /// in the underlying `IntentionCollection` object being tested, looking at
+    /// each file until a class extension with a specified name is found.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func asserter<Result>(
+        forClassExtensionNamed typeName: String,
+        file: StaticString = #file,
+        line: UInt = #line,
+        _ closure: (Asserter<ClassExtensionGenerationIntention>) -> Result?
+    ) -> Self? {
+
+        let extensions = object.extensionIntentions()
+
+        return asserter(for: extensions) { types in
+            types.asserterForFirstElement(
+                message: #"Could not find class extension with name "\#(typeName)""#,
+                file: file,
+                line: line
+            ) {
+                $0.typeName == typeName
+            }?.inClosure(closure)
+        }.map(self)
+    }
+
     /// Opens an asserter context for a global function with a given name in the
     /// underlying `IntentionCollection` object being tested, looking at each
     /// file until a global function with a specified name is found.

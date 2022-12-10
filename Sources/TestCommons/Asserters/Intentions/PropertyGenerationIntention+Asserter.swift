@@ -53,7 +53,7 @@ public extension Asserter where Object: PropertyGenerationIntention {
     ) -> Self? {
         
         asserter(forKeyPath: \.getter?.body) {
-            $0.assert(equals: getterBody, file: file, line: line)
+            $0.assert(statementEquals: getterBody, file: file, line: line)
         }
     }
 
@@ -74,7 +74,27 @@ public extension Asserter where Object: PropertyGenerationIntention {
     ) -> Self? {
         
         asserter(forKeyPath: \.setter?.body.body) {
-            $0.assert(equals: setterBody, file: file, line: line)
+            $0.assert(statementEquals: setterBody, file: file, line: line)
+        }
+    }
+
+    /// Asserts that the underlying `PropertyGenerationIntention` being tested
+    /// has a specified `valueIdentifier` in a `Mode.property` storage mode.
+    ///
+    /// Test fails if `setterValueIdentifier` is non-nil and the property is not
+    /// a `Mode.property` property.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        setterValueIdentifier: String?,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+        
+        asserter(forKeyPath: \.setter?.valueIdentifier) {
+            $0.assert(equals: setterValueIdentifier, file: file, line: line)
         }
     }
 
@@ -92,6 +112,66 @@ public extension Asserter where Object: PropertyGenerationIntention {
         
         asserter(forKeyPath: \.setterAccessLevel) {
             $0.assert(equals: setterAccessLevel, file: file, line: line)
+        }
+    }
+
+    /// Asserts that the underlying `PropertyGenerationIntention` being tested
+    /// is configured to be a value storage property with no getters or setters.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertIsStoredFieldMode(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+        
+        assertTrue(
+            message: "assertIsStoredFieldMode: Expected property \(object.name) to be a field.",
+            file: file,
+            line: line
+        ) { prop in
+            prop.mode.isField
+        }
+    }
+
+    /// Asserts that the underlying `PropertyGenerationIntention` being tested
+    /// is configured to be a computed property with just a getter.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertIsComputedMode(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+        
+        assertTrue(
+            message: "assertIsComputedMode: Expected property \(object.name) to be a computed property.",
+            file: file,
+            line: line
+        ) { prop in
+            prop.mode.isComputed
+        }
+    }
+
+    /// Asserts that the underlying `PropertyGenerationIntention` being tested
+    /// is configured to be a computed property with getter and setter bodies.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertIsPropertyMode(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+        
+        assertTrue(
+            message: "assertIsPropertyMode: Expected property \(object.name) to be a getter/setter property.",
+            file: file,
+            line: line
+        ) { prop in
+            prop.mode.isProperty
         }
     }
 }

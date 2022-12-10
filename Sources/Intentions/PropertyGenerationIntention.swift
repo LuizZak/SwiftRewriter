@@ -168,9 +168,16 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         try super.encode(to: container.superEncoder())
     }
     
+    /// Specifies the synthesize mode for a property.
     public enum Mode: Codable {
+        /// Property is created as a stored field that stores a value as a variable.
         case asField
+
+        /// Property is a computed property with a getter body and does not
+        /// require storage.
         case computed(FunctionBodyIntention)
+
+        /// Property has full getter/setter and does not require storage.
         case property(get: FunctionBodyIntention, set: Setter)
         
         public init(from decoder: Decoder) throws {
@@ -220,11 +227,32 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
             }
         }
         
+        /// Returns `true` if this `Mode` value is a `.asField` case.
         public var isField: Bool {
             switch self {
             case .asField:
                 return true
             case .computed, .property:
+                return false
+            }
+        }
+
+        /// Returns `true` if this `Mode` value is a `.computed` case.
+        public var isComputed: Bool {
+            switch self {
+            case .computed:
+                return true
+            case .asField, .property:
+                return false
+            }
+        }
+
+        /// Returns `true` if this `Mode` value is a `.property` case.
+        public var isProperty: Bool {
+            switch self {
+            case .property:
+                return true
+            case .asField, .computed:
                 return false
             }
         }

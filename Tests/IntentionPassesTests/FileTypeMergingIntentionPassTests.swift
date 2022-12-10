@@ -230,7 +230,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         Asserter(object: intentions).asserterForFiles { files in
             files.assertCount(1)
             files[0]?.asserter(forTypeNamed: "A") { type in
-                type[\.history.summary].assert(equals:
+                type.assert(historySummary:
                     """
                     [TypeMerge:FileTypeMergingIntentionPass] Creating definition for newly found method A.fromHeader()
                     """

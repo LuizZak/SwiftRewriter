@@ -101,6 +101,7 @@ public struct Asserter<Object> {
     /// for further chaining tests.
     @discardableResult
     public func assertTrue(
+        message: @autoclosure () -> String = "assertTrue failed.",
         file: StaticString = #file,
         line: UInt = #line,
         _ predicate: (Object) -> Bool
@@ -108,7 +109,7 @@ public struct Asserter<Object> {
 
         guard predicate(object) else {
             return assertFailed(
-                message: "assertTrue failed.",
+                message: message(),
                 file: file,
                 line: line
             )
@@ -297,10 +298,11 @@ public extension Asserter where Object: Equatable {
     ) -> Self? {
 
         guard object != expected else {
-            XCTAssertNotEqual(object, expected, message(), file: file, line: line)
-            dumpObject()
-
-            return nil
+            return assertFailed(
+                message: #"assert(notEquals:) failed: ("\#(object)") == ("\#(expected)"). \#(message())"#,
+                file: file,
+                line: line
+            )
         }
 
         return self
