@@ -13,7 +13,7 @@ public extension Asserter where Object: Collection, Object.Index == Int {
         
         guard object.count > index else {
             return assertFailed(
-                message: #"subscript[\#(index)] failed: collection has less than \#(index) item(s)."#,
+                message: #"subscript[\#(index)] failed: collection has less than \#(index + 1) item(s)."#,
                 file: file,
                 line: line
             )

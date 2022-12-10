@@ -101,7 +101,7 @@ public extension Asserter where Object == FunctionSignature {
 
         guard object.parameters.count > index else {
             return assertFailed(
-                message: #"asserter(forParameterAt: \#(index)) failed: parameter list has less than \#(index) parameter(s)."#,
+                message: #"asserter(forParameterAt: \#(index)) failed: parameter list has less than \#(index + 1) parameter(s)."#,
                 file: file,
                 line: line
             )
