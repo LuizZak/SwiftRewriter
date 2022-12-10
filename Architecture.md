@@ -60,7 +60,7 @@ Unlike high level constructs such as classes and global definitions, no intermed
     - aka an 'intention' to generate a Swift construct, and not a Swift construct itself.
 - `Intentions` target contains all declarations used by SwiftRewriter;
     - Granularity stops at statements and expressions: those are represented by `SwiftAST` constructs instead.
-- `IntentionCollection` bundles all `Intentions`.
+- `IntentionCollection` used to bundle and pass around all generated `Intentions` that will be used to create code later.
 ---
 
 The complete grammar tree is then analyzed and grouped up into sets of objects that encapsulate the intent of creating matching Swift source code for each object from the original Objective-C source code. These structures are aptly named `Intentions`. Many intention types are used to represent the final Swift source code that the tool will generate.
