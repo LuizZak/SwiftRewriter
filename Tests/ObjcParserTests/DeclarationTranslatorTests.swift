@@ -191,6 +191,17 @@ class DeclarationTranslatorTests: XCTestCase {
         }
     }
 
+    func testTranslate_singleDecl_variable_array_const() {
+        let tester = prepareTest(declaration: "int const a[];")
+
+        tester.assert { asserter in
+            asserter.assertCount(1)?
+                .assertVariable(name: "a")?
+                .assertNoInitializer()?
+                .assert(type: .pointer(.qualified("signed int", qualifiers: [.const])))
+        }
+    }
+
     func testTranslate_multiDecl_variable() {
         let tester = prepareTest(declaration: "short int a, b, *c;")
 

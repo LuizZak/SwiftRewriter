@@ -304,6 +304,23 @@ class DeclarationExtractorTests: XCTestCase {
         }
     }
 
+    func testExtract_declaration_singleDecl_constArray() {
+        let tester = prepareTest(declaration: "int const a[];")
+
+        tester.assert { (asserter: DeclarationsAsserter) in
+            asserter
+                .assertVariable(name: "a")?
+                .assert(specifierStrings: ["int", "const"])?
+                .assertIsStaticArray(count: nil)?
+                .assertIsNotPointer()?
+                .asserterForSourceRange { sourceRange in
+                    sourceRange.assert(
+                        start: .init(line: 1, column: 11)
+                    )
+                }
+        }
+    }
+
     func testExtract_declaration_singleDecl_blockDecl_noParameters() {
         let tester = prepareTest(declaration: "void (^a)();")
 

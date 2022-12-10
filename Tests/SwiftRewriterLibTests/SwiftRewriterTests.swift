@@ -3218,4 +3218,16 @@ class SwiftRewriterTests: XCTestCase {
             """
         )
     }
+    
+    func testRewriteCArrayFunctionArgument() {
+        assertRewrite(
+            objc: """
+            void f(unsigned count, AType p[], AType const p2[]) {
+            }
+            """,
+            swift: """
+            func f(_ count: CUnsignedInt, _ p: UnsafeMutablePointer<AType>!, _ p2: UnsafePointer<AType>!) {
+            }
+            """)
+    }
 }

@@ -521,3 +521,36 @@ public enum ObjcIBOutletQualifier: Hashable, Codable, CustomStringConvertible {
         }
     }
 }
+
+/// Returns the contained type name within a given Objective-C type, if available,
+/// looking through nested `.qualified`, `.specified`, and `.nullabilitySpecified`
+/// cases until a proper type name is found.
+///
+/// Looks through pointer and qualifier/specifiers until a root nominal type
+/// `.typeName(name)` is found, returning
+/// the string representation of the name, otherwise `nil` is returned.
+public func typeNameIn(objcType: ObjcType) -> String? {
+
+    switch objcType {
+    case .typeName(let name):
+        return name
+
+    case .nullabilitySpecified(_, let type),
+        .qualified(let type, _),
+        .specified(_, let type):
+        return typeNameIn(objcType: type)
+    
+    case .instancetype,
+        .id,
+        .anonymousEnum,
+        .anonymousStruct,
+        .incompleteStruct,
+        .blockType,
+        .functionPointer,
+        .pointer,
+        .fixedArray,
+        .void,
+        .genericTypeName:
+        return nil
+    }
+}
