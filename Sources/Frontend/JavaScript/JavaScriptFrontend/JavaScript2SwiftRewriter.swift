@@ -570,6 +570,19 @@ public final class JavaScript2SwiftRewriter {
             applier.apply(on: intentionCollection)
         }
         
+        if settings.stageDiagnostics.contains(.callGraph) {
+            let graph = CallGraph.fromIntentions(
+                intentionCollection,
+                typeSystem: typeSystem
+            )
+
+            let graphviz = graph.asGraphviz().generateFile(
+                options: .init(simplifyGroups: false)
+            )
+
+            print(graphviz)
+        }
+        
         typeSystem.tearDownCache()
     }
     
@@ -816,6 +829,9 @@ public final class JavaScript2SwiftRewriter {
         public enum StageDiagnosticFlag {
             /// Prints result of grammar parsing stage
             case parsedAST
+
+            /// Prints result of call graph from generated IntentionCollection.
+            case callGraph
         }
     }
 }

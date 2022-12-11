@@ -11,7 +11,8 @@ struct SwiftRewriterCommand: ParsableCommand {
         language modes.
         """,
         subcommands: [ObjectiveCCommand.self, JavaScriptCommand.self],
-        defaultSubcommand: ObjectiveCCommand.self)
+        defaultSubcommand: ObjectiveCCommand.self
+    )
     
     func run() throws {
         

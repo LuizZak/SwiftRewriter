@@ -158,8 +158,6 @@ public extension String {
             return []
         }
         
-        let unicodes = unicodeScalars
-        
         enum State {
             case normal
             case stringLiteral
@@ -172,26 +170,26 @@ public extension String {
         // Search for single-lined comments
         var ranges: [Range<Index>] = []
         
-        var index = unicodes.startIndex
-        while index < unicodes.index(before: unicodes.endIndex) {
+        var index = unicodeScalars.startIndex
+        while index < unicodeScalars.index(before: unicodeScalars.endIndex) {
             defer {
-                unicodes.formIndex(after: &index)
+                unicodeScalars.formIndex(after: &index)
             }
             
             switch state {
             case .normal:
                 // String literal
-                if unicodes[index] == "\"" {
+                if unicodeScalars[index] == "\"" {
                     state = .stringLiteral
                     continue
                 }
                 
                 // Ignore anything other than '/' since it doesn't form comments.
-                if unicodes[index] != "/" {
+                if unicodeScalars[index] != "/" {
                     continue
                 }
                 
-                let next = unicodes[unicodes.index(after: index)]
+                let next = unicodeScalars[unicodeScalars.index(after: index)]
                 
                 // Single-line
                 if next == "/" {
@@ -202,21 +200,21 @@ public extension String {
                 }
                 
             case .stringLiteral:
-                if unicodes[index] == "\"" {
+                if unicodeScalars[index] == "\"" {
                     state = .normal
                 }
                 
             case .singleLine(let begin):
                 // End of single-line
                 if self[index] == "\n" {
-                    ranges.append(begin..<unicodes.index(after: index))
+                    ranges.append(begin..<unicodeScalars.index(after: index))
                     state = .normal
                 }
                 
             case .multiLine(let begin):
                 // End of multi-line
-                if self[index] == "*" && unicodes[unicodes.index(after: index)] == "/" {
-                    ranges.append(begin..<unicodes.index(index, offsetBy: 2))
+                if self[index] == "*" && unicodeScalars[unicodeScalars.index(after: index)] == "/" {
+                    ranges.append(begin..<unicodeScalars.index(index, offsetBy: 2))
                     state = .normal
                 }
             }

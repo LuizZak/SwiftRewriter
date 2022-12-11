@@ -69,8 +69,9 @@ extension JavaScriptCommand {
 
 extension JavaScriptCommand {
     struct Files: ParsableCommand {
-        static let configuration =
-            CommandConfiguration(discussion: "Converts one or more .js file(s) to Swift.")
+        static let configuration = CommandConfiguration(
+            discussion: "Converts one or more .js file(s) to Swift."
+        )
         
         @Argument(help: "JavaScript file(s) to convert.")
         var files: [String]
@@ -96,8 +97,10 @@ extension JavaScriptCommand {
             }
             try withExtendedLifetime(delegate) {
                 for fileUrl in files {
-                    try fileCollectionStep.addFile(fromUrl: URL(fileURLWithPath: fileUrl),
-                                                   isPrimary: true)
+                    try fileCollectionStep.addFile(
+                        fromUrl: URL(fileURLWithPath: fileUrl),
+                        isPrimary: true
+                    )
                 }
             }
             
@@ -108,35 +111,45 @@ extension JavaScriptCommand {
 
 extension JavaScriptCommand {
     struct Path: ParsableCommand {
-        static let configuration =
-            CommandConfiguration(discussion: """
-                Examines a path and collects all .js files to convert, before presenting \
-                a prompt to confirm conversion of files.
-                """)
+        static let configuration = CommandConfiguration(
+            discussion: """
+            Examines a path and collects all .js files to convert, before presenting \
+            a prompt to confirm conversion of files.
+            """
+        )
         
         @Argument(help: "Path to the project to inspect")
         var path: String
         
-        @Option(name: .shortAndLong, help: """
+        @Option(
+            name: .shortAndLong,
+            help: """
             Provides a file pattern for excluding matches from the initial JavaScript \
             files search. Pattern is applied to the full path.
-            """)
+            """
+        )
         var excludePattern: String?
         
-        @Option(name: .shortAndLong,
-                help: """
+        @Option(
+            name: .shortAndLong,
+            help: """
             Provides a pattern for including matches from the initial JavaScript files \
             search. Pattern is applied to the full path. --exclude-pattern takes \
             priority over --include-pattern matches.
-            """)
+            """
+        )
         var includePattern: String?
         
-        @Flag(name: .shortAndLong,
-              help: "Skips asking for confirmation prior to parsing.")
+        @Flag(
+            name: .shortAndLong,
+            help: "Skips asking for confirmation prior to parsing."
+        )
         var skipConfirm: Bool = false
         
-        @Flag(name: .shortAndLong,
-              help: "Overwrites any .swift file with a matching output name on the target path.")
+        @Flag(
+            name: .shortAndLong,
+            help: "Overwrites any .swift file with a matching output name on the target path."
+        )
         var overwrite: Bool = false
         
         @OptionGroup()
@@ -226,10 +239,14 @@ private func makeRewriterService(_ options: JavaScriptCommand.Options) throws ->
     
     switch target {
     case .filedisk:
-        rewriter = JavaScriptSwiftRewriterServiceImpl.fileDisk(settings: settings)
+        rewriter = JavaScriptSwiftRewriterServiceImpl.fileDisk(
+            settings: settings
+        )
     case .stdout:
-        rewriter = JavaScriptSwiftRewriterServiceImpl.terminal(settings: settings,
-                                                               colorize: colorize)
+        rewriter = JavaScriptSwiftRewriterServiceImpl.terminal(
+            settings: settings,
+            colorize: colorize
+        )
     }
     
     return rewriter
@@ -247,6 +264,10 @@ private func makeSettings(_ options: JavaScriptCommand.Options) throws -> JavaSc
     settings.rewriter.forceUseLLPrediction = options.globalOptions.forceLl
     settings.rewriter.emitJavaScriptObject = options.emitJavaScriptObject
     settings.rewriter.deduceTypes = options.deduceTypes
+
+    if options.globalOptions.printCallGraph {
+        settings.rewriter.stageDiagnostics.append(.callGraph)
+    }
     
     return settings
 }

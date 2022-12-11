@@ -12,13 +12,17 @@ class JavaScriptFrontendImpl: SwiftRewriterFrontend {
         self.rewriterService = rewriterService
     }
 
-    func collectFiles(from directory: URL, fileProvider: FileProvider, options: SwiftRewriterFrontendFileCollectionOptions) throws -> [DiskInputFile] {
+    func collectFiles(
+        from directory: URL,
+        fileProvider: FileProvider,
+        options: SwiftRewriterFrontendFileCollectionOptions
+    ) throws -> [DiskInputFile] {
+        
         let fileCollectionStep = JavaScriptFileCollectionStep(fileProvider: fileProvider)
-        let importFileDelegate
-            = JavaScriptImportDirectiveFileCollectionDelegate(
-                parserCache: rewriterService.parserCache,
-                fileProvider: fileProvider
-            )
+        let importFileDelegate = JavaScriptImportDirectiveFileCollectionDelegate(
+            parserCache: rewriterService.parserCache,
+            fileProvider: fileProvider
+        )
         if options.followImports {
             fileCollectionStep.delegate = importFileDelegate
         }
