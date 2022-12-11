@@ -9,7 +9,7 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
     func testApplyOnMethod() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A.m") { type in
+            .createFileWithClass(named: "A") { type in
                 type.createMethod(named: "a", returnType: .nullabilityUnspecified(.typeName("A"))) {
                     method in
                     method.setBody([
@@ -51,7 +51,7 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
     func testDontApplyOnMethodWithExplicitOptionalReturnType() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A.m") { type in
+            .createFileWithClass(named: "A") { type in
                 type.createMethod(named: "a", returnType: .optional(.typeName("A"))) { method in
                     method.setBody([
                         .return(.identifier("self").typed(.typeName("A")))
@@ -69,7 +69,7 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
     func testDontApplyOnMethodWithErrorReturnType() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A.m") { type in
+            .createFileWithClass(named: "A") { type in
                 type.createMethod(named: "a", returnType: .nullabilityUnspecified(.typeName("A"))) {
                     method in
                     method.setBody([
@@ -91,7 +91,7 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
     func testDontApplyOnOverrides() {
         let intentions =
             IntentionCollectionBuilder()
-            .createFileWithClass(named: "A.m") { type in
+            .createFileWithClass(named: "A") { type in
                 type.createMethod(named: "a", returnType: .nullabilityUnspecified(.typeName("A"))) {
                     method in
                     method.setIsOverride(true)
