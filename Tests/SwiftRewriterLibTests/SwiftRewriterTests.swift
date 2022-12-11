@@ -3229,6 +3229,27 @@ class SwiftRewriterTests: XCTestCase {
         )
     }
     
+    func testRewriteConstantFromMacroIgnoresErrorTypedDeclarations() {
+        assertRewrite(
+            objc: """
+            #define aKnownIdentifier 1
+            #define VALUE_1 anUnknownIdentifier
+            #define VALUE_2 aKnownIdentifier
+            #define VALUE_3 @"aString" / 3
+            """,
+            swift: """
+            // Preprocessor directives found in file:
+            // #define aKnownIdentifier 1
+            // #define VALUE_1 anUnknownIdentifier
+            // #define VALUE_2 aKnownIdentifier
+            // #define VALUE_3 @"aString" / 3
+            let aKnownIdentifier: Int = 1
+            let VALUE_2: Int = aKnownIdentifier
+            """,
+            inputFileName: "test.h"
+        )
+    }
+    
     func testRewriteIgnoresInvalidConstantFromMacro() {
         assertRewrite(
             objc: """
