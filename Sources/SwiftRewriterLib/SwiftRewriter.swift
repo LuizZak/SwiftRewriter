@@ -259,7 +259,27 @@ public final class SwiftRewriter {
         let resolver = makeTypeResolverInvoker()
         
         for file in intentionCollection.fileIntentions() {
-            for directive in file.preprocessorDirectives {
+            // Start by removing duplicated directives by only emitting the last
+            // instance of a repeated declare directive
+            var definesFound: Set<String> = []
+            var preprocessorDirectives: [ObjcPreprocessorDirective] = []
+
+            for directive in file.preprocessorDirectives.reversed() {
+                guard
+                    let parsed = PreprocessorDirectiveConverter
+                        .parseDefineDirective(
+                            directive.string
+                        )
+                else {
+                    continue
+                }
+
+                if definesFound.insert(parsed.identifier).inserted {
+                    preprocessorDirectives.insert(directive, at: 0)
+                }
+            }
+            
+            for directive in preprocessorDirectives {
                 let converter = PreprocessorDirectiveConverter(
                     parserStatePool: parserStatePool,
                     typeSystem: typeSystem,
@@ -276,7 +296,7 @@ public final class SwiftRewriter {
                     // TODO: Abstract detection of .m/.c translation unit files
                     // here so we can properly generalize to any translation
                     // unit file kind
-                    accessLevel: file.sourcePath.hasSuffix("m") ? .private : .internal,
+                    accessLevel: file.sourcePath.hasSuffix("h") ? .internal : .private,
                     source: nil
                 )
                 

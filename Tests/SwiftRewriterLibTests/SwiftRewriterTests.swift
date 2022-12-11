@@ -3165,6 +3165,70 @@ class SwiftRewriterTests: XCTestCase {
             inputFileName: "test.m")
     }
     
+    func testRewriteConstantFromMacroDetectRepeatedDefine() {
+        assertRewrite(
+            objc: """
+            #define CONSTANT 1
+            #define CONSTANT 2
+            """,
+            swift: """
+            // Preprocessor directives found in file:
+            // #define CONSTANT 1
+            // #define CONSTANT 2
+            private let CONSTANT: Int = 2
+            """
+        )
+    }
+    
+    func testRewriteConstantFromMacroSupportsConstantExpressionTypes() {
+        assertRewrite(
+            objc: """
+            #define NUMERIC 1
+            #define STRING @"anObjcString"
+            #define BOOLEAN YES && NO
+            #define IDENTIFIER NUMERIC
+            #define BINARY 1 + 3
+            #define UNARY -15
+            #define SIZEOF_SCALAR sizeof(int)
+            #define PREFIX ++a
+            #define ARRAY @[@"1", @"2"]
+            #define DICTIONARY @{ @"a": @"b" }
+            #define TERNARY YES ? 1 : 2
+            #define CAST (int)NUMERIC
+            #define PARENS (1)
+            """,
+            swift: """
+            // Preprocessor directives found in file:
+            // #define NUMERIC 1
+            // #define STRING @"anObjcString"
+            // #define BOOLEAN YES && NO
+            // #define IDENTIFIER NUMERIC
+            // #define BINARY 1 + 3
+            // #define UNARY -15
+            // #define SIZEOF_SCALAR sizeof(int)
+            // #define PREFIX ++a
+            // #define ARRAY @[@"1", @"2"]
+            // #define DICTIONARY @{ @"a": @"b" }
+            // #define TERNARY YES ? 1 : 2
+            // #define CAST (int)NUMERIC
+            // #define PARENS (1)
+            let NUMERIC: Int = 1
+            let STRING: String = "anObjcString"
+            let BOOLEAN: Bool = true && false
+            let IDENTIFIER: Int = NUMERIC
+            let BINARY: Int = 1 + 3
+            let UNARY: Int = 15
+            let SIZEOF_SCALAR: Int = MemoryLayout<CInt>.size
+            let ARRAY: [String] = ["1", "2"]
+            let DICTIONARY: [String: String] = ["a": "b"]
+            let TERNARY: Int = true ? 1 : 2
+            let CAST: CInt? = NUMERIC as? CInt
+            let PARENS: Int = (1)
+            """,
+            inputFileName: "test.h"
+        )
+    }
+    
     func testRewriteIgnoresInvalidConstantFromMacro() {
         assertRewrite(
             objc: """
