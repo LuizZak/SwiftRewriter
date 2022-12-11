@@ -169,36 +169,15 @@ public class JsParser {
         let ranges = input.cStyleCommentSectionRanges()
         
         for range in ranges {
-            let lineStart = input.lineNumber(at: range.lowerBound)
-            let colStart = input.columnOffset(at: range.lowerBound)
-            
-            let lineEnd = input.lineNumber(at: range.upperBound)
-            let colEnd = input.columnOffset(at: range.upperBound)
-            
-            let utf8Offset = input.utf8.distance(from: input.startIndex, to: range.lowerBound)
-            let utf8Length = input.utf8.distance(from: range.lowerBound, to: range.upperBound)
-            
-            let location = SourceLocation(line: lineStart,
-                                          column: colStart,
-                                          utf8Offset: utf8Offset)
-            
-            let length: SourceLength
-            if lineStart == lineEnd {
-                length = SourceLength(newlines: 0,
-                                      columnsAtLastLine: colEnd - colStart,
-                                      utf8Length: utf8Length)
-            } else {
-                length = SourceLength(newlines: lineEnd - lineStart,
-                                      columnsAtLastLine: colEnd - 1,
-                                      utf8Length: utf8Length)
-            }
-            
+            let start = input.asSourceLocation(range.lowerBound)
+            let end = input.asSourceLocation(range.upperBound)
+
             let commentString = String(input[range])
             let comment = RawCodeComment(
                 string: commentString,
-                range: utf8Offset..<(utf8Offset + utf8Length),
-                location: location,
-                length: length
+                range: (start.utf8Offset)..<(end.utf8Offset),
+                location: start,
+                length: start.length(to: end)
             )
             
             result.append(comment)

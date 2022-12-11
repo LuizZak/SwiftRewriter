@@ -152,4 +152,14 @@ public enum SourceRange: Hashable, Codable {
     public init(union ranges: [SourceRange]) {
         self = ranges.reduce(.invalid, { $0.union(with: $1) })
     }
+
+    /// Initializes this source range as either a `SourceRange.range(start:end:)`
+    /// or `SourceRange.location(_:)`, depending on whether `start == end`.
+    public init(forStart start: SourceLocation, end: SourceLocation) {
+        if start == end {
+            self = .location(start)
+        } else {
+            self = .range(start: start, end: end)
+        }
+    }
 }

@@ -139,6 +139,15 @@ public extension String {
         
         return distance(from: lineStartOffset, to: index) + 1 // columns start at one
     }
+
+    /// Converts a specified `index` in this string to a `SourceLocation` value.
+    func asSourceLocation(_ index: Index) -> SourceLocation {
+        let line = lineNumber(at: index)
+        let column = columnOffset(at: index)
+        let utf8Offset = utf8.distance(from: startIndex, to: index)
+
+        return .init(line: line, column: column, utf8Offset: utf8Offset)
+    }
 }
 
 public extension String {
