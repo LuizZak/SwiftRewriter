@@ -51,15 +51,6 @@ extension ObjectiveCCommand {
         )
         var followImports: Bool = false
         
-        @Flag(
-            name: .long,
-            help: """
-            If set, prints the call graph of the entire final Swift program generated \
-            to the standard output before emitting the files.
-            """
-        )
-        var printCallGraph: Bool = false
-
         @OptionGroup()
         var globalOptions: GlobalOptions
     }
