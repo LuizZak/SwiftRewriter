@@ -281,7 +281,27 @@ public final class ObjectiveC2SwiftRewriter {
         let resolver = makeTypeResolverInvoker()
         
         for file in intentionCollection.fileIntentions() {
-            for comment in file.headerComments {
+            // Start by removing duplicated directives by only emitting the last
+            // instance of a repeated declare directive
+            var definesFound: Set<String> = []
+            var headerComments: [String] = []
+
+            for comment in file.headerComments.reversed() {
+                guard
+                    let parsed = CPreprocessorDirectiveConverter
+                        .parseDefineDirective(
+                            comment
+                        )
+                else {
+                    continue
+                }
+
+                if definesFound.insert(parsed.identifier).inserted {
+                    headerComments.insert(comment, at: 0)
+                }
+            }
+            
+            for comment in headerComments {
                 let converter = CPreprocessorDirectiveConverter(
                     parserStatePool: parserStatePool,
                     typeSystem: typeSystem,
@@ -298,7 +318,7 @@ public final class ObjectiveC2SwiftRewriter {
                     // TODO: Abstract detection of .m/.c translation unit files
                     // here so we can properly generalize to any translation
                     // unit file kind
-                    accessLevel: file.sourcePath.hasSuffix("m") ? .private : .internal,
+                    accessLevel: file.sourcePath.hasSuffix("h") ? .internal : .private,
                     source: nil
                 )
                 

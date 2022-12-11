@@ -181,6 +181,21 @@ class DefinitionCollectorTests: XCTestCase {
         }
     }
 
+    func testCollect_singleDecl_variable_array_const() {
+        let tester = prepareTest(declaration: "int const a[];")
+
+        tester.assert { nodeList in
+            nodeList.asserterForIterator()
+                .asserterForNext { decl in
+                    decl.assert(isOfType: ObjcVariableDeclarationNode.self)?
+                        .assert(type: .pointer(.qualified("signed int", qualifiers: [.const])))?
+                        .assert(name: "a")?
+                        .assertNoInitializer()
+                }?
+                .assertIsAtEnd()
+        }
+    }
+
     func testCollect_singleDecl_function() {
         let tester = prepareTest(declaration: "void global(int p1, int*);")
 

@@ -30,7 +30,7 @@ public class CPreprocessorDirectiveConverter {
         inFile file: FileGenerationIntention
     ) -> DirectiveDeclaration? {
         
-        guard let directive = processDirective(directiveString) else {
+        guard let directive = Self.parseDefineDirective(directiveString) else {
             return nil
         }
 
@@ -40,7 +40,7 @@ public class CPreprocessorDirectiveConverter {
         guard let parser = try? state.makeMainParser(input: directive.expression) else {
             return nil
         }
-        // Avoid printing paring errors to console
+        // Avoid printing parsing errors to console
         parser.parser.removeErrorListeners()
         parser.lexer.removeErrorListeners()
         guard let expressionContext = try? parser.parser.expression() else {
@@ -58,31 +58,6 @@ public class CPreprocessorDirectiveConverter {
             type: declaration.type,
             expression: declaration.expression
         )
-    }
-    
-    func processDirective(_ directive: String) -> Directive? {
-        do {
-            let lexer = Lexer(input: directive)
-            lexer.skipWhitespace()
-            
-            try lexer.advance(expectingCurrent: "#")
-            lexer.skipWhitespace()
-            
-            try lexer.consume(match: "define")
-            lexer.skipWhitespace()
-            
-            let identifier = String(try lexer.lexIdentifier())
-            // Detect and ignore macros that take in parameters
-            if try lexer.peek() == "(" {
-                return nil
-            }
-            
-            let expression = String(lexer.consumeRemaining())
-            
-            return Directive(identifier: identifier, expression: expression)
-        } catch {
-            return nil
-        }
     }
     
     func expressionFromExpressionContext(_ ctx: ObjectiveCParser.ExpressionContext) -> Expression {
@@ -117,7 +92,32 @@ public class CPreprocessorDirectiveConverter {
         return Declaration(type: resolvedType, expression: exp)
     }
     
-    struct Directive {
+    static func parseDefineDirective(_ directive: String) -> DefineDirective? {
+        do {
+            let lexer = Lexer(input: directive)
+            lexer.skipWhitespace()
+            
+            try lexer.advance(expectingCurrent: "#")
+            lexer.skipWhitespace()
+            
+            try lexer.consume(match: "define")
+            lexer.skipWhitespace()
+            
+            let identifier = String(try lexer.lexIdentifier())
+            // Detect and ignore macros that take in parameters
+            if try lexer.peek() == "(" {
+                return nil
+            }
+            
+            let expression = String(lexer.consumeRemaining())
+            
+            return DefineDirective(identifier: identifier, expression: expression)
+        } catch {
+            return nil
+        }
+    }
+    
+    struct DefineDirective {
         var identifier: String
         var expression: String
     }

@@ -126,9 +126,21 @@ public struct TypeMappingContext {
         return copy
     }
     
+    public func withExtraSpecifiers(_ specifiers: [ObjcTypeSpecifier]) -> TypeMappingContext {
+        var copy = self
+        copy.specifiers += specifiers
+        return copy
+    }
+    
     public func withQualifiers(_ qualifiers: [ObjcTypeQualifier]) -> TypeMappingContext {
         var copy = self
         copy.qualifiers = qualifiers
+        return copy
+    }
+    
+    public func withExtraQualifiers(_ qualifiers: [ObjcTypeQualifier]) -> TypeMappingContext {
+        var copy = self
+        copy.qualifiers += qualifiers
         return copy
     }
     
@@ -389,8 +401,11 @@ public class DefaultTypeMapper: TypeMapper {
         case .incompleteStruct(let name):
             return swiftType(forObjcStructType: name, context: context)
 
-        case .pointer(let type, _, let nullability):
-            let type = swiftType(forObjcPointerType: type, context: context)
+        case .pointer(let type, let qualifiers, let nullability):
+            let type = swiftType(
+                forObjcPointerType: type,
+                context: context.withExtraQualifiers(qualifiers)
+            )
 
             if let nullability {
                 return swiftType(type: type, replacingNullability: nullability)
@@ -554,17 +569,20 @@ public class DefaultTypeMapper: TypeMapper {
     private func swiftType(forObjcPointerType type: ObjcType, context: TypeMappingContext) -> SwiftType {
         let final: SwiftType
 
+        let isConst = context.hasQualifierModifier(.const) || isConstQualified(type)
+
         if case .incompleteStruct = type {
             final = "OpaquePointer"
         } else if type == .anonymousStruct {
             final = "OpaquePointer"
-        } else if case .typeName(let inner) = type {
+        } else if let inner = typeNameIn(objcType: type) {
+
             if let ptr = DefaultTypeMapper._pointerMappings[inner] {
                 final = ptr
                 
             } else if let scalar = DefaultTypeMapper._scalarMappings[inner] {
                 // Pointers of scalar types are converted to 'UnsafeMutablePointer<TypeName>'
-                final = .generic("UnsafeMutablePointer", parameters: [scalar])
+                final = swiftPointer(parameter: scalar, const: isConst)
                 
             } else if context.alwaysClass || typeSystem.isClassInstanceType(inner) {
                 // Assume it's a class type here
@@ -577,19 +595,35 @@ public class DefaultTypeMapper: TypeMapper {
                     context: .alwaysNonnull
                 )
                 
-                final = .generic("UnsafeMutablePointer", parameters: [pointeeType])
+                final = swiftPointer(parameter: pointeeType, const: isConst)
             }
         } else if case .void = type {
-            final = .typeName("UnsafeMutableRawPointer")
+            final = swiftRawPointer(const: isConst)
         } else if case .fixedArray(let base, let length) = type {
             let pointee = swiftTuple(type: base, count: length, context: context)
             
-            final = .generic("UnsafeMutablePointer", parameters: [pointee])
+            final = swiftPointer(parameter: pointee, const: isConst)
         } else {
             final = swiftType(forObjcType: type, context: context)
         }
         
         return swiftType(type: final, withNullability: context.nullability())
+    }
+
+    private func swiftPointer(parameter: SwiftType, const: Bool) -> SwiftType {
+        if const {
+            return .generic("UnsafePointer", parameters: [parameter])
+        } else {
+            return .generic("UnsafeMutablePointer", parameters: [parameter])
+        }
+    }
+
+    private func swiftRawPointer(const: Bool) -> SwiftType {
+        if const {
+            return .typeName("UnsafeRawPointer")
+        } else {
+            return .typeName("UnsafeMutableRawPointer")
+        }
     }
     
     private func swiftType(
@@ -623,20 +657,25 @@ public class DefaultTypeMapper: TypeMapper {
         context: TypeMappingContext
     ) -> SwiftType {
         
-        let locQualifiers = context.withQualifiers(qualifiers)
+        let locQualifiers = context.withExtraQualifiers(qualifiers)
         
         let final = swiftType(forObjcType: type, context: context.asAlwaysNonNull())
         
         switch type {
         case .void:
-            return final; // <- Semicolon needed to avoid a parse error
-            
-        case .typeName:
+            return final
+        
+        case .typeName, .genericTypeName:
             return _verifyStructTypeCanBeNullable(final, context: locQualifiers)
-            
-        case .specified:
+        
+        case .specified,
+            .pointer,
+            .fixedArray,
+            .functionPointer,
+            .blockType,
+            .nullabilitySpecified:
             return swiftType(forObjcType: type, context: locQualifiers)
-            
+        
         default:
             return swiftType(type: final, withNullability: locQualifiers.nullability())
         }
@@ -740,6 +779,27 @@ public class DefaultTypeMapper: TypeMapper {
         }
         
         return types.contains(where: \.isPointer)
+    }
+
+    /// Returns `true` if `type` is `const` qualified at its root level.
+    private func isConstQualified(_ type: ObjcType) -> Bool {
+        switch type {
+        case .qualified(let type, let qualifiers):
+            if qualifiers.contains(.const) {
+                return true
+            }
+
+            return isConstQualified(type)
+
+        case .pointer(_, let qualifiers, _):
+            return qualifiers.contains(.const)
+
+        case .specified(_, let type), .nullabilitySpecified(_, let type):
+            return isConstQualified(type)
+
+        default:
+            return false
+        }
     }
     
     // TODO: Improve handling of multiple type specifier patterns that map to the

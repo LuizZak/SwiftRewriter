@@ -314,6 +314,7 @@ class DefaultTypeMapperTests: XCTestCase {
 
     func testPointer() {
         expect(.pointer("NSObject"), toConvertTo: "NSObject")
+        expect(.pointer("int"), toConvertTo: "UnsafeMutablePointer<CInt>")
     }
 
     func testPointer_withNullabilitySpecifier() {
@@ -332,6 +333,42 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(
             .pointer("NSObject", nullabilitySpecifier: .nullResettable),
             toConvertTo: "NSObject!"
+        )
+    }
+
+    func testConstPointer() {
+        expect(
+            .pointer(.qualified("int", qualifiers: [.const])),
+            toConvertTo: "UnsafePointer<CInt>"
+        )
+        expect(
+            .qualified(.pointer("int"), qualifiers: [.const]),
+            toConvertTo: "UnsafePointer<CInt>"
+        )
+    }
+
+    func testPointerToFixedArray() {
+        expect(
+            .pointer(
+                .fixedArray(.typeName("char"), length: 3)
+            ),
+            inNonnullContext: false,
+            withExplicitNullability: nil,
+            toConvertTo: "UnsafeMutablePointer<(CChar, CChar, CChar)>!"
+        )
+    }
+
+    func testPointerToVoid() {
+        expect(
+            .pointer(.void),
+            toConvertTo: "UnsafeMutableRawPointer"
+        )
+    }
+
+    func testFixedArray() {
+        expect(
+            .fixedArray(.typeName("char"), length: 3),
+            toConvertTo: "(CChar, CChar, CChar)"
         )
     }
 
@@ -671,31 +708,6 @@ class DefaultTypeMapperTests: XCTestCase {
             ),
             withExplicitNullability: nil,
             toConvertTo: "String?"
-        )
-    }
-
-    func testFixedArray() {
-        expect(
-            .fixedArray(.typeName("char"), length: 3),
-            toConvertTo: "(CChar, CChar, CChar)"
-        )
-    }
-
-    func testPointerToFixedArray() {
-        expect(
-            .pointer(
-                .fixedArray(.typeName("char"), length: 3)
-            ),
-            inNonnullContext: false,
-            withExplicitNullability: nil,
-            toConvertTo: "UnsafeMutablePointer<(CChar, CChar, CChar)>!"
-        )
-    }
-
-    func testPointerToVoid() {
-        expect(
-            .pointer(.void),
-            toConvertTo: "UnsafeMutableRawPointer"
         )
     }
 
