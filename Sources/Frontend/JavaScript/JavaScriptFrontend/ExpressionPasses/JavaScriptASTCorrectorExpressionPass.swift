@@ -297,7 +297,7 @@ public class JavaScriptASTCorrectorExpressionPass: ASTRewriterPass {
         }
 
         let copy = stmt.copy()
-        copy.statements = stmts
+        copy.statements = stmts.map { $0.copy() }
         return copy
     }
 

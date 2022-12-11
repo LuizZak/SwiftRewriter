@@ -1372,4 +1372,93 @@ class JavaScriptASTCorrectorExpressionPassTests: ExpressionPassTestCase<JavaScri
                 ])
         )
     }
+
+    func testCrashInSuggestAssignmentStatementSplit() {
+        // Tests against a crash that happens due to un-copied adjacent statements
+        // when splitting assignment statements.
+        assertTransform(
+            statement:
+                // {
+                //     var args: Any = coords && coords.forEach ? coords : Array.from(arguments).slice()
+                //     var coordlen: Any = false
+                //     var assign1: Any = (assign2 = 0)
+                // }
+                .compound([
+                    .variableDeclaration(
+                        identifier: "args",
+                        type: .any,
+                        initialization:
+                            .ternary(
+                                .identifier("coords")
+                                .binary(
+                                    op: .and,
+                                    rhs: .identifier("coords").dot("forEach")
+                                ),
+                                true:
+                                    .identifier("coords"),
+                                false:
+                                    .identifier("Array")
+                                    .dot("from")
+                                    .call([.identifier("arguments")])
+                                    .dot("slice")
+                                    .call()
+                            )
+                    ),
+                    .variableDeclaration(
+                        identifier: "coordlen",
+                        type: .any,
+                        initialization: .identifier("false")
+                    ),
+                    .variableDeclaration(
+                        identifier: "assign1",
+                        type: .any,
+                        initialization:
+                            .identifier("assign2")
+                            .assignment(op: .assign, rhs: .constant(0))
+                    ),
+                ]),
+            into:
+                // {
+                //     var args: Any = coords && coords.forEach ? coords : Array.from(arguments).slice()
+                //     var coordlen: Any = false
+                //     var assign1: Any = (assign2 = 0)
+                // }
+                .compound([
+                    .variableDeclaration(
+                        identifier: "args",
+                        type: .any,
+                        initialization:
+                            .ternary(
+                                .identifier("coords")
+                                .binary(
+                                    op: .and,
+                                    rhs: .identifier("coords").dot("forEach")
+                                ),
+                                true:
+                                    .identifier("coords"),
+                                false:
+                                    .identifier("Array")
+                                    .dot("from")
+                                    .call([.identifier("arguments")])
+                                    .dot("slice")
+                                    .call()
+                            )
+                    ),
+                    .variableDeclaration(
+                        identifier: "coordlen",
+                        type: .any,
+                        initialization: .identifier("false")
+                    ),
+                    .expression(
+                        .identifier("assign2")
+                        .assignment(op: .assign, rhs: .constant(0))
+                    ),
+                    .variableDeclaration(
+                        identifier: "assign1",
+                        type: .any,
+                        initialization: .identifier("assign2")
+                    ),
+                ])
+        )
+    }
 }
