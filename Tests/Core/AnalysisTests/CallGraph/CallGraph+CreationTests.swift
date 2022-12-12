@@ -36,6 +36,7 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
                 }
                 """
         )
@@ -75,6 +76,8 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
+
                     subgraph cluster_1 {
                         label = "A.swift"
                 
@@ -129,6 +132,8 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
+
                     subgraph cluster_1 {
                         label = "A.swift"
                 
@@ -170,6 +175,8 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
+
                     subgraph cluster_1 {
                         label = "A.swift"
                 
@@ -223,6 +230,8 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
+
                     subgraph cluster_1 {
                         label = "A.swift"
                 
@@ -280,6 +289,8 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
+
                     subgraph cluster_1 {
                         label = "A.swift"
                 
@@ -338,6 +349,8 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
+
                     subgraph cluster_1 {
                         label = "A.swift"
                 
@@ -393,6 +406,8 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
+
                     subgraph cluster_1 {
                         label = "A.swift"
 
@@ -445,6 +460,8 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
+
                     subgraph cluster_1 {
                         label = "A.swift"
 
@@ -497,6 +514,8 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
+
                     subgraph cluster_1 {
                         label = "A.swift"
 
@@ -550,6 +569,8 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
+
                     subgraph cluster_1 {
                         label = "A.swift"
                 
@@ -607,6 +628,8 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
+
                     subgraph cluster_1 {
                         label = "A.swift"
                 
@@ -665,6 +688,8 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
+
                     subgraph cluster_1 {
                         label = "A.swift"
                 
@@ -721,6 +746,8 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
+
                     subgraph cluster_1 {
                         label = "A.swift"
                 
@@ -768,6 +795,8 @@ class CallGraph_CreationTests: XCTestCase {
             graph: graph,
             matches: """
                 digraph calls {
+                    graph [rankdir=RL]
+
                     subgraph cluster_1 {
                         label = "A.swift"
 
@@ -777,6 +806,50 @@ class CallGraph_CreationTests: XCTestCase {
 
                         n1 -> n2
                         n2 -> n3
+                    }
+                }
+                """
+        )
+    }
+
+    func testGlobalVariableInitializer_referencingDeclaration() {
+        let builder = IntentionCollectionBuilder()
+        builder
+            .createFile(named: "A.swift") { file in
+                file
+                    .createGlobalVariable(withName: "a", type: .int, initialExpression: .identifier("b").call())
+                    .createGlobalFunction(withName: "b") { method in
+                        method.setBody([])
+                    }
+                    .createGlobalFunction(withName: "c") { method in
+                        method.setBody([
+                            .expression(.identifier("a"))
+                        ])
+                    }
+            }
+        let intentions = builder.build(typeChecked: true)
+        let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
+
+        let graph = CallGraph.fromIntentions(intentions, typeSystem: typeSystem)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph calls {
+                    graph [rankdir=RL]
+
+                    subgraph cluster_1 {
+                        label = "A.swift"
+
+                        n1 [label="func b()"]
+                        n2 [label="func c()"]
+                        n3 [label="var a: Int"]
+                        n4 [label="var a: Int = <initializer>"]
+
+                        n4 -> n1
+                        n2 -> n3
+                        n3 -> n4
                     }
                 }
                 """

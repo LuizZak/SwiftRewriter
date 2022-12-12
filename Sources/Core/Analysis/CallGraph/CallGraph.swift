@@ -42,7 +42,7 @@ public class CallGraph: DirectedGraphBase<CallGraphNode, CallGraphEdge> {
 
             ensureEdge(from: declNode, to: initializer)
 
-            return declNode
+            return initializer
         default:
             break
         }
