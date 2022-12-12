@@ -357,32 +357,6 @@ public enum TraitType: Equatable, Codable {
     }
 }
 
-/// An object that supports attribute markings
-public protocol AttributeTaggableObject {
-    /// Gets an array of all known attributes for this object
-    var knownAttributes: [KnownAttribute] { get }
-}
-
-/// Describes an attribute for a `KnownType` or one of its members.
-public struct KnownAttribute: Codable, Equatable {
-    public var name: String
-    public var parameters: String?
-    
-    /// Returns the formatted attribute string as `@<name>(<parameters>)`
-    public var attributeString: String {
-        if let parameters = parameters {
-            return "@\(name)(\(parameters))"
-        }
-        
-        return "@\(name)"
-    }
-    
-    public init(name: String, parameters: String? = nil) {
-        self.name = name
-        self.parameters = parameters
-    }
-}
-
 public extension SwiftRewriterAttribute {
     var asKnownAttribute: KnownAttribute {
         KnownAttribute(
