@@ -136,7 +136,7 @@ extension SwiftSyntaxProducer {
         
         var leadingComments = stmt.comments
         if let label = stmt.label, !stmt.isLabelableStatementType {
-            leadingComments.append("// \(label):")
+            leadingComments.append(.line("// \(label):"))
         }
         
         genList = applyingLeadingComments(leadingComments, toList: genList)
@@ -201,7 +201,7 @@ extension SwiftSyntaxProducer {
     }
     
     private func applyingLeadingComments(
-        _ comments: [String],
+        _ comments: [SwiftComment],
         toList list: [StatementBlockProducer]
     ) -> [StatementBlockProducer] {
         
@@ -221,18 +221,19 @@ extension SwiftSyntaxProducer {
     }
     
     private func applyingTrailingComment(
-        _ comment: String?,
+        _ comment: SwiftComment?,
         toList list: [StatementBlockProducer]
     ) -> [StatementBlockProducer] {
 
         guard let comment = comment, let last = list.last else {
             return list
         }
+        let trivia = toCommentTrivia(comment)
         
         var list = list
         
         list[list.count - 1] = {
-            return last($0)?.withTrailingTrivia(.spaces(1) + .lineComment(comment))
+            return last($0)?.withTrailingTrivia(.spaces(1) + trivia)
         }
         
         return list

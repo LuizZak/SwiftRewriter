@@ -875,11 +875,9 @@ extension ObjectiveCIntentionCollector {
 
 extension ObjectiveCIntentionCollector {
     private func mapComments(_ node: ObjcASTNode, _ intention: FromSourceIntention) {
-        intention.precedingComments.append(contentsOf: convertComments(node.precedingComments))
-    }
-    
-    private func convertComments(_ comments: [RawCodeComment]) -> [String] {
-        return comments.map { $0.string.trimmingWhitespace() }
+        let applier = SwiftASTCommentApplier(comments: node.precedingComments)
+
+        intention.precedingComments.append(contentsOf: applier.popAllComments())
     }
 }
 

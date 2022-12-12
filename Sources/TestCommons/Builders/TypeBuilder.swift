@@ -23,14 +23,16 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     }
     
     @discardableResult
-    public func addComment(_ comment: String) -> TypeBuilder {
+    public func addComment(_ comment: SwiftComment) -> TypeBuilder {
         targetType.precedingComments.append(comment)
         return self
     }
     
     @discardableResult
-    public func addComments(_ comments: [String]) -> TypeBuilder {
-        targetType.precedingComments.append(contentsOf: comments)
+    public func addComments(_ comments: [SwiftComment]) -> TypeBuilder {
+        targetType.precedingComments.append(
+            contentsOf: comments
+        )
         return self
     }
     

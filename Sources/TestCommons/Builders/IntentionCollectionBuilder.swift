@@ -438,14 +438,17 @@ public class FunctionBuilder<T: FunctionIntention>: _FunctionBuilder {
 
 extension FunctionBuilder where T: FromSourceIntention {
     @discardableResult
-    public func addComment(_ comment: String) -> FunctionBuilder {
+    public func addComment(_ comment: SwiftComment) -> FunctionBuilder {
         target.precedingComments.append(comment)
         return self
     }
     
     @discardableResult
-    public func addComments(_ comments: [String]) -> FunctionBuilder {
-        target.precedingComments.append(contentsOf: comments)
+    public func addComments(_ comments: [SwiftComment]) -> FunctionBuilder {
+        target.precedingComments.append(
+            contentsOf: comments
+        )
+
         return self
     }
 }
@@ -468,13 +471,13 @@ public class EnumTypeBuilder {
     
     @discardableResult
     public func addComment(_ comment: String) -> EnumTypeBuilder {
-        targetEnum.precedingComments.append(comment)
+        targetEnum.precedingComments.append(.line(comment))
         return self
     }
     
     @discardableResult
     public func addComments(_ comments: [String]) -> EnumTypeBuilder {
-        targetEnum.precedingComments.append(contentsOf: comments)
+        targetEnum.precedingComments.append(contentsOf: comments.map(SwiftComment.line(_:)))
         return self
     }
     

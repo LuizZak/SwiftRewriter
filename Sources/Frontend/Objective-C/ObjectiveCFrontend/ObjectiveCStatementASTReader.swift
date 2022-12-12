@@ -58,7 +58,7 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
             return compound
         }
         
-        let comments = context.popClosestCommentsBefore(rule: ctx).map { $0.string.trimmingWhitespace() }
+        let comments = context.commentApplier.popAllCommentsBefore(rule: ctx)
         
         context.pushDefinitionContext()
         defer { context.popDefinitionContext() }
@@ -74,7 +74,7 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
         ) ?? .unknown(UnknownASTContext(context: ctx.getText()))
         
         stmt.comments = comments
-        stmt.trailingComment = context.popClosestCommentAtTrailingLine(node: ctx)?.string.trimmingWhitespace()
+        stmt.trailingComment = context.commentApplier.popClosestCommentAtTrailingLine(rule: ctx)
         
         return stmt
     }
@@ -424,11 +424,9 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
             // Ensure comments that are nested inside the compound statement are
             // still stored, even if it contains no statements of its own.
             if stmt.isEmpty {
-                let comments = context.popCommentsOverlapping(rule: ctx)
-                
-                stmt.comments = comments.map {
-                    $0.string.trimmingWhitespace()
-                }
+                stmt.comments = context
+                    .commentApplier
+                    .popCommentsOverlapping(rule: ctx)
             }
 
             return stmt
@@ -543,12 +541,12 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
             let varDeclStmt = Statement.variableDeclarations(declarations)
             
             varDeclStmt.comments = context
-                .popClosestCommentsBefore(rule: ctx)
-                .map { $0.string.trimmingWhitespace() }
+                .commentApplier
+                .popAllCommentsBefore(rule: ctx)
             
             varDeclStmt.trailingComment = context
-                .popClosestCommentAtTrailingLine(node: ctx)?
-                .string.trimmingWhitespace()
+                .commentApplier
+                .popClosestCommentAtTrailingLine(rule: ctx)
 
             reportAutotypeDeclarations(in: varDeclStmt)
             
@@ -731,12 +729,12 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
             let varDeclStmt = Statement.variableDeclarations(declarations)
             
             varDeclStmt.comments = context
-                .popClosestCommentsBefore(rule: ctx)
-                .map { $0.string.trimmingWhitespace() }
+                .commentApplier
+                .popAllCommentsBefore(rule: ctx)
             
             varDeclStmt.trailingComment = context
-                .popClosestCommentAtTrailingLine(node: ctx)?
-                .string.trimmingWhitespace()
+                .commentApplier
+                .popClosestCommentAtTrailingLine(rule: ctx)
 
             reportAutotypeDeclarations(in: varDeclStmt)
             
@@ -877,12 +875,12 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
             let varDeclStmt = Statement.variableDeclarations(declarations)
             
             varDeclStmt.comments = context
-                .popClosestCommentsBefore(rule: ctx)
-                .map { $0.string.trimmingWhitespace() }
+                .commentApplier
+                .popAllCommentsBefore(rule: ctx)
             
             varDeclStmt.trailingComment = context
-                .popClosestCommentAtTrailingLine(node: ctx)?
-                .string.trimmingWhitespace()
+                .commentApplier
+                .popClosestCommentAtTrailingLine(rule: ctx)
 
             reportAutotypeDeclarations(in: varDeclStmt)
             

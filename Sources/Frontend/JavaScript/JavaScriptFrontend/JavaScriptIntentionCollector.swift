@@ -5,6 +5,7 @@ import SwiftAST
 import KnownType
 import Intentions
 import TypeSystem
+import SwiftRewriterLib
 import Utils
 
 // TODO: Move lazy parse object reporting to use a `JavaScriptLazyParseItem` like
@@ -321,9 +322,9 @@ extension JavaScriptIntentionCollector {
     }
 
     private func _mapComments(_ node: JsASTNode, _ intention: FromSourceIntention) {
-        let comments = convertComments(node.precedingComments)
-
-        intention.precedingComments.append(contentsOf: comments)
+        let applier = SwiftASTCommentApplier(comments: node.precedingComments)
+        
+        intention.precedingComments.append(contentsOf: applier.popAllComments())
     }
     
     private func convertComments(_ comments: [RawCodeComment]) -> [String] {

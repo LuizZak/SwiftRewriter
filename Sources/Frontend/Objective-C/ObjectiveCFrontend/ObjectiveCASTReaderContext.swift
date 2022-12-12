@@ -3,6 +3,7 @@ import Utils
 import SwiftAST
 import GrammarModelBase
 import ObjcGrammarModels
+import SwiftRewriterLib
 import KnownType
 import TypeSystem
 
@@ -10,12 +11,18 @@ public final class ObjectiveCASTReaderContext {
     private var localsStack: [[Local]] = [[]]
     private var typeSystem: TypeSystem?
     private var typeContext: KnownType?
-    private var comments: [RawCodeComment]
     
-    public init(typeSystem: TypeSystem?, typeContext: KnownType?, comments: [RawCodeComment]) {
+    public let commentApplier: SwiftASTCommentApplier
+    
+    public init(
+        typeSystem: TypeSystem?,
+        typeContext: KnownType?,
+        comments: [RawCodeComment]
+    ) {
+
         self.typeSystem = typeSystem
         self.typeContext = typeContext
-        self.comments = comments
+        self.commentApplier = .init(comments: comments)
     }
     
     public func define(localNamed name: String, storage: ValueStorage) {
@@ -47,10 +54,12 @@ public final class ObjectiveCASTReaderContext {
             return field
         }
         
-        return typeSystem?.property(named: name,
-                                    static: false,
-                                    includeOptional: false,
-                                    in: typeContext)
+        return typeSystem?.property(
+            named: name,
+            static: false,
+            includeOptional: false,
+            in: typeContext
+        )
     }
     
     public func pushDefinitionContext() {
@@ -61,7 +70,18 @@ public final class ObjectiveCASTReaderContext {
         localsStack.removeLast()
     }
     
-    public func popClosestCommentBefore(rule: ParserRuleContext) -> RawCodeComment? {
+    /// Convenience for `commentApplier.applyComments(to:_:)`
+    public func applyComments(to statement: Statement, _ rule: ParserRuleContext) {
+        commentApplier.applyComments(to: statement, rule)
+    }
+
+    /// Convenience for `commentApplier.applyOverlappingComments(to:_:)`
+    public func applyOverlappingComments(to statement: Statement, _ rule: ParserRuleContext) {
+        commentApplier.applyOverlappingComments(to: statement, rule)
+    }
+    
+    /*
+    public func popClosestCommentBefore(rule: ParserRuleContext) -> SwiftComment? {
         guard let start = rule.getStart() else {
             return nil
         }
@@ -76,8 +96,8 @@ public final class ObjectiveCASTReaderContext {
         return nil
     }
     
-    public func popClosestCommentsBefore(rule: ParserRuleContext) -> [RawCodeComment] {
-        var comments: [RawCodeComment] = []
+    public func popClosestCommentsBefore(rule: ParserRuleContext) -> [SwiftComment] {
+        var comments: [SwiftComment] = []
         while let comment = popClosestCommentBefore(rule: rule) {
             comments.append(comment)
         }
@@ -85,7 +105,7 @@ public final class ObjectiveCASTReaderContext {
         return comments.reversed()
     }
     
-    public func popCommentsOverlapping(rule: ParserRuleContext) -> [RawCodeComment] {
+    public func popCommentsOverlapping(rule: ParserRuleContext) -> [SwiftComment] {
         guard let start = rule.getStart(), let stop = rule.getStop() else {
             return []
         }
@@ -95,7 +115,7 @@ public final class ObjectiveCASTReaderContext {
             end: stop.sourceLocation()
         )
 
-        var result: [RawCodeComment] = []
+        var result: [SwiftComment] = []
         
         for (i, comment) in comments.enumerated().reversed() {
             if range.contains(comment.location) {
@@ -108,7 +128,7 @@ public final class ObjectiveCASTReaderContext {
         return result
     }
     
-    public func popClosestCommentAtTrailingLine(node: ParserRuleContext) -> RawCodeComment? {
+    public func popClosestCommentAtTrailingLine(node: ParserRuleContext) -> SwiftComment? {
         guard let stop = node.getStop() else {
             return nil
         }
@@ -124,6 +144,7 @@ public final class ObjectiveCASTReaderContext {
         
         return nil
     }
+    */
     
     public struct Local {
         public var name: String

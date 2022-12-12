@@ -58,9 +58,11 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
         /// compiled and executed.
         public var emitObjcCompatibility: Bool
         
-        public init(outputExpressionTypes: Bool,
-                    printIntentionHistory: Bool,
-                    emitObjcCompatibility: Bool) {
+        public init(
+            outputExpressionTypes: Bool,
+            printIntentionHistory: Bool,
+            emitObjcCompatibility: Bool
+        ) {
             
             self.outputExpressionTypes = outputExpressionTypes
             self.printIntentionHistory = printIntentionHistory
@@ -156,13 +158,12 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
         return false
     }
 
-    // TODO: Map comments from frontends into an enum
-    func addComments(_ comments: [String]) {
+    func addComments(_ comments: [SwiftComment]) {
         let trivia = toCommentsTrivia(comments)
         addExtraLeading(trivia)
     }
 
-    func toCommentsTrivia(_ comments: [String], addNewLineAfter: Bool = true) -> Trivia {
+    func toCommentsTrivia(_ comments: [SwiftComment], addNewLineAfter: Bool = true) -> Trivia {
         var trivia: Trivia = []
 
         for (i, comment) in comments.enumerated() {
@@ -176,19 +177,18 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
         return trivia
     }
 
-    func toCommentTrivia(_ comment: String) -> Trivia {
+    func toCommentTrivia(_ comment: SwiftComment) -> Trivia {
         let commentTrivia: Trivia
 
-        if comment.hasPrefix("//") {
+        switch comment {
+        case .line(let comment):
             commentTrivia = .lineComment(comment)
-        } else if comment.hasPrefix("///") {
-            commentTrivia = .docLineComment(comment)
-        } else if comment.hasPrefix("/*") {
+        case .block(let comment):
             commentTrivia = .blockComment(comment)
-        } else if comment.hasPrefix("/**") {
+        case .docLine(let comment):
+            commentTrivia = .docLineComment(comment)
+        case .docBlock(let comment):
             commentTrivia = .docBlockComment(comment)
-        } else {
-            commentTrivia = .lineComment(comment)
         }
 
         return commentTrivia

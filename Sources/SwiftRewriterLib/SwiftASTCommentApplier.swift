@@ -28,8 +28,8 @@ public class SwiftASTCommentApplier {
         let leading = popAllCommentsBefore(rule: rule)
         let trailing = popClosestCommentAtTrailingLine(rule: rule)
 
-        statement.comments = _toCommentArray(leading)
-        statement.trailingComment = trailing.map(_toComment(_:))
+        statement.comments = leading
+        statement.trailingComment = trailing
     }
 
     /// Appends to the list of comments of a statement all comments that overlap
@@ -38,7 +38,7 @@ public class SwiftASTCommentApplier {
         let overlapping = popCommentsOverlapping(rule: rule)
 
         statement.comments.append(contentsOf:
-            _toCommentArray(overlapping)
+            overlapping
         )
     }
 
@@ -86,50 +86,73 @@ public class SwiftASTCommentApplier {
         )
     }
 
+    /// Pops all comments currently stored in this comment applier.
+    public func popAllComments() -> [SwiftComment] {
+        _withCommentQuerier {
+            $0.popAllComments().map(_toComment(_:))
+        }
+    }
+
     /// Pops the closest comment preceding a given source code location.
     ///
     /// Returns `nil` if no comment was found preceding `rule`.
-    public func popClosestCommentBefore(rule: ParserRuleContext) -> RawCodeComment? {
+    public func popClosestCommentBefore(rule: ParserRuleContext) -> SwiftComment? {
         _withCommentQuerier {
-            $0.popClosestCommentBefore(rule: rule)
+            $0.popClosestCommentBefore(rule: rule).map(_toComment(_:))
         }
     }
     
     /// Pops all comments that precede a given parser rule in the source code.
-    public func popAllCommentsBefore(rule: ParserRuleContext) -> [RawCodeComment] {
+    public func popAllCommentsBefore(rule: ParserRuleContext) -> [SwiftComment] {
         _withCommentQuerier {
-            $0.popAllCommentsBefore(rule: rule)
+            _toCommentArray($0.popAllCommentsBefore(rule: rule))
         }
     }
 
     /// Pops all comments lay inline with a given parser rule context.
-    public func popCommentsInlineWith(rule: ParserRuleContext) -> [RawCodeComment] {
+    public func popCommentsInlineWith(rule: ParserRuleContext) -> [SwiftComment] {
         _withCommentQuerier {
-            $0.popCommentsInlineWith(rule: rule)
+            _toCommentArray($0.popCommentsInlineWith(rule: rule))
         }
     }
     
     /// Pops all comments that overlap a given parser rule context.
-    public func popCommentsOverlapping(rule: ParserRuleContext) -> [RawCodeComment] {
+    public func popCommentsOverlapping(rule: ParserRuleContext) -> [SwiftComment] {
         _withCommentQuerier {
-            $0.popCommentsOverlapping(rule: rule)
+            _toCommentArray($0.popCommentsOverlapping(rule: rule))
         }
     }
     
     /// Pops the closest comment that trails a given parser rule's exact line
     /// number.
-    public func popClosestCommentAtTrailingLine(rule: ParserRuleContext) -> RawCodeComment? {
+    public func popClosestCommentAtTrailingLine(rule: ParserRuleContext) -> SwiftComment? {
         _withCommentQuerier {
-            $0.popClosestCommentAtTrailingLine(rule: rule)
+            $0.popClosestCommentAtTrailingLine(rule: rule).map(_toComment(_:))
         }
     }
 
-    private func _toCommentArray(_ rawComments: [RawCodeComment]) -> [String] {
+    private func _toCommentArray(_ rawComments: [RawCodeComment]) -> [SwiftComment] {
         rawComments.map(_toComment(_:))
     }
 
-    private func _toComment(_ rawComment: RawCodeComment) -> String {
-        rawComment.string.trimmingWhitespace()
+    private func _toComment(_ rawComment: RawCodeComment) -> SwiftComment {
+        let comment = rawComment.string.trimmingWhitespace()
+        let commentTrivia: SwiftComment
+
+        // TODO: Map comments from frontends into an enum
+        if comment.hasPrefix("//") {
+            commentTrivia = .line(comment)
+        } else if comment.hasPrefix("///") {
+            commentTrivia = .docLine(comment)
+        } else if comment.hasPrefix("/*") {
+            commentTrivia = .block(comment)
+        } else if comment.hasPrefix("/**") {
+            commentTrivia = .docBlock(comment)
+        } else {
+            commentTrivia = .line(comment)
+        }
+
+        return commentTrivia
     }
 
     /// Invokes a closure with a comment querier that can be used to modify the

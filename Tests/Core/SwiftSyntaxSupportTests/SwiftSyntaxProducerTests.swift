@@ -70,11 +70,13 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
                 builder.createGlobalFunction(withName: "f") { builder in
-                    builder.addComment("""
-                        /**
-                         * Comment
-                         */
-                        """
+                    builder.addComment(
+                        .block("""
+                            /**
+                             * Comment
+                             */
+                            """ 
+                        )
                     )
                 }
             }

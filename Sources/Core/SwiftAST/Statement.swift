@@ -18,11 +18,11 @@ public class Statement: SyntaxNode, Codable, Equatable {
     
     /// A list of comments, including leading // or /*, which are printed before
     /// the statement.
-    public var comments: [String] = []
+    public var comments: [SwiftComment] = []
     
     /// A comment that trails the statement (i.e. it's placed after the statement,
     /// before the newline feed)
-    public var trailingComment: String?
+    public var trailingComment: SwiftComment?
     
     override internal init() {
         super.init()
@@ -38,8 +38,8 @@ public class Statement: SyntaxNode, Codable, Equatable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         self.label = try container.decodeIfPresent(String.self, forKey: .label)
-        self.comments = try container.decode([String].self, forKey: .comments)
-        self.trailingComment = try container.decodeIfPresent(String.self, forKey: .trailingComment)
+        self.comments = try container.decode([SwiftComment].self, forKey: .comments)
+        self.trailingComment = try container.decodeIfPresent(SwiftComment.self, forKey: .trailingComment)
         
         super.init()
     }
@@ -126,6 +126,13 @@ public extension Statement {
     
     /// Replaces the current list of leading comments and returns this instance.
     func withComments(_ comments: [String]) -> Self {
+        return withSwiftComments(comments.map {
+            SwiftComment.line($0)
+        })
+    }
+    
+    /// Replaces the current list of leading comments and returns this instance.
+    func withSwiftComments(_ comments: [SwiftComment]) -> Self {
         self.comments = comments
         
         return self
@@ -134,6 +141,14 @@ public extension Statement {
     /// Replaces the trailing comment from this statement with a new value and
     /// returns this instance.
     func withTrailingComment(_ comment: String?) -> Self {
+        withTrailingSwiftComment(
+            comment.map(SwiftComment.line(_:))
+        )
+    }
+    
+    /// Replaces the trailing comment from this statement with a new value and
+    /// returns this instance.
+    func withTrailingSwiftComment(_ comment: SwiftComment?) -> Self {
         self.trailingComment = comment
         
         return self
