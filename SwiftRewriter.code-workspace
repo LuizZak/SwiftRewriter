@@ -248,10 +248,12 @@
 			"synthesizations",
 			"Trivias",
 			"typealiases",
+			"unalias",
+			"unaliased",
 			"uniquing",
 			"Unretained",
 			"whitespaces",
-			"Xexact",
+			"Xexact"
 		],
 		"swiftTestFileGen.gotoTestFile.useFilenameHeuristics": true,
 		"swiftTestFileGen.gotoTestFile.heuristicFilenamePattern": "$1Tests"

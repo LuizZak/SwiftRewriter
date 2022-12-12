@@ -12,14 +12,15 @@ public class TypeSystem {
     
     private var compoundKnownTypesCache: CompoundKnownTypesCache?
     private var protocolConformanceCache: ProtocolConformanceCache?
-    @ConcurrentValue private var baseClassTypesByNameCache: [String: ClassType] = [:]
     private var overloadResolverState = OverloadResolverState()
-    var memberSearchCache = MemberSearchCache()
+    private var memberSearchCache = MemberSearchCache()
+    @ConcurrentValue private var baseClassTypesByNameCache: [String: ClassType] = [:]
+    
     @ConcurrentValue var aliasCache: [SwiftType: SwiftType] = [:]
     @ConcurrentValue var allConformancesCache: [String: [KnownProtocolConformance]] = [:]
     @ConcurrentValue var typeExistsCache: [String: Bool] = [:]
     @ConcurrentValue var knownTypeForSwiftType: [SwiftType: KnownType?] = [:]
-    
+
     /// Type-aliases
     var innerAliasesProvider = CollectionTypealiasProvider(aliases: [:])
     var typealiasProviders: CompoundTypealiasProvider
@@ -64,8 +65,10 @@ public class TypeSystem {
     
     /// Gets the overload resolver instance for this type system
     public func overloadResolver() -> OverloadResolver {
-        OverloadResolver(typeSystem: self,
-                         state: overloadResolverState)
+        OverloadResolver(
+            typeSystem: self,
+            state: overloadResolverState
+        )
     }
     
     public func addTypealiasProvider(_ provider: TypealiasProvider) {
@@ -80,7 +83,7 @@ public class TypeSystem {
     /// values.
     public func reset() {
         innerKnownTypes.removeAllTypes()
-        innerAliasesProvider.removeAllTypealises()
+        innerAliasesProvider.removeAllTypealiases()
         
         knownTypeProviders.providers.removeAll()
         typealiasProviders.providers.removeAll()
@@ -95,7 +98,12 @@ public class TypeSystem {
     
     /// Returns true if two given Swift types match semantically after expanding
     /// all typealiases.
-    public func typesMatch(_ type1: SwiftType, _ type2: SwiftType, ignoreNullability: Bool) -> Bool {
+    public func typesMatch(
+        _ type1: SwiftType,
+        _ type2: SwiftType,
+        ignoreNullability: Bool
+    ) -> Bool {
+        
         // Structurally the same
         if !ignoreNullability && type1 == type2 {
             return true
@@ -139,7 +147,7 @@ public class TypeSystem {
     
     /// Returns `true` if a given type is known to exist.
     ///
-    /// Returns `false` for typenames other than `.nominal` and `.metatype` of
+    /// Returns `false` for type names other than `.nominal` and `.metatype` of
     /// nominals.
     public func typeExists(_ type: SwiftType) -> Bool {
         guard let typeName = typeNameIn(swiftType: type) else {
@@ -238,12 +246,11 @@ public class TypeSystem {
         
         // TODO: Expose a new protocol `KnownTypeComposition` to help expose
         // the type structure better, and get rid of this `typeName` hack-ish thing.
-        let compoundType =
-            CompoundKnownType(
-                typeName: typeNames.joined(separator: " & "),
-                types: types,
-                typeSystem: self
-            )
+        let compoundType = CompoundKnownType(
+            typeName: typeNames.joined(separator: " & "),
+            types: types,
+            typeSystem: self
+        )
         
         compoundKnownTypesCache?.record(type: compoundType, names: typeNames)
         
@@ -478,8 +485,8 @@ public class TypeSystem {
             let typeName = typeNameIn(nominalType: nominalType)
             let baseTypeName = typeNameIn(nominalType: nominalBaseType)
             
-            return isType(typeName, subtypeOf: baseTypeName) ||
-                isType(typeName, conformingTo: baseTypeName)
+            return isType(typeName, subtypeOf: baseTypeName)
+                || isType(typeName, conformingTo: baseTypeName)
         default:
             return false
         }
@@ -601,12 +608,16 @@ public class TypeSystem {
             
             // Structs with default constructors are default-initialized to its
             // respective value.
-            if knownType.kind == .struct, constructor(withArgumentLabels: [], in: knownType) != nil {
+            if
+                knownType.kind == .struct,
+                constructor(withArgumentLabels: [], in: knownType) != nil
+            {
                 let exp = Expression.identifier(name).call()
                 exp.resolvedType = type
                 
                 return exp
             }
+            
             // Enums have their default value bound to the case that corresponds
             // to 0
             if knownType.kind == .enum {
@@ -629,7 +640,7 @@ public class TypeSystem {
                     var isZero = false
                     if cs.expression == nil && increment == 0 {
                         isZero = true
-                    } else if let integer =  cs.expression?.asConstant?.constant.integerValue {
+                    } else if let integer = cs.expression?.asConstant?.constant.integerValue {
                         increment = integer
                         isZero = integer == 0
                     }
@@ -694,8 +705,8 @@ public class TypeSystem {
         let isFloat2 = isFloat(type2)
         
         if (isInt1 && isInt2) || (isFloat1 && isFloat2) {
-            let bw1 = bitwidth(intType: type1)
-            let bw2 = bitwidth(intType: type2)
+            let bw1 = bitWidth(numericType: type1)
+            let bw2 = bitWidth(numericType: type2)
             
             if bw1 > bw2 {
                 return type1
@@ -729,8 +740,8 @@ public class TypeSystem {
         return false
     }
     
-    private func bitwidth(intType: SwiftType) -> Int {
-        func internalBitwidth(_ type: SwiftType) -> Int? {
+    private func bitWidth(numericType: SwiftType) -> Int {
+        func internalBitWidth(_ type: SwiftType) -> Int? {
             switch type {
             case .int, .uint:
                 return 64
@@ -774,7 +785,7 @@ public class TypeSystem {
             }
         }
         
-        return internalBitwidth(intType) ?? internalBitwidth(resolveAlias(in: intType)) ?? 8
+        return internalBitWidth(numericType) ?? internalBitWidth(resolveAlias(in: numericType)) ?? 8
     }
     
     /// Returns `true` if `type` is an integer (signed or unsigned) type.
@@ -883,13 +894,15 @@ public class TypeSystem {
         in type: KnownType
     ) -> KnownConstructor? {
 
-        if let constructor =
-            type.knownConstructors
-                .first(where: { $0.parameters.map(\.label).elementsEqual(labels) }) {
+        if
+            let constructor = type.knownConstructors.first(where: {
+                $0.parameters.map(\.label).elementsEqual(labels)
+            })
+        {
             return constructor
         }
         
-        // Search on supertypes
+        // Search on super types
         return supertype(of: type).flatMap {
             constructor(withArgumentLabels: labels, in: $0)
         }
@@ -914,17 +927,26 @@ public class TypeSystem {
         
         visitedTypes.insert(type.typeName)
         
-        if let conformance =
-            type.knownProtocolConformances
-                .first(where: { $0.protocolName == name }) {
+        if
+            let conformance = type.knownProtocolConformances.first(where: {
+                $0.protocolName == name
+            })
+        {
             return conformance
         }
         
-        // Search on supertypes
-        if let supertype = supertype(of: type), !visitedTypes.contains(supertype.typeName) {
-            if let supertypeConformance = _conformance(toProtocolName: name,
-                                                       in: supertype,
-                                                       visitedTypes: visitedTypes) {
+        // Search on super types
+        if
+            let supertype = supertype(of: type),
+            !visitedTypes.contains(supertype.typeName)
+        {
+            if
+                let supertypeConformance = _conformance(
+                    toProtocolName: name,
+                    in: supertype,
+                    visitedTypes: visitedTypes
+                )
+            {
                 return supertypeConformance
             }
         }
@@ -939,9 +961,13 @@ public class TypeSystem {
                 continue
             }
             
-            if let conformance = _conformance(toProtocolName: name,
-                                              in: type,
-                                              visitedTypes: visitedTypes) {
+            if
+                let conformance = _conformance(
+                    toProtocolName: name,
+                    in: type,
+                    visitedTypes: visitedTypes
+                )
+            {
                 return conformance
             }
         }
@@ -972,9 +998,9 @@ public class TypeSystem {
             }
         }
         
-        var protocols =
-            type.knownProtocolConformances
-                .filter { !visitedTypes.contains($0.protocolName) }
+        var protocols = type.knownProtocolConformances.filter {
+            !visitedTypes.contains($0.protocolName)
+        }
         
         for prot in type.knownProtocolConformances {
             if visitedTypes.contains(prot.protocolName) {
@@ -988,9 +1014,15 @@ public class TypeSystem {
             }
         }
         
-        if let supertype = supertype(of: type), !visitedTypes.contains(supertype.typeName) {
+        if
+            let supertype = supertype(of: type),
+            !visitedTypes.contains(supertype.typeName)
+        {
             protocols.append(contentsOf:
-                _allConformances(of: supertype, visitedTypes: visitedTypes)
+                _allConformances(
+                    of: supertype,
+                    visitedTypes: visitedTypes
+                )
             )
         }
         
@@ -1015,14 +1047,13 @@ public class TypeSystem {
         in type: KnownType
     ) -> KnownMethod? {
         
-        let lookup = makeTypeMemberLookup()
+        let lookup = makeTypeLookup(type)
         
         return lookup.method(
             withIdentifier: identifier,
             invocationTypeHints: invocationTypeHints,
             static: isStatic,
-            includeOptional: includeOptional,
-            in: type
+            includeOptional: includeOptional
         )
     }
     
@@ -1036,13 +1067,12 @@ public class TypeSystem {
         in type: KnownType
     ) -> KnownProperty? {
         
-        let lookup = makeTypeMemberLookup()
+        let lookup = makeTypeLookup(type)
         
         return lookup.property(
             named: name,
             static: isStatic,
-            includeOptional: includeOptional,
-            in: type
+            includeOptional: includeOptional
         )
     }
     
@@ -1053,11 +1083,10 @@ public class TypeSystem {
         in type: KnownType
     ) -> KnownProperty? {
 
-        let lookup = makeTypeMemberLookup()
+        let lookup = makeTypeLookup(type)
         
-        return lookup.field(named: name, static: isStatic, in: type)
+        return lookup.field(named: name, static: isStatic)
     }
-
     
     /// Searches for a member with a given name on a type.
     public func member(
@@ -1066,12 +1095,11 @@ public class TypeSystem {
         in type: KnownType
     ) -> KnownMember? {
 
-        let lookup = makeTypeMemberLookup()
+        let lookup = makeTypeLookup(type)
         
         return lookup.member(
             named: name,
-            static: isStatic,
-            in: type
+            static: isStatic
         )
     }
     
@@ -1083,13 +1111,12 @@ public class TypeSystem {
         in type: KnownType
     ) -> KnownSubscript? {
         
-        let lookup = makeTypeMemberLookup()
+        let lookup = makeTypeLookup(type)
         
         return lookup.subscription(
             withParameterLabels: labels,
             invocationTypeHints: invocationTypeHints,
-            static: isStatic,
-            in: type
+            static: isStatic
         )
     }
     
@@ -1114,7 +1141,11 @@ public class TypeSystem {
             }
             
             for next in nested.dropFirst() {
-                if let type = current.nestedTypes.first(where: { $0.typeName == next.typeNameValue }) {
+                if
+                    let type = current.nestedTypes.first(where: {
+                        $0.typeName == next.typeNameValue
+                    })
+                {
                     current = type
                 } else {
                     return nil
@@ -1161,6 +1192,7 @@ public class TypeSystem {
         guard let knownType = self.findType(for: type) else {
             return nil
         }
+
         return constructor(withArgumentLabels: labels, in: knownType)
     }
     
@@ -1173,6 +1205,7 @@ public class TypeSystem {
         guard let knownType = self.findType(for: type) else {
             return nil
         }
+
         return conformance(toProtocolName: name, in: knownType)
     }
     
@@ -1199,14 +1232,13 @@ public class TypeSystem {
         in type: SwiftType
     ) -> KnownMethod? {
         
-        let lookup = makeTypeMemberLookup()
+        let lookup = makeTypeLookup(type)
         
         return lookup.method(
             withIdentifier: identifier,
             invocationTypeHints: invocationTypeHints,
             static: isStatic,
-            includeOptional: includeOptional,
-            in: type
+            includeOptional: includeOptional
         )
     }
     
@@ -1220,13 +1252,12 @@ public class TypeSystem {
         in type: SwiftType
     ) -> KnownProperty? {
         
-        let lookup = makeTypeMemberLookup()
+        let lookup = makeTypeLookup(type)
         
         return lookup.property(
             named: name,
             static: isStatic,
-            includeOptional: includeOptional,
-            in: type
+            includeOptional: includeOptional
         )
     }
     
@@ -1237,9 +1268,9 @@ public class TypeSystem {
         in type: SwiftType
     ) -> KnownProperty? {
 
-        let lookup = makeTypeMemberLookup()
+        let lookup = makeTypeLookup(type)
         
-        return lookup.field(named: name, static: isStatic, in: type)
+        return lookup.field(named: name, static: isStatic)
     }
     
     /// Gets a subscription for a given index type on a given type
@@ -1250,13 +1281,12 @@ public class TypeSystem {
         in type: SwiftType
     ) -> KnownSubscript? {
         
-        let lookup = makeTypeMemberLookup()
+        let lookup = makeTypeLookup(type)
         
         return lookup.subscription(
             withParameterLabels: labels,
             invocationTypeHints: invocationTypeHints,
-            static: isStatic,
-            in: type
+            static: isStatic
         )
     }
 
@@ -1267,29 +1297,44 @@ public class TypeSystem {
         in type: SwiftType
     ) -> KnownMember? {
 
-        let lookup = makeTypeMemberLookup()
+        let lookup = makeTypeLookup(type)
         
         return lookup.member(
             named: name,
-            static: isStatic,
-            in: type
+            static: isStatic
         )
     }
-    
-    private func makeTypeMemberLookup() -> TypeMemberLookup {
-        TypeMemberLookup(typeSystem: self, memberSearchCache: memberSearchCache)
+
+    private func makeTypeLookup(_ knownType: KnownType) -> MemberLookupType {
+        let lookup = makeTypeMemberLookupContext()
+
+        return lookup.makeKnownTypeLookup(knownType)
+    }
+
+    private func makeTypeLookup(_ swiftType: SwiftType) -> MemberLookupType {
+        let lookup = makeTypeMemberLookupContext()
+        
+        return lookup.makeSwiftTypeLookup(swiftType)
+    }
+
+    private func makeTypeMemberLookupContext() -> TypeMemberLookupContext {
+        return .init(
+            typeSystem: self,
+            memberSearchCache: memberSearchCache,
+            visitedTypes: []
+        )
     }
     
     private func classTypeDefinition(name: String) -> ClassType? {
         if !_baseClassTypesByNameCache.usingCache {
-            _baseClassTypesByNameCache
-                .setAsCaching(value:
-                    TypeDefinitions
-                        .classesList
-                        .classes
-                        .groupBy(\.typeName)
-                        .mapValues { $0[0] }
-                )
+            let mapped: [String: ClassType] =
+                TypeDefinitions
+                    .classesList
+                    .classes
+                    .groupBy(\.typeName)
+                    .mapValues { $0[0] }
+            
+            _baseClassTypesByNameCache.setAsCaching(value: mapped)
         }
         
         return baseClassTypesByNameCache[name]
@@ -1320,28 +1365,29 @@ extension TypeSystem {
     /// Initializes the default known types
     func registerInitialKnownTypes() {
         let nsObjectProtocol =
-            KnownTypeBuilder(typeName: "NSObjectProtocol", kind: .protocol)
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "responds",
-                        parameters: [ParameterSignature(label: "to",
-                                                        name: "selector",
-                                                        type: .selector)],
-                        returnType: .bool,
-                        isStatic: false,
-                        isMutating: false)
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "isEqual",
-                        parameters: [ParameterSignature(label: nil,
-                                                        name: "object",
-                                                        type: .anyObject)],
-                        returnType: .bool,
-                        isStatic: false,
-                        isMutating: false)
-                )
-                .build()
+            KnownTypeBuilder(
+                typeName: "NSObjectProtocol",
+                kind: .protocol
+            )
+            .method(withSignature: .init(
+                name: "responds",
+                parameters: [
+                    .init(label: "to", name: "selector", type: .selector)
+                ],
+                returnType: .bool,
+                isStatic: false,
+                isMutating: false
+            ))
+            .method(withSignature: .init(
+                name: "isEqual",
+                parameters: [
+                    .init(label: nil, name: "object", type: .anyObject)
+                ],
+                returnType: .bool,
+                isStatic: false,
+                isMutating: false
+            ))
+            .build()
         
         let nsObject =
             KnownTypeBuilder(typeName: "NSObject")
@@ -1355,18 +1401,22 @@ extension TypeSystem {
                 .build()
         
         let nsMutableSet =
-            KnownTypeBuilder(typeName: "NSMutableSet", supertype: nsSet)
-                .method(withSignature:
-                    FunctionSignature(
+            KnownTypeBuilder(
+                typeName: "NSMutableSet",
+                supertype: nsSet
+            )
+            .method(
+                withSignature:
+                    .init(
                         name: "add",
                         parameters: [
-                            ParameterSignature(label: nil, name: "object", type: .anyObject)
+                            .init(label: nil, name: "object", type: .anyObject)
                         ],
                         isMutating: false
                     ),
-                        semantics: Semantics.collectionMutator
-                )
-                .build()
+                semantics: Semantics.collectionMutator
+            )
+            .build()
         
         addType(nsObjectProtocol)
         addType(nsObject)
@@ -1379,13 +1429,25 @@ extension TypeSystem {
     }
     
     private func registerFoundation(nsObject: KnownType) {
-        let nsDate = KnownTypeBuilder(typeName: "NSDate", supertype: nsObject).build()
-        let nsData = KnownTypeBuilder(typeName: "NSData", supertype: nsObject).build()
-        let nsMutableData = KnownTypeBuilder(typeName: "NSMutableData", supertype: nsData).build()
-        let nsMutableString =
-            KnownTypeBuilder(typeName: "NSMutableString", supertype: KnownTypeReference.typeName("NSString"))
-                .constructor()
-                .build()
+        let nsDate = KnownTypeBuilder(
+            typeName: "NSDate",
+            supertype: nsObject
+        ).build()
+
+        let nsData = KnownTypeBuilder(
+            typeName: "NSData",
+            supertype: nsObject
+        ).build()
+
+        let nsMutableData = KnownTypeBuilder(
+            typeName: "NSMutableData",
+            supertype: nsData
+        ).build()
+
+        let nsMutableString = KnownTypeBuilder(
+            typeName: "NSMutableString",
+            supertype: KnownTypeReference.typeName("NSString")
+        ).constructor().build()
         
         addType(nsDate)
         addType(nsData)
@@ -1394,8 +1456,15 @@ extension TypeSystem {
     }
     
     private func registerFormatters(nsObject: KnownType) {
-        let nsFormatter = KnownTypeBuilder(typeName: "NSFormatter", supertype: nsObject).build()
-        let nsDateFormatter = KnownTypeBuilder(typeName: "NSDateFormatter", supertype: nsFormatter).build()
+        let nsFormatter = KnownTypeBuilder(
+            typeName: "NSFormatter",
+            supertype: nsObject
+        ).build()
+
+        let nsDateFormatter = KnownTypeBuilder(
+            typeName: "NSDateFormatter",
+            supertype: nsFormatter
+        ).build()
         
         addType(nsFormatter)
         addType(nsDateFormatter)
@@ -1447,9 +1516,11 @@ private class TypealiasExpander {
     func expand(in type: SwiftType) -> SwiftType {
         switch type {
         case let .block(returnType, parameters, attributes):
-            return .block(returnType: expand(in: returnType),
-                          parameters: parameters.map(expand),
-                          attributes: attributes)
+            return .block(
+                returnType: expand(in: returnType),
+                parameters: parameters.map(expand),
+                attributes: attributes
+            )
             
         case .nominal(.typeName(let name)):
             if let type = source.unalias(name) {
@@ -1521,17 +1592,21 @@ private class TypealiasExpander {
             return .typeName(expand(inString: name))
             
         case let .generic(name, parameters):
-            return .generic(expand(inString: name),
-                            parameters: .fromCollection(parameters.map(expand)))
+            return .generic(
+                expand(inString: name),
+                parameters: .fromCollection(parameters.map(expand))
+            )
         }
     }
     
     private func pushingAlias<T>(_ name: String, do work: () -> T) -> T {
         if aliasesInStack.contains(name) {
-            fatalError("""
-                Cycle found while expanding typealises: \
+            fatalError(
+                """
+                Cycle found while expanding typealiases: \
                 \(aliasesInStack.joined(separator: " -> ")) -> \(name)
-                """)
+                """
+            )
         }
         
         aliasesInStack.append(name)
@@ -1744,236 +1819,5 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         private struct _KnownProtocolConformance: KnownProtocolConformance {
             var protocolName: String
         }
-    }
-}
-
-internal final class MemberSearchCache {
-    @ConcurrentValue private var methodsCache: [MethodSearchEntry: KnownMethod?] = [:]
-    @ConcurrentValue private var propertiesCache: [PropertySearchEntry: KnownProperty?] = [:]
-    @ConcurrentValue private var fieldsCache: [FieldSearchEntry: KnownProperty?] = [:]
-    @ConcurrentValue private var byNameMembersCache: [ByNameMemberSearchEntry: KnownMember?] = [:]
-    @ConcurrentValue private var subscriptsCache: [SubscriptSearchEntry: KnownSubscript?] = [:]
-
-    var usingCache: Bool = false
-
-    func makeCache() {
-        usingCache = true
-        _methodsCache.setAsCaching(value: [:])
-        _propertiesCache.setAsCaching(value: [:])
-        _fieldsCache.setAsCaching(value: [:])
-        _subscriptsCache.setAsCaching(value: [:])
-    }
-
-    func tearDownCache() {
-        usingCache = false
-        _methodsCache.tearDownCaching(resetToValue: [:])
-        _propertiesCache.tearDownCaching(resetToValue: [:])
-        _fieldsCache.tearDownCaching(resetToValue: [:])
-        _subscriptsCache.tearDownCaching(resetToValue: [:])
-    }
-
-    func storeMethod(
-        withIdentifier identifier: FunctionIdentifier,
-        invocationTypeHints: [SwiftType?]?,
-        static isStatic: Bool,
-        includeOptional: Bool,
-        in typeName: String,
-        method: KnownMethod?
-    ) {
-        
-        let entry = MethodSearchEntry(
-            identifier: identifier,
-            invocationTypeHints: invocationTypeHints,
-            isStatic: isStatic,
-            includeOptional: includeOptional,
-            typeName: typeName
-        )
-        
-        methodsCache[entry] = method
-    }
-
-    func storeProperty(
-        named name: String,
-        static isStatic: Bool,
-        includeOptional: Bool,
-        in typeName: String,
-        property: KnownProperty?
-    ) {
-
-        let entry = PropertySearchEntry(
-            name: name,
-            isStatic: isStatic,
-            includeOptional: includeOptional,
-            typeName: typeName
-        )
-        
-        propertiesCache[entry] = property
-    }
-
-    func storeMember(
-        named name: String,
-        static isStatic: Bool,
-        in typeName: String,
-        member: KnownMember?
-    ) {
-        
-        let entry = ByNameMemberSearchEntry(
-            name: name,
-            isStatic: isStatic,
-            typeName: typeName
-        )
-
-        byNameMembersCache[entry] = member
-    }
-
-    func storeField(
-        named name: String,
-        static isStatic: Bool,
-        in typeName: String,
-        field: KnownProperty?
-    ) {
-        
-        let entry = FieldSearchEntry(
-            name: name,
-            isStatic: isStatic,
-            typeName: typeName
-        )
-        
-        fieldsCache[entry] = field
-    }
-    
-    func storeSubscript(
-        withParameterLabels labels: [String?],
-        invocationTypeHints: [SwiftType?]?,
-        static isStatic: Bool,
-        in typeName: String,
-        `subscript` sub: KnownSubscript?
-    ) {
-        
-        let entry = SubscriptSearchEntry(
-            labels: labels,
-            invocationTypeHints: invocationTypeHints,
-            isStatic: isStatic,
-            typeName: typeName
-        )
-        
-        subscriptsCache[entry] = sub
-    }
-
-    func lookupMethod(
-        withIdentifier identifier: FunctionIdentifier,
-        invocationTypeHints: [SwiftType?]?,
-        static isStatic: Bool,
-        includeOptional: Bool,
-        in typeName: String
-    ) -> KnownMethod?? {
-        
-        let entry = MethodSearchEntry(
-            identifier: identifier,
-            invocationTypeHints: invocationTypeHints,
-            isStatic: isStatic,
-            includeOptional: includeOptional,
-            typeName: typeName
-        )
-        
-        return methodsCache[entry]
-    }
-
-    func lookupProperty(
-        named name: String,
-        static isStatic: Bool,
-        includeOptional: Bool,
-        in typeName: String
-    ) -> KnownProperty?? {
-        
-        let entry = PropertySearchEntry(
-            name: name,
-            isStatic: isStatic,
-            includeOptional: includeOptional,
-            typeName: typeName
-        )
-        
-        return propertiesCache[entry]
-    }
-
-    func lookupField(
-        named name: String,
-        static isStatic: Bool,
-        in typeName: String
-    ) -> KnownProperty?? {
-        
-        let entry = FieldSearchEntry(
-            name: name,
-            isStatic: isStatic,
-            typeName: typeName
-        )
-        
-        return fieldsCache[entry]
-    }
-
-    func lookupMember(
-        named name: String,
-        static isStatic: Bool,
-        in typeName: String
-    ) -> KnownMember?? {
-        
-        let entry = ByNameMemberSearchEntry(
-            name: name,
-            isStatic: isStatic,
-            typeName: typeName
-        )
-
-        return byNameMembersCache[entry]
-    }
-    
-    func lookupSubscription(
-        withParameterLabels labels: [String?],
-        invocationTypeHints: [SwiftType?]?,
-        static isStatic: Bool,
-        in typeName: String
-    ) -> KnownSubscript?? {
-        
-        let entry = SubscriptSearchEntry(
-            labels: labels,
-            invocationTypeHints: invocationTypeHints,
-            isStatic: isStatic,
-            typeName: typeName
-        )
-        
-        return subscriptsCache[entry]
-    }
-
-    struct MethodSearchEntry: Hashable {
-        var identifier: FunctionIdentifier
-        var invocationTypeHints: [SwiftType?]?
-        var isStatic: Bool
-        var includeOptional: Bool
-        var typeName: String
-    }
-
-    struct PropertySearchEntry: Hashable {
-        var name: String
-        var isStatic: Bool
-        var includeOptional: Bool
-        var typeName: String
-    }
-
-    struct FieldSearchEntry: Hashable {
-        var name: String
-        var isStatic: Bool
-        var typeName: String
-    }
-
-    struct ByNameMemberSearchEntry: Hashable {
-        var name: String
-        var isStatic: Bool
-        var typeName: String
-    }
-    
-    struct SubscriptSearchEntry: Hashable {
-        var labels: [String?]
-        var invocationTypeHints: [SwiftType?]?
-        var isStatic: Bool
-        var typeName: String
     }
 }

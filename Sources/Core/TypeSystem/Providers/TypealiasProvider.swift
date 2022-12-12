@@ -80,7 +80,7 @@ public class CollectionTypealiasProvider: TypealiasProvider {
         self.aliases = aliases
     }
     
-    public func removeAllTypealises() {
+    public func removeAllTypealiases() {
         aliases.removeAll()
     }
     
