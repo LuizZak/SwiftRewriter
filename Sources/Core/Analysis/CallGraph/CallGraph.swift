@@ -33,26 +33,26 @@ public class CallGraph: DirectedGraphBase<CallGraphNode, CallGraphEdge> {
 
     @discardableResult
     func ensureNode(_ declaration: FunctionBodyCarryingIntention) -> Node {
-        if let node = nodes.first(where: { $0.declaration.asStatement == declaration }) {
-            return node
+        // Detect stored variables that should be declared using CallGraphValueStorageIntention
+        switch declaration {
+        // Separate initializers from variable references
+        case .globalVariable(let decl, _):
+            let initializer = ensureNode(.statement(declaration))
+            let declNode = ensureNode(CallGraphValueStorageIntention.globalVariable(decl))
+
+            ensureEdge(from: declNode, to: initializer)
+
+            return declNode
+        default:
+            break
         }
 
-        let node = Node(declaration: declaration)
-        addNode(node)
-        
-        return node
+        return ensureNode(.statement(declaration))
     }
 
     @discardableResult
     func ensureNode(_ declaration: CallGraphValueStorageIntention) -> Node {
-        if let node = nodes.first(where: { $0.declaration.asStored == declaration }) {
-            return node
-        }
-
-        let node = Node(declaration: declaration)
-        addNode(node)
-        
-        return node
+        ensureNode(.stored(declaration))
     }
 
     @discardableResult
@@ -227,6 +227,33 @@ public enum CallGraphValueStorageIntention: Hashable {
     case property(PropertyGenerationIntention)
     case instanceVariable(InstanceVariableGenerationIntention)
     case globalVariable(GlobalVariableGenerationIntention)
+
+    public var asProperty: PropertyGenerationIntention? {
+        switch self {
+        case .property(let value):
+            return value
+        default:
+            return nil
+        }
+    }
+
+    public var asInstanceVariable: InstanceVariableGenerationIntention? {
+        switch self {
+        case .instanceVariable(let value):
+            return value
+        default:
+            return nil
+        }
+    }
+
+    public var asGlobalVariable: GlobalVariableGenerationIntention? {
+        switch self {
+        case .globalVariable(let value):
+            return value
+        default:
+            return nil
+        }
+    }
 
     /// Returns the type-erased `ValueStorageIntention` associated with this
     /// enumerator value.

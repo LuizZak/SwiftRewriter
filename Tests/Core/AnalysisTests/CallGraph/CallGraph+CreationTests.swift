@@ -733,4 +733,53 @@ class CallGraph_CreationTests: XCTestCase {
                 """
         )
     }
+
+    func testGlobalVariableGetterSetterWithInitializer() {
+        let builder = IntentionCollectionBuilder()
+        let body: CompoundStatement = [
+            // b
+            .expression(
+                .identifier("b")
+            ),
+            // b = 0
+            .expression(
+                .identifier("b")
+                    .assignment(
+                        op: .assign,
+                        rhs: .constant(0)
+                    )
+            ),
+        ]
+        builder
+            .createFile(named: "A.swift") { file in
+                file
+                    .createGlobalVariable(withName: "b", type: .int, initialExpression: .constant(0))
+                    .createGlobalFunction(withName: "a") { method in
+                        method.setBody(body)
+                    }
+            }
+        let intentions = builder.build(typeChecked: true)
+        let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
+
+        let graph = CallGraph.fromIntentions(intentions, typeSystem: typeSystem)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph calls {
+                    subgraph cluster_1 {
+                        label = "A.swift"
+
+                        n1 [label="func a()"]
+                        n2 [label="var b: Int"]
+                        n3 [label="var b: Int = <initializer>"]
+
+                        n1 -> n2
+                        n2 -> n3
+                    }
+                }
+                """
+        )
+    }
 }

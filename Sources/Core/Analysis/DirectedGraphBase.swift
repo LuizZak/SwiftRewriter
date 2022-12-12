@@ -85,6 +85,16 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
     func addNodes<S: Sequence>(_ nodes: S) where S.Element == Node {
         nodes.forEach(addNode)
     }
+
+    /// Adds an edge `start -> end` to this graph, if one doesn't already exists.
+    @discardableResult
+    func ensureEdge(from start: Node, to end: Node) -> Edge {
+        if let existing = edge(from: start, to: end) {
+            return existing
+        }
+
+        return addEdge(from: start, to: end)
+    }
     
     /// Adds an edge `start -> end` to this graph.
     @discardableResult

@@ -39,13 +39,12 @@ extension CallGraph {
             )
 
             for usage in usages {
-                let refIntentions =
-                    _extractIntentions(
-                        usage.definition,
-                        usageKind: usage.usageKind,
-                        collection,
-                        typeSystem
-                    )
+                let refIntentions = _extractIntentions(
+                    usage.definition,
+                    usageKind: usage.usageKind,
+                    collection,
+                    typeSystem
+                )
 
                 for ref in refIntentions {
                     let next = graph.ensureNode(ref)

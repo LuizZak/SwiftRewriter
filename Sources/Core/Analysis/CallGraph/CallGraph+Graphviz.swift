@@ -9,7 +9,7 @@ extension CallGraph {
     /// Generates a GraphViz representation of this call graph.
     public func asGraphviz() -> GraphViz {
         let viz = GraphViz(rootGraphName: "calls")
-        viz.rankDir = .topToBottom
+        viz.rankDir = .rightToLeft
 
         var nodeIds: [ObjectIdentifier: GraphViz.NodeId] = [:]
         var nodeDefinitions: [NodeDefinition<CallGraphNode>] = []
