@@ -3174,6 +3174,25 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
         )
     }
 
+    func testEmptyMethodBodiesEmitBodyComments() {
+        assertRewrite(
+            objc: """
+                @implementation A
+                - (void)test {
+                    // Body comment
+                }
+                @end
+                """,
+            swift: """
+                class A {
+                    func test() {
+                        // Body comment
+                    }
+                }
+                """
+        )
+    }
+
     func testDeclarationCommentIgnoresMethodBodyComments() {
         assertRewrite(
             objc: """

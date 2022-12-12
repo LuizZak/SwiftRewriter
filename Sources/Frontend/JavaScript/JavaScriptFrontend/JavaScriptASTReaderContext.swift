@@ -11,8 +11,8 @@ public final class JavaScriptASTReaderContext {
     private var localsStack: [[Local]] = [[]]
     private var typeSystem: TypeSystem?
     private var typeContext: KnownType?
-    private var comments: [RawCodeComment]
 
+    public let commentApplier: SwiftASTCommentApplier
     public let options: JavaScriptASTReaderOptions
     
     public init(
@@ -25,8 +25,8 @@ public final class JavaScriptASTReaderContext {
         self.source = source
         self.typeSystem = typeSystem
         self.typeContext = typeContext
-        self.comments = comments
         self.options = options
+        self.commentApplier = SwiftASTCommentApplier(comments: comments)
     }
 
     public func sourceCode(for rule: ParserRuleContext) -> Substring? {
@@ -84,60 +84,19 @@ public final class JavaScriptASTReaderContext {
     public func popDefinitionContext() {
         localsStack.removeLast()
     }
-    
-    public func popClosestCommentBefore(node: ParserRuleContext) -> RawCodeComment? {
-        guard let start = node.getStart() else {
-            return nil
-        }
-        
-        let location = start.sourceLocation()
-        
-        for (i, comment) in comments.enumerated().reversed() where comment.location < location {
-            comments.remove(at: i)
-            return comment
-        }
-        
-        return nil
+
+    /// Convenience for `commentApplier.applyComments(to:_:)`
+    public func applyComments(to statement: Statement, _ rule: ParserRuleContext) {
+        commentApplier.applyComments(to: statement, rule)
     }
-    
-    public func popClosestCommentsBefore(node: ParserRuleContext) -> [RawCodeComment] {
-        var comments: [RawCodeComment] = []
-        while let comment = popClosestCommentBefore(node: node) {
-            comments.append(comment)
-        }
-        
-        return comments.reversed()
-    }
-    
-    public func popClosestCommentAtTrailingLine(node: ParserRuleContext) -> RawCodeComment? {
-        guard let stop = node.getStop() else {
-            return nil
-        }
-        
-        let location = stop.sourceLocation()
-        
-        for (i, comment) in comments.enumerated() {
-            if comment.location.line == location.line && comment.location.column > location.column {
-                comments.remove(at: i)
-                return comment
-            }
-        }
-        
-        return nil
+
+    /// Convenience for `commentApplier.applyOverlappingComments(to:_:)`
+    public func applyOverlappingComments(to statement: Statement, _ rule: ParserRuleContext) {
+        commentApplier.applyOverlappingComments(to: statement, rule)
     }
     
     public struct Local {
         public var name: String
         public var storage: ValueStorage
-    }
-}
-
-private extension Token {
-    func sourceLocation() -> SourceLocation {
-        let line = getLine()
-        let col = getCharPositionInLine() + 1
-        let char = getStartIndex()
-        
-        return SourceLocation(line: line, column: col, utf8Offset: char)
     }
 }

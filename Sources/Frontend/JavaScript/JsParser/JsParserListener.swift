@@ -236,6 +236,7 @@ internal class JsParserListener: JavaScriptParserBaseListener {
         }
 
         node.body = ctx
+        node.comments = commentQuerier.popCommentsOverlapping(rule: ctx)
     }
 
     override func enterVariableStatement(_ ctx: JavaScriptParser.VariableStatementContext) {

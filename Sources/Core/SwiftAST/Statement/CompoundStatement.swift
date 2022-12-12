@@ -12,6 +12,7 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral, StatementK
         CompoundStatement()
     }
     
+    /// Returns `true` if this compound statement has no statements within.
     public var isEmpty: Bool {
         statements.isEmpty
     }

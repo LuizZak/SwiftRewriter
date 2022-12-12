@@ -4,6 +4,7 @@ import TypeSystem
 import JsParserAntlr
 import GrammarModelBase
 import JsGrammarModels
+import SwiftRewriterLib
 import JsParser
 import KnownType
 
@@ -56,7 +57,10 @@ public class JavaScriptASTReader {
     ) -> CompoundStatement {
         
         guard let sourceElements = body.sourceElements() else {
-            return CompoundStatement()
+            let applier = SwiftASTCommentApplier(comments: comments)
+            let result = CompoundStatement()
+            applier.applyOverlappingComments(to: result, body)
+            return result
         }
 
         return _parseStatements(
@@ -81,28 +85,24 @@ public class JavaScriptASTReader {
         typeContext: KnownType? = nil
     ) -> CompoundStatement {
         
-        let context =
-            JavaScriptASTReaderContext(
-                source: source,
-                typeSystem: typeSystem,
-                typeContext: typeContext,
-                comments: comments,
-                options: options
-            )
+        let context = JavaScriptASTReaderContext(
+            source: source,
+            typeSystem: typeSystem,
+            typeContext: typeContext,
+            comments: comments,
+            options: options
+        )
         
-        let expressionReader =
-            JavaScriptExprASTReader(
-                context: context,
-                delegate: delegate
-            )
+        let expressionReader = JavaScriptExprASTReader(
+            context: context,
+            delegate: delegate
+        )
         
-        let parser =
-            JavaScriptStatementASTReader
-                .CompoundStatementVisitor(
-                    expressionReader: expressionReader,
-                    context: context,
-                    delegate: delegate
-                )
+        let parser = JavaScriptStatementASTReader.CompoundStatementVisitor(
+            expressionReader: expressionReader,
+            context: context,
+            delegate: delegate
+        )
         
         guard let result = ctx.accept(parser) else {
             return [.unknown(UnknownASTContext(context: ctx))]
@@ -117,27 +117,24 @@ public class JavaScriptASTReader {
         typeContext: KnownType? = nil
     ) -> Statement {
         
-        let context =
-            JavaScriptASTReaderContext(
-                source: source,
-                typeSystem: typeSystem,
-                typeContext: typeContext,
-                comments: comments,
-                options: options
-            )
+        let context = JavaScriptASTReaderContext(
+            source: source,
+            typeSystem: typeSystem,
+            typeContext: typeContext,
+            comments: comments,
+            options: options
+        )
         
-        let expressionReader =
-            JavaScriptExprASTReader(
-                context: context,
-                delegate: delegate
-            )
+        let expressionReader = JavaScriptExprASTReader(
+            context: context,
+            delegate: delegate
+        )
         
-        let parser =
-            JavaScriptStatementASTReader(
-                expressionReader: expressionReader,
-                context: context,
-                delegate: delegate
-            )
+        let parser = JavaScriptStatementASTReader(
+            expressionReader: expressionReader,
+            context: context,
+            delegate: delegate
+        )
         
         guard let result = ctx.accept(parser) else {
             return .unknown(UnknownASTContext(context: ctx))
@@ -146,23 +143,23 @@ public class JavaScriptASTReader {
         return result
     }
     
-    public func parseExpression(expression: JavaScriptParser.SingleExpressionContext,
-                                comments: [RawCodeComment] = []) -> Expression {
+    public func parseExpression(
+        expression: JavaScriptParser.SingleExpressionContext,
+        comments: [RawCodeComment] = []
+    ) -> Expression {
         
-        let context =
-            JavaScriptASTReaderContext(
-                source: source,
-                typeSystem: typeSystem,
-                typeContext: nil,
-                comments: comments,
-                options: options
-            )
+        let context = JavaScriptASTReaderContext(
+            source: source,
+            typeSystem: typeSystem,
+            typeContext: nil,
+            comments: comments,
+            options: options
+        )
         
-        let parser = 
-            JavaScriptExprASTReader(
-                context: context,
-                delegate: delegate
-            )
+        let parser =  JavaScriptExprASTReader(
+            context: context,
+            delegate: delegate
+        )
 
         guard let result = expression.accept(parser) else {
             return .unknown(UnknownASTContext(context: expression))
@@ -171,23 +168,23 @@ public class JavaScriptASTReader {
         return result
     }
     
-    public func parseExpression(expression: JavaScriptParser.ExpressionStatementContext,
-                                comments: [RawCodeComment] = []) -> Expression {
+    public func parseExpression(
+        expression: JavaScriptParser.ExpressionStatementContext,
+        comments: [RawCodeComment] = []
+    ) -> Expression {
         
-        let context =
-            JavaScriptASTReaderContext(
-                source: source,
-                typeSystem: typeSystem,
-                typeContext: nil,
-                comments: comments,
-                options: options
-            )
+        let context = JavaScriptASTReaderContext(
+            source: source,
+            typeSystem: typeSystem,
+            typeContext: nil,
+            comments: comments,
+            options: options
+        )
         
-        let parser = 
-            JavaScriptExprASTReader(
-                context: context,
-                delegate: delegate
-            )
+        let parser = JavaScriptExprASTReader(
+            context: context,
+            delegate: delegate
+        )
 
         guard let result = expression.accept(parser) else {
             return .unknown(UnknownASTContext(context: expression))

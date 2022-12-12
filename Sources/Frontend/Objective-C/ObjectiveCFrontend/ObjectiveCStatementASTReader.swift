@@ -349,9 +349,11 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
         var context: ObjectiveCASTReaderContext
         weak var delegate: ObjectiveCStatementASTReaderDelegate?
         
-        init(expressionReader: ObjectiveCExprASTReader,
-             context: ObjectiveCASTReaderContext,
-             delegate: ObjectiveCStatementASTReaderDelegate?) {
+        init(
+            expressionReader: ObjectiveCExprASTReader,
+            context: ObjectiveCASTReaderContext,
+            delegate: ObjectiveCStatementASTReaderDelegate?
+        ) {
 
             self.expressionReader = expressionReader
             self.context = context
@@ -383,12 +385,11 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
             context.pushDefinitionContext()
             defer { context.popDefinitionContext() }
             
-            let reader =
-                ObjectiveCStatementASTReader(
-                    expressionReader: expressionReader,
-                    context: context,
-                    delegate: delegate
-                )
+            let reader = ObjectiveCStatementASTReader(
+                expressionReader: expressionReader,
+                context: context,
+                delegate: delegate
+            )
             
             reader.expressionReader = expressionReader
             
@@ -396,7 +397,7 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
                 $0 as? ParserRuleContext
             } ?? []
             
-            return CompoundStatement(statements: rules.map { stmt -> Statement in
+            let stmt = CompoundStatement(statements: rules.map { stmt -> Statement in
                 let unknown = UnknownStatement.unknown(UnknownASTContext(context: stmt.getText()))
                 
                 if let stmt = stmt as? Parser.StatementContext {
@@ -419,6 +420,18 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
                 
                 return [stmt]
             })
+
+            // Ensure comments that are nested inside the compound statement are
+            // still stored, even if it contains no statements of its own.
+            if stmt.isEmpty {
+                let comments = context.popCommentsOverlapping(rule: ctx)
+                
+                stmt.comments = comments.map {
+                    $0.string.trimmingWhitespace()
+                }
+            }
+
+            return stmt
         }
     }
     

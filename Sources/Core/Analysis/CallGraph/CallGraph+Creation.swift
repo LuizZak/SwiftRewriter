@@ -65,7 +65,7 @@ extension CallGraph {
         usageKind: DefinitionUsage.UsageKind,
         _ collection: IntentionCollection,
         _ typeSystem: TypeSystem
-    ) -> [FunctionBodyCarryingIntention] {
+    ) -> [CallGraphNode.DeclarationKind] {
 
         switch definition {
         case let def as KnownMemberCodeDefinition:
@@ -86,35 +86,72 @@ extension CallGraph {
         usageKind: DefinitionUsage.UsageKind,
         _ collection: IntentionCollection,
         _ typeSystem: TypeSystem
-    ) -> [FunctionBodyCarryingIntention] {
+    ) -> [CallGraphNode.DeclarationKind] {
         
         switch member {
         case let member as InitGenerationIntention:
-            return [.initializer(member)]
+            return [
+                .statement(
+                    .initializer(member)
+                )
+            ]
             
         case let member as MethodGenerationIntention:
-            return [.method(member)]
+            return [
+                .statement(
+                    .method(member)
+                )
+            ]
         
+        case let member as InstanceVariableGenerationIntention:
+            return [
+                .stored(
+                    .instanceVariable(member)
+                )
+            ]
+            
         case let member as PropertyGenerationIntention:
-            var result: [FunctionBodyCarryingIntention] = []
+            var result: [CallGraphNode.DeclarationKind] = []
 
-            if usageKind.isRead, let getter = member.getter {
-                result.append(.propertyGetter(member, getter))
-            }
-            if usageKind.isWrite, let setter = member.setter {
-                result.append(.propertySetter(member, setter))
+            if member.mode.isField {
+                result.append(
+                    .stored(.property(member))
+                )
+            } else {
+                if usageKind.isRead, let getter = member.getter {
+                    result.append(
+                        .statement(
+                            .propertyGetter(member, getter)
+                        )
+                    )
+                }
+                if usageKind.isWrite, let setter = member.setter {
+                    result.append(
+                        .statement(
+                            .propertySetter(member, setter)
+                        )
+                    )
+                }
             }
 
             return result
             
         case let member as SubscriptGenerationIntention:
-            var result: [FunctionBodyCarryingIntention] = []
+            var result: [CallGraphNode.DeclarationKind] = []
 
             if usageKind.isRead {
-                result.append(.subscriptGetter(member, member.getter))
+                result.append(
+                    .statement(
+                        .subscriptGetter(member, member.getter)
+                    )
+                )
             }
             if usageKind.isWrite, let setter = member.setter {
-                result.append(.subscriptSetter(member, setter))
+                result.append(
+                    .statement(
+                        .subscriptSetter(member, setter)
+                    )
+                )
             }
 
             return result
@@ -129,11 +166,18 @@ extension CallGraph {
         usageKind: DefinitionUsage.UsageKind,
         _ collection: IntentionCollection,
         _ typeSystem: TypeSystem
-    ) -> [FunctionBodyCarryingIntention] {
+    ) -> [CallGraphNode.DeclarationKind] {
 
         switch definition.intention {
         case let def as GlobalFunctionGenerationIntention:
-            return [.global(def)]
+            return [
+                .statement(.global(def))
+            ]
+        
+        case let def as GlobalVariableGenerationIntention:
+            return [
+                .stored(.globalVariable(def))
+            ]
 
         default:
             return []

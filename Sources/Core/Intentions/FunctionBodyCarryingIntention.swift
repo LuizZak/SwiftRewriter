@@ -1,3 +1,5 @@
+import KnownType
+
 /// Describes an intention that is a carrier of a function body or a top-level
 /// expression.
 public enum FunctionBodyCarryingIntention: Hashable {
@@ -66,6 +68,8 @@ public enum FunctionBodyCarryingIntention: Hashable {
         }
     }
 
+    /// Gets the statement container associated with this `FunctionBodyCarryingIntention`,
+    /// or `nil`, in case none is present.
     public var statementContainer: StatementContainer? {
         switch self {
         case .method(let intention):
@@ -88,6 +92,42 @@ public enum FunctionBodyCarryingIntention: Hashable {
             return .expression(initializer.expression)
         case .globalVariable(_, let initializer):
             return .expression(initializer.expression)
+        }
+    }
+
+    /// Gets the file that owns the underlying symbol referenced by this
+    /// `FunctionBodyCarryingIntention`.
+    public var ownerFile: KnownFile? {
+        switch self {
+        case .method(let decl):
+            return decl.file
+
+        case .initializer(let decl):
+            return decl.file
+
+        case .deinit(let decl):
+            return decl.file
+
+        case .propertyGetter(_, let decl):
+            return decl.file
+
+        case .propertySetter(_, let decl):
+            return decl.body.file
+
+        case .subscriptGetter(_, let decl):
+            return decl.file
+
+        case .subscriptSetter(_, let decl):
+            return decl.body.file
+
+        case .propertyInitializer(_, let decl):
+            return decl.file
+
+        case .global(let decl):
+            return decl.file
+        
+        case .globalVariable(_, let decl):
+            return decl.file
         }
     }
 

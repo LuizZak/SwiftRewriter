@@ -75,4 +75,39 @@ public extension Asserter where Object: ASTNode {
 
         return self
     }
+
+    /// Asserts that the underlying `ASTNode` object being tested has a list of
+    /// preceding comments that match a specified value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        precedingComments: [RawCodeComment],
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+        
+        asserter(forKeyPath: \.precedingComments) {
+            $0.assert(equals: precedingComments, file: file, line: line)
+        }
+    }
+
+    /// Asserts that the underlying `FromSourceIntention` object being tested
+    /// has a list of a preceding comments that match a specified value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        precedingCommentStrings: [String],
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+        
+        let actual = object.precedingComments.map(\.string)
+        return asserter(for: actual) {
+            $0.assert(equals: precedingCommentStrings, file: file, line: line)
+        }.map(self)
+    }
 }

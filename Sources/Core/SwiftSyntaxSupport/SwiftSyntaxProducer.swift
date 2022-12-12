@@ -158,21 +158,40 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
 
     // TODO: Map comments from frontends into an enum
     func addComments(_ comments: [String]) {
-        for comment in comments {
-            if comment.hasPrefix("//") {
-                addExtraLeading(.lineComment(comment))
-            } else if comment.hasPrefix("///") {
-                addExtraLeading(.docLineComment(comment))
-            } else if comment.hasPrefix("/*") {
-                addExtraLeading(.blockComment(comment))
-            } else if comment.hasPrefix("/**") {
-                addExtraLeading(.docBlockComment(comment))
-            } else {
-                addExtraLeading(.lineComment(comment))
-            }
+        let trivia = toCommentsTrivia(comments)
+        addExtraLeading(trivia)
+    }
 
-            addExtraLeading(.newlines(1) + indentation())
+    func toCommentsTrivia(_ comments: [String], addNewLineAfter: Bool = true) -> Trivia {
+        var trivia: Trivia = []
+
+        for (i, comment) in comments.enumerated() {
+            trivia = trivia + toCommentTrivia(comment)
+
+            if addNewLineAfter || i < comments.count - 1 {
+                trivia = trivia + .newlines(1) + indentation()
+            }
         }
+
+        return trivia
+    }
+
+    func toCommentTrivia(_ comment: String) -> Trivia {
+        let commentTrivia: Trivia
+
+        if comment.hasPrefix("//") {
+            commentTrivia = .lineComment(comment)
+        } else if comment.hasPrefix("///") {
+            commentTrivia = .docLineComment(comment)
+        } else if comment.hasPrefix("/*") {
+            commentTrivia = .blockComment(comment)
+        } else if comment.hasPrefix("/**") {
+            commentTrivia = .docBlockComment(comment)
+        } else {
+            commentTrivia = .lineComment(comment)
+        }
+
+        return commentTrivia
     }
     
     func addCommentsIfAvailable(_ intention: FromSourceIntention) {

@@ -21,7 +21,7 @@ public extension Asserter where Object: FromSourceIntention {
     }
 
     /// Asserts that the underlying `FromSourceIntention` object being tested
-    /// has a list of a preceding comments that match a specified value.
+    /// has a list of preceding comments that match a specified value.
     ///
     /// Returns `nil` if the test failed, otherwise returns `self` for chaining
     /// further tests.

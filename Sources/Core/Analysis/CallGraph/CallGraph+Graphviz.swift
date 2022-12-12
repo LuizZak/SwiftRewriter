@@ -148,6 +148,15 @@ private func labelForNode(_ node: CallGraphNode, graph: CallGraph) -> String {
     return labelForDeclaration(node.declaration)
 }
 
+private func labelForDeclaration(_ declaration: CallGraphNode.DeclarationKind) -> String {
+    switch declaration {
+    case .statement(let decl):
+        return labelForDeclaration(decl)
+    case .stored(let decl):
+        return labelForDeclaration(decl)
+    }
+}
+
 private func labelForDeclaration(_ declaration: FunctionBodyCarryingIntention) -> String {
     func prependType(_ type: KnownTypeReference?, _ suffix: String) -> String {
         if let typeName = type?.asTypeName {
@@ -264,6 +273,54 @@ private func labelForDeclaration(_ declaration: FunctionBodyCarryingIntention) -
 
     case .globalVariable(let intention, _):
         label = labelFor(intention) + " = <initializer>"
+    }
+
+    return label
+}
+
+private func labelForDeclaration(_ declaration: CallGraphValueStorageIntention) -> String {
+    func prependType(_ type: KnownTypeReference?, _ suffix: String) -> String {
+        if let typeName = type?.asTypeName {
+            return "\(typeName).\(suffix)"
+        }
+
+        return suffix
+    }
+
+    func labelFor(_ intention: KnownProperty) -> String {
+        "var \(intention.name): \(TypeFormatter.stringify(intention.storage.type))"
+    }
+
+    func labelFor(_ intention: KnownGlobalVariable) -> String {
+        "var \(intention.name): \(TypeFormatter.stringify(intention.storage.type))"
+    }
+
+    func labelFor(_ intention: KnownProperty, getter: Bool) -> String {
+        getter ? "\(labelFor(intention)) { get }" :  "\(labelFor(intention)) { set }"
+    }
+
+    func labelFor(_ property: KnownProperty, ofType type: KnownTypeReferenceConvertible?) -> String {
+        let base: String
+
+        if let type = type?.asKnownTypeReference {
+            base = TypeFormatter.asString(property: property, ofType: type, includeAccessors: false)
+        } else {
+            base = "var \(property.name): \(property.memberType)"
+        }
+
+        return base
+    }
+
+    var label: String
+    switch declaration {
+    case .property(let intention):
+        label = labelFor(intention, ofType: intention.ownerType)
+
+    case .instanceVariable(let intention):
+        label = labelFor(intention, ofType: intention.ownerType)
+
+    case .globalVariable(let intention):
+        label = labelFor(intention)
     }
 
     return label

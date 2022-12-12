@@ -70,6 +70,26 @@ public enum SourceRange: Hashable, Codable {
             return false
         }
     }
+
+    /// Returns `true` if the range described by this source range and `other`
+    /// overlap.
+    public func overlaps(_ other: SourceRange) -> Bool {
+        switch (self, other) {
+        case (.range(let aStart, let aEnd), .range(let bStart, let bEnd)):
+            return aStart < bEnd && aEnd > bStart
+
+        case
+            (.location(let loc), .range(let start, let end)),
+            (.range(let start, let end), .location(let loc)):
+            return loc >= start && loc < end
+        
+        case (.location(let l1), .location(let l2)):
+            return l1 == l2
+
+        case (.invalid, _), (_, .invalid):
+            return false
+        }
+    }
     
     public func union(with location: SourceLocation) -> SourceRange {
         if !location.isValid {

@@ -758,6 +758,48 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         )
     }
 
+    func testCommentInCompoundStatement() {
+        let stmt: CompoundStatement = []
+        stmt.comments = [
+            "// A comment",
+            "// Another comment",
+        ]
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+
+        assert(
+            syntaxes,
+            matches: """
+                {
+                    // A comment
+                    // Another comment
+                }
+                """
+        )
+    }
+
+    func testCommentInCompoundStatement_nonEmpty() {
+        let stmt: CompoundStatement = [
+            .expression(.identifier("a"))
+        ]
+        stmt.comments = [
+            "// A comment",
+            "// Another comment",
+        ]
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+
+        assert(
+            syntaxes,
+            matches: """
+                {
+                    // A comment
+                    // Another comment
+                    
+                    a
+                }
+                """
+        )
+    }
+
     func testCommentAndLabel() {
         let stmt: CompoundStatement = [
             Statement

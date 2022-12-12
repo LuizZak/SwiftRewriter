@@ -85,6 +85,29 @@ public final class ObjectiveCASTReaderContext {
         return comments.reversed()
     }
     
+    public func popCommentsOverlapping(rule: ParserRuleContext) -> [RawCodeComment] {
+        guard let start = rule.getStart(), let stop = rule.getStop() else {
+            return []
+        }
+
+        let range = SourceRange(
+            forStart: start.sourceLocation(),
+            end: stop.sourceLocation()
+        )
+
+        var result: [RawCodeComment] = []
+        
+        for (i, comment) in comments.enumerated().reversed() {
+            if range.contains(comment.location) {
+                result.append(
+                    comments.remove(at: i)
+                )
+            }
+        }
+        
+        return result
+    }
+    
     public func popClosestCommentAtTrailingLine(node: ParserRuleContext) -> RawCodeComment? {
         guard let stop = node.getStop() else {
             return nil

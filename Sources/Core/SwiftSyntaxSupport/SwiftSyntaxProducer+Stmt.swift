@@ -47,9 +47,22 @@ extension SwiftSyntaxProducer {
     
     func generateCompound(_ compoundStmt: CompoundStatement) -> CodeBlockSyntax {
         CodeBlockSyntax { builder in
-            builder.useLeftBrace(makeStartToken(SyntaxFactory.makeLeftBraceToken))
-            
+            var leftBrace = makeStartToken(SyntaxFactory.makeLeftBraceToken)
             indent()
+
+            // Apply comments as a trailing trivia for the leading brace
+            if !compoundStmt.comments.isEmpty {
+                leftBrace = leftBrace.withTrailingTrivia(
+                    .newlines(1)
+                        + indentation()
+                        + toCommentsTrivia(
+                            compoundStmt.comments,
+                            addNewLineAfter: !compoundStmt.isEmpty
+                        )
+                )
+            }
+            builder.useLeftBrace(leftBrace)
+            
             defer {
                 deindent()
                 builder.useRightBrace(

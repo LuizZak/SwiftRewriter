@@ -395,8 +395,16 @@ class CallGraph_CreationTests: XCTestCase {
                 digraph calls {
                     subgraph cluster_1 {
                         label = "A.swift"
-                
-                        n1 [label="func a(b: B)"]
+
+                        n2 [label="func a(b: B)"]
+
+                        subgraph cluster_2 {
+                            label = "class B"
+
+                            n1 [label="B.c: Int"]
+                        }
+
+                        n2 -> n1
                     }
                 }
                 """
@@ -406,12 +414,12 @@ class CallGraph_CreationTests: XCTestCase {
     func testStoredPropertySetter() {
         let builder = IntentionCollectionBuilder()
         let body: CompoundStatement = [
-            // b.c = ""
+            // b.c = 0
             .expression(
                 Expression
                     .identifier("b")
                     .dot("c")
-                    .assignment(op: .assign, rhs: .constant(""))
+                    .assignment(op: .assign, rhs: .constant(0))
             )
         ]
         builder
@@ -439,8 +447,68 @@ class CallGraph_CreationTests: XCTestCase {
                 digraph calls {
                     subgraph cluster_1 {
                         label = "A.swift"
-                
-                        n1 [label="func a(b: B)"]
+
+                        n2 [label="func a(b: B)"]
+
+                        subgraph cluster_2 {
+                            label = "class B"
+
+                            n1 [label="B.c: Int"]
+                        }
+
+                        n2 -> n1
+                    }
+                }
+                """
+        )
+    }
+
+    func testInstanceVariable() {
+        let builder = IntentionCollectionBuilder()
+        let body: CompoundStatement = [
+            // b.c = 0
+            .expression(
+                Expression
+                    .identifier("b")
+                    .dot("c")
+                    .assignment(op: .assign, rhs: .constant(0))
+            )
+        ]
+        builder
+            .createFile(named: "A.swift") { file in
+                file
+                    .createGlobalFunction(withName: "a") { method in
+                        method
+                            .createSignature { sign in
+                                sign.addParameter(name: "b", type: "B")
+                            }.setBody(body)
+                    }
+                    .createClass(withName: "B") { builder in
+                        builder.createInstanceVariable(named: "c", type: .int)
+                    }
+            }
+        let intentions = builder.build(typeChecked: true)
+        let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
+
+        let graph = CallGraph.fromIntentions(intentions, typeSystem: typeSystem)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph calls {
+                    subgraph cluster_1 {
+                        label = "A.swift"
+
+                        n2 [label="func a(b: B)"]
+
+                        subgraph cluster_2 {
+                            label = "class B"
+
+                            n1 [label="B.c: Int"]
+                        }
+
+                        n2 -> n1
                     }
                 }
                 """
@@ -503,12 +571,12 @@ class CallGraph_CreationTests: XCTestCase {
     func testPropertySetter() {
         let builder = IntentionCollectionBuilder()
         let body: CompoundStatement = [
-            // b.c = ""
+            // b.c = 0
             .expression(
                 Expression
                     .identifier("b")
                     .dot("c")
-                    .assignment(op: .assign, rhs: .constant(""))
+                    .assignment(op: .assign, rhs: .constant(0))
             )
         ]
         builder
@@ -611,6 +679,55 @@ class CallGraph_CreationTests: XCTestCase {
                 
                         n3 -> n1
                         n3 -> n2
+                    }
+                }
+                """
+        )
+    }
+
+    // MARK: Global variable
+    
+    func testGlobalVariableGetterSetter() {
+        let builder = IntentionCollectionBuilder()
+        let body: CompoundStatement = [
+            // b
+            .expression(
+                .identifier("b")
+            ),
+            // b = 0
+            .expression(
+                .identifier("b")
+                    .assignment(
+                        op: .assign,
+                        rhs: .constant(0)
+                    )
+            ),
+        ]
+        builder
+            .createFile(named: "A.swift") { file in
+                file
+                    .createGlobalVariable(withName: "b", type: .int)
+                    .createGlobalFunction(withName: "a") { method in
+                        method.setBody(body)
+                    }
+            }
+        let intentions = builder.build(typeChecked: true)
+        let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
+
+        let graph = CallGraph.fromIntentions(intentions, typeSystem: typeSystem)
+
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+                digraph calls {
+                    subgraph cluster_1 {
+                        label = "A.swift"
+                
+                        n1 [label="func a()"]
+                        n2 [label="var b: Int"]
+
+                        n1 -> n2
                     }
                 }
                 """

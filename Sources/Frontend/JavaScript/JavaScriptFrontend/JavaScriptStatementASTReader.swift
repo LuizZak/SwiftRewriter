@@ -11,17 +11,30 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
     var context: JavaScriptASTReaderContext
     public weak var delegate: JavaScriptASTReaderDelegate?
     
-    public init(expressionReader: JavaScriptExprASTReader,
-                context: JavaScriptASTReaderContext,
-                delegate: JavaScriptASTReaderDelegate?) {
+    public init(
+        expressionReader: JavaScriptExprASTReader,
+        context: JavaScriptASTReaderContext,
+        delegate: JavaScriptASTReaderDelegate?
+    ) {
 
         self.expressionReader = expressionReader
         self.context = context
         self.delegate = delegate
     }
 
+
     public override func visitBlock(_ ctx: JavaScriptParser.BlockContext) -> Statement? {
         compoundVisitor().visitBlock(ctx)
+    }
+
+    public override func visitStatement(_ ctx: JavaScriptParser.StatementContext) -> Statement? {
+        guard let result = super.visitStatement(ctx) else {
+            return nil
+        }
+
+        context.applyComments(to: result, ctx)
+
+        return result
     }
 
     public override func visitVariableStatement(_ ctx: JavaScriptParser.VariableStatementContext) -> Statement? {
@@ -300,7 +313,12 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
             initialization = singleExpression.accept(expressionReader)
         }
 
-        return .init(identifier: identifier.getText(), type: type, isConstant: isConstant, initialization: initialization)
+        return .init(
+            identifier: identifier.getText(),
+            type: type,
+            isConstant: isConstant,
+            initialization: initialization
+        )
     }
 
     fileprivate func varModifier(from ctx: JavaScriptParser.VarModifierContext) -> JsVariableDeclarationListNode.VarModifier {
@@ -331,9 +349,11 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
         var context: JavaScriptASTReaderContext
         weak var delegate: JavaScriptASTReaderDelegate?
         
-        init(expressionReader: JavaScriptExprASTReader,
-             context: JavaScriptASTReaderContext,
-             delegate: JavaScriptASTReaderDelegate?) {
+        init(
+            expressionReader: JavaScriptExprASTReader,
+            context: JavaScriptASTReaderContext,
+            delegate: JavaScriptASTReaderDelegate?
+        ) {
 
             self.expressionReader = expressionReader
             self.context = context
@@ -342,10 +362,20 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
 
         override func visitFunctionBody(_ ctx: JavaScriptParser.FunctionBodyContext) -> CompoundStatement? {
             guard let sourceElements = ctx.sourceElements() else {
-                return CompoundStatement()
+                let result = CompoundStatement()
+                context.applyOverlappingComments(to: result, ctx)
+                return result
             }
 
-            return sourceElements.accept(self)
+            context.commentApplier.pushRangeContext(rule: ctx)
+            guard let result = sourceElements.accept(self) else {
+                context.commentApplier.popRangeContext()
+                return nil
+            }
+            
+            context.commentApplier.popRangeContext(applyingUnusedCommentsTo: result)
+
+            return result
         }
         
         override func visitStatement(_ ctx: Parser.StatementContext) -> CompoundStatement? {
@@ -364,7 +394,6 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
 
         override func visitSourceElements(_ ctx: JavaScriptParser.SourceElementsContext) -> CompoundStatement? {
             context.pushDefinitionContext()
-            defer { context.popDefinitionContext() }
             
             let reader = statementReader()
 
@@ -374,7 +403,11 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
                 return element.statement().flatMap { $0.accept(reader) } ?? unknown
             }
             
-            return makeCompoundStatement(statements)
+            let result = makeCompoundStatement(statements)
+            
+            context.popDefinitionContext()
+
+            return result
         }
 
         override func visitArrowFunctionBody(_ ctx: JavaScriptParser.ArrowFunctionBodyContext) -> CompoundStatement? {
@@ -392,7 +425,7 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
         
         override func visitBlock(_ ctx: Parser.BlockContext) -> CompoundStatement? {
             context.pushDefinitionContext()
-            defer { context.popDefinitionContext() }
+            context.commentApplier.pushRangeContext(rule: ctx)
             
             let reader = statementReader()
 
@@ -402,7 +435,14 @@ public final class JavaScriptStatementASTReader: JavaScriptParserBaseVisitor<Sta
                 return stmt.accept(reader) ?? unknown
             } ?? []
             
-            return makeCompoundStatement(statements)
+            let result =  makeCompoundStatement(statements)
+
+            context.popDefinitionContext()
+            context.commentApplier.popRangeContext(
+                applyingUnusedCommentsTo: result
+            )
+            
+            return result
         }
 
         private func makeCompoundStatement(_ statements: [Statement]) -> CompoundStatement {

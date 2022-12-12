@@ -107,6 +107,37 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
         )
     }
 
+    func testRewrite_collectBodyComments() {
+        assertRewrite(
+            js: """
+            /**
+             * Bezier curve constructor.
+             *
+             * ...docs pending...
+             */
+            function a() {
+                // Body comment
+            }
+            function b() {
+                let local;
+            }
+            """,
+            swift: """
+            /**
+             * Bezier curve constructor.
+             *
+             * ...docs pending...
+             */
+            func a() {
+                // Body comment
+            }
+            func b() {
+                let local: Any
+            }
+            """
+        )
+    }
+
     func testRewrite_nestedFunctions() {
         assertRewrite(
             js: """
@@ -667,6 +698,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
                         t = 0.5
                     }
 
+                    // shortcuts, although they're really dumb
                     if t == 0 {
                         return Bezier(p2, p2)
                     }
@@ -675,6 +707,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
                         return Bezier(p1, p2)
                     }
 
+                    // real fitting.
                     let abc: Any = Bezier.getABC(2, p1, p2, t)
 
                     return Bezier(p1, abc.A)

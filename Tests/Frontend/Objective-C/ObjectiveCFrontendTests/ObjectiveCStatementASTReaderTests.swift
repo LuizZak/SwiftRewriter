@@ -832,6 +832,26 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             readsAs: expected
         )
     }
+
+    func testReadWithComments_emptyCompoundStatement() throws {
+        let string = """
+            if(true) {
+                // Empty body
+            }
+            """
+        let objcParser = ObjcParser(string: string)
+        try objcParser.parse()
+        let comments = objcParser.comments
+        let expected = Statement.if(.constant(true), body: [])
+        expected.body.comments = ["// Empty body"]
+
+        assert(
+            objcStmt: string,
+            comments: comments,
+            parseBlock: { try $0.statement() },
+            readsAs: expected
+        )
+    }
 }
 
 extension ObjectiveCStatementASTReaderTests {

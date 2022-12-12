@@ -90,10 +90,13 @@ public class JsParser {
         
         let root = try tryParse(from: parser, { try $0.program() })
         
-        let commentQuerier =
-            CommentQuerier(allComments: comments)
+        let commentQuerier = CommentQuerier(allComments: comments)
         
-        let listener = JsParserListener(sourceString: src, source: source, commentQuerier: commentQuerier)
+        let listener = JsParserListener(
+            sourceString: src,
+            source: source,
+            commentQuerier: commentQuerier
+        )
         
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)

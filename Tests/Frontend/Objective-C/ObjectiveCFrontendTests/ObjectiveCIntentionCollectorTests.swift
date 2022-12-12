@@ -4,6 +4,7 @@ import ObjcParser
 import SwiftAST
 import SwiftRewriterLib
 import TypeSystem
+import TestCommons
 import XCTest
 
 @testable import ObjectiveCFrontend
@@ -47,17 +48,18 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
         sut.collectIntentions(root)
 
         // Assert
-        XCTAssertEqual(file.globalFunctionIntentions.count, 1)
-        XCTAssertEqual(
-            file.globalFunctionIntentions.first?.signature,
-            FunctionSignature(
-                name: "global",
-                parameters: [
-                    ParameterSignature(label: nil, name: "a", type: .int)
-                ],
-                isStatic: false
+        Asserter(object: file!).inClosureUnconditional { file in
+            file[\.globalFunctionIntentions].assertCount(1)
+            file[\.globalFunctionIntentions][0]?.assert(
+                signature: FunctionSignature(
+                    name: "global",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "a", type: .int)
+                    ],
+                    isStatic: false
+                )
             )
-        )
+        }
     }
 
     func testCollectGlobalConst() throws {
@@ -69,9 +71,12 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
         
         sut.collectIntentions(rootNode)
         
-        XCTAssertEqual(file.globalVariableIntentions.count, 1)
-        XCTAssertEqual(file.globalVariableIntentions.first?.name, "global")
-        XCTAssertEqual(file.globalVariableIntentions.first?.isConstant, true)
+        Asserter(object: file!).inClosureUnconditional { file in
+            file[\.globalVariableIntentions].assertCount(1)
+            file[\.globalVariableIntentions][0]?
+                .assert(name: "global")?
+                .assert(isConstant: true)
+        }
     }
     
     func testCollectFunctionDefinitionBody() throws {
@@ -99,9 +104,12 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
         
         sut.collectIntentions(rootNode)
         
-        XCTAssertEqual(file.globalVariableIntentions.count, 1)
-        XCTAssertEqual(file.globalVariableIntentions.first?.name, "global")
-        XCTAssertEqual(file.globalVariableIntentions.first?.isConstant, true)
+        Asserter(object: file!).inClosureUnconditional { file in
+            file[\.globalVariableIntentions].assertCount(1)
+            file[\.globalVariableIntentions][0]?
+                .assert(name: "global")?
+                .assert(isConstant: true)
+        }
     }
 
     func testCollectTypedefBlock() throws {

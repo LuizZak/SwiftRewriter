@@ -99,6 +99,47 @@ class JsParserTests: XCTestCase {
         )
     }
 
+    func testCollectCommentsGlobalFunction() {
+        let string = """
+            /**
+             * Bezier curve constructor.
+             *
+             * ...docs pending...
+             */
+            function a() {
+                // Body comment
+            }
+            function b() {
+                let local;
+            }
+            """
+        let node = parserTest(string)
+
+        Asserter(object: node).inClosureUnconditional { asserter in
+            asserter.assertChildCount(2)?
+                .asserter(forChildAt: 0) { aFunc in
+                    aFunc.assert(isOfType: JsFunctionDeclarationNode.self)?
+                        .assert(precedingCommentStrings: [
+                            """
+                            /**
+                             * Bezier curve constructor.
+                             *
+                             * ...docs pending...
+                             */
+                            """,
+                        ])?
+                        .assert(commentStrings: [
+                            "// Body comment\n",
+                        ])
+                }?
+                .asserter(forChildAt: 1) { aFunc in
+                    aFunc.assert(isOfType: JsFunctionDeclarationNode.self)?
+                        .assert(precedingCommentStrings: [])?
+                        .assert(commentStrings: [])
+                }
+        }
+    }
+
     // TODO: Support "string name" imports as per described here:
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#named_import
     func testParseImportDeclaration() throws {

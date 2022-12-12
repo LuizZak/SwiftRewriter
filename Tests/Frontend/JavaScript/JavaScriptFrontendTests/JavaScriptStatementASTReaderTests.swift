@@ -1,6 +1,7 @@
 import XCTest
 import Antlr4
 import Utils
+import GrammarModelBase
 import JsParser
 import TypeSystem
 import JsParserAntlr
@@ -472,6 +473,183 @@ class JavaScriptStatementASTReaderTests: XCTestCase {
             readsAs: .throw(.identifier("Error").call())
         )
     }
+
+    func testReadComments() {
+        let expected = VariableDeclarationsStatement(decl: [
+            .init(identifier: "local", type: .any)
+        ]).withComments([
+            "// A comment"
+        ])
+
+        assert(
+            jsStmt: """
+            // A comment
+            var local;
+            """,
+            readsAs: expected
+        )
+    }
+
+    func testReadComments_trailingComment() {
+        let expected = VariableDeclarationsStatement(decl: [
+            .init(identifier: "local", type: .any)
+        ]).withTrailingComment(
+            "// A comment"
+        )
+
+        assert(
+            jsStmt: """
+            var local; // A comment
+            """,
+            readsAs: expected
+        )
+    }
+
+    func testReadComments_emptyStatementBlockComments() {
+        let expected: CompoundStatement = [
+            .if(
+                .constant(true),
+                body: .compound([
+
+                ]).withComments([
+                    "// A comment in an empty block"
+                ])
+            ),
+            .variableDeclarations([
+                .init(identifier: "local", type: .any)
+            ]).withComments([
+                "// Another comment"
+            ]),
+        ]
+
+        assert(
+            jsStmt: """
+            {
+                if (true) {
+                    // A comment in an empty block
+                }
+
+                // Another comment
+                var local;
+            }
+            """,
+            readsAs: expected
+        )
+    }
+
+    func testReadComments_respectsBlockHierarchiesInExpressions() {
+        let expected: CompoundStatement = [
+            .expression(
+                .identifier("call").call([
+                    .block(
+                        return: .any,
+                        body: [
+                            .expression(
+                                .identifier("identifier")
+                            ).withComments([
+                                "// Block comment"
+                            ])
+                        ]
+                    )
+                ])
+            ),
+            .variableDeclarations([
+                .init(identifier: "local", type: .any)
+            ]).withComments([
+                "// Another comment"
+            ]),
+        ]
+
+        assert(
+            jsStmt: """
+            {
+                call(function() {
+                    // Block comment
+                    identifier;
+                })
+
+                // Another comment
+                var local;
+            }
+            """,
+            readsAs: expected
+        )
+    }
+
+    func testReadComments_respectsBlockHierarchiesInInitializers() {
+        let expected: CompoundStatement = [
+            .variableDeclaration(
+                identifier: "local1",
+                type: .any,
+                initialization: .identifier("call").call([
+                    .block(
+                        return: .any,
+                        body: [
+                            .expression(
+                                .identifier("identifier")
+                            ).withComments([
+                                "// Block comment"
+                            ]),
+                        ]
+                    )
+                ])
+            ),
+            .variableDeclarations([
+                .init(identifier: "local2", type: .any)
+            ]).withComments([
+                "// Another comment"
+            ]),
+        ]
+
+        assert(
+            jsStmt: """
+            {
+                var local1 = call(function() {
+                    // Block comment
+                    identifier;
+                })
+
+                // Another comment
+                var local2;
+            }
+            """,
+            readsAs: expected
+        )
+    }
+
+    func testReadComments_emptyStatementBlockCommentsToLocalFunctions() {
+        let expected: CompoundStatement = [
+            .localFunction(
+                identifier: "f",
+                parameters: [],
+                returnType: .any,
+                body: .compound([
+
+                ]).withComments([
+                    "// A comment in an function"
+                ])
+            ),
+            .variableDeclarations([
+                .init(identifier: "local", type: .any)
+            ]).withComments([
+                "// Another comment"
+            ]),
+        ]
+
+        assert(
+            jsStmt: """
+            {
+                function f() {
+                    // A comment in an function
+                }
+
+                // Another comment
+                var local;
+            }
+            """,
+            readsAs: expected
+        )
+    }
 }
 
 extension JavaScriptStatementASTReaderTests {
@@ -489,31 +667,33 @@ extension JavaScriptStatementASTReaderTests {
         let source = StringCodeSource(source: jsStmt, fileName: "test.js")
         let typeSystem = TypeSystem()
 
-        let context = JavaScriptASTReaderContext(
-            source: source,
-            typeSystem: typeSystem,
-            typeContext: nil,
-            comments: [],
-            options: options
-        )
-
-        let expReader = JavaScriptExprASTReader(
-            context: context,
-            delegate: nil
-        )
-
-        let sut =
-            JavaScriptStatementASTReader(
-                expressionReader: expReader,
-                context: context,
-                delegate: nil
-            )
-
         do {
+            let parser = JsParser(string: jsStmt)
+            try parser.parse()
+            
             let state = try JavaScriptStatementASTReaderTests._state.makeMainParser(input: jsStmt)
             tokens = state.tokens
 
             let expr = try parseWith(state.parser)
+
+            let context = JavaScriptASTReaderContext(
+                source: source,
+                typeSystem: typeSystem,
+                typeContext: nil,
+                comments: parser.comments,
+                options: options
+            )
+
+            let expReader = JavaScriptExprASTReader(
+                context: context,
+                delegate: nil
+            )
+
+            let sut = JavaScriptStatementASTReader(
+                expressionReader: expReader,
+                context: context,
+                delegate: nil
+            )
 
             let result = expr.accept(sut)
 
@@ -555,4 +735,3 @@ extension JavaScriptStatementASTReaderTests {
 
     private static var _state = JsParserState()
 }
-

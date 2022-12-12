@@ -33,6 +33,30 @@ public class CallGraph: DirectedGraphBase<CallGraphNode, CallGraphEdge> {
 
     @discardableResult
     func ensureNode(_ declaration: FunctionBodyCarryingIntention) -> Node {
+        if let node = nodes.first(where: { $0.declaration.asStatement == declaration }) {
+            return node
+        }
+
+        let node = Node(declaration: declaration)
+        addNode(node)
+        
+        return node
+    }
+
+    @discardableResult
+    func ensureNode(_ declaration: CallGraphValueStorageIntention) -> Node {
+        if let node = nodes.first(where: { $0.declaration.asStored == declaration }) {
+            return node
+        }
+
+        let node = Node(declaration: declaration)
+        addNode(node)
+        
+        return node
+    }
+
+    @discardableResult
+    func ensureNode(_ declaration: CallGraphNode.DeclarationKind) -> Node {
         if let node = nodes.first(where: { $0.declaration == declaration }) {
             return node
         }
@@ -46,79 +70,140 @@ public class CallGraph: DirectedGraphBase<CallGraphNode, CallGraphEdge> {
 
 /// A node in a call graph.
 public class CallGraphNode: DirectedGraphNode {
-    public let declaration: FunctionBodyCarryingIntention
+    public let declaration: DeclarationKind
 
     /// Gets the type symbol that owns the node related to this call graph, in
     /// case the node is a member of a type.
     var ownerType: KnownType? {
-        switch declaration {
-        case .method(let decl):
-            return decl.type
-
-        case .initializer(let decl):
-            return decl.type
-
-        case .deinit(let decl):
-            return decl.type
-
-        case .propertyGetter(let decl, _):
-            return decl.type
-
-        case .propertySetter(let decl, _):
-            return decl.type
-
-        case .subscriptGetter(let decl, _):
-            return decl.type
-
-        case .subscriptSetter(let decl, _):
-            return decl.type
-
-        case .propertyInitializer(let decl, _):
-            return decl.type
-
-        case .global, .globalVariable:
-            return nil
-        }
+        declaration.ownerType
     }
 
     /// Gets the file that owns the node related to this call graph, in case the
     /// node is a member of a file.
     var ownerFile: KnownFile? {
-        switch declaration {
-        case .method(let decl):
-            return decl.file
-
-        case .initializer(let decl):
-            return decl.file
-
-        case .deinit(let decl):
-            return decl.file
-
-        case .propertyGetter(let decl, _):
-            return decl.file
-
-        case .propertySetter(let decl, _):
-            return decl.file
-
-        case .subscriptGetter(let decl, _):
-            return decl.file
-
-        case .subscriptSetter(let decl, _):
-            return decl.file
-
-        case .propertyInitializer(let decl, _):
-            return decl.file
-
-        case .global(let decl):
-            return decl.file
-        
-        case .globalVariable(let decl, _):
-            return decl.file
-        }
+        declaration.ownerFile
     }
 
     init(declaration: FunctionBodyCarryingIntention) {
+        self.declaration = .statement(declaration)
+    }
+
+    init(declaration: CallGraphValueStorageIntention) {
+        self.declaration = .stored(declaration)
+    }
+
+    init(declaration: DeclarationKind) {
         self.declaration = declaration
+    }
+
+    /// Specifies the declaration that is referenced by this call graph node.
+    /// Is either a statement-based construct, like a function body or computed
+    /// property getter, or a stored value like 
+    public enum DeclarationKind: Hashable {
+        case statement(FunctionBodyCarryingIntention)
+        case stored(CallGraphValueStorageIntention)
+
+        /// If this enumerator value is a `.statement` case, returns the associated
+        /// value, otherwise returns `nil`.
+        var asStatement: FunctionBodyCarryingIntention? {
+            switch self {
+            case .statement(let decl):
+                return decl
+            case .stored:
+                return nil
+            }
+        }
+
+        /// If this enumerator value is a `.statement` case, returns the associated
+        /// value, otherwise returns `nil`.
+        var asStored: CallGraphValueStorageIntention? {
+            switch self {
+            case .stored(let decl):
+                return decl
+            case .statement:
+                return nil
+            }
+        }
+
+        /// Gets the type symbol that owns the node related to this call graph
+        /// declaration kind, in case the declaration is a member of a type.
+        var ownerType: KnownType? {
+            switch self {
+            case .statement(let declaration):
+                switch declaration {
+                case .method(let decl):
+                    return decl.type
+
+                case .initializer(let decl):
+                    return decl.type
+
+                case .deinit(let decl):
+                    return decl.type
+
+                case .propertyGetter(let decl, _):
+                    return decl.type
+
+                case .propertySetter(let decl, _):
+                    return decl.type
+
+                case .subscriptGetter(let decl, _):
+                    return decl.type
+
+                case .subscriptSetter(let decl, _):
+                    return decl.type
+
+                case .propertyInitializer(let decl, _):
+                    return decl.type
+
+                case .global, .globalVariable:
+                    return nil
+                }
+            
+            case .stored(let declaration):
+                switch declaration {
+                case .property(let decl):
+                    return decl.type
+                case .instanceVariable(let decl):
+                    return decl.type
+                case .globalVariable:
+                    return nil
+                }
+            }
+        }
+
+        /// Gets the file that owns the symbol related to this call graph declaration
+        /// kind.
+        var ownerFile: KnownFile? {
+            switch self {
+            case .statement(let decl):
+                return decl.ownerFile
+
+            case .stored(let decl):
+                return decl.ownerFile
+            }
+        }
+
+        public func hash(into hasher: inout Hasher) {
+            switch self {
+            case .statement(let stmt):
+                hasher.combine(stmt)
+            case .stored(let intention):
+                hasher.combine(intention)
+            }
+        }
+
+        public static func == (lhs: Self, rhs: Self) -> Bool {
+            switch (lhs, rhs) {
+            case (.statement(let lhs), .statement(let rhs)):
+                return lhs == rhs
+            
+            case (.stored(let lhs), .stored(let rhs)):
+                return lhs == rhs
+            
+            default:
+                return false
+            }
+        }
     }
 }
 
@@ -133,5 +218,47 @@ public class CallGraphEdge: DirectedGraphBaseEdgeType {
     internal init(start: CallGraphNode, end: CallGraphNode) {
         self.start = start
         self.end = end
+    }
+}
+
+/// Describes an intention that is configured to reference a stored value, instead
+/// of a computed property getter or function body.
+public enum CallGraphValueStorageIntention: Hashable {
+    case property(PropertyGenerationIntention)
+    case instanceVariable(InstanceVariableGenerationIntention)
+    case globalVariable(GlobalVariableGenerationIntention)
+
+    /// Returns the type-erased `ValueStorageIntention` associated with this
+    /// enumerator value.
+    public var storageIntention: ValueStorageIntention {
+        switch self {
+        case .globalVariable(let intention):
+            return intention
+        case .instanceVariable(let intention):
+            return intention
+        case .property(let intention):
+            return intention
+        }
+    }
+
+    /// Gets the file that owns the underlying symbol referenced by this
+    /// `CallGraphValueStorageIntention`.
+    var ownerFile: KnownFile? {
+        switch self {
+        case .globalVariable(let intention):
+            return intention.file
+        case .instanceVariable(let intention):
+            return intention.file
+        case .property(let intention):
+            return intention.file
+        }
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(storageIntention))
+    }
+
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.storageIntention === rhs.storageIntention
     }
 }

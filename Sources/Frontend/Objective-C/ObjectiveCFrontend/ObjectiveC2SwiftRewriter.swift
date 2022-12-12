@@ -232,12 +232,11 @@ public final class ObjectiveC2SwiftRewriter {
                             return
                         }
                         
-                        funcBody.body =
-                            reader.parseStatements(
-                                compoundStatement: body,
-                                comments: source.comments,
-                                typeContext: member.type
-                            )
+                        funcBody.body = reader.parseStatements(
+                            compoundStatement: body,
+                            comments: source.comments,
+                            typeContext: member.type
+                        )
                         
                     case let .globalFunction(funcBody, _):
                         guard let source = funcBody.typedSource else {
@@ -247,12 +246,11 @@ public final class ObjectiveC2SwiftRewriter {
                             return
                         }
                         
-                        funcBody.body =
-                            reader.parseStatements(
-                                compoundStatement: body,
-                                comments: source.comments,
-                                typeContext: nil
-                            )
+                        funcBody.body = reader.parseStatements(
+                            compoundStatement: body,
+                            comments: source.comments,
+                            typeContext: nil
+                        )
                         
                     case .globalVar(let v, _):
                         guard let expression = v.typedSource?.expression?.expression else {
