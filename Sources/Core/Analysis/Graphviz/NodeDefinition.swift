@@ -1,3 +1,5 @@
+import Graphviz
+
 struct NodeDefinition<Node: DirectedGraphNode> {
     var node: Node
     
@@ -17,5 +19,9 @@ struct NodeDefinition<Node: DirectedGraphNode> {
     /// If the node is not connected to the exit node, this value is `nil`.
     var rankFromEnd: Int?
 
+    /// Display label for the graphviz node.
     var label: String
+
+    /// Extra set of attributes for a graphviz node.
+    var attributes: GraphViz.Attributes = [:]
 }

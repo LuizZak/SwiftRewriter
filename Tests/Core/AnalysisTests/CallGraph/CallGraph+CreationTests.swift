@@ -800,11 +800,11 @@ class CallGraph_CreationTests: XCTestCase {
                     subgraph cluster_1 {
                         label = "A.swift"
 
-                        n1 [label="func a()"]
-                        n2 [label="var b: Int"]
-                        n3 [label="var b: Int = <initializer>"]
+                        n1 [label="0", shape=hexagon]
+                        n2 [label="func a()"]
+                        n3 [label="var b: Int"]
 
-                        n1 -> n2
+                        n3 -> n1 [label="<initializer>"]
                         n2 -> n3
                     }
                 }
@@ -842,13 +842,13 @@ class CallGraph_CreationTests: XCTestCase {
                     subgraph cluster_1 {
                         label = "A.swift"
 
-                        n1 [label="func b()"]
-                        n2 [label="func c()"]
-                        n3 [label="var a: Int"]
-                        n4 [label="var a: Int = <initializer>"]
+                        n1 [label="b()", shape=hexagon]
+                        n2 [label="func b()"]
+                        n3 [label="func c()"]
+                        n4 [label="var a: Int"]
 
-                        n4 -> n1
-                        n2 -> n3
+                        n4 -> n1 [label="<initializer>"]
+                        n1 -> n2
                         n3 -> n4
                     }
                 }

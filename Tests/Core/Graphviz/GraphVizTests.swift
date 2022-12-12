@@ -216,6 +216,29 @@ class GraphVizTests: XCTestCase {
         .diff(sut.generateFile())
     }
 
+    func testCreateNodeWithLabel_withAttributes() {
+        let sut = makeSut()
+        let n1 = sut.createNode(
+            label: "node",
+            attributes: ["attr": .double(1.0)]
+        )
+        let n2 = sut.createNode(
+            label: "node",
+            attributes: ["zAttr": .string("a value")]
+        )
+
+        XCTAssertNotEqual(n1, n2)
+        diffTest(expected: """
+        digraph {
+            graph [rankdir=LR]
+
+            n1 [attr=1.0, label="node"]
+            n2 [label="node", zAttr="a value"]
+        }
+        """)
+        .diff(sut.generateFile())
+    }
+
     func testCreateNodeWithLabel_withSingleGroup_simplifyGroups_false() {
         let sut = makeSut()
         sut.createNode(label: "node", groups: ["Subgroup"])
@@ -286,6 +309,36 @@ class GraphVizTests: XCTestCase {
             n2 [label="node2"]
 
             n1 -> n2 [color="red", label="connection label", penwidth=0.5]
+        }
+        """)
+        .diff(sut.generateFile())
+    }
+
+    func testSetAttributesForNodeId() {
+        let sut = makeSut()
+        let node = sut.createNode(label: "node")
+
+        sut.setAttributes(forNodeId: node, ["attr": .double(1.0)])
+
+        diffTest(expected: """
+        digraph {
+            graph [rankdir=LR]
+
+            n1 [attr=1.0, label="node"]
+        }
+        """)
+        .diff(sut.generateFile())
+    }
+
+    func testSetAttributesForNodeId_unknownNodeId_doesNothing() {
+        let sut = makeSut()
+        let unknownId = makeSut().createNode(label: "node")
+
+        sut.setAttributes(forNodeId: unknownId, ["attr": .double(1.0)])
+
+        diffTest(expected: """
+        digraph {
+            graph [rankdir=LR]
         }
         """)
         .diff(sut.generateFile())

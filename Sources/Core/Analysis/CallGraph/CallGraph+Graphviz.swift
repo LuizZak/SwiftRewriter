@@ -16,13 +16,8 @@ extension CallGraph {
         
         // Prepare nodes
         for node in self.nodes {
-            let label = labelForNode(node, graph: self)
-            
             nodeDefinitions.append(
-                .init(
-                    node: node,
-                    label: label
-                )
+                definitionForNode(node, graph: self)
             )
         }
 
@@ -96,11 +91,13 @@ extension CallGraph {
                 break
             }
 
-            nodeIds[ObjectIdentifier(definition.node)] =
-                viz.createNode(
-                    label: definition.label,
-                    groups: group
-                )
+            let graphvizNode = viz.createNode(
+                label: definition.label,
+                groups: group,
+                attributes: definition.attributes
+            )
+            
+            nodeIds[ObjectIdentifier(definition.node)] = graphvizNode
         }
 
         // Output connections
@@ -144,17 +141,28 @@ extension CallGraph {
     }
 }
 
-private func labelForNode(_ node: CallGraphNode, graph: CallGraph) -> String {
-    return labelForDeclaration(node.declaration)
-}
+private func definitionForNode(_ node: CallGraphNode, graph: CallGraph) -> NodeDefinition<CallGraphNode> {
+    var result = NodeDefinition(
+        node: node,
+        label: ""
+    )
 
-private func labelForDeclaration(_ declaration: CallGraphNode.DeclarationKind) -> String {
-    switch declaration {
+    switch node.declaration {
     case .statement(let decl):
-        return labelForDeclaration(decl)
+        result.label = labelForDeclaration(decl)
+
+        switch decl {
+        case .globalVariable(_, _):
+            result.attributes["shape"] = .raw("hexagon")
+        default:
+            break
+        }
+
     case .stored(let decl):
-        return labelForDeclaration(decl)
+        result.label = labelForDeclaration(decl)
     }
+
+    return result
 }
 
 private func labelForDeclaration(_ declaration: FunctionBodyCarryingIntention) -> String {
@@ -271,8 +279,8 @@ private func labelForDeclaration(_ declaration: FunctionBodyCarryingIntention) -
     case .propertyInitializer(let intention, _):
         label = prependType(intention.ownerType, labelFor(intention) + " = <initializer>")
 
-    case .globalVariable(let intention, _):
-        label = labelFor(intention) + " = <initializer>"
+    case .globalVariable(_, let initializer):
+        label = initializer.expression.description
     }
 
     return label

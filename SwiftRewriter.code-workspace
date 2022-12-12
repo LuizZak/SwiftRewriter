@@ -236,6 +236,7 @@
 			"nonnull",
 			"noreturn",
 			"penwidth",
+			"rankdir",
 			"repool",
 			"srcroot",
 			"stdcall",

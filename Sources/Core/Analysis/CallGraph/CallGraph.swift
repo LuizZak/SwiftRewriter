@@ -40,7 +40,8 @@ public class CallGraph: DirectedGraphBase<CallGraphNode, CallGraphEdge> {
             let initializer = ensureNode(.statement(declaration))
             let declNode = ensureNode(CallGraphValueStorageIntention.globalVariable(decl))
 
-            ensureEdge(from: declNode, to: initializer)
+            let edge = ensureEdge(from: declNode, to: initializer)
+            edge.debugLabel = "<initializer>"
 
             return initializer
         default:

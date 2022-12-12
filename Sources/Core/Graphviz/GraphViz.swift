@@ -76,14 +76,24 @@ public class GraphViz {
         _rootGroup.findNodeId(label: label)
     }
 
-    /// Creates a new node with a given label, nested within a given set of groups.
+    /// Creates a new node with a given label and (optionally) attributes,
+    /// nested within a given set of groups.
+    ///
+    /// - note: 'label' attribute in `attributes` dictionary is overwritten by
+    /// `label` provided.
     @discardableResult
-    public func createNode(label: String, groups: [String] = []) -> NodeId {
+    public func createNode(
+        label: String,
+        groups: [String] = [],
+        attributes: Attributes = [:]
+    ) -> NodeId {
+
         defer { _nextId += 1 }
 
         let id = _nextId
 
         var node = Node(id: id)
+        node.attributes = attributes
         node.label = label
         
         _rootGroup.getOrCreateGroup(groups).addNode(node)
@@ -103,6 +113,17 @@ public class GraphViz {
         return id
     }
 
+    /// Sets attributes for a specified node ID.
+    /// Note that this does not change the attribute for the label of the node.
+    public func setAttributes(forNodeId nodeId: NodeId, _ attributes: Attributes) {
+        withNodeId(nodeId) { node in
+            let label = node.label
+
+            node.attributes = attributes
+            node.label = label
+        }
+    }
+
     /// Adds a connection between two nodes whose labels match the given labels.
     /// If nodes with the given labels do not exist, they are created first on
     /// the root group.
@@ -116,7 +137,12 @@ public class GraphViz {
         let from = getOrCreate(label: fromLabel)
         let to = getOrCreate(label: toLabel)
 
-        addConnection(from: from, to: to, label: label, color: color)
+        addConnection(
+            from: from,
+            to: to,
+            label: label,
+            color: color
+        )
     }
 
     /// Adds a connection between two node IDs.
@@ -124,21 +150,23 @@ public class GraphViz {
         from: NodeId,
         to: NodeId,
         label: String? = nil,
-        color: String? = nil
+        color: String? = nil,
+        attributes: Attributes = [:]
     ) {
 
         var connection = Connection(
             idFrom: from,
             idTo: to
         )
-        
+
+        connection.attributes = attributes
         connection.label = label
         connection.color = color
 
         _rootGroup.addConnection(connection)
     }
 
-    /// Adds a connection between two node IDs.
+    /// Adds a connection between two node IDs with a specified set of attributes.
     public func addConnection(
         from: NodeId,
         to: NodeId,
@@ -154,8 +182,13 @@ public class GraphViz {
         _rootGroup.addConnection(connection)
     }
 
+    @discardableResult
+    private func withNodeId(_ nodeId: NodeId, _ closure: (inout Node) -> Void) -> Bool {
+        _rootGroup.withNodeId(nodeId, closure)
+    }
+
     private struct Node: Comparable {
-        var id: NodeId
+        let id: NodeId
         var attributes: Attributes = Attributes()
 
         var label: String {
@@ -485,6 +518,26 @@ public class GraphViz {
             }
 
             target.connections.append(connection)
+        }
+
+        /// Opens a mutation closure for modifying the properties of a node with
+        /// a specified ID within this group or one of its subgroups.
+        ///
+        /// Returns `true` if the node ID was found and the closure invoked,
+        /// otherwise returns `false`.
+        func withNodeId(_ nodeId: NodeId, _ closure: (inout Node) -> Void) -> Bool {
+            if let index = nodes.firstIndex(where: { $0.id == nodeId }) {
+                closure(&nodes[index])
+                return true
+            }
+
+            for group in subgroups {
+                if group.withNodeId(nodeId, closure) {
+                    return true
+                }
+            }
+
+            return false
         }
 
         func isDescendant(of view: Group) -> Bool {
