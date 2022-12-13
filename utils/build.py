@@ -11,7 +11,7 @@ import sys
 import subprocess
 from typing import Any, Callable, Generator, List, Optional, TypeVar
 
-from parser_generate import do_parser_generation
+import parser_generate
 from process import run, run_output
 from paths import GRAMMARS_ROOT_PATH, SOURCE_ROOT_PATH
 
@@ -107,7 +107,10 @@ def make_argparser() -> argparse.ArgumentParser:
     run_parser = subparsers.add_parser(
         "run", help="Facilitates running executable targets on Windows."
     )
-    subparsers.add_parser("gen-parsers", help="Main scripting entry point for .")
+    gen_parser = subparsers.add_parser(
+        "gen-parsers",
+        help="Main scripting entry point for generating ANTLR parsers.",
+    )
 
     add_common_args(test_parser)
     add_common_args(build_parser)
@@ -118,6 +121,8 @@ def make_argparser() -> argparse.ArgumentParser:
     add_target_arg(build_parser)
     add_target_arg(run_parser)
     add_executable_arg(run_parser)
+
+    parser_generate.populate_argparser(gen_parser)
 
     return argparser
 
@@ -360,7 +365,7 @@ def do_run_command(args: Any):
     return
 
 def do_generate_parsers_command(args: Any):
-    do_parser_generation()
+    parser_generate.do_parser_generation(args)
 
 def main() -> int:
     argparser = make_argparser()
