@@ -50,10 +50,8 @@
 				"args": [
 					"build",
 					"-c=release",
-					"-Xswiftc",
-					"-DJS_PARSER_TESTS_FULL_FIXTURES",
 				],
-				"detail": "swift build -c=release -Xswiftc -DJS_PARSER_TESTS_FULL_FIXTURES",
+				"detail": "swift build -c=release",
 			},
             {
 				"label": "Test",
@@ -73,9 +71,8 @@
 				"args": [
 					"test",
 					"-c", "release",
-					"-Xswiftc",
 				],
-				"detail": "swift test -c=release -Xswiftc -DJS_PARSER_TESTS_FULL_FIXTURES",
+				"detail": "swift test -c=release",
 			},
 		],
 	},
