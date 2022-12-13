@@ -67,13 +67,15 @@ public class SwiftTypeConverter {
         case .nested(let nested):
             return makeNestedTypeSyntax(nested, startTokenHandler: startTokenHandler).asTypeSyntax
             
-        case let .block(returnType, parameters, attributes):
+        case let .block(blockType):
             _blockStackLevel += 1
             defer {
                 _blockStackLevel -= 1
             }
             
-            let attributes = attributes.sorted(by: { $0.description < $1.description })
+            let returnType = blockType.returnType
+            let parameters = blockType.parameters
+            let attributes = blockType.attributes.sorted(by: { $0.description < $1.description })
             
             return AttributedTypeSyntax { builder in
                 let functionType = FunctionTypeSyntax { builder in

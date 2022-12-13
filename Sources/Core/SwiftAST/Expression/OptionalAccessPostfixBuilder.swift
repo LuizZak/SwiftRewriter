@@ -23,7 +23,7 @@ public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
     public func call(
         _ arguments: [FunctionArgument],
         type: SwiftType?,
-        callableSignature: SwiftType?
+        callableSignature: BlockSwiftType?
     ) -> PostfixExpression {
         
         let op = Postfix.functionCall(arguments: arguments)
@@ -37,7 +37,7 @@ public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
     public func call(
         _ unlabeledArguments: [Expression],
         type: SwiftType?,
-        callableSignature: SwiftType?
+        callableSignature: BlockSwiftType?
     ) -> PostfixExpression {
         
         let op = Postfix

@@ -1050,10 +1050,10 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                             
                             resource.ID = obj[@"id"];
                             resource.BP = obj[@"bp"];
-                            resource.firstName = AS(obj[@"firstName"], NSString);
-                            resource.lastName = AS(obj[@"lastName"], NSString);
-                            resource.middleName = AS(obj[@"middleName"], NSString);
-                            resource.mothersMaidenName = AS(obj[@"mothersMaidenName"], NSString);
+                            resource.firstName = obj[@"firstName"];
+                            resource.lastName = obj[@"lastName"];
+                            resource.middleName = obj[@"middleName"];
+                            resource.mothersMaidenName = obj[@"mothersMaidenName"];
                             
                             return resource;
                         }];
@@ -1103,13 +1103,13 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                             // type: AnyObject?
                             resource.BP = obj["bp"]
                             // type: AnyObject?
-                            resource.firstName = AS(obj["firstName"], String)
+                            resource.firstName = obj["firstName"]
                             // type: AnyObject?
-                            resource.lastName = AS(obj["lastName"], String)
+                            resource.lastName = obj["lastName"]
                             // type: AnyObject?
-                            resource.middleName = AS(obj["middleName"], String)
+                            resource.middleName = obj["middleName"]
                             // type: AnyObject?
-                            resource.mothersMaidenName = AS(obj["mothersMaidenName"], String)
+                            resource.mothersMaidenName = obj["mothersMaidenName"]
 
                             return resource
                         }

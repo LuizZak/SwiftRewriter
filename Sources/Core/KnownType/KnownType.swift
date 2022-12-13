@@ -271,7 +271,7 @@ public extension KnownProperty {
 
 public extension KnownMethod {
     var memberType: SwiftType {
-        signature.swiftClosureType
+        .block(signature.swiftClosureType)
     }
 }
 

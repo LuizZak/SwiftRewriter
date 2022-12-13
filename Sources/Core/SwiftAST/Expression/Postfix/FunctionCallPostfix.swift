@@ -1,4 +1,3 @@
-
 /// Postfix access that invokes an expression as a function.
 public final class FunctionCallPostfix: Postfix {
     private let _subExpressions: [Expression]
@@ -17,8 +16,8 @@ public final class FunctionCallPostfix: Postfix {
         arguments.map(\.label)
     }
     
-    /// A .block callable signature for this function call postfix.
-    public var callableSignature: SwiftType?
+    /// A block Swift type signature for this function call postfix.
+    public var callableSignature: BlockSwiftType?
     
     public init(arguments: [FunctionArgument]) {
         self.arguments = arguments
@@ -124,6 +123,7 @@ public extension PostfixExpression {
     }
 }
 
+// TODO: Rename to `FunctionCallArgument`
 /// A function argument kind from a function call expression
 public struct FunctionArgument: Codable, Equatable {
     public var label: String?

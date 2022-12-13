@@ -464,8 +464,16 @@ class TypeMerger {
         // TODO: Figure out what to do when two block types have different type
         // attributes.
         switch (type1Unaliased.deepUnwrapped, type2Unaliased.deepUnwrapped) {
-        case (let .block(t1Ret, t1Params, t1Attributes), var .block(ret, params, attributes))
-            where t1Params.count == params.count:
+        case (.block(let t1), .block(let t2)) where t1.parameters.count == t2.parameters.count:
+            
+            let t1Ret = t1.returnType
+            let t1Params = t1.parameters
+            let t1Attributes = t1.attributes
+
+            var ret = t2.returnType
+            var params = t2.parameters
+            var attributes = t2.attributes
+
             mergeTypeSignatures(t1Ret, &ret)
             
             for (i, p1) in t1Params.enumerated() {
@@ -474,11 +482,12 @@ class TypeMerger {
             
             attributes.formUnion(t1Attributes)
             
-            type2 = SwiftType
-                .block(returnType: ret,
-                       parameters: params,
-                       attributes: attributes)
-                .withSameOptionalityAs(type2)
+            type2 = SwiftType.block(
+                returnType: ret,
+                parameters: params,
+                attributes: attributes
+            ).withSameOptionalityAs(type2)
+            
             type2Unaliased = typeSystem.resolveAlias(in: type2)
         default:
             break

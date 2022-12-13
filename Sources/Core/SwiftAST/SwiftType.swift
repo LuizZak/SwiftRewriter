@@ -4,7 +4,7 @@ public indirect enum SwiftType: Hashable {
     case nominal(NominalSwiftType)
     case protocolComposition(ProtocolCompositionSwiftType)
     case tuple(TupleSwiftType)
-    case block(returnType: SwiftType, parameters: [SwiftType], attributes: Set<BlockTypeAttribute> = [])
+    case block(BlockSwiftType)
     case metatype(for: SwiftType)
     case optional(SwiftType)
     case implicitUnwrappedOptional(SwiftType)
@@ -54,6 +54,90 @@ extension TupleSwiftType: ExpressibleByArrayLiteral {
         }
 
         self = .types(.fromCollection(elements))
+    }
+}
+
+/// A type that describes a Swift function.
+public struct BlockSwiftType: Hashable, CustomStringConvertible {
+    /// The return type for this block type.
+    public var returnType: SwiftType
+
+    /// The type for each parameter for this block type.
+    public var parameters: [SwiftType]
+
+    /// A set of attributes that decorate this block type.
+    public var attributes: Set<BlockTypeAttribute> = []
+
+    public var description: String {
+        let sortedAttributes = attributes.sorted {
+            $0.description < $1.description
+        }
+        
+        let attributeString = sortedAttributes
+            .map(\.description)
+            .joined(separator: " ")
+        
+        let parameterList = parameters
+            .map(\.description)
+            .joined(separator: ", ")
+        
+        return (attributeString.isEmpty ? "" : attributeString + " ")
+            + "("
+            + parameterList
+            + ") -> "
+            + returnType.description
+    }
+
+    public init(
+        returnType: SwiftType,
+        parameters: [SwiftType],
+        attributes: Set<BlockTypeAttribute> = []
+    ) {
+        
+        self.returnType = returnType
+        self.parameters = parameters
+        self.attributes = attributes
+    }
+    
+    public static func swiftBlock(
+        returnType: SwiftType,
+        parameters: [SwiftType] = []
+    ) -> BlockSwiftType {
+
+        .init(returnType: returnType, parameters: parameters, attributes: [])
+    }
+    
+    /// Returns a block type that is the same as the input, but with any .optional
+    /// or .implicitUnwrappedOptional types unwrapped to non optional, including
+    /// any block parameters.
+    ///
+    /// - Parameters:
+    ///   - type: The input block type
+    ///   - removeUnspecifiedNullabilityOnly: Whether to only remove unspecified
+    /// nullability optionals, keeping optionals in place.
+    /// - Returns: The deeply unwrapped version of the input block type.
+    public static func asNonnullDeep(
+        type: BlockSwiftType,
+        removeUnspecifiedNullabilityOnly: Bool = false
+    ) -> BlockSwiftType {
+
+        let returnType = SwiftType.asNonnullDeep(
+            type.returnType,
+            removeUnspecifiedNullabilityOnly: removeUnspecifiedNullabilityOnly
+        )
+        
+        let parameters = type.parameters.map {
+            SwiftType.asNonnullDeep(
+                $0,
+                removeUnspecifiedNullabilityOnly: removeUnspecifiedNullabilityOnly
+            )
+        }
+        
+        return .init(
+            returnType: returnType,
+            parameters: parameters,
+            attributes: type.attributes
+        )
     }
 }
 
@@ -296,10 +380,15 @@ public extension SwiftType {
     static func typeName(_ name: String) -> SwiftType {
         .nominal(.typeName(name))
     }
-    
-    /// Convenience for `SwiftType.nominal(.generic(name, parameters: parameters))`
-    static func generic(_ name: String, parameters: GenericArgumentSwiftType) -> SwiftType {
-        .nominal(.generic(name, parameters: parameters))
+
+    static func block(returnType: SwiftType, parameters: [SwiftType], attributes: Set<BlockTypeAttribute> = []) -> Self {
+        .block(
+            BlockSwiftType(
+                returnType: returnType,
+                parameters: parameters,
+                attributes: attributes
+            )
+        )
     }
     
     static func swiftBlock(
@@ -307,7 +396,12 @@ public extension SwiftType {
         parameters: [SwiftType] = []
     ) -> SwiftType {
 
-        .block(returnType: returnType, parameters: parameters, attributes: [])
+        .block(.swiftBlock(returnType: returnType, parameters: parameters))
+    }
+    
+    /// Convenience for `SwiftType.nominal(.generic(name, parameters: parameters))`
+    static func generic(_ name: String, parameters: GenericArgumentSwiftType) -> SwiftType {
+        .nominal(.generic(name, parameters: parameters))
     }
     
     /// Returns a type that is the same as the input, but with any .optional or
@@ -335,24 +429,12 @@ public extension SwiftType {
         }
         
         switch result {
-        case let .block(returnType, parameters, attributes):
-            let returnType =
-                asNonnullDeep(
-                    returnType,
-                    removeUnspecifiedNullabilityOnly: removeUnspecifiedNullabilityOnly
-                )
-            
-            let parameters = parameters.map {
-                asNonnullDeep(
-                    $0,
-                    removeUnspecifiedNullabilityOnly: removeUnspecifiedNullabilityOnly
-                )
-            }
-            
+        case let .block(blockType):
             result = .block(
-                returnType: returnType,
-                parameters: parameters,
-                attributes: attributes
+                .asNonnullDeep(
+                    type: blockType,
+                    removeUnspecifiedNullabilityOnly: removeUnspecifiedNullabilityOnly
+                )
             )
             
         default:
@@ -411,19 +493,8 @@ extension SwiftType: CustomStringConvertible {
         case .nominal(let type):
             return type.description
             
-        case let .block(returnType, parameters, attributes):
-            let sortedAttributes =
-                attributes.sorted { $0.description < $1.description }
-            
-            let attributeString =
-                sortedAttributes.map(\.description).joined(separator: " ")
-            
-            return
-                (attributeString.isEmpty ? "" : attributeString + " ")
-                    + "("
-                    + parameters.map(\.description).joined(separator: ", ")
-                    + ") -> "
-                    + returnType.description
+        case let .block(block):
+            return block.description
             
         case .optional(let type):
             return type.descriptionWithParens + "?"

@@ -988,6 +988,20 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(resolvedAs: .void)
     }
 
+    func testCallClosureMemberType() {
+        // closure()
+        let exp = Expression.identifier("self").dot("closure").call()
+
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(named: "A") { type in
+                type.property(named: "closure", type: .swiftBlock(returnType: .void, parameters: []))
+                    .build()
+            }
+            .definingIntrinsic(name: "self", type: "A")
+            .resolve()
+            .thenAssertExpression(resolvedAs: .void)
+    }
+
     func testCallOptionalClosureType() {
         // closure()
         let exp = Expression.identifier("closure").call()

@@ -25,7 +25,7 @@ public class CodeDefinition: Equatable {
             return storage.type
 
         case .function(let signature):
-            return signature.swiftClosureType
+            return .block(signature.swiftClosureType)
         
         case .subscript(let signature):
             return signature.swiftClosureType

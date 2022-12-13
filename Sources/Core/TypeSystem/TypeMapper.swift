@@ -297,7 +297,11 @@ public class DefaultTypeMapper: TypeMapper {
     ) -> String {
         
         switch swiftType {
-        case let .block(returnType, parameters, attributes):
+        case let .block(blockType):
+            let returnType = blockType.returnType
+            let parameters = blockType.parameters
+            let attributes = blockType.attributes
+
             let sortedAttributes =
                 attributes.sorted { $0.description < $1.description }
             

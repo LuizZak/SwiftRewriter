@@ -3,15 +3,18 @@ public protocol ExpressionPostfixBuildable {
     
     /// Creates a function call invocation postfix expression with this expression
     /// buildable
-    func call(_ arguments: [FunctionArgument], type: SwiftType?,
-              callableSignature: SwiftType?) -> PostfixExpression
+    func call(
+        _ arguments: [FunctionArgument],
+        type: SwiftType?,
+        callableSignature: BlockSwiftType?
+    ) -> PostfixExpression
     
     /// Creates a function call invocation postfix expression with this expression
     /// buildable with a sequence of unlabeled function argument expressions
     func call(
         _ unlabeledArguments: [Expression],
         type: SwiftType?,
-        callableSignature: SwiftType?
+        callableSignature: BlockSwiftType?
     ) -> PostfixExpression
     
     /// Creates a member access postfix expression with this expression buildable
@@ -42,7 +45,7 @@ public extension ExpressionPostfixBuildable {
     
     func call(
         _ unlabeledArguments: [Expression],
-        callableSignature: SwiftType?
+        callableSignature: BlockSwiftType?
     ) -> PostfixExpression {
         
         call(unlabeledArguments, type: nil, callableSignature: callableSignature)
@@ -69,7 +72,7 @@ public extension ExpressionPostfixBuildable {
     func call(
         _ arguments: [FunctionArgument],
         type: SwiftType?,
-        callableSignature: SwiftType?
+        callableSignature: BlockSwiftType?
     ) -> PostfixExpression {
         
         let op = Postfix.functionCall(arguments: arguments)
@@ -83,7 +86,7 @@ public extension ExpressionPostfixBuildable {
     func call(
         _ unlabeledArguments: [Expression],
         type: SwiftType?,
-        callableSignature: SwiftType?
+        callableSignature: BlockSwiftType?
     ) -> PostfixExpression {
         
         let op = Postfix.functionCall(arguments: unlabeledArguments.map(FunctionArgument.unlabeled))

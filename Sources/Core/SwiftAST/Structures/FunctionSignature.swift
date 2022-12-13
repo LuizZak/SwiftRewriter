@@ -89,8 +89,8 @@ public struct FunctionSignature: Hashable {
     
     // TODO: Support supplying type attributes for function signatures
     /// Returns a `SwiftType.block`-equivalent type for this function signature
-    public var swiftClosureType: SwiftType {
-        .swiftBlock(
+    public var swiftClosureType: BlockSwiftType {
+        .init(
             returnType: returnType,
             parameters: parameters.map(\.type)
         )
@@ -126,7 +126,7 @@ public struct FunctionSignature: Hashable {
         self.returnType = returnType
         self.parameters = parameters
 
-        _asIdentifier = FunctionIdentifier(name: name, argumentLabels: parameters.map(\.label))
+        _asIdentifier = FunctionIdentifier(name: name, parameters: parameters)
         _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map(\.label))
 
         //
@@ -148,12 +148,12 @@ public struct FunctionSignature: Hashable {
         self.returnType = returnType
         self.parameters = parameters
 
-        _asIdentifier = FunctionIdentifier(name: name, argumentLabels: parameters.map(\.label))
+        _asIdentifier = FunctionIdentifier(name: name, parameters: parameters)
         _asSelector = SelectorSignature(isStatic: traits.contains(.static), keywords: [name] + parameters.map(\.label))
     }
     
     private mutating func _recreateAliases() {
-        _asIdentifier = FunctionIdentifier(name: name, argumentLabels: parameters.map(\.label))
+        _asIdentifier = FunctionIdentifier(name: name, parameters: parameters)
         _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map(\.label))
     }
     

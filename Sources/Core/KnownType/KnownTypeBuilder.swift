@@ -140,17 +140,31 @@ public struct KnownTypeBuilder {
         return new
     }
     
-    /// Adds a new semantical annotation
+    /// Adds a new semantical annotation to the type being built.
     public func addingSemanticAnnotation(_ semantic: Semantic) -> KnownTypeBuilder {
         var new = clone()
         new.type.semantics.insert(semantic)
         return new
     }
     
-    /// Adds a trait to the type
+    /// Adds a trait to the type being built.
     public func addingTrait(_ traitName: String, value: TraitType) -> KnownTypeBuilder {
         var new = clone()
         new.type.traits[traitName] = value
+        return new
+    }
+
+    /// Adds an attribute to the type being built.
+    public func addingAttribute(_ attribute: KnownAttribute) -> KnownTypeBuilder {
+        var new = clone()
+        new.type.attributes.append(attribute)
+        return new
+    }
+
+    /// Adds an attribute to the type being built.
+    public func addingAttribute(named name: String) -> KnownTypeBuilder {
+        var new = clone()
+        new.type.attributes.append(.init(name: name))
         return new
     }
     
@@ -697,7 +711,6 @@ public struct KnownTypeBuilder {
 
 // MARK: - Removal
 extension KnownTypeBuilder {
-    
     /// Removes direct protocol conformances to protocols that match the given
     /// name.
     public func removingConformance(to protocolName: String) -> KnownTypeBuilder {
@@ -705,7 +718,6 @@ extension KnownTypeBuilder {
         new.type.protocols.removeAll(where: { $0.protocolName == protocolName })
         return new
     }
-    
 }
 
 // MARK: - Querying

@@ -39,7 +39,7 @@ public class MethodGenerationIntention: MemberGenerationIntention, Parameterized
         signature.asSelector
     }
     public override var memberType: SwiftType {
-        signature.swiftClosureType
+        .block(signature.swiftClosureType)
     }
     
     public convenience init(

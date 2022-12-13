@@ -802,14 +802,15 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
     /// when a nullable value is passed to a non-null parameter of a function
     /// call expression.
     func testCorrectSimpleNullableValueInNonnullParameterToIfLet() {
-        let funcType = SwiftType.swiftBlock(returnType: .void, parameters: [.typeName("A")])
+        let blockType = BlockSwiftType(returnType: .void, parameters: [.typeName("A")])
+        let funcType = SwiftType.block(blockType)
 
         let exp =
             Expression
             .identifier("a").typed(funcType)
             .call(
                 [.identifier("b").typed(.optional(.typeName("A")))],
-                callableSignature: funcType
+                callableSignature: blockType
             )
 
         assertTransform(
@@ -828,14 +829,15 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
 
     /// Same as above, but as a member access.
     func testCorrectMemberAccessNullableValueInNonnullParameterToIfLet() {
-        let funcType = SwiftType.swiftBlock(returnType: .void, parameters: [.typeName("A")])
+        let blockType = BlockSwiftType(returnType: .void, parameters: [.typeName("A")])
+        let funcType = SwiftType.block(blockType)
 
         let exp =
             Expression
             .identifier("a").typed(funcType)
             .call(
                 [.identifier("b").dot("c").typed(.optional(.typeName("A")))],
-                callableSignature: funcType
+                callableSignature: blockType
             )
 
         assertTransform(
@@ -855,14 +857,15 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
     /// Use the member name of a nullable-method invocation as the name of the
     /// pattern local variable.
     func testCorrectMethodInvocationNullableValueInNonnullParameterToIfLet() {
-        let funcType = SwiftType.swiftBlock(returnType: .void, parameters: [.typeName("A")])
+        let blockType = BlockSwiftType(returnType: .void, parameters: [.typeName("A")])
+        let funcType = SwiftType.block(blockType)
 
         let exp =
             Expression
             .identifier("a").typed(funcType)
             .call(
                 [.identifier("b").dot("c").call().typed(.optional(.typeName("A")))],
-                callableSignature: funcType
+                callableSignature: blockType
             )
 
         assertTransform(
@@ -882,15 +885,18 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
     /// Correct method invocation returns as well by assigning the return value
     /// to a `value` local variable using an if-let.
     func testCorrectMethodReturnNullableValueInNonnullParameterToIfLet() {
-        let funcTypeA = SwiftType.swiftBlock(returnType: .void, parameters: ["A"])
-        let funcTypeB = SwiftType.swiftBlock(returnType: .optional("A"), parameters: [])
+        let blockTypeA = BlockSwiftType(returnType: .void, parameters: ["A"])
+        let funcTypeA = SwiftType.block(blockTypeA)
+
+        let blockTypeB = BlockSwiftType(returnType: .optional("A"), parameters: [])
+        let funcTypeB = SwiftType.block(blockTypeB)
 
         let exp =
             Expression
             .identifier("a").typed(funcTypeA)
             .call(
                 [Expression.identifier("b").typed(funcTypeB).call().typed(.optional("A"))],
-                callableSignature: funcTypeA
+                callableSignature: blockTypeA
             )
 
         assertTransform(
@@ -909,16 +915,16 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
 
     /// Tests non-null arguments with nullable scalar types are not corrected to
     /// an if-let, since this is dealt at another point in the AST corrector.
-    func testDontCorrectSimpleNullableValueInNonnullParameterToIfLetIfArgumentIsNullableScalarType()
-    {
-        let funcType = SwiftType.swiftBlock(returnType: .void, parameters: [.int])
+    func testDontCorrectSimpleNullableValueInNonnullParameterToIfLetIfArgumentIsNullableScalarType() {
+        let blockType = BlockSwiftType.init(returnType: .void, parameters: [.int])
+        let funcType = SwiftType.block(blockType)
 
         let exp =
             Expression
             .identifier("a").typed(funcType)
             .call(
                 [.identifier("b").dot("c").typed(.optional(.int))],
-                callableSignature: funcType
+                callableSignature: blockType
             )
 
         assertTransform(
@@ -936,7 +942,7 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
                                 )
                             )
                         ],
-                        callableSignature: funcType
+                        callableSignature: blockType
                     )
             )
         )
@@ -944,15 +950,17 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
 
     /// Make sure we don't correct passing a nullable value to a nullable parameter
     func testDontCorrectNullableValuesPassedToNullableParameters() {
-        let funcType = SwiftType.swiftBlock(
+        let blockType = BlockSwiftType(
             returnType: .void,
             parameters: [.optional(.typeName("A"))]
         )
+        let funcType = SwiftType.block(blockType)
+        
         let expMaker: () -> Expression = {
             .identifier("a").typed(funcType)
                 .call(
                     [.identifier("b").typed(.optional(.typeName("A")))],
-                    callableSignature: funcType
+                    callableSignature: blockType
                 )
         }
 

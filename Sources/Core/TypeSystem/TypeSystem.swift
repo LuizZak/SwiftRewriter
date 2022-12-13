@@ -1515,11 +1515,11 @@ private class TypealiasExpander {
     
     func expand(in type: SwiftType) -> SwiftType {
         switch type {
-        case let .block(returnType, parameters, attributes):
+        case let .block(blockType):
             return .block(
-                returnType: expand(in: returnType),
-                parameters: parameters.map(expand),
-                attributes: attributes
+                returnType: expand(in: blockType.returnType),
+                parameters: blockType.parameters.map(expand),
+                attributes: blockType.attributes
             )
             
         case .nominal(.typeName(let name)):

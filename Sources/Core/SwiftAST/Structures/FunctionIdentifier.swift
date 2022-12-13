@@ -17,6 +17,18 @@ public struct FunctionIdentifier: Hashable, Equatable, Codable, CustomStringConv
         self.name = name
         self.argumentLabels = argumentLabels
     }
+
+    /// Initializes a function identifier based on a function name and all of the
+    /// argument labels provided by `arguments`.
+    public init(name: String, arguments: [FunctionArgument]) {
+        self.init(name: name, argumentLabels: arguments.map(\.label))
+    }
+
+    /// Initializes a function identifier based on a function name and all of the
+    /// argument labels provided by `parameters`.
+    public init(name: String, parameters: [ParameterSignature]) {
+        self.init(name: name, argumentLabels: parameters.map(\.label))
+    }
 }
 
 public extension FunctionCallPostfix {

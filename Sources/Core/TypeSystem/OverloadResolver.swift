@@ -19,8 +19,10 @@ public class OverloadResolver {
     ) -> KnownMethod? {
         
         let signatures = methods.map(\.signature)
-        if let index = findBestOverload(inSignatures: signatures,
-                                        arguments: argumentTypes.asOverloadResolverArguments) {
+        if let index = findBestOverload(
+            inSignatures: signatures,
+            arguments: argumentTypes.asOverloadResolverArguments
+        ) {
             return methods[index]
         }
         
@@ -69,8 +71,10 @@ public class OverloadResolver {
             )
         }
         
-        if let index = findBestOverload(inSignatures: asFunctionSignatures,
-                                        arguments: arguments) {
+        if let index = findBestOverload(
+            inSignatures: asFunctionSignatures,
+            arguments: arguments
+        ) {
             return subscripts[index]
         }
         
@@ -127,9 +131,11 @@ public class OverloadResolver {
                         let parameterType =
                             candidate.signature.parameters[argIndex].type
                         
-                        if !typeSystem.typesMatch(argumentType,
-                                                  parameterType,
-                                                  ignoreNullability: false) {
+                        if !typeSystem.typesMatch(
+                            argumentType,
+                            parameterType,
+                            ignoreNullability: false
+                        ) {
                             break
                         }
                         
@@ -170,11 +176,10 @@ public class OverloadResolver {
                         continue
                     }
                     
-                    let isAssignable =
-                        typeSystem.isType(
-                            argumentType.deepUnwrapped,
-                            assignableTo: parameterType.deepUnwrapped
-                        )
+                    let isAssignable = typeSystem.isType(
+                        argumentType.deepUnwrapped,
+                        assignableTo: parameterType.deepUnwrapped
+                    )
                     
                     if isAssignable {
                         continue
@@ -224,14 +229,13 @@ public class OverloadResolver {
         
         for (i, signature) in signatures.enumerated() {
             for selector in signature.possibleSelectorSignatures() {
-                let candidate =
-                    OverloadCandidate(
-                        rank: 0,
-                        selector: selector,
-                        signature: signature,
-                        inputIndex: i,
-                        argumentCount: selector.keywords.count - 1
-                    )
+                let candidate = OverloadCandidate(
+                    rank: 0,
+                    selector: selector,
+                    signature: signature,
+                    inputIndex: i,
+                    argumentCount: selector.keywords.count - 1
+                )
                 
                 overloads.append(candidate)
             }
@@ -249,7 +253,12 @@ public class OverloadResolver {
         public var isLiteral: Bool
         public var literalKind: LiteralExpressionKind?
         
-        public init(type: SwiftType?, isLiteral: Bool, literalKind: LiteralExpressionKind?) {
+        public init(
+            type: SwiftType?,
+            isLiteral: Bool,
+            literalKind: LiteralExpressionKind?
+        ) {
+            
             self.type = type
             self.isLiteral = isLiteral
             self.literalKind = literalKind

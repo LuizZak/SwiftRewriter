@@ -248,7 +248,7 @@ class SwiftAttributeTransformationsExtractor {
                         transformer: ValueTransformer()
                             .validate(matcher: ValueMatcher()
                                 .keyPath(\.asPostfix, .isMemberAccess(forMember: signature.name))
-                                .keyPath(\.resolvedType, equals: signature.swiftClosureType)
+                                .keyPath(\.resolvedType, equals: .block(signature.swiftClosureType))
                             )
                             .removingMemberAccess()
                             .validate(matcher: ValueMatcher()

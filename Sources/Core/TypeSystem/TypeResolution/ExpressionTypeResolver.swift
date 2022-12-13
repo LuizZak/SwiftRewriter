@@ -1,6 +1,5 @@
 import SwiftAST
 import KnownType
-import ObjcParser
 
 public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     private var nearestScopeCache: [ObjectIdentifier: CodeScopeNode] = [:]
@@ -684,10 +683,10 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         var blockReturnType = exp.returnType
         
         // Adjust signatures of block parameters based on expected type
-        if case let .block(ret, params, _)? = (exp.expectedType?.deepUnwrapped).map(expandAliases),
-            params.count == exp.parameters.count {
+        if case let .block(block)? = (exp.expectedType?.deepUnwrapped).map(expandAliases),
+            block.parameters.count == exp.parameters.count {
             
-            for (i, expectedType) in zip(0..<exp.parameters.count, params) {
+            for (i, expectedType) in zip(0..<exp.parameters.count, block.parameters) {
                 let param = exp.parameters[i]
                 guard param.type.isNullabilityUnspecified else { continue }
                 guard param.type.deepUnwrapped == expectedType.deepUnwrapped else { continue }
@@ -696,9 +695,9 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             }
             
             if blockReturnType.isNullabilityUnspecified &&
-                blockReturnType.deepUnwrapped == ret.deepUnwrapped {
+                blockReturnType.deepUnwrapped == block.returnType.deepUnwrapped {
                 
-                blockReturnType = ret
+                blockReturnType = block.returnType
             }
 
             exp.resolvedType =
@@ -1134,8 +1133,41 @@ private class MemberInvocationResolver {
             }
         }
         
-        let arguments = functionCall.arguments
+        // Parameterless type constructor on type metadata (i.e. `MyClass.init([params])`)
+        if tryTypeInitializerResolution(postfix: postfix, functionCall: &functionCall) {
+            return postfix
+        }
+
+        // Selector invocation
+        if trySelectorCallResolution(postfix: postfix, functionCall: &functionCall) {
+            return postfix
+        }
+
+        // Local closure/global function type
+        if tryCallableIdentifierResolution(postfix: postfix, functionCall: &functionCall) {
+            return postfix
+        }
+
+        // Callable type instance invocation
+        if tryCallableTypeInvocation(postfix: postfix, functionCall: &functionCall) {
+            return postfix
+        }
+
+        // Fallthrough error path
+        return postfix.makeErrorTyped()
+    }
+
+    /// Attempts to resolve a function call as an initializer invocation on a
+    /// metatype that contains an initializer.
+    ///
+    /// Returns `true` if the resolution was successful.
+    func tryTypeInitializerResolution(
+        postfix: PostfixExpression,
+        functionCall: inout FunctionCallPostfix
+    ) -> Bool {
         
+        // TODO: Reduce duplication between the two branches bellow
+
         // Parameterless type constructor on type metadata (i.e. `MyClass.init([params])`)
         if
             let target = postfix.exp.asPostfix?.exp.asIdentifier,
@@ -1144,129 +1176,216 @@ private class MemberInvocationResolver {
         {
             
             guard let metatype = extractMetatype(from: target) else {
-                return postfix.makeErrorTyped()
+                return false
             }
-            guard let ctor = typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: metatype) else {
-                return postfix.makeErrorTyped()
+            guard let ctor = typeSystem.constructor(
+                withArgumentLabels: labels(in: functionCall.arguments),
+                in: metatype
+            ) else {
+                return false
             }
             
             postfix.resolvedType = metatype
             functionCall.returnType = metatype
-            functionCall.callableSignature =
-                .block(
-                    returnType: metatype,
-                    parameters: ctor.parameters.map(\.type),
-                    attributes: []
-                )
+            functionCall.callableSignature = .init(
+                returnType: metatype,
+                parameters: ctor.parameters.map(\.type),
+                attributes: []
+            )
             functionCall.definition = ctor
             initAccess.op.definition = ctor
             
             matchParameterTypes(parameters: ctor.parameters, callArguments: functionCall.arguments)
             
-            return postfix
+            return true
         }
+
         // Direct type constructor `MyClass([params])`
         if let metatype = extractMetatype(from: postfix.exp) {
-            guard let ctor = typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: metatype) else {
-                return postfix.makeErrorTyped()
+            guard let ctor = typeSystem.constructor(
+                withArgumentLabels: labels(in: functionCall.arguments),
+                in: metatype
+            ) else {
+                return false
             }
             
             postfix.resolvedType = metatype
             functionCall.returnType = metatype
-            functionCall.callableSignature =
-                .block(
-                    returnType: metatype,
-                    parameters: ctor.parameters.map(\.type),
-                    attributes: []
-                )
+            functionCall.callableSignature = .init(
+                returnType: metatype,
+                parameters: ctor.parameters.map(\.type),
+                attributes: []
+            )
             functionCall.definition = ctor
             
             matchParameterTypes(parameters: ctor.parameters, callArguments: functionCall.arguments)
             
-            return postfix
+            return true
         }
-        // Selector invocation
-        if let target = postfix.exp.asPostfix?.exp, let member = postfix.exp.asPostfix?.member {
-            guard let type = target.resolvedType else {
-                return postfix.makeErrorTyped()
-            }
-            guard let method =
-                method(
-                    isStatic: type.isMetatype,
-                    memberName: member.name,
-                    arguments: arguments,
-                    in: type
-                )
-            else {
-                
-                return postfix.makeErrorTyped()
-            }
-            
-            let signature = method.signature
-            
-            member.definition = method
-            member.returnType = signature.swiftClosureType
-            
-            postfix.exp.resolvedType = signature.swiftClosureType
-            postfix.resolvedType = signature.returnType
-            
-            functionCall.returnType = signature.returnType
-            functionCall.callableSignature = signature.swiftClosureType
-            functionCall.definition = method
-            
-            if method.optional {
-                member.returnType = member.returnType?.asOptional
-                postfix.exp.resolvedType = postfix.exp.resolvedType?.asOptional
-                postfix.resolvedType = postfix.resolvedType?.asOptional
-            }
-            
-            matchParameterTypes(parameters: signature.parameters, callArguments: functionCall.arguments)
-            
-            return postfix
+
+        return false
+    }
+
+    /// Attempts to resolve a function call as a selector invocation on a member
+    /// of a type.
+    ///
+    /// Returns `true` if the resolution was successful.
+    func trySelectorCallResolution(
+        postfix: PostfixExpression,
+        functionCall: inout FunctionCallPostfix
+    ) -> Bool {
+
+        guard let target = postfix.exp.asPostfix?.exp, let member = postfix.exp.asPostfix?.member else {
+            return false
         }
-        // Local closure/global function type
-        if let target = postfix.exp.asIdentifier {
-            
-            let identifier =
-                FunctionIdentifier(
-                    name: target.identifier,
-                    argumentLabels: arguments.map(\.label)
-                )
-            
-            let definitions =
-                typeResolver.searchFunctionDefinitions(matching: identifier, target)
-            let signatures = definitions.compactMap(\.asFunctionSignature)
+        guard let type = target.resolvedType else {
+            return false
+        }
+
+        guard let method = method(
+            isStatic: type.isMetatype,
+            memberName: member.name,
+            arguments: functionCall.arguments,
+            in: type
+        ) else {
+            return false
+        }
+        
+        let signature = method.signature
+        
+        member.definition = method
+        member.returnType = .block(signature.swiftClosureType)
+        
+        postfix.exp.resolvedType = .block(signature.swiftClosureType)
+        postfix.resolvedType = signature.returnType
+        
+        functionCall.returnType = signature.returnType
+        functionCall.callableSignature = signature.swiftClosureType
+        functionCall.definition = method
+        
+        if method.optional {
+            member.returnType = member.returnType?.asOptional
+            postfix.exp.resolvedType = postfix.exp.resolvedType?.asOptional
+            postfix.resolvedType = postfix.resolvedType?.asOptional
+        }
+        
+        matchParameterTypes(parameters: signature.parameters, callArguments: functionCall.arguments)
+        
+        return true
+    }
+
+    /// Attempts to resolve a function call as a call to a callable type, i.e a
+    /// closure-typed value or a callable type instance.
+    ///
+    /// Returns `true` if the resolution was successful.
+    func tryCallableTypeInvocation(
+        postfix: PostfixExpression,
+        functionCall: inout FunctionCallPostfix
+    ) -> Bool {
+
+        guard let expType = postfix.exp.resolvedType else {
+            return false
+        }
+
+        // Detect callable types
+        if case .block(let block) = expType {
+            matchParameterTypes(types: block.parameters, callArguments: functionCall.arguments)
             
             functionCall = functionCall.replacingArguments(
                 functionCall.subExpressions.map(typeResolver.visitExpression)
             )
             
-            let bestMatchIndex =
-                findBestMatchIndex(signatures, matching: functionCall.arguments)
+            postfix.resolvedType = block.returnType
 
-            let bestMatch =
-                (bestMatchIndex.map { signatures[$0] })?.swiftClosureType
-                    ?? postfix.exp.resolvedType
+            functionCall.returnType = block.returnType
+            functionCall.callableSignature = block
+
+            return true
+        }
+
+        // Try `callAsFunction` invocation first
+        if let knownType = typeSystem.findType(for: expType) {
+            let callableTypeResolver = CallableTypeResolver(
+                typeSystem: typeSystem,
+                type: knownType
+            )
+
+            functionCall = functionCall.replacingArguments(
+                functionCall.subExpressions.map(typeResolver.visitExpression)
+            )
             
-            // Update code definition
-            if let bestMatchIndex {
-                target.definition = definitions[bestMatchIndex]
-            }
-            
-            if let type = bestMatch,
-                case let .block(ret, args, _) = type.deepUnwrapped {
-                
-                let type = type
-                
-                postfix.resolvedType = type.wrappingOther(ret)
-                functionCall.returnType = postfix.resolvedType
-                functionCall.callableSignature = type
-                
-                matchParameterTypes(types: args, callArguments: functionCall.arguments)
+            let results = callableTypeResolver.resolveCall(functionCall.arguments)
+            if !results.isEmpty {
+                let result = results[0]
+                let callableType = result.method.signature.swiftClosureType
+
+                postfix.resolvedType = result.resolvedType
+
+                postfix.exp.resolvedType = .block(callableType)
+                functionCall.definition = result.method
+                functionCall.returnType = result.resolvedType
+                functionCall.callableSignature = callableType
+
+                return true
             }
         }
+
+        return false
+    }
+
+    /// Attempts to resolve a function call as a global function/local closure
+    /// identifier call.
+    ///
+    /// Returns `true` if the resolution was successful.
+    func tryCallableIdentifierResolution(
+        postfix: PostfixExpression,
+        functionCall: inout FunctionCallPostfix
+    ) -> Bool {
         
-        return postfix
+        guard let target = postfix.exp.asIdentifier else {
+            return false
+        }
+        
+        let identifier = FunctionIdentifier(
+            name: target.identifier,
+            arguments: functionCall.arguments
+        )
+        
+        let definitions = typeResolver.searchFunctionDefinitions(matching: identifier, target)
+        let signatures = definitions.compactMap(\.asFunctionSignature)
+        
+        functionCall = functionCall.replacingArguments(
+            functionCall.subExpressions.map(typeResolver.visitExpression)
+        )
+        
+        let bestMatchIndex = findBestMatchIndex(
+            signatures,
+            matching: functionCall.arguments
+        )
+
+        let bestMatch =
+            ((bestMatchIndex.map { signatures[$0] })?.swiftClosureType).map(SwiftType.block(_:))
+                ?? postfix.exp.resolvedType
+        
+        // Update code definition
+        if let bestMatchIndex {
+            target.definition = definitions[bestMatchIndex]
+        }
+        
+        guard let type = bestMatch, case let .block(blockType) = type.deepUnwrapped else {
+            return false
+        }
+
+        postfix.resolvedType = type.wrappingOther(blockType.returnType)
+        functionCall.returnType = postfix.resolvedType
+        functionCall.callableSignature = blockType
+        
+        matchParameterTypes(
+            types: blockType.parameters,
+            callArguments: functionCall.arguments
+        )
+
+        return true
     }
     
     func matchParameterTypes(parameters: [ParameterSignature], callArguments: [FunctionArgument]) {

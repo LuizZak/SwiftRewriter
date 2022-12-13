@@ -432,9 +432,10 @@ public class ObjectiveCASTCorrectorExpressionPass: ASTRewriterPass {
         }
         
         // Apply potential if-let patterns to simple 1-parameter function calls
-        guard case .block(_, let params, _)? = functionCall.value.callableSignature else {
+        guard let blockType = functionCall.value.callableSignature else {
             return nil
         }
+        let params = blockType.parameters
         
         let argument = functionCall.value.arguments[0].expression
         

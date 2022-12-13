@@ -856,10 +856,13 @@ enum SwiftTypeToken: String, TokenProtocol {
 private extension SwiftType {
     func withAttributes(_ attributes: [BlockTypeAttribute]) -> SwiftType {
         switch self {
-        case let .block(returnType, parameters, attr):
-            return .block(returnType: returnType,
-                          parameters: parameters,
-                          attributes: attr.union(attributes))
+        case .block(let blockType):
+
+            return .block(
+                returnType: blockType.returnType,
+                parameters: blockType.parameters,
+                attributes: blockType.attributes.union(attributes)
+            )
             
         default:
             return self

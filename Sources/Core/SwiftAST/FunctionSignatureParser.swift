@@ -482,10 +482,12 @@ public final class FunctionSignatureParser {
         
         // Append attributes
         switch type {
-        case let .block(returnType, parameters, attr):
-            type = .block(returnType: returnType,
-                          parameters: parameters,
-                          attributes: attr.union(attributes))
+        case .block(let blockType):
+            type = .block(
+                returnType: blockType.returnType,
+                parameters: blockType.parameters,
+                attributes: blockType.attributes.union(attributes)
+            )
             
         default:
             break

@@ -1478,7 +1478,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                             return
                         }
 
-                        let path = CGMutablePath()
+                        let path: CGMutablePathRef = CGMutablePath()
 
                         path.move(to: CGPoint(x: 0, y: top))
                         path.addLine(to: CGPoint(x: 0, y: bottom))
@@ -2057,7 +2057,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                     var b: B?
 
                     func method() {
-                        let local = Int((self.b?.value ?? 0.0) / (self.b?.value ?? 0.0))
+                        let local: Int = Int((self.b?.value ?? 0.0) / (self.b?.value ?? 0.0))
                     }
                 }
                 """
@@ -2400,7 +2400,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                     var prop: CGFloat = 0.0
 
                     func method() {
-                        let local = GLenum(prop)
+                        let local: GLenum = GLenum(prop)
                     }
                 }
                 """
@@ -2431,7 +2431,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                     var prop: CGFloat = 0.0
 
                     func method() {
-                        let local = GLenum(prop)
+                        let local: Alias = GLenum(prop)
                     }
                 }
                 """
