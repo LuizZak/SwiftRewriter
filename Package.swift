@@ -543,5 +543,7 @@ let package = Package(
             path: "Tests/SwiftRewriterTests"
         ),
     ],
-    swiftLanguageVersions: [.v5]
+    swiftLanguageVersions: [
+        .v5,
+    ]
 )

@@ -71,6 +71,13 @@ class SingleFileTestBuilder {
             }
 
             if outputBuffer != expectedSwift {
+                let formattedOutput = formatCodeForDisplay(outputBuffer)
+                let formattedExpected = formatCodeForDisplay(expectedSwift)
+
+                let diff = formattedOutput.makeDifferenceMarkString(
+                    against: formattedExpected
+                )
+
                 XCTFail(
                     """
                     Failed: Expected to translate Objective-C
@@ -78,17 +85,15 @@ class SingleFileTestBuilder {
 
                     as
 
-                    \(formatCodeForDisplay(expectedSwift))
+                    \(formattedExpected)
 
                     but translated as
 
-                    \(formatCodeForDisplay(outputBuffer))
+                    \(formattedOutput)
 
                     Diff:
 
-                    \(formatCodeForDisplay(outputBuffer)
-                        .makeDifferenceMarkString(against:
-                            formatCodeForDisplay(expectedSwift)))
+                    \(diff)
                     """,
                     file: file,
                     line: line

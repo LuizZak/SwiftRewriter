@@ -274,8 +274,11 @@ class CompiledMultiFileTestResults {
         }
     }
 
-    func assertErrorStreamIs(_ expected: String, file: StaticString = #filePath, line: UInt = #line)
-    {
+    func assertErrorStreamIs(
+        _ expected: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
         if errors != expected {
             XCTFail(
                 """

@@ -1,10 +1,8 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
 - master
+
+variables:
+  SWIFTPM_CACHE_FOLDER: '.build'
 
 jobs:
 - job: macOS
@@ -12,9 +10,19 @@ jobs:
     vmImage: 'macOS-12'
   steps:
   - bash: 'sudo xcode-select -s /Applications/Xcode_14.1.app/Contents/Developer'
+  - task: Cache@2
+    inputs:
+      key: 'v2 | "swiftpm" | "$(Agent.OS)" | Package.resolved'
+      path: $(SWIFTPM_CACHE_FOLDER)
+    displayName: Cache Swift build
+  - bash: 'swift --version'
+  - bash: 'swift package resolve'
+  - bash: 'swift test'
   - bash: 'swift --version'
   - bash: 'swift package resolve'
   - bash: 'swift test --enable-code-coverage'
+  # Avoid caching build artifacts and focus on checkout state only
+  - bash: 'rm -r $(dirname $(swift build --show-bin-path))'
   - bash: 'xcrun llvm-profdata merge -sparse ./.build/debug/codecov/*.profraw -o coverage.profdata'
   - bash: 'xcrun llvm-cov show ./.build/debug/SwiftRewriter -instr-profile=./coverage.profdata --ignore-filename-regex=ObjcParserAntlr --ignore-filename-regex=JsParserAntlr Sources > coverage.txt'
   - bash: 'bash <(curl -s https://codecov.io/bash)'
@@ -25,6 +33,13 @@ jobs:
   pool:
     vmImage: ubuntu-20.04
   steps:
+  - task: Cache@2
+    inputs:
+      key: 'v2 | "swiftpm" | "$(Agent.OS)" | Package.resolved'
+      path: $(SWIFTPM_CACHE_FOLDER)
+    displayName: Cache Swift build
   - bash: 'swift --version'
   - bash: 'swift package resolve'
   - bash: 'swift test'
+  # Avoid caching build artifacts and focus on checkout state only
+  - bash: 'rm -r $(dirname $(swift build --show-bin-path))'
