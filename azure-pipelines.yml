@@ -17,9 +17,6 @@ jobs:
     displayName: Cache Swift build
   - bash: 'swift --version'
   - bash: 'swift package resolve'
-  - bash: 'swift test'
-  - bash: 'swift --version'
-  - bash: 'swift package resolve'
   - bash: 'swift test --enable-code-coverage'
   # Avoid caching build artifacts and focus on checkout state only
   - bash: 'rm -r $(dirname $(swift build --show-bin-path))'
