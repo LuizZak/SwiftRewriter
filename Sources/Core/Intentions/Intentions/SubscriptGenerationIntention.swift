@@ -22,6 +22,10 @@ public final class SubscriptGenerationIntention: MemberGenerationIntention {
         }
     }
 
+    public override var memberType: SwiftType {
+        returnType
+    }
+
     /// Returns the getter body for this subscript generation intention.
     public var getter: FunctionBodyIntention {
         mode.getter

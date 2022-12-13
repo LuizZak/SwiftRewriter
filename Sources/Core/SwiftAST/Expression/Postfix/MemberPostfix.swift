@@ -1,4 +1,3 @@
-
 public final class MemberPostfix: Postfix {
     public let name: String
     

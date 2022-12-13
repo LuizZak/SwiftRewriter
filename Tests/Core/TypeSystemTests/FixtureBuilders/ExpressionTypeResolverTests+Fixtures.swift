@@ -442,6 +442,36 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
         return self
     }
 
+    /// Opens up a closure context and passes in an expression at a specified
+    /// keypath for custom inspection.
+    @discardableResult
+    func withExpression<E: Expression>(
+        at keyPath: KeyPath<T, E>,
+        file: StaticString = #filePath,
+        line: UInt = #line,
+        _ closure: (E) -> Void
+    ) -> StatementTypeTestBuilder {
+
+        closure(statement[keyPath: keyPath])
+
+        return self
+    }
+
+    /// Opens up a closure context and passes in an expression at a specified
+    /// keypath for custom inspection.
+    @discardableResult
+    func withExpression<E: Expression>(
+        at keyPath: KeyPath<T, E?>,
+        file: StaticString = #filePath,
+        line: UInt = #line,
+        _ closure: (E?) -> Void
+    ) -> StatementTypeTestBuilder {
+
+        closure(statement[keyPath: keyPath])
+
+        return self
+    }
+
     @discardableResult
     func resolve() -> StatementTypeTestBuilder {
         // Make sure to apply definitions just before starting assertions

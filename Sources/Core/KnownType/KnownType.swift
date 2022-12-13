@@ -149,8 +149,9 @@ public protocol KnownMember: SemanticalObject, AttributeTaggableObject {
 
     /// Gets the type for this member.
     /// In case this is a property or field member, this is just the storage type
-    /// of the variable, and if this is a method member, this is the signature of
-    /// the method.
+    /// of the variable, if this is a method member, this is the signature of
+    /// the method, and if this is a subscript member, this is the return type
+    /// of the subscript call.
     var memberType: SwiftType { get }
     
     /// Miscellaneous semantical annotations that do not affect this member's

@@ -221,6 +221,64 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
         )
     }
 
+    func testRewrite_emitJavaScriptObject_detectsDynamicMemberLookups() {
+        assertRewrite(
+            js: """
+            function f() {
+                var object = {
+                    x: 1,
+                    y: 2,
+                    z
+                }
+
+                var x = object.x;
+            }
+            """,
+            swift: """
+            @dynamicMemberLookup
+            final class JavaScriptObject: ExpressibleByDictionaryLiteral {
+                private var values: [String: Any]
+
+                subscript(dynamicMember member: String) -> Any? {
+                    return values[member]
+                }
+
+                init() {
+                    // type: [String: Any]
+                    self.values = [:]
+                }
+                init(dictionaryLiteral elements: (String, Any)...) {
+                    for (key, value) in elements {
+                        // type: <<error type>>
+                        self.values[key] = value
+                    }
+                }
+                init(_ values: [String: Any]) {
+                    // type: [String: Any]
+                    self.values = values
+                }
+            }
+            // End of file JavaScriptObject.swift
+            func f() {
+                // decl type: JavaScriptObject
+                // init type: JavaScriptObject
+                let object = JavaScriptObject(["x": 1, "y": 2, "z": z])
+                // decl type: Any?
+                // init type: Any?
+                let x = object.x
+            }
+            // End of file test.swift
+            """,
+            options:
+                .default
+                .with(\.outputExpressionTypes, true),
+            rewriterSettings:
+                .default
+                .with(\.deduceTypes, true)
+                .with(\.emitJavaScriptObject, true)
+        )
+    }
+
     func testRewrite_skipReturnOnNonReturningFunctions() {
         assertRewrite(
             js: """

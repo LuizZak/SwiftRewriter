@@ -34,6 +34,10 @@ class KnownTypeMemberLookup: MemberLookupType {
         context.makeSwiftTypeLookup(type)
     }
 
+    func makeDynamicTypeLookup() -> DynamicMemberLookup {
+        DynamicMemberLookup(type: type, context: context)
+    }
+
     func method(
         withIdentifier identifier: FunctionIdentifier,
         invocationTypeHints: [SwiftType?]?,
@@ -162,7 +166,7 @@ class KnownTypeMemberLookup: MemberLookupType {
             return result
         }
         
-        let result = _member(named: name, static: isStatic)
+        let result = _memberUncached(named: name, static: isStatic)
         
         if memberSearchCache.usingCache {
             memberSearchCache.storeMember(
@@ -338,7 +342,7 @@ class KnownTypeMemberLookup: MemberLookupType {
         }
     }
 
-    private func _member(
+    private func _memberUncached(
         named name: String,
         static isStatic: Bool
     ) -> KnownMember? {
@@ -357,10 +361,32 @@ class KnownTypeMemberLookup: MemberLookupType {
         }
         
         // Search on super types
-        return typeSystem.supertype(of: type).flatMap { superType in
+        let onSuperType = typeSystem.supertype(of: type).flatMap({ superType in
             makeKnownTypeLookup(superType)
                 .member(named: name, static: isStatic)
+        })
+        
+        if let onSuperType {
+            return onSuperType
         }
+
+        // Check for `@dynamicMemberLookup`
+        if type.isDynamicMemberLookupType {
+            let dynamicLookup = makeDynamicTypeLookup()
+
+            let result = dynamicLookup.member(named: name, static: isStatic)
+
+            switch result {
+            case .declared(let member):
+                return member
+            case .dynamicMember(let member):
+                return member
+            case nil:
+                break
+            }
+        }
+
+        return nil
     }
 
     private func _subscriptionUncached(
@@ -431,5 +457,12 @@ class KnownTypeMemberLookup: MemberLookupType {
         }
         
         return nil
+    }
+}
+
+private extension KnownType {
+    /// Returns `true` if this type has a `@dynamicMemberLookup` attribute.
+    var isDynamicMemberLookupType: Bool {
+        hasAttribute(named: KnownAttribute.dynamicMemberLookup.name)
     }
 }

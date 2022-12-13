@@ -16,7 +16,7 @@ public class MemberGenerationIntention: FromSourceIntention {
     public var annotations: [String] = []
     
     public var memberType: SwiftType {
-        fatalError("Must be overriden by subtypes")
+        fatalError("Must be overridden by subtypes")
     }
     
     public override init(accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {

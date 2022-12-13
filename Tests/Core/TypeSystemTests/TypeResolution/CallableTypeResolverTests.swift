@@ -5,7 +5,7 @@ import TestCommons
 
 @testable import TypeSystem
 
-class ExpressionTypeResolver_CallableTypeTests: XCTestCase {
+class CallableTypeResolverTests: XCTestCase {
     func testResolveTypeInstanceCall() {
         let exp: Expression = .identifier("v").call()
 
