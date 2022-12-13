@@ -26,7 +26,7 @@ jobs:
   steps:
   - task: Cache@2
     inputs:
-      key: '"swiftpm" | "$(Agent.OS)" | Package.resolved | "$(Build.SourceBranch)"'
+      key: 'v2 | "swiftpm" | "$(Agent.OS)" | Package.resolved'
       path: $(SWIFTPM_CACHE_FOLDER)
     displayName: Cache Swift build
   - bash: 'swift test'
