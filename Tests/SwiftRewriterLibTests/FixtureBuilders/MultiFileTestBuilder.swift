@@ -32,8 +32,11 @@ class MultiFileTestBuilder {
         return self
     }
     
-    func expectSwiftFile(name: String, _ contents: String,
-                         file: StaticString = #filePath, line: UInt = #line) -> MultiFileTestBuilder {
+    func expectSwiftFile(
+        name: String, _ contents: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> MultiFileTestBuilder {
         
         expectedFiles.append(
             ExpectedFile(path: name, source: contents, _file: file, _line: line)
@@ -41,10 +44,12 @@ class MultiFileTestBuilder {
         return self
     }
     
-    func transpile(expectsErrors: Bool = false,
-                   options: SwiftSyntaxOptions = .default,
-                   file: StaticString = #filePath,
-                   line: UInt = #line) -> CompiledMultiFileTestResults {
+    func transpile(
+        expectsErrors: Bool = false,
+        options: SwiftSyntaxOptions = .default,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> CompiledMultiFileTestResults {
         
         builder.swiftSyntaxOptions = options
         
@@ -55,11 +60,14 @@ class MultiFileTestBuilder {
         let errors = results.diagnostics.errors.map(\.description).joined(separator: "\n")
         
         if !expectsErrors && !results.diagnostics.errors.isEmpty {
-            XCTFail("""
-                    Unexpected error(s) converting code:
-                    \(errors)
-                    """,
-                    file: file, line: line)
+            XCTFail(
+                """
+                Unexpected error(s) converting code:
+                \(errors)
+                """,
+                file: file,
+                line: line
+            )
         }
         
         return CompiledMultiFileTestResults(
@@ -67,16 +75,19 @@ class MultiFileTestBuilder {
             results: output.outputs,
             files: files,
             expectedFiles: expectedFiles,
-            errors: errors)
+            errors: errors
+        )
     }
     
     /// Assertion execution point
     @discardableResult
-    func translatesToSwift(_ expectedSwift: String,
-                           expectsErrors: Bool = false,
-                           options: SwiftSyntaxOptions = .default,
-                           file: StaticString = #filePath,
-                           line: UInt = #line) -> MultiFileTestBuilder {
+    func translatesToSwift(
+        _ expectedSwift: String,
+        expectsErrors: Bool = false,
+        options: SwiftSyntaxOptions = .default,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> MultiFileTestBuilder {
         
         builder.swiftSyntaxOptions = options
         
@@ -88,11 +99,14 @@ class MultiFileTestBuilder {
         if !expectsErrors && !results.diagnostics.errors.isEmpty {
             let errors = results.diagnostics.errors.map(\.description).joined(separator: "\n")
             
-            XCTFail("""
-                    Unexpected error(s) converting code:
-                    \(errors)
-                    """,
-                    file: file, line: line)
+            XCTFail(
+                """
+                Unexpected error(s) converting code:
+                \(errors)
+                """,
+                file: file,
+                line: line
+            )
         } else {
             // Compute output
             let buffer = output.outputs
@@ -101,19 +115,22 @@ class MultiFileTestBuilder {
                 .joined(separator: "\n")
             
             if buffer != expectedSwift {
-                XCTFail("""
-                        Failed: Expected to translate Objective-C inputs as:
-                        
-                        \(expectedSwift)
-                        but translated as:
-                        
-                        \(buffer)
-                        
-                        Diff:
-                        
-                        \(buffer.makeDifferenceMarkString(against: expectedSwift))
-                        """,
-                        file: file, line: line)
+                XCTFail(
+                    """
+                    Failed: Expected to translate Objective-C inputs as:
+                    
+                    \(expectedSwift)
+                    but translated as:
+                    
+                    \(buffer)
+                    
+                    Diff:
+                    
+                    \(buffer.makeDifferenceMarkString(against: expectedSwift))
+                    """,
+                    file: file,
+                    line: line
+                )
             }
             
             var errorsOutput = ""
@@ -126,10 +143,13 @@ class MultiFileTestBuilder {
     
     func assertErrorStreamIs(_ expected: String, file: StaticString = #filePath, line: UInt = #line) {
         if errors != expected {
-            XCTFail("""
-                    Mismatched errors stream. Expected \(expected) but found \(errors)
-                    """,
-                    file: file, line: line)
+            XCTFail(
+                """
+                Mismatched errors stream. Expected \(expected) but found \(errors)
+                """,
+                file: file,
+                line: line
+            )
         }
     }
 }
@@ -143,11 +163,13 @@ class CompiledMultiFileTestResults {
     var expectedFiles: [ExpectedFile]
     var errors: String
     
-    init(test: XCTestCase,
-         results: [TestFileOutput],
-         files: [File],
-         expectedFiles: [ExpectedFile],
-         errors: String) {
+    init(
+        test: XCTestCase,
+        results: [TestFileOutput],
+        files: [File],
+        expectedFiles: [ExpectedFile],
+        errors: String
+    ) {
         
         self.test = test
         self.results = results
@@ -157,16 +179,20 @@ class CompiledMultiFileTestResults {
         
     }
     
-    func assertGeneratedFileCount(_ count: Int,
-                                  file: StaticString = #filePath,
-                                  line: UInt = #line) {
+    func assertGeneratedFileCount(
+        _ count: Int,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
         
         if results.count != count {
-            XCTFail("""
-                    Expected to generate \(count) file(s), but generated \(results.count)
-                    """,
-                    file: file,
-                    line: line)
+            XCTFail(
+                """
+                Expected to generate \(count) file(s), but generated \(results.count)
+                """,
+                file: file,
+                line: line
+            )
         }
     }
     
@@ -174,15 +200,19 @@ class CompiledMultiFileTestResults {
     /// where produced correctly.
     ///
     /// Does not assert if unexpected files where produced during compilation.
-    func assertExpectedSwiftFiles(file: StaticString = #filePath,
-                                  line: UInt = #line) {
+    func assertExpectedSwiftFiles(
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
         
         assertMatchesWithExpectedFiles(results, file: file, line: line)
     }
     
-    private func assertMatchesWithExpectedFiles(_ files: [TestFileOutput],
-                                                file: StaticString,
-                                                line: UInt) {
+    private func assertMatchesWithExpectedFiles(
+        _ files: [TestFileOutput],
+        file: StaticString,
+        line: UInt
+    ) {
         
         let expectedNotMatched = expectedFiles.filter { expected in
             !files.contains { $0.path == expected.path }
@@ -200,42 +230,52 @@ class CompiledMultiFileTestResults {
             let expectedSwift = match.expectedFile.source
             let actualSwift = match.result.buffer
             
-            XCTFail("""
-                    Failed: Expected to produce Swift file \(match.result) inputs as:
-                    
-                    --
-                    \(expectedSwift)
-                    --
-                    
-                    but translated as:
-                    
-                    --
-                    \(actualSwift)
-                    --
-                    
-                    Diff:
-                    
-                    \(actualSwift.makeDifferenceMarkString(against: expectedSwift))
-                    """, file: match.expectedFile._file, line: match.expectedFile._line)
+            XCTFail(
+                """
+                Failed: Expected to produce Swift file \(match.result) inputs as:
+                
+                --
+                \(expectedSwift)
+                --
+                
+                but translated as:
+                
+                --
+                \(actualSwift)
+                --
+                
+                Diff:
+                
+                \(actualSwift.makeDifferenceMarkString(against: expectedSwift))
+                """,
+                file: match.expectedFile._file,
+                line: match.expectedFile._line
+            )
             
             break
         }
         
         for nonMatched in expectedNotMatched {
-            XCTFail("""
-                    Failed: Expected to produce Swift file \(nonMatched.path), \
-                    but no such file was created.
-                    """,
-                    file: file, line: line)
+            XCTFail(
+                """
+                Failed: Expected to produce Swift file \(nonMatched.path), \
+                but no such file was created.
+                """,
+                file: file,
+                line: line
+            )
         }
     }
     
     func assertErrorStreamIs(_ expected: String, file: StaticString = #filePath, line: UInt = #line) {
         if errors != expected {
-            XCTFail("""
-                    Mismatched errors stream. Expected \(expected) but found \(errors)
-                    """,
-                    file: file, line: line)
+            XCTFail(
+                """
+                Mismatched errors stream. Expected \(expected) but found \(errors)
+                """,
+                file: file,
+                line: line
+            )
         }
     }
     
