@@ -1,7 +1,8 @@
+import XCTest
 import SwiftAST
 import TestCommons
-import TypeSystem
-import XCTest
+
+@testable import TypeSystem
 
 class DefaultTypeResolverInvokerTests: XCTestCase {
     func testExposesGlobalVariablesAsIntrinsics() {

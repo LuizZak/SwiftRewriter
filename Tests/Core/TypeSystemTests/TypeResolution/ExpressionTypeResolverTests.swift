@@ -1,9 +1,9 @@
-import KnownType
-import SwiftAST
-import TypeSystem
 import XCTest
+import SwiftAST
+import KnownType
+import TestCommons
 
-@testable import Commons
+@testable import TypeSystem
 
 class ExpressionTypeResolverTests: XCTestCase {
     func testStatementResolve() {

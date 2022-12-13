@@ -717,6 +717,11 @@ extension SwiftSyntaxProducer {
             return IdentifierPatternSyntax {
                 $0.useIdentifier(makeIdentifier(ident))
             }.asPatternSyntax
+        
+        case .wildcard:
+            return WildcardPatternSyntax {
+                $0.useWildcard(SyntaxFactory.makeWildcardKeyword())
+            }.asPatternSyntax
             
         case .expression(let exp):
             return ExpressionPatternSyntax {

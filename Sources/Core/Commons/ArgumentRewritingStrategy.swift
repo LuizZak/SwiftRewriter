@@ -99,12 +99,13 @@ public enum ArgumentRewritingStrategy {
             return arguments[index].copy()
             
         case let .mergingArguments(arg0, arg1, merger):
-            let arg =
-                FunctionArgument(
-                    label: nil,
-                    expression: merger(arguments[arg0].expression.copy(),
-                                       arguments[arg1].expression.copy())
+            let arg = FunctionArgument(
+                label: nil,
+                expression: merger(
+                    arguments[arg0].expression.copy(),
+                    arguments[arg1].expression.copy()
                 )
+            )
             
             return arg
             
@@ -179,9 +180,11 @@ public enum ArgumentRewritingStrategy {
             return parameters[index]
             
         case let .labeled(label, _):
-            return ParameterSignature(label: label,
-                                      name: parameters[index].name,
-                                      type: parameters[index].type)
+            return ParameterSignature(
+                label: label,
+                name: parameters[index].name,
+                type: parameters[index].type
+            )
         }
     }
 }
@@ -265,10 +268,11 @@ public extension Collection where Element == ArgumentRewritingStrategy, Index ==
 }
 
 public extension ValueTransformer where U == [FunctionArgument] {
-    
-    func rewritingArguments(_ transformers: [ArgumentRewritingStrategy],
-                            file: String = #file,
-                            line: Int = #line) -> ValueTransformer {
+    func rewritingArguments(
+        _ transformers: [ArgumentRewritingStrategy],
+        file: String = #file,
+        line: Int = #line
+    ) -> ValueTransformer {
         
         let required = transformers.requiredArgumentCount()
         
@@ -280,5 +284,4 @@ public extension ValueTransformer where U == [FunctionArgument] {
             return transformers.rewrite(arguments: args)
         }
     }
-    
 }

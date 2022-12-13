@@ -1,8 +1,9 @@
-import ObjcGrammarModels
-import ObjcParser
-import SwiftAST
-import TypeSystem
 import XCTest
+import SwiftAST
+import ObjcParser
+import ObjcGrammarModels
+
+@testable import TypeSystem
 
 class DefaultTypeMapperTests: XCTestCase {
     var typeSystem = TypeSystem()

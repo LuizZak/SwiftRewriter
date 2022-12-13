@@ -48,7 +48,7 @@ public final class SyntaxNodeIterator: IteratorProtocol {
             enqueue(exp)
         case .tuple(let patterns):
             patterns.forEach(enqueue)
-        case .identifier:
+        case .identifier, .wildcard:
             break
         }
     }

@@ -15,10 +15,12 @@ public class CompoundedMappingType {
     
     public var semantics: Set<Semantic>
     
-    public init(knownType: KnownType,
-                transformations: [PostfixTransformation],
-                semantics: Set<Semantic> = [],
-                aliases: [String] = []) {
+    public init(
+        knownType: KnownType,
+        transformations: [PostfixTransformation],
+        semantics: Set<Semantic> = [],
+        aliases: [String] = []
+    ) {
         
         self.knownType = knownType
         self.transformations = transformations

@@ -235,7 +235,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
         case .tuple(let patterns):
             return .tuple(patterns.map(visitPattern))
             
-        case .identifier:
+        case .identifier, .wildcard:
             return ptn
         }
     }

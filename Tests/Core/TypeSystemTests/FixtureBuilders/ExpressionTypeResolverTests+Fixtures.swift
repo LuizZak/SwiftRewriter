@@ -1,10 +1,11 @@
-import Commons
-import Intentions
-import KnownType
-import SwiftAST
-import TestCommons
-import TypeSystem
 import XCTest
+import Commons
+import SwiftAST
+import KnownType
+import Intentions
+import TestCommons
+
+@testable import TypeSystem
 
 protocol ExpressionTestResolverTestFixture {
     var scope: CodeScopeNode { get }

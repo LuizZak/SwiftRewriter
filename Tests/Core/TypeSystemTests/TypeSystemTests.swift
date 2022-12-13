@@ -1,7 +1,8 @@
-import KnownType
-import SwiftAST
-import TypeSystem
 import XCTest
+import SwiftAST
+import KnownType
+
+@testable import TypeSystem
 
 class TypeSystemTests: XCTestCase {
     var sut: TypeSystem!

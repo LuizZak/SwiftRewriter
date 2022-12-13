@@ -1,6 +1,6 @@
-import KnownType
-import SwiftAST
 import XCTest
+import SwiftAST
+import KnownType
 
 @testable import TypeSystem
 

@@ -188,7 +188,7 @@ open class BaseSyntaxNodeVisitor: ExpressionVisitor, StatementVisitor {
         case .tuple(let patterns):
             patterns.forEach(visitPattern)
             
-        case .identifier:
+        case .identifier, .wildcard:
             break
         }
     }

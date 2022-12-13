@@ -212,7 +212,7 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
         case .tuple(let patterns):
             patterns.forEach(visitPattern)
             
-        case .identifier:
+        case .identifier, .wildcard:
             break
         }
     }

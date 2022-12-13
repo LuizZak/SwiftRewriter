@@ -1,7 +1,8 @@
-import GlobalsProviders
-import TestCommons
-import TypeSystem
 import XCTest
+import TestCommons
+import GlobalsProviders
+
+@testable import TypeSystem
 
 class IntentionCollectionTypeSystemTests: XCTestCase {
     /// When an extension in an intention collection is described for a global

@@ -42,8 +42,19 @@ public indirect enum ProtocolCompositionComponent: Hashable {
 public enum TupleSwiftType: Hashable {
     /// An empty tuple type, or `Void`.
     case empty
+
     /// A tuple type containing two or more types.
     indirect case types(TwoOrMore<SwiftType>)
+
+    /// Returns the array of types that compose this tuple type.
+    public var elementTypes: [SwiftType] {
+        switch self {
+        case .empty:
+            return []
+        case .types(let types):
+            return Array(types)
+        }
+    }
 }
 
 extension TupleSwiftType: ExpressibleByArrayLiteral {
@@ -54,6 +65,35 @@ extension TupleSwiftType: ExpressibleByArrayLiteral {
         }
 
         self = .types(.fromCollection(elements))
+    }
+}
+
+extension TupleSwiftType: Collection {
+    public var startIndex: Int {
+        0
+    }
+
+    public var endIndex: Int {
+        switch self {
+        case .empty:
+            return 1
+        case .types(let types):
+            return types.count
+        }
+    }
+
+    public subscript(index: Int) -> SwiftType {
+        switch self {
+        case .empty:
+            fatalError("Index is out of bounds for TupleSwiftType.empty: \(index)")
+
+        case .types(let types):
+            return types[index]
+        }
+    }
+
+    public func index(after i: Int) -> Int {
+        i + 1
     }
 }
 
@@ -296,8 +336,8 @@ public extension SwiftType {
         }
     }
     
-    /// If this type is an `.optional` or `.implicitUnwrappedOptional` type, returns
-    /// an unwrapped version of self.
+    /// If this type is an `.optional`, `.implicitUnwrappedOptional`, or
+    /// `.nullabilityUnspecified` type, returns an unwrapped version of self.
     /// The return is unwrapped only once.
     var unwrapped: SwiftType {
         switch self {
@@ -311,8 +351,8 @@ public extension SwiftType {
         }
     }
     
-    /// If this type is an `.optional` or `.implicitUnwrappedOptional` type,
-    /// returns an unwrapped version of self.
+    /// If this type is an `.optional`, `.implicitUnwrappedOptional`, or
+    /// `.nullabilityUnspecified` type, returns an unwrapped version of self.
     /// The return is then recursively unwrapped again until a non-optional base
     /// type is reached.
     var deepUnwrapped: SwiftType {

@@ -14,7 +14,8 @@ import SwiftAST
 ///     arguments: [
 ///         .labeled("x"),
 ///         .labeled("y")
-///     ])
+///     ]
+/// )
 /// ```
 ///
 /// Would allow matching and converting:
@@ -32,12 +33,15 @@ import SwiftAST
 ///     toSwiftFunction: "move",
 ///     firstArgumentBecomesInstance: true,
 ///     arguments: [
-///         .labeled("to",
-///                  .mergingArguments(arg0: 1, arg1: 2, { x, y in
-///                                       .identifier("CGPoint")
-///                                       .call([.labeled("x", x), .labeled("y", y)])
-///                                    }))
-///     ])
+///         .labeled(
+///             "to",
+///             .mergingArguments(arg0: 1, arg1: 2) { x, y in
+///                 .identifier("CGPoint")
+///                 .call([.labeled("x", x), .labeled("y", y)])
+///             }
+///         )
+///     ]
+/// )
 /// ```
 ///
 /// Would allow detecting and converting:
@@ -63,7 +67,7 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
     public init(fromObjcFunctionName: String, destinationMember: Target) {
         self.objcFunctionName = fromObjcFunctionName
         self.destinationMember = destinationMember
-        
+
         switch destinationMember {
         case let .method(_, firstArgumentBecomesInstance, arguments):
             requiredArgumentCount =
@@ -88,15 +92,18 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
     /// of the call into a target instance, such that the free function call becomes
     /// a method call.
     ///   - arguments: Strategy to apply to each argument in the call.
-    public convenience init(objcFunctionName: String,
-                            toSwiftFunction swiftName: String,
-                            firstArgumentBecomesInstance: Bool,
-                            arguments: [ArgumentRewritingStrategy]) {
+    public convenience init(
+        objcFunctionName: String,
+        toSwiftFunction swiftName: String,
+        firstArgumentBecomesInstance: Bool,
+        arguments: [ArgumentRewritingStrategy]
+    ) {
         
-        let target =
-            Target.method(swiftName,
-                          firstArgumentBecomesInstance: firstArgumentBecomesInstance,
-                          arguments)
+        let target = Target.method(
+            swiftName,
+            firstArgumentBecomesInstance: firstArgumentBecomesInstance,
+            arguments
+        )
         
         self.init(fromObjcFunctionName: objcFunctionName, destinationMember: target)
     }
@@ -108,11 +115,15 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
     ///   - objcFunctionName: The function name to look for to transform.
     ///   - swiftProperty: The target swift property name to transform the getter
     /// into.
-    public convenience init(objcFunctionName: String,
-                            toSwiftPropertyGetter swiftProperty: String) {
+    public convenience init(
+        objcFunctionName: String,
+        toSwiftPropertyGetter swiftProperty: String
+    ) {
         
-        self.init(fromObjcFunctionName: objcFunctionName,
-                  destinationMember: .propertyGetter(swiftProperty))
+        self.init(
+            fromObjcFunctionName: objcFunctionName,
+            destinationMember: .propertyGetter(swiftProperty)
+        )
     }
     
     /// Initializes a new function transformer instance that can modify Foundation
@@ -125,8 +136,10 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
     ///   - argumentTransformer: An argument strategy that can be used to transform
     /// the remaining arguments from the function into the final value on the right
     /// side of the assignment expression.
-    public convenience init(objcFunctionName: String,
-                            toSwiftPropertySetter swiftProperty: String) {
+    public convenience init(
+        objcFunctionName: String,
+        toSwiftPropertySetter swiftProperty: String
+    ) {
         
         let target = Target.propertySetter(swiftProperty)
         
@@ -200,35 +213,43 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
             return exp.assignment(op: .assign, rhs: rhs.expression.copy())
             
         case let .method(name, firstArgIsInstance, args):
-            guard let result = attemptApply(on: functionCall,
-                                            name: name,
-                                            firstArgIsInstance: firstArgIsInstance,
-                                            args: args) else {
+            guard let result = attemptApply(
+                on: functionCall,
+                name: name,
+                firstArgIsInstance: firstArgIsInstance,
+                args: args
+            ) else {
                 return nil
             }
             
             // Construct a new postfix operation with the function's first
             // argument
             if firstArgIsInstance {
-                let exp =
-                    functionCall.arguments[0]
-                        .expression.copy().dot(name).call(result.arguments)
+                let exp = functionCall
+                    .arguments[0]
+                    .expression.copy()
+                    .dot(name).call(result.arguments)
+                
                 exp.resolvedType = postfix.resolvedType
                 
                 return exp
             }
             
-            let exp = Expression.identifier(destinationMember.memberName).call(result.arguments)
+            let exp = Expression
+                .identifier(destinationMember.memberName)
+                .call(result.arguments)
             exp.resolvedType = postfix.resolvedType
             
             return exp
         }
     }
     
-    public func attemptApply(on functionCall: FunctionCallPostfix,
-                             name: String,
-                             firstArgIsInstance: Bool,
-                             args: [ArgumentRewritingStrategy]) -> FunctionCallPostfix? {
+    public func attemptApply(
+        on functionCall: FunctionCallPostfix,
+        name: String,
+        firstArgIsInstance: Bool,
+        args: [ArgumentRewritingStrategy]
+    ) -> FunctionCallPostfix? {
         
         if functionCall.arguments.count != requiredArgumentCount {
             return nil

@@ -8,6 +8,9 @@ public enum Pattern: Codable, Equatable, ExpressionComponent {
     
     /// A tuple pattern
     indirect case tuple([Pattern])
+
+    /// A wildcard pattern (or `_`).
+    case wildcard
     
     /// Simplifies patterns that feature 1-item tuples (i.e. `(<item>)`) by
     /// unwrapping the inner patterns.
@@ -29,7 +32,7 @@ public enum Pattern: Codable, Equatable, ExpressionComponent {
         case .tuple(let tuple):
             return tuple.flatMap { $0.subExpressions }
             
-        case .identifier:
+        case .identifier, .wildcard:
             return []
         }
     }
@@ -48,12 +51,16 @@ public enum Pattern: Codable, Equatable, ExpressionComponent {
             
         case "tuple":
             try self = .tuple(container.decode([Pattern].self, forKey: .payload))
+        
+        case "wildcard":
+            self = .wildcard
             
         default:
             throw DecodingError.dataCorruptedError(
                 forKey: CodingKeys.discriminator,
                 in: container,
-                debugDescription: "Invalid discriminator tag \(discriminator)")
+                debugDescription: "Invalid discriminator tag \(discriminator)"
+            )
         }
     }
     
@@ -72,6 +79,9 @@ public enum Pattern: Codable, Equatable, ExpressionComponent {
         case .tuple(let pattern):
             try container.encode("tuple", forKey: .discriminator)
             try container.encode(pattern, forKey: .payload)
+        
+        case .wildcard:
+            try container.encode("wildcard", forKey: .discriminator)
         }
     }
     
@@ -92,6 +102,8 @@ public enum Pattern: Codable, Equatable, ExpressionComponent {
             return .expression(exp.copy())
         case .tuple(let patterns):
             return .tuple(patterns.map { $0.copy() })
+        case .wildcard:
+            return .wildcard
         }
     }
     
@@ -103,7 +115,7 @@ public enum Pattern: Codable, Equatable, ExpressionComponent {
         case .tuple(let tuple):
             tuple.forEach { $0.setParent(node) }
             
-        case .identifier:
+        case .identifier, .wildcard:
             break
         }
     }
@@ -116,7 +128,7 @@ public enum Pattern: Codable, Equatable, ExpressionComponent {
         case .tuple(let tuple):
             tuple.forEach { $0.collect(expressions: &expressions) }
             
-        case .identifier:
+        case .identifier, .wildcard:
             break
         }
     }
@@ -158,6 +170,8 @@ extension Pattern: CustomStringConvertible {
             return exp.description
         case .identifier(let ident):
             return ident
+        case .wildcard:
+            return "_"
         }
     }
 }
@@ -171,6 +185,7 @@ extension Pattern: CustomStringConvertible {
 public enum PatternLocation: Hashable {
     /// The root pattern itself
     case `self`
+    
     /// The tuple within the pattern, at a given index, with a given nested
     /// sub-pattern.
     indirect case tuple(index: Int, pattern: PatternLocation)
