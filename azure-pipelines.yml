@@ -19,10 +19,10 @@ jobs:
   - bash: 'swift package resolve'
   - bash: 'swift test --enable-code-coverage'
   # Avoid caching build artifacts and focus on checkout state only
-  - bash: 'rm -r $(dirname $(swift build --show-bin-path))'
   - bash: 'xcrun llvm-profdata merge -sparse ./.build/debug/codecov/*.profraw -o coverage.profdata'
   - bash: 'xcrun llvm-cov show ./.build/debug/SwiftRewriter -instr-profile=./coverage.profdata --ignore-filename-regex=ObjcParserAntlr --ignore-filename-regex=JsParserAntlr Sources > coverage.txt'
   - bash: 'bash <(curl -s https://codecov.io/bash)'
+  - bash: 'rm -r $(dirname $(swift build --show-bin-path))'
 
 - job: Linux
   container:
