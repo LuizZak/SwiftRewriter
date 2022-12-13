@@ -12,7 +12,7 @@
 					"line": 2,
 					"column": 3,
 					"severity": 4,
-					"message": 5
+					"message": 5,
 				}
 			},
 			// Fix to detect unit test executions, which do not feature a column during reporting
@@ -24,7 +24,7 @@
 					"file": 1,
 					"line": 2,
 					"severity": 3,
-					"message": 4
+					"message": 4,
 				}
 			}
 		],
@@ -45,7 +45,7 @@
 				"command": "swift",
 				"group": {
 					"kind": "build",
-					"isDefault": true
+					"isDefault": true,
 				},
 				"args": [
 					"build",
