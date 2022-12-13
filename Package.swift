@@ -201,5 +201,7 @@ let package = Package(
             name: "SwiftRewriterTests",
             dependencies: ["SwiftRewriter"])
     ],
-    swiftLanguageVersions: [.v5]
+    swiftLanguageVersions: [
+        .v5,
+    ]
 )
