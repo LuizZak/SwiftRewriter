@@ -220,15 +220,7 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
         line: UInt = #line
     ) -> StatementTypeTestBuilder {
 
-        // Make sure to apply definitions just before starting assertions
-        if !applied {
-            sut.typeSystem = typeSystem
-            sut.intrinsicVariables = intrinsics
-            sut.ignoreResolvedExpressions = true
-
-            _ = statement.accept(sut)
-            applied = true
-        }
+        resolve()
 
         guard let defined = scope.definitions.firstDefinition(named: localFunction.name) else {
             XCTFail(
@@ -279,15 +271,7 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
         line: UInt = #line
     ) -> StatementTypeTestBuilder {
 
-        // Make sure to apply definitions just before starting assertions
-        if !applied {
-            sut.typeSystem = typeSystem
-            sut.intrinsicVariables = intrinsics
-            sut.ignoreResolvedExpressions = true
-
-            _ = statement.accept(sut)
-            applied = true
-        }
+        resolve()
 
         guard let defined = scope.definitions.firstDefinition(named: name) else {
             XCTFail(
@@ -338,15 +322,7 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
         line: UInt = #line
     ) -> StatementTypeTestBuilder {
 
-        // Make sure to apply definitions just before starting assertions
-        if !applied {
-            sut.typeSystem = typeSystem
-            sut.intrinsicVariables = intrinsics
-            sut.ignoreResolvedExpressions = true
-
-            _ = statement.accept(sut)
-            applied = true
-        }
+        resolve()
 
         let exp = statement[keyPath: keyPath]
 
@@ -374,15 +350,7 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
         line: UInt = #line
     ) -> StatementTypeTestBuilder {
 
-        // Make sure to apply definitions just before starting assertions
-        if !applied {
-            sut.typeSystem = typeSystem
-            sut.intrinsicVariables = intrinsics
-            sut.ignoreResolvedExpressions = true
-
-            _ = statement.accept(sut)
-            applied = true
-        }
+        resolve()
 
         guard let exp = statement[keyPath: keyPath] else {
             XCTFail(
@@ -419,15 +387,7 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
         line: UInt = #line
     ) -> StatementTypeTestBuilder {
 
-        // Make sure to apply definitions just before starting assertions
-        if !applied {
-            sut.typeSystem = typeSystem
-            sut.intrinsicVariables = intrinsics
-            sut.ignoreResolvedExpressions = true
-
-            _ = statement.accept(sut)
-            applied = true
-        }
+        resolve()
 
         let exp = statement[keyPath: keyPath]
 
@@ -455,15 +415,7 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
         line: UInt = #line
     ) -> StatementTypeTestBuilder {
 
-        // Make sure to apply definitions just before starting assertions
-        if !applied {
-            sut.typeSystem = typeSystem
-            sut.intrinsicVariables = intrinsics
-            sut.ignoreResolvedExpressions = true
-
-            _ = statement.accept(sut)
-            applied = true
-        }
+        resolve()
 
         guard let exp = statement[keyPath: keyPath] else {
             XCTFail(
@@ -485,6 +437,21 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
                 file: file,
                 line: line
             )
+        }
+
+        return self
+    }
+
+    @discardableResult
+    func resolve() -> StatementTypeTestBuilder {
+        // Make sure to apply definitions just before starting assertions
+        if !applied {
+            sut.typeSystem = typeSystem
+            sut.intrinsicVariables = intrinsics
+            sut.ignoreResolvedExpressions = true
+
+            _ = statement.accept(sut)
+            applied = true
         }
 
         return self
