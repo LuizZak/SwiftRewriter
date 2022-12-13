@@ -35,3 +35,5 @@ jobs:
       path: $(SWIFTPM_CACHE_FOLDER)
     displayName: Cache Swift build
   - bash: 'swift test'
+  # Avoid caching build artifacts and focus on checkout state only
+  - bash: 'rm -r $(dirname $(swift build --show-bin-path))'
