@@ -6,6 +6,9 @@
 trigger:
 - master
 
+variables:
+  SWIFTPM_CACHE_FOLDER: '.build'
+
 jobs:
 - job: macOS
   pool:
@@ -26,4 +29,9 @@ jobs:
   pool:
     vmImage: ubuntu-20.04
   steps:
+  - task: Cache@2
+    inputs:
+      key: '"swiftpm" | "$(Agent.OS)" | Package.resolved | "$(Build.SourceBranch)"'
+      path: $(SWIFTPM_CACHE_FOLDER)
+    displayName: Cache Swift build
   - bash: 'swift test'
