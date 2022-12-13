@@ -160,35 +160,24 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         if stmt.exp.resolvedType == nil {
             stmt.exp = resolveType(stmt.exp)
         }
-        
+
+        let iteratorResolver = makeIteratorTypeResolver()
+
         // TODO: Move this responsibility to `TypeSystem`?
         
         let iteratorType: SwiftType
         
-        switch stmt.exp.resolvedType {
-        case .nominal(.generic("Array", let elements))? where elements.count == 1:
-            iteratorType = elements[0]
-            
-        case .array(let element)?:
-            iteratorType = element
-            
-        // Sub-types of `NSArray` iterate as .any
-        case .nominal(.typeName(let typeName))?
-            where typeSystem.isType(typeName, subtypeOf: "NSArray"):
-            iteratorType = .any
-            
-        case .nominal(.generic("Range", let elements))? where elements.count == 1,
-             .nominal(.generic("ClosedRange", let elements))? where elements.count == 1:
-            iteratorType = elements[0]
-            
-        default:
+        if let type = stmt.exp.resolvedType {
+            iteratorType = iteratorResolver.iterationElementType(for: type) ?? .errorType
+        } else {
             iteratorType = .errorType
         }
         
         collectInPattern(
             stmt.pattern,
             type: iteratorType,
-            location: .forLoop(stmt, .`self`),
+            locationDeriver: { .forLoop(stmt, $0) },
+            context: .declaration,
             to: stmt.body
         )
         
@@ -204,7 +193,8 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             collectInPattern(
                 pattern,
                 type: stmt.exp.resolvedType ?? .errorType,
-                location: .ifLet(stmt, .`self`),
+                locationDeriver: { .ifLet(stmt, $0) },
+                context: .optionalBinding,
                 to: stmt.body
             )
             
@@ -266,24 +256,24 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     func collectInPattern(
         _ pattern: Pattern,
         type: SwiftType,
-        location: LocalCodeDefinition.DefinitionLocation,
+        locationDeriver: (PatternLocation) -> LocalCodeDefinition.DefinitionLocation,
+        context: PatternMatcher.PatternBindingContext,
         to scope: CodeScope
     ) {
-        
-        switch pattern {
-        case .identifier(let ident):
+        let patternMatcher = makePatternMatcher()
+
+        let bindings = patternMatcher.match(pattern: pattern, to: type, context: context)
+
+        for binding in bindings {
             scope.recordDefinition(
                 .forLocalIdentifier(
-                    ident,
-                    type: type,
-                    isConstant: true,
-                    location: location
+                    binding.identifier,
+                    type: binding.type,
+                    isConstant: binding.isConstant,
+                    location: locationDeriver(binding.patternLocation)
                 ),
                 overwrite: true
             )
-        default:
-            // Other (more complex) patterns are not (yet) supported!
-            break
         }
     }
 
@@ -770,6 +760,14 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
 
     private func makeCoercionVerifier() -> CoercionVerifier {
         CoercionVerifier(typeSystem: typeSystem)
+    }
+
+    private func makePatternMatcher() -> PatternMatcher {
+        PatternMatcher(typeSystem: typeSystem)
+    }
+
+    private func makeIteratorTypeResolver() -> IteratorTypeResolver {
+        IteratorTypeResolver(typeSystem: typeSystem)
     }
     
     /// Returns `true` if a given expression is being used in a read-only context.

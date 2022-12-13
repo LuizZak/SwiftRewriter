@@ -2,7 +2,7 @@ import SwiftAST
 import KnownType
 
 /// Class used to type check for-in loops.
-class IterationTypeResolver {
+class IteratorTypeResolver {
     var typeSystem: TypeSystem
 
     init(typeSystem: TypeSystem) {
@@ -14,12 +14,20 @@ class IterationTypeResolver {
     func iterationElementType(for swiftType: SwiftType) -> SwiftType? {
         let unaliasedType = typeSystem.resolveAlias(in: swiftType)
 
+        // Hard-code Array<T>, Dictionary<T>, ClosedRange<T>, and OpenRange<T>
+        // types for now
         switch unaliasedType {
         case .array(let element):
-            // Hard-code Array<T> and Dictionary<T> types for now
             return element
+        
         case .dictionary(let key, let value):
             return .tuple([key, value])
+        
+        case .nominal(.generic("ClosedRange", parameters: let parameters)) where parameters.count == 1:
+            return parameters[0]
+        
+        case .nominal(.generic("Range", parameters: let parameters)) where parameters.count == 1:
+            return parameters[0]
         
         case .nested, .nominal, .protocolComposition:
             guard let knownType = typeSystem.findType(for: swiftType) else {

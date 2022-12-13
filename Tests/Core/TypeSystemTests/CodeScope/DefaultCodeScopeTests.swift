@@ -123,7 +123,7 @@ class DefaultCodeScopeTests: XCTestCase {
         XCTAssertTrue(result.elementsEqual([b, a_2, c], by: ===))
     }
 
-    func testRemoveLocalDefinitions() throws {
+    func testRemoveLocalDefinitions() {
         let a_1: CodeDefinition = .forLocalIdentifier("a", type: .int, isConstant: false, location: .parameter(index: 0))
         let b: CodeDefinition = .forLocalIdentifier("b", type: .string, isConstant: false, location: .parameter(index: 0))
         let a_2: CodeDefinition = .forGlobalVariable(name: "a", isConstant: false, type: .float)

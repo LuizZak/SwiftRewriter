@@ -249,7 +249,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
                 }
                 init(dictionaryLiteral elements: (String, Any)...) {
                     for (key, value) in elements {
-                        // type: <<error type>>
+                        // type: Any?
                         self.values[key] = value
                     }
                 }
@@ -419,7 +419,7 @@ class JavaScript2SwiftRewriterTests: XCTestCase {
                 }
                 init(dictionaryLiteral elements: (String, Any)...) {
                     for (key, value) in elements {
-                        // type: <<error type>>
+                        // type: Any?
                         self.values[key] = value
                     }
                 }

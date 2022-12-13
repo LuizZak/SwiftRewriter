@@ -1,5 +1,7 @@
 import SwiftAST
 
+// TODO: Implement a better pattern structure that allows deriving whether patterns bind as `let` or `var`s.
+
 /// Matches capturing patterns to type structures in a type resolution context.
 class PatternMatcher {
     var typeSystem: TypeSystem
@@ -94,7 +96,7 @@ class PatternMatcher {
         var patternLocation: PatternLocation
 
         /// Whether the bound value is constant or not.
-        var isConstant: Bool = false
+        var isConstant: Bool = true
 
         /// For accumulating pattern locations while recursively traversing
         /// through a pattern.

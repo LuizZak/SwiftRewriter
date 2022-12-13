@@ -172,9 +172,16 @@ public extension CodeDefinition {
     /// parameters
     static func forParameters(_ parameters: [ParameterSignature]) -> [LocalCodeDefinition] {
         parameters.enumerated().map { (i, param) in
-            LocalCodeDefinition(
-                variableNamed: param.name,
-                type: param.type,
+            let type: SwiftType
+            if param.isVariadic {
+                type = .array(param.type)
+            } else {
+                type = param.type
+            }
+
+            return LocalCodeDefinition(
+                constantNamed: param.name,
+                type: type,
                 location: .parameter(index: i)
             )
         }
@@ -185,7 +192,7 @@ public extension CodeDefinition {
     static func forParameters(_ parameters: [BlockParameter]) -> [LocalCodeDefinition] {
         parameters.enumerated().map { (i, param) in
             LocalCodeDefinition(
-                variableNamed: param.name,
+                constantNamed: param.name,
                 type: param.type,
                 location: .parameter(index: i)
             )

@@ -4,7 +4,7 @@ import Intentions
 
 /// Specifies a definition for a global function or variable, or a local variable
 /// of a function, or a type initializer.
-public class CodeDefinition: Equatable {
+public class CodeDefinition: Equatable, CustomStringConvertible {
     /// Gets the name of this definition.
     ///
     /// If this code definition is a function, the name is the identifier from
@@ -73,6 +73,15 @@ public class CodeDefinition: Equatable {
             return nil
         }
     }
+
+    public var description: String {
+        var result = "{ \(Swift.type(of: self)) "
+
+        result += "kind: \(kind)"
+
+        result += " }"
+        return result
+    }
     
     convenience init(variableNamed name: String, type: SwiftType) {
         self.init(
@@ -122,11 +131,27 @@ public class CodeDefinition: Equatable {
         lhs.isEqual(to: rhs)
     }
     
-    public enum Kind: Hashable {
+    public enum Kind: Hashable, CustomStringConvertible {
         case variable(name: String, storage: ValueStorage)
         case function(signature: FunctionSignature)
         case `subscript`(signature: SubscriptSignature)
         case initializer(KnownTypeReference, parameters: [ParameterSignature])
+
+        public var description: String {
+            switch self {
+            case .variable(let name, let storage):
+                return "Kind.variable(\(name), \(storage))"
+                
+            case .function(let signature):
+                return "Kind.function(\(signature))"
+            
+            case .subscript(let signature):
+                return "Kind.subscript(\(signature))"
+
+            case .initializer(let typeName, let parameters):
+                return "Kind.initializer(\(typeName), parameters: \(parameters))"
+            }
+        }
         
         public var name: String {
             switch self {

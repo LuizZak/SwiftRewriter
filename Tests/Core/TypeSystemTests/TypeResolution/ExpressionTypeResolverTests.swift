@@ -686,7 +686,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testForLoopArrayIteratorTypeResolving() {
-        let exp = Expression.identifier("")
+        let exp = Expression.identifier("a")
         exp.resolvedType = .array(.int)
 
         let stmt: ForStatement =
@@ -699,7 +699,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testForLoopArrayTypeResolving_OpenRange() {
         // Iterating over an open range of integers should produce `Int` values
 
-        let exp = Expression.identifier("")
+        let exp = Expression.identifier("a")
         exp.resolvedType = .openRange(.int)
 
         let stmt: ForStatement =
@@ -712,7 +712,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testForLoopArrayTypeResolving_ClosedRange() {
         // Iterating over a closed range of integers should produce `Int` values
 
-        let exp = Expression.identifier("")
+        let exp = Expression.identifier("a")
         exp.resolvedType = .closedRange(.int)
 
         let stmt: ForStatement =
@@ -725,7 +725,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testForLoopArrayTypeResolving_NonArray() {
         // Iterating over non-array types should produce error types
 
-        let exp = Expression.identifier("")
+        let exp = Expression.identifier("a")
         exp.resolvedType = .typeName("ANonArrayType")
 
         let stmt: ForStatement =
@@ -733,6 +733,18 @@ class ExpressionTypeResolverTests: XCTestCase {
 
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
             .thenAssertDefined(in: stmt.body, localNamed: "i", type: .errorType, isConstant: true)
+    }
+
+    func testForLoopArrayTypeResolving_patternMatching() {
+        let exp = Expression.identifier("a")
+        exp.resolvedType = .array(.tuple([.int, .string]))
+
+        let stmt: ForStatement =
+            .for(.tuple([.identifier("x"), .identifier("y")]), exp, body: [])
+
+        startScopedTest(with: stmt, sut: ExpressionTypeResolver())
+            .thenAssertDefined(in: stmt.body, localNamed: "x", type: .int, isConstant: true)
+            .thenAssertDefined(in: stmt.body, localNamed: "y", type: .string, isConstant: true)
     }
 
     func testMemberLookup() {

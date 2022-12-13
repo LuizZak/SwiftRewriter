@@ -5,11 +5,45 @@ import TestCommons
 
 @testable import TypeSystem
 
-class IterationTypeResolverTests: XCTestCase {
+class IteratorTypeResolverTests: XCTestCase {
     var typeSystem: TypeSystem!
 
     override func setUp() {
         self.typeSystem = TypeSystem()
+    }
+
+    func testIterationElementType_swiftType_closedRange() {
+        let sut = makeSut()
+
+        XCTAssertEqual(
+            sut.iterationElementType(for: .closedRange(.int)),
+            .int
+        )
+        XCTAssertEqual(
+            sut.iterationElementType(for: .closedRange(.uint)),
+            .uint
+        )
+        XCTAssertEqual(
+            sut.iterationElementType(for: .closedRange("Int64")),
+            "Int64"
+        )
+    }
+
+    func testIterationElementType_swiftType_openRange() {
+        let sut = makeSut()
+
+        XCTAssertEqual(
+            sut.iterationElementType(for: .openRange(.int)),
+            .int
+        )
+        XCTAssertEqual(
+            sut.iterationElementType(for: .openRange(.uint)),
+            .uint
+        )
+        XCTAssertEqual(
+            sut.iterationElementType(for: .openRange("Int64")),
+            "Int64"
+        )
     }
 
     func testIterationElementType_swiftType_array() {
@@ -66,7 +100,7 @@ class IterationTypeResolverTests: XCTestCase {
 
     // MARK: - Test internals
 
-    func makeSut() -> IterationTypeResolver {
-        IterationTypeResolver(typeSystem: typeSystem)
+    func makeSut() -> IteratorTypeResolver {
+        IteratorTypeResolver(typeSystem: typeSystem)
     }
 }
