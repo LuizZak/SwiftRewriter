@@ -1,4 +1,4 @@
-import Graphviz
+import GraphvizLib
 
 struct NodeDefinition<Node: DirectedGraphNode> {
     var node: Node

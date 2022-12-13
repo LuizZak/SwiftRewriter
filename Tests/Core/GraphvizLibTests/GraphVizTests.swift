@@ -1,7 +1,7 @@
 import XCTest
 import TestCommons
 
-@testable import Graphviz
+@testable import GraphvizLib
 
 class GraphVizTests: XCTestCase {
     func testGenerateFile_emptyGraph_nilRootGraphName() {

@@ -4,7 +4,7 @@ import SwiftSyntax
 import SwiftSyntaxParser
 import XCTest
 import TestCommons
-import Graphviz
+import GraphvizLib
 
 @testable import Analysis
 

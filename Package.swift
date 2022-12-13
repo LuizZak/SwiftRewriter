@@ -3,11 +3,11 @@ import PackageDescription
 
 let core: [Target] = [
     .target(
-        name: "Graphviz",
+        name: "GraphvizLib",
         dependencies: [
 
         ],
-        path: "Sources/Core/Graphviz"
+        path: "Sources/Core/GraphvizLib"
     ),
     .target(
         name: "AntlrCommons",
@@ -89,7 +89,7 @@ let core: [Target] = [
         name: "Analysis",
         dependencies: [
             "SwiftAST", "KnownType", "Commons", "Utils",
-            "Intentions", "TypeSystem", "Graphviz",
+            "Intentions", "TypeSystem", "GraphvizLib",
         ],
         path: "Sources/Core/Analysis"
     ),
@@ -296,12 +296,12 @@ let package = Package(
         ),
         /* Tests */
         .testTarget(
-            name: "GraphvizTests",
+            name: "GraphvizLibTests",
             dependencies: [
-                "Graphviz",
+                "GraphvizLib",
                 "TestCommons",
             ],
-            path: "Tests/Core/Graphviz"
+            path: "Tests/Core/GraphvizLibTests"
         ),
         .testTarget(
             name: "UtilsTests",
@@ -464,7 +464,7 @@ let package = Package(
                 "Analysis",
                 .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
                 "SwiftAST", "SwiftRewriterLib", "GlobalsProviders",
-                "TestCommons", "TypeSystem", "Graphviz",
+                "TestCommons", "TypeSystem", "GraphvizLib",
             ],
             path: "Tests/Core/AnalysisTests"
         ),

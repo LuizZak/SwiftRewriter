@@ -1,6 +1,6 @@
 import XCTest
 
-@testable import Graphviz
+@testable import GraphvizLib
 
 class GraphViz_GraphAttributesTests: XCTestCase {
     func testRankDir_rawValue() {
