@@ -1,31 +1,38 @@
 import ArgumentParser
 import Foundation
 import Console
-import JavaScriptFrontend
+import ObjectiveCFrontend
 import SwiftRewriterCLI
 
-struct JavaScriptCommand: ParsableCommand {
+struct ObjectiveCCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
-        commandName: "js",
-        abstract: "JavaScript code conversion frontend [EXPERIMENTAL]",
+        commandName: "objc",
+        abstract: "Objective-C code conversion frontend",
         discussion: """
-        Converts a set of JavaScript (.js) files, or, if not provided, starts an \
-        interactive menu to navigate the file system and choose files to convert.
+        Converts a set of Objective-C (.h/.m) files, or, if not provided, starts \
+        an interactive menu to navigate the file system and choose files to convert.
         """,
         subcommands: [Files.self, Path.self, InteractiveMode.self],
-        defaultSubcommand: InteractiveMode.self
-    )
+        defaultSubcommand: InteractiveMode.self)
     
     func run() throws {
         
     }
 }
 
-extension JavaScriptCommand {
+extension ObjectiveCCommand {
     struct Options: ParsableArguments {
-        @OptionGroup()
-        var globalOptions: GlobalOptions
+        @Flag(
+            help: """
+            Emits '@objc' attributes on definitions, and emits NSObject subclass \
+            and NSObjectProtocol conformance on protocols.
 
+            This forces Swift to create Objective-C-compatible subclassing structures
+            which may increase compatibility with previous Obj-C code.
+            """
+        )
+        var emitObjcCompatibility: Bool = false
+        
         @Option(
             help: """
             Provides a target file path to diagnose during rewriting.
@@ -43,37 +50,19 @@ extension JavaScriptCommand {
             """
         )
         var followImports: Bool = false
-
-        @Flag(
-            name: .long,
-            help: """
-            Whether to emit JavaScript object declarations wrapped in a JavaScriptObject \
-            declaration.
-            If specified, this will also emit a new file along the output for \
-            the JavaScriptObject type definition.
-            """
-        )
-        var emitJavaScriptObject: Bool = false
-
-        @Flag(
-            name: .long,
-            help: """
-            Whether to spend time attempting to deduce types of local variables \
-            and parameter types for functions.
-            Specifying this option can greatly increase time taken during conversion.
-            """
-        )
-        var deduceTypes: Bool = false
+        
+        @OptionGroup()
+        var globalOptions: GlobalOptions
     }
 }
 
-extension JavaScriptCommand {
+extension ObjectiveCCommand {
     struct Files: ParsableCommand {
         static let configuration = CommandConfiguration(
-            discussion: "Converts one or more .js file(s) to Swift."
+            discussion: "Converts one or more .h/.m file(s) to Swift."
         )
         
-        @Argument(help: "JavaScript file(s) to convert.")
+        @Argument(help: "Objective-C file(s) to convert.")
         var files: [String]
         
         @OptionGroup()
@@ -83,17 +72,17 @@ extension JavaScriptCommand {
             let rewriter = try makeRewriterService(options)
             
             let fileProvider = FileDiskProvider()
-            let fileCollectionStep = JavaScriptFileCollectionStep(fileProvider: fileProvider)
-            let delegate = JavaScriptImportDirectiveFileCollectionDelegate(
+            let fileCollectionStep = ObjectiveCFileCollectionStep(fileProvider: fileProvider)
+            let delegate = ObjectiveCImportDirectiveFileCollectionDelegate(
                 parserCache: rewriter.parserCache,
                 fileProvider: fileProvider
             )
-
+            
             if options.followImports {
                 fileCollectionStep.delegate = delegate
             }
             if options.globalOptions.verbose {
-                fileCollectionStep.listener = StdoutFileCollectionStepListener()
+                fileCollectionStep.listener = ObjectiveCStdoutFileCollectionStepListener()
             }
             try withExtendedLifetime(delegate) {
                 for fileUrl in files {
@@ -109,11 +98,11 @@ extension JavaScriptCommand {
     }
 }
 
-extension JavaScriptCommand {
+extension ObjectiveCCommand {
     struct Path: ParsableCommand {
         static let configuration = CommandConfiguration(
             discussion: """
-            Examines a path and collects all .js files to convert, before presenting \
+            Examines a path and collects all .h/.m files to convert, before presenting \
             a prompt to confirm conversion of files.
             """
         )
@@ -124,7 +113,7 @@ extension JavaScriptCommand {
         @Option(
             name: .shortAndLong,
             help: """
-            Provides a file pattern for excluding matches from the initial JavaScript \
+            Provides a file pattern for excluding matches from the initial Objective-C \
             files search. Pattern is applied to the full path.
             """
         )
@@ -133,7 +122,7 @@ extension JavaScriptCommand {
         @Option(
             name: .shortAndLong,
             help: """
-            Provides a pattern for including matches from the initial JavaScript files \
+            Provides a pattern for including matches from the initial Objective-C files \
             search. Pattern is applied to the full path. --exclude-pattern takes \
             priority over --include-pattern matches.
             """
@@ -157,15 +146,11 @@ extension JavaScriptCommand {
         
         func run() throws {
             let rewriter = try makeRewriterService(options)
-            let frontend = JavaScriptFrontendImpl(rewriterService: rewriter)
+            let frontend = ObjectiveCFrontendImpl(rewriterService: rewriter)
             let fileProvider = FileDiskProvider()
             
             let console = Console()
-            let menu = Menu(
-                rewriterFrontend: frontend,
-                fileProvider: fileProvider,
-                console: console
-            )
+            let menu = Menu(rewriterFrontend: frontend, fileProvider: fileProvider, console: console)
             
             let options: SuggestConversionInterface.Options = .init(
                 overwrite: overwrite,
@@ -189,7 +174,7 @@ extension JavaScriptCommand {
     }
 }
 
-extension JavaScriptCommand {
+extension ObjectiveCCommand {
     struct InteractiveMode: ParsableCommand {
         @OptionGroup()
         var options: Options
@@ -200,8 +185,8 @@ extension JavaScriptCommand {
             let fileProvider = FileDiskProvider()
             
             let output = StdoutWriterOutput(colorize: colorize)
-            let service = JavaScriptSwiftRewriterServiceImpl(output: output, settings: settings)
-            let frontend = JavaScriptFrontendImpl(rewriterService: service)
+            let service = ObjectiveCSwiftRewriterServiceImpl(output: output, settings: settings)
+            let frontend = ObjectiveCFrontendImpl(rewriterService: service)
             
             // Detect terminal
             if isatty(fileno(stdin)) != 0 {
@@ -218,7 +203,7 @@ extension JavaScriptCommand {
                 let inputData = FileHandle.standardInput.availableData
                 let inputString = String(decoding: inputData, as: UTF8.self)
 
-                let input = SingleInputProvider(code: inputString, isPrimary: true, fileName: "input.js")
+                let input = SingleInputProvider(code: inputString, isPrimary: true, fileName: "input.m")
 
                 try service.rewrite(inputs: [input])
             }
@@ -230,20 +215,20 @@ extension JavaScriptCommand {
     }
 }
 
-private func makeRewriterService(_ options: JavaScriptCommand.Options) throws -> JavaScriptSwiftRewriterService {
+private func makeRewriterService(_ options: ObjectiveCCommand.Options) throws -> ObjectiveCSwiftRewriterService {
     let colorize = options.globalOptions.colorize
     let target = options.globalOptions.target ?? .filedisk
     let settings = try makeSettings(options)
     
-    let rewriter: JavaScriptSwiftRewriterService
+    let rewriter: ObjectiveCSwiftRewriterService
     
     switch target {
     case .filedisk:
-        rewriter = JavaScriptSwiftRewriterServiceImpl.fileDisk(
+        rewriter = ObjectiveCSwiftRewriterServiceImpl.fileDisk(
             settings: settings
         )
     case .stdout:
-        rewriter = JavaScriptSwiftRewriterServiceImpl.terminal(
+        rewriter = ObjectiveCSwiftRewriterServiceImpl.terminal(
             settings: settings,
             colorize: colorize
         )
@@ -252,18 +237,17 @@ private func makeRewriterService(_ options: JavaScriptCommand.Options) throws ->
     return rewriter
 }
 
-private func makeSettings(_ options: JavaScriptCommand.Options) throws -> JavaScriptSwiftRewriterServiceImpl.Settings {
-    var settings = JavaScriptSwiftRewriterServiceImpl.Settings()
+private func makeSettings(_ options: ObjectiveCCommand.Options) throws -> ObjectiveCSwiftRewriterServiceImpl.Settings {
+    var settings = ObjectiveCSwiftRewriterServiceImpl.Settings()
     
     settings.rewriter.verbose = options.globalOptions.verbose
     settings.rewriter.diagnoseFiles = options.diagnoseFile.map { [$0] } ?? []
     settings.rewriter.numThreads = options.globalOptions.numThreads ?? OperationQueue.defaultMaxConcurrentOperationCount
     settings.astWriter.outputExpressionTypes = options.globalOptions.printExpressionTypes
     settings.astWriter.printIntentionHistory = options.globalOptions.printTracingHistory
+    settings.astWriter.emitObjcCompatibility = options.emitObjcCompatibility
     settings.astWriter.format = try options.globalOptions.computeFormatterMode()
     settings.rewriter.forceUseLLPrediction = options.globalOptions.forceLl
-    settings.rewriter.emitJavaScriptObject = options.emitJavaScriptObject
-    settings.rewriter.deduceTypes = options.deduceTypes
 
     if options.globalOptions.printCallGraph {
         settings.rewriter.stageDiagnostics.append(.callGraph)

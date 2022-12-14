@@ -27,7 +27,7 @@ class JavaScriptFrontendImpl: SwiftRewriterFrontend {
             fileCollectionStep.delegate = importFileDelegate
         }
         if options.verbose {
-            fileCollectionStep.listener = StdoutFileCollectionStepListener()
+            fileCollectionStep.listener = JavaScriptStdoutFileCollectionStepListener()
         }
 
         try withExtendedLifetime(importFileDelegate) {

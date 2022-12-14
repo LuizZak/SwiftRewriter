@@ -22,7 +22,7 @@ class ObjectiveCFrontendImpl: SwiftRewriterFrontend {
             fileCollectionStep.delegate = importFileDelegate
         }
         if options.verbose {
-            fileCollectionStep.listener = StdoutFileCollectionStepListener()
+            fileCollectionStep.listener = ObjectiveCStdoutFileCollectionStepListener()
         }
 
         try withExtendedLifetime(importFileDelegate) {

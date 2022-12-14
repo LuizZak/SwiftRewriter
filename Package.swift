@@ -118,6 +118,160 @@ let core: [Target] = [
     ),
 ]
 
+let coreTests: [Target] = [
+    /* Tests */
+    .testTarget(
+        name: "GraphvizLibTests",
+        dependencies: [
+            "GraphvizLib",
+            "TestCommons",
+        ],
+        path: "Tests/Core/GraphvizLibTests"
+    ),
+    .testTarget(
+        name: "WriterTargetOutputTests",
+        dependencies: [
+            "WriterTargetOutput",
+            .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
+            "TestCommons",
+        ],
+        path: "Tests/Core/WriterTargetOutputTests"
+    ),
+    .testTarget(
+        name: "GrammarModelBaseTests",
+        dependencies: [
+            "GrammarModelBase",
+        ],
+        path: "Tests/Core/GrammarModelBaseTests"
+    ),
+    .testTarget(
+        name: "SwiftASTTests",
+        dependencies: [
+            "SwiftAST",
+            "SwiftSyntaxSupport",
+            "TestCommons",
+        ],
+        path: "Tests/Core/SwiftASTTests"
+    ),
+    .testTarget(
+        name: "IntentionsTests",
+        dependencies: [
+            "Intentions",
+            "TestCommons", "SwiftAST",
+        ],
+        path: "Tests/Core/IntentionsTests"
+    ),
+    .testTarget(
+        name: "KnownTypeTests",
+        dependencies: [
+            "KnownType",
+            "TestCommons", "SwiftAST", "WriterTargetOutput",
+        ],
+        path: "Tests/Core/KnownTypeTests"
+    ),
+    .testTarget(
+        name: "SwiftSyntaxSupportTests",
+        dependencies: [
+            "SwiftSyntaxSupport",
+            .product(name: "SwiftSyntax", package: "swift-syntax"),
+            .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
+            "KnownType", "Intentions", "SwiftAST", "TestCommons",
+            "SwiftRewriterLib",
+        ],
+        path: "Tests/Core/SwiftSyntaxSupportTests"
+    ),
+    .testTarget(
+        name: "TypeSystemTests",
+        dependencies: [
+            "TypeSystem",
+            "SwiftAST", "ObjcParser", "TypeDefinitions", "Utils",
+            "Intentions", "ObjcGrammarModels", "KnownType", "TestCommons",
+            "GlobalsProviders",
+        ],
+        path: "Tests/Core/TypeSystemTests"
+    ),
+    .testTarget(
+        name: "SwiftSyntaxRewriterPassesTests",
+        dependencies: [
+            "SwiftSyntaxRewriterPasses",
+            .product(name: "SwiftSyntax", package: "swift-syntax"),
+            .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
+            "SwiftSyntaxSupport", "TestCommons",
+        ],
+        path: "Tests/Core/SwiftSyntaxRewriterPassesTests"
+    ),
+    .testTarget(
+        name: "CommonsTests",
+        dependencies: [
+            "Commons",
+            "SwiftAST", "KnownType", "SwiftRewriterLib",
+            "TypeSystem",
+        ],
+        path: "Tests/Core/CommonsTests"
+    ),
+    .testTarget(
+        name: "ExpressionPassesTests",
+        dependencies: [
+            "ExpressionPasses",
+            .product(name: "Antlr4", package: "antlr4-swift"),
+            "ObjectiveCFrontend",
+            "SwiftAST", "SwiftRewriterLib", "ObjcParser",
+            "ObjcParserAntlr", "IntentionPasses", "GlobalsProviders",
+            "TypeSystem", "TestCommons",
+        ],
+        path: "Tests/Core/ExpressionPassesTests"
+    ),
+    .testTarget(
+        name: "SourcePreprocessorsTests",
+        dependencies: [
+            "SourcePreprocessors",
+            "Utils", "SwiftRewriterLib", "IntentionPasses",
+            "GlobalsProviders",
+        ],
+        path: "Tests/Core/SourcePreprocessorsTests"
+    ),
+    .testTarget(
+        name: "IntentionPassesTests",
+        dependencies: [
+            "IntentionPasses",
+            "ObjectiveCFrontend",
+            "SwiftAST", "ObjcGrammarModels", "SwiftRewriterLib",
+            "TestCommons", "GlobalsProviders", "TypeSystem",
+        ],
+        path: "Tests/Core/IntentionPassesTests"
+    ),
+    .testTarget(
+        name: "AnalysisTests",
+        dependencies: [
+            "Analysis",
+            .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
+            "SwiftAST", "SwiftRewriterLib", "GlobalsProviders",
+            "TestCommons", "TypeSystem", "GraphvizLib",
+        ],
+        path: "Tests/Core/AnalysisTests"
+    ),
+]
+
+// MARK: - Main SwiftRewriter frontend
+
+var swiftRewriterTarget: Target = .executableTarget(
+    name: "SwiftRewriter",
+    dependencies: [
+        .product(name: "Console", package: "console"),
+        .product(name: "ArgumentParser", package: "swift-argument-parser"),
+        .product(name: "SwiftFormatConfiguration", package: "swift-format"),
+        "SwiftRewriterCLI", "SwiftRewriterLib",
+        "ExpressionPasses", "Utils", "SourcePreprocessors", "SwiftAST",
+        "IntentionPasses", "MiniLexer", "Commons",
+    ],
+    path: "Sources/SwiftRewriter"
+)
+
+var frontendTargets: [Target] = []
+var frontendTestTargets: [Target] = []
+
+// MARK: - Objective-C frontend
+
 let objcFrontend: [Target] = [
     .target(
         name: "ObjcParserAntlr",
@@ -166,6 +320,9 @@ let objcFrontend: [Target] = [
         ],
         path: "Sources/Frontend/Objective-C/ObjectiveCFrontend"
     ),
+]
+
+let objcFrontendTests: [Target] = [
     .testTarget(
         name: "ObjcParserTests",
         dependencies: [
@@ -199,6 +356,20 @@ let objcFrontend: [Target] = [
         path: "Tests/Frontend/Objective-C/ObjectiveCFrontendTests"
     ),
 ]
+
+// Attach Objective-C frontend to SwiftRewriter
+swiftRewriterTarget.dependencies.append(contentsOf: [
+    // Objective-C frontend
+    "ObjectiveCFrontend",
+    "ObjcParser",
+    "ObjcGrammarModels",
+    "GlobalsProviders",
+])
+
+frontendTargets.append(contentsOf: objcFrontend)
+frontendTestTargets.append(contentsOf: objcFrontendTests)
+
+// MARK: - JavaScript frontend
 
 let jsFrontend: [Target] = [
     .target(
@@ -236,6 +407,9 @@ let jsFrontend: [Target] = [
         ],
         path: "Sources/Frontend/JavaScript/JavaScriptFrontend"
     ),
+]
+
+let jsFrontendTests: [Target] = [
     .testTarget(
         name: "JsParserTests",
         dependencies: [
@@ -289,6 +463,17 @@ let jsFrontend: [Target] = [
     ),
 ]
 
+// Attach JavaScript frontend to SwiftRewriter
+swiftRewriterTarget.dependencies.append(contentsOf: [
+    // JavaScript frontend
+    "JavaScriptFrontend",
+    "JsParser",
+    "JsGrammarModels",
+])
+
+frontendTargets.append(contentsOf: jsFrontend)
+frontendTestTargets.append(contentsOf: jsFrontendTests)
+
 //
 
 let package = Package(
@@ -315,10 +500,8 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50700.1")),
         .package(url: "https://github.com/apple/swift-format.git", .exact("0.50700.1")),
     ],
-    targets: core
-        + objcFrontend
-        + jsFrontend
-        + [
+    targets: core + coreTests + frontendTargets + frontendTestTargets + [
+        swiftRewriterTarget,
         .target(
             name: "Utils",
             dependencies: [],
@@ -332,16 +515,11 @@ let package = Package(
                 .product(name: "SwiftFormat", package: "swift-format"),
                 .product(name: "SwiftFormatConfiguration", package: "swift-format"),
                 .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
-                "SwiftAST",
-                "Analysis", "TypeDefinitions", "Utils", "Intentions",
+                "SwiftAST", "Analysis", "TypeDefinitions", "Utils", "Intentions",
                 "TypeSystem", "IntentionPasses", "KnownType",
-                "WriterTargetOutput", "SwiftSyntaxSupport",
-                "GlobalsProviders", "ExpressionPasses",
-                "SourcePreprocessors", "SwiftSyntaxRewriterPasses",
-                // Objective-C
-                "ObjcGrammarModels", "ObjcParser",
-                // JavaScript
-                "JsGrammarModels", "JsParser",
+                "WriterTargetOutput", "SwiftSyntaxSupport", "GlobalsProviders",
+                "ExpressionPasses", "SourcePreprocessors",
+                "SwiftSyntaxRewriterPasses",
             ],
             path: "Sources/SwiftRewriterLib"
         ),
@@ -356,22 +534,6 @@ let package = Package(
             ],
             path: "Sources/SwiftRewriterCLI"
         ),
-        .executableTarget(
-            name: "SwiftRewriter",
-            dependencies: [
-                .product(name: "Console", package: "console"),
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .product(name: "SwiftFormatConfiguration", package: "swift-format"),
-                "SwiftRewriterCLI", "SwiftRewriterLib",
-                "ExpressionPasses", "Utils", "SourcePreprocessors", "SwiftAST",
-                "IntentionPasses", "MiniLexer", "GlobalsProviders", "Commons",
-                // Objective-C frontend
-                "ObjectiveCFrontend", "ObjcParser", "ObjcGrammarModels",
-                // JavaScript
-                "JavaScriptFrontend",
-            ],
-            path: "Sources/SwiftRewriter"
-        ),
         .target(
             name: "TestCommons",
             dependencies: [
@@ -384,91 +546,11 @@ let package = Package(
         ),
         /* Tests */
         .testTarget(
-            name: "GraphvizLibTests",
-            dependencies: [
-                "GraphvizLib",
-                "TestCommons",
-            ],
-            path: "Tests/Core/GraphvizLibTests"
-        ),
-        .testTarget(
             name: "UtilsTests",
             dependencies: [
                 "Utils",
             ],
             path: "Tests/UtilsTests"
-        ),
-        .testTarget(
-            name: "WriterTargetOutputTests",
-            dependencies: [
-                "WriterTargetOutput",
-                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
-                "TestCommons",
-            ],
-            path: "Tests/Core/WriterTargetOutputTests"
-        ),
-        .testTarget(
-            name: "GrammarModelBaseTests",
-            dependencies: [
-                "GrammarModelBase",
-            ],
-            path: "Tests/Core/GrammarModelBaseTests"
-        ),
-        .testTarget(
-            name: "SwiftASTTests",
-            dependencies: [
-                "SwiftAST",
-                "SwiftSyntaxSupport",
-                "TestCommons",
-            ],
-            path: "Tests/Core/SwiftASTTests"
-        ),
-        .testTarget(
-            name: "IntentionsTests",
-            dependencies: [
-                "Intentions",
-                "TestCommons", "SwiftAST",
-            ],
-            path: "Tests/Core/IntentionsTests"
-        ),
-        .testTarget(
-            name: "KnownTypeTests",
-            dependencies: [
-                "KnownType",
-                "TestCommons", "SwiftAST", "WriterTargetOutput",
-            ],
-            path: "Tests/Core/KnownTypeTests"
-        ),
-        .testTarget(
-            name: "SwiftSyntaxSupportTests",
-            dependencies: [
-                "SwiftSyntaxSupport",
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
-                "KnownType", "Intentions", "SwiftAST", "TestCommons",
-                "SwiftRewriterLib",
-            ],
-            path: "Tests/Core/SwiftSyntaxSupportTests"
-        ),
-        .testTarget(
-            name: "TypeSystemTests",
-            dependencies: [
-                "TypeSystem",
-                "SwiftAST", "ObjcParser", "TypeDefinitions", "Utils",
-                "Intentions", "ObjcGrammarModels", "KnownType", "TestCommons",
-                "GlobalsProviders",
-            ],
-            path: "Tests/Core/TypeSystemTests"
-        ),
-        .testTarget(
-            name: "SwiftSyntaxRewriterPassesTests",
-            dependencies: [
-                "SwiftSyntaxRewriterPasses",
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
-                "SwiftSyntaxSupport", "TestCommons",
-            ],
-            path: "Tests/Core/SwiftSyntaxRewriterPassesTests"
         ),
         .testTarget(
             name: "SwiftRewriterLibTests",
@@ -481,56 +563,6 @@ let package = Package(
                 "SwiftSyntaxSupport", "SwiftSyntaxRewriterPasses",
             ],
             path: "Tests/SwiftRewriterLibTests"
-        ),
-        .testTarget(
-            name: "CommonsTests",
-            dependencies: [
-                "Commons",
-                "SwiftAST", "KnownType", "SwiftRewriterLib",
-                "TypeSystem",
-            ],
-            path: "Tests/Core/CommonsTests"
-        ),
-        .testTarget(
-            name: "ExpressionPassesTests",
-            dependencies: [
-                "ExpressionPasses",
-                .product(name: "Antlr4", package: "antlr4-swift"),
-                "ObjectiveCFrontend",
-                "SwiftAST", "SwiftRewriterLib", "ObjcParser",
-                "ObjcParserAntlr", "IntentionPasses", "GlobalsProviders",
-                "TypeSystem", "TestCommons",
-            ],
-            path: "Tests/Core/ExpressionPassesTests"
-        ),
-        .testTarget(
-            name: "SourcePreprocessorsTests",
-            dependencies: [
-                "SourcePreprocessors",
-                "Utils", "SwiftRewriterLib", "IntentionPasses",
-                "GlobalsProviders",
-            ],
-            path: "Tests/Core/SourcePreprocessorsTests"
-        ),
-        .testTarget(
-            name: "IntentionPassesTests",
-            dependencies: [
-                "IntentionPasses",
-                "ObjectiveCFrontend",
-                "SwiftAST", "ObjcGrammarModels", "SwiftRewriterLib",
-                "TestCommons", "GlobalsProviders", "TypeSystem",
-            ],
-            path: "Tests/Core/IntentionPassesTests"
-        ),
-        .testTarget(
-            name: "AnalysisTests",
-            dependencies: [
-                "Analysis",
-                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
-                "SwiftAST", "SwiftRewriterLib", "GlobalsProviders",
-                "TestCommons", "TypeSystem", "GraphvizLib",
-            ],
-            path: "Tests/Core/AnalysisTests"
         ),
         .testTarget(
             name: "TestCommonsTests",
