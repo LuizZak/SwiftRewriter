@@ -82,7 +82,7 @@ extension ObjectiveCCommand {
                 fileCollectionStep.delegate = delegate
             }
             if options.globalOptions.verbose {
-                fileCollectionStep.listener = StdoutFileCollectionStepListener()
+                fileCollectionStep.listener = ObjectiveCStdoutFileCollectionStepListener()
             }
             try withExtendedLifetime(delegate) {
                 for fileUrl in files {

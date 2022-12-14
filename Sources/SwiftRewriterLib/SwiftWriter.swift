@@ -1,7 +1,4 @@
 import Foundation
-import ObjcGrammarModels
-import ObjcParser
-import ObjcParserAntlr
 import SwiftAST
 import KnownType
 import Intentions

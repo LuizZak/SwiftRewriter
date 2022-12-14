@@ -84,7 +84,6 @@
 				"args": [
 					"test",
 					"-c", "release",
-					"-Xswiftc",
 				],
 				"detail": "swift test -c=release",
 			},

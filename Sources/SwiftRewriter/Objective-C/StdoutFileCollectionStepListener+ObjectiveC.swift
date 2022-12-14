@@ -2,11 +2,7 @@ import Foundation
 import Console
 import ObjectiveCFrontend
 
-class StdoutFileCollectionStepListener {
-    
-}
-
-extension StdoutFileCollectionStepListener: ObjectiveCFileCollectionStepListener {
+class ObjectiveCStdoutFileCollectionStepListener: ObjectiveCFileCollectionStepListener {
     func objectiveCFileCollectionStep(
         _ collectionStep: ObjectiveCFileCollectionStep,
         didAddReferencedFile referencedUrl: URL,
