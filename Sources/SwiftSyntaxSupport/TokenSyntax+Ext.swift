@@ -9,6 +9,7 @@ extension TokenSyntax {
         
         return self
     }
+    
     func withLeadingSpace(count: Int = 1) -> TokenSyntax {
         withLeadingTrivia(.spaces(count))
     }

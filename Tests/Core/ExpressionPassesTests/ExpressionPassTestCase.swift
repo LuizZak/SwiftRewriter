@@ -1,0 +1,3 @@
+import TestCommons
+
+typealias ExpressionPassTestCase = TestCommons.ExpressionPassTestCase<ObjectiveCExpressionPassTestAdapter>

@@ -139,6 +139,15 @@ public extension String {
         
         return distance(from: lineStartOffset, to: index) + 1 // columns start at one
     }
+
+    /// Converts a specified `index` in this string to a `SourceLocation` value.
+    func asSourceLocation(_ index: Index) -> SourceLocation {
+        let line = lineNumber(at: index)
+        let column = columnOffset(at: index)
+        let utf8Offset = utf8.distance(from: startIndex, to: index)
+
+        return .init(line: line, column: column, utf8Offset: utf8Offset)
+    }
 }
 
 public extension String {
@@ -148,8 +157,6 @@ public extension String {
         if self.count < 2 {
             return []
         }
-        
-        let unicodes = unicodeScalars
         
         enum State {
             case normal
@@ -163,26 +170,26 @@ public extension String {
         // Search for single-lined comments
         var ranges: [Range<Index>] = []
         
-        var index = unicodes.startIndex
-        while index < unicodes.index(before: unicodes.endIndex) {
+        var index = unicodeScalars.startIndex
+        while index < unicodeScalars.index(before: unicodeScalars.endIndex) {
             defer {
-                unicodes.formIndex(after: &index)
+                unicodeScalars.formIndex(after: &index)
             }
             
             switch state {
             case .normal:
                 // String literal
-                if unicodes[index] == "\"" {
+                if unicodeScalars[index] == "\"" {
                     state = .stringLiteral
                     continue
                 }
                 
                 // Ignore anything other than '/' since it doesn't form comments.
-                if unicodes[index] != "/" {
+                if unicodeScalars[index] != "/" {
                     continue
                 }
                 
-                let next = unicodes[unicodes.index(after: index)]
+                let next = unicodeScalars[unicodeScalars.index(after: index)]
                 
                 // Single-line
                 if next == "/" {
@@ -193,21 +200,21 @@ public extension String {
                 }
                 
             case .stringLiteral:
-                if unicodes[index] == "\"" {
+                if unicodeScalars[index] == "\"" {
                     state = .normal
                 }
                 
             case .singleLine(let begin):
                 // End of single-line
                 if self[index] == "\n" {
-                    ranges.append(begin..<unicodes.index(after: index))
+                    ranges.append(begin..<unicodeScalars.index(after: index))
                     state = .normal
                 }
                 
             case .multiLine(let begin):
                 // End of multi-line
-                if self[index] == "*" && unicodes[unicodes.index(after: index)] == "/" {
-                    ranges.append(begin..<unicodes.index(index, offsetBy: 2))
+                if self[index] == "*" && unicodeScalars[unicodeScalars.index(after: index)] == "/" {
+                    ranges.append(begin..<unicodeScalars.index(index, offsetBy: 2))
                     state = .normal
                 }
             }

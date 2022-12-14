@@ -14,6 +14,14 @@
         <BuildableReference
           BuildableIdentifier = "primary"
           BuildableName = "'lib$(TARGET_NAME)'"
+          BlueprintName = "AntlrCommons"
+          ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+        </BuildableReference>
+      </BuildActionEntry>
+      <BuildActionEntry buildForTesting = "YES" buildForRunning = "YES" buildForProfiling = "YES" buildForArchiving = "YES" buildForAnalyzing = "YES">
+        <BuildableReference
+          BuildableIdentifier = "primary"
+          BuildableName = "'lib$(TARGET_NAME)'"
           BlueprintName = "Commons"
           ReferencedContainer = "container:SwiftRewriter.xcodeproj">
         </BuildableReference>
@@ -38,7 +46,15 @@
         <BuildableReference
           BuildableIdentifier = "primary"
           BuildableName = "'lib$(TARGET_NAME)'"
-          BlueprintName = "GrammarModels"
+          BlueprintName = "GrammarModelBase"
+          ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+        </BuildableReference>
+      </BuildActionEntry>
+      <BuildActionEntry buildForTesting = "YES" buildForRunning = "YES" buildForProfiling = "YES" buildForArchiving = "YES" buildForAnalyzing = "YES">
+        <BuildableReference
+          BuildableIdentifier = "primary"
+          BuildableName = "'lib$(TARGET_NAME)'"
+          BlueprintName = "GraphvizLib"
           ReferencedContainer = "container:SwiftRewriter.xcodeproj">
         </BuildableReference>
       </BuildActionEntry>
@@ -70,6 +86,14 @@
         <BuildableReference
           BuildableIdentifier = "primary"
           BuildableName = "'lib$(TARGET_NAME)'"
+          BlueprintName = "ObjcGrammarModels"
+          ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+        </BuildableReference>
+      </BuildActionEntry>
+      <BuildActionEntry buildForTesting = "YES" buildForRunning = "YES" buildForProfiling = "YES" buildForArchiving = "YES" buildForAnalyzing = "YES">
+        <BuildableReference
+          BuildableIdentifier = "primary"
+          BuildableName = "'lib$(TARGET_NAME)'"
           BlueprintName = "ObjcParser"
           ReferencedContainer = "container:SwiftRewriter.xcodeproj">
         </BuildableReference>
@@ -79,6 +103,14 @@
           BuildableIdentifier = "primary"
           BuildableName = "'lib$(TARGET_NAME)'"
           BlueprintName = "ObjcParserAntlr"
+          ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+        </BuildableReference>
+      </BuildActionEntry>
+      <BuildActionEntry buildForTesting = "YES" buildForRunning = "YES" buildForProfiling = "YES" buildForArchiving = "YES" buildForAnalyzing = "YES">
+        <BuildableReference
+          BuildableIdentifier = "primary"
+          BuildableName = "'lib$(TARGET_NAME)'"
+          BlueprintName = "ObjectiveCFrontend"
           ReferencedContainer = "container:SwiftRewriter.xcodeproj">
         </BuildableReference>
       </BuildActionEntry>
@@ -103,6 +135,14 @@
           BuildableIdentifier = "primary"
           BuildableName = "'$(TARGET_NAME)'"
           BlueprintName = "SwiftRewriter"
+          ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+        </BuildableReference>
+      </BuildActionEntry>
+      <BuildActionEntry buildForTesting = "YES" buildForRunning = "YES" buildForProfiling = "YES" buildForArchiving = "YES" buildForAnalyzing = "YES">
+        <BuildableReference
+          BuildableIdentifier = "primary"
+          BuildableName = "'lib$(TARGET_NAME)'"
+          BlueprintName = "SwiftRewriterCLI"
           ReferencedContainer = "container:SwiftRewriter.xcodeproj">
         </BuildableReference>
       </BuildActionEntry>
@@ -220,7 +260,16 @@
           <BuildableReference
             BuildableIdentifier = "primary"
             BuildableName = "'$(TARGET_NAME)'"
-            BlueprintName = "GrammarModelsTests"
+            BlueprintName = "GrammarModelBaseTests"
+            ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+          </BuildableReference>
+        </TestableReference>
+        <TestableReference
+          skipped = "NO">
+          <BuildableReference
+            BuildableIdentifier = "primary"
+            BuildableName = "'$(TARGET_NAME)'"
+            BlueprintName = "GraphvizLibTests"
             ReferencedContainer = "container:SwiftRewriter.xcodeproj">
           </BuildableReference>
         </TestableReference>
@@ -256,7 +305,25 @@
           <BuildableReference
             BuildableIdentifier = "primary"
             BuildableName = "'$(TARGET_NAME)'"
+            BlueprintName = "ObjcGrammarModelsTests"
+            ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+          </BuildableReference>
+        </TestableReference>
+        <TestableReference
+          skipped = "NO">
+          <BuildableReference
+            BuildableIdentifier = "primary"
+            BuildableName = "'$(TARGET_NAME)'"
             BlueprintName = "ObjcParserTests"
+            ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+          </BuildableReference>
+        </TestableReference>
+        <TestableReference
+          skipped = "NO">
+          <BuildableReference
+            BuildableIdentifier = "primary"
+            BuildableName = "'$(TARGET_NAME)'"
+            BlueprintName = "ObjectiveCFrontendTests"
             ReferencedContainer = "container:SwiftRewriter.xcodeproj">
           </BuildableReference>
         </TestableReference>

@@ -2,11 +2,13 @@
 
 from pathlib import Path
 import re
+import shutil
 
 from typing import Any
 
-from generator_paths import grammars_package_path, make_relative
+from paths import SOURCE_ROOT_PATH, grammar_transformer_package_path, make_relative
 from process import run, run_output
+from console_color import ConsoleColor
 
 # Minimum required ANTLR version
 antlr_req = "4.11"  # major.minor
@@ -15,7 +17,7 @@ swift_build_args = ["-c=release"]
 
 
 def call_swift(*args: Any):
-    run("swift", *args, cwd=grammars_package_path("."))
+    run("swift", *args, cwd=grammar_transformer_package_path("."))
 
 
 def build_swift_gen_transformer():
@@ -23,8 +25,6 @@ def build_swift_gen_transformer():
 
 
 def transform_source(swift_files: list[Path]):
-    print("Transforming source files...")
-
     call_swift("run", *swift_build_args, "--skip-build", "AntlrGrammars", *swift_files)
 
 
@@ -95,3 +95,22 @@ def validate_antlr_version(antlr_v: str | None = None):
     if not antlr_version.startswith(antlr_req):
         print(f"Expected Antlr version {antlr_req}.*, but found {antlr_version}!")
         exit(1)
+
+
+def copy_generated_files(output_path, target_parser_path):
+    if not target_parser_path.is_dir():
+        print(
+            ConsoleColor.RED(
+                f"Error: Could not find path for placing generated files @ {ConsoleColor.CYAN(make_relative(SOURCE_ROOT_PATH, target_parser_path))}"
+            )
+        )
+        exit(1)
+
+    files_to_copy = list(output_path.glob("*.swift"))
+
+    print(
+        f"Copying {ConsoleColor.CYAN(len(files_to_copy))} file(s) to {ConsoleColor.CYAN(make_relative(SOURCE_ROOT_PATH, target_parser_path))}..."
+    )
+
+    for file in files_to_copy:
+        shutil.copy(file, target_parser_path)

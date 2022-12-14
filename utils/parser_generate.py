@@ -9,6 +9,7 @@ from antlr_grammar_gen import (
     validate_antlr_version,
 )
 from objc_grammar_gen import generate_objc_antlr_grammar
+from console_color import ConsoleColor
 
 
 def do_parser_generation(antlr_version: str | None = None, skip_build: bool = False):
@@ -20,13 +21,19 @@ def do_parser_generation(antlr_version: str | None = None, skip_build: bool = Fa
 
     generate_objc_antlr_grammar(antlr_version)
 
-    print("Success!")
+    print(ConsoleColor.GREEN("Success!"))
 
 
 def make_argparser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Facility for preparing Antlr grammar files for use in SwiftRewriter",
     )
+    populate_argparser(parser)
+
+    return parser
+
+
+def populate_argparser(parser: argparse.ArgumentParser):
     parser.add_argument(
         "--antlr_version",
         type=str,
@@ -40,8 +47,6 @@ def make_argparser() -> argparse.ArgumentParser:
         dest="skip_build",
         help="Whether to skip building the Swift AntlrGrammars package prior to generating the parser. May result in failures if the package is not already built.",
     )
-
-    return parser
 
 
 def main() -> int:

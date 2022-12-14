@@ -34,7 +34,7 @@ public extension Asserter where Object: Sequence {
         }
 
         return assertFailed(
-            message: "asserterForFirstElement failed. \(message())",
+            message: "asserterForFirstElement(where:) failed. \(message())",
             file: file,
             line: line
         )
@@ -50,7 +50,7 @@ public extension Asserter where Object: Sequence {
         message: @autoclosure () -> String = "No element in sequence passed the provided predicate.",
         file: StaticString = #file,
         line: UInt = #line,
-        where predicate: (Object.Element) -> Bool
+        predicate: (Object.Element) -> Bool
     ) -> Self? {
 
         for element in object {
@@ -60,9 +60,35 @@ public extension Asserter where Object: Sequence {
         }
 
         return assertFailed(
-            message: "assertContains failed. \(message())",
+            message: "assertContains(where:) failed. \(message())",
             file: file,
             line: line
         )
+    }
+
+    /// Asserts that the underlying `Sequence` being tested contains no elements
+    /// that pass the given predicate.
+    ///
+    /// Returns `nil` if the test failed with at least one passing item, otherwise
+    /// returns `self` for chaining further tests.
+    @discardableResult
+    func assertDoesNotContain(
+        message: @autoclosure () -> String = "Found element that passed the provided predicate.",
+        file: StaticString = #file,
+        line: UInt = #line,
+        predicate: (Object.Element) -> Bool
+    ) -> Self? {
+
+        for element in object {
+            if predicate(element) {
+                return assertFailed(
+                    message: "assertDoesNotContain(predicate:) failed. \(message())",
+                    file: file,
+                    line: line
+                )
+            }
+        }
+
+        return self
     }
 }

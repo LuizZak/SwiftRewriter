@@ -1,0 +1,30 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug AntlrGrammars",
+            "program": "${workspaceFolder:GrammarTransformer}/.build/debug/AntlrGrammars",
+            "args": [],
+            "cwd": "${workspaceFolder:GrammarTransformer}",
+            "preLaunchTask": "swift: Build Debug AntlrGrammars"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release AntlrGrammars",
+            "program": "${workspaceFolder:GrammarTransformer}/.build/release/AntlrGrammars",
+            "args": [],
+            "cwd": "${workspaceFolder:GrammarTransformer}",
+            "preLaunchTask": "swift: Build Release AntlrGrammars"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Test AntlrGrammars",
+            "program": "${workspaceFolder:GrammarTransformer}/.build/debug/AntlrGrammarsPackageTests.xctest",
+            "cwd": "${workspaceFolder:GrammarTransformer}",
+            "preLaunchTask": "swift: Build All AntlrGrammars"
+        },
+    ]
+}

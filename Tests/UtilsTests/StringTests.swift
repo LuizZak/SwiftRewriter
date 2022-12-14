@@ -1,5 +1,6 @@
 import XCTest
-import Utils
+
+@testable import Utils
 
 class StringTests: XCTestCase {
     func testStartsUppercased() {
@@ -11,7 +12,7 @@ class StringTests: XCTestCase {
         XCTAssertFalse(" ".startsUppercased)
         XCTAssertFalse("".startsUppercased)
     }
-    
+
     func testLowercasedFirstLetter() {
         XCTAssertEqual("a", "A".lowercasedFirstLetter)
         XCTAssertEqual("abc", "Abc".lowercasedFirstLetter)
@@ -24,7 +25,7 @@ class StringTests: XCTestCase {
         XCTAssertEqual("", "".lowercasedFirstLetter)
         XCTAssertEqual(" ", " ".lowercasedFirstLetter)
     }
-    
+
     func testUppercasedFirstLetter() {
         XCTAssertEqual("A", "a".uppercasedFirstLetter)
         XCTAssertEqual("Abc", "abc".uppercasedFirstLetter)
@@ -37,7 +38,7 @@ class StringTests: XCTestCase {
         XCTAssertEqual("", "".uppercasedFirstLetter)
         XCTAssertEqual(" ", " ".uppercasedFirstLetter)
     }
-    
+
     func testMakeDifference() {
         let str1 = """
             Abcdef
@@ -45,15 +46,18 @@ class StringTests: XCTestCase {
         let str2 = """
             Abdef
             """
-        
+
         let result = str1.makeDifferenceMarkString(against: str2)
-        
-        XCTAssertEqual("""
+
+        XCTAssertEqual(
+            """
             Abcdef
             ~~^ Difference starts here
-            """, result)
+            """,
+            result
+        )
     }
-    
+
     func testMakeDifferenceBetweenLines() {
         let str1 = """
             Abc
@@ -65,17 +69,20 @@ class StringTests: XCTestCase {
             Df
             Ghi
             """
-        
+
         let result = str1.makeDifferenceMarkString(against: str2)
-        
-        XCTAssertEqual("""
+
+        XCTAssertEqual(
+            """
             Abc
             Def
             ~^ Difference starts here
             Ghi
-            """, result)
+            """,
+            result
+        )
     }
-    
+
     func testMakeDifferenceBetweenEqualStrings() {
         let str1 = """
             Abc
@@ -87,17 +94,20 @@ class StringTests: XCTestCase {
             Def
             Ghi
             """
-        
+
         let result = str1.makeDifferenceMarkString(against: str2)
-        
-        XCTAssertEqual("""
+
+        XCTAssertEqual(
+            """
             Abc
             Def
             Ghi
              ~ Strings are equal.
-            """, result)
+            """,
+            result
+        )
     }
-    
+
     func testMakeDifferenceBetweenStringsAtBeginning() {
         let str1 = """
             Abc
@@ -105,173 +115,188 @@ class StringTests: XCTestCase {
         let str2 = """
             Zwx
             """
-        
+
         let result = str1.makeDifferenceMarkString(against: str2)
-        
-        XCTAssertEqual("""
+
+        XCTAssertEqual(
+            """
             Abc
             ^ Difference starts here
-            """, result)
+            """,
+            result
+        )
     }
-    
+
     func testCommentSectionRangesInEmptyString() {
         let ranges = "".cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 0)
     }
-    
+
     func testCommentSectionRanges() {
         let input = """
-        // A comment!
-        Not a comment.
-        /*
-            A multi-lined comment!
-        */
-        Not a comment again.
-        """
-        
-        let ranges = input.cStyleCommentSectionRanges()
-        XCTAssertEqual(ranges.count, 2)
-        XCTAssertEqual(ranges[0], input.range(of: "// A comment!\n"))
-        XCTAssertEqual(ranges[1], input.range(of: """
+            // A comment!
+            Not a comment.
             /*
                 A multi-lined comment!
             */
-            """))
+            Not a comment again.
+            """
+
+        let ranges = input.cStyleCommentSectionRanges()
+        XCTAssertEqual(ranges.count, 2)
+        XCTAssertEqual(ranges[0], input.range(of: "// A comment!\n"))
+        XCTAssertEqual(
+            ranges[1],
+            input.range(
+                of: """
+                    /*
+                        A multi-lined comment!
+                    */
+                    """
+            )
+        )
     }
-    
+
     func testCommentSectionRangesEntireString() {
         let input = "// A comment!"
-        
+
         let ranges = input.cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
     }
-    
+
     func testCommentSectionRangesEntireStringMultiLine() {
         let input = "/* A comment! \n*/"
-        
+
         let ranges = input.cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
     }
-    
+
     func testCommentSectionRangesOpenMultiLineComment() {
         let input = "/* A comment! \n"
-        
+
         let ranges = input.cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
     }
-    
+
     func testCommentSectionRangesIgnoresCommentsInStringLiterals() {
         let input = "\"A comment in a string: // etc.\""
-        
+
         let ranges = input.cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 0)
     }
-    
+
     func testCommentSectionRangesIgnoresStringLiteralsWithinSingleLineComments() {
         let input = "/* A comment! \"A string\" \n"
-        
+
         let ranges = input.cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
     }
-    
+
     func testCommentSectionRangesIgnoresStringLiteralsWithinMultiLineComments() {
         let input = """
             /* A comment! "An unterminated string literal
             */ "A string /* */"
             """
-        
+
         let ranges = input.cStyleCommentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
-        XCTAssertEqual(ranges[0], input.range(of: """
-            /* A comment! "An unterminated string literal
-            */
-            """))
+        XCTAssertEqual(
+            ranges[0],
+            input.range(
+                of: """
+                    /* A comment! "An unterminated string literal
+                    */
+                    """
+            )
+        )
     }
-    
+
     func testLineRangesWithCountedLines() {
         let input = """
             1
             2
             3
             """
-        
+
         let ranges = input.lineRanges()
         XCTAssertEqual(ranges.count, 3)
         XCTAssertEqual(ranges[0], input.range(of: "1"))
         XCTAssertEqual(ranges[1], input.range(of: "2"))
         XCTAssertEqual(ranges[2], input.range(of: "3"))
     }
-    
+
     func testLineRangesWithEmptyLines() {
         let input = """
             1
-            
+
             3
             """
-        
+
         let ranges = input.lineRanges()
         XCTAssertEqual(ranges.count, 3)
         XCTAssertEqual(ranges[0], input.range(of: "1"))
-        XCTAssertEqual(ranges[1],
-                       input.range(of: "1\n")!.upperBound..<input.range(of: "\n3")!.lowerBound)
+        XCTAssertEqual(
+            ranges[1],
+            input.range(of: "1\n")!.upperBound..<input.range(of: "\n3")!.lowerBound
+        )
         XCTAssertEqual(ranges[2], input.range(of: "3"))
     }
-    
+
     func testLineRangesWithEmptyFinalLine() {
         let input = """
             1
-            
+
             """
-        
+
         let ranges = input.lineRanges()
         XCTAssertEqual(ranges.count, 2)
         XCTAssertEqual(ranges[0], input.range(of: "1"))
         XCTAssertEqual(ranges[1], input.range(of: "1\n")!.upperBound..<input.endIndex)
     }
-    
+
     func testLineRangesWithTwoEmptyFinalLines() {
         let input = """
             1
-            
-            
+
+
             """
-        
+
         let ranges = input.lineRanges()
         XCTAssertEqual(ranges.count, 3)
         XCTAssertEqual(ranges[0], input.intRange(0..<1))
         XCTAssertEqual(ranges[1], input.intRange(2..<2))
         XCTAssertEqual(ranges[2], input.intRange(3..<3))
     }
-    
+
     func testLineRangesWithSingleLine() {
         let input = "123"
-        
+
         let ranges = input.lineRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
     }
-    
+
     func testLineRangesWithEmptyString() {
         let input = ""
-        
+
         let ranges = input.lineRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
     }
-    
+
     func testLineRangesWithSingleEmptyLine() {
         let input = "\n"
-        
+
         let ranges = input.lineRanges()
         XCTAssertEqual(ranges.count, 2)
         XCTAssertEqual(ranges[0], input.startIndex..<input.startIndex)
         XCTAssertEqual(ranges[1], input.endIndex..<input.endIndex)
     }
-    
+
     func testTrimWhitespace() {
         XCTAssertEqual(trimWhitespace(""), "")
         XCTAssertEqual(trimWhitespace("  "), "")
@@ -318,10 +343,10 @@ class StringTests: XCTestCase {
 extension String {
     func intRange<R>(_ range: R) -> Range<Index> where R: RangeExpression, R.Bound == Int {
         let range = range.relative(to: Array(0..<count))
-        
+
         let start = index(startIndex, offsetBy: range.lowerBound)
         let end = index(startIndex, offsetBy: range.upperBound)
-        
+
         return start..<end
     }
 }

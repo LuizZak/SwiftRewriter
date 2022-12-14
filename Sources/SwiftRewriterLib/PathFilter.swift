@@ -13,7 +13,7 @@ import Foundation
 ///   - excludePattern: An optional pattern that when specified omits files
 /// matching the pattern. Takes priority over `includePattern`.
 /// - Returns: Whether the given file URL matches the given include/exclude pattern.
-public func fileMatchesFilter(path: String, includePattern: String?, excludePattern: String?) -> Bool {
+public func fileMatchesFilter(path: URL, includePattern: String?, excludePattern: String?) -> Bool {
     let fnflags: Int32
     #if os(macOS)
     fnflags = FNM_CASEFOLD
@@ -23,13 +23,13 @@ public func fileMatchesFilter(path: String, includePattern: String?, excludePatt
 
     // Inclusions
     if let includePattern = includePattern {
-        if fnmatch(includePattern, path, fnflags) != 0 {
+        if fnmatch(includePattern, path.path, fnflags) != 0 {
             return false
         }
     }
     // Exclusions
     if let excludePattern = excludePattern {
-        if fnmatch(excludePattern, path, fnflags) == 0 {
+        if fnmatch(excludePattern, path.path, fnflags) == 0 {
             return false
         }
     }

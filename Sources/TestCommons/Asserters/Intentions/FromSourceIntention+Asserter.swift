@@ -21,7 +21,7 @@ public extension Asserter where Object: FromSourceIntention {
     }
 
     /// Asserts that the underlying `FromSourceIntention` object being tested
-    /// has a list of a preceding comments that match a specified value.
+    /// has a list of preceding comments that match a specified value.
     ///
     /// Returns `nil` if the test failed, otherwise returns `self` for chaining
     /// further tests.
@@ -32,8 +32,9 @@ public extension Asserter where Object: FromSourceIntention {
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.precedingComments) {
+        let converted = object.precedingComments.map(\.string)
+        return asserter(for: converted) {
             $0.assert(equals: precedingComments, file: file, line: line)
-        }
+        }.map(self)
     }
 }

@@ -1,17 +1,17 @@
 import XCTest
-import Dispatch
-import Utils
+
+@testable import Utils
 
 class MutexTests: XCTestCase {
     func testMutex() {
         let expectation = self.expectation(description: "\(#function)\(#line)")
-        
+
         let mutex = Mutex()
         var resource = Resource(value: 0)
-        
+
         let queue = makeTestQueue()
         queue.suspend()
-        
+
         for _ in 0..<100 {
             queue.async {
                 mutex.lock()
@@ -22,24 +22,24 @@ class MutexTests: XCTestCase {
                 mutex.unlock()
             }
         }
-        
+
         queue.resume()
-        queue.sync(flags: .barrier, execute: { })
-        
+        queue.sync(flags: .barrier, execute: {})
+
         XCTAssertEqual(resource.value, 100)
-        
+
         waitForExpectations(timeout: 1.0, handler: nil)
     }
-    
+
     func testTryLock() {
         let expectation = self.expectation(description: "\(#function)\(#line)")
-        
+
         let mutex = Mutex()
         let queue = makeTestQueue()
         let otherQueue = makeTestQueue()
-        
+
         queue.suspend()
-        
+
         queue.async {
             mutex.lock()
             otherQueue.async {
@@ -49,17 +49,19 @@ class MutexTests: XCTestCase {
             usleep(25000)
             mutex.unlock()
         }
-        
+
         queue.resume()
-        
-        queue.sync(flags: .barrier, execute: { })
-        
+
+        queue.sync(flags: .barrier, execute: {})
+
         waitForExpectations(timeout: 1.0, handler: nil)
     }
-    
+
     func makeTestQueue() -> DispatchQueue {
-        return DispatchQueue(label: "com.swiftrewriter.utilstests.mutex.queue",
-                             attributes: .concurrent)
+        return DispatchQueue(
+            label: "com.swiftrewriter.utilstests.mutex.queue",
+            attributes: .concurrent
+        )
     }
 }
 

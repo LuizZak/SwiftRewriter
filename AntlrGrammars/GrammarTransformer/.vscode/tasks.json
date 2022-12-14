@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "swift",
+			"args": [
+				"build",
+				"--build-tests"
+			],
+			"cwd": "/home/luiz/dev/SwiftRewriter/AntlrGrammars/GrammarTransformer",
+			"problemMatcher": [
+				"$swiftc"
+			],
+			"group": "build",
+			"label": "swift: Build All AntlrGrammars",
+			"detail": "swift build --build-tests"
+		}
+	]
+}

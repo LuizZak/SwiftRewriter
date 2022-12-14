@@ -1,0 +1,27 @@
+import Utils
+import GrammarModelBase
+
+public class ObjcTypeNameNode: ObjcASTNode {
+    /// Full type name
+    public var type: ObjcType
+    
+    public override var shortDescription: String {
+        type.description
+    }
+    
+    public init(
+        type: ObjcType,
+        isInNonnullContext: Bool,
+        location: SourceLocation = .invalid,
+        length: SourceLength = .zero
+    ) {
+    
+        self.type = type
+        
+        super.init(
+            isInNonnullContext: isInNonnullContext,
+            location: location,
+            length: length
+        )
+    }
+}

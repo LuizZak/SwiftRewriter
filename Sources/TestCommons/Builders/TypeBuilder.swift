@@ -3,10 +3,17 @@ import Intentions
 import KnownType
 
 public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
-    var targetType: T
+    var targetType: T {
+        get {
+            declaration
+        }
+        set {
+            declaration = newValue
+        }
+    }
     
     public init(targetType: T) {
-        self.targetType = targetType
+        super.init(declaration: targetType)
     }
     
     @discardableResult
@@ -16,44 +23,54 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     }
     
     @discardableResult
-    public func addComment(_ comment: String) -> TypeBuilder {
+    public func addComment(_ comment: SwiftComment) -> TypeBuilder {
         targetType.precedingComments.append(comment)
         return self
     }
     
     @discardableResult
-    public func addComments(_ comments: [String]) -> TypeBuilder {
-        targetType.precedingComments.append(contentsOf: comments)
+    public func addComments(_ comments: [SwiftComment]) -> TypeBuilder {
+        targetType.precedingComments.append(
+            contentsOf: comments
+        )
         return self
     }
     
     @discardableResult
-    public func createProperty(named name: String,
-                               type: SwiftType,
-                               objcAttributes: [ObjcPropertyAttribute] = []) -> TypeBuilder {
+    public func createProperty(
+        named name: String,
+        type: SwiftType,
+        objcAttributes: [ObjcPropertyAttribute] = []
+    ) -> TypeBuilder {
         
         createProperty(named: name, type: type, mode: .asField, objcAttributes: objcAttributes)
     }
     
     @discardableResult
-    public func createProperty(named name: String,
-                               type: SwiftType,
-                               mode: PropertyGenerationIntention.Mode = .asField,
-                               objcAttributes: [ObjcPropertyAttribute] = [],
-                               builder: (PropertyBuilder) -> Void = emptyInit) -> TypeBuilder {
+    public func createProperty(
+        named name: String,
+        type: SwiftType,
+        mode: PropertyGenerationIntention.Mode = .asField,
+        objcAttributes: [ObjcPropertyAttribute] = [],
+        builder: (PropertyBuilder) -> Void = emptyInit
+    ) -> TypeBuilder {
         
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         
         let prop: PropertyGenerationIntention
         
         if targetType is ProtocolGenerationIntention {
-            prop = ProtocolPropertyGenerationIntention(name: name,
-                                                       storage: storage,
-                                                       objcAttributes: objcAttributes)
+            prop = ProtocolPropertyGenerationIntention(
+                name: name,
+                storage: storage,
+                objcAttributes: objcAttributes
+            )
         } else {
-            prop = PropertyGenerationIntention(name: name,
-                                               storage: storage,
-                                               objcAttributes: objcAttributes)
+            prop = PropertyGenerationIntention(
+                name: name,
+                storage: storage,
+                objcAttributes: objcAttributes
+            )
         }
         
         prop.mode = mode
@@ -68,10 +85,15 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     }
     
     @discardableResult
-    public func createConstructor(withParameters parameters: [ParameterSignature] = [],
-                                  builder: (InitializerBuilder) -> Void = emptyInit) -> TypeBuilder {
+    public func createConstructor(
+        withParameters parameters: [ParameterSignature] = [],
+        builder: (InitializerBuilder) -> Void = emptyInit
+    ) -> TypeBuilder {
         
-        let ctor = InitGenerationIntention(parameters: parameters, builder: builder)
+        let ctor = InitGenerationIntention(
+            parameters: parameters,
+            builder: builder
+        )
         
         targetType.addConstructor(ctor)
         
@@ -80,7 +102,9 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     
     @discardableResult
     public func createVoidMethod(
-        named name: String, builder: (MethodBuilder) -> Void = emptyInit) -> TypeBuilder {
+        named name: String,
+        builder: (MethodBuilder) -> Void = emptyInit
+    ) -> TypeBuilder {
         
         let signature = FunctionSignature(name: name, parameters: [])
         
@@ -88,24 +112,30 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     }
     
     @discardableResult
-    public func createMethod(named name: String,
-                             returnType: SwiftType = .void,
-                             parameters: [ParameterSignature] = [],
-                             isStatic: Bool = false,
-                             builder: (MethodBuilder) -> Void = emptyInit) -> TypeBuilder {
+    public func createMethod(
+        named name: String,
+        returnType: SwiftType = .void,
+        parameters: [ParameterSignature] = [],
+        isStatic: Bool = false,
+        builder: (MethodBuilder) -> Void = emptyInit
+    ) -> TypeBuilder {
         
-        let signature = FunctionSignature(name: name,
-                                          parameters: parameters,
-                                          returnType: returnType,
-                                          isStatic: isStatic)
+        let signature = FunctionSignature(
+            name: name,
+            parameters: parameters,
+            returnType: returnType,
+            isStatic: isStatic
+        )
         
         return createMethod(signature, builder: builder)
     }
     
     @discardableResult
-    public func createMethod(_ signatureString: String,
-                             isStatic: Bool = false,
-                             builder: (MethodBuilder) -> Void = emptyInit) -> TypeBuilder {
+    public func createMethod(
+        _ signatureString: String,
+        isStatic: Bool = false,
+        builder: (MethodBuilder) -> Void = emptyInit
+    ) -> TypeBuilder {
         
         var signature = try! FunctionSignatureParser.parseSignature(from: signatureString)
         signature.isStatic = isStatic
@@ -114,8 +144,10 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     }
     
     @discardableResult
-    public func createMethod(_ signature: FunctionSignature,
-                             builder: (MethodBuilder) -> Void = emptyInit) -> TypeBuilder {
+    public func createMethod(
+        _ signature: FunctionSignature,
+        builder: (MethodBuilder) -> Void = emptyInit
+    ) -> TypeBuilder {
         
         let method: MethodGenerationIntention
         
@@ -135,26 +167,34 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     }
     
     @discardableResult
-    public func createSubscript(_ parameters: String,
-                                returnType: SwiftType,
-                                builder: (SubscriptBuilder) -> Void = emptyInit) -> TypeBuilder {
+    public func createSubscript(
+        _ parameters: String,
+        returnType: SwiftType,
+        builder: (SubscriptBuilder) -> Void = emptyInit
+    ) -> TypeBuilder {
         
         let params = try! FunctionSignatureParser.parseParameters(from: parameters)
         
-        return createSubscript(parameters: params,
-                               returnType: returnType,
-                               builder: builder)
+        return createSubscript(
+            parameters: params,
+            returnType: returnType,
+            builder: builder
+        )
     }
     
     @discardableResult
-    public func createSubscript(parameters: [ParameterSignature],
-                                returnType: SwiftType,
-                                builder: (SubscriptBuilder) -> Void = emptyInit) -> TypeBuilder {
+    public func createSubscript(
+        parameters: [ParameterSignature],
+        returnType: SwiftType,
+        builder: (SubscriptBuilder) -> Void = emptyInit
+    ) -> TypeBuilder {
         
-        let sub = SubscriptGenerationIntention(parameters: parameters,
-                                               returnType: returnType,
-                                               mode: .getter(FunctionBodyIntention(body: [])),
-                                               builder: builder)
+        let sub = SubscriptGenerationIntention(
+            parameters: parameters,
+            returnType: returnType,
+            mode: .getter(FunctionBodyIntention(body: [])),
+            builder: builder
+        )
         
         targetType.addSubscript(sub)
         
@@ -217,7 +257,8 @@ public extension TypeBuilder where T: BaseClassIntention {
                 propertyName: propertyName,
                 ivarName: variableName ?? propertyName,
                 isExplicit: false,
-                type: .synthesize)
+                type: .synthesize
+            )
         
         targetType.addSynthesization(intent)
         
@@ -243,6 +284,13 @@ public extension TypeBuilder where T: ClassGenerationIntention {
     func inherit(from className: String) -> TypeBuilder {
         targetType.superclassName = className
         
+        return self
+    }
+
+    @discardableResult
+    func setIsFinal(_ isFinal: Bool) -> TypeBuilder {
+        targetType.isFinal = isFinal
+
         return self
     }
 }

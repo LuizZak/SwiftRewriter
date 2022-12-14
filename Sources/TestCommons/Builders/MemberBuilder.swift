@@ -1,12 +1,27 @@
 import SwiftAST
 import Intentions
 import KnownType
+import GrammarModelBase
 
 public class MemberBuilder<T: MemberGenerationIntention>: DeclarationBuilder<T> {
-    var targetMember: T
+    var targetMember: T {
+        get {
+            declaration
+        }
+        set {
+            declaration = newValue
+        }
+    }
     
     public init(targetMember: T) {
-        self.targetMember = targetMember
+        super.init(declaration: targetMember)
+    }
+
+    @discardableResult
+    public func setSource(_ source: ASTNode) -> MemberBuilder {
+        targetMember.source = source
+
+        return self
     }
     
     @discardableResult
@@ -41,14 +56,16 @@ public class MemberBuilder<T: MemberGenerationIntention>: DeclarationBuilder<T> 
     }
     
     @discardableResult
-    public func addComment(_ comment: String) -> MemberBuilder {
+    public func addComment(_ comment: SwiftComment) -> MemberBuilder {
         targetMember.precedingComments.append(comment)
         return self
     }
     
     @discardableResult
-    public func addComments(_ comments: [String]) -> MemberBuilder {
-        targetMember.precedingComments.append(contentsOf: comments)
+    public func addComments(_ comments: [SwiftComment]) -> MemberBuilder {
+        targetMember.precedingComments.append(
+            contentsOf: comments
+        )
         return self
     }
     
@@ -139,17 +156,21 @@ public extension MemberBuilder where T: PropertyGenerationIntention {
     }
     
     @discardableResult
-    func setAsGetterSetter(getter: CompoundStatement,
-                           setter: PropertyGenerationIntention.Setter) -> MemberBuilder {
+    func setAsGetterSetter(
+        getter: CompoundStatement,
+        setter: PropertyGenerationIntention.Setter
+    ) -> MemberBuilder {
         
-        targetMember.mode = .property(get: FunctionBodyIntention(body: getter),
-                                      set: setter)
+        targetMember.mode = .property(
+            get: FunctionBodyIntention(body: getter),
+            set: setter
+        )
         
         return self
     }
     
     @discardableResult
-    func setInitialValue(expression: Expression?) -> MemberBuilder {
+    func setComputedValue(expression: Expression?) -> MemberBuilder {
         targetMember.mode = .computed(FunctionBodyIntention(body: []))
         
         return self
@@ -167,6 +188,13 @@ public extension MemberBuilder where T: PropertyGenerationIntention {
         
         return self
     }
+
+    @discardableResult
+    func setInitialExpression(_ expression: Expression) -> MemberBuilder {
+        targetMember.initialValue = expression
+
+        return self
+    }
 }
 
 public extension MemberBuilder where T: SubscriptGenerationIntention {
@@ -178,11 +206,15 @@ public extension MemberBuilder where T: SubscriptGenerationIntention {
     }
     
     @discardableResult
-    func setAsGetterSetter(getter: CompoundStatement,
-                           setter: PropertyGenerationIntention.Setter) -> MemberBuilder {
+    func setAsGetterSetter(
+        getter: CompoundStatement,
+        setter: SubscriptGenerationIntention.Setter
+    ) -> MemberBuilder {
         
-        targetMember.mode = .getterAndSetter(get: FunctionBodyIntention(body: getter),
-                                             set: setter)
+        targetMember.mode = .getterAndSetter(
+            get: FunctionBodyIntention(body: getter),
+            set: setter
+        )
         
         return self
     }
@@ -225,8 +257,14 @@ public extension MethodGenerationIntention {
 }
 
 public extension InitGenerationIntention {
-    convenience init(parameters: [ParameterSignature], builder: (InitializerBuilder) -> Void) {
-        self.init(parameters: parameters)
+    convenience init(
+        parameters: [ParameterSignature],
+        builder: (InitializerBuilder) -> Void
+    ) {
+        self.init(
+            parameters: parameters,
+            functionBody: FunctionBodyIntention(body: [])
+        )
         
         builder(InitializerBuilder(targetMember: self))
     }
@@ -239,10 +277,12 @@ public extension InitGenerationIntention {
 }
 
 public extension SubscriptGenerationIntention {
-    convenience init(parameters: [ParameterSignature],
-                     returnType: SwiftType,
-                     mode: SubscriptGenerationIntention.Mode,
-                     builder: (SubscriptBuilder) -> Void) {
+    convenience init(
+        parameters: [ParameterSignature],
+        returnType: SwiftType,
+        mode: SubscriptGenerationIntention.Mode,
+        builder: (SubscriptBuilder) -> Void
+    ) {
         
         self.init(parameters: parameters, returnType: returnType, mode: mode)
         
@@ -252,7 +292,7 @@ public extension SubscriptGenerationIntention {
 
 public extension DeinitGenerationIntention {
     convenience init(builder: (DeinitBuilder) -> Void) {
-        self.init()
+        self.init(functionBody: FunctionBodyIntention(body: []))
         
         builder(DeinitBuilder(targetMember: self))
     }

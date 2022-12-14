@@ -13,7 +13,7 @@
 					"column": 3,
 					"severity": 4,
 					"message": 5,
-				}
+				},
 			},
 			// Fix to detect unit test executions, which do not feature a column during reporting
 			{
@@ -25,19 +25,28 @@
 					"line": 2,
 					"severity": 3,
 					"message": 4,
-				}
-			}
+				},
+			},
 		],
 		"tasks": [
             {
 				"label": "Build (debug)",
 				"type": "shell",
 				"command": "swift",
+				"group": {
+					"kind": "build",
+					"isDefault": true,
+				},
 				"args": [
 					"build",
 					"--build-tests",
 				],
 				"detail": "swift build --build-tests",
+			},
+            {
+				"label": "Build (debug) and reload tests",
+				"command": "${command:test-explorer.reload}",
+				"dependsOn": "Build (debug)"
 			},
             {
 				"label": "Build (release)",
@@ -57,6 +66,10 @@
 				"label": "Test",
 				"type": "shell",
 				"command": "swift",
+				"group": {
+					"kind": "test",
+					"isDefault": true,
+				},
 				"args": [
 					"test",
 					"--enable-code-coverage",
@@ -71,6 +84,7 @@
 				"args": [
 					"test",
 					"-c", "release",
+					"-Xswiftc",
 				],
 				"detail": "swift test -c=release",
 			},
@@ -82,8 +96,8 @@
 			"path": ".",
 		},
 		{
-			"name": "AntlrGrammars",
-			"path": "AntlrGrammars",
+			"name": "GrammarTransformer",
+			"path": "AntlrGrammars/GrammarTransformer",
 		},
 		{
 			"name": "Swift Package Dependencies",
@@ -94,6 +108,54 @@
 			"path": ".build",
 		},
 	],
+	"launch": {
+		"inputs": [
+			{
+				"id": "test_filter",
+				"type": "promptString",
+				"description": "Filter to pass to swift test --filter"
+			},
+		],
+		"configurations": [
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Debug SwiftRewriter",
+				"program": "${workspaceFolder:SwiftRewriter}/.build/debug/SwiftRewriter",
+				"args": [],
+				"cwd": "${workspaceFolder:SwiftRewriter}",
+				"preLaunchTask": "Build (debug)"
+			},
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Release SwiftRewriter",
+				"program": "${workspaceFolder:SwiftRewriter}/.build/release/SwiftRewriter",
+				"args": [],
+				"cwd": "${workspaceFolder:SwiftRewriter}",
+				"preLaunchTask": "Build (release)"
+			},
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Test SwiftRewriter",
+				"program": "./.build/debug/SwiftRewriterPackageTests.xctest",
+				"cwd": "${workspaceFolder:SwiftRewriter}",
+				"preLaunchTask": "Build (debug)"
+			},
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Test SwiftRewriter (filtered)",
+				"program": "./.build/debug/SwiftRewriterPackageTests.xctest",
+				"args": [
+					"${input:test_filter}",
+				],
+				"cwd": "${workspaceFolder:SwiftRewriter}",
+				"preLaunchTask": "Build (debug)",
+			},
+		]
+	},
 	"settings": {
 		"files.eol": "\n",
 		"files.insertFinalNewline": true,
@@ -101,35 +163,31 @@
 			".git": true,
 			".build": true,
 			".*.sw?": true,
-			"**/.DS_Store": true
+			"**/.DS_Store": true,
 		},
 		"commentAnchors.workspace.excludeFiles": "**/{node_modules,.git,.idea,target,out,build,vendor,.build,.swiftpm}/**/*",
-		"commentAnchors.tags.list": [
-			{
-				"tag": "MARK",
-				"iconColor": "default",
-				"highlightColor": "#A8C023",
-				"scope": "file"
-			},
-			{
-				"tag": "TODO",
-				"iconColor": "blue",
-				"highlightColor": "#3ea8ff",
-				"scope": "workspace"
-			},
-			{
-				"tag": "FIXME",
-				"iconColor": "red",
-				"highlightColor": "#F44336",
-				"scope": "workspace"
-			},
-			{
-				"tag": "NOTE",
-				"iconColor": "orange",
-				"highlightColor": "#FFB300",
-				"scope": "file"
-			},
-		],
+		"commentAnchors.tags.anchors": {
+            "MARK:": {
+                "iconColor": "default",
+                "highlightColor": "#A8C023",
+                "scope": "file",
+            },
+            "TODO:": {
+                "iconColor": "blue",
+                "highlightColor": "#3ea8ff",
+                "scope": "workspace",
+            },
+            "FIXME:": {
+                "iconColor": "red",
+                "highlightColor": "#F44336",
+                "scope": "workspace",
+            },
+            "NOTE:": {
+                "iconColor": "orange",
+                "highlightColor": "#FFB300",
+                "scope": "file",
+            },
+        },
 		
 		"python.formatting.provider": "black",
     	"python.linting.enabled": true,
@@ -147,32 +205,61 @@
 
 		"swift.buildArguments": [],
 
+		"swift.autoGenerateLaunchConfigurations": false,
+
 		"ShortcutMenuBar.userButton01Command": "workbench.action.tasks.runTask|Build (debug)",
 		"ShortcutMenuBar.userButton02Command": "workbench.action.tasks.runTask|Test",
 		"ShortcutMenuBar.userButton03Command": "workbench.action.tasks.runTask|Test (release)",
 		"cSpell.words": [
-			"Antlr",
+			"antlr",
+			"autoreleasepool",
 			"constexpr",
 			"declspec",
+			"deinitializer",
+			"deinitializers",
+			"Dlanguage",
+			"dont",
+			"Fallthroughs",
+			"Graphviz",
 			"Initializable",
 			"instancetype",
+			"ivar",
+			"ivars",
 			"kindof",
+			"Labelable",
 			"MSVC",
+			"mutex",
+			"mypy",
 			"nonnull",
 			"noreturn",
+			"penwidth",
+			"rankdir",
 			"repool",
+			"srcroot",
 			"stdcall",
 			"sugarize",
 			"swiftpm",
+			"swiftrewriter",
+			"swiftwriter",
+			"synthesization",
 			"synthesizations",
+			"Trivias",
 			"typealiases",
+			"unalias",
+			"unaliased",
+			"uniquing",
 			"Unretained",
-			"whitespaces"
+			"whitespaces",
+			"Xexact"
 		],
+		"swiftTestFileGen.gotoTestFile.useFilenameHeuristics": true,
+		"swiftTestFileGen.gotoTestFile.heuristicFilenamePattern": "$1Tests"
 	},
 	"extensions": {
 		"recommendations": [
-			"exodiusstudios.comment-anchors"
-		]
-	}
+			"exodiusstudios.comment-anchors",
+			"vknabel.swift-coverage",
+			"luizzak.swifttestfilegen",
+		],
+	},
 }

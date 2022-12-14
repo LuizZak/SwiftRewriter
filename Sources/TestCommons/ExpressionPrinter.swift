@@ -12,6 +12,6 @@ public enum ExpressionPrinter {
     public static func toString(expression: Expression) -> String {
         let writer = SwiftSyntaxProducer(settings: .default)
         
-        return writer.generateStatement(.expression(expression)).description
+        return writer.generateExpression(expression).description
     }
 }

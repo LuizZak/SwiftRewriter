@@ -257,19 +257,62 @@ private extension Sequence where Element: StringProtocol {
 }
 
 extension VirtualFileDisk: FileProvider {
-    public func enumerator(atPath path: String) -> [String]? {
+    public func enumerator(atUrl url: URL) -> [URL]? {
         do {
-            return try filesInDirectory(atPath: path, recursive: true)
+            return try filesInDirectory(atPath: url.path, recursive: true).map(URL.init(fileURLWithPath:))
         } catch {
             return nil
         }
     }
-    public func fileExists(atPath path: String) -> Bool {
+
+    public func fileExists(atUrl url: URL) -> Bool {
         do {
-            _ = try file(atPath: path)
+            _ = try file(atPath: url.path)
             return true
         } catch {
             return false
         }
+    }
+    
+    public func fileExists(atUrl url: URL, isDirectory: inout Bool) -> Bool {
+        if (try? directory(atPath: url.path)) != nil {
+            isDirectory = true
+            return true
+        }
+        if (try? file(atPath: url.path)) != nil {
+            isDirectory = false
+            return true
+        }
+        
+        isDirectory = false
+        return false
+    }
+
+    public func directoryExists(atUrl url: URL) -> Bool {
+        (try? directory(atPath: url.path)) != nil
+    }
+
+    public func contentsOfFile(atUrl url: URL) throws -> Data {
+        try contentsOfFile(atPath: url.path)
+    }
+
+    public func contentsOfDirectory(atUrl url: URL, shallow: Bool) throws -> [URL] {
+        do {
+            let contents = try contentsOfDirectory(atPath: url.path).map(URL.init(fileURLWithPath:))
+
+            if shallow {
+                return contents
+            } else {
+                return try directory(atPath: url.path).directories.reduce(contents) {
+                    try $0 + contentsOfDirectory(atUrl: URL(fileURLWithPath: $1.fullPath), shallow: false)
+                }
+            }
+        } catch {
+            return []
+        }
+    }
+
+    public func homeDirectoryForCurrentUser() -> URL {
+        URL(fileURLWithPath: "/home", isDirectory: true)
     }
 }

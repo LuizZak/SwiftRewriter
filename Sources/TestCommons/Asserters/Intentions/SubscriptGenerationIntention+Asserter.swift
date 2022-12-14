@@ -96,6 +96,7 @@ public extension Asserter where Object: SubscriptGenerationIntention {
             param.inClosure(closure)
         }.map(self)
     }
+    
     /// Asserts that the underlying `SubscriptGenerationIntention` being tested
     /// has a specified compound statement as its getter `FunctionBodyIntention`.
     ///
@@ -103,12 +104,12 @@ public extension Asserter where Object: SubscriptGenerationIntention {
     /// further tests.
     @discardableResult
     func assert(
-        getterBody: CompoundStatement?,
+        getterBody: CompoundStatement,
         file: StaticString = #file,
         line: UInt = #line
     ) -> Self? {
         
-        asserter(forKeyPath: \.getter?.body) {
+        asserter(forKeyPath: \.getter.body) {
             $0.assert(statementEquals: getterBody, file: file, line: line)
         }
     }

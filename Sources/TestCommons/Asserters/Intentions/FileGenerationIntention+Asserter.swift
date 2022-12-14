@@ -95,7 +95,8 @@ public extension Asserter where Object == FileGenerationIntention {
             $0.assert(equals: targetPath, file: file, line: line)
         }
     }
-
+    
+    /*
     /// Asserts that the underlying `FileGenerationIntention` object being tested
     /// has a `preprocessorDirectives` with `string` values that match a specified
     /// array of strings, in order.
@@ -119,6 +120,7 @@ public extension Asserter where Object == FileGenerationIntention {
             }
         }
     }
+    */
 
     /// Asserts that the underlying `FileGenerationIntention` object being tested
     /// has a `importDirectives` that match a specified value.

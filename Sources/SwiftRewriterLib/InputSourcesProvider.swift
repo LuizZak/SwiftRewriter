@@ -1,7 +1,6 @@
-import GrammarModels
-import ObjcParser
+import Utils
 
-/// Protocol to implement in order to feed input files to a `SwiftRewriter` instance.
+/// Protocol to implement in order to feed input files to a `ObjectiveC2SwiftRewriter` instance.
 public protocol InputSourcesProvider {
     func sources() -> [InputSource]
 }
@@ -19,7 +18,7 @@ public struct ArrayInputSourcesProvider: InputSourcesProvider {
     }
 }
 
-/// Represents an input source for Obj-c file
+/// Represents an input source code.
 public protocol InputSource {
     /// Whether this is a primary input source.
     /// Secondary sources are used to read related Objective-C code but do not
