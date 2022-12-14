@@ -10,7 +10,10 @@ struct SwiftRewriterCommand: ParsableCommand {
         Main frontend API for SwiftRewriter. Allows selection of specific source \
         language modes.
         """,
-        subcommands: [ObjectiveCCommand.self, JavaScriptCommand.self],
+        subcommands: [
+            ObjectiveCCommand.self,
+            JavaScriptCommand.self,
+        ],
         defaultSubcommand: ObjectiveCCommand.self
     )
     

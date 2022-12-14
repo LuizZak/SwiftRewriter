@@ -166,6 +166,38 @@ let objcFrontend: [Target] = [
         ],
         path: "Sources/Frontend/Objective-C/ObjectiveCFrontend"
     ),
+    .testTarget(
+        name: "ObjcParserTests",
+        dependencies: [
+            "ObjcGrammarModels",
+            "ObjcParser",
+            "TestCommons",
+        ],
+        path: "Tests/Frontend/Objective-C/ObjcParserTests"
+    ),
+    .testTarget(
+        name: "ObjcGrammarModelsTests",
+        dependencies: [
+            "ObjcGrammarModels",
+        ],
+        path: "Tests/Frontend/Objective-C/ObjcGrammarModelsTests"
+    ),
+    .testTarget(
+        name: "GlobalsProvidersTests",
+        dependencies: [
+            "GlobalsProviders",
+            "SwiftAST", "SwiftRewriterLib", "TestCommons", "TypeSystem",
+        ],
+        path: "Tests/Frontend/Objective-C/GlobalsProvidersTests"
+    ),
+    .testTarget(
+        name: "ObjectiveCFrontendTests",
+        dependencies: [
+            "ObjectiveCFrontend",
+            "TestCommons",
+        ],
+        path: "Tests/Frontend/Objective-C/ObjectiveCFrontendTests"
+    ),
 ]
 
 let jsFrontend: [Target] = [
@@ -204,6 +236,57 @@ let jsFrontend: [Target] = [
         ],
         path: "Sources/Frontend/JavaScript/JavaScriptFrontend"
     ),
+    .testTarget(
+        name: "JsParserTests",
+        dependencies: [
+            "JsParser", "TestCommons",
+        ],
+        path: "Tests/Frontend/JavaScript/JsParserTests",
+        resources: [
+            .copy("Fixtures/bezier.js"),
+            .copy("Fixtures/utils.js"),
+            .copy("Fixtures/EnhancedRegularExpression.js"),
+            .copy("Fixtures/Function.js"),
+            .copy("Fixtures/TemplateStrings.js"),
+            .copy("Fixtures/Classes.js"),
+            .copy("Fixtures/Stage3.js"),
+            .copy("Fixtures/ClassInNonGlobalStrict.js"),
+            .copy("Fixtures/ObjectInitializer.js"),
+            .copy("Fixtures/DestructuringAssignment.js"),
+            .copy("Fixtures/SymbolType.js"),
+            .copy("Fixtures/Generators.js"),
+            .copy("Fixtures/LetAndAsync.js"),
+            .copy("Fixtures/Iterators.js"),
+            .copy("Fixtures/Issue2178NewExpression.js"),
+            .copy("Fixtures/EnhancedObjectProperties.js"),
+            .copy("Fixtures/Modules.js"),
+            .copy("Fixtures/TypedArrays.js"),
+            .copy("Fixtures/MapSetAndWeakMapWeakSet.js"),
+            .copy("Fixtures/TemplateLiterals.js"),
+            .copy("Fixtures/ExtendedLiterals.js"),
+            .copy("Fixtures/Constants.js"),
+            .copy("Fixtures/Promises.js"),
+            .copy("Fixtures/Outdated.js"),
+            .copy("Fixtures/Misc.js"),
+            .copy("Fixtures/ExtendedParameterHandling.js"),
+            .copy("Fixtures/Scoping.js"),
+            .copy("Fixtures/NewBuildInMethods.js"),
+            .copy("Fixtures/StrictGlobal.js"),
+            .copy("Fixtures/ArrowFunctions.js"),
+            .copy("Fixtures/AsyncAwait.js"),
+            .copy("Fixtures/StrictFunctions.js"),
+            .copy("Fixtures/Meta-Programming.js"),
+            .copy("Fixtures/InternationalizationAndLocalization.js"),
+        ]
+    ),
+    .testTarget(
+        name: "JavaScriptFrontendTests",
+        dependencies: [
+            "JavaScriptFrontend",
+            "TestCommons",
+        ],
+        path: "Tests/Frontend/JavaScript/JavaScriptFrontendTests"
+    ),
 ]
 
 //
@@ -232,7 +315,10 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50700.1")),
         .package(url: "https://github.com/apple/swift-format.git", .exact("0.50700.1")),
     ],
-    targets: core + objcFrontend + jsFrontend + [
+    targets: core
+        + objcFrontend
+        + jsFrontend
+        + [
         .target(
             name: "Utils",
             dependencies: [],
@@ -246,16 +332,16 @@ let package = Package(
                 .product(name: "SwiftFormat", package: "swift-format"),
                 .product(name: "SwiftFormatConfiguration", package: "swift-format"),
                 .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
-                // Objective-C
-                "ObjcGrammarModels", "ObjcParser",
-                // JavaScript
-                "JsGrammarModels", "JsParser",
                 "SwiftAST",
                 "Analysis", "TypeDefinitions", "Utils", "Intentions",
                 "TypeSystem", "IntentionPasses", "KnownType",
                 "WriterTargetOutput", "SwiftSyntaxSupport",
                 "GlobalsProviders", "ExpressionPasses",
                 "SourcePreprocessors", "SwiftSyntaxRewriterPasses",
+                // Objective-C
+                "ObjcGrammarModels", "ObjcParser",
+                // JavaScript
+                "JsGrammarModels", "JsParser",
             ],
             path: "Sources/SwiftRewriterLib"
         ),
@@ -276,11 +362,13 @@ let package = Package(
                 .product(name: "Console", package: "console"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "SwiftFormatConfiguration", package: "swift-format"),
-                "SwiftRewriterCLI",
-                "ObjectiveCFrontend", "SwiftRewriterLib", "ObjcParser", "ObjcGrammarModels",
-                "JavaScriptFrontend",
+                "SwiftRewriterCLI", "SwiftRewriterLib",
                 "ExpressionPasses", "Utils", "SourcePreprocessors", "SwiftAST",
                 "IntentionPasses", "MiniLexer", "GlobalsProviders", "Commons",
+                // Objective-C frontend
+                "ObjectiveCFrontend", "ObjcParser", "ObjcGrammarModels",
+                // JavaScript
+                "JavaScriptFrontend",
             ],
             path: "Sources/SwiftRewriter"
         ),
@@ -318,22 +406,6 @@ let package = Package(
                 "TestCommons",
             ],
             path: "Tests/Core/WriterTargetOutputTests"
-        ),
-        .testTarget(
-            name: "ObjcParserTests",
-            dependencies: [
-                "ObjcGrammarModels",
-                "ObjcParser",
-                "TestCommons",
-            ],
-            path: "Tests/Frontend/Objective-C/ObjcParserTests"
-        ),
-        .testTarget(
-            name: "ObjcGrammarModelsTests",
-            dependencies: [
-                "ObjcGrammarModels",
-            ],
-            path: "Tests/Frontend/Objective-C/ObjcGrammarModelsTests"
         ),
         .testTarget(
             name: "GrammarModelBaseTests",
@@ -451,14 +523,6 @@ let package = Package(
             path: "Tests/Core/IntentionPassesTests"
         ),
         .testTarget(
-            name: "GlobalsProvidersTests",
-            dependencies: [
-                "GlobalsProviders",
-                "SwiftAST", "SwiftRewriterLib", "TestCommons", "TypeSystem",
-            ],
-            path: "Tests/Frontend/Objective-C/GlobalsProvidersTests"
-        ),
-        .testTarget(
             name: "AnalysisTests",
             dependencies: [
                 "Analysis",
@@ -475,65 +539,6 @@ let package = Package(
                 "Utils", "TypeSystem",
             ],
             path: "Tests/TestCommonsTests"
-        ),
-        .testTarget(
-            name: "ObjectiveCFrontendTests",
-            dependencies: [
-                "ObjectiveCFrontend",
-                "TestCommons",
-            ],
-            path: "Tests/Frontend/Objective-C/ObjectiveCFrontendTests"
-        ),
-        .testTarget(
-            name: "JsParserTests",
-            dependencies: [
-                "JsParser", "TestCommons",
-            ],
-            path: "Tests/Frontend/JavaScript/JsParserTests",
-            resources: [
-                .copy("Fixtures/bezier.js"),
-                .copy("Fixtures/utils.js"),
-                .copy("Fixtures/EnhancedRegularExpression.js"),
-                .copy("Fixtures/Function.js"),
-                .copy("Fixtures/TemplateStrings.js"),
-                .copy("Fixtures/Classes.js"),
-                .copy("Fixtures/Stage3.js"),
-                .copy("Fixtures/ClassInNonGlobalStrict.js"),
-                .copy("Fixtures/ObjectInitializer.js"),
-                .copy("Fixtures/DestructuringAssignment.js"),
-                .copy("Fixtures/SymbolType.js"),
-                .copy("Fixtures/Generators.js"),
-                .copy("Fixtures/LetAndAsync.js"),
-                .copy("Fixtures/Iterators.js"),
-                .copy("Fixtures/Issue2178NewExpression.js"),
-                .copy("Fixtures/EnhancedObjectProperties.js"),
-                .copy("Fixtures/Modules.js"),
-                .copy("Fixtures/TypedArrays.js"),
-                .copy("Fixtures/MapSetAndWeakMapWeakSet.js"),
-                .copy("Fixtures/TemplateLiterals.js"),
-                .copy("Fixtures/ExtendedLiterals.js"),
-                .copy("Fixtures/Constants.js"),
-                .copy("Fixtures/Promises.js"),
-                .copy("Fixtures/Outdated.js"),
-                .copy("Fixtures/Misc.js"),
-                .copy("Fixtures/ExtendedParameterHandling.js"),
-                .copy("Fixtures/Scoping.js"),
-                .copy("Fixtures/NewBuildInMethods.js"),
-                .copy("Fixtures/StrictGlobal.js"),
-                .copy("Fixtures/ArrowFunctions.js"),
-                .copy("Fixtures/AsyncAwait.js"),
-                .copy("Fixtures/StrictFunctions.js"),
-                .copy("Fixtures/Meta-Programming.js"),
-                .copy("Fixtures/InternationalizationAndLocalization.js"),
-            ]
-        ),
-        .testTarget(
-            name: "JavaScriptFrontendTests",
-            dependencies: [
-                "JavaScriptFrontend",
-                "TestCommons",
-            ],
-            path: "Tests/Frontend/JavaScript/JavaScriptFrontendTests"
         ),
         .testTarget(
             name: "SwiftRewriterTests",
