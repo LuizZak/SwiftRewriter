@@ -320,19 +320,25 @@ public class ObjcParser {
             let utf8Offset = input.utf8.distance(from: input.startIndex, to: range.lowerBound)
             let utf8Length = input.utf8.distance(from: range.lowerBound, to: range.upperBound)
             
-            let location = SourceLocation(line: lineStart,
-                                          column: colStart,
-                                          utf8Offset: utf8Offset)
+            let location = SourceLocation(
+                line: lineStart,
+                column: colStart,
+                utf8Offset: utf8Offset
+            )
             
             let length: SourceLength
             if lineStart == lineEnd {
-                length = SourceLength(newlines: 0,
-                                      columnsAtLastLine: colEnd - colStart,
-                                      utf8Length: utf8Length)
+                length = SourceLength(
+                    newlines: 0,
+                    columnsAtLastLine: colEnd - colStart,
+                    utf8Length: utf8Length
+                )
             } else {
-                length = SourceLength(newlines: lineEnd - lineStart,
-                                      columnsAtLastLine: colEnd - 1,
-                                      utf8Length: utf8Length)
+                length = SourceLength(
+                    newlines: lineEnd - lineStart,
+                    columnsAtLastLine: colEnd - 1,
+                    utf8Length: utf8Length
+                )
             }
             
             let commentString = String(input[range])

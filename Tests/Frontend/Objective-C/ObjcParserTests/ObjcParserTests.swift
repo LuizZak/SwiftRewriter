@@ -39,6 +39,44 @@ class ObjcParserTests: XCTestCase {
         _ = parserTest(source)
     }
 
+    func testParseSpecialCharactersInComment() {
+        let source = """
+            // ©
+            NSString *a;
+            // ©©
+            NSString *const b;
+            """
+        let sut = ObjcParser(string: source)
+        let node = parseTestGlobalContextNode(source: source, parser: sut)
+
+        XCTAssertEqual(sut.comments, [
+            .init(
+                string: "// ©\n",
+                range: 0..<6,
+                location: .init(line: 1, column: 1, utf8Offset: 0),
+                length: .init(newlines: 1, columnsAtLastLine: 0, utf8Length: 6)
+            ),
+            .init(
+                string: "// ©©\n",
+                range: 19..<27,
+                location: .init(line: 3, column: 1, utf8Offset: 19),
+                length: .init(newlines: 1, columnsAtLastLine: 0, utf8Length: 8)
+            )
+        ])
+        Asserter(object: node)
+            .assertChildCount(2)?
+            .asserter(forChildAt: 0) { a in
+                a.assert(isOfType: ObjcVariableDeclarationNode.self)?
+                    .assert(name: "a")?
+                    .assert(type: .pointer("NSString"))
+            }?
+            .asserter(forChildAt: 1) { a in
+                a.assert(isOfType: ObjcVariableDeclarationNode.self)?
+                    .assert(name: "b")?
+                    .assert(type: .pointer("NSString", qualifiers: [.const]))
+            }
+    }
+
     func testParse_detectsNonnullRegions_declarations() {
         let node = parserTest("""
             int a;
@@ -1223,10 +1261,10 @@ extension ObjcParserTests {
     {
         let sut = ObjcParser(string: source)
 
-        return _parseTestGlobalContextNode(source: source, parser: sut, file: file, line: line)
+        return parseTestGlobalContextNode(source: source, parser: sut, file: file, line: line)
     }
 
-    private func _parseTestGlobalContextNode(
+    private func parseTestGlobalContextNode(
         source: String,
         parser: ObjcParser,
         file: StaticString = #filePath,

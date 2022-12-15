@@ -38,7 +38,12 @@ public struct StringCodeSource: CodeSource {
     }
     
     public func utf8Index(forCharOffset offset: Int) -> Int {
-        offset
+        guard let offsetIndex = source.unicodeScalars.index(source.startIndex, offsetBy: offset, limitedBy: source.endIndex) else {
+            return source.count - 1
+        }
+
+        let distance = source.utf8.distance(from: source.startIndex, to: offsetIndex)
+        return distance
     }
     
     public func isEqual(to other: Source) -> Bool {

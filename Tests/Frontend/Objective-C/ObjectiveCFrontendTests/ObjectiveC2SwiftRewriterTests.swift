@@ -3502,4 +3502,60 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testRewriteStringInitializer() {
+        assertRewrite(
+            objc: """
+            NSString *str = @"aStr";
+            
+            void a() {
+                NSString *strLocal = @"aStr"
+                                      " moreStr";
+            }
+            """,
+            swift: """
+            var str: String! = "aStr moreStr"
+
+            func a() {
+                let strLocal = "aStr moreStr"
+            }
+            """
+        )
+    }
+
+    func testRewriteMultiLineStringInitializer() {
+        assertRewrite(
+            objc: """
+            NSString *str = @"aStr"
+                            " moreStr";
+            
+            void a() {
+                NSString *strLocal = @"aStr"
+                                      " moreStr";
+            }
+            """,
+            swift: """
+            var str: String! = "aStr moreStr"
+
+            func a() {
+                let strLocal = "aStr moreStr"
+            }
+            """
+        )
+    }
+
+    func testRewriteCommentSpecialCharactersBug() {
+        assertRewrite(
+            objc: """
+            // ©
+            NSString *const global = @"abc";
+            // ©
+            NSString *otherGlobal = @"def";
+            """,
+            swift: """
+            let global: String! = "abc"
+            var otherGlobal: String! = "def"
+            """
+        )
+    }
 }
