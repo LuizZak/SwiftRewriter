@@ -303,22 +303,17 @@ public class DefinitionCollector {
     }
 
     private func processFunction(
-        _ decl: DeclarationTranslator.ASTNodeDeclaration,
-        rule: DeclarationSyntaxElementType,
-        identifier: DeclarationTranslator.IdentifierInfo,
-        parameters: [DeclarationTranslator.FunctionParameterInfo],
-        returnType: DeclarationTranslator.TypeNameInfo?,
-        isVariadic: Bool,
+        _ decl: DeclarationTranslator.ASTFunctionDefinition,
         notifyDelegate: Bool
     ) -> [ObjcASTNode]? {
 
-        let isNonnull = nodeFactory.isInNonnullContext(identifier.sourceRange)
+        let isNonnull = nodeFactory.isInNonnullContext(decl.identifier.sourceRange)
 
         let parameterList = ObjcParameterListNode(isInNonnullContext: isNonnull)
         parameterList.addChildren(
-            makeParameterList(parameters)
+            makeParameterList(decl.parameters)
         )
-        if isVariadic {
+        if decl.isVariadic {
             let variadicParam = ObjcVariadicParameterNode(isInNonnullContext: isNonnull)
             parameterList.addChild(variadicParam)
         }
@@ -326,24 +321,22 @@ public class DefinitionCollector {
         let node = ObjcFunctionDefinitionNode(isInNonnullContext: isNonnull)
         
         node.addChild(
-            makeIdentifier(identifier)
+            makeIdentifier(decl.identifier)
         )
         node.addChild(parameterList)
 
-        if let returnType {
-            node.addChild(
-                makeTypeNameNode(returnType)
-            )
-        }
+        node.addChild(
+            makeTypeNameNode(decl.returnType)
+        )
 
         node.updateSourceRange()
-        collectComments(node, rule)
+        collectComments(node, decl.rule)
 
         if notifyDelegate {
             delegate?.definitionCollector(
                 self,
                 didDetectFunction: node,
-                from: decl
+                from: .function(decl)
             )
         }
 
@@ -351,38 +344,34 @@ public class DefinitionCollector {
     }
 
     private func processStructOrUnionDecl(
-        _ decl: DeclarationTranslator.ASTNodeDeclaration,
-        rule: DeclarationSyntaxElementType,
-        identifier: DeclarationTranslator.IdentifierInfo?,
-        structDecl: DeclarationExtractor.StructOrUnionSpecifier,
-        fields: [DeclarationTranslator.ASTStructFieldDeclaration],
+        _ decl: DeclarationTranslator.ASTStructOrUnionDeclaration,
         notifyDelegate: Bool
     ) -> [ObjcASTNode]? {
 
-        let nonnull = nodeFactory.isInNonnullContext(rule)
+        let nonnull = nodeFactory.isInNonnullContext(decl.rule)
 
         let node = ObjcStructDeclarationNode(isInNonnullContext: nonnull)
-        nodeFactory.updateSourceLocation(for: node, with: rule)
+        nodeFactory.updateSourceLocation(for: node, with: decl.rule)
 
-        if let identifier {
+        if let identifier = decl.identifier {
             node.addChild(
                 makeIdentifier(identifier)
             )
         }
 
-        let fieldNodes = fields.map(self.makeStructField(_:))
+        let fieldNodes = decl.fields.map(self.makeStructField(_:))
 
         let bodyNode = ObjcStructDeclarationBodyNode(isInNonnullContext: nonnull)
-        nodeFactory.updateSourceLocation(for: bodyNode, with: rule)
+        nodeFactory.updateSourceLocation(for: bodyNode, with: decl.rule)
         
         bodyNode.addChildren(fieldNodes)
         node.addChild(bodyNode)
 
         node.updateSourceRange()
-        collectComments(node, rule)
+        collectComments(node, decl.rule)
 
         // Process comments for each field
-        for (node, field) in zip(fieldNodes, fields) {
+        for (node, field) in zip(fieldNodes, decl.fields) {
             collectComments(node, field.rule)
         }
 
@@ -390,7 +379,7 @@ public class DefinitionCollector {
             delegate?.definitionCollector(
                 self,
                 didDetectStruct: node,
-                from: decl
+                from: .structOrUnionDecl(decl)
             )
         }
 
@@ -398,28 +387,23 @@ public class DefinitionCollector {
     }
 
     private func processEnumDecl(
-        _ decl: DeclarationTranslator.ASTNodeDeclaration,
-        rule: DeclarationSyntaxElementType,
-        identifier: DeclarationTranslator.IdentifierInfo?,
-        typeName: DeclarationTranslator.TypeNameInfo?,
-        enumDecl: DeclarationExtractor.EnumSpecifier,
-        enumerators: [DeclarationTranslator.ASTEnumeratorDeclaration],
+        _ decl: DeclarationTranslator.ASTEnumDeclaration,
         notifyDelegate: Bool
     ) -> [ObjcASTNode]? {
 
-        let nonnull = nodeFactory.isInNonnullContext(rule)
+        let nonnull = nodeFactory.isInNonnullContext(decl.rule)
 
-        let enumeratorNodes = enumerators.map(makeEnumerator(_:))
+        let enumeratorNodes = decl.enumerators.map(makeEnumerator(_:))
 
         let node = ObjcEnumDeclarationNode(isInNonnullContext: nonnull)
-        nodeFactory.updateSourceLocation(for: node, with: rule)
+        nodeFactory.updateSourceLocation(for: node, with: decl.rule)
         
-        if let identifier = identifier {
+        if let identifier = decl.identifier {
             node.addChild(
                 makeIdentifier(identifier)
             )
         }
-        if let typeName = typeName {
+        if let typeName = decl.typeName {
             node.addChild(
                 makeTypeNameNode(typeName)
             )
@@ -428,10 +412,10 @@ public class DefinitionCollector {
         node.addChildren(enumeratorNodes)
 
         node.updateSourceRange()
-        collectComments(node, rule)
+        collectComments(node, decl.rule)
 
         // Process comments for each enumerator
-        for (enumeratorNode, enumerator) in zip(enumeratorNodes, enumerators) {
+        for (enumeratorNode, enumerator) in zip(enumeratorNodes, decl.enumerators) {
             collectComments(enumeratorNode, enumerator.rule)
         }
         
@@ -439,7 +423,7 @@ public class DefinitionCollector {
             delegate?.definitionCollector(
                 self,
                 didDetectEnum: node,
-                from: decl
+                from: .enumDecl(decl)
             )
         }
 
@@ -447,33 +431,29 @@ public class DefinitionCollector {
     }
 
     private func processTypeAlias(
-        _ decl: DeclarationTranslator.ASTNodeDeclaration,
-        rule: DeclarationSyntaxElementType,
-        baseDecl: DeclarationTranslator.ASTNodeDeclaration,
-        typeNode: DeclarationTranslator.TypeNameInfo,
-        alias: DeclarationTranslator.IdentifierInfo,
+        _ decl: DeclarationTranslator.ASTTypedefDeclaration,
         notifyDelegate: Bool
     ) -> [ObjcASTNode]? {
 
-        let nonnull = nodeFactory.isInNonnullContext(rule)
+        let nonnull = nodeFactory.isInNonnullContext(decl.rule)
 
         let node = ObjcTypedefNode(isInNonnullContext: nonnull)
-        nodeFactory.updateSourceLocation(for: node, with: rule)
+        nodeFactory.updateSourceLocation(for: node, with: decl.rule)
 
         node.addChild(
-            makeIdentifier(alias)
+            makeIdentifier(decl.alias)
         )
         node.addChild(
-            makeTypeNameNode(typeNode)
+            makeTypeNameNode(decl.typeNode)
         )
         node.updateSourceRange()
-        collectComments(node, rule)
+        collectComments(node, decl.rule)
 
         if notifyDelegate {
             delegate?.definitionCollector(
                 self,
                 didDetectTypedef: node,
-                from: decl
+                from: .typedef(decl)
             )
         }
 
@@ -531,43 +511,25 @@ public class DefinitionCollector {
 
         case .enumDecl(let astDecl):
             return processEnumDecl(
-                decl,
-                rule: astDecl.rule,
-                identifier: astDecl.identifier,
-                typeName: astDecl.typeName,
-                enumDecl: astDecl.context,
-                enumerators: astDecl.enumerators,
+                astDecl,
                 notifyDelegate: notifyDelegate
             )
 
         case .structOrUnionDecl(let astDecl):
             return processStructOrUnionDecl(
-                decl,
-                rule: astDecl.rule,
-                identifier: astDecl.identifier,
-                structDecl: astDecl.context,
-                fields: astDecl.fields,
+                astDecl,
                 notifyDelegate: notifyDelegate
             )
 
         case .function(let astDecl):
             return processFunction(
-                decl,
-                rule: astDecl.rule,
-                identifier: astDecl.identifier,
-                parameters: astDecl.parameters,
-                returnType: astDecl.returnType,
-                isVariadic: astDecl.isVariadic,
+                astDecl,
                 notifyDelegate: notifyDelegate
             )
 
         case .typedef(let astDecl):
             return processTypeAlias(
-                decl,
-                rule: astDecl.rule,
-                baseDecl: astDecl.baseType,
-                typeNode: astDecl.typeNode,
-                alias: astDecl.alias,
+                astDecl,
                 notifyDelegate: notifyDelegate
             )
         }
