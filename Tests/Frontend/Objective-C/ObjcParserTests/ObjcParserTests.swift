@@ -229,6 +229,23 @@ class ObjcParserTests: XCTestCase {
             }
         }
     }
+
+    func testParseGenericCategoryInterface() {
+        let source = """
+        @interface MyClass<ObjectType> (Category)
+        - (void)categoryMethod;
+        @end
+        """
+        let node = parserTest(source)
+
+        Asserter(object: node).inClosureUnconditional { asserter in
+            asserter.asserter(forChildAt: 0) { type in
+                type.assert(isOfType: ObjcClassCategoryInterfaceNode.self)?
+                    .assert(identifier: "MyClass")?
+                    .assert(categoryName: "Category")
+            }
+        }
+    }
     
     func testParsePropertyAttributes() throws {
         let source = """
@@ -775,6 +792,27 @@ class ObjcParserTests: XCTestCase {
             """
             @class NSArray<__covariant ObjectType>;
             @class NSDictionary<KeyType, __contravariant ValueType>;
+            """
+        )
+    }
+
+    func testParseGenericArgumentsInAtInterfaceDeclarationWithInheritance() {
+        _ = parserTest(
+            """
+            @interface AType<__covariant ObjectType> : NSObject <SomeProtocol, SomeOtherProtocol>
+            @end
+            """
+        )
+    }
+
+    func testParseDoubleNestedGenericType() {
+        _ = parserTest(
+            """
+            @interface AType
+            {
+                NSMutableArray<__kindof id<AProtocol>> *field;
+            }
+            @end
             """
         )
     }

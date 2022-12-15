@@ -187,7 +187,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Class name
-        if let identifier = classInterfaceName.className()?.identifier() {
+        if let identifier = classInterfaceName.identifier() {
             let identifierNode = nodeFactory.makeIdentifier(from: identifier)
             classNode.addChild(identifierNode)
         }
@@ -218,10 +218,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             return
         }
         
-        // Note: In the original Antlr's grammar, 'className' and 'categoryName'
-        // seem to be switched around. We undo that here while parsing.
-        
-        if let className = ctx.categoryName?.identifier() {
+        if let className = ctx.categoryInterfaceName()?.identifier() {
             let identifierNode = nodeFactory.makeIdentifier(from: className)
             classNode.addChild(identifierNode)
         }

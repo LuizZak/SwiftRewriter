@@ -3506,7 +3506,8 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
     func testRewriteStringInitializer() {
         assertRewrite(
             objc: """
-            NSString *str = @"aStr";
+            NSString *str = @"aStr"
+                             " moreStr";
             
             void a() {
                 NSString *strLocal = @"aStr"
