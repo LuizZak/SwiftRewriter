@@ -123,7 +123,7 @@ public extension Optional {
     /// used as a return value for a differently typed function or closure.
     func mapAsserter<TOld, TNew>(
         _ newAsserter: Asserter<TNew>
-    ) -> Asserter<TNew>? where Wrapped == Asserter<TOld>? {
+    ) -> Asserter<TNew>? where Wrapped == Asserter<TOld> {
 
         switch self {
         case .some:
