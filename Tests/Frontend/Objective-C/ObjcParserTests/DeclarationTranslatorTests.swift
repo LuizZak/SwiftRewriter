@@ -124,18 +124,56 @@ class DeclarationTranslatorTests: XCTestCase {
 
         tester.assert { asserter in
             asserter.assertCount(1)?
-                .assertBlock(name: "a")?
+                .assertVariable(name: "a")?
                 .assert(hasArcSpecifier: .weak)
         }
     }
 
-    func testTranslate_singleDecl_blockDecl_nullabilitySpecifier() {
+    func testTranslate_singleDecl_blockDecl_withInitializer() {
+        let tester = prepareTest(declaration: "void (^a)() = ^{ };")
+
+        tester.assert { asserter in
+            asserter.assertCount(1)?
+                .assertVariable(name: "a")?
+                .assertHasInitializer()
+        }
+    }
+
+    func testTranslate_singleDecl_blockDecl_nullabilitySpecifier_asBlockSpecifier() {
         let tester = prepareTest(declaration: "void (^_Nonnull a)();")
 
         tester.assert { asserter in
             asserter.assertCount(1)?
-                .assertBlock(name: "a")?
-                .assert(hasNullabilitySpecifier: .nonnull)
+                .assertVariable(name: "a")?
+                .assert(hasNullabilitySpecifier: nil)?
+                .assert(type: .blockType(
+                    name: "a",
+                    returnType: .void,
+                    parameters: [],
+                    nullabilitySpecifier: .nonnull
+                ))
+        }
+    }
+
+    // TODO: Inspect if attributing _Nonnull to 'void' is the correct behaviour to expect here.
+    func _testTranslate_singleDecl_blockDecl_nullabilitySpecifier_asTypeSpecifier() {
+        let tester = prepareTest(declaration: "_Nonnull void (^a)();")
+
+        tester.assert { asserter in
+            asserter.assertCount(1)?
+                .assertVariable(name: "a")?
+                .assert(hasNullabilitySpecifier: .nonnull)?
+                .assert(type:
+                    .nullabilitySpecified(
+                        specifier: .nonnull,
+                        .blockType(
+                            name: "a",
+                            returnType: .void,
+                            parameters: [],
+                            nullabilitySpecifier: nil
+                        )
+                    )
+                )
         }
     }
 
@@ -144,7 +182,7 @@ class DeclarationTranslatorTests: XCTestCase {
 
         tester.assert { asserter in
             asserter.assertCount(1)?
-                .assertBlock(name: "a")?
+                .assertVariable(name: "a")?
                 .assert(hasTypeQualifier: .const)
         }
     }
@@ -232,26 +270,6 @@ class DeclarationTranslatorTests: XCTestCase {
                 .assertVariable(name: "a")?
                 .assertHasInitializer()?
                 .assert(type: "signed short int")
-        }
-    }
-
-    func testTranslate_singleDecl_block_withInitializer() {
-        let tester = prepareTest(declaration: "void (^a)() = ^{ };")
-
-        tester.assert { asserter in
-            asserter.assertCount(1)?
-                .assertBlock(name: "a")?
-                .assertHasInitializer()
-        }
-    }
-
-    func testTranslate_singleDecl_block_nullabilitySpecifier() {
-        let tester = prepareTest(declaration: "void(^_Nonnull callback)();")
-
-        tester.assert { asserter in
-            asserter.assertCount(1)?
-                .assertBlock(name: "callback")?
-                .assert(hasNullabilitySpecifier: .nonnull)
         }
     }
 

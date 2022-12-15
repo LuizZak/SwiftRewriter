@@ -27,6 +27,6 @@ public extension Asserter where Object == ObjcPropertySynthesizeListNode {
                 line: line,
                 by: ==
             )
-        }.map(self)
+        }.mapAsserter(self)
     }
 }

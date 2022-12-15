@@ -59,6 +59,7 @@ public class DeclarationTranslator {
                         rule: decl.declarationNode.syntaxElement,
                         nullability: partialType.nullability,
                         arcSpecifier: partialType.arcSpecifier,
+                        typeQualifiers: partialType.declSpecifiers.typeQualifiers(),
                         identifier: identifierNode,
                         type: typeNode,
                         initialValue: nil,
@@ -74,13 +75,22 @@ public class DeclarationTranslator {
                 // TODO: Support other types of pointer declarators
                 switch base {
                 case .function(let decl):
-                    result = .functionPointer(
+                    
+                    let type: ObjcType = .functionPointer(
+                        name: decl.identifier.name,
+                        returnType: decl.returnType.type,
+                        parameters: decl.parameters.map({ $0.type.type })
+                    )
+                    
+                    let typeNode = typeNameNode(from: type, syntax: ctxSyntax)
+
+                    result = .variable(
                         .init(
                             rule: decl.rule,
                             nullability: nil,
+                            typeQualifiers: [],
                             identifier: decl.identifier,
-                            parameters: decl.parameters,
-                            returnType: decl.returnType,
+                            type: typeNode,
                             initialValue: nil,
                             isStatic: partialType.isStatic
                         )
@@ -98,21 +108,24 @@ public class DeclarationTranslator {
                 let parameterNodes = parameters.compactMap { argument in
                     self.functionArgument(from: argument)
                 }
-                let returnTypeNode = self.typeNameNode(
-                    from: baseType,
-                    syntax: ctxSyntax
-                )
 
-                result = .block(
+                let type = ObjcType.blockType(
+                    name: identifierNode.name,
+                    returnType: baseType,
+                    parameters: parameterNodes.map({ $0.type.type }),
+                    nullabilitySpecifier: blockSpecifiers.nullabilitySpecifier().first
+                )
+                let typeNode = typeNameNode(from: type, syntax: ctxSyntax)
+
+                result = .variable(
                     .init(
                         rule: decl.declarationNode.syntaxElement,
-                        nullability: blockSpecifiers.nullabilitySpecifier().last ?? partialType.nullability,
+                        nullability: partialType.nullability,
                         arcSpecifier: blockSpecifiers.arcBehaviourSpecifier().last ?? partialType.arcSpecifier,
                         typeQualifiers: blockSpecifiers.typeQualifier(),
                         typePrefix: blockSpecifiers.typePrefix().last,
                         identifier: identifierNode,
-                        parameters: parameterNodes,
-                        returnType: returnTypeNode,
+                        type: typeNode,
                         initialValue: nil,
                         isStatic: partialType.isStatic
                     )
@@ -174,6 +187,8 @@ public class DeclarationTranslator {
                         rule: decl.declarationNode.syntaxElement,
                         nullability: partialType.nullability,
                         arcSpecifier: nil,
+                        typeQualifiers: [],
+                        typePrefix: nil,
                         identifier: identifierNode,
                         type: typeNameNode,
                         initialValue: nil,
@@ -719,12 +734,14 @@ public class DeclarationTranslator {
         case variable(
             ASTVariableDeclaration
         )
+        /*
         case block(
             ASTBlockDeclaration
         )
         case functionPointer(
             ASTFunctionPointerDeclaration
         )
+        */
         case function(
             ASTFunctionDefinition
         )
@@ -742,10 +759,6 @@ public class DeclarationTranslator {
         public var identifierNode: IdentifierInfo? {
             switch self {
             case .variable(let decl):
-                return decl.identifier
-            case .block(let decl):
-                return decl.identifier
-            case .functionPointer(let decl):
                 return decl.identifier
             case .function(let decl):
                 return decl.identifier
@@ -767,7 +780,7 @@ public class DeclarationTranslator {
             case .typedef(let decl):
                 return decl.typeNode
             
-            case .block, .functionPointer, .function, .enumDecl, .structOrUnionDecl:
+            case .function, .enumDecl, .structOrUnionDecl:
                 return nil
             }
         }
@@ -780,10 +793,6 @@ public class DeclarationTranslator {
                 switch self {
                 case .variable(let decl):
                     return decl.initialValue
-                case .block(let decl):
-                    return decl.initialValue
-                case .functionPointer(let decl):
-                    return decl.initialValue
 
                 case .enumDecl, .structOrUnionDecl, .typedef, .function:
                     return nil
@@ -791,19 +800,11 @@ public class DeclarationTranslator {
             }
             set {
                 switch self {
-                case .block(let decl):
-                    self = .block(
-                        decl.withInitializer(newValue)
-                    )
-
-                case .functionPointer(let decl):
-                    self = .functionPointer(
-                        decl.withInitializer(newValue)
-                    )
                 case .variable(let decl):
                     self = .variable(
                         decl.withInitializer(newValue)
                     )
+
                 case .enumDecl, .structOrUnionDecl, .typedef, .function:
                     break
                 }
@@ -832,25 +833,6 @@ public class DeclarationTranslator {
                     $0.type.type
                 })
 
-            case .functionPointer(let decl):
-                return .functionPointer(name: decl.identifier.name, returnType: decl.returnType.type, parameters: decl.parameters.compactMap {
-                    $0.type.type
-                })
-
-            case .block(let decl):
-                var partial: ObjcType = .blockType(name: decl.identifier.name, returnType: decl.returnType.type, parameters: decl.parameters.compactMap {
-                    $0.type.type
-                }, nullabilitySpecifier: decl.nullability)
-
-                if let arcSpecifier = decl.arcSpecifier {
-                    partial = .specified(specifiers: [.arcSpecifier(arcSpecifier)], partial)
-                }
-                if decl.typeQualifiers.count > 0 {
-                    partial = .qualified(partial, qualifiers: decl.typeQualifiers)
-                }
-
-                return partial
-            
             case .structOrUnionDecl(let decl):
                 return (decl.identifier?.name).map { .typeName($0) }
 
@@ -865,12 +847,6 @@ public class DeclarationTranslator {
             case .variable(let decl):
                 return decl.rule
 
-            case .block(let decl):
-                return decl.rule
-
-            case .functionPointer(let decl):
-                return decl.rule
-            
             case .function(let decl):
                 return decl.rule
 
@@ -911,47 +887,10 @@ public class DeclarationTranslator {
         public var rule: DeclarationSyntaxElementType
         public var nullability: ObjcNullabilitySpecifier?
         public var arcSpecifier: ObjcArcBehaviorSpecifier?
-        public var identifier: IdentifierInfo
-        public var type: TypeNameInfo
-        public var initialValue: InitializerInfo?
-        public var isStatic: Bool
-
-        public func withInitializer(_ value: InitializerInfo?) -> Self {
-            var copy = self
-            copy.initialValue = value
-            return copy
-        }
-    }
-
-    // TODO: Consider collapsing into `ASTVariableDeclaration`
-    /// Specifications for a block declaration.
-    public struct ASTBlockDeclaration {
-        public var rule: DeclarationSyntaxElementType
-        public var nullability: ObjcNullabilitySpecifier?
-        public var arcSpecifier: ObjcArcBehaviorSpecifier?
         public var typeQualifiers: [ObjcTypeQualifier]
         public var typePrefix: DeclarationExtractor.TypePrefix?
         public var identifier: IdentifierInfo
-        public var parameters: [FunctionParameterInfo]
-        public var returnType: TypeNameInfo
-        public var initialValue: InitializerInfo?
-        public var isStatic: Bool
-
-        public func withInitializer(_ value: InitializerInfo?) -> Self {
-            var copy = self
-            copy.initialValue = value
-            return copy
-        }
-    }
-
-    // TODO: Collapse into `ASTVariableDeclaration`
-    /// Specifications for a function pointer declaration.
-    public struct ASTFunctionPointerDeclaration {
-        public var rule: DeclarationSyntaxElementType
-        public var nullability: ObjcNullabilitySpecifier?
-        public var identifier: IdentifierInfo
-        public var parameters: [FunctionParameterInfo]
-        public var returnType: TypeNameInfo
+        public var type: TypeNameInfo
         public var initialValue: InitializerInfo?
         public var isStatic: Bool
 

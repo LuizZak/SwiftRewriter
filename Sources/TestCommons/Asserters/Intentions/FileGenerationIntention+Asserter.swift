@@ -188,7 +188,7 @@ public extension Asserter where Object == FileGenerationIntention {
             ) {
                 $0.typeName == typeName
             }?.inClosure(closure)
-        }.map(self)
+        }.mapAsserter(self)
     }
 
     /// Opens an asserter context for a class extension with a given type name
@@ -239,6 +239,6 @@ public extension Asserter where Object == FileGenerationIntention {
             ) {
                 $0.name == name
             }?.inClosure(closure)
-        }.map(self)
+        }.mapAsserter(self)
     }
 }

@@ -108,6 +108,6 @@ public extension Asserter where Object: ASTNode {
         let actual = object.precedingComments.map(\.string)
         return asserter(for: actual) {
             $0.assert(equals: precedingCommentStrings, file: file, line: line)
-        }.map(self)
+        }.mapAsserter(self)
     }
 }

@@ -94,7 +94,7 @@ public extension Asserter where Object: SubscriptGenerationIntention {
 
         return asserter(for: object.parameters[index]) { param in
             param.inClosure(closure)
-        }.map(self)
+        }.mapAsserter(self)
     }
     
     /// Asserts that the underlying `SubscriptGenerationIntention` being tested

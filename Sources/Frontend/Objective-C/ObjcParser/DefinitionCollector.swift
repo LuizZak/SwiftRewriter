@@ -225,77 +225,36 @@ public class DefinitionCollector {
     }
 
     private func processVariable(
-        _ decl: DeclarationTranslator.ASTNodeDeclaration,
-        rule: DeclarationSyntaxElementType,
-        identifier: DeclarationTranslator.IdentifierInfo,
-        type: ObjcType?,
-        nullability: ObjcNullabilitySpecifier?,
-        arcSpecifier: ObjcArcBehaviorSpecifier?,
-        initialValue: DeclarationTranslator.InitializerInfo?,
-        isStatic: Bool,
+        _ decl: DeclarationTranslator.ASTVariableDeclaration,
         notifyDelegate: Bool
     ) -> [ObjcASTNode]? {
 
-        guard let type = type else {
-            return nil
-        }
-
-        let typeNameInfo = DeclarationTranslator.TypeNameInfo(
-            sourceRange: rule.sourceRange,
-            type: type
-        )
-
-        return processVariable(
-            decl,
-            rule: rule,
-            identifier: identifier,
-            typeNode: typeNameInfo,
-            nullability: nullability,
-            arcSpecifier: arcSpecifier,
-            initialValue: initialValue,
-            isStatic: isStatic,
-            notifyDelegate: notifyDelegate
-        )
-    }
-
-    private func processVariable(
-        _ decl: DeclarationTranslator.ASTNodeDeclaration,
-        rule: DeclarationSyntaxElementType,
-        identifier: DeclarationTranslator.IdentifierInfo,
-        typeNode: DeclarationTranslator.TypeNameInfo,
-        nullability: ObjcNullabilitySpecifier?,
-        arcSpecifier: ObjcArcBehaviorSpecifier?,
-        initialValue: DeclarationTranslator.InitializerInfo?,
-        isStatic: Bool,
-        notifyDelegate: Bool
-    ) -> [ObjcASTNode]? {
-
-        let isNonnull = nodeFactory.isInNonnullContext(identifier.sourceRange)
+        let isNonnull = nodeFactory.isInNonnullContext(decl.identifier.sourceRange)
 
         let node = ObjcVariableDeclarationNode(isInNonnullContext: isNonnull)
-        node.isStatic = isStatic
+        node.isStatic = decl.isStatic
 
         node.addChild(
-            makeIdentifier(identifier)
+            makeIdentifier(decl.identifier)
         )
         node.addChild(
-            makeTypeNameNode(typeNode)
+            makeTypeNameNode(decl.type)
         )
 
-        if let initialValue {
+        if let initialValue = decl.initialValue {
             node.addChild(
                 makeInitialExpression(initialValue)
             )
         }
 
         node.updateSourceRange()
-        collectComments(node, rule)
+        collectComments(node, decl.rule)
 
         if notifyDelegate {
             delegate?.definitionCollector(
                 self,
                 didDetectVariable: node,
-                from: decl
+                from: .variable(decl)
             )
         }
 
@@ -472,40 +431,7 @@ public class DefinitionCollector {
         switch decl {
         case .variable(let astDecl):
             return processVariable(
-                decl,
-                rule: astDecl.rule,
-                identifier: astDecl.identifier,
-                typeNode: astDecl.type,
-                nullability: astDecl.nullability,
-                arcSpecifier: astDecl.arcSpecifier,
-                initialValue: astDecl.initialValue,
-                isStatic: astDecl.isStatic,
-                notifyDelegate: notifyDelegate
-            )
-            
-        case .block(let astDecl):
-            return processVariable(
-                decl,
-                rule: astDecl.rule,
-                identifier: astDecl.identifier,
-                type: decl.objcType,
-                nullability: astDecl.nullability,
-                arcSpecifier: astDecl.arcSpecifier,
-                initialValue: astDecl.initialValue,
-                isStatic: astDecl.isStatic,
-                notifyDelegate: notifyDelegate
-            )
-            
-        case .functionPointer(let astDecl):
-            return processVariable(
-                decl,
-                rule: astDecl.rule,
-                identifier: astDecl.identifier,
-                type: decl.objcType,
-                nullability: astDecl.nullability,
-                arcSpecifier: nil,
-                initialValue: astDecl.initialValue,
-                isStatic: astDecl.isStatic,
+                astDecl,
                 notifyDelegate: notifyDelegate
             )
 
