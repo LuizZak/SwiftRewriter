@@ -164,15 +164,33 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         if let unary = ctx.unaryExpression() {
             return unary.accept(self)
         }
-        if let typeName = ctx.typeName(),
+        guard
+            let typeName = ctx.typeName(),
             let type = typeParser.parseObjcType(from: typeName),
-            let exp = ctx.castExpression()?.accept(self) {
-            
-            let swiftType = typeMapper.swiftType(forObjcType: type, context: .alwaysNonnull)
-            return exp.casted(to: swiftType)
+            let exp = ctx.castExpression()?.accept(self)
+        else {
+            return makeUnknownNode(ctx)
+        }
+
+        let swiftType = typeMapper.swiftType(forObjcType: type, context: .alwaysNonnull)
+
+        // Detect a binary expression that had a parenthesized expression on the
+        // left side that was mistaken as a cast
+        let operators: Set<SwiftOperator> = [
+            .bitwiseAnd, .multiply, .add, .subtract,
+        ]
+        if
+            case .nominal(.typeName(let identifier)) = swiftType,
+            let unary = exp.asUnary, operators.contains(unary.op)
+        {
+            let lhs = Expression.parens(.identifier(identifier))
+            let op = unary.op
+            let rhs = unary.exp.copy()
+
+            return lhs.binary(op: op, rhs: rhs)
         }
         
-        return makeUnknownNode(ctx)
+        return exp.casted(to: swiftType)
     }
     
     public override func visitConstantExpression(_ ctx: ObjectiveCParser.ConstantExpressionContext) -> Expression? {

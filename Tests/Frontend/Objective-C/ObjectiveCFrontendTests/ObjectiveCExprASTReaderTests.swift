@@ -126,6 +126,15 @@ class ObjectiveCExprASTReaderTests: XCTestCase {
             objcExpr: "(NSString*)abc",
             readsAs: Expression.identifier("abc").casted(to: .string)
         )
+        assert(
+            objcExpr: "(NSInteger)abc",
+            readsAs: Expression.identifier("abc").casted(to: .int)
+        )
+        assert(
+            objcExpr: "(id<Protocol1, Protocol2>)abc",
+            readsAs: Expression.identifier("abc")
+                .casted(to: .protocolComposition(["Protocol1", "Protocol2"]))
+        )
     }
 
     func testSelectorExpression() {
@@ -232,6 +241,36 @@ class ObjectiveCExprASTReaderTests: XCTestCase {
         assert(
             objcExpr: "1 + 2 * 3",
             readsAs: .constant(1).binary(op: .add, rhs: .constant(2).binary(op: .multiply, rhs: .constant(3)))
+        )
+    }
+
+    func testBinaryOperations_dontMistakeParensForCastInBinaryExpressions() {
+        assert(
+            objcExpr: "(a) & 0xff",
+            readsAs: .parens(.identifier("a")).binary(op: .bitwiseAnd, rhs: .constant(.int(0xff, .hexadecimal)))
+        )
+        assert(
+            objcExpr: "(a) * 0xff",
+            readsAs: .parens(.identifier("a")).binary(op: .multiply, rhs: .constant(.int(0xff, .hexadecimal)))
+        )
+        assert(
+            objcExpr: "(a) + 0xff",
+            readsAs: .parens(.identifier("a")).binary(op: .add, rhs: .constant(.int(0xff, .hexadecimal)))
+        )
+        assert(
+            objcExpr: "(a) - 0xff",
+            readsAs: .parens(.identifier("a")).binary(op: .subtract, rhs: .constant(.int(0xff, .hexadecimal)))
+        )
+    }
+
+    func testParensExpression_detectProperCastExpressions() {
+        assert(
+            objcExpr: "(a) !0xff",
+            readsAs: .constant(.int(0xff, .hexadecimal)).unary(op: .negate).casted(to: .typeName("a"))
+        )
+        assert(
+            objcExpr: "(a) ~0xff",
+            readsAs: .constant(.int(0xff, .hexadecimal)).unary(op: .bitwiseNot).casted(to: .typeName("a"))
         )
     }
     
