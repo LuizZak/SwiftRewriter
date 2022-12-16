@@ -475,6 +475,7 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                 NS_ASSUME_NONNULL_BEGIN
                 @interface A
                 - (void)method:(void(^)(NSString*))param;
+                - (void)method2:(nullable void(^)(NSString*))param;
                 @end
                 NS_ASSUME_NONNULL_END
                 """
@@ -485,6 +486,8 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                 @implementation A
                 - (void)method:(void(^)(NSString*))param {
                 }
+                - (void)method2:(void(^)(NSString*))param {
+                }
                 @end
                 """
             )
@@ -492,6 +495,8 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                 """
                 class A {
                     func method(_ param: (String) -> Void) {
+                    }
+                    func method2(_ param: ((String) -> Void)?) {
                     }
                 }
                 // End of file A.swift
@@ -1090,10 +1095,10 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                         let filtered: NSArray! = resources?.filter { (res: NSDictionary!) -> Bool in
                             return baseIdsSet.containsObject(res["airbase"]?["id"])
                         }
+                        // Transform them into resource objects, now
                         // decl type: [CPResource]
                         // init type: NSArray
                         let results = filtered.map { (obj: NSDictionary!) -> Resource! in
-                            // Transform them into resource objects, now
                             // decl type: Resource
                             // init type: Resource
                             var resource = Resource()

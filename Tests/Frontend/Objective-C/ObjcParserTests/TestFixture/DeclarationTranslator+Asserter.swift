@@ -355,13 +355,11 @@ public extension Asserter where Object == DeclarationTranslator.ASTVariableDecla
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.initialValue) { initialValue in
-            initialValue.assertNotNil(
-                message: "Expected declaration '\(object.identifier.name)' to have initializer but found none.",
-                file: file,
-                line: line
-            )
-        }
+        self[\.initialValue].assertNotNil(
+            message: "Expected declaration '\(object.identifier.name)' to have initializer but found none.",
+            file: file,
+            line: line
+        ).mapAsserter(self)
     }
 
     /// Asserts that the underlying variable declaration being tested has no
@@ -375,13 +373,11 @@ public extension Asserter where Object == DeclarationTranslator.ASTVariableDecla
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.initialValue) { initialValue in
-            initialValue.assertNil(
-                message: "Expected declaration '\(object.identifier.name)' to have no initializer but found one.",
-                file: file,
-                line: line
-            )
-        }
+        self[\.initialValue].assertNil(
+            message: "Expected declaration '\(object.identifier.name)' to have no initializer but found one.",
+            file: file,
+            line: line
+        ).mapAsserter(self)
     }
 
     /// Asserts that the underlying variable declaration being tested has a given
@@ -396,13 +392,11 @@ public extension Asserter where Object == DeclarationTranslator.ASTVariableDecla
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.type.type) { type in
-            type.assert(
-                equals: expected,
-                file: file,
-                line: line
-            )
-        }
+        self[\.type.type].assert(
+            equals: expected,
+            file: file,
+            line: line
+        ).mapAsserter(self)
     }
 
     /// Asserts that the underlying variable declaration being tested has a given
@@ -417,14 +411,12 @@ public extension Asserter where Object == DeclarationTranslator.ASTVariableDecla
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.nullability) { nullability in
-            nullability.assert(
-                equals: nullabilitySpecifier,
-                message: "Expected declaration '\(object.identifier.name)' to have nullability specifier '\(nullabilitySpecifier?.description ?? "<nil>")'.",
-                file: file,
-                line: line
-            )
-        }
+        self[\.nullability].assert(
+            equals: nullabilitySpecifier,
+            message: "Expected declaration '\(object.identifier.name)' to have nullability specifier '\(nullabilitySpecifier?.description ?? "<nil>")'.",
+            file: file,
+            line: line
+        ).mapAsserter(self)
     }
 
     /// Asserts that the underlying variable declaration being tested has a given
@@ -439,14 +431,12 @@ public extension Asserter where Object == DeclarationTranslator.ASTVariableDecla
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.arcSpecifier) { arcSpecifier in
-            arcSpecifier.assert(
-                equals: expected,
-                message: "Expected declaration '\(object.identifier.name)' to have arc specifier '\(expected?.description ?? "<nil>")'.",
-                file: file,
-                line: line
-            )
-        }
+        self[\.arcSpecifier].assert(
+            equals: expected,
+            message: "Expected declaration '\(object.identifier.name)' to have arc specifier '\(expected?.description ?? "<nil>")'.",
+            file: file,
+            line: line
+        ).mapAsserter(self)
     }
 
     /// Asserts that the underlying variable declaration being tested has a given
@@ -456,25 +446,17 @@ public extension Asserter where Object == DeclarationTranslator.ASTVariableDecla
     /// further tests.
     @discardableResult
     func assert(
-        hasNullabilitySpecifier nullabilitySpecifier: ObjcNullabilitySpecifier?,
+        hasNullabilitySpecifier expected: ObjcNullabilitySpecifier?,
         file: StaticString = #file,
         line: UInt = #line
     ) -> Self? {
 
-        guard object.nullability == nullabilitySpecifier else {
-            XCTAssertEqual(
-                object.nullability,
-                nullabilitySpecifier,
-                "Expected variable '\(object.identifier.name)' to have nullability specifier '\(nullabilitySpecifier?.description ?? "<nil>")'.",
-                file: file,
-                line: line
-            )
-            dumpObject()
-            
-            return nil
-        }
-
-        return self
+        self[\.nullability].assert(
+            equals: expected,
+            message: "Expected variable '\(object.identifier.name)' to have nullability specifier '\(expected?.description ?? "<nil>")'.",
+            file: file,
+            line: line
+        ).mapAsserter(self)
     }
 
     /// Asserts that the underlying variable declaration being tested has a given
@@ -489,15 +471,13 @@ public extension Asserter where Object == DeclarationTranslator.ASTVariableDecla
         line: UInt = #line
     ) -> Self? {
 
-        return asserter(forKeyPath: \.typeQualifiers, file: file, line: line) { typeQualifiers in
-            typeQualifiers.assertContains(
-                message: "Expected variable \(object.identifier.name) to contain type qualifier '\(typeQualifier)'",
-                file: file,
-                line: line
-            ) { element in
-                element == typeQualifier
-            }
-        }
+        return self[\.typeQualifiers].assertContains(
+            message: "Expected variable \(object.identifier.name) to contain type qualifier '\(typeQualifier)'",
+            file: file,
+            line: line
+        ) { element in
+            element == typeQualifier
+        }.mapAsserter(self)
     }
 
     /// Asserts that the underlying variable declaration being tested has a

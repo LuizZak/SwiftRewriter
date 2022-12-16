@@ -219,7 +219,12 @@ public final class ObjectiveC2SwiftRewriter {
                             return
                         }
                         
-                        enCase.initialValue = reader.parseExpression(expression: expression)
+                        let origin = "enum case \(enCase.name) @ \(enCase.sourceOrigin)"
+
+                        enCase.initialValue = reader.parseExpression(
+                            expression: expression,
+                            origin: origin
+                        )
                         
                     case .method(let funcBody, let member as MemberGenerationIntention),
                         .initializer(let funcBody, let member as MemberGenerationIntention),
@@ -252,12 +257,17 @@ public final class ObjectiveC2SwiftRewriter {
                             typeContext: nil
                         )
                         
-                    case .globalVar(let v, _):
-                        guard let expression = v.typedSource?.expression?.expression else {
+                    case .globalVar(let initializer, let decl):
+                        guard let expression = initializer.typedSource?.expression?.expression else {
                             return
                         }
                         
-                        v.expression = reader.parseExpression(expression: expression)
+                        let origin = "global variable \(decl.name) @ \(decl.sourceOrigin)"
+
+                        initializer.expression = reader.parseExpression(
+                            expression: expression,
+                            origin: origin
+                        )
                     }
 
                     autotypeDeclarations.modifyingValue {

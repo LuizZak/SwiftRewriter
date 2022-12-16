@@ -70,6 +70,16 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#categoryInterfaceName}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitCategoryInterfaceName(_ ctx: ObjectiveCParser.CategoryInterfaceNameContext) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
 	 * Visit a parse tree produced by {@link ObjectiveCParser#classImplementation}.
 	- Parameters:
 	  - ctx: the parse tree
@@ -1286,6 +1296,16 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	- returns: the visitor result
 	 */
 	open func visitPointerEntry(_ ctx: ObjectiveCParser.PointerEntryContext) -> T {
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#pointerSpecifier}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitPointerSpecifier(_ ctx: ObjectiveCParser.PointerSpecifierContext) -> T {
 	 	fatalError(#function + " must be overridden")
 	}
 

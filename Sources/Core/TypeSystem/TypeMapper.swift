@@ -574,12 +574,13 @@ public class DefaultTypeMapper: TypeMapper {
         let final: SwiftType
 
         let isConst = context.hasQualifierModifier(.const) || isConstQualified(type)
+        let unwrappedType = type.unspecifiedUnqualified
 
-        if case .incompleteStruct = type {
+        if case .incompleteStruct = unwrappedType {
             final = "OpaquePointer"
-        } else if type == .anonymousStruct {
+        } else if unwrappedType == .anonymousStruct {
             final = "OpaquePointer"
-        } else if let inner = typeNameIn(objcType: type) {
+        } else if let inner = typeNameIn(objcType: unwrappedType) {
 
             if let ptr = DefaultTypeMapper._pointerMappings[inner] {
                 final = ptr
@@ -601,12 +602,17 @@ public class DefaultTypeMapper: TypeMapper {
                 
                 final = swiftPointer(parameter: pointeeType, const: isConst)
             }
-        } else if case .void = type {
+        } else if case .void = unwrappedType {
             final = swiftRawPointer(const: isConst)
-        } else if case .fixedArray(let base, let length) = type {
+        } else if case .fixedArray(let base, let length) = unwrappedType {
             let pointee = swiftTuple(type: base, count: length, context: context)
             
             final = swiftPointer(parameter: pointee, const: isConst)
+        } else if case .pointer(_, let qualifiers, _) = unwrappedType {
+            final = swiftPointer(
+                parameter: swiftType(forObjcType: type, context: context),
+                const: qualifiers.contains(.const)
+            )
         } else {
             final = swiftType(forObjcType: type, context: context)
         }

@@ -745,9 +745,27 @@ public class DeclarationExtractor {
 
     private func pointerEntry(from syntax: PointerSyntaxEntry) -> PointerEntry {
         return .pointer(
-            syntax.typeQualifiers.map(self.typeQualifierList(from:)),
-            syntax.nullabilitySpecifier.map(self.nullabilitySpecifier(from:))
+            syntax.pointerSpecifiers.map(self.pointerEntrySpecifier(from:))
         )
+    }
+
+    private func pointerEntrySpecifier(from syntax: PointerSpecifierSyntax) -> PointerEntrySpecifier {
+        switch syntax {
+        case .arcBehaviour(let specifier):
+            return .arcBehaviourSpecifier(
+                arcSpecifier(from: specifier)
+            )
+        
+        case .typeQualifier(let qualifier):
+            return .typeQualifier(
+                typeQualifier(from: qualifier)
+            )
+        
+        case .nullability(let nullability):
+            return .nullabilitySpecifier(
+                nullabilitySpecifier(from: nullability)
+            )
+        }
     }
 
     private func declSpecifiers(from syntax: DeclarationSpecifiersSyntax?) -> [DeclSpecifier]? {
@@ -1671,33 +1689,64 @@ public extension DeclarationExtractor {
     }
     /// A pointer entry for a pointer context
     enum PointerEntry: Hashable, CustomStringConvertible {
-        case pointer([ObjcTypeQualifier]? = nil, ObjcNullabilitySpecifier? = nil)
-        // case blocks([TypeQualifier]? = nil, NullabilitySpecifier? = nil)
+        case pointer(_ specifiers: [PointerEntrySpecifier] = [])
+        // case blocks(_ specifiers: [PointerEntrySpecifier] = [])
 
         public var description: String {
             var result = "*"
 
-            if let qualifiers = typeQualifiers {
-                result.join(qualifiers.map(\.description).joined(separator: " "))
-            }
-            result.joinIfPresent(nullabilitySpecifier)
+            result.joinList(specifiers)
 
             return result
         }
 
-        /// Returns the type qualifiers for this pointer, if any is present.
-        public var typeQualifiers: [ObjcTypeQualifier]? {
+        /// Returns the pointer specifiers for this pointer, if any is present.
+        public var specifiers: [PointerEntrySpecifier] {
             switch self {
-            case .pointer(let qualifiers, _):
-                return qualifiers
+            case .pointer(let specifiers):
+                return specifiers
+            }
+        }
+    }
+    /// A pointer specifier/qualifier for a pointer context
+    enum PointerEntrySpecifier: Hashable, CustomStringConvertible {
+        case nullabilitySpecifier(ObjcNullabilitySpecifier)
+        case arcBehaviourSpecifier(ObjcArcBehaviorSpecifier)
+        case typeQualifier(ObjcTypeQualifier)
+
+        public var nullabilitySpecifier: ObjcNullabilitySpecifier? {
+            switch self {
+            case .nullabilitySpecifier(let value):
+                return value
+            default:
+                return nil
+            }
+        }
+        public var arcBehaviourSpecifier: ObjcArcBehaviorSpecifier? {
+            switch self {
+            case .arcBehaviourSpecifier(let value):
+                return value
+            default:
+                return nil
+            }
+        }
+        public var typeQualifier: ObjcTypeQualifier? {
+            switch self {
+            case .typeQualifier(let value):
+                return value
+            default:
+                return nil
             }
         }
 
-        /// Returns the nullability specifier for this pointer, if any is present.
-        public var nullabilitySpecifier: ObjcNullabilitySpecifier? {
+        public var description: String {
             switch self {
-            case .pointer(_, let nullability):
-                return nullability
+            case .arcBehaviourSpecifier(let value):
+                return value.description
+            case .nullabilitySpecifier(let value):
+                return value.description
+            case .typeQualifier(let value):
+                return value.description
             }
         }
     }

@@ -102,6 +102,24 @@ class DefinitionCollectorTests: XCTestCase {
         }
     }
 
+    func testCollect_singleDecl_variable_pointer_mixedSpecifiers() {
+        let tester = prepareTest(declaration: "NSString *const _Nonnull __autoreleasing a;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: ObjcVariableDeclarationNode.self)?
+                    .assert(name: "a")?
+                    .assert(type:
+                        .specified(
+                            specifiers: [.arcSpecifier(.autoreleasing)],
+                            .pointer("NSString", qualifiers: [.const], nullabilitySpecifier: .nonnull)
+                        )
+                    )?
+                    .assertNoInitializer()
+            }
+        }
+    }
+
     func testCollect_singleDecl_variable_typeName_nullabilitySpecifier() {
         let tester = prepareTest(declaration: "_Nonnull callback a;")
 

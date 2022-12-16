@@ -1,3 +1,4 @@
+import Antlr4
 import SwiftAST
 import TypeSystem
 import ObjcParserAntlr
@@ -62,7 +63,8 @@ public class ObjectiveCASTReader {
     
     public func parseExpression(
         expression: ObjcExpressionNode.ExpressionKind,
-        comments: [RawCodeComment] = []
+        comments: [RawCodeComment] = [],
+        origin: String
     ) -> Expression {
 
         let parser = parserStatePool.pull()
@@ -78,6 +80,8 @@ public class ObjectiveCASTReader {
         case .string(let source):
             do {
                 let parser = try parser.makeMainParser(input: source)
+                parser.parser.removeErrorListeners()
+                parser.parser.addErrorListener(ErrorListener(extraContext: origin))
                 let expression = try parser.parser.expression()
 
                 return parseExpression(
@@ -92,7 +96,8 @@ public class ObjectiveCASTReader {
 
     public func parseExpression(
         expression: ObjcConstantExpressionNode.ExpressionKind,
-        comments: [RawCodeComment] = []
+        comments: [RawCodeComment] = [],
+        origin: String
     ) -> Expression {
 
         let parser = parserStatePool.pull()
@@ -108,6 +113,8 @@ public class ObjectiveCASTReader {
         case .string(let source):
             do {
                 let parser = try parser.makeMainParser(input: source)
+                parser.parser.removeErrorListeners()
+                parser.parser.addErrorListener(ErrorListener(extraContext: origin))
                 let expression = try parser.parser.expression()
 
                 return parseExpression(
@@ -168,5 +175,24 @@ public class ObjectiveCASTReader {
         }
 
         return result
+    }
+
+    class ErrorListener: BaseErrorListener {
+        var extraContext: String
+
+        init(extraContext: String) {
+            self.extraContext = extraContext
+        }
+
+        override public func syntaxError<T>(
+            _ recognizer: Recognizer<T>,
+            _ offendingSymbol: AnyObject?,
+            _ line: Int,
+            _ charPositionInLine: Int,
+            _ msg: String,
+            _ e: AnyObject?
+        ) {
+            print("\(extraContext) line \(line):\(charPositionInLine) \(msg)")
+        }
     }
 }

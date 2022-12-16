@@ -1460,49 +1460,19 @@ extension Asserter where Object == DeclarationExtractor.Pointer {
 }
 
 extension Asserter where Object == DeclarationExtractor.PointerEntry {
-    /// Asserts that the underlying `PointerEntry` being tested has a set of type
-    /// qualifiers that when converted to strings matches a specified set of
-    /// string values.
-    ///
-    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
-    /// further tests.
-    @discardableResult
-    func assert(
-        typeQualifierStrings expected: Set<String>?,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> Self? {
-
-        switch object {
-        case .pointer(let qualifiers, _):
-            let qualifiersSet = qualifiers.map { Set($0.map(\.description)) }
-
-            if expected != qualifiersSet {
-                XCTAssertEqual(
-                    qualifiersSet,
-                    expected,
-                    file: file,
-                    line: line
-                )
-            }
-        }
-
-        return self
-    }
-
     /// Asserts that the underlying `PointerEntry` being tested has a given
-    /// nullability specifier.
+    /// list of pointer specifiers.
     ///
     /// Returns `nil` if the test failed, otherwise returns `self` for chaining
     /// further tests.
     @discardableResult
     func assert(
-        nullabilitySpecifier expected: ObjcNullabilitySpecifier?,
+        pointerSpecifiers expected: [DeclarationExtractor.PointerEntrySpecifier],
         file: StaticString = #file,
         line: UInt = #line
     ) -> Self? {
 
-        return asserter(forKeyPath: \.nullabilitySpecifier) {
+        return asserter(forKeyPath: \.specifiers) {
             $0.assert(equals: expected, file: file, line: line)
         }
     }

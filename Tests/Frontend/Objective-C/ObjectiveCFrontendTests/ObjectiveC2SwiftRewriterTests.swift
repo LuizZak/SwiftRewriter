@@ -3595,4 +3595,22 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testNullableBlock() {
+        assertRewrite(
+            objc:
+            """
+            @interface A
+            - (void)method:(nullable void(^)(nonnull NSString*))param;
+            @end
+            """,
+            swift:
+            """
+            class A {
+                func method(_ param: ((String) -> Void)?) {
+                }
+            }
+            """
+        )
+    }
 }

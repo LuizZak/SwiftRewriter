@@ -24,6 +24,27 @@ public class Intention: IntentionProtocol, Codable {
             }
         }
     }
+
+    /// Gets a string representing the source of the `ASTNode` that originated
+    /// this intention object.
+    ///
+    /// Returns "<unknown>" if the origin could not be derived via `self.source`.
+    public var sourceOrigin: String {
+        get {
+            guard let sourceNode = source else {
+                return "<unknown>"
+            }
+            guard let source = sourceNode.originalSource else {
+                return "<unknown>"
+            }
+
+            if let location = originLocation {
+                return "\(source.filePath):\(location.line):\(location.column)"
+            } else {
+                return source.filePath
+            }
+        }
+    }
     
     /// Parent for this intention
     public internal(set) weak var parent: Intention?

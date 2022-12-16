@@ -122,9 +122,51 @@ class DeclarationExtractorTests: XCTestCase {
                 .assert(specifierStrings: ["NSObject"])?
                 .asserterForPointer { ptr in
                     ptr.assertPointerCount(1)?.asserter(forPointerEntryAt: 0) { ptr in
-                        ptr.assert(typeQualifierStrings: nil)?
-                            .assert(nullabilitySpecifier: .nonnull)
+                        ptr.assert(pointerSpecifiers: [
+                            .nullabilitySpecifier(.nonnull),
+                        ])
                     }
+                }
+        }
+    }
+
+    func testExtract_declaration_singleDecl_pointer_autoreleasingSpecifier() {
+        let tester = prepareTest(declaration: "NSObject *__autoreleasing a;")
+
+        tester.assert { (asserter: DeclarationsAsserter) in
+            asserter
+                .assertVariable(name: "a")?
+                .assert(specifierStrings: ["NSObject"])?
+                .asserterForPointer { ptr in
+                    ptr.assertPointerCount(1)?.asserter(forPointerEntryAt: 0) { ptr in
+                        ptr.assert(pointerSpecifiers: [
+                            .arcBehaviourSpecifier(.autoreleasing),
+                        ])
+                    }
+                }
+        }
+    }
+
+    func testExtract_declaration_singleDecl_pointer_mixedSpecifiers() {
+        let tester = prepareTest(declaration: "NSObject *_Nonnull __autoreleasing *_Nonnull a;")
+
+        tester.assert { (asserter: DeclarationsAsserter) in
+            asserter
+                .assertVariable(name: "a")?
+                .assert(specifierStrings: ["NSObject"])?
+                .asserterForPointer { ptr in
+                    ptr.assertPointerCount(2)?
+                        .asserter(forPointerEntryAt: 0) { ptr in
+                            ptr.assert(pointerSpecifiers: [
+                                .nullabilitySpecifier(.nonnull),
+                                .arcBehaviourSpecifier(.autoreleasing),
+                            ])
+                        }?
+                        .asserter(forPointerEntryAt: 1) { ptr in
+                            ptr.assert(pointerSpecifiers: [
+                                .nullabilitySpecifier(.nonnull),
+                            ])
+                        }
                 }
         }
     }
@@ -138,8 +180,9 @@ class DeclarationExtractorTests: XCTestCase {
                 .assert(specifierStrings: ["__weak", "NSObject"])?
                 .asserterForPointer { ptr in
                     ptr.assertPointerCount(1)?.asserter(forPointerEntryAt: 0) { ptr in
-                        ptr.assert(typeQualifierStrings: nil)?
-                            .assert(nullabilitySpecifier: .nonnull)
+                        ptr.assert(pointerSpecifiers: [
+                            .nullabilitySpecifier(.nonnull),
+                        ])
                     }
                 }
         }

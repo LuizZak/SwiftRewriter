@@ -118,6 +118,7 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
                 result += qualifiers.map(\.description).joined(separator: " ")
             }
             if let nullability = nullability {
+                if !qualifiers.isEmpty { result += " " }
                 result += nullability.description
             }
 
@@ -159,7 +160,7 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
         }
     }
     
-    /// Returns true if this is a pointer type
+    /// Returns `true` if this is a pointer type.
     public var isPointer: Bool {
         switch self {
         case .pointer, .id, .instancetype, .blockType, .functionPointer, .fixedArray:
@@ -175,9 +176,45 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
         }
     }
 
+    /// Returns `true` if this type is a block type.
+    public var isBlock: Bool {
+        switch self {
+        case .blockType:
+            return true
+        default:
+            return false
+        }
+    }
+
     /// Returns `ObjcType.pointer(self)`.
     public var wrapAsPointer: ObjcType {
         .pointer(self)
+    }
+
+    /// Returns a copy of this type with any top-level `.nullabilitySpecified`,
+    /// `.specified`, and `.qualified` unwrapped until the first
+    /// non-specifier/qualifier `ObjcType` value is found.
+    public var unspecifiedUnqualified: ObjcType {
+        switch self {
+        case .nullabilitySpecified(_, let type),
+            .qualified(let type, _),
+            .specified(_, let type):
+            return type.unspecifiedUnqualified
+        
+        case .typeName,
+            .instancetype,
+            .id,
+            .anonymousEnum,
+            .anonymousStruct,
+            .incompleteStruct,
+            .blockType,
+            .functionPointer,
+            .pointer,
+            .fixedArray,
+            .void,
+            .genericTypeName:
+            return self
+        }
     }
 
     /// Convenience for generating a non-variant generic type.
