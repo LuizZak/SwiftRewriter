@@ -3174,6 +3174,42 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
         )
     }
 
+    func testBlockBodyCommentTransposition() {
+        assertRewrite(
+            objc: """
+                // Class definition
+                @implementation A
+                // Method definition comment
+                - (void)test {
+                    // Pre-block
+                    void (^block)() = ^{
+                        // In block
+                        NSLog(@"1");
+                    };
+                    // Post-block
+                    NSLog(@"2");
+                }
+                @end
+                """,
+            swift: """
+                // Class definition
+                class A {
+                    // Method definition comment
+                    func test() {
+                        // Pre-block
+                        let block: () -> Void = {
+                            // In block
+                            NSLog("1")
+                        }
+
+                        // Post-block
+                        NSLog("2")
+                    }
+                }
+                """
+        )
+    }
+
     func testEmptyMethodBodiesEmitBodyComments() {
         assertRewrite(
             objc: """

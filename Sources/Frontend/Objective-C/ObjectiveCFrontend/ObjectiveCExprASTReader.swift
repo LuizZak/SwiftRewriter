@@ -47,7 +47,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         if let assignmentExpression = ctx.assignmentExpression() {
             return assignmentExpression.accept(self)
         }
-        // Nested expression
+        // Nested statement
         if let compound = ctx.compoundStatement() {
             let visitor = compoundStatementVisitor()
             guard let statement = compound.accept(visitor) else {

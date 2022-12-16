@@ -509,13 +509,22 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
             guard !expressions.isEmpty else {
                 return nil
             }
+
+            // Ensure we can restore state back so comments are available after
+            // every try.
+            let commentsState = context.commentApplier.saveState()
                         
             if let result = tryMapPointerDeclaration(ctx) {
                 return result
             }
+            
+            context.commentApplier.restore(state: commentsState)
+
             if let result = tryMapIdProtocolList(ctx) {
                 return result
             }
+
+            context.commentApplier.restore(state: commentsState)
 
             return nil
         }
@@ -524,6 +533,10 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
             guard let declarationSpecifiers = ctx.declarationSpecifiers() else {
                 return .unknown(UnknownASTContext(context: ctx.getText()))
             }
+
+            let comments = context
+                .commentApplier
+                .popAllCommentsBefore(rule: ctx)
 
             let declarations: [StatementVariableDeclaration]
 
@@ -540,9 +553,7 @@ public final class ObjectiveCStatementASTReader: ObjectiveCParserBaseVisitor<Sta
 
             let varDeclStmt = Statement.variableDeclarations(declarations)
             
-            varDeclStmt.comments = context
-                .commentApplier
-                .popAllCommentsBefore(rule: ctx)
+            varDeclStmt.comments = comments
             
             varDeclStmt.trailingComment = context
                 .commentApplier

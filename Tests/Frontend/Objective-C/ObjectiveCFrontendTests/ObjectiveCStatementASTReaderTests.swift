@@ -735,9 +735,10 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             identifier: "value",
             type: .int,
             initialization: nil
-        )
-        expected.comments.append("// A Comment")
-        expected.comments.append("// Another Comment")
+        ).withComments([
+            "// A Comment",
+            "// Another Comment",
+        ])
 
         assert(
             objcStmt: string,
@@ -803,8 +804,9 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
         let objcParser = ObjcParser(string: string)
         try objcParser.parse()
         let comments = objcParser.comments
-        let expected = Statement.expression(Expression.identifier("test").call())
-        expected.trailingComment = "// A trailing comment"
+        let expected = Statement
+            .expression(Expression.identifier("test").call())
+            .withTrailingComment("// A trailing comment")
 
         assert(
             objcStmt: string,
@@ -822,8 +824,9 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
         let objcParser = ObjcParser(string: string)
         try objcParser.parse()
         let comments = objcParser.comments
-        let expected = Statement.if(.constant(true), body: [])
-        expected.trailingComment = "// A trailing comment"
+        let expected = Statement
+            .if(.constant(true), body: [])
+            .withTrailingComment("// A trailing comment")
 
         assert(
             objcStmt: string,
@@ -842,14 +845,125 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
         let objcParser = ObjcParser(string: string)
         try objcParser.parse()
         let comments = objcParser.comments
-        let expected = Statement.if(.constant(true), body: [])
-        expected.body.comments = ["// Empty body"]
+        let expected = Statement.if(
+            .constant(true),
+            body: CompoundStatement().withComments(["// Empty body"])
+        )
 
         assert(
             objcStmt: string,
             comments: comments,
             parseBlock: { try $0.statement() },
             readsAs: expected
+        )
+    }
+
+    func testReadCommentInBlockBodyInBlockDeclaration() throws {
+        let string = """
+            {
+                // Pre-block
+                void (^block)() = ^{
+                    // In block
+                    a();
+                };
+                // Post-block
+            }
+            """
+        let objcParser = ObjcParser(string: string)
+        try objcParser.parse()
+        let comments = objcParser.comments
+        let expected = Statement.variableDeclaration(
+            identifier: "block",
+            type: .swiftBlock(returnType: .void).asNullabilityUnspecified,
+            initialization: .block(body: [
+                .expression(.identifier("a").call()).withComments(["// In block"])
+            ])
+        ).withComments(["// Pre-block"])
+
+        assert(
+            objcStmt: string,
+            comments: comments,
+            parseBlock: { try $0.statement() },
+            readsAs: CompoundStatement(statements: [expected])
+        )
+    }
+
+    func testReadCommentInMultiBlockBodiesInDeclaration() throws {
+        let string = """
+            {
+                // Pre-block
+                id value = [self block:^{
+                    // In block 1
+                    a();
+                } otherBlock:^{
+                    // In block 2
+                    b();
+                }];
+                // Post-block
+            }
+            """
+        let objcParser = ObjcParser(string: string)
+        try objcParser.parse()
+        let comments = objcParser.comments
+        let expected = Statement.variableDeclaration(
+            identifier: "value",
+            type: .anyObject.asNullabilityUnspecified,
+            initialization:
+                .identifier("self")
+                .dot("block")
+                .call([
+                    .init(label: nil, expression: .block(body: [
+                        .expression(.identifier("a").call()).withComments(["// In block 1"])
+                    ])),
+                    .init(label: "otherBlock", expression: .block(body: [
+                        .expression(.identifier("b").call()).withComments(["// In block 2"])
+                    ])),
+                ])
+        ).withComments(["// Pre-block"])
+
+        assert(
+            objcStmt: string,
+            comments: comments,
+            parseBlock: { try $0.statement() },
+            readsAs: CompoundStatement(statements: [expected])
+        )
+    }
+
+    func testReadCommentInMultiBlockBodiesInExpression() throws {
+        let string = """
+            {
+                // Pre-block
+                [self block:^{
+                    // In block 1
+                    a();
+                } otherBlock:^{
+                    // In block 2
+                    b();
+                }];
+                // Post-block
+            }
+            """
+        let objcParser = ObjcParser(string: string)
+        try objcParser.parse()
+        let comments = objcParser.comments
+        let expected = Statement.expression(
+            .identifier("self")
+                .dot("block")
+                .call([
+                    .init(label: nil, expression: .block(body: [
+                        .expression(.identifier("a").call()).withComments(["// In block 1"])
+                    ])),
+                    .init(label: "otherBlock", expression: .block(body: [
+                        .expression(.identifier("b").call()).withComments(["// In block 2"])
+                    ])),
+                ])
+        ).withComments(["// Pre-block"])
+
+        assert(
+            objcStmt: string,
+            comments: comments,
+            parseBlock: { try $0.statement() },
+            readsAs: CompoundStatement(statements: [expected])
         )
     }
 }
@@ -907,7 +1021,7 @@ extension ObjectiveCStatementASTReaderTests {
 
                 expString = producer.generateStatement(expected).description + "\n"
                 resString = (result.map(producer.generateStatement)?.description ?? "") + "\n"
-
+                
                 dump(expected, to: &expString)
                 dump(result, to: &resString)
 
