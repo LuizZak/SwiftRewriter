@@ -244,7 +244,7 @@ class ObjectiveCExprASTReaderTests: XCTestCase {
         )
     }
 
-    func testBinaryOperations_dontMistakeParensForCastInBinaryExpressions() {
+    func testBinaryOperations_doesNotMistakeParensForCastInBinaryExpressions() {
         assert(
             objcExpr: "(a) & 0xff",
             readsAs: .parens(.identifier("a")).binary(op: .bitwiseAnd, rhs: .constant(.int(0xff, .hexadecimal)))
@@ -260,6 +260,42 @@ class ObjectiveCExprASTReaderTests: XCTestCase {
         assert(
             objcExpr: "(a) - 0xff",
             readsAs: .parens(.identifier("a")).binary(op: .subtract, rhs: .constant(.int(0xff, .hexadecimal)))
+        )
+        assert(
+            objcExpr: "i + (value) - 1",
+            readsAs: .binary(
+                lhs: .identifier("i"),
+                op: .add,
+                rhs: .binary(
+                    lhs: .parens(.identifier("value")),
+                    op: .subtract,
+                    rhs: .constant(1)
+                )
+            )
+        )
+        assert(
+            objcExpr: "i << (value) - 1",
+            readsAs: .binary(
+                lhs: .binary(
+                    lhs: .identifier("i"),
+                    op: .bitwiseShiftLeft,
+                    rhs: .parens(.identifier("value"))
+                ),
+                op: .subtract,
+                rhs: .constant(1)
+            )
+        )
+        assert(
+            objcExpr: "i * (value) - 1",
+            readsAs: .binary(
+                lhs: .binary(
+                    lhs: .identifier("i"),
+                    op: .multiply,
+                    rhs: .parens(.identifier("value"))
+                ),
+                op: .subtract,
+                rhs: .constant(1)
+            )
         )
     }
 

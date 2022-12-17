@@ -49,7 +49,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         }
         // Nested statement
         if let compound = ctx.compoundStatement() {
-            let visitor = compoundStatementVisitor()
+            let visitor = makeCompoundStatementVisitor()
             guard let statement = compound.accept(visitor) else {
                 return makeUnknownNode(ctx)
             }
@@ -62,7 +62,18 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
 
     public override func visitAssignmentExpression(_ ctx: ObjectiveCParser.AssignmentExpressionContext) -> Expression? {
         if let conditional = ctx.conditionalExpression() {
-            return conditional.accept(self)
+            guard let exp = conditional.accept(self) else {
+                return nil
+            }
+
+            // Rebalance nested binary expressions based in operator precedence
+            // to ensure the inlined transformer in `visitCastExpression(_:)`
+            // produces valid results
+            if let binary = exp.asBinary {
+                return balancePrecedence(in: binary)
+            }
+
+            return exp
         }
 
         guard let lhs = ctx.unaryExpression()?.accept(self) else {
@@ -164,10 +175,13 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         if let unary = ctx.unaryExpression() {
             return unary.accept(self)
         }
+        guard let castExpression = ctx.castExpression() else {
+            return makeUnknownNode(ctx)
+        }
         guard
             let typeName = ctx.typeName(),
             let type = typeParser.parseObjcType(from: typeName),
-            let exp = ctx.castExpression()?.accept(self)
+            let exp = castExpression.accept(self)
         else {
             return makeUnknownNode(ctx)
         }
@@ -179,15 +193,42 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         let operators: Set<SwiftOperator> = [
             .bitwiseAnd, .multiply, .add, .subtract,
         ]
+
+        binaryOpCheck:
         if
-            case .nominal(.typeName(let identifier)) = swiftType,
-            let unary = exp.asUnary, operators.contains(unary.op)
+            case .nominal(.typeName(let identifier)) = swiftType
         {
             let lhs = Expression.parens(.identifier(identifier))
-            let op = unary.op
-            let rhs = unary.exp.copy()
 
-            return lhs.binary(op: op, rhs: rhs)
+            // First case: rhs is a unary operator
+            if let unary = exp.asUnary, operators.contains(unary.op) {
+                let op = unary.op
+                let rhs = unary.exp.copy()
+
+                return lhs.binary(op: op, rhs: rhs)
+            }
+
+            // Second case: rhs is a signed numeric constant
+            if
+                let signedConstant = ExtractedSignedConstant.fromCastExpression(castExpression),
+                let constant = signedConstant.constant.accept(self)?.asConstant
+            {
+                let op: SwiftOperator = signedConstant.isPositive ? .add : .subtract
+                let rhs: Expression
+
+                switch (signedConstant, constant.constant) {
+                case (.decimal, .int(let value, let type)):
+                    rhs = .constant(.int(abs(value), type))
+                
+                case (.float, .float(let value)):
+                    rhs = .constant(.float(abs(value)))
+
+                default:
+                    break binaryOpCheck
+                }
+
+                return lhs.binary(op: op, rhs: rhs)
+            }
         }
         
         return exp.casted(to: swiftType)
@@ -442,7 +483,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
             parameters = []
         }
         
-        let compoundVisitor = self.compoundStatementVisitor()
+        let compoundVisitor = self.makeCompoundStatementVisitor()
         
         guard let body = ctx.compoundStatement()?.accept(compoundVisitor) else {
             return makeUnknownNode(ctx)
@@ -638,8 +679,14 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
 
         return result
     }
+
+    private func balancePrecedence(in exp: BinaryExpression) -> BinaryExpression {
+        let balancer = BinaryExpressionBalancer()
+        
+        return balancer.balance(exp)
+    }
     
-    private func compoundStatementVisitor() -> ObjectiveCStatementASTReader.CompoundStatementVisitor {
+    private func makeCompoundStatementVisitor() -> ObjectiveCStatementASTReader.CompoundStatementVisitor {
         .init(
             expressionReader: self,
             context: context,
@@ -666,6 +713,76 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
             return .unlabeled(
                 expressionReader.makeUnknownNode(ctx)
             )
+        }
+    }
+
+    private enum ExtractedSignedConstant {
+        case decimal(ObjectiveCParser.ConstantContext, TerminalNode, isPositive: Bool)
+        case float(ObjectiveCParser.ConstantContext, TerminalNode, isPositive: Bool)
+
+        var constant: ObjectiveCParser.ConstantContext {
+            switch self {
+            case .decimal(let value, _, _), .float(let value, _, _):
+                return value
+            }
+        }
+
+        var terminalNode: TerminalNode {
+            switch self {
+            case .decimal(_, let value, _), .float(_, let value, _):
+                return value
+            }
+        }
+
+        var isPositive: Bool {
+            switch self {
+            case .decimal(_, _, let value), .float(_, _, let value):
+                return value
+            }
+        }
+        
+        /// Extracts `-[number]` and `+[number]` from a given cast expression
+        /// context.
+        static func fromCastExpression(
+            _ ctx: ObjectiveCParser.CastExpressionContext
+        ) -> Self? {
+            
+            guard ctx.EXTENSION() == nil && ctx.typeName() == nil else {
+                return nil
+            }
+            guard let unaryExpression = ctx.unaryExpression() else {
+                return nil
+            }
+            guard let postfixExpression = unaryExpression.postfixExpression() else {
+                return nil
+            }
+            guard postfixExpression.postfixExpr().isEmpty else {
+                return nil
+            }
+            guard let primaryExpression = postfixExpression.primaryExpression() else {
+                return nil
+            }
+            guard let constant = primaryExpression.constant() else {
+                return nil
+            }
+
+            if let decimalLiteral = constant.DECIMAL_LITERAL() {
+                if constant.ADD() != nil {
+                    return .decimal(constant, decimalLiteral, isPositive: true)
+                } else if constant.SUB() != nil {
+                    return .decimal(constant, decimalLiteral, isPositive: false)
+                }
+            }
+
+            if let floatLiteral = constant.FLOATING_POINT_LITERAL() {
+                if constant.ADD() != nil {
+                    return .float(constant, floatLiteral, isPositive: true)
+                } else if constant.SUB() != nil {
+                    return .float(constant, floatLiteral, isPositive: false)
+                }
+            }
+
+            return nil
         }
     }
 }
