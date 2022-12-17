@@ -203,7 +203,6 @@
 		],
 
 		"swift.buildArguments": [],
-
 		"swift.autoGenerateLaunchConfigurations": false,
 
 		"ShortcutMenuBar.userButton01Command": "workbench.action.tasks.runTask|Build (debug)",

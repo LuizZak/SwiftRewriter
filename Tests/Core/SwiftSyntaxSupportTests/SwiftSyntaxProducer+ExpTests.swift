@@ -308,6 +308,14 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
         )
     }
 
+    func testCast_parenthesizesExpression() {
+        assert(
+            Expression.identifier("foo").binary(op: .add, rhs: .constant(1)).casted(to: .int, optional: true),
+            producer: SwiftSyntaxProducer.generateCast,
+            matches: "(foo + 1) as? Int"
+        )
+    }
+
     func testTypeCheck() {
         assert(
             Expression.identifier("foo").typeCheck(as: .int),

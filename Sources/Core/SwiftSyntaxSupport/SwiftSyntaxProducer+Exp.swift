@@ -16,6 +16,18 @@ extension SwiftSyntaxProducer {
         }
     }
 
+    /// Returns a parenthesized `ExprSyntax` for a given expression if
+    /// `expression.requiresParens` is `true`.
+    func generateWithinParensIfNecessary(_ exp: Expression) -> ExprSyntax {
+        if exp.requiresParens {
+            return parenthesizeSyntax {
+                generateExpression(exp)
+            }
+        }
+        
+        return generateExpression(exp)
+    }
+    
     func generateExpressionKind(_ expressionKind: ExpressionKind) -> ExprSyntax {
         switch expressionKind {
         case .identifier(let exp):
@@ -134,13 +146,9 @@ extension SwiftSyntaxProducer {
     }
     
     public func generateParens(_ exp: ParensExpression) -> ExprSyntax {
-        TupleExprSyntax { builder in
-            builder.useLeftParen(makeStartToken(SyntaxFactory.makeLeftParenToken))
-            builder.useRightParen(SyntaxFactory.makeRightParenToken())
-            builder.addElement(TupleExprElementSyntax { builder in
-                builder.useExpression(generateExpression(exp.exp))
-            })
-        }.asExprSyntax
+        return parenthesizeSyntax {
+            generateExpression(exp.exp)
+        }
     }
     
     public func generateIdentifier(_ exp: IdentifierExpression) -> IdentifierExprSyntax {
@@ -151,7 +159,7 @@ extension SwiftSyntaxProducer {
     
     public func generateCast(_ exp: CastExpression) -> SequenceExprSyntax {
         SequenceExprSyntax { builder in
-            builder.addElement(generateExpression(exp.exp))
+            builder.addElement(generateWithinParensIfNecessary(exp.exp))
             
             builder.addElement(AsExprSyntax { builder in
                 if exp.isOptionalCast {
@@ -361,11 +369,11 @@ extension SwiftSyntaxProducer {
     }
     
     public func generateUnary(_ exp: UnaryExpression) -> ExprSyntax {
-        generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNeccessary(exp.exp) }))
+        generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNecessary(exp.exp) }))
     }
     
     public func generatePrefix(_ exp: PrefixExpression) -> ExprSyntax {
-        generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNeccessary(exp.exp) }))
+        generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNecessary(exp.exp) }))
     }
     
     public func generateBinary(_ exp: BinaryExpression) -> SequenceExprSyntax {
@@ -392,7 +400,7 @@ extension SwiftSyntaxProducer {
             optionalAccessKind: Postfix.OptionalAccessKind
         ) -> ExprSyntax {
             
-            let base = generateWithinParensIfNeccessary(exp)
+            let base = generateWithinParensIfNecessary(exp)
             
             switch optionalAccessKind {
             case .none:
@@ -756,22 +764,6 @@ extension SwiftSyntaxProducer {
         return producer(op)
     }
     
-    func generateWithinParensIfNeccessary(_ exp: Expression) -> ExprSyntax {
-        if exp.requiresParens {
-            return TupleExprSyntax { builder in
-                builder.useLeftParen(
-                    makeStartToken(SyntaxFactory.makeLeftParenToken))
-                
-                builder.useRightParen(SyntaxFactory.makeRightParenToken())
-                builder.addElement(TupleExprElementSyntax { builder in
-                    builder.useExpression(generateExpression(exp))
-                })
-            }.asExprSyntax
-        }
-        
-        return generateExpression(exp)
-    }
-    
     func generateFunctionIdentifier(type: SwiftType?, _ ident: FunctionIdentifier) -> ExprSyntax {
         let declArgs = DeclNameArgumentsSyntax { builder in
             builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
@@ -811,6 +803,18 @@ extension SwiftSyntaxProducer {
                 builder.useDeclNameArguments(declArgs)
             }.asExprSyntax
         }
+    }
+    
+    func parenthesizeSyntax(_ exprBuilder: () -> ExprSyntax) -> ExprSyntax {
+        TupleExprSyntax { builder in
+            builder.useLeftParen(
+                makeStartToken(SyntaxFactory.makeLeftParenToken))
+            
+            builder.useRightParen(SyntaxFactory.makeRightParenToken())
+            builder.addElement(TupleExprElementSyntax { builder in
+                builder.useExpression(exprBuilder())
+            })
+        }.asExprSyntax
     }
     
     enum OperatorMode {
