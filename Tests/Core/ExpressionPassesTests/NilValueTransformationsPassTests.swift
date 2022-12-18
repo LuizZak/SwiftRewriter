@@ -232,14 +232,14 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
     }
 
     func testLookupIntoChainedBlockExpressions() {
-        let makeCallback: (Bool, Int) -> Expression = { (coallesced, argCount) in
+        let makeCallback: (Bool, Int) -> Expression = { (coalesced, argCount) in
             let exp: Expression
 
             let params = (0..<argCount).map {
                 FunctionArgument.unlabeled(.constant(.int($0, .decimal)))
             }
 
-            if coallesced {
+            if coalesced {
                 exp = .identifier("callback").optional().call(params)
             }
             else {
@@ -300,21 +300,21 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                 .dot("then").call([
                     .unlabeled(
                         .block(body: [
-                            .expression(makeCallback( /* coalesced: */true, /* argCount: */ 0))
+                            .expression(makeCallback(/* coalesced: */true, /* argCount: */ 0))
                         ])
                     )
                 ])
                 .dot("then").call([
                     .unlabeled(
                         .block(body: [
-                            .expression(makeCallback( /* coalesced: */true, /* argCount: */ 1))
+                            .expression(makeCallback(/* coalesced: */true, /* argCount: */ 1))
                         ])
                     )
                 ])
                 .dot("always").call([
                     .unlabeled(
                         .block(body: [
-                            .expression(makeCallback( /* coalesced: */true, /* argCount: */ 2))
+                            .expression(makeCallback(/* coalesced: */true, /* argCount: */ 2))
                         ])
                     )
                 ])

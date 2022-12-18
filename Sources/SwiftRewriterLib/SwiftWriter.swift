@@ -81,13 +81,13 @@ public final class SwiftWriter {
                 continue
             }
             
-            let writer
-                = SwiftSyntaxWriter(
-                    options: options,
-                    diagnostics: Diagnostics(),
-                    output: output,
-                    typeSystem: typeSystem,
-                    syntaxRewriterApplier: syntaxRewriterApplier)
+            let writer = SwiftSyntaxWriter(
+                options: options,
+                diagnostics: Diagnostics(),
+                output: output,
+                typeSystem: typeSystem,
+                syntaxRewriterApplier: syntaxRewriterApplier
+            )
             
             queue.addOperation {
                 autoreleasepool {
@@ -100,7 +100,8 @@ public final class SwiftWriter {
                                     self,
                                     filesEmitted: fe,
                                     totalFiles: filesToEmit.count,
-                                    latestFile: file)
+                                    latestFile: file
+                                )
                             }
                         }
                         
@@ -119,9 +120,11 @@ public final class SwiftWriter {
         queue.runAndWaitConcurrent()
         
         for error in errors.wrappedValue {
-            diagnostics.error("Error while saving file \(error.0): \(error.1)",
-                              origin: error.0,
-                              location: .invalid)
+            diagnostics.error(
+                "Error while saving file \(error.0): \(error.1)",
+                origin: error.0,
+                location: .invalid
+            )
         }
     }
     
