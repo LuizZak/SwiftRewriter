@@ -231,7 +231,11 @@ class DefinitionCollectorTests: XCTestCase {
                         p2.assertNoName()?
                             .assert(type: .pointer("signed int"))
                     }?
-                    .assert(isVariadic: false)
+                    .assert(isVariadic: false)?
+                    .asserter(forKeyPath: \.parameterList) { parameterList in
+                        parameterList.assertNotNil()?
+                            .assertIsLocationValid()
+                    }
             }?.assertIsAtEnd()
         }
     }

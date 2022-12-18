@@ -205,16 +205,50 @@ extension SwiftSyntaxProducer {
     
     public func generateClosure(_ exp: BlockLiteralExpression) -> ClosureExprSyntax {
         ClosureExprSyntax { builder in
-            builder.useLeftBrace(makeStartToken(SyntaxFactory.makeLeftBraceToken))
-            
             let hasParameters = !exp.parameters.isEmpty
             let requiresTypeSignature =
                 exp.resolvedType == nil || exp.resolvedType != exp.expectedType
             
+            let requiresInToken = hasParameters || requiresTypeSignature
+
+            // Prepare leading comments for the block
+            var leadingComments: Trivia?
+            if !exp.body.comments.isEmpty {
+                indent() // Temporarily indent for leading comments generation
+
+                leadingComments =
+                    .newlines(1)
+                    + indentation()
+                    + toCommentsTrivia(
+                        exp.body.comments,
+                        addNewLineAfter: !exp.body.isEmpty
+                    )
+                
+                deindent()
+            }
+            
+            var leftBrace = makeStartToken(SyntaxFactory.makeLeftBraceToken)
+            
+            if !requiresInToken, let leadingComments {
+                leftBrace = leftBrace.withTrailingTrivia(
+                    leadingComments
+                )
+            }
+
+            builder.useLeftBrace(leftBrace)
+
             let signature = ClosureSignatureSyntax { builder in
-                if hasParameters || requiresTypeSignature {
+                if requiresInToken {
+                    var inToken = SyntaxFactory.makeInKeyword().addingLeadingSpace()
+
+                    if let leadingComments {
+                        inToken = inToken.withTrailingTrivia(
+                            leadingComments
+                        )
+                    }
+
                     builder.useInTok(
-                        SyntaxFactory.makeInKeyword().addingLeadingSpace()
+                        inToken
                     )
                 }
                 

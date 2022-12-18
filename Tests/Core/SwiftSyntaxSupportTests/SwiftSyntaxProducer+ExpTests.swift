@@ -468,6 +468,14 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
             producer: SwiftSyntaxProducer.generateClosure,
             matches: "{ () -> Void in\n    foo()\n}"
         )
+
+        assert(
+            Expression.block(body: [])
+            .typed(expected: SwiftType.swiftBlock(returnType: .void, parameters: []))
+            .typed(SwiftType.swiftBlock(returnType: .void, parameters: [])),
+            producer: SwiftSyntaxProducer.generateClosure,
+            matches: "{\n}"
+        )
     }
 
     func testClosureWithParameters() {
@@ -585,6 +593,31 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
             .typed(SwiftType.swiftBlock(returnType: .int, parameters: [])),
             producer: SwiftSyntaxProducer.generateClosure,
             matches: "{ (p1: Int) -> Void in\n    foo()\n}"
+        )
+    }
+
+    func testEmptyClosureWithBodyComments() {
+        assert(
+            Expression.block(body: CompoundStatement().withComments(["// A comment", "// Another comment"])),
+            producer: SwiftSyntaxProducer.generateClosure,
+            matches: """
+            { () -> Void in
+                // A comment
+                // Another comment
+            }
+            """
+        )
+        assert(
+            Expression.block(body: CompoundStatement().withComments(["// A comment", "// Another comment"]))
+            .typed(expected: SwiftType.swiftBlock(returnType: .void, parameters: []))
+            .typed(SwiftType.swiftBlock(returnType: .void, parameters: [])),
+            producer: SwiftSyntaxProducer.generateClosure,
+            matches: """
+            {
+                // A comment
+                // Another comment
+            }
+            """
         )
     }
 
