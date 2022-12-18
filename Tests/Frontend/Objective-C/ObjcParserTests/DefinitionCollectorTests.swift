@@ -530,6 +530,62 @@ class DefinitionCollectorTests: XCTestCase {
         }
     }
 
+    func testCollect_singleDecl_enum_typedef() {
+        let tester = prepareTest(declaration: "typedef enum { CASE0 = 0, CASE1 = 1, CASE2 } AnEnum;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: ObjcEnumDeclarationNode.self)?
+                    .assert(name: "AnEnum")?
+                    .assertNoTypeName()?
+                    .assertEnumeratorCount(3)?
+                    .asserter(forEnumeratorName: "CASE0") { case0 in
+                        case0
+                            .assert(name: "CASE0")?
+                            .assert(expressionString: "0")
+                    }?
+                    .asserter(forEnumeratorName: "CASE1") { case0 in
+                        case0
+                            .assert(name: "CASE1")?
+                            .assert(expressionString: "1")
+                    }?
+                    .asserter(forEnumeratorName: "CASE2") { case0 in
+                        case0
+                            .assert(name: "CASE2")?
+                            .assertNoExpression()
+                    }
+            }
+        }
+    }
+
+    func testCollect_singleDecl_enum_typedef_repeatedName() {
+        let tester = prepareTest(declaration: "typedef enum AnEnum { AnEnum_Case0, AnEnum_Case1, AnEnum_Case2 } AnEnum;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: ObjcEnumDeclarationNode.self)?
+                    .assert(name: "AnEnum")?
+                    .assertNoTypeName()?
+                    .assertEnumeratorCount(3)?
+                    .asserter(forEnumeratorName: "AnEnum_Case0") { case0 in
+                        case0
+                            .assert(name: "AnEnum_Case0")?
+                            .assertNoExpression()
+                    }?
+                    .asserter(forEnumeratorName: "AnEnum_Case1") { case0 in
+                        case0
+                            .assert(name: "AnEnum_Case1")?
+                            .assertNoExpression()
+                    }?
+                    .asserter(forEnumeratorName: "AnEnum_Case2") { case0 in
+                        case0
+                            .assert(name: "AnEnum_Case2")?
+                            .assertNoExpression()
+                    }
+            }
+        }
+    }
+
     func testCollect_singleDecl_enum_nsEnum() {
         let tester = prepareTest(declaration: "typedef NS_ENUM(NSInteger, AnEnum) { CASE0 = 0, CASE1 = 1, CASE2 };")
 

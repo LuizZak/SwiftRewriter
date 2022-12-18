@@ -110,4 +110,43 @@ public extension Asserter where Object: ASTNode {
             $0.assert(equals: precedingCommentStrings, file: file, line: line)
         }.mapAsserter(self)
     }
+
+    /// Asserts that the underlying `FromSourceIntention` object being tested
+    /// has a source range that matches a specified value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        sourceRange: SourceRange,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+        
+        self[\.sourceRange].assert(
+            equals: sourceRange,
+            file: file,
+            line: line
+        )
+        .mapAsserter(self)
+    }
+
+    /// Asserts that the underlying `FromSourceIntention` object being tested
+    /// has a `.location` value that is not `SourceLocation.invalid`.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertIsLocationValid(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+        
+        self[\.location].assert(
+            notEquals: .invalid,
+            file: file,
+            line: line
+        )
+        .mapAsserter(self)
+    }
 }

@@ -931,6 +931,42 @@ class ObjcParserTests: XCTestCase {
             }
         }
     }
+
+    func testParseEnumTypedef() throws {
+        let node = parserTest(
+            """
+            typedef enum AnEnum {
+                AnEnum_Case0,
+                AnEnum_Case1,
+                AnEnum_Case2
+            } AnEnum;
+            """
+        )
+
+        Asserter(object: node).inClosureUnconditional { decls in
+            decls.assertChildCount(1)?.asserter(forChildAt: 0) { decl in
+                decl.assert(isOfType: ObjcEnumDeclarationNode.self)?
+                    .assert(name: "AnEnum")?
+                    .assertNoTypeName()?
+                    .assertEnumeratorCount(3)?
+                    .asserter(forEnumeratorName: "AnEnum_Case0") { case0 in
+                        case0
+                            .assert(name: "AnEnum_Case0")?
+                            .assertNoExpression()
+                    }?
+                    .asserter(forEnumeratorName: "AnEnum_Case1") { case0 in
+                        case0
+                            .assert(name: "AnEnum_Case1")?
+                            .assertNoExpression()
+                    }?
+                    .asserter(forEnumeratorName: "AnEnum_Case2") { case0 in
+                        case0
+                            .assert(name: "AnEnum_Case2")?
+                            .assertNoExpression()
+                    }
+            }
+        }
+    }
     
     func testCommentRanges() throws {
         let string = """

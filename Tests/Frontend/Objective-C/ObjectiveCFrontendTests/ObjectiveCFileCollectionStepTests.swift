@@ -1,5 +1,6 @@
 import TestCommons
 import XCTest
+import Utils
 
 @testable import ObjectiveCFrontend
 
@@ -127,8 +128,9 @@ private class MockFileCollectionStepDelegate: ObjectiveCFileCollectionStepDelega
     func objectiveCFileCollectionStep(
         _ fileCollectionStep: ObjectiveCFileCollectionStep,
         referencedFilesForFile file: InputSource
-    ) throws -> [URL] {
+    ) throws -> [(file: URL, range: SourceRange?)] {
+
         fileCollectionStepReferencedFilesForFile.append((fileCollectionStep, file))
-        return fileReferences
+        return fileReferences.map { ($0, .invalid) }
     }
 }

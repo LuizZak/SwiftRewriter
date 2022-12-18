@@ -1527,6 +1527,25 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
         )
     }
 
+    func testEnumRepeatedNamingTypedef() {
+        assertRewrite(
+            objc: """
+                typedef enum MyEnum {
+                    MyEnum_Case0,
+                    MyEnum_Case1,
+                    MyEnum_Case2,
+                } MyEnum;
+                """,
+            swift: """
+                enum MyEnum: CInt {
+                    case MyEnum_Case0
+                    case MyEnum_Case1
+                    case MyEnum_Case2
+                }
+                """
+        )
+    }
+
     func testAppliesTypenameConversionToCategories() {
         // Make sure we have members on each extension so that the resulting
         // empty extensions are not removed

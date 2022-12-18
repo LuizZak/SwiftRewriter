@@ -21,8 +21,10 @@ extension KnownTypeBuilder {
             
         case .enum:
             let rawValueType = type.knownTrait(KnownTypeTraits.enumRawValue)?.asSwiftType ?? .int
-            typeIntention = EnumGenerationIntention(typeName: type.typeName,
-                                                    rawValueType: rawValueType)
+            typeIntention = EnumGenerationIntention(
+                typeName: type.typeName,
+                rawValueType: rawValueType
+            )
             
         case .protocol:
             typeIntention = ProtocolGenerationIntention(typeName: type.typeName)
