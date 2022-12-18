@@ -5,6 +5,11 @@ public struct ParameterSignature: Hashable, Codable {
     public var isVariadic: Bool
     public var hasDefaultValue: Bool
     
+    /// Initializes a new parameter signature with a parameter that has a name
+    /// and label of the same value `name`.
+    ///
+    /// Is equivalent to the default behavior of Swift parameters of creating a
+    /// label with the same name if only a name is provided.
     public init(name: String, type: SwiftType, isVariadic: Bool = false, hasDefaultValue: Bool = false) {
         self.label = name
         self.name = name
@@ -13,6 +18,7 @@ public struct ParameterSignature: Hashable, Codable {
         self.hasDefaultValue = hasDefaultValue
     }
     
+    /// Initializes a new parameter signature with a given set of values.
     public init(label: String?, name: String, type: SwiftType, isVariadic: Bool = false, hasDefaultValue: Bool = false) {
         self.label = label
         self.name = name

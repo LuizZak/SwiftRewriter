@@ -272,7 +272,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                     }
                     func __(_ a: AnyObject!) {
                     }
-                    func __(_ a: AnyObject!) -> AnyObject! {
+                    func __(_ a: AnyObject!) -> AnyObject? {
                     }
                 }
                 """
@@ -752,7 +752,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                     }
                 }
                 class MyClass2 {
-                    func aMethod(_ param: String!) -> AnyObject! {
+                    func aMethod(_ param: String!) -> AnyObject? {
                     }
                 }
                 """
@@ -1351,7 +1351,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 @end
                 """,
             swift: """
-                func global() -> A! {
+                func global() -> A? {
                 }
 
                 class A {
@@ -1985,7 +1985,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 """,
             swift: """
                 class A {
-                    static func makeA() -> A! {
+                    static func makeA() -> A? {
                     }
                 }
                 """
@@ -3042,7 +3042,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 """,
             swift: """
                 class A {
-                    subscript(index: UInt) -> NSObject! {
+                    subscript(index: UInt) -> NSObject? {
                         return self
                     }
                 }
@@ -3066,7 +3066,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 """,
             swift: """
                 class A {
-                    subscript(index: UInt) -> NSObject! {
+                    subscript(index: UInt) -> NSObject? {
                         get {
                             return self
                         }
@@ -3124,7 +3124,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                         test()
                     }
 
-                    func getObject() -> NSObject! {
+                    func getObject() -> NSObject? {
                         // A comment
                         test()
 

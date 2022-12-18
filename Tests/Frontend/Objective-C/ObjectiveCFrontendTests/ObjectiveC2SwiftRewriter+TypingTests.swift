@@ -728,14 +728,13 @@ class ObjectiveC2SwiftRewriter_TypingTests: XCTestCase {
                 @interface MyClass
                 - (nullable NSString*)optional;
                 - (nonnull NSString*)nonOptional;
-                - (null_unspecified NSString*)unspecifiedOptional;
-                - (NSString*)unspecifiedOptional;
                 @end
                 @implementation MyClass
                 - (void)method {
+                    NSString *null_unspecified localUnspecified;
                     NSString *local1 = [self optional];
                     NSString *local2 = [self nonOptional];
-                    NSString *local3 = [self unspecifiedOptional];
+                    NSString *local3 = localUnspecified;
                     NSString *local4 = @"Literal";
                     (local1);
                     (local2);
@@ -748,6 +747,8 @@ class ObjectiveC2SwiftRewriter_TypingTests: XCTestCase {
                 class MyClass {
                     func method() {
                         // decl type: String!
+                        let localUnspecified: String!
+                        // decl type: String!
                         // init type: String?
                         let local1 = self.optional()
                         // decl type: String
@@ -755,7 +756,7 @@ class ObjectiveC2SwiftRewriter_TypingTests: XCTestCase {
                         let local2 = self.nonOptional()
                         // decl type: String!
                         // init type: String!
-                        let local3 = self.unspecifiedOptional()
+                        let local3 = localUnspecified
                         // decl type: String
                         // init type: String
                         let local4 = "Literal"
@@ -776,17 +777,13 @@ class ObjectiveC2SwiftRewriter_TypingTests: XCTestCase {
                     }
                     func nonOptional() -> String {
                     }
-                    func unspecifiedOptional() -> String! {
-                    }
                 }
                 """,
             options: SwiftSyntaxOptions.default.with(\.outputExpressionTypes, true)
         )
     }
 
-    func
-        testLocalVariableDeclarationInitializedTransmitsNullabilityFromRightHandSideWithSubclassing()
-    {
+    func testLocalVariableDeclarationInitializedTransmitsNullabilityFromRightHandSideWithSubclassing() {
         assertRewrite(
             objc: """
                 @interface A
@@ -796,18 +793,14 @@ class ObjectiveC2SwiftRewriter_TypingTests: XCTestCase {
                 @interface MyClass
                 - (nullable B*)optional;
                 - (nonnull B*)nonOptional;
-                - (null_unspecified B*)unspecifiedOptional;
-                - (B*)unspecifiedOptional;
                 @end
 
                 @implementation MyClass
                 - (void)method {
                     A *local1 = [self optional];
                     A *local2 = [self nonOptional];
-                    A *local3 = [self unspecifiedOptional];
                     (local1);
                     (local2);
-                    (local3);
                 }
                 @end
                 """,
@@ -824,22 +817,15 @@ class ObjectiveC2SwiftRewriter_TypingTests: XCTestCase {
                         // decl type: A
                         // init type: B
                         let local2 = self.nonOptional()
-                        // decl type: A!
-                        // init type: B!
-                        let local3 = self.unspecifiedOptional()
 
                         // type: A?
                         local1
                         // type: A
                         local2
-                        // type: A?
-                        local3
                     }
                     func optional() -> B? {
                     }
                     func nonOptional() -> B {
-                    }
-                    func unspecifiedOptional() -> B! {
                     }
                 }
                 """,
@@ -966,7 +952,7 @@ class ObjectiveC2SwiftRewriter_TypingTests: XCTestCase {
             swift: """
                 typealias Callback = () -> Void
 
-                func takesBlockGlobal(_ block: (() -> Void)!) -> String! {
+                func takesBlockGlobal(_ block: (() -> Void)!) -> String? {
                 }
 
                 class MyClass {
@@ -1008,13 +994,11 @@ class ObjectiveC2SwiftRewriter_TypingTests: XCTestCase {
     func testAssignImplicitlyUnwrappedOptionalToLocalVariableEscalatesToOptional() {
         assertRewrite(
             objc: """
-                @interface A
-                - (A*)other;
-                @end
                 @implementation A
                 - (void)f1 {
-                    A *a = [self other];
-                    (a);
+                    A *null_unspecified a;
+                    A *b = a;
+                    (b);
                 }
                 @end
                 """,
@@ -1022,13 +1006,13 @@ class ObjectiveC2SwiftRewriter_TypingTests: XCTestCase {
                 class A {
                     func f1() {
                         // decl type: A!
+                        let a: A!
+                        // decl type: A!
                         // init type: A!
-                        let a = self.other()
+                        let b = a
 
                         // type: A?
-                        a
-                    }
-                    func other() -> A! {
+                        b
                     }
                 }
                 """,
@@ -1444,7 +1428,7 @@ class ObjectiveC2SwiftRewriter_TypingTests: XCTestCase {
                 """,
             swift: """
                 class A {
-                    subscript(index: UInt) -> NSObject! {
+                    subscript(index: UInt) -> NSObject? {
                         // type: UInt
                         index
 

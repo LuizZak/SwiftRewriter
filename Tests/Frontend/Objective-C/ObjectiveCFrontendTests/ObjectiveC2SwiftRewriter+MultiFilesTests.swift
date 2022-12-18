@@ -363,7 +363,7 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                     init(b: B!) {
                     }
 
-                    func takesB(_ b: B!) -> B! {
+                    func takesB(_ b: B!) -> B? {
                     }
                 }
                 // End of file A.swift
@@ -1098,7 +1098,7 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                         // Transform them into resource objects, now
                         // decl type: [CPResource]
                         // init type: NSArray
-                        let results = filtered.map { (obj: NSDictionary!) -> Resource! in
+                        let results = filtered.map { (obj: NSDictionary!) -> Resource? in
                             // decl type: Resource
                             // init type: Resource
                             var resource = Resource()

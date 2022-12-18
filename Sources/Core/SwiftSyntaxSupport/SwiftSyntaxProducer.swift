@@ -892,7 +892,13 @@ extension SwiftSyntaxProducer {
                     .makeArrowToken()
                     .addingSurroundingSpaces()
             )
-            builder.useReturnType(SwiftTypeConverter.makeTypeSyntax(ret, startTokenHandler: self))
+            builder.useReturnType(
+                SwiftTypeConverter.makeTypeSyntax(
+                    ret,
+                    allowRootNullabilityUnspecified: false,
+                    startTokenHandler: self
+                )
+            )
         }
     }
     

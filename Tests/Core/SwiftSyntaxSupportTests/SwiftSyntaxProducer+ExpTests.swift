@@ -621,6 +621,30 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
         )
     }
 
+    func testClosure_promotesNullabilityUnspecifiedReturnToOptional() {
+        assert(
+            Expression.block(
+                return: .nullabilityUnspecified(.string),
+                body: []
+            ),
+            producer: SwiftSyntaxProducer.generateClosure,
+            matches: "{ () -> String? in\n}"
+        )
+    }
+
+    func testClosure_doesNotPromoteNullabilityUnspecifiedArgumentsToOptional() {
+        assert(
+            Expression.block(
+                parameters: [
+                    .init(name: "a", type: .nullabilityUnspecified(.string))
+                ],
+                body: []
+            ),
+            producer: SwiftSyntaxProducer.generateClosure,
+            matches: "{ (a: String!) -> Void in\n}"
+        )
+    }
+
     func testSequentialBinaryExpression() {
         assert(
             Expression.constant(1).binary(op: .add, rhs: .constant(2)).binary(

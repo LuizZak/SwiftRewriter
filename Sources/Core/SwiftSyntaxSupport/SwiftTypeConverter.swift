@@ -2,8 +2,29 @@ import SwiftSyntax
 import SwiftAST
 
 public class SwiftTypeConverter {
-    public static func makeTypeSyntax(_ type: SwiftType, startTokenHandler: StartTokenHandler) -> TypeSyntax {
-        SwiftTypeConverter().makeTypeSyntax(type, startTokenHandler: startTokenHandler)
+    /// Converts a given `SwiftType` into an equivalent SwiftSyntax `TypeSyntax`
+    /// element.
+    ///
+    /// - parameter type: The type to convert.
+    /// - parameter allowRootNullabilityUnspecified: If `false`, any root-level
+    /// `SwiftType.nullabilityUnspecified` will be promoted to a regular
+    /// `SwiftType.optional`, instead.
+    /// - parameter startTokenHandler: A delegate that will be invoked for the
+    /// first token on the syntax.
+    public static func makeTypeSyntax(
+        _ type: SwiftType,
+        allowRootNullabilityUnspecified: Bool = true,
+        startTokenHandler: StartTokenHandler
+    ) -> TypeSyntax {
+
+        let converter = SwiftTypeConverter()
+        if allowRootNullabilityUnspecified {
+            converter._typeDepth = -1
+        } else {
+            converter._typeDepth = 0
+        }
+
+        return converter.makeTypeSyntax(type, startTokenHandler: startTokenHandler)
     }
     
     private var _typeDepth = -1

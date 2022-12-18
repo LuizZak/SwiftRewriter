@@ -355,6 +355,42 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                 """
         )
     }
+
+    func testGenerateSignature_promotesNullabilityUnspecifiedReturnsToOptional() {
+        let signature = FunctionSignature(
+            name: "f",
+            returnType: .nullabilityUnspecified(.anyObject)
+        )
+        let sut = SwiftSyntaxProducer()
+
+        let result = sut.generateSignature(signature)
+        
+        assert(
+            result,
+            matches: """
+                () -> AnyObject?
+                """
+        )
+    }
+
+    func testGenerateSignature_doesNotPromoteNullabilityUnspecifiedParametersToOptional() {
+        let signature = FunctionSignature(
+            name: "f",
+            parameters: [
+                .init(name: "a", type: .nullabilityUnspecified(.anyObject))
+            ]
+        )
+        let sut = SwiftSyntaxProducer()
+
+        let result = sut.generateSignature(signature)
+        
+        assert(
+            result,
+            matches: """
+                (a: AnyObject!)
+                """
+        )
+    }
 }
 
 // MARK: - Attribute writing
