@@ -761,8 +761,7 @@ private extension DefinitionCollectorTests {
                 nonnullContextQuerier: NonnullContextQuerier(
                     nonnullMacroRegionsTokenRange: [],
                     nonnullMacroRegionsRanges: []
-                ),
-                commentQuerier: CommentQuerier(allComments: [])
+                )
             )
 
             super.init(ruleDeriver: ObjectiveCParser.declaration)
@@ -776,7 +775,8 @@ private extension DefinitionCollectorTests {
 
             let sut = DefinitionCollector(
                 nonnullContextQuerier: nodeFactory.nonnullContextQuerier,
-                nodeFactory: nodeFactory
+                nodeFactory: nodeFactory,
+                commentQuerier: .init(allComments: [])
             )
             sut.delegate = delegate
 
@@ -806,7 +806,8 @@ private extension DefinitionCollectorTests {
 
             let sut = DefinitionCollector(
                 nonnullContextQuerier: nodeFactory.nonnullContextQuerier,
-                nodeFactory: nodeFactory
+                nodeFactory: nodeFactory,
+                commentQuerier: .init(allComments: [])
             )
             sut.delegate = delegate
 

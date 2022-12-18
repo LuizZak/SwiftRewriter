@@ -10,15 +10,19 @@ public class ObjcIdentifierNode: ObjcASTNode {
         name
     }
     
-    public init(name: String,
-                isInNonnullContext: Bool,
-                location: SourceLocation = .invalid,
-                length: SourceLength = .zero) {
+    public init(
+        name: String,
+        isInNonnullContext: Bool,
+        location: SourceLocation = .invalid,
+        length: SourceLength = .zero
+    ) {
         
         self.name = name
         
-        super.init(isInNonnullContext: isInNonnullContext,
-                   location: location,
-                   length: length)
+        super.init(
+            isInNonnullContext: isInNonnullContext,
+            location: location,
+            length: length
+        )
     }
 }

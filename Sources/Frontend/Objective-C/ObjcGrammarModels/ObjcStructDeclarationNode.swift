@@ -1,5 +1,7 @@
+import GrammarModelBase
+
 /// An Objective-C `struct` typedef declaration.
-public final class ObjcStructDeclarationNode: ObjcASTNode, ObjcInitializableNode {
+public final class ObjcStructDeclarationNode: ObjcASTNode, ObjcInitializableNode, CommentedASTNodeType {
     public var body: ObjcStructDeclarationBodyNode? {
         firstChild()
     }

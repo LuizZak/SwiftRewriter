@@ -9,6 +9,10 @@ class ObjcParserTests: XCTestCase {
         _ = ObjcParser(string: "abc")
     }
 
+    func testParseEmptySource() {
+        _ = parserTest("")
+    }
+
     func testParseComments() {
         let source = """
             // Test comment
@@ -16,7 +20,11 @@ class ObjcParserTests: XCTestCase {
                 Test multi-line comment
             */
             """
-        _ = parserTest(source)
+        let node = parserTest(source)
+        XCTAssertEqual(node.sourceRange, .range(
+            start: .init(line: 1, column: 1, utf8Offset: 0),
+            end: source.asSourceLocation(source.endIndex)
+        ))
     }
 
     func testParseDeclarationAfterComments() {
@@ -898,7 +906,7 @@ class ObjcParserTests: XCTestCase {
         }
     }
 
-    func testParseCFunctionArrayArguments() throws {
+    func testParseCFunctionArrayArguments() {
         let node = parserTest("""
             void aFunction(unsigned n, int args[]) {
 
@@ -937,26 +945,6 @@ class ObjcParserTests: XCTestCase {
 
         try sut.parse()
 
-        /*
-        XCTAssertEqual(sut.comments.count, 2)
-        // Single line
-        XCTAssertEqual(sut.comments[0].string, "// A comment\n")
-        XCTAssertEqual(sut.comments[0].range.lowerBound, 0)
-        XCTAssertEqual(sut.comments[0].range.upperBound, 13)
-        XCTAssertEqual(sut.comments[0].location.line, 1)
-        XCTAssertEqual(sut.comments[0].location.column, 1)
-        XCTAssertEqual(sut.comments[0].length.newlines, 1)
-        XCTAssertEqual(sut.comments[0].length.columnsAtLastLine, 0)
-        // Multi-line
-        XCTAssertEqual(sut.comments[1].string, "/*\n    Another comment\n*/")
-        XCTAssertEqual(sut.comments[1].range.lowerBound, (string as NSString).range(of: "/*").lowerBound)
-        XCTAssertEqual(sut.comments[1].range.upperBound, (string as NSString).range(of: "*/").upperBound)
-        XCTAssertEqual(sut.comments[1].location.line, 3)
-        XCTAssertEqual(sut.comments[1].location.column, 1)
-        XCTAssertEqual(sut.comments[1].length.newlines, 2)
-        XCTAssertEqual(sut.comments[1].length.columnsAtLastLine, 2)
-        */
-        
         Asserter(object: sut.comments).inClosureUnconditional { comments in
             comments.assertCount(2)
 

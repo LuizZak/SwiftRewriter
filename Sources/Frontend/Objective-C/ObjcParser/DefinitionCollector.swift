@@ -1,4 +1,5 @@
 import Antlr4
+import GrammarModelBase
 import ObjcParserAntlr
 import ObjcGrammarModels
 import Utils
@@ -87,6 +88,7 @@ public class DefinitionCollector {
     var declarations: [ObjcASTNode] = []
     var nonnullContextQuerier: NonnullContextQuerier
     var nodeFactory: ObjcASTNodeFactory
+    var commentQuerier: CommentQuerier
 
     var source: Source {
         nodeFactory.source
@@ -96,10 +98,12 @@ public class DefinitionCollector {
     
     public init(
         nonnullContextQuerier: NonnullContextQuerier,
-        nodeFactory: ObjcASTNodeFactory
+        nodeFactory: ObjcASTNodeFactory,
+        commentQuerier: CommentQuerier
     ) {
         self.nonnullContextQuerier = nonnullContextQuerier
         self.nodeFactory = nodeFactory
+        self.commentQuerier = commentQuerier
     }
 
     /// Collects definitions from a given declaration context parser rule.
@@ -268,12 +272,15 @@ public class DefinitionCollector {
 
         let isNonnull = nodeFactory.isInNonnullContext(decl.identifier.sourceRange)
 
-        let parameterList = ObjcParameterListNode(isInNonnullContext: isNonnull)
-        parameterList.addChildren(
-            makeParameterList(decl.parameters)
+        let parameterList = makeParameterList(
+            isInNonnullContext: isNonnull,
+            location: decl.identifier.sourceRange.start ?? .invalid,
+            decl.parameters
         )
+
         if decl.isVariadic {
             let variadicParam = ObjcVariadicParameterNode(isInNonnullContext: isNonnull)
+            nodeFactory.updateSourceLocation(for: variadicParam, with: parameterList.sourceRange)
             parameterList.addChild(variadicParam)
         }
 
@@ -556,7 +563,23 @@ public class DefinitionCollector {
         return node
     }
 
-    private func makeParameterList(_ parameterList: [DeclarationTranslator.FunctionParameterInfo]) -> [ObjcFunctionParameterNode] {
+    private func makeParameterList(
+        isInNonnullContext: Bool,
+        location: SourceLocation,
+        _ parameters: [DeclarationTranslator.FunctionParameterInfo]
+    ) -> ObjcParameterListNode {
+
+        let parameterList = ObjcParameterListNode(isInNonnullContext: isInNonnullContext)
+        parameterList.location = location
+        parameterList.addChildren(
+            makeParameters(parameters)
+        )
+        parameterList.updateSourceRange()
+
+        return parameterList
+    }
+
+    private func makeParameters(_ parameterList: [DeclarationTranslator.FunctionParameterInfo]) -> [ObjcFunctionParameterNode] {
         parameterList.map(makeParameter)
     }
 
@@ -581,19 +604,23 @@ public class DefinitionCollector {
 
     private func collectComments(_ node: ObjcASTNode, _ rule: ParserRuleContext) {
         node.precedingComments.append(
-            contentsOf: nodeFactory.popComments(preceding: rule)
+            contentsOf: commentQuerier.popAllCommentsBefore(rule: rule)
         )
         node.precedingComments.append(
-            contentsOf: nodeFactory.popComments(inLineWith: rule)
+            contentsOf: commentQuerier.popCommentsInlineWith(rule: rule)
         )
     }
 
     private func collectComments(_ node: ObjcASTNode, _ rule: DeclarationSyntaxElementType) {
+        guard let start = rule.sourceRange.start else {
+            return
+        }
+
         node.precedingComments.append(
-            contentsOf: nodeFactory.popComments(preceding: rule)
+            contentsOf: commentQuerier.popAllCommentsBefore(start)
         )
         node.precedingComments.append(
-            contentsOf: nodeFactory.popComments(inLineWith: rule)
+            contentsOf: commentQuerier.popCommentsInlineWith(start)
         )
     }
 }

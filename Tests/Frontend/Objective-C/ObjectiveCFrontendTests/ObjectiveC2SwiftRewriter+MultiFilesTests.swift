@@ -586,7 +586,7 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
             )
     }
 
-    func testHandleMultifileTypesInheritingFromTypesDefinedInGlobalProviders() {
+    func testHandleMultiFileTypesInheritingFromTypesDefinedInGlobalProviders() {
         assertThat()
             .file(
                 name: "A.h",
@@ -725,22 +725,22 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
             .file(
                 name: "A.h",
                 """
-                typedef struct Aimpl A;
+                typedef struct AImpl A;
                 """
             )
             .file(
                 name: "A.m",
                 """
-                struct Aimpl {
+                struct AImpl {
                     int a;
                 };
                 """
             )
             .translatesToSwift(
                 """
-                typealias A = Aimpl
+                typealias A = AImpl
 
-                struct Aimpl {
+                struct AImpl {
                     var a: CInt
 
                     init() {

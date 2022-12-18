@@ -1,14 +1,14 @@
+import XCTest
 import Antlr4
 import GrammarModelBase
 import ObjcGrammarModels
-import ObjcParser
 import ObjcParserAntlr
 import SwiftAST
 import SwiftSyntaxSupport
 import TypeSystem
 import Utils
 import WriterTargetOutput
-import XCTest
+@testable import ObjcParser
 
 @testable import ObjectiveCFrontend
 
@@ -705,7 +705,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             // This should not be included
             """
         let objcParser = ObjcParser(string: string)
-        try objcParser.parse()
+        objcParser.parseComments(input: string)
         let comments = Array(objcParser.comments[0...1])
         let expected = Statement.expression(Expression.identifier("test").call())
         expected.comments.append("// A Comment")
@@ -729,7 +729,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             }
             """
         let objcParser = ObjcParser(string: string)
-        try objcParser.parse()
+        objcParser.parseComments(input: string)
         let comments = objcParser.comments
         let expected = Statement.variableDeclaration(
             identifier: "value",
@@ -763,7 +763,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             }
             """
         let objcParser = ObjcParser(string: string)
-        try objcParser.parse()
+        objcParser.parseComments(input: string)
         let comments = objcParser.comments
         let expected: CompoundStatement = [
             Statement
@@ -802,7 +802,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             test(); // A trailing comment
             """
         let objcParser = ObjcParser(string: string)
-        try objcParser.parse()
+        objcParser.parseComments(input: string)
         let comments = objcParser.comments
         let expected = Statement
             .expression(Expression.identifier("test").call())
@@ -822,7 +822,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             } // A trailing comment
             """
         let objcParser = ObjcParser(string: string)
-        try objcParser.parse()
+        objcParser.parseComments(input: string)
         let comments = objcParser.comments
         let expected = Statement
             .if(.constant(true), body: [])
@@ -843,7 +843,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             }
             """
         let objcParser = ObjcParser(string: string)
-        try objcParser.parse()
+        objcParser.parseComments(input: string)
         let comments = objcParser.comments
         let expected = Statement.if(
             .constant(true),
@@ -870,7 +870,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             }
             """
         let objcParser = ObjcParser(string: string)
-        try objcParser.parse()
+        objcParser.parseComments(input: string)
         let comments = objcParser.comments
         let expected = Statement.variableDeclaration(
             identifier: "block",
@@ -903,7 +903,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             }
             """
         let objcParser = ObjcParser(string: string)
-        try objcParser.parse()
+        objcParser.parseComments(input: string)
         let comments = objcParser.comments
         let expected = Statement.variableDeclaration(
             identifier: "value",
@@ -944,7 +944,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             }
             """
         let objcParser = ObjcParser(string: string)
-        try objcParser.parse()
+        objcParser.parseComments(input: string)
         let comments = objcParser.comments
         let expected = Statement.expression(
             .identifier("self")
@@ -956,6 +956,56 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
                     .init(label: "otherBlock", expression: .block(body: [
                         .expression(.identifier("b").call()).withComments(["// In block 2"])
                     ])),
+                ])
+        ).withComments(["// Pre-block"])
+
+        assert(
+            objcStmt: string,
+            comments: comments,
+            parseBlock: { try $0.statement() },
+            readsAs: CompoundStatement(statements: [expected])
+        )
+    }
+
+    func testReadCommentInMultiBlockBodiesInPostfixExpression() throws {
+        let string = """
+            {
+                // Pre-block
+                PMKJoin(promises).then(^{
+                    // In block 1
+                }).always(^{
+                    [self doSomething];
+                }).catch(^(NSError *error){
+                    // In block 2
+                    NSLog("error!");
+                });
+                // Post-block
+            }
+            """
+        let objcParser = ObjcParser(string: string)
+        objcParser.parseComments(input: string)
+        let comments = objcParser.comments
+        let expected = Statement.expression(
+            .identifier("PMKJoin")
+                .call([.identifier("promises")])
+                .dot("then")
+                .call([
+                    .block(
+                        body: CompoundStatement().withComments(["// In block 1"])
+                    ),
+                ])
+                .dot("always")
+                .call([
+                    .block(body: [
+                        .expression(.identifier("self").dot("doSomething").call())
+                    ]),
+                ])
+                .dot("catch")
+                .call([
+                    .block(parameters: [.init(name: "error", type: .nullabilityUnspecified("Error"))], body: [
+                        .expression(.identifier("NSLog").call([.constant("error!")]))
+                            .withComments(["// In block 2"])
+                    ]),
                 ])
         ).withComments(["// Pre-block"])
 

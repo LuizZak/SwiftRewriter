@@ -141,6 +141,8 @@ public class ObjcParser {
         traverser.traverse()
 
         importDirectives = ObjcParser.parseObjcImports(in: preprocessorDirectives)
+
+        applyComments()
         
         parsed = true
     }
@@ -257,14 +259,23 @@ public class ObjcParser {
             source: source,
             state: state,
             antlrSettings: antlrSettings,
-            nonnullContextQuerier: nonnullContextQuerier,
-            commentQuerier: commentQuerier
+            nonnullContextQuerier: nonnullContextQuerier
         )
         
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)
-        
+
         rootNode = listener.rootNode
+        rootNode.location = src.asSourceLocation(src.startIndex)
+        rootNode.length = rootNode.location.length(
+            to: src.asSourceLocation(src.endIndex)
+        )
+    }
+
+    private func applyComments() {
+        let applier = ObjcCommentApplier(comments: comments)
+
+        applier.applyAll(toTree: rootNode)
     }
     
     private func parseNSAssumeNonnullChannel(input: String) throws {
@@ -305,7 +316,7 @@ public class ObjcParser {
         }
     }
     
-    private func parseComments(input: String) {
+    internal func parseComments(input: String) {
         comments.removeAll()
         
         let ranges = input.cStyleCommentSectionRanges()
@@ -372,13 +383,25 @@ public class ObjcParser {
                     try lexer.advance(expectingCurrent: "<")
                     let path = lexer.consume(until: { $0 == ">"})
 
-                    imports.append(ObjcImportDecl(path: String(path), isSystemImport: true))
+                    imports.append(
+                        ObjcImportDecl(
+                            path: String(path),
+                            sourceRange: directive.sourceRange,
+                            isSystemImport: true
+                        )
+                    )
                 } else {
                     // Extract "[PATH]"
                     try lexer.advance(expectingCurrent: "\"")
                     let path = lexer.consume(until: { $0 == "\""})
 
-                    imports.append(ObjcImportDecl(path: String(path), isSystemImport: false))
+                    imports.append(
+                        ObjcImportDecl(
+                            path: String(path),
+                            sourceRange: directive.sourceRange,
+                            isSystemImport: false
+                        )
+                    )
                 }
             } catch {
                 // Ignore silently

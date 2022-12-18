@@ -26,9 +26,11 @@ public struct SourceLength: Codable, Hashable {
         } else {
             columnsAtLastLine = rhs.columnsAtLastLine
         }
-        return SourceLength(newlines: newlines,
-                            columnsAtLastLine: columnsAtLastLine,
-                            utf8Length: utf8Length)
+        return SourceLength(
+            newlines: newlines,
+            columnsAtLastLine: columnsAtLastLine,
+            utf8Length: utf8Length
+        )
     }
     
     public static func += (lhs: inout SourceLength, rhs: SourceLength) {

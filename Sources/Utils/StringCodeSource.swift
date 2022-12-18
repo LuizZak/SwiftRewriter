@@ -14,7 +14,7 @@ public struct StringCodeSource: CodeSource {
         self.filePath = fileName
         
         _indices = Array(source.unicodeScalars.indices)
-        _lineOffsets = source.lineRanges()
+        _lineOffsets = source.lineRanges(includeLineBreak: true)
     }
     
     public func fetchSource() -> String {
@@ -51,6 +51,10 @@ public struct StringCodeSource: CodeSource {
     }
     
     public func lineNumber(at index: String.UnicodeScalarView.Index) -> Int {
+        if index == source.endIndex {
+            return _lineOffsets.count
+        }
+
         guard let intIndex = _lineOffsets.enumerated().first(where: { $0.element.contains(index) })?.offset else {
             return 0
         }
@@ -59,11 +63,15 @@ public struct StringCodeSource: CodeSource {
     }
     
     public func columnNumber(at index: String.UnicodeScalarView.Index) -> Int {
-        guard let offsets = _lineOffsets.first(where: { $0.contains(index) }) else {
+        if index == source.endIndex, let last = _lineOffsets.last {
+            return source.distance(from: last.lowerBound, to: index) + 1
+        }
+
+        guard let offset = _lineOffsets.first(where: { $0.contains(index) }) else {
             return 0
         }
-        
-        return source.distance(from: offsets.lowerBound, to: index) + 1
+
+        return source.distance(from: offset.lowerBound, to: index) + 1
     }
 
     public func substring(inCharRange range: Range<Int>) -> Substring? {

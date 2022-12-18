@@ -3210,6 +3210,39 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
         )
     }
 
+    func testBlockBodyCommentTransposing_emptyBlockInPostfixCall() {
+        assertRewrite(
+            objc: """
+                @implementation A
+                - (void)test {
+                    // Join to await all promises
+                    PMKJoin(promises).then(^{
+                        // All fine-o!
+                    }).always(^{
+                        [self doSomething];
+                    }).catch(^(NSError *error){
+                        NSLog("error!");
+                    });
+                }
+                @end
+                """,
+            swift: """
+                class A {
+                    func test() {
+                        // Join to await all promises
+                        PMKJoin(promises).then { () -> Void in
+                            // All fine-o!
+                        }.always { () -> Void in
+                            self.doSomething()
+                        }.catch { (error: Error!) -> Void in
+                            NSLog("error!")
+                        }
+                    }
+                }
+                """
+        )
+    }
+
     func testEmptyMethodBodiesEmitBodyComments() {
         assertRewrite(
             objc: """
@@ -3283,6 +3316,37 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 }
                 """
         )
+    }
+
+    func testDontDropCommentsWhileLookingAtDeclarationsOutOfOrder() {
+        assertRewrite(
+            objc: """
+                @implementation A
+                - (void)method {
+                    // A comment
+                    body();
+                }
+                BOOL inTypeField;
+                - (void)privateMethod {
+                    // Another comment
+                    body();
+                }
+                @end
+                """,
+            swift: """
+                class A {
+                    func method() {
+                        // A comment
+                        body()
+                    }
+                    func privateMethod() {
+                        // Another comment
+                        body()
+                    }
+                }
+                """
+        )
+        
     }
 
     func testBlockPropertyDeclaration() {

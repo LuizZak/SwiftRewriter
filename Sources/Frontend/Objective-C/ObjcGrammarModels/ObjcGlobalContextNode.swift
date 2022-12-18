@@ -1,3 +1,5 @@
+import GrammarModelBase
+
 /// A node that represents the global namespace
 public final class ObjcGlobalContextNode: ObjcASTNode, ObjcInitializableNode {
     public var functionDefinitions: [ObjcFunctionDefinitionNode] {
@@ -33,5 +35,9 @@ public final class ObjcGlobalContextNode: ObjcASTNode, ObjcInitializableNode {
     
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)
+    }
+
+    public override func addChild(_ node: ASTNode) {
+        super.addChild(node)
     }
 }

@@ -1,5 +1,7 @@
+import GrammarModelBase
+
 /// Node for a @synthesize/@dynamic declaration in a class implementation.
-public class ObjcPropertyImplementationNode: ObjcASTNode, ObjcInitializableNode {
+public class ObjcPropertyImplementationNode: ObjcASTNode, ObjcInitializableNode, CommentedASTNodeType {
     /// Returns the kind of this property implementation node.
     /// Defaults to `@synthesize`, if it's missing the required keyword nodes.
     public var kind: Kind {

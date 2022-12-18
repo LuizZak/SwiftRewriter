@@ -12,14 +12,16 @@ public final class ObjcMethodBodyNode: ObjcASTNode {
     }
 }
 
-public class ObjcMethodDefinitionNode: ObjcASTNode, ObjcInitializableNode {
+public class ObjcMethodDefinitionNode: ObjcASTNode, ObjcInitializableNode, CommentedASTNodeType {
     public var returnType: ObjcMethodTypeNode? {
         firstChild()
     }
     public var methodSelector: ObjcMethodSelectorNode? {
         firstChild()
     }
-    public var body: ObjcMethodBodyNode?
+    public var body: ObjcMethodBodyNode? {
+        firstChild()
+    }
     
     public var isClassMethod: Bool = false
     

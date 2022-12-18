@@ -36,6 +36,39 @@ class SourceRangeTests: XCTestCase {
         }
     }
 
+    func testUnion_withLineGap() {
+        let range1 = SourceRange.range(
+            start: .init(line: 1, column: 1, utf8Offset: 0),
+            end: .init(line: 2, column: 3, utf8Offset: 8)
+        )
+        let range2 = SourceRange.range(
+            start: .init(line: 5, column: 3, utf8Offset: 28),
+            end: .init(line: 6, column: 5, utf8Offset: 35)
+        )
+        let expected = (
+            start: SourceLocation(
+                line: 1,
+                column: 1,
+                utf8Offset: 0
+            ),
+            end: SourceLocation(
+                line: 6,
+                column: 5,
+                utf8Offset: 35
+            )
+        )
+        
+        let result = range1.union(with: range2)
+
+        switch result {
+        case .range(let start, let end) where (start, end) == expected:
+            // Success!
+            break
+        default:
+            XCTFail("Failed to receive expected range \(expected), received \(result) instead.")
+        }
+    }
+
     func testUnionOutOrOrder() {
         let range1 = SourceRange.range(
             start: .init(line: 2, column: 3, utf8Offset: 10),

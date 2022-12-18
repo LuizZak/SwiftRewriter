@@ -9,15 +9,19 @@ public class ObjcKeywordNode: ObjcASTNode {
         keyword.rawValue
     }
     
-    public init(keyword: ObjcKeyword,
-                isInNonnullContext: Bool,
-                location: SourceLocation = .invalid,
-                length: SourceLength = .zero) {
+    public init(
+        keyword: ObjcKeyword,
+        isInNonnullContext: Bool,
+        location: SourceLocation = .invalid,
+        length: SourceLength = .zero
+    ) {
         
         self.keyword = keyword
         
-        super.init(isInNonnullContext: isInNonnullContext,
-                   location: location,
-                   length: length)
+        super.init(
+            isInNonnullContext: isInNonnullContext,
+            location: location,
+            length: length
+        )
     }
 }

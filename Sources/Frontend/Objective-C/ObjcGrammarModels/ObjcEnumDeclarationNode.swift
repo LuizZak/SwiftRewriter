@@ -1,5 +1,7 @@
+import GrammarModelBase
+
 /// A C / Objective-C enumeration
-public class ObjcEnumDeclarationNode: ObjcASTNode, ObjcInitializableNode {
+public class ObjcEnumDeclarationNode: ObjcASTNode, ObjcInitializableNode, CommentedASTNodeType {
     public var isOptionSet: Bool = false
     
     public var identifier: ObjcIdentifierNode? {
@@ -19,7 +21,7 @@ public class ObjcEnumDeclarationNode: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
-public class ObjcEnumCaseNode: ObjcASTNode {
+public class ObjcEnumCaseNode: ObjcASTNode, CommentedASTNodeType {
     public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
