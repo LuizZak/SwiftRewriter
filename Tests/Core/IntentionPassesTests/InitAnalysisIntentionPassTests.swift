@@ -20,117 +20,96 @@ class InitAnalysisIntentionPassTests: XCTestCase {
     }
 
     func testFlagsInitAsConvenienceInit() {
-        testFlagsBody(
-            as: .convenience,
-            [
-                .expression(
-                    Expression
-                        .identifier("self")
-                        .assignment(
-                            op: .assign,
-                            rhs: Expression.identifier("self").dot("init").call([.constant(1)])
-                        )
+        testFlagsBody(as: .convenience, [
+            .expression(
+                .identifier("self")
+                .assignment(
+                    op: .assign,
+                    rhs: .identifier("self").dot("init").call([.constant(1)])
                 )
-            ]
-        )
+            )
+        ])
     }
 
     func testInitThatReturnsNil() {
-        testFlagsBody(
-            as: .fallible,
-            [
-                .return(.constant(.nil))
-            ]
-        )
+        testFlagsBody(as: .fallible, [
+            .return(.constant(.nil))
+        ])
     }
 
     func testInitThatHasBlockThatReturnsNil() {
-        testFlagsBody(
-            as: .none,
-            [
-                .expression(
-                    .block(body: [
-                        .return(.constant(.nil))
-                    ])
-                )
-            ]
-        )
+        testFlagsBody(as: .none, [
+            .expression(
+                .block(body: [
+                    .return(.constant(.nil))
+                ])
+            )
+        ])
     }
-
+    
     func testIgnoreWithinIfWithNilCheckSelf() {
         // Tests that the following case does not trigger the fallible init detector:
         //
         // if(self == nil) {
         //     return nil;
         // }
-
-        testFlagsBody(
-            as: .none,
-            [
-                .if(
-                    Expression.identifier("self").binary(op: .equals, rhs: .constant(.nil)),
-                    body: [
-                        .return(.constant(.nil))
-                    ]
-                )
-            ]
-        )
+        
+        testFlagsBody(as: .none, [
+            .if(
+                .identifier("self").binary(op: .equals, rhs: .constant(.nil)),
+                body: [
+                    .return(.constant(.nil))
+                ]
+            )
+        ])
     }
-
+    
     func testIgnoreWithinIfWithNilCheckSelfEqualsSuperInit() {
         // Tests that the following case does not trigger the fallible init detector:
         //
         // if(!(self = [super init])) {
         //     return nil;
         // }
-
-        testFlagsBody(
-            as: .none,
-            [
-                .if(
-                    .unary(
-                        op: .negate,
-                        Expression
-                            .identifier("self")
-                            .assignment(
-                                op: .assign,
-                                rhs: Expression.identifier("super").dot("init").call()
-                            )
-                    ),
-                    body: [
-                        .return(.constant(.nil))
-                    ]
-                )
-            ]
-        )
+        
+        testFlagsBody(as: .none, [
+            .if(
+                .unary(
+                    op: .negate,
+                    .identifier("self")
+                    .assignment(
+                        op: .assign,
+                        rhs: .identifier("super").dot("init").call()
+                    )
+                ),
+                body: [
+                    .return(.constant(.nil))
+                ]
+            )
+        ])
     }
-
+    
     func testIgnoreWithinIfWithNilCheckSelfEqualsSelfInit() {
         // Tests that the following case does not trigger the fallible init detector:
         //
         // if(!(self = [self init])) {
         //     return nil;
         // }
-
-        testFlagsBody(
-            as: .convenience,
-            [
-                .if(
-                    .unary(
-                        op: .negate,
-                        Expression
-                            .identifier("self")
-                            .assignment(
-                                op: .assign,
-                                rhs: Expression.identifier("self").dot("init").call()
-                            )
-                    ),
-                    body: [
-                        .return(.constant(.nil))
-                    ]
-                )
-            ]
-        )
+        
+        testFlagsBody(as: .convenience, [
+            .if(
+                .unary(
+                    op: .negate,
+                    .identifier("self")
+                    .assignment(
+                        op: .assign,
+                        rhs: .identifier("self").dot("init").call()
+                    )
+                ),
+                body: [
+                    .return(.constant(.nil))
+                ]
+            )
+        ])
     }
 }
 

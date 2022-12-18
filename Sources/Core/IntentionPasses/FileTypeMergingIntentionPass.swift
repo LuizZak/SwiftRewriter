@@ -128,7 +128,7 @@ public class FileTypeMergingIntentionPass: IntentionPass {
 
             // FIXME: This used to be emitted by syntax producers downstream,
             // FIXME: but now it's produced by Objective-C intention collectors.
-            // FIXME: For now, hack out way into avoiding emitting this comment
+            // FIXME: For now, hack our way into avoiding emitting this comment
             // FIXME: line twice here.
             let preprocessorDirectiveComment = "Preprocessor directives found in file:"
             if impl.headerComments.contains(preprocessorDirectiveComment) {

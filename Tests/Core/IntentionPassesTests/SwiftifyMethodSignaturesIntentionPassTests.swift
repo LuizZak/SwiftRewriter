@@ -16,31 +16,26 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
         let sut = SwiftifyMethodSignaturesIntentionPass()
 
         testThat(sut: sut)
-            .method(
-                withSignature:
-                    FunctionSignature(
-                        name: "doThingWithColor",
-                        parameters: [
-                            ParameterSignature(
-                                label: nil,
-                                name: "color",
-                                type: .typeName("CGColor")
-                            )
-                        ]
-                    )
+            .method(withSignature:
+                FunctionSignature(
+                    name: "doThingWithColor",
+                    parameters: [
+                        ParameterSignature(
+                            label: nil,
+                            name: "color",
+                            type: .typeName("CGColor")
+                        )
+                    ]
+                )
             )
-            .converts(
-                to:
-                    FunctionSignature(
-                        name: "doThing",
-                        parameters: [
-                            ParameterSignature(
-                                label: "with",
-                                name: "color",
-                                type: .typeName("CGColor")
-                            )
-                        ]
-                    )
+            .converts(to:
+                FunctionSignature(
+                    name: "doThing",
+                    parameters: [
+                        ParameterSignature(
+                            label: "with", name: "color", type: .typeName("CGColor"))
+                    ]
+                )
             )
     }
 
@@ -54,17 +49,15 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
                         name: "doThingWithColor",
                         parameters: [
                             ParameterSignature(label: nil, name: "color", type: .int)
-                        ]
-                    )
+                        ])
             )
-            .converts(
-                to:
-                    FunctionSignature(
-                        name: "doThingWithColor",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "color", type: .int)
-                        ]
-                    )
+            .converts(to:
+                FunctionSignature(
+                    name: "doThingWithColor",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "color", type: .int)
+                    ]
+                )
             )
     }
 
@@ -72,23 +65,21 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
         let sut = SwiftifyMethodSignaturesIntentionPass()
 
         testThat(sut: sut)
-            .method(
-                withSignature:
-                    FunctionSignature(
-                        name: "doThingWith",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "color", type: .any)
-                        ]
-                    )
+            .method(withSignature:
+                FunctionSignature(
+                    name: "doThingWith",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "color", type: .any)
+                    ]
+                )
             )
-            .converts(
-                to:
-                    FunctionSignature(
-                        name: "doThingWith",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "color", type: .any)
-                        ]
-                    )
+            .converts(to:
+                FunctionSignature(
+                    name: "doThingWith",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "color", type: .any)
+                    ]
+                )
             )
     }
 
@@ -96,19 +87,17 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
         let sut = SwiftifyMethodSignaturesIntentionPass()
 
         testThat(sut: sut)
-            .method(
-                withSignature:
-                    FunctionSignature(
-                        name: "doThingWithin",
-                        parameters: []
-                    )
+            .method(withSignature:
+                FunctionSignature(
+                    name: "doThingWithin",
+                    parameters: []
+                )
             )
-            .converts(
-                to:
-                    FunctionSignature(
-                        name: "doThingWithin",
-                        parameters: []
-                    )
+            .converts(to:
+                FunctionSignature(
+                    name: "doThingWithin",
+                    parameters: []
+                )
             )
     }
 
@@ -116,23 +105,21 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
         let sut = SwiftifyMethodSignaturesIntentionPass()
 
         testThat(sut: sut)
-            .method(
-                withSignature:
-                    FunctionSignature(
-                        name: "doThingWithin",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "thing", type: .any)
-                        ]
-                    )
+            .method(withSignature:
+                FunctionSignature(
+                    name: "doThingWithin",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "thing", type: .any)
+                    ]
+                )
             )
-            .converts(
-                to:
-                    FunctionSignature(
-                        name: "doThingWithin",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "thing", type: .any)
-                        ]
-                    )
+            .converts(to:
+                FunctionSignature(
+                    name: "doThingWithin",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "thing", type: .any)
+                    ]
+                )
             )
     }
 
@@ -140,14 +127,13 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
         let sut = SwiftifyMethodSignaturesIntentionPass()
 
         testThat(sut: sut)
-            .method(
-                withSignature:
-                    FunctionSignature(
-                        name: "init",
-                        parameters: [],
-                        returnType: .anyObject,
-                        isStatic: false
-                    )
+            .method(withSignature:
+                FunctionSignature(
+                    name: "init",
+                    parameters: [],
+                    returnType: .anyObject,
+                    isStatic: false
+                )
             )
             .converts(toInitializer: [])
     }
@@ -156,16 +142,15 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
         let sut = SwiftifyMethodSignaturesIntentionPass()
 
         testThat(sut: sut)
-            .method(
-                withSignature:
-                    FunctionSignature(
-                        name: "initWithInt",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "int", type: .int)
-                        ],
-                        returnType: .anyObject,
-                        isStatic: false
-                    )
+            .method(withSignature:
+                FunctionSignature(
+                    name: "initWithInt",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "int", type: .int)
+                    ],
+                    returnType: .anyObject,
+                    isStatic: false
+                )
             )
             .converts(toInitializer: [
                 ParameterSignature(label: "int", name: "int", type: .int)
@@ -176,16 +161,15 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
         let sut = SwiftifyMethodSignaturesIntentionPass()
 
         testThat(sut: sut)
-            .method(
-                withSignature:
-                    FunctionSignature(
-                        name: "initWithB",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "b", type: .typeName("B"))
-                        ],
-                        returnType: .instancetype,
-                        isStatic: false
-                    )
+            .method(withSignature:
+                FunctionSignature(
+                    name: "initWithB",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "b", type: .typeName("B"))
+                    ],
+                    returnType: .instancetype,
+                    isStatic: false
+                )
             )
             .converts(toInitializer: [
                 ParameterSignature(label: "b", name: "b", type: .typeName("B"))
@@ -196,20 +180,19 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
         let sut = SwiftifyMethodSignaturesIntentionPass()
 
         testThat(sut: sut)
-            .method(
-                withSignature:
-                    FunctionSignature(
-                        name: "initWithObjectList",
-                        parameters: [
-                            ParameterSignature(
-                                label: nil,
-                                name: "objects",
-                                type: .array(.typeName("Object"))
-                            )
-                        ],
-                        returnType: .instancetype,
-                        isStatic: false
-                    )
+            .method(withSignature:
+                FunctionSignature(
+                    name: "initWithObjectList",
+                    parameters: [
+                        ParameterSignature(
+                            label: nil,
+                            name: "objects",
+                            type: .array(.typeName("Object"))
+                        )
+                    ],
+                    returnType: .instancetype,
+                    isStatic: false
+                )
             )
             .converts(toInitializer: [
                 ParameterSignature(
@@ -225,28 +208,24 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
 
         testThat(typeName: "Squeak", sut: sut)
             .method(withObjcSignature: "- (Squeak*)getSqueakWithID:(NSInteger)id;")
-            .converts(
-                to: FunctionSignature(
+            .converts(to: FunctionSignature(
                     name: "getSqueakWithID",
                     parameters: [ParameterSignature(label: nil, name: "id", type: .int)],
                     returnType: .nullabilityUnspecified(.typeName("Squeak")),
                     isStatic: false
-                )
-            )
+            ))
     }
 
     func testConvertNullableReturnInitsIntoFallibleInits() {
         let sut = SwiftifyMethodSignaturesIntentionPass()
 
         testThat(typeName: "Squeak", sut: sut)
-            .method(
-                withSignature: FunctionSignature(
-                    name: "initWithValue",
-                    parameters: [ParameterSignature(label: nil, name: "value", type: .int)],
-                    returnType: .optional(.typeName("Squeak")),
-                    isStatic: false
-                )
-            )
+            .method(withSignature: FunctionSignature(
+                name: "initWithValue",
+                parameters: [ParameterSignature(label: nil, name: "value", type: .int)],
+                returnType: .optional(.typeName("Squeak")),
+                isStatic: false
+            ))
             .converts(toInitializer: "init?(value: Int)")
     }
 }

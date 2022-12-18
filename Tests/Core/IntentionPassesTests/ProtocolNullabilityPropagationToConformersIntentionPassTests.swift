@@ -39,12 +39,13 @@ class ProtocolNullabilityPropagationToConformersIntentionPassTests: XCTestCase {
                         )
                 }
             }.build()
-        let type = intentions.fileIntentions()[0].classIntentions[0]
-        let method = type.methods[0]
-
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
-        XCTAssertEqual(method.parameters[0].type, .string)
+        Asserter(object: intentions).asserter(forClassNamed: "B") { type in
+            type[\.methods][0]?.asserter(forParameterAt: 0) { param in
+                param.assert(type: .string)
+            }
+        }
     }
 
     func testPropagatesNullabilityLookingThroughProtocolConformancesInExtensions() {
@@ -74,12 +75,13 @@ class ProtocolNullabilityPropagationToConformersIntentionPassTests: XCTestCase {
                     ext.createConformance(protocolName: "A")
                 }
             }.build()
-        let type = intentions.fileIntentions()[0].classIntentions[0]
-        let method = type.methods[0]
-
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        XCTAssertEqual(method.parameters[0].type, .string)
+        
+        Asserter(object: intentions).asserter(forClassNamed: "B") { type in
+            type[\.methods][0]?.asserter(forParameterAt: 0) { param in
+                param.assert(type: .string)
+            }
+        }
     }
 
     func testProperlyOrganizePropagationToTypeExtensions() {
@@ -120,17 +122,18 @@ class ProtocolNullabilityPropagationToConformersIntentionPassTests: XCTestCase {
             }.build()
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
-
-        let classDef = intentions.fileIntentions()[0].classIntentions[0]
-        let extDef = intentions.fileIntentions()[4].extensionIntentions[0]
-        XCTAssertEqual(classDef.typeName, "A")
-        XCTAssertFalse(classDef.isExtension)
-        XCTAssertEqual(extDef.typeName, "A")
-        XCTAssert(extDef.isExtension)
-        XCTAssert(classDef.methods.isEmpty)
-        XCTAssertEqual(extDef.methods.count, 2)
-        XCTAssertEqual(extDef.methods[0].returnType, .string)
-        XCTAssertEqual(extDef.methods[1].returnType, .optional(.string))
+        
+        Asserter(object: intentions).asserter(forTargetPathFile: "A+P.m") { file in
+            let type = file[\.extensionIntentions].assertCount(1)?[0]
+            type?
+                .assert(typeName: "A")?
+                .assert(isExtension: true)
+            
+            let methods = type?[\.methods]
+            methods?.assertCount(2)
+            methods?[0]?.assert(returnType: .string)
+            methods?[1]?.assert(returnType: .optional(.string))
+        }
     }
 
     func testDoNotMergeProtocolToClassMethodComments() {
@@ -151,14 +154,11 @@ class ProtocolNullabilityPropagationToConformersIntentionPassTests: XCTestCase {
 
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
 
-        let file = intentions.fileIntentions()[0]
-        let cls = file.classIntentions[0]
-        let method = cls.methods[0]
-        XCTAssertEqual(
-            method.precedingComments,
-            [
+        Asserter(object: intentions).asserter(forTypeNamed: "A") { type in
+            type[\.methods].assertCount(1)
+            type[\.methods][0]?.assert(precedingComments: [
                 "// Method comment"
-            ]
-        )
+            ])
+        }
     }
 }

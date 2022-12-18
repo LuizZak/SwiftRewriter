@@ -96,31 +96,27 @@ public extension Asserter where Object == FileGenerationIntention {
         }
     }
     
-    /*
     /// Asserts that the underlying `FileGenerationIntention` object being tested
-    /// has a `preprocessorDirectives` with `string` values that match a specified
-    /// array of strings, in order.
+    /// has a list of `headerComments` that match a specified array of strings,
+    /// in order.
     ///
     /// Returns `nil` if the test failed, otherwise returns `self` for chaining
     /// further tests.
     @discardableResult
     func assert(
-        preprocessorDirectives: [String],
+        headerComments: [String],
         file: StaticString = #file,
         line: UInt = #line
     ) -> Self? {
 
-        asserter(forKeyPath: \.preprocessorDirectives, file: file, line: line) {
-            asserter(for: $0.object.map(\.string)) { actual in
-                actual.assert(
-                    equals: preprocessorDirectives,
-                    file: file,
-                    line: line
-                )
-            }
+        asserter(forKeyPath: \.headerComments, file: file, line: line) {
+            $0.assert(
+                equals: headerComments,
+                file: file,
+                line: line
+            )
         }
     }
-    */
 
     /// Asserts that the underlying `FileGenerationIntention` object being tested
     /// has a `importDirectives` that match a specified value.
