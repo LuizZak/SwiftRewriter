@@ -132,12 +132,13 @@ public final class ObjectiveC2SwiftRewriter {
         let queue = ConcurrentOperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
-        let outError: ConcurrentValue<Error?> = ConcurrentValue(wrappedValue: nil)
+        @ConcurrentValue
+        var outError: Error?
         let mutex = Mutex()
         
         for (i, src) in sources.enumerated() {
             queue.addOperation {
-                if outError.wrappedValue != nil {
+                if outError != nil {
                     return
                 }
                 
@@ -146,18 +147,14 @@ public final class ObjectiveC2SwiftRewriter {
                         try self.loadObjcSource(from: src, index: i, mutex: mutex)
                     }
                 } catch {
-                    outError.modifyingValue {
-                        if $0 != nil { return }
-                        
-                        $0 = error
-                    }
+                    _outError.setIfNil(error)
                 }
             }
         }
         
         queue.runAndWaitConcurrent()
         
-        if let error = outError.wrappedValue {
+        if let error = outError {
             throw error
         }
         
@@ -182,7 +179,8 @@ public final class ObjectiveC2SwiftRewriter {
             typeSystem.tearDownCache()
         }
 
-        let autotypeDeclarations = ConcurrentValue<[LazyAutotypeVarDeclResolve]>(wrappedValue: [])
+        @ConcurrentValue
+        var autotypeDeclarations: [LazyAutotypeVarDeclResolve] = []
         
         let antlrSettings = makeAntlrSettings()
 
@@ -270,16 +268,14 @@ public final class ObjectiveC2SwiftRewriter {
                         )
                     }
 
-                    autotypeDeclarations.modifyingValue {
-                        $0.append(contentsOf: delegate.autotypeDeclarations)
-                    }
+                    autotypeDeclarations.append(contentsOf: delegate.autotypeDeclarations)
                 }
             }
         }
         
         queue.runAndWaitConcurrent()
 
-        return autotypeDeclarations.wrappedValue
+        return autotypeDeclarations
     }
     
     /// Analyzes and converts #define directives and converts them into global

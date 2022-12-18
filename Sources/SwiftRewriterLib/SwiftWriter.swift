@@ -57,8 +57,11 @@ public final class SwiftWriter {
         var unique = Set<String>()
         let fileIntents = intentions.fileIntentions()
         
-        let errors = ConcurrentValue<[(String, Error)]>(wrappedValue: [])
-        let filesEmitted = ConcurrentValue<Int>(wrappedValue: 0)
+        @ConcurrentValue
+        var errors: [(String, Error)] = []
+        
+        @ConcurrentValue
+        var filesEmitted = 0
         
         let listenerQueue = DispatchQueue(label: "com.swiftrewriter.swiftwriter.listener")
         let queue = ConcurrentOperationQueue()
@@ -93,7 +96,7 @@ public final class SwiftWriter {
                 autoreleasepool {
                     do {
                         if let listener = self.progressListener {
-                            let fe: Int = filesEmitted.modifyingValue({ $0 += 1; return $0 })
+                            let fe: Int = _filesEmitted.prefixIncrement()
                             
                             listenerQueue.async {
                                 listener.swiftWriterReportProgress(
@@ -111,7 +114,7 @@ public final class SwiftWriter {
                             self.diagnostics.merge(with: writer.diagnostics)
                         }
                     } catch {
-                        errors.wrappedValue.append((file.targetPath, error))
+                        errors.append((file.targetPath, error))
                     }
                 }
             }
@@ -119,7 +122,7 @@ public final class SwiftWriter {
         
         queue.runAndWaitConcurrent()
         
-        for error in errors.wrappedValue {
+        for error in errors {
             diagnostics.error(
                 "Error while saving file \(error.0): \(error.1)",
                 origin: error.0,
