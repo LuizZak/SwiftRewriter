@@ -1,5 +1,18 @@
 // swift-tools-version:5.5
 import PackageDescription
+import Foundation
+
+var extraAntlrTargetSettings: [SwiftSetting] = []
+
+if ProcessInfo.processInfo.environment["SWIFT_REWRITER_BUILD_ANTLR_OPTIMIZED"] != nil {
+    extraAntlrTargetSettings = [
+        .unsafeFlags([
+            "-O",
+        ])
+    ]
+}
+
+// MARK: - Core
 
 let core: [Target] = [
     .target(
@@ -279,7 +292,8 @@ let objcFrontend: [Target] = [
             .product(name: "Antlr4", package: "antlr4-swift"),
             "AntlrCommons",
         ],
-        path: "Sources/Frontend/Objective-C/ObjcParserAntlr"
+        path: "Sources/Frontend/Objective-C/ObjcParserAntlr",
+        swiftSettings: extraAntlrTargetSettings
     ),
     .target(
         name: "ObjcGrammarModels",
