@@ -3679,7 +3679,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
         )
     }
 
-    func testNullableBlock() {
+    func testRewriteNullableBlock() {
         assertRewrite(
             objc:
             """
@@ -3692,6 +3692,21 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
             class A {
                 func method(_ param: ((String) -> Void)?) {
                 }
+            }
+            """
+        )
+    }
+
+    func testRewritePointerOfPointerType() {
+        assertRewrite(
+            objc:
+            """
+            void a(char **p) {
+            }
+            """,
+            swift:
+            """
+            func a(_ p: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>!) {
             }
             """
         )

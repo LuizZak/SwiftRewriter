@@ -469,7 +469,7 @@ public class DefaultTypeMapper: TypeMapper {
             return scalar
         }
         
-        return _verifyStructTypeCanBeNullable(.typeName(structType), context: context)
+        return _verifyTypeNameCanBeNullable(.typeName(structType), context: context)
     }
     
     private func swiftType(forIdWithProtocols protocols: [String], context: TypeMappingContext) -> SwiftType {
@@ -546,7 +546,7 @@ public class DefaultTypeMapper: TypeMapper {
             }
         
         if isPointerOnly(types: typeParameters) {
-            return .generic(name, parameters: .fromCollection(types))
+            return swiftType(genericTypeName: name, parameters: types)
         } else {
             var foundNonNominal = false
             let nominalTypes =
@@ -561,7 +561,7 @@ public class DefaultTypeMapper: TypeMapper {
                 }
             
             if foundNonNominal {
-                return .generic(name, parameters: .fromCollection(types))
+                return swiftType(genericTypeName: name, parameters: types)
             }
             
             let composition = nominalTypes.map(ProtocolCompositionComponent.nominal)
@@ -622,9 +622,9 @@ public class DefaultTypeMapper: TypeMapper {
 
     private func swiftPointer(parameter: SwiftType, const: Bool) -> SwiftType {
         if const {
-            return .generic("UnsafePointer", parameters: [parameter])
+            return swiftType(genericTypeName: "UnsafePointer", parameters: [parameter])
         } else {
-            return .generic("UnsafeMutablePointer", parameters: [parameter])
+            return swiftType(genericTypeName: "UnsafeMutablePointer", parameters: [parameter])
         }
     }
 
@@ -648,10 +648,10 @@ public class DefaultTypeMapper: TypeMapper {
         
         switch type {
         case .void:
-            return final; // <- Semicolon needed to avoid a parse error
+            return final
             
         case .typeName:
-            return _verifyStructTypeCanBeNullable(final, context: locSpecifiers)
+            return _verifyTypeNameCanBeNullable(final, context: locSpecifiers)
             
         case .qualified:
             return swiftType(forObjcType: type, context: locSpecifiers)
@@ -676,7 +676,7 @@ public class DefaultTypeMapper: TypeMapper {
             return final
         
         case .typeName, .genericTypeName:
-            return _verifyStructTypeCanBeNullable(final, context: locQualifiers)
+            return _verifyTypeNameCanBeNullable(final, context: locQualifiers)
         
         case .specified,
             .pointer,
@@ -691,7 +691,7 @@ public class DefaultTypeMapper: TypeMapper {
         }
     }
     
-    private func _verifyStructTypeCanBeNullable(
+    private func _verifyTypeNameCanBeNullable(
         _ type: SwiftType,
         context: TypeMappingContext
     ) -> SwiftType {
@@ -781,6 +781,13 @@ public class DefaultTypeMapper: TypeMapper {
         default:
             return swiftType(type: type, withNullability: nullability)
         }
+    }
+
+    /// Creates a new generic Swift type name from a specified set of parameters.
+    ///
+    /// - precondition: `parameters.count > 0`
+    private func swiftType(genericTypeName: String, parameters: [SwiftType]) -> SwiftType {
+        .generic(genericTypeName, parameters: .fromCollection(parameters))
     }
     
     private func isPointerOnly(types: [ObjcType]) -> Bool {

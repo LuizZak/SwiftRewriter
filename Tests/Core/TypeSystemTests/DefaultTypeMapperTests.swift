@@ -750,6 +750,39 @@ class DefaultTypeMapperTests: XCTestCase {
             toConvertTo: "@convention(c) (UnsafeMutableRawPointer?) -> CInt"
         )
     }
+
+    func testNestedGenericOptionalTypes() {
+        expect(
+            .pointer("char"),
+            withExplicitNullability: nil,
+            toConvertTo: "UnsafeMutablePointer<CChar>!"
+        )
+        expect(
+            .pointer(.pointer("char")),
+            withExplicitNullability: nil,
+            toConvertTo: "UnsafeMutablePointer<UnsafeMutablePointer<CChar>!>!"
+        )
+        expect(
+            .pointer(
+                .genericTypeName(
+                    "NSDictionary",
+                    typeParameters: [.pointer(.typeName("NSString")), .pointer(.typeName("NSObject"))]
+                )
+            ),
+            withExplicitNullability: nil,
+            toConvertTo: "[String: NSObject]!"
+        )
+        expect(
+            .pointer(
+                .genericTypeName(
+                    "SomeType",
+                    typeParameters: [.pointer(.typeName("NSString")), .pointer(.typeName("NSObject"))]
+                )
+            ),
+            withExplicitNullability: nil,
+            toConvertTo: "SomeType<String, NSObject>!"
+        )
+    }
 }
 
 extension DefaultTypeMapperTests {

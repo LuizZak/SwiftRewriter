@@ -6,21 +6,30 @@ public class SwiftTypeConverter {
         SwiftTypeConverter().makeTypeSyntax(type, startTokenHandler: startTokenHandler)
     }
     
-    private var _blockStackLevel = 0
+    private var _typeDepth = -1
     
     private init() {
         
     }
-    
-    func makeWrappedInParensIfRequired(_ type: SwiftType, startTokenHandler: StartTokenHandler) -> TypeSyntax {
-        if type.requiresSurroundingParens {
-            return TypeSyntax(makeTupleTypeSyntax([type], startTokenHandler: startTokenHandler))
+
+    func asNullabilityUnspecified(_ type: TypeSyntax) -> TypeSyntax {
+        if _typeDepth > 0 {
+            return SyntaxFactory.makeOptionalType(
+                wrappedType: type,
+                questionMark: SyntaxFactory.makePostfixQuestionMarkToken()
+            ).asTypeSyntax
+        } else {
+            return SyntaxFactory.makeImplicitlyUnwrappedOptionalType(
+                wrappedType: type,
+                exclamationMark: SyntaxFactory.makeExclamationMarkToken()
+            ).asTypeSyntax
         }
-        
-        return makeTypeSyntax(type, startTokenHandler: startTokenHandler)
     }
     
     func makeTypeSyntax(_ type: SwiftType, startTokenHandler: StartTokenHandler) -> TypeSyntax {
+        _typeDepth += 1
+        defer { _typeDepth -= 1 }
+
         switch type {
         case .nominal(let nominal):
             return makeNominalTypeSyntax(nominal, startTokenHandler: startTokenHandler).asTypeSyntax
@@ -35,19 +44,7 @@ public class SwiftTypeConverter {
         case .nullabilityUnspecified(let type):
             let type = makeWrappedInParensIfRequired(type, startTokenHandler: startTokenHandler)
             
-            if _blockStackLevel > 0 {
-                return SyntaxFactory
-                    .makeOptionalType(
-                        wrappedType: type,
-                        questionMark: SyntaxFactory.makePostfixQuestionMarkToken()
-                    ).asTypeSyntax
-            } else {
-                return SyntaxFactory
-                    .makeImplicitlyUnwrappedOptionalType(
-                        wrappedType: type,
-                        exclamationMark: SyntaxFactory.makeExclamationMarkToken()
-                    ).asTypeSyntax
-            }
+            return asNullabilityUnspecified(type)
             
         case .optional(let type):
             return SyntaxFactory
@@ -68,11 +65,6 @@ public class SwiftTypeConverter {
             return makeNestedTypeSyntax(nested, startTokenHandler: startTokenHandler).asTypeSyntax
             
         case let .block(blockType):
-            _blockStackLevel += 1
-            defer {
-                _blockStackLevel -= 1
-            }
-            
             let returnType = blockType.returnType
             let parameters = blockType.parameters
             let attributes = blockType.attributes.sorted(by: { $0.description < $1.description })
@@ -299,5 +291,13 @@ public class SwiftTypeConverter {
                 genericArgumentClause: genericArgumentClause
             )
         }
+    }
+    
+    func makeWrappedInParensIfRequired(_ type: SwiftType, startTokenHandler: StartTokenHandler) -> TypeSyntax {
+        if type.requiresSurroundingParens {
+            return TypeSyntax(makeTupleTypeSyntax([type], startTokenHandler: startTokenHandler))
+        }
+        
+        return makeTypeSyntax(type, startTokenHandler: startTokenHandler)
     }
 }
