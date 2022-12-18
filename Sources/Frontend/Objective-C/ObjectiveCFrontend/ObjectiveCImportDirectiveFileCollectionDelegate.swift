@@ -31,7 +31,7 @@ extension ObjectiveCImportDirectiveFileCollectionDelegate: ObjectiveCFileCollect
 
         for importDecl in fileReferences {
             let importPath = importDecl.path
-            let fileName = importPath.lastPathComponent
+            let fileName = (importPath as NSString).lastPathComponent
             let path = basePath.appendingPathComponent(fileName)
 
             if fileProvider.fileExists(atUrl: path) {
