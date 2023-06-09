@@ -25,31 +25,35 @@ extension SwiftSyntaxProducer {
             return generateCompound(statement)
         }
         
-        var syntax = CodeBlockSyntax()
+        var syntax = CodeBlockSyntax(
+            leftBrace: prepareStartToken(.leftBrace)
+        )
 
         indent()
-        defer {
-            deindent()
-        }
         
         let stmts = generateStatementBlockItems(statement)
         
-        for (i, stmt) in stmts.enumerated() {
-            if i > 0 {
-                addExtraLeading(.newlines(1))
-            }
-            
+        for stmt in stmts {
+            addExtraLeading(.newlines(1) + indentation())
+
             if let stmtSyntax = stmt(self) {
                 syntax = syntax.addStatement(.init(item: stmtSyntax))
             }
         }
+        
+        deindent()
+
+        syntax = syntax.withRightBrace(
+            .rightBrace
+                .onNewline()
+                .addingLeadingTrivia(indentation())
+                .withExtraLeading(consuming: &extraLeading)
+        )
 
         return syntax
     }
     
     func generateCompound(_ compoundStmt: CompoundStatement) -> CodeBlockSyntax {
-        var syntax = CodeBlockSyntax()
-
         var leftBrace = prepareStartToken(.leftBrace)
         indent()
 
@@ -64,8 +68,10 @@ extension SwiftSyntaxProducer {
                     )
             )
         }
-        syntax = syntax.withLeftBrace(leftBrace)
-        
+        var syntax = CodeBlockSyntax(
+            leftBrace: leftBrace
+        )
+
         let stmts = _generateStatements(compoundStmt.statements)
         
         for stmt in stmts {
