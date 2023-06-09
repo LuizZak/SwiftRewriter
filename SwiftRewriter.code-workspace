@@ -261,7 +261,7 @@
 			"Xexact"
 		],
 		"swiftTestFileGen.gotoTestFile.useFilenameHeuristics": true,
-		"swiftTestFileGen.gotoTestFile.heuristicFilenamePattern": "$1Tests"
+		"swiftTestFileGen.gotoTestFile.heuristicFilenamePattern": "$1Tests",
 	},
 	"extensions": {
 		"recommendations": [

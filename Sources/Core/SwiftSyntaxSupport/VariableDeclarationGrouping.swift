@@ -4,7 +4,7 @@ import SwiftAST
 
 struct ObjcVariableDeclarationNode {
     var constant: Bool
-    var attributes: [() -> AttributeSyntax]
+    var attributes: [() -> AttributeListSyntax.Element]
     var modifiers: [ModifiersDecoratorResult]
     var kind: VariableDeclarationKind
 }
@@ -17,6 +17,6 @@ struct PatternBindingElement {
 }
 
 enum VariableDeclarationKind {
-    case single(pattern: PatternBindingElement, accessors: (() -> Syntax)?)
+    case single(pattern: PatternBindingElement, accessors: (() -> PatternBindingSyntax.Accessor)?)
     case multiple(patterns: [PatternBindingElement])
 }

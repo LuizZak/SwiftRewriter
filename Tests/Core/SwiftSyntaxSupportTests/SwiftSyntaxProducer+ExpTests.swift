@@ -72,6 +72,14 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
         )
     }
 
+    func testConstantString_withEscapeCode() {
+        assert(
+            Expression.constant(.string("Hello,\\nWorld!")),
+            producer: SwiftSyntaxProducer.generateConstant,
+            matches: "\"Hello,\\nWorld!\""
+        )
+    }
+
     func testConstantNil() {
         assert(
             Expression.constant(.nil),

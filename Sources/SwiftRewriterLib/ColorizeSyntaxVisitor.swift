@@ -1,4 +1,5 @@
 import SwiftSyntax
+import IDEUtils
 import Console
 
 internal class ColorizeSyntaxVisitor: SyntaxVisitor {
@@ -18,6 +19,8 @@ internal class ColorizeSyntaxVisitor: SyntaxVisitor {
 
     init(printFunction: @escaping (String, ConsoleColor?) -> Void) {
         self._printFunction = printFunction
+
+        super.init(viewMode: .sourceAccurate)
     }
 
     override func visit(_ node: StringLiteralExprSyntax) -> SyntaxVisitorContinueKind {

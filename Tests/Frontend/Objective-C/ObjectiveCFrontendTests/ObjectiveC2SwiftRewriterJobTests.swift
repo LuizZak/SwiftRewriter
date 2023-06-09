@@ -221,7 +221,11 @@ private class MockSwiftSyntaxRewriterPassProvider: SwiftSyntaxRewriterPassProvid
         override func visit(_ node: IdentifierExprSyntax) -> ExprSyntax {
             if node.identifier.text == "hello" {
                 return ExprSyntax(
-                    node.withIdentifier(node.identifier.withKind(.identifier("Hello")))
+                    node.withIdentifier(
+                        .identifier("Hello")
+                        .withLeadingTrivia(node.identifier.leadingTrivia)
+                        .withTrailingTrivia(node.identifier.trailingTrivia)
+                    )
                 )
             }
 

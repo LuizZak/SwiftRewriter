@@ -86,8 +86,10 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
         modifiersDecorations.modifiers(for: decl)
     }
     
-    func attributes(for intention: IntentionProtocol,
-                    inline: Bool) -> [() -> AttributeSyntax] {
+    func attributes(
+        for intention: IntentionProtocol,
+        inline: Bool
+    ) -> [() -> AttributeListSyntax.Element] {
         
         guard let attributable = intention as? AttributeTaggableObject else {
             return []
@@ -100,10 +102,10 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
             attributes.append(KnownAttribute(name: "objc"))
         }
         
-        var attributeSyntaxes: [() -> AttributeSyntax] = []
+        var attributeSyntaxes: [() -> AttributeListSyntax.Element] = []
         
         for attr in attributes {
-            let attrSyntax: () -> AttributeSyntax = {
+            let attrSyntax: () -> AttributeListSyntax.Element = {
                 defer {
                     if inline {
                         self.addExtraLeading(.spaces(1))
@@ -215,90 +217,90 @@ extension SwiftSyntaxProducer {
     
     /// Generates a source file syntax from a given file generation intention.
     public func generateFile(_ file: FileGenerationIntention) -> SourceFileSyntax {
-        SourceFileSyntax { builder in
+        var fileSyntax = SourceFileSyntax()
+
+        // Imports come before any header #directive comments
+        iterating(file.importDirectives) { module in
+            let syntax = generateImport(module)
             
-            // Imports come before any header #directive comments
-            iterating(file.importDirectives) { module in
-                let syntax = generateImport(module)
-                
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
-                
-                builder.addStatement(codeBlock)
-            }
+            //let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
             
-            var hasHeaderTrivia = false
-            if let headerTrivia = generateHeaderCommentsTrivia(file) {
-                hasHeaderTrivia = true
-                addExtraLeading(headerTrivia)
-                addExtraLeading(.newlines(1))
-            }
-            
-            didModifyExtraLeading = false
-            
-            iterating(file.typealiasIntentions) { intention in
-                let syntax = generateTypealias(intention)
-                
-                builder.addStatement(syntax.inCodeBlock())
-            }
-            
-            iterating(file.enumIntentions) { intention in
-                let syntax = generateEnum(intention)
-                
-                builder.addStatement(syntax.inCodeBlock())
-            }
-            
-            iterating(file.structIntentions) { _struct in
-                let syntax = generateStruct(_struct)
-                
-                builder.addStatement(syntax.inCodeBlock())
-            }
-            
-            iterating(file.globalVariableIntentions) { variable in
-                let syntax = varDeclGenerator.generateGlobalVariable(variable)
-                
-                builder.addStatement(syntax.inCodeBlock())
-            }
-            
-            iterating(file.globalFunctionIntentions) { function in
-                let syntax = generateFunction(function, alwaysEmitBody: true)
-                
-                builder.addStatement(syntax.inCodeBlock())
-            }
-            
-            iterating(file.protocolIntentions) { _protocol in
-                let syntax = generateProtocol(_protocol)
-                
-                builder.addStatement(syntax.inCodeBlock())
-            }
-            
-            iterating(file.classIntentions) { _class in
-                let syntax = generateClass(_class)
-                
-                builder.addStatement(syntax.inCodeBlock())
-            }
-            
-            iterating(file.extensionIntentions) { _class in
-                let syntax = generateExtension(_class)
-                
-                builder.addStatement(syntax.inCodeBlock())
-            }
-            
-            // No one consumed the leading trivia - emit a dummy token just so we
-            // can have a file with preprocessor directives in place
-            if !didModifyExtraLeading && hasHeaderTrivia {
-                extraLeading = extraLeading.map { Trivia(pieces: $0.dropLast()) }
-                
-                let item = CodeBlockItemSyntax { builder in
-                    builder.useItem(SyntaxFactory
-                        .makeToken(.identifier(""), presence: .present)
-                        .withExtraLeading(consuming: &extraLeading)
-                        .asSyntax
-                    )
-                }
-                
-                builder.addStatement(item)
-            }
+            fileSyntax = fileSyntax.addStatement(
+                CodeBlockItemSyntax.init(item: .decl(syntax.asDeclSyntax))
+            )
         }
+        
+        var hasHeaderTrivia = false
+        if let headerTrivia = generateHeaderCommentsTrivia(file) {
+            hasHeaderTrivia = true
+            addExtraLeading(headerTrivia)
+            addExtraLeading(.newlines(1))
+        }
+        
+        didModifyExtraLeading = false
+        
+        iterating(file.typealiasIntentions) { intention in
+            let syntax = generateTypealias(intention)
+            
+            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+        }
+        
+        iterating(file.enumIntentions) { intention in
+            let syntax = generateEnum(intention)
+            
+            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+        }
+        
+        iterating(file.structIntentions) { _struct in
+            let syntax = generateStruct(_struct)
+            
+            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+        }
+        
+        iterating(file.globalVariableIntentions) { variable in
+            let syntax = varDeclGenerator.generateGlobalVariable(variable)
+            
+            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+        }
+        
+        iterating(file.globalFunctionIntentions) { function in
+            let syntax = generateFunction(function, alwaysEmitBody: true)
+            
+            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+        }
+        
+        iterating(file.protocolIntentions) { _protocol in
+            let syntax = generateProtocol(_protocol)
+            
+            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+        }
+        
+        iterating(file.classIntentions) { _class in
+            let syntax = generateClass(_class)
+            
+            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+        }
+        
+        iterating(file.extensionIntentions) { _class in
+            let syntax = generateExtension(_class)
+            
+            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+        }
+        
+        // No one consumed the leading trivia - emit a dummy token just so we
+        // can have a file with preprocessor directives in place
+        if !didModifyExtraLeading && hasHeaderTrivia {
+            extraLeading = extraLeading.map { Trivia(pieces: $0.dropLast()) }
+            
+            let item = CodeBlockItemSyntax(item: .nonEmptyTokenList([
+                .identifier("", presence: .present)
+                .withExtraLeading(consuming: &extraLeading)
+            ]))
+
+            fileSyntax = fileSyntax.addStatement(item)
+        }
+
+        return fileSyntax
     }
     
     func generateHeaderCommentsTrivia(_ file: FileGenerationIntention) -> Trivia? {
@@ -319,6 +321,11 @@ extension SwiftSyntaxProducer {
 // MARK: - Import declarations
 extension SwiftSyntaxProducer {
     func generateImport(_ module: String) -> ImportDeclSyntax {
+        return ImportDeclSyntax(
+            importTok: prepareStartToken(.importKeyword()).withTrailingSpace(),
+            path: [.init(name: makeIdentifier(module))]
+        )
+        /*
         ImportDeclSyntax { builder in
             builder.useImportTok(
                 makeStartToken(SyntaxFactory.makeImportKeyword)
@@ -328,6 +335,7 @@ extension SwiftSyntaxProducer {
                 builder.useName(makeIdentifier(module))
             })
         }
+        */
     }
 }
 
@@ -336,7 +344,18 @@ extension SwiftSyntaxProducer {
     func generateTypealias(_ intention: TypealiasIntention) -> TypealiasDeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
         addCommentsIfAvailable(intention)
+
+        return TypealiasDeclSyntax(
+            typealiasKeyword: prepareStartToken(.typealias).withTrailingSpace(),
+            identifier: makeIdentifier(intention.name),
+            initializer: .init(
+                equal: .equalToken().addingSurroundingSpaces(),
+                value:  SwiftTypeConverter
+                    .makeTypeSyntax(intention.fromType, startTokenHandler: self)
+            )
+        )
         
+        /*
         return TypealiasDeclSyntax { builder in
             builder.useTypealiasKeyword(
                 makeStartToken(SyntaxFactory.makeTypealiasKeyword)
@@ -355,6 +374,7 @@ extension SwiftSyntaxProducer {
                 )
             })
         }
+        */
     }
 }
 
@@ -363,7 +383,40 @@ extension SwiftSyntaxProducer {
     func generateEnum(_ intention: EnumGenerationIntention) -> EnumDeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
         addCommentsIfAvailable(intention)
+
+        addExtraLeading(indentation())
+
+        let attributesSyntax = self.attributes(for: intention, inline: false).map { attribute in
+            attribute()
+        }
         
+        var syntax = EnumDeclSyntax(
+            attributes: AttributeListSyntax(attributesSyntax),
+            enumKeyword: prepareStartToken(.enum).withTrailingSpace(),
+            identifier: makeIdentifier(intention.typeName),
+            members: .init()
+        )
+        
+        syntax = syntax.withInheritanceClause(TypeInheritanceClauseSyntax(
+            colon: prepareStartToken(.colon).withTrailingSpace(),
+            inheritedTypeCollection: [
+                .init(typeName: SwiftTypeConverter.makeTypeSyntax(intention.rawValueType, startTokenHandler: self))
+            ]
+        ))
+        
+        indent()
+        
+        addExtraLeading(.spaces(1))
+        
+        let members = generateMembers(intention)
+        
+        deindent()
+        
+        syntax = syntax.withMembers(members)
+
+        return syntax
+        
+        /*
         return EnumDeclSyntax { builder in
             addExtraLeading(indentation())
             
@@ -405,11 +458,33 @@ extension SwiftSyntaxProducer {
             
             builder.useMembers(members)
         }
+        */
     }
     
     func generateEnumCase(_ _case: EnumCaseGenerationIntention) -> EnumCaseDeclSyntax {
         addCommentsIfAvailable(_case)
         
+        var syntax = EnumCaseDeclSyntax(
+            caseKeyword: prepareStartToken(.case).withTrailingSpace()
+        )
+
+        let initializerClause: InitializerClauseSyntax?
+        if let rawValue = _case.expression {
+            initializerClause = .init(
+                equal: .equalToken().addingSurroundingSpaces(),
+                value: generateExpression(rawValue)
+            )
+        } else {
+            initializerClause = nil
+        }
+
+        syntax = syntax.addElement(.init(
+            identifier: makeIdentifier(_case.name),
+            rawValue: initializerClause
+        ))
+
+        return syntax
+        /*
         return EnumCaseDeclSyntax { builder in
             builder.useCaseKeyword(
                 makeStartToken(SyntaxFactory.makeCaseKeyword)
@@ -431,6 +506,7 @@ extension SwiftSyntaxProducer {
                 }
             })
         }
+        */
     }
 }
 
@@ -452,7 +528,43 @@ extension SwiftSyntaxProducer {
         
         addHistoryTrackingLeadingIfEnabled(intention)
         addCommentsIfAvailable(intention)
+
+        var syntax = ExtensionDeclSyntax(extendedType: MissingTypeSyntax())
+
+        for attribute in attributes(for: intention, inline: false) {
+            syntax = syntax.addAttribute(attribute().asSyntax)
+        }
+        for modifier in modifiers(for: intention) {
+            syntax = syntax.addModifier(modifier(self))
+        }
         
+        syntax = syntax.withExtensionKeyword(
+            prepareStartToken(.extensionKeyword())
+                .addingTrailingSpace()
+        )
+        
+        // TODO: Support nested type extension
+        syntax = syntax.withExtendedType(
+            SwiftTypeConverter.makeTypeSyntax(.typeName(intention.typeName), startTokenHandler: self)
+        )
+        
+        if let inheritanceClause = generateInheritanceClause(intention) {
+            syntax = syntax.withInheritanceClause(inheritanceClause)
+        } else {
+            addExtraLeading(.spaces(1))
+        }
+        
+        indent()
+        
+        let members = generateMembers(intention)
+        
+        deindent()
+        
+        syntax = syntax.withMembers(members)
+
+        return syntax
+        
+        /*
         return ExtensionDeclSyntax { builder in
             for attribute in attributes(for: intention, inline: false) {
                 builder.addAttribute(attribute().asSyntax)
@@ -485,6 +597,7 @@ extension SwiftSyntaxProducer {
             
             builder.useMembers(members)
         }
+        */
     }
 }
 
@@ -493,7 +606,41 @@ extension SwiftSyntaxProducer {
     func generateClass(_ intention: ClassGenerationIntention) -> ClassDeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
         addCommentsIfAvailable(intention)
+
+        addExtraLeading(indentation())
+
+        let attributesSyntax = attributes(for: intention, inline: false).map { attribute in
+            attribute()
+        }
+        let modifiersSyntax = modifiers(for: intention).map { modifier in
+            modifier(self)
+        }
         
+        let identifier = makeIdentifier(intention.typeName)
+        var syntax = ClassDeclSyntax(
+            attributes: AttributeListSyntax(attributesSyntax),
+            modifiers: ModifierListSyntax(modifiersSyntax),
+            classKeyword: prepareStartToken(.class).addingTrailingSpace(),
+            identifier: makeIdentifier(intention.typeName).withTrailingSpace(),
+            members: MemberDeclBlockSyntax()
+        )
+        
+        if let inheritanceClause = generateInheritanceClause(intention) {
+            syntax = syntax.withIdentifier(identifier)
+            syntax = syntax.withInheritanceClause(inheritanceClause)
+        }
+        
+        indent()
+        
+        let members = generateMembers(intention)
+        
+        deindent()
+        
+        syntax = syntax.withMembers(members)
+
+        return syntax
+        
+        /*
         return ClassDeclSyntax { builder in
             addExtraLeading(indentation())
             
@@ -527,6 +674,7 @@ extension SwiftSyntaxProducer {
             
             builder.useMembers(members)
         }
+        */
     }
     
     public func generateInheritanceClause(_ type: KnownType) -> TypeInheritanceClauseSyntax? {
@@ -563,7 +711,34 @@ extension SwiftSyntaxProducer {
         if inheritances.isEmpty {
             return nil
         }
+
+        var syntax = TypeInheritanceClauseSyntax()
+
+        syntax = syntax.withColon(.colonToken().withTrailingSpace())
+            
+        for (i, inheritance) in inheritances.enumerated() {
+            var typeSyntax = InheritedTypeSyntax(typeName: MissingTypeSyntax())
+
+            var identifier = makeIdentifier(inheritance)
+            
+            if i != inheritances.count - 1 {
+                typeSyntax = typeSyntax.withTrailingComma(
+                    .commaToken().withTrailingSpace()
+                )
+            } else {
+                identifier = identifier.withTrailingSpace()
+            }
+            
+            typeSyntax = typeSyntax.withTypeName(
+                SimpleTypeIdentifierSyntax(name: identifier).asTypeSyntax
+            )
+            
+            syntax = syntax.addInheritedType(typeSyntax)
+        }
+
+        return syntax
         
+        /*
         return TypeInheritanceClauseSyntax { builder in
             builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
             
@@ -592,6 +767,7 @@ extension SwiftSyntaxProducer {
                 builder.addInheritedType(type)
             }
         }
+        */
     }
 }
 
@@ -600,7 +776,41 @@ extension SwiftSyntaxProducer {
     func generateStruct(_ intention: StructGenerationIntention) -> StructDeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
         addCommentsIfAvailable(intention)
+
+        addExtraLeading(indentation())
+
+        var syntax = StructDeclSyntax(identifier: "")
         
+        let attributes = self.attributes(for: intention, inline: false)
+        for attribute in attributes {
+            syntax = syntax.addAttribute(attribute().asSyntax)
+        }
+        syntax = syntax.withStructKeyword(
+            prepareStartToken(.structKeyword())
+                .addingTrailingSpace()
+        )
+        
+        let identifier = makeIdentifier(intention.typeName)
+        
+        if let inheritanceClause = generateInheritanceClause(intention) {
+            syntax = syntax.withIdentifier(identifier)
+            
+            syntax = syntax.withInheritanceClause(inheritanceClause)
+        } else {
+            syntax = syntax.withIdentifier(identifier.withTrailingSpace())
+        }
+        
+        indent()
+        
+        let members = generateMembers(intention)
+        
+        deindent()
+        
+        syntax = syntax.withMembers(members)
+
+        return syntax
+        
+        /*
         return StructDeclSyntax { builder in
             addExtraLeading(indentation())
             
@@ -631,6 +841,7 @@ extension SwiftSyntaxProducer {
             
             builder.useMembers(members)
         }
+        */
     }
 }
 
@@ -640,6 +851,40 @@ extension SwiftSyntaxProducer {
         addHistoryTrackingLeadingIfEnabled(intention)
         addCommentsIfAvailable(intention)
         
+        addExtraLeading(indentation())
+
+        var syntax = ProtocolDeclSyntax(identifier: "")
+        
+        let attributes = self.attributes(for: intention, inline: false)
+        for attribute in attributes {
+            syntax = syntax.addAttribute(attribute().asSyntax)
+        }
+        syntax = syntax.withProtocolKeyword(
+            prepareStartToken(.protocolKeyword())
+                .addingTrailingSpace()
+        )
+        
+        let identifier = makeIdentifier(intention.typeName)
+        
+        if let inheritanceClause = generateInheritanceClause(intention) {
+            syntax = syntax.withIdentifier(identifier)
+            
+            syntax = syntax.withInheritanceClause(inheritanceClause)
+        } else {
+            syntax = syntax.withIdentifier(identifier.withTrailingSpace())
+        }
+        
+        indent()
+        
+        let members = generateMembers(intention)
+        
+        deindent()
+        
+        syntax = syntax.withMembers(members)
+
+        return syntax
+
+        /*
         return ProtocolDeclSyntax.init { builder in
             addExtraLeading(indentation())
             
@@ -670,12 +915,124 @@ extension SwiftSyntaxProducer {
             
             builder.useMembers(generateMembers(intention))
         }
+        */
     }
 }
 
 // MARK: - Type member generation
 extension SwiftSyntaxProducer {
     func generateMembers(_ intention: TypeGenerationIntention) -> MemberDeclBlockSyntax {
+        var syntax = MemberDeclBlockSyntax()
+
+        syntax = syntax.withLeftBrace(prepareStartToken(.leftBrace))
+        syntax = syntax.withRightBrace(.rightBrace.onNewline())
+        
+        addExtraLeading(.newlines(1))
+        
+        // TODO: Probably shouldn't detect ivar containers like this.
+        if let ivarHolder = intention as? InstanceVariableContainerIntention {
+            iterating(ivarHolder.instanceVariables) { ivar in
+                addExtraLeading(indentation())
+                
+                syntax = syntax.addMember(
+                    MemberDeclListItemSyntax(
+                        decl: varDeclGenerator.generateInstanceVariable(ivar),
+                        semicolon: nil
+                    )
+                )
+            }
+            
+            if !intention.properties.isEmpty {
+                extraLeading = .newlines(1)
+            }
+        }
+        // TODO: ...and neither enums
+        let enumCases = intention
+            .properties
+            .compactMap { $0 as? EnumCaseGenerationIntention }
+        
+        iterating(enumCases) { prop in
+            addExtraLeading(indentation())
+            
+            syntax = syntax.addMember(
+                MemberDeclListItemSyntax(
+                    decl: generateEnumCase(prop).asDeclSyntax,
+                    semicolon: nil
+                )
+            )
+        }
+        // TODO: ...and again...
+        let properties = intention
+            .properties
+            .filter { !($0 is EnumCaseGenerationIntention) }
+        
+        iterating(properties) { prop in
+            addExtraLeading(indentation())
+            
+            syntax = syntax.addMember(
+                MemberDeclListItemSyntax(
+                    decl: varDeclGenerator.generateProperty(prop),
+                    semicolon: nil
+                )
+            )
+        }
+        
+        iterating(intention.subscripts) { sub in
+            addExtraLeading(indentation())
+            
+            syntax = syntax.addMember(
+                MemberDeclListItemSyntax(
+                    decl: varDeclGenerator.generateSubscript(sub),
+                    semicolon: nil
+                )
+            )
+        }
+        
+        iterating(intention.constructors) { _init in
+            addExtraLeading(indentation())
+            
+            syntax = syntax.addMember(
+                MemberDeclListItemSyntax(
+                    decl: generateInitializer(
+                        _init,
+                        emitBody: !(intention is ProtocolGenerationIntention),
+                        alwaysEmitBody: !(intention is ProtocolGenerationIntention)
+                    ).asDeclSyntax,
+                    semicolon: nil
+                )
+            )
+        }
+        
+        // TODO: ...and once more...
+        if let deinitIntention = (intention as? BaseClassIntention)?.deinitIntention {
+            addExtraLeading(indentation())
+            
+            syntax = syntax.addMember(
+                MemberDeclListItemSyntax(
+                    decl: generateDeinitializer(deinitIntention).asDeclSyntax,
+                    semicolon: nil
+                )
+            )
+            addExtraLeading(.newlines(2))
+        }
+        
+        iterating(intention.methods) { method in
+            addExtraLeading(indentation())
+            
+            syntax = syntax.addMember(
+                MemberDeclListItemSyntax(
+                    decl: generateFunction(
+                        method,
+                        alwaysEmitBody: !(intention is ProtocolGenerationIntention)
+                    ).asDeclSyntax,
+                    semicolon: nil
+                )
+            )
+        }
+
+        return syntax
+
+        /*
         MemberDeclBlockSyntax { builder in
             builder.useLeftBrace(makeStartToken(SyntaxFactory.makeLeftBraceToken))
             builder.useRightBrace(SyntaxFactory.makeRightBraceToken().onNewline())
@@ -783,6 +1140,7 @@ extension SwiftSyntaxProducer {
                 )
             }
         }
+        */
     }
 }
 
@@ -797,7 +1155,35 @@ extension SwiftSyntaxProducer {
         
         addHistoryTrackingLeadingIfEnabled(intention)
         addCommentsIfAvailable(intention)
+
+        let attributesSyntax = attributes(for: intention, inline: false).map { attribute in
+            attribute()
+        }
+        let modifiersSyntax = modifiers(for: intention).map { modifier in
+            modifier(self)
+        }
         
+        var syntax = InitializerDeclSyntax(
+            attributes: AttributeListSyntax(attributesSyntax),
+            modifiers: ModifierListSyntax(modifiersSyntax),
+            initKeyword: prepareStartToken(.`init`),
+            optionalMark: intention.isFallible ? .infixQuestionMark : nil,
+            signature: .init(input: generateParameterClause(intention.parameters))
+        )
+
+        if emitBody {
+            if let body = intention.functionBody {
+                addExtraLeading(.spaces(1))
+                syntax = syntax.withBody(generateFunctionBody(body))
+            } else if alwaysEmitBody {
+                addExtraLeading(.spaces(1))
+                syntax = syntax.withBody(generateEmptyFunctionBody())
+            }
+        }
+
+        return syntax
+        
+        /*
         return InitializerDeclSyntax { builder in
             for attribute in attributes(for: intention, inline: false) {
                 builder.addAttribute(attribute().asSyntax)
@@ -824,11 +1210,24 @@ extension SwiftSyntaxProducer {
                 }
             }
         }
+        */
     }
     
     func generateDeinitializer(_ intention: DeinitGenerationIntention) -> DeinitializerDeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
+
+        var syntax = DeinitializerDeclSyntax(
+            deinitKeyword: prepareStartToken(.deinit)
+        )
+
+        if let body = intention.functionBody {
+            addExtraLeading(.spaces(1))
+            syntax = syntax.withBody(generateFunctionBody(body))
+        }
+
+        return syntax
         
+        /*
         return DeinitializerDeclSyntax { builder in
             builder.useDeinitKeyword(makeStartToken(SyntaxFactory.makeDeinitKeyword))
             
@@ -837,6 +1236,7 @@ extension SwiftSyntaxProducer {
                 builder.useBody(generateFunctionBody(body))
             }
         }
+        */
     }
     
     func generateFunction(
@@ -849,7 +1249,33 @@ extension SwiftSyntaxProducer {
         if let fromSource = intention as? FromSourceIntention {
             addCommentsIfAvailable(fromSource)
         }
+
+        let attributesSyntax = attributes(for: intention, inline: false).map { attribute in
+            attribute()
+        }
+        let modifiersSyntax = modifiers(for: intention).map { modifier in
+            modifier(self)
+        }
         
+        var syntax = FunctionDeclSyntax(
+            attributes: AttributeListSyntax(attributesSyntax),
+            modifiers: ModifierListSyntax(modifiersSyntax),
+            funcKeyword: prepareStartToken(.func).withTrailingSpace(),
+            identifier: prepareStartToken(makeIdentifier(intention.signature.name)),
+            signature: generateSignature(intention.signature)
+        )
+
+        if let body = intention.functionBody {
+            addExtraLeading(.spaces(1))
+            syntax = syntax.withBody(generateFunctionBody(body))
+        } else if alwaysEmitBody {
+            addExtraLeading(.spaces(1))
+            syntax = syntax.withBody(generateEmptyFunctionBody())
+        }
+
+        return syntax
+        
+        /*
         return FunctionDeclSyntax { builder in
             for attribute in attributes(for: intention, inline: false) {
                 builder.addAttribute(attribute().asSyntax)
@@ -873,9 +1299,20 @@ extension SwiftSyntaxProducer {
                 builder.useBody(generateEmptyFunctionBody())
             }
         }
+        */
     }
     
     func generateSignature(_ signature: FunctionSignature) -> FunctionSignatureSyntax {
+        var syntax = FunctionSignatureSyntax(
+            input: generateParameterClause(signature.parameters)
+        )
+
+        if signature.returnType != .void {
+            syntax = syntax.withOutput(generateReturnType(signature.returnType))
+        }
+
+        return syntax
+        /*
         FunctionSignatureSyntax { builder in
             builder.useInput(generateParameterClause(signature.parameters))
             
@@ -883,9 +1320,21 @@ extension SwiftSyntaxProducer {
                 builder.useOutput(generateReturnType(signature.returnType))
             }
         }
+        */
     }
     
     func generateReturnType(_ ret: SwiftType) -> ReturnClauseSyntax {
+        let syntax = ReturnClauseSyntax(
+            arrow: .arrow.addingSurroundingSpaces(),
+            returnType: SwiftTypeConverter.makeTypeSyntax(
+                ret,
+                allowRootNullabilityUnspecified: false,
+                startTokenHandler: self
+            )
+        )
+
+        return syntax
+        /*
         ReturnClauseSyntax { builder in
             builder.useArrow(
                 SyntaxFactory
@@ -900,9 +1349,20 @@ extension SwiftSyntaxProducer {
                 )
             )
         }
+        */
     }
     
     func generateParameterClause(_ parameters: [ParameterSignature]) -> ParameterClauseSyntax {
+        var syntax = ParameterClauseSyntax()
+
+        iterateWithComma(parameters) { (item, hasComma) in
+            syntax = syntax.addParameter(
+                generateParameter(item, withTrailingComma: hasComma)
+            )
+        }
+
+        return syntax
+        /*
         ParameterClauseSyntax { builder in
             builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
             builder.useRightParen(SyntaxFactory.makeRightParenToken())
@@ -913,6 +1373,7 @@ extension SwiftSyntaxProducer {
                 )
             }
         }
+        */
     }
     
     func generateParameter(
@@ -920,6 +1381,42 @@ extension SwiftSyntaxProducer {
         withTrailingComma: Bool
     ) -> FunctionParameterSyntax {
         
+        var syntax = FunctionParameterSyntax()
+
+        if parameter.label == parameter.name {
+            syntax = syntax.withFirstName(
+                prepareStartToken(makeIdentifier(parameter.name))
+            )
+        } else if let label = parameter.label {
+            syntax = syntax.withFirstName(
+                prepareStartToken(makeIdentifier(label))
+                    .withTrailingSpace()
+            )
+            syntax = syntax.withSecondName(makeIdentifier(parameter.name))
+        } else {
+            syntax = syntax.withFirstName(
+                prepareStartToken(.wildcard)
+                    .withTrailingSpace()
+            )
+            syntax = syntax.withSecondName(makeIdentifier(parameter.name))
+        }
+        
+        syntax = syntax.withColon(.colon.withTrailingSpace())
+        
+        syntax = syntax.withType(SwiftTypeConverter.makeTypeSyntax(parameter.type, startTokenHandler: self))
+
+        if parameter.isVariadic {
+            syntax = syntax.withEllipsis(.ellipsis)
+        }
+        
+        if withTrailingComma {
+            syntax = syntax.withTrailingComma(
+                .comma.withTrailingSpace()
+            )
+        }
+
+        return syntax
+        /*
         FunctionParameterSyntax { builder in
             if parameter.label == parameter.name {
                 builder.useFirstName(
@@ -953,6 +1450,7 @@ extension SwiftSyntaxProducer {
                 )
             }
         }
+        */
     }
     
     func generateFunctionBody(_ body: FunctionBodyIntention) -> CodeBlockSyntax {
@@ -960,6 +1458,13 @@ extension SwiftSyntaxProducer {
     }
     
     func generateEmptyFunctionBody() -> CodeBlockSyntax {
+        let syntax = CodeBlockSyntax(
+            leftBrace: prepareStartToken(.leftBrace),
+            rightBrace: .rightBrace.onNewline().addingLeadingTrivia(indentation())
+        )
+
+        return syntax
+        /*
         CodeBlockSyntax { builder in
             builder.useLeftBrace(
                 makeStartToken(SyntaxFactory.makeLeftBraceToken)
@@ -971,14 +1476,64 @@ extension SwiftSyntaxProducer {
                     .addingLeadingTrivia(indentation())
             )
         }
+        */
     }
     
-    func generateAttributeListSyntax<S: Sequence>(_ attributes: S) -> AttributeListSyntax
-        where S.Element == KnownAttribute {
+    func generateAttributeListSyntax<S: Sequence>(
+        _ attributes: S
+    ) -> AttributeListSyntax where S.Element == KnownAttribute {
 
-        SyntaxFactory.makeAttributeList(attributes.lazy.map(generateAttributeSyntax).map { $0.asSyntax })
+        let items = attributes.map(generateAttributeSyntax)
+        let syntax = AttributeListSyntax(items)
+
+        return syntax
     }
     
+    func generateAttributeSyntax(_ attribute: KnownAttribute) -> AttributeListSyntax.Element {
+        let syntax: AttributeListSyntax.Element
+        let atSignToken = prepareStartToken(TokenSyntax.atSign)
+        let attributeNameSyntax = SimpleTypeIdentifierSyntax(name: makeIdentifier(attribute.name))
+
+        // TODO: Actually use balanced tokens to do attribute parameters
+        if let parameters = attribute.parameters {
+            let argumentList = TupleExprElementListSyntax([
+                .init(expression: .init(stringLiteral: "(\(parameters))"))
+            ])
+
+            syntax = .customAttribute(
+                CustomAttributeSyntax(
+                    atSignToken: atSignToken,
+                    attributeName: attributeNameSyntax,
+                    argumentList: argumentList 
+                )
+            )
+        } else {
+            syntax = .customAttribute(
+                CustomAttributeSyntax(
+                    atSignToken: atSignToken,
+                    attributeName: attributeNameSyntax
+                )
+            )
+        }
+
+        return syntax
+
+        /*
+        AttributeSyntax { builder in
+            builder.useAtSignToken(makeStartToken(SyntaxFactory.makeAtSignToken))
+            builder.useAttributeName(makeIdentifier(attribute.name))
+            
+            // TODO: Actually use balanced tokens to do attribute parameters
+            if let parameters = attribute.parameters {
+                builder.addToken(SyntaxFactory.makeLeftParenToken())
+                builder.addToken(makeIdentifier(parameters))
+                builder.addToken(SyntaxFactory.makeRightParenToken())
+            }
+        }
+        */
+    }
+    
+    /*
     func generateAttributeSyntax(_ attribute: KnownAttribute) -> AttributeSyntax {
         AttributeSyntax { builder in
             builder.useAtSignToken(makeStartToken(SyntaxFactory.makeAtSignToken))
@@ -992,6 +1547,7 @@ extension SwiftSyntaxProducer {
             }
         }
     }
+    */
 }
 
 // MARK: - General/commons
@@ -999,7 +1555,7 @@ extension SwiftSyntaxProducer {
 // MARK: TokenSyntax
 
 func makeIdentifier(_ identifier: String) -> TokenSyntax {
-    SyntaxFactory.makeIdentifier(identifier)
+    .identifier(identifier)
 }
 
 func iterateWithComma<T>(_ elements: T, do block: (T.Element, Bool) -> Void) where T: Collection {
