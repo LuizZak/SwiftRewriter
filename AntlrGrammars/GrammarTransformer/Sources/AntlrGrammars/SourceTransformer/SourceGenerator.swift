@@ -206,31 +206,29 @@ enum SourceGenerator {
         expr: ExprSyntax
     ) -> VariableDeclSyntax {
 
-        VariableDeclSyntax { decl in
-            decl.addModifier(
-                declModifier(
-                    accessLevel.asTokenSyntax().withTrailingSpace()
+        let syntax = VariableDeclSyntax(
+            modifiers: ModifierListSyntax([
+                declModifier(accessLevel.asTokenSyntax().withTrailingSpace())
+            ]),
+            letOrVarKeyword: .varKeyword().withTrailingSpace(),
+            bindings: PatternBindingListSyntax([
+                PatternBindingSyntax(
+                    pattern: identifierPattern(identifier),
+                    typeAnnotation: .init(
+                        colon: .colonToken().withTrailingSpace(),
+                        type: type
+                    ),
+                    accessor: .getter(getAccessor(
+                        ReturnStmtSyntax(
+                            returnKeyword: .returnKeyword().withTrailingSpace(),
+                            expression: expr
+                        )
+                    ))
                 )
-            )
+            ])
+        )
 
-            decl.useLetOrVarKeyword(SyntaxFactory.makeVarKeyword().withTrailingSpace())
-
-            decl.addBinding(PatternBindingSyntax { builder in
-                builder.usePattern(identifierPattern(identifier))
-                builder.useTypeAnnotation(TypeAnnotationSyntax {
-                    $0.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
-                    $0.useType(type)
-                })
-                builder.useAccessor(getAccessor(ReturnStmtSyntax { builder in
-                    builder.useReturnKeyword(
-                        SyntaxFactory
-                            .makeReturnKeyword()
-                            .withTrailingSpace()
-                    )
-                    builder.useExpression(expr)
-                }.asStmtSyntax))
-            })
-        }
+        return syntax
     }
 
     private static func makeVarDecl(
@@ -239,23 +237,23 @@ enum SourceGenerator {
         type: TypeSyntax
     ) -> VariableDeclSyntax {
 
-        VariableDeclSyntax { decl in
-            decl.addModifier(
-                declModifier(
-                    accessLevel.asTokenSyntax().withTrailingSpace()
-                )
-            )
+        let syntax = VariableDeclSyntax(
+            modifiers: ModifierListSyntax([
+                declModifier(accessLevel.asTokenSyntax().withTrailingSpace())
+            ]),
+            letOrVarKeyword: .varKeyword().withTrailingSpace(),
+            bindings: PatternBindingListSyntax([
+                .init(
+                    pattern: identifierPattern(identifier),
+                    typeAnnotation: .init(
+                        colon: .colonToken().withTrailingSpace(),
+                        type: type
+                    )
+                ),
+            ])
+        )
 
-            decl.useLetOrVarKeyword(SyntaxFactory.makeVarKeyword().withTrailingSpace())
-
-            decl.addBinding(PatternBindingSyntax { builder in
-                builder.usePattern(identifierPattern(identifier))
-                builder.useTypeAnnotation(TypeAnnotationSyntax {
-                    $0.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
-                    $0.useType(type)
-                })
-            })
-        }
+        return syntax
     }
 
     enum AccessLevel {
@@ -270,48 +268,28 @@ enum SourceGenerator {
             case .open:
                 return identifierToken("open")
             case .public:
-                return SyntaxFactory.makePublicKeyword()
+                return .publicKeyword()
             case .internal:
-                return SyntaxFactory.makeInternalKeyword()
+                return .internalKeyword()
             case .fileprivate:
-                return SyntaxFactory.makeFileprivateKeyword()
+                return .fileprivateKeyword()
             case .private:
-                return SyntaxFactory.makePrivateKeyword()
+                return .privateKeyword()
             }
         }
     }
 }
 
-private func getAccessor(_ body: StmtSyntax) -> Syntax {
-    CodeBlockSyntax { builder in
-        builder.useLeftBrace(
-            SyntaxFactory.makeLeftBraceToken().withLeadingSpace()
-        )
-        
-        let stmtList = SyntaxFactory.makeCodeBlockItemList([
-            CodeBlockItemSyntax { builder in
-                builder.useItem(
-                    body.asSyntax
-                    .withLeadingTrivia(
-                        .newlines(1) + Trivia.spaces(4)
-                    )
-                )
-            }
-        ])
-        
-        let codeBlock = SyntaxFactory.makeCodeBlockItem(
-            item: stmtList.asSyntax,
-            semicolon: nil,
-            errorTokens: nil
-        )
-        
-        builder.addStatement(codeBlock)
-        
-        builder.useRightBrace(
-            SyntaxFactory.makeRightBraceToken()
-                .withLeadingTrivia(.newlines(1) + Trivia.spaces(4))
-        )
-    }.asSyntax
+private func getAccessor<S: StmtSyntaxProtocol>(_ body: S) -> CodeBlockSyntax {
+    let syntax = CodeBlockSyntax(
+        leftBrace: .leftBraceToken().withLeadingSpace(),
+        statements: CodeBlockItemListSyntax([
+            .init(item: .stmt(body.asStmtSyntax))
+        ]),
+        rightBrace: .rightBraceToken().withLeadingTrivia(.newlines(1) + .spaces(4))
+    )
+
+    return syntax
 }
 
 // MARK: - Utils
@@ -327,7 +305,7 @@ internal extension SyntaxProtocol {
                 return value
             }
 
-            for child in next.children {
+            for child in next.children(viewMode: .sourceAccurate) {
                 queue.append(child)
             }
         }
