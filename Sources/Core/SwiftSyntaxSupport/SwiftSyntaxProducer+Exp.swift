@@ -167,21 +167,6 @@ extension SwiftSyntaxProducer {
         )
         
         return syntax
-        /*
-        let syntax = SequenceExprSyntax { builder in
-            builder.addElement(generateExpression(exp.exp))
-            
-            builder.addElement(IsExprSyntax { builder in
-                builder.useIsTok(
-                    SyntaxFactory
-                        .makeIsKeyword()
-                        .addingSurroundingSpaces()
-                )
-                
-                builder.useTypeName(SwiftTypeConverter.makeTypeSyntax(exp.type, startTokenHandler: self))
-            }.asExprSyntax)
-        }
-        */
     }
     
     public func generateClosure(_ exp: BlockLiteralExpression) -> ClosureExprSyntax {
@@ -444,14 +429,6 @@ extension SwiftSyntaxProducer {
             }
 
             return subscriptSyntax.asExprSyntax
-
-            /*
-            return SubscriptExprSyntax { builder in
-                builder.useCalledExpression(subExp)
-                builder.useLeftBracket(SyntaxFactory.makeLeftSquareBracketToken())
-                builder.useRightBracket(SyntaxFactory.makeRightSquareBracketToken())
-            }.asExprSyntax
-            */
             
         case let call as FunctionCallPostfix:
             var arguments = call.arguments

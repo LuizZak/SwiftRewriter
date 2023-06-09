@@ -5,12 +5,6 @@ extension SyntaxProtocol {
         return Syntax(self)
     }
     
-    /*
-    func inCodeBlock() -> CodeBlockItemSyntax {
-        return asSyntax.inCodeBlock()
-    }
-    */
-
     func withExtraLeading(consuming trivia: inout Trivia?) -> Self {
         if let t = trivia {
             trivia = nil
@@ -82,14 +76,6 @@ extension PatternSyntaxProtocol {
         return PatternSyntax(self)
     }
 }
-
-/* Note: Removed in SwiftSyntax 5.8
-extension Syntax {
-    func inCodeBlock() -> CodeBlockItemSyntax {
-        return CodeBlockItemSyntax { $0.useItem(self) }
-    }
-}
-*/
 
 extension ExprSyntaxProtocol {
     func inCodeBlock() -> CodeBlockItemSyntax {

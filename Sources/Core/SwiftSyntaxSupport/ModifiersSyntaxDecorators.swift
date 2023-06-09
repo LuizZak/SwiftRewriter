@@ -75,18 +75,6 @@ class MutatingModifiersDecorator: ModifiersSyntaxDecorator {
                     .withExtraLeading(from: producer)
                 )
             }
-            /*
-            return {
-                SyntaxFactory
-                    .makeDeclModifier(
-                        name: makeIdentifier("mutating")
-                            .addingTrailingSpace()
-                            .withExtraLeading(from: $0),
-                        detailLeftParen: nil,
-                        detail: nil,
-                        detailRightParen: nil)
-            }
-            */
         }
         
         return nil
@@ -109,19 +97,6 @@ class StaticModifiersDecorator: ModifiersSyntaxDecorator {
                     .withExtraLeading(from: producer)
                 )
             }
-            /*
-            return {
-                SyntaxFactory
-                    .makeDeclModifier(
-                        name: SyntaxFactory
-                            .makeStaticKeyword()
-                            .addingTrailingSpace()
-                            .withExtraLeading(from: $0),
-                        detailLeftParen: nil,
-                        detail: nil,
-                        detailRightParen: nil)
-            }
-            */
         }
         
         return nil
@@ -148,19 +123,6 @@ class AccessLevelModifiersDecorator: ModifiersSyntaxDecorator {
                     .withExtraLeading(from: producer)
             )
         }
-        
-        /*
-        return {
-            SyntaxFactory
-                .makeDeclModifier(
-                    name: token
-                        .addingTrailingSpace()
-                        .withExtraLeading(from: $0),
-                    detailLeftParen: nil,
-                    detail: nil,
-                    detailRightParen: nil)
-        }
-        */
     }
     
 }
@@ -187,21 +149,6 @@ class PropertySetterAccessModifiersDecorator: ModifiersSyntaxDecorator {
                     .init(detail: "set", rightParen: .rightParen.withTrailingSpace())
                 )
         }
-        
-        /*
-        return { producer in
-            DeclModifierSyntax { builder in
-                builder.useName(setterAccessLevel.withExtraLeading(from: producer))
-                builder.useDetailLeftParen(SyntaxFactory.makeLeftParenToken())
-                builder.useDetail(makeIdentifier("set"))
-                builder.useDetailRightParen(
-                    SyntaxFactory
-                        .makeRightParenToken()
-                        .withTrailingSpace()
-                )
-            }
-        }
-        */
     }
     
 }
@@ -247,20 +194,6 @@ class OwnershipModifiersDecorator: ModifiersSyntaxDecorator {
                     .init(detail: token, rightParen: .rightParen.withTrailingSpace())
                 }
             )
-            /*
-            return SyntaxFactory
-                .makeDeclModifier(name: token.withExtraLeading(from: $0),
-                                  detailLeftParen: detail == nil
-                                    ? nil
-                                    : SyntaxFactory.makeLeftParenToken(),
-                                  detail: detail,
-                                  detailRightParen: detail == nil
-                                    ? nil
-                                    : SyntaxFactory
-                                        .makeRightParenToken()
-                                        .withTrailingSpace()
-                )
-            */
         }
     }
     
@@ -294,16 +227,6 @@ class OverrideModifiersDecorator: ModifiersSyntaxDecorator {
                         .withTrailingSpace()
                 )
             }
-            /*
-            return { producer in
-                DeclModifierSyntax { builder in
-                    builder.useName(SyntaxFactory
-                        .makeIdentifier("override")
-                        .withExtraLeading(from: producer)
-                        .withTrailingSpace())
-                }
-            }
-            */
         }
         
         return nil
@@ -337,17 +260,6 @@ class ConvenienceInitModifiersDecorator: ModifiersSyntaxDecorator {
                         .withTrailingSpace()
                 )
             }
-            /*
-            return { producer in
-                DeclModifierSyntax { builder in
-                    builder.useName(SyntaxFactory
-                        .makeIdentifier("convenience")
-                        .withExtraLeading(from: producer)
-                        .withTrailingSpace()
-                    )
-                }
-            }
-            */
         }
         
         return nil
@@ -371,17 +283,6 @@ class ProtocolOptionalModifiersDecorator: ModifiersSyntaxDecorator {
                         .withTrailingSpace()
                 )
             }
-            /*
-            return { producer in
-                DeclModifierSyntax { builder in
-                    builder.useName(SyntaxFactory
-                        .makeIdentifier("optional")
-                        .withExtraLeading(from: producer)
-                        .withTrailingSpace()
-                    )
-                }
-            }
-            */
         }
         
         return nil
@@ -418,20 +319,6 @@ class FinalClassModifiersDecorator: ModifiersSyntaxDecorator {
                         .withTrailingSpace()
                 )
             }
-            /*
-            return { producer in
-                DeclModifierSyntax { builder in
-                    // TODO: There's no `final` keyword currently in the
-                    // TODO: SwiftSyntax version we're using;
-                    builder.useName(
-                        SyntaxFactory
-                        .makeIdentifier("final")
-                        .withExtraLeading(from: producer)
-                        .withTrailingSpace()
-                    )
-                }
-            }
-            */
         }
 
         return nil
