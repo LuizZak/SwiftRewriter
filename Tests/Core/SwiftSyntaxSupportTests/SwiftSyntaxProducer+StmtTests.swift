@@ -642,8 +642,10 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntaxes,
             matches: """
-                // label:
+                {
+                    // label:
                     value
+                }
                 """
         )
     }
@@ -655,9 +657,11 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntaxes,
             matches: """
-                label:
+                {
+                    label:
                     if true {
                     }
+                }
                 """
         )
     }
@@ -669,9 +673,11 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntaxes,
             matches: """
-                label:
+                {
+                    label:
                     while true {
                     }
+                }
                 """
         )
     }
@@ -683,9 +689,11 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntaxes,
             matches: """
-                label:
+                {
+                    label:
                     repeat {
                     } while true
+                }
                 """
         )
     }
@@ -703,9 +711,11 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntaxes,
             matches: """
-                label:
+                {
+                    label:
                     switch value {
                     }
+                }
                 """
         )
     }
@@ -717,9 +727,11 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntaxes,
             matches: """
-                label:
+                {
+                    label:
                     for v in value {
                     }
+                }
                 """
         )
     }
@@ -731,9 +743,11 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(
             syntaxes,
             matches: """
-                label:
+                {
+                    label:
                     do {
                     }
+                }
                 """
         )
     }

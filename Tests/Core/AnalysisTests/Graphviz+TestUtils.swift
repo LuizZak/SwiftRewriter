@@ -172,23 +172,11 @@ private class GraphvizUpdateRewriter: SyntaxRewriter {
     }
 
     private func updatingExpectedString(_ exp: StringLiteralExprSyntax) -> StringLiteralExprSyntax {
-        let result = StringLiteralExprSyntax { builder in
-            builder.useOpenQuote(
-                SyntaxFactory.makeMultilineStringQuoteToken()
-            )
-            builder.useCloseQuote(
-                SyntaxFactory.makeMultilineStringQuoteToken()
-            )
-
-            let formatted = formatGraphviz(entry.newGraphviz)
-
-            builder.addSegment(
-                Syntax(
-                    SyntaxFactory
-                    .makeStringSegment(formatted)
-                )
-            )
-        }
+        let result = StringLiteralExprSyntax(
+            openQuote: .multilineStringQuote,
+            content: formatGraphviz(entry.newGraphviz),
+            closeQuote: .multilineStringQuote
+        )
 
         return result
     }

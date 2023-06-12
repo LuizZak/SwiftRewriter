@@ -48,7 +48,7 @@ class ParserTransformer: TransformerType {
 
         let rewriter = _ParserRewriter(targetClassName: targetClassName)
         
-        let transformed = rewriter.visit(file).as(SourceFileSyntax.self) ?? file
+        let transformed = rewriter.visit(file)
 
         return try formatter?.format(_stripPrevCtx(transformed)) ?? transformed
     }
@@ -161,10 +161,10 @@ private class _ParserRewriter: SyntaxRewriter {
         self.targetClassName = targetClassName
     }
 
-    override func visit(_ node: SourceFileSyntax) -> Syntax {
+    override func visit(_ node: SourceFileSyntax) -> SourceFileSyntax {
         let node = super.visit(node).as(SourceFileSyntax.self) ?? node
 
-        return Syntax(node)
+        return node
     }
 
     override func visit(_ node: ClassDeclSyntax) -> DeclSyntax {

@@ -52,10 +52,12 @@ extension BaseSwiftSyntaxProducer: StartTokenHandler {
 
 // MARK: - Utilities
 extension BaseSwiftSyntaxProducer {
-    func iterating<T>(_ elements: [T],
-                      inBetweenSpacing: Trivia = .newlines(1),
-                      postSeparator: Trivia = .newlines(2),
-                      do block: (T) -> Void) {
+    func iterating<T>(
+        _ elements: [T],
+        inBetweenSpacing: Trivia = .newlines(1),
+        postSeparator: Trivia = .newlines(2),
+        do block: (T) -> Void
+    ) {
         
         for (i, item) in elements.enumerated() {
             if i > 0 {

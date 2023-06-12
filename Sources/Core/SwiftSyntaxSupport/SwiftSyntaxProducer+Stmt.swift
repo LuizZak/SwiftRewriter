@@ -3,7 +3,7 @@ import Intentions
 import SwiftAST
 
 extension SwiftSyntaxProducer {
-    typealias StatementBlockProducer = (SwiftSyntaxProducer) -> CodeBlockItemSyntax?
+    typealias StatementBlockProducer = (SwiftSyntaxProducer) -> CodeBlockItemSyntax.Item?
     
     // TODO: Consider reducing code duplication within `generateStatement` and
     // `_generateStatements`
@@ -25,61 +25,69 @@ extension SwiftSyntaxProducer {
             return generateCompound(statement)
         }
         
-        return CodeBlockSyntax { builder in
-            indent()
-            defer {
-                deindent()
-            }
-            
-            let stmts = generateStatementBlockItems(statement)
-            
-            for (i, stmt) in stmts.enumerated() {
-                if i > 0 {
-                    addExtraLeading(.newlines(1))
-                }
-                
-                if let syntax = stmt(self) {
-                    builder.addStatement(syntax)
-                }
+        var syntax = CodeBlockSyntax(
+            leftBrace: prepareStartToken(.leftBrace)
+        )
+
+        indent()
+        
+        let stmts = generateStatementBlockItems(statement)
+        
+        for stmt in stmts {
+            addExtraLeading(.newlines(1) + indentation())
+
+            if let stmtSyntax = stmt(self) {
+                syntax = syntax.addStatement(.init(item: stmtSyntax))
             }
         }
+        
+        deindent()
+
+        syntax = syntax.withRightBrace(
+            .rightBrace
+                .onNewline()
+                .addingLeadingTrivia(indentation())
+                .withExtraLeading(consuming: &extraLeading)
+        )
+
+        return syntax
     }
     
     func generateCompound(_ compoundStmt: CompoundStatement) -> CodeBlockSyntax {
-        CodeBlockSyntax { builder in
-            var leftBrace = makeStartToken(SyntaxFactory.makeLeftBraceToken)
-            indent()
+        var leftBrace = prepareStartToken(.leftBrace)
+        indent()
 
-            // Apply comments as a trailing trivia for the leading brace
-            if !compoundStmt.comments.isEmpty {
-                leftBrace = leftBrace.withTrailingTrivia(
-                    .newlines(1)
-                        + indentation()
-                        + toCommentsTrivia(
-                            compoundStmt.comments,
-                            addNewLineAfter: !compoundStmt.isEmpty
-                        )
-                )
-            }
-            builder.useLeftBrace(leftBrace)
-            
-            defer {
-                deindent()
-                builder.useRightBrace(
-                    SyntaxFactory
-                        .makeRightBraceToken()
-                        .onNewline()
-                        .addingLeadingTrivia(indentation())
-                        .withExtraLeading(consuming: &extraLeading)
-                )
-            }
-            
-            let stmts = _generateStatements(compoundStmt.statements)
-            
-            for stmt in stmts {
-                builder.addStatement(stmt)
-            }
+        // Apply comments as a trailing trivia for the leading brace
+        if !compoundStmt.comments.isEmpty {
+            leftBrace = leftBrace.withTrailingTrivia(
+                .newlines(1)
+                    + indentation()
+                    + toCommentsTrivia(
+                        compoundStmt.comments,
+                        addNewLineAfter: !compoundStmt.isEmpty
+                    )
+            )
         }
+        var syntax = CodeBlockSyntax(
+            leftBrace: leftBrace
+        )
+
+        let stmts = _generateStatements(compoundStmt.statements)
+        
+        for stmt in stmts {
+            syntax = syntax.addStatement(stmt)
+        }
+
+        deindent()
+
+        syntax = syntax.withRightBrace(
+            .rightBrace
+                .onNewline()
+                .addingLeadingTrivia(indentation())
+                .withExtraLeading(consuming: &extraLeading)
+        )
+
+        return syntax
     }
     
     func _generateStatements(_ stmtList: [Statement]) -> [CodeBlockItemSyntax] {
@@ -92,7 +100,7 @@ extension SwiftSyntaxProducer {
                 addExtraLeading(.newlines(1) + indentation())
 
                 if let syntax = item(self) {
-                    items.append(syntax)
+                    items.append(.init(item: syntax))
                 }
             }
             
@@ -131,7 +139,7 @@ extension SwiftSyntaxProducer {
 
         default:
             assertionFailure("Found unknown statement syntax node type \(type(of: stmt))")
-            genList = [{ _ in SyntaxFactory.makeBlankExpressionStmt().inCodeBlock() }]
+            genList = [{ _ in .expr(MissingExprSyntax().asExprSyntax) }]
         }
         
         var leadingComments = stmt.comments
@@ -146,18 +154,55 @@ extension SwiftSyntaxProducer {
     }
 
     private func generateStatementKind(_ statementKind: StatementKind) -> [StatementBlockProducer] {
+
+        func prefixLabel<S: StmtSyntaxProtocol>(
+            label: String?,
+            _ producer: SwiftSyntaxProducer,
+            _ generator: (SwiftSyntaxProducer) -> S
+        ) -> StmtSyntax {
+
+            guard let label = label else {
+                return StmtSyntax(generator(producer))
+            }
+
+            let labelToken = prepareStartToken(.identifier(label))
+
+            let builder = LabeledStmtBuilder(label: (labelToken, labelText: label, colon: .colon))
+
+            producer.addExtraLeading(.newlines(1) + producer.indentation())
+
+            return builder.buildSyntax(generator(producer))
+        }
+
+        func prefixLabel<S: StmtSyntaxProtocol>(
+            _ stmt: Statement,
+            _ producer: SwiftSyntaxProducer,
+            _ generator: (SwiftSyntaxProducer) -> S
+        ) -> StmtSyntax {
+
+            return prefixLabel(label: stmt.label, producer, generator)
+        }
+
         switch statementKind {
         case .return(let stmt):
-            return [{ $0.generateReturn(stmt).inCodeBlock() }]
+            return [{ producer in
+                prefixLabel(stmt, producer, { $0.generateReturn(stmt) }).inCodeBlockItem()
+            }]
             
         case .continue(let stmt):
-            return [{ $0.generateContinue(stmt).inCodeBlock() }]
+            return [{ producer in
+                prefixLabel(stmt, producer, { $0.generateContinue(stmt) }).inCodeBlockItem()
+            }]
             
         case .break(let stmt):
-            return [{ $0.generateBreak(stmt).inCodeBlock() }]
+            return [{ producer in
+                prefixLabel(stmt, producer, { $0.generateBreak(stmt) }).inCodeBlockItem()
+            }]
             
         case .fallthrough(let stmt):
-            return [{ $0.generateFallthrough(stmt).inCodeBlock() }]
+            return [{ producer in
+                prefixLabel(stmt, producer, { $0.generateFallthrough(stmt) }).inCodeBlockItem()
+            }]
             
         case .expressions(let stmt):
             return generateExpressions(stmt)
@@ -166,34 +211,50 @@ extension SwiftSyntaxProducer {
             return generateVariableDeclarations(stmt)
             
         case .if(let stmt):
-            return [{ $0.generateIfStmt(stmt).inCodeBlock() }]
+            return [{ producer in
+                prefixLabel(stmt, producer, { $0.generateIfStmt(stmt) }).inCodeBlockItem()
+            }]
             
         case .switch(let stmt):
-            return [{ $0.generateSwitchStmt(stmt).inCodeBlock() }]
+            return [{ producer in
+                prefixLabel(stmt, producer, { $0.generateSwitchStmt(stmt) }).inCodeBlockItem()
+            }]
             
         case .while(let stmt):
-            return [{ $0.generateWhileStmt(stmt).inCodeBlock() }]
+            return [{ producer in
+                prefixLabel(stmt, producer, { $0.generateWhileStmt(stmt) }).inCodeBlockItem()
+            }]
             
         case .do(let stmt):
-            return [{ $0.generateDo(stmt).inCodeBlock() }]
+            return [{ producer in
+                prefixLabel(stmt, producer, { $0.generateDo(stmt) }).inCodeBlockItem()
+            }]
             
         case .repeatWhile(let stmt):
-            return [{ $0.generateDoWhileStmt(stmt).inCodeBlock() }]
+            return [{ producer in
+                prefixLabel(stmt, producer, { $0.generateDoWhileStmt(stmt) }).inCodeBlockItem()
+            }]
             
         case .for(let stmt):
-            return [{ $0.generateForIn(stmt).inCodeBlock() }]
+            return [{ producer in
+                prefixLabel(stmt, producer, { $0.generateForIn(stmt) }).inCodeBlockItem()
+            }]
             
         case .defer(let stmt):
-            return [{ $0.generateDefer(stmt).inCodeBlock() }]
+            return [{ producer in
+                prefixLabel(stmt, producer, { $0.generateDefer(stmt) }).inCodeBlockItem()
+            }]
             
         case .compound(let stmt):
             return stmt.statements.flatMap(generateStatementBlockItems)
 
         case .localFunction(let stmt):
-            return [{ $0.generateLocalFunction(stmt).inCodeBlock() }]
+            return [{ $0.generateLocalFunction(stmt).inCodeBlockItem() }]
 
         case .throw(let stmt):
-            return [{ $0.generateThrow(stmt).inCodeBlock() }]
+            return [{ producer in
+                prefixLabel(stmt, producer, { $0.generateThrow(stmt) }).inCodeBlockItem()
+            }]
             
         case .unknown(let stmt):
             return [self.generateUnknown(stmt)]
@@ -259,7 +320,7 @@ extension SwiftSyntaxProducer {
     
     func generateExpressions(_ stmt: ExpressionsStatement) -> [StatementBlockProducer] {
         stmt.expressions
-            .map { exp -> (SwiftSyntaxProducer) -> CodeBlockItemSyntax in
+            .map { exp -> (SwiftSyntaxProducer) -> CodeBlockItemSyntax.Item in
                 return {
                     if $0.settings.outputExpressionTypes {
                         let type = "// type: \(exp.resolvedType ?? "<nil>")"
@@ -268,7 +329,7 @@ extension SwiftSyntaxProducer {
                         $0.addExtraLeading(.newlines(1) + $0.indentation())
                     }
                     
-                    return $0.generateExpression(exp).inCodeBlock()
+                    return $0.generateExpression(exp).inCodeBlockItem()
                 }
             }
     }
@@ -297,475 +358,372 @@ extension SwiftSyntaxProducer {
                         }
                     }
 
-                    return SyntaxFactory.makeCodeBlockItem(
-                        item: decl().asSyntax,
-                        semicolon: nil,
-                        errorTokens: nil
-                    )
+                    return decl().inCodeBlockItem()
                 }
             }
     }
     
     public func generateReturn(_ stmt: ReturnStatement) -> ReturnStmtSyntax {
-        ReturnStmtSyntax { builder in
-            var returnToken = makeStartToken(SyntaxFactory.makeReturnKeyword)
-            
-            if let exp = stmt.exp {
-                returnToken = returnToken.addingTrailingSpace()
-                builder.useExpression(generateExpression(exp))
-            }
-            
-            builder.useReturnKeyword(returnToken)
+        let syntax: ReturnStmtSyntax
+
+        let returnKeywordSyntax = prepareStartToken(.return)
+
+        if let exp = stmt.exp {
+            syntax = ReturnStmtSyntax(
+                returnKeyword: returnKeywordSyntax.addingTrailingSpace(),
+                expression: generateExpression(exp)
+            )
+        } else {
+            syntax = ReturnStmtSyntax(returnKeyword: returnKeywordSyntax)
         }
+        
+        return syntax
     }
     
     public func generateContinue(_ stmt: ContinueStatement) -> ContinueStmtSyntax {
-        ContinueStmtSyntax { builder in
-            builder.useContinueKeyword(
-                makeStartToken(SyntaxFactory.makeContinueKeyword)
+        let syntax: ContinueStmtSyntax
+
+        if let label = stmt.targetLabel {
+            syntax = ContinueStmtSyntax(
+                continueKeyword: prepareStartToken(.continue).withTrailingSpace(),
+                label: label
             )
-            
-            if let label = stmt.targetLabel {
-                builder.useLabel(makeIdentifier(label).withLeadingSpace())
-            }
+        } else {
+            syntax = ContinueStmtSyntax(
+                continueKeyword: prepareStartToken(.continue)
+            )
         }
+
+        return syntax
     }
     
     public func generateBreak(_ stmt: BreakStatement) -> BreakStmtSyntax {
-        BreakStmtSyntax { builder in
-            builder.useBreakKeyword(makeStartToken(SyntaxFactory.makeBreakKeyword))
-            
-            if let label = stmt.targetLabel {
-                builder.useLabel(makeIdentifier(label).withLeadingSpace())
-            }
+        let syntax: BreakStmtSyntax
+
+        if let label = stmt.targetLabel {
+            syntax = BreakStmtSyntax(
+                breakKeyword: prepareStartToken(.break).withTrailingSpace(),
+                label: label
+            )
+        } else {
+            syntax = BreakStmtSyntax(
+                breakKeyword: prepareStartToken(.break)
+            )
         }
+
+        return syntax
     }
     
     public func generateFallthrough(_ stmt: FallthroughStatement) -> FallthroughStmtSyntax {
-        FallthroughStmtSyntax { builder in
-            builder.useFallthroughKeyword(
-                makeStartToken(SyntaxFactory.makeFallthroughKeyword)
-            )
-        }
+        let syntax = FallthroughStmtSyntax(
+            fallthroughKeyword: prepareStartToken(.fallthrough)
+        )
+
+        return syntax
     }
     
     public func generateIfStmt(_ stmt: IfStatement) -> IfStmtSyntax {
-        IfStmtSyntax { builder in
-            if let label = stmt.label {
-                builder.useLabelName(
-                    prepareStartToken(SyntaxFactory.makeIdentifier(label))
+        var syntax = IfStmtSyntax(conditions: [])
+        
+        syntax = syntax.withIfKeyword(
+            prepareStartToken(.if).withTrailingSpace()
+        )
+        
+        if let pattern = stmt.pattern {
+            let bindingConditionSyntax = OptionalBindingConditionSyntax(
+                letOrVarKeyword: prepareStartToken(.let).withTrailingSpace(),
+                pattern: generatePattern(pattern),
+                initializer: .init(
+                    equal: .equal.addingSurroundingSpaces(),
+                    value: generateExpression(stmt.exp)
                 )
-                
-                builder.useLabelColon(SyntaxFactory.makeColonToken())
-                addExtraLeading(.newlines(1) + indentation())
-            }
-            
-            builder.useIfKeyword(
-                makeStartToken(SyntaxFactory.makeIfKeyword)
-                    .withTrailingSpace()
+            )
+
+            let conditionSyntax = ConditionElementSyntax(condition: .optionalBinding(bindingConditionSyntax))
+
+            syntax = syntax.addCondition(conditionSyntax.withTrailingSpace())
+        } else {
+            let conditionSyntax = ConditionElementSyntax(
+                condition: .expression(
+                    generateExpression(stmt.exp).withTrailingSpace()
+                )
+            )
+
+            syntax = syntax.addCondition(conditionSyntax)
+        }
+        
+        syntax = syntax.withBody(generateCompound(stmt.body))
+        
+        if let _else = stmt.elseBody {
+            syntax = syntax.withElseKeyword(
+                .else.addingSurroundingSpaces()
             )
             
-            if let pattern = stmt.pattern {
-                builder.addCondition(ConditionElementSyntax { builder in
-                    builder.useCondition(OptionalBindingConditionSyntax { builder in
-                        builder.useLetOrVarKeyword(
-                            SyntaxFactory
-                                .makeLetKeyword()
-                                .withTrailingSpace()
-                        )
-                        
-                        builder.usePattern(generatePattern(pattern))
-                        
-                        builder.useInitializer(InitializerClauseSyntax { builder in
-                            builder.useEqual(
-                                SyntaxFactory
-                                    .makeEqualToken()
-                                    .withTrailingSpace()
-                                    .withLeadingSpace()
-                            )
-                            
-                            builder.useValue(generateExpression(stmt.exp))
-                        })
-                    }.asSyntax)
-                }.withTrailingSpace())
+            if _else.statements.count == 1, let elseIfStmt = _else.statements[0] as? IfStatement {
+                syntax = syntax.withElseBody(.init(generateIfStmt(elseIfStmt)))
             } else {
-                builder.addCondition(ConditionElementSyntax { builder in
-                    builder.useCondition(
-                        generateExpression(stmt.exp)
-                        .asSyntax
-                        .withTrailingSpace()
-                    )
-                })
-            }
-            
-            builder.useBody(generateCompound(stmt.body))
-            
-            if let _else = stmt.elseBody {
-                builder.useElseKeyword(
-                    makeStartToken(SyntaxFactory.makeElseKeyword)
-                        .addingSurroundingSpaces()
-                )
-                
-                if _else.statements.count == 1, let elseIfStmt = _else.statements[0] as? IfStatement {
-                    builder.useElseBody(generateIfStmt(elseIfStmt).asSyntax)
-                } else {
-                    builder.useElseBody(generateCompound(_else).asSyntax)
-                }
+                syntax = syntax.withElseBody(.init(generateCompound(_else)))
             }
         }
+
+        return syntax
     }
     
     public func generateSwitchStmt(_ stmt: SwitchStatement) -> SwitchStmtSyntax {
-        SwitchStmtSyntax { builder in
-            if let label = stmt.label {
-                builder.useLabelName(
-                    prepareStartToken(SyntaxFactory.makeIdentifier(label))
-                )
-                
-                builder.useLabelColon(SyntaxFactory.makeColonToken())
-                addExtraLeading(.newlines(1) + indentation())
-            }
+        let switchKeyword = prepareStartToken(.switch).withTrailingSpace()
+        let expSyntax = generateExpression(stmt.exp)
+
+        var syntaxes: [SwitchCaseListSyntax.Element] = []
+        
+        for _case in stmt.cases {
+            addExtraLeading(.newlines(1) + indentation())
             
-            builder.useSwitchKeyword(
-                makeStartToken(SyntaxFactory.makeSwitchKeyword)
-                    .withTrailingSpace()
-            )
+            let switchCase = generateSwitchCase(_case)
             
-            builder.useLeftBrace(
-                SyntaxFactory
-                    .makeLeftBraceToken()
-                    .withLeadingSpace()
-            )
-            
-            builder.useRightBrace(
-                SyntaxFactory
-                    .makeRightBraceToken()
-                    .withLeadingTrivia(.newlines(1) + indentation())
-            )
-            
-            builder.useExpression(generateExpression(stmt.exp))
-            
-            var syntaxes: [Syntax] = []
-            
-            for _case in stmt.cases {
-                addExtraLeading(.newlines(1) + indentation())
-                
-                let switchCase = generateSwitchCase(_case)
-                
-                syntaxes.append(switchCase.asSyntax)
-            }
-            
-            if let defaultCase = stmt.defaultCase {
-                addExtraLeading(.newlines(1) + indentation())
-                
-                let switchCase = generateSwitchDefaultCase(defaultCase)
-                
-                syntaxes.append(switchCase.asSyntax)
-            }
-            
-            builder.addCase(SyntaxFactory.makeSwitchCaseList(syntaxes).asSyntax)
+            syntaxes.append(.switchCase(switchCase))
         }
+        
+        if let defaultCase = stmt.defaultCase {
+            addExtraLeading(.newlines(1) + indentation())
+            
+            let switchCase = generateSwitchDefaultCase(defaultCase)
+            
+            syntaxes.append(.switchCase(switchCase))
+        }
+
+        let syntax = SwitchStmtSyntax(
+            switchKeyword: switchKeyword,
+            expression: expSyntax,
+            leftBrace: .leftBrace.withLeadingSpace(),
+            cases: .init(syntaxes),
+            rightBrace: .rightBrace.withLeadingTrivia(.newlines(1) + indentation())
+        )
+
+        return syntax
     }
     
     public func generateSwitchCase(
         _ switchCase: SwitchCase
     ) -> SwitchCaseSyntax {
         
-        SwitchCaseSyntax { builder in
-            let label = generateSwitchCaseLabel(switchCase).asSyntax
+        var syntax = SwitchCaseSyntax(
+            label: generateSwitchCaseLabel(switchCase)
+        )
 
-            builder.useLabel(label)
-            
-            indent()
-            defer {
-                deindent()
-            }
-            
-            let stmts = _generateStatements(switchCase.statements)
-            
-            for stmt in stmts {
-                builder.addStatement(stmt)
-            }
+        indent()
+        defer {
+            deindent()
         }
+        
+        let stmts = _generateStatements(switchCase.statements)
+        
+        for stmt in stmts {
+            syntax = syntax.addStatement(stmt) // builder.useStatement(stmt)
+        }
+
+        return syntax
     }
     
     public func generateSwitchDefaultCase(
         _ defaultCase: SwitchDefaultCase
     ) -> SwitchCaseSyntax {
         
-        SwitchCaseSyntax { builder in
-            let label = SwitchDefaultLabelSyntax { builder in
-                builder.useDefaultKeyword(
-                    makeStartToken(SyntaxFactory.makeDefaultKeyword)
-                )
-                
-                builder.useColon(SyntaxFactory.makeColonToken())
-            }.asSyntax
-            
-            builder.useLabel(label)
-            
-            indent()
-            defer {
-                deindent()
-            }
-            
-            let stmts = _generateStatements(defaultCase.statements)
-            
-            for stmt in stmts {
-                builder.addStatement(stmt)
-            }
+        var syntax = SwitchCaseSyntax(
+            label: .default(
+                .init(defaultKeyword: prepareStartToken(.default))
+            )
+        )
+
+        indent()
+        defer {
+            deindent()
         }
+        
+        let stmts = _generateStatements(defaultCase.statements)
+        
+        for stmt in stmts {
+            syntax = syntax.addStatement(stmt) // builder.useStatement(stmt)
+        }
+
+        return syntax
     }
     
-    public func generateSwitchCaseLabel(_ _case: SwitchCase) -> SwitchCaseLabelSyntax {
-        SwitchCaseLabelSyntax { builder in
-            builder.useCaseKeyword(
-                makeStartToken(SyntaxFactory.makeCaseKeyword)
-                    .withTrailingSpace()
-            )
+    public func generateSwitchCaseLabel(_ _case: SwitchCase) -> SwitchCaseSyntax.Label {
+        var syntax = SwitchCaseLabelSyntax(
+            caseKeyword: prepareStartToken(.case).withTrailingSpace()
+        )
+
+        iterateWithComma(_case.patterns) { (item, hasComma) in
+            var itemSyntax = CaseItemSyntax(pattern: generatePattern(item))
+
+            itemSyntax = itemSyntax.withPattern(generatePattern(item))
             
-            builder.useColon(SyntaxFactory.makeColonToken())
-            
-            iterateWithComma(_case.patterns) { (item, hasComma) in
-                builder.addCaseItem(CaseItemSyntax { builder in
-                    builder.usePattern(generatePattern(item))
-                    
-                    if hasComma {
-                        builder.useTrailingComma(
-                            SyntaxFactory
-                                .makeCommaToken()
-                                .withTrailingSpace()
-                        )
-                    }
-                })
+            if hasComma {
+                itemSyntax = itemSyntax.withTrailingComma(
+                    .comma.withTrailingSpace()
+                )
             }
+
+            syntax = syntax.addCaseItem(itemSyntax)
         }
+
+        return .case(syntax)
     }
     
     public func generateWhileStmt(_ stmt: WhileStatement) -> WhileStmtSyntax {
-        WhileStmtSyntax { builder in
-            if let label = stmt.label {
-                builder.useLabelName(
-                    prepareStartToken(SyntaxFactory.makeIdentifier(label))
-                )
-                
-                builder.useLabelColon(SyntaxFactory.makeColonToken())
-                addExtraLeading(.newlines(1) + indentation())
-            }
-            
-            builder.useWhileKeyword(
-                makeStartToken(SyntaxFactory.makeWhileKeyword)
-                    .withTrailingSpace()
-            )
-            
-            builder.addCondition(ConditionElementSyntax { builder in
-                builder.useCondition(
-                    generateExpression(stmt.exp)
-                    .asSyntax
-                    .withTrailingSpace()
-                )
-            })
-            
-            builder.useBody(generateCompound(stmt.body))
-        }
+        let syntax = WhileStmtSyntax(
+            whileKeyword: prepareStartToken(.while).withTrailingSpace(),
+            conditions: [ConditionElementSyntax(
+                condition: .expression(generateExpression(stmt.exp).withTrailingSpace())
+            )],
+            body: generateCompound(stmt.body)
+        )
+
+        return syntax
     }
     
     public func generateDoWhileStmt(_ stmt: RepeatWhileStatement) -> RepeatWhileStmtSyntax {
-        RepeatWhileStmtSyntax { builder in
-            if let label = stmt.label {
-                builder.useLabelName(
-                    prepareStartToken(SyntaxFactory.makeIdentifier(label))
-                )
-                
-                builder.useLabelColon(SyntaxFactory.makeColonToken())
-                addExtraLeading(.newlines(1) + indentation())
-            }
-            
-            builder.useRepeatKeyword(
-                makeStartToken(SyntaxFactory.makeRepeatKeyword)
-                    .withTrailingSpace()
-            )
-            
-            builder.useBody(generateCompound(stmt.body))
-            builder.useWhileKeyword(
-                SyntaxFactory
-                    .makeWhileKeyword()
-                    .addingSurroundingSpaces()
-            )
-            
-            builder.useCondition(generateExpression(stmt.exp))
-        }
+        let syntax = RepeatWhileStmtSyntax(
+            repeatKeyword: prepareStartToken(.repeat).withTrailingSpace(),
+            body: generateCompound(stmt.body),
+            whileKeyword: prepareStartToken(.while).addingSurroundingSpaces(),
+            condition: generateExpression(stmt.exp)
+        )
+
+        return syntax
     }
     
     public func generateForIn(_ stmt: ForStatement) -> ForInStmtSyntax {
-        ForInStmtSyntax { builder in
-            if let label = stmt.label {
-                builder.useLabelName(
-                    prepareStartToken(SyntaxFactory.makeIdentifier(label))
-                )
-                
-                builder.useLabelColon(SyntaxFactory.makeColonToken())
-                addExtraLeading(.newlines(1) + indentation())
-            }
-            
-            builder.useForKeyword(
-                makeStartToken(SyntaxFactory.makeForKeyword)
-                    .withTrailingSpace()
-            )
-            
-            builder.useInKeyword(
-                SyntaxFactory
-                    .makeInKeyword()
-                    .addingSurroundingSpaces()
-            )
-            
-            builder.usePattern(generatePattern(stmt.pattern))
-            builder.useSequenceExpr(generateExpression(stmt.exp).withTrailingSpace())
-            builder.useBody(generateCompound(stmt.body))
-        }
+        let syntax = ForInStmtSyntax(
+            forKeyword: prepareStartToken(.for).withTrailingSpace(),
+            pattern: generatePattern(stmt.pattern),
+            inKeyword: .in.addingSurroundingSpaces(),
+            sequenceExpr: generateExpression(stmt.exp).withTrailingSpace(),
+            body: generateCompound(stmt.body)
+        )
+        
+        return syntax
     }
     
     public func generateDo(_ stmt: DoStatement) -> DoStmtSyntax {
-        DoStmtSyntax { builder in
-            if let label = stmt.label {
-                builder.useLabelName(
-                    prepareStartToken(SyntaxFactory.makeIdentifier(label))
-                )
-                
-                builder.useLabelColon(SyntaxFactory.makeColonToken())
-                addExtraLeading(.newlines(1) + indentation())
-            }
-            
-            builder.useDoKeyword(
-                makeStartToken(SyntaxFactory.makeDoKeyword)
-                .withTrailingSpace()
-            )
-            builder.useBody(generateCompound(stmt.body))
+        let doKeyword = prepareStartToken(.do).withTrailingSpace()
+        let bodySyntax = generateCompound(stmt.body)
+        let catchClausesListSyntax = CatchClauseListSyntax(stmt.catchBlocks.map({ generateCatchBlock($0).withLeadingSpace() }))
 
-            for catchBlock in stmt.catchBlocks {
-                builder.addCatchClause(
-                    generateCatchBlock(catchBlock)
-                    .withLeadingSpace()
-                )
-            }
-        }
+        let syntax = DoStmtSyntax(
+            doKeyword: doKeyword,
+            body: bodySyntax,
+            catchClauses: catchClausesListSyntax
+        )
+
+        return syntax
     }
 
     public func generateCatchBlock(_ catchBlock: CatchBlock) -> CatchClauseSyntax {
-        CatchClauseSyntax { builder in
-            builder.useCatchKeyword(
-                SyntaxFactory.makeCatchKeyword()
+        var syntax = CatchClauseSyntax(
+            catchKeyword: prepareStartToken(.catch).withTrailingSpace()
+        )
+
+        if let pattern = catchBlock.pattern {
+            syntax = syntax.addCatchItem(
+                generateCatchItem(from: pattern)
                 .withTrailingSpace()
             )
-            
-            if let pattern = catchBlock.pattern {
-                builder.addCatchItem(
-                    generateCatchItem(from: pattern)
-                    .withTrailingSpace()
-                )
-            }
-
-            builder.useBody(generateCompound(catchBlock.body))
         }
+
+        syntax = syntax.withBody(generateCompound(catchBlock.body))
+
+        return syntax
     }
 
     public func generateCatchItem(from pattern: Pattern, hasComma: Bool = false) -> CatchItemSyntax {
-        CatchItemSyntax { builder in
-            builder.usePattern(
-                generateValueBindingPattern(pattern)
-                .asPatternSyntax
-            )
+        var syntax = CatchItemSyntax(
+            pattern: generateValueBindingPattern(pattern)
+        )
 
-            if hasComma {
-                builder.useTrailingComma(SyntaxFactory.makeCommaToken())
-            }
+        if hasComma {
+            syntax = syntax.withTrailingComma(.comma)
         }
+
+        return syntax
     }
     
     public func generateDefer(_ stmt: DeferStatement) -> DeferStmtSyntax {
-        DeferStmtSyntax { builder in
-            builder.useDeferKeyword(
-                makeStartToken(SyntaxFactory.makeDeferKeyword)
-                .withTrailingSpace()
-            )
-            builder.useBody(generateCompound(stmt.body))
-        }
+        let syntax = DeferStmtSyntax(
+            deferKeyword: prepareStartToken(.defer).withTrailingSpace(),
+            body: generateCompound(stmt.body)
+        )
+        
+        return syntax
     }
 
     public func generateLocalFunction(_ stmt: LocalFunctionStatement) -> FunctionDeclSyntax {
-        FunctionDeclSyntax { builder in
-            builder.useFuncKeyword(makeStartToken(SyntaxFactory.makeFuncKeyword).withTrailingSpace())
-            builder.useIdentifier(makeIdentifier(stmt.function.identifier))
-            builder.useSignature(generateSignature(stmt.function.signature).withTrailingSpace())
-            builder.useBody(generateCompound(stmt.function.body))
-        }
+        let syntax = FunctionDeclSyntax(
+            funcKeyword: prepareStartToken(.func).withTrailingSpace(),
+            identifier: makeIdentifier(stmt.function.identifier),
+            signature: generateSignature(stmt.function.signature).withTrailingSpace(),
+            body: generateCompound(stmt.function.body)
+        )
+        
+        return syntax
     }
 
     public func generateThrow(_ stmt: ThrowStatement) -> ThrowStmtSyntax {
-        ThrowStmtSyntax { builder in
-            builder.useThrowKeyword(
-                makeStartToken(SyntaxFactory.makeThrowKeyword)
-                .addingTrailingSpace()
-            )
-            builder.useExpression(generateExpression(stmt.exp))
-        }
+        let syntax = ThrowStmtSyntax(
+            throwKeyword: prepareStartToken(.throw).withTrailingSpace(),
+            expression: generateExpression(stmt.exp)
+        )
+
+        return syntax
     }
     
     public func generatePattern(_ pattern: Pattern) -> PatternSyntax {
         switch pattern {
         case .identifier(let ident):
-            return IdentifierPatternSyntax {
-                $0.useIdentifier(makeIdentifier(ident))
-            }.asPatternSyntax
+            return IdentifierPatternSyntax(
+                identifier: makeIdentifier(ident)
+            ).asPatternSyntax
         
         case .wildcard:
-            return WildcardPatternSyntax {
-                $0.useWildcard(SyntaxFactory.makeWildcardKeyword())
-            }.asPatternSyntax
+            return WildcardPatternSyntax().asPatternSyntax
             
         case .expression(let exp):
-            return ExpressionPatternSyntax {
-                $0.useExpression(generateExpression(exp))
-            }.asPatternSyntax
+            return ExpressionPatternSyntax(
+                expression: generateExpression(exp)
+            ).asPatternSyntax
             
         case .tuple(let items):
-            return TuplePatternSyntax { builder in
-                builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
-                builder.useRightParen(SyntaxFactory.makeRightParenToken())
-                
-                iterateWithComma(items) { (item, hasComma) in
-                    builder.addElement(
-                        TuplePatternElementSyntax { builder in
-                            builder.usePattern(generatePattern(item))
-                            
-                            if hasComma {
-                                builder.useTrailingComma(SyntaxFactory
-                                    .makeCommaToken()
-                                    .withTrailingSpace()
-                                )
-                            }
-                        }
+            var syntax = TuplePatternSyntax()
+
+            iterateWithComma(items) { (item, hasComma) in
+                var elementSyntax = TuplePatternElementSyntax(pattern: generatePattern(item))
+                    
+                if hasComma {
+                    elementSyntax = elementSyntax.withTrailingComma(
+                        .comma.withTrailingSpace()
                     )
                 }
-            }.asPatternSyntax
+                syntax = syntax.addElement(elementSyntax)
+            }
+
+            return syntax.asPatternSyntax
         }
     }
     
     public func generateValueBindingPattern(_ pattern: Pattern, isConstant: Bool = true) -> ValueBindingPatternSyntax {
-        ValueBindingPatternSyntax { builder in
-            if isConstant {
-                builder.useLetOrVarKeyword(
-                    SyntaxFactory.makeLetKeyword()
-                        .withTrailingSpace()
-                )
-            } else {
-                builder.useLetOrVarKeyword(
-                    SyntaxFactory.makeVarKeyword()
-                        .withTrailingSpace()
-                )
-            }
-            
-            builder.useValuePattern(generatePattern(pattern))
+        let letOrVarKeyword: TokenSyntax
+
+        if isConstant {
+            letOrVarKeyword = prepareStartToken(.let).withTrailingSpace()
+        } else {
+            letOrVarKeyword = prepareStartToken(.var).withTrailingSpace()
         }
+
+        let syntax = ValueBindingPatternSyntax(
+            letOrVarKeyword: letOrVarKeyword,
+            valuePattern: generatePattern(pattern)
+        )
+        
+        return syntax
     }
 }

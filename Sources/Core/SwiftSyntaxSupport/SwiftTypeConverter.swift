@@ -35,14 +35,10 @@ public class SwiftTypeConverter {
 
     func asNullabilityUnspecified(_ type: TypeSyntax) -> TypeSyntax {
         if _typeDepth > 0 {
-            return SyntaxFactory.makeOptionalType(
-                wrappedType: type,
-                questionMark: SyntaxFactory.makePostfixQuestionMarkToken()
-            ).asTypeSyntax
+            return OptionalTypeSyntax(wrappedType: type).asTypeSyntax
         } else {
-            return SyntaxFactory.makeImplicitlyUnwrappedOptionalType(
-                wrappedType: type,
-                exclamationMark: SyntaxFactory.makeExclamationMarkToken()
+            return ImplicitlyUnwrappedOptionalTypeSyntax(
+                wrappedType: type
             ).asTypeSyntax
         }
     }
@@ -56,10 +52,8 @@ public class SwiftTypeConverter {
             return makeNominalTypeSyntax(nominal, startTokenHandler: startTokenHandler).asTypeSyntax
             
         case .implicitUnwrappedOptional(let type):
-            return SyntaxFactory
-                .makeImplicitlyUnwrappedOptionalType(
-                    wrappedType: makeWrappedInParensIfRequired(type, startTokenHandler: startTokenHandler),
-                    exclamationMark: SyntaxFactory.makeExclamationMarkToken()
+            return ImplicitlyUnwrappedOptionalTypeSyntax(
+                    wrappedType: makeWrappedInParensIfRequired(type, startTokenHandler: startTokenHandler)
                 ).asTypeSyntax
             
         case .nullabilityUnspecified(let type):
@@ -68,18 +62,14 @@ public class SwiftTypeConverter {
             return asNullabilityUnspecified(type)
             
         case .optional(let type):
-            return SyntaxFactory
-                .makeOptionalType(
-                    wrappedType: makeWrappedInParensIfRequired(type, startTokenHandler: startTokenHandler),
-                    questionMark: SyntaxFactory.makePostfixQuestionMarkToken()
+            return OptionalTypeSyntax(
+                    wrappedType: makeWrappedInParensIfRequired(type, startTokenHandler: startTokenHandler)
                 ).asTypeSyntax
             
         case .metatype(let type):
-            return SyntaxFactory
-                .makeMetatypeType(
+            return MetatypeTypeSyntax(
                     baseType: makeTypeSyntax(type, startTokenHandler: startTokenHandler),
-                    period: SyntaxFactory.makePeriodToken(),
-                    typeOrProtocol: SyntaxFactory.makeTypeToken()
+                    typeOrProtocol: makeIdentifier("Type")
                 ).asTypeSyntax
             
         case .nested(let nested):
@@ -90,71 +80,57 @@ public class SwiftTypeConverter {
             let parameters = blockType.parameters
             let attributes = blockType.attributes.sorted(by: { $0.description < $1.description })
             
-            return AttributedTypeSyntax { builder in
-                let functionType = FunctionTypeSyntax { builder in
-                    builder.useArrow(
-                        SyntaxFactory
-                            .makeArrowToken()
-                            .addingSurroundingSpaces()
+            let functionTypeSyntax = makeFunctionTypeSyntax(
+                parameters: parameters,
+                returnType: returnType,
+                startTokenHandler: startTokenHandler
+            )
+            
+            var syntax = AttributedTypeSyntax(baseType: functionTypeSyntax)
+            
+            for attribute in attributes {
+                let attrSyntax: AttributeSyntax
+                switch attribute {
+                case .autoclosure:
+                    attrSyntax = AttributeSyntax(
+                        atSignToken: .atSign,
+                        attributeName: makeIdentifier("autoclosure"),
+                        leftParen: nil,
+                        argument: nil,
+                        rightParen: nil,
+                        tokenList: nil
                     )
-                    builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
-                    builder.useRightParen(SyntaxFactory.makeRightParenToken())
-                    builder.useReturnType(makeTypeSyntax(returnType, startTokenHandler: startTokenHandler))
                     
-                    // Parameters
-                    makeTupleTypeSyntax(parameters, startTokenHandler: startTokenHandler)
-                        .elements
-                        .forEach { builder.addArgument($0) }
-                }.asTypeSyntax
-                
-                builder.useBaseType(functionType)
-                
-                for attribute in attributes {
-                    let attrSyntax: AttributeSyntax
-                    switch attribute {
-                    case .autoclosure:
-                        attrSyntax = SyntaxFactory
-                            .makeAttribute(
-                                atSignToken: SyntaxFactory.makeAtSignToken(),
-                                attributeName: makeIdentifier("autoclosure"),
-                                leftParen: nil,
-                                argument: nil,
-                                rightParen: nil,
-                                tokenList: nil
-                            )
-                        
-                    case .escaping:
-                        attrSyntax = SyntaxFactory
-                            .makeAttribute(
-                                atSignToken: SyntaxFactory.makeAtSignToken(),
-                                attributeName: makeIdentifier("escaping"),
-                                leftParen: nil,
-                                argument: nil,
-                                rightParen: nil,
-                                tokenList: nil
-                            )
-                        
-                    case .convention(let convention):
-                        attrSyntax = SyntaxFactory
-                            .makeAttribute(
-                                atSignToken: SyntaxFactory.makeAtSignToken(),
-                                attributeName: makeIdentifier("convention"),
-                                leftParen: nil,
-                                argument: nil,
-                                rightParen: nil,
-                                tokenList: SyntaxFactory.makeTokenList([
-                                    SyntaxFactory.makeLeftParenToken(),
-                                    makeIdentifier(convention.rawValue),
-                                    SyntaxFactory
-                                        .makeRightParenToken()
-                                        .withTrailingSpace()
-                                ])
-                            )
-                    }
+                case .escaping:
+                    attrSyntax = AttributeSyntax(
+                        atSignToken: .atSign,
+                        attributeName: makeIdentifier("escaping"),
+                        leftParen: nil,
+                        argument: nil,
+                        rightParen: nil,
+                        tokenList: nil
+                    )
                     
-                    builder.addAttribute(Syntax(attrSyntax))
+                case .convention(let convention):
+                    attrSyntax = AttributeSyntax(
+                        atSignToken: .atSign,
+                        attributeName: makeIdentifier("convention"),
+                        leftParen: nil,
+                        argument: nil,
+                        rightParen: nil,
+                        tokenList: TokenListSyntax([
+                            .leftParen,
+                            makeIdentifier(convention.rawValue),
+                            .rightParen
+                                .withTrailingSpace()
+                        ])
+                    )
                 }
-            }.asTypeSyntax
+                
+                syntax = syntax.addAttribute(Syntax(attrSyntax))
+            }
+
+            return syntax.asTypeSyntax
             
         case .tuple(let tuple):
             switch tuple {
@@ -162,152 +138,174 @@ public class SwiftTypeConverter {
                 return makeTupleTypeSyntax(types, startTokenHandler: startTokenHandler).asTypeSyntax
                 
             case .empty:
-                return SyntaxFactory.makeTypeIdentifier("Void")
+                return SimpleTypeIdentifierSyntax("Void").asTypeSyntax
             }
             
         case .protocolComposition(let composition):
-            return CompositionTypeSyntax { builder in
-                let count = composition.count
+            var syntax = CompositionTypeSyntax(elements: [])
+            let count = composition.count
                 
-                for (i, type) in composition.enumerated() {
-                    builder.addElement(CompositionTypeElementSyntax { builder in
-                        
-                        switch type {
-                        case .nested(let nested):
-                            builder.useType(makeNestedTypeSyntax(nested, startTokenHandler: startTokenHandler).asTypeSyntax)
-                            
-                        case .nominal(let nominal):
-                            builder.useType(makeNominalTypeSyntax(nominal, startTokenHandler: startTokenHandler).asTypeSyntax)
-                        }
-                        
-                        if i != count - 1 {
-                            builder.useAmpersand(
-                                SyntaxFactory
-                                    .makePrefixAmpersandToken()
-                                    .addingSurroundingSpaces()
-                            )
-                        }
-                    })
+            for (i, type) in composition.enumerated() {
+                var elementSyntax: CompositionTypeElementSyntax
+                
+                switch type {
+                case .nested(let nested):
+                    elementSyntax = CompositionTypeElementSyntax(
+                        type: makeNestedTypeSyntax(
+                            nested,
+                            startTokenHandler: startTokenHandler
+                        ).asTypeSyntax
+                    )
+                    
+                case .nominal(let nominal):
+                    elementSyntax = CompositionTypeElementSyntax(
+                        type: makeNominalTypeSyntax(
+                            nominal,
+                            startTokenHandler: startTokenHandler
+                        ).asTypeSyntax
+                    )
                 }
-            }.asTypeSyntax
+                
+                if i != count - 1 {
+                    elementSyntax = elementSyntax.withAmpersand(
+                        .prefixAmpersand
+                            .addingSurroundingSpaces()
+                    )
+                }
+
+                syntax = syntax.addElement(elementSyntax)
+            }
+
+            return syntax.asTypeSyntax
             
         case .array(let inner):
-            return ArrayTypeSyntax { builder in
-                builder.useLeftSquareBracket(
-                    SyntaxFactory
-                        .makeLeftSquareBracketToken()
-                )
-                builder.useRightSquareBracket(
-                    SyntaxFactory
-                        .makeRightSquareBracketToken()
-                )
-                
-                builder.useElementType(makeTypeSyntax(inner, startTokenHandler: startTokenHandler))
-            }.asTypeSyntax
+            let syntax = ArrayTypeSyntax(
+                elementType: makeTypeSyntax(inner, startTokenHandler: startTokenHandler)
+            )
+
+            return syntax.asTypeSyntax
             
         case let .dictionary(key, value):
-            return DictionaryTypeSyntax { builder in
-                builder.useLeftSquareBracket(
-                    SyntaxFactory
-                        .makeLeftSquareBracketToken()
-                )
-                builder.useColon(
-                    SyntaxFactory
-                        .makeColonToken()
-                        .withTrailingSpace()
-                )
-                builder.useRightSquareBracket(
-                    SyntaxFactory
-                        .makeRightSquareBracketToken()
-                )
-                
-                builder.useKeyType(makeTypeSyntax(key, startTokenHandler: startTokenHandler))
-                builder.useValueType(makeTypeSyntax(value, startTokenHandler: startTokenHandler))
-            }.asTypeSyntax
-        }
-    }
-    
-    func makeTupleTypeSyntax<C: Collection>(_ types: C, startTokenHandler: StartTokenHandler) -> TupleTypeSyntax where C.Element == SwiftType {
-        TupleTypeSyntax { builder in
-            builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
-            builder.useRightParen(SyntaxFactory.makeRightParenToken())
-            
-            iterateWithComma(types) { (type, hasComma) in
-                builder.addElement(TupleTypeElementSyntax { builder in
-                    builder.useType(makeTypeSyntax(type, startTokenHandler: startTokenHandler))
-                    
-                    if hasComma {
-                        builder.useTrailingComma(
-                            SyntaxFactory
-                                .makeCommaToken()
-                                .withTrailingSpace()
-                        )
-                    }
-                })
-            }
+            let syntax = DictionaryTypeSyntax(
+                keyType: makeTypeSyntax(key, startTokenHandler: startTokenHandler),
+                colon: .colon.withTrailingSpace(),
+                valueType: makeTypeSyntax(value, startTokenHandler: startTokenHandler)
+            )
+
+            return syntax.asTypeSyntax
         }
     }
 
-    func makeNestedTypeSyntax(_ nestedType: NestedSwiftType, startTokenHandler: StartTokenHandler) -> MemberTypeIdentifierSyntax {
-        let typeSyntax = makeNominalTypeSyntax(nestedType.second, startTokenHandler: startTokenHandler)
+    func makeFunctionTypeSyntax(
+        parameters: [SwiftType],
+        returnType: SwiftType,
+        startTokenHandler: StartTokenHandler
+    ) -> FunctionTypeSyntax {
+
+        let syntax = FunctionTypeSyntax(
+            arguments: makeTupleTypeSyntax(parameters, startTokenHandler: startTokenHandler).elements,
+            arrow: .arrow.addingSurroundingSpaces(),
+            returnType: makeTypeSyntax(returnType, startTokenHandler: startTokenHandler)
+        )
+
+        return syntax
+    }
+    
+    func makeTupleTypeSyntax<C: Collection>(_ types: C, startTokenHandler: StartTokenHandler) -> TupleTypeSyntax where C.Element == SwiftType {
+        var syntax = TupleTypeSyntax(elements: [])
         
-        let initial = SyntaxFactory
-            .makeMemberTypeIdentifier(
-                baseType: makeNominalTypeSyntax(nestedType.first, startTokenHandler: startTokenHandler).asTypeSyntax,
-                period: SyntaxFactory.makePeriodToken(),
+        iterateWithComma(types) { (type, hasComma) in
+            syntax = syntax.addElement(
+                makeTupleTypeElementSyntax(
+                    type,
+                    hasComma: hasComma,
+                    startTokenHandler: startTokenHandler
+                )
+            )
+        }
+
+        return syntax
+    }
+
+    func makeTupleTypeElementSyntax(
+        _ type: SwiftType,
+        hasComma: Bool,
+        startTokenHandler: StartTokenHandler
+    ) -> TupleTypeElementSyntax {
+
+        var syntax = TupleTypeElementSyntax(
+            type: makeTypeSyntax(type, startTokenHandler: startTokenHandler)
+        )
+
+        if hasComma {
+            syntax = syntax.withTrailingComma(
+                .comma.withTrailingSpace()
+            )
+        }
+
+        return syntax
+    }
+
+    func makeNestedTypeSyntax(_ nestedType: NestedSwiftType, startTokenHandler: StartTokenHandler) -> MemberTypeIdentifierSyntax {
+        let typeSyntax = makeNominalTypeSyntax(
+            nestedType.second,
+            startTokenHandler: startTokenHandler
+        )
+        
+        let initial = MemberTypeIdentifierSyntax(
+            baseType: makeNominalTypeSyntax(
+                nestedType.first,
+                startTokenHandler: startTokenHandler
+            ),
+            period: .period,
+            name: typeSyntax.name,
+            genericArgumentClause: typeSyntax.genericArgumentClause
+        )
+        
+        return nestedType.reduce(initial) { (previous, type) in
+            let typeSyntax = self.makeNominalTypeSyntax(
+                type,
+                startTokenHandler: startTokenHandler
+            )
+            
+            return MemberTypeIdentifierSyntax(
+                baseType: previous.asTypeSyntax,
+                period: .period,
                 name: typeSyntax.name,
                 genericArgumentClause: typeSyntax.genericArgumentClause
             )
-        
-        return nestedType.reduce(initial) { (previous, type) in
-            let typeSyntax = self.makeNominalTypeSyntax(type, startTokenHandler: startTokenHandler)
-            
-            return SyntaxFactory
-                .makeMemberTypeIdentifier(
-                    baseType: previous.asTypeSyntax,
-                    period: SyntaxFactory.makePeriodToken(),
-                    name: typeSyntax.name,
-                    genericArgumentClause: typeSyntax.genericArgumentClause
-                )
         }
     }
     
     func makeNominalTypeSyntax(_ nominal: NominalSwiftType, startTokenHandler: StartTokenHandler) -> SimpleTypeIdentifierSyntax {
         switch nominal {
         case .typeName(let name):
-            return SyntaxFactory
-                .makeSimpleTypeIdentifier(
-                    name: startTokenHandler.prepareStartToken(SyntaxFactory.makeIdentifier(name)),
-                    genericArgumentClause: nil
-                )
+            return SimpleTypeIdentifierSyntax(
+                name: startTokenHandler.prepareStartToken(.identifier(name)),
+                genericArgumentClause: nil
+            )
             
         case let .generic(name, parameters):
-            let nameSyntax = startTokenHandler.prepareStartToken(SyntaxFactory.makeIdentifier(name))
+            let nameSyntax = startTokenHandler.prepareStartToken(.identifier(name))
             
             let types = parameters.map { makeTypeSyntax($0, startTokenHandler: startTokenHandler) }
             
-            let genericArgumentList =
-                SyntaxFactory
-                    .makeGenericArgumentList(
-                        mapWithComma(types) { (type, hasComma) -> GenericArgumentSyntax in
-                            SyntaxFactory
-                                .makeGenericArgument(
-                                    argumentType: type,
-                                    trailingComma: hasComma
-                                        ? SyntaxFactory
-                                            .makeCommaToken()
-                                            .withTrailingSpace()
-                                        : nil)
-                        })
+            let genericArgumentList = GenericArgumentListSyntax(
+                mapWithComma(types) { (type, hasComma) -> GenericArgumentSyntax in
+                    GenericArgumentSyntax(
+                        argumentType: type,
+                        trailingComma: hasComma
+                            ? .comma.withTrailingSpace()
+                            : nil
+                    )
+                }
+            )
             
-            let genericArgumentClause = SyntaxFactory
-                .makeGenericArgumentClause(
-                    leftAngleBracket: SyntaxFactory.makeLeftAngleToken(),
-                    arguments: genericArgumentList,
-                    rightAngleBracket: SyntaxFactory.makeRightAngleToken()
-                )
+            let genericArgumentClause = GenericArgumentClauseSyntax(
+                arguments: genericArgumentList
+            )
             
-            return SyntaxFactory.makeSimpleTypeIdentifier(
+            return SimpleTypeIdentifierSyntax(
                 name: nameSyntax,
                 genericArgumentClause: genericArgumentClause
             )

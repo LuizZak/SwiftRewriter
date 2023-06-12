@@ -2,62 +2,52 @@ import SwiftSyntax
 
 extension SyntaxProtocol {
     var asSyntax: Syntax {
-        return Syntax(self)
-    }
-    
-    func inCodeBlock() -> CodeBlockItemSyntax {
-        return asSyntax.inCodeBlock()
+        Syntax(self)
     }
 }
 
 extension TypeSyntaxProtocol {
     var asTypeSyntax: TypeSyntax {
-        return TypeSyntax(self)
+        TypeSyntax(self)
     }
 }
 
 extension DeclSyntaxProtocol {
     var asDeclSyntax: DeclSyntax {
-        return DeclSyntax(self)
+        DeclSyntax(self)
     }
 
     func inMemberDeclListItem() -> MemberDeclListItemSyntax {
-        return MemberDeclListItemSyntax { $0.useDecl(asDeclSyntax) }
+        MemberDeclListItemSyntax(decl: self.asDeclSyntax)
     }
 }
 
 extension ExprSyntaxProtocol {
     var asExprSyntax: ExprSyntax {
-        return ExprSyntax(self)
+        ExprSyntax(self)
     }
 }
 
 extension StmtSyntaxProtocol {
     var asStmtSyntax: StmtSyntax {
-        return StmtSyntax(self)
+        StmtSyntax(self)
     }
 }
 
 extension PatternSyntaxProtocol {
     var asPatternSyntax: PatternSyntax {
-        return PatternSyntax(self)
-    }
-}
-
-extension Syntax {
-    func inCodeBlock() -> CodeBlockItemSyntax {
-        return CodeBlockItemSyntax { $0.useItem(self) }
+        PatternSyntax(self)
     }
 }
 
 extension ExprSyntaxProtocol {
     func inCodeBlock() -> CodeBlockItemSyntax {
-        self.asSyntax.inCodeBlock()
+        .init(item: .expr(self.asExprSyntax))
     }
 }
 
 extension StmtSyntaxProtocol {
     func inCodeBlock() -> CodeBlockItemSyntax {
-        self.asSyntax.inCodeBlock()
+        .init(item: .stmt(self.asStmtSyntax))
     }
 }

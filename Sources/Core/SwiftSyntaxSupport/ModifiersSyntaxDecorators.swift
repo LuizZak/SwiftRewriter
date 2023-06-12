@@ -1,4 +1,5 @@
 import SwiftSyntax
+import SwiftSyntaxBuilder
 import Intentions
 import SwiftAST
 
@@ -68,15 +69,11 @@ class MutatingModifiersDecorator: ModifiersSyntaxDecorator {
         }
         
         if method.signature.isMutating {
-            return {
-                SyntaxFactory
-                    .makeDeclModifier(
-                        name: makeIdentifier("mutating")
-                            .addingTrailingSpace()
-                            .withExtraLeading(from: $0),
-                        detailLeftParen: nil,
-                        detail: nil,
-                        detailRightParen: nil)
+            return { producer in
+                .init(name: .identifier("mutating")
+                    .addingTrailingSpace()
+                    .withExtraLeading(from: producer)
+                )
             }
         }
         
@@ -94,16 +91,11 @@ class StaticModifiersDecorator: ModifiersSyntaxDecorator {
         }
         
         if intention.isStatic {
-            return {
-                SyntaxFactory
-                    .makeDeclModifier(
-                        name: SyntaxFactory
-                            .makeStaticKeyword()
-                            .addingTrailingSpace()
-                            .withExtraLeading(from: $0),
-                        detailLeftParen: nil,
-                        detail: nil,
-                        detailRightParen: nil)
+            return { producer in
+                .init(name: .staticKeyword()
+                    .addingTrailingSpace()
+                    .withExtraLeading(from: producer)
+                )
             }
         }
         
@@ -123,16 +115,13 @@ class AccessLevelModifiersDecorator: ModifiersSyntaxDecorator {
         guard let token = _accessModifierFor(accessLevel: intention.accessLevel, omitInternal: true) else {
             return nil
         }
-        
-        return {
-            SyntaxFactory
-                .makeDeclModifier(
-                    name: token
-                        .addingTrailingSpace()
-                        .withExtraLeading(from: $0),
-                    detailLeftParen: nil,
-                    detail: nil,
-                    detailRightParen: nil)
+
+        return { producer in
+            DeclModifierSyntax(
+                name: token
+                    .addingTrailingSpace()
+                    .withExtraLeading(from: producer)
+            )
         }
     }
     
@@ -153,18 +142,12 @@ class PropertySetterAccessModifiersDecorator: ModifiersSyntaxDecorator {
         guard let setterAccessLevel = _accessModifierFor(accessLevel: setterLevel, omitInternal: false) else {
             return nil
         }
-                
+
         return { producer in
-            DeclModifierSyntax { builder in
-                builder.useName(setterAccessLevel.withExtraLeading(from: producer))
-                builder.useDetailLeftParen(SyntaxFactory.makeLeftParenToken())
-                builder.useDetail(makeIdentifier("set"))
-                builder.useDetailRightParen(
-                    SyntaxFactory
-                        .makeRightParenToken()
-                        .withTrailingSpace()
+            DeclModifierSyntax(name: setterAccessLevel.withExtraLeading(from: producer))
+                .withDetail(
+                    .init(detail: "set", rightParen: .rightParen.withTrailingSpace())
                 )
-            }
         }
     }
     
@@ -189,7 +172,7 @@ class OwnershipModifiersDecorator: ModifiersSyntaxDecorator {
             
             switch ownership {
             case .strong:
-                token = SyntaxFactory.makeToken(.identifier(""), presence: .present)
+                token = TokenSyntax.identifier("", presence: .present)
                 detail = nil
                 
             case .weak:
@@ -205,18 +188,12 @@ class OwnershipModifiersDecorator: ModifiersSyntaxDecorator {
                 detail = makeIdentifier("unsafe")
             }
             
-            return SyntaxFactory
-                .makeDeclModifier(name: token.withExtraLeading(from: $0),
-                                  detailLeftParen: detail == nil
-                                    ? nil
-                                    : SyntaxFactory.makeLeftParenToken(),
-                                  detail: detail,
-                                  detailRightParen: detail == nil
-                                    ? nil
-                                    : SyntaxFactory
-                                        .makeRightParenToken()
-                                        .withTrailingSpace()
-                )
+            return DeclModifier(
+                name: token.withExtraLeading(from: $0),
+                detail: detail.map { token in
+                    .init(detail: token, rightParen: .rightParen.withTrailingSpace())
+                }
+            )
         }
     }
     
@@ -244,12 +221,11 @@ class OverrideModifiersDecorator: ModifiersSyntaxDecorator {
         
         if isOverridenMember(intention) {
             return { producer in
-                DeclModifierSyntax { builder in
-                    builder.useName(SyntaxFactory
-                        .makeIdentifier("override")
+                DeclModifierSyntax(
+                    name: .identifier("override")
                         .withExtraLeading(from: producer)
-                        .withTrailingSpace())
-                }
+                        .withTrailingSpace()
+                )
             }
         }
         
@@ -278,13 +254,11 @@ class ConvenienceInitModifiersDecorator: ModifiersSyntaxDecorator {
         
         if intention.isConvenience {
             return { producer in
-                DeclModifierSyntax { builder in
-                    builder.useName(SyntaxFactory
-                        .makeIdentifier("convenience")
+                DeclModifierSyntax(
+                    name: .identifier("convenience")
                         .withExtraLeading(from: producer)
                         .withTrailingSpace()
-                    )
-                }
+                )
             }
         }
         
@@ -303,13 +277,11 @@ class ProtocolOptionalModifiersDecorator: ModifiersSyntaxDecorator {
         
         if isOptionalMember(member) {
             return { producer in
-                DeclModifierSyntax { builder in
-                    builder.useName(SyntaxFactory
-                        .makeIdentifier("optional")
+                DeclModifierSyntax(
+                    name: .identifier("optional")
                         .withExtraLeading(from: producer)
                         .withTrailingSpace()
-                    )
-                }
+                )
             }
         }
         
@@ -341,17 +313,12 @@ class FinalClassModifiersDecorator: ModifiersSyntaxDecorator {
 
         if intention.isFinal {
             return { producer in
-                DeclModifierSyntax { builder in
-                    // TODO: There's no `final` keyword currently in the
-                    // TODO: SwiftSyntax version we're using;
-                    builder.useName(
-                        SyntaxFactory
-                        .makeIdentifier("final")
+                DeclModifierSyntax(
+                    name: .identifier("final")
                         .withExtraLeading(from: producer)
                         .withTrailingSpace()
-                    )
-                }
-            } 
+                )
+            }
         }
 
         return nil
@@ -364,21 +331,21 @@ func _accessModifierFor(accessLevel: AccessLevel, omitInternal: Bool) -> TokenSy
     switch accessLevel {
     case .internal:
         // We don't emit `internal` explicitly by default here
-        return omitInternal ? nil : SyntaxFactory.makeInternalKeyword()
+        return omitInternal ? nil : .internalKeyword()
         
     case .open:
         // TODO: There's no `open` keyword currently in the SwiftSyntax version
         // we're using;
-        token = SyntaxFactory.makeIdentifier("open")
+        token = .identifier("open")
         
     case .private:
-        token = SyntaxFactory.makePrivateKeyword()
+        token = .privateKeyword()
         
     case .fileprivate:
-        token = SyntaxFactory.makeFileprivateKeyword()
+        token = .fileprivateKeyword()
         
     case .public:
-        token = SyntaxFactory.makePublicKeyword()
+        token = .publicKeyword()
     }
     
     return token

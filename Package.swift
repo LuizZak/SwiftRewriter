@@ -71,6 +71,7 @@ let core: [Target] = [
         name: "SwiftSyntaxSupport",
         dependencies: [
             .product(name: "SwiftSyntax", package: "swift-syntax"),
+            .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
             "KnownType", "Intentions", "SwiftAST",
         ],
         path: "Sources/Core/SwiftSyntaxSupport"
@@ -406,8 +407,8 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.0.0"),
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", .exact("4.1.2")),
         .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.2")),
-        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50700.1")),
-        .package(url: "https://github.com/apple/swift-format.git", .exact("0.50700.1")),
+        .package(url: "https://github.com/apple/swift-syntax.git", .exact("508.0.1")),
+        .package(url: "https://github.com/apple/swift-format.git", .exact("508.0.1")),
     ],
     targets: core + coreTests + frontendTargets + frontendTestTargets + [
         swiftRewriterTarget,
@@ -424,6 +425,7 @@ let package = Package(
                 .product(name: "SwiftFormat", package: "swift-format"),
                 .product(name: "SwiftFormatConfiguration", package: "swift-format"),
                 .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
+                .product(name: "IDEUtils", package: "swift-syntax"),
                 "SwiftAST", "Analysis", "TypeDefinitions", "Utils", "Intentions",
                 "TypeSystem", "IntentionPasses", "KnownType",
                 "WriterTargetOutput", "SwiftSyntaxSupport", "GlobalsProviders",

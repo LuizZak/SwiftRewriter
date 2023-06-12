@@ -10,6 +10,18 @@ class VariableDeclSyntaxGenerator {
     init(producer: SwiftSyntaxProducer) {
         self.producer = producer
     }
+
+    func generateAttributeList(_ attributeGenerators: [() -> AttributeListSyntax.Element]) -> AttributeListSyntax {
+        let syntax = AttributeListSyntax(attributeGenerators.map({ $0() }))
+
+        return syntax
+    }
+
+    func generateModifierList(_ modifierDecorators: [ModifiersDecoratorResult]) -> ModifierListSyntax {
+        let syntax = ModifierListSyntax(modifierDecorators.map({ $0(producer) }))
+
+        return syntax
+    }
     
     func generateInstanceVariable(_ intention: InstanceVariableGenerationIntention) -> DeclSyntax {
         generateVariableDecl(intention)
@@ -23,24 +35,26 @@ class VariableDeclSyntaxGenerator {
         producer.addHistoryTrackingLeadingIfEnabled(intention)
         producer.addCommentsIfAvailable(intention)
         
-        return SubscriptDeclSyntax { builder in
-            for attribute in producer.attributes(for: intention, inline: false) {
-                builder.addAttribute(attribute().asSyntax)
-            }
-            for modifier in producer.modifiers(for: intention) {
-                builder.addModifier(modifier(producer))
-            }
-            
-            builder.useSubscriptKeyword(
-                producer.makeStartToken(SyntaxFactory.makeSubscriptKeyword)
-            )
-            builder.useIndices(producer.generateParameterClause(intention.parameters))
-            builder.useResult(producer.generateReturnType(intention.returnType))
-            
-            if let accessors = VariableDeclSyntaxGenerator.makeAccessorBlockCreator(intention, producer) {
-                builder.useAccessor(accessors())
-            }
-        }.asDeclSyntax
+        let attributeListSyntax = generateAttributeList(
+            producer.attributes(for: intention, inline: false)
+        )
+        let modifierListSyntax = generateModifierList(
+            producer.modifiers(for: intention)
+        )
+        
+        var syntax = SubscriptDeclSyntax(
+            attributes: attributeListSyntax,
+            modifiers: modifierListSyntax,
+            subscriptKeyword: producer.prepareStartToken(.subscript),
+            indices: producer.generateParameterClause(intention.parameters),
+            result: producer.generateReturnType(intention.returnType)
+        )
+
+        if let accessors = VariableDeclSyntaxGenerator.makeAccessorBlockCreator(intention, producer) {
+            syntax = syntax.withAccessor(accessors()) // builder.useAccessor(accessors())
+        }
+
+        return syntax.asDeclSyntax
     }
     
     func generateGlobalVariable(_ intention: GlobalVariableGenerationIntention) -> DeclSyntax {
@@ -71,123 +85,108 @@ class VariableDeclSyntaxGenerator {
     }
     
     func generate(_ variableDecl: ObjcVariableDeclarationNode) -> VariableDeclSyntax {
-        VariableDeclSyntax { builder in
-            for attribute in variableDecl.attributes {
-                builder.addAttribute(attribute().asSyntax)
-            }
-            for modifier in variableDecl.modifiers {
-                builder.addModifier(modifier(producer))
-            }
+        let attributeListSyntax = generateAttributeList(
+            variableDecl.attributes
+        )
+        let modifierListSyntax = generateModifierList(
+            variableDecl.modifiers
+        )
+        
+        let letOrVar: TokenSyntax = variableDecl.constant ? .let : .var
+        
+        var syntax = VariableDeclSyntax(
+            attributes: attributeListSyntax,
+            modifiers: modifierListSyntax,
+            letOrVarKeyword: producer
+                .prepareStartToken(letOrVar)
+                .addingTrailingSpace()
+        )
+        
+        switch variableDecl.kind {
+        case let .single(pattern, accessors):
+            let patternSyntax =
+                generate(pattern, hasComma: false, accessors: accessors)
             
-            let letOrVar =
-                variableDecl.constant
-                    ? SyntaxFactory.makeLetKeyword
-                    : SyntaxFactory.makeVarKeyword
+            syntax = syntax.addBinding(patternSyntax) // syntax = syntax.withBinding(patternSyntax) // builder.useBinding(patternSyntax)
             
-            builder.useLetOrVarKeyword(
-                producer
-                    .makeStartToken(letOrVar)
-                    .addingTrailingSpace()
-            )
-            
-            switch variableDecl.kind {
-            case let .single(pattern, accessors):
-                let patternSyntax =
-                    generate(pattern, hasComma: false, accessors: accessors)
-                
-                builder.addBinding(patternSyntax)
-                
-            case let .multiple(patterns):
-                iterateWithComma(patterns) { pattern, hasComma in
-                    builder.addBinding(generate(pattern, hasComma: hasComma))
-                }
+        case let .multiple(patterns):
+            iterateWithComma(patterns) { pattern, hasComma in
+                syntax = syntax.addBinding(generate(pattern, hasComma: hasComma)) // syntax = syntax.withBinding(generate(pattern, hasComma: hasComma)) // builder.useBinding(generate(pattern, hasComma: hasComma))
             }
         }
+
+        return syntax
     }
     
     private func generate(
         _ binding: PatternBindingElement,
         hasComma: Bool,
-        accessors: (() -> Syntax)? = nil
+        accessors: (() -> PatternBindingSyntax.Accessor)? = nil
     ) -> PatternBindingSyntax {
         
-        PatternBindingSyntax { builder in
-            builder.usePattern(IdentifierPatternSyntax { builder in
-                builder.useIdentifier(makeIdentifier(binding.name))
-            }.asPatternSyntax)
-            
-            if let bindingType = binding.type {
-                builder.useTypeAnnotation(TypeAnnotationSyntax { builder in
-                    builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
-                    builder.useType(SwiftTypeConverter.makeTypeSyntax(bindingType, startTokenHandler: producer))
-                })
-            }
-            
-            if hasComma {
-                builder.useTrailingComma(
-                    SyntaxFactory
-                        .makeCommaToken()
-                        .withTrailingSpace()
-                )
-            }
-            
-            if let accessor = accessors {
-                builder.useAccessor(accessor())
-            }
-            
-            if let initialization = binding.initialization {
-                builder.useInitializer(InitializerClauseSyntax { builder in
-                    builder.useEqual(
-                        SyntaxFactory
-                            .makeEqualToken()
-                            .addingSurroundingSpaces()
-                    )
-                    builder.useValue(producer.generateExpression(initialization))
-                })
-            }
+        var syntax = PatternBindingSyntax(
+            pattern: IdentifierPatternSyntax(
+                identifier: producer.prepareStartToken(makeIdentifier(binding.name))
+            )
+        )
+
+        if let bindingType = binding.type {
+            let typeSyntax = TypeAnnotationSyntax(
+                colon: .colon.withTrailingSpace(),
+                type: SwiftTypeConverter.makeTypeSyntax(bindingType, startTokenHandler: producer)
+            )
+
+            syntax = syntax.withTypeAnnotation(typeSyntax)
         }
+        
+        if hasComma {
+            syntax = syntax.withTrailingComma(
+                .comma.withTrailingSpace()
+            )
+        }
+        
+        if let accessor = accessors {
+            syntax = syntax.withAccessor(accessor())
+        }
+        
+        if let initialization = binding.initialization {
+            let initializerSyntax = InitializerClauseSyntax(
+                equal: .equal.addingSurroundingSpaces(),
+                value: producer.generateExpression(initialization)
+            )
+
+            syntax = syntax.withInitializer(initializerSyntax)
+        }
+
+        return syntax
     }
     
     private static func makeAccessorBlockCreator(
         _ property: PropertyGenerationIntention,
         _ producer: SwiftSyntaxProducer
-    ) -> (() -> Syntax)? {
+    ) -> (() -> PatternBindingSyntax.Accessor)? {
         
         // Emit { get } and { get set } accessor blocks for protocols
         if let property = property as? ProtocolPropertyGenerationIntention {
             return {
-                return AccessorBlockSyntax { builder in
-                    builder.useLeftBrace(
-                        producer.makeStartToken(SyntaxFactory.makeLeftBraceToken)
-                            .addingSurroundingSpaces()
-                    )
-                    
-                    builder.useRightBrace(SyntaxFactory.makeRightBraceToken())
-                    
-                    builder.addAccessor(AccessorDeclSyntax { builder in
-                        builder.useAccessorKind(
-                            SyntaxFactory
-                                .makeToken(
-                                    .contextualKeyword("get"),
-                                    presence: .present
-                                )
-                                .withTrailingSpace()
+                var syntax = AccessorBlockSyntax(
+                    leftBrace: producer.prepareStartToken(.leftBrace).addingSurroundingSpaces(),
+                    accessors: [
+                        AccessorDeclSyntax(
+                            accessorKind: .contextualKeyword("get").withTrailingSpace()
                         )
-                    })
-                    
-                    if !property.isReadOnly {
-                        builder.addAccessor(AccessorDeclSyntax { builder in
-                            builder.useAccessorKind(
-                                SyntaxFactory
-                                    .makeToken(
-                                        .contextualKeyword("set"),
-                                        presence: .present
-                                    )
-                                    .withTrailingSpace()
-                            )
-                        })
-                    }
-                }.asSyntax
+                    ]
+                )
+                
+                if !property.isReadOnly {
+                    syntax = syntax.addAccessor(
+                        AccessorDeclSyntax(
+                            accessorKind: .contextualKeyword("set").withTrailingSpace()
+                        )
+                    )
+                }
+
+                return .accessors(syntax)
             }
         }
         
@@ -196,55 +195,93 @@ class VariableDeclSyntaxGenerator {
             return nil
             
         case .computed(let body):
-            return generateGetterAccessor(body, producer)
+            return {
+                .getter(generateGetterAccessor(body, producer)())
+            }
             
         case let .property(get, set):
-            return generateGetterSetterAccessor(get, set, producer)
+            return {
+                let leftBraceSyntax = producer.prepareStartToken(.leftBrace).withLeadingSpace()
+                producer.addExtraLeading(.newlines(1))
+
+                let result = generateGetterSetterAccessor(get, set, producer)()
+
+                producer.addExtraLeading(.newlines(1) + producer.indentation())
+                let rightBraceSyntax = producer.prepareStartToken(.rightBrace)
+
+                return .accessors(
+                    .init(
+                        leftBrace: leftBraceSyntax,
+                        accessors: [
+                            result.getter,
+                            result.setter
+                        ],
+                        rightBrace: rightBraceSyntax
+                ))
+            }
         }
     }
     
-    private static func makeAccessorBlockCreator(_ subcript: SubscriptGenerationIntention,
-                                                 _ producer: SwiftSyntaxProducer) -> (() -> Syntax)? {
+    private static func makeAccessorBlockCreator(
+        _ subscriptIntention: SubscriptGenerationIntention,
+        _ producer: SwiftSyntaxProducer
+    ) -> (() -> SubscriptDeclSyntax.Accessor)? {
         
-        switch subcript.mode {
+        switch subscriptIntention.mode {
         case .getter(let body):
-            return generateGetterAccessor(body, producer)
+            return {
+                .getter(generateGetterAccessor(body, producer)())
+            }
             
         case let .getterAndSetter(getter, setter):
-            return generateGetterSetterAccessor(getter, setter, producer)
+            return {
+                producer.addExtraLeading(.spaces(1))
+                let leftBrace = producer.prepareStartToken(.leftBrace)
+                
+                producer.addExtraLeading(.newlines(1))
+
+                let (getterSyntax, setterSyntax) = generateGetterSetterAccessor(getter, setter, producer)()
+                
+                producer.addExtraLeading(.newlines(1) + producer.indentation())
+                let rightBrace = producer.prepareStartToken(.rightBrace)
+
+                return .accessors(.init(
+                    leftBrace: leftBrace,
+                    accessors: [getterSyntax, setterSyntax],
+                    rightBrace: rightBrace
+                ))
+            }
         }
     }
     
-    private static func generateGetterAccessor(_ getter: FunctionBodyIntention,
-                                               _ producer: SwiftSyntaxProducer) -> () -> Syntax {
+    private static func generateGetterAccessor(
+        _ getter: FunctionBodyIntention,
+        _ producer: SwiftSyntaxProducer
+    ) -> () -> CodeBlockSyntax {
         
         return {
-            return CodeBlockSyntax { builder in
-                builder.useLeftBrace(
-                    producer.makeStartToken(SyntaxFactory.makeLeftBraceToken)
-                        .withLeadingSpace()
-                )
-                
-                producer.indent()
-                let blocks = producer._generateStatements(getter.body.statements)
-                producer.deindent()
-                
-                let stmtList = SyntaxFactory.makeCodeBlockItemList(blocks)
-                let codeBlock = 
-                    SyntaxFactory
-                    .makeCodeBlockItem(
-                        item: stmtList.asSyntax,
-                        semicolon: nil,
-                        errorTokens: nil
-                    )
-                
-                builder.addStatement(codeBlock)
-                
-                producer.addExtraLeading(.newlines(1) + producer.indentation())
-                builder.useRightBrace(
-                    producer.makeStartToken(SyntaxFactory.makeRightBraceToken)
-                )
-            }.asSyntax
+            var syntax = CodeBlockSyntax()
+            syntax = syntax.withLeftBrace( // builder.useLeftBrace(
+                producer.prepareStartToken(.leftBrace)
+                    .withLeadingSpace()
+            )
+            
+            producer.indent()
+            let blocks = producer._generateStatements(getter.body.statements)
+            producer.deindent()
+            
+            let stmtList = CodeBlockItemListSyntax(blocks)
+            
+            for item in stmtList {
+                syntax = syntax.addStatement(item)
+            }
+            
+            producer.addExtraLeading(.newlines(1) + producer.indentation())
+            syntax = syntax.withRightBrace(
+                producer.prepareStartToken(.rightBrace)
+            )
+
+            return syntax
         }
     }
     
@@ -252,7 +289,8 @@ class VariableDeclSyntaxGenerator {
         _ getter: FunctionBodyIntention,
         _ setter: PropertyGenerationIntention.Setter,
         _ producer: SwiftSyntaxProducer
-    ) -> () -> Syntax {
+    ) -> () -> (getter: AccessorDeclSyntax, setter: AccessorDeclSyntax) {
+
         return generateGetterSetterAccessor(
             getter,
             (setter.valueIdentifier, setter.body),
@@ -264,7 +302,8 @@ class VariableDeclSyntaxGenerator {
         _ getter: FunctionBodyIntention,
         _ setter: SubscriptGenerationIntention.Setter,
         _ producer: SwiftSyntaxProducer
-    ) -> () -> Syntax {
+    ) -> () -> (getter: AccessorDeclSyntax, setter: AccessorDeclSyntax) {
+
         return generateGetterSetterAccessor(
             getter,
             (setter.valueIdentifier, setter.body),
@@ -276,66 +315,46 @@ class VariableDeclSyntaxGenerator {
         _ getter: FunctionBodyIntention,
         _ setter: (valueIdentifier: String, body: FunctionBodyIntention),
         _ producer: SwiftSyntaxProducer
-    ) -> () -> Syntax {
+    ) -> () -> (getter: AccessorDeclSyntax, setter: AccessorDeclSyntax) {
+
         return {
-            return AccessorBlockSyntax { builder in
-                builder.useLeftBrace(
-                    producer
-                        .makeStartToken(SyntaxFactory.makeLeftBraceToken)
-                        .withLeadingSpace()
+            producer.indent()
+            
+            producer.addExtraLeading(producer.indentation())
+            
+            let getterSyntax = AccessorDeclSyntax(
+                accessorKind: producer.prepareStartToken(.contextualKeyword("get")).withTrailingSpace(),
+                body: producer.generateFunctionBody(getter)
+            )
+            
+            producer.addExtraLeading(.newlines(1) + producer.indentation())
+            
+            let setterSyntax: AccessorDeclSyntax
+
+            let setToken = producer.prepareStartToken(
+                TokenSyntax.contextualKeyword("set")
+            )
+
+            if setter.valueIdentifier != "newValue" {
+                setterSyntax = AccessorDeclSyntax(
+                    accessorKind: setToken,
+                    parameter: AccessorParameterSyntax(
+                        leftParen: producer.prepareStartToken(.leftParen),
+                        name: setter.valueIdentifier,
+                        rightParen: .rightParen.withTrailingSpace()
+                    ),
+                    body: producer.generateFunctionBody(setter.body)
                 )
-                
-                producer.indent()
-                
-                producer.addExtraLeading(.newlines(1) + producer.indentation())
-                
-                let getter = AccessorDeclSyntax { builder in
-                    builder.useAccessorKind(
-                        producer.prepareStartToken(
-                            SyntaxFactory
-                                .makeToken(.contextualKeyword("get"), presence: .present)
-                                .withTrailingSpace()
-                        )
-                    )
-                    
-                    builder.useBody(producer.generateFunctionBody(getter))
-                }
-                
-                producer.addExtraLeading(.newlines(1) + producer.indentation())
-                
-                let setter = AccessorDeclSyntax { builder in
-                    let setToken = producer.prepareStartToken(
-                        SyntaxFactory
-                            .makeToken(.contextualKeyword("set"), presence: .present)
-                    )
-                    
-                    if setter.valueIdentifier != "newValue" {
-                        builder.useAccessorKind(setToken)
-                        builder.useParameter(AccessorParameterSyntax { builder in
-                            builder.useLeftParen(
-                                producer
-                                    .makeStartToken(SyntaxFactory.makeLeftParenToken)
-                            )
-                            builder.useName(makeIdentifier(setter.valueIdentifier))
-                            builder.useRightParen(SyntaxFactory.makeRightParenToken())
-                        }.withTrailingSpace())
-                    } else {
-                        builder.useAccessorKind(setToken.withTrailingSpace())
-                    }
-                    
-                    builder.useBody(producer.generateFunctionBody(setter.body))
-                }
-                
-                producer.deindent()
-                
-                builder.addAccessor(getter)
-                builder.addAccessor(setter)
-                
-                producer.addExtraLeading(.newlines(1) + producer.indentation())
-                builder.useRightBrace(
-                    producer.makeStartToken(SyntaxFactory.makeRightBraceToken)
+            } else {
+                setterSyntax = AccessorDeclSyntax(
+                    accessorKind: setToken.withTrailingSpace(),
+                    body: producer.generateFunctionBody(setter.body)
                 )
-            }.asSyntax
+            }
+            
+            producer.deindent()
+            
+            return (getterSyntax, setterSyntax)
         }
     }
 }
@@ -376,7 +395,7 @@ private extension VariableDeclSyntaxGenerator {
     }
     
     func makeDeclaration(_ intention: ValueStorageIntention) -> ObjcVariableDeclarationNode {
-        var accessors: (() -> Syntax)?
+        var accessors: (() -> PatternBindingSyntax.Accessor)?
         if let intention = intention as? PropertyGenerationIntention {
             accessors = VariableDeclSyntaxGenerator.makeAccessorBlockCreator(intention, producer)
         }
@@ -384,11 +403,10 @@ private extension VariableDeclSyntaxGenerator {
         return makeDeclaration(
             name: intention.name,
             storage: intention.storage,
-            attributes: producer
-                .attributes(
-                    for: intention,
-                    inline: true
-                ),
+            attributes: producer.attributes(
+                for: intention,
+                inline: true
+            ),
             intention: intention,
             modifiers: producer.modifiers(for: intention),
             accessors: accessors,
@@ -396,13 +414,15 @@ private extension VariableDeclSyntaxGenerator {
         )
     }
     
-    func makeDeclaration(name: String,
-                         storage: ValueStorage,
-                         attributes: [() -> AttributeSyntax],
-                         intention: IntentionProtocol?,
-                         modifiers: [ModifiersDecoratorResult],
-                         accessors: (() -> Syntax)? = nil,
-                         initialization: Expression? = nil) -> ObjcVariableDeclarationNode {
+    func makeDeclaration(
+        name: String,
+        storage: ValueStorage,
+        attributes: [() -> AttributeListSyntax.Element],
+        intention: IntentionProtocol?,
+        modifiers: [ModifiersDecoratorResult],
+        accessors: (() -> PatternBindingSyntax.Accessor)? = nil,
+        initialization: Expression? = nil
+    ) -> ObjcVariableDeclarationNode {
         
         var patternBinding = makePatternBinding(
             name: name,
@@ -410,27 +430,33 @@ private extension VariableDeclSyntaxGenerator {
             initialization: initialization
         )
         
-        if producer.delegate?.swiftSyntaxProducer(producer,
-                                                  shouldEmitTypeFor: storage,
-                                                  intention: intention,
-                                                  initialValue: initialization) == false {
+        if
+            producer.delegate?.swiftSyntaxProducer(
+                producer,
+                shouldEmitTypeFor: storage,
+                intention: intention,
+                initialValue: initialization
+            ) == false
+        {
             patternBinding.type = nil
         }
         
-        return
-            ObjcVariableDeclarationNode(
-                constant: storage.isConstant,
-                attributes: attributes,
-                modifiers: modifiers,
-                kind: .single(
-                    pattern: patternBinding,
-                    accessors: accessors
-                ))
+        return ObjcVariableDeclarationNode(
+            constant: storage.isConstant,
+            attributes: attributes,
+            modifiers: modifiers,
+            kind: .single(
+                pattern: patternBinding,
+                accessors: accessors
+            )
+        )
     }
     
-    private func makePatternBinding(name: String,
-                                    type: SwiftType?,
-                                    initialization: Expression?) -> PatternBindingElement {
+    private func makePatternBinding(
+        name: String,
+        type: SwiftType?,
+        initialization: Expression?
+    ) -> PatternBindingElement {
         
         PatternBindingElement(
             name: name,

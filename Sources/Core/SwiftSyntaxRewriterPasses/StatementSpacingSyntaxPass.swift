@@ -18,19 +18,23 @@ public class StatementSpacingSyntaxPass: SwiftSyntaxRewriterPass {
 }
 
 private class InnerSyntaxRewriter: SyntaxRewriter {
-    override func visit(_ node: CodeBlockItemListSyntax) -> Syntax {
+    override func visit(_ node: CodeBlockItemListSyntax) -> CodeBlockItemListSyntax {
         var statements = super.visit(node).as(CodeBlockItemListSyntax.self)!
         
         let ranges = rangeOfExpressionStatements(in: node)
         statements = separateExpressions(in: statements, ranges: ranges)
-        
-        return Syntax(ranges.reduce(statements) { stmts, range in
+
+        let result = ranges.reduce(statements) { stmts, range in
             analyzeRange(range, in: stmts)
-        })
+        }
+        
+        return result
     }
     
-    func separateExpressions(in statements: CodeBlockItemListSyntax,
-                             ranges: [Range<Int>]) -> CodeBlockItemListSyntax {
+    func separateExpressions(
+        in statements: CodeBlockItemListSyntax,
+        ranges: [Range<Int>]
+    ) -> CodeBlockItemListSyntax {
         
         var statements = statements
         
@@ -153,17 +157,17 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
     private class SetEmptyLineLeadingTrivia: SyntaxRewriter {
         var isFirstVisit: Bool = true
         
-        override func visit(_ token: TokenSyntax) -> Syntax {
+        override func visit(_ token: TokenSyntax) -> TokenSyntax {
             if isFirstVisit {
                 isFirstVisit = false
                 let trivia = .newlines(2)
                     + indentation(for: token)
                     + removingLeadingWhitespace(token.leadingTrivia)
                 
-                return Syntax(token.withLeadingTrivia(trivia))
+                return token.withLeadingTrivia(trivia)
             }
             
-            return Syntax(token)
+            return token
         }
     }
 }

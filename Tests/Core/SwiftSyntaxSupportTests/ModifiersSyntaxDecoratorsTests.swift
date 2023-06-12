@@ -41,7 +41,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
             assert(
                 decorator: sut,
                 element: .intention(method),
-                producesModifier: "mutating"
+                producesModifier: "mutating "
             )
         }
     }
@@ -80,7 +80,11 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
 
             let sut = MutatingModifiersDecorator()
 
-            assert(decorator: sut, element: .intention(method), producesModifier: nil)
+            assert(
+                decorator: sut,
+                element: .intention(method),
+                producesModifier: nil
+            )
         }
     }
 
@@ -98,7 +102,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         assert(
             decorator: sut,
             element: .intention(method),
-            producesModifier: "static"
+            producesModifier: "static "
         )
     }
 
@@ -112,7 +116,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         assert(
             decorator: sut,
             element: .intention(property),
-            producesModifier: "static"
+            producesModifier: "static "
         )
     }
 
@@ -121,7 +125,11 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
 
         let sut = StaticModifiersDecorator()
 
-        assert(decorator: sut, element: .intention(globalVar), producesModifier: nil)
+        assert(
+            decorator: sut,
+            element: .intention(globalVar),
+            producesModifier: nil
+        )
     }
 
     func testAccessLevelModifiersDecorator() {
@@ -136,13 +144,13 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         assert(
             decorator: sut,
             element: .intention(makeIntention(.private)),
-            producesModifier: "private"
+            producesModifier: "private "
         )
 
         assert(
             decorator: sut,
             element: .intention(makeIntention(.fileprivate)),
-            producesModifier: "fileprivate"
+            producesModifier: "fileprivate "
         )
 
         assert(
@@ -154,7 +162,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         assert(
             decorator: sut,
             element: .intention(makeIntention(.open)),
-            producesModifier: "open"
+            producesModifier: "open "
         )
     }
 
@@ -183,19 +191,19 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         assert(
             decorator: sut,
             element: .intention(makeProperty(.internal)),
-            producesModifier: "internal(set)"
+            producesModifier: "internal(set) "
         )
 
         assert(
             decorator: sut,
             element: .intention(makeProperty(.fileprivate)),
-            producesModifier: "fileprivate(set)"
+            producesModifier: "fileprivate(set) "
         )
 
         assert(
             decorator: sut,
             element: .intention(makeProperty(.private)),
-            producesModifier: "private(set)"
+            producesModifier: "private(set) "
         )
     }
 
@@ -217,19 +225,19 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         assert(
             decorator: sut,
             element: .intention(makeIntention(.weak)),
-            producesModifier: "weak"
+            producesModifier: "weak "
         )
 
         assert(
             decorator: sut,
             element: .intention(makeIntention(.unownedSafe)),
-            producesModifier: "unowned(safe)"
+            producesModifier: "unowned(safe) "
         )
 
         assert(
             decorator: sut,
             element: .intention(makeIntention(.unownedUnsafe)),
-            producesModifier: "unowned(unsafe)"
+            producesModifier: "unowned(unsafe) "
         )
     }
 
@@ -249,19 +257,19 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         assert(
             decorator: sut,
             element: .variableDecl(makeVarDecl(.weak)),
-            producesModifier: "weak"
+            producesModifier: "weak "
         )
 
         assert(
             decorator: sut,
             element: .variableDecl(makeVarDecl(.unownedSafe)),
-            producesModifier: "unowned(safe)"
+            producesModifier: "unowned(safe) "
         )
 
         assert(
             decorator: sut,
             element: .variableDecl(makeVarDecl(.unownedUnsafe)),
-            producesModifier: "unowned(unsafe)"
+            producesModifier: "unowned(unsafe) "
         )
     }
 
@@ -278,7 +286,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         assert(
             decorator: sut,
             element: .intention(overriden),
-            producesModifier: "override"
+            producesModifier: "override "
         )
 
         assert(decorator: sut, element: .intention(nonOverriden), producesModifier: nil)
@@ -297,7 +305,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         assert(
             decorator: sut,
             element: .intention(_convenience),
-            producesModifier: "convenience"
+            producesModifier: "convenience "
         )
 
         assert(
@@ -340,18 +348,26 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
             assert(
                 decorator: sut,
                 element: .intention(optionalProp),
-                producesModifier: "optional"
+                producesModifier: "optional "
             )
 
             assert(
                 decorator: sut,
                 element: .intention(optionalMethod),
-                producesModifier: "optional"
+                producesModifier: "optional "
             )
 
-            assert(decorator: sut, element: .intention(nonOptionalProp), producesModifier: nil)
+            assert(
+                decorator: sut,
+                element: .intention(nonOptionalProp),
+                producesModifier: nil
+            )
 
-            assert(decorator: sut, element: .intention(nonOptionalMethod), producesModifier: nil)
+            assert(
+                decorator: sut,
+                element: .intention(nonOptionalMethod),
+                producesModifier: nil
+            )
         }
     }
 
@@ -364,7 +380,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         assert(
             decorator: sut,
             element: .intention(intention),
-            producesModifier: "final"
+            producesModifier: "final "
         )
     }
 }
@@ -385,13 +401,13 @@ extension ModifiersSyntaxDecoratorsTests {
             .map {
                 $0(producer)
             }.map {
-                $0.description.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                $0.description
             }
 
         if expected != modifierString {
             XCTFail(
                 """
-                Expected to produce modifier \(expected ?? "<nil>"), but produced \(modifierString ?? "<nil>")
+                Expected to produce modifier string "\(expected ?? "<nil>")", but produced "\(modifierString ?? "<nil>")"
                 """,
                 file: #filePath,
                 line: line

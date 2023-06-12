@@ -5,10 +5,6 @@ extension SyntaxProtocol {
         return Syntax(self)
     }
     
-    func inCodeBlock() -> CodeBlockItemSyntax {
-        return asSyntax.inCodeBlock()
-    }
-
     func withExtraLeading(consuming trivia: inout Trivia?) -> Self {
         if let t = trivia {
             trivia = nil
@@ -81,20 +77,32 @@ extension PatternSyntaxProtocol {
     }
 }
 
-extension Syntax {
-    func inCodeBlock() -> CodeBlockItemSyntax {
-        return CodeBlockItemSyntax { $0.useItem(self) }
-    }
-}
-
 extension ExprSyntaxProtocol {
     func inCodeBlock() -> CodeBlockItemSyntax {
-        self.asSyntax.inCodeBlock()
+        .init(item: inCodeBlockItem())
+    }
+
+    func inCodeBlockItem() -> CodeBlockItemSyntax.Item {
+        .expr(self.asExprSyntax)
     }
 }
 
 extension StmtSyntaxProtocol {
     func inCodeBlock() -> CodeBlockItemSyntax {
-        self.asSyntax.inCodeBlock()
+        .init(item: inCodeBlockItem())
+    }
+
+    func inCodeBlockItem() -> CodeBlockItemSyntax.Item {
+        .stmt(self.asStmtSyntax)
+    }
+}
+
+extension DeclSyntaxProtocol {
+    func inCodeBlock() -> CodeBlockItemSyntax {
+        .init(item: inCodeBlockItem())
+    }
+
+    func inCodeBlockItem() -> CodeBlockItemSyntax.Item {
+        .decl(self.asDeclSyntax)
     }
 }

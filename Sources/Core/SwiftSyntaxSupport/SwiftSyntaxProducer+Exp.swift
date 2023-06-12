@@ -12,7 +12,7 @@ extension SwiftSyntaxProducer {
             
         default:
             assertionFailure("Found unknown expression syntax node type \(type(of: expression))")
-            return SyntaxFactory.makeBlankAsExpr().asExprSyntax
+            return MissingExprSyntax().asExprSyntax
         }
     }
 
@@ -85,46 +85,23 @@ extension SwiftSyntaxProducer {
             return generateTry(exp).asExprSyntax
 
         case .unknown:
-            return SyntaxFactory.makeBlankUnknownExpr().asExprSyntax
+            return MissingExprSyntax().asExprSyntax
         }
     }
     
     public func generateSizeOf(_ exp: SizeOfExpression) -> ExprSyntax {
         func _forType(_ type: SwiftType) -> ExprSyntax {
-            MemberAccessExprSyntax { builder in
-                let base = SpecializeExprSyntax { builder in
-                    let token = prepareStartToken(
-                        SyntaxFactory.makeIdentifier("MemoryLayout")
-                    )
-                    
-                    builder.useExpression(
-                        SyntaxFactory
-                            .makeIdentifierExpr(identifier: token,
-                                                declNameArguments: nil)
-                            .asExprSyntax
-                    )
-                    
-                    builder.useGenericArgumentClause(GenericArgumentClauseSyntax { builder in
-                        builder.useLeftAngleBracket(
-                            SyntaxFactory.makeLeftAngleToken()
-                        )
-                        
-                        builder.useRightAngleBracket(
-                            SyntaxFactory.makeRightAngleToken()
-                        )
-                        
-                        builder.addArgument(GenericArgumentSyntax { builder in
-                            builder.useArgumentType(
-                                SwiftTypeConverter.makeTypeSyntax(type, startTokenHandler: self)
-                            )
-                        })
-                    })
-                }
-                
-                builder.useBase(base.asExprSyntax)
-                builder.useDot(SyntaxFactory.makePeriodToken())
-                builder.useName(makeIdentifier("size"))
-            }.asExprSyntax
+            let baseSyntax = SpecializeExprSyntax(
+                expression: IdentifierExprSyntax(identifier: prepareStartToken(
+                    makeIdentifier("MemoryLayout")
+                )),
+                genericArgumentClause: .init(arguments: [
+                    .init(argumentType: SwiftTypeConverter.makeTypeSyntax(type, startTokenHandler: self))
+                ])
+            )
+            
+            let syntax = generateMemberAccessExpr(base: baseSyntax.asExprSyntax, name: "size")
+            return syntax.asExprSyntax
         }
         
         switch exp.value {
@@ -152,254 +129,236 @@ extension SwiftSyntaxProducer {
     }
     
     public func generateIdentifier(_ exp: IdentifierExpression) -> IdentifierExprSyntax {
-        IdentifierExprSyntax { builder in
-            builder.useIdentifier(prepareStartToken(makeIdentifier(exp.identifier)))
-        }
+        let syntax = IdentifierExprSyntax(identifier: prepareStartToken(makeIdentifier(exp.identifier)))
+
+        return syntax
     }
     
-    public func generateCast(_ exp: CastExpression) -> SequenceExprSyntax {
-        SequenceExprSyntax { builder in
-            builder.addElement(generateWithinParensIfNecessary(exp.exp))
-            
-            builder.addElement(AsExprSyntax { builder in
-                if exp.isOptionalCast {
-                    builder.useAsTok(
-                        SyntaxFactory
-                            .makeAsKeyword()
-                            .withLeadingSpace()
-                    )
-                    
-                    builder.useQuestionOrExclamationMark(
-                        SyntaxFactory
-                            .makePostfixQuestionMarkToken()
-                            .withTrailingSpace()
-                    )
-                } else {
-                    builder.useAsTok(
-                        SyntaxFactory
-                            .makeAsKeyword()
-                            .addingSurroundingSpaces()
-                    )
-                }
-                
-                builder.useTypeName(SwiftTypeConverter.makeTypeSyntax(exp.type, startTokenHandler: self))
-            }.asExprSyntax)
+    public func generateCast(_ exp: CastExpression) -> AsExprSyntax {
+        let expSyntax = generateWithinParensIfNecessary(exp.exp)
+
+        let syntax: AsExprSyntax
+
+        if exp.isOptionalCast {
+            syntax = AsExprSyntax(
+                expression: expSyntax,
+                asTok: .as.withLeadingSpace(),
+                questionOrExclamationMark: .postfixQuestionMark.withTrailingSpace(),
+                typeName: SwiftTypeConverter.makeTypeSyntax(exp.type, startTokenHandler: self)
+            )
+        } else {
+            syntax = AsExprSyntax(
+                expression: expSyntax,
+                asTok: .as.addingSurroundingSpaces(),
+                typeName: SwiftTypeConverter.makeTypeSyntax(exp.type, startTokenHandler: self)
+            )
         }
+        
+        return syntax
     }
     
-    public func generateTypeCheck(_ exp: TypeCheckExpression) -> SequenceExprSyntax {
-        SequenceExprSyntax { builder in
-            builder.addElement(generateExpression(exp.exp))
-            
-            builder.addElement(IsExprSyntax { builder in
-                builder.useIsTok(
-                    SyntaxFactory
-                        .makeIsKeyword()
-                        .addingSurroundingSpaces()
-                )
-                
-                builder.useTypeName(SwiftTypeConverter.makeTypeSyntax(exp.type, startTokenHandler: self))
-            }.asExprSyntax)
-        }
+    public func generateTypeCheck(_ exp: TypeCheckExpression) -> IsExprSyntax {
+        let expSyntax = generateWithinParensIfNecessary(exp.exp)
+
+        let syntax: IsExprSyntax = IsExprSyntax(
+            expression: expSyntax,
+            isTok: prepareStartToken(.is).addingSurroundingSpaces(),
+            typeName: SwiftTypeConverter.makeTypeSyntax(exp.type, startTokenHandler: self)
+        )
+        
+        return syntax
     }
     
     public func generateClosure(_ exp: BlockLiteralExpression) -> ClosureExprSyntax {
-        ClosureExprSyntax { builder in
-            let hasParameters = !exp.parameters.isEmpty
-            let requiresTypeSignature =
-                exp.resolvedType == nil || exp.resolvedType != exp.expectedType
+        var syntax = ClosureExprSyntax()
+
+        let hasParameters = !exp.parameters.isEmpty
+        let requiresTypeSignature =
+            exp.resolvedType == nil || exp.resolvedType != exp.expectedType
+        
+        let requiresInToken = hasParameters || requiresTypeSignature
+
+        // Prepare leading comments for the block
+        var leadingComments: Trivia?
+        if !exp.body.comments.isEmpty {
+            indent() // Temporarily indent for leading comments generation
+
+            leadingComments =
+                .newlines(1)
+                + indentation()
+                + toCommentsTrivia(
+                    exp.body.comments,
+                    addNewLineAfter: !exp.body.isEmpty
+                )
             
-            let requiresInToken = hasParameters || requiresTypeSignature
+            deindent()
+        }
+        
+        var leftBrace = prepareStartToken(.leftBrace)
+        
+        if !requiresInToken, let leadingComments {
+            leftBrace = leftBrace.withTrailingTrivia(
+                leadingComments
+            )
+        }
 
-            // Prepare leading comments for the block
-            var leadingComments: Trivia?
-            if !exp.body.comments.isEmpty {
-                indent() // Temporarily indent for leading comments generation
+        syntax = syntax.withLeftBrace(leftBrace)
 
-                leadingComments =
-                    .newlines(1)
-                    + indentation()
-                    + toCommentsTrivia(
-                        exp.body.comments,
-                        addNewLineAfter: !exp.body.isEmpty
-                    )
+        var signatureSyntax = ClosureSignatureSyntax()
+
+        addExtraLeading(.spaces(1))
+        
+        if requiresTypeSignature {
+            var parametersSyntax = ParameterClauseSyntax()
+
+            parametersSyntax = parametersSyntax.withLeftParen(
+                .leftParen
+                    .withExtraLeading(from: self)
+            )
+            
+            parametersSyntax = parametersSyntax.withRightParen(.rightParen)
+            
+            iterateWithComma(exp.parameters) { (arg, hasComma) in
+                var paramSyntax = FunctionParameterSyntax(
+                    firstName: makeIdentifier(arg.name).withExtraLeading(from: self),
+                    colon: .colon.withTrailingSpace(),
+                    type: SwiftTypeConverter.makeTypeSyntax(arg.type, startTokenHandler: self)
+                )
                 
-                deindent()
+                if hasComma {
+                    paramSyntax = paramSyntax.withTrailingComma(
+                        .comma.withTrailingSpace()
+                    )
+                }
+
+                parametersSyntax = parametersSyntax.addParameter(paramSyntax)
             }
             
-            var leftBrace = makeStartToken(SyntaxFactory.makeLeftBraceToken)
-            
-            if !requiresInToken, let leadingComments {
-                leftBrace = leftBrace.withTrailingTrivia(
+            signatureSyntax = signatureSyntax.withInput(.input(parametersSyntax))
+        } else if hasParameters {
+            var parametersSyntax = ClosureParamListSyntax()
+
+            iterateWithComma(exp.parameters) { (arg, hasComma) in
+                var paramSyntax = ClosureParamSyntax(
+                    name: makeIdentifier(arg.name).withExtraLeading(from: self)
+                )
+                
+                if hasComma {
+                    paramSyntax = paramSyntax.withTrailingComma(
+                        .comma.withTrailingSpace()
+                    )
+                }
+
+                parametersSyntax = parametersSyntax.appending(paramSyntax)
+            }
+
+            signatureSyntax = signatureSyntax.withInput(.simpleInput(parametersSyntax))
+        }
+
+        if requiresInToken {
+            var inToken = TokenSyntax.in.addingLeadingSpace()
+
+            if let leadingComments {
+                inToken = inToken.withTrailingTrivia(
                     leadingComments
                 )
             }
 
-            builder.useLeftBrace(leftBrace)
-
-            let signature = ClosureSignatureSyntax { builder in
-                if requiresInToken {
-                    var inToken = SyntaxFactory.makeInKeyword().addingLeadingSpace()
-
-                    if let leadingComments {
-                        inToken = inToken.withTrailingTrivia(
-                            leadingComments
-                        )
-                    }
-
-                    builder.useInTok(
-                        inToken
-                    )
-                }
-                
-                if requiresTypeSignature {
-                    builder.useOutput(generateReturnType(exp.returnType))
-                }
-                
-                let parameters = ParameterClauseSyntax { builder in
-                    addExtraLeading(.spaces(1))
-                    
-                    if requiresTypeSignature {
-                        builder.useLeftParen(
-                            SyntaxFactory
-                                .makeLeftParenToken()
-                                .withExtraLeading(from: self)
-                        )
-                        
-                        builder.useRightParen(SyntaxFactory.makeRightParenToken())
-                    }
-                    
-                    iterateWithComma(exp.parameters) { (arg, hasComma) in
-                        builder.addParameter(FunctionParameterSyntax { builder in
-                            builder.useFirstName(
-                                makeIdentifier(arg.name)
-                                    .withExtraLeading(from: self))
-                            
-                            if requiresTypeSignature {
-                                builder.useColon(
-                                    SyntaxFactory
-                                        .makeColonToken()
-                                        .withTrailingSpace()
-                                )
-                                
-                                builder.useType(
-                                    SwiftTypeConverter
-                                        .makeTypeSyntax(arg.type, startTokenHandler: self)
-                                )
-                            }
-                            
-                            if hasComma {
-                                builder.useTrailingComma(
-                                    SyntaxFactory
-                                        .makeCommaToken()
-                                        .withTrailingSpace()
-                                )
-                            }
-                        })
-                    }
-                }
-                
-                builder.useInput(parameters.asSyntax)
-            }
-            
-            builder.useSignature(signature)
-            
-            indent()
-            
-            extraLeading = nil
-            
-            let statements = _generateStatements(exp.body.statements)
-            for stmt in statements {
-                builder.addStatement(stmt)
-            }
-            
-            deindent()
-            
-            extraLeading = .newlines(1) + indentation()
-            
-            builder.useRightBrace(makeStartToken(SyntaxFactory.makeRightBraceToken))
+            signatureSyntax = signatureSyntax.withInTok(inToken)
+        } else {
+            signatureSyntax = signatureSyntax.withInTok(nil)
         }
+        
+        if requiresTypeSignature {
+            signatureSyntax = signatureSyntax.withOutput(generateReturnType(exp.returnType))
+        }
+
+        syntax = syntax.withSignature(signatureSyntax)
+        
+        indent()
+        
+        extraLeading = nil
+        
+        let statements = _generateStatements(exp.body.statements)
+        for stmt in statements {
+            syntax = syntax.addStatement(stmt)
+        }
+        
+        deindent()
+        
+        extraLeading = .newlines(1) + indentation()
+        
+        syntax = syntax.withRightBrace(prepareStartToken(.rightBrace))
+
+        return syntax
     }
     
     public func generateArrayLiteral(_ exp: ArrayLiteralExpression) -> ArrayExprSyntax {
-        ArrayExprSyntax { builder in
-            builder.useLeftSquare(
-                makeStartToken(SyntaxFactory.makeLeftSquareBracketToken)
-            )
-            builder.useRightSquare(SyntaxFactory.makeRightSquareBracketToken())
-            
-            iterateWithComma(exp.items) { (item, hasComma) in
-                builder.addElement(ArrayElementSyntax { builder in
-                    builder.useExpression(generateExpression(item))
-                    
-                    if hasComma {
-                        builder.useTrailingComma(
-                            SyntaxFactory
-                                .makeCommaToken()
-                                .withTrailingSpace()
-                        )
-                    }
-                })
+        var syntax = ArrayExprSyntax(
+            leftSquare: prepareStartToken(.leftSquareBracket)
+        )
+        
+        iterateWithComma(exp.items) { (item: Expression, hasComma) in
+            var elementSyntax = ArrayElementSyntax(expression: generateExpression(item))
+
+            if hasComma {
+                elementSyntax = elementSyntax.withTrailingComma(
+                    .comma.withTrailingSpace()
+                )
             }
+
+            syntax = syntax.addElement(elementSyntax)
         }
+
+        return syntax
     }
     
     public func generateDictionaryLiteral(_ exp: DictionaryLiteralExpression) -> DictionaryExprSyntax {
-        DictionaryExprSyntax { builder in
-            builder.useLeftSquare(
-                makeStartToken(SyntaxFactory.makeLeftSquareBracketToken)
-            )
+        var syntax = DictionaryExprSyntax(
+            leftSquare: prepareStartToken(.leftSquareBracket)
+        )
+
+        if exp.pairs.isEmpty {
+            syntax = syntax.withContent(.colon(.colon))
+        } else {
+            var elements: [DictionaryElementSyntax] = []
             
-            builder.useRightSquare(SyntaxFactory.makeRightSquareBracketToken())
-            
-            if exp.pairs.isEmpty {
-                builder.useContent(SyntaxFactory.makeColonToken().asSyntax)
-            } else {
-                var elements: [DictionaryElementSyntax] = []
+            iterateWithComma(exp.pairs) { (item, hasComma) in
+                var elementSyntax = DictionaryElementSyntax(
+                    keyExpression: generateExpression(item.key),
+                    colon: .colon.withTrailingSpace(),
+                    valueExpression: generateExpression(item.value)
+                )
                 
-                iterateWithComma(exp.pairs) { (item, hasComma) in
-                    elements.append(
-                        DictionaryElementSyntax { builder in
-                            builder.useKeyExpression(generateExpression(item.key))
-                            builder.useColon(
-                                SyntaxFactory
-                                    .makeColonToken()
-                                    .withTrailingSpace()
-                            )
-                            builder.useValueExpression(generateExpression(item.value))
-                            
-                            if hasComma {
-                                builder.useTrailingComma(
-                                    SyntaxFactory
-                                        .makeCommaToken()
-                                        .withTrailingSpace()
-                                )
-                            }
-                        }
+                if hasComma {
+                    elementSyntax = elementSyntax.withTrailingComma(
+                        .comma.withTrailingSpace()
                     )
                 }
-                
-                builder.useContent(
-                    SyntaxFactory
-                        .makeDictionaryElementList(elements)
-                        .asSyntax
-                )
+
+                elements.append(elementSyntax)
             }
+            
+            syntax = syntax.withContent(.elements(.init(elements)))
         }
+
+        return syntax
     }
     
     public func generateAssignment(_ exp: AssignmentExpression) -> SequenceExprSyntax {
-        SequenceExprSyntax { builder in
-            builder.addElement(generateExpression(exp.lhs))
-            
-            addExtraLeading(.spaces(1))
-            
-            builder.addElement(generateOperator(exp.op, mode: .assignment))
-            
-            addExtraLeading(.spaces(1))
-            
-            builder.addElement(generateExpression(exp.rhs))
-        }
+        var syntax = SequenceExprSyntax()
+        
+        syntax = syntax.addElement(generateExpression(exp.lhs))
+        
+        addExtraLeading(.spaces(1))
+        
+        syntax = syntax.addElement(generateOperator(exp.op, mode: .assignment))
+        
+        addExtraLeading(.spaces(1))
+        
+        syntax = syntax.addElement(generateExpression(exp.rhs))
+
+        return syntax
     }
     
     public func generateUnary(_ exp: UnaryExpression) -> ExprSyntax {
@@ -411,21 +370,23 @@ extension SwiftSyntaxProducer {
     }
     
     public func generateBinary(_ exp: BinaryExpression) -> SequenceExprSyntax {
-        SequenceExprSyntax { builder in
-            builder.addElement(generateExpression(exp.lhs))
-            
-            if exp.op.category != .range {
-                addExtraLeading(.spaces(1))
-            }
-            
-            builder.addElement(generateOperator(exp.op, mode: .infix))
-            
-            if exp.op.category != .range {
-                addExtraLeading(.spaces(1))
-            }
-            
-            builder.addElement(generateExpression(exp.rhs))
+        var syntax = SequenceExprSyntax()
+
+        syntax = syntax.addElement(generateExpression(exp.lhs))
+        
+        if exp.op.category != .range {
+            addExtraLeading(.spaces(1))
         }
+        
+        syntax = syntax.addElement(generateOperator(exp.op, mode: .infix))
+        
+        if exp.op.category != .range {
+            addExtraLeading(.spaces(1))
+        }
+        
+        syntax = syntax.addElement(generateExpression(exp.rhs))
+
+        return syntax
     }
     
     public func generatePostfix(_ exp: PostfixExpression) -> ExprSyntax {
@@ -441,22 +402,10 @@ extension SwiftSyntaxProducer {
                 return base
                 
             case .safeUnwrap:
-                return OptionalChainingExprSyntax { builder in
-                    builder.useExpression(base)
-                    builder.useQuestionMark(
-                        SyntaxFactory
-                            .makePostfixQuestionMarkToken()
-                    )
-                }.asExprSyntax
+                return OptionalChainingExprSyntax(expression: base).asExprSyntax
                 
             case .forceUnwrap:
-                return ForcedValueExprSyntax { builder in
-                    builder.useExpression(base)
-                    builder.useExclamationMark(
-                        SyntaxFactory
-                            .makeExclamationMarkToken()
-                    )
-                }.asExprSyntax
+                return ForcedValueExprSyntax(expression: base).asExprSyntax
             }
         }
         
@@ -464,42 +413,22 @@ extension SwiftSyntaxProducer {
         
         switch exp.op {
         case let member as MemberPostfix:
-            return MemberAccessExprSyntax { builder in
-                builder.useBase(subExp)
-                builder.useDot(SyntaxFactory.makePeriodToken())
-                builder.useName(makeIdentifier(member.name))
-            }.asExprSyntax
+            return generateMemberAccessExpr(base: subExp, name: member.name).asExprSyntax
             
         case let subs as SubscriptPostfix:
-            return SubscriptExprSyntax { builder in
-                builder.useCalledExpression(subExp)
-                iterateWithComma(subs.arguments) { (arg, hasComma) in
-                    builder.addArgument(TupleExprElementSyntax { builder in
-                        if let label = arg.label {
-                            builder.useLabel(makeIdentifier(label))
-                            builder.useColon(
-                                SyntaxFactory
-                                    .makeColonToken()
-                                    .withTrailingSpace()
-                            )
-                        }
-                        
-                        let argExpSyntax = generateExpression(arg.expression)
-                        
-                        builder.useExpression(argExpSyntax)
-                        
-                        if hasComma {
-                            builder.useTrailingComma(
-                                SyntaxFactory
-                                    .makeCommaToken()
-                                    .withTrailingSpace()
-                            )
-                        }
-                    })
-                }
-                builder.useLeftBracket(SyntaxFactory.makeLeftSquareBracketToken())
-                builder.useRightBracket(SyntaxFactory.makeRightSquareBracketToken())
-            }.asExprSyntax
+            var subscriptSyntax = SubscriptExprSyntax(calledExpression: subExp)
+
+            iterateWithComma(subs.arguments) { (arg, hasComma) in
+                subscriptSyntax = subscriptSyntax.addArgument(
+                    generateTupleExprElement(
+                        label: arg.label,
+                        exp: arg.expression,
+                        hasComma: hasComma
+                    )
+                )
+            }
+
+            return subscriptSyntax.asExprSyntax
             
         case let call as FunctionCallPostfix:
             var arguments = call.arguments
@@ -518,149 +447,153 @@ extension SwiftSyntaxProducer {
                 arguments.removeLast()
             }
             
-            return FunctionCallExprSyntax { builder in
-                builder.useCalledExpression(subExp)
-                
-                iterateWithComma(arguments) { (arg, hasComma) in
-                    builder.addArgument(TupleExprElementSyntax { builder in
-                        if let label = arg.label {
-                            builder.useLabel(makeIdentifier(label))
-                            builder.useColon(
-                                SyntaxFactory
-                                    .makeColonToken()
-                                    .withTrailingSpace()
-                            )
-                        }
-                        
-                        let argExpSyntax = generateExpression(arg.expression)
-                        
-                        builder.useExpression(argExpSyntax)
-                        
-                        if hasComma {
-                            builder.useTrailingComma(
-                                SyntaxFactory
-                                    .makeCommaToken()
-                                    .withTrailingSpace()
-                            )
-                        }
-                    })
-                }
-                
-                if let trailingClosure = trailingClosure {
-                    addExtraLeading(.spaces(1))
-                    builder.useTrailingClosure(
-                        generateClosure(trailingClosure)
+            var syntax = FunctionCallExprSyntax(calledExpression: subExp)
+            
+            iterateWithComma(arguments) { (arg, hasComma) in
+                syntax = syntax.addArgument(
+                    generateTupleExprElement(
+                        label: arg.label,
+                        exp: arg.expression,
+                        hasComma: hasComma
                     )
-                }
-                
-                // No need to emit parenthesis if a trailing closure
-                // is present as the only argument of the function
-                if !arguments.isEmpty || trailingClosure == nil {
-                    builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
-                    builder.useRightParen(SyntaxFactory.makeRightParenToken())
-                }
-            }.asExprSyntax
+                )
+            }
+            
+            if let trailingClosure = trailingClosure {
+                addExtraLeading(.spaces(1))
+                syntax = syntax.withTrailingClosure(
+                    generateClosure(trailingClosure)
+                )
+            }
+            
+            // No need to emit parenthesis if a trailing closure
+            // is present as the only argument of the function
+            if !arguments.isEmpty || trailingClosure == nil {
+                syntax = syntax.withLeftParen(.leftParen)
+                syntax = syntax.withRightParen(.rightParen)
+            }
+
+            return syntax.asExprSyntax
             
         default:
-            return SyntaxFactory.makeBlankPostfixUnaryExpr().asExprSyntax
+            return MissingExprSyntax().asExprSyntax
         }
+    }
+
+    internal func generateTupleExprElement(label: String?, exp: Expression, hasComma: Bool) -> TupleExprElementSyntax {
+        var elementSyntax: TupleExprElementSyntax
+
+        if let label = label {
+            elementSyntax = TupleExprElementSyntax(
+                label: makeIdentifier(label),
+                colon: .colon.withTrailingSpace(),
+                expression: generateExpression(exp)
+            )
+        } else {
+            elementSyntax = TupleExprElementSyntax(
+                expression: generateExpression(exp)
+            )
+        }
+        
+        if hasComma {
+            elementSyntax = elementSyntax.withTrailingComma(
+                .comma.withTrailingSpace()
+            )
+        }
+
+        return elementSyntax
     }
     
     public func generateTernary(_ exp: TernaryExpression) -> ExprSyntax {
-        TernaryExprSyntax { builder in
-            builder.useConditionExpression(generateExpression(exp.exp))
-            builder.useQuestionMark(
-                SyntaxFactory
-                    .makeInfixQuestionMarkToken()
-                    .addingSurroundingSpaces()
-            )
-            builder.useFirstChoice(generateExpression(exp.ifTrue))
-            builder.useColonMark(
-                SyntaxFactory
-                    .makeColonToken()
-                    .addingSurroundingSpaces()
-            )
-            builder.useSecondChoice(generateExpression(exp.ifFalse))
-        }.asExprSyntax
+        let syntax = TernaryExprSyntax(
+            conditionExpression: generateExpression(exp.exp),
+            questionMark: .infixQuestionMark.addingSurroundingSpaces(),
+            firstChoice: generateExpression(exp.ifTrue),
+            colonMark: .colon.addingSurroundingSpaces(),
+            secondChoice: generateExpression(exp.ifFalse)
+        )
+
+        return syntax.asExprSyntax
     }
     
     public func generateTuple(_ exp: TupleExpression) -> ExprSyntax {
-        TupleExprSyntax { builder in
-            builder.useLeftParen(makeStartToken(SyntaxFactory.makeLeftParenToken))
-            builder.useRightParen(SyntaxFactory.makeRightParenToken())
-            
-            iterateWithComma(exp.elements) { (item, hasComma) in
-                builder.addElement(TupleExprElementSyntax { builder in
-                    builder.useExpression(generateExpression(item))
-                    
-                    if hasComma {
-                        builder.useTrailingComma(
-                            SyntaxFactory
-                                .makeCommaToken()
-                                .withTrailingSpace()
-                        )
-                    }
-                })
+        var syntax = TupleExprSyntax(leftParen: prepareStartToken(.leftParen))
+
+        iterateWithComma(exp.elements) { (item, hasComma) in
+            var elementSyntax = TupleExprElementSyntax(expression: generateExpression(item))
+            if hasComma {
+                elementSyntax = elementSyntax.withTrailingComma(
+                    .comma.withTrailingSpace()
+                )
             }
-        }.asExprSyntax
+
+            syntax = syntax.addElement(elementSyntax)
+        }
+        
+        return syntax.asExprSyntax
     }
     
     public func generateSelector(_ exp: SelectorExpression) -> ExprSyntax {
-        return ObjcSelectorExprSyntax { builder in
-            builder.usePoundSelector(makeStartToken(SyntaxFactory.makePoundSelectorKeyword))
-            builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
-            builder.useRightParen(SyntaxFactory.makeRightParenToken())
-            
-            func makePropReference(type: SwiftType?, property: String) -> ExprSyntax {
-                if let type = type {
-                    return MemberAccessExprSyntax { builder in
-                        builder.useBase(
-                            SyntaxFactory
-                                .makeTypeExpr(type: SwiftTypeConverter.makeTypeSyntax(type, startTokenHandler: self))
-                                .asExprSyntax
-                        )
-                        builder.useDot(SyntaxFactory.makePeriodToken())
-                        builder.useName(makeIdentifier(property))
-                    }.asExprSyntax
-                }
+        var syntax = MacroExpansionExprSyntax(
+            macro: prepareStartToken(makeIdentifier("selector")),
+            leftParen: .leftParen,
+            argumentList: [],
+            rightParen: .rightParen
+        )
 
-                return SyntaxFactory
-                    .makeIdentifierExpr(
-                        identifier: makeIdentifier(property),
-                        declNameArguments: nil
-                    ).asExprSyntax
+        func makePropReference(type: SwiftType?, property: String) -> ExprSyntax {
+            if let type = type {
+                let syntax = generateMemberAccessExpr(
+                    base: SwiftTypeConverter.makeTypeSyntax(type, startTokenHandler: self),
+                    name: property
+                )
+
+                return syntax.asExprSyntax
             }
 
-            switch exp.kind {
-            case let .function(type, identifier):
-                builder.useName(generateFunctionIdentifier(type: type, identifier))
+            return IdentifierExprSyntax(
+                identifier: makeIdentifier(property)
+            ).asExprSyntax
+        }
 
-            case let .getter(type, property):
-                builder.useKind(makeIdentifier("getter"))
-                builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
-                builder.useName(makePropReference(type: type, property: property))
+        switch exp.kind {
+        case let .function(type, identifier):
+            syntax = syntax.addArgument(
+                .init(expression: generateFunctionIdentifier(type: type, identifier))
+            )
 
-            case let .setter(type, property):
-                builder.useKind(makeIdentifier("setter"))
-                builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
-                builder.useName(makePropReference(type: type, property: property))
-            }
-        }.asExprSyntax
+        case let .getter(type, property):
+            syntax = syntax.addArgument(
+                .init(
+                    label: makeIdentifier("getter"),
+                    colon: .colon.withTrailingSpace(),
+                    expression: makePropReference(type: type, property: property)
+                )
+            )
+
+        case let .setter(type, property):
+            syntax = syntax.addArgument(
+                .init(
+                    label: makeIdentifier("setter"),
+                    colon: .colon.withTrailingSpace(),
+                    expression: makePropReference(type: type, property: property)
+                )
+            )
+        }
+        
+        return syntax.asExprSyntax
     }
     
     public func generateConstant(_ constant: ConstantExpression) -> ExprSyntax {
         switch constant.constant {
         case .boolean(let bool):
-            let tokenFactory = bool ? SyntaxFactory.makeTrueKeyword : SyntaxFactory.makeFalseKeyword
-            let token = makeStartToken(tokenFactory)
+            let booleanToken = bool ? TokenSyntax.true : TokenSyntax.false
+            let token = prepareStartToken(booleanToken)
             
-            return SyntaxFactory
-                .makeBooleanLiteralExpr(booleanLiteral: token)
-                .asExprSyntax
+            return BooleanLiteralExprSyntax(booleanLiteral: token).asExprSyntax
             
         case .nil:
-            return SyntaxFactory
-                .makeNilLiteralExpr(nilKeyword: prepareStartToken(SyntaxFactory.makeNilKeyword()))
+            return NilLiteralExprSyntax(nilKeyword: prepareStartToken(.nil))
                 .asExprSyntax
             
         case let .int(value, type):
@@ -668,82 +601,77 @@ extension SwiftSyntaxProducer {
             
             switch type {
             case .binary:
-                digits = SyntaxFactory
-                    .makeIntegerLiteral("0b" + String(value, radix: 2))
+                digits = .integerLiteral("0b" + String(value, radix: 2))
                 
             case .decimal:
-                digits = SyntaxFactory.makeIntegerLiteral(value.description)
+                digits = .integerLiteral(value.description)
                 
             case .octal:
-                digits = SyntaxFactory
-                    .makeIntegerLiteral("0o" + String(value, radix: 8))
+                digits = .integerLiteral("0o" + String(value, radix: 8))
                 
             case .hexadecimal:
-                digits = SyntaxFactory
-                    .makeIntegerLiteral("0x" + String(value, radix: 16))
+                digits = .integerLiteral("0x" + String(value, radix: 16))
             }
             
-            return SyntaxFactory
-                .makeIntegerLiteralExpr(digits: prepareStartToken(digits))
+            return IntegerLiteralExprSyntax(digits: prepareStartToken(digits))
                 .asExprSyntax
             
         case .float(let value):
             let digits = prepareStartToken(
-                SyntaxFactory
-                    .makeFloatingLiteral(value.description)
+                .floatingLiteral(value.description)
             )
             
-            return SyntaxFactory
-                .makeFloatLiteralExpr(floatingDigits: digits)
+            return FloatLiteralExprSyntax(floatingDigits: digits)
                 .asExprSyntax
             
         case .double(let value):
             let digits = prepareStartToken(
-                SyntaxFactory
-                    .makeFloatingLiteral(value.description)
+                .floatingLiteral(value.description)
             )
             
-            return SyntaxFactory
-                .makeFloatLiteralExpr(floatingDigits: digits)
+            return FloatLiteralExprSyntax(floatingDigits: digits)
                 .asExprSyntax
             
         case .string(let string):
-            return StringLiteralExprSyntax { builder in
-                builder.useOpenQuote(
-                    prepareStartToken(SyntaxFactory.makeStringQuoteToken()))
-                
-                builder.addSegment(SyntaxFactory.makeStringLiteral(string).asSyntax)
-                builder.useCloseQuote(SyntaxFactory.makeStringQuoteToken())
-            }.asExprSyntax
+            return StringLiteralExprSyntax(
+                openQuote: prepareStartToken(.stringQuote),
+                segments: [
+                    .init(.init(content: string))
+                ],
+                closeQuote: .stringQuote
+            ).asExprSyntax
             
         case .rawConstant(let constant):
-            return IdentifierExprSyntax { builder in
-                builder.useIdentifier(prepareStartToken(makeIdentifier(constant)))
-            }.asExprSyntax
+            return IdentifierExprSyntax(
+                identifier: prepareStartToken(makeIdentifier(constant))
+            ).asExprSyntax
         }
     }
 
     public func generateTry(_ exp: TryExpression) -> TryExprSyntax {
-        TryExprSyntax { builder in
-            builder.useTryKeyword(makeStartToken(SyntaxFactory.makeTryKeyword))
+        let questionOrExclamationMark: TokenSyntax?
 
-            switch exp.mode {
-            case .throwable:
-                break
-            case .forced:
-                builder.useQuestionOrExclamationMark(
-                    SyntaxFactory.makeExclamationMarkToken()
-                )
-            case .optional:
-                builder.useQuestionOrExclamationMark(
-                    SyntaxFactory.makeInfixQuestionMarkToken()
-                )
-            }
+        switch exp.mode {
+        case .throwable:
+            questionOrExclamationMark = nil
 
-            addExtraLeading(.spaces(1))
-
-            builder.useExpression(generateExpression(exp.exp))
+        case .forced:
+            questionOrExclamationMark = .exclamationMark
+        case .optional:
+            questionOrExclamationMark = .infixQuestionMark
         }
+
+        let tryKeyword = prepareStartToken(.try)
+        addExtraLeading(.spaces(1))
+        let exprSyntax = generateExpression(exp.exp)
+
+        let syntax = TryExprSyntax(
+            tryKeyword: tryKeyword,
+            questionOrExclamationMark: questionOrExclamationMark,
+            expression: exprSyntax
+        )
+
+        return syntax
     }
     
     func generateOperator(_ op: SwiftOperator, mode: OperatorMode) -> ExprSyntax {
@@ -752,46 +680,32 @@ extension SwiftSyntaxProducer {
         switch mode {
         case .assignment:
             producer = { op in
-                return AssignmentExprSyntax { builder in
-                    builder.useAssignToken(
-                        self.prepareStartToken(
-                            SyntaxFactory.makeSpacedBinaryOperator(op.rawValue)
-                        )
-                    )
-                }.asExprSyntax
+                let token = self.prepareStartToken(.spacedBinaryOperator(op.rawValue))
+
+                return AssignmentExprSyntax(assignToken: token).asExprSyntax
             }
             
         case .prefix(let exp):
             producer = { op in
-                return PrefixOperatorExprSyntax { builder in
-                    builder.useOperatorToken(
-                        self.prepareStartToken(
-                            SyntaxFactory.makePrefixOperator(op.rawValue)
-                        )
-                    )
-                    builder.usePostfixExpression(exp())
-                }.asExprSyntax
+                let token = self.prepareStartToken(.prefixOperator(op.rawValue))
+
+                return PrefixOperatorExprSyntax(
+                    operatorToken: token,
+                    postfixExpression: exp()
+                ).asExprSyntax
             }
         case .infix:
             producer = { op in
-                return BinaryOperatorExprSyntax { builder in
-                    let token = self.prepareStartToken(
-                        SyntaxFactory.makeSpacedBinaryOperator(op.rawValue)
-                    )
-                    
-                    builder.useOperatorToken(token)
-                }.asExprSyntax
+                let token = self.prepareStartToken(.spacedBinaryOperator(op.rawValue))
+
+                return BinaryOperatorExprSyntax(operatorToken: token).asExprSyntax
             }
         case .postfix(let exp):
             producer = { op in
-                return PostfixUnaryExprSyntax { builder in
-                    builder.useOperatorToken(
-                        self.prepareStartToken(
-                            SyntaxFactory.makePrefixOperator(op.rawValue)
-                        )
-                    )
-                    builder.useExpression(exp())
-                }.asExprSyntax
+                return PostfixUnaryExprSyntax(
+                    expression: exp(),
+                    operatorToken: self.prepareStartToken(.postfixOperator(op.rawValue))
+                ).asExprSyntax
             }
         }
         
@@ -799,56 +713,90 @@ extension SwiftSyntaxProducer {
     }
     
     func generateFunctionIdentifier(type: SwiftType?, _ ident: FunctionIdentifier) -> ExprSyntax {
-        let declArgs = DeclNameArgumentsSyntax { builder in
-            builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
-            builder.useRightParen(SyntaxFactory.makeRightParenToken())
-            
-            for arg in ident.argumentLabels {
-                builder.addArgument(DeclNameArgumentSyntax { builder in
-                    if let arg = arg {
-                        builder.useName(makeIdentifier(arg))
-                    } else {
-                        builder.useName(SyntaxFactory.makeWildcardKeyword())
-                    }
-                    
-                    builder.useColon(SyntaxFactory.makeColonToken())
-                })
-            }
-        }
-        
         if let type = type {
             let typeSyntax = SwiftTypeConverter.makeTypeSyntax(type, startTokenHandler: self)
             
-            return MemberAccessExprSyntax { builder in
-                builder.useBase(
-                    SyntaxFactory
-                        .makeTypeExpr(type: typeSyntax)
-                        .asExprSyntax
-                )
-                
-                builder.useDot(SyntaxFactory.makePeriodToken())
-                
-                builder.useName(makeIdentifier(ident.name))
-                builder.useDeclNameArguments(declArgs)
-            }.asExprSyntax
+            let syntax = generateMemberAccessExpr(
+                base: TypeExprSyntax(type: typeSyntax).asExprSyntax,
+                name: ident.name,
+                declNameArguments: generateDeclNameArguments(argumentLabels: ident.argumentLabels)
+            )
+
+            return syntax.asExprSyntax
         } else {
-            return IdentifierExprSyntax { builder in
-                builder.useIdentifier(prepareStartToken(makeIdentifier(ident.name)))
-                builder.useDeclNameArguments(declArgs)
-            }.asExprSyntax
+            return IdentifierExprSyntax(
+                identifier: prepareStartToken(makeIdentifier(ident.name)),
+                declNameArguments: generateDeclNameArguments(argumentLabels: ident.argumentLabels)
+            ).asExprSyntax
         }
+    }
+
+    func generateMemberAccessExpr(
+        base: TypeSyntax,
+        name: String,
+        declNameArguments: DeclNameArgumentsSyntax? = nil
+    ) -> MemberAccessExprSyntax {
+
+        return generateMemberAccessExpr(
+            base: TypeExprSyntax(type: base),
+            name: name,
+            declNameArguments: declNameArguments
+        )
+    }
+
+    func generateMemberAccessExpr(
+        base: TypeExprSyntax,
+        name: String,
+        declNameArguments: DeclNameArgumentsSyntax? = nil
+    ) -> MemberAccessExprSyntax {
+
+        return generateMemberAccessExpr(
+            base: base.asExprSyntax,
+            name: name,
+            declNameArguments: declNameArguments
+        )
+    }
+
+    func generateMemberAccessExpr(
+        base: ExprSyntax,
+        name: String,
+        declNameArguments: DeclNameArgumentsSyntax? = nil
+    ) -> MemberAccessExprSyntax {
+
+        let syntax = MemberAccessExprSyntax(
+            base: base,
+            name: name,
+            declNameArguments: declNameArguments
+        )
+
+        return syntax
+    }
+
+    func generateDeclNameArguments(argumentLabels: [String?]) -> DeclNameArgumentsSyntax {
+        var declArgsSyntax = DeclNameArgumentsSyntax(arguments: [])
+
+        for arg in argumentLabels {
+            var argSyntax: DeclNameArgumentSyntax
+
+            if let arg = arg {
+                argSyntax = .init(name: makeIdentifier(arg))
+            } else {
+                argSyntax = .init(name: .wildcard)
+            }
+            
+            argSyntax = argSyntax.withColon(.colon)
+
+            declArgsSyntax = declArgsSyntax.addArgument(argSyntax)
+        }
+
+        return declArgsSyntax
     }
     
     func parenthesizeSyntax(_ exprBuilder: () -> ExprSyntax) -> ExprSyntax {
-        TupleExprSyntax { builder in
-            builder.useLeftParen(
-                makeStartToken(SyntaxFactory.makeLeftParenToken))
-            
-            builder.useRightParen(SyntaxFactory.makeRightParenToken())
-            builder.addElement(TupleExprElementSyntax { builder in
-                builder.useExpression(exprBuilder())
-            })
-        }.asExprSyntax
+        return TupleExprSyntax(
+            leftParen: prepareStartToken(.leftParen),
+            elementList: [.init(expression: exprBuilder())]
+        ).asExprSyntax
     }
     
     enum OperatorMode {

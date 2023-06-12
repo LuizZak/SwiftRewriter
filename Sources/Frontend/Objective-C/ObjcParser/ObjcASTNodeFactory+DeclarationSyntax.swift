@@ -1,5 +1,6 @@
 import Utils
 import ObjcGrammarModels
+import ObjcParserAntlr
 import GrammarModelBase
 
 extension ObjcASTNodeFactory {
