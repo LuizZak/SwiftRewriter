@@ -22,8 +22,8 @@ struct LabeledStmtBuilder {
 
         return LabeledStmtSyntax(
             leadingTrivia: labelToken.leadingTrivia,
-            labelName: .identifier(labelText),
-            labelColon: colon,
+            label: .identifier(labelText),
+            colon: colon,
             statement: syntax
         ).asStmtSyntax
     }

@@ -46,16 +46,16 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
             let rangeEnd = statements.index(statements.startIndex, offsetBy: range.upperBound)
             
             if range.lowerBound > 0 {
-                statements = statements.replacing(
-                    childAt: range.lowerBound,
-                    with: CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(statements[rangeStart]))!
+                statements = statements.with(
+                    \.[statements.index(statements.startIndex, offsetBy: range.lowerBound)],
+                    CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(statements[rangeStart]))!
                 )
             }
             
             if statements.count > range.upperBound {
-                statements = statements.replacing(
-                    childAt: range.upperBound,
-                    with: CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(statements[rangeEnd]))!
+                statements = statements.with(
+                    \.[statements.index(statements.startIndex, offsetBy: range.upperBound)],
+                    CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(statements[rangeEnd]))!
                 )
             }
         }
@@ -76,9 +76,9 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
         func addLineSpace(_ block: CodeBlockItemSyntax, _ index: CodeBlockItemListSyntax.Index) {
             let childIndex = stmts.distance(from: stmts.startIndex, to: index)
             
-            stmts = stmts.replacing(
-                childAt: childIndex,
-                with: CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(block))!
+            stmts = stmts.with(
+                \.[stmts.index(stmts.startIndex, offsetBy: childIndex)],
+                CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(block))!
             )
         }
         

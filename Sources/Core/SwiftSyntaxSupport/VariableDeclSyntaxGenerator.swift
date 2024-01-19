@@ -17,8 +17,8 @@ class VariableDeclSyntaxGenerator {
         return syntax
     }
 
-    func generateModifierList(_ modifierDecorators: [ModifiersDecoratorResult]) -> ModifierListSyntax {
-        let syntax = ModifierListSyntax(modifierDecorators.map({ $0(producer) }))
+    func generateModifierList(_ modifierDecorators: [ModifiersDecoratorResult]) -> DeclModifierListSyntax {
+        let syntax = DeclModifierListSyntax(modifierDecorators.map({ $0(producer) }))
 
         return syntax
     }
@@ -46,12 +46,12 @@ class VariableDeclSyntaxGenerator {
             attributes: attributeListSyntax,
             modifiers: modifierListSyntax,
             subscriptKeyword: producer.prepareStartToken(.keyword(.subscript)),
-            indices: producer.generateParameterClause(intention.parameters),
-            result: producer.generateReturnType(intention.returnType)
+            parameterClause: producer.generateParameterClause(intention.parameters),
+            returnClause: producer.generateReturnType(intention.returnType)
         )
 
         if let accessors = VariableDeclSyntaxGenerator.makeAccessorBlockCreator(intention, producer) {
-            syntax = syntax.with(\.accessor, accessors()) // builder.useAccessor(accessors())
+            syntax = syntax.with(\.accessorBlock, accessors())
         }
 
         return syntax.asDeclSyntax
@@ -92,7 +92,7 @@ class VariableDeclSyntaxGenerator {
             variableDecl.modifiers
         )
         
-        let letOrVar: TokenSyntax = variableDecl.constant ? .let : .var
+        let letOrVar: TokenSyntax = variableDecl.constant ? .keyword(.let) : .keyword(.var)
         
         var syntax = VariableDeclSyntax(
             attributes: attributeListSyntax,
@@ -108,11 +108,11 @@ class VariableDeclSyntaxGenerator {
             let patternSyntax =
                 generate(pattern, hasComma: false, accessors: accessors)
             
-            syntax = syntax.addBinding(patternSyntax) // syntax = syntax.withBinding(patternSyntax) // builder.useBinding(patternSyntax)
+            syntax.bindings.append(patternSyntax)
             
         case let .multiple(patterns):
             iterateWithComma(patterns) { pattern, hasComma in
-                syntax = syntax.addBinding(generate(pattern, hasComma: hasComma)) // syntax = syntax.withBinding(generate(pattern, hasComma: hasComma)) // builder.useBinding(generate(pattern, hasComma: hasComma))
+                syntax.bindings.append(generate(pattern, hasComma: hasComma))
             }
         }
 
@@ -133,7 +133,7 @@ class VariableDeclSyntaxGenerator {
 
         if let bindingType = binding.type {
             let typeSyntax = TypeAnnotationSyntax(
-                colon: .colon.withTrailingSpace(),
+                colon: .colonToken().withTrailingSpace(),
                 type: SwiftTypeConverter.makeTypeSyntax(bindingType, startTokenHandler: producer)
             )
 
@@ -143,12 +143,12 @@ class VariableDeclSyntaxGenerator {
         if hasComma {
             syntax = syntax.with(
                 \.trailingComma,
-                .comma.withTrailingSpace()
+                .commaToken().withTrailingSpace()
             )
         }
         
         if let accessor = accessors {
-            syntax = syntax.with(\.accessor, accessor())
+            syntax = syntax.with(\.accessorBlock, accessor())
         }
         
         if let initialization = binding.initialization {
@@ -173,20 +173,20 @@ class VariableDeclSyntaxGenerator {
             return {
                 var accessorDeclList = AccessorDeclListSyntax([
                     AccessorDeclSyntax(
-                        accessorKind: .keyword(.get).withTrailingSpace()
+                        accessorSpecifier: .keyword(.get).withTrailingSpace()
                     )
                 ])
                 
                 if !property.isReadOnly {
                     accessorDeclList.append(
                         AccessorDeclSyntax(
-                            accessorKind: .keyword(.set).withTrailingSpace()
+                            accessorSpecifier: .keyword(.set).withTrailingSpace()
                         )
                     )
                 }
 
-                var syntax = AccessorBlockSyntax(
-                    leftBrace: producer.prepareStartToken(.leftBrace).addingSurroundingSpaces(),
+                let syntax = AccessorBlockSyntax(
+                    leftBrace: producer.prepareStartToken(.leftBraceToken()).addingSurroundingSpaces(),
                     accessors: .accessors(accessorDeclList)
                 )
 
@@ -203,7 +203,7 @@ class VariableDeclSyntaxGenerator {
 
         return {
             producer.addExtraLeading(.spaces(1))
-            let leftBrace = producer.prepareStartToken(.leftBrace)
+            let leftBrace = producer.prepareStartToken(.leftBraceToken())
 
             let accessors: AccessorBlockSyntax.Accessors
 
@@ -223,7 +223,7 @@ class VariableDeclSyntaxGenerator {
                 producer.addExtraLeading(.newlines(1) + producer.indentation())
             }
 
-            let rightBrace = producer.prepareStartToken(.rightBrace)
+            let rightBrace = producer.prepareStartToken(.rightBraceToken())
 
             return .init(
                 leftBrace: leftBrace,
@@ -240,7 +240,7 @@ class VariableDeclSyntaxGenerator {
 
         return {
             producer.addExtraLeading(.spaces(1))
-            let leftBrace = producer.prepareStartToken(.leftBrace)
+            let leftBrace = producer.prepareStartToken(.leftBraceToken())
             
             let accessors: AccessorBlockSyntax.Accessors
 
@@ -257,7 +257,7 @@ class VariableDeclSyntaxGenerator {
                 producer.addExtraLeading(.newlines(1) + producer.indentation())
             }
 
-            let rightBrace = producer.prepareStartToken(.rightBrace)
+            let rightBrace = producer.prepareStartToken(.rightBraceToken())
 
             return .init(
                 leftBrace: leftBrace,
@@ -276,9 +276,9 @@ class VariableDeclSyntaxGenerator {
             let getter = generateGetterAccessor(getter, producer)
 
             return CodeBlockSyntax(
-                leftBrace: producer.prepareStartToken(.leftBrace).withLeadingSpace(),
+                leftBrace: producer.prepareStartToken(.leftBraceToken()).withLeadingSpace(),
                 statements: getter(),
-                rightBrace: producer.prepareStartToken(.rightBrace)
+                rightBrace: producer.prepareStartToken(.rightBraceToken())
             )
         }
     }
@@ -343,7 +343,7 @@ class VariableDeclSyntaxGenerator {
             producer.addExtraLeading(producer.indentation())
             
             let getterSyntax = AccessorDeclSyntax(
-                accessorKind: producer.prepareStartToken(.keyword(.get)).withTrailingSpace(),
+                accessorSpecifier: producer.prepareStartToken(.keyword(.get)).withTrailingSpace(),
                 body: producer.generateFunctionBody(getter)
             )
             
@@ -352,22 +352,22 @@ class VariableDeclSyntaxGenerator {
             let setterSyntax: AccessorDeclSyntax
 
             let setToken = producer.prepareStartToken(
-                TokenSyntax.set
+                TokenSyntax.keyword(.set)
             )
 
             if setter.valueIdentifier != "newValue" {
                 setterSyntax = AccessorDeclSyntax(
-                    accessorKind: setToken,
-                    parameter: AccessorParameterSyntax(
-                        leftParen: producer.prepareStartToken(.leftParen),
+                    accessorSpecifier: setToken,
+                    parameters: AccessorParametersSyntax(
+                        leftParen: producer.prepareStartToken(.leftParenToken()),
                         name: makeIdentifier(setter.valueIdentifier),
-                        rightParen: .rightParen.withTrailingSpace()
+                        rightParen: .rightParenToken().withTrailingSpace()
                     ),
                     body: producer.generateFunctionBody(setter.body)
                 )
             } else {
                 setterSyntax = AccessorDeclSyntax(
-                    accessorKind: setToken.withTrailingSpace(),
+                    accessorSpecifier: setToken.withTrailingSpace(),
                     body: producer.generateFunctionBody(setter.body)
                 )
             }

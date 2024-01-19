@@ -69,7 +69,7 @@ public class SwiftTypeConverter {
         case .metatype(let type):
             return MetatypeTypeSyntax(
                     baseType: makeTypeSyntax(type, startTokenHandler: startTokenHandler),
-                    typeOrProtocol: makeIdentifier("Type")
+                    metatypeSpecifier: makeIdentifier("Type")
                 ).asTypeSyntax
             
         case .nested(let nested):
@@ -93,33 +93,33 @@ public class SwiftTypeConverter {
                 switch attribute {
                 case .autoclosure:
                     attrSyntax = AttributeSyntax(
-                        atSignToken: .atSign,
+                        atSign: .atSignToken(),
                         attributeName: makeIdentifierType("autoclosure").withTrailingSpace(),
                         leftParen: nil,
-                        argument: nil,
+                        arguments: nil,
                         rightParen: nil
                     )
                     
                 case .escaping:
                     attrSyntax = AttributeSyntax(
-                        atSignToken: .atSign,
+                        atSign: .atSignToken(),
                         attributeName: makeIdentifierType("escaping").withTrailingSpace(),
                         leftParen: nil,
-                        argument: nil,
+                        arguments: nil,
                         rightParen: nil
                     )
                     
                 case .convention(let convention):
                     attrSyntax = AttributeSyntax(
-                        atSignToken: .atSign,
+                        atSign: .atSignToken(),
                         attributeName: makeIdentifierType("convention"),
-                        leftParen: .leftParen,
-                        argument: .argumentList([.init(expression: makeIdentifierExpr(convention.rawValue))]),
-                        rightParen: .rightParen.withTrailingSpace()
+                        leftParen: .leftParenToken(),
+                        arguments: .argumentList([.init(expression: makeIdentifierExpr(convention.rawValue))]),
+                        rightParen: .rightParenToken().withTrailingSpace()
                     )
                 }
                 
-                syntax = syntax.addAttribute(Syntax(attrSyntax))
+                syntax.attributes.append(.attribute(attrSyntax))
             }
 
             return syntax.asTypeSyntax
@@ -165,23 +165,23 @@ public class SwiftTypeConverter {
                     )
                 }
 
-                syntax = syntax.addElement(elementSyntax)
+                syntax.elements.append(elementSyntax)
             }
 
             return syntax.asTypeSyntax
             
         case .array(let inner):
             let syntax = ArrayTypeSyntax(
-                elementType: makeTypeSyntax(inner, startTokenHandler: startTokenHandler)
+                element: makeTypeSyntax(inner, startTokenHandler: startTokenHandler)
             )
 
             return syntax.asTypeSyntax
             
         case let .dictionary(key, value):
             let syntax = DictionaryTypeSyntax(
-                keyType: makeTypeSyntax(key, startTokenHandler: startTokenHandler),
-                colon: .colon.withTrailingSpace(),
-                valueType: makeTypeSyntax(value, startTokenHandler: startTokenHandler)
+                key: makeTypeSyntax(key, startTokenHandler: startTokenHandler),
+                colon: .colonToken().withTrailingSpace(),
+                value: makeTypeSyntax(value, startTokenHandler: startTokenHandler)
             )
 
             return syntax.asTypeSyntax
@@ -195,10 +195,10 @@ public class SwiftTypeConverter {
     ) -> FunctionTypeSyntax {
 
         let syntax = FunctionTypeSyntax(
-            leftParen: .leftParen,
-            arguments: makeTupleTypeSyntax(parameters, startTokenHandler: startTokenHandler).elements,
-            rightParen: .rightParen,
-            output: makeReturnClauseSyntax(makeTypeSyntax(returnType, startTokenHandler: startTokenHandler))
+            leftParen: .leftParenToken(),
+            parameters: makeTupleTypeSyntax(parameters, startTokenHandler: startTokenHandler).elements,
+            rightParen: .rightParenToken(),
+            returnClause: makeReturnClauseSyntax(makeTypeSyntax(returnType, startTokenHandler: startTokenHandler))
         )
 
         return syntax
@@ -218,7 +218,7 @@ public class SwiftTypeConverter {
         var syntax = TupleTypeSyntax(elements: [])
         
         iterateWithComma(types) { (type, hasComma) in
-            syntax = syntax.addElement(
+            syntax.elements.append(
                 makeTupleTypeElementSyntax(
                     type,
                     hasComma: hasComma,
@@ -243,7 +243,7 @@ public class SwiftTypeConverter {
         if hasComma {
             syntax = syntax.with(
                 \.trailingComma,
-                .comma.withTrailingSpace()
+                .commaToken().withTrailingSpace()
             )
         }
 
@@ -261,7 +261,7 @@ public class SwiftTypeConverter {
                 nestedType.first,
                 startTokenHandler: startTokenHandler
             ),
-            period: .period,
+            period: .periodToken(),
             name: typeSyntax.name,
             genericArgumentClause: typeSyntax.genericArgumentClause
         )
@@ -274,7 +274,7 @@ public class SwiftTypeConverter {
             
             return MemberTypeSyntax(
                 baseType: previous.asTypeSyntax,
-                period: .period,
+                period: .periodToken(),
                 name: typeSyntax.name,
                 genericArgumentClause: typeSyntax.genericArgumentClause
             )
@@ -297,9 +297,9 @@ public class SwiftTypeConverter {
             let genericArgumentList = GenericArgumentListSyntax(
                 mapWithComma(types) { (type, hasComma) -> GenericArgumentSyntax in
                     GenericArgumentSyntax(
-                        argumentType: type,
+                        argument: type,
                         trailingComma: hasComma
-                            ? .comma.withTrailingSpace()
+                            ? .commaToken().withTrailingSpace()
                             : nil
                     )
                 }

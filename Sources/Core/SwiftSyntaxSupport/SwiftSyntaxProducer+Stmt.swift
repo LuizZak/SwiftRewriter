@@ -26,7 +26,7 @@ extension SwiftSyntaxProducer {
         }
         
         var syntax = CodeBlockSyntax(
-            leftBrace: prepareStartToken(.leftBrace),
+            leftBrace: prepareStartToken(.leftBraceToken()),
             statements: []
         )
 
@@ -38,14 +38,14 @@ extension SwiftSyntaxProducer {
             addExtraLeading(.newlines(1) + indentation())
 
             if let stmtSyntax = stmt(self) {
-                syntax = syntax.addStatement(.init(item: stmtSyntax))
+                syntax.statements.append(.init(item: stmtSyntax))
             }
         }
         
         deindent()
 
         syntax = syntax.with(\.rightBrace, 
-            .rightBrace
+            .rightBraceToken()
                 .onNewline()
                 .addingLeadingTrivia(indentation())
                 .withExtraLeading(consuming: &extraLeading)
@@ -55,7 +55,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateCompound(_ compoundStmt: CompoundStatement) -> CodeBlockSyntax {
-        var leftBrace = prepareStartToken(.leftBrace)
+        var leftBrace = prepareStartToken(.leftBraceToken())
         indent()
 
         // Apply comments as a trailing trivia for the leading brace
@@ -77,13 +77,13 @@ extension SwiftSyntaxProducer {
         let stmts = _generateStatements(compoundStmt.statements)
         
         for stmt in stmts {
-            syntax = syntax.addStatement(stmt)
+            syntax.statements.append(stmt)
         }
 
         deindent()
 
         syntax = syntax.with(\.rightBrace, 
-            .rightBrace
+            .rightBraceToken()
                 .onNewline()
                 .addingLeadingTrivia(indentation())
                 .withExtraLeading(consuming: &extraLeading)
@@ -169,7 +169,7 @@ extension SwiftSyntaxProducer {
 
             let labelToken = prepareStartToken(.identifier(label))
 
-            let builder = LabeledStmtBuilder(label: (labelToken, labelText: label, colon: .colon))
+            let builder = LabeledStmtBuilder(label: (labelToken, labelText: label, colon: .colonToken()))
 
             producer.addExtraLeading(.newlines(1) + producer.indentation())
 
@@ -377,7 +377,7 @@ extension SwiftSyntaxProducer {
     public func generateReturn(_ stmt: ReturnStatement) -> ReturnStmtSyntax {
         let syntax: ReturnStmtSyntax
 
-        let returnKeywordSyntax = prepareStartToken(.return)
+        let returnKeywordSyntax = prepareStartToken(.keyword(.return))
 
         if let exp = stmt.exp {
             syntax = ReturnStmtSyntax(
@@ -396,12 +396,12 @@ extension SwiftSyntaxProducer {
 
         if let label = stmt.targetLabel {
             syntax = ContinueStmtSyntax(
-                continueKeyword: prepareStartToken(.continue).withTrailingSpace(),
+                continueKeyword: prepareStartToken(.keyword(.continue)).withTrailingSpace(),
                 label: makeIdentifier(label)
             )
         } else {
             syntax = ContinueStmtSyntax(
-                continueKeyword: prepareStartToken(.continue)
+                continueKeyword: prepareStartToken(.keyword(.continue))
             )
         }
 
@@ -413,21 +413,21 @@ extension SwiftSyntaxProducer {
 
         if let label = stmt.targetLabel {
             syntax = BreakStmtSyntax(
-                breakKeyword: prepareStartToken(.break).withTrailingSpace(),
+                breakKeyword: prepareStartToken(.keyword(.break)).withTrailingSpace(),
                 label: makeIdentifier(label)
             )
         } else {
             syntax = BreakStmtSyntax(
-                breakKeyword: prepareStartToken(.break)
+                breakKeyword: prepareStartToken(.keyword(.break))
             )
         }
 
         return syntax
     }
     
-    public func generateFallthrough(_ stmt: FallthroughStatement) -> FallthroughStmtSyntax {
-        let syntax = FallthroughStmtSyntax(
-            fallthroughKeyword: prepareStartToken(.fallthrough)
+    public func generateFallthrough(_ stmt: FallthroughStatement) -> FallThroughStmtSyntax {
+        let syntax = FallThroughStmtSyntax(
+            fallthroughKeyword: prepareStartToken(.keyword(.fallthrough))
         )
 
         return syntax
@@ -437,12 +437,12 @@ extension SwiftSyntaxProducer {
         var syntax = IfExprSyntax(conditions: [], body: .init(statements: []))
         
         syntax = syntax.with(\.ifKeyword, 
-            prepareStartToken(.if).withTrailingSpace()
+            prepareStartToken(.keyword(.if)).withTrailingSpace()
         )
         
         if let pattern = stmt.pattern {
             let bindingConditionSyntax = OptionalBindingConditionSyntax(
-                bindingSpecifier: prepareStartToken(.let).withTrailingSpace(),
+                bindingSpecifier: prepareStartToken(.keyword(.let)).withTrailingSpace(),
                 pattern: generatePattern(pattern),
                 initializer: .init(
                     equal: .equalToken().addingSurroundingSpaces(),
@@ -452,7 +452,7 @@ extension SwiftSyntaxProducer {
 
             let conditionSyntax = ConditionElementSyntax(condition: .optionalBinding(bindingConditionSyntax))
 
-            syntax = syntax.addCondition(conditionSyntax.withTrailingSpace())
+            syntax.conditions.append(conditionSyntax.withTrailingSpace())
         } else {
             let conditionSyntax = ConditionElementSyntax(
                 condition: .expression(
@@ -460,14 +460,15 @@ extension SwiftSyntaxProducer {
                 )
             )
 
-            syntax = syntax.addCondition(conditionSyntax)
+            syntax.conditions.append(conditionSyntax)
         }
         
         syntax = syntax.with(\.body, generateCompound(stmt.body))
         
         if let _else = stmt.elseBody {
-            syntax = syntax.with(\.elseKeyword, 
-                .else.addingSurroundingSpaces()
+            syntax = syntax.with(
+                \.elseKeyword, 
+                .keyword(.else).addingSurroundingSpaces()
             )
             
             if _else.statements.count == 1, let elseIfStmt = _else.statements[0] as? IfStatement {
@@ -481,7 +482,7 @@ extension SwiftSyntaxProducer {
     }
     
     public func generateSwitchStmt(_ stmt: SwitchStatement) -> SwitchExprSyntax {
-        let switchKeyword = prepareStartToken(.switch).withTrailingSpace()
+        let switchKeyword = prepareStartToken(.keyword(.switch)).withTrailingSpace()
         let expSyntax = generateExpression(stmt.exp)
 
         var syntaxes: [SwitchCaseListSyntax.Element] = []
@@ -504,10 +505,10 @@ extension SwiftSyntaxProducer {
 
         let syntax = SwitchExprSyntax(
             switchKeyword: switchKeyword,
-            expression: expSyntax,
-            leftBrace: .leftBrace.withLeadingSpace(),
+            subject: expSyntax,
+            leftBrace: .leftBraceToken().withLeadingSpace(),
             cases: .init(syntaxes),
-            rightBrace: .rightBrace.withLeadingTrivia(.newlines(1) + indentation())
+            rightBrace: .rightBraceToken().withLeadingTrivia(.newlines(1) + indentation())
         )
 
         return syntax
@@ -530,7 +531,7 @@ extension SwiftSyntaxProducer {
         let stmts = _generateStatements(switchCase.statements)
         
         for stmt in stmts {
-            syntax = syntax.addStatement(stmt) // builder.useStatement(stmt)
+            syntax.statements.append(stmt)
         }
 
         return syntax
@@ -542,7 +543,7 @@ extension SwiftSyntaxProducer {
         
         var syntax = SwitchCaseSyntax(
             label: .default(
-                .init(defaultKeyword: prepareStartToken(.default))
+                .init(defaultKeyword: prepareStartToken(.keyword(.default)))
             ),
             statements: []
         )
@@ -555,7 +556,7 @@ extension SwiftSyntaxProducer {
         let stmts = _generateStatements(defaultCase.statements)
         
         for stmt in stmts {
-            syntax = syntax.addStatement(stmt) // builder.useStatement(stmt)
+            syntax.statements.append(stmt)
         }
 
         return syntax
@@ -563,22 +564,22 @@ extension SwiftSyntaxProducer {
     
     public func generateSwitchCaseLabel(_ _case: SwitchCase) -> SwitchCaseSyntax.Label {
         var syntax = SwitchCaseLabelSyntax(
-            caseKeyword: prepareStartToken(.case).withTrailingSpace(),
+            caseKeyword: prepareStartToken(.keyword(.case)).withTrailingSpace(),
             caseItems: []
         )
 
         iterateWithComma(_case.patterns) { (item, hasComma) in
-            var itemSyntax = CaseItemSyntax(pattern: generatePattern(item))
+            var itemSyntax = SwitchCaseItemSyntax(pattern: generatePattern(item))
 
             itemSyntax = itemSyntax.with(\.pattern, generatePattern(item))
             
             if hasComma {
                 itemSyntax = itemSyntax.with(\.trailingComma, 
-                    .comma.withTrailingSpace()
+                    .commaToken().withTrailingSpace()
                 )
             }
 
-            syntax = syntax.addCaseItem(itemSyntax)
+            syntax.caseItems.append(itemSyntax)
         }
 
         return .case(syntax)
@@ -586,7 +587,7 @@ extension SwiftSyntaxProducer {
     
     public func generateWhileStmt(_ stmt: WhileStatement) -> WhileStmtSyntax {
         let syntax = WhileStmtSyntax(
-            whileKeyword: prepareStartToken(.while).withTrailingSpace(),
+            whileKeyword: prepareStartToken(.keyword(.while)).withTrailingSpace(),
             conditions: [ConditionElementSyntax(
                 condition: .expression(generateExpression(stmt.exp).withTrailingSpace())
             )],
@@ -596,23 +597,23 @@ extension SwiftSyntaxProducer {
         return syntax
     }
     
-    public func generateDoWhileStmt(_ stmt: RepeatWhileStatement) -> RepeatWhileStmtSyntax {
-        let syntax = RepeatWhileStmtSyntax(
-            repeatKeyword: prepareStartToken(.repeat).withTrailingSpace(),
+    public func generateDoWhileStmt(_ stmt: RepeatWhileStatement) -> RepeatStmtSyntax {
+        let syntax = RepeatStmtSyntax(
+            repeatKeyword: prepareStartToken(.keyword(.repeat)).withTrailingSpace(),
             body: generateCompound(stmt.body),
-            whileKeyword: prepareStartToken(.while).addingSurroundingSpaces(),
+            whileKeyword: prepareStartToken(.keyword(.while)).addingSurroundingSpaces(),
             condition: generateExpression(stmt.exp)
         )
 
         return syntax
     }
     
-    public func generateForIn(_ stmt: ForStatement) -> ForInStmtSyntax {
-        let syntax = ForInStmtSyntax(
-            forKeyword: prepareStartToken(.for).withTrailingSpace(),
+    public func generateForIn(_ stmt: ForStatement) -> ForStmtSyntax {
+        let syntax = ForStmtSyntax(
+            forKeyword: prepareStartToken(.keyword(.for)).withTrailingSpace(),
             pattern: generatePattern(stmt.pattern),
-            inKeyword: .in.addingSurroundingSpaces(),
-            sequenceExpr: generateExpression(stmt.exp).withTrailingSpace(),
+            inKeyword: .keyword(.in).addingSurroundingSpaces(),
+            sequence: generateExpression(stmt.exp).withTrailingSpace(),
             body: generateCompound(stmt.body)
         )
         
@@ -620,7 +621,7 @@ extension SwiftSyntaxProducer {
     }
     
     public func generateDo(_ stmt: DoStatement) -> DoStmtSyntax {
-        let doKeyword = prepareStartToken(.do).withTrailingSpace()
+        let doKeyword = prepareStartToken(.keyword(.do)).withTrailingSpace()
         let bodySyntax = generateCompound(stmt.body)
         let catchClausesListSyntax = CatchClauseListSyntax(stmt.catchBlocks.map({ generateCatchBlock($0).withLeadingSpace() }))
 
@@ -635,12 +636,12 @@ extension SwiftSyntaxProducer {
 
     public func generateCatchBlock(_ catchBlock: CatchBlock) -> CatchClauseSyntax {
         var syntax = CatchClauseSyntax(
-            catchKeyword: prepareStartToken(.catch).withTrailingSpace(),
+            catchKeyword: prepareStartToken(.keyword(.catch)).withTrailingSpace(),
             body: .init(statements: [])
         )
 
         if let pattern = catchBlock.pattern {
-            syntax = syntax.addCatchItem(
+            syntax.catchItems.append(
                 generateCatchItem(from: pattern)
                 .withTrailingSpace()
             )
@@ -657,7 +658,7 @@ extension SwiftSyntaxProducer {
         )
 
         if hasComma {
-            syntax = syntax.with(\.trailingComma, .comma)
+            syntax = syntax.with(\.trailingComma, .commaToken())
         }
 
         return syntax
@@ -665,7 +666,7 @@ extension SwiftSyntaxProducer {
     
     public func generateDefer(_ stmt: DeferStatement) -> DeferStmtSyntax {
         let syntax = DeferStmtSyntax(
-            deferKeyword: prepareStartToken(.defer).withTrailingSpace(),
+            deferKeyword: prepareStartToken(.keyword(.defer)).withTrailingSpace(),
             body: generateCompound(stmt.body)
         )
         
@@ -674,8 +675,8 @@ extension SwiftSyntaxProducer {
 
     public func generateLocalFunction(_ stmt: LocalFunctionStatement) -> FunctionDeclSyntax {
         let syntax = FunctionDeclSyntax(
-            funcKeyword: prepareStartToken(.func).withTrailingSpace(),
-            identifier: makeIdentifier(stmt.function.identifier),
+            funcKeyword: prepareStartToken(.keyword(.func)).withTrailingSpace(),
+            name: makeIdentifier(stmt.function.identifier),
             signature: generateSignature(stmt.function.signature).withTrailingSpace(),
             body: generateCompound(stmt.function.body)
         )
@@ -685,7 +686,7 @@ extension SwiftSyntaxProducer {
 
     public func generateThrow(_ stmt: ThrowStatement) -> ThrowStmtSyntax {
         let syntax = ThrowStmtSyntax(
-            throwKeyword: prepareStartToken(.throw).withTrailingSpace(),
+            throwKeyword: prepareStartToken(.keyword(.throw)).withTrailingSpace(),
             expression: generateExpression(stmt.exp)
         )
 
@@ -715,10 +716,10 @@ extension SwiftSyntaxProducer {
                     
                 if hasComma {
                     elementSyntax = elementSyntax.with(\.trailingComma, 
-                        .comma.withTrailingSpace()
+                        .commaToken().withTrailingSpace()
                     )
                 }
-                syntax = syntax.addElement(elementSyntax)
+                syntax.elements.append(elementSyntax)
             }
 
             return syntax.asPatternSyntax
@@ -729,9 +730,9 @@ extension SwiftSyntaxProducer {
         let bindingSpecifier: TokenSyntax
 
         if isConstant {
-            bindingSpecifier = prepareStartToken(.let).withTrailingSpace()
+            bindingSpecifier = prepareStartToken(.keyword(.let)).withTrailingSpace()
         } else {
-            bindingSpecifier = prepareStartToken(.var).withTrailingSpace()
+            bindingSpecifier = prepareStartToken(.keyword(.var)).withTrailingSpace()
         }
 
         let syntax = ValueBindingPatternSyntax(

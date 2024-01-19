@@ -16,7 +16,7 @@ extension SyntaxProtocol {
     func withExtraLeading(consuming trivia: inout Trivia?) -> Self {
         if let t = trivia {
             trivia = nil
-            return withLeadingTrivia(t + (leadingTrivia ?? []))
+            return withLeadingTrivia(t + leadingTrivia)
         }
         
         return self
@@ -39,11 +39,11 @@ extension SyntaxProtocol {
     }
     
     func addingLeadingTrivia(_ trivia: Trivia) -> Self {
-        withLeadingTrivia((leadingTrivia ?? []) + trivia)
+        withLeadingTrivia(leadingTrivia + trivia)
     }
     
     func addingTrailingTrivia(_ trivia: Trivia) -> Self {
-        withTrailingTrivia((trailingTrivia ?? []) + trivia)
+        withTrailingTrivia(trailingTrivia + trivia)
     }
     
     func addingSurroundingSpaces() -> Self {
