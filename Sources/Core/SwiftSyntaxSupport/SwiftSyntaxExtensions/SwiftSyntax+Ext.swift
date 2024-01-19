@@ -4,6 +4,14 @@ extension SyntaxProtocol {
     var asSyntax: Syntax {
         return Syntax(self)
     }
+
+    func withLeadingTrivia(_ trivia: Trivia) -> Self {
+        self.with(\.leadingTrivia, trivia)
+    }
+
+    func withTrailingTrivia(_ trivia: Trivia) -> Self {
+        self.with(\.trailingTrivia, trivia)
+    }
     
     func withExtraLeading(consuming trivia: inout Trivia?) -> Self {
         if let t = trivia {
@@ -104,5 +112,11 @@ extension DeclSyntaxProtocol {
 
     func inCodeBlockItem() -> CodeBlockItemSyntax.Item {
         .decl(self.asDeclSyntax)
+    }
+}
+
+extension TokenSyntax {
+    static func spacedBinaryOperator(_ text: String) -> TokenSyntax {
+        .binaryOperator(text)
     }
 }

@@ -217,16 +217,15 @@ extension SwiftSyntaxProducer {
     
     /// Generates a source file syntax from a given file generation intention.
     public func generateFile(_ file: FileGenerationIntention) -> SourceFileSyntax {
-        var fileSyntax = SourceFileSyntax()
+        var fileSyntax = SourceFileSyntax(statements: [])
 
         // Imports come before any header #directive comments
         iterating(file.importDirectives) { module in
             let syntax = generateImport(module)
             
             //let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax.asSyntax) }
-            
-            fileSyntax = fileSyntax.addStatement(
-                CodeBlockItemSyntax.init(item: .decl(syntax.asDeclSyntax))
+            fileSyntax.statements.append(
+                CodeBlockItemSyntax(item: .decl(syntax.asDeclSyntax))
             )
         }
         
@@ -242,60 +241,61 @@ extension SwiftSyntaxProducer {
         iterating(file.typealiasIntentions) { intention in
             let syntax = generateTypealias(intention)
             
-            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+            fileSyntax.statements.append(syntax.inCodeBlock())
         }
         
         iterating(file.enumIntentions) { intention in
             let syntax = generateEnum(intention)
             
-            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+            fileSyntax.statements.append(syntax.inCodeBlock())
         }
         
         iterating(file.structIntentions) { _struct in
             let syntax = generateStruct(_struct)
             
-            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+            fileSyntax.statements.append(syntax.inCodeBlock())
         }
         
         iterating(file.globalVariableIntentions) { variable in
             let syntax = varDeclGenerator.generateGlobalVariable(variable)
             
-            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+            fileSyntax.statements.append(syntax.inCodeBlock())
         }
         
         iterating(file.globalFunctionIntentions) { function in
             let syntax = generateFunction(function, alwaysEmitBody: true)
             
-            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+            fileSyntax.statements.append(syntax.inCodeBlock())
         }
         
         iterating(file.protocolIntentions) { _protocol in
             let syntax = generateProtocol(_protocol)
             
-            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+            fileSyntax.statements.append(syntax.inCodeBlock())
         }
         
         iterating(file.classIntentions) { _class in
             let syntax = generateClass(_class)
             
-            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+            fileSyntax.statements.append(syntax.inCodeBlock())
         }
         
         iterating(file.extensionIntentions) { _class in
             let syntax = generateExtension(_class)
             
-            fileSyntax = fileSyntax.addStatement(syntax.inCodeBlock())
+            fileSyntax.statements.append(syntax.inCodeBlock())
         }
         
         // No one consumed the leading trivia - emit a dummy token just so we
         // can have a file with preprocessor directives in place
         if !didModifyExtraLeading && hasHeaderTrivia {
             extraLeading = extraLeading.map { Trivia(pieces: $0.dropLast()) }
-            
-            let item = CodeBlockItemSyntax(item: .nonEmptyTokenList([
-                .identifier("", presence: .present)
+
+            let item = CodeBlockItemSyntax(item: .expr(
+                DeclReferenceExprSyntax(baseName: .identifier(""))
                 .withExtraLeading(consuming: &extraLeading)
-            ]))
+                .asExprSyntax
+            ))
 
             fileSyntax = fileSyntax.addStatement(item)
         }
@@ -322,7 +322,7 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     func generateImport(_ module: String) -> ImportDeclSyntax {
         return ImportDeclSyntax(
-            importTok: prepareStartToken(.importKeyword()).withTrailingSpace(),
+            importTok: prepareStartToken(.keyword(.import)).withTrailingSpace(),
             path: [.init(name: makeIdentifier(module))]
         )
     }
@@ -330,12 +330,12 @@ extension SwiftSyntaxProducer {
 
 // MARK: - Typealias Intention
 extension SwiftSyntaxProducer {
-    func generateTypealias(_ intention: TypealiasIntention) -> TypealiasDeclSyntax {
+    func generateTypealias(_ intention: TypealiasIntention) -> TypeAliasDeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
         addCommentsIfAvailable(intention)
 
-        return TypealiasDeclSyntax(
-            typealiasKeyword: prepareStartToken(.typealias).withTrailingSpace(),
+        return TypeAliasDeclSyntax(
+            typealiasKeyword: prepareStartToken(.keyword(.typealias)).withTrailingSpace(),
             identifier: makeIdentifier(intention.name),
             initializer: .init(
                 equal: .equalToken().addingSurroundingSpaces(),
@@ -360,13 +360,13 @@ extension SwiftSyntaxProducer {
         
         var syntax = EnumDeclSyntax(
             attributes: AttributeListSyntax(attributesSyntax),
-            enumKeyword: prepareStartToken(.enum).withTrailingSpace(),
+            enumKeyword: prepareStartToken(.keyword(.enum)).withTrailingSpace(),
             identifier: makeIdentifier(intention.typeName),
-            members: .init()
+            memberBlock: .init()
         )
         
-        syntax = syntax.withInheritanceClause(TypeInheritanceClauseSyntax(
-            colon: prepareStartToken(.colon).withTrailingSpace(),
+        syntax = syntax.with(\.inheritanceClause, TypeInheritanceClauseSyntax(
+            colon: prepareStartToken(.colonToken()).withTrailingSpace(),
             inheritedTypeCollection: [
                 .init(typeName: SwiftTypeConverter.makeTypeSyntax(intention.rawValueType, startTokenHandler: self))
             ]
@@ -380,7 +380,7 @@ extension SwiftSyntaxProducer {
         
         deindent()
         
-        syntax = syntax.withMembers(members)
+        syntax = syntax.with(\.members, members)
 
         return syntax
     }
@@ -389,7 +389,8 @@ extension SwiftSyntaxProducer {
         addCommentsIfAvailable(_case)
         
         var syntax = EnumCaseDeclSyntax(
-            caseKeyword: prepareStartToken(.case).withTrailingSpace()
+            caseKeyword: prepareStartToken(.keyword(.case)).withTrailingSpace(),
+            elements: []
         )
 
         let initializerClause: InitializerClauseSyntax?
@@ -430,7 +431,7 @@ extension SwiftSyntaxProducer {
         addHistoryTrackingLeadingIfEnabled(intention)
         addCommentsIfAvailable(intention)
 
-        var syntax = ExtensionDeclSyntax(extendedType: MissingTypeSyntax())
+        var syntax = ExtensionDeclSyntax(extendedType: MissingTypeSyntax(), memberBlock: .init())
 
         for attribute in attributes(for: intention, inline: false) {
             syntax = syntax.addAttribute(attribute().asSyntax)
@@ -439,18 +440,18 @@ extension SwiftSyntaxProducer {
             syntax = syntax.addModifier(modifier(self))
         }
         
-        syntax = syntax.withExtensionKeyword(
-            prepareStartToken(.extensionKeyword())
+        syntax = syntax.with(\.extensionKeyword, 
+            prepareStartToken(.keyword(.extension))
                 .addingTrailingSpace()
         )
         
         // TODO: Support nested type extension
-        syntax = syntax.withExtendedType(
+        syntax = syntax.with(\.extendedType, 
             SwiftTypeConverter.makeTypeSyntax(.typeName(intention.typeName), startTokenHandler: self)
         )
         
         if let inheritanceClause = generateInheritanceClause(intention) {
-            syntax = syntax.withInheritanceClause(inheritanceClause)
+            syntax = syntax.with(\.inheritanceClause, inheritanceClause)
         } else {
             addExtraLeading(.spaces(1))
         }
@@ -461,7 +462,7 @@ extension SwiftSyntaxProducer {
         
         deindent()
         
-        syntax = syntax.withMembers(members)
+        syntax = syntax.with(\.members, members)
 
         return syntax
     }
@@ -486,14 +487,14 @@ extension SwiftSyntaxProducer {
         var syntax = ClassDeclSyntax(
             attributes: AttributeListSyntax(attributesSyntax),
             modifiers: ModifierListSyntax(modifiersSyntax),
-            classKeyword: prepareStartToken(.class).addingTrailingSpace(),
+            classKeyword: prepareStartToken(.keyword(.class)).addingTrailingSpace(),
             identifier: makeIdentifier(intention.typeName).withTrailingSpace(),
-            members: MemberDeclBlockSyntax()
+            memberBlock: .init()
         )
         
         if let inheritanceClause = generateInheritanceClause(intention) {
-            syntax = syntax.withIdentifier(identifier)
-            syntax = syntax.withInheritanceClause(inheritanceClause)
+            syntax = syntax.with(\.identifier, identifier)
+            syntax = syntax.with(\.inheritanceClause, inheritanceClause)
         }
         
         indent()
@@ -502,12 +503,12 @@ extension SwiftSyntaxProducer {
         
         deindent()
         
-        syntax = syntax.withMembers(members)
+        syntax = syntax.with(\.members, members)
 
         return syntax
     }
     
-    public func generateInheritanceClause(_ type: KnownType) -> TypeInheritanceClauseSyntax? {
+    public func generateInheritanceClause(_ type: KnownType) -> InheritanceClauseSyntax? {
         var inheritances: [String] = []
         if let supertype = type.supertype?.asTypeName {
             inheritances.append(supertype)
@@ -542,9 +543,9 @@ extension SwiftSyntaxProducer {
             return nil
         }
 
-        var syntax = TypeInheritanceClauseSyntax()
+        var syntax = InheritanceClauseSyntax(inheritedTypes: [])
 
-        syntax = syntax.withColon(.colonToken().withTrailingSpace())
+        syntax = syntax.with(\.colon, .colonToken().withTrailingSpace())
             
         for (i, inheritance) in inheritances.enumerated() {
             var typeSyntax = InheritedTypeSyntax(typeName: MissingTypeSyntax())
@@ -552,15 +553,17 @@ extension SwiftSyntaxProducer {
             var identifier = makeIdentifier(inheritance)
             
             if i != inheritances.count - 1 {
-                typeSyntax = typeSyntax.withTrailingComma(
+                typeSyntax = typeSyntax.with(
+                    \.trailingComma,
                     .commaToken().withTrailingSpace()
                 )
             } else {
                 identifier = identifier.withTrailingSpace()
             }
             
-            typeSyntax = typeSyntax.withTypeName(
-                SimpleTypeIdentifierSyntax(name: identifier).asTypeSyntax
+            typeSyntax = typeSyntax.with(
+                \.typeName,
+                IdentifierTypeSyntax(name: identifier).asTypeSyntax
             )
             
             syntax = syntax.addInheritedType(typeSyntax)
@@ -578,25 +581,25 @@ extension SwiftSyntaxProducer {
 
         addExtraLeading(indentation())
 
-        var syntax = StructDeclSyntax(identifier: "")
+        var syntax = StructDeclSyntax(identifier: "", memberBlock: .init())
         
         let attributes = self.attributes(for: intention, inline: false)
         for attribute in attributes {
             syntax = syntax.addAttribute(attribute().asSyntax)
         }
-        syntax = syntax.withStructKeyword(
-            prepareStartToken(.structKeyword())
+        syntax = syntax.with(\.structKeyword, 
+            prepareStartToken(.keyword(.struct))
                 .addingTrailingSpace()
         )
         
         let identifier = makeIdentifier(intention.typeName)
         
         if let inheritanceClause = generateInheritanceClause(intention) {
-            syntax = syntax.withIdentifier(identifier)
+            syntax = syntax.with(\.identifier, identifier)
             
-            syntax = syntax.withInheritanceClause(inheritanceClause)
+            syntax = syntax.with(\.inheritanceClause, inheritanceClause)
         } else {
-            syntax = syntax.withIdentifier(identifier.withTrailingSpace())
+            syntax = syntax.with(\.identifier, identifier.withTrailingSpace())
         }
         
         indent()
@@ -605,7 +608,7 @@ extension SwiftSyntaxProducer {
         
         deindent()
         
-        syntax = syntax.withMembers(members)
+        syntax = syntax.with(\.members, members)
 
         return syntax
     }
@@ -619,25 +622,25 @@ extension SwiftSyntaxProducer {
         
         addExtraLeading(indentation())
 
-        var syntax = ProtocolDeclSyntax(identifier: "")
+        var syntax = ProtocolDeclSyntax(identifier: "", memberBlock: .init())
         
         let attributes = self.attributes(for: intention, inline: false)
         for attribute in attributes {
             syntax = syntax.addAttribute(attribute().asSyntax)
         }
-        syntax = syntax.withProtocolKeyword(
-            prepareStartToken(.protocolKeyword())
+        syntax = syntax.with(\.protocolKeyword, 
+            prepareStartToken(.keyword(.protocol))
                 .addingTrailingSpace()
         )
         
         let identifier = makeIdentifier(intention.typeName)
         
         if let inheritanceClause = generateInheritanceClause(intention) {
-            syntax = syntax.withIdentifier(identifier)
+            syntax = syntax.with(\.identifier, identifier)
             
-            syntax = syntax.withInheritanceClause(inheritanceClause)
+            syntax = syntax.with(\.inheritanceClause, inheritanceClause)
         } else {
-            syntax = syntax.withIdentifier(identifier.withTrailingSpace())
+            syntax = syntax.with(\.identifier, identifier.withTrailingSpace())
         }
         
         indent()
@@ -646,7 +649,7 @@ extension SwiftSyntaxProducer {
         
         deindent()
         
-        syntax = syntax.withMembers(members)
+        syntax = syntax.with(\.members, members)
 
         return syntax
     }
@@ -657,8 +660,8 @@ extension SwiftSyntaxProducer {
     func generateMembers(_ intention: TypeGenerationIntention) -> MemberDeclBlockSyntax {
         var syntax = MemberDeclBlockSyntax()
 
-        syntax = syntax.withLeftBrace(prepareStartToken(.leftBrace))
-        syntax = syntax.withRightBrace(.rightBrace.onNewline())
+        syntax = syntax.with(\.leftBrace, prepareStartToken(.leftBraceToken()))
+        syntax = syntax.with(\.rightBrace, .rightBraceToken().onNewline())
         
         addExtraLeading(.newlines(1))
         
@@ -789,18 +792,18 @@ extension SwiftSyntaxProducer {
         var syntax = InitializerDeclSyntax(
             attributes: AttributeListSyntax(attributesSyntax),
             modifiers: ModifierListSyntax(modifiersSyntax),
-            initKeyword: prepareStartToken(.`init`),
-            optionalMark: intention.isFallible ? .infixQuestionMark : nil,
+            initKeyword: prepareStartToken(.keyword(.`init`)),
+            optionalMark: intention.isFallible ? .infixQuestionMarkToken() : nil,
             signature: .init(input: generateParameterClause(intention.parameters))
         )
 
         if emitBody {
             if let body = intention.functionBody {
                 addExtraLeading(.spaces(1))
-                syntax = syntax.withBody(generateFunctionBody(body))
+                syntax = syntax.with(\.body, generateFunctionBody(body))
             } else if alwaysEmitBody {
                 addExtraLeading(.spaces(1))
-                syntax = syntax.withBody(generateEmptyFunctionBody())
+                syntax = syntax.with(\.body, generateEmptyFunctionBody())
             }
         }
 
@@ -811,12 +814,12 @@ extension SwiftSyntaxProducer {
         addHistoryTrackingLeadingIfEnabled(intention)
 
         var syntax = DeinitializerDeclSyntax(
-            deinitKeyword: prepareStartToken(.deinit)
+            deinitKeyword: prepareStartToken(.keyword(.deinit))
         )
 
         if let body = intention.functionBody {
             addExtraLeading(.spaces(1))
-            syntax = syntax.withBody(generateFunctionBody(body))
+            syntax = syntax.with(\.body, generateFunctionBody(body))
         }
 
         return syntax
@@ -843,17 +846,17 @@ extension SwiftSyntaxProducer {
         var syntax = FunctionDeclSyntax(
             attributes: AttributeListSyntax(attributesSyntax),
             modifiers: ModifierListSyntax(modifiersSyntax),
-            funcKeyword: prepareStartToken(.func).withTrailingSpace(),
+            funcKeyword: prepareStartToken(.keyword(.func)).withTrailingSpace(),
             identifier: prepareStartToken(makeIdentifier(intention.signature.name)),
             signature: generateSignature(intention.signature)
         )
 
         if let body = intention.functionBody {
             addExtraLeading(.spaces(1))
-            syntax = syntax.withBody(generateFunctionBody(body))
+            syntax = syntax.with(\.body, generateFunctionBody(body))
         } else if alwaysEmitBody {
             addExtraLeading(.spaces(1))
-            syntax = syntax.withBody(generateEmptyFunctionBody())
+            syntax = syntax.with(\.body, generateEmptyFunctionBody())
         }
 
         return syntax
@@ -865,7 +868,7 @@ extension SwiftSyntaxProducer {
         )
 
         if signature.returnType != .void {
-            syntax = syntax.withOutput(generateReturnType(signature.returnType))
+            syntax = syntax.with(\.output, generateReturnType(signature.returnType))
         }
 
         return syntax
@@ -873,7 +876,7 @@ extension SwiftSyntaxProducer {
     
     func generateReturnType(_ ret: SwiftType) -> ReturnClauseSyntax {
         let syntax = ReturnClauseSyntax(
-            arrow: .arrow.addingSurroundingSpaces(),
+            arrow: .arrowToken().addingSurroundingSpaces(),
             returnType: SwiftTypeConverter.makeTypeSyntax(
                 ret,
                 allowRootNullabilityUnspecified: false,
@@ -885,7 +888,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateParameterClause(_ parameters: [ParameterSignature]) -> ParameterClauseSyntax {
-        var syntax = ParameterClauseSyntax()
+        var syntax = ParameterClauseSyntax(parameters: [])
 
         iterateWithComma(parameters) { (item, hasComma) in
             syntax = syntax.addParameter(
@@ -901,37 +904,37 @@ extension SwiftSyntaxProducer {
         withTrailingComma: Bool
     ) -> FunctionParameterSyntax {
         
-        var syntax = FunctionParameterSyntax()
+        var syntax = FunctionParameterSyntax(stringLiteral: "")
 
         if parameter.label == parameter.name {
-            syntax = syntax.withFirstName(
+            syntax = syntax.with(\.firstName, 
                 prepareStartToken(makeIdentifier(parameter.name))
             )
         } else if let label = parameter.label {
-            syntax = syntax.withFirstName(
+            syntax = syntax.with(\.firstName, 
                 prepareStartToken(makeIdentifier(label))
                     .withTrailingSpace()
             )
-            syntax = syntax.withSecondName(makeIdentifier(parameter.name))
+            syntax = syntax.with(\.secondName, makeIdentifier(parameter.name))
         } else {
-            syntax = syntax.withFirstName(
-                prepareStartToken(.wildcard)
+            syntax = syntax.with(\.firstName, 
+                prepareStartToken(.wildcardToken())
                     .withTrailingSpace()
             )
-            syntax = syntax.withSecondName(makeIdentifier(parameter.name))
+            syntax = syntax.with(\.secondName, makeIdentifier(parameter.name))
         }
         
-        syntax = syntax.withColon(.colon.withTrailingSpace())
+        syntax = syntax.with(\.colon, .colonToken().withTrailingSpace())
         
-        syntax = syntax.withType(SwiftTypeConverter.makeTypeSyntax(parameter.type, startTokenHandler: self))
+        syntax = syntax.with(\.type, SwiftTypeConverter.makeTypeSyntax(parameter.type, startTokenHandler: self))
 
         if parameter.isVariadic {
-            syntax = syntax.withEllipsis(.ellipsis)
+            syntax = syntax.with(\.ellipsis, .ellipsisToken())
         }
         
         if withTrailingComma {
-            syntax = syntax.withTrailingComma(
-                .comma.withTrailingSpace()
+            syntax = syntax.with(\.trailingComma, 
+                .commaToken().withTrailingSpace()
             )
         }
 
@@ -944,8 +947,9 @@ extension SwiftSyntaxProducer {
     
     func generateEmptyFunctionBody() -> CodeBlockSyntax {
         let syntax = CodeBlockSyntax(
-            leftBrace: prepareStartToken(.leftBrace),
-            rightBrace: .rightBrace.onNewline().addingLeadingTrivia(indentation())
+            leftBrace: prepareStartToken(.leftBraceToken()),
+            statements: [],
+            rightBrace: .rightBraceToken().onNewline().addingLeadingTrivia(indentation())
         )
 
         return syntax
@@ -963,29 +967,33 @@ extension SwiftSyntaxProducer {
     
     func generateAttributeSyntax(_ attribute: KnownAttribute) -> AttributeListSyntax.Element {
         let syntax: AttributeListSyntax.Element
-        let atSignToken = prepareStartToken(TokenSyntax.atSign)
-        let attributeNameSyntax = SimpleTypeIdentifierSyntax(name: makeIdentifier(attribute.name))
+        let atSignToken = prepareStartToken(TokenSyntax.atSignToken())
+        let attributeNameSyntax = IdentifierTypeSyntax(name: makeIdentifier(attribute.name))
 
         // TODO: Actually use balanced tokens to do attribute parameters
         if let parameters = attribute.parameters {
-            let argumentList = TupleExprElementListSyntax([
-                .init(expression: .init(stringLiteral: "(\(parameters))"))
+            let expString = "(\(parameters))"
+
+            let argumentList = LabeledExprListSyntax([
+                //.init(expression: .init(stringLiteral: "(\(parameters))"))
             ])
 
-            syntax = .customAttribute(
-                CustomAttributeSyntax(
-                    atSignToken: atSignToken,
-                    attributeName: attributeNameSyntax,
-                    argumentList: argumentList 
-                )
-            )
+            let _argList = ExprSyntax(stringLiteral: expString)
+
+            let temp: AttributeSyntax = "@a\(raw: expString)"
+
+            syntax = .attribute(AttributeSyntax(
+                atSignToken: atSignToken,
+                attributeName: attributeNameSyntax,
+                leftParen: .leftParenToken(),
+                argument: temp.arguments,
+                rightParen: .rightParenToken()
+            ))
         } else {
-            syntax = .customAttribute(
-                CustomAttributeSyntax(
-                    atSignToken: atSignToken,
-                    attributeName: attributeNameSyntax
-                )
-            )
+            syntax = .attribute(AttributeSyntax(
+                atSignToken: atSignToken,
+                attributeName: attributeNameSyntax
+            ))
         }
 
         return syntax
@@ -998,6 +1006,14 @@ extension SwiftSyntaxProducer {
 
 func makeIdentifier(_ identifier: String) -> TokenSyntax {
     .identifier(identifier)
+}
+
+func makeIdentifierExpr(_ identifier: String) -> DeclReferenceExprSyntax {
+    .init(baseName: makeIdentifier(identifier))
+}
+
+func makeIdentifierType(_ identifier: String) -> IdentifierTypeSyntax {
+    .init(name: makeIdentifier(identifier))
 }
 
 func iterateWithComma<T>(_ elements: T, do block: (T.Element, Bool) -> Void) where T: Collection {

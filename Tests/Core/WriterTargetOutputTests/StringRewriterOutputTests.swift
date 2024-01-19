@@ -1,7 +1,7 @@
 import TestCommons
 import XCTest
 import SwiftSyntax
-import SwiftSyntaxParser
+import SwiftParser
 
 @testable import WriterTargetOutput
 
@@ -18,7 +18,7 @@ class StringRewriterOutputTests: XCTestCase {
             }
         }
         """
-        let fileSyntax = try SyntaxParser.parse(source: input)
+        let fileSyntax = Parser.parse(source: input)
         let sut = StringRewriterOutput()
 
         sut.outputFile(fileSyntax)

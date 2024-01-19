@@ -1,79 +1,77 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "Antlr4",
-        "repositoryURL": "https://github.com/LuizZak/antlr4-swift.git",
-        "state": {
-          "branch": null,
-          "revision": "f999ab7adf98e4613634b0a90ad47493c9bdf5ae",
-          "version": "4.1.2"
-        }
-      },
-      {
-        "package": "Console",
-        "repositoryURL": "https://github.com/LuizZak/console.git",
-        "state": {
-          "branch": null,
-          "revision": "33af2c3ed45de242c5262ce9ab5900d23b7971b7",
-          "version": "0.8.2"
-        }
-      },
-      {
-        "package": "MiniLexer",
-        "repositoryURL": "https://github.com/LuizZak/MiniLexer.git",
-        "state": {
-          "branch": null,
-          "revision": "71cc272f4613d1e45e1eacab33fa2f77c6311007",
-          "version": "0.10.0"
-        }
-      },
-      {
-        "package": "swift-argument-parser",
-        "repositoryURL": "https://github.com/apple/swift-argument-parser.git",
-        "state": {
-          "branch": null,
-          "revision": "9f39744e025c7d377987f30b03770805dcb0bcd1",
-          "version": "1.1.4"
-        }
-      },
-      {
-        "package": "swift-format",
-        "repositoryURL": "https://github.com/apple/swift-format.git",
-        "state": {
-          "branch": null,
-          "revision": "fbfe1869527923dd9f9b2edac148baccfce0dce7",
-          "version": "508.0.1"
-        }
-      },
-      {
-        "package": "SwiftSyntax",
-        "repositoryURL": "https://github.com/apple/swift-syntax.git",
-        "state": {
-          "branch": null,
-          "revision": "2c49d66d34dfd6f8130afdba889de77504b58ec0",
-          "version": "508.0.1"
-        }
-      },
-      {
-        "package": "swift-system",
-        "repositoryURL": "https://github.com/apple/swift-system.git",
-        "state": {
-          "branch": null,
-          "revision": "836bc4557b74fe6d2660218d56e3ce96aff76574",
-          "version": "1.1.1"
-        }
-      },
-      {
-        "package": "swift-tools-support-core",
-        "repositoryURL": "https://github.com/apple/swift-tools-support-core.git",
-        "state": {
-          "branch": null,
-          "revision": "93784c59434dbca8e8a9e4b700d0d6d94551da6a",
-          "version": "0.5.2"
-        }
+  "pins" : [
+    {
+      "identity" : "antlr4-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/LuizZak/antlr4-swift.git",
+      "state" : {
+        "revision" : "f999ab7adf98e4613634b0a90ad47493c9bdf5ae",
+        "version" : "4.1.2"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "console",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/LuizZak/console.git",
+      "state" : {
+        "revision" : "33af2c3ed45de242c5262ce9ab5900d23b7971b7",
+        "version" : "0.8.2"
+      }
+    },
+    {
+      "identity" : "minilexer",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/LuizZak/MiniLexer.git",
+      "state" : {
+        "revision" : "71cc272f4613d1e45e1eacab33fa2f77c6311007",
+        "version" : "0.10.0"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "state" : {
+        "revision" : "c8ed701b513cf5177118a175d85fbbbcd707ab41",
+        "version" : "1.3.0"
+      }
+    },
+    {
+      "identity" : "swift-cmark",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-cmark.git",
+      "state" : {
+        "revision" : "f218e5d7691f78b55bfa39b367763f4612486c35",
+        "version" : "0.3.0"
+      }
+    },
+    {
+      "identity" : "swift-format",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-format.git",
+      "state" : {
+        "revision" : "83248b4fa37919f78ffbd4650946759bcc54c2b5",
+        "version" : "509.0.0"
+      }
+    },
+    {
+      "identity" : "swift-markdown",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-markdown.git",
+      "state" : {
+        "revision" : "e4f95e2dc23097a1a9a1dfdfe3fe3ee44de77378",
+        "version" : "0.3.0"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-syntax.git",
+      "state" : {
+        "revision" : "43c802fb7f96e090dde015344a94b5e85779eff1",
+        "version" : "509.1.0"
+      }
+    }
+  ],
+  "version" : 2
 }

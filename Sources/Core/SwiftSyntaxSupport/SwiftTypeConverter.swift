@@ -94,36 +94,28 @@ public class SwiftTypeConverter {
                 case .autoclosure:
                     attrSyntax = AttributeSyntax(
                         atSignToken: .atSign,
-                        attributeName: makeIdentifier("autoclosure"),
+                        attributeName: makeIdentifierType("autoclosure").withTrailingSpace(),
                         leftParen: nil,
                         argument: nil,
-                        rightParen: nil,
-                        tokenList: nil
+                        rightParen: nil
                     )
                     
                 case .escaping:
                     attrSyntax = AttributeSyntax(
                         atSignToken: .atSign,
-                        attributeName: makeIdentifier("escaping"),
+                        attributeName: makeIdentifierType("escaping").withTrailingSpace(),
                         leftParen: nil,
                         argument: nil,
-                        rightParen: nil,
-                        tokenList: nil
+                        rightParen: nil
                     )
                     
                 case .convention(let convention):
                     attrSyntax = AttributeSyntax(
                         atSignToken: .atSign,
-                        attributeName: makeIdentifier("convention"),
-                        leftParen: nil,
-                        argument: nil,
-                        rightParen: nil,
-                        tokenList: TokenListSyntax([
-                            .leftParen,
-                            makeIdentifier(convention.rawValue),
-                            .rightParen
-                                .withTrailingSpace()
-                        ])
+                        attributeName: makeIdentifierType("convention"),
+                        leftParen: .leftParen,
+                        argument: .argumentList([.init(expression: makeIdentifierExpr(convention.rawValue))]),
+                        rightParen: .rightParen.withTrailingSpace()
                     )
                 }
                 
@@ -138,7 +130,7 @@ public class SwiftTypeConverter {
                 return makeTupleTypeSyntax(types, startTokenHandler: startTokenHandler).asTypeSyntax
                 
             case .empty:
-                return SimpleTypeIdentifierSyntax("Void").asTypeSyntax
+                return IdentifierTypeSyntax(name: makeIdentifier("Void")).asTypeSyntax
             }
             
         case .protocolComposition(let composition):
@@ -167,9 +159,9 @@ public class SwiftTypeConverter {
                 }
                 
                 if i != count - 1 {
-                    elementSyntax = elementSyntax.withAmpersand(
-                        .prefixAmpersand
-                            .addingSurroundingSpaces()
+                    elementSyntax = elementSyntax.with(
+                        \.ampersand,
+                        .prefixAmpersandToken().addingSurroundingSpaces()
                     )
                 }
 
@@ -203,12 +195,23 @@ public class SwiftTypeConverter {
     ) -> FunctionTypeSyntax {
 
         let syntax = FunctionTypeSyntax(
+            leftParen: .leftParen,
             arguments: makeTupleTypeSyntax(parameters, startTokenHandler: startTokenHandler).elements,
-            arrow: .arrow.addingSurroundingSpaces(),
-            returnType: makeTypeSyntax(returnType, startTokenHandler: startTokenHandler)
+            rightParen: .rightParen,
+            output: makeReturnClauseSyntax(makeTypeSyntax(returnType, startTokenHandler: startTokenHandler))
         )
 
         return syntax
+    }
+
+    func makeReturnClauseSyntax(
+        _ type: TypeSyntaxProtocol
+    ) -> ReturnClauseSyntax {
+        
+        ReturnClauseSyntax(
+            arrow: .arrowToken().addingSurroundingSpaces(),
+            type: type
+        )
     }
     
     func makeTupleTypeSyntax<C: Collection>(_ types: C, startTokenHandler: StartTokenHandler) -> TupleTypeSyntax where C.Element == SwiftType {
@@ -238,7 +241,8 @@ public class SwiftTypeConverter {
         )
 
         if hasComma {
-            syntax = syntax.withTrailingComma(
+            syntax = syntax.with(
+                \.trailingComma,
                 .comma.withTrailingSpace()
             )
         }
@@ -246,13 +250,13 @@ public class SwiftTypeConverter {
         return syntax
     }
 
-    func makeNestedTypeSyntax(_ nestedType: NestedSwiftType, startTokenHandler: StartTokenHandler) -> MemberTypeIdentifierSyntax {
+    func makeNestedTypeSyntax(_ nestedType: NestedSwiftType, startTokenHandler: StartTokenHandler) -> MemberTypeSyntax {
         let typeSyntax = makeNominalTypeSyntax(
             nestedType.second,
             startTokenHandler: startTokenHandler
         )
         
-        let initial = MemberTypeIdentifierSyntax(
+        let initial = MemberTypeSyntax(
             baseType: makeNominalTypeSyntax(
                 nestedType.first,
                 startTokenHandler: startTokenHandler
@@ -268,7 +272,7 @@ public class SwiftTypeConverter {
                 startTokenHandler: startTokenHandler
             )
             
-            return MemberTypeIdentifierSyntax(
+            return MemberTypeSyntax(
                 baseType: previous.asTypeSyntax,
                 period: .period,
                 name: typeSyntax.name,
@@ -277,10 +281,10 @@ public class SwiftTypeConverter {
         }
     }
     
-    func makeNominalTypeSyntax(_ nominal: NominalSwiftType, startTokenHandler: StartTokenHandler) -> SimpleTypeIdentifierSyntax {
+    func makeNominalTypeSyntax(_ nominal: NominalSwiftType, startTokenHandler: StartTokenHandler) -> IdentifierTypeSyntax {
         switch nominal {
         case .typeName(let name):
-            return SimpleTypeIdentifierSyntax(
+            return IdentifierTypeSyntax(
                 name: startTokenHandler.prepareStartToken(.identifier(name)),
                 genericArgumentClause: nil
             )
@@ -305,7 +309,7 @@ public class SwiftTypeConverter {
                 arguments: genericArgumentList
             )
             
-            return SimpleTypeIdentifierSyntax(
+            return IdentifierTypeSyntax(
                 name: nameSyntax,
                 genericArgumentClause: genericArgumentClause
             )

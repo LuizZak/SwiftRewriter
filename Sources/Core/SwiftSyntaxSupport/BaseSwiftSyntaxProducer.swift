@@ -12,7 +12,7 @@ public class BaseSwiftSyntaxProducer {
     
     func indentation() -> Trivia {
         return indentationLevel == 0
-            ? .zero
+            ? []
             : Trivia.spaces(indentationLevel * spacesInIndentation)
     }
     

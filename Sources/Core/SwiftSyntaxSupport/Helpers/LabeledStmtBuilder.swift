@@ -11,7 +11,7 @@ struct LabeledStmtBuilder {
         self.label = label
     }
 
-    init(labelToken: TokenSyntax, labelText: String, colon: TokenSyntax = .colon) {
+    init(labelToken: TokenSyntax, labelText: String, colon: TokenSyntax = .colonToken()) {
         self.label = (labelToken, labelText, colon)
     }
 
@@ -22,7 +22,7 @@ struct LabeledStmtBuilder {
 
         return LabeledStmtSyntax(
             leadingTrivia: labelToken.leadingTrivia,
-            labelName: labelText,
+            labelName: .identifier(labelText),
             labelColon: colon,
             statement: syntax
         ).asStmtSyntax

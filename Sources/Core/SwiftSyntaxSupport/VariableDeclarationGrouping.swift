@@ -17,6 +17,6 @@ struct PatternBindingElement {
 }
 
 enum VariableDeclarationKind {
-    case single(pattern: PatternBindingElement, accessors: (() -> PatternBindingSyntax.Accessor)?)
+    case single(pattern: PatternBindingElement, accessors: (() -> AccessorBlockSyntax)?)
     case multiple(patterns: [PatternBindingElement])
 }

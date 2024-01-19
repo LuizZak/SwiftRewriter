@@ -4,7 +4,7 @@ import ObjcParser
 import SwiftAST
 import SwiftFormatConfiguration
 import SwiftSyntax
-import SwiftSyntaxParser
+import SwiftParser
 import SwiftSyntaxSupport
 import TestCommons
 import TypeSystem
@@ -128,7 +128,7 @@ class SwiftSyntaxWriterTests: XCTestCase {
             init() { }
                 }
             """
-        let fileSyntax = try SyntaxParser.parse(source: original)
+        let fileSyntax = Parser.parse(source: original)
 
         let result = try sut.formatSyntax(fileSyntax, fileUrl: URL(fileURLWithPath: "path.swift"), format: .noFormatting)
 
@@ -144,7 +144,7 @@ class SwiftSyntaxWriterTests: XCTestCase {
             init() { }
                 }
             """
-        let fileSyntax = try SyntaxParser.parse(source: original)
+        let fileSyntax = Parser.parse(source: original)
 
         let result = try sut.formatSyntax(fileSyntax, fileUrl: URL(fileURLWithPath: "path.swift"), format: .swiftFormat(configuration: nil))
 
@@ -167,7 +167,7 @@ class SwiftSyntaxWriterTests: XCTestCase {
             init() { }
                 }
             """
-        let fileSyntax = try SyntaxParser.parse(source: original)
+        let fileSyntax = Parser.parse(source: original)
 
         var configuration = Configuration()
         configuration.indentation = .spaces(4)

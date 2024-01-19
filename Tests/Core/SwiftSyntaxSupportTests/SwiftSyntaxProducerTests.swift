@@ -58,7 +58,7 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
         )
         let syntax = result.children(viewMode: .sourceAccurate).first
         XCTAssertEqual(
-            syntax?.leadingTrivia?[0],
+            syntax?.leadingTrivia[0],
             .lineComment("""
                 // Comment
                 """
@@ -96,7 +96,7 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
         )
         let syntax = result.children(viewMode: .sourceAccurate).first
         XCTAssertEqual(
-            syntax?.leadingTrivia?[0],
+            syntax?.leadingTrivia[0],
             .blockComment("""
                 /**
                  * Comment
@@ -1490,7 +1490,7 @@ private class SyntaxDebugPrinter: SyntaxAnyVisitor {
 
         for token in node.tokens(viewMode: .sourceAccurate) {
             _line(token.leadingTrivia)
-            _line(token.withoutTrivia())
+            _line(token.trimmed)
             _line(token.trailingTrivia)
         }
 

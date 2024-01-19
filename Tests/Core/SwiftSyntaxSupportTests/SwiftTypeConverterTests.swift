@@ -35,6 +35,28 @@ class SwiftTypeConverterTests: XCTestCase {
         expectSwift(.tuple([.int, .int]), toConvertTo: "(Int, Int)")
     }
 
+    func testBlock_attributes() {
+        expectSwift(
+            .block(returnType: .void, parameters: [], attributes: [.autoclosure]),
+            toConvertTo: "@autoclosure () -> Void"
+        )
+        expectSwift(
+            .block(returnType: .void, parameters: [], attributes: [.escaping]),
+            toConvertTo: "@escaping () -> Void"
+        )
+        expectSwift(
+            .block(returnType: .void, parameters: [], attributes: [.convention(.c)]),
+            toConvertTo: "@convention(c) () -> Void"
+        )
+    }
+
+    func testBlock_attributes_multiple() {
+        expectSwift(
+            .block(returnType: .void, parameters: [], attributes: [.autoclosure, .escaping, .convention(.block)]),
+            toConvertTo: "@autoclosure @convention(block) @escaping () -> Void"
+        )
+    }
+
     func testNullabilityUnspecified_promotesToOptional_genericParameter() {
         expectSwift(
             .generic("TypeName", parameters: [.nullabilityUnspecified(.string)]),

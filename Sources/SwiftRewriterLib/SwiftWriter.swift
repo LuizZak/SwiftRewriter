@@ -6,7 +6,7 @@ import TypeSystem
 import WriterTargetOutput
 import SwiftSyntax
 import SwiftFormat
-import SwiftSyntaxParser
+import SwiftParser
 import SwiftSyntaxSupport
 import Utils
 
@@ -198,7 +198,7 @@ class SwiftSyntaxWriter {
             var intermediary: String = ""
             try formatter.format(source: string, assumingFileURL: fileUrl, to: &intermediary)
 
-            return try SyntaxParser.parse(source: intermediary)
+            return Parser.parse(source: intermediary)
         }
     }
 

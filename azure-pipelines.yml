@@ -7,9 +7,9 @@ variables:
 jobs:
 - job: macOS
   pool:
-    vmImage: 'macOS-12'
+    vmImage: 'macOS-14'
   steps:
-  - bash: 'sudo xcode-select -s /Applications/Xcode_14.1.app/Contents/Developer'
+  - bash: 'sudo xcode-select -s /Applications/Xcode_15.1.app/Contents/Developer'
   - task: Cache@2
     inputs:
       key: 'v2 | "swiftpm" | "$(Agent.OS)" | Package.resolved'
@@ -26,7 +26,7 @@ jobs:
 
 - job: Linux
   container:
-    image: swift:5.7-focal
+    image: swift:5.9-focal
   pool:
     vmImage: ubuntu-20.04
   steps:

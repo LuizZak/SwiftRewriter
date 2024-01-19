@@ -100,7 +100,7 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
     }
     
     func identInStmt(_ stmt: CodeBlockItemSyntax) -> String? {
-        let desc = stmt.withoutTrivia().description
+        let desc = stmt.trimmed.description
         
         let lexer = Lexer(input: desc)
         lexer.skipWhitespace()
@@ -164,7 +164,7 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
                     + indentation(for: token)
                     + removingLeadingWhitespace(token.leadingTrivia)
                 
-                return token.withLeadingTrivia(trivia)
+                return token.with(\.leadingTrivia, trivia)
             }
             
             return token
@@ -174,14 +174,14 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
 
 // Returns only the indentation of a given token's leading trivia
 private func indentation(for token: TokenSyntax) -> Trivia {
-    var leading: Trivia = .zero
+    var leading: Trivia = []
     for trivia in token.leadingTrivia {
         switch trivia {
         case .spaces, .tabs:
             leading = leading.appending(trivia)
         // Reset on newlines
         case .newlines:
-            leading = .zero
+            leading = []
         default:
             continue
         }

@@ -142,14 +142,14 @@ extension SwiftSyntaxProducer {
         if exp.isOptionalCast {
             syntax = AsExprSyntax(
                 expression: expSyntax,
-                asTok: .as.withLeadingSpace(),
-                questionOrExclamationMark: .postfixQuestionMark.withTrailingSpace(),
+                asTok: .keyword(.as).withLeadingSpace(),
+                questionOrExclamationMark: .postfixQuestionMarkToken().withTrailingSpace(),
                 typeName: SwiftTypeConverter.makeTypeSyntax(exp.type, startTokenHandler: self)
             )
         } else {
             syntax = AsExprSyntax(
                 expression: expSyntax,
-                asTok: .as.addingSurroundingSpaces(),
+                asTok: .keyword(.as).addingSurroundingSpaces(),
                 typeName: SwiftTypeConverter.makeTypeSyntax(exp.type, startTokenHandler: self)
             )
         }
@@ -162,7 +162,7 @@ extension SwiftSyntaxProducer {
 
         let syntax: IsExprSyntax = IsExprSyntax(
             expression: expSyntax,
-            isTok: prepareStartToken(.is).addingSurroundingSpaces(),
+            isTok: prepareStartToken(.keyword(.is)).addingSurroundingSpaces(),
             typeName: SwiftTypeConverter.makeTypeSyntax(exp.type, startTokenHandler: self)
         )
         
@@ -170,7 +170,7 @@ extension SwiftSyntaxProducer {
     }
     
     public func generateClosure(_ exp: BlockLiteralExpression) -> ClosureExprSyntax {
-        var syntax = ClosureExprSyntax()
+        var syntax = ClosureExprSyntax(statements: [])
 
         let hasParameters = !exp.parameters.isEmpty
         let requiresTypeSignature =
@@ -194,7 +194,7 @@ extension SwiftSyntaxProducer {
             deindent()
         }
         
-        var leftBrace = prepareStartToken(.leftBrace)
+        var leftBrace = prepareStartToken(.leftBraceToken())
         
         if !requiresInToken, let leadingComments {
             leftBrace = leftBrace.withTrailingTrivia(
@@ -202,31 +202,31 @@ extension SwiftSyntaxProducer {
             )
         }
 
-        syntax = syntax.withLeftBrace(leftBrace)
+        syntax = syntax.with(\.leftBrace, leftBrace)
 
         var signatureSyntax = ClosureSignatureSyntax()
 
         addExtraLeading(.spaces(1))
         
         if requiresTypeSignature {
-            var parametersSyntax = ParameterClauseSyntax()
+            var parametersSyntax = ClosureParameterClauseSyntax(parameters: [])
 
-            parametersSyntax = parametersSyntax.withLeftParen(
+            parametersSyntax = parametersSyntax.with(\.leftParen, 
                 .leftParen
                     .withExtraLeading(from: self)
             )
             
-            parametersSyntax = parametersSyntax.withRightParen(.rightParen)
+            parametersSyntax = parametersSyntax.with(\.rightParen, .rightParen)
             
             iterateWithComma(exp.parameters) { (arg, hasComma) in
-                var paramSyntax = FunctionParameterSyntax(
+                var paramSyntax = ClosureParameterSyntax(
                     firstName: makeIdentifier(arg.name).withExtraLeading(from: self),
                     colon: .colon.withTrailingSpace(),
                     type: SwiftTypeConverter.makeTypeSyntax(arg.type, startTokenHandler: self)
                 )
                 
                 if hasComma {
-                    paramSyntax = paramSyntax.withTrailingComma(
+                    paramSyntax = paramSyntax.with(\.trailingComma, 
                         .comma.withTrailingSpace()
                     )
                 }
@@ -234,7 +234,7 @@ extension SwiftSyntaxProducer {
                 parametersSyntax = parametersSyntax.addParameter(paramSyntax)
             }
             
-            signatureSyntax = signatureSyntax.withInput(.input(parametersSyntax))
+            signatureSyntax = signatureSyntax.with(\.input, .input(parametersSyntax))
         } else if hasParameters {
             var parametersSyntax = ClosureParamListSyntax()
 
@@ -244,7 +244,7 @@ extension SwiftSyntaxProducer {
                 )
                 
                 if hasComma {
-                    paramSyntax = paramSyntax.withTrailingComma(
+                    paramSyntax = paramSyntax.with(\.trailingComma, 
                         .comma.withTrailingSpace()
                     )
                 }
@@ -252,7 +252,7 @@ extension SwiftSyntaxProducer {
                 parametersSyntax = parametersSyntax.appending(paramSyntax)
             }
 
-            signatureSyntax = signatureSyntax.withInput(.simpleInput(parametersSyntax))
+            signatureSyntax = signatureSyntax.with(\.input, .simpleInput(parametersSyntax))
         }
 
         if requiresInToken {
@@ -264,16 +264,16 @@ extension SwiftSyntaxProducer {
                 )
             }
 
-            signatureSyntax = signatureSyntax.withInTok(inToken)
-        } else {
-            signatureSyntax = signatureSyntax.withInTok(nil)
+            signatureSyntax = signatureSyntax.with(\.inTok, inToken)
         }
         
         if requiresTypeSignature {
-            signatureSyntax = signatureSyntax.withOutput(generateReturnType(exp.returnType))
+            signatureSyntax = signatureSyntax.with(\.output, generateReturnType(exp.returnType))
         }
 
-        syntax = syntax.withSignature(signatureSyntax)
+        if requiresInToken || requiresTypeSignature || hasParameters {
+            syntax = syntax.with(\.signature, signatureSyntax)
+        }
         
         indent()
         
@@ -288,21 +288,22 @@ extension SwiftSyntaxProducer {
         
         extraLeading = .newlines(1) + indentation()
         
-        syntax = syntax.withRightBrace(prepareStartToken(.rightBrace))
+        syntax = syntax.with(\.rightBrace, prepareStartToken(.rightBrace))
 
         return syntax
     }
     
     public func generateArrayLiteral(_ exp: ArrayLiteralExpression) -> ArrayExprSyntax {
         var syntax = ArrayExprSyntax(
-            leftSquare: prepareStartToken(.leftSquareBracket)
+            leftSquare: prepareStartToken(.leftSquare),
+            elements: []
         )
         
         iterateWithComma(exp.items) { (item: Expression, hasComma) in
             var elementSyntax = ArrayElementSyntax(expression: generateExpression(item))
 
             if hasComma {
-                elementSyntax = elementSyntax.withTrailingComma(
+                elementSyntax = elementSyntax.with(\.trailingComma, 
                     .comma.withTrailingSpace()
                 )
             }
@@ -315,11 +316,11 @@ extension SwiftSyntaxProducer {
     
     public func generateDictionaryLiteral(_ exp: DictionaryLiteralExpression) -> DictionaryExprSyntax {
         var syntax = DictionaryExprSyntax(
-            leftSquare: prepareStartToken(.leftSquareBracket)
+            leftSquare: prepareStartToken(.leftSquare)
         )
 
         if exp.pairs.isEmpty {
-            syntax = syntax.withContent(.colon(.colon))
+            syntax = syntax.with(\.content, .colon(.colon))
         } else {
             var elements: [DictionaryElementSyntax] = []
             
@@ -331,7 +332,7 @@ extension SwiftSyntaxProducer {
                 )
                 
                 if hasComma {
-                    elementSyntax = elementSyntax.withTrailingComma(
+                    elementSyntax = elementSyntax.with(\.trailingComma, 
                         .comma.withTrailingSpace()
                     )
                 }
@@ -339,14 +340,14 @@ extension SwiftSyntaxProducer {
                 elements.append(elementSyntax)
             }
             
-            syntax = syntax.withContent(.elements(.init(elements)))
+            syntax = syntax.with(\.content, .elements(.init(elements)))
         }
 
         return syntax
     }
     
     public func generateAssignment(_ exp: AssignmentExpression) -> SequenceExprSyntax {
-        var syntax = SequenceExprSyntax()
+        var syntax = SequenceExprSyntax(elements: [])
         
         syntax = syntax.addElement(generateExpression(exp.lhs))
         
@@ -370,7 +371,7 @@ extension SwiftSyntaxProducer {
     }
     
     public func generateBinary(_ exp: BinaryExpression) -> SequenceExprSyntax {
-        var syntax = SequenceExprSyntax()
+        var syntax = SequenceExprSyntax(elements: [])
 
         syntax = syntax.addElement(generateExpression(exp.lhs))
         
@@ -416,7 +417,7 @@ extension SwiftSyntaxProducer {
             return generateMemberAccessExpr(base: subExp, name: member.name).asExprSyntax
             
         case let subs as SubscriptPostfix:
-            var subscriptSyntax = SubscriptExprSyntax(calledExpression: subExp)
+            var subscriptSyntax = SubscriptExprSyntax(calledExpression: subExp, arguments: [])
 
             iterateWithComma(subs.arguments) { (arg, hasComma) in
                 subscriptSyntax = subscriptSyntax.addArgument(
@@ -447,7 +448,7 @@ extension SwiftSyntaxProducer {
                 arguments.removeLast()
             }
             
-            var syntax = FunctionCallExprSyntax(calledExpression: subExp)
+            var syntax = FunctionCallExprSyntax(calledExpression: subExp, arguments: [])
             
             iterateWithComma(arguments) { (arg, hasComma) in
                 syntax = syntax.addArgument(
@@ -461,7 +462,7 @@ extension SwiftSyntaxProducer {
             
             if let trailingClosure = trailingClosure {
                 addExtraLeading(.spaces(1))
-                syntax = syntax.withTrailingClosure(
+                syntax = syntax.with(\.trailingClosure, 
                     generateClosure(trailingClosure)
                 )
             }
@@ -469,8 +470,8 @@ extension SwiftSyntaxProducer {
             // No need to emit parenthesis if a trailing closure
             // is present as the only argument of the function
             if !arguments.isEmpty || trailingClosure == nil {
-                syntax = syntax.withLeftParen(.leftParen)
-                syntax = syntax.withRightParen(.rightParen)
+                syntax = syntax.with(\.leftParen, .leftParen)
+                syntax = syntax.with(\.rightParen, .rightParen)
             }
 
             return syntax.asExprSyntax
@@ -496,7 +497,7 @@ extension SwiftSyntaxProducer {
         }
         
         if hasComma {
-            elementSyntax = elementSyntax.withTrailingComma(
+            elementSyntax = elementSyntax.with(\.trailingComma, 
                 .comma.withTrailingSpace()
             )
         }
@@ -507,7 +508,7 @@ extension SwiftSyntaxProducer {
     public func generateTernary(_ exp: TernaryExpression) -> ExprSyntax {
         let syntax = TernaryExprSyntax(
             conditionExpression: generateExpression(exp.exp),
-            questionMark: .infixQuestionMark.addingSurroundingSpaces(),
+            questionMark: .infixQuestionMarkToken().addingSurroundingSpaces(),
             firstChoice: generateExpression(exp.ifTrue),
             colonMark: .colon.addingSurroundingSpaces(),
             secondChoice: generateExpression(exp.ifFalse)
@@ -517,12 +518,12 @@ extension SwiftSyntaxProducer {
     }
     
     public func generateTuple(_ exp: TupleExpression) -> ExprSyntax {
-        var syntax = TupleExprSyntax(leftParen: prepareStartToken(.leftParen))
+        var syntax = TupleExprSyntax(leftParen: prepareStartToken(.leftParen), elements: [])
 
         iterateWithComma(exp.elements) { (item, hasComma) in
             var elementSyntax = TupleExprElementSyntax(expression: generateExpression(item))
             if hasComma {
-                elementSyntax = elementSyntax.withTrailingComma(
+                elementSyntax = elementSyntax.with(\.trailingComma, 
                     .comma.withTrailingSpace()
                 )
             }
@@ -566,7 +567,7 @@ extension SwiftSyntaxProducer {
             syntax = syntax.addArgument(
                 .init(
                     label: makeIdentifier("getter"),
-                    colon: .colon.withTrailingSpace(),
+                    colon: .colonToken().withTrailingSpace(),
                     expression: makePropReference(type: type, property: property)
                 )
             )
@@ -575,7 +576,7 @@ extension SwiftSyntaxProducer {
             syntax = syntax.addArgument(
                 .init(
                     label: makeIdentifier("setter"),
-                    colon: .colon.withTrailingSpace(),
+                    colon: .colonToken().withTrailingSpace(),
                     expression: makePropReference(type: type, property: property)
                 )
             )
@@ -587,13 +588,13 @@ extension SwiftSyntaxProducer {
     public func generateConstant(_ constant: ConstantExpression) -> ExprSyntax {
         switch constant.constant {
         case .boolean(let bool):
-            let booleanToken = bool ? TokenSyntax.true : TokenSyntax.false
+            let booleanToken = bool ? TokenSyntax.keyword(.true) : TokenSyntax.keyword(.false)
             let token = prepareStartToken(booleanToken)
             
             return BooleanLiteralExprSyntax(booleanLiteral: token).asExprSyntax
             
         case .nil:
-            return NilLiteralExprSyntax(nilKeyword: prepareStartToken(.nil))
+            return NilLiteralExprSyntax(nilKeyword: prepareStartToken(.keyword(.nil)))
                 .asExprSyntax
             
         case let .int(value, type):
@@ -634,11 +635,11 @@ extension SwiftSyntaxProducer {
             
         case .string(let string):
             return StringLiteralExprSyntax(
-                openQuote: prepareStartToken(.stringQuote),
+                openQuote: prepareStartToken(.stringQuoteToken()),
                 segments: [
-                    .init(.init(content: string))
+                    .init(StringSegmentSyntax(content: .stringSegment(string)))
                 ],
-                closeQuote: .stringQuote
+                closeQuote: .stringQuoteToken()
             ).asExprSyntax
             
         case .rawConstant(let constant):
@@ -656,12 +657,12 @@ extension SwiftSyntaxProducer {
             questionOrExclamationMark = nil
 
         case .forced:
-            questionOrExclamationMark = .exclamationMark
+            questionOrExclamationMark = .exclamationMarkToken()
         case .optional:
-            questionOrExclamationMark = .infixQuestionMark
+            questionOrExclamationMark = .infixQuestionMarkToken()
         }
 
-        let tryKeyword = prepareStartToken(.try)
+        let tryKeyword = prepareStartToken(.keyword(.try))
         addExtraLeading(.spaces(1))
         let exprSyntax = generateExpression(exp.exp)
 
@@ -765,7 +766,7 @@ extension SwiftSyntaxProducer {
 
         let syntax = MemberAccessExprSyntax(
             base: base,
-            name: name,
+            name: makeIdentifier(name),
             declNameArguments: declNameArguments
         )
 
@@ -784,7 +785,7 @@ extension SwiftSyntaxProducer {
                 argSyntax = .init(name: .wildcard)
             }
             
-            argSyntax = argSyntax.withColon(.colon)
+            argSyntax = argSyntax.with(\.colon, .colon)
 
             declArgsSyntax = declArgsSyntax.addArgument(argSyntax)
         }

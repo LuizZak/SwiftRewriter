@@ -92,7 +92,7 @@ class StaticModifiersDecorator: ModifiersSyntaxDecorator {
         
         if intention.isStatic {
             return { producer in
-                .init(name: .staticKeyword()
+                .init(name: .keyword(.static)
                     .addingTrailingSpace()
                     .withExtraLeading(from: producer)
                 )
@@ -145,9 +145,7 @@ class PropertySetterAccessModifiersDecorator: ModifiersSyntaxDecorator {
 
         return { producer in
             DeclModifierSyntax(name: setterAccessLevel.withExtraLeading(from: producer))
-                .withDetail(
-                    .init(detail: "set", rightParen: .rightParen.withTrailingSpace())
-                )
+                .with(\.detail, .init(detail: "set", rightParen: .rightParenToken().withTrailingSpace()))
         }
     }
     
@@ -188,10 +186,10 @@ class OwnershipModifiersDecorator: ModifiersSyntaxDecorator {
                 detail = makeIdentifier("unsafe")
             }
             
-            return DeclModifier(
+            return DeclModifierSyntax(
                 name: token.withExtraLeading(from: $0),
                 detail: detail.map { token in
-                    .init(detail: token, rightParen: .rightParen.withTrailingSpace())
+                    .init(detail: token, rightParen: .rightParenToken().withTrailingSpace())
                 }
             )
         }
@@ -331,21 +329,19 @@ func _accessModifierFor(accessLevel: AccessLevel, omitInternal: Bool) -> TokenSy
     switch accessLevel {
     case .internal:
         // We don't emit `internal` explicitly by default here
-        return omitInternal ? nil : .internalKeyword()
+        return omitInternal ? nil : .keyword(.internal)
         
     case .open:
-        // TODO: There's no `open` keyword currently in the SwiftSyntax version
-        // we're using;
-        token = .identifier("open")
+        token = .keyword(.open)
         
     case .private:
-        token = .privateKeyword()
+        token = .keyword(.private)
         
     case .fileprivate:
-        token = .fileprivateKeyword()
+        token = .keyword(.fileprivate)
         
     case .public:
-        token = .publicKeyword()
+        token = .keyword(.public)
     }
     
     return token
