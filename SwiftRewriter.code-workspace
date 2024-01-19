@@ -195,10 +195,7 @@
             },
         },
 		
-		"python.formatting.provider": "black",
-    	"python.linting.enabled": true,
-		"python.linting.flake8Enabled": true,
-		"python.linting.flake8Args": ["--ignore=E203,E225,E302,E501,W293,W503"],
+		"flake8.args": ["--ignore=E203,E225,E302,E501,W293,W503"],
 		"[python]": {
 			"editor.formatOnSave": true
 		},
