@@ -8,7 +8,7 @@ import XCTest
 @testable import Intentions
 @testable import SwiftSyntaxSupport
 
-class SwiftProducerTests: BaseSwiftSyntaxProducerTests {
+class SwiftProducerTests: XCTestCase {
 
     func testGenerateEmptyFile() {
         let file = FileGenerationIntention(sourcePath: "", targetPath: "")
@@ -1795,6 +1795,15 @@ extension SwiftProducerTests {
     ) {
 
         diffTest(expected: expected, line: line).diff(value, line: line)
+    }
+
+    func assert(
+        _ value: SourceFileSyntax,
+        matches expected: String,
+        line: UInt = #line
+    ) {
+
+        diffTest(expected: expected, line: line).diff(value.description, line: line)
     }
 }
 

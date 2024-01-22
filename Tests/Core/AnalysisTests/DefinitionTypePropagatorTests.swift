@@ -816,10 +816,8 @@ extension DefinitionTypePropagatorTests {
             return
         }
 
-        let producer = SwiftSyntaxProducer()
-
-        var expString = producer.generateStatement(expected).description + "\n"
-        var resString = producer.generateStatement(statement).description + "\n"
+        var expString = SwiftProducer.generateStatement(expected) + "\n"
+        var resString = SwiftProducer.generateStatement(statement) + "\n"
 
         if expString == resString {
             dump(statement, to: &resString)

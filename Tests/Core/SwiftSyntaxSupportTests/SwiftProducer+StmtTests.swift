@@ -7,7 +7,7 @@ import XCTest
 
 @testable import SwiftSyntaxSupport
 
-class SwiftProducer_StmtTests: BaseSwiftSyntaxProducerTests {
+class SwiftProducer_StmtTests: XCTestCase {
 
     func testCompoundInCompound() {
         assert(

@@ -1340,17 +1340,15 @@ extension SyntaxNodeIteratorTests {
     }
 
     func dumpNode(_ node: SyntaxNode) -> String {
-        let syntaxProducer = SwiftSyntaxProducer()
-
         switch node {
         case let node as Expression:
-            return syntaxProducer.generateExpression(node).description
+            return SwiftProducer.generateExpression(node)
 
         case let stmt as Statement:
-            return syntaxProducer.generateStatement(stmt).description
+            return SwiftProducer.generateStatement(stmt)
 
         case let catchBlock as CatchBlock:
-            let body = syntaxProducer.generateStatement(catchBlock.body).description
+            let body = SwiftProducer.generateStatement(catchBlock.body)
 
             if let pattern = catchBlock.pattern {
                 return "catch let \(pattern.description) \(body)"
@@ -1359,12 +1357,12 @@ extension SyntaxNodeIteratorTests {
             return "catch \(body)"
         
         case let block as SwitchCase:
-            let syntax = syntaxProducer.generateSwitchCase(block)
+            let syntax = SwiftProducer.generateStatement(.compound(block.statements))
 
-            return syntax.description
+            return syntax
         
         case let block as SwitchDefaultCase:
-            let syntax = syntaxProducer.generateSwitchDefaultCase(block)
+            let syntax = SwiftProducer.generateStatement(.compound(block.statements))
 
             return syntax.description
         

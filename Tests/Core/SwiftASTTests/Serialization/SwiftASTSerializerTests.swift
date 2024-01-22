@@ -113,10 +113,8 @@ class SwiftASTSerializerTests: XCTestCase {
 
         let decoded = try SwiftASTSerializer.decodeStatement(decoder: decoder, data: data)
 
-        let writer = SwiftSyntaxProducer()
-
-        let expBuffer = writer.generateStatement(stmt).description
-        let resBuffer = writer.generateStatement((decoded as? CompoundStatement) ?? [decoded]).description
+        let expBuffer = SwiftProducer.generateStatement(stmt)
+        let resBuffer = SwiftProducer.generateStatement((decoded as? CompoundStatement) ?? [decoded])
 
         XCTAssertEqual(
             stmt,

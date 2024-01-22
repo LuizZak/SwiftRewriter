@@ -386,6 +386,34 @@ public extension SwiftProducer {
         finishBuffer()
         return Parser.parse(source: buffer)
     }
+
+    /// Generates a string syntax from a given expression.
+    static func generateExpression(
+        _ exp: Expression,
+        settings: Settings = .default,
+        delegate: SwiftProducerDelegate? = nil
+    ) -> String {
+
+        let producer = SwiftProducer(settings: settings, delegate: delegate)
+        producer.emit(exp)
+        producer.finishBuffer()
+
+        return producer.buffer
+    }
+
+    /// Generates a string syntax from a given statement.
+    static func generateStatement(
+        _ stmt: Statement,
+        settings: Settings = .default,
+        delegate: SwiftProducerDelegate? = nil
+    ) -> String {
+
+        let producer = SwiftProducer(settings: settings, delegate: delegate)
+        producer.emit(stmt)
+        producer.finishBuffer()
+
+        return producer.buffer
+    }
 }
 
 // MARK: - Misc helpers

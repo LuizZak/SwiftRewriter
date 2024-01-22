@@ -14,15 +14,15 @@ class ModifiersDecoratorApplier {
     /// decorators setup.
     static func makeDefaultDecoratorApplier() -> ModifiersDecoratorApplier {
         let decorator = ModifiersDecoratorApplier()
-        decorator.addDecorator(_AccessLevelModifiersDecorator())
-        decorator.addDecorator(_FinalClassModifiersDecorator())
-        decorator.addDecorator(_PropertySetterAccessModifiersDecorator())
-        decorator.addDecorator(_ProtocolOptionalModifiersDecorator())
-        decorator.addDecorator(_StaticModifiersDecorator())
-        decorator.addDecorator(_OverrideModifiersDecorator())
-        decorator.addDecorator(_ConvenienceInitModifiersDecorator())
-        decorator.addDecorator(_MutatingModifiersDecorator())
-        decorator.addDecorator(_OwnershipModifiersDecorator())
+        decorator.addDecorator(AccessLevelModifiersDecorator())
+        decorator.addDecorator(FinalClassModifiersDecorator())
+        decorator.addDecorator(PropertySetterAccessModifiersDecorator())
+        decorator.addDecorator(ProtocolOptionalModifiersDecorator())
+        decorator.addDecorator(StaticModifiersDecorator())
+        decorator.addDecorator(OverrideModifiersDecorator())
+        decorator.addDecorator(ConvenienceInitModifiersDecorator())
+        decorator.addDecorator(MutatingModifiersDecorator())
+        decorator.addDecorator(OwnershipModifiersDecorator())
         return decorator
     }
     
@@ -58,7 +58,7 @@ class ModifiersDecoratorApplier {
 }
 
 /// Decorator for adding `mutating` modifier to methods
-class _MutatingModifiersDecorator: ModifiersDecorator {
+class MutatingModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let method = element.intention as? MethodGenerationIntention else {
@@ -78,7 +78,7 @@ class _MutatingModifiersDecorator: ModifiersDecorator {
 }
 
 /// Decorator that applies `static` to static members of types
-class _StaticModifiersDecorator: ModifiersDecorator {
+class StaticModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let intention = element.intention as? MemberGenerationIntention else {
@@ -98,7 +98,7 @@ class _StaticModifiersDecorator: ModifiersDecorator {
 }
 
 /// Decorator that appends access level to declarations
-class _AccessLevelModifiersDecorator: ModifiersDecorator {
+class AccessLevelModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let intention = element.intention as? FromSourceIntention else {
@@ -116,7 +116,7 @@ class _AccessLevelModifiersDecorator: ModifiersDecorator {
 
 /// Decorator that adds `public(set)`, `internal(set)`, `fileprivate(set)`, `private(set)`
 /// setter modifiers to properties and instance variables
-class _PropertySetterAccessModifiersDecorator: ModifiersDecorator {
+class PropertySetterAccessModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let prop = element.intention as? PropertyGenerationIntention else {
@@ -124,9 +124,6 @@ class _PropertySetterAccessModifiersDecorator: ModifiersDecorator {
         }
         
         guard let setterLevel = prop.setterAccessLevel, prop.accessLevel.isMoreAccessible(than: setterLevel) else {
-            return nil
-        }
-        guard setterLevel != .internal else {
             return nil
         }
 
@@ -137,7 +134,7 @@ class _PropertySetterAccessModifiersDecorator: ModifiersDecorator {
 
 /// Decorator that applies `weak`, `unowned(safe)`, and `unowned(unsafe)`
 /// modifiers to variable declarations
-class _OwnershipModifiersDecorator: ModifiersDecorator {
+class OwnershipModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let ownership = ownership(for: element) else {
@@ -166,7 +163,7 @@ class _OwnershipModifiersDecorator: ModifiersDecorator {
 }
 
 /// Decorator that applies `override` modifier to members of types
-class _OverrideModifiersDecorator: ModifiersDecorator {
+class OverrideModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let intention = element.intention as? MemberGenerationIntention else {
@@ -193,7 +190,7 @@ class _OverrideModifiersDecorator: ModifiersDecorator {
 }
 
 /// Decorator that applies `convenience` modifier to initializers
-class _ConvenienceInitModifiersDecorator: ModifiersDecorator {
+class ConvenienceInitModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let intention = element.intention as? InitGenerationIntention else {
@@ -210,7 +207,7 @@ class _ConvenienceInitModifiersDecorator: ModifiersDecorator {
 }
 
 /// Decorator that applies 'optional' modifier to protocol members
-class _ProtocolOptionalModifiersDecorator: ModifiersDecorator {
+class ProtocolOptionalModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let member = element.intention as? MemberGenerationIntention else {
@@ -241,7 +238,7 @@ class _ProtocolOptionalModifiersDecorator: ModifiersDecorator {
 }
 
 /// Modifier that appends `final` declarations to class intentions.
-class _FinalClassModifiersDecorator: ModifiersDecorator {
+class FinalClassModifiersDecorator: ModifiersDecorator {
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let intention = element.intention as? ClassGenerationIntention else {
             return nil

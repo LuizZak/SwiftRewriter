@@ -14,8 +14,6 @@ public func assertStatementsEqual(
         return
     }
 
-    let producer = SwiftSyntaxProducer()
-
     func stringify(_ stmt: Statement?) -> String {
         guard let stmt = stmt else {
             return "<nil>"
@@ -27,7 +25,7 @@ public func assertStatementsEqual(
             result = "\(type(of: stmt)): "
         }
 
-        result += producer.generateStatement(stmt).description
+        result += SwiftProducer.generateStatement(stmt)
 
         return result
     }
@@ -72,8 +70,6 @@ public func assertExpressionsEqual(
         return
     }
 
-    let producer = SwiftSyntaxProducer()
-
     func stringify(_ exp: Expression?) -> String {
         guard let exp = exp else {
             return "<nil>"
@@ -86,7 +82,7 @@ public func assertExpressionsEqual(
         }
 
         if exp.isBlock {
-            result += producer.generateExpression(exp).description
+            result += SwiftProducer.generateExpression(exp)
         } else {
             result += exp.description
         }
