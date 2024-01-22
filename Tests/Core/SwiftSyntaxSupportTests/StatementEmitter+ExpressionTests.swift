@@ -7,7 +7,7 @@ import XCTest
 
 @testable import SwiftSyntaxSupport
 
-class SwiftProducer_ExpTests: XCTestCase {
+class StatementEmitter_ExpressionTests: XCTestCase {
 
     func testConstantInt() {
         assert(
@@ -638,7 +638,7 @@ class SwiftProducer_ExpTests: XCTestCase {
 }
 
 // MARK: - Test internals
-extension SwiftProducer_ExpTests {
+extension StatementEmitter_ExpressionTests {
     func assert<T: Expression>(
         _ node: T,
         matches expected: String,

@@ -7,7 +7,7 @@ import XCTest
 
 @testable import SwiftSyntaxSupport
 
-class SwiftProducer_StmtTests: XCTestCase {
+class StatementEmitter_StatementTests: XCTestCase {
 
     func testCompoundInCompound() {
         assert(
@@ -1020,7 +1020,7 @@ class SwiftProducer_StmtTests: XCTestCase {
 }
 
 // MARK: - Test internals
-extension SwiftProducer_StmtTests {
+extension StatementEmitter_StatementTests {
     func assert<T: Statement, U: SyntaxProtocol>(
         _ node: T,
         producer: (SwiftProducer) -> (Statement) -> U,
