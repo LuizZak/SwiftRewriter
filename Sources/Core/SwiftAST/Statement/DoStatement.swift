@@ -105,7 +105,7 @@ public extension Statement {
 
     /// Returns `true` if this `Statement` is an instance of `DoStatement` class.
     @inlinable
-    var isDoStatement: Bool? {
+    var isDoStatement: Bool {
         asDoStatement != nil
     }
     

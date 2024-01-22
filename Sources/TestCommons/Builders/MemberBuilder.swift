@@ -88,6 +88,12 @@ public extension MemberBuilder where T: InitGenerationIntention {
         targetMember.isConvenience = isConvenience
         return self
     }
+
+    @discardableResult
+    func setIsFallible(_ isFallible: Bool) -> MemberBuilder {
+        targetMember.isFallible = isFallible
+        return self
+    }
 }
 
 extension MemberBuilder: _FunctionBuilder where T: FunctionIntention {
@@ -134,6 +140,15 @@ public extension MemberBuilder where T: MutableValueStorageIntention {
 }
 
 public extension MemberBuilder where T: PropertyGenerationIntention {
+    @discardableResult
+    func setAsReadOnly() -> MemberBuilder {
+        if !targetMember.isReadOnly {
+            targetMember.objcAttributes.append(.attribute("readonly"))
+        }
+
+        return self
+    }
+
     @discardableResult
     func setAsField() -> MemberBuilder {
         targetMember.mode = .asField
@@ -220,10 +235,30 @@ public extension MemberBuilder where T: SubscriptGenerationIntention {
     }
 }
 
+public extension MemberBuilder where T: ProtocolPropertyGenerationIntention {
+    @discardableResult
+    func setIsOptional(_ isOptional: Bool) -> MemberBuilder {
+        targetMember.isOptional = isOptional
+
+        return self
+    }
+}
+
+public extension MemberBuilder where T: ProtocolMethodGenerationIntention {
+    @discardableResult
+    func setIsOptional(_ isOptional: Bool) -> MemberBuilder {
+        targetMember.isOptional = isOptional
+
+        return self
+    }
+}
+
 // MARK: - Typealiases
 public typealias PropertyBuilder = MemberBuilder<PropertyGenerationIntention>
+public typealias ProtocolPropertyBuilder = MemberBuilder<ProtocolPropertyGenerationIntention>
 public typealias InstanceVarBuilder = MemberBuilder<InstanceVariableGenerationIntention>
 public typealias MethodBuilder = MemberBuilder<MethodGenerationIntention>
+public typealias ProtocolMethodBuilder = MemberBuilder<ProtocolMethodGenerationIntention>
 public typealias InitializerBuilder = MemberBuilder<InitGenerationIntention>
 public typealias SubscriptBuilder = MemberBuilder<SubscriptGenerationIntention>
 public typealias DeinitBuilder = MemberBuilder<DeinitGenerationIntention>
@@ -244,6 +279,14 @@ public extension PropertyGenerationIntention {
     }
 }
 
+public extension ProtocolPropertyGenerationIntention {
+    convenience init(name: String, type: SwiftType, builder: (ProtocolPropertyBuilder) -> Void) {
+        self.init(name: name, type: type, objcAttributes: [])
+        
+        builder(ProtocolPropertyBuilder(targetMember: self))
+    }
+}
+
 public extension MethodGenerationIntention {
     convenience init(name: String, builder: (MethodBuilder) -> Void) {
         self.init(signature: FunctionSignature(name: name), builder: builder)
@@ -253,6 +296,18 @@ public extension MethodGenerationIntention {
         self.init(signature: signature)
         
         builder(MethodBuilder(targetMember: self))
+    }
+}
+
+public extension ProtocolMethodGenerationIntention {
+    convenience init(name: String, builder: (ProtocolMethodBuilder) -> Void) {
+        self.init(signature: FunctionSignature(name: name), builder: builder)
+    }
+    
+    convenience init(signature: FunctionSignature, builder: (ProtocolMethodBuilder) -> Void) {
+        self.init(signature: signature)
+        
+        builder(ProtocolMethodBuilder(targetMember: self))
     }
 }
 

@@ -117,7 +117,7 @@ public extension Statement {
 
     /// Returns `true` if this `Statement` is an instance of `CompoundStatement` class.
     @inlinable
-    var isCompound: Bool? {
+    var isCompound: Bool {
         asCompound != nil
     }
     

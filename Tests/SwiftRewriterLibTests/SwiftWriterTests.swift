@@ -36,7 +36,7 @@ class SwiftSyntaxWriterTests: XCTestCase {
 
     func testShouldEmitTypeSignature_optionalInitializedVar_returnsTrue() {
         typeSystem.addType(KnownTypeBuilder(typeName: "A").build())
-        let producer = SwiftSyntaxProducer()
+        let producer = SwiftProducer()
         let storage = ValueStorage(
             type: .optional("A"),
             ownership: .strong,
@@ -44,7 +44,7 @@ class SwiftSyntaxWriterTests: XCTestCase {
         )
 
         let result =
-            sut.swiftSyntaxProducer(
+            sut.swiftProducer(
                 producer,
                 shouldEmitTypeFor: storage,
                 intention: nil,
@@ -56,7 +56,7 @@ class SwiftSyntaxWriterTests: XCTestCase {
 
     func testShouldEmitTypeSignature_weakInitializedVar_returnsFalse() {
         typeSystem.addType(KnownTypeBuilder(typeName: "A").build())
-        let producer = SwiftSyntaxProducer()
+        let producer = SwiftProducer()
         let storage = ValueStorage(
             type: .optional("A"),
             ownership: .weak,
@@ -64,7 +64,7 @@ class SwiftSyntaxWriterTests: XCTestCase {
         )
 
         let result =
-            sut.swiftSyntaxProducer(
+            sut.swiftProducer(
                 producer,
                 shouldEmitTypeFor: storage,
                 intention: nil,
@@ -79,7 +79,7 @@ class SwiftSyntaxWriterTests: XCTestCase {
         let typeB = KnownTypeBuilder(typeName: "B").settingSupertype(typeA).build()
         typeSystem.addType(typeA)
         typeSystem.addType(typeB)
-        let producer = SwiftSyntaxProducer()
+        let producer = SwiftProducer()
         let storage = ValueStorage(
             type: .optional("A"),
             ownership: .weak,
@@ -87,7 +87,7 @@ class SwiftSyntaxWriterTests: XCTestCase {
         )
 
         let result =
-            sut.swiftSyntaxProducer(
+            sut.swiftProducer(
                 producer,
                 shouldEmitTypeFor: storage,
                 intention: nil,
@@ -99,14 +99,14 @@ class SwiftSyntaxWriterTests: XCTestCase {
 
     func testShouldEmitTypeSignature_alwaysEmitVariableTypesTrue_returnsTrue() {
         typeSystem.addType(KnownTypeBuilder(typeName: "A").build())
-        let producer = SwiftSyntaxProducer()
+        let producer = SwiftProducer()
         let storage = ValueStorage(
             type: .optional("A"),
             ownership: .weak,
             isConstant: false
         )
         var lazyResult: Bool {
-            sut.swiftSyntaxProducer(
+            sut.swiftProducer(
                 producer,
                 shouldEmitTypeFor: storage,
                 intention: nil,

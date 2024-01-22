@@ -333,12 +333,12 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
             )
             nonOptionalProp.isOptional = false
             nonOptionalProp.type = prot
-            let optionalMethod = ProtocolMethodGenerationIntention(name: "name", builder: { _ in })
+            let optionalMethod = ProtocolMethodGenerationIntention(name: "name", builder: { (_: ProtocolMethodBuilder) in })
             optionalMethod.isOptional = true
             optionalMethod.type = prot
             let nonOptionalMethod = ProtocolMethodGenerationIntention(
                 name: "name",
-                builder: { _ in }
+                builder: { (_: ProtocolMethodBuilder) in }
             )
             nonOptionalMethod.isOptional = false
             nonOptionalMethod.type = prot

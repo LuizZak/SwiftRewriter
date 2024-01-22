@@ -17,7 +17,7 @@ class VariableDeclSyntaxGenerator {
         return syntax
     }
 
-    func generateModifierList(_ modifierDecorators: [ModifiersDecoratorResult]) -> DeclModifierListSyntax {
+    func generateModifierList(_ modifierDecorators: [ModifiersSyntaxDecoratorResult]) -> DeclModifierListSyntax {
         let syntax = DeclModifierListSyntax(modifierDecorators.map({ $0(producer) }))
 
         return syntax
@@ -439,7 +439,7 @@ private extension VariableDeclSyntaxGenerator {
         storage: ValueStorage,
         attributes: [() -> AttributeListSyntax.Element],
         intention: IntentionProtocol?,
-        modifiers: [ModifiersDecoratorResult],
+        modifiers: [ModifiersSyntaxDecoratorResult],
         accessors: (() -> AccessorBlockSyntax)? = nil,
         initialization: Expression? = nil
     ) -> ObjcVariableDeclarationNode {

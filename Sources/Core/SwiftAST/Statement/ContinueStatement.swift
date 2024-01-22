@@ -72,7 +72,7 @@ public extension Statement {
 
     /// Returns `true` if this `Statement` is an instance of `ContinueStatement` class.
     @inlinable
-    var isContinue: Bool? {
+    var isContinue: Bool {
         asContinue != nil
     }
 

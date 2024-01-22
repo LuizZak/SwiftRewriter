@@ -72,7 +72,7 @@ public extension Statement {
 
     /// Returns `true` if this `Statement` is an instance of `BreakStatement` class.
     @inlinable
-    var isBreak: Bool? {
+    var isBreak: Bool {
         asBreak != nil
     }
 

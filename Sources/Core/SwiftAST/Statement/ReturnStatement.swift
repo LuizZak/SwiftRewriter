@@ -86,7 +86,7 @@ public extension Statement {
     /// Returns `true` if this `Statement` is an instance of `ReturnStatement`
     /// class.
     @inlinable
-    var isReturn: Bool? {
+    var isReturn: Bool {
         asReturn != nil
     }
     

@@ -52,7 +52,7 @@ public extension Statement {
     /// Returns `true` if this `Statement` is an instance of `UnknownStatement`
     /// class.
     @inlinable
-    var isUnknown: Bool? {
+    var isUnknown: Bool {
         asUnknown != nil
     }
     

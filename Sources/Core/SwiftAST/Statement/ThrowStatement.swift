@@ -82,7 +82,7 @@ public extension Statement {
     /// Returns `true` if this `Statement` is an instance of `ThrowStatement`
     /// class.
     @inlinable
-    var isThrow: Bool? {
+    var isThrow: Bool {
         asThrow != nil
     }
 

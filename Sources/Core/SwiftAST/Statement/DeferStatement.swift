@@ -77,7 +77,7 @@ public extension Statement {
 
     /// Returns `true` if this `Statement` is an instance of `DeferStatement` class.
     @inlinable
-    var isDefer: Bool? {
+    var isDefer: Bool {
         asDefer != nil
     }
     

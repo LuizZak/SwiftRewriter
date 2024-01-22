@@ -78,7 +78,7 @@ public extension Statement {
 
     /// Returns `true` if this `Statement` is an instance of `ExpressionsStatement` class.
     @inlinable
-    var isExpressions: Bool? {
+    var isExpressions: Bool {
         asExpressions != nil
     }
 

@@ -94,7 +94,7 @@ public extension Statement {
     /// Returns `true` if this `Statement` is an instance of `WhileStatement`
     /// class.
     @inlinable
-    var isWhile: Bool? {
+    var isWhile: Bool {
         asWhile != nil
     }
     

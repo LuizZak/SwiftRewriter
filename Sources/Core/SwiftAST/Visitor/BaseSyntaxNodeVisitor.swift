@@ -110,7 +110,7 @@ open class BaseSyntaxNodeVisitor: ExpressionVisitor, StatementVisitor {
     /// Visits a type-check expression node
     ///
     /// - Parameter exp: A type check expression to visit
-    public func visitTypeCheck(_ exp: TypeCheckExpression) {
+    open func visitTypeCheck(_ exp: TypeCheckExpression) {
         visitExpression(exp.exp)
     }
     
@@ -166,7 +166,7 @@ open class BaseSyntaxNodeVisitor: ExpressionVisitor, StatementVisitor {
     /// Visits a try expression node
     ///
     /// - Parameter exp: A try expression to visit
-    public func visitTry(_ exp: TryExpression) {
+    open func visitTry(_ exp: TryExpression) {
         
     }
 
@@ -232,7 +232,7 @@ open class BaseSyntaxNodeVisitor: ExpressionVisitor, StatementVisitor {
     /// Visits a `case` block from a `SwitchStatement`.
     ///
     /// - Parameter switchCase: A switch case block to visit
-    public func visitSwitchCase(_ switchCase: SwitchCase) {
+    open func visitSwitchCase(_ switchCase: SwitchCase) {
         switchCase.patterns.forEach(visitPattern)
         switchCase.statements.forEach(visitStatement)
     }
@@ -240,7 +240,7 @@ open class BaseSyntaxNodeVisitor: ExpressionVisitor, StatementVisitor {
     /// Visits a `default` block from a `SwitchStatement`.
     ///
     /// - Parameter defaultCase: A switch default case block to visit
-    public func visitSwitchDefaultCase(_ defaultCase: SwitchDefaultCase) {
+    open func visitSwitchDefaultCase(_ defaultCase: SwitchDefaultCase) {
         defaultCase.statements.forEach(visitStatement)
     }
     
@@ -274,19 +274,18 @@ open class BaseSyntaxNodeVisitor: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: A DoStatement to visit
     open func visitDo(_ stmt: DoStatement) {
         visitStatement(stmt.body)
+        // NOTE: This should call visitCatchBlock for the catch blocks attached!
     }
     
     /// Visits a `catch` block from a `DoStatement`.
     ///
     /// - Parameter stmt: A catch block to visit
-    public func visitCatchBlock(_ block: CatchBlock) -> CatchBlock {
+    open func visitCatchBlock(_ block: CatchBlock) {
         if let pattern = block.pattern {
             visitPattern(pattern)
         }
 
         visitCompound(block.body)
-
-        return block
     }
     
     /// Visits a `defer` statement node
@@ -343,21 +342,21 @@ open class BaseSyntaxNodeVisitor: ExpressionVisitor, StatementVisitor {
     /// Visits a variable declaration statement's element
     ///
     /// - Parameter stmt: A variable declaration statement's element to visit
-    public func visitStatementVariableDeclaration(_ decl: StatementVariableDeclaration) {
+    open func visitStatementVariableDeclaration(_ decl: StatementVariableDeclaration) {
         decl.initialization.map(self.visitExpression(_:))
     }
 
     /// Visits a local function statement
     ///
     /// - Parameter stmt: A LocalFunctionStatement to visit
-    public func visitLocalFunction(_ stmt: LocalFunctionStatement) {
+    open func visitLocalFunction(_ stmt: LocalFunctionStatement) {
         visitStatement(stmt.function.body)
     }
     
     /// Visits a throw statement
     ///
     /// - Parameter stmt: A ThrowStatement to visit
-    public func visitThrow(_ stmt: ThrowStatement) {
+    open func visitThrow(_ stmt: ThrowStatement) {
         visitExpression(stmt.exp)
     }
     

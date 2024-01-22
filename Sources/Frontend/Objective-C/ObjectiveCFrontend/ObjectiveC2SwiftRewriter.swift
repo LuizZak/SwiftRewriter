@@ -792,7 +792,7 @@ public final class ObjectiveC2SwiftRewriter {
             return
         }
         
-        let writer = SwiftSyntaxProducer(settings: writerOptions.toSwiftSyntaxProducerSettings())
+        let writer = SwiftProducer(settings: writerOptions.toSwiftProducerSettings())
         
         let output = writer.generateFile(match)
         

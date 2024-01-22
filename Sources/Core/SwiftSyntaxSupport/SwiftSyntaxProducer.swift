@@ -22,12 +22,14 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
         VariableDeclSyntaxGenerator(producer: self)
     }
     
+    @available(*, deprecated, message: "Use SwiftProducer")
     public override init() {
         settings = .default
         
         super.init()
     }
     
+    @available(*, deprecated, message: "Use SwiftProducer")
     public init(settings: Settings, delegate: SwiftSyntaxProducerDelegate? = nil) {
         self.settings = settings
         self.delegate = delegate
@@ -78,11 +80,11 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
         }
     }
     
-    func modifiers(for intention: IntentionProtocol) -> [ModifiersDecoratorResult] {
+    func modifiers(for intention: IntentionProtocol) -> [ModifiersSyntaxDecoratorResult] {
         modifiersDecorations.modifiers(for: intention)
     }
     
-    func modifiers(for decl: StatementVariableDeclaration) -> [ModifiersDecoratorResult] {
+    func modifiers(for decl: StatementVariableDeclaration) -> [ModifiersSyntaxDecoratorResult] {
         modifiersDecorations.modifiers(for: decl)
     }
     

@@ -165,12 +165,12 @@ class SwiftSyntaxWriter {
     func outputFile(_ fileIntent: FileGenerationIntention, targetFile: FileOutput) throws {
         let out = targetFile.outputTarget()
         
-        let settings = SwiftSyntaxProducer
+        let settings = SwiftProducer
             .Settings(outputExpressionTypes: options.outputExpressionTypes,
                       printIntentionHistory: options.printIntentionHistory,
                       emitObjcCompatibility: options.emitObjcCompatibility)
         
-        let producer = SwiftSyntaxProducer(settings: settings, delegate: self)
+        let producer = SwiftProducer(settings: settings, delegate: self)
         
         var fileSyntax = producer.generateFile(fileIntent)
 
@@ -207,9 +207,9 @@ class SwiftSyntaxWriter {
     }
 }
 
-extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
-    func swiftSyntaxProducer(
-        _ producer: SwiftSyntaxProducer,
+extension SwiftSyntaxWriter: SwiftProducerDelegate {
+    func swiftProducer(
+        _ producer: SwiftProducer,
         shouldEmitTypeFor storage: ValueStorage,
         intention: IntentionProtocol?,
         initialValue: Expression?
@@ -232,8 +232,8 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
         )
     }
     
-    func swiftSyntaxProducer(
-        _ producer: SwiftSyntaxProducer,
+    func swiftProducer(
+        _ producer: SwiftProducer,
         initialValueFor intention: ValueStorageIntention
     ) -> Expression? {
         if let intention = intention as? PropertyGenerationIntention {

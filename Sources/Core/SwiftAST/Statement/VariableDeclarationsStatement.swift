@@ -92,7 +92,7 @@ public extension Statement {
     /// Returns `true` if this `Statement` is an instance of `VariableDeclarationsStatement`
     /// class.
     @inlinable
-    var isVariableDeclaration: Bool? {
+    var isVariableDeclaration: Bool {
         asVariableDeclaration != nil
     }
 
