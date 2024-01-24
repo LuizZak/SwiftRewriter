@@ -77,7 +77,6 @@
 				},
 				"args": [
 					"test",
-					"--skip-build",
 					"--enable-code-coverage",
 				],
 				"detail": "swift test",

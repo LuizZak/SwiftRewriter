@@ -94,7 +94,7 @@ public extension Statement {
     /// Returns `true` if this `Statement` is an instance of `RepeatWhileStatement`
     /// class.
     @inlinable
-    var isRepeatWhile: Bool? {
+    var isRepeatWhile: Bool {
         asRepeatWhile != nil
     }
     

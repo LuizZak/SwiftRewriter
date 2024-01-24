@@ -128,7 +128,7 @@ public extension Statement {
     /// Returns `true` if this `Statement` is an instance of `ForStatement`
     /// class.
     @inlinable
-    var isFor: Bool? {
+    var isFor: Bool {
         asFor != nil
     }
     

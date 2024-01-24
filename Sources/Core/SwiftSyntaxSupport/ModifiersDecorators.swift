@@ -3,17 +3,17 @@ import SwiftSyntaxBuilder
 import Intentions
 import SwiftAST
 
-typealias ModifiersDecoratorResult = (SwiftSyntaxProducer) -> DeclModifierSyntax
+typealias ModifiersDecoratorResult = SwiftDeclarationModifier
 
-protocol ModifiersSyntaxDecorator {
+protocol ModifiersDecorator {
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult?
 }
 
-class ModifiersSyntaxDecoratorApplier {
+class ModifiersDecoratorApplier {
     /// Creates and returns a modifiers decorator with all default modifier
     /// decorators setup.
-    static func makeDefaultDecoratorApplier() -> ModifiersSyntaxDecoratorApplier {
-        let decorator = ModifiersSyntaxDecoratorApplier()
+    static func makeDefaultDecoratorApplier() -> ModifiersDecoratorApplier {
+        let decorator = ModifiersDecoratorApplier()
         decorator.addDecorator(AccessLevelModifiersDecorator())
         decorator.addDecorator(FinalClassModifiersDecorator())
         decorator.addDecorator(PropertySetterAccessModifiersDecorator())
@@ -26,9 +26,9 @@ class ModifiersSyntaxDecoratorApplier {
         return decorator
     }
     
-    private(set) var decorators: [ModifiersSyntaxDecorator] = []
+    private(set) var decorators: [ModifiersDecorator] = []
     
-    func addDecorator(_ decorator: ModifiersSyntaxDecorator) {
+    func addDecorator(_ decorator: ModifiersDecorator) {
         decorators.append(decorator)
     }
     
@@ -58,7 +58,7 @@ class ModifiersSyntaxDecoratorApplier {
 }
 
 /// Decorator for adding `mutating` modifier to methods
-class MutatingModifiersDecorator: ModifiersSyntaxDecorator {
+class MutatingModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let method = element.intention as? MethodGenerationIntention else {
@@ -69,12 +69,7 @@ class MutatingModifiersDecorator: ModifiersSyntaxDecorator {
         }
         
         if method.signature.isMutating {
-            return { producer in
-                .init(name: .identifier("mutating")
-                    .addingTrailingSpace()
-                    .withExtraLeading(from: producer)
-                )
-            }
+            return .mutating
         }
         
         return nil
@@ -83,20 +78,18 @@ class MutatingModifiersDecorator: ModifiersSyntaxDecorator {
 }
 
 /// Decorator that applies `static` to static members of types
-class StaticModifiersDecorator: ModifiersSyntaxDecorator {
+class StaticModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let intention = element.intention as? MemberGenerationIntention else {
             return nil
         }
         
+        if intention is EnumCaseGenerationIntention {
+            return nil
+        }
         if intention.isStatic {
-            return { producer in
-                .init(name: .staticKeyword()
-                    .addingTrailingSpace()
-                    .withExtraLeading(from: producer)
-                )
-            }
+            return .static
         }
         
         return nil
@@ -105,31 +98,25 @@ class StaticModifiersDecorator: ModifiersSyntaxDecorator {
 }
 
 /// Decorator that appends access level to declarations
-class AccessLevelModifiersDecorator: ModifiersSyntaxDecorator {
+class AccessLevelModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let intention = element.intention as? FromSourceIntention else {
             return nil
         }
-        
-        guard let token = _accessModifierFor(accessLevel: intention.accessLevel, omitInternal: true) else {
-            return nil
+
+        if intention.accessLevel != .internal {
+            return .accessLevel(intention.accessLevel)
         }
 
-        return { producer in
-            DeclModifierSyntax(
-                name: token
-                    .addingTrailingSpace()
-                    .withExtraLeading(from: producer)
-            )
-        }
+        return nil
     }
     
 }
 
 /// Decorator that adds `public(set)`, `internal(set)`, `fileprivate(set)`, `private(set)`
 /// setter modifiers to properties and instance variables
-class PropertySetterAccessModifiersDecorator: ModifiersSyntaxDecorator {
+class PropertySetterAccessModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let prop = element.intention as? PropertyGenerationIntention else {
@@ -139,23 +126,15 @@ class PropertySetterAccessModifiersDecorator: ModifiersSyntaxDecorator {
         guard let setterLevel = prop.setterAccessLevel, prop.accessLevel.isMoreAccessible(than: setterLevel) else {
             return nil
         }
-        guard let setterAccessLevel = _accessModifierFor(accessLevel: setterLevel, omitInternal: false) else {
-            return nil
-        }
 
-        return { producer in
-            DeclModifierSyntax(name: setterAccessLevel.withExtraLeading(from: producer))
-                .withDetail(
-                    .init(detail: "set", rightParen: .rightParen.withTrailingSpace())
-                )
-        }
+        return .setterAccessLevel(setterLevel)
     }
     
 }
 
 /// Decorator that applies `weak`, `unowned(safe)`, and `unowned(unsafe)`
 /// modifiers to variable declarations
-class OwnershipModifiersDecorator: ModifiersSyntaxDecorator {
+class OwnershipModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let ownership = ownership(for: element) else {
@@ -166,35 +145,7 @@ class OwnershipModifiersDecorator: ModifiersSyntaxDecorator {
             return nil
         }
         
-        return {
-            let token: TokenSyntax
-            let detail: TokenSyntax?
-            
-            switch ownership {
-            case .strong:
-                token = TokenSyntax.identifier("", presence: .present)
-                detail = nil
-                
-            case .weak:
-                token = makeIdentifier("weak").addingTrailingSpace()
-                detail = nil
-                
-            case .unownedSafe:
-                token = makeIdentifier("unowned")
-                detail = makeIdentifier("safe")
-                
-            case .unownedUnsafe:
-                token = makeIdentifier("unowned")
-                detail = makeIdentifier("unsafe")
-            }
-            
-            return DeclModifier(
-                name: token.withExtraLeading(from: $0),
-                detail: detail.map { token in
-                    .init(detail: token, rightParen: .rightParen.withTrailingSpace())
-                }
-            )
-        }
+        return .ownership(ownership)
     }
     
     private func ownership(for element: DecoratableElement) -> Ownership? {
@@ -212,7 +163,7 @@ class OwnershipModifiersDecorator: ModifiersSyntaxDecorator {
 }
 
 /// Decorator that applies `override` modifier to members of types
-class OverrideModifiersDecorator: ModifiersSyntaxDecorator {
+class OverrideModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let intention = element.intention as? MemberGenerationIntention else {
@@ -220,13 +171,7 @@ class OverrideModifiersDecorator: ModifiersSyntaxDecorator {
         }
         
         if isOverridenMember(intention) {
-            return { producer in
-                DeclModifierSyntax(
-                    name: .identifier("override")
-                        .withExtraLeading(from: producer)
-                        .withTrailingSpace()
-                )
-            }
+            return .override
         }
         
         return nil
@@ -245,7 +190,7 @@ class OverrideModifiersDecorator: ModifiersSyntaxDecorator {
 }
 
 /// Decorator that applies `convenience` modifier to initializers
-class ConvenienceInitModifiersDecorator: ModifiersSyntaxDecorator {
+class ConvenienceInitModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let intention = element.intention as? InitGenerationIntention else {
@@ -253,13 +198,7 @@ class ConvenienceInitModifiersDecorator: ModifiersSyntaxDecorator {
         }
         
         if intention.isConvenience {
-            return { producer in
-                DeclModifierSyntax(
-                    name: .identifier("convenience")
-                        .withExtraLeading(from: producer)
-                        .withTrailingSpace()
-                )
-            }
+            return .convenience
         }
         
         return nil
@@ -268,7 +207,7 @@ class ConvenienceInitModifiersDecorator: ModifiersSyntaxDecorator {
 }
 
 /// Decorator that applies 'optional' modifier to protocol members
-class ProtocolOptionalModifiersDecorator: ModifiersSyntaxDecorator {
+class ProtocolOptionalModifiersDecorator: ModifiersDecorator {
     
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let member = element.intention as? MemberGenerationIntention else {
@@ -276,13 +215,7 @@ class ProtocolOptionalModifiersDecorator: ModifiersSyntaxDecorator {
         }
         
         if isOptionalMember(member) {
-            return { producer in
-                DeclModifierSyntax(
-                    name: .identifier("optional")
-                        .withExtraLeading(from: producer)
-                        .withTrailingSpace()
-                )
-            }
+            return .optional
         }
         
         return nil
@@ -292,12 +225,12 @@ class ProtocolOptionalModifiersDecorator: ModifiersSyntaxDecorator {
         guard member.type is ProtocolGenerationIntention else {
             return false
         }
-        
-        if let method = member as? MethodGenerationIntention {
-            return method.optional
+
+        if let member = member as? ProtocolMethodGenerationIntention {
+            return member.isOptional
         }
-        if let property = member as? PropertyGenerationIntention {
-            return property.optional
+        if let member = member as? ProtocolPropertyGenerationIntention {
+            return member.isOptional
         }
         
         return false
@@ -305,48 +238,16 @@ class ProtocolOptionalModifiersDecorator: ModifiersSyntaxDecorator {
 }
 
 /// Modifier that appends `final` declarations to class intentions.
-class FinalClassModifiersDecorator: ModifiersSyntaxDecorator {
+class FinalClassModifiersDecorator: ModifiersDecorator {
     func modifier(for element: DecoratableElement) -> ModifiersDecoratorResult? {
         guard let intention = element.intention as? ClassGenerationIntention else {
             return nil
         }
 
         if intention.isFinal {
-            return { producer in
-                DeclModifierSyntax(
-                    name: .identifier("final")
-                        .withExtraLeading(from: producer)
-                        .withTrailingSpace()
-                )
-            }
+            return .final
         }
 
         return nil
     }
-}
-
-func _accessModifierFor(accessLevel: AccessLevel, omitInternal: Bool) -> TokenSyntax? {
-    let token: TokenSyntax
-    
-    switch accessLevel {
-    case .internal:
-        // We don't emit `internal` explicitly by default here
-        return omitInternal ? nil : .internalKeyword()
-        
-    case .open:
-        // TODO: There's no `open` keyword currently in the SwiftSyntax version
-        // we're using;
-        token = .identifier("open")
-        
-    case .private:
-        token = .privateKeyword()
-        
-    case .fileprivate:
-        token = .fileprivateKeyword()
-        
-    case .public:
-        token = .publicKeyword()
-    }
-    
-    return token
 }

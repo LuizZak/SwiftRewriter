@@ -1067,10 +1067,8 @@ extension ObjectiveCStatementASTReaderTests {
                 var expString = ""
                 var resString = ""
 
-                let producer = SwiftSyntaxProducer()
-
-                expString = producer.generateStatement(expected).description + "\n"
-                resString = (result.map(producer.generateStatement)?.description ?? "") + "\n"
+                expString = SwiftProducer.generateStatement(expected).description + "\n"
+                resString = (result.map { SwiftProducer.generateStatement($0) } ?? "") + "\n"
                 
                 dump(expected, to: &expString)
                 dump(result, to: &resString)

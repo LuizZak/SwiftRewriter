@@ -37,6 +37,14 @@ public class TypeBuilder<T: TypeGenerationIntention>: DeclarationBuilder<T> {
     }
     
     @discardableResult
+    public func createConformance(protocolName: String) -> TypeBuilder {
+        let prot = ProtocolInheritanceIntention(protocolName: protocolName)
+        targetType.addProtocol(prot)
+        
+        return self
+    }
+    
+    @discardableResult
     public func createProperty(
         named name: String,
         type: SwiftType,
@@ -243,14 +251,6 @@ public extension TypeBuilder where T: BaseClassIntention {
     }
     
     @discardableResult
-    func createConformance(protocolName: String) -> TypeBuilder {
-        let prot = ProtocolInheritanceIntention(protocolName: protocolName)
-        targetType.addProtocol(prot)
-        
-        return self
-    }
-    
-    @discardableResult
     func createSynthesize(propertyName: String, variableName: String? = nil) -> TypeBuilder {
         let intent =
             PropertySynthesizationIntention(
@@ -301,6 +301,96 @@ public extension TypeBuilder where T: ClassExtensionGenerationIntention {
     @discardableResult
     func setAsCategoryInterfaceSource() -> TypeBuilder {
         targetType.isInterfaceSource = true
+        
+        return self
+    }
+}
+
+public extension TypeBuilder where T: ProtocolGenerationIntention {
+    @discardableResult
+    func createProtocolProperty(
+        named name: String,
+        type: SwiftType,
+        mode: PropertyGenerationIntention.Mode = .asField,
+        objcAttributes: [ObjcPropertyAttribute] = [],
+        builder: (ProtocolPropertyBuilder) -> Void = emptyInit
+    ) -> TypeBuilder {
+        
+        let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
+        
+        let prop = ProtocolPropertyGenerationIntention(
+            name: name,
+            storage: storage,
+            objcAttributes: objcAttributes
+        )
+        
+        prop.mode = mode
+        
+        let mbuilder = MemberBuilder(targetMember: prop)
+        
+        builder(mbuilder)
+        
+        targetType.addProperty(mbuilder.build())
+        
+        return self
+    }
+    
+    @discardableResult
+    func createProtocolVoidMethod(
+        named name: String,
+        builder: (ProtocolMethodBuilder) -> Void = emptyInit
+    ) -> TypeBuilder {
+        
+        let signature = FunctionSignature(name: name, parameters: [])
+        
+        return createProtocolMethod(signature, builder: builder)
+    }
+    
+    @discardableResult
+    func createProtocolMethod(
+        named name: String,
+        returnType: SwiftType = .void,
+        parameters: [ParameterSignature] = [],
+        isStatic: Bool = false,
+        builder: (ProtocolMethodBuilder) -> Void = emptyInit
+    ) -> TypeBuilder {
+        
+        let signature = FunctionSignature(
+            name: name,
+            parameters: parameters,
+            returnType: returnType,
+            isStatic: isStatic
+        )
+        
+        return createProtocolMethod(signature, builder: builder)
+    }
+    
+    @discardableResult
+    func createProtocolMethod(
+        _ signatureString: String,
+        isStatic: Bool = false,
+        builder: (ProtocolMethodBuilder) -> Void = emptyInit
+    ) -> TypeBuilder {
+        
+        var signature = try! FunctionSignatureParser.parseSignature(from: signatureString)
+        signature.isStatic = isStatic
+        
+        return createProtocolMethod(signature, builder: builder)
+    }
+    
+    @discardableResult
+    func createProtocolMethod(
+        _ signature: FunctionSignature,
+        builder: (ProtocolMethodBuilder) -> Void = emptyInit
+    ) -> TypeBuilder {
+        
+        let method: MethodGenerationIntention
+        
+        method = ProtocolMethodGenerationIntention(signature: signature) { mb in
+            builder(mb)
+        }
+        
+        targetType.addMethod(method)
         
         return self
     }

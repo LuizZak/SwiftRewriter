@@ -34,7 +34,7 @@ public extension Statement {
 
     /// Returns `true` if this `Statement` is an instance of `FallthroughStatement` class.
     @inlinable
-    var isFallthrough: Bool? {
+    var isFallthrough: Bool {
         asFallthrough != nil
     }
     

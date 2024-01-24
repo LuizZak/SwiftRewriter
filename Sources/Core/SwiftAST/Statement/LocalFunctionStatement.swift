@@ -79,7 +79,7 @@ public extension Statement {
     /// Returns `true` if this `Statement` is an instance of `LocalFunctionStatement`
     /// class.
     @inlinable
-    var isLocalFunction: Bool? {
+    var isLocalFunction: Bool {
         asLocalFunction != nil
     }
 

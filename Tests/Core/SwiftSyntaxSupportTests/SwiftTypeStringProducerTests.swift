@@ -1,10 +1,9 @@
 import XCTest
-import SwiftAST
 
 @testable import SwiftSyntaxSupport
+import SwiftAST
 
-class SwiftTypeConverterTests: XCTestCase {
-
+class SwiftTypeStringProducerTests: XCTestCase {
     func testTypeNameString() {
         expectSwift(.typeName("MyType"), toConvertTo: "MyType")
         expectSwift(.optional(.typeName("MyType")), toConvertTo: "MyType?")
@@ -33,6 +32,28 @@ class SwiftTypeConverterTests: XCTestCase {
         expectSwift(.metatype(for: .int), toConvertTo: "Int.Type")
         expectSwift(.tuple(.empty), toConvertTo: "Void")
         expectSwift(.tuple([.int, .int]), toConvertTo: "(Int, Int)")
+    }
+
+    func testBlock_attributes() {
+        expectSwift(
+            .block(returnType: .void, parameters: [], attributes: [.autoclosure]),
+            toConvertTo: "@autoclosure () -> Void"
+        )
+        expectSwift(
+            .block(returnType: .void, parameters: [], attributes: [.escaping]),
+            toConvertTo: "@escaping () -> Void"
+        )
+        expectSwift(
+            .block(returnType: .void, parameters: [], attributes: [.convention(.c)]),
+            toConvertTo: "@convention(c) () -> Void"
+        )
+    }
+
+    func testBlock_attributes_multiple() {
+        expectSwift(
+            .block(returnType: .void, parameters: [], attributes: [.autoclosure, .escaping, .convention(.block)]),
+            toConvertTo: "@autoclosure @convention(block) @escaping () -> Void"
+        )
     }
 
     func testNullabilityUnspecified_promotesToOptional_genericParameter() {
@@ -72,6 +93,10 @@ class SwiftTypeConverterTests: XCTestCase {
             .swiftBlock(returnType: .void, parameters: [.nullabilityUnspecified(.string)]),
             toConvertTo: "(String?) -> Void"
         )
+        expectSwift(
+            .swiftBlock(returnType: .void, parameters: [.nullabilityUnspecified(.anyObject), .implicitUnwrappedOptional(.anyObject)]),
+            toConvertTo: "(AnyObject?, AnyObject!) -> Void"
+        )
     }
 
     func testNullabilityUnspecified_promotesToOptional_blockReturnType() {
@@ -80,9 +105,16 @@ class SwiftTypeConverterTests: XCTestCase {
             toConvertTo: "() -> String?"
         )
     }
+
+    func testNullabilityUnspecified_promotesToOptional_genericArgument() {
+        expectSwift(
+            .generic("A", parameters: [.nullabilityUnspecified(.string)]),
+            toConvertTo: "A<String?>"
+        )
+    }
 }
 
-extension SwiftTypeConverterTests {
+extension SwiftTypeStringProducerTests {
     private func expectSwift(
         _ type: SwiftType,
         toConvertTo expected: String,
@@ -105,7 +137,7 @@ extension SwiftTypeConverterTests {
     }
 
     private func typeMapperConvert(_ type: SwiftType) -> String {
-        return SwiftTypeConverter.makeTypeSyntax(type, startTokenHandler: NullStartTokenHandler())
-            .description
+        let sut = SwiftTypeStringProducer()
+        return sut.convert(type)
     }
 }

@@ -413,6 +413,10 @@ extension FunctionSignature: CustomStringConvertible {
         result += name
         
         result += TypeFormatter.asString(parameters: parameters)
+
+        if isThrowing {
+            result += " throws"
+        }
         
         if returnType != .void {
             result += " -> \(TypeFormatter.stringify(returnType))"

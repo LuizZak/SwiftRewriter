@@ -1,5 +1,6 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.9
 import PackageDescription
+import CompilerPluginSupport
 import Foundation
 
 var extraAntlrTargetSettings: [SwiftSetting] = []
@@ -146,7 +147,7 @@ let coreTests: [Target] = [
         name: "WriterTargetOutputTests",
         dependencies: [
             "WriterTargetOutput",
-            .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
+            .product(name: "SwiftParser", package: "swift-syntax"),
             "TestCommons",
         ],
         path: "Tests/Core/WriterTargetOutputTests"
@@ -188,7 +189,7 @@ let coreTests: [Target] = [
         dependencies: [
             "SwiftSyntaxSupport",
             .product(name: "SwiftSyntax", package: "swift-syntax"),
-            .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
+            .product(name: "SwiftParser", package: "swift-syntax"),
             "KnownType", "Intentions", "SwiftAST", "TestCommons",
             "SwiftRewriterLib",
         ],
@@ -209,7 +210,7 @@ let coreTests: [Target] = [
         dependencies: [
             "SwiftSyntaxRewriterPasses",
             .product(name: "SwiftSyntax", package: "swift-syntax"),
-            .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
+            .product(name: "SwiftParser", package: "swift-syntax"),
             "SwiftSyntaxSupport", "TestCommons",
         ],
         path: "Tests/Core/SwiftSyntaxRewriterPassesTests"
@@ -258,7 +259,7 @@ let coreTests: [Target] = [
         name: "AnalysisTests",
         dependencies: [
             "Analysis",
-            .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
+            .product(name: "SwiftParser", package: "swift-syntax"),
             "SwiftAST", "SwiftRewriterLib", "GlobalsProviders",
             "TestCommons", "TypeSystem", "GraphvizLib",
         ],
@@ -385,6 +386,9 @@ frontendTargets.append(contentsOf: objcFrontend)
 frontendTestTargets.append(contentsOf: objcFrontendTests)
 
 //
+let aggregateTargets: [Target] =
+    core + coreTests +
+    frontendTargets + frontendTestTargets
 
 let package = Package(
     name: "SwiftRewriter",
@@ -403,14 +407,14 @@ let package = Package(
             targets: ["SwiftRewriter"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/LuizZak/MiniLexer.git", .exact("0.10.0")),
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.0.0"),
-        .package(url: "https://github.com/LuizZak/antlr4-swift.git", .exact("4.1.2")),
-        .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.2")),
-        .package(url: "https://github.com/apple/swift-syntax.git", .exact("508.0.1")),
-        .package(url: "https://github.com/apple/swift-format.git", .exact("508.0.1")),
+        .package(url: "https://github.com/LuizZak/MiniLexer.git", exact: "0.10.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.3.0"),
+        .package(url: "https://github.com/LuizZak/antlr4-swift.git", exact: "4.1.2"),
+        .package(url: "https://github.com/LuizZak/console.git", exact:  "0.8.2"),
+        .package(url: "https://github.com/apple/swift-syntax.git", from: "509.1.0"),
+        .package(url: "https://github.com/apple/swift-format.git", from: "509.0.0"),
     ],
-    targets: core + coreTests + frontendTargets + frontendTestTargets + [
+    targets: aggregateTargets + [
         swiftRewriterTarget,
         .target(
             name: "Utils",
@@ -424,8 +428,8 @@ let package = Package(
                 .product(name: "Console", package: "console"),
                 .product(name: "SwiftFormat", package: "swift-format"),
                 .product(name: "SwiftFormatConfiguration", package: "swift-format"),
-                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
-                .product(name: "IDEUtils", package: "swift-syntax"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
+                .product(name: "SwiftIDEUtils", package: "swift-syntax"),
                 "SwiftAST", "Analysis", "TypeDefinitions", "Utils", "Intentions",
                 "TypeSystem", "IntentionPasses", "KnownType",
                 "WriterTargetOutput", "SwiftSyntaxSupport", "GlobalsProviders",
@@ -467,7 +471,7 @@ let package = Package(
             name: "SwiftRewriterLibTests",
             dependencies: [
                 "SwiftRewriterLib",
-                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
                 "SwiftAST", "ObjcGrammarModels", "ObjcParser", "ExpressionPasses",
                 "IntentionPasses", "TestCommons", "GlobalsProviders",
                 "Intentions", "TypeSystem", "WriterTargetOutput",

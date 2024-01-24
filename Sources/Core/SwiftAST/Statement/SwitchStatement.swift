@@ -120,7 +120,7 @@ public extension Statement {
     /// Returns `true` if this `Statement` is an instance of `SwitchStatement`
     /// class.
     @inlinable
-    var isSwitch: Bool? {
+    var isSwitch: Bool {
         asSwitch != nil
     }
 

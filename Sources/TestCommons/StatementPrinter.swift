@@ -10,8 +10,6 @@ public enum StatementPrinter {
     }
     
     public static func toString(statement: Statement) -> String {
-        let writer = SwiftSyntaxProducer(settings: .default)
-        
-        return writer.generateStatement(statement).description
+        return SwiftProducer.generateStatement(statement)
     }
 }

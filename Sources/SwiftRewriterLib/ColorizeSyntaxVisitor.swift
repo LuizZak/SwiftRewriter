@@ -1,5 +1,5 @@
 import SwiftSyntax
-import IDEUtils
+import SwiftIDEUtils
 import Console
 
 internal class ColorizeSyntaxVisitor: SyntaxVisitor {
@@ -46,7 +46,7 @@ internal class ColorizeSyntaxVisitor: SyntaxVisitor {
 
         // Split token into leading - content - trailing and print in separate
         // parts.
-        let content = token.withoutTrivia().description
+        let content = token.trimmed.description
 
         return _wrapTrivias(
             leading: token.leadingTrivia,
@@ -63,7 +63,7 @@ internal class ColorizeSyntaxVisitor: SyntaxVisitor {
 
         // Split token into leading - content - trailing and print in separate
         // parts.
-        let content = syntax.withoutTrivia().description
+        let content = syntax.trimmed.description
 
         return _wrapTrivias(
             leading: syntax.leadingTrivia,
@@ -107,19 +107,19 @@ internal class ColorizeSyntaxVisitor: SyntaxVisitor {
         case .keyword:
             return keywordColor
 
-        case .integerLiteral, .floatingLiteral:
+        case .integerLiteral, .floatLiteral:
             return numberLiteralColor
 
         case .stringLiteral:
             return stringLiteralColor
 
-        case .poundDirectiveKeyword:
+        case .ifConfigDirective:
             return directiveColor
 
         case .identifier:
             return identifierColor
 
-        case .typeIdentifier:
+        case .type:
             return typeNameColor
 
         default:

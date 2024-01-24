@@ -143,7 +143,7 @@ public extension Statement {
     /// Returns `true` if this `Statement` is an instance of `IfStatement`
     /// class.
     @inlinable
-    var isIf: Bool? {
+    var isIf: Bool {
         asIf != nil
     }
     

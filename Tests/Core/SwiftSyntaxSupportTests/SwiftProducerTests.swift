@@ -8,11 +8,11 @@ import XCTest
 @testable import Intentions
 @testable import SwiftSyntaxSupport
 
-class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
+class SwiftProducerTests: XCTestCase {
 
     func testGenerateEmptyFile() {
         let file = FileGenerationIntention(sourcePath: "", targetPath: "")
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -22,7 +22,7 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
     func testGenerateEmptyFileWithComments() {
         let file = FileGenerationIntention(sourcePath: "", targetPath: "")
         file.headerComments = ["Comment"]
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
         
@@ -44,7 +44,7 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                     )
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -58,7 +58,7 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
         )
         let syntax = result.children(viewMode: .sourceAccurate).first
         XCTAssertEqual(
-            syntax?.leadingTrivia?[0],
+            syntax?.leadingTrivia.first,
             .lineComment("""
                 // Comment
                 """
@@ -80,7 +80,7 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                     )
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -96,13 +96,43 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
         )
         let syntax = result.children(viewMode: .sourceAccurate).first
         XCTAssertEqual(
-            syntax?.leadingTrivia?[0],
-            .blockComment("""
+            syntax?.leadingTrivia.first,
+            .docBlockComment("""
                 /**
                  * Comment
                  */
                 """
             )
+        )
+    }
+
+    func testGenerateEmptyMethodBodyWithComments() {
+        let file =
+            FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A") { builder in
+                    builder.createMethod(named: "a") { method in
+                        method.setBody(
+                            CompoundStatement().withComments(["// A Comment"])
+                        )
+                    }
+                }
+            }
+        var settings = SwiftProducer.Settings.default
+        settings.outputExpressionTypes = true
+        let sut = SwiftProducer(settings: settings)
+
+        let result = sut.generateFile(file)
+
+        assert(
+            result,
+            matches: """
+                class A {
+                    func a() {
+                        // A Comment
+                    }
+                }
+                """
         )
     }
 
@@ -117,9 +147,9 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                     ])
                 }
             }
-        var settings = SwiftSyntaxProducer.Settings.default
+        var settings = SwiftProducer.Settings.default
         settings.outputExpressionTypes = true
-        let sut = SwiftSyntaxProducer(settings: settings)
+        let sut = SwiftProducer(settings: settings)
 
         let result = sut.generateFile(file)
 
@@ -137,6 +167,24 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
     }
 
     func testGenerateVariableDeclarationTypes() {
+        class LocalDelegate: SwiftProducerDelegate {
+            func swiftProducer(
+                _ producer: SwiftProducer,
+                shouldEmitTypeFor storage: ValueStorage,
+                intention: IntentionProtocol?,
+                initialValue: Expression?
+            ) -> Bool {
+                
+                return !(initialValue?.resolvedType == .int)
+            }
+
+            func swiftProducer(
+                _ producer: SwiftProducer,
+                initialValueFor intention: ValueStorageIntention
+            ) -> SwiftAST.Expression? {
+                return nil
+            }
+        }
         let file =
             FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
@@ -152,27 +200,39 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                             type: .int,
                             initialization: nil
                         ),
+                        Statement.variableDeclaration(
+                            identifier: "baz",
+                            type: .int,
+                            initialization: Expression.constant(0).typed(.int)
+                        ),
                     ])
                 }
             }
-        var settings = SwiftSyntaxProducer.Settings.default
+        var settings = SwiftProducer.Settings.default
         settings.outputExpressionTypes = true
-        let sut = SwiftSyntaxProducer(settings: settings)
+        let sut = SwiftProducer(settings: settings)
 
-        let result = sut.generateFile(file)
+        let delegate = LocalDelegate()
+        sut.delegate = delegate
+        withExtendedLifetime(delegate) {
+            let result = sut.generateFile(file)
 
-        assert(
-            result,
-            matches: """
-                func foo() {
-                    // decl type: Int
-                    // init type: Double
-                    var foo: Int = 0
-                    // decl type: Int
-                    var bar: Int
-                }
-                """
-        )
+            assert(
+                result,
+                matches: """
+                    func foo() {
+                        // decl type: Int
+                        // init type: Double
+                        var foo: Int = 0
+                        // decl type: Int
+                        var bar: Int
+                        // decl type: Int
+                        // init type: Int
+                        var baz = 0
+                    }
+                    """
+            )
+        }
     }
 
     func testGenerateIntentionHistory() {
@@ -195,9 +255,9 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                     }
                 }
             }
-        var settings = SwiftSyntaxProducer.Settings.default
+        var settings = SwiftProducer.Settings.default
         settings.printIntentionHistory = true
-        let sut = SwiftSyntaxProducer(settings: settings)
+        let sut = SwiftProducer(settings: settings)
 
         let result = sut.generateFile(file)
 
@@ -246,9 +306,9 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                     }
                 }
             }
-        var settings = SwiftSyntaxProducer.Settings.default
+        var settings = SwiftProducer.Settings.default
         settings.printIntentionHistory = true
-        let sut = SwiftSyntaxProducer(settings: settings)
+        let sut = SwiftProducer(settings: settings)
 
         let result = sut.generateFile(file)
 
@@ -288,9 +348,9 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                     builder.createMethod(named: "method")
                 }
             }
-        var settings = SwiftSyntaxProducer.Settings.default
+        var settings = SwiftProducer.Settings.default
         settings.emitObjcCompatibility = true
-        let sut = SwiftSyntaxProducer(settings: settings)
+        let sut = SwiftProducer(settings: settings)
 
         let result = sut.generateFile(file)
 
@@ -344,14 +404,15 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
             isStatic: false,
             isMutating: false
         )
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
-        let result = sut.generateSignature(signature)
+        sut.emit(signature)
+        let result = sut.buffer
         
         assert(
             result,
             matches: """
-                (_ param1: Any, p2 param2: String, param3: Int...) -> AnyObject
+                f(_ param1: Any, p2 param2: String, param3: Int...) -> AnyObject
                 """
         )
     }
@@ -361,14 +422,15 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
             name: "f",
             returnType: .nullabilityUnspecified(.anyObject)
         )
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
-        let result = sut.generateSignature(signature)
+        sut.emit(signature)
+        let result = sut.buffer
         
         assert(
             result,
             matches: """
-                () -> AnyObject?
+                f() -> AnyObject?
                 """
         )
     }
@@ -380,21 +442,42 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                 .init(name: "a", type: .nullabilityUnspecified(.anyObject))
             ]
         )
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
-        let result = sut.generateSignature(signature)
+        sut.emit(signature)
+        let result = sut.buffer
         
         assert(
             result,
             matches: """
-                (a: AnyObject!)
+                f(a: AnyObject!)
+                """
+        )
+    }
+
+    func testGenerateSignature_promotesNestedNullabilityUnspecifiedParametersToOptional() {
+        let signature = FunctionSignature(
+            name: "f",
+            parameters: [
+                .init(name: "a", type: .generic("A", parameters: [.nullabilityUnspecified(.anyObject)]))
+            ]
+        )
+        let sut = SwiftProducer()
+
+        sut.emit(signature)
+        let result = sut.buffer
+
+        assert(
+            result,
+            matches: """
+                f(a: A<AnyObject?>)
                 """
         )
     }
 }
 
 // MARK: - Attribute writing
-extension SwiftSyntaxProducerTests {
+extension SwiftProducerTests {
 
     func testWriteClassAttributes() {
         let type = KnownTypeBuilder(typeName: "A", kind: .class)
@@ -405,9 +488,10 @@ extension SwiftSyntaxProducerTests {
             ])
             .buildIntention()
         let intent = type as! ClassGenerationIntention
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
-        let output = sut.generateClass(intent).description
+        sut.emit(intent)
+        let result = sut.buffer
 
         let expected = """
             @attr
@@ -417,7 +501,7 @@ extension SwiftSyntaxProducerTests {
             }
             """
         XCTAssertEqual(
-            output.trimmingCharacters(in: .whitespacesAndNewlines),
+            result.trimmingCharacters(in: .whitespacesAndNewlines),
             expected
         )
     }
@@ -432,9 +516,10 @@ extension SwiftSyntaxProducerTests {
             ])
             .buildIntention()
         let intent = type as! ClassExtensionGenerationIntention
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
-        let output = sut.generateExtension(intent).description
+        sut.emit(intent)
+        let result = sut.buffer
 
         let expected = """
             // MARK: -
@@ -445,7 +530,7 @@ extension SwiftSyntaxProducerTests {
             }
             """
         XCTAssertEqual(
-            output.trimmingCharacters(in: .whitespacesAndNewlines),
+            result.trimmingCharacters(in: .whitespacesAndNewlines),
             expected
         )
     }
@@ -459,9 +544,10 @@ extension SwiftSyntaxProducerTests {
             ])
             .buildIntention()
         let intent = type as! StructGenerationIntention
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
-        let output = sut.generateStruct(intent).description
+        sut.emit(intent)
+        let result = sut.buffer
 
         let expected = """
             @attr
@@ -471,7 +557,7 @@ extension SwiftSyntaxProducerTests {
             }
             """
         XCTAssertEqual(
-            output.trimmingCharacters(in: .whitespacesAndNewlines),
+            result.trimmingCharacters(in: .whitespacesAndNewlines),
             expected
         )
     }
@@ -485,9 +571,10 @@ extension SwiftSyntaxProducerTests {
             ])
             .buildIntention()
         let intent = type as! EnumGenerationIntention
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
-        let output = sut.generateEnum(intent).description
+        sut.emit(intent)
+        let result = sut.buffer
 
         let expected = """
             @attr
@@ -497,7 +584,7 @@ extension SwiftSyntaxProducerTests {
             }
             """
         XCTAssertEqual(
-            output.trimmingCharacters(in: .whitespacesAndNewlines),
+            result.trimmingCharacters(in: .whitespacesAndNewlines),
             expected
         )
     }
@@ -511,9 +598,10 @@ extension SwiftSyntaxProducerTests {
             ])
             .buildIntention()
         let intent = type as! ProtocolGenerationIntention
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
-        let output = sut.generateProtocol(intent).description
+        sut.emit(intent)
+        let result = sut.buffer
 
         let expected = """
             @attr
@@ -522,7 +610,7 @@ extension SwiftSyntaxProducerTests {
             protocol A {
             }
             """
-        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines), expected)
+        XCTAssertEqual(result.trimmingCharacters(in: .whitespacesAndNewlines), expected)
     }
 
     func testWritePropertyAttributes() {
@@ -538,9 +626,10 @@ extension SwiftSyntaxProducerTests {
             )
             .buildIntention()
         let intent = type as! ClassGenerationIntention
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
-        let output = sut.generateClass(intent).description
+        sut.emit(intent)
+        let result = sut.buffer
 
         let expected = """
             class A {
@@ -548,7 +637,7 @@ extension SwiftSyntaxProducerTests {
             }
             """
         XCTAssertEqual(
-            output.trimmingCharacters(in: .whitespacesAndNewlines),
+            result.trimmingCharacters(in: .whitespacesAndNewlines),
             expected
         )
     }
@@ -566,9 +655,10 @@ extension SwiftSyntaxProducerTests {
             )
             .buildIntention()
         let intent = type as! ClassGenerationIntention
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
-        let output = sut.generateClass(intent).description
+        sut.emit(intent)
+        let result = sut.buffer
 
         let expected = """
             class A {
@@ -579,19 +669,19 @@ extension SwiftSyntaxProducerTests {
                 }
             }
             """
-        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines), expected)
+        XCTAssertEqual(result.trimmingCharacters(in: .whitespacesAndNewlines), expected)
     }
 }
 
 // MARK: - File generation
-extension SwiftSyntaxProducerTests {
+extension SwiftProducerTests {
     func testGenerateImportDirective() {
         let file =
             FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
                 builder.addImportDirective(moduleName: "moduleA")
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -610,7 +700,7 @@ extension SwiftSyntaxProducerTests {
                 builder.addImportDirective(moduleName: "moduleA")
                 builder.addImportDirective(moduleName: "moduleB")
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -632,7 +722,7 @@ extension SwiftSyntaxProducerTests {
                     "#define MAX(a, b) ((a) > (b) ? (a) : (b))"
                 )
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -655,7 +745,7 @@ extension SwiftSyntaxProducerTests {
                 )
                 builder.createClass(withName: "A")
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -672,7 +762,7 @@ extension SwiftSyntaxProducerTests {
 }
 
 // MARK: - Global Function generation
-extension SwiftSyntaxProducerTests {
+extension SwiftProducerTests {
     func testGenerateFileWithEmptyFunction() {
         let file =
             FileIntentionBuilder
@@ -681,7 +771,7 @@ extension SwiftSyntaxProducerTests {
                     builder.addComment("// A comment")
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -718,7 +808,7 @@ extension SwiftSyntaxProducerTests {
                     ])
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -748,7 +838,7 @@ extension SwiftSyntaxProducerTests {
                     }
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -773,7 +863,7 @@ extension SwiftSyntaxProducerTests {
                     }
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -788,7 +878,7 @@ extension SwiftSyntaxProducerTests {
 }
 
 // MARK: - Property / global variable generation
-extension SwiftSyntaxProducerTests {
+extension SwiftProducerTests {
     func testGenerateFileWithOwnershippedGlobalVariables() {
         let file =
             FileIntentionBuilder
@@ -810,7 +900,7 @@ extension SwiftSyntaxProducerTests {
                 )
             }
         file.globalVariableIntentions[0].precedingComments = ["// A comment"]
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -837,7 +927,7 @@ extension SwiftSyntaxProducerTests {
                     }
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -901,7 +991,7 @@ extension SwiftSyntaxProducerTests {
                     }
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -932,15 +1022,16 @@ extension SwiftSyntaxProducerTests {
 }
 
 // MARK: - Init writing
-extension SwiftSyntaxProducerTests {
+extension SwiftProducerTests {
     
     func testWriteFallibleInit() {
         let initMethod = InitGenerationIntention(parameters: [])
         initMethod.isFallible = true
         initMethod.functionBody = FunctionBodyIntention(body: [])
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
-        let output = sut.generateInitializer(initMethod, emitBody: true, alwaysEmitBody: true).description
+        sut.emit(initMethod)
+        let output = sut.buffer
 
         let expected = """
             init?() {
@@ -956,9 +1047,10 @@ extension SwiftSyntaxProducerTests {
         let initMethod = InitGenerationIntention(parameters: [])
         initMethod.isConvenience = true
         initMethod.functionBody = FunctionBodyIntention(body: [])
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
-        let output = sut.generateInitializer(initMethod, emitBody: true, alwaysEmitBody: true).description
+        sut.emit(initMethod)
+        let output = sut.buffer
 
         let expected = """
             convenience init() {
@@ -973,7 +1065,7 @@ extension SwiftSyntaxProducerTests {
 }
 
 // MARK: - Subscript Generation
-extension SwiftSyntaxProducerTests {
+extension SwiftProducerTests {
     func testGenerateSubscript() {
         let file =
             FileIntentionBuilder
@@ -986,7 +1078,7 @@ extension SwiftSyntaxProducerTests {
                 }
             }
         file.typeIntentions[0].subscripts[0].precedingComments = ["// A comment"]
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1029,7 +1121,7 @@ extension SwiftSyntaxProducerTests {
                     }
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1052,7 +1144,7 @@ extension SwiftSyntaxProducerTests {
 }
 
 // MARK: - Typealias Generation
-extension SwiftSyntaxProducerTests {
+extension SwiftProducerTests {
     func testGenerateFileWithTypealias() {
         let file =
             FileIntentionBuilder
@@ -1064,7 +1156,7 @@ extension SwiftSyntaxProducerTests {
                 )
             }
         file.typealiasIntentions[0].precedingComments = ["// A comment"]
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1076,10 +1168,76 @@ extension SwiftSyntaxProducerTests {
                 """
         )
     }
+
+    func testGenerateFileWithTypealias_nullabilityUnspecifiedToOptional_baseType() {
+        let file =
+            FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createTypealias(
+                    withName: "Alias",
+                    swiftType: .nullabilityUnspecified(.anyObject),
+                    type: .void
+                )
+            }
+        let sut = SwiftProducer()
+
+        let result = sut.generateFile(file)
+
+        assert(
+            result,
+            matches: """
+                typealias Alias = AnyObject!
+                """
+        )
+    }
+
+    func testGenerateFileWithTypealias_nullabilityUnspecifiedToOptional_blockReturnType() {
+        let file =
+            FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createTypealias(
+                    withName: "Alias",
+                    swiftType: .swiftBlock(returnType: .nullabilityUnspecified(.anyObject)),
+                    type: .void
+                )
+            }
+        let sut = SwiftProducer()
+
+        let result = sut.generateFile(file)
+
+        assert(
+            result,
+            matches: """
+                typealias Alias = () -> AnyObject?
+                """
+        )
+    }
+
+    func testGenerateFileWithTypealias_nullabilityUnspecifiedToOptional_blockParameter() {
+        let file =
+            FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createTypealias(
+                    withName: "Alias",
+                    swiftType: .swiftBlock(returnType: .void, parameters: [.nullabilityUnspecified(.anyObject), .implicitUnwrappedOptional(.anyObject)]),
+                    type: .void
+                )
+            }
+        let sut = SwiftProducer()
+
+        let result = sut.generateFile(file)
+
+        assert(
+            result,
+            matches: """
+                typealias Alias = (AnyObject?, AnyObject!) -> Void
+                """
+        )
+    }
 }
 
 // MARK: - Extension Generation
-extension SwiftSyntaxProducerTests {
+extension SwiftProducerTests {
     func testGenerateFileWithExtension() {
         let file =
             FileIntentionBuilder
@@ -1089,7 +1247,7 @@ extension SwiftSyntaxProducerTests {
                 }
                 builder.createExtension(forClassNamed: "B", categoryName: "BExtension")
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1109,7 +1267,7 @@ extension SwiftSyntaxProducerTests {
 }
 
 // MARK: - Enum Generation
-extension SwiftSyntaxProducerTests {
+extension SwiftProducerTests {
     func testGenerateFileWithEmptyEnum() {
         let file =
             FileIntentionBuilder
@@ -1118,7 +1276,7 @@ extension SwiftSyntaxProducerTests {
                     e.addComment("// A comment")
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1141,7 +1299,7 @@ extension SwiftSyntaxProducerTests {
                     builder.createCase(name: "case2")
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1155,10 +1313,36 @@ extension SwiftSyntaxProducerTests {
                 """
         )
     }
+
+    func testGenerateFileWithEnum_objcCompatibilityEnabled_dontEmitAttributesInEnumCases() {
+        let file =
+            FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createEnum(withName: "A", rawValue: .int) { builder in
+                    builder.createCase(name: "case1")
+                }
+            }
+        let settings: SwiftProducer.Settings =
+            .default
+            .with(\.emitObjcCompatibility, true)
+        let sut = SwiftProducer(settings: settings)
+
+        let result = sut.generateFile(file)
+
+        assert(
+            result,
+            matches: """
+                @objc
+                enum A: Int {
+                    case case1
+                }
+                """
+        )
+    }
 }
 
 // MARK: - Class Generation
-extension SwiftSyntaxProducerTests {
+extension SwiftProducerTests {
     func testGenerateFileWithEmptyClass() {
         let file =
             FileIntentionBuilder
@@ -1167,7 +1351,7 @@ extension SwiftSyntaxProducerTests {
                     type.addComment("// A comment")
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1188,7 +1372,7 @@ extension SwiftSyntaxProducerTests {
                 builder.createClass(withName: "A")
                 builder.createClass(withName: "B")
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1211,7 +1395,7 @@ extension SwiftSyntaxProducerTests {
                     builder.inherit(from: "Supertype")
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1233,7 +1417,7 @@ extension SwiftSyntaxProducerTests {
                     builder.createConformance(protocolName: "ProtocolB")
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1254,7 +1438,7 @@ extension SwiftSyntaxProducerTests {
                     builder.setIsFinal(true)
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1275,7 +1459,7 @@ extension SwiftSyntaxProducerTests {
                     builder.createProperty(named: "property", type: .int)
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1297,7 +1481,7 @@ extension SwiftSyntaxProducerTests {
                     builder.createInstanceVariable(named: "ivarA", type: .int)
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1321,7 +1505,7 @@ extension SwiftSyntaxProducerTests {
                         .createInstanceVariable(named: "ivarA", type: .int)
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1344,7 +1528,7 @@ extension SwiftSyntaxProducerTests {
                     builder.createConstructor()
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1367,7 +1551,7 @@ extension SwiftSyntaxProducerTests {
                     builder.createMethod("foo(_ a: Bar)")
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1390,7 +1574,7 @@ extension SwiftSyntaxProducerTests {
                     builder.createDeinit()
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1407,16 +1591,17 @@ extension SwiftSyntaxProducerTests {
 }
 
 // MARK: - Struct Generation
-extension SwiftSyntaxProducerTests {
+extension SwiftProducerTests {
     func testGenerateFileWithStruct() {
         let file =
             FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
                 builder.createStruct(withName: "A") { str in
                     str.addComment("// A comment")
+                    str.createInstanceVariable(named: "field", type: .int)
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1425,6 +1610,7 @@ extension SwiftSyntaxProducerTests {
             matches: """
                 // A comment
                 struct A {
+                    var field: Int
                 }
                 """
         )
@@ -1432,16 +1618,18 @@ extension SwiftSyntaxProducerTests {
 }
 
 // MARK: - Protocol Generation
-extension SwiftSyntaxProducerTests {
+extension SwiftProducerTests {
     func testGenerateFileWithProtocol() {
         let file =
             FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
                 builder.createProtocol(withName: "A") { prot in
                     prot.addComment("// A comment")
+                        .createProperty(named: "a", type: .int)
+                        .createProperty(named: "b", type: .int)
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1450,6 +1638,8 @@ extension SwiftSyntaxProducerTests {
             matches: """
                 // A comment
                 protocol A {
+                    var a: Int { get set }
+                    var b: Int { get set }
                 }
                 """
         )
@@ -1464,7 +1654,7 @@ extension SwiftSyntaxProducerTests {
                     builder.createVoidMethod(named: "method")
                 }
             }
-        let sut = SwiftSyntaxProducer()
+        let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
 
@@ -1479,6 +1669,142 @@ extension SwiftSyntaxProducerTests {
                 """
         )
     }
+
+    func testProtocol_readOnlyProperty() {
+        let file =
+            FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createProtocol(withName: "A") { builder in
+                    builder.createProtocolProperty(named: "a", type: .int) { prop in
+                        prop.setAsReadOnly()
+                    }
+                }
+            }
+        let sut = SwiftProducer()
+
+        let result = sut.generateFile(file)
+
+        assert(
+            result,
+            matches: """
+                protocol A {
+                    var a: Int { get }
+                }
+                """
+        )
+    }
+
+    func testGenerateFileWithProtocol_optionalMethod_optionalProperty_forceEmitObjcCompatibility() {
+        let file =
+            FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createProtocol(withName: "A") { prot in
+                    prot.createProtocolMethod(named: "method") { method in
+                        method.setIsOptional(true)
+                    }
+                }
+                builder.createProtocol(withName: "B") { prot in
+                    prot.createProtocolProperty(named: "prop", type: .int) { prop in
+                        prop.setIsOptional(true)
+                    }
+                }
+                builder.createProtocol(withName: "C") { prot in
+                    prot.createProtocolProperty(named: "prop", type: .int)
+                    prot.createProtocolMethod(named: "method")
+                }
+            }
+        let sut = SwiftProducer()
+
+        let result = sut.generateFile(file)
+
+        assert(
+            result,
+            matches: """
+                @objc
+                protocol A: NSObjectProtocol {
+                    @objc
+                    optional func method()
+                }
+                @objc
+                protocol B: NSObjectProtocol {
+                    @objc optional var prop: Int { get set }
+                }
+                protocol C {
+                    var prop: Int { get set }
+
+                    func method()
+                }
+                """
+        )
+    }
+
+    func testGenerateFileWithProtocol_objcCompatibilityDisabled_discardNSObjectProtocolConformances() {
+        let file =
+            FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createProtocol(withName: "A") { prot in
+                    prot.createConformance(protocolName: "NSObjectProtocol")
+                }
+            }
+        let sut = SwiftProducer()
+
+        let result = sut.generateFile(file)
+
+        assert(
+            result,
+            matches: """
+                protocol A {
+                }
+                """
+        )
+    }
+
+    func testGenerateFileWithProtocol_objcCompatibilityEnabled_dontEmitDuplicatedConformanceToNSObjectProtocol() {
+        let file =
+            FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createProtocol(withName: "A") { prot in
+                    prot.createConformance(protocolName: "NSObjectProtocol")
+                }
+            }
+        let settings: SwiftProducer.Settings = 
+            .default
+            .with(\.emitObjcCompatibility, true)
+        let sut = SwiftProducer(settings: settings)
+
+        let result = sut.generateFile(file)
+
+        assert(
+            result,
+            matches: """
+                @objc
+                protocol A: NSObjectProtocol {
+                }
+                """
+        )
+    }
+}
+
+// MARK: - Test internals
+
+extension SwiftProducerTests {
+    func assert(
+        _ value: String,
+        matches expected: String,
+        line: UInt = #line
+    ) {
+
+        diffTest(expected: expected, line: line).diff(value, line: line)
+    }
+
+    func assert(
+        _ value: SourceFileSyntax,
+        matches expected: String,
+        line: UInt = #line
+    ) {
+
+        diffTest(expected: expected, line: line).diff(value.description, line: line)
+    }
 }
 
 private class SyntaxDebugPrinter: SyntaxAnyVisitor {
@@ -1490,7 +1816,7 @@ private class SyntaxDebugPrinter: SyntaxAnyVisitor {
 
         for token in node.tokens(viewMode: .sourceAccurate) {
             _line(token.leadingTrivia)
-            _line(token.withoutTrivia())
+            _line(token.trimmed)
             _line(token.trailingTrivia)
         }
 
