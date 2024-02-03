@@ -96,6 +96,24 @@
           <BuildableReference
             BuildableIdentifier = "primary"
             BuildableName = "'$(TARGET_NAME)'"
+            BlueprintName = "JavaScriptFrontendTests"
+            ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+          </BuildableReference>
+        </TestableReference>
+        <TestableReference
+          skipped = "NO">
+          <BuildableReference
+            BuildableIdentifier = "primary"
+            BuildableName = "'$(TARGET_NAME)'"
+            BlueprintName = "JsParserTests"
+            ReferencedContainer = "container:SwiftRewriter.xcodeproj">
+          </BuildableReference>
+        </TestableReference>
+        <TestableReference
+          skipped = "NO">
+          <BuildableReference
+            BuildableIdentifier = "primary"
+            BuildableName = "'$(TARGET_NAME)'"
             BlueprintName = "KnownTypeTests"
             ReferencedContainer = "container:SwiftRewriter.xcodeproj">
           </BuildableReference>

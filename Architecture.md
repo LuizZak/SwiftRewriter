@@ -16,7 +16,7 @@ The tool splits the conversion process into six discrete steps, which are, whene
 └─────────────┘ └──────────────────────┘ └─────────────┘ └─────────────┘ └─────────────┘ └────────────────┘ └──────────┘
 ```
 
-All of these steps are encapsulated and run by `ObjectiveC2SwiftRewriter` within the frontend's main target.
+All of these steps are encapsulated and run by `ObjectiveC2SwiftRewriter` and `JavaScript2SwiftRewriter` within each frontend's main target.
 
 An overview of the steps taken is described bellow.
 
@@ -26,6 +26,7 @@ An overview of the steps taken is described bellow.
 ##### summary
 - [ANTLR](http://www.antlr.org/) used as main parser generator;
     - `ObjcParser` target contains an `ObjcParser` class that performs Objective-C code parsing.
+    - `JsParser` target contains a `JsParser` class that performs code JavaScript code parsing.
 - `ASTNode` class used as abstraction over ANTLR for next steps;
     - Statement and expressions are not parsed in this step yet;
     - Each language has its own target implementing appropriate `ASTNode` subclasses.
@@ -39,11 +40,11 @@ The source code is then processed by `SourcePreprocessor` objects provided to `S
 
 For the tooled part, [ANTLR](http://www.antlr.org/) is used to do the heavy lifting and parse all the input source code.
 
-All input parsing for a single file can be done with just an `ObjcParser` instance.
+All input parsing for a single file can be done with just an `ObjcParser` or `JsParser` instance, depending on the input language.
 
 Since trees produced by ANTLR are too heavyweight and reflect a lot of the complexity of the source language's grammar, the produced AST is converted into a customized AST representation that is more useful for manipulation, rooted into a base `ASTNode` class.
 
-The source code for the AST class structure used is found inside the `ObjcGrammarModels` target and is used throughout the rest of the process to inspect the input AST.
+The source code for the AST class structure used is found inside the `ObjcGrammarModels` and `JsGrammarModels` targets, and is used throughout the rest of the process to inspect the input AST.
 
 ---
 ## 2. Statements parsing

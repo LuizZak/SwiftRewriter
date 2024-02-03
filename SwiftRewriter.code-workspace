@@ -90,6 +90,8 @@
 				"args": [
 					"test",
 					"-c", "release",
+					"-Xswiftc",
+					"-DJS_PARSER_TESTS_FULL_FIXTURES",
 				],
 				"detail": "swift test -c=release",
 			},
