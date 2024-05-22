@@ -5,9 +5,30 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
     /// A list of all edges contained in this graph
     internal(set) public var edges: [Edge] = []
 
+    /// Initializes an empty directed graph.
+    required convenience init() {
+        self.init(nodes: [], edges: [])
+    }
+
     init(nodes: [Node], edges: [Edge]) {
         self.nodes = nodes
         self.edges = edges
+    }
+
+    public func subgraph<S>(of nodes: S) -> Self where S: Sequence, S.Element == Node {
+        let nodeSet = Set(nodes)
+        let connectedEdges = self.edges.filter {
+            nodeSet.contains($0.start) && nodeSet.contains($0.end)
+        }
+
+        let graph = Self()
+        graph.addNodes(nodeSet)
+        
+        for edge in connectedEdges {
+            graph.addEdge(from: edge.start, to: edge.end)
+        }
+
+        return graph
     }
 
     /// Returns `true` iff two node references represent the same underlying node

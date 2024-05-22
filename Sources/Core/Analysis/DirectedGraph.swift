@@ -10,7 +10,13 @@ public protocol DirectedGraph {
     var nodes: [Node] { get }
     /// Gets a list of all edges in this directed graph
     var edges: [Edge] { get }
-    
+
+    /// Returns a subset of this directed graph containing only the nodes from
+    /// a given sequence, and all edges present that match start/end nodes within
+    /// the sequence.
+    @inlinable
+    func subgraph<S>(of nodes: S) -> Self where S: Sequence, S.Element == Node
+
     /// Returns `true` iff two node references represent the same underlying node
     /// in this graph.
     @inlinable
@@ -95,6 +101,27 @@ public protocol DirectedGraph {
     /// all nodes are visited, or when `visitor` returns false.
     @inlinable
     func breadthFirstVisit(start: Node, _ visitor: (VisitElement) -> Bool)
+
+    /// Computes and returns the strongly connected components of this directed
+    /// graph.
+    /// 
+    /// Each strongly connected component is returned as an array of nodes
+    /// belonging to the component.
+    /// 
+    /// A node in this graph only ever shows up once in one of the components.
+    /// 
+    /// Nodes that are not strongly connected to any other node show up as an
+    /// array containing that node only.
+    @inlinable
+    func stronglyConnectedComponents() -> [Set<Node>]
+
+    /// Returns cycles found within a this graph returned from a given start
+    /// node.
+    /// 
+    /// Returns an array of array of nodes that connects from `start` into a cycle,
+    /// with the remaining nodes looping from the last index into an earlier index.
+    @inlinable
+    func findCycles(from start: Node) -> [[Node]]
 }
 
 /// Element for a graph visiting operation.
@@ -289,6 +316,77 @@ public extension DirectedGraph {
                 queue.append(.edge(nextEdge, from: next, towards: node))
             }
         }
+    }
+
+    @inlinable
+    func stronglyConnectedComponents() -> [Set<Node>] {
+        // TODO: Cleanup implementation
+
+        var result: [Set<Node>] = []
+
+        var indices: [Node: Int] = [:]
+        var lowLink: [Node: Int] = [:]
+        var stack: [Node] = []
+        var index = 0
+
+        func strongConnect(_ node: Node) {
+            indices[node] = index
+            lowLink[node] = index
+            index += 1
+            stack.append(node)
+
+            for next in self.nodesConnected(from: node) {
+                if indices[next] == nil {
+                    strongConnect(next)
+                    lowLink[node] = min(lowLink[node]!, lowLink[next]!)
+                } else if stack.contains(next) {
+                    lowLink[node] = min(lowLink[node]!, indices[next]!)
+                }
+            }
+
+            if lowLink[node] == indices[node] {
+                var components: Set<Node> = []
+
+                while let next = stack.popLast() {
+                    components.insert(next)
+
+                    if next == node {
+                        break
+                    }
+                }
+
+                result.append(components)
+            }
+        }
+
+        for node in nodes {
+            if indices[node] == nil {
+                strongConnect(node)
+            }
+        }
+
+        return result
+    }
+
+    @inlinable
+    func findCycles(from start: Node) -> [[Node]] {
+        assert(nodes.contains(start), "!component.contains(start)")
+
+        var result: [[Node]] = []
+
+        func inner(node: Node, path: [Node]) {
+            if path.contains(node) {
+                result.append(path + [node])
+                return
+            }
+
+            let path = path + [node]
+            for next in nodesConnected(from: node) {
+                inner(node: next, path: path)
+            }
+        }
+
+        return result
     }
 }
 

@@ -25,7 +25,17 @@ public final class ControlFlowGraph: DirectedGraphBase<ControlFlowGraphNode, Con
         addNode(entry)
         addNode(exit)
     }
-    
+
+    @available(*, unavailable, message: "Initialize ControlFlowGraph with 'init(entry:exit:)', instead.")
+    required convenience init() {
+        fatalError("init() has not been implemented")
+    }
+
+    @available(*, unavailable, message: "Cannot make arbitrary subgraphs of a ControlFlowGraph.")
+    public override func subgraph<S>(of nodes: S) -> Self where S: Sequence, S.Element == Node {
+        fatalError("Cannot take subgraphs of a ControlFlowGraph")
+    }
+
     /// Returns the control flow graph node that represents a given syntax node,
     /// if available.
     /// Returns `nil`, if no graph node represents the given syntax node directly.
