@@ -854,7 +854,7 @@ class SwiftTypePermutator {
     }
 
     private func random(upTo max: Int) -> Int {
-        return Int(context.randomNumberGenerator.next()) % (max + 1)
+        Int.random(in: 0...max, using: &context.randomNumberGenerator)
     }
 
     private func randomNormal() -> Double {
