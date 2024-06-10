@@ -7,7 +7,10 @@ public final class ControlFlowGraph: DirectedGraphBase<ControlFlowGraphNode, Con
     internal(set) public var entry: ControlFlowGraphEntryNode
     /// The exit point of this control flow graph
     internal(set) public var exit: ControlFlowGraphExitNode
-    
+
+    /// Counter used to differentiate nodes in the graph as they are added.
+    var idCounter: Int = 0
+
     /// Returns `true` if the only nodes in this graph are the entry and exit
     /// nodes, and marker nodes.
     var isEmpty: Bool {
@@ -15,13 +18,13 @@ public final class ControlFlowGraph: DirectedGraphBase<ControlFlowGraphNode, Con
             node === entry || node === exit
         }
     }
-    
+
     init(entry: ControlFlowGraphEntryNode, exit: ControlFlowGraphExitNode) {
         self.entry = entry
         self.exit = exit
 
         super.init(nodes: [], edges: [])
-        
+
         addNode(entry)
         addNode(exit)
     }
@@ -36,6 +39,12 @@ public final class ControlFlowGraph: DirectedGraphBase<ControlFlowGraphNode, Con
         fatalError("Cannot take subgraphs of a ControlFlowGraph")
     }
 
+    /// Returns the next available node ID and increments the counter by 1.
+    func nextId() -> Int {
+        defer { idCounter += 1 }
+        return idCounter
+    }
+
     /// Returns the control flow graph node that represents a given syntax node,
     /// if available.
     /// Returns `nil`, if no graph node represents the given syntax node directly.
@@ -44,7 +53,7 @@ public final class ControlFlowGraph: DirectedGraphBase<ControlFlowGraphNode, Con
     public func graphNode(for node: SyntaxNode) -> Node? {
         nodes.first { $0.node === node }
     }
-    
+
     /// Returns the control flow graph node that represents a given syntax node,
     /// or any of its ancestors.
     /// When searching across ancestors, the nearest ancestors are searched first.
@@ -63,11 +72,11 @@ public final class ControlFlowGraph: DirectedGraphBase<ControlFlowGraphNode, Con
 
         return nil
     }
-    
+
     // MARK: - Internals
 
     override func copyMetadata(from node1: Node, to node2: Node) {
-    
+
     }
 
     override func copyMetadata(from edge1: Edge, to edge2: Edge) {
@@ -92,7 +101,7 @@ public final class ControlFlowGraph: DirectedGraphBase<ControlFlowGraphNode, Con
                 "Adding a graph as a subnode of itself!"
             )
         }
-        
+
         super.addNode(node)
     }
 
@@ -107,10 +116,10 @@ public final class ControlFlowGraph: DirectedGraphBase<ControlFlowGraphNode, Con
             containsNode(end),
             "Attempted to add edge between nodes that are not contained within this graph: \(end)."
         )
-        
+
         let edge = Edge(start: start, end: end)
         addEdge(edge)
-        
+
         return edge
     }
 }
@@ -121,24 +130,24 @@ extension ControlFlowGraph {
     /// Returns a list of nodes collected in depth-first order
     func depthFirstList() -> [Node] {
         var list: [Node] = []
-        
+
         depthFirstVisit(start: entry) {
             list.append($0.node)
             return true
         }
-        
+
         return list
     }
-    
+
     /// Returns a list of nodes collected in breadth-first order
     func breadthFirstList() -> [Node] {
         var list: [Node] = []
-        
+
         breadthFirstVisit(start: entry) {
             list.append($0.node)
             return true
         }
-        
+
         return list
     }
 }
@@ -149,7 +158,7 @@ extension ControlFlowGraph {
     func copy() -> ControlFlowGraph {
         let copy = ControlFlowGraph(entry: entry, exit: exit)
         copy.nodes = nodes
-        
+
         for edge in edges {
             let edgeCopy = copy.addEdge(from: edge.start, to: edge.end)
             copyMetadata(from: edge, to: edgeCopy)
@@ -164,7 +173,7 @@ extension ControlFlowGraph {
     func deepCopy() -> ControlFlowGraph {
         let copy = ControlFlowGraph(entry: entry, exit: exit)
         copy.nodes = nodes
-        
+
         for edge in edges {
             let edgeCopy = copy.addEdge(from: edge.start, to: edge.end)
             copyMetadata(from: edge, to: edgeCopy)
@@ -186,7 +195,7 @@ extension ControlFlowGraph {
         ignoreEntryExit: Bool = true,
         ignoreRepeated: Bool = false
     ) {
-        
+
         assert(other !== self, "attempting to merge a graph with itself!")
 
         func shouldMerge(_ node: Node) -> Bool {
@@ -198,11 +207,11 @@ extension ControlFlowGraph {
         }
 
         let nodes = other.nodes.filter(shouldMerge)
-        
+
         let edges = other.edges.filter {
             shouldMerge($0.start) && shouldMerge($0.end)
         }
-        
+
         for node in nodes {
             if ignoreRepeated && containsNode(node) {
                 continue
@@ -261,7 +270,7 @@ internal extension ControlFlowGraph {
 
         breadthFirstVisit(start: entry) { visit in
             toRemove.remove(visit.node)
-            
+
             return true
         }
 
@@ -289,37 +298,37 @@ internal extension ControlFlowGraph {
             return true
         }
     }
-    
+
     /// Expands subgraph nodes in this graph, performing a many-to-many expansion
     /// of the edges going in and out of the subgraph node.
     func expandSubgraphs() {
         for case let node as ControlFlowSubgraphNode in nodes {
             let edgesTo = edges(towards: node)
             let edgesFrom = edges(from: node)
-            
+
             let entryEdges = node.graph.edges(from: node.graph.entry)
             let exitEdges = node.graph.edges(towards: node.graph.exit)
-            
+
             removeNode(node)
-            
+
             merge(with: node.graph)
-            
+
             for edgeTo in edgesTo {
                 let source = edgeTo.start
-                
+
                 for entryEdge in entryEdges {
                     let target = entryEdge.end
-                    
+
                     let edge = addEdge(from: source, to: target)
                     edge.isBackEdge = edgeTo.isBackEdge
                 }
             }
             for edgeFrom in edgesFrom {
                 let target = edgeFrom.end
-                
+
                 for exitEdge in exitEdges {
                     let source = exitEdge.start
-                    
+
                     let edge = addEdge(from: source, to: target)
                     edge.isBackEdge = edgeFrom.isBackEdge
                 }
@@ -329,31 +338,38 @@ internal extension ControlFlowGraph {
 }
 
 /// Specifies a control flow graph node
-public class ControlFlowGraphNode: DirectedGraphNode, CustomStringConvertible {
+public class ControlFlowGraphNode: Hashable, CustomStringConvertible {
     /// An associated node for this control flow graph node.
     public let node: SyntaxNode
 
+    /// An extra identifier used to differentiate nodes of the same label on a graph.
+    /// Has no requirement to be unique amongst all nodes, and is mainly used
+    /// during Graphviz generation.
+    public let id: Int
+
     public var description: String {
-        "{node: \(type(of: node)): \(node)}"
+        "{node: \(type(of: node)): \(node) {\(id)}}"
     }
 
-    init(node: SyntaxNode) {
+    init(node: SyntaxNode, id: Int) {
         self.node = node
+        self.id = id
     }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(ObjectIdentifier(node))
+        hasher.combine(id)
     }
 
     /// Returns a copy of this graph node, pointing to the same underlying
     /// syntax node reference.
     public func copy() -> ControlFlowGraphNode {
-        ControlFlowGraphNode(node: node)
+        ControlFlowGraphNode(node: node, id: id)
     }
 
     public static func == (lhs: ControlFlowGraphNode, rhs: ControlFlowGraphNode) -> Bool {
         //type(of: lhs) == type(of: rhs) && lhs.node === rhs.node
-        lhs === rhs
+        lhs === rhs && lhs.id == rhs.id
     }
 }
 
@@ -361,6 +377,10 @@ public class ControlFlowGraphNode: DirectedGraphNode, CustomStringConvertible {
 public final class ControlFlowGraphEntryNode: ControlFlowGraphNode {
     public override var description: String {
         "{entry: \(type(of: node)): \(node)}"
+    }
+
+    public init(node: SyntaxNode) {
+        super.init(node: node, id: 1)
     }
 
     public override func copy() -> ControlFlowGraphEntryNode {
@@ -374,6 +394,10 @@ public final class ControlFlowGraphExitNode: ControlFlowGraphNode {
         "{exit: \(type(of: node)): \(node)}"
     }
 
+    public init(node: SyntaxNode) {
+        super.init(node: node, id: 1)
+    }
+
     public override func copy() -> ControlFlowGraphExitNode {
         ControlFlowGraphExitNode(node: node)
     }
@@ -383,15 +407,15 @@ public final class ControlFlowGraphExitNode: ControlFlowGraphNode {
 public final class ControlFlowSubgraphNode: ControlFlowGraphNode {
     /// An associated node for this control flow graph node.
     public let graph: ControlFlowGraph
-    
-    init(node: SyntaxNode, graph: ControlFlowGraph) {
+
+    init(node: SyntaxNode, graph: ControlFlowGraph, id: Int) {
         self.graph = graph
-        
-        super.init(node: node)
+
+        super.init(node: node, id: id)
     }
 
     public override func copy() -> ControlFlowGraphNode {
-        ControlFlowSubgraphNode(node: node, graph: graph.deepCopy())
+        ControlFlowSubgraphNode(node: node, graph: graph.deepCopy(), id: id)
     }
 }
 
@@ -400,14 +424,14 @@ public final class ControlFlowGraphEndScopeNode: ControlFlowGraphNode {
     /// An associated code scope for this control flow graph node.
     public let scope: CodeScopeNode
 
-    init(node: SyntaxNode, scope: CodeScopeNode) {
+    init(node: SyntaxNode, scope: CodeScopeNode, id: Int) {
         self.scope = scope
 
-        super.init(node: node)
+        super.init(node: node, id: id)
     }
 
     public override func copy() -> ControlFlowGraphNode {
-        ControlFlowGraphEndScopeNode(node: node, scope: scope)
+        ControlFlowGraphEndScopeNode(node: node, scope: scope, id: id)
     }
 }
 
@@ -415,14 +439,14 @@ public final class ControlFlowGraphEndScopeNode: ControlFlowGraphNode {
 public final class ControlFlowGraphEdge: DirectedGraphBaseEdgeType {
     public let start: ControlFlowGraphNode
     public let end: ControlFlowGraphNode
-    
+
     /// True if this is a back edge which points backwards towards the start of
     /// a flow
     public var isBackEdge: Bool = false
 
     /// A label that can be used during debugging to discern CFG edges.
     public var debugLabel: String?
-    
+
     init(start: ControlFlowGraphNode, end: ControlFlowGraphNode) {
         self.start = start
         self.end = end
@@ -433,6 +457,16 @@ public final class ControlFlowGraphEdge: DirectedGraphBaseEdgeType {
     /// The new edge object references the same underlying node references.
     public func copy() -> ControlFlowGraphEdge {
         ControlFlowGraphEdge(start: start, end: end)
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(start))
+        hasher.combine(ObjectIdentifier(end))
+    }
+
+    public static func == (lhs: ControlFlowGraphEdge, rhs: ControlFlowGraphEdge) -> Bool {
+        //type(of: lhs) == type(of: rhs) && lhs.node === rhs.node
+        lhs === rhs
     }
 }
 

@@ -7,9 +7,11 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
     typealias StmtResult = CFGVisitResult
 
     let options: ControlFlowGraph.GenerationOptions
+    var nextId: () -> Int
 
-    init(options: ControlFlowGraph.GenerationOptions) {
+    init(options: ControlFlowGraph.GenerationOptions, nextId: @escaping () -> Int) {
         self.options = options
+        self.nextId = nextId
     }
 
     // MARK: - Statement
@@ -37,14 +39,15 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
                     return CFGVisitResult(
                         forNode: ControlFlowGraphEndScopeNode(
                             node: node,
-                            scope: node
+                            scope: node,
+                            id: visitor.nextId()
                         )
                     )
                 }
             }
         }
 
-        var result = CFGVisitResult(forSyntaxNode: stmt)
+        var result = CFGVisitResult(forSyntaxNode: stmt, id: nextId())
 
         var endEntries: [CompoundEndEntry] = []
 
@@ -59,11 +62,11 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
         }
 
         endEntries.reverse()
-        
+
         if options.generateEndScopes {
             endEntries.append(.endOfScope(stmt))
         }
-        
+
         return
             result
             .then(
@@ -82,7 +85,7 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
 
     func visitIf(_ stmt: IfStatement) -> CFGVisitResult {
         let exp = stmt.exp.accept(self)
-        let node = CFGVisitResult(forSyntaxNode: stmt)
+        let node = CFGVisitResult(forSyntaxNode: stmt, id: nextId())
 
         let body = stmt.body.accept(self)
         let elseBody = stmt.elseBody.map(visitStatement)
@@ -105,7 +108,7 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
 
     func visitWhile(_ stmt: WhileStatement) -> CFGVisitResult {
         let exp = stmt.exp.accept(self)
-        let head = CFGVisitResult(forSyntaxNode: stmt)
+        let head = CFGVisitResult(forSyntaxNode: stmt, id: nextId())
 
         let body = stmt.body.accept(self)
 
@@ -127,7 +130,7 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
     func visitSwitch(_ stmt: SwitchStatement) -> CFGVisitResult {
         let exp = stmt.exp.accept(self)
 
-        let node = CFGVisitResult(forSyntaxNode: stmt)
+        let node = CFGVisitResult(forSyntaxNode: stmt, id: nextId())
 
         let caseClauses = stmt.cases.map(visitSwitchCase)
         let defaultClause = stmt.defaultCase.map(visitSwitchDefaultCase)
@@ -183,11 +186,11 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
             .reduce(CFGVisitResult()) {
                 $0.then($1)
             }
-            .then(CFGVisitResult(forSyntaxNode: switchCase))
-            .then(CFGVisitResult(branchingToUnresolvedJump: .switchCasePatternFail))
-        
+            .then(CFGVisitResult(forSyntaxNode: switchCase, id: nextId()))
+            .then(CFGVisitResult(branchingToUnresolvedJump: .switchCasePatternFail, id: nextId()))
+
         let body = visitStatement(switchCase.body)
-        
+
         result = result.then(body)
 
         return .init(
@@ -199,9 +202,9 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
     func visitSwitchDefaultCase(_ defaultCase: SwitchDefaultCase) -> SwitchCaseVisitResult {
         let body = visitStatement(defaultCase.body)
         let result =
-            CFGVisitResult(forSyntaxNode: defaultCase)
+            CFGVisitResult(forSyntaxNode: defaultCase, id: nextId())
             .then(body)
-        
+
         return .init(
             result: result,
             fallthroughTarget: body.entry
@@ -211,7 +214,7 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
     func visitRepeatWhile(_ stmt: RepeatWhileStatement) -> CFGVisitResult {
         let body = stmt.body.accept(self)
         let exp = stmt.exp.accept(self)
-        let head = CFGVisitResult(forSyntaxNode: stmt)
+        let head = CFGVisitResult(forSyntaxNode: stmt, id: nextId())
         let breakMark = CFGVisitResult()
 
         return body
@@ -229,7 +232,7 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
     func visitFor(_ stmt: ForStatement) -> CFGVisitResult {
         let exp = stmt.exp.accept(self)
         let pattern = visitPattern(stmt.pattern)
-        let head = CFGVisitResult(forSyntaxNode: stmt)
+        let head = CFGVisitResult(forSyntaxNode: stmt, id: nextId())
 
         let body = stmt.body.accept(self)
 
@@ -248,11 +251,11 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
 
     func visitDo(_ stmt: DoStatement) -> CFGVisitResult {
         let body =
-            CFGVisitResult(forSyntaxNode: stmt)
+            CFGVisitResult(forSyntaxNode: stmt, id: nextId())
             .then(
                 stmt.body.accept(self)
             )
-        
+
         let endMarker = CFGVisitResult()
         var result = body.then(endMarker)
 
@@ -263,7 +266,7 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
             result = result
                 .inserting(blockGraph)
                 .branching(from: blockGraph.exit, to: endMarker.entry)
-            
+
             if !didHandle {
                 didHandle = true
 
@@ -273,12 +276,12 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
                 )
             }
         }
-        
+
         return result.finalized()
     }
 
     func visitCatchBlock(_ block: CatchBlock) -> CFGVisitResult {
-        let result = CFGVisitResult(forSyntaxNode: block)
+        let result = CFGVisitResult(forSyntaxNode: block, id: nextId())
 
         let pattern = block.pattern.map(visitPattern) ?? CFGVisitResult()
         let body = block.body.accept(self)
@@ -287,40 +290,43 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
     }
 
     func visitDefer(_ stmt: DeferStatement) -> CFGVisitResult {
-        CFGVisitResult(forSyntaxNode: stmt)
+        CFGVisitResult(forSyntaxNode: stmt, id: nextId())
             .then(stmt.body.accept(self))
             .resolvingAllJumpsToExit()
     }
 
     func visitReturn(_ stmt: ReturnStatement) -> CFGVisitResult {
         (stmt.exp?.accept(self) ?? CFGVisitResult()).then (
-            CFGVisitResult(forUnresolvedJumpSyntaxNode: stmt, kind: .return)
+            CFGVisitResult(forUnresolvedJumpSyntaxNode: stmt, kind: .return, id: nextId())
         ).finalized()
     }
 
     func visitBreak(_ stmt: BreakStatement) -> CFGVisitResult {
         CFGVisitResult(
             forUnresolvedJumpSyntaxNode: stmt,
-            kind: .break(label: stmt.targetLabel)
+            kind: .break(label: stmt.targetLabel),
+            id: nextId()
         )
     }
 
     func visitFallthrough(_ stmt: FallthroughStatement) -> CFGVisitResult {
         CFGVisitResult(
             forUnresolvedJumpSyntaxNode: stmt,
-            kind: .fallthrough
+            kind: .fallthrough,
+            id: nextId()
         )
     }
 
     func visitContinue(_ stmt: ContinueStatement) -> CFGVisitResult {
         CFGVisitResult(
             forUnresolvedJumpSyntaxNode: stmt,
-            kind: .continue(label: stmt.targetLabel)
+            kind: .continue(label: stmt.targetLabel),
+            id: nextId()
         )
     }
 
     func visitExpressions(_ stmt: ExpressionsStatement) -> CFGVisitResult {
-        var result = CFGVisitResult(forSyntaxNode: stmt)
+        var result = CFGVisitResult(forSyntaxNode: stmt, id: nextId())
 
         for exp in stmt.expressions {
             var expGraph = visitExpression(exp)
@@ -333,7 +339,7 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
     }
 
     func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> CFGVisitResult {
-        let result = CFGVisitResult(forSyntaxNode: stmt)
+        let result = CFGVisitResult(forSyntaxNode: stmt, id: nextId())
 
         return stmt
             .decl
@@ -347,26 +353,26 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
         let initialization = decl.initialization.map(visitExpression) ?? CFGVisitResult()
 
         return initialization
-            .then(CFGVisitResult(forSyntaxNode: decl))
+            .then(CFGVisitResult(forSyntaxNode: decl, id: nextId()))
             .finalized()
     }
 
     func visitLocalFunction(_ stmt: LocalFunctionStatement) -> CFGVisitResult {
-        CFGVisitResult(forSyntaxNode: stmt)
+        CFGVisitResult(forSyntaxNode: stmt, id: nextId())
     }
 
     func visitThrow(_ stmt: ThrowStatement) -> CFGVisitResult {
         stmt.exp.accept(self).then (
-            CFGVisitResult(forUnresolvedJumpSyntaxNode: stmt, kind: .throw)
+            CFGVisitResult(forUnresolvedJumpSyntaxNode: stmt, kind: .throw, id: nextId())
         ).finalized()
     }
 
     func visitUnknown(_ stmt: UnknownStatement) -> CFGVisitResult {
-        CFGVisitResult(forSyntaxNode: stmt)
+        CFGVisitResult(forSyntaxNode: stmt, id: nextId())
     }
 
     // MARK: - Expression
-    
+
     func visitExpression(_ expression: Expression) -> CFGVisitResult {
         expression.accept(self)
     }
@@ -379,8 +385,8 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
 
         lhs.resolveJumps(kind: .expressionShortCircuit, to: suffix.graph.exit)
 
-        let node = CFGVisitResult(forSyntaxNode: exp)
-        
+        let node = CFGVisitResult(forSyntaxNode: exp, id: nextId())
+
         return
             lhs
             .then(rhs)
@@ -396,7 +402,10 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
         let shortCircuit: CFGVisitResult
         switch exp.op {
         case .and, .or, .nullCoalesce:
-            shortCircuit = CFGVisitResult(branchingToUnresolvedJump: .expressionShortCircuit)
+            shortCircuit = CFGVisitResult(
+                branchingToUnresolvedJump: .expressionShortCircuit,
+                id: nextId()
+            )
         default:
             shortCircuit = CFGVisitResult()
         }
@@ -405,7 +414,7 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
             .then(shortCircuit)
             .then(rhs)
             .resolvingJumpsToExit(kind: .expressionShortCircuit)
-            .then(CFGVisitResult(forSyntaxNode: exp))
+            .then(CFGVisitResult(forSyntaxNode: exp, id: nextId()))
             .finalized()
     }
 
@@ -413,12 +422,12 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
         exp.exp
             .accept(self)
             .resolvingJumpsToExit(kind: .expressionShortCircuit)
-            .then(CFGVisitResult(forSyntaxNode: exp))
+            .then(CFGVisitResult(forSyntaxNode: exp, id: nextId()))
             .finalized()
     }
 
     func visitSizeOf(_ exp: SizeOfExpression) -> CFGVisitResult {
-        var result = CFGVisitResult(forSyntaxNode: exp)
+        var result = CFGVisitResult(forSyntaxNode: exp, id: nextId())
 
         switch exp.value {
         case .expression(let subExp):
@@ -437,7 +446,7 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
         exp.exp
             .accept(self)
             .resolvingJumpsToExit(kind: .expressionShortCircuit)
-            .then(CFGVisitResult(forSyntaxNode: exp))
+            .then(CFGVisitResult(forSyntaxNode: exp, id: nextId()))
             .finalized()
     }
 
@@ -458,46 +467,49 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
         case .none, .forceUnwrap:
             shortCircuit = CFGVisitResult()
         case .safeUnwrap:
-            shortCircuit = CFGVisitResult(branchingToUnresolvedJump: .expressionShortCircuit)
+            shortCircuit = CFGVisitResult(
+                branchingToUnresolvedJump: .expressionShortCircuit,
+                id: nextId()
+            )
         }
 
         return
             operand
             .then(opExp)
             .then(
-                CFGVisitResult(forSyntaxNode: exp)
+                CFGVisitResult(forSyntaxNode: exp, id: nextId())
             )
             .then(shortCircuit)
             .finalized()
     }
 
     func visitConstant(_ exp: ConstantExpression) -> CFGVisitResult {
-        CFGVisitResult(forSyntaxNode: exp)
+        CFGVisitResult(forSyntaxNode: exp, id: nextId())
     }
 
     func visitParens(_ exp: ParensExpression) -> CFGVisitResult {
         exp.exp
             .accept(self)
             .resolvingJumpsToExit(kind: .expressionShortCircuit)
-            .then(CFGVisitResult(forSyntaxNode: exp))
+            .then(CFGVisitResult(forSyntaxNode: exp, id: nextId()))
             .finalized()
     }
 
     func visitIdentifier(_ exp: IdentifierExpression) -> CFGVisitResult {
-        CFGVisitResult(forSyntaxNode: exp)
+        CFGVisitResult(forSyntaxNode: exp, id: nextId())
     }
 
     func visitCast(_ exp: CastExpression) -> CFGVisitResult {
         visitExpression(exp.exp)
             .resolvingJumpsToExit(kind: .expressionShortCircuit)
-            .then(CFGVisitResult(forSyntaxNode: exp))
+            .then(CFGVisitResult(forSyntaxNode: exp, id: nextId()))
             .finalized()
     }
 
     func visitTypeCheck(_ exp: TypeCheckExpression) -> CFGVisitResult {
         visitExpression(exp.exp)
             .resolvingJumpsToExit(kind: .expressionShortCircuit)
-            .then(CFGVisitResult(forSyntaxNode: exp))
+            .then(CFGVisitResult(forSyntaxNode: exp, id: nextId()))
             .finalized()
     }
 
@@ -513,7 +525,7 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
         }
 
         return result
-            .then(CFGVisitResult(forSyntaxNode: exp))
+            .then(CFGVisitResult(forSyntaxNode: exp, id: nextId()))
             .finalized()
     }
 
@@ -524,7 +536,7 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
             let key =
                 visitExpression(pair.key)
                 .resolvingJumpsToExit(kind: .expressionShortCircuit)
-            
+
             let value =
                 visitExpression(pair.value)
                 .resolvingJumpsToExit(kind: .expressionShortCircuit)
@@ -535,16 +547,16 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
         }
 
         return result
-            .then(CFGVisitResult(forSyntaxNode: exp))
+            .then(CFGVisitResult(forSyntaxNode: exp, id: nextId()))
             .finalized()
     }
 
     func visitBlock(_ exp: BlockLiteralExpression) -> CFGVisitResult {
-        CFGVisitResult(forSyntaxNode: exp)
+        CFGVisitResult(forSyntaxNode: exp, id: nextId())
     }
 
     func visitTernary(_ exp: TernaryExpression) -> CFGVisitResult {
-        let predicate = 
+        let predicate =
             exp.exp
             .accept(self)
             .resolvingJumpsToExit(kind: .expressionShortCircuit)
@@ -553,13 +565,13 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
             exp.ifTrue
             .accept(self)
             .resolvingJumpsToExit(kind: .expressionShortCircuit)
-        
+
         let rhs =
             exp.ifFalse
             .accept(self)
             .resolvingJumpsToExit(kind: .expressionShortCircuit)
 
-        let node = CFGVisitResult(forSyntaxNode: exp)
+        let node = CFGVisitResult(forSyntaxNode: exp, id: nextId())
 
         return predicate
             .then(node)
@@ -581,33 +593,37 @@ class CFGVisitor: ExpressionVisitor, StatementVisitor {
         }
 
         return result
-            .then(CFGVisitResult(forSyntaxNode: exp))
+            .then(CFGVisitResult(forSyntaxNode: exp, id: nextId()))
             .finalized()
     }
 
     func visitSelector(_ exp: SelectorExpression) -> CFGVisitResult {
-        CFGVisitResult(forSyntaxNode: exp)
+        CFGVisitResult(forSyntaxNode: exp, id: nextId())
     }
 
     func visitTry(_ exp: TryExpression) -> CFGVisitResult {
         let result =
             visitExpression(exp.exp)
             .resolvingJumpsToExit(kind: .expressionShortCircuit)
-        
+
         let node: CFGVisitResult
         switch exp.mode {
         case .throwable:
-            node = CFGVisitResult(withBranchingSyntaxNode: exp, toUnresolvedJump: .throw)
+            node = CFGVisitResult(
+                withBranchingSyntaxNode: exp,
+                toUnresolvedJump: .throw,
+                id: nextId()
+            )
 
         case .optional, .forced:
-            node = .init(forSyntaxNode: exp)
+            node = .init(forSyntaxNode: exp, id: nextId())
         }
 
         return result.then(node)
     }
 
     func visitUnknown(_ exp: UnknownExpression) -> CFGVisitResult {
-        CFGVisitResult(forSyntaxNode: exp)
+        CFGVisitResult(forSyntaxNode: exp, id: nextId())
     }
 
     func visitPattern(_ pattern: Pattern) -> CFGVisitResult {
@@ -639,7 +655,7 @@ private func inParallel(_ results: CFGVisitResult...) -> CFGVisitResult {
     for item in results {
         result = result
             .inserting(item)
-        
+
         result.graph.addEdge(
             from: entry,
             to: item.graph.entry

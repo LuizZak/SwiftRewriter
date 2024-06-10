@@ -11,13 +11,15 @@ extension ControlFlowGraph {
         let viz = GraphViz(rootGraphName: "flow")
         viz.rankDir = .topToBottom
 
-        var nodeIds: [ObjectIdentifier: GraphViz.NodeId] = [:]
+        var nodeIds: [Node: GraphViz.NodeId] = [:]
         var nodeDefinitions: [NodeDefinition<ControlFlowGraphNode>] = []
-        
+
+        let nodes = Array(self.nodes)
+
         // Prepare nodes
         for node in nodes {
             let label = labelForNode(node, graph: self)
-            
+
             let rankStart = self.shortestDistance(from: self.entry, to: node)
             let rankEnd = self.shortestDistance(from: node, to: self.exit)
 
@@ -45,7 +47,7 @@ extension ControlFlowGraph {
             if n2.node === self.exit {
                 return true
             }
-            
+
             // If rank data is available, use it to create a more linear list of
             // nodes on the output. Nodes with no rank should be added to the end
             // of the graph, after all ranked nodes.
@@ -55,13 +57,13 @@ extension ControlFlowGraph {
 
             case (_?, nil):
                 return true
-            
+
             case (let r1?, let r2?) where r1 < r2:
                 return true
 
             case (let r1?, let r2?) where r1 > r2:
                 return false
-            
+
             default:
                 break
             }
@@ -72,13 +74,13 @@ extension ControlFlowGraph {
 
             case (_?, nil):
                 return false
-            
+
             case (let r1?, let r2?) where r1 < r2:
                 return false
 
             case (let r1?, let r2?) where r1 > r2:
                 return true
-            
+
             default:
                 return n1.label < n2.label
             }
@@ -86,70 +88,83 @@ extension ControlFlowGraph {
 
         // Prepare nodes
         for definition in nodeDefinitions {
-            nodeIds[ObjectIdentifier(definition.node)] = viz.createNode(label: definition.label)
+            nodeIds[definition.node] = viz.createNode(label: definition.label)
         }
 
-        // Output connections
-        for definition in nodeDefinitions {
-            let node = definition.node
+        var intermediaries: [IntermediaryEdge] = []
 
-            guard let nodeId = nodeIds[ObjectIdentifier(node)] else {
+        for edge in edges {
+            guard let startId = nodeIds[edge.start] else {
+                continue
+            }
+            guard let endId = nodeIds[edge.end] else {
                 continue
             }
 
-            var edges = self.edges(from: node)
-
-            // Sort edges by lexical ordering
-            edges.sort {
-                guard let lhs = nodeIds[ObjectIdentifier($0.end)] else {
-                    return false
-                }
-                guard let rhs = nodeIds[ObjectIdentifier($1.end)] else {
-                    return true
-                }
-                
-                return lhs
-                    .description
-                    .compare(
-                        rhs.description,
-                        options: .numeric
-                    ) == .orderedAscending
-            }
-
-            for edge in edges {
-                let target = edge.end
-                guard let targetId = nodeIds[ObjectIdentifier(target)] else {
-                    continue
-                }
-
-                var attributes: GraphViz.Attributes = GraphViz.Attributes()
-
-                if let label = edge.debugLabel {
-                    attributes["label"] = .string(label)
-                }
-                if edge.isBackEdge {
-                    attributes["color"] = .string("#aa3333")
-                    attributes["penwidth"] = 0.5
-                }
-
-                viz.addConnection(
-                    from: nodeId,
-                    to: targetId,
-                    attributes: attributes
+            let intermediary =
+                IntermediaryEdge(
+                    start: edge.start,
+                    end: edge.end,
+                    debugLabel: edge.debugLabel,
+                    isBackEdge: edge.isBackEdge,
+                    vizStart: startId,
+                    vizEnd: endId
                 )
+
+            intermediaries.append(intermediary)
+        }
+
+        // Sort intermediaries
+        intermediaries.sort()
+
+        for intermediary in intermediaries {
+            var attributes: GraphViz.Attributes = GraphViz.Attributes()
+
+            if let label = intermediary.debugLabel {
+                attributes["label"] = .string(label)
             }
+            if intermediary.isBackEdge {
+                attributes["color"] = .string("#aa3333")
+                attributes["penwidth"] = 0.5
+            }
+
+            viz.addConnection(
+                from: intermediary.vizStart,
+                to: intermediary.vizEnd,
+                attributes: attributes
+            )
         }
 
         return viz
     }
+
+    /// Used to generate Graphviz graphs; supports stable ordering based on the
+    /// start/end nodes of each edge.
+    private struct IntermediaryEdge: Comparable {
+        var start: Node
+        var end: Node
+        var debugLabel: String?
+        var isBackEdge: Bool
+
+        var vizStart: GraphViz.NodeId
+        var vizEnd: GraphViz.NodeId
+
+        static func < (lhs: Self, rhs: Self) -> Bool {
+            if lhs.vizStart == rhs.vizStart {
+                return lhs.vizEnd < rhs.vizEnd
+            }
+
+            return lhs.vizStart < rhs.vizStart
+        }
+    }
 }
 
-fileprivate func labelForSyntaxNode(_ node: SwiftAST.SyntaxNode) -> String {
+fileprivate func labelForSyntaxNode(_ node: SwiftAST.SyntaxNode, id: Int) -> String {
     var label: String
     switch node {
     case let exp as Expression:
         label = exp.description
-    
+
     case is CompoundStatement:
         label = "{compound}"
 
@@ -158,17 +173,17 @@ fileprivate func labelForSyntaxNode(_ node: SwiftAST.SyntaxNode) -> String {
 
     case is IfStatement:
         label = "{if}"
-    
+
     case is SwitchStatement:
         label = "{switch}"
-    
+
     case let clause as SwitchCase:
         if clause.patterns.count == 1 {
             label = "{case \(clause.patterns[0])}"
         } else {
             label = "{case \(clause.patterns)}"
         }
-    
+
     case is SwitchDefaultCase:
         label = "{default}"
 
@@ -190,10 +205,10 @@ fileprivate func labelForSyntaxNode(_ node: SwiftAST.SyntaxNode) -> String {
         } else {
             label = "{catch}"
         }
-    
+
     case is DeferStatement:
         label = "{defer}"
-    
+
     case let ret as ReturnStatement:
         if let exp = ret.exp {
             label = "{return \(exp)}"
@@ -212,21 +227,21 @@ fileprivate func labelForSyntaxNode(_ node: SwiftAST.SyntaxNode) -> String {
 
             return declLabel
         }.joined(separator: ", ")
-    
+
     case let stmt as BreakStatement:
         if let l = stmt.targetLabel {
             label = "{break \(l)}"
         } else {
             label = "{break}"
         }
-    
+
     case let stmt as ContinueStatement:
         if let l = stmt.targetLabel {
             label = "{continue \(l)}"
         } else {
             label = "{continue}"
         }
-    
+
     case is FallthroughStatement:
         label = "{fallthrough}"
 
@@ -236,6 +251,8 @@ fileprivate func labelForSyntaxNode(_ node: SwiftAST.SyntaxNode) -> String {
     default:
         label = "\(type(of: node))"
     }
+
+    label += " (\(id))"
 
     return label
 }
@@ -259,8 +276,8 @@ fileprivate func labelForNode(_ node: ControlFlowGraphNode, graph: ControlFlowGr
             reportNode = reportNode.parent ?? reportNode
         }
 
-        return "{end scope of \(labelForSyntaxNode(reportNode))}"
+        return "{end scope of \(labelForSyntaxNode(reportNode, id: node.id))}"
     }
 
-    return labelForSyntaxNode(node.node)
+    return labelForSyntaxNode(node.node, id: node.id)
 }

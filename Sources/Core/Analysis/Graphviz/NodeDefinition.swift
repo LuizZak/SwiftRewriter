@@ -1,8 +1,8 @@
 import MiniGraphviz
 
-struct NodeDefinition<Node: DirectedGraphNode> {
+struct NodeDefinition<Node: Hashable> {
     var node: Node
-    
+
     /// Rank of the node, or the minimal number of edges that connect the node
     /// to the entry of the graph.
     ///

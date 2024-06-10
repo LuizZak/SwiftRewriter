@@ -15,7 +15,7 @@ public extension ControlFlowGraph {
     /// Options that can be specified during generation of control flow graphs.
     struct GenerationOptions {
         public static var `default`: Self = Self()
-        
+
         /// If `true`, generates marker nodes between code scope changes.
         public var generateEndScopes: Bool
 
@@ -43,7 +43,11 @@ public extension ControlFlowGraph {
         options: GenerationOptions = .default
     ) -> CFGVisitResult {
 
-        let visitor = CFGVisitor(options: options)
+        var counter = 1
+        let visitor = CFGVisitor(options: options, nextId: {
+            defer { counter += 1 }
+            return counter
+        })
         var result = visitor.visitCompound(body.body)
 
         if !keepUnresolvedJumps {
@@ -60,7 +64,7 @@ public extension ControlFlowGraph {
 
         return result
     }
-    
+
     /// Creates a control flow graph for a given compound statement.
     /// The entry and exit points for the resulting graph will be the compound
     /// statement itself, with its inner nodes being the statements contained
@@ -70,7 +74,11 @@ public extension ControlFlowGraph {
         options: GenerationOptions = .default
     ) -> ControlFlowGraph {
 
-        let visitor = CFGVisitor(options: options)
+        var counter = 1
+        let visitor = CFGVisitor(options: options, nextId: {
+            defer { counter += 1 }
+            return counter
+        })
         let result = visitor.visitCompound(compoundStatement)
 
         let graph = _finalizeGraph(result, entry: compoundStatement).graph
@@ -80,10 +88,10 @@ public extension ControlFlowGraph {
         if options.pruneUnreachable {
             graph.prune()
         }
-        
+
         return graph
     }
-    
+
     /// Creates a control flow graph for a given expression.
     /// The entry and exit points for the resulting graph will be the expression
     /// itself, with its inner nodes being the sub expressions contained within.
@@ -94,17 +102,21 @@ public extension ControlFlowGraph {
         options: GenerationOptions = .default
     ) -> ControlFlowGraph {
 
-        let visitor = CFGVisitor(options: options)
+        var counter = 1
+        let visitor = CFGVisitor(options: options, nextId: {
+            defer { counter += 1 }
+            return counter
+        })
         let result = visitor.visitExpression(expression)
 
         let graph = _finalizeGraph(result, entry: expression).graph
-        
+
         graph.markBackEdges()
 
         if options.pruneUnreachable {
             graph.prune()
         }
-        
+
         return graph
     }
 

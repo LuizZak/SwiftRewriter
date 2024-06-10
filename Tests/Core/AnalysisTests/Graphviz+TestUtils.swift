@@ -42,7 +42,7 @@ internal func assertGraphviz(
 
     case let node as Statement:
         syntaxString = StatementPrinter.toString(statement: node)
-    
+
     default:
         syntaxString = nil
     }
@@ -107,9 +107,9 @@ func updateGraphvizCode(entry: GraphvizUpdateEntry) throws {
 
     let converter = SourceLocationConverter(fileName: entry.file, tree: syntax)
     let rewriter = GraphvizUpdateRewriter(entry: entry, locationConverter: converter)
-    
+
     let newSyntax = rewriter.visit(syntax)
-    
+
     guard syntax.description != newSyntax.description else {
         return
     }
@@ -172,11 +172,25 @@ private class GraphvizUpdateRewriter: SyntaxRewriter {
     }
 
     private func updatingExpectedString(_ exp: StringLiteralExprSyntax) -> StringLiteralExprSyntax {
+        let content = formatGraphviz(entry.newGraphviz)
+        //*
+        let result = StringLiteralExprSyntax(
+            openingQuote: .multilineStringQuoteToken(),
+            segments: [
+                .stringSegment(
+                    .init(content: TokenSyntax.stringSegment(content))
+                )
+            ],
+            closingQuote: .multilineStringQuoteToken()
+        )
+        // */
+        /*
         let result = StringLiteralExprSyntax(
             openDelimiter: .multilineStringQuoteToken(),
             content: formatGraphviz(entry.newGraphviz),
             closeDelimiter: .multilineStringQuoteToken()
         )
+        // */
 
         return result
     }

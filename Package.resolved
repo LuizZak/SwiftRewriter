@@ -19,6 +19,15 @@
       }
     },
     {
+      "identity" : "minidigraph",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/LuizZak/MiniDigraph.git",
+      "state" : {
+        "revision" : "e1314571b60a17563d8c847fde19e4cd545b16ec",
+        "version" : "0.2.1"
+      }
+    },
+    {
       "identity" : "minigraphviz",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LuizZak/MiniGraphviz.git",

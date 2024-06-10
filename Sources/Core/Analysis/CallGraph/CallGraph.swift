@@ -16,10 +16,10 @@ public class CallGraph: DirectedGraphBase<CallGraphNode, CallGraphEdge> {
             containsNode(end),
             "Attempted to add edge between nodes that are not contained within this graph: \(end)."
         )
-        
+
         let edge = Edge(start: start, end: end)
         addEdge(edge)
-        
+
         return edge
     }
 
@@ -27,7 +27,7 @@ public class CallGraph: DirectedGraphBase<CallGraphNode, CallGraphEdge> {
         _ collection: IntentionCollection,
         typeSystem: TypeSystem
     ) -> CallGraph {
-        
+
         _fromIntentions(collection, typeSystem: typeSystem)
     }
 
@@ -64,13 +64,13 @@ public class CallGraph: DirectedGraphBase<CallGraphNode, CallGraphEdge> {
 
         let node = Node(declaration: declaration)
         addNode(node)
-        
+
         return node
     }
 }
 
 /// A node in a call graph.
-public class CallGraphNode: DirectedGraphNode {
+public class CallGraphNode: Hashable {
     public let declaration: DeclarationKind
 
     /// Gets the type symbol that owns the node related to this call graph, in
@@ -97,9 +97,18 @@ public class CallGraphNode: DirectedGraphNode {
         self.declaration = declaration
     }
 
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
+    }
+
+    public static func == (lhs: CallGraphNode, rhs: CallGraphNode) -> Bool {
+        //type(of: lhs) == type(of: rhs) && lhs.node === rhs.node
+        lhs === rhs
+    }
+
     /// Specifies the declaration that is referenced by this call graph node.
     /// Is either a statement-based construct, like a function body or computed
-    /// property getter, or a stored value like 
+    /// property getter, or a stored value like
     public enum DeclarationKind: Hashable {
         case statement(FunctionBodyCarryingIntention)
         case stored(CallGraphValueStorageIntention)
@@ -159,7 +168,7 @@ public class CallGraphNode: DirectedGraphNode {
                 case .global, .globalVariable:
                     return nil
                 }
-            
+
             case .stored(let declaration):
                 switch declaration {
                 case .property(let decl):
@@ -197,10 +206,10 @@ public class CallGraphNode: DirectedGraphNode {
             switch (lhs, rhs) {
             case (.statement(let lhs), .statement(let rhs)):
                 return lhs == rhs
-            
+
             case (.stored(let lhs), .stored(let rhs)):
                 return lhs == rhs
-            
+
             default:
                 return false
             }
@@ -219,6 +228,16 @@ public class CallGraphEdge: DirectedGraphBaseEdgeType {
     internal init(start: CallGraphNode, end: CallGraphNode) {
         self.start = start
         self.end = end
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(start))
+        hasher.combine(ObjectIdentifier(end))
+    }
+
+    public static func == (lhs: CallGraphEdge, rhs: CallGraphEdge) -> Bool {
+        //type(of: lhs) == type(of: rhs) && lhs.node === rhs.node
+        lhs === rhs
     }
 }
 

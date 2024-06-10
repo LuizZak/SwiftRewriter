@@ -15,8 +15,8 @@ public struct CFGVisitResult {
     }
 
     /// Initializes a graph from a syntax node, `entry -> syntaxNode -> exit`.
-    init(forSyntaxNode syntaxNode: SyntaxNode) {
-        self.init(forNode: ControlFlowGraphNode(node: syntaxNode))
+    init(forSyntaxNode syntaxNode: SyntaxNode, id: Int) {
+        self.init(forNode: ControlFlowGraphNode(node: syntaxNode, id: id))
     }
 
     /// Initializes a graph from a graph node, `entry -> node -> exit`.
@@ -32,15 +32,16 @@ public struct CFGVisitResult {
     /// `entry -> syntaxNode -> jump X-> exit`.
     init(
         forUnresolvedJumpSyntaxNode syntaxNode: SyntaxNode,
-        kind: UnresolvedJump.Kind
+        kind: UnresolvedJump.Kind,
+        id: Int
     ) {
 
-        let node = ControlFlowGraphNode(node: syntaxNode)
+        let node = ControlFlowGraphNode(node: syntaxNode, id: id)
 
         self.init()
 
         let jump = UnresolvedJump(
-            node: ControlFlowGraphNode(node: MarkerSyntaxNode()),
+            node: ControlFlowGraphNode(node: MarkerSyntaxNode(), id: id),
             kind: kind
         )
 
@@ -56,11 +57,11 @@ public struct CFGVisitResult {
     /// connection to the exit.
     ///
     /// `entry -> jump X-> exit`.
-    init(forUnresolvedJump kind: UnresolvedJump.Kind) {
+    init(forUnresolvedJump kind: UnresolvedJump.Kind, id: Int) {
         self.init()
 
         let jump = UnresolvedJump(
-            node: ControlFlowGraphNode(node: MarkerSyntaxNode()),
+            node: ControlFlowGraphNode(node: MarkerSyntaxNode(), id: id),
             kind: kind
         )
 
@@ -79,15 +80,16 @@ public struct CFGVisitResult {
     /// ```
     init(
         withBranchingSyntaxNode syntaxNode: SyntaxNode,
-        toUnresolvedJump kind: UnresolvedJump.Kind
+        toUnresolvedJump kind: UnresolvedJump.Kind,
+        id: Int
     ) {
 
-        let node = ControlFlowGraphNode(node: syntaxNode)
+        let node = ControlFlowGraphNode(node: syntaxNode, id: id)
 
         self.init()
 
         let jump = UnresolvedJump(
-            node: ControlFlowGraphNode(node: MarkerSyntaxNode()),
+            node: ControlFlowGraphNode(node: MarkerSyntaxNode(), id: id),
             kind: kind
         )
 
@@ -105,11 +107,11 @@ public struct CFGVisitResult {
     /// entry --> exit
     ///       \-> jump
     /// ```
-    init(branchingToUnresolvedJump kind: UnresolvedJump.Kind) {
+    init(branchingToUnresolvedJump kind: UnresolvedJump.Kind, id: Int) {
         self.init()
 
         let jump = UnresolvedJump(
-            node: ControlFlowGraphNode(node: MarkerSyntaxNode()),
+            node: ControlFlowGraphNode(node: MarkerSyntaxNode(), id: id),
             kind: kind
         )
 
@@ -183,7 +185,7 @@ public struct CFGVisitResult {
         let loopStart = exit
 
         let dummy = Self()
-        
+
         let copy = self
             .then(dummy)
             .branching(
@@ -191,7 +193,7 @@ public struct CFGVisitResult {
                 to: node,
                 debugLabel: debugLabel
             )
-        
+
         if !conditional {
             if copy.graph.areConnected(start: loopStart, end: dummy.entry) {
                 copy.graph.removeEdge(from: loopStart, to: dummy.entry)
@@ -208,7 +210,7 @@ public struct CFGVisitResult {
         to target: ControlFlowGraphNode,
         debugLabel: String? = nil
     ) -> Self {
-        
+
         let copy = self.copy()
         copy.graph.redirectEntries(for: source, to: target).setDebugLabel(debugLabel)
 
@@ -222,7 +224,7 @@ public struct CFGVisitResult {
         to target: ControlFlowGraphNode,
         debugLabel: String? = nil
     ) -> Self {
-        
+
         let copy = self.copy()
         copy.graph.redirectExits(for: source, to: target).setDebugLabel(debugLabel)
 
@@ -259,7 +261,7 @@ public struct CFGVisitResult {
         for jump in copy.unresolvedJumps {
             let subgraphs = closure()
             let deferSubgraph = subgraphs.reduce(Self()) { $0.then($1) }
-            
+
             copy = copy.inserting(deferSubgraph)
 
             copy.graph.redirectEntries(for: jump.node, to: deferSubgraph.entry)
@@ -441,7 +443,7 @@ public struct CFGVisitResult {
 
             graph.addEdge(from: node, to: target)
         }
-        
+
         public enum Kind: Equatable {
             case `continue`(label: String?)
             case `break`(label: String?)
