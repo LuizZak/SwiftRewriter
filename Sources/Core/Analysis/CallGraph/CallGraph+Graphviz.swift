@@ -3,7 +3,7 @@ import Intentions
 import SwiftAST
 import TypeSystem
 import KnownType
-import GraphvizLib
+import MiniGraphviz
 
 extension CallGraph {
     /// Generates a GraphViz representation of this call graph.

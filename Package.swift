@@ -17,13 +17,6 @@ if ProcessInfo.processInfo.environment["SWIFT_REWRITER_BUILD_ANTLR_OPTIMIZED"] !
 
 let core: [Target] = [
     .target(
-        name: "GraphvizLib",
-        dependencies: [
-
-        ],
-        path: "Sources/Core/GraphvizLib"
-    ),
-    .target(
         name: "AntlrCommons",
         dependencies: [
             .product(name: "Antlr4", package: "antlr4-swift"),
@@ -102,8 +95,9 @@ let core: [Target] = [
         name: "Analysis",
         dependencies: [
             .product(name: "SwiftAST", package: "SwiftAST"),
+            .product(name: "MiniGraphviz", package: "MiniGraphviz"),
             "KnownType", "Commons", "Utils",
-            "Intentions", "TypeSystem", "GraphvizLib",
+            "Intentions", "TypeSystem",
         ],
         path: "Sources/Core/Analysis"
     ),
@@ -136,14 +130,6 @@ let core: [Target] = [
 
 let coreTests: [Target] = [
     /* Tests */
-    .testTarget(
-        name: "GraphvizLibTests",
-        dependencies: [
-            "GraphvizLib",
-            "TestCommons",
-        ],
-        path: "Tests/Core/GraphvizLibTests"
-    ),
     .testTarget(
         name: "WriterTargetOutputTests",
         dependencies: [
@@ -258,8 +244,9 @@ let coreTests: [Target] = [
             "Analysis",
             .product(name: "SwiftParser", package: "swift-syntax"),
             .product(name: "SwiftAST", package: "SwiftAST"),
+            .product(name: "MiniGraphviz", package: "MiniGraphviz"),
             "SwiftRewriterLib", "GlobalsProviders",
-            "TestCommons", "TypeSystem", "GraphvizLib",
+            "TestCommons", "TypeSystem",
         ],
         path: "Tests/Core/AnalysisTests"
     ),
@@ -415,6 +402,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-format.git", from: "509.0.0"),
         //
         .package(url: "https://github.com/LuizZak/MiniLexer.git", exact: "0.10.0"),
+        .package(url: "https://github.com/LuizZak/MiniGraphviz.git", exact: "0.1.0"),
         .package(url: "https://github.com/LuizZak/SwiftAST.git", exact: "0.1.1"),
     ],
     targets: aggregateTargets + [

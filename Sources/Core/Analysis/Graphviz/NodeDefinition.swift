@@ -1,4 +1,4 @@
-import GraphvizLib
+import MiniGraphviz
 
 struct NodeDefinition<Node: DirectedGraphNode> {
     var node: Node

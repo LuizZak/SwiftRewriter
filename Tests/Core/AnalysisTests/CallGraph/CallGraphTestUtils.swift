@@ -6,7 +6,7 @@ import XCTest
 import Intentions
 import KnownType
 import TestCommons
-import GraphvizLib
+import MiniGraphviz
 
 @testable import Analysis
 

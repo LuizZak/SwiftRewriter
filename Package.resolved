@@ -19,6 +19,15 @@
       }
     },
     {
+      "identity" : "minigraphviz",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/LuizZak/MiniGraphviz.git",
+      "state" : {
+        "revision" : "aa15c50cf8027dae6dde860a40987c238070d849",
+        "version" : "0.1.0"
+      }
+    },
+    {
       "identity" : "minilexer",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LuizZak/MiniLexer.git",
