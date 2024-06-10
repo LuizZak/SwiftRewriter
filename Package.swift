@@ -48,23 +48,18 @@ let core: [Target] = [
         path: "Sources/Core/GrammarModelBase"
     ),
     .target(
-        name: "SwiftAST",
-        dependencies: [
-            "MiniLexer", "Utils", "WriterTargetOutput",
-        ],
-        path: "Sources/Core/SwiftAST"
-    ),
-    .target(
         name: "KnownType",
         dependencies: [
-            "SwiftAST", "WriterTargetOutput",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "WriterTargetOutput",
         ],
         path: "Sources/Core/KnownType"
     ),
     .target(
         name: "Intentions",
         dependencies: [
-            "SwiftAST", "GrammarModelBase", "KnownType",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "GrammarModelBase", "KnownType",
         ],
         path: "Sources/Core/Intentions"
     ),
@@ -73,7 +68,8 @@ let core: [Target] = [
         dependencies: [
             .product(name: "SwiftSyntax", package: "swift-syntax"),
             .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
-            "KnownType", "Intentions", "SwiftAST",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "KnownType", "Intentions",
         ],
         path: "Sources/Core/SwiftSyntaxSupport"
     ),
@@ -88,7 +84,8 @@ let core: [Target] = [
     .target(
         name: "TypeSystem",
         dependencies: [
-            "SwiftAST", "ObjcParser", "TypeDefinitions", "Utils",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "ObjcParser", "TypeDefinitions", "Utils",
             "Intentions", "KnownType", "ObjcGrammarModels",
         ],
         path: "Sources/Core/TypeSystem"
@@ -96,14 +93,16 @@ let core: [Target] = [
     .target(
         name: "Commons",
         dependencies: [
-            "SwiftAST", "Utils", "TypeSystem", "KnownType",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "Utils", "TypeSystem", "KnownType",
         ],
         path: "Sources/Core/Commons"
     ),
     .target(
         name: "Analysis",
         dependencies: [
-            "SwiftAST", "KnownType", "Commons", "Utils",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "KnownType", "Commons", "Utils",
             "Intentions", "TypeSystem", "GraphvizLib",
         ],
         path: "Sources/Core/Analysis"
@@ -111,7 +110,8 @@ let core: [Target] = [
     .target(
         name: "IntentionPasses",
         dependencies: [
-            "SwiftAST", "Commons", "Utils", "MiniLexer",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "Commons", "Utils", "MiniLexer",
             "Intentions", "ObjcGrammarModels", "Analysis",
         ],
         path: "Sources/Core/IntentionPasses"
@@ -119,7 +119,8 @@ let core: [Target] = [
     .target(
         name: "ExpressionPasses",
         dependencies: [
-            "SwiftAST", "Commons", "Utils", "Analysis",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "Commons", "Utils", "Analysis",
             "Intentions", "TypeSystem", "MiniLexer",
         ],
         path: "Sources/Core/ExpressionPasses"
@@ -160,27 +161,20 @@ let coreTests: [Target] = [
         path: "Tests/Core/GrammarModelBaseTests"
     ),
     .testTarget(
-        name: "SwiftASTTests",
-        dependencies: [
-            "SwiftAST",
-            "SwiftSyntaxSupport",
-            "TestCommons",
-        ],
-        path: "Tests/Core/SwiftASTTests"
-    ),
-    .testTarget(
         name: "IntentionsTests",
         dependencies: [
+            .product(name: "SwiftAST", package: "SwiftAST"),
             "Intentions",
-            "TestCommons", "SwiftAST",
+            "TestCommons",
         ],
         path: "Tests/Core/IntentionsTests"
     ),
     .testTarget(
         name: "KnownTypeTests",
         dependencies: [
+            .product(name: "SwiftAST", package: "SwiftAST"),
             "KnownType",
-            "TestCommons", "SwiftAST", "WriterTargetOutput",
+            "TestCommons", "WriterTargetOutput",
         ],
         path: "Tests/Core/KnownTypeTests"
     ),
@@ -190,7 +184,8 @@ let coreTests: [Target] = [
             "SwiftSyntaxSupport",
             .product(name: "SwiftSyntax", package: "swift-syntax"),
             .product(name: "SwiftParser", package: "swift-syntax"),
-            "KnownType", "Intentions", "SwiftAST", "TestCommons",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "KnownType", "Intentions", "TestCommons",
             "SwiftRewriterLib",
         ],
         path: "Tests/Core/SwiftSyntaxSupportTests"
@@ -199,7 +194,8 @@ let coreTests: [Target] = [
         name: "TypeSystemTests",
         dependencies: [
             "TypeSystem",
-            "SwiftAST", "ObjcParser", "TypeDefinitions", "Utils",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "ObjcParser", "TypeDefinitions", "Utils",
             "Intentions", "ObjcGrammarModels", "KnownType", "TestCommons",
             "GlobalsProviders",
         ],
@@ -219,8 +215,8 @@ let coreTests: [Target] = [
         name: "CommonsTests",
         dependencies: [
             "Commons",
-            "SwiftAST", "KnownType", "SwiftRewriterLib",
-            "TypeSystem",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "KnownType", "SwiftRewriterLib", "TypeSystem",
         ],
         path: "Tests/Core/CommonsTests"
     ),
@@ -229,8 +225,9 @@ let coreTests: [Target] = [
         dependencies: [
             "ExpressionPasses",
             .product(name: "Antlr4", package: "antlr4-swift"),
+            .product(name: "SwiftAST", package: "SwiftAST"),
             "ObjectiveCFrontend",
-            "SwiftAST", "SwiftRewriterLib", "ObjcParser",
+            "SwiftRewriterLib", "ObjcParser",
             "ObjcParserAntlr", "IntentionPasses", "GlobalsProviders",
             "TypeSystem", "TestCommons",
         ],
@@ -249,8 +246,8 @@ let coreTests: [Target] = [
         name: "IntentionPassesTests",
         dependencies: [
             "IntentionPasses",
-            "ObjectiveCFrontend",
-            "SwiftAST", "ObjcGrammarModels", "SwiftRewriterLib",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "ObjectiveCFrontend", "ObjcGrammarModels", "SwiftRewriterLib",
             "TestCommons", "GlobalsProviders", "TypeSystem",
         ],
         path: "Tests/Core/IntentionPassesTests"
@@ -260,7 +257,8 @@ let coreTests: [Target] = [
         dependencies: [
             "Analysis",
             .product(name: "SwiftParser", package: "swift-syntax"),
-            "SwiftAST", "SwiftRewriterLib", "GlobalsProviders",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "SwiftRewriterLib", "GlobalsProviders",
             "TestCommons", "TypeSystem", "GraphvizLib",
         ],
         path: "Tests/Core/AnalysisTests"
@@ -275,8 +273,9 @@ var swiftRewriterTarget: Target = .executableTarget(
         .product(name: "Console", package: "console"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "SwiftFormatConfiguration", package: "swift-format"),
+        .product(name: "SwiftAST", package: "SwiftAST"),
         "SwiftRewriterCLI", "SwiftRewriterLib",
-        "ExpressionPasses", "Utils", "SourcePreprocessors", "SwiftAST",
+        "ExpressionPasses", "Utils", "SourcePreprocessors",
         "IntentionPasses", "MiniLexer", "Commons",
     ],
     path: "Sources/SwiftRewriter"
@@ -325,7 +324,8 @@ let objcFrontend: [Target] = [
     .target(
         name: "GlobalsProviders",
         dependencies: [
-            "SwiftAST", "Commons", "TypeSystem",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "Commons", "TypeSystem",
         ],
         path: "Sources/Frontend/Objective-C/GlobalsProviders"
     ),
@@ -359,7 +359,8 @@ let objcFrontendTests: [Target] = [
         name: "GlobalsProvidersTests",
         dependencies: [
             "GlobalsProviders",
-            "SwiftAST", "SwiftRewriterLib", "TestCommons", "TypeSystem",
+            .product(name: "SwiftAST", package: "SwiftAST"),
+            "SwiftRewriterLib", "TestCommons", "TypeSystem",
         ],
         path: "Tests/Frontend/Objective-C/GlobalsProvidersTests"
     ),
@@ -407,12 +408,14 @@ let package = Package(
             targets: ["SwiftRewriter"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/LuizZak/MiniLexer.git", exact: "0.10.0"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.3.0"),
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", exact: "4.1.2"),
         .package(url: "https://github.com/LuizZak/console.git", exact:  "0.8.2"),
         .package(url: "https://github.com/apple/swift-syntax.git", from: "509.1.0"),
         .package(url: "https://github.com/apple/swift-format.git", from: "509.0.0"),
+        //
+        .package(url: "https://github.com/LuizZak/MiniLexer.git", exact: "0.10.0"),
+        .package(url: "https://github.com/LuizZak/SwiftAST.git", exact: "0.1.1"),
     ],
     targets: aggregateTargets + [
         swiftRewriterTarget,
@@ -430,7 +433,8 @@ let package = Package(
                 .product(name: "SwiftFormatConfiguration", package: "swift-format"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
                 .product(name: "SwiftIDEUtils", package: "swift-syntax"),
-                "SwiftAST", "Analysis", "TypeDefinitions", "Utils", "Intentions",
+                .product(name: "SwiftAST", package: "SwiftAST"),
+                "Analysis", "TypeDefinitions", "Utils", "Intentions",
                 "TypeSystem", "IntentionPasses", "KnownType",
                 "WriterTargetOutput", "SwiftSyntaxSupport", "GlobalsProviders",
                 "ExpressionPasses", "SourcePreprocessors",
@@ -443,8 +447,9 @@ let package = Package(
             dependencies: [
                 .product(name: "Console", package: "console"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "SwiftAST", package: "SwiftAST"),
                 "SwiftRewriterLib",
-                "ExpressionPasses", "Utils", "SourcePreprocessors", "SwiftAST",
+                "ExpressionPasses", "Utils", "SourcePreprocessors",
                 "IntentionPasses", "MiniLexer", "Commons",
             ],
             path: "Sources/SwiftRewriterCLI"
@@ -452,7 +457,8 @@ let package = Package(
         .target(
             name: "TestCommons",
             dependencies: [
-                .product(name: "Antlr4", package: "antlr4-swift"), "SwiftAST",
+                .product(name: "Antlr4", package: "antlr4-swift"),
+                .product(name: "SwiftAST", package: "SwiftAST"),
                 "SwiftSyntaxSupport", "SwiftRewriterLib", "Intentions",
                 "KnownType", "ObjcGrammarModels", "Utils", "TypeSystem",
                 "ObjectiveCFrontend", "MiniLexer",
@@ -472,7 +478,8 @@ let package = Package(
             dependencies: [
                 "SwiftRewriterLib",
                 .product(name: "SwiftParser", package: "swift-syntax"),
-                "SwiftAST", "ObjcGrammarModels", "ObjcParser", "ExpressionPasses",
+                .product(name: "SwiftAST", package: "SwiftAST"),
+                "ObjcGrammarModels", "ObjcParser", "ExpressionPasses",
                 "IntentionPasses", "TestCommons", "GlobalsProviders",
                 "Intentions", "TypeSystem", "WriterTargetOutput",
                 "SwiftSyntaxSupport", "SwiftSyntaxRewriterPasses",
