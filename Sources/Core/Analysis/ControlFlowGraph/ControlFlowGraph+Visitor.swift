@@ -1,3 +1,6 @@
+/// This file contains the main visitor of the bottom-to-top control flow graph
+/// creation algorithm, and is abstracted away by ControlFlowGraph+Creation.swift.
+
 import SwiftAST
 import TypeSystem
 
