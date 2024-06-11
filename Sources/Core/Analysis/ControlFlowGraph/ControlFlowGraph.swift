@@ -280,7 +280,7 @@ internal extension ControlFlowGraph {
     /// Marks back edges for a graph.
     ///
     /// A back edge is an edge that connects one node to another node that comes
-    /// earlier in the graph when visiting the graph in depth-first fashion
+    /// earlier in the graph when visiting the graph in breadth-first fashion
     /// starting from its entry point.
     func markBackEdges() {
         var visited: Set<Node> = []
@@ -357,6 +357,7 @@ public class ControlFlowGraphNode: Hashable, CustomStringConvertible {
     }
 
     public func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
         hasher.combine(ObjectIdentifier(node))
         hasher.combine(id)
     }

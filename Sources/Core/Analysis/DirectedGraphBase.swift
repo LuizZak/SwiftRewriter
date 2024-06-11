@@ -162,13 +162,11 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
 
     /// Removes a given sequence of edges from this graph.
     func removeEdges<S: Sequence>(_ edgesToRemove: S) where S.Element == Edge {
-        // edges.removeAll(where: edgesToRemove.contains)
         edges = edges.filter({ !edgesToRemove.contains($0) })
     }
 
     /// Removes a given sequence of nodes from this graph.
     func removeNodes<S: Sequence>(_ nodesToRemove: S) where S.Element == Node {
-        //nodes.removeAll(where: nodesToRemove.contains)
         nodes = nodes.filter({ !nodesToRemove.contains($0) })
     }
 
