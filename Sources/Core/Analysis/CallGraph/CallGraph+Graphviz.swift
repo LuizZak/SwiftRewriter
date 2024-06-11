@@ -144,7 +144,8 @@ extension CallGraph {
 private func definitionForNode(_ node: CallGraphNode, graph: CallGraph) -> NodeDefinition<CallGraphNode> {
     var result = NodeDefinition(
         node: node,
-        label: ""
+        label: "",
+        id: 0
     )
 
     switch node.declaration {

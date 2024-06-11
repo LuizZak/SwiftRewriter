@@ -88,6 +88,8 @@ func updateAllRecordedGraphviz() throws {
     }
 
     print("Success!")
+
+    recordMode = false
 }
 
 func throwErrorIfInGraphvizRecordMode(file: StaticString = #file) throws {
@@ -173,7 +175,7 @@ private class GraphvizUpdateRewriter: SyntaxRewriter {
 
     private func updatingExpectedString(_ exp: StringLiteralExprSyntax) -> StringLiteralExprSyntax {
         let content = formatGraphviz(entry.newGraphviz)
-        //*
+
         let result = StringLiteralExprSyntax(
             openingQuote: .multilineStringQuoteToken(),
             segments: [
@@ -183,14 +185,6 @@ private class GraphvizUpdateRewriter: SyntaxRewriter {
             ],
             closingQuote: .multilineStringQuoteToken()
         )
-        // */
-        /*
-        let result = StringLiteralExprSyntax(
-            openDelimiter: .multilineStringQuoteToken(),
-            content: formatGraphviz(entry.newGraphviz),
-            closeDelimiter: .multilineStringQuoteToken()
-        )
-        // */
 
         return result
     }

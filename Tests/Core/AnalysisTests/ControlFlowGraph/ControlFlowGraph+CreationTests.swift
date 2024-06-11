@@ -7,6 +7,10 @@ import XCTest
 @testable import Analysis
 
 class ControlFlowGraph_CreationTests: XCTestCase {
+    override func setUp() {
+        // recordMode = true
+    }
+
     override class func tearDown() {
         super.tearDown()
 
@@ -34,7 +38,7 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="{compound} (1)"]
+                    n2 [label="{compound}"]
                     n3 [label="exit"]
                 
                     n1 -> n2
@@ -72,14 +76,14 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="{compound} (1)"]
-                    n3 [label="{compound} (2)"]
-                    n4 [label="{exp} (3)"]
-                    n5 [label="a (4)"]
-                    n6 [label="{end scope of {compound} (5)}"]
-                    n7 [label="{exp} (6)"]
-                    n8 [label="b (7)"]
-                    n9 [label="{end scope of {compound} (8)}"]
+                    n2 [label="{compound}"]
+                    n3 [label="{compound}"]
+                    n4 [label="{exp}"]
+                    n5 [label="a"]
+                    n6 [label="{end scope of {compound}}"]
+                    n7 [label="{exp}"]
+                    n8 [label="b"]
+                    n9 [label="{end scope of {compound}}"]
                     n10 [label="exit"]
                 
                     n1 -> n2
@@ -126,24 +130,24 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="{compound} (1)"]
-                    n3 [label="{compound} (2)"]
-                    n4 [label="{exp} (8)"]
-                    n5 [label="b (9)"]
-                    n6 [label="{defer} (10)"]
-                    n7 [label="{compound} (11)"]
-                    n8 [label="{exp} (12)"]
-                    n9 [label="a (13)"]
-                    n10 [label="{end scope of {defer} (14)}"]
-                    n11 [label="{end scope of {compound} (15)}"]
-                    n12 [label="{exp} (21)"]
-                    n13 [label="d (22)"]
-                    n14 [label="{defer} (23)"]
-                    n15 [label="{compound} (24)"]
-                    n16 [label="{exp} (25)"]
-                    n17 [label="c (26)"]
-                    n18 [label="{end scope of {defer} (27)}"]
-                    n19 [label="{end scope of {compound} (28)}"]
+                    n2 [label="{compound}"]
+                    n3 [label="{compound}"]
+                    n4 [label="{exp}"]
+                    n5 [label="b"]
+                    n6 [label="{defer}"]
+                    n7 [label="{compound}"]
+                    n8 [label="{exp}"]
+                    n9 [label="a"]
+                    n10 [label="{end scope of {defer}}"]
+                    n11 [label="{end scope of {compound}}"]
+                    n12 [label="{exp}"]
+                    n13 [label="d"]
+                    n14 [label="{defer}"]
+                    n15 [label="{compound}"]
+                    n16 [label="{exp}"]
+                    n17 [label="c"]
+                    n18 [label="{end scope of {defer}}"]
+                    n19 [label="{end scope of {compound}}"]
                     n20 [label="exit"]
                 
                     n1 -> n2
@@ -198,26 +202,26 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="{compound} (1)"]
-                    n3 [label="{do} (2)"]
-                    n4 [label="{compound} (3)"]
-                    n5 [label="{exp} (4)"]
-                    n6 [label="a (5)"]
-                    n7 [label="b (6)"]
-                    n8 [label="{if} (7)"]
-                    n9 [label="{compound} (8)"]
-                    n10 [label="{end scope of {do} (13)}"]
-                    n11 [label="c (9)"]
-                    n12 [label="{end scope of {compound} (20)}"]
-                    n13 [label="{throw c} (10)"]
-                    n14 [label="{end scope of {if} (12)}"]
-                    n15 [label="{end scope of {do} (14)}"]
-                    n16 [label="{catch} (15)"]
-                    n17 [label="{compound} (16)"]
-                    n18 [label="{exp} (17)"]
-                    n19 [label="d (18)"]
-                    n20 [label="{end scope of {catch} (19)}"]
-                    n21 [label="{end scope of {if} (11)}"]
+                    n2 [label="{compound}"]
+                    n3 [label="{do}"]
+                    n4 [label="{compound}"]
+                    n5 [label="{exp}"]
+                    n6 [label="a"]
+                    n7 [label="b"]
+                    n8 [label="{if}"]
+                    n9 [label="{compound}"]
+                    n10 [label="{end scope of {do}}"]
+                    n11 [label="c"]
+                    n12 [label="{end scope of {compound}}"]
+                    n13 [label="{throw c}"]
+                    n14 [label="{end scope of {if}}"]
+                    n15 [label="{end scope of {do}}"]
+                    n16 [label="{catch}"]
+                    n17 [label="{compound}"]
+                    n18 [label="{exp}"]
+                    n19 [label="d"]
+                    n20 [label="{end scope of {catch}}"]
+                    n21 [label="{end scope of {if}}"]
                     n22 [label="exit"]
                 
                     n1 -> n2
@@ -272,20 +276,20 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="{compound} (1)"]
-                    n3 [label="var preIf: Int (2)"]
-                    n4 [label="0 (3)"]
-                    n5 [label="preIf: Int = 0 (4)"]
-                    n6 [label="true (5)"]
-                    n7 [label="{if} (6)"]
-                    n8 [label="{compound} (7)"]
-                    n9 [label="{exp} (12)"]
-                    n10 [label="var ifBody: Int (8)"]
-                    n11 [label="postIf (13)"]
-                    n12 [label="0 (9)"]
-                    n13 [label="{end scope of {compound} (14)}"]
-                    n14 [label="ifBody: Int = 0 (10)"]
-                    n15 [label="{end scope of {if} (11)}"]
+                    n2 [label="{compound}"]
+                    n3 [label="var preIf: Int"]
+                    n4 [label="0"]
+                    n5 [label="preIf: Int = 0"]
+                    n6 [label="true"]
+                    n7 [label="{if}"]
+                    n8 [label="{compound}"]
+                    n9 [label="{exp}"]
+                    n10 [label="var ifBody: Int"]
+                    n11 [label="postIf"]
+                    n12 [label="0"]
+                    n13 [label="{end scope of {compound}}"]
+                    n14 [label="ifBody: Int = 0"]
+                    n15 [label="{end scope of {if}}"]
                     n16 [label="exit"]
                 
                     n1 -> n2
@@ -334,20 +338,20 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="{compound} (1)"]
-                    n3 [label="var a: Int (2)"]
-                    n4 [label="0 (3)"]
-                    n5 [label="a: Int = 0 (4)"]
-                    n6 [label="b (5)"]
-                    n7 [label="{for} (6)"]
-                    n8 [label="{compound} (7)"]
-                    n9 [label="{exp} (12)"]
-                    n10 [label="var c: Int (8)"]
-                    n11 [label="d (13)"]
-                    n12 [label="0 (9)"]
-                    n13 [label="{end scope of {compound} (14)}"]
-                    n14 [label="c: Int = 0 (10)"]
-                    n15 [label="{end scope of {for} (11)}"]
+                    n2 [label="{compound}"]
+                    n3 [label="var a: Int"]
+                    n4 [label="0"]
+                    n5 [label="a: Int = 0"]
+                    n6 [label="b"]
+                    n7 [label="{for}"]
+                    n8 [label="{compound}"]
+                    n9 [label="{exp}"]
+                    n10 [label="var c: Int"]
+                    n11 [label="d"]
+                    n12 [label="0"]
+                    n13 [label="{end scope of {compound}}"]
+                    n14 [label="c: Int = 0"]
+                    n15 [label="{end scope of {for}}"]
                     n16 [label="exit"]
                 
                     n1 -> n2
@@ -394,10 +398,10 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="{compound} (1)"]
-                    n3 [label="{exp} (2)"]
-                    n4 [label="a (3)"]
-                    n5 [label="{return} (4)"]
+                    n2 [label="{compound}"]
+                    n3 [label="{exp}"]
+                    n4 [label="a"]
+                    n5 [label="{return}"]
                     n6 [label="exit"]
                 
                     n1 -> n2
@@ -431,12 +435,12 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="{compound} (1)"]
-                    n3 [label="{exp} (2)"]
-                    n4 [label="a (3)"]
-                    n5 [label="{return} (4)"]
-                    n6 [label="{exp} (5)"]
-                    n7 [label="b (6)"]
+                    n2 [label="{compound}"]
+                    n3 [label="{exp}"]
+                    n4 [label="a"]
+                    n5 [label="{return}"]
+                    n6 [label="{exp}"]
+                    n7 [label="b"]
                     n8 [label="exit"]
                 
                     n1 -> n2
@@ -476,22 +480,22 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="{compound} (1)"]
-                    n3 [label="{do} (2)"]
-                    n4 [label="{compound} (3)"]
-                    n5 [label="Error (4)"]
-                    n6 [label="{throw Error} (5)"]
-                    n7 [label="{end scope of {do} (11)}"]
-                    n8 [label="{catch} (12)"]
-                    n9 [label="{compound} (13)"]
-                    n10 [label="{exp} (14)"]
-                    n11 [label="errorHandler (15)"]
-                    n12 [label="2 (16)"]
-                    n13 [label="errorHandler = 2 (17)"]
-                    n14 [label="{end scope of {catch} (18)}"]
-                    n15 [label="{exp} (19)"]
-                    n16 [label="postDo (20)"]
-                    n17 [label="{end scope of {compound} (21)}"]
+                    n2 [label="{compound}"]
+                    n3 [label="{do}"]
+                    n4 [label="{compound}"]
+                    n5 [label="Error"]
+                    n6 [label="{throw Error}"]
+                    n7 [label="{end scope of {do}}"]
+                    n8 [label="{catch}"]
+                    n9 [label="{compound}"]
+                    n10 [label="{exp}"]
+                    n11 [label="errorHandler"]
+                    n12 [label="2"]
+                    n13 [label="errorHandler = 2"]
+                    n14 [label="{end scope of {catch}}"]
+                    n15 [label="{exp}"]
+                    n16 [label="postDo"]
+                    n17 [label="{end scope of {compound}}"]
                     n18 [label="exit"]
                 
                     n1 -> n2
@@ -536,9 +540,9 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="{compound} (1)"]
-                    n3 [label="{exp} (2)"]
-                    n4 [label="a (3)"]
+                    n2 [label="{compound}"]
+                    n3 [label="{exp}"]
+                    n4 [label="a"]
                     n5 [label="exit"]
                 
                     n1 -> n2
@@ -577,15 +581,15 @@ class ControlFlowGraph_CreationTests: XCTestCase {
             matches: """
                 digraph flow {
                     n1 [label="entry"]
-                    n2 [label="{compound} (1)"]
-                    n3 [label="a (2)"]
-                    n4 [label="{if} (3)"]
-                    n5 [label="b (7)"]
-                    n6 [label="{compound} (4)"]
-                    n7 [label="Error (5)"]
-                    n8 [label="{return b} (8)"]
+                    n2 [label="{compound}"]
+                    n3 [label="a"]
+                    n4 [label="{if}"]
+                    n5 [label="b"]
+                    n6 [label="{compound}"]
+                    n7 [label="Error"]
+                    n8 [label="{return b}"]
                     n9 [label="{marker}"]
-                    n10 [label="{throw Error} (6)"]
+                    n10 [label="{throw Error}"]
                     n11 [label="{marker}"]
                     n12 [label="exit"]
                 

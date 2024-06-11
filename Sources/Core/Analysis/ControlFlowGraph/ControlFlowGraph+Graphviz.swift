@@ -28,7 +28,8 @@ extension ControlFlowGraph {
                     node: node,
                     rankFromStart: rankStart,
                     rankFromEnd: rankEnd,
-                    label: label
+                    label: label,
+                    id: node.id
                 )
             )
         }
@@ -82,8 +83,17 @@ extension ControlFlowGraph {
                 return true
 
             default:
-                return n1.label < n2.label
+                break
             }
+
+            if n1.label < n2.label {
+                return true
+            }
+            if n1.label > n2.label {
+                return false
+            }
+
+            return n1.id < n2.id
         }
 
         // Prepare nodes
@@ -159,7 +169,7 @@ extension ControlFlowGraph {
     }
 }
 
-fileprivate func labelForSyntaxNode(_ node: SwiftAST.SyntaxNode, id: Int) -> String {
+fileprivate func labelForSyntaxNode(_ node: SwiftAST.SyntaxNode) -> String {
     var label: String
     switch node {
     case let exp as Expression:
@@ -252,8 +262,6 @@ fileprivate func labelForSyntaxNode(_ node: SwiftAST.SyntaxNode, id: Int) -> Str
         label = "\(type(of: node))"
     }
 
-    label += " (\(id))"
-
     return label
 }
 
@@ -276,8 +284,8 @@ fileprivate func labelForNode(_ node: ControlFlowGraphNode, graph: ControlFlowGr
             reportNode = reportNode.parent ?? reportNode
         }
 
-        return "{end scope of \(labelForSyntaxNode(reportNode, id: node.id))}"
+        return "{end scope of \(labelForSyntaxNode(reportNode))}"
     }
 
-    return labelForSyntaxNode(node.node, id: node.id)
+    return labelForSyntaxNode(node.node)
 }

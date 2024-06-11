@@ -22,6 +22,9 @@ struct NodeDefinition<Node: Hashable> {
     /// Display label for the graphviz node.
     var label: String
 
+    /// An integer used to differentiate nodes for ordering purposes.
+    var id: Int = 0
+
     /// Extra set of attributes for a graphviz node.
     var attributes: GraphViz.Attributes = [:]
 }
