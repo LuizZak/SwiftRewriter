@@ -2,8 +2,9 @@ import XCTest
 import Analysis
 import SwiftSyntax
 import SwiftParser
-import SwiftAST
 import TestCommons
+import SwiftAST
+import SwiftCFG
 
 internal var recordMode: Bool = false
 internal var recordedGraphs: [GraphvizUpdateEntry] = []
