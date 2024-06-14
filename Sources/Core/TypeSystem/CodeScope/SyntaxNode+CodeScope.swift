@@ -32,50 +32,63 @@ public extension CodeScopeNode {
         }
         let scope = DefaultCodeScope()
         metadata[_codeScopeKey] = scope
-        
+
         return scope
     }
-    
+
     func firstDefinition(named name: String) -> CodeDefinition? {
         if let def = definitions.firstDefinition(named: name) {
             return def
         }
-        
+
         return nearestScopeThatIsNotSelf?.firstDefinition(named: name)
     }
-    
+
     func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
         let defs =
             nearestScopeThatIsNotSelf?
                 .functionDefinitions(matching: identifier)
                     ?? []
-        
+
         return definitions.functionDefinitions(matching: identifier) + defs
     }
-    
+
     func functionDefinitions(named name: String) -> [CodeDefinition] {
         let defs =
             nearestScopeThatIsNotSelf?
                 .functionDefinitions(named: name)
                     ?? []
-        
+
         return definitions.functionDefinitions(named: name) + defs
     }
 
     func localDefinitions() -> [CodeDefinition] {
         definitions.localDefinitions()
     }
-    
+
     func recordDefinition(_ definition: CodeDefinition, overwrite: Bool) {
         definitions.recordDefinition(definition, overwrite: overwrite)
     }
-    
+
     func recordDefinitions(_ definitions: [CodeDefinition], overwrite: Bool) {
         self.definitions.recordDefinitions(definitions, overwrite: overwrite)
     }
-    
+
     func removeLocalDefinitions() {
         definitions.removeLocalDefinitions()
+    }
+}
+
+extension CodeScopeNodeType {
+    /// Attempts to type-cast this node type to `CodeScopeNode`.
+    ///
+    /// If casting fails, a runtime exception is raised.
+    public var codeScope: CodeScope {
+        if let scoped = self as? CodeScopeNode {
+            return scoped
+        }
+
+        fatalError("Node type \(type(of: self)) is not a CodeScopeNode type.")
     }
 }
 
@@ -88,13 +101,13 @@ public extension SyntaxNode {
             if let scope = p as? CodeScopeNode {
                 return scope
             }
-            
+
             parent = p.parent
         }
-        
+
         return nil
     }
-    
+
     /// Finds the nearest definition scope in the hierarchy chain for this syntax
     /// node which is not `self`
     internal var nearestScopeThatIsNotSelf: CodeScopeNode? {
@@ -129,7 +142,7 @@ extension IdentifierExpression: DefinitionReferenceNode {
             metadata[_identifierReadOnlyUsageKey] = newValue
         }
     }
-    
+
     /// Returns a copy of this `IdentifierExpression` with a given definition
     /// associated with the copy.
     public func settingDefinition(_ definition: CodeDefinition) -> IdentifierExpression {

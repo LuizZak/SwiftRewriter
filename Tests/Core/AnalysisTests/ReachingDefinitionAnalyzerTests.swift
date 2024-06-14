@@ -1,8 +1,9 @@
 import Intentions
-import SwiftAST
 import TestCommons
 import TypeSystem
 import XCTest
+import SwiftAST
+import SwiftCFG
 
 @testable import Analysis
 
@@ -194,12 +195,12 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         ]
         setupTest(with: body)
         let stmt = try XCTUnwrap(body.statements[try: 2])
-        
+
         let definitions =
             sut.reachingDefinitions(
                 for: try XCTUnwrap(controlFlowGraph.graphNode(for: stmt))
             )
-        
+
         XCTAssertEqual(definitions.count, 1)
         XCTAssertEqual(definitions.first?.definition.name, "a")
         XCTAssertEqual(definitions.first?.definition.type, .int)
@@ -226,12 +227,12 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
             .body
             .statements[try: 0]
         )
-        
+
         let definitions =
             sut.reachingDefinitions(
                 for: try XCTUnwrap(controlFlowGraph.graphNode(for: stmt))
             )
-        
+
         XCTAssertEqual(definitions.count, 1)
         XCTAssertEqual(definitions.first?.definition.name, "error")
         try XCTAssertTrue(

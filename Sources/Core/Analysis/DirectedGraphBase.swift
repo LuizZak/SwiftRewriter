@@ -1,9 +1,11 @@
+import MiniDigraph
+
 /// A base class for directed graph class implementations in this module.
-public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedGraph where Edge.Node == Node {
+public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedGraphType where Edge.Node == Node {
     /// A list of all nodes contained in this graph
-    internal(set) public var nodes: [Node] = []
+    internal(set) public var nodes: Set<Node> = []
     /// A list of all edges contained in this graph
-    internal(set) public var edges: [Edge] = []
+    internal(set) public var edges: Set<Edge> = []
 
     /// Initializes an empty directed graph.
     required convenience init() {
@@ -11,6 +13,11 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
     }
 
     init(nodes: [Node], edges: [Edge]) {
+        self.nodes = Set(nodes)
+        self.edges = Set(edges)
+    }
+
+    init(nodes: Set<Node>, edges: Set<Edge>) {
         self.nodes = nodes
         self.edges = edges
     }
@@ -23,7 +30,7 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
 
         let graph = Self()
         graph.addNodes(nodeSet)
-        
+
         for edge in connectedEdges {
             graph.addEdge(from: edge.start, to: edge.end)
         }
@@ -36,38 +43,38 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
     public func areNodesEqual(_ node1: Node, _ node2: Node) -> Bool {
         node1 === node2
     }
-    
+
     /// Returns whether a given graph node exists in this graph.
     ///
     /// A reference equality test (===) is used to determine syntax node equality.
     public func containsNode(_ node: Node) -> Bool {
         nodes.contains { $0 === node }
     }
-    
+
     @inlinable
     public func startNode(for edge: Edge) -> Node {
         edge.start
     }
-    
+
     @inlinable
     public func endNode(for edge: Edge) -> Node {
         edge.end
     }
-    
+
     /// Returns all outgoing edges for a given graph node.
     ///
     /// A reference equality test (===) is used to determine graph node equality.
-    public func edges(from node: Node) -> [Edge] {
+    public func edges(from node: Node) -> Set<Edge> {
         edges.filter { $0.start === node }
     }
-    
+
     /// Returns all ingoing edges for a given graph node.
     ///
     /// A reference equality test (===) is used to determine graph node equality.
-    public func edges(towards node: Node) -> [Edge] {
+    public func edges(towards node: Node) -> Set<Edge> {
         edges.filter { $0.end === node }
     }
-    
+
     /// Returns an existing edge between two nodes, or `nil`, if no edges between
     /// them currently exist.
     ///
@@ -83,7 +90,7 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
     }
 
     func copyMetadata(from edge1: Edge, to edge2: Edge) {
-        
+
     }
 
     /// Removes all nodes and edges from this graph.
@@ -91,15 +98,15 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
         nodes.removeAll()
         edges.removeAll()
     }
-    
+
     /// Adds a given node to this graph.
     func addNode(_ node: Node) {
         assert(
             !self.containsNode(node),
             "Node \(node) already exists in this graph"
         )
-        
-        nodes.append(node)
+
+        nodes.insert(node)
     }
 
     /// Adds a sequence of nodes to this graph.
@@ -116,7 +123,7 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
 
         return addEdge(from: start, to: end)
     }
-    
+
     /// Adds an edge `start -> end` to this graph.
     @discardableResult
     func addEdge(from start: Node, to end: Node) -> Edge {
@@ -125,9 +132,9 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
 
     /// Adds a given edge to this graph.
     func addEdge(_ edge: Edge) {
-        edges.append(edge)
+        edges.insert(edge)
     }
-    
+
     /// Removes an edge between two nodes from this graph.
     func removeEdge(from start: Node, to end: Node) {
         func predicate(_ edge: Edge) -> Bool {
@@ -139,9 +146,9 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
             "Attempted to remove edge from nodes \(start) -> \(end) that do not exist in this graph."
         )
 
-        edges.removeAll(where: predicate)
+        edges = edges.filter({ !predicate($0) })
     }
-    
+
     /// Removes a given node from this graph.
     func removeNode(_ node: Node) {
         assert(
@@ -150,22 +157,22 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
         )
 
         removeEdges(allEdges(for: node))
-        nodes.removeAll(where: { $0 === node })
+        nodes = nodes.filter({ $0 !== node })
     }
-    
+
     /// Removes a given sequence of edges from this graph.
     func removeEdges<S: Sequence>(_ edgesToRemove: S) where S.Element == Edge {
-        edges.removeAll(where: edgesToRemove.contains)
+        edges = edges.filter({ !edgesToRemove.contains($0) })
     }
-    
+
     /// Removes a given sequence of nodes from this graph.
     func removeNodes<S: Sequence>(_ nodesToRemove: S) where S.Element == Node {
-        nodes.removeAll(where: nodesToRemove.contains)
+        nodes = nodes.filter({ !nodesToRemove.contains($0) })
     }
 
     /// Removes the entry edges from a given node.
     @discardableResult
-    func removeEntryEdges(towards node: Node) -> [Edge] {
+    func removeEntryEdges(towards node: Node) -> Set<Edge> {
         let connections = edges(towards: node)
         removeEdges(connections)
         return connections
@@ -173,7 +180,7 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
 
     /// Removes the exit edges from a given node.
     @discardableResult
-    func removeExitEdges(from node: Node) -> [Edge] {
+    func removeExitEdges(from node: Node) -> Set<Edge> {
         let connections = edges(from: node)
         removeEdges(connections)
         return connections
@@ -241,8 +248,8 @@ public class DirectedGraphBase<Node, Edge: DirectedGraphBaseEdgeType>: DirectedG
     }
 }
 
-public protocol DirectedGraphBaseEdgeType: AnyObject, DirectedGraphEdge {
-    associatedtype Node: AnyObject & DirectedGraphNode
+public protocol DirectedGraphBaseEdgeType: AnyObject, Hashable, DirectedGraphEdge {
+    associatedtype Node: AnyObject & Hashable
 
     var start: Node { get }
     var end: Node { get }
