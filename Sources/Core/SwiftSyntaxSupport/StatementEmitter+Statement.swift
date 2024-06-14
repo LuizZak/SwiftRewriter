@@ -16,7 +16,6 @@ extension StatementEmitter: StatementVisitor {
             emit(")")
 
         case .identifier(let ident):
-            emit("let ")
             emit(ident)
 
         case .asType(let pattern, let type):

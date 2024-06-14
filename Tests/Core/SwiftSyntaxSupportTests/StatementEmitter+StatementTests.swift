@@ -1015,10 +1015,78 @@ class StatementEmitter_StatementTests: XCTestCase {
                 """
         )
     }
+
+    func testPattern_expression() {
+        let sut = makeSut()
+
+        sut.visitPattern(.expression(.identifier("a")))
+
+        XCTAssertEqual(sut.producer.buffer, "a")
+    }
+
+    func testPattern_tuple() {
+        let sut = makeSut()
+
+        sut.visitPattern(
+            .tuple([.identifier("a"), .identifier("b")])
+        )
+
+        XCTAssertEqual(sut.producer.buffer, "(a, b)")
+    }
+
+    func testPattern_identifier() {
+        let sut = makeSut()
+
+        sut.visitPattern(.identifier("a"))
+
+        XCTAssertEqual(sut.producer.buffer, "a")
+    }
+
+    func testPattern_asType() {
+        let sut = makeSut()
+
+        sut.visitPattern(
+            .asType(.identifier("a"), .int)
+        )
+
+        XCTAssertEqual(sut.producer.buffer, "a as Int")
+    }
+
+    func testPattern_valueBindingPattern_constantFalse() {
+        let sut = makeSut()
+
+        sut.visitPattern(
+            .valueBindingPattern(constant: false, .identifier("a"))
+        )
+
+        XCTAssertEqual(sut.producer.buffer, "var a")
+    }
+
+    func testPattern_valueBindingPattern_constantTrue() {
+        let sut = makeSut()
+
+        sut.visitPattern(
+            .valueBindingPattern(constant: true, .identifier("a"))
+        )
+
+        XCTAssertEqual(sut.producer.buffer, "let a")
+    }
+
+    func testPattern_wildcard() {
+        let sut = makeSut()
+
+        sut.visitPattern(.wildcard)
+
+        XCTAssertEqual(sut.producer.buffer, "_")
+    }
 }
 
 // MARK: - Test internals
 extension StatementEmitter_StatementTests {
+    func makeSut() -> StatementEmitter {
+        return StatementEmitter(producer: SwiftProducer())
+    }
+
     func assert<T: Statement, U: SyntaxProtocol>(
         _ node: T,
         producer: (SwiftProducer) -> (Statement) -> U,

@@ -1,4 +1,5 @@
 import XCTest
+import KnownType
 
 @testable import TypeSystem
 
@@ -136,7 +137,7 @@ class PatternMatcherTests: XCTestCase {
         let result = sut.match(
             pattern: .tuple([.identifier("a"), .identifier("b"), .identifier("c")]),
             to: .tuple(["A", "B"]),
-            context: .optionalBinding
+            context: [.optionalBinding, .declaration]
         )
 
         XCTAssertEqual(result, [])
@@ -157,7 +158,7 @@ class PatternMatcherTests: XCTestCase {
                 "A",
                 .tuple(["B", "C", "D"])
             ]),
-            context: .optionalBinding
+            context: [.optionalBinding, .declaration]
         )
 
         XCTAssertEqual(result, [
@@ -167,6 +168,39 @@ class PatternMatcherTests: XCTestCase {
                 patternLocation: .tuple(index: 0, pattern: .`self`),
                 isConstant: false
             ),
+        ])
+    }
+
+    func testMatch_asType_declaration_matchingType() {
+        let sut = makeSut()
+
+        let result = sut.match(
+            pattern: .asType(.identifier("a"), .int),
+            to: .int,
+            context: []
+        )
+
+        XCTAssertEqual(result, [
+            .init(identifier: "a", type: .int, patternLocation: .asType(pattern: .self), isConstant: false),
+        ])
+    }
+
+    func testMatch_asType_declaration_derivedType() {
+        let sut = makeSut()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "B")
+                .settingSupertype("A")
+                .build()
+        )
+
+        let result = sut.match(
+            pattern: .asType(.identifier("a"), .typeName("A")),
+            to: "B",
+            context: []
+        )
+
+        XCTAssertEqual(result, [
+            .init(identifier: "a", type: "A", patternLocation: .asType(pattern: .self), isConstant: false),
         ])
     }
 

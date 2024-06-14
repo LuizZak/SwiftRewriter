@@ -1,4 +1,4 @@
-// swift-tools-version:5.9
+// swift-tools-version:5.10
 import PackageDescription
 import CompilerPluginSupport
 import Foundation
@@ -406,7 +406,7 @@ let package = Package(
         .package(url: "https://github.com/LuizZak/MiniLexer.git", exact: "0.10.0"),
         .package(url: "https://github.com/LuizZak/MiniGraphviz.git", exact: "0.1.0"),
         .package(url: "https://github.com/LuizZak/MiniDigraph.git", exact: "0.3.0"),
-        .package(url: "https://github.com/LuizZak/SwiftAST.git", exact: "0.7.1"),
+        .package(url: "https://github.com/LuizZak/SwiftAST.git", exact: "0.8.0"),
     ],
     targets: aggregateTargets + [
         swiftRewriterTarget,
