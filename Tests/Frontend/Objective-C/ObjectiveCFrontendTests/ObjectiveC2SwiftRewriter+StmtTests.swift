@@ -64,8 +64,8 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
         )
 
         assertSingleStatement(
-            objc: "@\"literal \\n abc\";",
-            swift: "\"literal \\n abc\""
+            objc: #"@"literal \n abc";"#,
+            swift: #""literal \\n abc""#
         )
     }
 

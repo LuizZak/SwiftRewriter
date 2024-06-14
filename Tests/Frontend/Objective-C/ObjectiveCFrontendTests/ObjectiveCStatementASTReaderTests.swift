@@ -38,7 +38,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             readsAs: .if(
                 .identifier("abc"),
                 body: .empty,
-                else: CompoundStatement(statements: [.if(.identifier("def"), body: .empty)])
+                elseIf: .if(.identifier("def"), body: .empty)
             )
         )
     }
@@ -429,7 +429,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             )
         )
     }
-    
+
     func testDeclaration_usesTypeMapper() {
         assert(
             objcStmt: "NSString *str = nil;",
@@ -441,7 +441,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             )
         )
     }
-    
+
     func testStatement_convertsToDeclarationIfTopLevelMultiplicationExpression() {
         assert(
             objcStmt: "NSObject *object;",
@@ -510,7 +510,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             )
         )
     }
-    
+
     func testStatement_convertsToDeclarationIfTopLevelMultiplicationExpression_usesTypeMapper() {
         assert(
             objcStmt: "NSString *str;",
@@ -522,7 +522,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             )
         )
     }
-    
+
     func testStatement_convertsToDeclarationIfTopLevelComparisonExpression() {
         assert(
             objcStmt: "id<Protocol> local;",
@@ -534,7 +534,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             )
         )
     }
-    
+
     func testStatement_convertsToDeclarationIfTopLevelComparisonExpression_multipleProtocols() {
         assert(
             objcStmt: "id<Protocol1, Protocol2> local;",
@@ -559,7 +559,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             )
         )
     }
-    
+
     func testStatement_convertsToDeclarationIfTopLevelComparisonExpression_multipleDeclarators() {
         assert(
             objcStmt: "id<Protocol> local1, local2;",
@@ -598,7 +598,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             ])
         )
     }
-    
+
     func testBlockDeclaration() {
         assert(
             objcStmt: "void(^callback)();",
@@ -1069,7 +1069,7 @@ extension ObjectiveCStatementASTReaderTests {
 
                 expString = SwiftProducer.generateStatement(expected).description + "\n"
                 resString = (result.map { SwiftProducer.generateStatement($0) } ?? "") + "\n"
-                
+
                 dump(expected, to: &expString)
                 dump(result, to: &resString)
 

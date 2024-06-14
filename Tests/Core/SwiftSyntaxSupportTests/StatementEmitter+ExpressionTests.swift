@@ -59,14 +59,14 @@ class StatementEmitter_ExpressionTests: XCTestCase {
     func testConstantString() {
         assert(
             Expression.constant(.string("Hello, World!")),
-            matches: "\"Hello, World!\""
+            matches: #""Hello, World!""#
         )
     }
 
     func testConstantString_withEscapeCode() {
         assert(
-            Expression.constant(.string("Hello,\\nWorld!")),
-            matches: "\"Hello,\\nWorld!\""
+            Expression.constant(.string(#"Hello,\nWorld!"#)),
+            matches: #""Hello,\\nWorld!""#
         )
     }
 

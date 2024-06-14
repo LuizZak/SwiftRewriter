@@ -76,7 +76,7 @@ class StatementEmitter_StatementTests: XCTestCase {
         let stmt: CompoundStatement = [
             Statement.expressions([.identifier("foo"), .identifier("bar")])
         ]
-        
+
         assert(
             stmt,
             matches: """
@@ -117,7 +117,7 @@ class StatementEmitter_StatementTests: XCTestCase {
                     initialization: .constant(0)
                 )
             ])
-        
+
         assert(
             stmt,
             matches: """
@@ -284,13 +284,11 @@ class StatementEmitter_StatementTests: XCTestCase {
             Statement.if(
                 .constant(true),
                 body: [],
-                else: [
-                    .if(
-                        .constant(true),
-                        body: [],
-                        else: []
-                    )
-                ]
+                elseIf: .if(
+                    .constant(true),
+                    body: [],
+                    else: []
+                )
             ),
             matches: """
                 if true {

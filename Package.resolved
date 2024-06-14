@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LuizZak/MiniDigraph.git",
       "state" : {
-        "revision" : "e1314571b60a17563d8c847fde19e4cd545b16ec",
-        "version" : "0.2.1"
+        "revision" : "35d34ead986d858e6c25952406da5936d23c2f59",
+        "version" : "0.3.0"
       }
     },
     {
@@ -95,8 +95,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LuizZak/SwiftAST.git",
       "state" : {
-        "revision" : "e54bacb4a6e9fe1aa59b3f4a35a57582ca7aca83",
-        "version" : "0.3.0"
+        "revision" : "0c79ed114d4e520bce160356336740e704d62cb7",
+        "version" : "0.7.1"
       }
     }
   ],

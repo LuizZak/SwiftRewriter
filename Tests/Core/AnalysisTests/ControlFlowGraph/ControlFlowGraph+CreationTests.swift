@@ -92,9 +92,9 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                     n7 [label="{compound}"]
                     n8 [label="Error"]
                     n9 [label="{return b}"]
-                    n10 [label="{marker}"]
+                    n10 [fillcolor="#DDDDFF", label="{marker return}", style=filled]
                     n11 [label="{throw Error}"]
-                    n12 [label="{marker}"]
+                    n12 [fillcolor="#DDDDFF", label="{marker throw}", style=filled]
                     n13 [label="exit"]
 
                     n1 -> n2
