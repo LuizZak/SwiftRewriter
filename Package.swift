@@ -398,8 +398,8 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.3.0"),
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", exact: "4.1.2"),
         .package(url: "https://github.com/LuizZak/console.git", exact:  "0.8.2"),
-        .package(url: "https://github.com/apple/swift-syntax.git", from: "509.1.0"),
-        .package(url: "https://github.com/apple/swift-format.git", from: "509.0.0"),
+        .package(url: "https://github.com/apple/swift-syntax.git", from: "510.0.0"),
+        .package(url: "https://github.com/apple/swift-format.git", from: "510.0.0"),
         //
         .package(url: "https://github.com/LuizZak/MiniLexer.git", exact: "0.10.0"),
         .package(url: "https://github.com/LuizZak/MiniGraphviz.git", exact: "0.1.0"),
