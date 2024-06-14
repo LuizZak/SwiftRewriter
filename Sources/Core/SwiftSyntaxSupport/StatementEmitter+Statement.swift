@@ -5,16 +5,16 @@ extension StatementEmitter: StatementVisitor {
         switch ptn {
         case .expression(let exp):
             visitExpression(exp)
-            
+
         case .tuple(let patterns):
             emit("(")
             producer.emitWithSeparators(patterns, separator: ", ", visitPattern)
             emit(")")
-        
+
         case .identifier(let ident):
             emit("let ")
             emit(ident)
-            
+
         case .wildcard:
             emit("_")
         }
@@ -51,13 +51,28 @@ extension StatementEmitter: StatementVisitor {
         emitStatements(stmt.statements)
     }
 
-    func visitIf(_ stmt: IfStatement) {
-        emit("if ")
-        if let pattern = stmt.pattern {
+    func visitConditionalClauses(_ clauses: ConditionalClauses) {
+        for (i, element) in clauses.clauses.enumerated() {
+            if i > 0 {
+                emit(", ")
+            }
+
+            visitConditionalClauseElement(element)
+        }
+    }
+
+    func visitConditionalClauseElement(_ clause: ConditionalClauseElement) {
+        if let pattern = clause.pattern {
             visitPattern(pattern)
             emit(" = ")
         }
-        visitExpression(stmt.exp)
+        visitExpression(clause.expression)
+    }
+
+    func visitIf(_ stmt: IfStatement) {
+        emit("if ")
+        visitConditionalClauses(stmt.conditionalClauses)
+
         emitSpaceSeparator()
 
         emitCodeBlock(stmt.body)
@@ -79,11 +94,19 @@ extension StatementEmitter: StatementVisitor {
         }
     }
 
+    func visitGuard(_ stmt: GuardStatement) {
+        emit("guard ")
+        visitConditionalClauses(stmt.conditionalClauses)
+
+        emit(" else ")
+        emitCodeBlock(stmt.elseBody)
+    }
+
     func visitSwitch(_ stmt: SwitchStatement) {
         emit("switch ")
         visitExpression(stmt.exp)
         emitLine(" {")
-        
+
         stmt.cases.forEach { visitSwitchCase($0) }
 
         if let defaultCase = stmt.defaultCase {
@@ -116,7 +139,7 @@ extension StatementEmitter: StatementVisitor {
 
     func visitWhile(_ stmt: WhileStatement) {
         emit("while ")
-        visitExpression(stmt.exp)
+        visitConditionalClauses(stmt.conditionalClauses)
         producer.emitSpaceSeparator()
         emitCodeBlock(stmt.body)
     }
@@ -211,7 +234,7 @@ extension StatementEmitter: StatementVisitor {
             visitExpression(exp)
         }
     }
-    
+
     func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) {
         let declarations = group(stmt.decl.map(producer.makeDeclaration))
 
@@ -219,7 +242,7 @@ extension StatementEmitter: StatementVisitor {
             if producer.settings.outputExpressionTypes {
                 let declType = stmt.decl[i].type
                 producer.emitComment("decl type: \(declType)")
-                
+
                 if let exp = stmt.decl[i].initialization {
                     producer.emitComment("init type: \(exp.resolvedType ?? "<nil>")")
                 }
@@ -228,9 +251,9 @@ extension StatementEmitter: StatementVisitor {
             producer.emit(decl)
         }
     }
-    
+
     func visitStatementVariableDeclaration(_ decl: StatementVariableDeclaration) {
-        
+
     }
 
     func visitLocalFunction(_ stmt: LocalFunctionStatement) {
@@ -239,12 +262,12 @@ extension StatementEmitter: StatementVisitor {
         emitSpaceSeparator()
         emitCodeBlock(stmt.function.body)
     }
-    
+
     func visitThrow(_ stmt: ThrowStatement) {
         emit("throw ")
         visitExpression(stmt.exp)
     }
-    
+
     func visitUnknown(_ stmt: UnknownStatement) {
         emitLine("/*")
         emitLine(stmt.context.context)

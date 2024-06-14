@@ -95,8 +95,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LuizZak/SwiftAST.git",
       "state" : {
-        "revision" : "b535d5c2721c558adee9c97c3a44df0aee4cd6b2",
-        "version" : "0.2.0"
+        "revision" : "e54bacb4a6e9fe1aa59b3f4a35a57582ca7aca83",
+        "version" : "0.3.0"
       }
     }
   ],

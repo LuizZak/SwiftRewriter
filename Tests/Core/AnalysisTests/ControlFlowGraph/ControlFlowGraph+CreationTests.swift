@@ -85,27 +85,29 @@ class ControlFlowGraph_CreationTests: XCTestCase {
                 digraph flow {
                     n1 [label="entry"]
                     n2 [label="{compound}"]
-                    n3 [label="a"]
-                    n4 [label="{if}"]
-                    n5 [label="b"]
-                    n6 [label="{compound}"]
-                    n7 [label="Error"]
-                    n8 [label="{return b}"]
-                    n9 [label="{marker}"]
-                    n10 [label="{throw Error}"]
-                    n11 [label="{marker}"]
-                    n12 [label="exit"]
-                
+                    n3 [label="{if}"]
+                    n4 [label="a"]
+                    n5 [label="{if a}"]
+                    n6 [label="b"]
+                    n7 [label="{compound}"]
+                    n8 [label="Error"]
+                    n9 [label="{return b}"]
+                    n10 [label="{marker}"]
+                    n11 [label="{throw Error}"]
+                    n12 [label="{marker}"]
+                    n13 [label="exit"]
+
                     n1 -> n2
                     n2 -> n3
                     n3 -> n4
                     n4 -> n5
-                    n4 -> n6
-                    n6 -> n7
-                    n5 -> n8
-                    n8 -> n9
-                    n7 -> n10
-                    n10 -> n11
+                    n5 -> n6 [label="false"]
+                    n5 -> n7 [label="true"]
+                    n7 -> n8
+                    n6 -> n9
+                    n9 -> n10
+                    n8 -> n11
+                    n11 -> n12
                 }
                 """,
             syntaxNode: stmt
