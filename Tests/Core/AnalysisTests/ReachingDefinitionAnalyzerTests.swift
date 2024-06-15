@@ -152,14 +152,111 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
                 ]
             )
         ]
+        let ifStatement = try XCTUnwrap(body.statements[0].asIf)
         setupTest(with: body)
-        let node = try XCTUnwrap(controlFlowGraph.graphNode(for: XCTUnwrap(body.statements[0].asIf?.body.statements[0])))
+        let node = try XCTUnwrap(controlFlowGraph.graphNode(for: ifStatement.body.statements[0]))
 
         let definitions = sut.reachingDefinitions(for: node)
 
-        XCTAssertEqual(definitions.count, 1)
-        XCTAssertEqual(definitions.first?.definition.name, "a")
-        XCTAssert(definitions.first?.definitionSite === body.statements[0])
+        let asserter = Asserter(object: definitions)
+        asserter
+            .assertCount(1)?
+            .assertContains(predicate: { def in
+                def.definition.name == "a"
+                && def.definition.location == .conditionalClause(ifStatement.conditionalClauses.clauses[0], .valueBindingPattern(pattern: .self))
+                && def.definitionSite === ifStatement.conditionalClauses.clauses[0]
+            })
+    }
+
+    func testIf_tupleBinding() throws {
+        let body: CompoundStatement = [
+            .if(
+                clauses: [
+                    .init(
+                        pattern: .tuple([.identifier("a"), .identifier("b")]),
+                        expression: .tuple([
+                            .constant(0),
+                            .constant(1),
+                        ])
+                    )
+                ],
+                body: [
+                    .expression(.identifier("a"))
+                ],
+                else: [
+                    .expression(.identifier("a"))
+                ]
+            )
+        ]
+        let ifStatement = try XCTUnwrap(body.statements[0].asIf)
+        setupTest(with: body)
+        let node = try XCTUnwrap(controlFlowGraph.graphNode(for: ifStatement.body.statements[0]))
+
+        let definitions = sut.reachingDefinitions(for: node)
+
+        let asserter = Asserter(object: definitions)
+        asserter
+            .assertCount(2)?
+            .assertContains(predicate: { def in
+                def.definition.name == "a"
+                && def.definition.location == .conditionalClause(ifStatement.conditionalClauses.clauses[0], .tuple(index: 0, pattern: .self))
+                && def.definitionSite === ifStatement.conditionalClauses.clauses[0]
+            })?
+            .assertContains(predicate: { def in
+                def.definition.name == "b"
+                && def.definition.location == .conditionalClause(ifStatement.conditionalClauses.clauses[0], .tuple(index: 1, pattern: .self))
+                && def.definitionSite === ifStatement.conditionalClauses.clauses[0]
+            })
+    }
+
+    func testGuardLet() throws {
+        let body: CompoundStatement = [
+            .guardLet(
+                .identifier("a"),
+                .constant(.nil),
+                else: [
+                    .expression(.identifier("a")),
+                    .return(nil),
+                ]
+            ),
+            .expression(.identifier("a")),
+        ]
+        let guardStatement = try XCTUnwrap(body.statements[0].asGuard)
+        setupTest(with: body)
+        let node = try XCTUnwrap(controlFlowGraph.graphNode(for: body.statements[1]))
+
+        let definitions = sut.reachingDefinitions(for: node)
+
+        let asserter = Asserter(object: definitions)
+        asserter
+            .assertCount(1)?
+            .assertContains(predicate: { def in
+                def.definition.name == "a"
+                && def.definition.location == .conditionalClause(guardStatement.conditionalClauses.clauses[0], .valueBindingPattern(pattern: .self))
+                && def.definitionSite === guardStatement.conditionalClauses.clauses[0]
+            })
+    }
+
+    // TODO: Correct behavior of visibility of definitions of guard clauses and their 'else' body
+    func x_testGuardLet_inElseBody() throws {
+        let body: CompoundStatement = [
+            .guardLet(
+                .identifier("a"),
+                .constant(.nil),
+                else: [
+                    .expression(.identifier("a")),
+                    .return(nil),
+                ]
+            )
+        ]
+        let guardStatement = try XCTUnwrap(body.statements[0].asGuard)
+        setupTest(with: body)
+        let node = try XCTUnwrap(controlFlowGraph.graphNode(for: guardStatement.elseBody.statements[0]))
+
+        let definitions = sut.reachingDefinitions(for: node)
+
+        let asserter = Asserter(object: definitions)
+        asserter.assertIsEmpty()
     }
 
     func testForLoop() throws {
@@ -183,6 +280,36 @@ class ReachingDefinitionAnalyzerTests: XCTestCase {
         XCTAssertEqual(definitions.count, 1)
         XCTAssertEqual(definitions.first?.definition.name, "a")
         XCTAssert(definitions.first?.definitionSite === body.statements[0])
+    }
+
+    func testWhile_binding() throws {
+        let body: CompoundStatement = [
+            .while(
+                clauses: [
+                    .init(
+                        pattern: .valueBindingPattern(constant: true, .identifier("a")),
+                        expression: .identifier("b")
+                    )
+                ],
+                body: [
+                    .expression(.identifier("c"))
+                ]
+            )
+        ]
+        let whileStatement = try XCTUnwrap(body.statements[0].asWhile)
+        setupTest(with: body)
+        let node = try XCTUnwrap(controlFlowGraph.graphNode(for: whileStatement.body.statements[0]))
+
+        let definitions = sut.reachingDefinitions(for: node)
+
+        let asserter = Asserter(object: definitions)
+        asserter
+            .assertCount(1)?
+            .assertContains(predicate: { def in
+                def.definition.name == "a"
+                && def.definition.location == .conditionalClause(whileStatement.conditionalClauses.clauses[0], .valueBindingPattern(pattern: .self))
+                && def.definitionSite === whileStatement.conditionalClauses.clauses[0]
+            })
     }
 
     func testNestedCompound() throws {

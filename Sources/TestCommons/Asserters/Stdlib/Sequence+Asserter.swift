@@ -60,7 +60,7 @@ public extension Asserter where Object: Sequence {
         }
 
         return assertFailed(
-            message: "assertContains(where:) failed. \(message())",
+            message: "assertContains(predicate:) failed. \(message())",
             file: file,
             line: line
         )
@@ -71,8 +71,56 @@ public extension Asserter where Object: Sequence {
     ///
     /// Returns `nil` if the test failed with at least one passing item, otherwise
     /// returns `self` for chaining further tests.
+    @available(*, deprecated, renamed: "assertNoneSatisfy")
     @discardableResult
     func assertDoesNotContain(
+        message: @autoclosure () -> String = "Found element that passed the provided predicate.",
+        file: StaticString = #file,
+        line: UInt = #line,
+        predicate: (Object.Element) -> Bool
+    ) -> Self? {
+
+        return assertNoneSatisfy(
+            message: message(),
+            file: file,
+            line: line,
+            predicate: predicate
+        )
+    }
+
+    /// Asserts that the underlying `Sequence` being tested has all of its elements
+    /// pass a given predicate.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertAllSatisfy(
+        message: @autoclosure () -> String = "Not all elements in sequence passed the provided predicate.",
+        file: StaticString = #file,
+        line: UInt = #line,
+        predicate: (Object.Element) -> Bool
+    ) -> Self? {
+
+        for element in object {
+            if !predicate(element) {
+                return assertFailed(
+                    message: "assertAllSatisfy(predicate:) failed. \(message())",
+                    file: file,
+                    line: line
+                )
+            }
+        }
+
+        return self
+    }
+
+    /// Asserts that the underlying `Sequence` being tested contains no elements
+    /// that pass the given predicate.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertNoneSatisfy(
         message: @autoclosure () -> String = "Found element that passed the provided predicate.",
         file: StaticString = #file,
         line: UInt = #line,
@@ -82,7 +130,7 @@ public extension Asserter where Object: Sequence {
         for element in object {
             if predicate(element) {
                 return assertFailed(
-                    message: "assertDoesNotContain(predicate:) failed. \(message())",
+                    message: "assertNoneSatisfy(predicate:) failed. \(message())",
                     file: file,
                     line: line
                 )

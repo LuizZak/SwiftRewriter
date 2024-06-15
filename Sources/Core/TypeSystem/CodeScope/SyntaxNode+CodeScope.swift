@@ -44,6 +44,14 @@ public extension CodeScopeNode {
         return nearestScopeThatIsNotSelf?.firstDefinition(named: name)
     }
 
+    func firstDefinition(where predicate: (CodeDefinition) -> Bool) -> CodeDefinition? {
+        if let def = definitions.firstDefinition(where: predicate) {
+            return def
+        }
+
+        return nearestScopeThatIsNotSelf?.firstDefinition(where: predicate)
+    }
+
     func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
         let defs =
             nearestScopeThatIsNotSelf?
@@ -60,6 +68,15 @@ public extension CodeScopeNode {
                     ?? []
 
         return definitions.functionDefinitions(named: name) + defs
+    }
+
+    func functionDefinitions(where predicate: (CodeDefinition) -> Bool) -> [CodeDefinition] {
+        let defs =
+            nearestScopeThatIsNotSelf?
+                .functionDefinitions(where: predicate)
+                    ?? []
+
+        return definitions.functionDefinitions(where: predicate) + defs
     }
 
     func localDefinitions() -> [CodeDefinition] {
@@ -118,6 +135,9 @@ public extension SyntaxNode {
 extension CompoundStatement: CodeScopeNode { }
 extension BlockLiteralExpression: CodeScopeNode { }
 // extension CatchBlock: CodeScopeNode { }
+extension IfStatement: CodeScopeNode { }
+extension WhileStatement: CodeScopeNode { }
+extension ForStatement: CodeScopeNode { }
 extension SwitchCase: CodeScopeNode { }
 extension SwitchDefaultCase: CodeScopeNode { }
 

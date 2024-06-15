@@ -614,7 +614,7 @@ class StatementEmitter_StatementTests: XCTestCase {
             .catch([
                 .expression(.identifier("a").call())
             ])
-            .catch(pattern: .identifier("error"), [
+            .catch(pattern: .valueBindingPattern(constant: true, .identifier("error")), [
                 .expression(.identifier("b").call())
             ])
 

@@ -3,13 +3,11 @@ import PackageDescription
 import CompilerPluginSupport
 import Foundation
 
-var extraAntlrTargetSettings: [SwiftSetting] = []
+var extraAntlrTargetSettings: [SwiftSetting]? = nil
 
 if ProcessInfo.processInfo.environment["SWIFT_REWRITER_BUILD_ANTLR_OPTIMIZED"] != nil {
     extraAntlrTargetSettings = [
-        .unsafeFlags([
-            "-O",
-        ])
+        .unsafeFlags(["-O"], .when(configuration: .debug)),
     ]
 }
 
@@ -406,7 +404,7 @@ let package = Package(
         .package(url: "https://github.com/LuizZak/MiniLexer.git", exact: "0.10.0"),
         .package(url: "https://github.com/LuizZak/MiniGraphviz.git", exact: "0.1.0"),
         .package(url: "https://github.com/LuizZak/MiniDigraph.git", exact: "0.3.0"),
-        .package(url: "https://github.com/LuizZak/SwiftAST.git", exact: "0.8.0"),
+        .package(url: "https://github.com/LuizZak/SwiftAST.git", exact: "0.8.3"),
     ],
     targets: aggregateTargets + [
         swiftRewriterTarget,

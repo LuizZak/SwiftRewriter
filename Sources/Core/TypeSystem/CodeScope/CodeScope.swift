@@ -23,11 +23,19 @@ class EmptyCodeScope: CodeScope {
         nil
     }
 
+    func firstDefinition(where predicate: (CodeDefinition) -> Bool) -> CodeDefinition? {
+        nil
+    }
+
     func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
         []
     }
 
     func functionDefinitions(named name: String) -> [CodeDefinition] {
+        []
+    }
+
+    func functionDefinitions(where predicate: (CodeDefinition) -> Bool) -> [CodeDefinition] {
         []
     }
 

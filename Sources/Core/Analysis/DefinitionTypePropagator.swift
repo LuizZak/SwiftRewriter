@@ -325,8 +325,8 @@ public class DefinitionTypePropagator {
                 return true
             }
 
-        case .ifLetBinding(let stmt):
-            if verifier.canCoerce(stmt.exp, toType: type) {
+        case .conditionalClause(let clause):
+            if verifier.canCoerce(clause.expression, toType: type) {
                 return true
             }
 
@@ -451,7 +451,7 @@ public class DefinitionTypePropagator {
         case .initialValue(let exp):
             return exp.resolvedType
 
-        case .ifLetBinding, .forBinding, .catchBlock:
+        case .conditionalClause, .forBinding, .catchBlock:
             return definition.definition.type
 
         case nil:
@@ -476,7 +476,7 @@ public class DefinitionTypePropagator {
         case .initialValue:
             return true
 
-        case .ifLetBinding, .forBinding, .catchBlock:
+        case .conditionalClause, .forBinding, .catchBlock:
             return false
 
         case nil:

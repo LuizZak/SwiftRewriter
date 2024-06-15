@@ -12,6 +12,8 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     /// traverses into block expressions.
     private var contextFunctionReturnTypeStack: [SwiftType?]
 
+    internal var scopeContextStack: [ScopeContext] = []
+
     public var typeSystem: TypeSystem
 
     /// Intrinsic variables provided by the type system
@@ -186,30 +188,56 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         return stmt
     }
 
-    public override func visitIf(_ stmt: IfStatement) -> Statement {
-        if let pattern = stmt.pattern {
-            let result = super.visitIf(stmt)
+    public override func visitConditionalClauseElement(_ clause: ConditionalClauseElement) -> ConditionalClauseElement {
+        if let pattern = clause.pattern {
+            let result = super.visitConditionalClauseElement(clause)
+            guard let scope = nearestScope(for: clause) else {
+                return result
+            }
+
+            var bindingContext: PatternMatcher.PatternBindingContext = [.constant]
+
+            // Detect optional binding contexts
+            switch pattern {
+            case .identifier, .valueBindingPattern(_, .identifier):
+                // TODO: Refactor this context detecting hack as an explicit flag
+                // TODO: in the conditional clause instead
+                guard
+                    scope is IfStatement ||
+                    scope is WhileStatement ||
+                    clause.parent?.parent is GuardStatement
+                else {
+                    break
+                }
+
+                bindingContext.insert(.optionalBinding)
+            default:
+                break
+            }
 
             collectInPattern(
                 pattern,
-                type: stmt.exp.resolvedType ?? .errorType,
-                locationDeriver: { .ifLet(stmt, $0) },
-                context: [.optionalBinding, .constant],
-                to: stmt.body
+                type: clause.expression.resolvedType ?? .errorType,
+                locationDeriver: { .conditionalClause(clause, $0) },
+                context: bindingContext,
+                to: scope
             )
 
             return result
         }
 
-        stmt.exp.expectedType = .bool
+        clause.expression.expectedType = .bool
 
-        return super.visitIf(stmt)
+        return super.visitConditionalClauseElement(clause)
     }
 
-    public override func visitWhile(_ stmt: WhileStatement) -> Statement {
-        stmt.exp.expectedType = .bool
+    public override func visitGuard(_ stmt: GuardStatement) -> Statement {
+        // Visit out of order: We first visit the guard statement, and then the
+        // conditional clauses.
+        _=visitCompound(stmt.elseBody)
 
-        return super.visitWhile(stmt)
+        stmt.conditionalClauses = visitConditionalClauses(stmt.conditionalClauses)
+        return stmt
     }
 
     public override func visitRepeatWhile(_ stmt: RepeatWhileStatement) -> Statement {
@@ -823,7 +851,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
 }
 
 extension ExpressionTypeResolver {
-
     func nearestScope(for node: SyntaxNode) -> CodeScopeNode? {
         if let scope = nearestScopeCache[ObjectIdentifier(node)] {
             return scope
@@ -834,7 +861,6 @@ extension ExpressionTypeResolver {
 
         return scope
     }
-
 }
 
 extension ExpressionTypeResolver {
@@ -842,26 +868,72 @@ extension ExpressionTypeResolver {
         typeSystem.resolveAlias(in: type)
     }
 
-    func searchIdentifierDefinition(_ exp: IdentifierExpression) -> CodeDefinition? {
+    // MARK: - Identifier/function lookup
+
+    func searchIdentifierDefinition(
+        _ exp: IdentifierExpression
+    ) -> CodeDefinition? {
+
+        guard hasIgnorableContext() else {
+            // Fast path: No ignorable contexts
+            return _fastIdentifierDefinition(exp)
+        }
+
+        let identifier = exp.identifier
+        let filter: (CodeDefinition) -> Bool = { definition in
+            guard !self.shouldIgnoreDefinition(definition) else {
+                return false
+            }
+
+            return definition.name == identifier
+        }
+
         // Visit identifier's type from current context
-        if let definition = nearestScope(for: exp)?.firstDefinition(named: exp.identifier) {
+        if let definition = nearestScope(for: exp)?.firstDefinition(where: filter) {
             return definition
         }
-        if let definition = nearestScope(for: exp)?.functionDefinitions(named: exp.identifier).first {
+        if let definition = nearestScope(for: exp)?.functionDefinitions(where: filter).first {
             return definition
         }
 
         // Look into intrinsics first, since they always take precedence
-        if let intrinsic = intrinsicVariables.firstDefinition(named: exp.identifier) {
+        if let intrinsic = intrinsicVariables.firstDefinition(where: filter) {
             return intrinsic
         }
-        if let intrinsic = intrinsicVariables.functionDefinitions(named: exp.identifier).first {
+        if let intrinsic = intrinsicVariables.functionDefinitions(where: filter).first {
             return intrinsic
         }
 
         // Check type system for a metatype with the identifier name
-        if typeSystem.nominalTypeExists(exp.identifier) {
-            return CodeDefinition.forType(named: exp.identifier)
+        if typeSystem.nominalTypeExists(identifier) {
+            return CodeDefinition.forType(named: identifier)
+        }
+
+        return nil
+    }
+
+    private func _fastIdentifierDefinition(_ exp: IdentifierExpression) -> CodeDefinition? {
+        let identifier = exp.identifier
+
+        // Visit identifier's type from current context
+        if let definition = nearestScope(for: exp)?.firstDefinition(named: identifier) {
+            return definition
+        }
+        if let definition = nearestScope(for: exp)?.functionDefinitions(named: identifier).first {
+            return definition
+        }
+
+        // Look into intrinsics first, since they always take precedence
+        if let intrinsic = intrinsicVariables.firstDefinition(named: identifier) {
+            return intrinsic
+        }
+        if let intrinsic = intrinsicVariables.functionDefinitions(named: identifier).first {
+            return intrinsic
+        }
+
+        // Check type system for a metatype with the identifier name
+        if typeSystem.nominalTypeExists(identifier) {
+            return CodeDefinition.forType(named: identifier)
         }
 
         return nil
@@ -872,6 +944,40 @@ extension ExpressionTypeResolver {
         _ exp: IdentifierExpression
     ) -> [CodeDefinition] {
 
+        guard hasIgnorableContext() else {
+            // Fast path: No ignorable contexts
+            return _fastSearchFunctionDefinitions(identifier, exp)
+        }
+
+        let filter: (CodeDefinition) -> Bool = { definition in
+            guard !self.shouldIgnoreDefinition(definition) else {
+                return false
+            }
+
+            switch definition.kind {
+            case .function(signature: let signature):
+                return signature.asIdentifier == identifier
+            default:
+                return false
+            }
+        }
+
+        var definitions: [CodeDefinition] = []
+
+        if let def = nearestScope(for: exp)?.functionDefinitions(where: filter) {
+            definitions.append(contentsOf: def)
+        }
+
+        let intrinsics = intrinsicVariables.functionDefinitions(where: filter)
+        definitions.append(contentsOf: intrinsics)
+
+        return definitions
+    }
+
+    private func _fastSearchFunctionDefinitions(
+        _ identifier: FunctionIdentifier,
+        _ exp: IdentifierExpression
+    ) -> [CodeDefinition] {
         var definitions: [CodeDefinition] = []
 
         if let def = nearestScope(for: exp)?.functionDefinitions(matching: identifier) {
