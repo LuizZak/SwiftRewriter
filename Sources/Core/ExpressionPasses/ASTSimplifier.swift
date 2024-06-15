@@ -135,31 +135,49 @@ public class ASTSimplifier: ASTRewriterPass {
 
 extension IfStatement {
     var isNullCheck: Bool {
+        guard conditionalClauses.clauses.count == 1 else {
+            return false
+        }
+
+        return conditionalClauses.clauses[0].isNullCheck
+    }
+
+    var nullCheckMember: Expression? {
+        guard conditionalClauses.clauses.count == 1 else {
+            return nil
+        }
+
+        return conditionalClauses.clauses[0].nullCheckMember
+    }
+}
+
+extension ConditionalClauseElement {
+    fileprivate var isNullCheck: Bool {
         // `if (nullablePointer) { ... }`-style checking:
         // An if-statement over a nullable value is also considered a null-check
         // in Objective-C.
-        if exp.resolvedType?.isOptional == true {
+        if expression.resolvedType?.isOptional == true {
             return true
         }
 
-        guard let binary = exp.asBinary else {
+        guard let binary = expression.asBinary else {
             return false
         }
 
         return binary.op == .unequals && binary.rhs == .constant(.nil)
     }
 
-    var nullCheckMember: Expression? {
+    fileprivate var nullCheckMember: Expression? {
         guard isNullCheck else {
             return nil
         }
 
         // `if (nullablePointer) { ... }`-style checking
-        if exp.resolvedType?.isOptional == true {
-            return exp
+        if expression.resolvedType?.isOptional == true {
+            return expression
         }
 
-        if let binary = exp.asBinary {
+        if let binary = expression.asBinary {
             return binary.rhs == .constant(.nil) ? binary.lhs : binary.rhs
         }
 

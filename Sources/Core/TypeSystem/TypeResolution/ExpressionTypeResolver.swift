@@ -316,6 +316,9 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public override func visitParens(_ exp: ParensExpression) -> Expression {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
 
+        // Propagate expected type
+        exp.exp.expectedType = exp.expectedType
+
         _=super.visitParens(exp)
 
         exp.resolvedType = exp.exp.resolvedType

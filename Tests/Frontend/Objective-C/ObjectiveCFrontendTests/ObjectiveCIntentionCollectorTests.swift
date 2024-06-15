@@ -68,9 +68,9 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
             """)
         try parser.parse()
         let rootNode = parser.rootNode
-        
+
         sut.collectIntentions(rootNode)
-        
+
         Asserter(object: file!).inClosureUnconditional { file in
             file[\.globalVariableIntentions].assertCount(1)
             file[\.globalVariableIntentions][0]?
@@ -78,7 +78,7 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
                 .assert(isConstant: true)
         }
     }
-    
+
     func testCollectFunctionDefinitionBody() throws {
         let parser = ObjcParser(string: "void global() { stmt(); }")
         try parser.parse()
@@ -101,9 +101,9 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
             """)
         try parser.parse()
         let rootNode = parser.rootNode
-        
+
         sut.collectIntentions(rootNode)
-        
+
         Asserter(object: file!).inClosureUnconditional { file in
             file[\.globalVariableIntentions].assertCount(1)
             file[\.globalVariableIntentions][0]?
@@ -118,9 +118,9 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
             """)
         try parser.parse()
         let rootNode = parser.rootNode
-        
+
         sut.collectIntentions(rootNode)
-        
+
         XCTAssertEqual(delegate.reportedForLazyResolving.count, 1)
         XCTAssertEqual(file.globalVariableIntentions.count, 0)
         XCTAssertEqual(file.globalFunctionIntentions.count, 0)
@@ -139,9 +139,9 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
             """)
         try parser.parse()
         let rootNode = parser.rootNode
-        
+
         sut.collectIntentions(rootNode)
-        
+
         XCTAssertEqual(delegate.reportedForLazyResolving.count, 1)
         XCTAssertEqual(file.globalVariableIntentions.count, 0)
         XCTAssertEqual(file.globalFunctionIntentions.count, 0)
@@ -161,9 +161,9 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
             """)
         try parser.parse()
         let rootNode = parser.rootNode
-        
+
         sut.collectIntentions(rootNode)
-        
+
         XCTAssertEqual(file.classIntentions[0].typeName, "MyClass")
         XCTAssertEqual(file.classIntentions[0].superclassName, "UIView")
     }
@@ -175,9 +175,9 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
             """)
         try parser.parse()
         let rootNode = parser.rootNode
-        
+
         sut.collectIntentions(rootNode)
-        
+
         XCTAssertEqual(file.classIntentions[0].typeName, "MyClass")
         XCTAssertEqual(file.classIntentions[0].superclassName, "NSArray")
     }
@@ -189,9 +189,9 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
             """)
         try parser.parse()
         let rootNode = parser.rootNode
-        
+
         sut.collectIntentions(rootNode)
-        
+
         XCTAssertEqual(file.classIntentions[0].typeName, "MyClass")
         XCTAssertNil(file.classIntentions[0].superclassName)
         XCTAssertEqual(file.classIntentions[0].protocols.count, 1)
@@ -205,15 +205,15 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
             """)
         try parser.parse()
         let rootNode = parser.rootNode
-        
+
         sut.collectIntentions(rootNode)
-        
+
         XCTAssertEqual(file.classIntentions[0].typeName, "MyClass")
         XCTAssertEqual(file.classIntentions[0].superclassName, "UIView")
         XCTAssertEqual(file.classIntentions[0].protocols.count, 1)
         XCTAssertEqual(file.classIntentions[0].protocols.first?.protocolName, "UITableViewDelegate")
     }
-    
+
     func testCollectProperty() throws {
         let parser = ObjcParser(string: """
             @interface Foo
@@ -222,15 +222,15 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
             """)
         try parser.parse()
         let rootNode = parser.rootNode
-        
+
         sut.collectIntentions(rootNode)
-        
+
         XCTAssertEqual(file.classIntentions[0].properties.count, 1)
         XCTAssertEqual(file.classIntentions[0].properties.first?.name, "property")
         XCTAssertEqual(file.classIntentions[0].properties.first?.isClassProperty, false)
         XCTAssertEqual(file.classIntentions[0].properties.first?.type, .anyObject) // Initially .anyObject, is processed afterwards by a delegate
     }
-    
+
     func testCollectProperty_classProperty() throws {
         let parser = ObjcParser(string: """
             @interface Foo
@@ -239,13 +239,13 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
             """)
         try parser.parse()
         let rootNode = parser.rootNode
-        
+
         sut.collectIntentions(rootNode)
-        
+
         XCTAssertEqual(file.classIntentions[0].properties.count, 1)
         XCTAssertEqual(file.classIntentions[0].properties.first?.isClassProperty, true)
     }
-    
+
     func testCollectProperty_weak() throws {
         let parser = ObjcParser(string: """
             @interface Foo
@@ -254,13 +254,13 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
             """)
         try parser.parse()
         let rootNode = parser.rootNode
-        
+
         sut.collectIntentions(rootNode)
-        
+
         XCTAssertEqual(file.classIntentions[0].properties.count, 1)
         XCTAssertEqual(file.classIntentions[0].properties.first?.storage.ownership, .weak)
     }
-    
+
     func testCollectProperty_getter() throws {
         let parser = ObjcParser(string: """
             @interface Foo
@@ -269,14 +269,14 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
             """)
         try parser.parse()
         let rootNode = parser.rootNode
-        
+
         sut.collectIntentions(rootNode)
-        
+
         XCTAssertEqual(file.classIntentions[0].properties.count, 1)
         XCTAssertEqual(file.classIntentions[0].properties.first?.objcAttributes.count, 1)
         XCTAssertEqual(file.classIntentions[0].properties.first?.objcAttributes[0], .getterName("propertyGetter"))
     }
-    
+
     func testCollectProperty_setter() throws {
         let parser = ObjcParser(string: """
             @interface Foo
@@ -285,14 +285,14 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
             """)
         try parser.parse()
         let rootNode = parser.rootNode
-        
+
         sut.collectIntentions(rootNode)
-        
+
         XCTAssertEqual(file.classIntentions[0].properties.count, 1)
         XCTAssertEqual(file.classIntentions[0].properties.first?.objcAttributes.count, 1)
         XCTAssertEqual(file.classIntentions[0].properties.first?.objcAttributes[0], .setterName("propertySetter:"))
     }
-    
+
     func testCollectPropertyIBOutletAttribute() throws {
         let parser = ObjcParser(
             string: """
@@ -340,13 +340,13 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
             """)
         try parser.parse()
         let rootNode = parser.rootNode
-        
+
         sut.collectIntentions(rootNode)
-        
+
         XCTAssertEqual(file.globalVariableIntentions.count, 2)
         XCTAssertEqual(file.classIntentions.first?.properties.count, 0)
     }
-    
+
     func testCollectStructDeclaration() throws {
         let parser = ObjcParser(
             string: """
@@ -394,15 +394,15 @@ class ObjectiveCIntentionCollectorTests: XCTestCase {
         delegate.isNodeInNonnullContext_stub = { node in
             node.location.line == 2 ? true : false
         }
-        
+
         sut.collectIntentions(rootNode)
-        
+
         XCTAssertEqual(file.globalVariableIntentions.count, 3)
         XCTAssertFalse(file.globalVariableIntentions[0].inNonnullContext)
         XCTAssertTrue(file.globalVariableIntentions[1].inNonnullContext)
         XCTAssertFalse(file.globalVariableIntentions[2].inNonnullContext)
     }
-    
+
     func testCollectClassInterfaceComments() throws {
         testCommentCollection(
             """
@@ -608,7 +608,7 @@ private class TestCollectorDelegate: ObjectiveCIntentionCollectorDelegate {
     }
 }
 
-extension ObjectiveCLazyParseItem: Equatable {
+extension ObjectiveCLazyParseItem: @retroactive Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
             case (.enumCase(let li), .enumCase(let ri)):

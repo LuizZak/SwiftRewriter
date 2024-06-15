@@ -28,8 +28,8 @@ open class ASTRewriterPass: SyntaxNodeRewriter {
         return visitBaseExpression(expression)
     }
 
-    /// Visits an that is the outermost Expression of a SyntaxNode, before the
-    /// next parent up is a Statement-, or other non-Expression- node.
+    /// Visits an expression that is the outermost Expression of a SyntaxNode,
+    /// before the next parent up is a Statement-, or other non-Expression- node.
     open func visitBaseExpression(_ exp: Expression) -> Expression {
         visitExpression(exp)
     }
@@ -98,31 +98,11 @@ open class ASTRewriterPass: SyntaxNodeRewriter {
         return stmt
     }
 
-    open override func visitIf(_ stmt: IfStatement) -> Statement {
-        stmt.exp = visitBaseExpression(stmt.exp)
-        _=visitStatement(stmt.body)
-        stmt.elseBody = stmt.elseBody.map(visitElseBody(_:))
+    open override func visitConditionalClauseElement(_ clause: ConditionalClauseElement) -> ConditionalClauseElement {
+        clause.pattern = clause.pattern.map(visitPattern)
+        clause.expression = visitBaseExpression(clause.expression)
 
-        return stmt
-    }
-
-    open override func visitElseBody(_ stmt: IfStatement.ElseBody) -> IfStatement.ElseBody {
-        switch stmt {
-        case .else(let stmts):
-            _=visitCompound(stmts)
-            return .else(stmts)
-
-        case .elseIf(let elseIf):
-            _=visitIf(elseIf)
-            return .elseIf(elseIf)
-        }
-    }
-
-    open override func visitWhile(_ stmt: WhileStatement) -> Statement {
-        stmt.exp = visitBaseExpression(stmt.exp)
-        _=visitStatement(stmt.body)
-
-        return stmt
+        return clause
     }
 
     open override func visitFor(_ stmt: ForStatement) -> Statement {

@@ -7,6 +7,8 @@ class MutexTests: XCTestCase {
         let expectation = self.expectation(description: "\(#function)\(#line)")
 
         let mutex = Mutex()
+
+        nonisolated(unsafe)
         var resource = Resource(value: 0)
 
         let queue = makeTestQueue()
