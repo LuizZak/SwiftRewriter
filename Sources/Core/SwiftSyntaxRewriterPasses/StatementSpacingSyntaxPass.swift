@@ -8,50 +8,50 @@ import MiniLexer
 /// matches the identifier from the previous line.
 public class StatementSpacingSyntaxPass: SwiftSyntaxRewriterPass {
     public init() {
-        
+
     }
-    
+
     public func rewrite(_ file: SourceFileSyntax) -> SourceFileSyntax {
         let rewriter = InnerSyntaxRewriter()
-        return rewriter.visit(file).as(SourceFileSyntax.self) ?? file
+        return rewriter.visit(file)
     }
 }
 
 private class InnerSyntaxRewriter: SyntaxRewriter {
     override func visit(_ node: CodeBlockItemListSyntax) -> CodeBlockItemListSyntax {
-        var statements = super.visit(node).as(CodeBlockItemListSyntax.self)!
-        
+        var statements = super.visit(node)
+
         let ranges = rangeOfExpressionStatements(in: node)
         statements = separateExpressions(in: statements, ranges: ranges)
 
         let result = ranges.reduce(statements) { stmts, range in
             analyzeRange(range, in: stmts)
         }
-        
+
         return result
     }
-    
+
     func separateExpressions(
         in statements: CodeBlockItemListSyntax,
         ranges: [Range<Int>]
     ) -> CodeBlockItemListSyntax {
-        
+
         var statements = statements
-        
+
         // Add leading line breaks between expression sequence boundaries, making
         // sure expressions are always separated by at least one empty line from
         // other statement kinds
         for range in ranges {
             let rangeStart = statements.index(statements.startIndex, offsetBy: range.lowerBound)
             let rangeEnd = statements.index(statements.startIndex, offsetBy: range.upperBound)
-            
+
             if range.lowerBound > 0 {
                 statements = statements.with(
                     \.[statements.index(statements.startIndex, offsetBy: range.lowerBound)],
                     CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(statements[rangeStart]))!
                 )
             }
-            
+
             if statements.count > range.upperBound {
                 statements = statements.with(
                     \.[statements.index(statements.startIndex, offsetBy: range.upperBound)],
@@ -59,59 +59,59 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
                 )
             }
         }
-        
+
         return statements
     }
-    
+
     func analyzeRange(_ range: Range<Int>, in stmts: CodeBlockItemListSyntax) -> CodeBlockItemListSyntax {
         if range.count < 4 {
             return stmts
         }
-        
+
         var stmts = stmts
         let rangeStart = stmts.index(stmts.startIndex, offsetBy: range.lowerBound)
         let rangeEnd = stmts.index(stmts.startIndex, offsetBy: range.upperBound)
         let expressions = stmts[rangeStart..<rangeEnd]
-        
+
         func addLineSpace(_ block: CodeBlockItemSyntax, _ index: CodeBlockItemListSyntax.Index) {
             let childIndex = stmts.distance(from: stmts.startIndex, to: index)
-            
+
             stmts = stmts.with(
                 \.[stmts.index(stmts.startIndex, offsetBy: childIndex)],
                 CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(block))!
             )
         }
-        
+
         var currentIdent: String? = identInStmt(stmts[rangeStart])
-        
+
         for i in 1..<expressions.count {
             let index = expressions.index(expressions.startIndex, offsetBy: i)
             let curr = expressions[index]
-            
+
             let nextIdent = identInStmt(curr)
-            
+
             if currentIdent != nextIdent {
                 currentIdent = nextIdent
                 addLineSpace(curr, index)
             }
         }
-        
+
         return stmts
     }
-    
+
     func identInStmt(_ stmt: CodeBlockItemSyntax) -> String? {
         let desc = stmt.trimmed.description
-        
+
         let lexer = Lexer(input: desc)
         lexer.skipWhitespace()
         guard lexer.safeNextCharPasses(with: { Lexer.isLetter($0) || $0 == "_" }) else {
             return nil
         }
-        
+
         var str = lexer.consumeString { lex in
             lex.advance(while: { Lexer.isAlphanumeric($0) || $0 == "_" })
         }
-        
+
         // Attempt to consume property after 'self'
         if str == "self" {
             if lexer.advanceIf(equals: ".") {
@@ -120,10 +120,10 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
                 }
             }
         }
-        
+
         return str.isEmpty ? nil : String(str)
     }
-    
+
     /// Returns a list of indexes which represent running sequences of expression
     /// statements.
     /// The return is such that the list of ranges overlaps exactly all top-level
@@ -135,7 +135,7 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
         // statement is the range of expressions (non-inclusive)
         var currentRangeStart: Int?
         var ranges: [Range<Int>] = []
-        
+
         for (i, stmt) in statements.enumerated() {
             if stmt.item.is(ExprSyntax.self) {
                 currentRangeStart = currentRangeStart ?? i
@@ -144,29 +144,29 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
                 currentRangeStart = nil
             }
         }
-        
+
         // Found an open range- actual range is all remaining statements from
         // where the counting started.
         if let currentRangeStart = currentRangeStart {
             ranges.append(currentRangeStart..<statements.count)
         }
-        
+
         return ranges
     }
-    
+
     private class SetEmptyLineLeadingTrivia: SyntaxRewriter {
         var isFirstVisit: Bool = true
-        
+
         override func visit(_ token: TokenSyntax) -> TokenSyntax {
             if isFirstVisit {
                 isFirstVisit = false
                 let trivia = .newlines(2)
                     + indentation(for: token)
                     + removingLeadingWhitespace(token.leadingTrivia)
-                
+
                 return token.with(\.leadingTrivia, trivia)
             }
-            
+
             return token
         }
     }
@@ -186,7 +186,7 @@ private func indentation(for token: TokenSyntax) -> Trivia {
             continue
         }
     }
-    
+
     return leading
 }
 
@@ -200,6 +200,6 @@ private func removingLeadingWhitespace(_ trivia: Trivia) -> Trivia {
             return false
         }
     }
-    
+
     return Trivia(pieces: Array(newTrivia))
 }

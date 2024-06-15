@@ -6,13 +6,13 @@ public class ASTSimplifier: ASTRewriterPass {
         // Drop parens from base expressions
         if let parens = exp.asParens {
             notifyChange()
-            
+
             return visitBaseExpression(parens.exp.copy())
         }
-        
+
         return super.visitBaseExpression(exp)
     }
-    
+
     public override func visitCompound(_ stmt: CompoundStatement) -> Statement {
         /// Simplify `do` statements that are the only statement within a compound
         /// statement context.
@@ -20,11 +20,11 @@ public class ASTSimplifier: ASTRewriterPass {
             let body = doStmt.body.statements
             doStmt.body.statements = []
             stmt.statements = body
-            
+
             for def in doStmt.body.localDefinitions() {
                 stmt.definitions.recordDefinition(def, overwrite: false)
             }
-            
+
             notifyChange()
         }
 
@@ -43,7 +43,7 @@ public class ASTSimplifier: ASTRewriterPass {
                     split.append(expression)
                 }
             }
-            
+
             if expressions.expressions != split {
                 toSplit.append((i, split))
             }
@@ -66,24 +66,24 @@ public class ASTSimplifier: ASTRewriterPass {
                 expStatements.first?.label = label
                 expStatements.first?.comments = leadingComments
                 expStatements.last?.trailingComment = trailingComments
-                
+
                 newStatements.remove(at: index)
                 newStatements.insert(contentsOf: expStatements, at: index)
             }
 
             stmt.statements = newStatements
-            
+
             notifyChange()
         }
 
         return super.visitCompound(stmt)
     }
-    
+
     /// Simplify check before invoking nullable closure
     public override func visitIf(_ stmt: IfStatement) -> Statement {
         let nullCheckM = ValueMatcherExtractor<IdentifierExpression?>()
         let postfix = ValueMatcherExtractor<PostfixExpression?>()
-        
+
         let matcher =
             ValueMatcher<IfStatement>()
                 .match(if: !hasElse())
@@ -98,20 +98,20 @@ public class ASTSimplifier: ASTRewriterPass {
                                         .keyPath(\.exp, lazyEquals(nullCheckM.value))
                                         ->> postfix
                             ))
-        
+
         if matcher.matches(stmt), let postfix = postfix.value?.copy() {
             postfix.op.optionalAccessKind = .safeUnwrap
-            
+
             let statement = Statement.expression(postfix)
-            
+
             notifyChange()
-            
+
             return visitStatement(statement)
         }
-        
+
         return super.visitIf(stmt)
     }
-    
+
     /// Simplify switch statements by removing spurious `break` statements from
     /// cases
     public override func visitSwitch(_ stmt: SwitchStatement) -> Statement {
@@ -121,7 +121,7 @@ public class ASTSimplifier: ASTRewriterPass {
                 notifyChange()
             }
         }
-        
+
         if let def = stmt.defaultCase {
             if def.statements.count > 1 && def.statements.last is BreakStatement {
                 def.body.statements.removeLast()
@@ -141,28 +141,28 @@ extension IfStatement {
         if exp.resolvedType?.isOptional == true {
             return true
         }
-        
+
         guard let binary = exp.asBinary else {
             return false
         }
-        
+
         return binary.op == .unequals && binary.rhs == .constant(.nil)
     }
-    
+
     var nullCheckMember: Expression? {
         guard isNullCheck else {
             return nil
         }
-        
+
         // `if (nullablePointer) { ... }`-style checking
         if exp.resolvedType?.isOptional == true {
             return exp
         }
-        
+
         if let binary = exp.asBinary {
             return binary.rhs == .constant(.nil) ? binary.lhs : binary.rhs
         }
-        
+
         return nil
     }
 }

@@ -1,10 +1,11 @@
-import SwiftAST
+import XCTest
 import WriterTargetOutput
 import SwiftSyntax
 import SwiftParser
-import XCTest
 import TestCommons
 import MiniGraphviz
+import SwiftAST
+import SwiftCFG
 
 @testable import Analysis
 
