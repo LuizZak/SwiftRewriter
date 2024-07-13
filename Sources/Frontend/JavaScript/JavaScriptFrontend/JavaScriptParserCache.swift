@@ -13,42 +13,46 @@ public class JavaScriptParserCache {
     let sourcePreprocessors: [SourcePreprocessor]
     let antlrSettings: AntlrSettings
 
-    public init(fileProvider: FileProvider,
-                parserStatePool: JsParserStatePool,
-                sourcePreprocessors: [SourcePreprocessor] = [],
-                antlrSettings: AntlrSettings = .default) {
-        
+    public init(
+        fileProvider: FileProvider,
+        parserStatePool: JsParserStatePool,
+        sourcePreprocessors: [SourcePreprocessor] = [],
+        antlrSettings: AntlrSettings = .default
+    ) {
+
         self.fileProvider = fileProvider
         self.parserStatePool = parserStatePool
         self.sourcePreprocessors = sourcePreprocessors
         self.antlrSettings = antlrSettings
     }
-    
+
     public func replaceCachedParsedTree(file: URL, parser: JsParser) {
         cache[file] = parser
     }
 
     public func loadParsedTree(input: InputSource) throws -> JsParser {
-        let url = URL(fileURLWithPath: input.sourcePath())
-        
-        if let parser = cache[url] {
+        return try _cache.modifyingValue { cache in
+            let url = URL(fileURLWithPath: input.sourcePath())
+
+            if let parser = cache[url] {
+                try parser.parse()
+                return parser
+            }
+
+            let src = try input.loadSource().fetchSource()
+
+            let state = self.parserStatePool.pull()
+            let parser = JsParser(
+                string: src,
+                fileName: url.path,
+                state: state
+            )
+            parser.antlrSettings = antlrSettings
             try parser.parse()
+            parserStatePool.repool(state)
+            cache[url] = parser
             return parser
         }
-
-        let src = try input.loadSource().fetchSource()
-        
-        let state = parserStatePool.pull()
-        let parser = JsParser(
-            string: src,
-            fileName: url.path,
-            state: state
-        )
-        parser.antlrSettings = antlrSettings
-        try parser.parse()
-        parserStatePool.repool(state)
-        cache[url] = parser
-        return parser
     }
 
     public enum Error: Swift.Error {
