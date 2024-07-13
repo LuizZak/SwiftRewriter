@@ -96,19 +96,26 @@ public extension String {
     
     /// Returns the ranges for all individual lines of text separated by a line-break
     /// character `\n` within this string.
-    func lineRanges() -> [Range<Index>] {
+    func lineRanges(includeLineBreak: Bool = false) -> [Range<Index>] {
         var lines: [Range<Index>] = []
         var currentLineStart = startIndex
-        
-        for (index, char) in zip(indices, unicodeScalars) where char == "\n" {
-            lines.append(currentLineStart..<index)
-            
-            if index != endIndex {
-                // Skip past the linebreak char
+
+        if includeLineBreak {
+            for (index, char) in zip(indices, unicodeScalars) where char == "\n" {
+                let nextLine = self.index(after: index)
+                lines.append(currentLineStart..<nextLine)
+
+                currentLineStart = nextLine
+            }
+        } else {
+            for (index, char) in zip(indices, unicodeScalars) where char == "\n" {
+                lines.append(currentLineStart..<index)
+
+                // Skip past the line break char
                 currentLineStart = self.index(after: index)
             }
         }
-        
+
         lines.append(currentLineStart..<endIndex)
         
         return lines

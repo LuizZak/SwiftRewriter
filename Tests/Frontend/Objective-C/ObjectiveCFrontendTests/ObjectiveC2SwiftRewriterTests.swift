@@ -272,7 +272,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                     }
                     func __(_ a: AnyObject!) {
                     }
-                    func __(_ a: AnyObject!) -> AnyObject! {
+                    func __(_ a: AnyObject!) -> AnyObject? {
                     }
                 }
                 """
@@ -752,7 +752,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                     }
                 }
                 class MyClass2 {
-                    func aMethod(_ param: String!) -> AnyObject! {
+                    func aMethod(_ param: String!) -> AnyObject? {
                     }
                 }
                 """
@@ -1351,7 +1351,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 @end
                 """,
             swift: """
-                func global() -> A! {
+                func global() -> A? {
                 }
 
                 class A {
@@ -1522,6 +1522,25 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                     func method() {
                         MyEnum.MyEnumCase
                     }
+                }
+                """
+        )
+    }
+
+    func testEnumRepeatedNamingTypedef() {
+        assertRewrite(
+            objc: """
+                typedef enum MyEnum {
+                    MyEnum_Case0,
+                    MyEnum_Case1,
+                    MyEnum_Case2,
+                } MyEnum;
+                """,
+            swift: """
+                enum MyEnum: CInt {
+                    case MyEnum_Case0
+                    case MyEnum_Case1
+                    case MyEnum_Case2
                 }
                 """
         )
@@ -1966,7 +1985,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 """,
             swift: """
                 class A {
-                    static func makeA() -> A! {
+                    static func makeA() -> A? {
                     }
                 }
                 """
@@ -3023,7 +3042,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 """,
             swift: """
                 class A {
-                    subscript(index: UInt) -> NSObject! {
+                    subscript(index: UInt) -> NSObject? {
                         return self
                     }
                 }
@@ -3047,7 +3066,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 """,
             swift: """
                 class A {
-                    subscript(index: UInt) -> NSObject! {
+                    subscript(index: UInt) -> NSObject? {
                         get {
                             return self
                         }
@@ -3105,7 +3124,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                         test()
                     }
 
-                    func getObject() -> NSObject! {
+                    func getObject() -> NSObject? {
                         // A comment
                         test()
 
@@ -3168,6 +3187,75 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                     // Method declaration comment
                     // Method definition comment
                     func test() {
+                    }
+                }
+                """
+        )
+    }
+
+    func testBlockBodyCommentTransposition() {
+        assertRewrite(
+            objc: """
+                // Class definition
+                @implementation A
+                // Method definition comment
+                - (void)test {
+                    // Pre-block
+                    void (^block)() = ^{
+                        // In block
+                        NSLog(@"1");
+                    };
+                    // Post-block
+                    NSLog(@"2");
+                }
+                @end
+                """,
+            swift: """
+                // Class definition
+                class A {
+                    // Method definition comment
+                    func test() {
+                        // Pre-block
+                        let block: () -> Void = {
+                            // In block
+                            NSLog("1")
+                        }
+
+                        // Post-block
+                        NSLog("2")
+                    }
+                }
+                """
+        )
+    }
+
+    func testBlockBodyCommentTransposing_emptyBlockInPostfixCall() {
+        assertRewrite(
+            objc: """
+                @implementation A
+                - (void)test {
+                    // Join to await all promises
+                    PMKJoin(promises).then(^{
+                        // All fine-o!
+                    }).always(^{
+                        [self doSomething];
+                    }).catch(^(NSError *error){
+                        NSLog("error!");
+                    });
+                }
+                @end
+                """,
+            swift: """
+                class A {
+                    func test() {
+                        // Join to await all promises
+                        PMKJoin(promises).then { () -> Void in
+                            // All fine-o!
+                        }.always { () -> Void in
+                            self.doSomething()
+                        }.catch { (error: Error!) -> Void in
+                            NSLog("error!")
+                        }
                     }
                 }
                 """
@@ -3247,6 +3335,37 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 }
                 """
         )
+    }
+
+    func testDontDropCommentsWhileLookingAtDeclarationsOutOfOrder() {
+        assertRewrite(
+            objc: """
+                @implementation A
+                - (void)method {
+                    // A comment
+                    body();
+                }
+                BOOL inTypeField;
+                - (void)privateMethod {
+                    // Another comment
+                    body();
+                }
+                @end
+                """,
+            swift: """
+                class A {
+                    func method() {
+                        // A comment
+                        body()
+                    }
+                    func privateMethod() {
+                        // Another comment
+                        body()
+                    }
+                }
+                """
+        )
+        
     }
 
     func testBlockPropertyDeclaration() {
@@ -3498,6 +3617,96 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func f(_ count: CUnsignedInt, _ p: UnsafeMutablePointer<AType>!, _ p2: UnsafePointer<AType>!) {
+            }
+            """
+        )
+    }
+
+    func testRewriteStringInitializer() {
+        assertRewrite(
+            objc: """
+            NSString *str = @"aStr"
+                             " moreStr";
+            
+            void a() {
+                NSString *strLocal = @"aStr"
+                                      " moreStr";
+            }
+            """,
+            swift: """
+            var str: String! = "aStr moreStr"
+
+            func a() {
+                let strLocal = "aStr moreStr"
+            }
+            """
+        )
+    }
+
+    func testRewriteMultiLineStringInitializer() {
+        assertRewrite(
+            objc: """
+            NSString *str = @"aStr"
+                            " moreStr";
+            
+            void a() {
+                NSString *strLocal = @"aStr"
+                                      " moreStr";
+            }
+            """,
+            swift: """
+            var str: String! = "aStr moreStr"
+
+            func a() {
+                let strLocal = "aStr moreStr"
+            }
+            """
+        )
+    }
+
+    func testRewriteCommentSpecialCharactersBug() {
+        assertRewrite(
+            objc: """
+            // ©
+            NSString *const global = @"abc";
+            // ©
+            NSString *otherGlobal = @"def";
+            """,
+            swift: """
+            let global: String! = "abc"
+            var otherGlobal: String! = "def"
+            """
+        )
+    }
+
+    func testRewriteNullableBlock() {
+        assertRewrite(
+            objc:
+            """
+            @interface A
+            - (void)method:(nullable void(^)(nonnull NSString*))param;
+            @end
+            """,
+            swift:
+            """
+            class A {
+                func method(_ param: ((String) -> Void)?) {
+                }
+            }
+            """
+        )
+    }
+
+    func testRewritePointerOfPointerType() {
+        assertRewrite(
+            objc:
+            """
+            void a(char **p) {
+            }
+            """,
+            swift:
+            """
+            func a(_ p: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>!) {
             }
             """
         )

@@ -394,14 +394,34 @@ class AntlrDeclarationParser {
         guard let ctx else { return nil }
         let range = self.range(ctx)
 
-        let qualifiers = typeQualifierList(ctx.typeQualifierList())
-        let nullability = nullabilitySpecifier(ctx.nullabilitySpecifier())
+        let specifiers = ctx.pointerSpecifier().compactMap(self.pointerSpecifier(_:))
 
         return .init(
             location: range.start ?? .invalid,
-            typeQualifiers: qualifiers,
-            nullabilitySpecifier: nullability
+            pointerSpecifiers: specifiers
         )
+    }
+
+    func pointerSpecifier(_ ctx: ObjectiveCParser.PointerSpecifierContext?) -> PointerSpecifierSyntax? {
+        guard let ctx else { return nil }
+
+        if let syntax = ctx.nullabilitySpecifier(), let nullability = nullabilitySpecifier(syntax) {
+            return .nullability(
+                nullability
+            )
+        }
+        if let syntax = ctx.typeQualifier(), let typeQualifiers = typeQualifier(syntax) {
+            return .typeQualifier(
+                typeQualifiers
+            )
+        }
+        if let syntax = ctx.arcBehaviourSpecifier(), let arcBehaviour = arcBehaviourSpecifier(syntax) {
+            return .arcBehaviour(
+                arcBehaviour
+            )
+        }
+
+        return nil
     }
 
     func typeQualifierList(_ ctx: ObjectiveCParser.TypeQualifierListContext?) -> TypeQualifierListSyntax? {

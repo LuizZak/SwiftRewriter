@@ -5,14 +5,8 @@ import GrammarModelBase
 import ObjcParserAntlr
 import ObjcGrammarModels
 
-// TODO: Create a base implementation to cover this file and with JsParser.JsParserListener.
-
 internal class ObjcParserListener: ObjectiveCParserBaseListener {
-    let context: NodeCreationContext
-    let rootNode: ObjcGlobalContextNode
-    let typeParser: ObjcTypeParser
     private var nonnullContextQuerier: NonnullContextQuerier
-    private var commentQuerier: CommentQuerier
     private let mapper: GenericParseTreeContextMapper
     private let sourceString: String
     private let source: Source
@@ -21,25 +15,26 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     /// Whether the listener is currently visiting a @protocol section that was
     /// marked @optional.
     private var inOptionalContext: Bool = false
+
+    let context: NodeCreationContext
+    let rootNode: ObjcGlobalContextNode
+    let typeParser: ObjcTypeParser
     
     init(
         sourceString: String,
         source: Source,
         state: ObjcParserState,
         antlrSettings: AntlrSettings,
-        nonnullContextQuerier: NonnullContextQuerier,
-        commentQuerier: CommentQuerier
+        nonnullContextQuerier: NonnullContextQuerier
     ) {
         
         self.sourceString = sourceString
         self.source = source
         self.nonnullContextQuerier = nonnullContextQuerier
-        self.commentQuerier = commentQuerier
         self.nodeFactory =
             ObjcASTNodeFactory(
                 source: source,
-                nonnullContextQuerier: nonnullContextQuerier,
-                commentQuerier: commentQuerier
+                nonnullContextQuerier: nonnullContextQuerier
             )
         
         typeParser = ObjcTypeParser(
@@ -52,8 +47,8 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         mapper = GenericParseTreeContextMapper(
             source: source,
             nonnullContextQuerier: nonnullContextQuerier,
-            commentQuerier: commentQuerier,
-            nodeFactory: nodeFactory)
+            nodeFactory: nodeFactory
+        )
         
         super.init()
         
@@ -74,33 +69,27 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         )
         mapper.addRuleMap(
             rule: O.ClassInterfaceContext.self,
-            nodeType: ObjcClassInterfaceNode.self,
-            collectComments: true
+            nodeType: ObjcClassInterfaceNode.self
         )
         mapper.addRuleMap(
             rule: O.ClassImplementationContext.self,
-            nodeType: ObjcClassImplementationNode.self,
-            collectComments: true
+            nodeType: ObjcClassImplementationNode.self
         )
         mapper.addRuleMap(
             rule: O.CategoryInterfaceContext.self,
-            nodeType: ObjcClassCategoryInterfaceNode.self,
-            collectComments: true
+            nodeType: ObjcClassCategoryInterfaceNode.self
         )
         mapper.addRuleMap(
             rule: O.CategoryImplementationContext.self,
-            nodeType: ObjcClassCategoryImplementationNode.self,
-            collectComments: true
+            nodeType: ObjcClassCategoryImplementationNode.self
         )
         mapper.addRuleMap(
             rule: O.MethodDeclarationContext.self,
-            nodeType: ObjcMethodDefinitionNode.self,
-            collectComments: true
+            nodeType: ObjcMethodDefinitionNode.self
         )
         mapper.addRuleMap(
             rule: O.MethodDefinitionContext.self,
-            nodeType: ObjcMethodDefinitionNode.self,
-            collectComments: true
+            nodeType: ObjcMethodDefinitionNode.self
         )
         mapper.addRuleMap(
             rule: O.KeywordDeclaratorContext.self,
@@ -120,8 +109,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         )
         mapper.addRuleMap(
             rule: O.ProtocolDeclarationContext.self,
-            nodeType: ObjcProtocolDeclarationNode.self,
-            collectComments: true
+            nodeType: ObjcProtocolDeclarationNode.self
         )
         mapper.addRuleMap(
             rule: O.PropertyImplementationContext.self,
@@ -143,7 +131,8 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
 
         let collector = DefinitionCollector(
             nonnullContextQuerier: nonnullContextQuerier,
-            nodeFactory: nodeFactory
+            nodeFactory: nodeFactory,
+            commentQuerier: .init(allComments: [])
         )
         collector.delegate = delegate
 
@@ -187,7 +176,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Class name
-        if let identifier = classInterfaceName.className()?.identifier() {
+        if let identifier = classInterfaceName.identifier() {
             let identifierNode = nodeFactory.makeIdentifier(from: identifier)
             classNode.addChild(identifierNode)
         }
@@ -218,10 +207,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             return
         }
         
-        // Note: In the original Antlr's grammar, 'className' and 'categoryName'
-        // seem to be switched around. We undo that here while parsing.
-        
-        if let className = ctx.categoryName?.identifier() {
+        if let className = ctx.categoryInterfaceName()?.identifier() {
             let identifierNode = nodeFactory.makeIdentifier(from: className)
             classNode.addChild(identifierNode)
         }
@@ -314,6 +300,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             
             if let accessNode = accessNode {
                 context.addChildNode(accessNode)
+                nodeFactory.updateSourceLocation(for: accessNode, with: ctx)
             }
         }
 
@@ -376,7 +363,6 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             isInNonnullContext: isInNonnullContext(ctx),
             typeParser: typeParser,
             nonnullContextQuerier: nonnullContextQuerier,
-            commentQuerier: commentQuerier,
             nodeFactory: nodeFactory,
             inOptionalContext: inOptionalContext
         )
@@ -445,7 +431,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         
         let methodBody = nodeFactory.makeMethodBody(from: ctx)
         
-        node.body = methodBody
+        node.addChild(methodBody)
     }
     
     override func enterMethodSelector(_ ctx: ObjectiveCParser.MethodSelectorContext) {
@@ -485,16 +471,6 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         if let ident = ident {
             node.addChild(ident)
         }
-    }
-    
-    override func enterEnumerator(_ ctx: ObjectiveCParser.EnumeratorContext) {
-        guard let identifier = ctx.enumeratorIdentifier()?.identifier() else {
-            return
-        }
-        
-        let enumCase = nodeFactory.makeEnumCase(from: ctx, identifier: identifier)
-            
-        context.addChildNode(enumCase)
     }
     
     // MARK: - Function Declaration/Definition
@@ -561,7 +537,8 @@ private class StaticDeclarationsVisitor: ObjectiveCParserVisitor<[ObjcASTNode]> 
 
         let collector = DefinitionCollector(
             nonnullContextQuerier: nodeFactory.nonnullContextQuerier,
-            nodeFactory: nodeFactory
+            nodeFactory: nodeFactory,
+            commentQuerier: .init(allComments: [])
         )
         collector.delegate = delegate
 
@@ -638,7 +615,6 @@ private class PropertyListener: ObjectiveCParserBaseListener {
     var property: ObjcPropertyDefinitionNode
     var typeParser: ObjcTypeParser
     var nonnullContextQuerier: NonnullContextQuerier
-    var commentQuerier: CommentQuerier
     var nodeFactory: ObjcASTNodeFactory
     var inOptionalContext: Bool
     
@@ -646,7 +622,6 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         isInNonnullContext: Bool,
         typeParser: ObjcTypeParser,
         nonnullContextQuerier: NonnullContextQuerier,
-        commentQuerier: CommentQuerier,
         nodeFactory: ObjcASTNodeFactory,
         inOptionalContext: Bool
     ) {
@@ -654,7 +629,6 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         self.property = ObjcPropertyDefinitionNode(isInNonnullContext: isInNonnullContext)
         self.typeParser = typeParser
         self.nonnullContextQuerier = nonnullContextQuerier
-        self.commentQuerier = commentQuerier
         self.nodeFactory = nodeFactory
         self.inOptionalContext = inOptionalContext
     }
@@ -663,7 +637,8 @@ private class PropertyListener: ObjectiveCParserBaseListener {
 
         let collector = DefinitionCollector(
             nonnullContextQuerier: nonnullContextQuerier,
-            nodeFactory: nodeFactory
+            nodeFactory: nodeFactory,
+            commentQuerier: .init(allComments: [])
         )
 
         return collector
@@ -676,7 +651,6 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         )
         nodeFactory.updateSourceLocation(for: node, with: ctx)
         property.addChild(node)
-        property.precedingComments = commentQuerier.popAllCommentsBefore(rule: ctx)
         
         if ctx.ibOutletQualifier() != nil {
             property.hasIbOutletSpecifier = true
@@ -764,28 +738,27 @@ private class GenericParseTreeContextMapper {
     private var source: Source
     
     private var nonnullContextQuerier: NonnullContextQuerier
-    private var commentQuerier: CommentQuerier
     private var nodeFactory: ObjcASTNodeFactory
     
-    init(source: Source,
-         nonnullContextQuerier: NonnullContextQuerier,
-         commentQuerier: CommentQuerier,
-         nodeFactory: ObjcASTNodeFactory) {
+    init(
+        source: Source,
+        nonnullContextQuerier: NonnullContextQuerier,
+        nodeFactory: ObjcASTNodeFactory
+    ) {
         
         self.source = source
         self.nonnullContextQuerier = nonnullContextQuerier
-        self.commentQuerier = commentQuerier
         self.nodeFactory = nodeFactory
     }
     
     func addRuleMap<T: ParserRuleContext, U: ObjcInitializableNode>(
         rule: T.Type,
-        nodeType: U.Type,
-        collectComments: Bool = false) {
+        nodeType: U.Type
+    ) {
         
         assert(match(ruleType: rule) == nil, "Duplicated mapping rule for parser rule context \(rule)")
         
-        pairs.append(.type(rule: rule, nodeType: nodeType, collectComments: collectComments))
+        pairs.append(.type(rule: rule, nodeType: nodeType))
     }
     
     func addRuleMap<T: ParserRuleContext, U: ObjcInitializableNode>(rule: T.Type, node: U) {
@@ -809,16 +782,12 @@ private class GenericParseTreeContextMapper {
         }
         
         switch nodeType {
-        case let .type(_, nodeType, collectComments):
+        case let .type(_, nodeType):
             let node =
                 nodeType.init(isInNonnullContext:
                     nonnullContextQuerier.isInNonnullContext(rule))
             
             nodeFactory.updateSourceLocation(for: node, with: rule)
-            
-            if collectComments {
-                node.precedingComments = commentQuerier.popAllCommentsBefore(rule: rule)
-            }
             
             context.pushContext(node: node)
             
@@ -835,7 +804,7 @@ private class GenericParseTreeContextMapper {
         
         if let popped = context.popContext() {
             switch pair {
-            case .type(_, let nodeType, _):
+            case .type(_, let nodeType):
                 assert(type(of: popped) == nodeType)
             case .instance(_, let node):
                 assert(popped === node)
@@ -852,12 +821,12 @@ private class GenericParseTreeContextMapper {
     }
     
     private enum Pair {
-        case type(rule: ParserRuleContext.Type, nodeType: ObjcInitializableNode.Type, collectComments: Bool)
+        case type(rule: ParserRuleContext.Type, nodeType: ObjcInitializableNode.Type)
         case instance(rule: ParserRuleContext.Type, node: ObjcInitializableNode)
         
         var ruleType: ParserRuleContext.Type {
             switch self {
-            case .type(let rule, _, _):
+            case .type(let rule, _):
                 return rule
             case .instance(let rule, _):
                 return rule

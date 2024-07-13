@@ -35,6 +35,6 @@ public extension Asserter where Object: FromSourceIntention {
         let converted = object.precedingComments.map(\.string)
         return asserter(for: converted) {
             $0.assert(equals: precedingComments, file: file, line: line)
-        }.map(self)
+        }.mapAsserter(self)
     }
 }

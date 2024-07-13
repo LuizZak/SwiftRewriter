@@ -1,5 +1,7 @@
+import GrammarModelBase
+
 /// A class category that extends a class with additional properties/methods/ivars/protocols.
-public class ObjcClassCategoryInterfaceNode: ObjcASTNode, ObjcInitializableNode {
+public class ObjcClassCategoryInterfaceNode: ObjcASTNode, ObjcInitializableNode, CommentedASTNodeType {
     public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
@@ -32,7 +34,7 @@ public extension ObjcClassCategoryInterfaceNode {
 
 /// A syntax node for an Objective-C class implementation (`@implementation`)
 /// declaration for a category.
-public class ObjcClassCategoryImplementationNode: ObjcASTNode, ObjcInitializableNode {
+public class ObjcClassCategoryImplementationNode: ObjcASTNode, ObjcInitializableNode, CommentedASTNodeType {
     public var identifier: ObjcIdentifierNode? {
         firstChild()
     }

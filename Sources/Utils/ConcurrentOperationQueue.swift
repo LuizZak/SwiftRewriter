@@ -92,11 +92,7 @@ public class ConcurrentOperationQueue {
             do {
                 try next.block()
             } catch {
-                __firstError.modifyingValue {
-                    if $0 == nil {
-                        $0 = error
-                    }
-                }
+                __firstError.setIfNil(error)
             }
         }
 
@@ -165,11 +161,7 @@ public class ConcurrentOperationQueue {
             do {
                 try block()
             } catch {
-                self.__firstError.modifyingValue {
-                    if $0 == nil {
-                        $0 = error
-                    }
-                }
+                self.__firstError.setIfNil(error)
             }
         }
 

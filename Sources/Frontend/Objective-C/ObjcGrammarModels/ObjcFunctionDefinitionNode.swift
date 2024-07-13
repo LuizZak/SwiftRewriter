@@ -1,5 +1,7 @@
+import GrammarModelBase
+
 /// Represents a global function definition
-public class ObjcFunctionDefinitionNode: ObjcASTNode, ObjcInitializableNode {
+public class ObjcFunctionDefinitionNode: ObjcASTNode, ObjcInitializableNode, CommentedASTNodeType {
     public var returnType: ObjcTypeNameNode? {
         firstChild()
     }

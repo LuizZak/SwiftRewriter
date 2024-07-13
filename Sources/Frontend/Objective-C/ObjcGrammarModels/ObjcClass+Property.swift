@@ -1,7 +1,7 @@
 import Utils
 import GrammarModelBase
 
-public class ObjcPropertyDefinitionNode: ObjcASTNode, ObjcInitializableNode {
+public class ObjcPropertyDefinitionNode: ObjcASTNode, ObjcInitializableNode, CommentedASTNodeType {
     /// Type identifier
     public var type: ObjcTypeNameNode? {
         firstChild()

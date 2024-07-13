@@ -102,6 +102,24 @@ class DefinitionCollectorTests: XCTestCase {
         }
     }
 
+    func testCollect_singleDecl_variable_pointer_mixedSpecifiers() {
+        let tester = prepareTest(declaration: "NSString *const _Nonnull __autoreleasing a;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: ObjcVariableDeclarationNode.self)?
+                    .assert(name: "a")?
+                    .assert(type:
+                        .specified(
+                            specifiers: [.arcSpecifier(.autoreleasing)],
+                            .pointer("NSString", qualifiers: [.const], nullabilitySpecifier: .nonnull)
+                        )
+                    )?
+                    .assertNoInitializer()
+            }
+        }
+    }
+
     func testCollect_singleDecl_variable_typeName_nullabilitySpecifier() {
         let tester = prepareTest(declaration: "_Nonnull callback a;")
 
@@ -213,7 +231,11 @@ class DefinitionCollectorTests: XCTestCase {
                         p2.assertNoName()?
                             .assert(type: .pointer("signed int"))
                     }?
-                    .assert(isVariadic: false)
+                    .assert(isVariadic: false)?
+                    .asserter(forKeyPath: \.parameterList) { parameterList in
+                        parameterList.assertNotNil()?
+                            .assertIsLocationValid()
+                    }
             }?.assertIsAtEnd()
         }
     }
@@ -512,6 +534,62 @@ class DefinitionCollectorTests: XCTestCase {
         }
     }
 
+    func testCollect_singleDecl_enum_typedef() {
+        let tester = prepareTest(declaration: "typedef enum { CASE0 = 0, CASE1 = 1, CASE2 } AnEnum;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: ObjcEnumDeclarationNode.self)?
+                    .assert(name: "AnEnum")?
+                    .assertNoTypeName()?
+                    .assertEnumeratorCount(3)?
+                    .asserter(forEnumeratorName: "CASE0") { case0 in
+                        case0
+                            .assert(name: "CASE0")?
+                            .assert(expressionString: "0")
+                    }?
+                    .asserter(forEnumeratorName: "CASE1") { case0 in
+                        case0
+                            .assert(name: "CASE1")?
+                            .assert(expressionString: "1")
+                    }?
+                    .asserter(forEnumeratorName: "CASE2") { case0 in
+                        case0
+                            .assert(name: "CASE2")?
+                            .assertNoExpression()
+                    }
+            }
+        }
+    }
+
+    func testCollect_singleDecl_enum_typedef_repeatedName() {
+        let tester = prepareTest(declaration: "typedef enum AnEnum { AnEnum_Case0, AnEnum_Case1, AnEnum_Case2 } AnEnum;")
+
+        tester.assert { nodeList in
+            nodeList.assertCount(1)?.asserter(forItemAt: 0) { decl in
+                decl.assert(isOfType: ObjcEnumDeclarationNode.self)?
+                    .assert(name: "AnEnum")?
+                    .assertNoTypeName()?
+                    .assertEnumeratorCount(3)?
+                    .asserter(forEnumeratorName: "AnEnum_Case0") { case0 in
+                        case0
+                            .assert(name: "AnEnum_Case0")?
+                            .assertNoExpression()
+                    }?
+                    .asserter(forEnumeratorName: "AnEnum_Case1") { case0 in
+                        case0
+                            .assert(name: "AnEnum_Case1")?
+                            .assertNoExpression()
+                    }?
+                    .asserter(forEnumeratorName: "AnEnum_Case2") { case0 in
+                        case0
+                            .assert(name: "AnEnum_Case2")?
+                            .assertNoExpression()
+                    }
+            }
+        }
+    }
+
     func testCollect_singleDecl_enum_nsEnum() {
         let tester = prepareTest(declaration: "typedef NS_ENUM(NSInteger, AnEnum) { CASE0 = 0, CASE1 = 1, CASE2 };")
 
@@ -743,8 +821,7 @@ private extension DefinitionCollectorTests {
                 nonnullContextQuerier: NonnullContextQuerier(
                     nonnullMacroRegionsTokenRange: [],
                     nonnullMacroRegionsRanges: []
-                ),
-                commentQuerier: CommentQuerier(allComments: [])
+                )
             )
 
             super.init(ruleDeriver: ObjectiveCParser.declaration)
@@ -758,7 +835,8 @@ private extension DefinitionCollectorTests {
 
             let sut = DefinitionCollector(
                 nonnullContextQuerier: nodeFactory.nonnullContextQuerier,
-                nodeFactory: nodeFactory
+                nodeFactory: nodeFactory,
+                commentQuerier: .init(allComments: [])
             )
             sut.delegate = delegate
 
@@ -788,7 +866,8 @@ private extension DefinitionCollectorTests {
 
             let sut = DefinitionCollector(
                 nonnullContextQuerier: nodeFactory.nonnullContextQuerier,
-                nodeFactory: nodeFactory
+                nodeFactory: nodeFactory,
+                commentQuerier: .init(allComments: [])
             )
             sut.delegate = delegate
 

@@ -1,6 +1,7 @@
 import GrammarModelBase
 import SwiftAST
 
+// TODO: Rename to TypealiasGenerationIntention
 /// An intention of generating a Swift `typealias` clause.
 public final class TypealiasIntention: FromSourceIntention {
     public var fromType: SwiftType

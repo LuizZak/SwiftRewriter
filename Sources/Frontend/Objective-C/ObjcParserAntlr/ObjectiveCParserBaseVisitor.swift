@@ -58,6 +58,13 @@ open class ObjectiveCParserBaseVisitor<T>: AbstractParseTreeVisitor<T> {
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	open func visitCategoryInterfaceName(_ ctx: ObjectiveCParser.CategoryInterfaceNameContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	open func visitClassImplementation(_ ctx: ObjectiveCParser.ClassImplementationContext) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
@@ -906,6 +913,13 @@ open class ObjectiveCParserBaseVisitor<T>: AbstractParseTreeVisitor<T> {
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	open func visitPointerEntry(_ ctx: ObjectiveCParser.PointerEntryContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitPointerSpecifier(_ ctx: ObjectiveCParser.PointerSpecifierContext) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
 	 *

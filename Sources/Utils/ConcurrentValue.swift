@@ -97,3 +97,31 @@ public final class ConcurrentValue<T> {
         pthread_rwlock_unlock(&lock)
     }
 }
+
+public extension ConcurrentValue where T == Int {
+    /// Performs an increment of the underlying concurrent value, returning it's
+    /// value after it was incremented, similar to C's `++i`.
+    @inlinable
+    func prefixIncrement() -> Int {
+        modifyingValue({ $0 += 1; return $0 })
+    }
+
+    /// Performs an increment of the underlying concurrent value, returning it's
+    /// value before it was incremented, similar to C's `i++`.
+    @inlinable
+    func postfixIncrement() -> Int {
+        modifyingValue({ v in defer { v += 1 }; return v })
+    }
+}
+
+public extension ConcurrentValue {
+    /// Sets the underlying concurrent value to be a given value, but only if
+    /// it's storage is currently `nil`.
+    func setIfNil<Wrapped>(_ value: Wrapped) where T == Optional<Wrapped> {
+        modifyingValue {
+            if $0 == nil {
+                $0 = value
+            }
+        }
+    }
+}

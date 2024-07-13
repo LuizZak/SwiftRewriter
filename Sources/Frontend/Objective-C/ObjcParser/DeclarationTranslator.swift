@@ -32,9 +32,12 @@ public class DeclarationTranslator {
         var result: ASTNodeDeclaration?
         let partialType = PartialType(decl.specifiers, pointer: decl.pointer)
 
+        // TODO: Reduce duplication with `declaration` and `translateObjectiveCType` methods bellow
+
         /// Recursively unwraps nested declarators into root declaration kinds.
         func _applyDeclarator(
-            _ declKind: DeclarationExtractor.DeclarationKind?
+            _ declKind: DeclarationExtractor.DeclarationKind?,
+            specifiers: [DeclarationExtractor.DeclSpecifier]
         ) -> ASTNodeDeclaration? {
 
             guard let declKind = declKind else {
@@ -59,6 +62,7 @@ public class DeclarationTranslator {
                         rule: decl.declarationNode.syntaxElement,
                         nullability: partialType.nullability,
                         arcSpecifier: partialType.arcSpecifier,
+                        typeQualifiers: partialType.declSpecifiers.typeQualifiers(),
                         identifier: identifierNode,
                         type: typeNode,
                         initialValue: nil,
@@ -67,20 +71,29 @@ public class DeclarationTranslator {
                 )
             
             case .pointer(let base, _):
-                guard let base = _applyDeclarator(base) else {
+                guard let base = _applyDeclarator(base, specifiers: specifiers) else {
                     return nil
                 }
 
                 // TODO: Support other types of pointer declarators
                 switch base {
                 case .function(let decl):
-                    result = .functionPointer(
+                    
+                    let type: ObjcType = .functionPointer(
+                        name: decl.identifier.name,
+                        returnType: decl.returnType.type,
+                        parameters: decl.parameters.map({ $0.type.type })
+                    )
+                    
+                    let typeNode = typeNameNode(from: type, syntax: ctxSyntax)
+
+                    result = .variable(
                         .init(
                             rule: decl.rule,
                             nullability: nil,
+                            typeQualifiers: [],
                             identifier: decl.identifier,
-                            parameters: decl.parameters,
-                            returnType: decl.returnType,
+                            type: typeNode,
                             initialValue: nil,
                             isStatic: partialType.isStatic
                         )
@@ -98,21 +111,27 @@ public class DeclarationTranslator {
                 let parameterNodes = parameters.compactMap { argument in
                     self.functionArgument(from: argument)
                 }
-                let returnTypeNode = self.typeNameNode(
-                    from: baseType,
-                    syntax: ctxSyntax
-                )
 
-                result = .block(
+                guard let type = partialType.makeBlockType(
+                    identifier: identifierNode.name,
+                    parameters: parameterNodes.map({ $0.type.type }),
+                    blockSpecifiers: blockSpecifiers,
+                    { translateObjectiveCType($0) }
+                ) else {
+                    return nil
+                }
+
+                let typeNode = typeNameNode(from: type, syntax: ctxSyntax)
+
+                result = .variable(
                     .init(
                         rule: decl.declarationNode.syntaxElement,
-                        nullability: blockSpecifiers.nullabilitySpecifier().last ?? partialType.nullability,
-                        arcSpecifier: blockSpecifiers.arcBehaviourSpecifier().last ?? partialType.arcSpecifier,
+                        nullability: specifiers.nullabilitySpecifiers().first,
+                        arcSpecifier: blockSpecifiers.arcBehaviourSpecifier().last ?? specifiers.arcSpecifiers().last,
                         typeQualifiers: blockSpecifiers.typeQualifier(),
                         typePrefix: blockSpecifiers.typePrefix().last,
                         identifier: identifierNode,
-                        parameters: parameterNodes,
-                        returnType: returnTypeNode,
+                        type: typeNode,
                         initialValue: nil,
                         isStatic: partialType.isStatic
                     )
@@ -174,6 +193,8 @@ public class DeclarationTranslator {
                         rule: decl.declarationNode.syntaxElement,
                         nullability: partialType.nullability,
                         arcSpecifier: nil,
+                        typeQualifiers: [],
+                        typePrefix: nil,
                         identifier: identifierNode,
                         type: typeNameNode,
                         initialValue: nil,
@@ -185,7 +206,7 @@ public class DeclarationTranslator {
             return result
         }
 
-        result = _applyDeclarator(decl.declaration)
+        result = _applyDeclarator(decl.declaration, specifiers: decl.specifiers)
         result?.initializer = self.initializerInfo(from: decl.initializer)
 
         // Conversion into struct/enum/typedef
@@ -276,6 +297,7 @@ public class DeclarationTranslator {
 
         func _applyDeclarator(
             _ declKind: DeclarationExtractor.DeclarationKind?,
+            specifiers: [DeclarationExtractor.DeclSpecifier],
             type: ObjcType
         ) -> ObjcType? {
 
@@ -298,7 +320,7 @@ public class DeclarationTranslator {
                     parameters: paramTypes
                 )
 
-                return _applyDeclarator(base, type: partial)
+                return _applyDeclarator(base, specifiers: specifiers, type: partial)
             
             case .staticArray(let base, _, let length):
                 let partial: ObjcType
@@ -309,37 +331,32 @@ public class DeclarationTranslator {
                     partial = .pointer(type)
                 }
 
-                return _applyDeclarator(base, type: partial)
+                return _applyDeclarator(base, specifiers: specifiers, type: partial)
             
             case .pointer(let base, _):
                 let partial: ObjcType = .pointer(type)
 
-                return _applyDeclarator(base, type: partial)
+                return _applyDeclarator(base, specifiers: specifiers, type: partial)
             
             case .block(let blockSpecifiers, let base, let params):
                 guard let paramTypes = functionArgumentTypes(from: params) else {
                     return nil
                 }
 
-                var partial: ObjcType = .blockType(
-                    name: nil,
-                    returnType: type,
+                guard let type = partialType.makeBlockType(
+                    identifier: nil,
                     parameters: paramTypes,
-                    nullabilitySpecifier: blockSpecifiers.nullabilitySpecifier().last ?? partialType.nullability
-                )
-
-                if let lastArcSpecifier = blockSpecifiers.arcBehaviourSpecifier().last {
-                    partial = .specified(specifiers: [.arcSpecifier(lastArcSpecifier)], partial)
-                }
-                if !blockSpecifiers.typeQualifier().isEmpty {
-                    partial = .qualified(partial, qualifiers: blockSpecifiers.typeQualifier())
+                    blockSpecifiers: blockSpecifiers,
+                    { translateObjectiveCType($0) }
+                ) else {
+                    return nil
                 }
 
-                return _applyDeclarator(base, type: partial)
+                return _applyDeclarator(base, specifiers: specifiers, type: type)
             }
         }
 
-        return _applyDeclarator(decl.declaration, type: type)
+        return _applyDeclarator(decl.declaration, specifiers: decl.specifiers, type: type)
     }
 
     /// Translates the type of a generic parameter into an appropriate `ObjcType`
@@ -358,12 +375,13 @@ public class DeclarationTranslator {
     ) -> ObjcType? {
 
         let partialType = PartialType(decl.specifiers, pointer: decl.pointer)
-        guard let type = partialType.makeType({ translateObjectiveCType($0) }) else {
+        guard let baseType = partialType.makeType({ translateObjectiveCType($0) }) else {
             return nil
         }
 
         func _applyDeclarator(
             _ declKind: DeclarationExtractor.AbstractDeclarationKind?,
+            specifiers: [DeclarationExtractor.DeclSpecifier],
             type: ObjcType
         ) -> ObjcType? {
 
@@ -383,27 +401,23 @@ public class DeclarationTranslator {
                     parameters: paramTypes
                 )
 
-                return _applyDeclarator(base, type: partial)
+                return _applyDeclarator(base, specifiers: specifiers, type: partial)
             
-            case .block(let base, let specifiers, let params):
+            case .block(let base, let blockSpecifiers, let params):
                 guard let paramTypes = functionArgumentTypes(from: params) else {
                     return nil
                 }
 
-                var partial: ObjcType = .blockType(
-                    name: nil,
-                    returnType: type,
+                guard let type = partialType.makeBlockType(
+                    identifier: nil,
                     parameters: paramTypes,
-                    nullabilitySpecifier: specifiers.nullabilitySpecifier().last
-                )
-                if let lastArcSpecifier = specifiers.arcBehaviourSpecifier().last {
-                    partial = .specified(specifiers: [.arcSpecifier(lastArcSpecifier)], partial)
-                }
-                if !specifiers.typeQualifier().isEmpty {
-                    partial = .qualified(partial, qualifiers: specifiers.typeQualifier())
+                    blockSpecifiers: blockSpecifiers,
+                    { translateObjectiveCType($0) }
+                ) else {
+                    return nil
                 }
 
-                return _applyDeclarator(base, type: partial)
+                return _applyDeclarator(base, specifiers: specifiers, type: type)
             
             case .staticArray(let base, _, let length):
                 let partial: ObjcType
@@ -414,11 +428,11 @@ public class DeclarationTranslator {
                     partial = .pointer(type)
                 }
 
-                return _applyDeclarator(base, type: partial)
+                return _applyDeclarator(base, specifiers: specifiers, type: partial)
             }
         }
 
-        return _applyDeclarator(decl.declaration, type: type)
+        return _applyDeclarator(decl.declaration, specifiers: decl.specifiers, type: baseType)
     }
 
     /// Returns `true` if the contents of a declaration along with a partial type
@@ -714,16 +728,9 @@ public class DeclarationTranslator {
 
     /// A declaration that has been converted into a mode that is suitable to
     /// create `ASTNode` instances out of.
-    // TODO: Collapse `functionPointer` and `block` into `variable` case.
     public enum ASTNodeDeclaration {
         case variable(
             ASTVariableDeclaration
-        )
-        case block(
-            ASTBlockDeclaration
-        )
-        case functionPointer(
-            ASTFunctionPointerDeclaration
         )
         case function(
             ASTFunctionDefinition
@@ -742,10 +749,6 @@ public class DeclarationTranslator {
         public var identifierNode: IdentifierInfo? {
             switch self {
             case .variable(let decl):
-                return decl.identifier
-            case .block(let decl):
-                return decl.identifier
-            case .functionPointer(let decl):
                 return decl.identifier
             case .function(let decl):
                 return decl.identifier
@@ -767,7 +770,7 @@ public class DeclarationTranslator {
             case .typedef(let decl):
                 return decl.typeNode
             
-            case .block, .functionPointer, .function, .enumDecl, .structOrUnionDecl:
+            case .function, .enumDecl, .structOrUnionDecl:
                 return nil
             }
         }
@@ -780,10 +783,6 @@ public class DeclarationTranslator {
                 switch self {
                 case .variable(let decl):
                     return decl.initialValue
-                case .block(let decl):
-                    return decl.initialValue
-                case .functionPointer(let decl):
-                    return decl.initialValue
 
                 case .enumDecl, .structOrUnionDecl, .typedef, .function:
                     return nil
@@ -791,19 +790,11 @@ public class DeclarationTranslator {
             }
             set {
                 switch self {
-                case .block(let decl):
-                    self = .block(
-                        decl.withInitializer(newValue)
-                    )
-
-                case .functionPointer(let decl):
-                    self = .functionPointer(
-                        decl.withInitializer(newValue)
-                    )
                 case .variable(let decl):
                     self = .variable(
                         decl.withInitializer(newValue)
                     )
+
                 case .enumDecl, .structOrUnionDecl, .typedef, .function:
                     break
                 }
@@ -832,25 +823,6 @@ public class DeclarationTranslator {
                     $0.type.type
                 })
 
-            case .functionPointer(let decl):
-                return .functionPointer(name: decl.identifier.name, returnType: decl.returnType.type, parameters: decl.parameters.compactMap {
-                    $0.type.type
-                })
-
-            case .block(let decl):
-                var partial: ObjcType = .blockType(name: decl.identifier.name, returnType: decl.returnType.type, parameters: decl.parameters.compactMap {
-                    $0.type.type
-                }, nullabilitySpecifier: decl.nullability)
-
-                if let arcSpecifier = decl.arcSpecifier {
-                    partial = .specified(specifiers: [.arcSpecifier(arcSpecifier)], partial)
-                }
-                if decl.typeQualifiers.count > 0 {
-                    partial = .qualified(partial, qualifiers: decl.typeQualifiers)
-                }
-
-                return partial
-            
             case .structOrUnionDecl(let decl):
                 return (decl.identifier?.name).map { .typeName($0) }
 
@@ -865,12 +837,6 @@ public class DeclarationTranslator {
             case .variable(let decl):
                 return decl.rule
 
-            case .block(let decl):
-                return decl.rule
-
-            case .functionPointer(let decl):
-                return decl.rule
-            
             case .function(let decl):
                 return decl.rule
 
@@ -911,49 +877,16 @@ public class DeclarationTranslator {
         public var rule: DeclarationSyntaxElementType
         public var nullability: ObjcNullabilitySpecifier?
         public var arcSpecifier: ObjcArcBehaviorSpecifier?
+        public var typeQualifiers: [ObjcTypeQualifier]
+        public var typePrefix: DeclarationExtractor.TypePrefix?
         public var identifier: IdentifierInfo
         public var type: TypeNameInfo
         public var initialValue: InitializerInfo?
         public var isStatic: Bool
 
-        public func withInitializer(_ value: InitializerInfo?) -> Self {
-            var copy = self
-            copy.initialValue = value
-            return copy
+        var isBlockDeclaration: Bool {
+            type.type.unspecifiedUnqualified.isBlock
         }
-    }
-
-    // TODO: Consider collapsing into `ASTVariableDeclaration`
-    /// Specifications for a block declaration.
-    public struct ASTBlockDeclaration {
-        public var rule: DeclarationSyntaxElementType
-        public var nullability: ObjcNullabilitySpecifier?
-        public var arcSpecifier: ObjcArcBehaviorSpecifier?
-        public var typeQualifiers: [ObjcTypeQualifier]
-        public var typePrefix: DeclarationExtractor.TypePrefix?
-        public var identifier: IdentifierInfo
-        public var parameters: [FunctionParameterInfo]
-        public var returnType: TypeNameInfo
-        public var initialValue: InitializerInfo?
-        public var isStatic: Bool
-
-        public func withInitializer(_ value: InitializerInfo?) -> Self {
-            var copy = self
-            copy.initialValue = value
-            return copy
-        }
-    }
-
-    // TODO: Collapse into `ASTVariableDeclaration`
-    /// Specifications for a function pointer declaration.
-    public struct ASTFunctionPointerDeclaration {
-        public var rule: DeclarationSyntaxElementType
-        public var nullability: ObjcNullabilitySpecifier?
-        public var identifier: IdentifierInfo
-        public var parameters: [FunctionParameterInfo]
-        public var returnType: TypeNameInfo
-        public var initialValue: InitializerInfo?
-        public var isStatic: Bool
 
         public func withInitializer(_ value: InitializerInfo?) -> Self {
             var copy = self
@@ -1182,17 +1115,54 @@ public class DeclarationTranslator {
         func makeBlockType(
             identifier: String?,
             parameters: [ObjcType],
+            blockSpecifiers: [DeclarationExtractor.BlockDeclarationSpecifier],
             _ genericTypeParsing: (DeclarationExtractor.GenericTypeParameter) -> ObjcType?
         ) -> ObjcType? {
-            let baseType = makeType(genericTypeParsing)
+            // Nullability and ARC specifiers leading up apply to the block type
+            // itself and not its return type
+            let returnType: ObjcType?
+            let stript = PartialType(
+                declSpecifiers.filter({
+                    $0.arcSpecifier == nil && $0.nullabilitySpecifier == nil
+                }),
+                pointer: pointer
+            )
+            
+            if stript.declSpecifiers.isEmpty {
+                returnType = .void
+            } else {
+                returnType = stript.makeType(genericTypeParsing)
+            }
+            guard let returnType else {
+                return nil
+            }
 
-            return baseType.map {
-                .blockType(
-                    name: identifier,
-                    returnType: $0,
-                    parameters: parameters
+            var result: ObjcType = .blockType(
+                name: identifier,
+                returnType: returnType,
+                parameters: parameters,
+                nullabilitySpecifier: blockSpecifiers.nullabilitySpecifier().first
+            )
+            if let arcSpecifier = declSpecifiers.arcSpecifiers().last ?? blockSpecifiers.arcBehaviourSpecifier().last {
+                result = .specified(
+                    specifiers: [.arcSpecifier(arcSpecifier)],
+                    result
                 )
             }
+            if let nullability = declSpecifiers.nullabilitySpecifiers().last {
+                result = .nullabilitySpecified(
+                    specifier: nullability,
+                    result
+                )
+            }
+            if !blockSpecifiers.typeQualifier().isEmpty {
+                result = .qualified(
+                    result,
+                    qualifiers: blockSpecifiers.typeQualifier()
+                )
+            }
+
+            return result
         }
 
         func makeFunctionPointerType(
@@ -1249,11 +1219,30 @@ public class DeclarationTranslator {
 
             if let pointer = pointer {
                 for ptr in pointer.pointers {
+                    let typeQualifiers =
+                        ptr.specifiers
+                        .compactMap(\.typeQualifier)
+                    let nullabilitySpecifiers =
+                        ptr.specifiers
+                        .compactMap(\.nullabilitySpecifier)
+                    let arcBehaviourSpecifiers =
+                        ptr.specifiers
+                        .compactMap(\.arcBehaviourSpecifier)
+
                     result = .pointer(
                         result,
-                        qualifiers: ptr.typeQualifiers ?? [],
-                        nullabilitySpecifier: ptr.nullabilitySpecifier
+                        qualifiers: typeQualifiers,
+                        nullabilitySpecifier: nullabilitySpecifiers.last
                     )
+
+                    if let arcBehaviour = arcBehaviourSpecifiers.last {
+                        result = .specified(
+                            specifiers: [
+                                .arcSpecifier(arcBehaviour)
+                            ],
+                            result
+                        )
+                    }
                 }
             }
 

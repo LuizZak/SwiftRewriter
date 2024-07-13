@@ -28,7 +28,7 @@ public struct SourceLocation: Comparable, Hashable, Codable {
 
         return SourceLength(
             newlines: lineOffset,
-            columnsAtLastLine: columnsAtLastLine,
+            columnsAtLastLine: columnsAtLastLine - 1, // SourceLength has 0-based column index for selection lengths
             utf8Length: utf8Offset
         )
     }

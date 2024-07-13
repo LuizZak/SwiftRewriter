@@ -141,6 +141,8 @@ public class ObjcParser {
         traverser.traverse()
 
         importDirectives = ObjcParser.parseObjcImports(in: preprocessorDirectives)
+
+        applyComments()
         
         parsed = true
     }
@@ -257,14 +259,23 @@ public class ObjcParser {
             source: source,
             state: state,
             antlrSettings: antlrSettings,
-            nonnullContextQuerier: nonnullContextQuerier,
-            commentQuerier: commentQuerier
+            nonnullContextQuerier: nonnullContextQuerier
         )
         
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)
-        
+
         rootNode = listener.rootNode
+        rootNode.location = src.asSourceLocation(src.startIndex)
+        rootNode.length = rootNode.location.length(
+            to: src.asSourceLocation(src.endIndex)
+        )
+    }
+
+    private func applyComments() {
+        let applier = ObjcCommentApplier(comments: comments)
+
+        applier.applyAll(toTree: rootNode)
     }
     
     private func parseNSAssumeNonnullChannel(input: String) throws {
@@ -305,7 +316,7 @@ public class ObjcParser {
         }
     }
     
-    private func parseComments(input: String) {
+    internal func parseComments(input: String) {
         comments.removeAll()
         
         let ranges = input.cStyleCommentSectionRanges()
@@ -320,19 +331,25 @@ public class ObjcParser {
             let utf8Offset = input.utf8.distance(from: input.startIndex, to: range.lowerBound)
             let utf8Length = input.utf8.distance(from: range.lowerBound, to: range.upperBound)
             
-            let location = SourceLocation(line: lineStart,
-                                          column: colStart,
-                                          utf8Offset: utf8Offset)
+            let location = SourceLocation(
+                line: lineStart,
+                column: colStart,
+                utf8Offset: utf8Offset
+            )
             
             let length: SourceLength
             if lineStart == lineEnd {
-                length = SourceLength(newlines: 0,
-                                      columnsAtLastLine: colEnd - colStart,
-                                      utf8Length: utf8Length)
+                length = SourceLength(
+                    newlines: 0,
+                    columnsAtLastLine: colEnd - colStart,
+                    utf8Length: utf8Length
+                )
             } else {
-                length = SourceLength(newlines: lineEnd - lineStart,
-                                      columnsAtLastLine: colEnd - 1,
-                                      utf8Length: utf8Length)
+                length = SourceLength(
+                    newlines: lineEnd - lineStart,
+                    columnsAtLastLine: colEnd - 1,
+                    utf8Length: utf8Length
+                )
             }
             
             let commentString = String(input[range])
@@ -366,13 +383,25 @@ public class ObjcParser {
                     try lexer.advance(expectingCurrent: "<")
                     let path = lexer.consume(until: { $0 == ">"})
 
-                    imports.append(ObjcImportDecl(path: String(path), isSystemImport: true))
+                    imports.append(
+                        ObjcImportDecl(
+                            path: String(path),
+                            sourceRange: directive.sourceRange,
+                            isSystemImport: true
+                        )
+                    )
                 } else {
                     // Extract "[PATH]"
                     try lexer.advance(expectingCurrent: "\"")
                     let path = lexer.consume(until: { $0 == "\""})
 
-                    imports.append(ObjcImportDecl(path: String(path), isSystemImport: false))
+                    imports.append(
+                        ObjcImportDecl(
+                            path: String(path),
+                            sourceRange: directive.sourceRange,
+                            isSystemImport: false
+                        )
+                    )
                 }
             } catch {
                 // Ignore silently

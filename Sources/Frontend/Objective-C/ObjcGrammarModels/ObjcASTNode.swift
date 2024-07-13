@@ -10,13 +10,19 @@ open class ObjcASTNode: ASTNode {
     
     /// Instantiates a bare ObjcASTNode with a given range.
     /// Defaults to an invalid range
-    public init(isInNonnullContext: Bool,
-                location: SourceLocation = .invalid,
-                length: SourceLength = .zero,
-                existsInSource: Bool = true) {
+    public init(
+        isInNonnullContext: Bool,
+        location: SourceLocation = .invalid,
+        length: SourceLength = .zero,
+        existsInSource: Bool = true
+    ) {
         
         self.isInNonnullContext = isInNonnullContext
 
-        super.init(location: location, length: length, existsInSource: existsInSource)
+        super.init(
+            location: location,
+            length: length,
+            existsInSource: existsInSource
+        )
     }
 }

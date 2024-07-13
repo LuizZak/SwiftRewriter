@@ -1,6 +1,8 @@
+import GrammarModelBase
+
 /// A syntax node for an Objective-C class implementation (`@implementation`)
 /// declaration.
-public class ObjcClassImplementationNode: ObjcASTNode, ObjcInitializableNode {
+public class ObjcClassImplementationNode: ObjcASTNode, ObjcInitializableNode, CommentedASTNodeType {
     public var identifier: ObjcIdentifierNode? {
         firstChild()
     }

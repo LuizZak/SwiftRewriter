@@ -61,13 +61,27 @@ classInterface
     ;
 
 classInterfaceName
-    : className (COLON superclassName genericClassParametersSpecifier?)? (LT protocolList GT)?
+    : identifier
+    | identifier LT protocolList GT
+    | identifier genericTypeList
+    | identifier genericTypeList LT protocolList GT
+    | identifier genericTypeList? COLON superclassName
+    | identifier genericTypeList? COLON superclassName LT protocolList GT
+    | identifier genericTypeList? COLON superclassName genericClassParametersSpecifier
+    | identifier genericTypeList? COLON superclassName genericClassParametersSpecifier LT protocolList GT
     ;
 
 categoryInterface
     : INTERFACE
-       categoryName=className LP identifier? RP (LT protocolList GT)? instanceVariables? interfaceDeclarationList?
+       categoryInterfaceName LP identifier? RP (LT protocolList GT)? instanceVariables? interfaceDeclarationList?
       END
+    ;
+
+categoryInterfaceName
+    : identifier
+    | identifier LT protocolList GT
+    | identifier genericTypeList
+    | identifier genericTypeList LT protocolList GT
     ;
 
 classImplementation
@@ -122,7 +136,10 @@ classDeclarationList
     ;
 
 classDeclaration
-    : className (LT protocolList GT)?
+    : identifier
+    | identifier LT protocolList GT
+    | identifier genericTypeList
+    | identifier genericTypeList LT protocolList GT
     ;
 
 protocolList
@@ -149,7 +166,7 @@ propertyAttribute
 
 protocolName
     : LT protocolList GT
-    | (COVARIANT | CONTRAVARIANT)? identifier
+    | identifier
     ;
 
 instanceVariables
@@ -498,7 +515,7 @@ attributeSpecifier
     ;
 
 atomicTypeSpecifier
-    : ATOMIC_ LP typeName RP
+    :   ATOMIC_ LP typeName RP
     ;
 
 fieldDeclaration
@@ -707,7 +724,13 @@ pointer
     ;
 
 pointerEntry
-    : (MUL) typeQualifierList? nullabilitySpecifier?
+    : (MUL) pointerSpecifier*
+    ;
+
+pointerSpecifier
+    : typeQualifier
+    | arcBehaviourSpecifier
+    | nullabilitySpecifier
     ;
 
 macro
@@ -879,7 +902,7 @@ shiftExpression
     : additiveExpression (shiftOperator additiveExpression)*
     ;
 shiftOperator
-    : LSHIFT | RSHIFT
+    : (LT LT) | (GT GT)
     ;
 
 additiveExpression

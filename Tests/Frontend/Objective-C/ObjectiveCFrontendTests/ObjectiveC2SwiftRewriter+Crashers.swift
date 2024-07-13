@@ -25,7 +25,6 @@ class ObjectiveC2SwiftRewriter_CrashersTests: XCTestCase {
                     switch foo {
                     case 0:
                         foo()
-
                         bar()
                     default:
                         break

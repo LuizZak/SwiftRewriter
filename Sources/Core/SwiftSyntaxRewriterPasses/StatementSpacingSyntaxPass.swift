@@ -18,19 +18,23 @@ public class StatementSpacingSyntaxPass: SwiftSyntaxRewriterPass {
 }
 
 private class InnerSyntaxRewriter: SyntaxRewriter {
-    override func visit(_ node: CodeBlockItemListSyntax) -> Syntax {
+    override func visit(_ node: CodeBlockItemListSyntax) -> CodeBlockItemListSyntax {
         var statements = super.visit(node).as(CodeBlockItemListSyntax.self)!
         
         let ranges = rangeOfExpressionStatements(in: node)
         statements = separateExpressions(in: statements, ranges: ranges)
-        
-        return Syntax(ranges.reduce(statements) { stmts, range in
+
+        let result = ranges.reduce(statements) { stmts, range in
             analyzeRange(range, in: stmts)
-        })
+        }
+        
+        return result
     }
     
-    func separateExpressions(in statements: CodeBlockItemListSyntax,
-                             ranges: [Range<Int>]) -> CodeBlockItemListSyntax {
+    func separateExpressions(
+        in statements: CodeBlockItemListSyntax,
+        ranges: [Range<Int>]
+    ) -> CodeBlockItemListSyntax {
         
         var statements = statements
         
@@ -42,16 +46,16 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
             let rangeEnd = statements.index(statements.startIndex, offsetBy: range.upperBound)
             
             if range.lowerBound > 0 {
-                statements = statements.replacing(
-                    childAt: range.lowerBound,
-                    with: CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(statements[rangeStart]))!
+                statements = statements.with(
+                    \.[statements.index(statements.startIndex, offsetBy: range.lowerBound)],
+                    CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(statements[rangeStart]))!
                 )
             }
             
             if statements.count > range.upperBound {
-                statements = statements.replacing(
-                    childAt: range.upperBound,
-                    with: CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(statements[rangeEnd]))!
+                statements = statements.with(
+                    \.[statements.index(statements.startIndex, offsetBy: range.upperBound)],
+                    CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(statements[rangeEnd]))!
                 )
             }
         }
@@ -72,9 +76,9 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
         func addLineSpace(_ block: CodeBlockItemSyntax, _ index: CodeBlockItemListSyntax.Index) {
             let childIndex = stmts.distance(from: stmts.startIndex, to: index)
             
-            stmts = stmts.replacing(
-                childAt: childIndex,
-                with: CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(block))!
+            stmts = stmts.with(
+                \.[stmts.index(stmts.startIndex, offsetBy: childIndex)],
+                CodeBlockItemSyntax(SetEmptyLineLeadingTrivia().visit(block))!
             )
         }
         
@@ -96,7 +100,7 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
     }
     
     func identInStmt(_ stmt: CodeBlockItemSyntax) -> String? {
-        let desc = stmt.withoutTrivia().description
+        let desc = stmt.trimmed.description
         
         let lexer = Lexer(input: desc)
         lexer.skipWhitespace()
@@ -153,31 +157,31 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
     private class SetEmptyLineLeadingTrivia: SyntaxRewriter {
         var isFirstVisit: Bool = true
         
-        override func visit(_ token: TokenSyntax) -> Syntax {
+        override func visit(_ token: TokenSyntax) -> TokenSyntax {
             if isFirstVisit {
                 isFirstVisit = false
                 let trivia = .newlines(2)
                     + indentation(for: token)
                     + removingLeadingWhitespace(token.leadingTrivia)
                 
-                return Syntax(token.withLeadingTrivia(trivia))
+                return token.with(\.leadingTrivia, trivia)
             }
             
-            return Syntax(token)
+            return token
         }
     }
 }
 
 // Returns only the indentation of a given token's leading trivia
 private func indentation(for token: TokenSyntax) -> Trivia {
-    var leading: Trivia = .zero
+    var leading: Trivia = []
     for trivia in token.leadingTrivia {
         switch trivia {
         case .spaces, .tabs:
             leading = leading.appending(trivia)
         // Reset on newlines
         case .newlines:
-            leading = .zero
+            leading = []
         default:
             continue
         }

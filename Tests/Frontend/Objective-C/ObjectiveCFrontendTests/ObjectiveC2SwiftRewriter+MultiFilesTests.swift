@@ -363,7 +363,7 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                     init(b: B!) {
                     }
 
-                    func takesB(_ b: B!) -> B! {
+                    func takesB(_ b: B!) -> B? {
                     }
                 }
                 // End of file A.swift
@@ -475,6 +475,7 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                 NS_ASSUME_NONNULL_BEGIN
                 @interface A
                 - (void)method:(void(^)(NSString*))param;
+                - (void)method2:(nullable void(^)(NSString*))param;
                 @end
                 NS_ASSUME_NONNULL_END
                 """
@@ -485,6 +486,8 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                 @implementation A
                 - (void)method:(void(^)(NSString*))param {
                 }
+                - (void)method2:(void(^)(NSString*))param {
+                }
                 @end
                 """
             )
@@ -492,6 +495,8 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                 """
                 class A {
                     func method(_ param: (String) -> Void) {
+                    }
+                    func method2(_ param: ((String) -> Void)?) {
                     }
                 }
                 // End of file A.swift
@@ -581,7 +586,7 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
             )
     }
 
-    func testHandleMultifileTypesInheritingFromTypesDefinedInGlobalProviders() {
+    func testHandleMultiFileTypesInheritingFromTypesDefinedInGlobalProviders() {
         assertThat()
             .file(
                 name: "A.h",
@@ -720,22 +725,22 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
             .file(
                 name: "A.h",
                 """
-                typedef struct Aimpl A;
+                typedef struct AImpl A;
                 """
             )
             .file(
                 name: "A.m",
                 """
-                struct Aimpl {
+                struct AImpl {
                     int a;
                 };
                 """
             )
             .translatesToSwift(
                 """
-                typealias A = Aimpl
+                typealias A = AImpl
 
-                struct Aimpl {
+                struct AImpl {
                     var a: CInt
 
                     init() {
@@ -1090,10 +1095,10 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                         let filtered: NSArray! = resources?.filter { (res: NSDictionary!) -> Bool in
                             return baseIdsSet.containsObject(res["airbase"]?["id"])
                         }
+                        // Transform them into resource objects, now
                         // decl type: [CPResource]
                         // init type: NSArray
-                        let results = filtered.map { (obj: NSDictionary!) -> Resource! in
-                            // Transform them into resource objects, now
+                        let results = filtered.map { (obj: NSDictionary!) -> Resource? in
                             // decl type: Resource
                             // init type: Resource
                             var resource = Resource()

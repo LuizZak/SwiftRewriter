@@ -1,7 +1,8 @@
+import GrammarModelBase
 import ObjcParserAntlr
 
 /// A global variable declaration.
-public class ObjcVariableDeclarationNode: ObjcASTNode, ObjcInitializableNode {
+public class ObjcVariableDeclarationNode: ObjcASTNode, ObjcInitializableNode, CommentedASTNodeType {
     public var type: ObjcTypeNameNode? {
         firstChild()
     }

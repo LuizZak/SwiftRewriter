@@ -1,5 +1,7 @@
+import GrammarModelBase
+
 /// A syntax node for an Objective-C protocol (`@protocol`) declaration.
-public class ObjcProtocolDeclarationNode: ObjcASTNode, ObjcInitializableNode {
+public class ObjcProtocolDeclarationNode: ObjcASTNode, ObjcInitializableNode, CommentedASTNodeType {
     public var identifier: ObjcIdentifierNode? {
         firstChild()
     }

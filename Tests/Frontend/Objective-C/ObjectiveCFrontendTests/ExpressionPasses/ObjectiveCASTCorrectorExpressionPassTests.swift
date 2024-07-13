@@ -11,81 +11,6 @@ import Utils
 
 @testable import ObjectiveCFrontend
 
-final class ObjectiveCExpressionPassTestAdapter: ExpressionPassTestCaseAdapter {
-    static var _state: ObjcParserState = ObjcParserState()
-
-    typealias Lexer = ObjectiveCLexer
-    typealias Parser = ObjectiveCParser
-
-    init() {
-
-    }
-
-    func makeParser(for source: String) -> AntlrParser<Lexer, Parser> {
-        return try! Self._state.makeMainParser(input: source)
-    }
-
-    func parseExpression(
-        _ parser: Parser,
-        source: Source,
-        typeSystem: TypeSystem,
-        intentionContext: FunctionBodyCarryingIntention?,
-        container: StatementContainer?
-    ) throws -> Expression? {
-        let expression = try parser.expression()
-
-        let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
-
-        let context = ObjectiveCASTReaderContext(
-            typeSystem: typeSystem,
-            typeContext: nil,
-            comments: []
-        )
-
-        let reader = ObjectiveCExprASTReader(
-            typeMapper: typeMapper,
-            typeParser: ObjcTypeParser(state: Self._state, source: source),
-            context: context,
-            delegate: nil
-        )
-
-        return expression.accept(reader)
-    }
-
-    func parseStatement(
-        _ parser: Parser,
-        source: Source,
-        typeSystem: TypeSystem,
-        intentionContext: FunctionBodyCarryingIntention?,
-        container: StatementContainer?
-    ) throws -> Statement? {
-        let stmt = try parser.statement()
-
-        let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
-        let typeParser = ObjcTypeParser(state: Self._state, source: source)
-
-        let expReader =
-            ObjectiveCExprASTReader(
-                typeMapper: typeMapper,
-                typeParser: typeParser,
-                context: ObjectiveCASTReaderContext(
-                    typeSystem: typeSystem,
-                    typeContext: nil,
-                    comments: []
-                ),
-                delegate: nil
-            )
-
-        let reader = ObjectiveCStatementASTReader(
-            expressionReader: expReader,
-            context: expReader.context,
-            delegate: nil
-        )
-
-        return stmt.accept(reader)
-    }
-}
-
 class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<ObjectiveCExpressionPassTestAdapter> {
     override func setUp() {
         super.setUp()
@@ -882,6 +807,23 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
         )
     }
 
+    /// Skip transform if the block receives no parameters but the function call
+    /// site reports one parameter.
+    func testSkipBlockIfLetUnwrappingIfNoParametersAvailable() {
+        let blockType = BlockSwiftType(returnType: .void, parameters: [])
+        let funcType = SwiftType.block(blockType)
+
+        let exp =
+            Expression
+            .identifier("a").typed(funcType)
+            .call(
+                [.identifier("b").dot("c").call().typed(.optional(.typeName("A")))],
+                callableSignature: blockType
+            )
+
+        assertNoTransform(statement: Statement.expression(exp))
+    }
+
     /// Correct method invocation returns as well by assigning the return value
     /// to a `value` local variable using an if-let.
     func testCorrectMethodReturnNullableValueInNonnullParameterToIfLet() {
@@ -1356,5 +1298,82 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
                     )
                 ])
         )
+    }
+}
+
+// MARK: - Test internals
+
+final class ObjectiveCExpressionPassTestAdapter: ExpressionPassTestCaseAdapter {
+    static var _state: ObjcParserState = ObjcParserState()
+
+    typealias Lexer = ObjectiveCLexer
+    typealias Parser = ObjectiveCParser
+
+    init() {
+
+    }
+
+    func makeParser(for source: String) -> AntlrParser<Lexer, Parser> {
+        return try! Self._state.makeMainParser(input: source)
+    }
+
+    func parseExpression(
+        _ parser: Parser,
+        source: Source,
+        typeSystem: TypeSystem,
+        intentionContext: FunctionBodyCarryingIntention?,
+        container: StatementContainer?
+    ) throws -> Expression? {
+        let expression = try parser.expression()
+
+        let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
+
+        let context = ObjectiveCASTReaderContext(
+            typeSystem: typeSystem,
+            typeContext: nil,
+            comments: []
+        )
+
+        let reader = ObjectiveCExprASTReader(
+            typeMapper: typeMapper,
+            typeParser: ObjcTypeParser(state: Self._state, source: source),
+            context: context,
+            delegate: nil
+        )
+
+        return expression.accept(reader)
+    }
+
+    func parseStatement(
+        _ parser: Parser,
+        source: Source,
+        typeSystem: TypeSystem,
+        intentionContext: FunctionBodyCarryingIntention?,
+        container: StatementContainer?
+    ) throws -> Statement? {
+        let stmt = try parser.statement()
+
+        let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
+        let typeParser = ObjcTypeParser(state: Self._state, source: source)
+
+        let expReader =
+            ObjectiveCExprASTReader(
+                typeMapper: typeMapper,
+                typeParser: typeParser,
+                context: ObjectiveCASTReaderContext(
+                    typeSystem: typeSystem,
+                    typeContext: nil,
+                    comments: []
+                ),
+                delegate: nil
+            )
+
+        let reader = ObjectiveCStatementASTReader(
+            expressionReader: expReader,
+            context: expReader.context,
+            delegate: nil
+        )
+
+        return stmt.accept(reader)
     }
 }

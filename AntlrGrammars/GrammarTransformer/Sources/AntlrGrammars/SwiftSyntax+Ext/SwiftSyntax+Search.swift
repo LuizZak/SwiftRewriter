@@ -49,7 +49,7 @@ enum SyntaxSearchTerm: CustomStringConvertible {
             guard modifiersMatch(syntax.modifiers, expected: modifiers) else {
                 return false
             }
-            guard parametersMatch(syntax.parameters.parameterList, expected: parameters) else {
+            guard parametersMatch(syntax.signature.input.parameterList, expected: parameters) else {
                 return false
             }
 
@@ -167,10 +167,10 @@ extension SyntaxProtocol {
             let next = queue.removeFirst()
 
             if search.matches(next) {
-                return Syntax(next)
+                return Syntax(fromProtocol: next)
             }
 
-            for child in next.children {
+            for child in next.children(viewMode: .sourceAccurate) {
                 queue.append(child)
             }
         }
@@ -209,7 +209,9 @@ private func typesMatch(_ actual: TypeSyntax?, expected: TypeSyntax?) -> Bool {
     guard let expected else { return true }
     guard let actual else { return false }
 
-    return zip(actual.tokens, expected.tokens).allSatisfy {
+    let viewMode = SyntaxTreeViewMode.sourceAccurate
+
+    return zip(actual.tokens(viewMode: viewMode), expected.tokens(viewMode: viewMode)).allSatisfy {
         $0.text == $1.text
     }
 }
@@ -218,7 +220,9 @@ private func modifiersMatch(_ actual: DeclModifierSyntax?, expected: DeclModifie
     guard let expected else { return true }
     guard let actual else { return false }
 
-    return zip(actual.tokens, expected.tokens).allSatisfy {
+    let viewMode = SyntaxTreeViewMode.sourceAccurate
+
+    return zip(actual.tokens(viewMode: viewMode), expected.tokens(viewMode: viewMode)).allSatisfy {
         $0.text == $1.text
     }
 }

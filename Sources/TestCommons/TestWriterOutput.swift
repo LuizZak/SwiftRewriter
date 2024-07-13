@@ -47,7 +47,8 @@ public class TestFileOutput: FileOutput {
 }
 
 public class TestWriterOutput: WriterOutput {
-    @ConcurrentValue public var outputs: [TestFileOutput] = []
+    @ConcurrentValue
+    public var outputs: [TestFileOutput] = []
 
     public init() {
         
@@ -55,9 +56,7 @@ public class TestWriterOutput: WriterOutput {
     
     public func createFile(path: String) -> FileOutput {
         let output = TestFileOutput(path: path)
-        _outputs.modifyingValue { value in
-            value.append(output)
-        }
+        outputs.append(output)
         return output
     }
 }

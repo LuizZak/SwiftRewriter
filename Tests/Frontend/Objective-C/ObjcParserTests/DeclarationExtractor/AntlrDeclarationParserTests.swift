@@ -79,8 +79,28 @@ class AntlrDeclarationParserTests: XCTestCase {
                     .typeSpecifier("NSString"),
                 ],
                 abstractDeclarator: .pointer([
-                    .init(nullabilitySpecifier: .nullable()),
+                    .init(pointerSpecifiers: [
+                        .nullability(.nullable())
+                    ]),
                 ])
+            )
+        )
+        assertEqual(
+            test("nullable (^)(nonnull NSString*)"),
+            .init(
+                declarationSpecifiers: [
+                    .nullability(.nullable()),
+                ],
+                abstractDeclarator: .directAbstractDeclarator(nil,
+                    .blockDeclarator(
+                        .init(parameterList: [
+                            .abstractDeclarator([
+                                .nullability(.nonnull()),
+                                .typeSpecifier("NSString"),
+                            ], .pointer([.init()]))
+                        ])
+                    )
+                )
             )
         )
     }
@@ -841,12 +861,35 @@ class AntlrDeclarationParserTests: XCTestCase {
         )
 
         assertEqual(test("*"), [.init()])
-        assertEqual(test("*const"), [.init(typeQualifiers: [.const()])])
+        assertEqual(
+            test("*const"),
+            [
+                .init(pointerSpecifiers: [
+                    .typeQualifier(.const())
+                ]),
+            ]
+        )
         assertEqual(
             test("*const *_Nullable"),
             [
-                .init(typeQualifiers: [.const()]),
-                .init(nullabilitySpecifier: .nullable()),
+                .init(pointerSpecifiers: [
+                    .typeQualifier(.const())
+                ]),
+                .init(pointerSpecifiers: [
+                    .nullability(.nullable())
+                ]),
+            ]
+        )
+        assertEqual(
+            test("*_Nullable __autoreleasing *_Nullable"),
+            [
+                .init(pointerSpecifiers: [
+                    .nullability(.nullable()),
+                    .arcBehaviour(.autoreleasingQualifier()),
+                ]),
+                .init(pointerSpecifiers: [
+                    .nullability(.nullable())
+                ]),
             ]
         )
     }
@@ -858,13 +901,38 @@ class AntlrDeclarationParserTests: XCTestCase {
         )
 
         assertEqual(test("*"), .init())
-        assertEqual(test("*const"), .init(typeQualifiers: [.const()]))
+        assertEqual(
+            test("*const"),
+            .init(pointerSpecifiers: [
+                .typeQualifier(.const())
+            ])
+        )
         assertEqual(
             test("*const _Nullable"),
-            .init(
-                typeQualifiers: [.const()],
-                nullabilitySpecifier: .nullable()
-            )
+            .init(pointerSpecifiers: [
+                .typeQualifier(.const()),
+                .nullability(.nullable()),
+            ])
+        )
+    }
+
+    func testPointerSpecifier() {
+        let test = self.prepareParser(
+            ObjectiveCParser.pointerSpecifier,
+            AntlrDeclarationParser.pointerSpecifier(_:)
+        )
+        
+        assertEqual(
+            test("const"),
+            .typeQualifier(.const())
+        )
+        assertEqual(
+            test("_Nullable"),
+            .nullability(.nullable())
+        )
+        assertEqual(
+            test("__weak"),
+            .arcBehaviour(.weakQualifier())
         )
     }
 

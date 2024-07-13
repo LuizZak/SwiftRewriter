@@ -11,8 +11,7 @@ public struct PointerSyntax: Hashable, Codable {
 public struct PointerSyntaxEntry: Hashable, Codable {
     public var location: SourceLocation = .invalid
 
-    public var typeQualifiers: TypeQualifierListSyntax?
-    public var nullabilitySpecifier: NullabilitySpecifierSyntax?
+    public var pointerSpecifiers: [PointerSpecifierSyntax] = []
 }
 
 // MARK: - DeclarationSyntaxElementType conformance
@@ -35,7 +34,7 @@ extension PointerSyntax: ExpressibleByArrayLiteral {
 
 extension PointerSyntaxEntry: DeclarationSyntaxElementType {
     public var children: [DeclarationSyntaxElementType] {
-        toChildrenList(typeQualifiers, nullabilitySpecifier)
+        pointerSpecifiers
     }
 
     public var sourceRange: SourceRange {
@@ -44,15 +43,75 @@ extension PointerSyntaxEntry: DeclarationSyntaxElementType {
 }
 extension PointerSyntaxEntry: CustomStringConvertible {
     public var description: String {
-        switch (typeQualifiers, nullabilitySpecifier) {
-        case (nil, nil):
-            return "*"
-        case (nil, let nullability?):
-            return "*\(nullability)"
-        case (let qualifiers?, nil):
-            return "*\(qualifiers)"
-        case (let qualifiers?, let nullability?):
-            return "*\(qualifiers) \(nullability)"
+        var result = "*"
+
+        result += pointerSpecifiers.map(\.description).joined(separator: " ")
+
+        return result
+    }
+}
+
+/// Syntax element for a pointer declaration specifier in a pointer syntax.
+public enum PointerSpecifierSyntax: Hashable, Codable {
+    case typeQualifier(TypeQualifierSyntax)
+    case nullability(NullabilitySpecifierSyntax)
+    case arcBehaviour(ArcBehaviourSpecifierSyntax)
+    
+    /// Returns the `TypeQualifierSyntax` associated with this enumerator if its
+    /// a `.typeQualifier` case, otherwise returns `nil`.
+    public var typeQualifier: TypeQualifierSyntax? {
+        switch self {
+        case .typeQualifier(let value):
+            return value
+        default:
+            return nil
+        }
+    }
+
+    /// Returns the `NullabilitySpecifierSyntax` associated with this enumerator
+    /// if its a `.nullability` case, otherwise returns `nil`.
+    public var nullabilitySpecifier: NullabilitySpecifierSyntax? {
+        switch self {
+        case .nullability(let value):
+            return value
+        default:
+            return nil
+        }
+    }
+
+    /// Returns the `ArcBehaviourSpecifierSyntax` associated with this enumerator
+    /// if its a `.arcBehaviour` case, otherwise returns `nil`.
+    public var arcBehaviourSpecifier: ArcBehaviourSpecifierSyntax? {
+        switch self {
+        case .arcBehaviour(let value):
+            return value
+        default:
+            return nil
+        }
+    }
+}
+
+extension PointerSpecifierSyntax: DeclarationSyntaxElementType {
+    public var children: [DeclarationSyntaxElementType] {
+        switch self {
+        case .typeQualifier(let value):
+            return toChildrenList(value)
+        case .nullability(let value):
+            return toChildrenList(value)
+        case .arcBehaviour(let value):
+            return toChildrenList(value)
+        }
+    }
+}
+extension PointerSpecifierSyntax: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .typeQualifier(let value):
+            return "\(value)"
+        case .nullability(let value):
+            return "\(value)"
+        case .arcBehaviour(let value):
+            return "\(value)"
         }
     }
 }

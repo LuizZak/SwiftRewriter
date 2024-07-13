@@ -1,6 +1,6 @@
 import Foundation
 import SwiftSyntax
-import SwiftSyntaxParser
+import SwiftParser
 import SwiftSyntaxSupport
 import TestCommons
 import XCTest
@@ -31,6 +31,6 @@ class BaseSyntaxRewriterPassTest: XCTestCase {
     }
 
     func createSyntax(_ content: String) throws -> SourceFileSyntax {
-        try SyntaxParser.parse(source: content)
+        Parser.parse(source: content)
     }
 }

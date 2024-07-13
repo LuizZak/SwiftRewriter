@@ -97,14 +97,14 @@ class DeclarationTranslatorTests: XCTestCase {
         }
     }
 
-    func testTranslate_singleDecl_variable_typeName_nullabilitySpecifier() {
-        let tester = prepareTest(declaration: "_Nonnull callback a;")
+    func testTranslate_singleDecl_variable_pointer_const() {
+        let tester = prepareTest(declaration: "short int *const a;")
 
         tester.assert { asserter in
             asserter.assertCount(1)?
                 .assertVariable(name: "a")?
                 .assertNoInitializer()?
-                .assert(type: .nullabilitySpecified(specifier: .nonnull, "callback"))
+                .assert(type: .pointer("signed short int", qualifiers: [.const]))
         }
     }
 
@@ -119,23 +119,87 @@ class DeclarationTranslatorTests: XCTestCase {
         }
     }
 
+    func testTranslate_singleDecl_variable_pointer_mixedSpecifiers() {
+        let tester = prepareTest(declaration: "NSString *const _Nonnull __autoreleasing a;")
+
+        tester.assert { asserter in
+            asserter.assertCount(1)?
+                .assertVariable(name: "a")?
+                .assertNoInitializer()?
+                .assert(type:
+                    .specified(
+                        specifiers: [.arcSpecifier(.autoreleasing)],
+                        .pointer("NSString", qualifiers: [.const], nullabilitySpecifier: .nonnull)
+                    )
+                )
+        }
+    }
+
+    func testTranslate_singleDecl_variable_typeName_nullabilitySpecifier() {
+        let tester = prepareTest(declaration: "_Nonnull callback a;")
+
+        tester.assert { asserter in
+            asserter.assertCount(1)?
+                .assertVariable(name: "a")?
+                .assertNoInitializer()?
+                .assert(type: .nullabilitySpecified(specifier: .nonnull, "callback"))
+        }
+    }
+
     func testTranslate_singleDecl_blockDecl_arcSpecifier() {
         let tester = prepareTest(declaration: "void (^__weak a)();")
 
         tester.assert { asserter in
             asserter.assertCount(1)?
-                .assertBlock(name: "a")?
+                .assertVariable(name: "a")?
                 .assert(hasArcSpecifier: .weak)
         }
     }
 
-    func testTranslate_singleDecl_blockDecl_nullabilitySpecifier() {
+    func testTranslate_singleDecl_blockDecl_withInitializer() {
+        let tester = prepareTest(declaration: "void (^a)() = ^{ };")
+
+        tester.assert { asserter in
+            asserter.assertCount(1)?
+                .assertVariable(name: "a")?
+                .assertHasInitializer()
+        }
+    }
+
+    func testTranslate_singleDecl_blockDecl_nullabilitySpecifier_asBlockSpecifier() {
         let tester = prepareTest(declaration: "void (^_Nonnull a)();")
 
         tester.assert { asserter in
             asserter.assertCount(1)?
-                .assertBlock(name: "a")?
-                .assert(hasNullabilitySpecifier: .nonnull)
+                .assertVariable(name: "a")?
+                .assert(hasNullabilitySpecifier: nil)?
+                .assert(type: .blockType(
+                    name: "a",
+                    returnType: .void,
+                    parameters: [],
+                    nullabilitySpecifier: .nonnull
+                ))
+        }
+    }
+
+    func testTranslate_singleDecl_blockDecl_nullabilitySpecifier_asTypeSpecifier() {
+        let tester = prepareTest(declaration: "_Nonnull void (^a)();")
+
+        tester.assert { asserter in
+            asserter.assertCount(1)?
+                .assertVariable(name: "a")?
+                .assert(hasNullabilitySpecifier: .nonnull)?
+                .assert(type:
+                    .nullabilitySpecified(
+                        specifier: .nonnull,
+                        .blockType(
+                            name: "a",
+                            returnType: .void,
+                            parameters: [],
+                            nullabilitySpecifier: nil
+                        )
+                    )
+                )
         }
     }
 
@@ -144,8 +208,25 @@ class DeclarationTranslatorTests: XCTestCase {
 
         tester.assert { asserter in
             asserter.assertCount(1)?
-                .assertBlock(name: "a")?
+                .assertVariable(name: "a")?
                 .assert(hasTypeQualifier: .const)
+        }
+    }
+
+    func testTranslate_singleDecl_blockDecl_returnsPointer() {
+        let tester = prepareTest(declaration: "int*(^returnsPointer)(void);")
+
+        tester.assert { asserter in
+            asserter.assertCount(1)?
+                .assertVariable(name: "returnsPointer")?
+                .assert(type:
+                    .blockType(
+                        name: "returnsPointer",
+                        returnType: .pointer("signed int"),
+                        parameters: [],
+                        nullabilitySpecifier: nil
+                    )
+                )
         }
     }
 
@@ -232,26 +313,6 @@ class DeclarationTranslatorTests: XCTestCase {
                 .assertVariable(name: "a")?
                 .assertHasInitializer()?
                 .assert(type: "signed short int")
-        }
-    }
-
-    func testTranslate_singleDecl_block_withInitializer() {
-        let tester = prepareTest(declaration: "void (^a)() = ^{ };")
-
-        tester.assert { asserter in
-            asserter.assertCount(1)?
-                .assertBlock(name: "a")?
-                .assertHasInitializer()
-        }
-    }
-
-    func testTranslate_singleDecl_block_nullabilitySpecifier() {
-        let tester = prepareTest(declaration: "void(^_Nonnull callback)();")
-
-        tester.assert { asserter in
-            asserter.assertCount(1)?
-                .assertBlock(name: "callback")?
-                .assert(hasNullabilitySpecifier: .nonnull)
         }
     }
 
@@ -671,6 +732,27 @@ class DeclarationTranslatorTests: XCTestCase {
             asserter.assertNoDeclarations()
         }
     }
+    
+    func testTranslate_objcType_blockType_nullabilitySpecifier() {
+        let tester = prepareTest(declaration: "nullable void (^)(nonnull NSString*);")
+
+        tester.assertObjcType { asserter in
+            asserter.assert(equals:
+                .nullabilitySpecified(
+                    specifier: .nullable,
+                    .blockType(
+                        returnType: .void,
+                        parameters: [
+                            .nullabilitySpecified(
+                                specifier: .nonnull,
+                                .pointer("NSString")
+                            ),
+                        ]
+                    )
+                )
+            )
+        }
+    }
 }
 
 private extension DeclarationTranslatorTests {
@@ -719,6 +801,50 @@ private extension DeclarationTranslatorTests {
                 }
 
                 try closure(.init(object: result))
+            } catch {
+                XCTFail(
+                    "Failed to parse from source string: \(source)\n\(error)",
+                    file: file,
+                    line: line
+                )
+            }
+        }
+
+        func assertObjcType(
+            file: StaticString = #file,
+            line: UInt = #line,
+            _ closure: (Asserter<ObjcType?>) throws -> Void
+        ) rethrows {
+
+            let extractor = DeclarationExtractor()
+            let declParser = AntlrDeclarationParser(source: source)
+            let sut = DeclarationTranslator()
+
+            do {
+                let parserRule = try parse(
+                    sourceString,
+                    file: file,
+                    line: line,
+                    ruleDeriver: ObjectiveCParser.typeName
+                )
+
+                guard let typeNameSyntax = declParser.typeName(parserRule) else {
+                    XCTFail(
+                        "Failed to parse from source string: \(AntlrDeclarationParser.self) returned nil for AntlrDeclarationParser.typeName(_:)",
+                        file: file,
+                        line: line
+                    )
+                    return
+                }
+
+                guard let typeName = extractor.extract(fromTypeName: typeNameSyntax) else {
+                    try closure(.init(object: nil))
+                    return
+                }
+
+                let type = sut.translateObjectiveCType(typeName)
+
+                try closure(.init(object: type))
             } catch {
                 XCTFail(
                     "Failed to parse from source string: \(source)\n\(error)",

@@ -1,5 +1,7 @@
+import GrammarModelBase
+
 /// A type definition node
-public class ObjcTypedefNode: ObjcASTNode, ObjcInitializableNode {
+public class ObjcTypedefNode: ObjcASTNode, ObjcInitializableNode, CommentedASTNodeType {
     public var identifier: ObjcIdentifierNode? {
         firstChild()
     }
@@ -12,6 +14,7 @@ public class ObjcTypedefNode: ObjcASTNode, ObjcInitializableNode {
     }
 }
 
+// TODO: Remove this unused declaration
 /// Block parameters for a block typedef
 public class ObjcBlockParametersNode: ObjcASTNode, ObjcInitializableNode {
     public var parameters: [ObjcTypeNameNode] {

@@ -9,6 +9,10 @@ class ObjcParserTests: XCTestCase {
         _ = ObjcParser(string: "abc")
     }
 
+    func testParseEmptySource() {
+        _ = parserTest("")
+    }
+
     func testParseComments() {
         let source = """
             // Test comment
@@ -16,7 +20,11 @@ class ObjcParserTests: XCTestCase {
                 Test multi-line comment
             */
             """
-        _ = parserTest(source)
+        let node = parserTest(source)
+        XCTAssertEqual(node.sourceRange, .range(
+            start: .init(line: 1, column: 1, utf8Offset: 0),
+            end: source.asSourceLocation(source.endIndex)
+        ))
     }
 
     func testParseDeclarationAfterComments() {
@@ -37,6 +45,44 @@ class ObjcParserTests: XCTestCase {
             #warning A warning!
             """
         _ = parserTest(source)
+    }
+
+    func testParseSpecialCharactersInComment() {
+        let source = """
+            // ©
+            NSString *a;
+            // ©©
+            NSString *const b;
+            """
+        let sut = ObjcParser(string: source)
+        let node = parseTestGlobalContextNode(source: source, parser: sut)
+
+        XCTAssertEqual(sut.comments, [
+            .init(
+                string: "// ©\n",
+                range: 0..<6,
+                location: .init(line: 1, column: 1, utf8Offset: 0),
+                length: .init(newlines: 1, columnsAtLastLine: 0, utf8Length: 6)
+            ),
+            .init(
+                string: "// ©©\n",
+                range: 19..<27,
+                location: .init(line: 3, column: 1, utf8Offset: 19),
+                length: .init(newlines: 1, columnsAtLastLine: 0, utf8Length: 8)
+            )
+        ])
+        Asserter(object: node)
+            .assertChildCount(2)?
+            .asserter(forChildAt: 0) { a in
+                a.assert(isOfType: ObjcVariableDeclarationNode.self)?
+                    .assert(name: "a")?
+                    .assert(type: .pointer("NSString"))
+            }?
+            .asserter(forChildAt: 1) { a in
+                a.assert(isOfType: ObjcVariableDeclarationNode.self)?
+                    .assert(name: "b")?
+                    .assert(type: .pointer("NSString", qualifiers: [.const]))
+            }
     }
 
     func testParse_detectsNonnullRegions_declarations() {
@@ -188,6 +234,23 @@ class ObjcParserTests: XCTestCase {
                 type.assert(isOfType: ObjcClassInterfaceNode.self)?
                     .assert(superclassName: "NSArray")?
                     .assert(protocolListString: ["UITableViewDelegate"])
+            }
+        }
+    }
+
+    func testParseGenericCategoryInterface() {
+        let source = """
+        @interface MyClass<ObjectType> (Category)
+        - (void)categoryMethod;
+        @end
+        """
+        let node = parserTest(source)
+
+        Asserter(object: node).inClosureUnconditional { asserter in
+            asserter.asserter(forChildAt: 0) { type in
+                type.assert(isOfType: ObjcClassCategoryInterfaceNode.self)?
+                    .assert(identifier: "MyClass")?
+                    .assert(categoryName: "Category")
             }
         }
     }
@@ -740,6 +803,27 @@ class ObjcParserTests: XCTestCase {
             """
         )
     }
+
+    func testParseGenericArgumentsInAtInterfaceDeclarationWithInheritance() {
+        _ = parserTest(
+            """
+            @interface AType<__covariant ObjectType> : NSObject <SomeProtocol, SomeOtherProtocol>
+            @end
+            """
+        )
+    }
+
+    func testParseDoubleNestedGenericType() {
+        _ = parserTest(
+            """
+            @interface AType
+            {
+                NSMutableArray<__kindof id<AProtocol>> *field;
+            }
+            @end
+            """
+        )
+    }
     
     func testParseTypeofSpecifier() {
         _=parserTest("""
@@ -822,7 +906,7 @@ class ObjcParserTests: XCTestCase {
         }
     }
 
-    func testParseCFunctionArrayArguments() throws {
+    func testParseCFunctionArrayArguments() {
         let node = parserTest("""
             void aFunction(unsigned n, int args[]) {
 
@@ -847,6 +931,42 @@ class ObjcParserTests: XCTestCase {
             }
         }
     }
+
+    func testParseEnumTypedef() throws {
+        let node = parserTest(
+            """
+            typedef enum AnEnum {
+                AnEnum_Case0,
+                AnEnum_Case1,
+                AnEnum_Case2
+            } AnEnum;
+            """
+        )
+
+        Asserter(object: node).inClosureUnconditional { decls in
+            decls.assertChildCount(1)?.asserter(forChildAt: 0) { decl in
+                decl.assert(isOfType: ObjcEnumDeclarationNode.self)?
+                    .assert(name: "AnEnum")?
+                    .assertNoTypeName()?
+                    .assertEnumeratorCount(3)?
+                    .asserter(forEnumeratorName: "AnEnum_Case0") { case0 in
+                        case0
+                            .assert(name: "AnEnum_Case0")?
+                            .assertNoExpression()
+                    }?
+                    .asserter(forEnumeratorName: "AnEnum_Case1") { case0 in
+                        case0
+                            .assert(name: "AnEnum_Case1")?
+                            .assertNoExpression()
+                    }?
+                    .asserter(forEnumeratorName: "AnEnum_Case2") { case0 in
+                        case0
+                            .assert(name: "AnEnum_Case2")?
+                            .assertNoExpression()
+                    }
+            }
+        }
+    }
     
     func testCommentRanges() throws {
         let string = """
@@ -861,26 +981,6 @@ class ObjcParserTests: XCTestCase {
 
         try sut.parse()
 
-        /*
-        XCTAssertEqual(sut.comments.count, 2)
-        // Single line
-        XCTAssertEqual(sut.comments[0].string, "// A comment\n")
-        XCTAssertEqual(sut.comments[0].range.lowerBound, 0)
-        XCTAssertEqual(sut.comments[0].range.upperBound, 13)
-        XCTAssertEqual(sut.comments[0].location.line, 1)
-        XCTAssertEqual(sut.comments[0].location.column, 1)
-        XCTAssertEqual(sut.comments[0].length.newlines, 1)
-        XCTAssertEqual(sut.comments[0].length.columnsAtLastLine, 0)
-        // Multi-line
-        XCTAssertEqual(sut.comments[1].string, "/*\n    Another comment\n*/")
-        XCTAssertEqual(sut.comments[1].range.lowerBound, (string as NSString).range(of: "/*").lowerBound)
-        XCTAssertEqual(sut.comments[1].range.upperBound, (string as NSString).range(of: "*/").upperBound)
-        XCTAssertEqual(sut.comments[1].location.line, 3)
-        XCTAssertEqual(sut.comments[1].location.column, 1)
-        XCTAssertEqual(sut.comments[1].length.newlines, 2)
-        XCTAssertEqual(sut.comments[1].length.columnsAtLastLine, 2)
-        */
-        
         Asserter(object: sut.comments).inClosureUnconditional { comments in
             comments.assertCount(2)
 
@@ -1223,10 +1323,10 @@ extension ObjcParserTests {
     {
         let sut = ObjcParser(string: source)
 
-        return _parseTestGlobalContextNode(source: source, parser: sut, file: file, line: line)
+        return parseTestGlobalContextNode(source: source, parser: sut, file: file, line: line)
     }
 
-    private func _parseTestGlobalContextNode(
+    private func parseTestGlobalContextNode(
         source: String,
         parser: ObjcParser,
         file: StaticString = #filePath,

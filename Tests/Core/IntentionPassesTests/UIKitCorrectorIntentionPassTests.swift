@@ -9,29 +9,27 @@ import XCTest
 
 class UIKitCorrectorIntentionPassTests: XCTestCase {
     func testDrawRect() {
-        let inputSignature =
-            FunctionSignature(
-                name: "drawRect",
-                parameters: [
-                    ParameterSignature(
-                        label: nil,
-                        name: "rect",
-                        type: "CGRect"
-                    )
-                ]
-            )
+        let inputSignature = FunctionSignature(
+            name: "drawRect",
+            parameters: [
+                .init(
+                    label: nil,
+                    name: "rect",
+                    type: "CGRect"
+                )
+            ]
+        )
 
-        let expectedSignature =
-            FunctionSignature(
-                name: "draw",
-                parameters: [
-                    ParameterSignature(
-                        label: nil,
-                        name: "rect",
-                        type: "CGRect"
-                    )
-                ]
-            )
+        let expectedSignature = FunctionSignature(
+            name: "draw",
+            parameters: [
+                .init(
+                    label: nil,
+                    name: "rect",
+                    type: "CGRect"
+                )
+            ]
+        )
 
         assert(
             sut: UIKitCorrectorIntentionPass(),
@@ -43,43 +41,39 @@ class UIKitCorrectorIntentionPassTests: XCTestCase {
     }
 
     func testUpdatesNullabilityOfDetectedOverrides() {
-        let inputSignature =
-            FunctionSignature(
-                name: "convertPoint",
-                parameters: [
-                    ParameterSignature(
-                        label: nil,
-                        name: "point",
-                        type: "CGPoint"
-                    ),
-
-                    ParameterSignature(
-                        label: "toView",
-                        name: "view",
-                        type: .implicitUnwrappedOptional("UIView")
-                    ),
-                ],
-                returnType: "CGPoint"
-            )
-
-        let expectedSignature =
-            FunctionSignature(
-                name: "convert",
-                parameters: [
-                    ParameterSignature(
-                        label: nil,
-                        name: "point",
-                        type: "CGPoint"
-                    ),
-
-                    ParameterSignature(
-                        label: "to",
-                        name: "view",
-                        type: .optional("UIView")
-                    ),
-                ],
-                returnType: "CGPoint"
-            )
+        let inputSignature = FunctionSignature(
+            name: "convertPoint",
+            parameters: [
+                .init(
+                    label: nil,
+                    name: "point",
+                    type: "CGPoint"
+                ),
+                .init(
+                    label: "toView",
+                    name: "view",
+                    type: .implicitUnwrappedOptional("UIView")
+                )
+            ],
+            returnType: "CGPoint"
+        )
+        
+        let expectedSignature = FunctionSignature(
+            name: "convert",
+            parameters: [
+                .init(
+                    label: nil,
+                    name: "point",
+                    type: "CGPoint"
+                ),
+                .init(
+                    label: "to",
+                    name: "view",
+                    type: .optional("UIView")
+                )
+            ],
+            returnType: "CGPoint"
+        )
 
         assert(
             sut: UIKitCorrectorIntentionPass(),
@@ -91,32 +85,22 @@ class UIKitCorrectorIntentionPassTests: XCTestCase {
     }
 
     func testUITableViewDelegate() {
-        let inputSignature =
-            FunctionSignature(
-                name: "tableView",
-                parameters: [
-                    ParameterSignature(label: nil, name: "tableView", type: "UITableView"),
-                    ParameterSignature(
-                        label: "willDisplayCell",
-                        name: "cell",
-                        type: "UITableViewCell"
-                    ),
-                    ParameterSignature(
-                        label: "forRowAtIndexPath",
-                        name: "indexPath",
-                        type: "IndexPath"
-                    ),
-                ]
-            )
-        let expectedSignature =
-            FunctionSignature(
-                name: "tableView",
-                parameters: [
-                    ParameterSignature(label: nil, name: "tableView", type: "UITableView"),
-                    ParameterSignature(label: "willDisplay", name: "cell", type: "UITableViewCell"),
-                    ParameterSignature(label: "forRowAt", name: "indexPath", type: "IndexPath"),
-                ]
-            )
+        let inputSignature = FunctionSignature(
+            name: "tableView",
+            parameters: [
+                .init(label: nil, name: "tableView", type: "UITableView"),
+                .init(label: "willDisplayCell", name: "cell", type: "UITableViewCell"),
+                .init(label: "forRowAtIndexPath", name: "indexPath", type: "IndexPath")
+            ]
+        )
+        let expectedSignature = FunctionSignature(
+            name: "tableView",
+            parameters: [
+                .init(label: nil, name: "tableView", type: "UITableView"),
+                .init(label: "willDisplay", name: "cell", type: "UITableViewCell"),
+                .init(label: "forRowAt", name: "indexPath", type: "IndexPath")
+            ]
+        )
 
         assert(
             sut: UIKitCorrectorIntentionPass(),

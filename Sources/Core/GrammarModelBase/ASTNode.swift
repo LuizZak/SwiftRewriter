@@ -10,7 +10,14 @@ open class ASTNode {
     /// Returns the `SourceRange` that encompasses the source range of this AST
     /// node base on its `location` and `length` properties.
     public var sourceRange: SourceRange {
-        SourceRange.range(
+        if location == .invalid {
+            return .invalid
+        }
+        if length == .zero {
+            return .location(location)
+        }
+
+        return SourceRange.range(
             start: location,
             end: location + length
         )
@@ -152,19 +159,17 @@ open class ASTNode {
     /// children's ranges combined.
     /// Does nothing if resulting range is .invalid.
     open func updateSourceRange() {
-        guard let startNode = children.min(by: { $0.location < $1.location }) else {
-            return
+        let union = SourceRange(union: children.map(\.sourceRange))
+
+        switch union {
+        case .range(let start, let end):
+            location = start
+            length = start.length(to: end)
+        case .location(let start):
+            location = start
+        case .invalid:
+            break
         }
-        guard let endNode = children.max(by: { ($0.location + $0.length) < ($1.location + $1.length) }) else {
-            return
-        }
-        
-        self.location = startNode.location
-        self.length = SourceLength(
-            newlines: endNode.location.line - startNode.location.line,
-            columnsAtLastLine: endNode.location.column,
-            utf8Length: endNode.location.utf8Offset - startNode.location.utf8Offset
-        )
     }
 }
 

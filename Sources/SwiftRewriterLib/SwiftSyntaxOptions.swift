@@ -50,14 +50,14 @@ public struct SwiftSyntaxOptions {
         self.format = format
     }
 
-    public func toSwiftSyntaxProducerSettings() -> SwiftSyntaxProducer.Settings {
+    public func toSwiftProducerSettings() -> SwiftProducer.Settings {
         .init(
             outputExpressionTypes: self.outputExpressionTypes,
             printIntentionHistory: self.printIntentionHistory,
             emitObjcCompatibility: self.emitObjcCompatibility
         )
     }
-        
+
     /// To ease modifications of single parameters from default settings
     /// without having to create a temporary variable first
     public func with<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: T) -> Self {

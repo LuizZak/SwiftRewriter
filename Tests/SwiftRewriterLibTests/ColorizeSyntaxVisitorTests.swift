@@ -1,6 +1,6 @@
 import XCTest
 import SwiftSyntax
-import SwiftSyntaxParser
+import SwiftParser
 import Console
 
 @testable import SwiftRewriterLib
@@ -136,7 +136,7 @@ class ColorizeSyntaxVisitorTests: XCTestCase {
     }
 
     private func colorizeTest(_ input: String) throws -> (ColorizeSyntaxVisitor, ResultType) {
-        let syntax = try SyntaxParser.parse(source: input)
+        let syntax = Parser.parse(source: input)
         let printTarget = PrintTarget()
         let sut = ColorizeSyntaxVisitor(printFunction: printTarget.printFunction)
 

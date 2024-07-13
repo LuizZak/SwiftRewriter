@@ -366,6 +366,25 @@ class DefaultTypeMapperTests: XCTestCase {
         )
     }
 
+    func testPointerToNSTypePointer() {
+        expect(
+            .pointer(.pointer("NSObject")),
+            toConvertTo: "UnsafeMutablePointer<NSObject>"
+        )
+    }
+
+    func testPointerToSpecifiedNSTypePointer() {
+        expect(
+            .pointer(
+                .specified(
+                    specifiers: [.strong],
+                    .pointer("NSObject")
+                )
+            ),
+            toConvertTo: "UnsafeMutablePointer<NSObject>"
+        )
+    }
+
     func testFixedArray() {
         expect(
             .fixedArray(.typeName("char"), length: 3),
@@ -729,6 +748,39 @@ class DefaultTypeMapperTests: XCTestCase {
                 ]
             ),
             toConvertTo: "@convention(c) (UnsafeMutableRawPointer?) -> CInt"
+        )
+    }
+
+    func testNestedGenericOptionalTypes() {
+        expect(
+            .pointer("char"),
+            withExplicitNullability: nil,
+            toConvertTo: "UnsafeMutablePointer<CChar>!"
+        )
+        expect(
+            .pointer(.pointer("char")),
+            withExplicitNullability: nil,
+            toConvertTo: "UnsafeMutablePointer<UnsafeMutablePointer<CChar>!>!"
+        )
+        expect(
+            .pointer(
+                .genericTypeName(
+                    "NSDictionary",
+                    typeParameters: [.pointer(.typeName("NSString")), .pointer(.typeName("NSObject"))]
+                )
+            ),
+            withExplicitNullability: nil,
+            toConvertTo: "[String: NSObject]!"
+        )
+        expect(
+            .pointer(
+                .genericTypeName(
+                    "SomeType",
+                    typeParameters: [.pointer(.typeName("NSString")), .pointer(.typeName("NSObject"))]
+                )
+            ),
+            withExplicitNullability: nil,
+            toConvertTo: "SomeType<String, NSObject>!"
         )
     }
 }

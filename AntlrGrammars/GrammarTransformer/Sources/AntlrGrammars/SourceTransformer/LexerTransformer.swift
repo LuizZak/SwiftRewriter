@@ -148,10 +148,10 @@ private class _LexerRewriter: SyntaxRewriter {
         self.targetClassName = targetClassName
     }
 
-    override func visit(_ node: SourceFileSyntax) -> Syntax {
+    override func visit(_ node: SourceFileSyntax) -> SourceFileSyntax {
         let node = super.visit(node).as(SourceFileSyntax.self) ?? node
 
-        return Syntax(node)
+        return node
     }
 
     override func visit(_ node: ClassDeclSyntax) -> DeclSyntax {

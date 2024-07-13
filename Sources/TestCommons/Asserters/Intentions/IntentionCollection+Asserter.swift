@@ -16,7 +16,7 @@ public extension Asserter where Object == IntentionCollection {
 
         return asserter(for: files) { files in
             files.inClosure(closure)
-        }.map(self)
+        }.mapAsserter(self)
     }
 
     /// Opens an asserter context for a file with a given target path in the
@@ -89,7 +89,7 @@ public extension Asserter where Object == IntentionCollection {
             ) {
                 $0.typeName == typeName
             }?.inClosure(closure)
-        }.map(self)
+        }.mapAsserter(self)
     }
 
     /// Opens an asserter context for a class with a given name in the underlying
@@ -116,7 +116,7 @@ public extension Asserter where Object == IntentionCollection {
             ) {
                 $0.typeName == typeName
             }?.inClosure(closure)
-        }.map(self)
+        }.mapAsserter(self)
     }
 
     /// Opens an asserter context for a class extension with a given type name
@@ -146,7 +146,7 @@ public extension Asserter where Object == IntentionCollection {
             ) {
                 $0.typeName == typeName && (categoryName == nil || $0.categoryName == categoryName)
             }?.inClosure(closure)
-        }.map(self)
+        }.mapAsserter(self)
     }
 
     /// Opens an asserter context for a global function with a given name in the
@@ -173,6 +173,6 @@ public extension Asserter where Object == IntentionCollection {
             ) {
                 $0.name == name
             }?.inClosure(closure)
-        }.map(self)
+        }.mapAsserter(self)
     }
 }

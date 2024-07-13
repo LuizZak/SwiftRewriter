@@ -9,17 +9,14 @@ public class ObjcASTNodeFactory {
     
     let source: Source
     let nonnullContextQuerier: NonnullContextQuerier
-    let commentQuerier: CommentQuerier
     
     public init(
         source: Source,
-        nonnullContextQuerier: NonnullContextQuerier,
-        commentQuerier: CommentQuerier
+        nonnullContextQuerier: NonnullContextQuerier
     ) {
         
         self.source = source
         self.nonnullContextQuerier = nonnullContextQuerier
-        self.commentQuerier = commentQuerier
     }
 
     public func isInNonnullContext(_ context: ParserRuleContext) -> Bool {
@@ -32,18 +29,6 @@ public class ObjcASTNodeFactory {
 
     public func isInNonnullContext(_ range: SourceRange) -> Bool {
         nonnullContextQuerier.isInNonnullContext(range)
-    }
-    
-    public func popComments(preceding context: ParserRuleContext) -> [RawCodeComment] {
-        commentQuerier.popAllCommentsBefore(rule: context)
-    }
-    
-    public func popComments(overlapping context: ParserRuleContext) -> [RawCodeComment] {
-        commentQuerier.popCommentsOverlapping(rule: context)
-    }
-    
-    public func popComments(inLineWith context: ParserRuleContext) -> [RawCodeComment] {
-        commentQuerier.popCommentsInlineWith(rule: context)
     }
     
     public func makeIdentifier(from context: Parser.IdentifierContext) -> ObjcIdentifierNode {
@@ -61,22 +46,32 @@ public class ObjcASTNodeFactory {
     }
     
     public func makeProtocolReferenceList(from context: Parser.ProtocolListContext) -> ObjcProtocolReferenceListNode {
-        let protocolListNode =
-            ObjcProtocolReferenceListNode(isInNonnullContext: isInNonnullContext(context))
+        let protocolListNode = ObjcProtocolReferenceListNode(
+            isInNonnullContext: isInNonnullContext(context)
+        )
         
         for prot in context.protocolName() {
             guard let identifier = prot.identifier() else {
                 continue
             }
             
-            let protNameNode =
-                ObjcProtocolNameNode(name: identifier.getText(),
-                             isInNonnullContext: isInNonnullContext(identifier))
-            updateSourceLocation(for: protocolListNode, with: identifier)
+            let protNameNode = makeProtocolName(from: prot, identifier: identifier)
             protocolListNode.addChild(protNameNode)
         }
+
+        updateSourceLocation(for: protocolListNode, with: context)
         
         return protocolListNode
+    }
+
+    public func makeProtocolName(from context: Parser.ProtocolNameContext, identifier: Parser.IdentifierContext) -> ObjcProtocolNameNode {
+        let protNameNode = ObjcProtocolNameNode(
+            name: identifier.getText(),
+            isInNonnullContext: isInNonnullContext(identifier)
+        )
+        updateSourceLocation(for: protNameNode, with: context)
+
+        return protNameNode
     }
     
     public func makePointer(from context: ObjectiveCParser.PointerContext) -> ObjcPointerNode {
@@ -118,7 +113,6 @@ public class ObjcASTNodeFactory {
         let methodBody = ObjcMethodBodyNode(isInNonnullContext: isInNonnullContext(rule))
         updateSourceLocation(for: methodBody, with: rule)
         methodBody.statements = rule.compoundStatement()
-        methodBody.comments = popComments(overlapping: rule)
         
         return methodBody
     }
@@ -130,7 +124,6 @@ public class ObjcASTNodeFactory {
         let body = ObjcMethodBodyNode(isInNonnullContext: nonnull)
         body.statements = rule
         updateSourceLocation(for: body, with: rule)
-        body.comments = popComments(overlapping: rule)
         
         return body
     }
@@ -139,7 +132,6 @@ public class ObjcASTNodeFactory {
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
         
         let enumCase = ObjcEnumCaseNode(isInNonnullContext: nonnull)
-        enumCase.precedingComments = popComments(preceding: rule)
         updateSourceLocation(for: enumCase, with: rule)
         
         let identifierNode = makeIdentifier(from: identifier)
@@ -203,6 +195,8 @@ public class ObjcASTNodeFactory {
         let startColumn = source.columnNumber(at: sourceStartIndex)
         let endLine = source.lineNumber(at: sourceEndIndex)
         let endColumn = source.columnNumber(at: sourceEndIndex)
+
+        let columnsAtLastLine = startLine == endLine ? endColumn - startColumn : endColumn - 1
         
         let location = SourceLocation(
             line: startLine,
@@ -212,7 +206,7 @@ public class ObjcASTNodeFactory {
         
         let length = SourceLength(
             newlines: endLine - startLine,
-            columnsAtLastLine: endColumn,
+            columnsAtLastLine: columnsAtLastLine,
             utf8Length: endIndex - startIndex
         )
         

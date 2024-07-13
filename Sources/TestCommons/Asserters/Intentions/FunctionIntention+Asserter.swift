@@ -14,7 +14,7 @@ public extension Asserter where Object: FunctionIntention {
         
         return asserter(for: object.functionBody) { functionBody in
             functionBody.inClosure(closure)
-        }.map(self)
+        }.mapAsserter(self)
     }
 
     /// Asserts that the underlying `FunctionIntention` being tested has a
@@ -76,7 +76,7 @@ public extension Asserter where Object: ParameterizedFunctionIntention {
 
         return asserter(for: object.parameters[index]) { param in
             param.inClosure(closure)
-        }.map(self)
+        }.mapAsserter(self)
     }
 }
 
@@ -93,7 +93,7 @@ public extension Asserter where Object: SignatureFunctionIntention {
         
         return asserter(for: object.signature) { signature in
             signature.inClosure(closure)
-        }.map(self)
+        }.mapAsserter(self)
     }
     
     /// Asserts that the underlying `SignatureFunctionIntention` being tested

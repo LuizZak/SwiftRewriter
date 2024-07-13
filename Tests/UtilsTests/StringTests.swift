@@ -227,6 +227,12 @@ class StringTests: XCTestCase {
         XCTAssertEqual(ranges[0], input.range(of: "1"))
         XCTAssertEqual(ranges[1], input.range(of: "2"))
         XCTAssertEqual(ranges[2], input.range(of: "3"))
+
+        let rangesWithLineBreaks = input.lineRanges(includeLineBreak: true)
+        XCTAssertEqual(rangesWithLineBreaks.count, 3)
+        XCTAssertEqual(rangesWithLineBreaks[0], input.range(of: "1\n"))
+        XCTAssertEqual(rangesWithLineBreaks[1], input.range(of: "2\n"))
+        XCTAssertEqual(rangesWithLineBreaks[2], input.range(of: "3"))
     }
 
     func testLineRangesWithEmptyLines() {
@@ -244,6 +250,15 @@ class StringTests: XCTestCase {
             input.range(of: "1\n")!.upperBound..<input.range(of: "\n3")!.lowerBound
         )
         XCTAssertEqual(ranges[2], input.range(of: "3"))
+
+        let rangesWithLineBreaks = input.lineRanges(includeLineBreak: true)
+        XCTAssertEqual(rangesWithLineBreaks.count, 3)
+        XCTAssertEqual(rangesWithLineBreaks[0], input.range(of: "1\n"))
+        XCTAssertEqual(
+            rangesWithLineBreaks[1],
+            input.range(of: "1\n")!.upperBound..<input.range(of: "3")!.lowerBound
+        )
+        XCTAssertEqual(rangesWithLineBreaks[2], input.range(of: "3"))
     }
 
     func testLineRangesWithEmptyFinalLine() {
@@ -256,6 +271,11 @@ class StringTests: XCTestCase {
         XCTAssertEqual(ranges.count, 2)
         XCTAssertEqual(ranges[0], input.range(of: "1"))
         XCTAssertEqual(ranges[1], input.range(of: "1\n")!.upperBound..<input.endIndex)
+
+        let rangesWithLineBreaks = input.lineRanges(includeLineBreak: true)
+        XCTAssertEqual(rangesWithLineBreaks.count, 2)
+        XCTAssertEqual(rangesWithLineBreaks[0], input.range(of: "1\n"))
+        XCTAssertEqual(rangesWithLineBreaks[1], input.range(of: "1\n")!.upperBound..<input.endIndex)
     }
 
     func testLineRangesWithTwoEmptyFinalLines() {
@@ -270,6 +290,12 @@ class StringTests: XCTestCase {
         XCTAssertEqual(ranges[0], input.intRange(0..<1))
         XCTAssertEqual(ranges[1], input.intRange(2..<2))
         XCTAssertEqual(ranges[2], input.intRange(3..<3))
+
+        let rangesWithLineBreaks = input.lineRanges(includeLineBreak: true)
+        XCTAssertEqual(rangesWithLineBreaks.count, 3)
+        XCTAssertEqual(rangesWithLineBreaks[0], input.intRange(0..<2))
+        XCTAssertEqual(rangesWithLineBreaks[1], input.intRange(2..<3))
+        XCTAssertEqual(rangesWithLineBreaks[2], input.intRange(3..<3))
     }
 
     func testLineRangesWithSingleLine() {
@@ -278,6 +304,10 @@ class StringTests: XCTestCase {
         let ranges = input.lineRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
+
+        let rangesWithLineBreaks = input.lineRanges(includeLineBreak: true)
+        XCTAssertEqual(rangesWithLineBreaks.count, 1)
+        XCTAssertEqual(rangesWithLineBreaks[0], input.startIndex..<input.endIndex)
     }
 
     func testLineRangesWithEmptyString() {
@@ -286,6 +316,10 @@ class StringTests: XCTestCase {
         let ranges = input.lineRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
+
+        let rangesWithLineBreaks = input.lineRanges(includeLineBreak: true)
+        XCTAssertEqual(rangesWithLineBreaks.count, 1)
+        XCTAssertEqual(rangesWithLineBreaks[0], input.startIndex..<input.endIndex)
     }
 
     func testLineRangesWithSingleEmptyLine() {
@@ -295,6 +329,11 @@ class StringTests: XCTestCase {
         XCTAssertEqual(ranges.count, 2)
         XCTAssertEqual(ranges[0], input.startIndex..<input.startIndex)
         XCTAssertEqual(ranges[1], input.endIndex..<input.endIndex)
+
+        let rangesWithLineBreaks = input.lineRanges(includeLineBreak: true)
+        XCTAssertEqual(rangesWithLineBreaks.count, 2)
+        XCTAssertEqual(rangesWithLineBreaks[0], input.startIndex..<input.endIndex)
+        XCTAssertEqual(rangesWithLineBreaks[1], input.endIndex..<input.endIndex)
     }
 
     func testTrimWhitespace() {

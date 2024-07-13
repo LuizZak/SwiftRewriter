@@ -1,5 +1,6 @@
 import Analysis
 import XCTest
+import TestCommons
 
 class DirectedGraphTests: XCTestCase {
     func testAreEdgesEqual() {
@@ -159,6 +160,76 @@ class DirectedGraphTests: XCTestCase {
         XCTAssertNil(result)
     }
 
+    func testStronglyConnectedComponents_emptyGraph() {
+        let sut = makeSut()
+
+        let result = sut.stronglyConnectedComponents()
+
+        Asserter(object: result)
+            .assertIsEmpty()
+    }
+
+    func testStronglyConnectedComponents_singleNode() {
+        let sut = makeSut()
+        let node = sut.addNode(1)
+
+        let result = sut.stronglyConnectedComponents()
+
+        Asserter(object: result)
+            .assert(elementsEqualUnordered: [[node]])
+    }
+
+    func testStronglyConnectedComponents_twoNodes_notConnected() {
+        let sut = makeSut()
+        let node1 = sut.addNode(1)
+        let node2 = sut.addNode(2)
+
+        let result = sut.stronglyConnectedComponents()
+
+        Asserter(object: result)
+            .assert(elementsEqualUnordered: [[node1], [node2]])
+    }
+
+    func testStronglyConnectedComponents_twoNodes_connectedWeakly() {
+        let sut = makeSut()
+        let node1 = sut.addNode(1)
+        let node2 = sut.addNode(2)
+        sut.addEdge(from: node1, to: node2)
+
+        let result = sut.stronglyConnectedComponents()
+
+        Asserter(object: result)
+            .assert(elementsEqualUnordered: [[node1], [node2]])
+    }
+
+    func testStronglyConnectedComponents_twoNodes_connectedStrongly() {
+        let sut = makeSut()
+        let node1 = sut.addNode(1)
+        let node2 = sut.addNode(2)
+        sut.addMutualEdges(from: node1, to: node2)
+
+        let result = sut.stronglyConnectedComponents()
+
+        Asserter(object: result)
+            .assert(elementsEqualUnordered: [[node1, node2]])
+    }
+
+    func testStronglyConnectedComponents_fourNodes() {
+        let sut = makeSut()
+        let node1 = sut.addNode(1)
+        let node2 = sut.addNode(2)
+        let node3 = sut.addNode(3)
+        let node4 = sut.addNode(4)
+        sut.addMutualEdges(from: node1, to: node2)
+        sut.addEdge(from: node1, to: node3)
+        sut.addMutualEdges(from: node3, to: node4)
+
+        let result = sut.stronglyConnectedComponents()
+
+        Asserter(object: result)
+            .assert(elementsEqualUnordered: [[node1, node2], [node3, node4]])
+    }
+
     // MARK: - Test internals
 
     private func makeSut() -> TestGraph {
@@ -277,6 +348,14 @@ private class TestGraph {
         return edge
     }
 
+    @discardableResult
+    func addMutualEdges(from start: Node, to end: Node) -> [Edge] {
+        return [
+            addEdge(from: start, to: end),
+            addEdge(from: end, to: start),
+        ]
+    }
+
     class Node: DirectedGraphNode, CustomDebugStringConvertible {
         var value: Int
 
@@ -307,6 +386,10 @@ private class TestGraph {
 }
 
 extension TestGraph: DirectedGraph {
+    func subgraph<S>(of nodes: S) -> Self where S : Sequence, Node == S.Element {
+        fatalError("Subgraph not implemented on TestGraph")
+    }
+
     func areNodesEqual(_ node1: Node, _ node2: Node) -> Bool {
         node1 == node2
     }

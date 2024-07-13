@@ -1,7 +1,7 @@
 import XCTest
 import Analysis
 import SwiftSyntax
-import SwiftSyntaxParser
+import SwiftParser
 import SwiftAST
 import TestCommons
 
@@ -103,9 +103,9 @@ func throwErrorIfInGraphvizRecordMode(file: StaticString = #file) throws {
 func updateGraphvizCode(entry: GraphvizUpdateEntry) throws {
     let path = URL(fileURLWithPath: entry.file)
 
-    let syntax = try SyntaxParser.parse(path)
+    let syntax = try Parser.parse(source: String(contentsOf: path))
 
-    let converter = SourceLocationConverter(file: entry.file, tree: syntax)
+    let converter = SourceLocationConverter(fileName: entry.file, tree: syntax)
     let rewriter = GraphvizUpdateRewriter(entry: entry, locationConverter: converter)
     
     let newSyntax = rewriter.visit(syntax)
@@ -145,14 +145,14 @@ private class GraphvizUpdateRewriter: SyntaxRewriter {
         guard matchesEntryLine(node) else {
             return super.visit(node)
         }
-        guard let ident = node.calledExpression.as(IdentifierExprSyntax.self) else {
+        guard let ident = node.calledExpression.as(DeclReferenceExprSyntax.self) else {
             return super.visit(node)
         }
         guard matchesAssertIdentifier(ident) else {
             return super.visit(node)
         }
 
-        let args = node.argumentList
+        let args = node.arguments
         guard args.count == 2 || args.count == 3 else {
             return super.visit(node)
         }
@@ -172,23 +172,11 @@ private class GraphvizUpdateRewriter: SyntaxRewriter {
     }
 
     private func updatingExpectedString(_ exp: StringLiteralExprSyntax) -> StringLiteralExprSyntax {
-        let result = StringLiteralExprSyntax { builder in
-            builder.useOpenQuote(
-                SyntaxFactory.makeMultilineStringQuoteToken()
-            )
-            builder.useCloseQuote(
-                SyntaxFactory.makeMultilineStringQuoteToken()
-            )
-
-            let formatted = formatGraphviz(entry.newGraphviz)
-
-            builder.addSegment(
-                Syntax(
-                    SyntaxFactory
-                    .makeStringSegment(formatted)
-                )
-            )
-        }
+        let result = StringLiteralExprSyntax(
+            openDelimiter: .multilineStringQuoteToken(),
+            content: formatGraphviz(entry.newGraphviz),
+            closeDelimiter: .multilineStringQuoteToken()
+        )
 
         return result
     }
@@ -201,8 +189,8 @@ private class GraphvizUpdateRewriter: SyntaxRewriter {
         return lineSeparator + lines.joined(separator: lineSeparator) + lineSeparator
     }
 
-    private func matchesAssertIdentifier(_ syntax: IdentifierExprSyntax) -> Bool {
-        return syntax.identifier.withoutTrivia().description == "assertGraphviz"
+    private func matchesAssertIdentifier(_ syntax: DeclReferenceExprSyntax) -> Bool {
+        return syntax.baseName.trimmed.description == "assertGraphviz"
     }
 
     private func matchesEntryLine(_ syntax: SyntaxProtocol) -> Bool {

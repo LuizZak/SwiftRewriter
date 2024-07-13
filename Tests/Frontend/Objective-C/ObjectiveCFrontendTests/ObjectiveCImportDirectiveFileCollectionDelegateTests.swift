@@ -41,7 +41,7 @@ class ObjectiveCImportDirectiveFileCollectionDelegateTests: XCTestCase {
                 referencedFilesForFile: inputFile
             )
 
-        XCTAssertEqual(result.map { $0.path }, ["/a_file.h"])
+        XCTAssertEqual(result.map { $0.0.path }, ["/a_file.h"])
     }
 
     func testReferencedFilesForFileIgnoresNonExistingFiles() throws {
@@ -67,7 +67,7 @@ class ObjectiveCImportDirectiveFileCollectionDelegateTests: XCTestCase {
                 referencedFilesForFile: inputFile
             )
 
-        XCTAssertEqual(result.map { $0.path }, ["/a_file.h"])
+        XCTAssertEqual(result.map { $0.0.path }, ["/a_file.h"])
     }
 
     func testReferencedFilesForFileIgnoresSystemImports() throws {

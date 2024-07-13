@@ -616,10 +616,11 @@ public class ObjectiveCIntentionCollector {
             return
         }
         
-        let enumIntention =
-            EnumGenerationIntention(typeName: identifier.name,
-                                    rawValueType: .anyObject,
-                                    source: node)
+        let enumIntention = EnumGenerationIntention(
+            typeName: identifier.name,
+            rawValueType: "CInt",
+            source: node
+        )
         enumIntention.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
         
         mapComments(node, enumIntention)

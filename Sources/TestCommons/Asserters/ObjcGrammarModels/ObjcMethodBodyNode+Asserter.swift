@@ -35,6 +35,6 @@ public extension Asserter where Object == ObjcMethodBodyNode {
         let actual = object.comments.map(\.string)
         return asserter(for: actual) {
             $0.assert(equals: commentStrings, file: file, line: line)
-        }.map(self)
+        }.mapAsserter(self)
     }
 }

@@ -151,11 +151,11 @@ class ObjectiveC2SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                     // [Creation] A.c line 29 column 13
                     var parent: UnsafeMutablePointer<node234>!
                     // [Creation] A.c line 30 column 13
-                    var kids: (UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!)
+                    var kids: (UnsafeMutablePointer<node234>?, UnsafeMutablePointer<node234>?, UnsafeMutablePointer<node234>?, UnsafeMutablePointer<node234>?)
                     // [Creation] A.c line 31 column 9
                     var counts: (CInt, CInt, CInt, CInt)
                     // [Creation] A.c line 32 column 10
-                    var elems: (UnsafeMutableRawPointer!, UnsafeMutableRawPointer!, UnsafeMutableRawPointer!)
+                    var elems: (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?)
 
                     // [Creation] Synthesizing parameterless constructor for struct
                     init() {
@@ -168,7 +168,7 @@ class ObjectiveC2SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                         elems = (nil, nil, nil)
                     }
                     // [Creation] Synthesizing parameterized constructor for struct
-                    init(parent: UnsafeMutablePointer<node234>!, kids: (UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!, UnsafeMutablePointer<node234>!), counts: (CInt, CInt, CInt, CInt), elems: (UnsafeMutableRawPointer!, UnsafeMutableRawPointer!, UnsafeMutableRawPointer!)) {
+                    init(parent: UnsafeMutablePointer<node234>!, kids: (UnsafeMutablePointer<node234>?, UnsafeMutablePointer<node234>?, UnsafeMutablePointer<node234>?, UnsafeMutablePointer<node234>?), counts: (CInt, CInt, CInt, CInt), elems: (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?)) {
                         self.parent = parent
 
                         self.kids = kids

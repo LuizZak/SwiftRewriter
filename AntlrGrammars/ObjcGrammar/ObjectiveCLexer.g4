@@ -223,8 +223,9 @@ AT:                       '@';
 // Operators
 
 ASSIGNMENT:               '=';
-LSHIFT:                   '<<';
-RSHIFT:                   '>>';
+// Disabled: Causes lexing errors in nested generic syntaxes (e.g. "A<B<C>>")
+// LSHIFT:                   '<<';
+// RSHIFT:                   '>>';
 GT:                       '>';
 LT:                       '<';
 BANG:                     '!';
@@ -259,7 +260,7 @@ OR_ASSIGN:                '|=';
 XOR_ASSIGN:               '^=';
 MOD_ASSIGN:               '%=';
 LSHIFT_ASSIGN:            '<<=';
-RSHIFT_ASSIGN:            '>>=';
+RSHIFT_ASSIGN:            '>>='; // TODO: Validate that this lexer rule doesn't cause issues in generic declarations like RSHIFT does
 ELIPSIS:                  '...';
 
 // Literals

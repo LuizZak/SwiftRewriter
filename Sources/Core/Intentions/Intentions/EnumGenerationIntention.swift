@@ -22,10 +22,12 @@ public final class EnumGenerationIntention: TypeGenerationIntention {
         properties.compactMap { $0 as? EnumCaseGenerationIntention }
     }
     
-    public init(typeName: String,
-                rawValueType: SwiftType,
-                accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+    public init(
+        typeName: String,
+        rawValueType: SwiftType,
+        accessLevel: AccessLevel = .internal,
+        source: ASTNode? = nil
+    ) {
         
         self.rawValueType = rawValueType
         super.init(typeName: typeName, accessLevel: accessLevel, source: source)

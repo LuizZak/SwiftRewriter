@@ -53,33 +53,6 @@ public extension Asserter where Object == [DeclarationTranslator.ASTNodeDeclarat
     }
 
     @discardableResult
-    func assertBlock(
-        name: String,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> Asserter<DeclarationTranslator.ASTBlockDeclaration>? {
-
-        for value in object {
-            switch value {
-            case .block(let decl) where decl.identifier.name == name:
-                return .init(object: decl)
-
-            default:
-                break
-            }
-        }
-
-        XCTFail(
-            "Expected to find block named '\(name)' but found none.",
-            file: file,
-            line: line
-        )
-        dumpObject()
-
-        return nil
-    }
-
-    @discardableResult
     func assertFunction(
         name: String,
         file: StaticString = #file,
@@ -198,10 +171,6 @@ public extension Asserter where Object == DeclarationTranslator.ASTNodeDeclarati
         switch object {
         case .variable(let decl) where decl.initialValue != nil:
             return self
-        case .block(let decl) where decl.initialValue != nil:
-            return self
-        case .functionPointer(let decl) where decl.initialValue != nil:
-            return self
 
         default:
             break
@@ -225,10 +194,6 @@ public extension Asserter where Object == DeclarationTranslator.ASTNodeDeclarati
 
         switch object {
         case .variable(let decl) where decl.initialValue == nil:
-            return self
-        case .block(let decl) where decl.initialValue == nil:
-            return self
-        case .functionPointer(let decl) where decl.initialValue == nil:
             return self
 
         default:
@@ -379,63 +344,59 @@ public extension Asserter where Object == DeclarationTranslator.ASTNodeDeclarati
 }
 
 public extension Asserter where Object == DeclarationTranslator.ASTVariableDeclaration {
+    /// Asserts that the underlying variable declaration being tested has an
+    /// initial value associated with it.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
     @discardableResult
     func assertHasInitializer(
         file: StaticString = #file,
         line: UInt = #line
     ) -> Self? {
-        guard object.initialValue != nil else {
-            XCTFail(
-                "Expected declaration '\(object.identifier.name)' to have initializer but found none.",
-                file: file,
-                line: line
-            )
-            dumpObject()
 
-            return nil
-        }
-
-        return self
+        self[\.initialValue].assertNotNil(
+            message: "Expected declaration '\(object.identifier.name)' to have initializer but found none.",
+            file: file,
+            line: line
+        ).mapAsserter(self)
     }
 
+    /// Asserts that the underlying variable declaration being tested has no
+    /// initial value associated with it.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
     @discardableResult
     func assertNoInitializer(
         file: StaticString = #file,
         line: UInt = #line
     ) -> Self? {
 
-        guard object.initialValue == nil else {
-            XCTFail(
-                "Expected declaration '\(object.identifier.name)' to have no initializer but found one.",
-                file: file,
-                line: line
-            )
-            dumpObject()
-            return nil
-        }
-
-        return self
+        self[\.initialValue].assertNil(
+            message: "Expected declaration '\(object.identifier.name)' to have no initializer but found one.",
+            file: file,
+            line: line
+        ).mapAsserter(self)
     }
 
+    /// Asserts that the underlying variable declaration being tested has a given
+    /// type value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
     @discardableResult
     func assert(
-        type: ObjcType,
+        type expected: ObjcType,
         file: StaticString = #file,
         line: UInt = #line
     ) -> Self? {
 
-        guard object.type.type == type else {
-            XCTFail(
-                "Expected declaration '\(object.identifier.name)' to have type '\(type)' but found '\(object.type.type)'.",
-                file: file,
-                line: line
-            )
-            dumpObject()
-
-            return nil
-        }
-
-        return self
+        self[\.type.type].assert(
+            equals: expected,
+            file: file,
+            line: line
+        ).mapAsserter(self)
     }
 
     /// Asserts that the underlying variable declaration being tested has a given
@@ -450,20 +411,12 @@ public extension Asserter where Object == DeclarationTranslator.ASTVariableDecla
         line: UInt = #line
     ) -> Self? {
 
-        guard object.nullability == nullabilitySpecifier else {
-            XCTAssertEqual(
-                object.nullability,
-                nullabilitySpecifier,
-                "Expected declaration '\(object.identifier.name)' to have nullability specifier '\(nullabilitySpecifier?.description ?? "<nil>")'.",
-                file: file,
-                line: line
-            )
-            dumpObject()
-            
-            return nil
-        }
-
-        return self
+        self[\.nullability].assert(
+            equals: nullabilitySpecifier,
+            message: "Expected declaration '\(object.identifier.name)' to have nullability specifier '\(nullabilitySpecifier?.description ?? "<nil>")'.",
+            file: file,
+            line: line
+        ).mapAsserter(self)
     }
 
     /// Asserts that the underlying variable declaration being tested has a given
@@ -473,25 +426,58 @@ public extension Asserter where Object == DeclarationTranslator.ASTVariableDecla
     /// further tests.
     @discardableResult
     func assert(
-        arcSpecifier: ObjcArcBehaviorSpecifier?,
+        hasArcSpecifier expected: ObjcArcBehaviorSpecifier?,
         file: StaticString = #file,
         line: UInt = #line
     ) -> Self? {
 
-        guard object.arcSpecifier == arcSpecifier else {
-            XCTAssertEqual(
-                object.arcSpecifier,
-                arcSpecifier,
-                "Expected declaration '\(object.identifier.name)' to have arc specifier '\(arcSpecifier?.description ?? "<nil>")'.",
-                file: file,
-                line: line
-            )
-            dumpObject()
-            
-            return nil
-        }
+        self[\.arcSpecifier].assert(
+            equals: expected,
+            message: "Expected declaration '\(object.identifier.name)' to have arc specifier '\(expected?.description ?? "<nil>")'.",
+            file: file,
+            line: line
+        ).mapAsserter(self)
+    }
 
-        return self
+    /// Asserts that the underlying variable declaration being tested has a given
+    /// nullability specifier value.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        hasNullabilitySpecifier expected: ObjcNullabilitySpecifier?,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        self[\.nullability].assert(
+            equals: expected,
+            message: "Expected variable '\(object.identifier.name)' to have nullability specifier '\(expected?.description ?? "<nil>")'.",
+            file: file,
+            line: line
+        ).mapAsserter(self)
+    }
+
+    /// Asserts that the underlying variable declaration being tested has a given
+    /// type qualifier.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        hasTypeQualifier typeQualifier: ObjcTypeQualifier,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        return self[\.typeQualifiers].assertContains(
+            message: "Expected variable \(object.identifier.name) to contain type qualifier '\(typeQualifier)'",
+            file: file,
+            line: line
+        ) { element in
+            element == typeQualifier
+        }.mapAsserter(self)
     }
 
     /// Asserts that the underlying variable declaration being tested has a
@@ -514,249 +500,6 @@ public extension Asserter where Object == DeclarationTranslator.ASTVariableDecla
             $0.assert(
                 equals: isStatic,
                 message: "Expected variable '\(object.identifier.name).isStatic' to be \(isStatic).",
-                file: file,
-                line: line
-            )
-        }
-    }
-}
-
-public extension Asserter where Object == DeclarationTranslator.ASTBlockDeclaration {
-    @discardableResult
-    func assertHasInitializer(
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> Self? {
-
-        guard object.initialValue != nil else {
-            XCTFail(
-                "Expected block '\(object.identifier.name)' to have initializer but found none.",
-                file: file,
-                line: line
-            )
-            dumpObject()
-
-            return nil
-        }
-
-        return self
-    }
-
-    @discardableResult
-    func assertNoInitializer(
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> Self? {
-
-        guard object.initialValue == nil else {
-            XCTFail(
-                "Expected block '\(object.identifier.name)' to have no initializer but found one.",
-                file: file,
-                line: line
-            )
-            dumpObject()
-            
-            return nil
-        }
-
-        return self
-    }
-
-    /// Asserts that the underlying block declaration being tested has a given
-    /// nullability specifier value.
-    ///
-    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
-    /// further tests.
-    @discardableResult
-    func assert(
-        hasNullabilitySpecifier nullabilitySpecifier: ObjcNullabilitySpecifier?,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> Self? {
-
-        guard object.nullability == nullabilitySpecifier else {
-            XCTAssertEqual(
-                object.nullability,
-                nullabilitySpecifier,
-                "Expected block '\(object.identifier.name)' to have nullability specifier '\(nullabilitySpecifier?.description ?? "<nil>")'.",
-                file: file,
-                line: line
-            )
-            dumpObject()
-            
-            return nil
-        }
-
-        return self
-    }
-
-    /// Asserts that the underlying block declaration being tested has a given
-    /// arc behaviour specifier value.
-    ///
-    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
-    /// further tests.
-    @discardableResult
-    func assert(
-        hasArcSpecifier arcSpecifier: ObjcArcBehaviorSpecifier?,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> Self? {
-
-        guard object.arcSpecifier == arcSpecifier else {
-            XCTAssertEqual(
-                object.arcSpecifier,
-                arcSpecifier,
-                "Expected block '\(object.identifier.name)' to have arc specifier '\(arcSpecifier?.description ?? "<nil>")'.",
-                file: file,
-                line: line
-            )
-            dumpObject()
-            
-            return nil
-        }
-
-        return self
-    }
-
-    /// Asserts that the underlying block declaration being tested has a given
-    /// type qualifier.
-    ///
-    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
-    /// further tests.
-    @discardableResult
-    func assert(
-        hasTypeQualifier typeQualifier: ObjcTypeQualifier,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> Self? {
-
-        return asserter(forKeyPath: \.typeQualifiers, file: file, line: line) { typeQualifiers in
-            typeQualifiers.assertContains(
-                message: "Expected block to contain type qualifier '\(typeQualifier)'",
-                file: file,
-                line: line
-            ) { element in
-                element == typeQualifier
-            }
-        }
-    }
-
-    /// Asserts that the underlying block declaration being tested has a
-    /// specified `isStatic` value.
-    ///
-    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
-    /// further tests.
-    @discardableResult
-    func assert(
-        isStatic: Bool,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> Self? {
-
-        asserter(
-            forKeyPath: \.isStatic,
-            file: file,
-            line: line
-        ) {
-            $0.assert(
-                equals: isStatic,
-                message: "Expected block's '\(object.identifier.name).isStatic' to be \(isStatic).",
-                file: file,
-                line: line
-            )
-        }
-    }
-}
-
-public extension Asserter where Object == DeclarationTranslator.ASTFunctionPointerDeclaration {
-    @discardableResult
-    func assertHasInitializer(
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> Self? {
-
-        guard object.initialValue != nil else {
-            XCTFail(
-                "Expected function pointer '\(object.identifier.name)' to have initializer but found none.",
-                file: file,
-                line: line
-            )
-            dumpObject()
-
-            return nil
-        }
-
-        return self
-    }
-
-    @discardableResult
-    func assertNoInitializer(
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> Self? {
-
-        guard object.initialValue == nil else {
-            XCTFail(
-                "Expected function pointer '\(object.identifier.name)' to have no initializer but found one.",
-                file: file,
-                line: line
-            )
-            dumpObject()
-            
-            return nil
-        }
-
-        return self
-    }
-
-    /// Asserts that the underlying function pointer declaration being tested
-    /// has a given nullability specifier value.
-    ///
-    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
-    /// further tests.
-    @discardableResult
-    func assert(
-        hasNullabilitySpecifier nullabilitySpecifier: ObjcNullabilitySpecifier?,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> Self? {
-
-        guard object.nullability == nullabilitySpecifier else {
-            XCTAssertEqual(
-                object.nullability,
-                nullabilitySpecifier,
-                "Expected function pointer '\(object.identifier.name)' to have nullability specifier '\(nullabilitySpecifier?.description ?? "<nil>")'.",
-                file: file,
-                line: line
-            )
-            dumpObject()
-            
-            return nil
-        }
-
-        return self
-    }
-
-    /// Asserts that the underlying function pointer declaration being tested has
-    /// a specified `isStatic` value.
-    ///
-    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
-    /// further tests.
-    @discardableResult
-    func assert(
-        isStatic: Bool,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> Self? {
-
-        asserter(
-            forKeyPath: \.isStatic,
-            file: file,
-            line: line
-        ) {
-            $0.assert(
-                equals: isStatic,
-                message: "Expected function pointer's '\(object.identifier.name).isStatic' to be \(isStatic).",
                 file: file,
                 line: line
             )

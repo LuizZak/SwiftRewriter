@@ -14,7 +14,7 @@ public extension Asserter where Object: ValueStorageIntention {
         
         return asserter(for: object.initialValue) { signature in
             signature.inClosure(closure)
-        }.map(self)
+        }.mapAsserter(self)
     }
     
     /// Asserts that the underlying `ValueStorageIntention` being tested has a 

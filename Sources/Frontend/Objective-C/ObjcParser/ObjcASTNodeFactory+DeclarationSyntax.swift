@@ -1,5 +1,6 @@
 import Utils
 import ObjcGrammarModels
+import ObjcParserAntlr
 import GrammarModelBase
 
 extension ObjcASTNodeFactory {
@@ -11,22 +12,6 @@ extension ObjcASTNodeFactory {
         return nonnullContextQuerier.isInNonnullContext(start)
     }
     
-    public func popComments(preceding syntax: DeclarationSyntaxElementType) -> [RawCodeComment] {
-        guard let start = syntax.sourceRange.start else {
-            return []
-        }
-
-        return commentQuerier.popAllCommentsBefore(start)
-    }
-    
-    public func popComments(overlapping syntax: DeclarationSyntaxElementType) -> [RawCodeComment] {
-        commentQuerier.popCommentsOverlapping(syntax.sourceRange)
-    }
-    
-    public func popComments(inLineWith syntax: DeclarationSyntaxElementType) -> [RawCodeComment] {
-        commentQuerier.popCommentsInlineWith(syntax.sourceRange.start ?? .invalid)
-    }
-    
     public func makeIdentifier(from syntax: IdentifierSyntax) -> ObjcIdentifierNode {
         let nonnull = isInNonnullContext(syntax)
         let node = ObjcIdentifierNode(name: syntax.identifier, isInNonnullContext: nonnull)
@@ -35,21 +20,26 @@ extension ObjcASTNodeFactory {
     }
     
     public func makeProtocolReferenceList(from syntax: ProtocolReferenceListSyntax) -> ObjcProtocolReferenceListNode {
-        let protocolListNode =
-            ObjcProtocolReferenceListNode(isInNonnullContext: isInNonnullContext(syntax))
+        let protocolListNode = ObjcProtocolReferenceListNode(
+            isInNonnullContext: isInNonnullContext(syntax)
+        )
         
         for prot in syntax.protocols {
-            let identifier = prot.identifier
-            
-            let protNameNode = ObjcProtocolNameNode(
-                name: identifier.identifier,
-                isInNonnullContext: isInNonnullContext(identifier)
-            )
-            updateSourceLocation(for: protocolListNode, with: identifier)
+            let protNameNode = makeProtocolName(from: prot)
             protocolListNode.addChild(protNameNode)
         }
         
         return protocolListNode
+    }
+
+    public func makeProtocolName(from syntax: ProtocolNameSyntax) -> ObjcProtocolNameNode {
+        let protNameNode = ObjcProtocolNameNode(
+            name: syntax.identifier.identifier,
+            isInNonnullContext: isInNonnullContext(syntax)
+        )
+        updateSourceLocation(for: protNameNode, with: syntax)
+
+        return protNameNode
     }
     
     public func makePointer(from syntax: PointerSyntax) -> ObjcPointerNode {
@@ -99,7 +89,7 @@ extension ObjcASTNodeFactory {
         let nonnull = isInNonnullContext(syntax)
         
         let enumCase = ObjcEnumCaseNode(isInNonnullContext: nonnull)
-        enumCase.precedingComments = popComments(preceding: syntax)
+
         updateSourceLocation(for: enumCase, with: syntax)
         
         let identifierNode = makeIdentifier(from: identifier)

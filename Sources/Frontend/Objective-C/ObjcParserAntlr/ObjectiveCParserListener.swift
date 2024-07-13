@@ -79,6 +79,18 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitCategoryInterface(_ ctx: ObjectiveCParser.CategoryInterfaceContext)
 	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#categoryInterfaceName}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterCategoryInterfaceName(_ ctx: ObjectiveCParser.CategoryInterfaceNameContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#categoryInterfaceName}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitCategoryInterfaceName(_ ctx: ObjectiveCParser.CategoryInterfaceNameContext)
+	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#classImplementation}.
 	 - Parameters:
 	   - ctx: the parse tree
@@ -1542,6 +1554,18 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	   - ctx: the parse tree
 	 */
 	func exitPointerEntry(_ ctx: ObjectiveCParser.PointerEntryContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#pointerSpecifier}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterPointerSpecifier(_ ctx: ObjectiveCParser.PointerSpecifierContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#pointerSpecifier}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitPointerSpecifier(_ ctx: ObjectiveCParser.PointerSpecifierContext)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#macro}.
 	 - Parameters:

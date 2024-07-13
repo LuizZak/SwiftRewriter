@@ -93,6 +93,19 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	open func enterCategoryInterfaceName(_ ctx: ObjectiveCParser.CategoryInterfaceNameContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitCategoryInterfaceName(_ ctx: ObjectiveCParser.CategoryInterfaceNameContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	open func enterClassImplementation(_ ctx: ObjectiveCParser.ClassImplementationContext) { }
 	/**
 	 * {@inheritDoc}
@@ -1673,6 +1686,19 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitPointerEntry(_ ctx: ObjectiveCParser.PointerEntryContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterPointerSpecifier(_ ctx: ObjectiveCParser.PointerSpecifierContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitPointerSpecifier(_ ctx: ObjectiveCParser.PointerSpecifierContext) { }
 
 	/**
 	 * {@inheritDoc}

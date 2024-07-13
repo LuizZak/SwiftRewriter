@@ -120,3 +120,53 @@ public extension Asserter where Object: Collection, Object.Index == Int {
         return self
     }
 }
+
+public extension Asserter where Object: Collection, Object.Element: Equatable {
+    /// Asserts that the underlying `Collection` being tested matches with another
+    /// collection of the same elements but with arbitrary order, under
+    /// the element's `Equatable` conformance.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assert(
+        elementsEqualUnordered other: some Collection<Object.Element>,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        if object.count != other.count {
+            assertFailed(
+                message: "assert(elementsEqualUnordered:) failed: object.count != other.count (\(object.count) != \(other.count))",
+                file: file,
+                line: line
+            )
+            return nil
+        }
+
+        let signal: () -> Self? = {
+            assertFailed(
+                message: #"assert(elementsEqualUnordered:) failed: ("\#(object)") != ("\#(other)")"#,
+                file: file,
+                line: line
+            )
+
+            return nil
+        }
+
+        var remaining = Array(object)
+        for item in other {
+            if let nextIndex = remaining.firstIndex(of: item) {
+                remaining.remove(at: nextIndex)
+            } else {
+                return signal()
+            }
+        }
+
+        if !remaining.isEmpty {
+            return signal()
+        }
+
+        return self
+    }
+}

@@ -6,11 +6,19 @@ import SwiftAST
 /// Used to apply source code comments to `SwiftAST` syntax trees that originated
 /// from source code as these elements are parsed.
 public class SwiftASTCommentApplier {
-    /// Collection of comments yet to be distributed to syntax elements.
-    var comments: [RawCodeComment]
-
-    var rangeContextStack: [SourceRange] = []
+    private var state: _State
     
+    /// Collection of comments yet to be distributed to syntax elements.
+    var comments: [RawCodeComment] {
+        get { state.comments }
+        set { state.comments = newValue }
+    }
+
+    var rangeContextStack: [SourceRange] {
+        get { state.rangeContextStack }
+        set { state.rangeContextStack = newValue }
+    }
+
     /// Returns the most recently pushed `SourceRange` context.
     /// Is `nil` if no range context is currently pushed.
     public var rangeContext: SourceRange? {
@@ -19,7 +27,10 @@ public class SwiftASTCommentApplier {
 
     /// Initializes a new comment applier with a given set of comments.
     public init(comments: [RawCodeComment]) {
-        self.comments = comments.sorted { $0.location < $1.location }
+        self.state = _State(
+            comments: comments.sorted { $0.location < $1.location },
+            rangeContextStack: []
+        )
     }
 
     /// Sets the list of comments of a statement to be all comments that apply to
@@ -131,6 +142,21 @@ public class SwiftASTCommentApplier {
         }
     }
 
+    /// Returns a State value that can be used to restore the state of this
+    /// comment applier to a previous point.
+    public func saveState() -> State {
+        return State(state: state)
+    }
+
+    /// Restores the state of this comment applier to a previous point specified
+    /// by a given `State` object.
+    ///
+    /// This affects both the comments available as well as the stack of source
+    /// range contexts pushed by `pushRangeContext(_:)` and `pushRangeContext(rule:)`.
+    public func restore(state: State) {
+        self.state = state.state
+    }
+
     private func _toCommentArray(_ rawComments: [RawCodeComment]) -> [SwiftComment] {
         rawComments.map(_toComment(_:))
     }
@@ -183,6 +209,22 @@ public class SwiftASTCommentApplier {
         }
 
         return closure(querier)
+    }
+
+    /// Internal state for a comment applier
+    fileprivate struct _State {
+        var comments: [RawCodeComment]
+        var rangeContextStack: [SourceRange]
+    }
+
+    /// A token value that can be used to restore the comments from this AST
+    /// comment applier to a previously held state.
+    public class State {
+        fileprivate var state: _State
+
+        fileprivate init(state: _State) {
+            self.state = state
+        }
     }
 }
 

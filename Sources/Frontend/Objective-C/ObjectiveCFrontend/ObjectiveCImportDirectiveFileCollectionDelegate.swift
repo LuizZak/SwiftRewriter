@@ -1,6 +1,7 @@
 import Foundation
 import ObjcParser
 import SwiftRewriterLib
+import Utils
 
 public class ObjectiveCImportDirectiveFileCollectionDelegate {
     var parserCache: ObjectiveCParserCache
@@ -13,29 +14,31 @@ public class ObjectiveCImportDirectiveFileCollectionDelegate {
 }
 
 extension ObjectiveCImportDirectiveFileCollectionDelegate: ObjectiveCFileCollectionStepDelegate {
-    public func objectiveCFileCollectionStep(_ fileCollectionStep: ObjectiveCFileCollectionStep,
-                                             referencedFilesForFile file: InputSource) throws -> [URL] {
+    public func objectiveCFileCollectionStep(
+        _ fileCollectionStep: ObjectiveCFileCollectionStep,
+        referencedFilesForFile file: InputSource
+    ) throws -> [(file: URL, range: SourceRange?)] {
 
         let parserTree = try parserCache.loadParsedTree(input: file)
         let fileReferences =
             parserTree.importDirectives
                 .filter { !$0.isSystemImport }
-                .map { $0.path }
-                .filter { $0.hasSuffix(".h") }
+                .filter { $0.path.hasSuffix(".h") }
 
         let basePath = URL(fileURLWithPath: file.sourcePath()).deletingLastPathComponent()
 
-        var urls: [URL] = []
+        var results: [(URL, SourceRange)] = []
 
-        for reference in fileReferences {
-            let fileName = (reference as NSString).lastPathComponent
+        for importDecl in fileReferences {
+            let importPath = importDecl.path
+            let fileName = (importPath as NSString).lastPathComponent
             let path = basePath.appendingPathComponent(fileName)
 
             if fileProvider.fileExists(atUrl: path) {
-                urls.append(path)
+                results.append((path, importDecl.sourceRange))
             }
         }
 
-        return urls
+        return results
     }
 }

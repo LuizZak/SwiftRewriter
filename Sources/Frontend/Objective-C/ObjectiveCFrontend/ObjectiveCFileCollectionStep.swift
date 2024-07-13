@@ -1,5 +1,6 @@
 import Foundation
 import SwiftRewriterLib
+import Utils
 
 public class ObjectiveCFileCollectionStep {
     var fileProvider: FileProvider
@@ -91,11 +92,12 @@ public class ObjectiveCFileCollectionStep {
 
         let references = try delegate.objectiveCFileCollectionStep(self, referencedFilesForFile: file)
 
-        for url in references {
+        for (url, range) in references {
             if !hasFile(url) && fileProvider.fileExists(atUrl: url) {
                 listener?.objectiveCFileCollectionStep(
                     self,
                     didAddReferencedFile: url,
+                    sourceRange: range,
                     forInputFile: file
                 )
                 
@@ -132,7 +134,10 @@ public extension ObjectiveCFileCollectionStep {
 
 // TODO: Maybe merge with ObjectiveCFileCollectionStepDelegate?
 public protocol ObjectiveCFileCollectionStepListener {
-    func objectiveCFileCollectionStep(_ collectionStep: ObjectiveCFileCollectionStep,
-                                      didAddReferencedFile referencedUrl: URL,
-                                      forInputFile inputFile: DiskInputFile)
+    func objectiveCFileCollectionStep(
+        _ collectionStep: ObjectiveCFileCollectionStep,
+        didAddReferencedFile referencedUrl: URL,
+        sourceRange: SourceRange?,
+        forInputFile inputFile: DiskInputFile
+    )
 }

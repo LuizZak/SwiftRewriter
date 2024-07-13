@@ -16,7 +16,7 @@ public extension Asserter where Object: PropertyGenerationIntention {
         
         return asserter(for: object.initialValue) { signature in
             signature.inClosure(closure)
-        }.map(self)
+        }.mapAsserter(self)
     }
     
     /// Asserts that the underlying `PropertyGenerationIntention` being tested

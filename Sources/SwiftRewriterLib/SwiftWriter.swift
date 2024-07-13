@@ -6,7 +6,7 @@ import TypeSystem
 import WriterTargetOutput
 import SwiftSyntax
 import SwiftFormat
-import SwiftSyntaxParser
+import SwiftParser
 import SwiftSyntaxSupport
 import Utils
 
@@ -57,8 +57,11 @@ public final class SwiftWriter {
         var unique = Set<String>()
         let fileIntents = intentions.fileIntentions()
         
-        let errors = ConcurrentValue<[(String, Error)]>(wrappedValue: [])
-        let filesEmitted = ConcurrentValue<Int>(wrappedValue: 0)
+        @ConcurrentValue
+        var errors: [(String, Error)] = []
+        
+        @ConcurrentValue
+        var filesEmitted = 0
         
         let listenerQueue = DispatchQueue(label: "com.swiftrewriter.swiftwriter.listener")
         let queue = ConcurrentOperationQueue()
@@ -81,26 +84,27 @@ public final class SwiftWriter {
                 continue
             }
             
-            let writer
-                = SwiftSyntaxWriter(
-                    options: options,
-                    diagnostics: Diagnostics(),
-                    output: output,
-                    typeSystem: typeSystem,
-                    syntaxRewriterApplier: syntaxRewriterApplier)
+            let writer = SwiftSyntaxWriter(
+                options: options,
+                diagnostics: Diagnostics(),
+                output: output,
+                typeSystem: typeSystem,
+                syntaxRewriterApplier: syntaxRewriterApplier
+            )
             
             queue.addOperation {
                 autoreleasepool {
                     do {
                         if let listener = self.progressListener {
-                            let fe: Int = filesEmitted.modifyingValue({ $0 += 1; return $0 })
+                            let fe: Int = _filesEmitted.prefixIncrement()
                             
                             listenerQueue.async {
                                 listener.swiftWriterReportProgress(
                                     self,
                                     filesEmitted: fe,
                                     totalFiles: filesToEmit.count,
-                                    latestFile: file)
+                                    latestFile: file
+                                )
                             }
                         }
                         
@@ -110,7 +114,7 @@ public final class SwiftWriter {
                             self.diagnostics.merge(with: writer.diagnostics)
                         }
                     } catch {
-                        errors.wrappedValue.append((file.targetPath, error))
+                        errors.append((file.targetPath, error))
                     }
                 }
             }
@@ -118,10 +122,12 @@ public final class SwiftWriter {
         
         queue.runAndWaitConcurrent()
         
-        for error in errors.wrappedValue {
-            diagnostics.error("Error while saving file \(error.0): \(error.1)",
-                              origin: error.0,
-                              location: .invalid)
+        for error in errors {
+            diagnostics.error(
+                "Error while saving file \(error.0): \(error.1)",
+                origin: error.0,
+                location: .invalid
+            )
         }
     }
     
@@ -159,12 +165,12 @@ class SwiftSyntaxWriter {
     func outputFile(_ fileIntent: FileGenerationIntention, targetFile: FileOutput) throws {
         let out = targetFile.outputTarget()
         
-        let settings = SwiftSyntaxProducer
+        let settings = SwiftProducer
             .Settings(outputExpressionTypes: options.outputExpressionTypes,
                       printIntentionHistory: options.printIntentionHistory,
                       emitObjcCompatibility: options.emitObjcCompatibility)
         
-        let producer = SwiftSyntaxProducer(settings: settings, delegate: self)
+        let producer = SwiftProducer(settings: settings, delegate: self)
         
         var fileSyntax = producer.generateFile(fileIntent)
 
@@ -192,7 +198,7 @@ class SwiftSyntaxWriter {
             var intermediary: String = ""
             try formatter.format(source: string, assumingFileURL: fileUrl, to: &intermediary)
 
-            return try SyntaxParser.parse(source: intermediary)
+            return Parser.parse(source: intermediary)
         }
     }
 
@@ -201,9 +207,9 @@ class SwiftSyntaxWriter {
     }
 }
 
-extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
-    func swiftSyntaxProducer(
-        _ producer: SwiftSyntaxProducer,
+extension SwiftSyntaxWriter: SwiftProducerDelegate {
+    func swiftProducer(
+        _ producer: SwiftProducer,
         shouldEmitTypeFor storage: ValueStorage,
         intention: IntentionProtocol?,
         initialValue: Expression?
@@ -226,8 +232,8 @@ extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
         )
     }
     
-    func swiftSyntaxProducer(
-        _ producer: SwiftSyntaxProducer,
+    func swiftProducer(
+        _ producer: SwiftProducer,
         initialValueFor intention: ValueStorageIntention
     ) -> Expression? {
         if let intention = intention as? PropertyGenerationIntention {

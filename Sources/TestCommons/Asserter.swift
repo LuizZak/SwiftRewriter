@@ -12,11 +12,6 @@ public struct Asserter<Object> {
     public subscript<Value>(member: KeyPath<Object, Value>) -> Asserter<Value> {
         .init(object: object[keyPath: member])
     }
-    /*
-    public subscript<Value>(dynamicMember dynamicMember: KeyPath<Object, Value>) -> Asserter<Value> {
-        .init(object: object[keyPath: dynamicMember])
-    }
-    */
 
     public init(object: Object) {
         self.object = object
@@ -126,9 +121,9 @@ public extension Optional {
     /// Can be used to replace result types of assertion calls with other asserters
     /// that are type-compatible with a certain object type, allowing them to be
     /// used as a return value for a differently typed function or closure.
-    func map<TOld, TNew>(
+    func mapAsserter<TOld, TNew>(
         _ newAsserter: Asserter<TNew>
-    ) -> Asserter<TNew>? where Wrapped == Asserter<TOld>? {
+    ) -> Asserter<TNew>? where Wrapped == Asserter<TOld> {
 
         switch self {
         case .some:
