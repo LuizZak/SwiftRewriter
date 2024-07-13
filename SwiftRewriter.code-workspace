@@ -40,6 +40,7 @@
 				"args": [
 					"build",
 					"--build-tests",
+					"-Xswiftc", "-diagnostic-style=llvm",
 				],
 				"options": {
 					"env": {
@@ -64,6 +65,7 @@
 				"args": [
 					"build",
 					"-c=release",
+					"-Xswiftc", "-diagnostic-style=llvm",
 				],
 				"detail": "swift build -c=release",
 			},
@@ -78,7 +80,13 @@
 				"args": [
 					"test",
 					"--enable-code-coverage",
+					"-Xswiftc", "-diagnostic-style=llvm",
 				],
+				"options": {
+					"env": {
+						"SWIFT_REWRITER_BUILD_ANTLR_OPTIMIZED": "1",
+					}
+				},
 				"detail": "swift test",
 				"dependsOn": "Build (debug)"
 			},
@@ -92,6 +100,7 @@
 					"-c", "release",
 					"-Xswiftc",
 					"-DJS_PARSER_TESTS_FULL_FIXTURES",
+					"-Xswiftc", "-diagnostic-style=llvm",
 				],
 				"detail": "swift test -c=release",
 			},
@@ -196,7 +205,6 @@
             },
         },
 		
-		"flake8.args": ["--ignore=E203,E225,E302,E501,W293,W503"],
 		"[python]": {
 			"editor.formatOnSave": true
 		},
@@ -258,13 +266,13 @@
 			"whitespaces",
 			"Xexact"
 		],
+
 		"swiftTestFileGen.gotoTestFile.useFilenameHeuristics": true,
 		"swiftTestFileGen.gotoTestFile.heuristicFilenamePattern": "$1Tests",
 	},
 	"extensions": {
 		"recommendations": [
 			"exodiusstudios.comment-anchors",
-			"vknabel.swift-coverage",
 			"luizzak.swifttestfilegen",
 		],
 	},

@@ -76,7 +76,7 @@ class StatementEmitter_StatementTests: XCTestCase {
         let stmt: CompoundStatement = [
             Statement.expressions([.identifier("foo"), .identifier("bar")])
         ]
-        
+
         assert(
             stmt,
             matches: """
@@ -117,7 +117,7 @@ class StatementEmitter_StatementTests: XCTestCase {
                     initialization: .constant(0)
                 )
             ])
-        
+
         assert(
             stmt,
             matches: """
@@ -595,6 +595,16 @@ class StatementEmitter_StatementTests: XCTestCase {
             Statement.for(.identifier("test"), .identifier("array"), body: []),
             matches: """
                 for test in array {
+                }
+                """
+        )
+    }
+
+    func testForStatement_tuplePattern() {
+        assert(
+            Statement.for(.tuple([.identifier("a"), .identifier("b")]), .identifier("array"), body: []),
+            matches: """
+                for (a, b) in array {
                 }
                 """
         )

@@ -219,10 +219,14 @@ private class MockSwiftSyntaxRewriterPassProvider: SwiftSyntaxRewriterPassProvid
             return SourceFileSyntax(self.visit(file))!
         }
 
-        override func visit(_ node: IdentifierExprSyntax) -> ExprSyntax {
-            if node.identifier.text == "hello" {
+        override func visit(_ node: DeclReferenceExprSyntax) -> ExprSyntax {
+            if node.baseName.text == "hello" {
+                let token = TokenSyntax
+                    .identifier("Hello")
+                    .with(\.leadingTrivia, node.baseName.leadingTrivia)
+                    .with(\.trailingTrivia, node.baseName.trailingTrivia)
                 return ExprSyntax(
-                    node.withIdentifier(node.identifier.withKind(.identifier("Hello")))
+                    node.with(\.baseName, token)
                 )
             }
 

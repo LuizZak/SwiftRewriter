@@ -382,7 +382,8 @@ let jsFrontend: [Target] = [
             .product(name: "Antlr4", package: "antlr4-swift"),
             "AntlrCommons",
         ],
-        path: "Sources/Frontend/JavaScript/JsParserAntlr"
+        path: "Sources/Frontend/JavaScript/JsParserAntlr",
+        swiftSettings: extraAntlrTargetSettings
     ),
     .target(
         name: "JsGrammarModels",

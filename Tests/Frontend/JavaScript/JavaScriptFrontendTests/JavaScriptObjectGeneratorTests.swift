@@ -52,7 +52,7 @@ class JavaScriptObjectGeneratorTests: XCTestCase {
         let file = FileGenerationIntention(sourcePath: "A.source", targetPath: "A.swift")
         file.addType(intention)
 
-        let producer = SwiftSyntaxProducer()
+        let producer = SwiftProducer()
         let syntax = producer.generateFile(file)
 
         diffTest(expected: string, line: line + 2)

@@ -12,7 +12,7 @@ import SwiftSyntaxSupport
 
 class JavaScriptStatementASTReaderTests: XCTestCase {
     var tokens: CommonTokenStream!
-    
+
     func testBlockStatement() {
         assert(
             jsStmt: """
@@ -670,7 +670,7 @@ extension JavaScriptStatementASTReaderTests {
         do {
             let parser = JsParser(string: jsStmt)
             try parser.parse()
-            
+
             let state = try JavaScriptStatementASTReaderTests._state.makeMainParser(input: jsStmt)
             tokens = state.tokens
 
@@ -701,10 +701,8 @@ extension JavaScriptStatementASTReaderTests {
                 var expString = ""
                 var resString = ""
 
-                let producer = SwiftSyntaxProducer()
-
-                expString = producer.generateStatement(expected).description + "\n"
-                resString = (result.map(producer.generateStatement)?.description ?? "") + "\n"
+                expString = SwiftProducer.generateStatement(expected).description + "\n"
+                resString = (result.map({ SwiftProducer.generateStatement($0) })?.description ?? "") + "\n"
 
                 XCTFail(
                     """

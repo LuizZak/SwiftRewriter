@@ -14,7 +14,7 @@ public extension Asserter where Object == JsFunctionBodyNode {
         file: StaticString = #file,
         line: UInt = #line
     ) -> Self? {
-        
+
         asserter(forKeyPath: \.comments) {
             $0.assert(equals: comments, file: file, line: line)
         }
@@ -31,10 +31,10 @@ public extension Asserter where Object == JsFunctionBodyNode {
         file: StaticString = #file,
         line: UInt = #line
     ) -> Self? {
-        
+
         let actual = object.comments.map(\.string)
         return asserter(for: actual) {
             $0.assert(equals: commentStrings, file: file, line: line)
-        }.map(self)
+        }.mapAsserter(self)
     }
 }
