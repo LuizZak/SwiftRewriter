@@ -320,6 +320,9 @@ let objcFrontend: [Target] = [
         name: "ObjectiveCFrontend",
         dependencies: [
             "SwiftRewriterLib",
+            "ObjcParser",
+            "ObjcGrammarModels",
+            "GlobalsProviders",
         ],
         path: "Sources/Frontend/Objective-C/ObjectiveCFrontend"
     ),
@@ -365,9 +368,6 @@ let objcFrontendTests: [Target] = [
 swiftRewriterTarget.dependencies.append(contentsOf: [
     // Objective-C frontend
     "ObjectiveCFrontend",
-    "ObjcParser",
-    "ObjcGrammarModels",
-    "GlobalsProviders",
 ])
 
 frontendTargets.append(contentsOf: objcFrontend)
@@ -409,6 +409,8 @@ let jsFrontend: [Target] = [
         name: "JavaScriptFrontend",
         dependencies: [
             "SwiftRewriterLib",
+            "JsParser",
+            "JsGrammarModels",
         ],
         path: "Sources/Frontend/JavaScript/JavaScriptFrontend"
     ),
@@ -472,8 +474,6 @@ let jsFrontendTests: [Target] = [
 swiftRewriterTarget.dependencies.append(contentsOf: [
     // JavaScript frontend
     "JavaScriptFrontend",
-    "JsParser",
-    "JsGrammarModels",
 ])
 
 frontendTargets.append(contentsOf: jsFrontend)
@@ -555,7 +555,7 @@ let package = Package(
                 .product(name: "SwiftAST", package: "SwiftAST"),
                 "SwiftSyntaxSupport", "SwiftRewriterLib", "Intentions",
                 "KnownType", "ObjcGrammarModels", "Utils", "TypeSystem",
-                "ObjectiveCFrontend", "MiniLexer",
+                "ObjectiveCFrontend", "MiniLexer", "JsGrammarModels",
             ],
             path: "Sources/TestCommons"
         ),
