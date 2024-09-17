@@ -26,7 +26,7 @@ jobs:
 
 - job: Linux
   container:
-    image: swift:5.10-focal
+    image: swift:6.0-focal
   pool:
     vmImage: ubuntu-20.04
   steps:
