@@ -50,12 +50,12 @@ internal func assertGraphviz(
 
     let syntaxString: String?
     switch syntaxNode {
-    case let node as Expression:
+    case let node as SwiftAST.Expression:
         syntaxString = ExpressionPrinter.toString(expression: node)
 
     case let node as Statement:
         syntaxString = StatementPrinter.toString(statement: node)
-    
+
     default:
         syntaxString = nil
     }

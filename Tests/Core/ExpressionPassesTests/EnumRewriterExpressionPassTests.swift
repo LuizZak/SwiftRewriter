@@ -37,7 +37,7 @@ class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
             .enumCase(named: "Enum_Case1")
             .build()
         typeSystem.addType(en)
-        let exp: Expression = .identifier("Enum_Case1")
+        let exp: SwiftAST.Expression = .identifier("Enum_Case1")
 
         let sut = makeSut(container: .expression(exp))
         let res = sut.apply(on: exp.makeErrorTyped(), context: makeContext(container: .expression(exp)))

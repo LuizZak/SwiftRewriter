@@ -259,7 +259,6 @@ var swiftRewriterTarget: Target = .executableTarget(
     dependencies: [
         .product(name: "Console", package: "console"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
-        .product(name: "SwiftFormatConfiguration", package: "swift-format"),
         .product(name: "SwiftAST", package: "SwiftAST"),
         "SwiftRewriterCLI", "SwiftRewriterLib",
         "ExpressionPasses", "Utils", "SourcePreprocessors",
@@ -398,13 +397,13 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.3.0"),
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", exact: "4.1.2"),
         .package(url: "https://github.com/LuizZak/console.git", exact:  "0.8.2"),
-        .package(url: "https://github.com/apple/swift-syntax.git", from: "510.0.0"),
-        .package(url: "https://github.com/apple/swift-format.git", from: "510.0.0"),
+        .package(url: "https://github.com/apple/swift-syntax.git", from: "600.0.0"),
+        .package(url: "https://github.com/apple/swift-format.git", from: "600.0.0"),
         //
         .package(url: "https://github.com/LuizZak/MiniLexer.git", exact: "0.10.0"),
         .package(url: "https://github.com/LuizZak/MiniGraphviz.git", exact: "0.1.0"),
-        .package(url: "https://github.com/LuizZak/MiniDigraph.git", exact: "0.3.0"),
-        .package(url: "https://github.com/LuizZak/SwiftAST.git", exact: "0.8.3"),
+        .package(url: "https://github.com/LuizZak/MiniDigraph.git", exact: "0.6.0"),
+        .package(url: "https://github.com/LuizZak/SwiftAST.git", exact: "0.10.1"),
     ],
     targets: aggregateTargets + [
         swiftRewriterTarget,
@@ -419,7 +418,6 @@ let package = Package(
                 .product(name: "Antlr4", package: "antlr4-swift"),
                 .product(name: "Console", package: "console"),
                 .product(name: "SwiftFormat", package: "swift-format"),
-                .product(name: "SwiftFormatConfiguration", package: "swift-format"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
                 .product(name: "SwiftIDEUtils", package: "swift-syntax"),
                 .product(name: "SwiftAST", package: "SwiftAST"),

@@ -183,6 +183,14 @@ public class ReachingDefinitionAnalyzer {
                 }
             }.relocating(PatternLocation.asType)
 
+        case .optional(let inner):
+            let result = expandBindingsInPattern(
+                inner,
+                bindingContext: bindingContext
+            )
+
+            return result.relocating(PatternLocation.optional)
+
         case .expression, .wildcard:
             return []
         }

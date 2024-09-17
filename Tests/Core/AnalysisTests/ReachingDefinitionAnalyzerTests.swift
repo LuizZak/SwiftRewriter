@@ -512,7 +512,7 @@ extension ReachingDefinitionAnalyzerTests {
         switch (actual, expected) {
         case (nil, nil):
             return
-        case (let lhs as Expression?, let rhs as Expression?):
+        case (let lhs as SwiftAST.Expression?, let rhs as SwiftAST.Expression?):
             assertExpressionsEqual(
                 actual: lhs,
                 expected: rhs,

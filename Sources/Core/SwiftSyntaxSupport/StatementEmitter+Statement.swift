@@ -31,6 +31,10 @@ extension StatementEmitter: StatementVisitor {
             emit("var ")
             visitPattern(pattern)
 
+        case .optional(let pattern):
+            visitPattern(pattern)
+            emit("?")
+
         case .wildcard:
             emit("_")
         }

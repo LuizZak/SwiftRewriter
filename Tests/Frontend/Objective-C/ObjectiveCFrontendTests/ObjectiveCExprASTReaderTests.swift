@@ -229,7 +229,7 @@ class ObjectiveCExprASTReaderTests: XCTestCase {
             readsAs: .binary(lhs: .identifier("i"), op: .bitwiseShiftRight, rhs: .constant(10))
         )
     }
-    
+
     func testChainedBinaryOperations() {
         assert(
             objcExpr: "1 + 2 + 3",
@@ -309,7 +309,7 @@ class ObjectiveCExprASTReaderTests: XCTestCase {
             readsAs: .constant(.int(0xff, .hexadecimal)).unary(op: .bitwiseNot).casted(to: .typeName("a"))
         )
     }
-    
+
     func testPostfixIncrementDecrement() {
         assert(
             objcExpr: "i++",
@@ -487,7 +487,7 @@ extension ObjectiveCExprASTReaderTests {
         parseWith: (ObjectiveCParser) throws -> ParserRuleContext = { parser in
             try parser.expression()
         },
-        readsAs expected: Expression,
+        readsAs expected: SwiftAST.Expression,
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
@@ -538,7 +538,7 @@ extension ObjectiveCExprASTReaderTests {
                     suffix += "\nExpected:\n"
                     dump(expected, to: &suffix)
                 }
-                
+
                 XCTFail(
                     """
                     Failed: Expected to read Objective-C expression

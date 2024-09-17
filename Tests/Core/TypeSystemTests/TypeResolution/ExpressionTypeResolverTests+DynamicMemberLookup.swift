@@ -16,7 +16,7 @@ class ExpressionTypeResolverTests_DynamicMemberLookup: XCTestCase {
                 returnType: .int
             )
             .build()
-        let exp: Expression = .identifier("a").dot("unknownMember")
+        let exp: SwiftAST.Expression = .identifier("a").dot("unknownMember")
 
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(type)
@@ -38,7 +38,7 @@ class ExpressionTypeResolverTests_DynamicMemberLookup: XCTestCase {
                 returnType: .int
             )
             .build()
-        
+
         let stmt: CompoundStatement = [
             .expression(.identifier("a").dot("property")),
             .expression(.identifier("a").dot("field")),
@@ -85,7 +85,7 @@ class ExpressionTypeResolverTests_DynamicMemberLookup: XCTestCase {
                 isStatic: true
             )
             .build()
-        
+
         let stmt: CompoundStatement = [
             .expression(.identifier("a").dot("unknown")),
             .expression(.identifier("A").dot("unknown")),
@@ -139,7 +139,7 @@ class ExpressionTypeResolverTests_DynamicMemberLookup: XCTestCase {
                 returnType: .int
             )
             .build()
-        let exp: Expression = .identifier("a").dot("property")
+        let exp: SwiftAST.Expression = .identifier("a").dot("property")
 
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(superType)
@@ -159,7 +159,7 @@ class ExpressionTypeResolverTests_DynamicMemberLookup: XCTestCase {
                 returnType: .int
             )
             .build()
-        let exp: Expression = .identifier("a").dot("unknownMember")
+        let exp: SwiftAST.Expression = .identifier("a").dot("unknownMember")
 
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(type)
@@ -178,7 +178,7 @@ class ExpressionTypeResolverTests_DynamicMemberLookup: XCTestCase {
                 returnType: .int
             )
             .build()
-        let exp: Expression = .identifier("a").dot("unknownMember")
+        let exp: SwiftAST.Expression = .identifier("a").dot("unknownMember")
 
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(type)
@@ -209,7 +209,7 @@ class ExpressionTypeResolverTests_DynamicMemberLookup: XCTestCase {
                 returnType: .double
             )
             .build()
-        let exp: Expression = .identifier("a").dot("unknownMember")
+        let exp: SwiftAST.Expression = .identifier("a").dot("unknownMember")
 
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(type)
@@ -228,14 +228,14 @@ extension XCTestCase {
         return StatementTypeTestBuilder(testCase: self, sut: sut, statement: stmt)
     }
 
-    fileprivate func startScopedTest<T: Expression>(with exp: T, sut: ExpressionTypeResolver)
+    fileprivate func startScopedTest<T: SwiftAST.Expression>(with exp: T, sut: ExpressionTypeResolver)
         -> ExpressionTypeTestBuilder<T>
     {
         return ExpressionTypeTestBuilder(testCase: self, sut: sut, expression: exp)
     }
 
     fileprivate func assertResolve(
-        _ exp: Expression,
+        _ exp: SwiftAST.Expression,
         expect type: SwiftType?,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -246,7 +246,7 @@ extension XCTestCase {
     }
 
     fileprivate func assertExpects(
-        _ exp: Expression,
+        _ exp: SwiftAST.Expression,
         expect type: SwiftType?,
         file: StaticString = #filePath,
         line: UInt = #line

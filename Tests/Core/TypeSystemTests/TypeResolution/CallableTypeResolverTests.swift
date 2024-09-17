@@ -7,7 +7,7 @@ import TestCommons
 
 class CallableTypeResolverTests: XCTestCase {
     func testResolveTypeInstanceCall() {
-        let exp: Expression = .identifier("v").call()
+        let exp: SwiftAST.Expression = .identifier("v").call()
 
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(named: "MyType") { type in
@@ -20,7 +20,7 @@ class CallableTypeResolverTests: XCTestCase {
     }
 
     func testResolveTypeInstanceCall_noCallAsFunctionPresent() {
-        let exp: Expression = .identifier("v").call()
+        let exp: SwiftAST.Expression = .identifier("v").call()
 
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(named: "MyType") { type in
@@ -107,14 +107,14 @@ extension XCTestCase {
         return StatementTypeTestBuilder(testCase: self, sut: sut, statement: stmt)
     }
 
-    fileprivate func startScopedTest<T: Expression>(with exp: T, sut: ExpressionTypeResolver)
+    fileprivate func startScopedTest<T: SwiftAST.Expression>(with exp: T, sut: ExpressionTypeResolver)
         -> ExpressionTypeTestBuilder<T>
     {
         return ExpressionTypeTestBuilder(testCase: self, sut: sut, expression: exp)
     }
 
     fileprivate func assertResolve(
-        _ exp: Expression,
+        _ exp: SwiftAST.Expression,
         expect type: SwiftType?,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -125,7 +125,7 @@ extension XCTestCase {
     }
 
     fileprivate func assertExpects(
-        _ exp: Expression,
+        _ exp: SwiftAST.Expression,
         expect type: SwiftType?,
         file: StaticString = #filePath,
         line: UInt = #line

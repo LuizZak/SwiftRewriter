@@ -639,7 +639,7 @@ class StatementEmitter_ExpressionTests: XCTestCase {
 
 // MARK: - Test internals
 extension StatementEmitter_ExpressionTests {
-    func assert<T: Expression>(
+    func assert<T: SwiftAST.Expression>(
         _ node: T,
         matches expected: String,
         file: StaticString = #filePath,

@@ -100,6 +100,17 @@ class PatternMatcher {
                 .asType(pattern: $0)
             })
 
+        case .optional(let pattern):
+            let inner = _matchRecursive(
+                pattern: pattern,
+                to: type,
+                context: .optionalBinding
+            )
+
+            return inner.withPatternLocation(modifiedBy: {
+                .optional(pattern: $0)
+            })
+
         case .expression, .wildcard:
             break
         }

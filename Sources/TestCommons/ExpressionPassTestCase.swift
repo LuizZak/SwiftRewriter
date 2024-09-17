@@ -19,14 +19,14 @@ public protocol ExpressionPassTestCaseAdapter {
     init()
 
     func makeParser(for source: String) throws -> AntlrParser<Lexer, Parser>
-    
+
     func parseExpression(
         _ parser: Parser,
         source: Source,
         typeSystem: TypeSystem,
         intentionContext: FunctionBodyCarryingIntention?,
         container: StatementContainer?
-    ) throws -> Expression?
+    ) throws -> SwiftAST.Expression?
 
     func parseStatement(
         _ parser: Parser,
@@ -61,8 +61,8 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
         expression original: String,
         file: StaticString = #filePath,
         line: UInt = #line
-    ) -> Expression {
-        
+    ) -> SwiftAST.Expression {
+
         let exp = parse(original, file: file, line: line)
 
         return assertNoTransform(
@@ -75,10 +75,10 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
     @discardableResult
     public func assertTransformParsed(
         expression original: String,
-        into expected: Expression,
+        into expected: SwiftAST.Expression,
         file: StaticString = #filePath,
         line: UInt = #line
-    ) -> Expression {
+    ) -> SwiftAST.Expression {
 
         let exp = parse(original, file: file, line: line)
         return assertTransform(expression: exp, into: expected, file: file, line: line)
@@ -109,12 +109,12 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
 
     @discardableResult
     public func assertNoTransform(
-        expression: Expression,
+        expression: SwiftAST.Expression,
         file: StaticString = #filePath,
         line: UInt = #line
-    ) -> Expression {
-        
-        defer { 
+    ) -> SwiftAST.Expression {
+
+        defer {
             assertDidNotNotifyChange(
                 file: file,
                 line: line
@@ -131,11 +131,11 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
 
     @discardableResult
     public func assertTransform(
-        expression: Expression,
-        into expected: Expression,
+        expression: SwiftAST.Expression,
+        into expected: SwiftAST.Expression,
         file: StaticString = #filePath,
         line: UInt = #line
-    ) -> Expression {
+    ) -> SwiftAST.Expression {
 
         defer {
             assertNotifiedChange(
@@ -158,8 +158,8 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> Statement {
-        
-        defer { 
+
+        defer {
             assertDidNotNotifyChange(
                 file: file,
                 line: line
@@ -196,7 +196,7 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
             line: line
         )
     }
-    
+
     @discardableResult
     private func _assertTransform(
         statement: Statement,
@@ -215,17 +215,17 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
             file: file,
             line: line
         )
-        
+
         return result
     }
 
     @discardableResult
     private func _assertTransform(
-        expression: Expression,
-        into expected: Expression,
+        expression: SwiftAST.Expression,
+        into expected: SwiftAST.Expression,
         file: StaticString = #filePath,
         line: UInt = #line
-    ) -> Expression {
+    ) -> SwiftAST.Expression {
 
         let sut = makeSut(container: .expression(expression))
         let result = sut.apply(on: expression, context: makeContext(container: .expression(expression)))
@@ -237,11 +237,11 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
             file: file,
             line: line
         )
-        
+
         return result
     }
 
-    public func parse(_ exp: String, file: StaticString = #filePath, line: UInt = #line) -> Expression {
+    public func parse(_ exp: String, file: StaticString = #filePath, line: UInt = #line) -> SwiftAST.Expression {
         let (stream, parser) = try! makeParser(for: exp)
         defer {
             _ = stream  // Keep alive!
@@ -330,7 +330,7 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
             container: container
         )
     }
-    
+
     func assertNotifiedChange(file: StaticString = #filePath, line: UInt = #line) {
         if !notified {
             XCTFail(
@@ -357,7 +357,7 @@ open class ExpressionPassTestCase<Adapter: ExpressionPassTestCaseAdapter>: XCTes
                 line: line
             )
         }
-        
+
         notified = false
     }
 }

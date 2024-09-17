@@ -215,7 +215,7 @@ private class TestFixture {
 
     @discardableResult
     func assert(
-        _ exp: Expression,
+        _ exp: SwiftAST.Expression,
         isCoercible: Bool,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -237,13 +237,13 @@ private class TestFixture {
 
     @discardableResult
     private func _assert(
-        _ exps: [Expression],
+        _ exps: [SwiftAST.Expression],
         areCoercible: Bool,
         file: StaticString,
         line: UInt
     ) -> TestFixture {
         var result = self
-        
+
         for exp in exps {
             result = result.assert(
                 exp,
@@ -258,7 +258,7 @@ private class TestFixture {
 
     @discardableResult
     func assert(
-        _ exps: Expression...,
+        _ exps: SwiftAST.Expression...,
         areCoercible: Bool,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -269,7 +269,7 @@ private class TestFixture {
 
     @discardableResult
     func assertCanCoerce(
-        _ exps: Expression...,
+        _ exps: SwiftAST.Expression...,
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> TestFixture {
@@ -279,7 +279,7 @@ private class TestFixture {
 
     @discardableResult
     func assertCannotCoerce(
-        _ exps: Expression...,
+        _ exps: SwiftAST.Expression...,
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> TestFixture {
