@@ -43,7 +43,7 @@ class StatementEmitter {
 
     func isShorthandClosureCandidate(_ exp: BlockLiteralExpression) -> Bool {
         let hasParameters = !exp.parameters.isEmpty
-        
+
         return !closureRequiresSignature(exp) && hasParameters
     }
 

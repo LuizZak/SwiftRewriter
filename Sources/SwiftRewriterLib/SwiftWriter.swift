@@ -27,9 +27,9 @@ public final class SwiftWriter {
     let numThreads: Int
     let typeSystem: TypeSystem
     let syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier
-    
+
     public weak var progressListener: SwiftWriterProgressListener?
-    
+
     public init(
         intentions: IntentionCollection,
         options: SwiftSyntaxOptions,
@@ -47,29 +47,29 @@ public final class SwiftWriter {
         self.typeSystem = typeSystem
         self.syntaxRewriterApplier = syntaxRewriterApplier
     }
-    
+
     public func execute() {
         typeSystem.makeCache()
         defer {
             typeSystem.tearDownCache()
         }
-        
+
         var unique = Set<String>()
         let fileIntents = intentions.fileIntentions()
-        
+
         @ConcurrentValue
         var errors: [(String, Error)] = []
-        
+
         @ConcurrentValue
         var filesEmitted = 0
-        
+
         let listenerQueue = DispatchQueue(label: "com.swiftrewriter.swiftwriter.listener")
         let queue = ConcurrentOperationQueue()
         queue.maxConcurrentOperationCount = numThreads
-        
+
         let mutex = Mutex()
         let filesToEmit = fileIntents.filter(shouldOutputFile(_:))
-        
+
         for file in filesToEmit {
             if !unique.insert(file.targetPath).inserted {
                 mutex.locking {
@@ -83,7 +83,7 @@ public final class SwiftWriter {
                 }
                 continue
             }
-            
+
             let writer = SwiftSyntaxWriter(
                 options: options,
                 diagnostics: Diagnostics(),
@@ -91,13 +91,13 @@ public final class SwiftWriter {
                 typeSystem: typeSystem,
                 syntaxRewriterApplier: syntaxRewriterApplier
             )
-            
+
             queue.addOperation {
                 autoreleasepool {
                     do {
                         if let listener = self.progressListener {
                             let fe: Int = _filesEmitted.prefixIncrement()
-                            
+
                             listenerQueue.async {
                                 listener.swiftWriterReportProgress(
                                     self,
@@ -107,9 +107,9 @@ public final class SwiftWriter {
                                 )
                             }
                         }
-                        
+
                         try writer.outputFile(file)
-                        
+
                         mutex.locking {
                             self.diagnostics.merge(with: writer.diagnostics)
                         }
@@ -119,9 +119,9 @@ public final class SwiftWriter {
                 }
             }
         }
-        
+
         queue.runAndWaitConcurrent()
-        
+
         for error in errors {
             diagnostics.error(
                 "Error while saving file \(error.0): \(error.1)",
@@ -130,7 +130,7 @@ public final class SwiftWriter {
             )
         }
     }
-    
+
     func shouldOutputFile(_ file: FileGenerationIntention) -> Bool {
         return file.isPrimary
     }
@@ -142,43 +142,43 @@ class SwiftSyntaxWriter {
     var options: SwiftSyntaxOptions
     let typeSystem: TypeSystem
     let syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier
-    
+
     init(options: SwiftSyntaxOptions,
          diagnostics: Diagnostics,
          output: WriterOutput,
          typeSystem: TypeSystem,
          syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier) {
-        
+
         self.options = options
         self.diagnostics = diagnostics
         self.output = output
         self.typeSystem = typeSystem
         self.syntaxRewriterApplier = syntaxRewriterApplier
     }
-    
+
     func outputFile(_ fileIntent: FileGenerationIntention) throws {
         let target = try output.createFile(path: fileIntent.targetPath)
-        
+
         try outputFile(fileIntent, targetFile: target)
     }
-    
+
     func outputFile(_ fileIntent: FileGenerationIntention, targetFile: FileOutput) throws {
         let out = targetFile.outputTarget()
-        
+
         let settings = SwiftProducer
             .Settings(outputExpressionTypes: options.outputExpressionTypes,
                       printIntentionHistory: options.printIntentionHistory,
                       emitObjcCompatibility: options.emitObjcCompatibility)
-        
+
         let producer = SwiftProducer(settings: settings, delegate: self)
-        
+
         var fileSyntax = producer.generateFile(fileIntent)
 
         fileSyntax = try formatSyntax(fileSyntax, fileUrl: URL(fileURLWithPath: fileIntent.targetPath), format: options.format)
         fileSyntax = applySyntaxPasses(fileSyntax)
-        
+
         out.outputFile(fileSyntax)
-        
+
         targetFile.close()
     }
 
@@ -186,11 +186,11 @@ class SwiftSyntaxWriter {
         switch format {
         case .noFormatting:
             return file
-            
+
         case .swiftFormat(let configuration):
             // Turn the syntax back into a string and pass that string as an
             // input in order to normalize abnormal syntax trees that may have
-            // been generated by `SwiftSyntaxProducer`.
+            // been generated by `SwiftProducer`.
             let string = file.description
 
             let formatter = SwiftFormatter(configuration: configuration ?? .init())
@@ -219,11 +219,11 @@ extension SwiftSyntaxWriter: SwiftProducerDelegate {
         if intention != nil {
             return true
         }
-        
+
         guard let initialValue = initialValue else {
             return true
         }
-        
+
         return shouldEmitTypeSignature(
             forInitVal: initialValue,
             varType: storage.type,
@@ -231,7 +231,7 @@ extension SwiftSyntaxWriter: SwiftProducerDelegate {
             isConstant: storage.isConstant
         )
     }
-    
+
     func swiftProducer(
         _ producer: SwiftProducer,
         initialValueFor intention: ValueStorageIntention
@@ -244,7 +244,7 @@ extension SwiftSyntaxWriter: SwiftProducerDelegate {
                 return nil
             }
         }
-        
+
         // Don't emit `nil` values for non-constant fields, since Swift assumes
         // the initial value of these values to be nil already.
         // We need to emit `nil` in case of constants since 'let's don't do that
@@ -252,10 +252,10 @@ extension SwiftSyntaxWriter: SwiftProducerDelegate {
         if intention.type.isOptional && !intention.storage.isConstant {
             return nil
         }
-        
+
         return typeSystem.defaultValue(for: intention.type)
     }
-    
+
     func shouldEmitTypeSignature(
         forInitVal exp: Expression,
         varType: SwiftType,
@@ -269,32 +269,32 @@ extension SwiftSyntaxWriter: SwiftProducerDelegate {
         if exp.isErrorTyped {
             return true
         }
-        
+
         if case .block? = exp.resolvedType {
             return true
         }
-        
+
         if exp.isLiteralExpression {
             if let type = exp.resolvedType {
                 switch type {
                 case .int:
                     return varType != .int
-                    
+
                 case .float:
                     return varType != .double
-                    
+
                 case .optional, .implicitUnwrappedOptional, .nullabilityUnspecified:
                     return true
-                    
+
                 default:
                     break
                 }
             }
-            
+
             switch deduceType(from: exp) {
             case .int, .float, .nil:
                 return true
-                
+
             default:
                 return false
             }
@@ -302,26 +302,26 @@ extension SwiftSyntaxWriter: SwiftProducerDelegate {
             guard typeSystem.isClassInstanceType(type) else {
                 return !typeSystem.typesMatch(type, varType, ignoreNullability: true)
             }
-            
+
             if isConstant {
                 return false
             }
-            
+
             if type.isOptional != varType.isOptional {
                 let isSame = type.deepUnwrapped == varType.deepUnwrapped
                 let isWeak = ownership == .weak
-                
+
                 if !isSame || !isWeak {
                     return true
                 }
             }
-            
+
             return !typeSystem.typesMatch(type, varType, ignoreNullability: true)
         }
-        
+
         return false
     }
-    
+
     /// Attempts to make basic deductions about an expression's resulting type.
     /// Used only for deciding whether to infer types for variable definitions
     /// with initial values.
@@ -330,7 +330,7 @@ extension SwiftSyntaxWriter: SwiftProducerDelegate {
             if constant.isInteger {
                 return .int
             }
-            
+
             switch constant {
             case .float:
                 return .float
@@ -343,30 +343,30 @@ extension SwiftSyntaxWriter: SwiftProducerDelegate {
             default:
                 break
             }
-            
+
             return .other
         } else if let binary = exp.asBinary {
             return deduceType(binary)
-            
+
         } else if let assignment = exp.asAssignment {
             return deduceType(from: assignment.rhs)
-            
+
         } else if let parens = exp.asParens {
             return deduceType(from: parens.exp)
-            
+
         } else if exp is PrefixExpression || exp is UnaryExpression {
             let op = exp.asPrefix?.op ?? exp.asUnary?.op
-            
+
             switch op {
             case .some(.negate):
                 return .bool
             case .some(.bitwiseNot):
                 return .int
-                
+
             // Pointer types
             case .some(.multiply), .some(.bitwiseAnd):
                 return .other
-                
+
             default:
                 return .other
             }
@@ -375,29 +375,29 @@ extension SwiftSyntaxWriter: SwiftProducerDelegate {
             if lhsType == deduceType(from: ternary.ifFalse) {
                 return lhsType
             }
-            
+
             return .other
         }
-        
+
         return .other
     }
-    
+
     private func deduceType(_ binary: BinaryExpression) -> DeducedType {
         let lhs = binary.lhs
         let op = binary.op
         let rhs = binary.rhs
-        
+
         switch op.category {
         case .arithmetic, .bitwise:
             let lhsType = deduceType(from: lhs)
             let rhsType = deduceType(from: rhs)
-            
+
             // Arithmetic and bitwise operators keep operand types, if they
             // are the same.
             if lhsType == rhsType {
                 return lhsType
             }
-            
+
             // Float takes precedence over ints on arithmetic operators
             if op.category == .arithmetic {
                 switch (lhsType, rhsType) {
@@ -416,23 +416,23 @@ extension SwiftSyntaxWriter: SwiftProducerDelegate {
                     break
                 }
             }
-            
+
             return .other
-            
+
         case .assignment:
             return deduceType(from: rhs)
-            
+
         case .comparison:
             return .bool
-            
+
         case .logical:
             return .bool
-            
+
         case .nullCoalesce, .range:
             return .other
         }
     }
-    
+
     private enum DeducedType {
         case int
         case float

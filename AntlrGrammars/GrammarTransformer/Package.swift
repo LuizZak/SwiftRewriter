@@ -4,9 +4,9 @@ import PackageDescription
 let package = Package(
     name: "AntlrGrammars",
     dependencies: [
-        .package(url: "https://github.com/apple/swift-syntax.git", exact: "508.0.1"),
-        .package(url: "https://github.com/apple/swift-format.git", exact: "508.0.1"),
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-syntax.git", exact: "510.0.2"),
+        .package(url: "https://github.com/apple/swift-format.git", exact: "510.1.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.4.0"),
     ],
     targets: [
         .executableTarget(

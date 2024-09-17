@@ -320,6 +320,9 @@ let objcFrontend: [Target] = [
         name: "ObjectiveCFrontend",
         dependencies: [
             "SwiftRewriterLib",
+            "ObjcParser",
+            "ObjcGrammarModels",
+            "GlobalsProviders",
         ],
         path: "Sources/Frontend/Objective-C/ObjectiveCFrontend"
     ),
@@ -365,13 +368,116 @@ let objcFrontendTests: [Target] = [
 swiftRewriterTarget.dependencies.append(contentsOf: [
     // Objective-C frontend
     "ObjectiveCFrontend",
-    "ObjcParser",
-    "ObjcGrammarModels",
-    "GlobalsProviders",
 ])
 
 frontendTargets.append(contentsOf: objcFrontend)
 frontendTestTargets.append(contentsOf: objcFrontendTests)
+
+// MARK: - JavaScript frontend
+
+let jsFrontend: [Target] = [
+    .target(
+        name: "JsParserAntlr",
+        dependencies: [
+            .product(name: "Antlr4", package: "antlr4-swift"),
+            "AntlrCommons",
+        ],
+        path: "Sources/Frontend/JavaScript/JsParserAntlr",
+        swiftSettings: extraAntlrTargetSettings
+    ),
+    .target(
+        name: "JsGrammarModels",
+        dependencies: [
+            "JsParserAntlr", "GrammarModelBase", "Utils"
+        ],
+        path: "Sources/Frontend/JavaScript/JsGrammarModels"
+    ),
+    .target(
+        name: "JsParser",
+        dependencies: [
+            .product(name: "Antlr4", package: "antlr4-swift"),
+            .product(name: "TypeLexing", package: "MiniLexer"),
+            "JsParserAntlr",
+            "JsGrammarModels",
+            "AntlrCommons",
+            "MiniLexer",
+            "Utils",
+        ],
+        path: "Sources/Frontend/JavaScript/JsParser"
+    ),
+    .target(
+        name: "JavaScriptFrontend",
+        dependencies: [
+            "SwiftRewriterLib",
+            "JsParser",
+            "JsGrammarModels",
+        ],
+        path: "Sources/Frontend/JavaScript/JavaScriptFrontend"
+    ),
+]
+
+let jsFrontendTests: [Target] = [
+    .testTarget(
+        name: "JsParserTests",
+        dependencies: [
+            "JsParser", "TestCommons",
+        ],
+        path: "Tests/Frontend/JavaScript/JsParserTests",
+        resources: [
+            .copy("Fixtures/bezier.js"),
+            .copy("Fixtures/utils.js"),
+            .copy("Fixtures/EnhancedRegularExpression.js"),
+            .copy("Fixtures/Function.js"),
+            .copy("Fixtures/TemplateStrings.js"),
+            .copy("Fixtures/Classes.js"),
+            .copy("Fixtures/Stage3.js"),
+            .copy("Fixtures/ClassInNonGlobalStrict.js"),
+            .copy("Fixtures/ObjectInitializer.js"),
+            .copy("Fixtures/DestructuringAssignment.js"),
+            .copy("Fixtures/SymbolType.js"),
+            .copy("Fixtures/Generators.js"),
+            .copy("Fixtures/LetAndAsync.js"),
+            .copy("Fixtures/Iterators.js"),
+            .copy("Fixtures/Issue2178NewExpression.js"),
+            .copy("Fixtures/EnhancedObjectProperties.js"),
+            .copy("Fixtures/Modules.js"),
+            .copy("Fixtures/TypedArrays.js"),
+            .copy("Fixtures/MapSetAndWeakMapWeakSet.js"),
+            .copy("Fixtures/TemplateLiterals.js"),
+            .copy("Fixtures/ExtendedLiterals.js"),
+            .copy("Fixtures/Constants.js"),
+            .copy("Fixtures/Promises.js"),
+            .copy("Fixtures/Outdated.js"),
+            .copy("Fixtures/Misc.js"),
+            .copy("Fixtures/ExtendedParameterHandling.js"),
+            .copy("Fixtures/Scoping.js"),
+            .copy("Fixtures/NewBuildInMethods.js"),
+            .copy("Fixtures/StrictGlobal.js"),
+            .copy("Fixtures/ArrowFunctions.js"),
+            .copy("Fixtures/AsyncAwait.js"),
+            .copy("Fixtures/StrictFunctions.js"),
+            .copy("Fixtures/Meta-Programming.js"),
+            .copy("Fixtures/InternationalizationAndLocalization.js"),
+        ]
+    ),
+    .testTarget(
+        name: "JavaScriptFrontendTests",
+        dependencies: [
+            "JavaScriptFrontend",
+            "TestCommons",
+        ],
+        path: "Tests/Frontend/JavaScript/JavaScriptFrontendTests"
+    ),
+]
+
+// Attach JavaScript frontend to SwiftRewriter
+swiftRewriterTarget.dependencies.append(contentsOf: [
+    // JavaScript frontend
+    "JavaScriptFrontend",
+])
+
+frontendTargets.append(contentsOf: jsFrontend)
+frontendTestTargets.append(contentsOf: jsFrontendTests)
 
 //
 let aggregateTargets: [Target] =
@@ -449,7 +555,7 @@ let package = Package(
                 .product(name: "SwiftAST", package: "SwiftAST"),
                 "SwiftSyntaxSupport", "SwiftRewriterLib", "Intentions",
                 "KnownType", "ObjcGrammarModels", "Utils", "TypeSystem",
-                "ObjectiveCFrontend", "MiniLexer",
+                "ObjectiveCFrontend", "MiniLexer", "JsGrammarModels",
             ],
             path: "Sources/TestCommons"
         ),

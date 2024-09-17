@@ -9,6 +9,7 @@ from antlr_grammar_gen import (
     validate_antlr_version,
 )
 from objc_grammar_gen import generate_objc_antlr_grammar
+from js_grammar_gen import generate_js_antlr_grammar
 from console_color import ConsoleColor
 
 
@@ -20,6 +21,7 @@ def do_parser_generation(antlr_version: str | None = None, skip_build: bool = Fa
         build_swift_gen_transformer()
 
     generate_objc_antlr_grammar(antlr_version)
+    generate_js_antlr_grammar(antlr_version)
 
     print(ConsoleColor.GREEN("Success!"))
 

@@ -12,6 +12,7 @@ struct SwiftRewriterCommand: ParsableCommand {
         """,
         subcommands: [
             ObjectiveCCommand.self,
+            JavaScriptCommand.self,
         ],
         defaultSubcommand: ObjectiveCCommand.self
     )

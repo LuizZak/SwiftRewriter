@@ -7,9 +7,9 @@ variables:
 jobs:
 - job: macOS
   pool:
-    vmImage: 'macOS-13'
+    vmImage: 'macOS-14'
   steps:
-  - bash: 'sudo xcode-select -s /Applications/Xcode_15.1.app/Contents/Developer'
+  - bash: 'sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer'
   - task: Cache@2
     inputs:
       key: 'v2 | "swiftpm" | "$(Agent.OS)" | Package.resolved'
@@ -19,7 +19,7 @@ jobs:
   - bash: 'swift package resolve'
   - bash: 'swift test --enable-code-coverage'
   - bash: 'xcrun llvm-profdata merge -sparse ./.build/debug/codecov/*.profraw -o coverage.profdata'
-  - bash: 'xcrun llvm-cov show ./.build/debug/SwiftRewriter -instr-profile=./coverage.profdata --ignore-filename-regex=ObjcParserAntlr Sources > coverage.txt'
+  - bash: 'xcrun llvm-cov show ./.build/debug/SwiftRewriter -instr-profile=./coverage.profdata --ignore-filename-regex=ObjcParserAntlr --ignore-filename-regex=JsParserAntlr Sources > coverage.txt'
   - bash: 'bash <(curl -s https://codecov.io/bash)'
   # Avoid caching build artifacts and focus on checkout state only
   - bash: 'rm -r $(dirname $(swift build --show-bin-path))'
