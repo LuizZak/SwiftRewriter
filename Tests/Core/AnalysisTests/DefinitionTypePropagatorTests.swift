@@ -120,7 +120,7 @@ class DefinitionTypePropagatorTests: XCTestCase {
         let sut = makeSut(intention: carrier)
 
         sut.propagate(in: carrier)
-        
+
         assertEqual(functionBody.body, [
             .variableDeclaration(identifier: "a", type: .double, initialization: .constant(0)),
         ])
@@ -138,14 +138,14 @@ class DefinitionTypePropagatorTests: XCTestCase {
         let sut = makeSut(intention: carrier, numericType: .int)
 
         sut.propagate(in: carrier)
-        
+
         assertEqual(functionBody.body, [
             .variableDeclaration(identifier: "a", type: .double, initialization: nil),
             .expression(.identifier("a").assignment(op: .assign, rhs: .constant(0))),
             .expression(.identifier("a").assignment(op: .assign, rhs: .constant(0.0))),
         ])
     }
-    
+
     func testPropagate_functionBody_avoidPropagatingErrorTypes() {
         let intentionCollection = IntentionCollectionBuilder()
             .createFile(named: "A") { file in
@@ -183,7 +183,7 @@ class DefinitionTypePropagatorTests: XCTestCase {
         let sut = makeSut(intention: carrier, cache: cache)
 
         sut.propagate(in: carrier)
-        
+
         assertEqual(functionBody.body, [
             .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
         ])
@@ -198,13 +198,13 @@ class DefinitionTypePropagatorTests: XCTestCase {
         let sut = makeSut(intention: carrier)
 
         sut.propagate(in: carrier)
-        
+
         assertEqual(functionBody.body, [
             .variableDeclaration(identifier: "a", type: .any, initialization: nil),
             .expression(.identifier("a"))
         ])
     }
-    
+
     func testPropagate_functionBody_ignoreWriteReferencesToMembers() {
         let (intention, functionBody) = makeFunction([
             .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
@@ -221,7 +221,7 @@ class DefinitionTypePropagatorTests: XCTestCase {
     }
 
     func testPropagate_expression() {
-        let exp: Expression = .block(body: [
+        let exp: SwiftAST.Expression = .block(body: [
             .variableDeclaration(identifier: "a", type: .any, initialization: .constant(0)),
         ])
         let body: CompoundStatement = [
@@ -768,7 +768,7 @@ extension DefinitionTypePropagatorTests {
         stringType: SwiftType? = .string,
         cache: DefinitionTypePropagator.DefinitionTypeCache = .init()
     ) -> DefinitionTypePropagator {
-        
+
         let localTypeResolver = DefaultLocalTypeResolverInvoker(
             intention: intention,
             globals: globals,
@@ -876,7 +876,7 @@ private class TestDefinitionTypePropagatorDelegate: DefinitionTypePropagatorDele
             definition,
             usages
         ))
-        
+
         return _suggestTypeForDefinitionUsages?(typePropagator, definition, usages) ?? .none
     }
 }

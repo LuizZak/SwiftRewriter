@@ -22,15 +22,23 @@ class EmptyCodeScope: CodeScope {
     func firstDefinition(named name: String) -> CodeDefinition? {
         nil
     }
-    
+
+    func firstDefinition(where predicate: (CodeDefinition) -> Bool) -> CodeDefinition? {
+        nil
+    }
+
     func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
         []
     }
-    
+
     func functionDefinitions(named name: String) -> [CodeDefinition] {
         []
     }
-    
+
+    func functionDefinitions(where predicate: (CodeDefinition) -> Bool) -> [CodeDefinition] {
+        []
+    }
+
     func localDefinitions() -> [CodeDefinition] {
         []
     }
@@ -38,11 +46,11 @@ class EmptyCodeScope: CodeScope {
     func recordDefinition(_ definition: CodeDefinition, overwrite: Bool) {
 
     }
-    
+
     func recordDefinitions(_ definitions: [CodeDefinition], overwrite: Bool) {
 
     }
-    
+
     func removeLocalDefinitions() {
 
     }

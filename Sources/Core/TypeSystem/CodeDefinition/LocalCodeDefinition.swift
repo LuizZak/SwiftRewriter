@@ -3,14 +3,14 @@ import SwiftAST
 
 public class LocalCodeDefinition: CodeDefinition {
     public var location: DefinitionLocation
-    
+
     convenience init(
         variableNamed name: String,
         type: SwiftType,
         ownership: Ownership = .strong,
         location: DefinitionLocation
     ) {
-        
+
         self.init(
             variableNamed: name,
             storage: ValueStorage(
@@ -21,14 +21,14 @@ public class LocalCodeDefinition: CodeDefinition {
             location: location
         )
     }
-    
+
     convenience init(
         constantNamed name: String,
         type: SwiftType,
         ownership: Ownership = .strong,
         location: DefinitionLocation
     ) {
-        
+
         self.init(
             variableNamed: name,
             storage: ValueStorage(
@@ -39,19 +39,19 @@ public class LocalCodeDefinition: CodeDefinition {
             location: location
         )
     }
-    
+
     init(variableNamed name: String, storage: ValueStorage, location: DefinitionLocation) {
         self.location = location
-        
+
         super.init(variableNamed: name, storage: storage)
     }
-    
+
     init(functionSignature: FunctionSignature, location: DefinitionLocation) {
         self.location = location
-        
+
         super.init(functionSignature: functionSignature)
     }
-    
+
     public override func isEqual(to other: CodeDefinition) -> Bool {
         switch other {
         case let other as LocalCodeDefinition:
@@ -64,7 +64,7 @@ public class LocalCodeDefinition: CodeDefinition {
     public func isEqual(to other: LocalCodeDefinition) -> Bool {
         (self.kind == other.kind && self.location == other.location)
     }
-    
+
     public enum DefinitionLocation: Hashable {
         case instanceSelf
         case staticSelf
@@ -72,18 +72,22 @@ public class LocalCodeDefinition: CodeDefinition {
         case parameter(index: Int)
         case variableDeclaration(StatementVariableDeclaration)
         case forLoop(ForStatement, PatternLocation)
-        case ifLet(IfStatement, PatternLocation)
+        case ifClause(IfStatement, clauseIndex: Int, PatternLocation)
+        case whileClause(WhileStatement, clauseIndex: Int, PatternLocation)
+        case conditionalClause(ConditionalClauseElement, PatternLocation)
         case localFunction(LocalFunctionStatement)
         case catchBlock(CatchBlock, PatternLocation?)
 
         public var canModify: Bool {
             switch self {
-            case 
+            case
                 .instanceSelf,
                 .staticSelf,
                 .setterValue,
                 .forLoop,
-                .ifLet,
+                .ifClause,
+                .whileClause,
+                .conditionalClause,
                 .localFunction,
                 .parameter,
                 .catchBlock:
@@ -96,12 +100,14 @@ public class LocalCodeDefinition: CodeDefinition {
 
         public func modifyType(_ newType: SwiftType) {
             switch self {
-            case 
+            case
                 .instanceSelf,
                 .staticSelf,
                 .setterValue,
                 .forLoop,
-                .ifLet,
+                .ifClause,
+                .whileClause,
+                .conditionalClause,
                 .localFunction,
                 .parameter,
                 .catchBlock:
@@ -111,42 +117,54 @@ public class LocalCodeDefinition: CodeDefinition {
                 decl.type = newType
             }
         }
-        
+
         public func hash(into hasher: inout Hasher) {
             switch self {
             case .instanceSelf:
                 hasher.combine(1)
-                
+
             case .staticSelf:
                 hasher.combine(2)
-                
+
             case .setterValue:
                 hasher.combine(3)
-                
+
             case .parameter(let index):
                 hasher.combine(4)
                 hasher.combine(index)
-                
+
             case let .variableDeclaration(decl):
                 hasher.combine(5)
                 hasher.combine(ObjectIdentifier(decl))
-                
+
             case let .forLoop(stmt, loc):
                 hasher.combine(6)
                 hasher.combine(ObjectIdentifier(stmt))
                 hasher.combine(loc)
-                
-            case let .ifLet(stmt, loc):
+
+            case let .ifClause(stmt, index, loc):
                 hasher.combine(7)
                 hasher.combine(ObjectIdentifier(stmt))
+                hasher.combine(index)
+                hasher.combine(loc)
+
+            case let .whileClause(stmt, index, loc):
+                hasher.combine(8)
+                hasher.combine(ObjectIdentifier(stmt))
+                hasher.combine(index)
+                hasher.combine(loc)
+
+            case let .conditionalClause(clause, loc):
+                hasher.combine(9)
+                hasher.combine(ObjectIdentifier(clause))
                 hasher.combine(loc)
 
             case let .localFunction(stmt):
-                hasher.combine(8)
+                hasher.combine(10)
                 hasher.combine(ObjectIdentifier(stmt))
-            
+
             case .catchBlock(let catchBlock, let loc):
-                hasher.combine(9)
+                hasher.combine(11)
                 hasher.combine(ObjectIdentifier(catchBlock.body))
                 hasher.combine(loc)
             }
@@ -167,7 +185,7 @@ public extension CodeDefinition {
     static func forParameters(inSignature signature: FunctionSignature) -> [LocalCodeDefinition] {
         forParameters(signature.parameters)
     }
-    
+
     /// Creates a set of code definitions that correspond to the given set of
     /// parameters
     static func forParameters(_ parameters: [ParameterSignature]) -> [LocalCodeDefinition] {
@@ -186,7 +204,7 @@ public extension CodeDefinition {
             )
         }
     }
-    
+
     /// Creates a set of code definitions that correspond to the given set of
     /// block parameters
     static func forParameters(_ parameters: [BlockParameter]) -> [LocalCodeDefinition] {
@@ -198,14 +216,14 @@ public extension CodeDefinition {
             )
         }
     }
-    
+
     /// Creates a code definition that matches the instance or static type of
     /// `type`.
     /// Used for creating self intrinsics for member bodies.
     static func forSelf(type: TypeGenerationIntention, isStatic: Bool) -> LocalCodeDefinition {
         forSelf(type: type.asSwiftType, isStatic: isStatic)
     }
-    
+
     /// Creates a code definition that matches the instance or static type of
     /// `type`.
     /// Used for creating self intrinsics for member bodies.
@@ -216,14 +234,14 @@ public extension CodeDefinition {
             location: isStatic ? .staticSelf : .instanceSelf
         )
     }
-    
+
     /// Creates a code definition that matches the instance or static type of
     /// `super`.
     /// Used for creating self intrinsics for member bodies.
     static func forSuper(type: TypeGenerationIntention, isStatic: Bool) -> LocalCodeDefinition {
         forSuper(type: type.asSwiftType, isStatic: isStatic)
     }
-    
+
     /// Creates a code definition that matches the instance or static type of
     /// `super`.
     /// Used for creating self intrinsics for member bodies.
@@ -234,7 +252,7 @@ public extension CodeDefinition {
             location: isStatic ? .staticSelf : .instanceSelf
         )
     }
-    
+
     /// Creates a code definition for the setter of a setter method body.
     static func forSetterValue(named name: String, type: SwiftType) -> LocalCodeDefinition {
         LocalCodeDefinition(
@@ -243,7 +261,7 @@ public extension CodeDefinition {
             location: .setterValue
         )
     }
-    
+
     /// Creates a code definition for a local identifier
     static func forLocalIdentifier(
         _ identifier: String,
@@ -252,7 +270,7 @@ public extension CodeDefinition {
         isConstant: Bool,
         location: LocalCodeDefinition.DefinitionLocation
     ) -> LocalCodeDefinition {
-        
+
         if isConstant {
             return LocalCodeDefinition(
                 constantNamed: identifier,
@@ -261,7 +279,7 @@ public extension CodeDefinition {
                 location: location
             )
         }
-        
+
         return LocalCodeDefinition(
             variableNamed: identifier,
             type: type,
@@ -296,7 +314,7 @@ public extension CodeDefinition {
             location: .catchBlock(catchBlock, nil)
         )
     }
-    
+
     static func forVarDeclStatement(_ stmt: VariableDeclarationsStatement) -> [LocalCodeDefinition] {
         stmt.decl.enumerated().map { (i, decl) in
             forVarDeclElement(decl)
@@ -315,7 +333,7 @@ public extension CodeDefinition {
             location: .variableDeclaration(decl)
         )
     }
-    
+
     static func forLocalFunctionStatement(_ stmt: LocalFunctionStatement) -> LocalCodeDefinition {
         LocalCodeDefinition(
             functionSignature: stmt.function.signature,

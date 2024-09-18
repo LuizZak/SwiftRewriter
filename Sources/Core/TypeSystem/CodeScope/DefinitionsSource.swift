@@ -1,18 +1,25 @@
 import SwiftAST
 
-/// An object that can provide definitions for a type resolver
+/// An object that can provide definitions for a type resolver.
 public protocol DefinitionsSource {
     /// Searches for the first definition matching a given name, recursively
-    /// through all scopes, from innermost to outermost
+    /// through all scopes, from innermost to outermost.
     func firstDefinition(named name: String) -> CodeDefinition?
-    
-    /// Returns all function definitions that match a given function identifier
+
+    /// Searches for the first definition matching a given predicate, recursively
+    /// through all scopes, from innermost to outermost.
+    func firstDefinition(where predicate: (CodeDefinition) -> Bool) -> CodeDefinition?
+
+    /// Returns all function definitions that match a given function identifier.
     func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition]
-    
+
     /// Returns all function definitions that have an initial function identifier
-    /// matching a given name
+    /// matching a given name.
     func functionDefinitions(named name: String) -> [CodeDefinition]
-    
-    /// Returns all definitions from this local scope only
+
+    /// Returns all function definitions that match a given predicate.
+    func functionDefinitions(where predicate: (CodeDefinition) -> Bool) -> [CodeDefinition]
+
+    /// Returns all definitions from this local scope only.
     func localDefinitions() -> [CodeDefinition]
 }

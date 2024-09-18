@@ -18,7 +18,7 @@ public func assertStatementsEqual(
         guard let stmt = stmt else {
             return "<nil>"
         }
-        
+
         var result: String = ""
 
         if printTypes {
@@ -59,8 +59,8 @@ public func assertStatementsEqual(
 }
 
 public func assertExpressionsEqual(
-    actual: Expression?,
-    expected: Expression?,
+    actual: SwiftAST.Expression?,
+    expected: SwiftAST.Expression?,
     messageHeader: String = "Failed: Expected statement",
     printTypes: Bool = false,
     file: StaticString = #file,
@@ -70,7 +70,7 @@ public func assertExpressionsEqual(
         return
     }
 
-    func stringify(_ exp: Expression?) -> String {
+    func stringify(_ exp: SwiftAST.Expression?) -> String {
         guard let exp = exp else {
             return "<nil>"
         }

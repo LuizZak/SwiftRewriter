@@ -13,7 +13,7 @@ extension CallGraph {
 
         var nodeIds: [ObjectIdentifier: GraphViz.NodeId] = [:]
         var nodeDefinitions: [NodeDefinition<CallGraphNode>] = []
-        
+
         // Prepare nodes
         for node in self.nodes {
             nodeDefinitions.append(
@@ -32,13 +32,13 @@ extension CallGraph {
 
             case (_?, nil):
                 return true
-            
+
             case (let r1?, let r2?) where r1 < r2:
                 return true
 
             case (let r1?, let r2?) where r1 > r2:
                 return false
-            
+
             default:
                 break
             }
@@ -49,13 +49,13 @@ extension CallGraph {
 
             case (_?, nil):
                 return false
-            
+
             case (let r1?, let r2?) where r1 < r2:
                 return false
 
             case (let r1?, let r2?) where r1 > r2:
                 return true
-            
+
             default:
                 return n1.label < n2.label
             }
@@ -68,7 +68,7 @@ extension CallGraph {
             switch definition.node.ownerFile {
             case let intention as FileGenerationIntention:
                 group.append((intention.targetPath as NSString).lastPathComponent)
-                
+
             case let knownFile?:
                 group.append(knownFile.fileName)
 
@@ -83,7 +83,7 @@ extension CallGraph {
                 group.append(contentsOf: baseNames + [
                     "\(ownerType.kind.rawValue) \(ownerType.typeName)"
                 ])
-                
+
             case let ownerType?:
                 group.append(contentsOf: ownerType.asKnownTypeReference.asNestedTypeNames)
 
@@ -96,7 +96,7 @@ extension CallGraph {
                 groups: group,
                 attributes: definition.attributes
             )
-            
+
             nodeIds[ObjectIdentifier(definition.node)] = graphvizNode
         }
 
@@ -108,7 +108,7 @@ extension CallGraph {
                 continue
             }
 
-            var edges: [CallGraphEdge] = self.edges(from: node)
+            var edges: [CallGraphEdge] = Array(self.edges(from: node))
 
             // Sort edges by lexical ordering
             edges.sort {
@@ -118,7 +118,7 @@ extension CallGraph {
                 guard let rhs = nodeIds[ObjectIdentifier($1.end)] else {
                     return true
                 }
-                
+
                 return lhs.description.compare(rhs.description, options: .numeric) == .orderedAscending
             }
 
@@ -144,7 +144,8 @@ extension CallGraph {
 private func definitionForNode(_ node: CallGraphNode, graph: CallGraph) -> NodeDefinition<CallGraphNode> {
     var result = NodeDefinition(
         node: node,
-        label: ""
+        label: "",
+        id: 0
     )
 
     switch node.declaration {

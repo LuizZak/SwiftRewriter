@@ -2,7 +2,7 @@ import Intentions
 import KnownType
 import ObjcParser
 import SwiftAST
-import SwiftFormatConfiguration
+import SwiftFormat
 import SwiftSyntax
 import SwiftParser
 import SwiftSyntaxSupport

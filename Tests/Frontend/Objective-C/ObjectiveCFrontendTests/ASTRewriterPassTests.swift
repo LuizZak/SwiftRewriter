@@ -29,7 +29,7 @@ class ASTRewriterPassTests: XCTestCase {
     }
 
     func testTraverseThroughPostfixSubscriptArgument() {
-        let exp: Expression =
+        let exp: SwiftAST.Expression =
             Expression
             .identifier("a")
             .sub(Expression.identifier("function").call())
@@ -183,7 +183,7 @@ class ASTRewriterPassTests: XCTestCase {
     class TestExpressionPass: ASTRewriterPass {
         var foundNeedle = false
 
-        override func visitPostfix(_ exp: PostfixExpression) -> Expression {
+        override func visitPostfix(_ exp: PostfixExpression) -> SwiftAST.Expression {
             if exp.exp == .identifier("function") && exp.op == .functionCall(arguments: []) {
                 foundNeedle = true
 

@@ -273,7 +273,7 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
     /// that form a function argument, or a subscript operand) have their nullability
     /// corrected by default.
     func testAlwaysCorrectBaseExpressionsScalarTypesThatResolveAsNull() {
-        let funcMaker = { (arg: Expression) in Expression.identifier("f").call([arg]) }
+        let funcMaker = { (arg: SwiftAST.Expression) in Expression.identifier("f").call([arg]) }
         let expMaker = { Expression.identifier("a") }
 
         let exp = expMaker()
@@ -293,7 +293,7 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
     /// that form a function argument, or a subscript operand) have their nullability
     /// corrected by default.
     func testAlwaysCorrectBaseExpressionsScalarTypesThatResolveAsNullInFunctionArguments() {
-        let expMaker: () -> Expression = {
+        let expMaker: () -> SwiftAST.Expression = {
             .identifier("a")
                 .call([
                     .identifier("b")
@@ -897,8 +897,8 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
             parameters: [.optional(.typeName("A"))]
         )
         let funcType = SwiftType.block(blockType)
-        
-        let expMaker: () -> Expression = {
+
+        let expMaker: () -> SwiftAST.Expression = {
             .identifier("a").typed(funcType)
                 .call(
                     [.identifier("b").typed(.optional(.typeName("A")))],
@@ -922,7 +922,7 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
             .constructor()
             .build()
         typeSystem.addType(type)
-        let rhsMaker: () -> Expression = {
+        let rhsMaker: () -> SwiftAST.Expression = {
             return
                 .identifier("self")
                 .dot("value", type: .nullabilityUnspecified("Value"))
@@ -1231,7 +1231,7 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
                     .variableDeclaration(
                         identifier: "a",
                         type: .any,
-                        initialization: 
+                        initialization:
                             .identifier("b")
                             .dot("c")
                             .dot("d")
@@ -1323,7 +1323,7 @@ final class ObjectiveCExpressionPassTestAdapter: ExpressionPassTestCaseAdapter {
         typeSystem: TypeSystem,
         intentionContext: FunctionBodyCarryingIntention?,
         container: StatementContainer?
-    ) throws -> Expression? {
+    ) throws -> SwiftAST.Expression? {
         let expression = try parser.expression()
 
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)

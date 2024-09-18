@@ -1,5 +1,5 @@
 import Foundation
-import SwiftFormatConfiguration
+import SwiftFormat
 import SwiftSyntaxSupport
 
 public struct SwiftSyntaxOptions {
@@ -16,12 +16,12 @@ public struct SwiftSyntaxOptions {
     /// type of the expression before the expression statement as a comment
     /// for inspection.
     public var outputExpressionTypes: Bool
-    
+
     /// If `true`, when outputting final intentions, print any history
     /// information tracked on its `IntentionHistory` property before the
     /// intention's declaration as a comment for inspection.
     public var printIntentionHistory: Bool
-    
+
     /// If `true`, `@objc` attributes and `: NSObject` are emitted for
     /// declarations during output.
     ///
@@ -35,7 +35,7 @@ public struct SwiftSyntaxOptions {
 
     /// Specifies the type of formatting to perform on the output files.
     public var format: FormatOption
-    
+
     public init(
         outputExpressionTypes: Bool,
         printIntentionHistory: Bool,
@@ -73,6 +73,6 @@ public struct SwiftSyntaxOptions {
 
         /// Performs SwiftFormat formatting, optionally using a provided configuration
         /// for the process.
-        case swiftFormat(configuration: Configuration?)
+        case swiftFormat(configuration: SwiftFormat.Configuration?)
     }
 }

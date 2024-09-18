@@ -40,13 +40,14 @@
 				"args": [
 					"build",
 					"--build-tests",
+					"-Xswiftc", "-diagnostic-style=llvm" // Work around vscode-swift adding this argument and invalidating previous non-test builds
 				],
 				"options": {
 					"env": {
 						"SWIFT_REWRITER_BUILD_ANTLR_OPTIMIZED": "1",
 					}
 				},
-				"detail": "swift build --build-tests",
+				"detail": "swift build --build-tests -Xswiftc -diagnostic-style=llvm",
 			},
             {
 				"label": "Build (debug) and reload tests",
@@ -64,8 +65,9 @@
 				"args": [
 					"build",
 					"-c=release",
+					"-Xswiftc", "-diagnostic-style=llvm" // Work around vscode-swift adding this argument and invalidating previous non-test builds
 				],
-				"detail": "swift build -c=release",
+				"detail": "swift build -c=release -Xswiftc -diagnostic-style=llvm",
 			},
             {
 				"label": "Test",
@@ -77,7 +79,7 @@
 				},
 				"args": [
 					"test",
-					"--enable-code-coverage",
+					"-Xswiftc", "-diagnostic-style=llvm" // Work around vscode-swift adding this argument and invalidating previous non-test builds
 				],
 				"detail": "swift test",
 				"dependsOn": "Build (debug)"
@@ -90,8 +92,9 @@
 				"args": [
 					"test",
 					"-c", "release",
+					"-Xswiftc", "-diagnostic-style=llvm" // Work around vscode-swift adding this argument and invalidating previous non-test builds
 				],
-				"detail": "swift test -c=release",
+				"detail": "swift test -c=release -Xswiftc -diagnostic-style=llvm",
 			},
 		],
 	},
@@ -206,6 +209,9 @@
 		],
 
 		"swift.buildArguments": [],
+		"swift.swiftEnvironmentVariables": {
+			"SWIFT_REWRITER_BUILD_ANTLR_OPTIMIZED": "1",
+		},
 		"swift.testEnvironmentVariables": {
 			"SWIFT_REWRITER_BUILD_ANTLR_OPTIMIZED": "1",
 		},
@@ -262,7 +268,6 @@
 	"extensions": {
 		"recommendations": [
 			"exodiusstudios.comment-anchors",
-			"vknabel.swift-coverage",
 			"luizzak.swifttestfilegen",
 		],
 	},

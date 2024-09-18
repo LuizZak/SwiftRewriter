@@ -4,9 +4,9 @@ import SwiftAST
 /// statement.
 struct ReturnStatementVisitor: StatementVisitor {
     typealias StmtResult = [ReturnStatement]
-    
+
     func visitStatement(_ statement: Statement) -> [ReturnStatement] {
-        statement.accept(self)
+        return statement.accept(self)
     }
 
     func visitReturn(_ stmt: ReturnStatement) -> [ReturnStatement] {
@@ -14,11 +14,37 @@ struct ReturnStatementVisitor: StatementVisitor {
     }
 
     func visitCompound(_ stmt: CompoundStatement) -> [ReturnStatement] {
-        stmt.statements.flatMap { $0.accept(self) }
+        return stmt.statements.flatMap { $0.accept(self) }
+    }
+
+    func visitConditionalClauses(_ clauses: ConditionalClauses) -> [ReturnStatement] {
+        return []
+    }
+
+    func visitConditionalClauseElement(_ clause: ConditionalClauseElement) -> [ReturnStatement] {
+        return []
     }
 
     func visitIf(_ stmt: IfStatement) -> [ReturnStatement] {
+        if let elseBody = stmt.elseBody {
+            return stmt.body.accept(self) + visitElseBody(elseBody)
+        }
+
         return stmt.body.accept(self)
+    }
+
+    func visitElseBody(_ stmt: IfStatement.ElseBody) -> [ReturnStatement] {
+        switch stmt {
+        case .else(let body):
+            return visitCompound(body)
+
+        case .elseIf(let elseIf):
+            return visitIf(elseIf)
+        }
+    }
+
+    func visitGuard(_ stmt: GuardStatement) -> [ReturnStatement] {
+        return stmt.elseBody.accept(self)
     }
 
     func visitWhile(_ stmt: WhileStatement) -> [ReturnStatement] {
@@ -30,22 +56,22 @@ struct ReturnStatementVisitor: StatementVisitor {
         if let defaultCase = stmt.defaultCase {
             result.append(contentsOf: visitSwitchDefaultCase(defaultCase))
         }
-        
+
         return result
     }
 
     func visitSwitchCase(_ switchCase: SwitchCase) -> [ReturnStatement] {
-        switchCase.statements.flatMap(visitStatement)
+        return switchCase.statements.flatMap(visitStatement)
     }
-    
-    /// Visits a `default` block from a `SwitchStatement`.
-    ///
-    /// - Parameter defaultCase: A switch default case block to visit
-    /// - Returns: Result of visiting the switch default case block
+
+    func visitSwitchCasePattern(_ casePattern: SwitchCase.CasePattern) -> [ReturnStatement] {
+        return []
+    }
+
     func visitSwitchDefaultCase(_ defaultCase: SwitchDefaultCase) -> [ReturnStatement] {
-        defaultCase.statements.flatMap(visitStatement)
+        return defaultCase.statements.flatMap(visitStatement)
     }
-    
+
     func visitRepeatWhile(_ stmt: RepeatWhileStatement) -> [ReturnStatement] {
         return stmt.body.accept(self)
     }

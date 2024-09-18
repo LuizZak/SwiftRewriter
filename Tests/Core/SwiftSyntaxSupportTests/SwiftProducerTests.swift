@@ -25,7 +25,7 @@ class SwiftProducerTests: XCTestCase {
         let sut = SwiftProducer()
 
         let result = sut.generateFile(file)
-        
+
         assert(
             result,
             matches: """
@@ -75,7 +75,7 @@ class SwiftProducerTests: XCTestCase {
                             /**
                              * Comment
                              */
-                            """ 
+                            """
                         )
                     )
                 }
@@ -172,9 +172,9 @@ class SwiftProducerTests: XCTestCase {
                 _ producer: SwiftProducer,
                 shouldEmitTypeFor storage: ValueStorage,
                 intention: IntentionProtocol?,
-                initialValue: Expression?
+                initialValue: SwiftAST.Expression?
             ) -> Bool {
-                
+
                 return !(initialValue?.resolvedType == .int)
             }
 
@@ -408,7 +408,7 @@ class SwiftProducerTests: XCTestCase {
 
         sut.emit(signature)
         let result = sut.buffer
-        
+
         assert(
             result,
             matches: """
@@ -426,7 +426,7 @@ class SwiftProducerTests: XCTestCase {
 
         sut.emit(signature)
         let result = sut.buffer
-        
+
         assert(
             result,
             matches: """
@@ -446,7 +446,7 @@ class SwiftProducerTests: XCTestCase {
 
         sut.emit(signature)
         let result = sut.buffer
-        
+
         assert(
             result,
             matches: """
@@ -1023,7 +1023,7 @@ extension SwiftProducerTests {
 
 // MARK: - Init writing
 extension SwiftProducerTests {
-    
+
     func testWriteFallibleInit() {
         let initMethod = InitGenerationIntention(parameters: [])
         initMethod.isFallible = true
@@ -1767,7 +1767,7 @@ extension SwiftProducerTests {
                     prot.createConformance(protocolName: "NSObjectProtocol")
                 }
             }
-        let settings: SwiftProducer.Settings = 
+        let settings: SwiftProducer.Settings =
             .default
             .with(\.emitObjcCompatibility, true)
         let sut = SwiftProducer(settings: settings)

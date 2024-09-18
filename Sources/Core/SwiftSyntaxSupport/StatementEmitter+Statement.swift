@@ -5,16 +5,36 @@ extension StatementEmitter: StatementVisitor {
         switch ptn {
         case .expression(let exp):
             visitExpression(exp)
-            
+
         case .tuple(let patterns):
             emit("(")
-            producer.emitWithSeparators(patterns, separator: ", ", visitPattern)
+            producer.emitWithSeparators(
+                patterns,
+                separator: ", ",
+                visitPattern
+            )
             emit(")")
-        
+
         case .identifier(let ident):
-            emit("let ")
             emit(ident)
-            
+
+        case .asType(let pattern, let type):
+            visitPattern(pattern)
+            emit(" as ")
+            emit(type)
+
+        case .valueBindingPattern(true, let pattern):
+            emit("let ")
+            visitPattern(pattern)
+
+        case .valueBindingPattern(false, let pattern):
+            emit("var ")
+            visitPattern(pattern)
+
+        case .optional(let pattern):
+            visitPattern(pattern)
+            emit("?")
+
         case .wildcard:
             emit("_")
         }
@@ -51,39 +71,63 @@ extension StatementEmitter: StatementVisitor {
         emitStatements(stmt.statements)
     }
 
-    func visitIf(_ stmt: IfStatement) {
-        emit("if ")
-        if let pattern = stmt.pattern {
+    func visitConditionalClauses(_ clauses: ConditionalClauses) {
+        for (i, element) in clauses.clauses.enumerated() {
+            if i > 0 {
+                emit(", ")
+            }
+
+            visitConditionalClauseElement(element)
+        }
+    }
+
+    func visitConditionalClauseElement(_ clause: ConditionalClauseElement) {
+        if let pattern = clause.pattern {
             visitPattern(pattern)
             emit(" = ")
         }
-        visitExpression(stmt.exp)
+        visitExpression(clause.expression)
+    }
+
+    func visitIf(_ stmt: IfStatement) {
+        emit("if ")
+        visitConditionalClauses(stmt.conditionalClauses)
+
         emitSpaceSeparator()
 
         emitCodeBlock(stmt.body)
 
         if let elseBody = stmt.elseBody {
-            // Backtrack to closing brace
-            producer.backtrackWhitespace()
-            emit(" else ")
-
-            // Collapse else-if chains
-            if
-                elseBody.statements.count == 1,
-                let elseIf = elseBody.statements.first?.asIf
-            {
-                visitIf(elseIf)
-            } else {
-                emitCodeBlock(elseBody)
-            }
+            visitElseBody(elseBody)
         }
+    }
+
+    func visitElseBody(_ stmt: IfStatement.ElseBody) {
+        producer.backtrackWhitespace()
+        emit(" else ")
+
+        switch stmt {
+        case .else(let stmts):
+            emitCodeBlock(stmts)
+
+        case .elseIf(let elseIf):
+            visitIf(elseIf)
+        }
+    }
+
+    func visitGuard(_ stmt: GuardStatement) {
+        emit("guard ")
+        visitConditionalClauses(stmt.conditionalClauses)
+
+        emit(" else ")
+        emitCodeBlock(stmt.elseBody)
     }
 
     func visitSwitch(_ stmt: SwitchStatement) {
         emit("switch ")
         visitExpression(stmt.exp)
         emitLine(" {")
-        
+
         stmt.cases.forEach { visitSwitchCase($0) }
 
         if let defaultCase = stmt.defaultCase {
@@ -96,12 +140,21 @@ extension StatementEmitter: StatementVisitor {
 
     func visitSwitchCase(_ switchCase: SwitchCase) {
         emit("case ")
-        producer.emitWithSeparators(switchCase.patterns, separator: ", ", visitPattern)
+        producer.emitWithSeparators(switchCase.casePatterns, separator: ", ", visitSwitchCasePattern)
         emitLine(":")
         producer.indented {
             pushClosureStack()
             emitStatements(switchCase.statements)
             popClosureStack()
+        }
+    }
+
+    func visitSwitchCasePattern(_ casePattern: SwitchCase.CasePattern) {
+        visitPattern(casePattern.pattern)
+
+        if let whereClause = casePattern.whereClause {
+            emit(" where ")
+            visitExpression(whereClause)
         }
     }
 
@@ -116,7 +169,7 @@ extension StatementEmitter: StatementVisitor {
 
     func visitWhile(_ stmt: WhileStatement) {
         emit("while ")
-        visitExpression(stmt.exp)
+        visitConditionalClauses(stmt.conditionalClauses)
         producer.emitSpaceSeparator()
         emitCodeBlock(stmt.body)
     }
@@ -211,7 +264,7 @@ extension StatementEmitter: StatementVisitor {
             visitExpression(exp)
         }
     }
-    
+
     func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) {
         let declarations = group(stmt.decl.map(producer.makeDeclaration))
 
@@ -219,7 +272,7 @@ extension StatementEmitter: StatementVisitor {
             if producer.settings.outputExpressionTypes {
                 let declType = stmt.decl[i].type
                 producer.emitComment("decl type: \(declType)")
-                
+
                 if let exp = stmt.decl[i].initialization {
                     producer.emitComment("init type: \(exp.resolvedType ?? "<nil>")")
                 }
@@ -228,9 +281,9 @@ extension StatementEmitter: StatementVisitor {
             producer.emit(decl)
         }
     }
-    
+
     func visitStatementVariableDeclaration(_ decl: StatementVariableDeclaration) {
-        
+
     }
 
     func visitLocalFunction(_ stmt: LocalFunctionStatement) {
@@ -239,12 +292,12 @@ extension StatementEmitter: StatementVisitor {
         emitSpaceSeparator()
         emitCodeBlock(stmt.function.body)
     }
-    
+
     func visitThrow(_ stmt: ThrowStatement) {
         emit("throw ")
         visitExpression(stmt.exp)
     }
-    
+
     func visitUnknown(_ stmt: UnknownStatement) {
         emitLine("/*")
         emitLine(stmt.context.context)

@@ -8,7 +8,7 @@ import Intentions
 /// based on statement AST analysis and flags them appropriately.
 public class InitAnalysisIntentionPass: IntentionPass {
     private let tag = "\(InitAnalysisIntentionPass.self)"
-    
+
     // Matches 'self.init'/'super.init' expressions, with or without parameters.
     let matchSelfOrSuperInit =
         ValueMatcher<PostfixExpression>()
@@ -20,36 +20,36 @@ public class InitAnalysisIntentionPass: IntentionPass {
                                                   .closure { $0?.hasPrefix("init") == true }))
                     .atIndex(2, matcher: .isFunctionCall)
             }.anyExpression()
-    
+
     var context: IntentionPassContext?
-    
+
     public init() {
-        
+
     }
-    
+
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         self.context = context
-        
+
         let visitor = AnonymousIntentionVisitor()
         visitor.onVisitInitializer = { ctor in
             self.analyzeInit(ctor)
         }
-        
+
         visitor.visit(intentions: intentionCollection)
     }
-    
+
     private func analyzeInit(_ initializer: InitGenerationIntention) {
         guard let body = initializer.functionBody?.body else {
             return
         }
-        
+
         // Search for `return nil` within the constructor which indicates this is
         // a fallible initializer
         // (make sure we don't look into closures and match those by accident,
         // as well).
-        
+
         let nodes = SyntaxNodeSequence(node: body, inspectBlocks: false)
-        
+
         for node in nodes.compactMap({ $0 as? ReturnStatement }) {
             if analyzeIsReturnStatementFallible(node) {
                 initializer.isFallible = true
@@ -57,7 +57,7 @@ public class InitAnalysisIntentionPass: IntentionPass {
                     Marked as fallible since an explicit nil return was detected \
                     within initializer body
                     """)
-                
+
                 break
             }
         }
@@ -71,20 +71,20 @@ public class InitAnalysisIntentionPass: IntentionPass {
             }
         }
     }
-    
+
     private func analyzeIsReturnStatementFallible(_ stmt: ReturnStatement) -> Bool {
         guard stmt.exp?.matches(.nil) == true else {
             return false
         }
-        
+
         // Check if we're not in one of the following patterns, which indicate
         // an early exit that is not necessarily from a fallible initializer
-        
+
         // 1.:
         // if(self == nil) {
         //     return nil;
         // }
-        
+
         guard let ifStatement = stmt.parent?.parent as? IfStatement else {
             return true
         }
@@ -94,11 +94,16 @@ public class InitAnalysisIntentionPass: IntentionPass {
         guard ifStatement.body.statements[0] == stmt else {
             return true
         }
-        
-        if ifStatement.exp.matches(.nilCompare(against: .identifier("self"))) {
+        guard ifStatement.conditionalClauses.clauses.count == 1 else {
+            return true
+        }
+
+        let exp = ifStatement.conditionalClauses.clauses[0].expression
+
+        if exp.matches(.nilCompare(against: .identifier("self"))) {
             return false
         }
-        
+
         // 2.:
         // if(!(self = [super|self init])) {
         //     return nil;
@@ -113,16 +118,16 @@ public class InitAnalysisIntentionPass: IntentionPass {
                             .keyPath(\.rhs, matchSelfOrSuperInit)
                             .anyExpression()
                 ).anyExpression()
-        
-        if negatedSelfIsSelfOrSuperInit(matches: ifStatement.exp) {
+
+        if negatedSelfIsSelfOrSuperInit(matches: exp) {
             return false
         }
-        
+
         return true
     }
-    
+
     private func superOrSelfInitExpressionTargetFrom(exp: Expression) -> String? {
-        
+
         // Looks for
         //
         // self = [super|self init<...>]
@@ -150,12 +155,12 @@ public class InitAnalysisIntentionPass: IntentionPass {
                         }.anyExpression()
                     )
                 )
-        
+
         if matchSelfOrSuper(matches: exp), let selfOrSuper = selfOrSuper?.asIdentifier?.identifier {
             return selfOrSuper
         }
-        
+
         return nil
     }
-    
+
 }

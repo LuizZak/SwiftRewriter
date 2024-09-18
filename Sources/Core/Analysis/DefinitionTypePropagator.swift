@@ -1,4 +1,5 @@
 import SwiftAST
+import SwiftCFG
 import Intentions
 import TypeSystem
 
@@ -53,7 +54,7 @@ public class DefinitionTypePropagator {
             container: .function(body)
         )
         let allDefinitions = analyzer.allDefinitions()
-        
+
         let groupedDefinitions = allDefinitions.groupBy {
             $0.definition
         }
@@ -185,7 +186,7 @@ public class DefinitionTypePropagator {
                     continue
                 }
             }
-            
+
         } while didModify
     }
 
@@ -220,7 +221,7 @@ public class DefinitionTypePropagator {
 
         repeat {
             didWork = false
-            
+
             block(propagator)
         } while didWork
     }
@@ -232,20 +233,20 @@ public class DefinitionTypePropagator {
         _ usages: [DefinitionUsage],
         in graph: ControlFlowGraph
     ) -> [SwiftType]? {
-        
+
         var types: [SwiftType] = []
         var typesFromDelegate: DefinitionTypePropagator.TypeSuggestion = .none
-        
+
         // Query delegate
         if let delegate = delegate {
             let contexts = usages.compactMap(usageContext(for:))
-            
+
             typesFromDelegate = delegate.suggestTypeForDefinitionUsages(
                 self,
                 definition: definition,
                 usages: contexts
             )
-            
+
             if case .certain(let type) = typesFromDelegate {
                 return [type]
             }
@@ -285,14 +286,14 @@ public class DefinitionTypePropagator {
         switch typesFromDelegate {
         case .none, .certain:
             return types
-        
+
         case .oneOfPossibly(let suggested):
             if types.isEmpty {
                 return suggested
             }
 
             return types
-            
+
         case .oneOfCertain(let subset):
             return Array(Set(subset).intersection(types))
         }
@@ -302,7 +303,7 @@ public class DefinitionTypePropagator {
         _ definitions: S,
         to type: SwiftType
     ) -> Bool where S.Element == ReachingDefinitionAnalyzer.Definition {
-        
+
         definitions.allSatisfy { checkCanCoerce(definition: $0, to: type) }
     }
 
@@ -312,7 +313,7 @@ public class DefinitionTypePropagator {
     ) -> Bool {
 
         let verifier = makeCoercionVerifier()
-        
+
         switch definition.context {
         case .assignment(let exp):
             if verifier.canCoerce(exp.rhs, toType: type) {
@@ -324,16 +325,16 @@ public class DefinitionTypePropagator {
                 return true
             }
 
-        case .ifLetBinding(let stmt):
-            if verifier.canCoerce(stmt.exp, toType: type) {
+        case .conditionalClause(let clause):
+            if verifier.canCoerce(clause.expression, toType: type) {
                 return true
             }
-        
+
         case .forBinding(let stmt):
             if verifier.canCoerce(stmt.exp, toType: type) {
                 return true
             }
-        
+
         case .catchBlock:
             return type == .swiftError
 
@@ -361,12 +362,12 @@ public class DefinitionTypePropagator {
             nextPostfix.exp == postfixExp {
                 return .memberFunctionCall(exp, op, functionCall, in: nextPostfix)
             }
-            
+
             return .memberAccess(exp, op, in: postfixExp)
-        
+
         case let op as SubscriptPostfix:
             return .subscriptAccess(exp, op, in: postfixExp)
-        
+
         case let op as FunctionCallPostfix:
             return .functionCall(exp, op, in: postfixExp)
 
@@ -446,11 +447,11 @@ public class DefinitionTypePropagator {
             }
 
             return exp.rhs.resolvedType
-            
+
         case .initialValue(let exp):
             return exp.resolvedType
 
-        case .ifLetBinding, .forBinding, .catchBlock:
+        case .conditionalClause, .forBinding, .catchBlock:
             return definition.definition.type
 
         case nil:
@@ -471,11 +472,11 @@ public class DefinitionTypePropagator {
             }
 
             return true
-            
+
         case .initialValue:
             return true
 
-        case .ifLetBinding, .forBinding, .catchBlock:
+        case .conditionalClause, .forBinding, .catchBlock:
             return false
 
         case nil:
@@ -528,7 +529,7 @@ public class DefinitionTypePropagator {
 
             let cache = DefinitionTypeCache()
             _cache[intention] = cache
-            
+
             return cache
         }
     }
@@ -702,7 +703,7 @@ private extension DefinitionTypePropagator {
             guard let scope = decl.nearestScope as? Statement else {
                 return nil
             }
-            
+
             let definition: LocalCodeDefinition = .forVarDeclElement(decl)
             let usages = localUsageAnalyzer.findUsagesOf(
                 definition: definition,

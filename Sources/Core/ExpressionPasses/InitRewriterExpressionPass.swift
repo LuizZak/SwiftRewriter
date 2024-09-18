@@ -29,56 +29,56 @@ import KnownType
 /// to invalid code in some scenarios.
 public class InitRewriterExpressionPass: ASTRewriterPass {
     private var ownerType: KnownTypeReference?
-    
+
     public override func apply(on statement: Statement, context: ASTRewriterPassContext) -> Statement {
         ownerType = nil
-        
+
         // Can only apply to initializers
         switch context.source {
         case .initializer(let initializer)?:
             self.context = context
-            
+
             if let compound = statement.asCompound {
                 compound.statements = analyzeStatementBody(compound)
             }
-            
+
             // Next step is recursive fallible super.init analysis- if we lack the
             // context needed to figure out the superclass, quit now
             if initializer.ownerType != nil {
                 ownerType = initializer.ownerType
                 return super.apply(on: statement, context: context)
             }
-            
+
             return statement
         default:
             return statement
         }
     }
-    
+
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         if let newExp = validateFallibleSuperInit(exp) {
             notifyChange()
             return newExp
         }
-        
+
         return exp
     }
-    
+
     private func analyzeStatementBody(_ compoundStatement: CompoundStatement) -> [Statement] {
         if let statements = analyzeTraditionalIfSelfInit(compoundStatement) {
             notifyChange()
-            
+
             return statements
         }
         if let statements = analyzeEarlyExitIfStatement(compoundStatement) {
             notifyChange()
-            
+
             return statements
         }
-        
+
         return compoundStatement.statements
     }
-    
+
     private func analyzeTraditionalIfSelfInit(_ compoundStatement: CompoundStatement) -> [Statement]? {
         // Detect more common
         //
@@ -92,35 +92,39 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
         if compoundStatement.statements.count != 3 {
             return nil
         }
-        
+
         let _superInit = compoundStatement.statements[0].asExpressions
         let _ifSelf = compoundStatement.statements[1].asIf
         let _returnSelf = compoundStatement.statements[2].asReturn
-        
+
         guard let superInit = _superInit, let ifSelf = _ifSelf, let returnSelf = _returnSelf else {
             return nil
         }
-        
+
         // Do a quick validation of the pattern we're seeing
         guard let superInitExp = superInitExpressionFrom(exp: superInit) else {
             return nil
         }
-        guard InitRewriterExpressionPass.isNullCheckingSelf(ifSelf.exp) else {
+        guard ifSelf.conditionalClauses.clauses.count == 1 else {
+            return nil
+        }
+        let clause = ifSelf.conditionalClauses.clauses[0]
+        guard InitRewriterExpressionPass.isNullCheckingSelf(clause.expression) else {
             return nil
         }
         guard returnSelf.exp?.asIdentifier?.identifier == "self" else {
             return nil
         }
-        
+
         // Create a new init body, now
         let result: [Statement] =
             ifSelf.body.copy().statements + [
                 .expression(superInitExp.copy())
             ]
-        
+
         return result
     }
-    
+
     private func analyzeEarlyExitIfStatement(_ compoundStatement: CompoundStatement) -> [Statement]? {
         // Detect an early-exit pattern
         //
@@ -132,46 +136,50 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
         //
         // return self;
         //
-        
+
         guard let ifSelfInit = compoundStatement.statements.first?.asIf else {
             return nil
         }
-        
+
         // if(!(self = [super init]))
         guard ifSelfInit.body == [.return(.constant(.nil))] else {
             return nil
         }
-        guard let superInit = superOrSelfInitExpressionFrom(exp: ifSelfInit.exp) else {
+        guard ifSelfInit.conditionalClauses.clauses.count == 1 else {
+            return nil
+        }
+        let clause = ifSelfInit.conditionalClauses.clauses[0]
+        guard let superInit = superOrSelfInitExpressionFrom(exp: clause.expression) else {
             return nil
         }
         guard superInit.matches(ValueMatcher<Expression>.nilCheck(against: superInit)) else {
             return nil
         }
-        
+
         // return self;
         guard compoundStatement.statements.last == .return(.identifier("self")) else {
             return nil
         }
-        
+
         // Initializer code
         let initializerCode = compoundStatement.dropFirst().dropLast()
-        
+
         let result: [Statement] =
             Array(initializerCode) + [
                 .expression(superInit.copy())
             ]
-        
+
         return result
     }
-    
+
     private func superInitExpressionFrom(exp: ExpressionsStatement) -> Expression? {
         if exp.expressions.count == 1, let superInit = superOrSelfInitExpressionFrom(exp: exp.expressions[0]) {
             return superInit
         }
-        
+
         return nil
     }
-    
+
     /// In case a given `super.init` invocation is a fallible initializer invocation,
     /// return a transformed, fallible init invocation (`super.init?()`) matching
     /// the original invocation.
@@ -179,9 +187,9 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
         guard let ownerType = ownerType else {
             return nil
         }
-        
+
         var _functionCall: FunctionCallPostfix?
-        
+
         let invertedMatchSuperInitMatcher =
             ValueMatcher<PostfixExpression>()
                 .inverted { inverted in
@@ -194,23 +202,23 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
                             return $0.postfix is FunctionCallPostfix
                         })
                 }.anyExpression()
-        
+
         guard invertedMatchSuperInitMatcher(matches: exp), let functionCall = _functionCall else {
             return nil
         }
-        
+
         // Try to find the containing type now
-        
+
         let _constructor =
             context
                 .typeSystem
                 .constructor(withArgumentLabels: functionCall.argumentKeywords,
                              in: .typeName(ownerType.asTypeName))
-        
+
         guard let constructor = _constructor else {
             return nil
         }
-        
+
         if constructor.isFallible {
             let newExp =
                 Expression
@@ -220,17 +228,17 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
                     .call(functionCall.arguments.map { $0.copy() },
                           type: functionCall.returnType,
                           callableSignature: functionCall.callableSignature)
-            
+
             return newExp
         }
-        
+
         return nil
     }
-    
+
     private func superOrSelfInitExpressionFrom(exp: Expression) -> Expression? {
-        
+
         let superInit = ValueMatcherExtractor<Expression?>()
-        
+
         let invertedMatchSuperInit =
             ValueMatcher<PostfixExpression>()
                 .inverted { inverted in
@@ -240,7 +248,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
                         .atIndex(1, matcher: .keyPath(\.postfix?.asMember?.name, equals: "init"))
                         .atIndex(2, matcher: .isFunctionCall)
                 }.anyExpression()
-        
+
         let selfInit =
             Expression.matcher(
                 .findAny(thatMatches:
@@ -252,19 +260,19 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
                     .anyExpression()
                 )
             )
-        
+
         if selfInit.anyExpression().matches(exp) {
             return superInit.value
         }
-        
+
         return nil
     }
-    
+
     private static func isNullCheckingSelf(_ exp: Expression) -> Bool {
         let matchSelfEqualsNil =
             Expression.matcher(.nilCheck(against: .identifier("self")))
-        
+
         return matchSelfEqualsNil.matches(exp)
     }
-    
+
 }

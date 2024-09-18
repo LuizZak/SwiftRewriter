@@ -41,6 +41,29 @@ public extension Asserter where Object: Collection {
         return self
     }
 
+    /// Asserts that the underlying `Collection` being tested has a specified
+    /// count of elements.
+    ///
+    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
+    /// further tests.
+    @discardableResult
+    func assertCount(
+        _ count: Int,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> Self? {
+
+        guard object.count == count else {
+            return assertFailed(
+                message: #"assertCount failed: expected \#(count) found \#(object.count)."#,
+                file: file,
+                line: line
+            )
+        }
+
+        return self
+    }
+
     /// Asserts that the underlying `Collection` being tested matches with another
     /// collection of the same elements, using a given test comparator closure.
     /// The comparison is strict in terms of collection length: if one of the
@@ -69,29 +92,6 @@ public extension Asserter where Object: Collection {
 }
 
 public extension Asserter where Object: Collection, Object.Index == Int {
-    /// Asserts that the underlying `Collection` being tested has a specified
-    /// count of elements.
-    ///
-    /// Returns `nil` if the test failed, otherwise returns `self` for chaining
-    /// further tests.
-    @discardableResult
-    func assertCount(
-        _ count: Int,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> Self? {
-
-        guard object.count == count else {
-            return assertFailed(
-                message: #"assertCount failed: expected \#(count) found \#(object.count)."#,
-                file: file,
-                line: line
-            )
-        }
-
-        return self
-    }
-
     /// Opens an asserter context for a child node on the underlying `Collection`
     /// being tested.
     ///

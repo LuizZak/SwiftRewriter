@@ -1,8 +1,8 @@
 import MiniGraphviz
 
-struct NodeDefinition<Node: DirectedGraphNode> {
+struct NodeDefinition<Node: Hashable> {
     var node: Node
-    
+
     /// Rank of the node, or the minimal number of edges that connect the node
     /// to the entry of the graph.
     ///
@@ -21,6 +21,9 @@ struct NodeDefinition<Node: DirectedGraphNode> {
 
     /// Display label for the graphviz node.
     var label: String
+
+    /// An integer used to differentiate nodes for ordering purposes.
+    var id: Int = 0
 
     /// Extra set of attributes for a graphviz node.
     var attributes: GraphViz.Attributes = [:]

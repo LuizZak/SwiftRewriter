@@ -1,6 +1,6 @@
 import Foundation
 import ArgumentParser
-import SwiftFormatConfiguration
+import SwiftFormat
 import SwiftRewriterLib
 
 /// Group of global options available to all frontends in files- or path- mode.
@@ -10,13 +10,13 @@ struct GlobalOptions: ParsableArguments {
         help: "Pass this parameter as true to enable terminal colorization during output."
     )
     var colorize: Bool = false
-    
+
     @Flag(
         name: [.long],
         help: "Prints the type of each top-level resolved expression statement found in function bodies."
     )
     var printExpressionTypes: Bool = false
-    
+
     @Flag(
         name: [.long, .customShort("p")],
         help: """
@@ -26,13 +26,13 @@ struct GlobalOptions: ParsableArguments {
         """
     )
     var printTracingHistory: Bool = false
-    
+
     @Flag(
         name: .shortAndLong,
         help: "Prints progress information to the console while performing a transpiling job."
     )
     var verbose: Bool = false
-    
+
     @Option(
         name: [.long, .customShort("t")],
         help: """
@@ -42,7 +42,7 @@ struct GlobalOptions: ParsableArguments {
         """
     )
     var numThreads: Int?
-    
+
     @Flag(
         help: """
         Forces ANTLR parsing to use LL prediction context, instead of making an \
@@ -52,7 +52,7 @@ struct GlobalOptions: ParsableArguments {
         """
     )
     var forceLl: Bool = false
-    
+
     @Option(
         name: [.long, .customShort("w")],
         help: """

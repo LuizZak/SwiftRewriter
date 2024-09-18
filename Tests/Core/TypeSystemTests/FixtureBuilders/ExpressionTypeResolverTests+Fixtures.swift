@@ -195,7 +195,7 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
             line: line
         )
     }
-    
+
     /// Asserts a local function definition was created on the given scope.
     @discardableResult
     func thenAssertDefined(
@@ -317,7 +317,7 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
     /// set to expect a given type
     @discardableResult
     func thenAssertExpression(
-        at keyPath: KeyPath<T, Expression>,
+        at keyPath: KeyPath<T, SwiftAST.Expression>,
         expectsType type: SwiftType?,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -345,7 +345,7 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
     /// set to expect a given type
     @discardableResult
     func thenAssertExpression(
-        at keyPath: KeyPath<T, Expression?>,
+        at keyPath: KeyPath<T, SwiftAST.Expression?>,
         expectsType type: SwiftType?,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -382,7 +382,7 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
     /// resolved to a specified type
     @discardableResult
     func thenAssertExpression(
-        at keyPath: KeyPath<T, Expression>,
+        at keyPath: KeyPath<T, SwiftAST.Expression>,
         resolvedAs type: SwiftType?,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -410,7 +410,7 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
     /// resolved to a specified type
     @discardableResult
     func thenAssertExpression(
-        at keyPath: KeyPath<T, Expression?>,
+        at keyPath: KeyPath<T, SwiftAST.Expression?>,
         resolvedAs type: SwiftType?,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -446,7 +446,7 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
     /// Opens up a closure context and passes in an expression at a specified
     /// keypath for custom inspection.
     @discardableResult
-    func withExpression<E: Expression>(
+    func withExpression<E: SwiftAST.Expression>(
         at keyPath: KeyPath<T, E>,
         file: StaticString = #filePath,
         line: UInt = #line,
@@ -461,7 +461,7 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
     /// Opens up a closure context and passes in an expression at a specified
     /// keypath for custom inspection.
     @discardableResult
-    func withExpression<E: Expression>(
+    func withExpression<E: SwiftAST.Expression>(
         at keyPath: KeyPath<T, E?>,
         file: StaticString = #filePath,
         line: UInt = #line,
@@ -491,7 +491,7 @@ final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFi
 
 /// Test builder for expression type resolver tests that require scope for expression
 /// resolving.
-final class ExpressionTypeTestBuilder<T: Expression>: ExpressionTestResolverTestFixture {
+final class ExpressionTypeTestBuilder<T: SwiftAST.Expression>: ExpressionTestResolverTestFixture {
     let testCase: XCTestCase
     let sut: ExpressionTypeResolver
     let expression: T
@@ -590,7 +590,7 @@ final class ExpressionTypeTestBuilder<T: Expression>: ExpressionTestResolverTest
         /// resolved as having a specified type
         @discardableResult
         func thenAssertExpression(
-            at keyPath: KeyPath<T, Expression?>,
+            at keyPath: KeyPath<T, SwiftAST.Expression?>,
             resolvedAs type: SwiftType?,
             file: StaticString = #filePath,
             line: UInt = #line
@@ -625,7 +625,7 @@ final class ExpressionTypeTestBuilder<T: Expression>: ExpressionTestResolverTest
         /// set to expect a given type
         @discardableResult
         func thenAssertExpression(
-            at keyPath: KeyPath<T, Expression?>,
+            at keyPath: KeyPath<T, SwiftAST.Expression?>,
             expectsType type: SwiftType?,
             file: StaticString = #filePath,
             line: UInt = #line

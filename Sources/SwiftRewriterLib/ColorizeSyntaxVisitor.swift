@@ -116,7 +116,7 @@ internal class ColorizeSyntaxVisitor: SyntaxVisitor {
         case .ifConfigDirective:
             return directiveColor
 
-        case .identifier:
+        case .identifier, .argumentLabel:
             return identifierColor
 
         case .type:

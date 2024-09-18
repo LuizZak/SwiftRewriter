@@ -1,4 +1,5 @@
 import XCTest
+import KnownType
 
 @testable import TypeSystem
 
@@ -43,7 +44,21 @@ class PatternMatcherTests: XCTestCase {
         )
 
         XCTAssertEqual(result, [
-            .init(identifier: "a", type: .int, patternLocation: .`self`),
+            .init(identifier: "a", type: .int, patternLocation: .`self`, isConstant: false),
+        ])
+    }
+
+    func testMatch_identifier_declaration_constant() {
+        let sut = makeSut()
+
+        let result = sut.match(
+            pattern: .identifier("a"),
+            to: .int,
+            context: [.declaration, .constant]
+        )
+
+        XCTAssertEqual(result, [
+            .init(identifier: "a", type: .int, patternLocation: .`self`, isConstant: true),
         ])
     }
 
@@ -57,7 +72,7 @@ class PatternMatcherTests: XCTestCase {
         )
 
         XCTAssertEqual(result, [
-            .init(identifier: "a", type: .int, patternLocation: .`self`),
+            .init(identifier: "a", type: .int, patternLocation: .`self`, isConstant: false),
         ])
     }
 
@@ -71,8 +86,8 @@ class PatternMatcherTests: XCTestCase {
         )
 
         XCTAssertEqual(result, [
-            .init(identifier: "a", type: "A", patternLocation: .tuple(index: 0, pattern: .`self`)),
-            .init(identifier: "b", type: "B", patternLocation: .tuple(index: 1, pattern: .`self`)),
+            .init(identifier: "a", type: "A", patternLocation: .tuple(index: 0, pattern: .`self`), isConstant: false),
+            .init(identifier: "b", type: "B", patternLocation: .tuple(index: 1, pattern: .`self`), isConstant: false),
         ])
     }
 
@@ -98,17 +113,20 @@ class PatternMatcherTests: XCTestCase {
             .init(
                 identifier: "a",
                 type: "A",
-                patternLocation: .tuple(index: 0, pattern: .`self`)
+                patternLocation: .tuple(index: 0, pattern: .`self`),
+                isConstant: false
             ),
             .init(
                 identifier: "b",
                 type: "B",
-                patternLocation: .tuple(index: 1, pattern: .tuple(index: 0, pattern: .`self`))
+                patternLocation: .tuple(index: 1, pattern: .tuple(index: 0, pattern: .`self`)),
+                isConstant: false
             ),
             .init(
                 identifier: "c",
                 type: "C",
-                patternLocation: .tuple(index: 1, pattern: .tuple(index: 1, pattern: .`self`))
+                patternLocation: .tuple(index: 1, pattern: .tuple(index: 1, pattern: .`self`)),
+                isConstant: false
             ),
         ])
     }
@@ -119,7 +137,7 @@ class PatternMatcherTests: XCTestCase {
         let result = sut.match(
             pattern: .tuple([.identifier("a"), .identifier("b"), .identifier("c")]),
             to: .tuple(["A", "B"]),
-            context: .optionalBinding
+            context: [.optionalBinding, .declaration]
         )
 
         XCTAssertEqual(result, [])
@@ -140,15 +158,49 @@ class PatternMatcherTests: XCTestCase {
                 "A",
                 .tuple(["B", "C", "D"])
             ]),
-            context: .optionalBinding
+            context: [.optionalBinding, .declaration]
         )
 
         XCTAssertEqual(result, [
             .init(
                 identifier: "a",
                 type: "A",
-                patternLocation: .tuple(index: 0, pattern: .`self`)
+                patternLocation: .tuple(index: 0, pattern: .`self`),
+                isConstant: false
             ),
+        ])
+    }
+
+    func testMatch_asType_declaration_matchingType() {
+        let sut = makeSut()
+
+        let result = sut.match(
+            pattern: .asType(.identifier("a"), .int),
+            to: .int,
+            context: []
+        )
+
+        XCTAssertEqual(result, [
+            .init(identifier: "a", type: .int, patternLocation: .asType(pattern: .self), isConstant: false),
+        ])
+    }
+
+    func testMatch_asType_declaration_derivedType() {
+        let sut = makeSut()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "B")
+                .settingSupertype("A")
+                .build()
+        )
+
+        let result = sut.match(
+            pattern: .asType(.identifier("a"), .typeName("A")),
+            to: "B",
+            context: []
+        )
+
+        XCTAssertEqual(result, [
+            .init(identifier: "a", type: "A", patternLocation: .asType(pattern: .self), isConstant: false),
         ])
     }
 

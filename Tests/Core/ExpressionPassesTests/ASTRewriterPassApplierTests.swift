@@ -48,7 +48,7 @@ class ASTRewriterPassApplierTests: XCTestCase {
             .createFile(named: "A.h") { file in
                 file.createGlobalVariable(withName: "a", storage: .constant(ofType: .any), initialExpression: .identifier("original"))
             }.build(typeChecked: true)
-        
+
 
         let sut = ASTRewriterPassApplier(
             passes: [TestExpressionPass.self],
@@ -70,7 +70,7 @@ class ASTRewriterPassApplierTests: XCTestCase {
                     }
                 }
             }.build(typeChecked: true)
-        
+
 
         let sut = ASTRewriterPassApplier(
             passes: [TestExpressionPass.self],
@@ -93,9 +93,9 @@ private class TestExpressionPass: ASTRewriterPass {
     }
 
     override func apply(
-        on expression: Expression, 
+        on expression: SwiftAST.Expression,
         context: ASTRewriterPassContext
-    ) -> Expression {
+    ) -> SwiftAST.Expression {
         return .identifier("replaced")
     }
 }

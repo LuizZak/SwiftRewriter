@@ -56,11 +56,11 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
         let _exp = Expression.identifier("view")
         _exp.resolvedType = .typeName("UIView")
 
-        var exp: Expression {
+        var exp: SwiftAST.Expression {
             return _exp.copy()
         }
 
-        let makeGetter: (String) -> Expression = {
+        let makeGetter: (String) -> SwiftAST.Expression = {
             return exp.dot($0)
         }
 
