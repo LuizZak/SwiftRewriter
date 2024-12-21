@@ -783,6 +783,13 @@ class DefaultTypeMapperTests: XCTestCase {
             toConvertTo: "SomeType<String, NSObject>!"
         )
     }
+
+    func testFixedSizeArray() {
+        expect(
+            .fixedArray(.typeName("signed int"), length: 1),
+            toConvertTo: "UnsafeMutablePointer<CInt>"
+        )
+    }
 }
 
 extension DefaultTypeMapperTests {
