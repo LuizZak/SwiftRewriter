@@ -82,7 +82,12 @@
 					"-Xswiftc", "-diagnostic-style=llvm" // Work around vscode-swift adding this argument and invalidating previous non-test builds
 				],
 				"detail": "swift test",
-				"dependsOn": "Build (debug)"
+				"dependsOn": "Build (debug)",
+				"options": {
+					"env": {
+						"SWIFT_REWRITER_BUILD_ANTLR_OPTIMIZED": "1",
+					}
+				},
 			},
             {
 				"label": "Test (release)",

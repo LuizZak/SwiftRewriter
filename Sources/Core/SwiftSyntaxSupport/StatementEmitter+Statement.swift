@@ -89,82 +89,12 @@ extension StatementEmitter: StatementVisitor {
         visitExpression(clause.expression)
     }
 
-    func visitIf(_ stmt: IfStatement) {
-        emit("if ")
-        visitConditionalClauses(stmt.conditionalClauses)
-
-        emitSpaceSeparator()
-
-        emitCodeBlock(stmt.body)
-
-        if let elseBody = stmt.elseBody {
-            visitElseBody(elseBody)
-        }
-    }
-
-    func visitElseBody(_ stmt: IfStatement.ElseBody) {
-        producer.backtrackWhitespace()
-        emit(" else ")
-
-        switch stmt {
-        case .else(let stmts):
-            emitCodeBlock(stmts)
-
-        case .elseIf(let elseIf):
-            visitIf(elseIf)
-        }
-    }
-
     func visitGuard(_ stmt: GuardStatement) {
         emit("guard ")
         visitConditionalClauses(stmt.conditionalClauses)
 
         emit(" else ")
         emitCodeBlock(stmt.elseBody)
-    }
-
-    func visitSwitch(_ stmt: SwitchStatement) {
-        emit("switch ")
-        visitExpression(stmt.exp)
-        emitLine(" {")
-
-        stmt.cases.forEach { visitSwitchCase($0) }
-
-        if let defaultCase = stmt.defaultCase {
-            visitSwitchDefaultCase(defaultCase)
-        }
-
-        producer.ensureNewline()
-        emitLine("}")
-    }
-
-    func visitSwitchCase(_ switchCase: SwitchCase) {
-        emit("case ")
-        producer.emitWithSeparators(switchCase.casePatterns, separator: ", ", visitSwitchCasePattern)
-        emitLine(":")
-        producer.indented {
-            pushClosureStack()
-            emitStatements(switchCase.statements)
-            popClosureStack()
-        }
-    }
-
-    func visitSwitchCasePattern(_ casePattern: SwitchCase.CasePattern) {
-        visitPattern(casePattern.pattern)
-
-        if let whereClause = casePattern.whereClause {
-            emit(" where ")
-            visitExpression(whereClause)
-        }
-    }
-
-    func visitSwitchDefaultCase(_ defaultCase: SwitchDefaultCase) {
-        emitLine("default:")
-        producer.indented {
-            pushClosureStack()
-            emitStatements(defaultCase.statements)
-            popClosureStack()
-        }
     }
 
     func visitWhile(_ stmt: WhileStatement) {

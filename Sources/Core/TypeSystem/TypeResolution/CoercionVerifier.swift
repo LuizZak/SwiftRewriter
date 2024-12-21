@@ -145,6 +145,32 @@ private class _CoercionVerifierVisitor: ExpressionVisitor {
         }
     }
 
+    // TODO: Support if expression coercion verification
+    func visitIf(_ exp: IfExpression) -> Bool {
+        false
+    }
+
+    func visitElseBody(_ exp: IfExpression.ElseBody) -> Bool {
+        false
+    }
+
+    // TODO: Support switch expression coercion verification
+    func visitSwitch(_ exp: SwitchExpression) -> Bool {
+        false
+    }
+
+    func visitSwitchCase(_ switchCase: SwitchCase) -> Bool {
+        false
+    }
+
+    func visitSwitchCasePattern(_ casePattern: SwitchCase.CasePattern) -> Bool {
+        false
+    }
+
+    func visitSwitchDefaultCase(_ defaultCase: SwitchDefaultCase) -> Bool {
+        false
+    }
+
     func visitUnknown(_ exp: UnknownExpression) -> Bool {
         false
     }

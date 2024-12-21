@@ -667,6 +667,7 @@ class ObjectiveC2SwiftRewriter_TypingTests: XCTestCase {
                         // type: Bool?
                         self.b?.responds(to: #selector(abc(_:)))
 
+                        // type: <nil>
                         if self.b?.responds(to: #selector(abc(_:))) == true {
                         }
                     }
@@ -1355,6 +1356,7 @@ class ObjectiveC2SwiftRewriter_TypingTests: XCTestCase {
                     // type: Bool?
                     prot.method?()
 
+                    // type: <nil>
                     if prot.method?() == true {
                     }
                 }

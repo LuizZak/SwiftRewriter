@@ -203,7 +203,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
                 // TODO: Refactor this context detecting hack as an explicit flag
                 // TODO: in the conditional clause instead
                 guard
-                    scope is IfStatement ||
+                    scope is IfExpression ||
                     scope is WhileStatement ||
                     clause.parent?.parent is GuardStatement
                 else {

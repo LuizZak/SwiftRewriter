@@ -25,7 +25,7 @@ struct ReturnStatementVisitor: StatementVisitor {
         return []
     }
 
-    func visitIf(_ stmt: IfStatement) -> [ReturnStatement] {
+    func visitIf(_ stmt: IfExpression) -> [ReturnStatement] {
         if let elseBody = stmt.elseBody {
             return stmt.body.accept(self) + visitElseBody(elseBody)
         }
@@ -33,7 +33,7 @@ struct ReturnStatementVisitor: StatementVisitor {
         return stmt.body.accept(self)
     }
 
-    func visitElseBody(_ stmt: IfStatement.ElseBody) -> [ReturnStatement] {
+    func visitElseBody(_ stmt: IfExpression.ElseBody) -> [ReturnStatement] {
         switch stmt {
         case .else(let body):
             return visitCompound(body)
@@ -51,7 +51,7 @@ struct ReturnStatementVisitor: StatementVisitor {
         return stmt.body.accept(self)
     }
 
-    func visitSwitch(_ stmt: SwitchStatement) -> [ReturnStatement] {
+    func visitSwitch(_ stmt: SwitchExpression) -> [ReturnStatement] {
         var result = stmt.cases.flatMap(visitSwitchCase)
         if let defaultCase = stmt.defaultCase {
             result.append(contentsOf: visitSwitchDefaultCase(defaultCase))

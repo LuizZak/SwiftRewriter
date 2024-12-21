@@ -384,9 +384,7 @@ public class ReachingDefinitionAnalyzer {
         public enum Context {
             case assignment(AssignmentExpression)
             case catchBlock(CatchBlock)
-            //case ifLetBinding(IfStatement)
             case forBinding(ForStatement)
-            //case whileBinding(WhileStatement)
             case conditionalClause(ConditionalClauseElement)
             case initialValue(Expression)
         }

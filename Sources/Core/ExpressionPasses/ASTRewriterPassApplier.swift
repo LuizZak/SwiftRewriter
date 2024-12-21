@@ -203,7 +203,7 @@ public final class ASTRewriterPassApplier {
     }
 }
 
-extension FunctionBodyIntention: @retroactive Hashable {
+extension FunctionBodyIntention: Hashable {
     public static func == (lhs: FunctionBodyIntention, rhs: FunctionBodyIntention) -> Bool {
         lhs === rhs
     }

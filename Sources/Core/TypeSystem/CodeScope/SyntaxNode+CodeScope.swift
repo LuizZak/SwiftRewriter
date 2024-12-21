@@ -135,7 +135,7 @@ public extension SyntaxNode {
 extension CompoundStatement: CodeScopeNode { }
 extension BlockLiteralExpression: CodeScopeNode { }
 // extension CatchBlock: CodeScopeNode { }
-extension IfStatement: CodeScopeNode { }
+extension IfExpression: CodeScopeNode { }
 extension WhileStatement: CodeScopeNode { }
 extension ForStatement: CodeScopeNode { }
 extension SwitchCase: CodeScopeNode { }
