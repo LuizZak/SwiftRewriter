@@ -18,12 +18,14 @@ public struct SwiftRewriterFrontendFileCollectionOptions {
     public var followImports: Bool
     public var excludePattern: String?
     public var includePattern: String?
+    public var recursive: Bool
     public var verbose: Bool
 
-    public init(followImports: Bool, excludePattern: String? = nil, includePattern: String? = nil, verbose: Bool) {
+    public init(followImports: Bool, excludePattern: String? = nil, includePattern: String? = nil, recursive: Bool, verbose: Bool) {
         self.followImports = followImports
         self.excludePattern = excludePattern
         self.includePattern = includePattern
+        self.recursive = recursive
         self.verbose = verbose
     }
 }

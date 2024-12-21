@@ -14,9 +14,9 @@ struct ObjectiveCCommand: ParsableCommand {
         """,
         subcommands: [Files.self, Path.self, InteractiveMode.self],
         defaultSubcommand: InteractiveMode.self)
-    
+
     func run() throws {
-        
+
     }
 }
 
@@ -32,7 +32,7 @@ extension ObjectiveCCommand {
             """
         )
         var emitObjcCompatibility: Bool = false
-        
+
         @Option(
             help: """
             Provides a target file path to diagnose during rewriting.
@@ -41,7 +41,7 @@ extension ObjectiveCCommand {
             """
         )
         var diagnoseFile: String?
-        
+
         @Flag(
             name: .shortAndLong,
             help: """
@@ -50,7 +50,7 @@ extension ObjectiveCCommand {
             """
         )
         var followImports: Bool = false
-        
+
         @OptionGroup()
         var globalOptions: GlobalOptions
     }
@@ -61,23 +61,23 @@ extension ObjectiveCCommand {
         static let configuration = CommandConfiguration(
             discussion: "Converts one or more .h/.m file(s) to Swift."
         )
-        
+
         @Argument(help: "Objective-C file(s) to convert.")
         var files: [String]
-        
+
         @OptionGroup()
         var options: Options
-        
+
         func run() throws {
             let rewriter = try makeRewriterService(options)
-            
+
             let fileProvider = FileDiskProvider()
             let fileCollectionStep = ObjectiveCFileCollectionStep(fileProvider: fileProvider)
             let delegate = ObjectiveCImportDirectiveFileCollectionDelegate(
                 parserCache: rewriter.parserCache,
                 fileProvider: fileProvider
             )
-            
+
             if options.followImports {
                 fileCollectionStep.delegate = delegate
             }
@@ -92,7 +92,7 @@ extension ObjectiveCCommand {
                     )
                 }
             }
-            
+
             try rewriter.rewrite(files: fileCollectionStep.files)
         }
     }
@@ -106,10 +106,10 @@ extension ObjectiveCCommand {
             a prompt to confirm conversion of files.
             """
         )
-        
+
         @Argument(help: "Path to the project to inspect")
         var path: String
-        
+
         @Option(
             name: .shortAndLong,
             help: """
@@ -118,7 +118,7 @@ extension ObjectiveCCommand {
             """
         )
         var excludePattern: String?
-        
+
         @Option(
             name: .shortAndLong,
             help: """
@@ -128,39 +128,46 @@ extension ObjectiveCCommand {
             """
         )
         var includePattern: String?
-        
+
+        @Flag(
+            name: .shortAndLong,
+            help: "Whether to recursively traverse the provided path for files to convert."
+        )
+        var recursive: Bool = false
+
         @Flag(
             name: .shortAndLong,
             help: "Skips asking for confirmation prior to parsing."
         )
         var skipConfirm: Bool = false
-        
+
         @Flag(
             name: .shortAndLong,
             help: "Overwrites any .swift file with a matching output name on the target path."
         )
         var overwrite: Bool = false
-        
+
         @OptionGroup()
         var options: Options
-        
+
         func run() throws {
             let rewriter = try makeRewriterService(options)
             let frontend = ObjectiveCFrontendImpl(rewriterService: rewriter)
             let fileProvider = FileDiskProvider()
-            
+
             let console = Console()
             let menu = Menu(rewriterFrontend: frontend, fileProvider: fileProvider, console: console)
-            
+
             let options: SuggestConversionInterface.Options = .init(
                 overwrite: overwrite,
                 skipConfirm: skipConfirm,
                 followImports: self.options.followImports,
                 excludePattern: excludePattern,
                 includePattern: includePattern,
+                recursive: recursive,
                 verbose: self.options.globalOptions.verbose
             )
-            
+
             let interface = SuggestConversionInterface(
                 rewriterFrontend: frontend,
                 fileProvider: fileProvider
@@ -178,28 +185,28 @@ extension ObjectiveCCommand {
     struct InteractiveMode: ParsableCommand {
         @OptionGroup()
         var options: Options
-        
+
         func run() throws {
             let colorize = options.globalOptions.colorize
             let settings = try makeSettings(options)
             let fileProvider = FileDiskProvider()
-            
+
             let output = StdoutWriterOutput(colorize: colorize)
             let service = ObjectiveCSwiftRewriterServiceImpl(output: output, settings: settings)
             let frontend = ObjectiveCFrontendImpl(rewriterService: service)
-            
+
             // Detect terminal
             if isatty(fileno(stdin)) != 0 {
                 let console = Console()
                 let menu = Menu(rewriterFrontend: frontend, fileProvider: fileProvider, console: console)
-                
+
                 menu.main()
             } else {
                 // If not invoked by a terminal, produce an output based on the
                 // standard input
-                
+
                 output.signalEndOfFiles = false
-                
+
                 let inputData = FileHandle.standardInput.availableData
                 let inputString = String(decoding: inputData, as: UTF8.self)
 
@@ -209,7 +216,7 @@ extension ObjectiveCCommand {
             }
         }
     }
-    
+
     struct SwiftRewriterError: Error {
         var description: String
     }
@@ -219,9 +226,9 @@ private func makeRewriterService(_ options: ObjectiveCCommand.Options) throws ->
     let colorize = options.globalOptions.colorize
     let target = options.globalOptions.target ?? .filedisk
     let settings = try makeSettings(options)
-    
+
     let rewriter: ObjectiveCSwiftRewriterService
-    
+
     switch target {
     case .filedisk:
         rewriter = ObjectiveCSwiftRewriterServiceImpl.fileDisk(
@@ -233,13 +240,13 @@ private func makeRewriterService(_ options: ObjectiveCCommand.Options) throws ->
             colorize: colorize
         )
     }
-    
+
     return rewriter
 }
 
 private func makeSettings(_ options: ObjectiveCCommand.Options) throws -> ObjectiveCSwiftRewriterServiceImpl.Settings {
     var settings = ObjectiveCSwiftRewriterServiceImpl.Settings()
-    
+
     settings.rewriter.verbose = options.globalOptions.verbose
     settings.rewriter.diagnoseFiles = options.diagnoseFile.map { [$0] } ?? []
     settings.rewriter.numThreads = options.globalOptions.numThreads ?? OperationQueue.defaultMaxConcurrentOperationCount
@@ -252,6 +259,6 @@ private func makeSettings(_ options: ObjectiveCCommand.Options) throws -> Object
     if options.globalOptions.printCallGraph {
         settings.rewriter.stageDiagnostics.append(.callGraph)
     }
-    
+
     return settings
 }

@@ -37,23 +37,35 @@ public class FileDiskProvider: FileProvider {
         guard let data = fileManager.contents(atPath: url.path) else {
             throw Error.invalidFileData
         }
-        
+
         return data
     }
 
     public func contentsOfDirectory(atUrl url: URL, shallow: Bool) throws -> [URL] {
-        var options: FileManager.DirectoryEnumerationOptions = [
+        let options: FileManager.DirectoryEnumerationOptions = [
             .skipsHiddenFiles,
         ]
+
         if shallow {
-            options.insert(.skipsSubdirectoryDescendants)
+            return try fileManager.contentsOfDirectory(at:
+                url,
+                includingPropertiesForKeys: nil,
+                options: options
+            )
         }
 
-        return try fileManager.contentsOfDirectory(at:
-            url,
-            includingPropertiesForKeys: nil,
-            options: options
-        )
+        guard let enumerator = fileManager.enumerator(at: url, includingPropertiesForKeys: nil, options: options) else {
+            return []
+        }
+
+        var results: [URL] = []
+        for file in enumerator {
+            if let file = file as? URL {
+                results.append(file)
+            }
+        }
+
+        return results
     }
 
     public func homeDirectoryForCurrentUser() -> URL {

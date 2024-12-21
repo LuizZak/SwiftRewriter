@@ -1,0 +1,1 @@
+let ZX_NUM_MASK_PATTERNS: CInt

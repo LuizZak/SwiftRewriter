@@ -16,10 +16,10 @@ public class ObjectiveCFileCollectionStep {
         // Promote non-primary files into primaries
         if let index = files.firstIndex(where: { $0.url == url }) {
             files[index].isPrimary = files[index].isPrimary || isPrimary
-            
+
             return
         }
-        
+
         if fileProvider.fileExists(atUrl: url) {
             let file = DiskInputFile(url: url, isPrimary: isPrimary)
             try addFile(file)
@@ -32,10 +32,10 @@ public class ObjectiveCFileCollectionStep {
         // Promote non-primary files into primaries
         if let index = files.firstIndex(where: { $0.url == file.url }) {
             files[index].isPrimary = files[index].isPrimary || file.isPrimary
-            
+
             return
         }
-        
+
         files.append(file)
         try resolveReferences(in: file)
     }
@@ -46,8 +46,7 @@ public class ObjectiveCFileCollectionStep {
         includePattern: String? = nil,
         excludePattern: String? = nil
     ) throws {
-        let allFiles = try fileProvider
-        .contentsOfDirectory(
+        let allFiles = try fileProvider.contentsOfDirectory(
             atUrl: directory,
             shallow: !recursive
         )
@@ -65,7 +64,7 @@ public class ObjectiveCFileCollectionStep {
             .sorted { (s1: URL, s2: URL) -> Bool in
                 let name1 = s1.lastPathComponent
                 let name2 = s2.lastPathComponent
-                
+
                 return name1.compare(name2, options: .numeric) == .orderedAscending
             }
 
@@ -100,15 +99,15 @@ public class ObjectiveCFileCollectionStep {
                     sourceRange: range,
                     forInputFile: file
                 )
-                
+
                 try addFile(fromUrl: url, isPrimary: false)
             }
         }
     }
-    
+
     public enum Error: Swift.Error, CustomStringConvertible {
         case fileDoesNotExist(path: String)
-        
+
         public var description: String {
             switch self {
             case .fileDoesNotExist(let path):
@@ -122,10 +121,10 @@ public extension ObjectiveCFileCollectionStep {
     func makeInputSourcesProvider() -> InputSourcesProvider {
         return InternalSourcesProvider(files: files)
     }
-    
+
     private struct InternalSourcesProvider: InputSourcesProvider {
         let files: [DiskInputFile]
-        
+
         func sources() -> [InputSource] {
             return files
         }

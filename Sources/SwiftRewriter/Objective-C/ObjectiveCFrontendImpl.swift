@@ -28,7 +28,7 @@ class ObjectiveCFrontendImpl: SwiftRewriterFrontend {
         try withExtendedLifetime(importFileDelegate) {
             try fileCollectionStep.addFromDirectory(
                 directory,
-                recursive: true,
+                recursive: options.recursive,
                 includePattern: options.includePattern,
                 excludePattern: options.excludePattern
             )

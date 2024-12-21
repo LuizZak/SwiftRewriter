@@ -1,0 +1,15 @@
+// Preprocessor directives found in file:
+// #import "ZXOneDReader.h"
+var ZX_CODE128_CODE_PATTERNS: (CInt, CInt, CInt, CInt, CInt, CInt, CInt)
+let ZX_CODE128_CODE_START_A: CInt
+let ZX_CODE128_CODE_START_B: CInt
+let ZX_CODE128_CODE_START_C: CInt
+let ZX_CODE128_CODE_CODE_A: CInt
+let ZX_CODE128_CODE_CODE_B: CInt
+let ZX_CODE128_CODE_CODE_C: CInt
+let ZX_CODE128_CODE_STOP: CInt
+let ZX_CODE128_CODE_FNC_1: CInt
+let ZX_CODE128_CODE_FNC_2: CInt
+let ZX_CODE128_CODE_FNC_3: CInt
+let ZX_CODE128_CODE_FNC_4_A: CInt
+let ZX_CODE128_CODE_FNC_4_B: CInt

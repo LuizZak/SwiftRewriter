@@ -1,0 +1,1 @@
+let ZX_DEFAULT_BYTE_MODE_ENCODING: NSStringEncoding
