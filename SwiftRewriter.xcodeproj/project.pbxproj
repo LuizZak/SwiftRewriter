@@ -1357,11 +1357,11 @@
 		OBJ_3515 /* ExpressionsStatement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_407 /* ExpressionsStatement.swift */; };
 		OBJ_3516 /* FallthroughStatement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_408 /* FallthroughStatement.swift */; };
 		OBJ_3517 /* ForStatement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_409 /* ForStatement.swift */; };
-		OBJ_3518 /* IfStatement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_410 /* IfStatement.swift */; };
+		OBJ_3518 /* IfExpression.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_410 /* IfExpression.swift */; };
 		OBJ_3519 /* LocalFunctionStatement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_411 /* LocalFunctionStatement.swift */; };
 		OBJ_3520 /* RepeatWhileStatement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_412 /* RepeatWhileStatement.swift */; };
 		OBJ_3521 /* ReturnStatement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_413 /* ReturnStatement.swift */; };
-		OBJ_3522 /* SwitchStatement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_414 /* SwitchStatement.swift */; };
+		OBJ_3522 /* SwitchExpression.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_414 /* SwitchExpression.swift */; };
 		OBJ_3523 /* ThrowStatement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_415 /* ThrowStatement.swift */; };
 		OBJ_3524 /* UnknownStatement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_416 /* UnknownStatement.swift */; };
 		OBJ_3525 /* VariableDeclarationsStatement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_417 /* VariableDeclarationsStatement.swift */; };
@@ -2845,11 +2845,11 @@
 		OBJ_408 /* FallthroughStatement.swift */ = {isa = PBXFileReference; path = FallthroughStatement.swift; sourceTree = "<group>"; };
 		OBJ_409 /* ForStatement.swift */ = {isa = PBXFileReference; path = ForStatement.swift; sourceTree = "<group>"; };
 		OBJ_41 /* CompoundedMappingTypeList.swift */ = {isa = PBXFileReference; path = CompoundedMappingTypeList.swift; sourceTree = "<group>"; };
-		OBJ_410 /* IfStatement.swift */ = {isa = PBXFileReference; path = IfStatement.swift; sourceTree = "<group>"; };
+		OBJ_410 /* IfExpression.swift */ = {isa = PBXFileReference; path = IfExpression.swift; sourceTree = "<group>"; };
 		OBJ_411 /* LocalFunctionStatement.swift */ = {isa = PBXFileReference; path = LocalFunctionStatement.swift; sourceTree = "<group>"; };
 		OBJ_412 /* RepeatWhileStatement.swift */ = {isa = PBXFileReference; path = RepeatWhileStatement.swift; sourceTree = "<group>"; };
 		OBJ_413 /* ReturnStatement.swift */ = {isa = PBXFileReference; path = ReturnStatement.swift; sourceTree = "<group>"; };
-		OBJ_414 /* SwitchStatement.swift */ = {isa = PBXFileReference; path = SwitchStatement.swift; sourceTree = "<group>"; };
+		OBJ_414 /* SwitchExpression.swift */ = {isa = PBXFileReference; path = SwitchExpression.swift; sourceTree = "<group>"; };
 		OBJ_415 /* ThrowStatement.swift */ = {isa = PBXFileReference; path = ThrowStatement.swift; sourceTree = "<group>"; };
 		OBJ_416 /* UnknownStatement.swift */ = {isa = PBXFileReference; path = UnknownStatement.swift; sourceTree = "<group>"; };
 		OBJ_417 /* VariableDeclarationsStatement.swift */ = {isa = PBXFileReference; path = VariableDeclarationsStatement.swift; sourceTree = "<group>"; };
@@ -6204,11 +6204,11 @@
 				OBJ_407 /* ExpressionsStatement.swift */,
 				OBJ_408 /* FallthroughStatement.swift */,
 				OBJ_409 /* ForStatement.swift */,
-				OBJ_410 /* IfStatement.swift */,
+				OBJ_410 /* IfExpression.swift */,
 				OBJ_411 /* LocalFunctionStatement.swift */,
 				OBJ_412 /* RepeatWhileStatement.swift */,
 				OBJ_413 /* ReturnStatement.swift */,
-				OBJ_414 /* SwitchStatement.swift */,
+				OBJ_414 /* SwitchExpression.swift */,
 				OBJ_415 /* ThrowStatement.swift */,
 				OBJ_416 /* UnknownStatement.swift */,
 				OBJ_417 /* VariableDeclarationsStatement.swift */,
@@ -10847,11 +10847,11 @@
 				OBJ_3515 /* ExpressionsStatement.swift in Sources */,
 				OBJ_3516 /* FallthroughStatement.swift in Sources */,
 				OBJ_3517 /* ForStatement.swift in Sources */,
-				OBJ_3518 /* IfStatement.swift in Sources */,
+				OBJ_3518 /* IfExpression.swift in Sources */,
 				OBJ_3519 /* LocalFunctionStatement.swift in Sources */,
 				OBJ_3520 /* RepeatWhileStatement.swift in Sources */,
 				OBJ_3521 /* ReturnStatement.swift in Sources */,
-				OBJ_3522 /* SwitchStatement.swift in Sources */,
+				OBJ_3522 /* SwitchExpression.swift in Sources */,
 				OBJ_3523 /* ThrowStatement.swift in Sources */,
 				OBJ_3524 /* UnknownStatement.swift in Sources */,
 				OBJ_3525 /* VariableDeclarationsStatement.swift in Sources */,

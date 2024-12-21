@@ -48,7 +48,7 @@ extension StatementEmitter: ExpressionVisitor {
                 visitExpression(innerExp)
                 emit(")")
             }
-            
+
         case .type(let type):
             emit("MemoryLayout<")
             emit(type)
@@ -82,7 +82,7 @@ extension StatementEmitter: ExpressionVisitor {
         case .safeUnwrap:
             emit("?")
         }
-        
+
         switch exp.op {
         case let fc as FunctionCallPostfix:
             // If the last argument is a block type, close the
@@ -93,7 +93,7 @@ extension StatementEmitter: ExpressionVisitor {
             // code.
             var arguments = fc.arguments
             var trailing: BlockLiteralExpression?
-            
+
             if isTrailingClosureCandidate(fc) {
                 trailing = arguments.removeLast().expression.asBlock
             }
@@ -177,7 +177,7 @@ extension StatementEmitter: ExpressionVisitor {
     func visitBlock(_ exp: BlockLiteralExpression) {
         producer.emitBlock { () -> Void in
             let hasParameters = !exp.parameters.isEmpty
-            
+
             if closureRequiresSignature(exp) || hasParameters {
                 producer.backtrackWhitespace()
                 emitSpaceSeparator()
@@ -252,8 +252,78 @@ extension StatementEmitter: ExpressionVisitor {
         parenthesizeIfRequired(exp.exp)
     }
 
+    func visitIf(_ stmt: IfExpression) {
+        emit("if ")
+        visitConditionalClauses(stmt.conditionalClauses)
+
+        emitSpaceSeparator()
+
+        emitCodeBlock(stmt.body)
+
+        if let elseBody = stmt.elseBody {
+            visitElseBody(elseBody)
+        }
+    }
+
+    func visitElseBody(_ stmt: IfExpression.ElseBody) {
+        producer.backtrackWhitespace()
+        emit(" else ")
+
+        switch stmt {
+        case .else(let stmts):
+            emitCodeBlock(stmts)
+
+        case .elseIf(let elseIf):
+            visitIf(elseIf)
+        }
+    }
+
+    func visitSwitch(_ stmt: SwitchExpression) {
+        emit("switch ")
+        visitExpression(stmt.exp)
+        emitLine(" {")
+
+        stmt.cases.forEach { visitSwitchCase($0) }
+
+        if let defaultCase = stmt.defaultCase {
+            visitSwitchDefaultCase(defaultCase)
+        }
+
+        producer.ensureNewline()
+        emitLine("}")
+    }
+
+    func visitSwitchCase(_ switchCase: SwitchCase) {
+        emit("case ")
+        producer.emitWithSeparators(switchCase.casePatterns, separator: ", ", visitSwitchCasePattern)
+        emitLine(":")
+        producer.indented {
+            pushClosureStack()
+            emitStatements(switchCase.statements)
+            popClosureStack()
+        }
+    }
+
+    func visitSwitchCasePattern(_ casePattern: SwitchCase.CasePattern) {
+        visitPattern(casePattern.pattern)
+
+        if let whereClause = casePattern.whereClause {
+            emit(" where ")
+            visitExpression(whereClause)
+        }
+    }
+
+    func visitSwitchDefaultCase(_ defaultCase: SwitchDefaultCase) {
+        emitLine("default:")
+        producer.indented {
+            pushClosureStack()
+            emitStatements(defaultCase.statements)
+            popClosureStack()
+        }
+    }
+
     func visitUnknown(_ exp: UnknownExpression) {
-        
+
     }
 }
 

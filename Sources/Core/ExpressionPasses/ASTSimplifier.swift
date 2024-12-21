@@ -80,12 +80,12 @@ public class ASTSimplifier: ASTRewriterPass {
     }
 
     /// Simplify check before invoking nullable closure
-    public override func visitIf(_ stmt: IfStatement) -> Statement {
+    public override func visitIf(_ stmt: IfExpression) -> Expression {
         let nullCheckM = ValueMatcherExtractor<IdentifierExpression?>()
         let postfix = ValueMatcherExtractor<PostfixExpression?>()
 
         let matcher =
-            ValueMatcher<IfStatement>()
+            ValueMatcher<IfExpression>()
                 .match(if: !hasElse())
                 .keyPath(\.nullCheckMember?.asIdentifier,
                             .differentThan(nil) ->> nullCheckM)
@@ -102,11 +102,9 @@ public class ASTSimplifier: ASTRewriterPass {
         if matcher.matches(stmt), let postfix = postfix.value?.copy() {
             postfix.op.optionalAccessKind = .safeUnwrap
 
-            let statement = Statement.expression(postfix)
-
             notifyChange()
 
-            return visitStatement(statement)
+            return postfix
         }
 
         return super.visitIf(stmt)
@@ -114,7 +112,7 @@ public class ASTSimplifier: ASTRewriterPass {
 
     /// Simplify switch statements by removing spurious `break` statements from
     /// cases
-    public override func visitSwitch(_ stmt: SwitchStatement) -> Statement {
+    public override func visitSwitch(_ stmt: SwitchExpression) -> Expression {
         for (i, cs) in stmt.cases.enumerated() {
             if cs.statements.count > 1 && cs.statements.last is BreakStatement {
                 stmt.cases[i].body.statements.removeLast()
@@ -133,7 +131,7 @@ public class ASTSimplifier: ASTRewriterPass {
     }
 }
 
-extension IfStatement {
+extension IfExpression {
     var isNullCheck: Bool {
         guard conditionalClauses.clauses.count == 1 else {
             return false

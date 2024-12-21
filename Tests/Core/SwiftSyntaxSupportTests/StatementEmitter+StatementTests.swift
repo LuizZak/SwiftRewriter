@@ -320,6 +320,22 @@ class StatementEmitter_StatementTests: XCTestCase {
         )
     }
 
+    func testIfExpression_surroundsWithSpaces() {
+        assert(
+            Statement.compound([
+                Statement.if(.constant(0), body: []),
+                Statement.if(.constant(1), body: []),
+            ]),
+            matches: """
+                if 0 {
+                }
+
+                if 1 {
+                }
+                """
+        )
+    }
+
     func testSwitchStatementEmpty() {
         let stmt =
             Statement

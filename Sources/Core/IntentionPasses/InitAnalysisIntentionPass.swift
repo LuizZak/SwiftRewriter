@@ -85,7 +85,7 @@ public class InitAnalysisIntentionPass: IntentionPass {
         //     return nil;
         // }
 
-        guard let ifStatement = stmt.parent?.parent as? IfStatement else {
+        guard let ifStatement = stmt.parent?.parent as? IfExpression else {
             return true
         }
         guard ifStatement.body.statements.count == 1 else {

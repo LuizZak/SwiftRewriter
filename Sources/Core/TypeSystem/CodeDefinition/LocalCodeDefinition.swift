@@ -72,7 +72,7 @@ public class LocalCodeDefinition: CodeDefinition {
         case parameter(index: Int)
         case variableDeclaration(StatementVariableDeclaration)
         case forLoop(ForStatement, PatternLocation)
-        case ifClause(IfStatement, clauseIndex: Int, PatternLocation)
+        case ifClause(IfExpression, clauseIndex: Int, PatternLocation)
         case whileClause(WhileStatement, clauseIndex: Int, PatternLocation)
         case conditionalClause(ConditionalClauseElement, PatternLocation)
         case localFunction(LocalFunctionStatement)

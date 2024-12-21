@@ -43,7 +43,7 @@ class StatementEmitter {
 
     func isShorthandClosureCandidate(_ exp: BlockLiteralExpression) -> Bool {
         let hasParameters = !exp.parameters.isEmpty
-        
+
         return !closureRequiresSignature(exp) && hasParameters
     }
 
@@ -60,9 +60,17 @@ class StatementEmitter {
             return false
         }
 
-        if (latest is ExpressionsStatement) && (nextStmt is ExpressionsStatement) {
+        if let latestExp = latest as? ExpressionsStatement, let nextStmtExp = nextStmt as? ExpressionsStatement {
+            let latestIsStmt = latestExp.expressions.last is IfExpression || latestExp.expressions.last is SwitchExpression
+            let nextIsStmt = nextStmtExp.expressions.first is IfExpression || nextStmtExp.expressions.first is SwitchExpression
+
+            if latestIsStmt || nextIsStmt {
+                return true
+            }
+
             return false
         }
+
         if (latest is VariableDeclarationsStatement) && (nextStmt is VariableDeclarationsStatement) {
             return false
         }

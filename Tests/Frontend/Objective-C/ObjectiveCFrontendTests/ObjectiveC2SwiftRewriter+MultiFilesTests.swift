@@ -427,6 +427,7 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                         // type: Bool?
                         self.delegate?.responds(to: #selector(delegateMethod(_:)))
 
+                        // type: <nil>
                         if self.delegate?.responds(to: #selector(delegateMethod(_:))) == true {
                             // type: Void?
                             self.delegate?.delegateMethod(self)
@@ -1080,6 +1081,7 @@ class ObjectiveC2SwiftRewriter_MultiFilesTests: XCTestCase {
                         // init type: NSArray?
                         let resources = response.tryArrayAt(["data", "user", "getByProfile"], error: errorPtr)
 
+                        // type: <nil>
                         if resources == nil {
                             return nil
                         }

@@ -28,8 +28,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             statement: statement,
             into: .compound([
                 .expression(.identifier("a"))
-            ]
-            )
+            ])
         )
     }
 
@@ -41,7 +40,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                 )
             ]),
             .expression(.identifier("b")),
-        ])   
+        ])
 
         assertNoTransform(
             statement: statement
@@ -344,7 +343,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                 .expression(
                     .dictionaryLiteral([
                         .init(
-                            key: .identifier("a"), 
+                            key: .identifier("a"),
                             value: .block(body: [
                                 .defer([
                                     .expression(
@@ -362,7 +361,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                 .expression(
                     .dictionaryLiteral([
                         .init(
-                            key: .identifier("a"), 
+                            key: .identifier("a"),
                             value: .block(body: [
                                 .defer([
                                     .expression(

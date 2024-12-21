@@ -608,7 +608,7 @@ private class TestCollectorDelegate: ObjectiveCIntentionCollectorDelegate {
     }
 }
 
-extension ObjectiveCLazyParseItem: @retroactive Equatable {
+extension ObjectiveCLazyParseItem: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
             case (.enumCase(let li), .enumCase(let ri)):
