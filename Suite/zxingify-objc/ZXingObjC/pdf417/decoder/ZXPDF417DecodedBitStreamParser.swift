@@ -349,9 +349,9 @@ class ZXPDF417DecodedBitStreamParser: NSObject {
             switch subMode {
             case ZXPDF417Mode.ZXPDF417ModeAlpha:
                 if subModeCh < 26 {
-                    ch = ('A' + subModeCh) as? unichar
+                    ch = ("A" + subModeCh) as? unichar
                 } else if subModeCh == 26 {
-                    ch = ' '
+                    ch = " "
                 } else if subModeCh == ZX_PDF417_LL {
                     subMode = ZXPDF417Mode.ZXPDF417ModeLower
                 } else if subModeCh == ZX_PDF417_ML {
@@ -366,9 +366,9 @@ class ZXPDF417DecodedBitStreamParser: NSObject {
                 }
             case ZXPDF417Mode.ZXPDF417ModeLower:
                 if subModeCh < 26 {
-                    ch = ('a' + subModeCh) as? unichar
+                    ch = ("a" + subModeCh) as? unichar
                 } else if subModeCh == 26 {
-                    ch = ' '
+                    ch = " "
                 } else if subModeCh == ZX_PDF417_AS {
                     priorToShiftMode = subMode
                     subMode = ZXPDF417Mode.ZXPDF417ModeAlphaShift
@@ -388,7 +388,7 @@ class ZXPDF417DecodedBitStreamParser: NSObject {
                 } else if subModeCh == ZX_PDF417_PL {
                     subMode = ZXPDF417Mode.ZXPDF417ModePunct
                 } else if subModeCh == 26 {
-                    ch = ' '
+                    ch = " "
                 } else if subModeCh == ZX_PDF417_LL {
                     subMode = ZXPDF417Mode.ZXPDF417ModeLower
                 } else if subModeCh == ZX_PDF417_AL {
@@ -415,9 +415,9 @@ class ZXPDF417DecodedBitStreamParser: NSObject {
                 subMode = priorToShiftMode
 
                 if subModeCh < 26 {
-                    ch = ('A' + subModeCh) as? unichar
+                    ch = ("A" + subModeCh) as? unichar
                 } else if subModeCh == 26 {
-                    ch = ' '
+                    ch = " "
                 } else if subModeCh == ZX_PDF417_TEXT_COMPACTION_MODE_LATCH {
                     subMode = ZXPDF417Mode.ZXPDF417ModeAlpha
                 }

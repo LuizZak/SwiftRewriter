@@ -147,7 +147,7 @@ class ZXCode39Reader: ZXOneDReader {
 
             // Read off white space
             nextStart = row.nextSet(nextStart)
-        } while decodedChar != '*'
+        } while decodedChar != "*"
 
         result.deleteCharacters(in: NSMakeRange(result.length() - 1, 1)) // remove asterisk
 
@@ -367,7 +367,7 @@ class ZXCode39Reader: ZXOneDReader {
         }
 
         if pattern == ZX_CODE39_ASTERISK_ENCODING {
-            return '*'
+            return "*"
         }
 
         return 0
@@ -385,52 +385,52 @@ class ZXCode39Reader: ZXOneDReader {
 
             let c: unichar = encoded.characterAtIndex(i)
 
-            if c == '+' || c == '$' || c == '%' || c == '/' {
+            if c == "+" || c == "$" || c == "%" || c == "/" {
                 let next: unichar = encoded.characterAtIndex(i + 1)
-                var decodedChar: unichar = '\0'
+                var decodedChar: unichar = "\\0"
 
                 switch c {
-                case '+':
+                case "+":
                     // +A to +Z map to a to z
-                    if next >= 'A' && next <= 'Z' {
+                    if next >= "A" && next <= "Z" {
                         decodedChar = (next + 32) as? unichar
                     } else {
                         return nil
                     }
-                case '$':
+                case "$":
                     // $A to $Z map to control codes SH to SB
-                    if next >= 'A' && next <= 'Z' {
+                    if next >= "A" && next <= "Z" {
                         decodedChar = (next - 64) as? unichar
                     } else {
                         return nil
                     }
-                case '%':
+                case "%":
                     // %A to %E map to control codes ESC to US
-                    if next >= 'A' && next <= 'E' {
+                    if next >= "A" && next <= "E" {
                         decodedChar = (next - 38) as? unichar
-                    } else if next >= 'F' && next <= 'J' {
+                    } else if next >= "F" && next <= "J" {
                         decodedChar = (next - 11) as? unichar
-                    } else if next >= 'K' && next <= 'O' {
+                    } else if next >= "K" && next <= "O" {
                         decodedChar = (next + 16) as? unichar
-                    } else if next >= 'P' && next <= 'T' {
+                    } else if next >= "P" && next <= "T" {
                         decodedChar = (next + 43) as? unichar
-                    } else if next == 'U' {
+                    } else if next == "U" {
                         decodedChar = 0 as? unichar
-                    } else if next == 'V' {
-                        decodedChar = '@'
-                    } else if next == 'W' {
-                        decodedChar = '`'
-                    } else if next == 'X' || next == 'Y' || next == 'Z' {
+                    } else if next == "V" {
+                        decodedChar = "@"
+                    } else if next == "W" {
+                        decodedChar = "`"
+                    } else if next == "X" || next == "Y" || next == "Z" {
                         decodedChar = 127 as? unichar
                     } else {
                         return nil
                     }
-                case '/':
+                case "/":
                     // /A to /O map to ! to , and /Z maps to :
-                    if next >= 'A' && next <= 'O' {
+                    if next >= "A" && next <= "O" {
                         decodedChar = (next - 32) as? unichar
-                    } else if next == 'Z' {
-                        decodedChar = ':'
+                    } else if next == "Z" {
+                        decodedChar = ":"
                     } else {
                         return nil
                     }

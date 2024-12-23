@@ -40,67 +40,67 @@ class ZXDataMatrixTextEncoder: ZXDataMatrixC40Encoder {
     }
     @objc
     func encodeChar(_ c: unichar, buffer sb: NSMutableString!) -> CInt {
-        if c == ' ' {
+        if c == " " {
             sb.append("\\3")
 
             return 1
         }
 
-        if c >= '0' && c <= '9' {
+        if c >= "0" && c <= "9" {
             sb.appendFormat("%C", (c - 48 + 4) as? unichar)
 
             return 1
         }
 
-        if c >= 'a' && c <= 'z' {
+        if c >= "a" && c <= "z" {
             sb.appendFormat("%C", (c - 97 + 14) as? unichar)
 
             return 1
         }
 
-        if c >= '\0' && c <= 0x1f as? unichar {
+        if c >= "\\0" && c <= 0x1f as? unichar {
             sb.append("\\0") //Shift 1 Set
             sb.appendFormat("%C", c)
 
             return 2
         }
 
-        if c >= '!' && c <= '/' {
+        if c >= "!" && c <= "/" {
             sb.append("\\1") //Shift 2 Set
             sb.appendFormat("%C", (c - 33) as? unichar)
 
             return 2
         }
 
-        if c >= ':' && c <= '@' {
+        if c >= ":" && c <= "@" {
             sb.append("\\1") //Shift 2 Set
             sb.appendFormat("%C", (c - 58 + 15) as? unichar)
 
             return 2
         }
 
-        if c >= '[' && c <= '_' {
+        if c >= "[" && c <= "_" {
             sb.append("\\1") //Shift 2 Set
             sb.appendFormat("%C", (c - 91 + 22) as? unichar)
 
             return 2
         }
 
-        if c == '\u0060' {
+        if c == "\\u0060" {
             sb.append("\\2") //Shift 3 Set
             sb.appendFormat("%C", (c - 96) as? unichar)
 
             return 2
         }
 
-        if c >= 'A' && c <= 'Z' {
+        if c >= "A" && c <= "Z" {
             sb.append("\\2") //Shift 3 Set
             sb.appendFormat("%C", (c - 65 + 1) as? unichar)
 
             return 2
         }
 
-        if c >= '{' && c <= 0x7f as? unichar {
+        if c >= "{" && c <= 0x7f as? unichar {
             sb.append("\\2") //Shift 3 Set
             sb.appendFormat("%C", (c - 123 + 27) as? unichar)
 

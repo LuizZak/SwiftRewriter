@@ -103,7 +103,7 @@ class ZXCodaBarWriter: ZXOneDimensionalCodeWriter {
                 i += 1
             }
 
-            if (contents.characterAtIndex(i) >= '0' && contents.characterAtIndex(i) <= '9') || contents.characterAtIndex(i) == '-' || contents.characterAtIndex(i) == '$' {
+            if (contents.characterAtIndex(i) >= "0" && contents.characterAtIndex(i) <= "9") || contents.characterAtIndex(i) == "-" || contents.characterAtIndex(i) == "$" {
                 resultLength += 9
             } else if ZXCodaBarReader.arrayContains(ZX_CHARS_WHICH_ARE_TEN_LENGTH_EACH_AFTER_DECODED, length: 4, key: contents.characterAtIndex(i)) {
                 resultLength += 10
@@ -131,14 +131,14 @@ class ZXCodaBarWriter: ZXOneDimensionalCodeWriter {
             if index == 0 || index == contents.length - 1 {
                 // The start/end chars are not in the CodaBarReader.ALPHABET.
                 switch c {
-                case 'T':
-                    c = 'A'
-                case 'N':
-                    c = 'B'
-                case '*':
-                    c = 'C'
-                case 'E':
-                    c = 'D'
+                case "T":
+                    c = "A"
+                case "N":
+                    c = "B"
+                case "*":
+                    c = "C"
+                case "E":
+                    c = "D"
                 default:
                     break
                 }

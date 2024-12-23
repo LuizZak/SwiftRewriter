@@ -187,7 +187,7 @@ class ZXResultParser: NSObject {
 
             let c: unichar = escaped.characterAtIndex(i)
 
-            if nextIsEscaped || c != '\\' {
+            if nextIsEscaped || c != "\\\\" {
                 unescaped.appendFormat("%C", c)
                 nextIsEscaped = false
             } else {
@@ -199,16 +199,16 @@ class ZXResultParser: NSObject {
     }
     @objc
     static func parseHexDigit(_ c: unichar) -> CInt {
-        if c >= '0' && c <= '9' {
-            return c - '0'
+        if c >= "0" && c <= "9" {
+            return c - "0"
         }
 
-        if c >= 'a' && c <= 'f' {
-            return 10 + (c - 'a')
+        if c >= "a" && c <= "f" {
+            return 10 + (c - "a")
         }
 
-        if c >= 'A' && c <= 'F' {
-            return 10 + (c - 'A')
+        if c >= "A" && c <= "F" {
+            return 10 + (c - "A")
         }
 
         return 1
@@ -244,9 +244,9 @@ class ZXResultParser: NSObject {
             let c: unichar = escaped.characterAtIndex(i)
 
             switch c {
-            case '+':
+            case "+":
                 unescaped.append(" ")
-            case '%':
+            case "%":
                 if i >= max - 2 {
                     unescaped.append("%")
                 } else {
@@ -278,7 +278,7 @@ class ZXResultParser: NSObject {
 
             let c: unichar = escaped.characterAtIndex(i)
 
-            if c == '+' || c == '%' {
+            if c == "+" || c == "%" {
                 return i
             }
         }
@@ -399,7 +399,7 @@ class ZXResultParser: NSObject {
                 i -= 1
             }
 
-            if s.characterAtIndex(i) == '\\' {
+            if s.characterAtIndex(i) == "\\\\" {
                 count += 1
             } else {
                 break

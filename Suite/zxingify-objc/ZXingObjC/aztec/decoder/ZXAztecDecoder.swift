@@ -194,7 +194,7 @@ class ZXAztecDecoder: NSObject {
                     latchTable = shiftTable
                     shiftTable = self.table(str.characterAtIndex(5))
 
-                    if str.characterAtIndex(6) == 'L' {
+                    if str.characterAtIndex(6) == "L" {
                         latchTable = shiftTable
                     }
                 } else {
@@ -209,15 +209,15 @@ class ZXAztecDecoder: NSObject {
     @objc
     static func table(_ t: unichar) -> ZXAztecTable {
         switch t {
-        case 'L':
+        case "L":
             return ZXAztecTable.ZXAztecTableLower
-        case 'P':
+        case "P":
             return ZXAztecTable.ZXAztecTablePunct
-        case 'M':
+        case "M":
             return ZXAztecTable.ZXAztecTableMixed
-        case 'D':
+        case "D":
             return ZXAztecTable.ZXAztecTableDigit
-        case 'B':
+        case "B":
             return ZXAztecTable.ZXAztecTableBinary
         default:
             return ZXAztecTable.ZXAztecTableUpper

@@ -305,7 +305,7 @@ class ZXUPCEANReader: ZXOneDReader {
                 i -= 2
             }
 
-            let digit: CInt = CInt(s.characterAtIndex(i)) - CInt('0')
+            let digit: CInt = CInt(s.characterAtIndex(i)) - CInt("0")
 
             if digit < 0 || digit > 9 {
                 return false
@@ -323,7 +323,7 @@ class ZXUPCEANReader: ZXOneDReader {
                 i -= 2
             }
 
-            let digit: CInt = CInt(s.characterAtIndex(i)) - CInt('0')
+            let digit: CInt = CInt(s.characterAtIndex(i)) - CInt("0")
 
             if digit < 0 || digit > 9 {
                 return false

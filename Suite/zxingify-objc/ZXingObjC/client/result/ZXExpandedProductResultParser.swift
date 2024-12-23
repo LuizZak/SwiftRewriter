@@ -146,7 +146,7 @@ class ZXExpandedProductResultParser: ZXResultParser {
         let c: unichar = rawText.characterAtIndex(i)
 
         // First character must be a open parenthesis.If not, ERROR
-        if c != '(' {
+        if c != "(" {
             return nil
         }
 
@@ -161,9 +161,9 @@ class ZXExpandedProductResultParser: ZXResultParser {
 
             let currentChar: unichar = rawTextAux.characterAtIndex(index)
 
-            if currentChar == ')' {
+            if currentChar == ")" {
                 return buf
-            } else if currentChar >= '0' && currentChar <= '9' {
+            } else if currentChar >= "0" && currentChar <= "9" {
                 buf.appendFormat("%C", currentChar)
             } else {
                 return nil
@@ -185,7 +185,7 @@ class ZXExpandedProductResultParser: ZXResultParser {
 
             let c: unichar = rawTextAux.characterAtIndex(index)
 
-            if c == '(' {
+            if c == "(" {
                 // We look for a new AI. If it doesn't exist (ERROR), we coninue
                 // with the iteration
                 if self.findAIvalue(index, rawText: rawTextAux) == nil {

@@ -153,38 +153,38 @@ class ZXCode39Writer: ZXOneDimensionalCodeWriter {
             switch character {
             case 0x0:
                 extendedContent.append("%U")
-            case ' ', '-', '.':
+            case " ", "-", ".":
                 extendedContent.appendFormat("%C", character)
-            case '@':
+            case "@":
                 extendedContent.append("%V")
-            case '`':
+            case "`":
                 extendedContent.append("%W")
             default:
                 if character > 0 && character < 27 {
-                    extendedContent.appendFormat("%C", '$' as? unichar)
-                    extendedContent.appendFormat("%C", ('A' + (character - 1)) as? unichar)
-                } else if character > 26 && character < ' ' {
-                    extendedContent.appendFormat("%C", '%' as? unichar)
-                    extendedContent.appendFormat("%C", ('A' + (character - 27)) as? unichar)
-                } else if (character > ' ' && character < '-') || character == '/' || character == ':' {
-                    extendedContent.appendFormat("%C", '/' as? unichar)
-                    extendedContent.appendFormat("%C", ('A' + (character - 33)) as? unichar)
-                } else if character > '/' && character < ':' {
-                    extendedContent.appendFormat("%C", ('0' + (character - 48)) as? unichar)
-                } else if character > ':' && character < '@' {
-                    extendedContent.appendFormat("%C", '%' as? unichar)
-                    extendedContent.appendFormat("%C", ('F' + (character - 59)) as? unichar)
-                } else if character > '@' && character < '[' {
-                    extendedContent.appendFormat("%C", ('A' + (character - 65)) as? unichar)
-                } else if character > 'Z' && character < '`' {
-                    extendedContent.appendFormat("%C", '%' as? unichar)
-                    extendedContent.appendFormat("%C", ('K' + (character - 91)) as? unichar)
-                } else if character > '`' && character < '{' {
-                    extendedContent.appendFormat("%C", '+' as? unichar)
-                    extendedContent.appendFormat("%C", ('A' + (character - 97)) as? unichar)
-                } else if character > 'z' && character < 128 {
-                    extendedContent.appendFormat("%C", '%' as? unichar)
-                    extendedContent.appendFormat("%C", ('P' + (character - 123)) as? unichar)
+                    extendedContent.appendFormat("%C", "$" as? unichar)
+                    extendedContent.appendFormat("%C", ("A" + (character - 1)) as? unichar)
+                } else if character > 26 && character < " " {
+                    extendedContent.appendFormat("%C", "%" as? unichar)
+                    extendedContent.appendFormat("%C", ("A" + (character - 27)) as? unichar)
+                } else if (character > " " && character < "-") || character == "/" || character == ":" {
+                    extendedContent.appendFormat("%C", "/" as? unichar)
+                    extendedContent.appendFormat("%C", ("A" + (character - 33)) as? unichar)
+                } else if character > "/" && character < ":" {
+                    extendedContent.appendFormat("%C", ("0" + (character - 48)) as? unichar)
+                } else if character > ":" && character < "@" {
+                    extendedContent.appendFormat("%C", "%" as? unichar)
+                    extendedContent.appendFormat("%C", ("F" + (character - 59)) as? unichar)
+                } else if character > "@" && character < "[" {
+                    extendedContent.appendFormat("%C", ("A" + (character - 65)) as? unichar)
+                } else if character > "Z" && character < "`" {
+                    extendedContent.appendFormat("%C", "%" as? unichar)
+                    extendedContent.appendFormat("%C", ("K" + (character - 91)) as? unichar)
+                } else if character > "`" && character < "{" {
+                    extendedContent.appendFormat("%C", "+" as? unichar)
+                    extendedContent.appendFormat("%C", ("A" + (character - 97)) as? unichar)
+                } else if character > "z" && character < 128 {
+                    extendedContent.appendFormat("%C", "%" as? unichar)
+                    extendedContent.appendFormat("%C", ("P" + (character - 123)) as? unichar)
                 } else {
                     NSException.raise(NSInvalidArgumentException, format: "Requested content contains a non-encodable character: \'%@\'", contents.substringWithRange(NSMakeRange(i, 1)))
                 }

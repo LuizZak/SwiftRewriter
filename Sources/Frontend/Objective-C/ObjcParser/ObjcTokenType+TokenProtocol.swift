@@ -37,7 +37,7 @@ let operators: [(string: String, op: ObjcOperator)] = [
     (">", .greaterThan)
 ]
 
-extension ObjcTokenType: @retroactive TokenProtocol {
+extension ObjcTokenType: TokenProtocol {
     public static var eofToken: ObjcTokenType {
         .eof
     }

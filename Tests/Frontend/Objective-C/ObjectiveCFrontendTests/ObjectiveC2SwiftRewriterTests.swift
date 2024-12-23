@@ -3762,4 +3762,21 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
             """
         )
     }
+
+    func testRewriteCharLiteral() {
+        assertRewrite(
+            objc:
+            """
+            void a() {
+                int a = '0';
+            }
+            """,
+            swift:
+            """
+            func a() {
+                let a: CInt = "0"
+            }
+            """
+        )
+    }
 }

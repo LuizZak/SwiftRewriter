@@ -12,7 +12,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
     public var typeParser: ObjcTypeParser
     public var context: ObjectiveCASTReaderContext
     public var delegate: ObjectiveCStatementASTReaderDelegate?
-    
+
     public init(typeMapper: TypeMapper, typeParser: ObjcTypeParser, context: ObjectiveCASTReaderContext,
                 delegate: ObjectiveCStatementASTReaderDelegate?) {
 
@@ -21,17 +21,17 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         self.context = context
         self.delegate = delegate
     }
-    
+
     public override func visitRangeExpression(_ ctx: ObjectiveCParser.RangeExpressionContext) -> Expression? {
         let expressions = ctx.expression()
         guard !expressions.isEmpty else {
             return makeUnknownNode(ctx)
         }
-        
+
         guard expressions.count > 1 else {
             return expressions[0].accept(self)
         }
-        
+
         guard
             let exp1 = expressions[0].accept(self),
             let exp2 = expressions[1].accept(self)
@@ -41,7 +41,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
 
         return exp1.binary(op: .closedRange, rhs: exp2)
     }
-    
+
     public override func visitExpression(_ ctx: ObjectiveCParser.ExpressionContext) -> Expression? {
         // Assignment expression
         if let assignmentExpression = ctx.assignmentExpression() {
@@ -53,10 +53,10 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
             guard let statement = compound.accept(visitor) else {
                 return makeUnknownNode(ctx)
             }
-            
+
             return .block(body: statement).call()
         }
-        
+
         return makeUnknownNode(ctx)
     }
 
@@ -101,7 +101,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
             return logicalOrExpression
         }
         guard let falseExpression = ctx.falseExpression?.accept(self) else {
-            return makeUnknownNode(ctx) 
+            return makeUnknownNode(ctx)
         }
 
         if let trueExpression = ctx.trueExpression?.accept(self) {
@@ -170,7 +170,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
             $0.accept(self)
         }
     }
-    
+
     public override func visitCastExpression(_ ctx: ObjectiveCParser.CastExpressionContext) -> Expression? {
         if let unary = ctx.unaryExpression() {
             return unary.accept(self)
@@ -219,7 +219,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
                 switch (signedConstant, constant.constant) {
                 case (.decimal, .int(let value, let type)):
                     rhs = .constant(.int(abs(value), type))
-                
+
                 case (.float, .float(let value)):
                     rhs = .constant(.float(abs(value)))
 
@@ -230,10 +230,10 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
                 return lhs.binary(op: op, rhs: rhs)
             }
         }
-        
+
         return exp.casted(to: swiftType)
     }
-    
+
     public override func visitConstantExpression(_ ctx: ObjectiveCParser.ConstantExpressionContext) -> Expression? {
         if let identifier = ctx.identifier() {
             return identifier.accept(self)
@@ -241,10 +241,10 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         if let constant = ctx.constant() {
             return constant.accept(self)
         }
-        
+
         return makeUnknownNode(ctx)
     }
-    
+
     public override func visitUnaryExpression(_ ctx: ObjectiveCParser.UnaryExpressionContext) -> Expression? {
         if ctx.INC() != nil, let exp = ctx.unaryExpression()?.accept(self) {
             return exp.assignment(op: .addAssign, rhs: .constant(1))
@@ -256,7 +256,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
             guard let swiftOp = SwiftOperator(rawValue: op.getText()) else {
                 return makeUnknownNode(ctx)
             }
-            
+
             return .unary(op: swiftOp, exp)
         }
         // sizeof(<expr>) / sizeof(<type>)
@@ -268,24 +268,24 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
             {
                 let type = ObjcType.typeName(typeSpecifier.getText())
                 let swiftType = typeMapper.swiftType(forObjcType: type)
-                
+
                 return .sizeof(type: swiftType)
             } else if let unary = ctx.unaryExpression()?.accept(self) {
                 return .sizeof(unary)
             }
         }
-        
+
         return acceptFirst(from: ctx.postfixExpression)
     }
-    
+
     public override func visitPostfixExpression(_ ctx: ObjectiveCParser.PostfixExpressionContext) -> Expression? {
         var result: Expression
-        
+
         if let primary = ctx.primaryExpression() {
             guard let prim = primary.accept(self) else {
                 return makeUnknownNode(ctx)
             }
-            
+
             result = prim
         } else if let postfixExpression = ctx.postfixExpression() {
             guard let postfix = postfixExpression.accept(self) else {
@@ -294,57 +294,57 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
             guard let identifier = ctx.identifier() else {
                 return makeUnknownNode(ctx)
             }
-            
+
             result = .postfix(postfix, .member(identifier.getText()))
         } else {
             return makeUnknownNode(ctx)
         }
-        
+
         for post in ctx.postfixExpr() {
             // Function call
             if post.LP() != nil {
                 var arguments: [FunctionArgument] = []
-                
+
                 if let args = post.argumentExpressionList() {
                     let funcArgVisitor = FunctionArgumentVisitor(expressionReader: self)
-                    
+
                     for arg in args.argumentExpression() {
                         if let funcArg = arg.accept(funcArgVisitor) {
                             arguments.append(funcArg)
                         }
                     }
                 }
-                
+
                 result = result.call(arguments)
-                
+
             } else if post.LBRACK() != nil, let expression = post.expression() {
                 guard let expr = expression.accept(self) else {
                     continue
                 }
-                
+
                 // Subscription
                 result = result.sub(expr)
-                
+
             } else if post.INC() != nil {
                 result = result.assignment(op: .addAssign, rhs: .constant(1))
-                
+
             } else if post.DEC() != nil {
                 result = result.assignment(op: .subtractAssign, rhs: .constant(1))
             }
         }
-        
+
         return result
     }
-    
+
     public override func visitArgumentExpression(_ ctx: ObjectiveCParser.ArgumentExpressionContext) -> Expression? {
         acceptFirst(from: ctx.expression)
     }
-    
+
     public override func visitPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) -> Expression? {
         if ctx.LP() != nil, let exp = ctx.expression()?.accept(self) {
             return .parens(exp)
         }
-        
+
         return
             acceptFirst(
                 from: ctx.constant,
@@ -358,7 +358,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
                     ctx.blockExpression
             ) ?? makeUnknownNode(ctx)
     }
-    
+
     public override func visitMessageExpression(_ ctx: ObjectiveCParser.MessageExpressionContext) -> Expression? {
         guard let receiverExpression = ctx.receiver()?.expression() else {
             return makeUnknownNode(ctx)
@@ -366,38 +366,38 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         guard let receiver = receiverExpression.accept(self) else {
             return makeUnknownNode(ctx)
         }
-        
+
         if let identifier = ctx.messageSelector()?.selector()?.identifier()?.getText() {
             return receiver.dot(identifier).call()
         }
         guard let keywordArguments = ctx.messageSelector()?.keywordArgument() else {
             return makeUnknownNode(ctx)
         }
-        
+
         var name: String = ""
-        
+
         var arguments: [FunctionArgument] = []
         for (keywordIndex, keyword) in keywordArguments.enumerated() {
             let selectorText = keyword.selector()?.getText() ?? ""
-            
+
             if keywordIndex == 0 {
                 // First keyword is always the method's name, Swift doesn't support
                 // 'nameless' methods!
                 if keyword.selector() == nil {
                     return makeUnknownNode(ctx)
                 }
-                
+
                 name = selectorText
             }
-            
+
             for keywordArgumentType in keyword.keywordArgumentType() {
                 guard let expressions = keywordArgumentType.expressions() else {
                     return makeUnknownNode(ctx)
                 }
-                
+
                 for (expIndex, expression) in expressions.expression().enumerated() {
                     let exp = expression.accept(self) ?? .unknown(UnknownASTContext(context: expression.getText()))
-                    
+
                     // Every argument after the first one on a comma-separated
                     // argument sequence is unlabeled.
                     // We also don't label empty keyword-arguments due to them
@@ -410,23 +410,23 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
                 }
             }
         }
-        
+
         return receiver.dot(name).call(arguments)
     }
-    
+
     public override func visitArrayExpression(_ ctx: ObjectiveCParser.ArrayExpressionContext) -> Expression? {
         guard let expressions = ctx.expressions() else {
             return .arrayLiteral([])
         }
-        
+
         let exps = expressions.expression().compactMap { $0.accept(self) }
-        
+
         return .arrayLiteral(exps)
     }
-    
+
     public override func visitDictionaryExpression(_ ctx: ObjectiveCParser.DictionaryExpressionContext) -> Expression? {
         let dictionaryPairs = ctx.dictionaryPair()
-        
+
         let pairs =
             dictionaryPairs.compactMap { pair -> ExpressionDictionaryPair? in
                 guard let castExpression = pair.castExpression() else {
@@ -435,30 +435,30 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
                 guard let expression = pair.expression() else {
                     return nil
                 }
-                
+
                 let key = castExpression.accept(self) ?? .unknown(UnknownASTContext(context: castExpression.getText()))
                 let value = expression.accept(self) ?? .unknown(UnknownASTContext(context: expression.getText()))
-                
+
                 return ExpressionDictionaryPair(key: key, value: value)
             }
-        
+
         return .dictionaryLiteral(pairs)
     }
-    
+
     public override func visitBoxExpression(_ ctx: ObjectiveCParser.BoxExpressionContext) -> Expression? {
         acceptFirst(from: ctx.expression, ctx.constant, ctx.identifier)
     }
-    
+
     public override func visitStringLiteral(_ ctx: ObjectiveCParser.StringLiteralContext) -> Expression? {
         let value = ctx.STRING_VALUE().map {
             // TODO: Support conversion of hexadecimal and octal digits properly.
             // Octal literals need to be converted before being proper to use.
             $0.getText()
         }.joined()
-        
+
         return .constant(.string(value))
     }
-    
+
     public override func visitBlockExpression(_ ctx: ObjectiveCParser.BlockExpressionContext) -> Expression? {
         let returnType = ctx.typeName().flatMap { typeName -> ObjcType? in
             return typeParser.parseObjcType(from: typeName)
@@ -468,32 +468,32 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         if let blockParameters = ctx.blockParameters() {
             let types = typeParser.parseObjcTypes(from: blockParameters)
             let parametersCtx = blockParameters.parameterDeclaration()
-            
+
             parameters =
                 zip(parametersCtx, types).map { (param, type) -> BlockParameter in
                     guard let identifier = VarDeclarationIdentifierNameExtractor.extract(from: param) else {
                         return BlockParameter(name: "<unknown>", type: .void)
                     }
-                    
+
                     let swiftType = typeMapper.swiftType(forObjcType: type)
-                    
+
                     return BlockParameter(name: identifier.getText(), type: swiftType)
                 }
         } else {
             parameters = []
         }
-        
+
         let compoundVisitor = self.makeCompoundStatementVisitor()
-        
+
         guard let body = ctx.compoundStatement()?.accept(compoundVisitor) else {
             return makeUnknownNode(ctx)
         }
-        
+
         let swiftReturnType = typeMapper.swiftType(forObjcType: returnType)
-        
+
         return .block(parameters: parameters, return: swiftReturnType, body: body)
     }
-    
+
     public override func visitConstant(_ ctx: ObjectiveCParser.ConstantContext) -> Expression? {
         func dropIntSuffixes(from string: String) -> String {
             var string = string
@@ -501,21 +501,21 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
                 string.hasSuffix("l") || string.hasSuffix("L") {
                 string = String(string.dropLast())
             }
-            
+
             return string
         }
-        
+
         func dropFloatSuffixes(from string: String) -> String {
             var string = string
-            
+
             while string.hasSuffix("f") || string.hasSuffix("F") ||
                 string.hasSuffix("d") || string.hasSuffix("D") {
                 string = String(string.dropLast())
             }
-            
+
             return string
         }
-        
+
         if let int = ctx.DECIMAL_LITERAL(), let intV = Int(dropIntSuffixes(from: int.getText())) {
             return .constant(.int(intV, .decimal))
         }
@@ -540,17 +540,20 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         }
         if let float = ctx.FLOATING_POINT_LITERAL()?.getText() {
             let suffixless = dropIntSuffixes(from: dropFloatSuffixes(from: float))
-            
+
             if let value = Float(suffixless) {
                 return .constant(.float(value))
             } else {
                 return .constant(.rawConstant(suffixless))
             }
         }
-        
+        if let literal = ctx.CHARACTER_LITERAL()?.getText() {
+            return .constant(.string(String(literal.dropFirst().dropLast())))
+        }
+
         return .constant(.rawConstant(ctx.getText()))
     }
-    
+
     public override func visitSelectorExpression(_ ctx: ObjectiveCParser.SelectorExpressionContext) -> Expression? {
         guard let selectorName = ctx.selectorName() else {
             return makeUnknownNode(ctx)
@@ -558,14 +561,14 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         guard let sel = convertSelectorToIdentifier(selectorName) else {
             return makeUnknownNode(ctx)
         }
-        
+
         return .selector(sel)
     }
-    
+
     public override func visitSelectorName(_ ctx: ObjectiveCParser.SelectorNameContext) -> Expression? {
         .constant(.string(ctx.getText()))
     }
-    
+
     public override func visitIdentifier(_ ctx: ObjectiveCParser.IdentifierContext) -> Expression? {
         .identifier(ctx.getText())
     }
@@ -575,14 +578,14 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
     private func makeUnknownNode(_ ctx: ParserRuleContext) -> UnknownExpression {
         return .unknown(UnknownASTContext(context: "/*\(ctx.getText())*/"))
     }
-    
+
     private func acceptFirst(from rules: () -> ParserRuleContext?...) -> Expression? {
         for rule in rules {
             if let expr = rule()?.accept(self) {
                 return expr
             }
         }
-        
+
         return nil
     }
 
@@ -602,7 +605,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         operator op: SwiftOperator,
         parser: (T) -> Expression?
     ) -> Expression {
-        
+
         return reduceBinary(
             fullList,
             opDeriver: { _ in op },
@@ -629,7 +632,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         opRule: (Int) -> ParserRuleContext?,
         parser: (T) -> Expression?
     ) -> Expression {
-        
+
         return reduceBinary(
             fullList,
             opDeriver: { index in opRule(index).flatMap({ swiftOperator(from: $0.getText()) }) },
@@ -661,7 +664,7 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
         guard var result = parser(fullList[0]) else {
             return makeUnknownNode(fullList[0])
         }
-        
+
         guard fullList.count > 1 else {
             return result
         }
@@ -682,10 +685,10 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
 
     private func balancePrecedence(in exp: BinaryExpression) -> BinaryExpression {
         let balancer = BinaryExpressionBalancer()
-        
+
         return balancer.balance(exp)
     }
-    
+
     private func makeCompoundStatementVisitor() -> ObjectiveCStatementASTReader.CompoundStatementVisitor {
         .init(
             expressionReader: self,
@@ -693,23 +696,23 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
             delegate: delegate
         )
     }
-    
+
     private class FunctionArgumentVisitor: ObjectiveCParserBaseVisitor<FunctionArgument> {
         var expressionReader: ObjectiveCExprASTReader
-        
+
         init(expressionReader: ObjectiveCExprASTReader) {
             self.expressionReader = expressionReader
         }
-        
+
         override func visitArgumentExpression(_ ctx: ObjectiveCParser.ArgumentExpressionContext) -> FunctionArgument? {
             if let exp = ctx.expression() {
                 guard let expEnum = exp.accept(expressionReader) else {
                     return .unlabeled(.unknown(UnknownASTContext(context: exp.getText())))
                 }
-                
+
                 return .unlabeled(expEnum)
             }
-            
+
             return .unlabeled(
                 expressionReader.makeUnknownNode(ctx)
             )
@@ -740,13 +743,13 @@ public final class ObjectiveCExprASTReader: ObjectiveCParserBaseVisitor<Expressi
                 return value
             }
         }
-        
+
         /// Extracts `-[number]` and `+[number]` from a given cast expression
         /// context.
         static func fromCastExpression(
             _ ctx: ObjectiveCParser.CastExpressionContext
         ) -> Self? {
-            
+
             guard ctx.EXTENSION() == nil && ctx.typeName() == nil else {
                 return nil
             }
@@ -791,19 +794,19 @@ func convertSelectorToIdentifier(_ ctx: ObjectiveCParser.SelectorNameContext) ->
     func selToLabel(_ sel: ObjectiveCParser.SelectorContext) -> String {
         return sel.getText()
     }
-    
+
     guard let children = ctx.children else {
         return nil
     }
-    
+
     let selectors = ctx.selector()
     if selectors.isEmpty {
         return nil
     }
-    
+
     let name = selToLabel(selectors[0])
     var arguments: [String?] = []
-    
+
     var previous: ParseTree? = nil
     for child in children.dropFirst() {
         // Flush selector name
@@ -813,13 +816,13 @@ func convertSelectorToIdentifier(_ ctx: ObjectiveCParser.SelectorNameContext) ->
             } else {
                 arguments.append(nil)
             }
-            
+
             previous = nil
         } else {
             previous = child
         }
     }
-    
+
     return FunctionIdentifier(name: name, argumentLabels: arguments)
 }
 

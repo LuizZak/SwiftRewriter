@@ -58,10 +58,10 @@
 class ZXAbstractDoCoMoResultParser: ZXResultParser {
     @objc
     static func matchDoCoMoPrefixedField(_ prefix: String!, rawText: String!, trim: Bool) -> NSArray? {
-        return self.matchPrefixedField(prefix, rawText: rawText, endChar: ';', trim: trim)
+        return self.matchPrefixedField(prefix, rawText: rawText, endChar: ";", trim: trim)
     }
     @objc
     static func matchSingleDoCoMoPrefixedField(_ prefix: String!, rawText: String!, trim: Bool) -> String? {
-        return self.matchSinglePrefixedField(prefix, rawText: rawText, endChar: ';', trim: trim)
+        return self.matchSinglePrefixedField(prefix, rawText: rawText, endChar: ";", trim: trim)
     }
 }

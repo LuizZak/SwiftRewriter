@@ -240,10 +240,10 @@ class ZXCode128Reader: ZXOneDReader {
                 if code < 64 {
                     if shiftUpperMode == upperMode {
                         if !wasAlreadyAppended {
-                            result.appendFormat("%C", (' ' + code) as? unichar)
+                            result.appendFormat("%C", (" " + code) as? unichar)
                         }
                     } else if !wasAlreadyAppended {
-                        result.appendFormat("%C", (' ' + code + 128) as? unichar)
+                        result.appendFormat("%C", (" " + code + 128) as? unichar)
                     }
 
                     shiftUpperMode = false
@@ -304,10 +304,10 @@ class ZXCode128Reader: ZXOneDReader {
                 if code < 96 {
                     if shiftUpperMode == upperMode {
                         if !wasAlreadyAppended {
-                            result.appendFormat("%C", (' ' + code) as? unichar)
+                            result.appendFormat("%C", (" " + code) as? unichar)
                         }
                     } else if !wasAlreadyAppended {
-                        result.appendFormat("%C", (' ' + code + 128) as? unichar)
+                        result.appendFormat("%C", (" " + code + 128) as? unichar)
                     }
 
                     shiftUpperMode = false

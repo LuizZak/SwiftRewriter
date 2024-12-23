@@ -54,7 +54,7 @@ class ZXUPCEReader: ZXUPCEANReader {
                 return 1
             }
 
-            result.appendFormat("%C", ('0' + bestMatch % 10) as? unichar)
+            result.appendFormat("%C", ("0" + bestMatch % 10) as? unichar)
             rowOffset += (counters?.sum() ?? 0)
 
             if bestMatch >= 10 {
@@ -97,8 +97,8 @@ class ZXUPCEReader: ZXUPCEANReader {
                 }
 
                 if lgPatternFound == ZX_UCPE_NUMSYS_AND_CHECK_DIGIT_PATTERNS[numSys][d] {
-                    resultString.insert(String(format: "%C", ('0' + numSys) as? unichar), at: 0)
-                    resultString.appendFormat("%C", ('0' + d) as? unichar)
+                    resultString.insert(String(format: "%C", ("0" + numSys) as? unichar), at: 0)
+                    resultString.appendFormat("%C", ("0" + d) as? unichar)
 
                     return true
                 }
@@ -127,16 +127,16 @@ class ZXUPCEReader: ZXUPCEANReader {
         let lastChar: unichar = upceChars.characterAtIndex(5)
 
         switch lastChar {
-        case '0', '1', '2':
+        case "0", "1", "2":
             result.append(upceChars.substringToIndex(2))
             result.appendFormat("%C", lastChar)
             result.append("0000")
             result.append(upceChars.substringWithRange(NSMakeRange(2, 3)))
-        case '3':
+        case "3":
             result.append(upceChars.substringToIndex(3))
             result.append("00000")
             result.append(upceChars.substringWithRange(NSMakeRange(3, 2)))
-        case '4':
+        case "4":
             result.append(upceChars.substringToIndex(4))
             result.append("00000")
             result.append(upceChars.substringWithRange(NSMakeRange(4, 1)))

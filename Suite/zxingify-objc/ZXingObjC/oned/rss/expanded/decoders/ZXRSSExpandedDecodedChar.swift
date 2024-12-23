@@ -1,7 +1,7 @@
 // Preprocessor directives found in file:
 // #import "ZXRSSExpandedDecodedObject.h"
 // #import "ZXRSSExpandedDecodedChar.h"
-let ZX_FNC1_CHAR: unichar = '$'
+let ZX_FNC1_CHAR: unichar = "$"
 
 // It's not in Alphanumeric neither in ISO/IEC 646 charset
 @objc

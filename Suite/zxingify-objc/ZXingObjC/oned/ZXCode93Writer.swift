@@ -119,49 +119,49 @@ class ZXCode93Writer: ZXOneDimensionalCodeWriter {
                 extendedContent.append("bU")
             } else if character <= 26 {
                 // SOH - SUB: ($)A - ($)Z
-                extendedContent.appendFormat("%c", 'a')
-                extendedContent.appendFormat("%c", 'A' + character - 1)
+                extendedContent.appendFormat("%c", "a")
+                extendedContent.appendFormat("%c", "A" + character - 1)
             } else if character <= 31 {
                 // ESC - US: (%)A - (%)E
-                extendedContent.appendFormat("%c", 'b')
-                extendedContent.appendFormat("%c", 'A' + character - 27)
-            } else if character == ' ' || character == '$' || character == '%' || character == '+' {
+                extendedContent.appendFormat("%c", "b")
+                extendedContent.appendFormat("%c", "A" + character - 27)
+            } else if character == " " || character == "$" || character == "%" || character == "+" {
                 // space $ % +
                 extendedContent.appendFormat("%c", character)
-            } else if character <= ',' {
+            } else if character <= "," {
                 // ! " # & ' ( ) * ,: (/)A - (/)L
-                extendedContent.appendFormat("%c", 'c')
-                extendedContent.appendFormat("%c", 'A' + character - '!')
-            } else if character <= '9' {
+                extendedContent.appendFormat("%c", "c")
+                extendedContent.appendFormat("%c", "A" + character - "!")
+            } else if character <= "9" {
                 extendedContent.appendFormat("%c", character)
-            } else if character == ':' {
+            } else if character == ":" {
                 // :: (/)Z
                 extendedContent.append("cZ")
-            } else if character <= '?' {
+            } else if character <= "?" {
                 // ; - ?: (%)F - (%)J
-                extendedContent.appendFormat("%c", 'b')
-                extendedContent.appendFormat("%c", 'F' + character - ';')
-            } else if character == '@' {
+                extendedContent.appendFormat("%c", "b")
+                extendedContent.appendFormat("%c", "F" + character - ";")
+            } else if character == "@" {
                 // @: (%)V
                 extendedContent.append("bV")
-            } else if character <= 'Z' {
+            } else if character <= "Z" {
                 // A - Z
                 extendedContent.appendFormat("%c", character)
-            } else if character <= '_' {
+            } else if character <= "_" {
                 // [ - _: (%)K - (%)O
-                extendedContent.appendFormat("%c", 'b')
-                extendedContent.appendFormat("%c", 'K' + character - '[')
-            } else if character == '`' {
+                extendedContent.appendFormat("%c", "b")
+                extendedContent.appendFormat("%c", "K" + character - "[")
+            } else if character == "`" {
                 // `: (%)W
                 extendedContent.append("bW")
-            } else if character <= 'z' {
+            } else if character <= "z" {
                 // a - z: (*)A - (*)Z
-                extendedContent.appendFormat("%c", 'd')
-                extendedContent.appendFormat("%c", 'A' + character - 'a')
+                extendedContent.appendFormat("%c", "d")
+                extendedContent.appendFormat("%c", "A" + character - "a")
             } else if character <= 127 {
                 // { - DEL: (%)P - (%)T
-                extendedContent.appendFormat("%c", 'b')
-                extendedContent.appendFormat("%c", 'P' + character - '{')
+                extendedContent.appendFormat("%c", "b")
+                extendedContent.appendFormat("%c", "P" + character - "{")
             } else {
                 NSException.raise(NSInvalidArgumentException, format: "Requested content contains a non-encodable character: \'%c\'", character)
             }

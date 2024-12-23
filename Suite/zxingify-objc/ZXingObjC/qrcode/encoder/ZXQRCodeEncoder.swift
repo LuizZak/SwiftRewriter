@@ -223,7 +223,7 @@ class ZXQRCodeEncoder: NSObject {
 
             let c: unichar = content.characterAtIndex(i)
 
-            if c >= '0' && c <= '9' {
+            if c >= "0" && c <= "9" {
                 hasNumeric = true
             } else if self.alphanumericCode(c) != 1 {
                 hasAlphanumeric = true
@@ -701,16 +701,16 @@ class ZXQRCodeEncoder: NSObject {
         var i: CInt = 0
 
         while i < length {
-            let num1: CInt = content.characterAtIndex(i) - '0'
+            let num1: CInt = content.characterAtIndex(i) - "0"
 
             if i + 2 < length {
-                let num2: CInt = content.characterAtIndex(i + 1) - '0'
-                let num3: CInt = content.characterAtIndex(i + 2) - '0'
+                let num2: CInt = content.characterAtIndex(i + 1) - "0"
+                let num3: CInt = content.characterAtIndex(i + 2) - "0"
 
                 bits.appendBits(num1 * 100 + num2 * 10 + num3, numBits: 10)
                 i += 3
             } else if i + 1 < length {
-                let num2: CInt = content.characterAtIndex(i + 1) - '0'
+                let num2: CInt = content.characterAtIndex(i + 1) - "0"
 
                 bits.appendBits(num1 * 10 + num2, numBits: 7)
                 i += 2

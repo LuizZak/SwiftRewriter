@@ -208,14 +208,14 @@ class ZXITFReader: ZXOneDReader {
                 return false
             }
 
-            resultString.appendFormat("%C", ('0' + bestMatch) as? unichar)
+            resultString.appendFormat("%C", ("0" + bestMatch) as? unichar)
             bestMatch = self.decodeDigit(counterWhite)
 
             if bestMatch == 1 {
                 return false
             }
 
-            resultString.appendFormat("%C", ('0' + bestMatch) as? unichar)
+            resultString.appendFormat("%C", ("0" + bestMatch) as? unichar)
 
             var i: CInt = 0
 

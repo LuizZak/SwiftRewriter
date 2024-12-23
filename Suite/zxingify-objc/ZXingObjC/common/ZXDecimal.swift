@@ -131,7 +131,7 @@ class ZXDecimal: NSObject {
                 i += 1
             }
 
-            result[i] = CInt(characters[i]) - '0'
+            result[i] = CInt(characters[i]) - "0"
         }
 
         return result

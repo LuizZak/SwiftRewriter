@@ -205,7 +205,7 @@ class ZXPDF417HighLevelEncoder: NSObject {
             switch submode {
             case ZX_PDF417_SUBMODE_ALPHA:
                 if self.isAlphaUpper(ch) {
-                    if ch == ' ' {
+                    if ch == " " {
                         tmp.appendFormat("%C", 26 as? unichar) //space
                     } else {
                         tmp.appendFormat("%C", (ch - 65) as? unichar)
@@ -228,7 +228,7 @@ class ZXPDF417HighLevelEncoder: NSObject {
                 }
             case ZX_PDF417_SUBMODE_LOWER:
                 if self.isAlphaLower(ch) {
-                    if ch == ' ' {
+                    if ch == " " {
                         tmp.appendFormat("%C", 26 as? unichar) //space
                     } else {
                         tmp.appendFormat("%C", (ch - 97) as? unichar)
@@ -445,15 +445,15 @@ class ZXPDF417HighLevelEncoder: NSObject {
     }
     @objc
     static func isDigit(_ ch: unichar) -> Bool {
-        return ch >= '0' && ch <= '9'
+        return ch >= "0" && ch <= "9"
     }
     @objc
     static func isAlphaUpper(_ ch: unichar) -> Bool {
-        return ch == ' ' || (ch >= 'A' && ch <= 'Z')
+        return ch == " " || (ch >= "A" && ch <= "Z")
     }
     @objc
     static func isAlphaLower(_ ch: unichar) -> Bool {
-        return ch == ' ' || (ch >= 'a' && ch <= 'z')
+        return ch == " " || (ch >= "a" && ch <= "z")
     }
     @objc
     static func isMixed(_ ch: unichar) -> Bool {
@@ -465,7 +465,7 @@ class ZXPDF417HighLevelEncoder: NSObject {
     }
     @objc
     static func isText(_ ch: unichar) -> Bool {
-        return ch == '\t' || ch == '\n' || ch == '\r' || (ch >= 32 && ch <= 126)
+        return ch == "\\t" || ch == "\\n" || ch == "\\r" || (ch >= 32 && ch <= 126)
     }
     /**
  * Determines the number of consecutive characters that are encodable using numeric compaction.

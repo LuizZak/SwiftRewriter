@@ -361,7 +361,7 @@ class ZXRSSExpandedGeneralAppIdDecoder: NSObject {
         }
 
         if fiveBitValue >= 5 && fiveBitValue < 15 {
-            return ZXRSSExpandedDecodedChar(newPosition: pos + 5, value: ('0' + fiveBitValue - 5) as? unichar)
+            return ZXRSSExpandedDecodedChar(newPosition: pos + 5, value: ("0" + fiveBitValue - 5) as? unichar)
         }
 
         let sevenBitValue = self.extractNumericValueFromBitArray(pos, bits: 7)
@@ -379,47 +379,47 @@ class ZXRSSExpandedGeneralAppIdDecoder: NSObject {
 
         switch eightBitValue {
         case 232:
-            c = '!'
+            c = "!"
         case 233:
-            c = '"'
+            c = "\""
         case 234:
-            c = '%'
+            c = "%"
         case 235:
-            c = '&'
+            c = "&"
         case 236:
-            c = '\''
+            c = "\\\'"
         case 237:
-            c = '('
+            c = "("
         case 238:
-            c = ')'
+            c = ")"
         case 239:
-            c = '*'
+            c = "*"
         case 240:
-            c = '+'
+            c = "+"
         case 241:
-            c = ','
+            c = ","
         case 242:
-            c = '-'
+            c = "-"
         case 243:
-            c = '.'
+            c = "."
         case 244:
-            c = '/'
+            c = "/"
         case 245:
-            c = ':'
+            c = ":"
         case 246:
-            c = ';'
+            c = ";"
         case 247:
-            c = '<'
+            c = "<"
         case 248:
-            c = '='
+            c = "="
         case 249:
-            c = '>'
+            c = ">"
         case 250:
-            c = '?'
+            c = "?"
         case 251:
-            c = '_'
+            c = "_"
         case 252:
-            c = ' '
+            c = " "
         default:
             return nil
         }
@@ -455,7 +455,7 @@ class ZXRSSExpandedGeneralAppIdDecoder: NSObject {
         }
 
         if fiveBitValue >= 5 && fiveBitValue < 15 {
-            return ZXRSSExpandedDecodedChar(newPosition: pos + 5, value: ('0' + fiveBitValue - 5) as? unichar)
+            return ZXRSSExpandedDecodedChar(newPosition: pos + 5, value: ("0" + fiveBitValue - 5) as? unichar)
         }
 
         let sixBitValue = self.extractNumericValueFromBitArray(pos, bits: 6)
@@ -468,15 +468,15 @@ class ZXRSSExpandedGeneralAppIdDecoder: NSObject {
 
         switch sixBitValue {
         case 58:
-            c = '*'
+            c = "*"
         case 59:
-            c = ','
+            c = ","
         case 60:
-            c = '-'
+            c = "-"
         case 61:
-            c = '.'
+            c = "."
         case 62:
-            c = '/'
+            c = "/"
         default:
             /*
             @throw[NSExceptionexceptionWithName:@"RuntimeException"reason:[NSStringstringWithFormat:@"Decoding invalid alphanumeric value: %d",sixBitValue]userInfo:nil];

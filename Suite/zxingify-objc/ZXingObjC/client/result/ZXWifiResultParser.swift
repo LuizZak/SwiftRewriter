@@ -72,20 +72,20 @@ class ZXWifiResultParser: ZXResultParser {
             return nil
         }
 
-        let ssid: String! = type(of: self).matchSinglePrefixedField("S:", rawText: rawText, endChar: ';', trim: false)
+        let ssid: String! = type(of: self).matchSinglePrefixedField("S:", rawText: rawText, endChar: ";", trim: false)
 
         if ssid == nil || ssid.length == 0 {
             return nil
         }
 
-        let pass: String! = type(of: self).matchSinglePrefixedField("P:", rawText: rawText, endChar: ';', trim: false)
-        var type: String! = type(of: self).matchSinglePrefixedField("T:", rawText: rawText, endChar: ';', trim: false)
+        let pass: String! = type(of: self).matchSinglePrefixedField("P:", rawText: rawText, endChar: ";", trim: false)
+        var type: String! = type(of: self).matchSinglePrefixedField("T:", rawText: rawText, endChar: ";", trim: false)
 
         if type == nil {
             type = "nopass"
         }
 
-        let hidden: Bool = type(of: self).matchSinglePrefixedField("H:", rawText: rawText, endChar: ';', trim: false).boolValue()
+        let hidden: Bool = type(of: self).matchSinglePrefixedField("H:", rawText: rawText, endChar: ";", trim: false).boolValue()
 
         return ZXWifiParsedResult.wifiParsedResultWithNetworkEncryption(type, ssid: ssid, password: pass, hidden: hidden)
     }

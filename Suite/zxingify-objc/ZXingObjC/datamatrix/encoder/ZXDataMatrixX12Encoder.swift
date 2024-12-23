@@ -71,17 +71,17 @@ class ZXDataMatrixX12Encoder: ZXDataMatrixC40Encoder {
     }
     @objc
     func encodeChar(_ c: unichar, buffer sb: NSMutableString!) -> CInt {
-        if c == '\r' {
+        if c == "\\r" {
             sb.append("\\0")
-        } else if c == '*' {
+        } else if c == "*" {
             sb.append("\\1")
-        } else if c == '>' {
+        } else if c == ">" {
             sb.append("\\2")
-        } else if c == ' ' {
+        } else if c == " " {
             sb.append("\\3")
-        } else if c >= '0' && c <= '9' {
+        } else if c >= "0" && c <= "9" {
             sb.appendFormat("%C", (c - 48 + 4) as? unichar)
-        } else if c >= 'A' && c <= 'Z' {
+        } else if c >= "A" && c <= "Z" {
             sb.appendFormat("%C", (c - 65 + 14) as? unichar)
         } else {
             ZXDataMatrixHighLevelEncoder.illegalCharacter(c)

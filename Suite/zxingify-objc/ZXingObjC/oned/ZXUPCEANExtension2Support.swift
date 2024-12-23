@@ -79,7 +79,7 @@ class ZXUPCEANExtension2Support: NSObject {
                 return 1
             }
 
-            result.appendFormat("%C", ('0' + bestMatch % 10) as? unichar)
+            result.appendFormat("%C", ("0" + bestMatch % 10) as? unichar)
             rowOffset += (counters?.sum() ?? 0)
 
             if bestMatch >= 10 {

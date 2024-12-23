@@ -73,7 +73,7 @@ class ZXEAN8Reader: ZXUPCEANReader {
                 return 1
             }
 
-            result.appendFormat("%C", ('0' + bestMatch) as? unichar)
+            result.appendFormat("%C", ("0" + bestMatch) as? unichar)
             rowOffset += (counters?.sum() ?? 0)
         }
 
@@ -98,7 +98,7 @@ class ZXEAN8Reader: ZXUPCEANReader {
                 return 1
             }
 
-            result.appendFormat("%C", ('0' + bestMatch) as? unichar)
+            result.appendFormat("%C", ("0" + bestMatch) as? unichar)
             rowOffset += (counters?.sum() ?? 0)
         }
 

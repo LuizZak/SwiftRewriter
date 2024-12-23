@@ -111,7 +111,7 @@ class ZXMultiFormatUPCEANReader: ZXOneDReader {
             // result if appropriate.
             //
             // But, don't return UPC-A if UPC-A was not a requested format!
-            let ean13MayBeUPCA = ZXBarcodeFormat.kBarcodeFormatEan13 == result.barcodeFormat && result.text.characterAtIndex(0) == '0'
+            let ean13MayBeUPCA = ZXBarcodeFormat.kBarcodeFormatEan13 == result.barcodeFormat && result.text.characterAtIndex(0) == "0"
             let canReturnUPCA = hints == nil || hints.numberOfPossibleFormats() == 0 || hints.containsFormat(ZXBarcodeFormat.kBarcodeFormatUPCA)
 
             if ean13MayBeUPCA && canReturnUPCA {

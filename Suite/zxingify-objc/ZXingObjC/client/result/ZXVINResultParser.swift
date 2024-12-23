@@ -107,7 +107,7 @@ class ZXVINResultParser: ZXResultParser {
 
         let checkChar: unichar = vin.characterAtIndex(8)
 
-        if checkChar == '\0' {
+        if checkChar == "\\0" {
             return false
         }
 
@@ -117,20 +117,20 @@ class ZXVINResultParser: ZXResultParser {
     }
     @objc
     func vinCharValue(_ c: unichar) -> CInt {
-        if c >= 'A' && c <= 'I' {
-            return (c - 'A') + 1
+        if c >= "A" && c <= "I" {
+            return (c - "A") + 1
         }
 
-        if c >= 'J' && c <= 'R' {
-            return (c - 'J') + 1
+        if c >= "J" && c <= "R" {
+            return (c - "J") + 1
         }
 
-        if c >= 'S' && c <= 'Z' {
-            return (c - 'S') + 2
+        if c >= "S" && c <= "Z" {
+            return (c - "S") + 2
         }
 
-        if c >= '0' && c <= '9' {
-            return c - '0'
+        if c >= "0" && c <= "9" {
+            return c - "0"
         }
 
         return 1
@@ -158,43 +158,43 @@ class ZXVINResultParser: ZXResultParser {
     @objc
     func checkChar(_ remainder: CInt) -> unichar {
         if remainder < 10 {
-            return ('0' + remainder) as? unichar
+            return ("0" + remainder) as? unichar
         }
 
         if remainder == 10 {
-            return 'X'
+            return "X"
         }
 
-        return '\0'
+        return "\\0"
     }
     @objc
     func modelYear(_ c: unichar) -> CInt {
-        if c >= 'E' && c <= 'H' {
-            return (c - 'E') + 1984
+        if c >= "E" && c <= "H" {
+            return (c - "E") + 1984
         }
 
-        if c >= 'J' && c <= 'N' {
-            return (c - 'J') + 1988
+        if c >= "J" && c <= "N" {
+            return (c - "J") + 1988
         }
 
-        if c == 'P' {
+        if c == "P" {
             return 1993
         }
 
-        if c >= 'R' && c <= 'T' {
-            return (c - 'R') + 1994
+        if c >= "R" && c <= "T" {
+            return (c - "R") + 1994
         }
 
-        if c >= 'V' && c <= 'Y' {
-            return (c - 'V') + 1997
+        if c >= "V" && c <= "Y" {
+            return (c - "V") + 1997
         }
 
-        if c >= '1' && c <= '9' {
-            return (c - '1') + 2001
+        if c >= "1" && c <= "9" {
+            return (c - "1") + 2001
         }
 
-        if c >= 'A' && c <= 'D' {
-            return (c - 'A') + 2010
+        if c >= "A" && c <= "D" {
+            return (c - "A") + 2010
         }
 
         return 1
@@ -205,56 +205,56 @@ class ZXVINResultParser: ZXResultParser {
         let c2: unichar = wmi.characterAtIndex(1)
 
         switch c1 {
-        case '1', '4', '5':
+        case "1", "4", "5":
             return "US"
-        case '2':
+        case "2":
             return "CA"
-        case '3':
-            if c2 >= 'A' && c2 <= 'W' {
+        case "3":
+            if c2 >= "A" && c2 <= "W" {
                 return "MX"
             }
-        case '9':
-            if (c2 >= 'A' && c2 <= 'E') || (c2 >= '3' && c2 <= '9') {
+        case "9":
+            if (c2 >= "A" && c2 <= "E") || (c2 >= "3" && c2 <= "9") {
                 return "BR"
             }
-        case 'J':
-            if c2 >= 'A' && c2 <= 'T' {
+        case "J":
+            if c2 >= "A" && c2 <= "T" {
                 return "JP"
             }
-        case 'K':
-            if c2 >= 'L' && c2 <= 'R' {
+        case "K":
+            if c2 >= "L" && c2 <= "R" {
                 return "KO"
             }
-        case 'L':
+        case "L":
             return "CN"
-        case 'M':
-            if c2 >= 'A' && c2 <= 'E' {
+        case "M":
+            if c2 >= "A" && c2 <= "E" {
                 return "IN"
             }
-        case 'S':
-            if c2 >= 'A' && c2 <= 'M' {
+        case "S":
+            if c2 >= "A" && c2 <= "M" {
                 return "UK"
             }
 
-            if c2 >= 'N' && c2 <= 'T' {
+            if c2 >= "N" && c2 <= "T" {
                 return "DE"
             }
-        case 'V':
-            if c2 >= 'F' && c2 <= 'R' {
+        case "V":
+            if c2 >= "F" && c2 <= "R" {
                 return "FR"
             }
 
-            if c2 >= 'S' && c2 <= 'W' {
+            if c2 >= "S" && c2 <= "W" {
                 return "ES"
             }
-        case 'W':
+        case "W":
             return "DE"
-        case 'X':
-            if c2 == '0' || (c2 >= '3' && c2 <= '9') {
+        case "X":
+            if c2 == "0" || (c2 >= "3" && c2 <= "9") {
                 return "RU"
             }
-        case 'Z':
-            if c2 >= 'A' && c2 <= 'R' {
+        case "Z":
+            if c2 >= "A" && c2 <= "R" {
                 return "IT"
             }
         default:

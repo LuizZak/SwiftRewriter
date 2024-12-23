@@ -97,7 +97,7 @@ class ZXCode93Reader: ZXOneDReader {
 
             // Read off white space
             nextStart = row.nextSet(nextStart)
-        } while decodedChar != '*'
+        } while decodedChar != "*"
 
         result.deleteCharacters(in: NSMakeRange(result.length() - 1, 1)) // remove asterisk
 
@@ -260,60 +260,60 @@ class ZXCode93Reader: ZXOneDReader {
 
             let c: unichar = encoded.characterAtIndex(i)
 
-            if c >= 'a' && c <= 'd' {
+            if c >= "a" && c <= "d" {
                 if i >= length - 1 {
                     return nil
                 }
 
                 let next: unichar = encoded.characterAtIndex(i + 1)
-                var decodedChar: unichar = '\0'
+                var decodedChar: unichar = "\\0"
 
                 switch c {
-                case 'd':
-                    if next >= 'A' && next <= 'Z' {
+                case "d":
+                    if next >= "A" && next <= "Z" {
                         decodedChar = (next + 32) as? unichar
                     } else {
                         return nil
                     }
-                case 'a':
-                    if next >= 'A' && next <= 'Z' {
+                case "a":
+                    if next >= "A" && next <= "Z" {
                         decodedChar = (next - 64) as? unichar
                     } else {
                         return nil
                     }
-                case 'b':
-                    if next >= 'A' && next <= 'E' {
+                case "b":
+                    if next >= "A" && next <= "E" {
                         // %A to %E map to control codes ESC to USep
                         decodedChar = (next - 38) as? unichar
-                    } else if next >= 'F' && next <= 'J' {
+                    } else if next >= "F" && next <= "J" {
                         // %F to %J map to ; < = > ?
                         decodedChar = (next - 11) as? unichar
-                    } else if next >= 'K' && next <= 'O' {
+                    } else if next >= "K" && next <= "O" {
                         // %K to %O map to [ \ ] ^ _
                         decodedChar = (next + 16) as? unichar
-                    } else if next >= 'P' && next <= 'T' {
+                    } else if next >= "P" && next <= "T" {
                         // %P to %T map to { | } ~ DEL
                         decodedChar = (next + 43) as? unichar
-                    } else if next == 'U' {
+                    } else if next == "U" {
                         // %U map to NUL
-                        decodedChar = '\0'
-                    } else if next == 'V' {
+                        decodedChar = "\\0"
+                    } else if next == "V" {
                         // %V map to @
-                        decodedChar = '@'
-                    } else if next == 'W' {
+                        decodedChar = "@"
+                    } else if next == "W" {
                         // %W map to `
-                        decodedChar = '`'
-                    } else if next >= 'X' && next <= 'Z' {
+                        decodedChar = "`"
+                    } else if next >= "X" && next <= "Z" {
                         // %X to %Z all map to DEL (127)
                         decodedChar = 127
                     } else {
                         return nil
                     }
-                case 'c':
-                    if next >= 'A' && next <= 'O' {
+                case "c":
+                    if next >= "A" && next <= "O" {
                         decodedChar = (next - 32) as? unichar
-                    } else if next == 'Z' {
-                        decodedChar = ':'
+                    } else if next == "Z" {
+                        decodedChar = ":"
                     } else {
                         return nil
                     }

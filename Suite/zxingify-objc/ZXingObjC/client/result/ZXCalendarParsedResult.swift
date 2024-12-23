@@ -163,7 +163,7 @@ class ZXCalendarParsedResult: ZXParsedResult {
         if when.length == 8 {
             // Show only year/month/day
             return self.buildDateFormat().date(from: when) ?? Date()
-        } else if when.length == 16 && when.characterAtIndex(15) == 'Z' {
+        } else if when.length == 16 && when.characterAtIndex(15) == "Z" {
             return self.buildDateTimeFormat().date(from: when.substringToIndex(15)) ?? Date()
         } else {
             return self.buildDateTimeFormat().date(from: when) ?? Date()

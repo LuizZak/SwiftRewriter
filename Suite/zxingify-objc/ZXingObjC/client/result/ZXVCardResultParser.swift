@@ -182,11 +182,11 @@ class ZXVCardResultParser: ZXResultParser {
 
             while UInt(i = rawText.rangeOfString("\\n", options: NSLiteralSearch, range: NSMakeRange(i, rawText.length() - i)).location) != NSNotFound {
                 // Really, end in \r\n
-                if i < rawText.length() - 1 && (rawText.characterAtIndex(i + 1) == ' ' || rawText.characterAtIndex(i + 1) == '\t') {
+                if i < rawText.length() - 1 && (rawText.characterAtIndex(i + 1) == " " || rawText.characterAtIndex(i + 1) == "\\t") {
                     // But if followed by tab or space,
                     // this is only a continuation
                     i += 2 // Skip \n and continutation whitespace
-                } else if quotedPrintable && ((i >= 1 && rawText.characterAtIndex(i - 1) == '=') || (i >= 2 && rawText.characterAtIndex(i - 2) == '=')) {
+                } else if quotedPrintable && ((i >= 1 && rawText.characterAtIndex(i - 1) == "=") || (i >= 2 && rawText.characterAtIndex(i - 2) == "=")) {
                     // If preceded by = in quoted printable
                     // this is a continuation
                     i += 1 // Skip \n
@@ -204,7 +204,7 @@ class ZXVCardResultParser: ZXResultParser {
                     matches = NSMutableArray.arrayWithCapacity(1)
                 }
 
-                if i >= 1 && rawText.characterAtIndex(i - 1) == '\r' {
+                if i >= 1 && rawText.characterAtIndex(i - 1) == "\\r" {
                     i -= 1 // Back up over \r, which really should be there
                 }
 
@@ -266,13 +266,13 @@ class ZXVCardResultParser: ZXResultParser {
             let c: unichar = value.characterAtIndex(i)
 
             switch c {
-            case '\r', '\n':
+            case "\\r", "\\n":
                 break
-            case '=':
+            case "=":
                 if i < length - 2 {
                     let nextChar: unichar = value.characterAtIndex(i + 1)
 
-                    if nextChar != '\r' && nextChar != '\n' {
+                    if nextChar != "\\r" && nextChar != "\\n" {
                         let nextNextChar: unichar = value.characterAtIndex(i + 2)
                         let firstDigit = self.parseHexDigit(nextChar)
                         let secondDigit = self.parseHexDigit(nextNextChar)

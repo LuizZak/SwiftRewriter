@@ -288,6 +288,9 @@ extension SwiftSyntaxWriter: SwiftProducerDelegate {
                 case .float:
                     return varType != .double
 
+                case .string:
+                    return varType != .string
+
                 case .optional, .implicitUnwrappedOptional, .nullabilityUnspecified:
                     return true
 

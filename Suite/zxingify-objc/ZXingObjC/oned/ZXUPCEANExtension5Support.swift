@@ -81,7 +81,7 @@ class ZXUPCEANExtension5Support: NSObject {
                 return 1
             }
 
-            result.appendFormat("%C", ('0' + bestMatch % 10) as? unichar)
+            result.appendFormat("%C", ("0" + bestMatch % 10) as? unichar)
             rowOffset += (counters?.sum() ?? 0)
 
             if bestMatch >= 10 {
@@ -132,7 +132,7 @@ class ZXUPCEANExtension5Support: NSObject {
                 i -= 2
             }
 
-            sum += CInt(s.characterAtIndex(i)) - CInt('0')
+            sum += CInt(s.characterAtIndex(i)) - CInt("0")
         }
 
         sum *= 3
@@ -144,7 +144,7 @@ class ZXUPCEANExtension5Support: NSObject {
                 i -= 2
             }
 
-            sum += CInt(s.characterAtIndex(i)) - CInt('0')
+            sum += CInt(s.characterAtIndex(i)) - CInt("0")
         }
 
         sum *= 3
@@ -191,11 +191,11 @@ class ZXUPCEANExtension5Support: NSObject {
         var currency: String!
 
         switch raw.characterAtIndex(0) {
-        case '0':
+        case "0":
             currency = "£"
-        case '5':
+        case "5":
             currency = "$"
-        case '9':
+        case "9":
             if "90000" == raw {
                 return nil
             }

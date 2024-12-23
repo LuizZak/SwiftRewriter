@@ -538,7 +538,7 @@ class ZXDataMatrixHighLevelEncoder: NSObject {
     }
     @objc
     static func isDigit(_ ch: unichar) -> Bool {
-        return ch >= '0' && ch <= '9'
+        return ch >= "0" && ch <= "9"
     }
     @objc
     static func isExtendedASCII(_ ch: unichar) -> Bool {
@@ -546,23 +546,23 @@ class ZXDataMatrixHighLevelEncoder: NSObject {
     }
     @objc
     static func isNativeC40(_ ch: unichar) -> Bool {
-        return (ch == ' ') || (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z')
+        return (ch == " ") || (ch >= "0" && ch <= "9") || (ch >= "A" && ch <= "Z")
     }
     @objc
     static func isNativeText(_ ch: unichar) -> Bool {
-        return (ch == ' ') || (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z')
+        return (ch == " ") || (ch >= "0" && ch <= "9") || (ch >= "a" && ch <= "z")
     }
     @objc
     static func isNativeX12(_ ch: unichar) -> Bool {
-        return self.isX12TermSep(ch) || (ch == ' ') || (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z')
+        return self.isX12TermSep(ch) || (ch == " ") || (ch >= "0" && ch <= "9") || (ch >= "A" && ch <= "Z")
     }
     @objc
     static func isX12TermSep(_ ch: unichar) -> Bool {
-        return (ch == '\r') || (ch == '*') || (ch == '>')
+        return (ch == "\\r") || (ch == "*") || (ch == ">")
     }
     @objc
     static func isNativeEDIFACT(_ ch: unichar) -> Bool {
-        return ch >= ' ' && ch <= '^'
+        return ch >= " " && ch <= "^"
     }
     @objc
     static func isSpecialB256(_ ch: unichar) -> Bool {

@@ -67,6 +67,11 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
             objc: #"@"literal \n abc";"#,
             swift: #""literal \\n abc""#
         )
+
+        assertSingleStatement(
+            objc: #"'l';"#,
+            swift: #""l""#
+        )
     }
 
     func testFloatLiteral() {

@@ -257,13 +257,13 @@ class ZXLuminanceSource: NSObject {
                 var c: unichar
 
                 if luminance < 0x40 {
-                    c = '#'
+                    c = "#"
                 } else if luminance < 0x80 {
-                    c = '+'
+                    c = "+"
                 } else if luminance < 0xc0 {
-                    c = '.'
+                    c = "."
                 } else {
-                    c = ' '
+                    c = " "
                 }
 
                 result.appendFormat("%C", c)

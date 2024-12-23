@@ -66,12 +66,12 @@ class ZXAddressBookAUResultParser: ZXResultParser {
             return nil
         }
 
-        let name: String! = type(of: self).matchSinglePrefixedField("NAME1:", rawText: rawText, endChar: '\r', trim: true)
-        let pronunciation: String! = type(of: self).matchSinglePrefixedField("NAME2:", rawText: rawText, endChar: '\r', trim: true)
+        let name: String! = type(of: self).matchSinglePrefixedField("NAME1:", rawText: rawText, endChar: "\\r", trim: true)
+        let pronunciation: String! = type(of: self).matchSinglePrefixedField("NAME2:", rawText: rawText, endChar: "\\r", trim: true)
         let phoneNumbers = self.matchMultipleValuePrefix("TEL", max: 3, rawText: rawText, trim: true)
         let emails = self.matchMultipleValuePrefix("MAIL", max: 3, rawText: rawText, trim: true)
-        let note: String! = type(of: self).matchSinglePrefixedField("MEMORY:", rawText: rawText, endChar: '\r', trim: false)
-        let address: String! = type(of: self).matchSinglePrefixedField("ADD:", rawText: rawText, endChar: '\r', trim: true)
+        let note: String! = type(of: self).matchSinglePrefixedField("MEMORY:", rawText: rawText, endChar: "\\r", trim: false)
+        let address: String! = type(of: self).matchSinglePrefixedField("ADD:", rawText: rawText, endChar: "\\r", trim: true)
         let addresses: NSArray! = (address == nil) ? nil : [address]
 
         return ZXAddressBookParsedResult.addressBookParsedResultWithNames(self.maybeWrap(name), nicknames: nil, pronunciation: pronunciation, phoneNumbers: phoneNumbers, phoneTypes: nil, emails: emails, emailTypes: nil, instantMessenger: nil, note: note, addresses: addresses, addressTypes: nil, org: nil, birthday: nil, title: nil, urls: nil, geo: nil)
@@ -86,7 +86,7 @@ class ZXAddressBookAUResultParser: ZXResultParser {
                 i += 1
             }
 
-            let value: String! = type(of: self).matchSinglePrefixedField(String(format: "%@%d:", prefix, i), rawText: rawText, endChar: '\r', trim: trim)
+            let value: String! = type(of: self).matchSinglePrefixedField(String(format: "%@%d:", prefix, i), rawText: rawText, endChar: "\\r", trim: trim)
 
             if value == nil {
                 break

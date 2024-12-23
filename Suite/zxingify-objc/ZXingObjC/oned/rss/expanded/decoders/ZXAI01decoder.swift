@@ -50,7 +50,7 @@ class ZXAI01decoder: ZXAbstractExpandedDecoder {
                 i += 1
             }
 
-            let digit: CInt = buf.characterAtIndex(i + currentPos) - '0'
+            let digit: CInt = buf.characterAtIndex(i + currentPos) - "0"
 
             checkDigit += ((i & 0x1) == 0) ? 3 * digit : digit
         }

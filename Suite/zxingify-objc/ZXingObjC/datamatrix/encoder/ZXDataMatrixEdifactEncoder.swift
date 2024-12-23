@@ -100,9 +100,9 @@ class ZXDataMatrixEdifactEncoder: NSObject, ZXDataMatrixEncoder {
     }
     @objc
     func encodeChar(_ c: unichar, buffer sb: NSMutableString!) {
-        if c >= ' ' && c <= '?' {
+        if c >= " " && c <= "?" {
             sb.appendFormat("%C", c)
-        } else if c >= '@' && c <= '^' {
+        } else if c >= "@" && c <= "^" {
             sb.appendFormat("%C", (c - 64) as? unichar)
         } else {
             ZXDataMatrixHighLevelEncoder.illegalCharacter(c)

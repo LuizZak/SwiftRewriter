@@ -47,7 +47,7 @@ class ZXEAN13Reader: ZXUPCEANReader {
                 return 1
             }
 
-            result.appendFormat("%C", ('0' + bestMatch % 10) as? unichar)
+            result.appendFormat("%C", ("0" + bestMatch % 10) as? unichar)
             rowOffset += (counters?.sum() ?? 0)
 
             if bestMatch >= 10 {
@@ -84,7 +84,7 @@ class ZXEAN13Reader: ZXUPCEANReader {
                 return 1
             }
 
-            result.appendFormat("%C", ('0' + bestMatch) as? unichar)
+            result.appendFormat("%C", ("0" + bestMatch) as? unichar)
             rowOffset += (counters?.sum() ?? 0)
         }
 
@@ -114,7 +114,7 @@ class ZXEAN13Reader: ZXUPCEANReader {
             }
 
             if lgPatternFound == ZX_EAN13_FIRST_DIGIT_ENCODINGS[d] {
-                resultString.insert(String(format: "%C", ('0' + d) as? unichar), at: 0)
+                resultString.insert(String(format: "%C", ("0" + d) as? unichar), at: 0)
 
                 return true
             }

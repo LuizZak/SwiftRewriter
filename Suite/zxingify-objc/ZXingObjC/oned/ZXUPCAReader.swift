@@ -145,7 +145,7 @@ class ZXUPCAReader: ZXUPCEANReader {
     func maybeReturnResult(_ result: ZXResult!) -> ZXResult {
         let text = result.text
 
-        if text?.characterAtIndex(0) == '0' {
+        if text?.characterAtIndex(0) == "0" {
             let upcaResult = ZXResult.resultWithText(text?.substringFromIndex(1), rawBytes: nil, resultPoints: result.resultPoints, format: ZXBarcodeFormat.kBarcodeFormatUPCA)
 
             upcaResult?.putAllMetadata(result.resultMetadata())

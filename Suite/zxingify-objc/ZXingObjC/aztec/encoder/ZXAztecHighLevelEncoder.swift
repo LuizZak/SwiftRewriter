@@ -54,44 +54,44 @@ class ZXAztecHighLevelEncoder: NSObject {
     static func load() {
         ZX_AZTEC_MODE_NAMES = ["UPPER", "LOWER", "DIGIT", "MIXED", "PUNCT"]
         memset(ZX_AZTEC_CHAR_MAP, 0, Int(ZX_AZTEC_CHAR_MAP_HEIGHT * ZX_AZTEC_CHAR_MAP_WIDTH) * MemoryLayout<CInt>.size)
-        ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_UPPER][' '] = 1
+        ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_UPPER][" "] = 1
 
-        var c: CInt = 'A'
+        var c: CInt = "A"
 
-        while c <= 'Z' {
+        while c <= "Z" {
             defer {
                 c += 1
             }
 
-            ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_UPPER][c] = c - 'A' + 2
+            ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_UPPER][c] = c - "A" + 2
         }
 
-        ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_LOWER][' '] = 1
+        ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_LOWER][" "] = 1
 
-        var c: CInt = 'a'
+        var c: CInt = "a"
 
-        while c <= 'z' {
+        while c <= "z" {
             defer {
                 c += 1
             }
 
-            ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_LOWER][c] = c - 'a' + 2
+            ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_LOWER][c] = c - "a" + 2
         }
 
-        ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_DIGIT][' '] = 1
+        ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_DIGIT][" "] = 1
 
-        var c: CInt = '0'
+        var c: CInt = "0"
 
-        while c <= '9' {
+        while c <= "9" {
             defer {
                 c += 1
             }
 
-            ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_DIGIT][c] = c - '0' + 2
+            ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_DIGIT][c] = c - "0" + 2
         }
 
-        ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_DIGIT][','] = 12
-        ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_DIGIT]['.'] = 13
+        ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_DIGIT][","] = 12
+        ZX_AZTEC_CHAR_MAP[ZX_AZTEC_MODE_DIGIT]["."] = 13
 
         let mixedTable: UnsafePointer<CInt>!
         var i: CInt = 0
@@ -146,14 +146,14 @@ class ZXAztecHighLevelEncoder: NSObject {
             let nextChar: CInt = (index + 1 < (self.text.length ?? 0)) ? self.text.array[index + 1] : 0
 
             switch self.text.array[index] {
-            case '\r':
-                pairCode = (nextChar == '\n') ? 2 : 0
-            case '.':
-                pairCode = (nextChar == ' ') ? 3 : 0
-            case ',':
-                pairCode = (nextChar == ' ') ? 4 : 0
-            case ':':
-                pairCode = (nextChar == ' ') ? 5 : 0
+            case "\\r":
+                pairCode = (nextChar == "\\n") ? 2 : 0
+            case ".":
+                pairCode = (nextChar == " ") ? 3 : 0
+            case ",":
+                pairCode = (nextChar == " ") ? 4 : 0
+            case ":":
+                pairCode = (nextChar == " ") ? 5 : 0
             default:
                 pairCode = 0
             }

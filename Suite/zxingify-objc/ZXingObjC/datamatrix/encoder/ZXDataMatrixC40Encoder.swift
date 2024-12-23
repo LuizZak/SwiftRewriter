@@ -162,39 +162,39 @@ class ZXDataMatrixC40Encoder: NSObject, ZXDataMatrixEncoder {
     }
     @objc
     func encodeChar(_ c: unichar, buffer sb: NSMutableString!) -> CInt {
-        if c == ' ' {
+        if c == " " {
             sb.append("\\3")
 
             return 1
-        } else if c >= '0' && c <= '9' {
+        } else if c >= "0" && c <= "9" {
             sb.appendFormat("%C", (c - 48 + 4) as? unichar)
 
             return 1
-        } else if c >= 'A' && c <= 'Z' {
+        } else if c >= "A" && c <= "Z" {
             sb.appendFormat("%C", (c - 65 + 14) as? unichar)
 
             return 1
-        } else if c >= '\0' && c <= 0x1f as? unichar {
+        } else if c >= "\\0" && c <= 0x1f as? unichar {
             sb.append("\\0") //Shift 1 Set
             sb.appendFormat("%C", c)
 
             return 2
-        } else if c >= '!' && c <= '/' {
+        } else if c >= "!" && c <= "/" {
             sb.append("\\1") //Shift 2 Set
             sb.appendFormat("%C", (c - 33) as? unichar)
 
             return 2
-        } else if c >= ':' && c <= '@' {
+        } else if c >= ":" && c <= "@" {
             sb.append("\\1") //Shift 2 Set
             sb.appendFormat("%C", (c - 58 + 15) as? unichar)
 
             return 2
-        } else if c >= '[' && c <= '_' {
+        } else if c >= "[" && c <= "_" {
             sb.append("\\1") //Shift 2 Set
             sb.appendFormat("%C", (c - 91 + 22) as? unichar)
 
             return 2
-        } else if c >= '\u0060' && c <= 0x7f as? unichar {
+        } else if c >= "\\u0060" && c <= 0x7f as? unichar {
             sb.append("\\2") //Shift 3 Set
             sb.appendFormat("%C", (c - 96) as? unichar)
 

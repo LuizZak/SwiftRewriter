@@ -150,7 +150,7 @@ class ZXRSS14Reader: ZXAbstractRSSReader {
                 i += 1
             }
 
-            let digit: CInt = buffer.characterAtIndex(i) - '0'
+            let digit: CInt = buffer.characterAtIndex(i) - "0"
 
             checkDigit += ((i & 0x1) == 0) ? 3 * digit : digit
         }

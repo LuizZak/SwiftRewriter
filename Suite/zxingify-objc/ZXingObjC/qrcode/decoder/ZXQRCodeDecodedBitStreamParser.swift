@@ -312,8 +312,8 @@ class ZXQRCodeDecodedBitStreamParser: NSObject {
                     i += 1
                 }
 
-                if result.characterAtIndex(i) == '%' {
-                    if i < result.length() - 1 && result.characterAtIndex(i + 1) == '%' {
+                if result.characterAtIndex(i) == "%" {
+                    if i < result.length() - 1 && result.characterAtIndex(i + 1) == "%" {
                         result.deleteCharacters(in: NSMakeRange(i + 1, 1))
                     } else {
                         result.insert(String(format: "%C", 0x1d as? unichar), at: Int(i))

@@ -123,14 +123,14 @@ class ZXCode128Writer: ZXOneDimensionalCodeWriter {
                 default:
                     // Then handle normal characters otherwise
                     if codeSet == ZX_CODE128_CODE_CODE_A {
-                        patternIndex = contents.characterAtIndex(position) - ' '
+                        patternIndex = contents.characterAtIndex(position) - " "
 
                         if patternIndex < 0 {
                             // everything below a space character comes behind the underscore in the code patterns table
-                            patternIndex += '`'
+                            patternIndex += "`"
                         }
                     } else if codeSet == ZX_CODE128_CODE_CODE_B {
-                        patternIndex = contents.characterAtIndex(position) - ' '
+                        patternIndex = contents.characterAtIndex(position) - " "
                     } else {
                         // CODE_CODE_C
                         patternIndex = contents.substringWithRange(NSMakeRange(position, 2)).intValue()
@@ -270,7 +270,7 @@ class ZXCode128Writer: ZXOneDimensionalCodeWriter {
             return ZXCType.ZXCTypeFNC1
         }
 
-        if c < '0' || c > '9' {
+        if c < "0" || c > "9" {
             return ZXCType.ZXCTypeUncodable
         }
 
@@ -280,7 +280,7 @@ class ZXCode128Writer: ZXOneDimensionalCodeWriter {
 
         c = value.characterAtIndex(start + 1)
 
-        if c < '0' || c > '9' {
+        if c < "0" || c > "9" {
             return ZXCType.ZXCTypeOneDigit
         }
 
@@ -302,7 +302,7 @@ class ZXCode128Writer: ZXOneDimensionalCodeWriter {
             if position < contents.length {
                 let c: unichar = contents.characterAtIndex(position)
 
-                if c < ' ' || (oldCode == ZX_CODE128_CODE_CODE_A && (c < '`' || (c >= ZX_CODE128_ESCAPE_FNC_1 && c <= ZX_CODE128_ESCAPE_FNC_4))) {
+                if c < " " || (oldCode == ZX_CODE128_CODE_CODE_A && (c < "`" || (c >= ZX_CODE128_ESCAPE_FNC_1 && c <= ZX_CODE128_ESCAPE_FNC_4))) {
                     // can continue in code A, encodes ASCII 0 to 95 or FNC1 to FNC4
                     return ZX_CODE128_CODE_CODE_A
                 }
