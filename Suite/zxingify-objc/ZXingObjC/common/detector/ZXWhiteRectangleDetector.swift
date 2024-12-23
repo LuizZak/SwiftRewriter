@@ -81,8 +81,8 @@ class ZXWhiteRectangleDetector: NSObject {
             _downInit = y + halfsize
 
             if _upInit < 0 || _leftInit < 0 || _downInit >= _height || _rightInit >= _width {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -248,8 +248,8 @@ class ZXWhiteRectangleDetector: NSObject {
             }
 
             if z == nil {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -271,8 +271,8 @@ class ZXWhiteRectangleDetector: NSObject {
             }
 
             if t == nil {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -294,8 +294,8 @@ class ZXWhiteRectangleDetector: NSObject {
             }
 
             if x == nil {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -317,8 +317,8 @@ class ZXWhiteRectangleDetector: NSObject {
             }
 
             if y == nil {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -326,8 +326,8 @@ class ZXWhiteRectangleDetector: NSObject {
 
             return self.centerEdges(y, z: z, x: x, t: t)
         } else {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil

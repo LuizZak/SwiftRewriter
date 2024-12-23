@@ -92,8 +92,8 @@ class ZXHybridBinarizer: ZXGlobalHistogramBinarizer {
         if width <= 0 || height <= 0 {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "Source is empty or misbehaving."]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXNotFoundError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXNotFoundError, userInfo: userInfo)
             }
 
             return nil

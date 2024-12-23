@@ -121,7 +121,7 @@ class ZXIntArray: NSObject, NSCopying {
     }
 
     deinit {
-        if _array {
+        if _array != nil {
             free(_array)
         }
     }

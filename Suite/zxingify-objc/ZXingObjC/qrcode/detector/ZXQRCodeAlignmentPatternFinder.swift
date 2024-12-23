@@ -146,8 +146,8 @@ class ZXQRCodeAlignmentPatternFinder: NSObject {
             return self.possibleCenters[0]
         }
 
-        if error {
-            *error = ZXNotFoundErrorInstance()
+        if error != nil {
+            error.pointee = ZXNotFoundErrorInstance()
         }
 
         return nil

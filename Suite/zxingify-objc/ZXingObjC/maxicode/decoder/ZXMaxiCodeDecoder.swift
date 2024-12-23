@@ -108,8 +108,8 @@ class ZXMaxiCodeDecoder: NSObject {
 
             datawords = ZXByteArray(length: 78)
         default:
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -159,8 +159,8 @@ class ZXMaxiCodeDecoder: NSObject {
         var decodeError: Error! = nil
 
         if self.rsDecoder.decode(codewordsInts, twoS: ecCodewords / divisor, error: &decodeError) != true {
-            if decodeError?.code == ZXReedSolomonError && error {
-                *error = ZXChecksumErrorInstance()
+            if decodeError?.code == ZXReedSolomonError && (error != nil) {
+                error.pointee = ZXChecksumErrorInstance()
             }
 
             return false

@@ -98,7 +98,7 @@ class ZXResultPoint: NSObject, NSCopying {
     }
     @objc
     func hash() -> UInt {
-        return 31 * *((&_x) as? UnsafeMutablePointer<CInt>) + *((&_y) as? UnsafeMutablePointer<CInt>)
+        return 31 * ((&_x) as? UnsafeMutablePointer<CInt>).pointee + ((&_y) as? UnsafeMutablePointer<CInt>).pointee
     }
     @objc
     func description() -> String? {

@@ -152,8 +152,8 @@ class ZXReedSolomonDecoder: NSObject {
             if position < 0 {
                 let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "Bad error location"]
 
-                if error {
-                    *error = Error(domain: ZXErrorDomain, code: ZXReedSolomonError, userInfo: userInfo)
+                if error != nil {
+                    error.pointee = Error(domain: ZXErrorDomain, code: ZXReedSolomonError, userInfo: userInfo)
                 }
 
                 return false
@@ -188,8 +188,8 @@ class ZXReedSolomonDecoder: NSObject {
             if rLast?.zero() == true {
                 let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "r_{i-1} was zero"]
 
-                if error {
-                    *error = Error(domain: ZXErrorDomain, code: ZXReedSolomonError, userInfo: userInfo)
+                if error != nil {
+                    error.pointee = Error(domain: ZXErrorDomain, code: ZXReedSolomonError, userInfo: userInfo)
                 }
 
                 return nil
@@ -223,8 +223,8 @@ class ZXReedSolomonDecoder: NSObject {
         if sigmaTildeAtZero == 0 {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "sigmaTilde(0) was zero"]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXReedSolomonError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXReedSolomonError, userInfo: userInfo)
             }
 
             return nil
@@ -266,8 +266,8 @@ class ZXReedSolomonDecoder: NSObject {
         if e != numErrors {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "Error locator degree does not match number of roots"]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXReedSolomonError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXReedSolomonError, userInfo: userInfo)
             }
 
             return nil

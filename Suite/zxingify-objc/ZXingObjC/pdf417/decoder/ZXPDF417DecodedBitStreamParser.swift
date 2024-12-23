@@ -129,8 +129,8 @@ class ZXPDF417DecodedBitStreamParser: NSObject {
                 codeIndex = self.numericCompaction(codewords, codeIndex: codeIndex, result: result)
 
                 if codeIndex < 0 {
-                    if error {
-                        *error = ZXFormatErrorInstance()
+                    if error != nil {
+                        error.pointee = ZXFormatErrorInstance()
                     }
 
                     return nil
@@ -147,15 +147,15 @@ class ZXPDF417DecodedBitStreamParser: NSObject {
                 codeIndex = self.decodeMacroBlock(codewords, codeIndex: codeIndex, resultMetadata: resultMetadata)
 
                 if codeIndex < 0 {
-                    if error {
-                        *error = ZXFormatErrorInstance()
+                    if error != nil {
+                        error.pointee = ZXFormatErrorInstance()
                     }
 
                     return nil
                 }
             case ZX_PDF417_BEGIN_MACRO_PDF417_OPTIONAL_FIELD, ZX_PDF417_MACRO_PDF417_TERMINATOR:
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
 
                 return nil
@@ -167,8 +167,8 @@ class ZXPDF417DecodedBitStreamParser: NSObject {
             if codeIndex < codewords.length {
                 code = codewords.array[codeIndex += 1]
             } else {
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
 
                 return nil
@@ -176,8 +176,8 @@ class ZXPDF417DecodedBitStreamParser: NSObject {
         }
 
         if result.length() == 0 {
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
             return nil

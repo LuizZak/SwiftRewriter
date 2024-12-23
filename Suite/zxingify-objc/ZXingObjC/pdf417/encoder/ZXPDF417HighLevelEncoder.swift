@@ -582,8 +582,8 @@ class ZXPDF417HighLevelEncoder: NSObject {
             if !chString.canBeConvertedToEncoding(encoding) {
                 let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: String(format: "Non-encodable character detected: %c (Unicode: %C)", ch, ch as? unichar)]
 
-                if error {
-                    *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+                if error != nil {
+                    error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
                 }
 
                 return 1
@@ -609,8 +609,8 @@ class ZXPDF417HighLevelEncoder: NSObject {
         } else {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: String(format: "ECI number not in valid range from 0..811799, but was %d", eci)]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
             }
 
             return false

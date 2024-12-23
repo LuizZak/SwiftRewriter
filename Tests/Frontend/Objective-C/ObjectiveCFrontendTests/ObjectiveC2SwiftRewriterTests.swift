@@ -1243,7 +1243,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 """
         )
     }
-    
+
     // TODO: Implement struct aliasing
     func _testRewriteAliasedTypedefStruct() {
         assertRewrite(
@@ -3365,7 +3365,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 }
                 """
         )
-        
+
     }
 
     func testBlockPropertyDeclaration() {
@@ -3437,7 +3437,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
             inputFileName: "test.m"
         )
     }
-    
+
     func testRewriteConstantFromMacroDetectRepeatedDefine() {
         assertRewrite(
             objc: """
@@ -3452,7 +3452,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 """
         )
     }
-    
+
     func testRewriteConstantFromMacroSupportsConstantExpressionTypes() {
         assertRewrite(
             objc: """
@@ -3501,7 +3501,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
             inputFileName: "test.h"
         )
     }
-    
+
     func testRewriteConstantFromMacroIgnoresErrorTypedDeclarations() {
         assertRewrite(
             objc: """
@@ -3522,7 +3522,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
             inputFileName: "test.h"
         )
     }
-    
+
     func testRewriteIgnoresInvalidConstantFromMacro() {
         assertRewrite(
             objc: """
@@ -3536,7 +3536,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
                 """
         )
     }
-    
+
     func testRewriteTableViewScrollViewInheritance() {
         assertRewrite(
             objc: """
@@ -3608,7 +3608,7 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
             """
         )
     }
-    
+
     func testRewriteCArrayFunctionArgument() {
         assertRewrite(
             objc: """
@@ -3707,6 +3707,57 @@ class ObjectiveC2SwiftRewriterTests: XCTestCase {
             swift:
             """
             func a(_ p: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>!) {
+            }
+            """
+        )
+    }
+
+    func testRewritePointerWrite() {
+        assertRewrite(
+            objc:
+            """
+            @implementation A
+            - (void)a:(NSError**)error {
+                *error = nil;
+            }
+            @end
+            """,
+            swift:
+            """
+            class A {
+                func a(_ error: UnsafeMutablePointer<Error?>!) {
+                    error.pointee = nil
+                }
+            }
+            """
+        )
+    }
+
+    func testRewritePointerNilCheck() {
+        assertRewrite(
+            objc:
+            """
+            @implementation A
+            - (void)a:(NSError**)error {
+                if (error) {
+
+                }
+                if (!error) {
+
+                }
+            }
+            @end
+            """,
+            swift:
+            """
+            class A {
+                func a(_ error: UnsafeMutablePointer<Error?>!) {
+                    if error != nil {
+                    }
+
+                    if error == nil {
+                    }
+                }
             }
             """
         )

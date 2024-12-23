@@ -93,8 +93,8 @@ class ZXMonochromeRectangleDetector: NSObject {
         var pointA = self.findCornerFromCenter(halfWidth, deltaX: 0, left: left, right: right, centerY: halfHeight, deltaY: -deltaY, top: top, bottom: bottom, maxWhiteRun: halfWidth / 2)
 
         if pointA == nil {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -105,8 +105,8 @@ class ZXMonochromeRectangleDetector: NSObject {
         let pointB = self.findCornerFromCenter(halfWidth, deltaX: -deltaX, left: left, right: right, centerY: halfHeight, deltaY: 0, top: top, bottom: bottom, maxWhiteRun: halfHeight / 2)
 
         if pointB == nil {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -117,8 +117,8 @@ class ZXMonochromeRectangleDetector: NSObject {
         let pointC = self.findCornerFromCenter(halfWidth, deltaX: deltaX, left: left, right: right, centerY: halfHeight, deltaY: 0, top: top, bottom: bottom, maxWhiteRun: halfHeight / 2)
 
         if pointC == nil {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -129,8 +129,8 @@ class ZXMonochromeRectangleDetector: NSObject {
         let pointD = self.findCornerFromCenter(halfWidth, deltaX: 0, left: left, right: right, centerY: halfHeight, deltaY: deltaY, top: top, bottom: bottom, maxWhiteRun: halfWidth / 2)
 
         if pointD == nil {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -140,8 +140,8 @@ class ZXMonochromeRectangleDetector: NSObject {
         pointA = self.findCornerFromCenter(halfWidth, deltaX: 0, left: left, right: right, centerY: halfHeight, deltaY: -deltaY, top: top, bottom: bottom, maxWhiteRun: halfWidth / 4)
 
         if pointA == nil {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil

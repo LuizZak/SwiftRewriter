@@ -33,8 +33,8 @@ class ZXQRCodeBitMatrixParser: NSObject {
         let dimension = bitMatrix.height
 
         if dimension < 21 || (dimension & 0x3) != 1 {
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
             return nil
@@ -116,8 +116,8 @@ class ZXQRCodeBitMatrixParser: NSObject {
             return self.parsedFormatInfo
         }
 
-        if error {
-            *error = ZXFormatErrorInstance()
+        if error != nil {
+            error.pointee = ZXFormatErrorInstance()
         }
 
         return nil
@@ -198,8 +198,8 @@ class ZXQRCodeBitMatrixParser: NSObject {
             return self.parsedVersion
         }
 
-        if error {
-            *error = ZXFormatErrorInstance()
+        if error != nil {
+            error.pointee = ZXFormatErrorInstance()
         }
 
         return nil
@@ -296,8 +296,8 @@ class ZXQRCodeBitMatrixParser: NSObject {
         }
 
         if resultOffset != version?.totalCodewords {
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
             return nil

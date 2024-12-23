@@ -106,8 +106,8 @@ class ZXQRCodeReader: NSObject, ZXReader {
             let bits = self.extractPureBits(matrix)
 
             if !bits {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil

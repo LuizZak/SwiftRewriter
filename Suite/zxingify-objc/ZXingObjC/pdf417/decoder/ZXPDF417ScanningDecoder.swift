@@ -178,7 +178,7 @@ class ZXPDF417ScanningDecoder: NSObject {
         }
 
         ZXPDF417BoundingBox * leftBoundingBox
-        *rightBoundingBox
+        rightBoundingBox.pointee
 
         if !self.adjustBoundingBox(&leftBoundingBox, rowIndicatorColumn: leftRowIndicatorColumn, error: error) {
             return nil
@@ -191,8 +191,8 @@ class ZXPDF417ScanningDecoder: NSObject {
         let boundingBox = ZXPDF417BoundingBox.mergeLeftBox(leftBoundingBox, rightBox: rightBoundingBox)
 
         if boundingBox == nil {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -203,7 +203,7 @@ class ZXPDF417ScanningDecoder: NSObject {
     @objc
     static func adjustBoundingBox(_ boundingBox: UnsafeMutablePointer<ZXPDF417BoundingBox?>!, rowIndicatorColumn: ZXPDF417DetectionResultRowIndicatorColumn!, error: UnsafeMutablePointer<Error?>!) -> Bool {
         if !rowIndicatorColumn {
-            *boundingBox = nil
+            boundingBox.pointee = nil
 
             return true
         }
@@ -211,17 +211,17 @@ class ZXPDF417ScanningDecoder: NSObject {
         var rowHeights: ZXIntArray!
 
         if !rowIndicatorColumn.getRowHeights(&rowHeights) {
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
-            *boundingBox = nil
+            boundingBox.pointee = nil
 
             return false
         }
 
         if !rowHeights {
-            *boundingBox = nil
+            boundingBox.pointee = nil
 
             return true
         }
@@ -280,9 +280,9 @@ class ZXPDF417ScanningDecoder: NSObject {
             missingEndRows -= 1
         }
 
-        *boundingBox = rowIndicatorColumn.boundingBox.addMissingRows(missingStartRows, missingEndRows: missingEndRows, isLeft: rowIndicatorColumn.isLeft)
+        boundingBox.pointee = rowIndicatorColumn.boundingBox.addMissingRows(missingStartRows, missingEndRows: missingEndRows, isLeft: rowIndicatorColumn.isLeft)
 
-        return *boundingBox != nil
+        return boundingBox.pointee != nil
     }
     @objc
     static func max(_ values: ZXIntArray!) -> CInt {
@@ -381,16 +381,16 @@ class ZXPDF417ScanningDecoder: NSObject {
         let barcodeMatrix = self.createBarcodeMatrix(detectionResult)
 
         if !barcodeMatrix {
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
             return nil
         }
 
         if !self.adjustCodewordCount(detectionResult, barcodeMatrix: barcodeMatrix) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -467,16 +467,16 @@ class ZXPDF417ScanningDecoder: NSObject {
             if result {
                 return result
             } else if e.code != ZXChecksumError {
-                if error {
-                    *error = e
+                if error != nil {
+                    error.pointee = e
                 }
 
                 return nil
             }
 
             if ambiguousIndexCount.length == 0 {
-                if error {
-                    *error = ZXChecksumErrorInstance()
+                if error != nil {
+                    error.pointee = ZXChecksumErrorInstance()
                 }
 
                 return nil
@@ -497,8 +497,8 @@ class ZXPDF417ScanningDecoder: NSObject {
                     ambiguousIndexCount.array[i] = 0
 
                     if i == ambiguousIndexes.length - 1 {
-                        if error {
-                            *error = ZXChecksumErrorInstance()
+                        if error != nil {
+                            error.pointee = ZXChecksumErrorInstance()
                         }
 
                         return nil
@@ -507,8 +507,8 @@ class ZXPDF417ScanningDecoder: NSObject {
             }
         }
 
-        if error {
-            *error = ZXChecksumErrorInstance()
+        if error != nil {
+            error.pointee = ZXChecksumErrorInstance()
         }
 
         return nil
@@ -743,8 +743,8 @@ class ZXPDF417ScanningDecoder: NSObject {
     @objc
     static func decodeCodewords(_ codewords: ZXIntArray!, ecLevel: CInt, erasures: ZXIntArray!, error: UnsafeMutablePointer<Error?>!) -> ZXDecoderResult {
         if codewords.length == 0 {
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
             return nil
@@ -754,16 +754,16 @@ class ZXPDF417ScanningDecoder: NSObject {
         let correctedErrorsCount = self.correctErrors(codewords, erasures: erasures, numECCodewords: numECCodewords)
 
         if correctedErrorsCount == 1 {
-            if error {
-                *error = ZXChecksumErrorInstance()
+            if error != nil {
+                error.pointee = ZXChecksumErrorInstance()
             }
 
             return nil
         }
 
         if !self.verifyCodewordCount(codewords, numECCodewords: numECCodewords) {
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
             return nil

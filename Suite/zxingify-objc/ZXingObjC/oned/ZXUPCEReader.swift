@@ -63,8 +63,8 @@ class ZXUPCEReader: ZXUPCEANReader {
         }
 
         if !self.determineNumSysAndCheckDigit(result, lgPatternFound: lgPatternFound) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return 1

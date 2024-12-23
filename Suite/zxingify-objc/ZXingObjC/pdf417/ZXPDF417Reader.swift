@@ -85,8 +85,8 @@ class ZXPDF417Reader: NSObject, ZXReader, ZXMultipleBarcodeReader {
         let result = self.decode(image, hints: hints, multiple: false, error: error)
 
         if (result == nil) || result?.count == 0 || (result?[0] == nil) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil

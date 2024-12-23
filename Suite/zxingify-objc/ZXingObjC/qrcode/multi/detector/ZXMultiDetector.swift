@@ -67,8 +67,8 @@ class ZXMultiDetector: ZXQRCodeDetector {
         let info = finder.findMulti(hints, error: error)
 
         if info.count == 0 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil

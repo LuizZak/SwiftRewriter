@@ -58,8 +58,8 @@ class ZXRSSExpandedFieldParser: NSObject {
         }
 
         if rawInformation.length() < 2 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -81,8 +81,8 @@ class ZXRSSExpandedFieldParser: NSObject {
                 let result = self.processFixedAI(2, fieldSize: TWO_DIGIT_DATA_LENGTH[Int(i)][1].intValue(), rawInformation: rawInformation)
 
                 if result == nil {
-                    if error {
-                        *error = ZXNotFoundErrorInstance()
+                    if error != nil {
+                        error.pointee = ZXNotFoundErrorInstance()
                     }
 
                     return nil
@@ -93,8 +93,8 @@ class ZXRSSExpandedFieldParser: NSObject {
         }
 
         if rawInformation.length() < 3 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -116,8 +116,8 @@ class ZXRSSExpandedFieldParser: NSObject {
                 let result = self.processFixedAI(3, fieldSize: THREE_DIGIT_DATA_LENGTH[Int(i)][1].intValue(), rawInformation: rawInformation)
 
                 if result == nil {
-                    if error {
-                        *error = ZXNotFoundErrorInstance()
+                    if error != nil {
+                        error.pointee = ZXNotFoundErrorInstance()
                     }
 
                     return nil
@@ -142,8 +142,8 @@ class ZXRSSExpandedFieldParser: NSObject {
                 let result = self.processFixedAI(4, fieldSize: THREE_DIGIT_PLUS_DIGIT_DATA_LENGTH[Int(i)][1].intValue(), rawInformation: rawInformation)
 
                 if result == nil {
-                    if error {
-                        *error = ZXNotFoundErrorInstance()
+                    if error != nil {
+                        error.pointee = ZXNotFoundErrorInstance()
                     }
 
                     return nil
@@ -154,8 +154,8 @@ class ZXRSSExpandedFieldParser: NSObject {
         }
 
         if rawInformation.length() < 4 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -174,8 +174,8 @@ class ZXRSSExpandedFieldParser: NSObject {
                     let result = self.processVariableAI(4, variableFieldSize: FOUR_DIGIT_DATA_LENGTH[Int(i)][2].intValue(), rawInformation: rawInformation)
 
                     if result == nil {
-                        if error {
-                            *error = ZXNotFoundErrorInstance()
+                        if error != nil {
+                            error.pointee = ZXNotFoundErrorInstance()
                         }
 
                         return nil
@@ -187,8 +187,8 @@ class ZXRSSExpandedFieldParser: NSObject {
                 let result = self.processFixedAI(4, fieldSize: FOUR_DIGIT_DATA_LENGTH[Int(i)][1].intValue(), rawInformation: rawInformation)
 
                 if result == nil {
-                    if error {
-                        *error = ZXNotFoundErrorInstance()
+                    if error != nil {
+                        error.pointee = ZXNotFoundErrorInstance()
                     }
 
                     return nil
@@ -198,8 +198,8 @@ class ZXRSSExpandedFieldParser: NSObject {
             }
         }
 
-        if error {
-            *error = ZXNotFoundErrorInstance()
+        if error != nil {
+            error.pointee = ZXNotFoundErrorInstance()
         }
 
         return nil

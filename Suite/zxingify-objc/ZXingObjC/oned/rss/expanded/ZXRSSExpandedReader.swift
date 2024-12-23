@@ -105,8 +105,8 @@ class ZXRSSExpandedReader: ZXAbstractRSSReader {
         pairs = self.decodeRow2pairs(rowNumber, row: row, error: error)
 
         if pairs == nil {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil

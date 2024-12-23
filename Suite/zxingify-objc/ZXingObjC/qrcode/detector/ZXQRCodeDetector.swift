@@ -126,8 +126,8 @@ class ZXQRCodeDetector: NSObject {
         let moduleSize = self.calculateModuleSize(topLeft, topRight: topRight, bottomLeft: bottomLeft)
 
         if moduleSize < 1.0 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -142,8 +142,8 @@ class ZXQRCodeDetector: NSObject {
         let provisionalVersion = ZXQRCodeVersion.provisionalVersionForDimension(dimension)
 
         if provisionalVersion == nil {
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
             return nil
@@ -172,8 +172,8 @@ class ZXQRCodeDetector: NSObject {
                 if alignmentPattern != nil {
                     break
                 } else if alignmentError?.code != ZXNotFoundError {
-                    if error {
-                        *error = alignmentError
+                    if error != nil {
+                        error.pointee = alignmentError
                     }
 
                     return nil
@@ -248,8 +248,8 @@ class ZXQRCodeDetector: NSObject {
         case 2:
             dimension -= 1
         case 3:
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return 1
@@ -450,8 +450,8 @@ class ZXQRCodeDetector: NSObject {
         let alignmentAreaRightX = min((self.image.width ?? 0) - 1, estAlignmentX + allowance)
 
         if alignmentAreaRightX - alignmentAreaLeftX < overallEstModuleSize * 3 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -461,8 +461,8 @@ class ZXQRCodeDetector: NSObject {
         let alignmentAreaBottomY = min((self.image.height ?? 0) - 1, estAlignmentY + allowance)
 
         if alignmentAreaBottomY - alignmentAreaTopY < overallEstModuleSize * 3 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil

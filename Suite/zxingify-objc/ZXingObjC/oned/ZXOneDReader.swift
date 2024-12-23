@@ -117,8 +117,8 @@ class ZXOneDReader: NSObject, ZXReader {
             }
         }
 
-        if error {
-            *error = decodeError
+        if error != nil {
+            error.pointee = decodeError
         }
 
         return nil
@@ -181,8 +181,8 @@ class ZXOneDReader: NSObject, ZXReader {
             if !row && rowError?.code == ZXNotFoundError {
                 continue
             } else if !row {
-                if error {
-                    *error = rowError
+                if error != nil {
+                    error.pointee = rowError
                 }
 
                 return nil
@@ -223,8 +223,8 @@ class ZXOneDReader: NSObject, ZXReader {
             }
         }
 
-        if error {
-            *error = ZXNotFoundErrorInstance()
+        if error != nil {
+            error.pointee = ZXNotFoundErrorInstance()
         }
 
         return nil

@@ -187,8 +187,8 @@ class ZXQRCodeFinderPatternFinder: NSObject {
         let patternInfo = self.selectBestPatterns()
 
         if patternInfo == nil {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil

@@ -325,6 +325,21 @@ class TypeSystemTests: XCTestCase {
         )
     }
 
+    func testIsPointer() {
+        XCTAssertTrue(sut.isPointer(.typeName("UnsafeRawPointer")))
+        XCTAssertTrue(sut.isPointer(.typeName("UnsafeMutableRawPointer")))
+        XCTAssertTrue(sut.isPointer(.typeName("UnsafeRawBufferPointer")))
+        XCTAssertTrue(sut.isPointer(.typeName("UnsafeMutableRawBufferPointer")))
+
+        XCTAssertTrue(sut.isPointer(.generic("UnsafePointer", parameters: [.int])))
+        XCTAssertTrue(sut.isPointer(.generic("UnsafeMutablePointer", parameters: [.int])))
+        XCTAssertTrue(sut.isPointer(.generic("UnsafeBufferPointer", parameters: [.int])))
+        XCTAssertTrue(sut.isPointer(.generic("UnsafeMutableBufferPointer", parameters: [.int])))
+
+        XCTAssertFalse(sut.isPointer(.typeName("NonPointer")))
+        XCTAssertFalse(sut.isPointer(.generic("UnsafeNonPointer", parameters: [.int])))
+    }
+
     func testIsNumeric() {
         // 64-bits
         XCTAssertTrue(sut.isNumeric(.typeName("Int64")))

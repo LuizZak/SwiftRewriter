@@ -126,8 +126,8 @@ class ZXMultiFormatUPCEANReader: ZXOneDReader {
             return result
         }
 
-        if error {
-            *error = ZXNotFoundErrorInstance()
+        if error != nil {
+            error.pointee = ZXNotFoundErrorInstance()
         }
 
         return nil

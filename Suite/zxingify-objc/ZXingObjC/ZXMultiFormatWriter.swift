@@ -134,8 +134,8 @@ class ZXMultiFormatWriter: NSObject, ZXWriter {
         case ZXBarcodeFormat.kBarcodeFormatAztec:
             writer = ZXAztecWriter()
         default:
-            if error {
-                *error = Error.errorWithDomain(ZXErrorDomain, code: ZXWriterError, userInfo: [NSLocalizedDescriptionKey: "No encoder available for format"])
+            if error != nil {
+                error.pointee = Error.errorWithDomain(ZXErrorDomain, code: ZXWriterError, userInfo: [NSLocalizedDescriptionKey: "No encoder available for format"])
             }
 
             return nil

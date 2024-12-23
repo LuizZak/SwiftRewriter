@@ -26,8 +26,8 @@ class ZXAI013x0xDecoder: ZXAI01weightDecoder {
     @objc
     func parseInformationWithError(_ error: UnsafeMutablePointer<Error?>!) -> String? {
         if self.information.size != ZX_AI013x0x_HEADER_SIZE + ZX_AI01_GTIN_SIZE + ZX_AI013x0x_WEIGHT_SIZE {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil

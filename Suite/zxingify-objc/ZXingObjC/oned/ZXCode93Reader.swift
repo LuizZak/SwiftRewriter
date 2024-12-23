@@ -35,8 +35,8 @@ class ZXCode93Reader: ZXOneDReader {
         let start = self.findAsteriskPattern(row)
 
         if start == nil {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -55,8 +55,8 @@ class ZXCode93Reader: ZXOneDReader {
 
         repeat {
             if !ZXOneDReader.recordPattern(row, start: nextStart, counters: theCounters) {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -65,8 +65,8 @@ class ZXCode93Reader: ZXOneDReader {
             let pattern = self.toPattern(theCounters)
 
             if pattern < 0 {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -75,8 +75,8 @@ class ZXCode93Reader: ZXOneDReader {
             decodedChar = self.patternToChar(pattern)
 
             if decodedChar == 0 {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -105,8 +105,8 @@ class ZXCode93Reader: ZXOneDReader {
 
         // Should be at least one more black module
         if nextStart == end || !row.get(nextStart) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -114,8 +114,8 @@ class ZXCode93Reader: ZXOneDReader {
 
         if result.length() < 2 {
             // false positive -- need at least 2 checksum digits
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -130,8 +130,8 @@ class ZXCode93Reader: ZXOneDReader {
         let resultString = self.decodeExtended(result)
 
         if resultString == nil {
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
             return nil
@@ -359,8 +359,8 @@ class ZXCode93Reader: ZXOneDReader {
         }
 
         if result.characterAtIndex(checkPosition) != ZX_CODE93_ALPHABET[total % 47] {
-            if error {
-                *error = ZXChecksumErrorInstance()
+            if error != nil {
+                error.pointee = ZXChecksumErrorInstance()
             }
 
             return false

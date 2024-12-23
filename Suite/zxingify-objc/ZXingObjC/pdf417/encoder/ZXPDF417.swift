@@ -268,8 +268,8 @@ class ZXPDF417: NSObject {
             // +1 for symbol length CW
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: String(format: "Encoded message contains to many code words, message to big (%d bytes)", CInt(msg.length))]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
             }
 
             return false
@@ -362,8 +362,8 @@ class ZXPDF417: NSObject {
         if dimension == nil {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "Unable to fit message in columns"]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
             }
 
             return nil

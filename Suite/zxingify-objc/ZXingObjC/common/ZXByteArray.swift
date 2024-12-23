@@ -157,7 +157,7 @@ class ZXByteArray: NSObject {
     }
 
     deinit {
-        if _array {
+        if _array != nil {
             free(_array)
         }
     }

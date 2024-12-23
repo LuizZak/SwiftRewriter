@@ -266,14 +266,14 @@ class ZXQRCodeDecoder: NSObject {
 
         if self.rsDecoder.decode(codewordsInts, twoS: numECCodewords, error: &decodeError) != true {
             if decodeError?.code == ZXReedSolomonError {
-                if error {
-                    *error = ZXChecksumErrorInstance()
+                if error != nil {
+                    error.pointee = ZXChecksumErrorInstance()
                 }
 
                 return false
             } else {
-                if error {
-                    *error = decodeError
+                if error != nil {
+                    error.pointee = decodeError
                 }
 
                 return false

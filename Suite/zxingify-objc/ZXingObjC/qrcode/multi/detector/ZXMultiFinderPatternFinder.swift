@@ -59,8 +59,8 @@ class ZXMultiFinderPatternFinder: ZXQRCodeFinderPatternFinder {
         let size: UInt = UInt(_possibleCenters.count)
 
         if size < 3 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -179,8 +179,8 @@ class ZXMultiFinderPatternFinder: ZXQRCodeFinderPatternFinder {
             return results
         }
 
-        if error {
-            *error = ZXNotFoundErrorInstance()
+        if error != nil {
+            error.pointee = ZXNotFoundErrorInstance()
         }
 
         return nil

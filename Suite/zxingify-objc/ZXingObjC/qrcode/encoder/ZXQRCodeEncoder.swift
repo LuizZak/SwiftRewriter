@@ -96,8 +96,8 @@ class ZXQRCodeEncoder: NSObject {
             } else {
                 let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "Data too big"]
 
-                if error {
-                    *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+                if error != nil {
+                    error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
                 }
             }
         } else {
@@ -311,8 +311,8 @@ class ZXQRCodeEncoder: NSObject {
 
         let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "Data too big"]
 
-        if error {
-            *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+        if error != nil {
+            error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
         }
 
         return nil
@@ -357,8 +357,8 @@ class ZXQRCodeEncoder: NSObject {
         if bits.size > capacity {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: String(format: "data bits cannot fit in the QR Code %d > %d", bits.size(), capacity)]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
             }
 
             return false
@@ -402,8 +402,8 @@ class ZXQRCodeEncoder: NSObject {
         if bits.size != capacity {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "Bits size does not equal capacity"]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
             }
 
             return false
@@ -426,8 +426,8 @@ class ZXQRCodeEncoder: NSObject {
         if blockID >= numRSBlocks {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "Block ID too large"]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
             }
 
             return false
@@ -445,8 +445,8 @@ class ZXQRCodeEncoder: NSObject {
         if numEcBytesInGroup1 != numEcBytesInGroup2 {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "EC bytes mismatch"]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
             }
 
             return false
@@ -455,8 +455,8 @@ class ZXQRCodeEncoder: NSObject {
         if numRSBlocks != numRsBlocksInGroup1 + numRsBlocksInGroup2 {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "RS blocks mismatch"]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
             }
 
             return false
@@ -465,8 +465,8 @@ class ZXQRCodeEncoder: NSObject {
         if numTotalBytes != ((numDataBytesInGroup1 + numEcBytesInGroup1) * numRsBlocksInGroup1) + ((numDataBytesInGroup2 + numEcBytesInGroup2) * numRsBlocksInGroup2) {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "Total bytes mismatch"]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
             }
 
             return false
@@ -496,8 +496,8 @@ class ZXQRCodeEncoder: NSObject {
         if bits.sizeInBytes() != numDataBytes {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "Number of bits and data bytes does not match"]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
             }
 
             return nil
@@ -543,8 +543,8 @@ class ZXQRCodeEncoder: NSObject {
         if numDataBytes != dataBytesOffset {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "Data bytes does not match offset"]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
             }
 
             return nil
@@ -588,8 +588,8 @@ class ZXQRCodeEncoder: NSObject {
         if numTotalBytes != result.sizeInBytes() {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: String(format: "Interleaving error: %d and %d differ.", numTotalBytes, result.sizeInBytes())]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
             }
 
             return nil
@@ -652,8 +652,8 @@ class ZXQRCodeEncoder: NSObject {
         if numLetters >= (1 << numBits) {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: String(format: "%d is bigger than %d", numLetters, (1 << numBits) - 1)]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
             }
 
             return false
@@ -686,8 +686,8 @@ class ZXQRCodeEncoder: NSObject {
         } else {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: String(format: "Invalid mode: %@", mode)]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
             }
 
             return false
@@ -729,8 +729,8 @@ class ZXQRCodeEncoder: NSObject {
             let code1 = self.alphanumericCode(content.characterAtIndex(i))
 
             if code1 == 1 {
-                if error {
-                    *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: nil)
+                if error != nil {
+                    error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: nil)
                 }
 
                 return false
@@ -740,8 +740,8 @@ class ZXQRCodeEncoder: NSObject {
                 let code2 = self.alphanumericCode(content.characterAtIndex(i + 1))
 
                 if code2 == 1 {
-                    if error {
-                        *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: nil)
+                    if error != nil {
+                        error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: nil)
                     }
 
                     return false
@@ -796,8 +796,8 @@ class ZXQRCodeEncoder: NSObject {
             if subtracted == 1 {
                 let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "Invalid byte sequence"]
 
-                if error {
-                    *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+                if error != nil {
+                    error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
                 }
 
                 return false

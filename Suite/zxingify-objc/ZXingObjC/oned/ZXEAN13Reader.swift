@@ -56,8 +56,8 @@ class ZXEAN13Reader: ZXUPCEANReader {
         }
 
         if !self.determineFirstDigit(result, lgPatternFound: lgPatternFound) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return 1

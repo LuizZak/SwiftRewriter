@@ -111,8 +111,8 @@ class ZXMultiFormatOneDReader: ZXOneDReader {
             }
         }
 
-        if error {
-            *error = ZXNotFoundErrorInstance()
+        if error != nil {
+            error.pointee = ZXNotFoundErrorInstance()
         }
 
         return nil

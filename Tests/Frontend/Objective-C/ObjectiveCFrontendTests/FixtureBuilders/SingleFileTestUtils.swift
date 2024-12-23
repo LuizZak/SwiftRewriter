@@ -166,6 +166,8 @@ class TestSingleInputProvider: InputSourcesProvider, InputSource {
 
 extension XCTestCase {
 
+    /// Asserts that a given Objective-C source code string converts into a given
+    /// Swift source code string.
     @discardableResult
     func assertRewrite(
         objc: String,

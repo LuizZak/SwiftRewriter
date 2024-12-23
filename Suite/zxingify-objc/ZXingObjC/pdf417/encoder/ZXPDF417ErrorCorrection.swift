@@ -70,8 +70,8 @@ class ZXPDF417ErrorCorrection: NSObject {
 
         let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "No recommendation possible"]
 
-        if error {
-            *error = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
+        if error != nil {
+            error.pointee = Error(domain: ZXErrorDomain, code: ZXWriterError, userInfo: userInfo)
         }
 
         return 1

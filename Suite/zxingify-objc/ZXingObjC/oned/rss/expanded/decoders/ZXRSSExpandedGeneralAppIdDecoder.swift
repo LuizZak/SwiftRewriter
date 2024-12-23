@@ -49,8 +49,8 @@ class ZXRSSExpandedGeneralAppIdDecoder: NSObject {
             let info = self.decodeGeneralPurposeField(currentPosition, remaining: remaining)
 
             if info == nil {
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
 
                 return nil
@@ -191,8 +191,8 @@ class ZXRSSExpandedGeneralAppIdDecoder: NSObject {
             }
 
             if localError {
-                if error {
-                    *error = localError
+                if error != nil {
+                    error.pointee = localError
                 }
 
                 return nil
@@ -213,8 +213,8 @@ class ZXRSSExpandedGeneralAppIdDecoder: NSObject {
             let numeric = self.decodeNumeric(self.current.position ?? 0)
 
             if numeric == nil {
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
 
                 return nil
@@ -258,8 +258,8 @@ class ZXRSSExpandedGeneralAppIdDecoder: NSObject {
             let iso = self.decodeIsoIec646(self.current.position ?? 0)
 
             if iso == nil {
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
 
                 return nil

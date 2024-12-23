@@ -102,8 +102,8 @@ class ZXGlobalHistogramBinarizer: ZXBinarizer {
         let blackPoint = self.estimateBlackPoint(localBuckets)
 
         if blackPoint == 1 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -186,8 +186,8 @@ class ZXGlobalHistogramBinarizer: ZXBinarizer {
         let blackPoint = self.estimateBlackPoint(localBuckets)
 
         if blackPoint == 1 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil

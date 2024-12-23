@@ -91,8 +91,8 @@ class ZXAztecDecoder: NSObject {
         let rawbits = self.extractBits(matrix)
 
         if !rawbits {
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
             return nil
@@ -265,8 +265,8 @@ class ZXAztecDecoder: NSObject {
         let numCodewords: CInt = CInt(rawbits.length) / codewordSize
 
         if numCodewords < numDataCodewords {
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
             return 0
@@ -291,11 +291,11 @@ class ZXAztecDecoder: NSObject {
 
         if !rsDecoder.decode(dataWords, twoS: numECCodewords, error: &decodeError) {
             if decodeError?.code == ZXReedSolomonError {
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
-            } else if error {
-                *error = decodeError
+            } else if error != nil {
+                error.pointee = decodeError
             }
 
             return 0
@@ -313,8 +313,8 @@ class ZXAztecDecoder: NSObject {
             let dataWord: int32_t = dataWords.array[i]
 
             if dataWord == 0 || dataWord == mask {
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
 
                 return 0

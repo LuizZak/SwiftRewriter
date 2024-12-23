@@ -43,8 +43,8 @@ class ZXCodaBarReader: ZXOneDReader {
         self.counters.clear()
 
         if !self.setCountersWithRow(row) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -53,8 +53,8 @@ class ZXCodaBarReader: ZXOneDReader {
         let startOffset = self.findStartPattern()
 
         if startOffset == 1 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -68,8 +68,8 @@ class ZXCodaBarReader: ZXOneDReader {
             let charOffset = self.toNarrowWidePattern(nextStart)
 
             if charOffset == 1 {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -104,16 +104,16 @@ class ZXCodaBarReader: ZXOneDReader {
         // otherwise this is probably a false positive. The exception is if we are
         // at the end of the row. (I.e. the barcode barely fits.)
         if nextStart < self.counterLength && trailingWhitespace < lastPatternSize / 2 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
         }
 
         if !self.validatePattern(startOffset) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -133,8 +133,8 @@ class ZXCodaBarReader: ZXOneDReader {
         let startchar: unichar = self.decodeRowResult.characterAtIndex(0)
 
         if !ZXCodaBarReader.arrayContains(ZX_CODA_STARTEND_ENCODING, length: CUnsignedInt(MemoryLayout.size(ofValue: ZX_CODA_STARTEND_ENCODING) / MemoryLayout.size(ofValue: unichar)), key: startchar) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -143,8 +143,8 @@ class ZXCodaBarReader: ZXOneDReader {
         let endchar: unichar = self.decodeRowResult.characterAtIndex(self.decodeRowResult.length - 1)
 
         if !ZXCodaBarReader.arrayContains(ZX_CODA_STARTEND_ENCODING, length: CUnsignedInt(MemoryLayout.size(ofValue: ZX_CODA_STARTEND_ENCODING) / MemoryLayout.size(ofValue: unichar)), key: endchar) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -152,8 +152,8 @@ class ZXCodaBarReader: ZXOneDReader {
 
         // remove stop/start characters character and check if a long enough string is contained
         if self.decodeRowResult.length <= ZX_CODA_MIN_CHARACTER_LENGTH {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil

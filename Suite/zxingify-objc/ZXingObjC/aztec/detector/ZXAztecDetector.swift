@@ -150,8 +150,8 @@ class ZXAztecDetector: NSObject {
         let pCenter = self.matrixCenter()
 
         if pCenter == nil {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -162,8 +162,8 @@ class ZXAztecDetector: NSObject {
         let bullsEyeCorners = self.bullsEyeCorners(pCenter)
 
         if bullsEyeCorners == nil {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -178,8 +178,8 @@ class ZXAztecDetector: NSObject {
 
         // 3. Get the size of the matrix and other parameters from the bull's eye
         if !self.extractParameters(bullsEyeCorners) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -189,8 +189,8 @@ class ZXAztecDetector: NSObject {
         let bits = self.sampleGrid(self.image, topLeft: bullsEyeCorners?[Int(self.shift % 4)], topRight: bullsEyeCorners?[Int((self.shift + 1) % 4)], bottomRight: bullsEyeCorners?[Int((self.shift + 2) % 4)], bottomLeft: bullsEyeCorners?[Int((self.shift + 3) % 4)])
 
         if !bits {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -200,8 +200,8 @@ class ZXAztecDetector: NSObject {
         let corners = self.matrixCornerPoints(bullsEyeCorners)
 
         if corners == nil {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil

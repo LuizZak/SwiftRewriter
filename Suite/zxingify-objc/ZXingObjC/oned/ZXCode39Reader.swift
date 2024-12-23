@@ -90,8 +90,8 @@ class ZXCode39Reader: ZXOneDReader {
         let start = self.findAsteriskPattern(row, counters: theCounters)
 
         if start == nil {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -105,8 +105,8 @@ class ZXCode39Reader: ZXOneDReader {
 
         repeat {
             if !ZXOneDReader.recordPattern(row, start: nextStart, counters: theCounters) {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -115,8 +115,8 @@ class ZXCode39Reader: ZXOneDReader {
             let pattern = self.toNarrowWidePattern(theCounters)
 
             if pattern < 0 {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -125,8 +125,8 @@ class ZXCode39Reader: ZXOneDReader {
             decodedChar = self.patternToChar(pattern)
 
             if decodedChar == 0 {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -168,8 +168,8 @@ class ZXCode39Reader: ZXOneDReader {
         // If 50% of last pattern size, following last pattern, is not whitespace, fail
         // (but if it's whitespace to the very end of the image, that's OK)
         if nextStart != end && (whiteSpaceAfterEnd << 1) < lastPatternSize {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -189,8 +189,8 @@ class ZXCode39Reader: ZXOneDReader {
             }
 
             if result.characterAtIndex(max) != ZX_CODE39_ALPHABET[total % 43] {
-                if error {
-                    *error = ZXChecksumErrorInstance()
+                if error != nil {
+                    error.pointee = ZXChecksumErrorInstance()
                 }
 
                 return nil
@@ -201,8 +201,8 @@ class ZXCode39Reader: ZXOneDReader {
 
         if result.length() == 0 {
             // false positive
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -214,8 +214,8 @@ class ZXCode39Reader: ZXOneDReader {
             resultString = self.decodeExtended(result)
 
             if !resultString {
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
 
                 return nil

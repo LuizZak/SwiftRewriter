@@ -55,8 +55,8 @@ class ZXQRCodeDecodedBitStreamParser: NSObject {
                 mode = ZXQRCodeMode.forBits(bits.readBits(4)) // mode is encoded by 4 bits
 
                 if !mode {
-                    if error {
-                        *error = ZXFormatErrorInstance()
+                    if error != nil {
+                        error.pointee = ZXFormatErrorInstance()
                     }
 
                     return nil
@@ -69,8 +69,8 @@ class ZXQRCodeDecodedBitStreamParser: NSObject {
                     fc1InEffect = true
                 } else if mode.isEqual(ZXQRCodeMode.structuredAppendMode()) {
                     if bits.available < 16 {
-                        if error {
-                            *error = ZXFormatErrorInstance()
+                        if error != nil {
+                            error.pointee = ZXFormatErrorInstance()
                         }
 
                         return nil
@@ -87,8 +87,8 @@ class ZXQRCodeDecodedBitStreamParser: NSObject {
                     currentCharacterSetECI = ZXCharacterSetECI.characterSetECIByValue(value)
 
                     if currentCharacterSetECI == nil {
-                        if error {
-                            *error = ZXFormatErrorInstance()
+                        if error != nil {
+                            error.pointee = ZXFormatErrorInstance()
                         }
 
                         return nil
@@ -100,8 +100,8 @@ class ZXQRCodeDecodedBitStreamParser: NSObject {
 
                     if subset == ZX_GB2312_SUBSET {
                         if !self.decodeHanziSegment(bits, result: result, count: countHanzi) {
-                            if error {
-                                *error = ZXFormatErrorInstance()
+                            if error != nil {
+                                error.pointee = ZXFormatErrorInstance()
                             }
 
                             return nil
@@ -114,39 +114,39 @@ class ZXQRCodeDecodedBitStreamParser: NSObject {
 
                     if mode.isEqual(ZXQRCodeMode.numericMode()) {
                         if !self.decodeNumericSegment(bits, result: result, count: count) {
-                            if error {
-                                *error = ZXFormatErrorInstance()
+                            if error != nil {
+                                error.pointee = ZXFormatErrorInstance()
                             }
 
                             return nil
                         }
                     } else if mode.isEqual(ZXQRCodeMode.alphanumericMode()) {
                         if !self.decodeAlphanumericSegment(bits, result: result, count: count, fc1InEffect: fc1InEffect) {
-                            if error {
-                                *error = ZXFormatErrorInstance()
+                            if error != nil {
+                                error.pointee = ZXFormatErrorInstance()
                             }
 
                             return nil
                         }
                     } else if mode.isEqual(ZXQRCodeMode.byteMode()) {
                         if !self.decodeByteSegment(bits, result: result, count: count, currentCharacterSetECI: currentCharacterSetECI, byteSegments: byteSegments, hints: hints) {
-                            if error {
-                                *error = ZXFormatErrorInstance()
+                            if error != nil {
+                                error.pointee = ZXFormatErrorInstance()
                             }
 
                             return nil
                         }
                     } else if mode.isEqual(ZXQRCodeMode.kanjiMode()) {
                         if !self.decodeKanjiSegment(bits, result: result, count: count) {
-                            if error {
-                                *error = ZXFormatErrorInstance()
+                            if error != nil {
+                                error.pointee = ZXFormatErrorInstance()
                             }
 
                             return nil
                         }
                     } else {
-                        if error {
-                            *error = ZXFormatErrorInstance()
+                        if error != nil {
+                            error.pointee = ZXFormatErrorInstance()
                         }
 
                         return nil

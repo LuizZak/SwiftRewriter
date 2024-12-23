@@ -60,8 +60,8 @@ class ZXDefaultGridSampler: ZXGridSampler {
     @objc
     func sampleGrid(_ image: ZXBitMatrix!, dimensionX: CInt, dimensionY: CInt, transform: ZXPerspectiveTransform!, error: UnsafeMutablePointer<Error?>!) -> ZXBitMatrix {
         if dimensionX <= 0 || dimensionY <= 0 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -110,8 +110,8 @@ class ZXDefaultGridSampler: ZXGridSampler {
                 let yy: CInt = CInt(pointsf[x + 1])
 
                 if xx < 0 || yy < 0 || xx >= image.width || yy >= image.height {
-                    if error {
-                        *error = ZXNotFoundErrorInstance()
+                    if error != nil {
+                        error.pointee = ZXNotFoundErrorInstance()
                     }
 
                     return nil

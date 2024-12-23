@@ -34,8 +34,8 @@ class ZXDataMatrixBitMatrixParser: NSObject {
             let dimension = bitMatrix.height
 
             if dimension < 8 || dimension > 144 || (dimension & 0x1) != 0 {
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
 
                 return nil
@@ -44,8 +44,8 @@ class ZXDataMatrixBitMatrixParser: NSObject {
             _version = self.readVersion(bitMatrix)
 
             if !_version {
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
 
                 return nil

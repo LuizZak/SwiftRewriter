@@ -80,8 +80,8 @@ class ZXByQuadrantReader: NSObject, ZXReader {
         if result != nil {
             return result
         } else if decodeError?.code != ZXNotFoundError {
-            if error {
-                *error = decodeError
+            if error != nil {
+                error.pointee = decodeError
             }
 
             return nil
@@ -95,8 +95,8 @@ class ZXByQuadrantReader: NSObject, ZXReader {
 
             return result
         } else if decodeError?.code != ZXNotFoundError {
-            if error {
-                *error = decodeError
+            if error != nil {
+                error.pointee = decodeError
             }
 
             return nil
@@ -110,8 +110,8 @@ class ZXByQuadrantReader: NSObject, ZXReader {
 
             return result
         } else if decodeError?.code != ZXNotFoundError {
-            if error {
-                *error = decodeError
+            if error != nil {
+                error.pointee = decodeError
             }
 
             return nil
@@ -125,8 +125,8 @@ class ZXByQuadrantReader: NSObject, ZXReader {
 
             return result
         } else if decodeError?.code != ZXNotFoundError {
-            if error {
-                *error = decodeError
+            if error != nil {
+                error.pointee = decodeError
             }
 
             return nil

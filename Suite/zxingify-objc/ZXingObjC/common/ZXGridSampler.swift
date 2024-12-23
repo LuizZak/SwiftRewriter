@@ -211,8 +211,8 @@ class ZXGridSampler: NSObject {
             let y: CInt = CInt(points[offset + 1])
 
             if x < 1 || x > width || y < 1 || y > height {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return false
@@ -251,8 +251,8 @@ class ZXGridSampler: NSObject {
             let y: CInt = CInt(points[offset + 1])
 
             if x < 1 || x > width || y < 1 || y > height {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return false

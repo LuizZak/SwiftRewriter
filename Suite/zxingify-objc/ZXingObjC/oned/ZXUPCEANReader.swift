@@ -168,8 +168,8 @@ class ZXUPCEANReader: ZXOneDReader {
         let quietEnd: CInt = end + (end - CInt(endRange.location))
 
         if quietEnd >= row.size || !row.isRange(end, end: quietEnd, value: false) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -179,16 +179,16 @@ class ZXUPCEANReader: ZXOneDReader {
 
         // UPC/EAN should never be less than 8 chars anyway
         if resultString.length() < 8 {
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
             return nil
         }
 
         if !self.checkChecksum(resultString, error: error) {
-            if error {
-                *error = ZXChecksumErrorInstance()
+            if error != nil {
+                error.pointee = ZXChecksumErrorInstance()
             }
 
             return nil
@@ -228,8 +228,8 @@ class ZXUPCEANReader: ZXOneDReader {
             }
 
             if !valid {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -259,8 +259,8 @@ class ZXUPCEANReader: ZXOneDReader {
         if type(of: self).checkStandardUPCEANChecksum(s) {
             return true
         } else {
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
             return false
@@ -414,8 +414,8 @@ class ZXUPCEANReader: ZXOneDReader {
             }
         }
 
-        if error {
-            *error = ZXNotFoundErrorInstance()
+        if error != nil {
+            error.pointee = ZXNotFoundErrorInstance()
         }
 
         return NSMakeRange(NSNotFound, 0)
@@ -450,8 +450,8 @@ class ZXUPCEANReader: ZXOneDReader {
     @objc
     static func decodeDigit(_ row: ZXBitArray!, counters: ZXIntArray!, rowOffset: CInt, patternType: ZX_UPC_EAN_PATTERNS, error: UnsafeMutablePointer<Error?>!) -> CInt {
         if !self.recordPattern(row, start: rowOffset, counters: counters) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return 1
@@ -525,8 +525,8 @@ class ZXUPCEANReader: ZXOneDReader {
         if bestMatch >= 0 {
             return bestMatch
         } else {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return 1

@@ -139,8 +139,8 @@ class ZXCode128Reader: ZXOneDReader {
         let startPatternInfo = self.findStartPattern(row)
 
         if startPatternInfo == nil {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -158,8 +158,8 @@ class ZXCode128Reader: ZXOneDReader {
         case ZX_CODE128_CODE_START_C:
             codeSet = ZX_CODE128_CODE_CODE_C
         default:
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
             return nil
@@ -189,8 +189,8 @@ class ZXCode128Reader: ZXOneDReader {
             code = self.decodeCode(row, counters: counters, rowOffset: nextStart)
 
             if code == 1 {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -214,8 +214,8 @@ class ZXCode128Reader: ZXOneDReader {
             // Take care of illegal start codes
             switch code {
             case ZX_CODE128_CODE_START_A, ZX_CODE128_CODE_START_B, ZX_CODE128_CODE_START_C:
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
 
                 return nil
@@ -408,8 +408,8 @@ class ZXCode128Reader: ZXOneDReader {
         nextStart = row.nextUnset(nextStart)
 
         if !row.isRange(nextStart, end: min(row.size, nextStart + (nextStart - lastStart) / 2), value: false) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -420,8 +420,8 @@ class ZXCode128Reader: ZXOneDReader {
 
         // lastCode is the checksum then:
         if checksumTotal % 103 != lastCode {
-            if error {
-                *error = ZXChecksumErrorInstance()
+            if error != nil {
+                error.pointee = ZXChecksumErrorInstance()
             }
 
             return nil
@@ -432,8 +432,8 @@ class ZXCode128Reader: ZXOneDReader {
 
         if resultLength == 0 {
             // false positive
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil

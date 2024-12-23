@@ -94,16 +94,16 @@ class ZXUPCEANExtension2Support: NSObject {
         }
 
         if result.length != 2 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return 1
         }
 
         if result.intValue() % 4 != checkParity {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return 1

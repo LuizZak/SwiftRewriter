@@ -61,8 +61,8 @@ class ZXUPCAReader: ZXUPCEANReader {
             result = self.maybeReturnResult(result)
 
             if result == nil {
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
 
                 return nil
@@ -81,8 +81,8 @@ class ZXUPCAReader: ZXUPCEANReader {
             result = self.maybeReturnResult(result)
 
             if result == nil {
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
 
                 return nil
@@ -101,8 +101,8 @@ class ZXUPCAReader: ZXUPCEANReader {
             result = self.maybeReturnResult(result)
 
             if result == nil {
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
 
                 return nil
@@ -121,8 +121,8 @@ class ZXUPCAReader: ZXUPCEANReader {
             result = self.maybeReturnResult(result)
 
             if result == nil {
-                if error {
-                    *error = ZXFormatErrorInstance()
+                if error != nil {
+                    error.pointee = ZXFormatErrorInstance()
                 }
 
                 return nil

@@ -94,8 +94,8 @@ class ZXITFReader: ZXOneDReader {
         let endRange = self.decodeEnd(row)
 
         if (startRange == nil) || (endRange == nil) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -104,8 +104,8 @@ class ZXITFReader: ZXOneDReader {
         let resultString = NSMutableString(capacity: 20)
 
         if !self.decodeMiddle(row, payloadStart: startRange?.array[1], payloadEnd: endRange?.array[0], resultString: resultString) {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
@@ -157,8 +157,8 @@ class ZXITFReader: ZXOneDReader {
         }
 
         if !lengthOK {
-            if error {
-                *error = ZXFormatErrorInstance()
+            if error != nil {
+                error.pointee = ZXFormatErrorInstance()
             }
 
             return nil

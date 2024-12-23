@@ -140,8 +140,7 @@ class MultiFileTestBuilder {
         return self
     }
 
-    func assertErrorStreamIs(_ expected: String, file: StaticString = #filePath, line: UInt = #line)
-    {
+    func assertErrorStreamIs(_ expected: String, file: StaticString = #filePath, line: UInt = #line) {
         if errors != expected {
             XCTFail(
                 """
@@ -170,13 +169,11 @@ class CompiledMultiFileTestResults {
         expectedFiles: [ExpectedFile],
         errors: String
     ) {
-
         self.test = test
         self.results = results
         self.files = files
         self.expectedFiles = expectedFiles
         self.errors = errors
-
     }
 
     func assertGeneratedFileCount(

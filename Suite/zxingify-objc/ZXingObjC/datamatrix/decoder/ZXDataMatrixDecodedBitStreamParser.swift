@@ -54,8 +54,8 @@ class ZXDataMatrixDecodedBitStreamParser: NSObject {
                 mode = self.decodeAsciiSegment(bits, result: result, resultTrailer: resultTrailer)
 
                 if mode == 1 {
-                    if error {
-                        *error = ZXFormatErrorInstance()
+                    if error != nil {
+                        error.pointee = ZXFormatErrorInstance()
                     }
 
                     return nil
@@ -64,24 +64,24 @@ class ZXDataMatrixDecodedBitStreamParser: NSObject {
                 switch mode {
                 case C40_ENCODE:
                     if !self.decodeC40Segment(bits, result: result) {
-                        if error {
-                            *error = ZXFormatErrorInstance()
+                        if error != nil {
+                            error.pointee = ZXFormatErrorInstance()
                         }
 
                         return nil
                     }
                 case TEXT_ENCODE:
                     if !self.decodeTextSegment(bits, result: result) {
-                        if error {
-                            *error = ZXFormatErrorInstance()
+                        if error != nil {
+                            error.pointee = ZXFormatErrorInstance()
                         }
 
                         return nil
                     }
                 case ANSIX12_ENCODE:
                     if !self.decodeAnsiX12Segment(bits, result: result) {
-                        if error {
-                            *error = ZXFormatErrorInstance()
+                        if error != nil {
+                            error.pointee = ZXFormatErrorInstance()
                         }
 
                         return nil
@@ -90,15 +90,15 @@ class ZXDataMatrixDecodedBitStreamParser: NSObject {
                     self.decodeEdifactSegment(bits, result: result)
                 case BASE256_ENCODE:
                     if !self.decodeBase256Segment(bits, result: result, byteSegments: byteSegments) {
-                        if error {
-                            *error = ZXFormatErrorInstance()
+                        if error != nil {
+                            error.pointee = ZXFormatErrorInstance()
                         }
 
                         return nil
                     }
                 default:
-                    if error {
-                        *error = ZXFormatErrorInstance()
+                    if error != nil {
+                        error.pointee = ZXFormatErrorInstance()
                     }
 
                     return nil

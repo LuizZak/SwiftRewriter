@@ -147,7 +147,7 @@ class ZXPDF417DetectionResultRowIndicatorColumn: ZXPDF417DetectionResultColumn {
         let barcodeMetadata = self.barcodeMetadata()
 
         if !barcodeMetadata {
-            *rowHeights = nil
+            rowHeights.pointee = nil
 
             return true
         }
@@ -161,7 +161,7 @@ class ZXPDF417DetectionResultRowIndicatorColumn: ZXPDF417DetectionResultColumn {
                 let rowNumber: CInt = codeword.rowNumber
 
                 if rowNumber >= result.length {
-                    *rowHeights = nil
+                    rowHeights.pointee = nil
 
                     // We have more rows than the barcode metadata allows for, ignore them.
                     continue
@@ -171,7 +171,7 @@ class ZXPDF417DetectionResultRowIndicatorColumn: ZXPDF417DetectionResultColumn {
             } // else throw exception?
         }
 
-        *rowHeights = result
+        rowHeights.pointee = result
 
         return true
     }

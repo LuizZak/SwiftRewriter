@@ -122,8 +122,17 @@ public class ObjectiveCASTCorrectorExpressionPass: ASTRewriterPass {
             }
 
             return exp
+
         case .arithmetic:
             exp.exp = super.visitExpression(exp.exp)
+
+            if exp.op == .multiply {
+                if let newExp = correctToPointerDereference(exp.exp) {
+                    notifyChange()
+
+                    return newExp
+                }
+            }
 
             if let newExp = correctToNumeric(exp.exp) {
                 notifyChange()
@@ -530,6 +539,10 @@ public class ObjectiveCASTCorrectorExpressionPass: ASTRewriterPass {
         return .parens(converted).typed(defValue.resolvedType?.deepUnwrapped)
     }
 
+    func correctToPointerDereference(_ exp: Expression) -> Expression? {
+        return exp.copy().dot("pointee")
+    }
+
     func correctToNumeric(_ exp: Expression) -> Expression? {
         guard let type = exp.resolvedType else {
             return nil
@@ -589,6 +602,12 @@ public class ObjectiveCASTCorrectorExpressionPass: ASTRewriterPass {
         return cast
     }
 
+    /// Corrects a given expression into a Swift boolean expression, depending
+    /// on its underlying type.
+    ///
+    /// Corrects numerical expressions into checks against `0`, pointer
+    /// expressions as comparisons against `nil`, and optional boolean comparisons
+    /// as checks against `true`.
     func correctToBoolean(_ exp: Expression) -> Expression? {
         func innerHandle(_ exp: Expression, negated: Bool) -> Expression? {
             guard let type = exp.resolvedType else {
@@ -596,6 +615,19 @@ public class ObjectiveCASTCorrectorExpressionPass: ASTRewriterPass {
             }
 
             let newExp = exp.copy()
+
+            // <Pointer>
+            if typeSystem.isPointer(type.deepUnwrapped) {
+                newExp.expectedType = nil
+
+                let outer =
+                    newExp.binary(op: negated ? .equals : .unequals,
+                                  rhs: .constant(.nil))
+
+                outer.resolvedType = .bool
+
+                return outer
+            }
 
             // <Numeric>
             if typeSystem.isNumeric(type.deepUnwrapped) {

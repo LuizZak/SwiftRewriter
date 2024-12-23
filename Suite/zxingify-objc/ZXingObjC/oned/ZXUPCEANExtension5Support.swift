@@ -96,8 +96,8 @@ class ZXUPCEANExtension5Support: NSObject {
         }
 
         if result.length != 5 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return 1
@@ -106,14 +106,14 @@ class ZXUPCEANExtension5Support: NSObject {
         let checkDigit = self.determineCheckDigit(lgPatternFound)
 
         if checkDigit == 1 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return 1
         } else if self.extensionChecksum(result) != checkDigit {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return 1

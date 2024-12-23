@@ -87,8 +87,8 @@ class ZXMaxiCodeReader: NSObject, ZXReader {
             let bits = self.extractPureBits(matrix)
 
             if !bits {
-                if error {
-                    *error = ZXNotFoundErrorInstance()
+                if error != nil {
+                    error.pointee = ZXNotFoundErrorInstance()
                 }
 
                 return nil
@@ -100,8 +100,8 @@ class ZXMaxiCodeReader: NSObject, ZXReader {
                 return nil
             }
         } else {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil

@@ -74,8 +74,8 @@ class ZXQRCodeMatrixUtil: NSObject {
     static func embedBasicPatterns(_ version: ZXQRCodeVersion!, matrix: ZXByteMatrix!, error: UnsafeMutablePointer<Error?>!) -> Bool {
         // Let's get started with embedding big squares at corners.
         if !self.embedPositionDetectionPatternsAndSeparators(matrix) {
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXNotFoundError, userInfo: nil)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXNotFoundError, userInfo: nil)
             }
 
             return false
@@ -83,8 +83,8 @@ class ZXQRCodeMatrixUtil: NSObject {
 
         // Then, embed the dark dot at the left bottom corner.
         if !self.embedDarkDotAtLeftBottomCorner(matrix) {
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXNotFoundError, userInfo: nil)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXNotFoundError, userInfo: nil)
             }
 
             return false
@@ -245,8 +245,8 @@ class ZXQRCodeMatrixUtil: NSObject {
         if bitIndex != dataBits.size {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: String(format: "Not all bits consumed: %d/%d", bitIndex, dataBits.size())]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXNotFoundError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXNotFoundError, userInfo: userInfo)
             }
 
             return false
@@ -319,8 +319,8 @@ class ZXQRCodeMatrixUtil: NSObject {
         if !ZXQRCode.isValidMaskPattern(maskPattern) {
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: "Invalid mask pattern"]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXNotFoundError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXNotFoundError, userInfo: userInfo)
             }
 
             return false
@@ -343,8 +343,8 @@ class ZXQRCodeMatrixUtil: NSObject {
             // Just in case.
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: String(format: "should not happen but we got: %d", bits.size())]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXNotFoundError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXNotFoundError, userInfo: userInfo)
             }
 
             return false
@@ -366,8 +366,8 @@ class ZXQRCodeMatrixUtil: NSObject {
             // Just in case.
             let userInfo: NSDictionary! = [NSLocalizedDescriptionKey: String(format: "should not happen but we got: %d", bits.size())]
 
-            if error {
-                *error = Error(domain: ZXErrorDomain, code: ZXNotFoundError, userInfo: userInfo)
+            if error != nil {
+                error.pointee = Error(domain: ZXErrorDomain, code: ZXNotFoundError, userInfo: userInfo)
             }
 
             return false

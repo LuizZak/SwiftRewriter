@@ -105,7 +105,7 @@ class ZXCGImageLuminanceSource: ZXLuminanceSource {
             CGImageRelease(_image)
         }
 
-        if _data {
+        if _data != nil {
             free(_data)
         }
     }

@@ -85,8 +85,8 @@ class ZXGenericMultipleBarcodeReader: NSObject, ZXMultipleBarcodeReader {
         self.doDecodeMultiple(image, hints: hints, results: results, xOffset: 0, yOffset: 0, currentDepth: 0, error: error)
 
         if results.count == 0 {
-            if error {
-                *error = ZXNotFoundErrorInstance()
+            if error != nil {
+                error.pointee = ZXNotFoundErrorInstance()
             }
 
             return nil
