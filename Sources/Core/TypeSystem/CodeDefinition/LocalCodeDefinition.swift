@@ -296,10 +296,10 @@ public extension CodeDefinition {
 
         if let pattern = catchBlock.pattern {
             switch pattern.simplified {
-            case .identifier(let name):
+            case .identifier(let name, let typeAnnotation):
                 return LocalCodeDefinition(
                     constantNamed: name,
-                    type: .swiftError,
+                    type: typeAnnotation?.type ?? .swiftError,
                     location: .catchBlock(catchBlock, .`self`)
                 )
             // TODO: Support mode pattern binding types

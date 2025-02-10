@@ -36,22 +36,22 @@ class SwiftTypeStringProducerTests: XCTestCase {
 
     func testBlock_attributes() {
         expectSwift(
-            .block(returnType: .void, parameters: [], attributes: [.autoclosure]),
+            .block(returnType: .void, attributes: [.autoclosure]),
             toConvertTo: "@autoclosure () -> Void"
         )
         expectSwift(
-            .block(returnType: .void, parameters: [], attributes: [.escaping]),
+            .block(returnType: .void, attributes: [.escaping]),
             toConvertTo: "@escaping () -> Void"
         )
         expectSwift(
-            .block(returnType: .void, parameters: [], attributes: [.convention(.c)]),
+            .block(returnType: .void, attributes: [.convention(.c)]),
             toConvertTo: "@convention(c) () -> Void"
         )
     }
 
     func testBlock_attributes_multiple() {
         expectSwift(
-            .block(returnType: .void, parameters: [], attributes: [.autoclosure, .escaping, .convention(.block)]),
+            .block(returnType: .void, attributes: [.autoclosure, .escaping, .convention(.block)]),
             toConvertTo: "@autoclosure @convention(block) @escaping () -> Void"
         )
     }

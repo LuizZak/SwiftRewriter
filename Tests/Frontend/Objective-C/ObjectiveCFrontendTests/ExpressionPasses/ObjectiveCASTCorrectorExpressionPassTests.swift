@@ -385,10 +385,10 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
             // a?.b.c()
             expression:
                 exp
-                .dot("c", type: .swiftBlock(returnType: .int, parameters: [])).typed(
-                    .optional(.swiftBlock(returnType: .int, parameters: []))
+                .dot("c", type: .swiftBlock(returnType: .int)).typed(
+                    .optional(.swiftBlock(returnType: .int))
                 )
-                .call([], callableSignature: .swiftBlock(returnType: .int, parameters: [])).typed(
+                .call([], callableSignature: .swiftBlock(returnType: .int, parameters: [] as [SwiftType])).typed(
                     .optional(.int)
                 ),
             // (a?.b ?? B()).c()
@@ -400,7 +400,7 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
         XCTAssertEqual(res.resolvedType, .int)
         XCTAssertEqual(
             res.asPostfix?.exp.resolvedType,
-            .swiftBlock(returnType: .int, parameters: [])
+            .swiftBlock(returnType: .int)
         )
     }
 
@@ -442,9 +442,9 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
             // a.b.c()
             expression:
                 exp
-                .dot("c", type: .swiftBlock(returnType: .int, parameters: []))
-                .typed(.nullabilityUnspecified(.swiftBlock(returnType: .int, parameters: [])))
-                .call([], callableSignature: .swiftBlock(returnType: .int, parameters: []))
+                .dot("c", type: .swiftBlock(returnType: .int))
+                .typed(.nullabilityUnspecified(.swiftBlock(returnType: .int)))
+                .call([], callableSignature: .swiftBlock(returnType: .int, parameters: [] as [SwiftType]))
                 .typed(.nullabilityUnspecified(.int))
         )
     }
@@ -810,7 +810,7 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
     /// Skip transform if the block receives no parameters but the function call
     /// site reports one parameter.
     func testSkipBlockIfLetUnwrappingIfNoParametersAvailable() {
-        let blockType = BlockSwiftType(returnType: .void, parameters: [])
+        let blockType = BlockSwiftType(returnType: .void, parameters: [] as [SwiftType])
         let funcType = SwiftType.block(blockType)
 
         let exp =
@@ -830,7 +830,7 @@ class ObjectiveCASTCorrectorExpressionPassTests: ExpressionPassTestCase<Objectiv
         let blockTypeA = BlockSwiftType(returnType: .void, parameters: ["A"])
         let funcTypeA = SwiftType.block(blockTypeA)
 
-        let blockTypeB = BlockSwiftType(returnType: .optional("A"), parameters: [])
+        let blockTypeB = BlockSwiftType(returnType: .optional("A"), parameters: [] as [SwiftType])
         let funcTypeB = SwiftType.block(blockTypeB)
 
         let exp =

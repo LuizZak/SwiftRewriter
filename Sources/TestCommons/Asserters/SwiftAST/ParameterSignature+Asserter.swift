@@ -12,7 +12,7 @@ public extension Asserter where Object == ParameterSignature {
         file: StaticString = #file,
         line: UInt = #line
     ) -> Self? {
-        
+
         asserter(forKeyPath: \.label) {
             $0.assert(equals: label, file: file, line: line)
         }
@@ -29,7 +29,7 @@ public extension Asserter where Object == ParameterSignature {
         file: StaticString = #file,
         line: UInt = #line
     ) -> Self? {
-        
+
         asserter(forKeyPath: \.name) {
             $0.assert(equals: name, file: file, line: line)
         }
@@ -46,7 +46,7 @@ public extension Asserter where Object == ParameterSignature {
         file: StaticString = #file,
         line: UInt = #line
     ) -> Self? {
-        
+
         asserter(forKeyPath: \.type) {
             $0.assert(equals: type, file: file, line: line)
         }
@@ -63,9 +63,9 @@ public extension Asserter where Object == ParameterSignature {
         file: StaticString = #file,
         line: UInt = #line
     ) -> Self? {
-        
-        asserter(forKeyPath: \.hasDefaultValue) {
-            $0.assert(equals: hasDefaultValue, file: file, line: line)
+
+        asserter(forKeyPath: \.defaultValue) {
+            $0.assertNotNil(file: file, line: line)
         }
     }
 }

@@ -380,7 +380,7 @@ let aggregateTargets: [Target] =
 let package = Package(
     name: "SwiftRewriter",
     platforms: [
-        .macOS(.v10_15),
+        .macOS(.v12),
     ],
     products: [
         .library(
@@ -402,8 +402,8 @@ let package = Package(
         //
         .package(url: "https://github.com/LuizZak/MiniLexer.git", exact: "0.10.0"),
         .package(url: "https://github.com/LuizZak/MiniGraphviz.git", exact: "0.1.0"),
-        .package(url: "https://github.com/LuizZak/MiniDigraph.git", exact: "0.6.0"),
-        .package(url: "https://github.com/LuizZak/SwiftAST.git", exact: "0.11.0"),
+        .package(url: "https://github.com/LuizZak/MiniDigraph.git", exact: "0.8.0"),
+        .package(url: "https://github.com/LuizZak/SwiftAST.git", exact: "0.14.0"),
     ],
     targets: aggregateTargets + [
         swiftRewriterTarget,

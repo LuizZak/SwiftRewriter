@@ -38,7 +38,7 @@ public class ASTSimplifier: ASTRewriterPass {
             var split: [Expression] = []
             for expression in expressions.expressions {
                 if let tuple = expression.asTuple {
-                    split.append(contentsOf: tuple.elements)
+                    split.append(contentsOf: tuple.elements.map(\.exp))
                 } else {
                     split.append(expression)
                 }

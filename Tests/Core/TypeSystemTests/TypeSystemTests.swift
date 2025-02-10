@@ -24,8 +24,8 @@ class TypeSystemTests: XCTestCase {
 
         XCTAssertTrue(
             sut.typesMatch(
-                .nested([.typeName("A"), .typeName("B")]),
-                .nested([.typeName("A"), .typeName("B")]),
+                .nested(.init(base: "A", nested: "B")),
+                .nested(.init(base: "A", nested: "B")),
                 ignoreNullability: false
             )
         )
@@ -42,8 +42,8 @@ class TypeSystemTests: XCTestCase {
 
         XCTAssertFalse(
             sut.typesMatch(
-                .nested([.typeName("A"), .typeName("B")]),
-                .nested([.typeName("A"), .typeName("DIFFER")]),
+                .nested(.init(base: "A", nested: "B")),
+                .nested(.init(base: "A", nested: "DIFFER")),
                 ignoreNullability: false
             )
         )
@@ -60,8 +60,8 @@ class TypeSystemTests: XCTestCase {
 
         XCTAssertTrue(
             sut.typesMatch(
-                .optional(.nested([.typeName("A"), .typeName("B")])),
-                .nested([.typeName("A"), .typeName("B")]),
+                .optional(.nested(.init(base: "A", nested: "B"))),
+                .nested(.init(base: "A", nested: "B")),
                 ignoreNullability: true
             )
         )
@@ -107,8 +107,8 @@ class TypeSystemTests: XCTestCase {
 
         XCTAssertTrue(
             sut.typesMatch(
-                .swiftBlock(returnType: "A", parameters: []),
-                .swiftBlock(returnType: "B", parameters: []),
+                .swiftBlock(returnType: "A"),
+                .swiftBlock(returnType: "B"),
                 ignoreNullability: false
             )
         )
@@ -117,13 +117,13 @@ class TypeSystemTests: XCTestCase {
     func testTypesMatchExpandBlockTypeAliases() {
         sut.addTypealias(
             aliasName: "A",
-            originalType: .swiftBlock(returnType: .void, parameters: [])
+            originalType: .swiftBlock(returnType: .void)
         )
 
         XCTAssertTrue(
             sut.typesMatch(
                 .typeName("A"),
-                .swiftBlock(returnType: .void, parameters: []),
+                .swiftBlock(returnType: .void),
                 ignoreNullability: false
             )
         )
@@ -132,7 +132,7 @@ class TypeSystemTests: XCTestCase {
     func testTypesMatchExpandBlockTypeAliasesDeep() {
         sut.addTypealias(
             aliasName: "A",
-            originalType: .swiftBlock(returnType: "B", parameters: [])
+            originalType: .swiftBlock(returnType: "B")
         )
 
         sut.addTypealias(
@@ -143,7 +143,7 @@ class TypeSystemTests: XCTestCase {
         XCTAssertTrue(
             sut.typesMatch(
                 .typeName("A"),
-                .swiftBlock(returnType: .typeName("C"), parameters: []),
+                .swiftBlock(returnType: .typeName("C")),
                 ignoreNullability: false
             )
         )
@@ -195,24 +195,24 @@ class TypeSystemTests: XCTestCase {
     }
 
     func testDefaultValueForVoid() {
-        XCTAssertEqual(sut.defaultValue(for: .void), .tuple([]))
+        XCTAssertEqual(sut.defaultValue(for: .void), .voidTuple())
         XCTAssertEqual(sut.defaultValue(for: .void)?.resolvedType, .void)
     }
 
     func testDefaultValueForTuple() {
         XCTAssertEqual(
-            sut.defaultValue(for: .tuple(.types([.int, .int]))),
+            sut.defaultValue(for: .tuple([.int, .int])),
             .tuple([.constant(0), .constant(0)])
         )
 
         XCTAssertEqual(
-            sut.defaultValue(for: .tuple(.types([.int, .int])))?.resolvedType,
-            .tuple(.types([.int, .int]))
+            sut.defaultValue(for: .tuple([.int, .int]))?.resolvedType,
+            .tuple([.int, .int])
         )
     }
 
     func testDefaultValueForTupleWithNonRepresentableDefaultValue() {
-        XCTAssertNil(sut.defaultValue(for: .tuple(.types([.int, .typeName("UnknownType")]))))
+        XCTAssertNil(sut.defaultValue(for: .tuple([.int, .typeName("UnknownType")])))
     }
 
     func testDefaultValueOfUnknownType() {
@@ -787,10 +787,10 @@ class TypeSystemTests: XCTestCase {
     func testAddTypeAlias() {
         sut.addTypealias(
             aliasName: "A",
-            originalType: .swiftBlock(returnType: .void, parameters: [])
+            originalType: .swiftBlock(returnType: .void)
         )
 
-        XCTAssertEqual(sut.resolveAlias(in: "A"), .swiftBlock(returnType: .void, parameters: []))
+        XCTAssertEqual(sut.resolveAlias(in: "A"), .swiftBlock(returnType: .void))
     }
 
     func testResolveAliasRecursive() {
@@ -1617,7 +1617,7 @@ class TypeSystemTests: XCTestCase {
             .build()
         sut.addType(type)
 
-        let result = sut.findType(for: .nested(["A", "B"]))
+        let result = sut.findType(for: .nested(.init(base: "A", nested: "B")))
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.typeName, "B")
     }
@@ -1628,7 +1628,7 @@ class TypeSystemTests: XCTestCase {
             .build()
         sut.addType(type)
 
-        let result = sut.findType(for: .metatype(for: .nested(["A", "B"])))
+        let result = sut.findType(for: .metatype(for: .nested(.init(base: "A", nested: "B"))))
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.typeName, "B")
     }

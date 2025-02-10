@@ -69,7 +69,7 @@ class DefaultTypeMapperTests: XCTestCase {
         )
         expectSwift(.metatype(for: .int), toConvertTo: "Int.self")
         expectSwift(.tuple(.empty), toConvertTo: "Void")
-        expectSwift(.tuple(.types([.int, .int])), toConvertTo: "(Int, Int)")
+        expectSwift(.tuple([.int, .int]), toConvertTo: "(Int, Int)")
     }
 
     func testConvertNSObjectSubclassPointersAsInstanceTypes() {
@@ -676,7 +676,7 @@ class DefaultTypeMapperTests: XCTestCase {
     func testNullableBlockViaTypealias() {
         typeSystem.addTypealias(
             aliasName: "callback",
-            originalType: .swiftBlock(returnType: .void, parameters: [])
+            originalType: .swiftBlock(returnType: .void)
         )
 
         expect(

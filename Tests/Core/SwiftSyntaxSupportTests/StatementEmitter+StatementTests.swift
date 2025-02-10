@@ -1050,12 +1050,30 @@ class StatementEmitter_StatementTests: XCTestCase {
         XCTAssertEqual(sut.producer.buffer, "(a, b)")
     }
 
+    func testPattern_tuple_typed() {
+        let sut = makeSut()
+
+        sut.visitPattern(
+            .tuple([.identifier("a"), .identifier("b")], .init(type: .tuple([.int, .bool])))
+        )
+
+        XCTAssertEqual(sut.producer.buffer, "(a, b): (Int, Bool)")
+    }
+
     func testPattern_identifier() {
         let sut = makeSut()
 
         sut.visitPattern(.identifier("a"))
 
         XCTAssertEqual(sut.producer.buffer, "a")
+    }
+
+    func testPattern_identifier_typed() {
+        let sut = makeSut()
+
+        sut.visitPattern(.identifier("a", .init(type: .int)))
+
+        XCTAssertEqual(sut.producer.buffer, "a: Int")
     }
 
     func testPattern_asType() {
@@ -1091,9 +1109,17 @@ class StatementEmitter_StatementTests: XCTestCase {
     func testPattern_wildcard() {
         let sut = makeSut()
 
-        sut.visitPattern(.wildcard)
+        sut.visitPattern(.wildcard())
 
         XCTAssertEqual(sut.producer.buffer, "_")
+    }
+
+    func testPattern_wildcard_typed() {
+        let sut = makeSut()
+
+        sut.visitPattern(.wildcard(.init(type: .int)))
+
+        XCTAssertEqual(sut.producer.buffer, "_: Int")
     }
 }
 

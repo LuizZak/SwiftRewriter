@@ -1001,7 +1001,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         let exp = SwiftAST.Expression.identifier("closure").call()
 
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "closure", type: .swiftBlock(returnType: .void, parameters: []))
+            .definingLocal(name: "closure", type: .swiftBlock(returnType: .void))
             .resolve()
             .thenAssertExpression(resolvedAs: .void)
     }
@@ -1012,7 +1012,7 @@ class ExpressionTypeResolverTests: XCTestCase {
 
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(named: "A") { type in
-                type.property(named: "closure", type: .swiftBlock(returnType: .void, parameters: []))
+                type.property(named: "closure", type: .swiftBlock(returnType: .void))
                     .build()
             }
             .definingIntrinsic(name: "self", type: "A")
@@ -1023,10 +1023,10 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testCallOptionalClosureType() {
         // closure()
         let exp = SwiftAST.Expression.identifier("closure").call()
-        exp.exp.resolvedType = .optional(.swiftBlock(returnType: .void, parameters: []))
+        exp.exp.resolvedType = .optional(.swiftBlock(returnType: .void))
 
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "closure", type: .swiftBlock(returnType: .void, parameters: []))
+            .definingLocal(name: "closure", type: .swiftBlock(returnType: .void))
             .resolve()
             .thenAssertExpression(resolvedAs: .optional(.void))
     }
@@ -1088,7 +1088,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(
                 name: "callback",
-                type: .optional(.swiftBlock(returnType: .void, parameters: []))
+                type: .optional(.swiftBlock(returnType: .void))
             )
             .resolve()
 
@@ -1111,7 +1111,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
 
     func testVariableDeclaration() {
-        let blockType: SwiftType = .block(returnType: .void, parameters: [])
+        let blockType: SwiftType = .block(returnType: .void)
 
         startScopedTest(
             with:
@@ -1263,11 +1263,11 @@ class ExpressionTypeResolverTests: XCTestCase {
             sut: ExpressionTypeResolver()
         )
         .resolve()
-        .thenAssertExpression(resolvedAs: .block(returnType: .void, parameters: []))
+        .thenAssertExpression(resolvedAs: .block(returnType: .void))
     }
 
     func testBlockWithExpectedType() {
-        let expectedType: SwiftType = .block(returnType: .void, parameters: [])
+        let expectedType: SwiftType = .block(returnType: .void)
 
         startScopedTest(
             with:
@@ -1275,7 +1275,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             sut: ExpressionTypeResolver()
         )
         .resolve()
-        .thenAssertExpression(resolvedAs: .block(returnType: .void, parameters: []))
+        .thenAssertExpression(resolvedAs: .block(returnType: .void))
     }
 
     /// Tests invoking a block sets the parameters to the properly expected
@@ -1577,7 +1577,7 @@ class ExpressionTypeResolverTests: XCTestCase {
 
         _ = sut.resolveType(exp)
 
-        XCTAssertEqual(exp.parameters[0].type, .typeName("A"))
+        XCTAssertEqual(exp.parameters?[0].type, .typeName("A"))
     }
 
     /// Tests that on contexts where the expected type of a block literal type is
@@ -1598,7 +1598,7 @@ class ExpressionTypeResolverTests: XCTestCase {
 
         _ = sut.resolveType(exp)
 
-        XCTAssertEqual(exp.parameters[0].type, .typeName("A"))
+        XCTAssertEqual(exp.parameters?[0].type, .typeName("A"))
     }
 
     /// Tests that on contexts where the expected type of a block literal type is
@@ -1621,7 +1621,7 @@ class ExpressionTypeResolverTests: XCTestCase {
 
         _ = sut.resolveType(exp)
 
-        XCTAssertEqual(exp.parameters[0].type, .typeName("A"))
+        XCTAssertEqual(exp.parameters?[0].type, .typeName("A"))
     }
 
     /// Tests propagation of expected block type to block expression doesn't alter
@@ -1638,7 +1638,7 @@ class ExpressionTypeResolverTests: XCTestCase {
 
         _ = sut.resolveType(exp)
 
-        XCTAssertEqual(exp.parameters[0].type, .optional(.typeName("A")))
+        XCTAssertEqual(exp.parameters?[0].type, .optional(.typeName("A")))
     }
 
     /// Tests propagation of expected block type to block expression doesn't alter
@@ -1665,7 +1665,7 @@ class ExpressionTypeResolverTests: XCTestCase {
 
         _ = sut.resolveType(exp)
 
-        XCTAssertEqual(exp.parameters[0].type, .implicitUnwrappedOptional(.typeName("A")))
+        XCTAssertEqual(exp.parameters?[0].type, .implicitUnwrappedOptional(.typeName("A")))
     }
 
     /// Tests proper deduction of optionality from an invocation of a function
@@ -1773,7 +1773,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                 body: [.return(.constant(0))]
             )
             .typed(
-                expected: SwiftType.swiftBlock(returnType: .typeName("NSObject"), parameters: [])
+                expected: SwiftType.swiftBlock(returnType: .typeName("NSObject"))
             ),
             sut: ExpressionTypeResolver()
         )
@@ -1879,7 +1879,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         .resolve()
         .thenAssertExpression(
             at: \SwiftAST.Expression.asPostfix?.functionCall?.subExpressions[0].asPostfix?.exp,
-            expectsType: .swiftBlock(returnType: .int, parameters: [])
+            expectsType: .swiftBlock(returnType: .int)
         )
 
         // Test that argument types are back-propagated as well
@@ -2029,7 +2029,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             }
         )
         .resolve()
-        .thenAssertExpression(resolvedAs: .metatype(for: .nested(["A", "Nested"])))
+        .thenAssertExpression(resolvedAs: .metatype(for: .nested(.init(base: "A", nested: "Nested"))))
     }
 
     func testNestedTypeNestedTypeReference() {
@@ -2049,7 +2049,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             }
         )
         .resolve()
-        .thenAssertExpression(resolvedAs: .metatype(for: .nested(["A", "Nested", "Nested"])))
+        .thenAssertExpression(resolvedAs: .metatype(for: .nested(.init(base: .nested(.init(base: "A", nested: "Nested")), nested: "Nested"))))
     }
 
     func testNestedTypeInitialization() {
@@ -2069,7 +2069,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             }
         )
         .resolve()
-        .thenAssertExpression(resolvedAs: .nested(["A", "Nested"]))
+        .thenAssertExpression(resolvedAs: .nested(.init(base: "A", nested: "Nested")))
     }
 
     func testNestedTypeEnumCaseFetch() {
@@ -2091,7 +2091,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             }
         )
         .resolve()
-        .thenAssertExpression(resolvedAs: .nested(["A", "Nested"]))
+        .thenAssertExpression(resolvedAs: .nested(.init(base: "A", nested: "Nested")))
     }
 
     func testLocalFunctionIsCollected() {

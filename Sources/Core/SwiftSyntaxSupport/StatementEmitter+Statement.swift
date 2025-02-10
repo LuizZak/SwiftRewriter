@@ -6,7 +6,7 @@ extension StatementEmitter: StatementVisitor {
         case .expression(let exp):
             visitExpression(exp)
 
-        case .tuple(let patterns):
+        case .tuple(let patterns, let typeAnnotation):
             emit("(")
             producer.emitWithSeparators(
                 patterns,
@@ -15,8 +15,18 @@ extension StatementEmitter: StatementVisitor {
             )
             emit(")")
 
-        case .identifier(let ident):
+            if let typeAnnotation {
+                emit(": ")
+                emit(typeAnnotation.type)
+            }
+
+        case .identifier(let ident, let typeAnnotation):
             emit(ident)
+
+            if let typeAnnotation {
+                emit(": ")
+                emit(typeAnnotation.type)
+            }
 
         case .asType(let pattern, let type):
             visitPattern(pattern)
@@ -35,8 +45,13 @@ extension StatementEmitter: StatementVisitor {
             visitPattern(pattern)
             emit("?")
 
-        case .wildcard:
+        case .wildcard(let typeAnnotation):
             emit("_")
+
+            if let typeAnnotation {
+                emit(": ")
+                emit(typeAnnotation.type)
+            }
         }
     }
 
@@ -116,8 +131,13 @@ extension StatementEmitter: StatementVisitor {
         emit("for ")
 
         switch stmt.pattern {
-        case .identifier(let ident):
+        case .identifier(let ident, let typeAnnotation):
             emit(ident)
+
+            if let typeAnnotation {
+                emit(": ")
+                emit(typeAnnotation.type)
+            }
         default:
             visitPattern(stmt.pattern)
         }

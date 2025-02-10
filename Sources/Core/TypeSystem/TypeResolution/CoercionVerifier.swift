@@ -80,6 +80,10 @@ private class _CoercionVerifierVisitor: ExpressionVisitor {
         exp.exp.accept(self)
     }
 
+    func visitImplicitMember(_ exp: SwiftAST.ImplicitMemberExpression) -> Bool {
+        false
+    }
+
     func visitIdentifier(_ exp: IdentifierExpression) -> Bool {
         _isAssignable(valueType: exp.resolvedType, to: type)
     }
@@ -121,7 +125,7 @@ private class _CoercionVerifierVisitor: ExpressionVisitor {
             }
 
             for (expEl, type) in zip(exp.elements, types) {
-                if !_makeVerifier().canCoerce(expEl, toType: type) {
+                if !_makeVerifier().canCoerce(expEl.exp, toType: type.swiftType) {
                     return false
                 }
             }

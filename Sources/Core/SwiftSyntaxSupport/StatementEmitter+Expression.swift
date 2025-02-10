@@ -133,6 +133,11 @@ extension StatementEmitter: ExpressionVisitor {
         emit(")")
     }
 
+    func visitImplicitMember(_ exp: SwiftAST.ImplicitMemberExpression) -> () {
+        emit(".")
+        emit(exp.identifier)
+    }
+
     func visitIdentifier(_ exp: IdentifierExpression) {
         emit(exp.identifier)
     }
@@ -176,26 +181,34 @@ extension StatementEmitter: ExpressionVisitor {
 
     func visitBlock(_ exp: BlockLiteralExpression) {
         producer.emitBlock { () -> Void in
-            let hasParameters = !exp.parameters.isEmpty
+            let hasParameters: Bool
+            if let parameters = exp.parameters {
+                hasParameters = !parameters.isEmpty
+            } else {
+                hasParameters = false
+            }
 
             if closureRequiresSignature(exp) || hasParameters {
                 producer.backtrackWhitespace()
                 emitSpaceSeparator()
 
                 if isShorthandClosureCandidate(exp) {
-                    producer.emitWithSeparators(exp.parameters, separator: ", ") { param in
+                    producer.emitWithSeparators(exp.parameters ?? [], separator: ", ") { param in
                         emit(param.name)
                     }
                 } else {
                     emit("(")
-                    producer.emitWithSeparators(exp.parameters, separator: ", ") { param in
+                    producer.emitWithSeparators(exp.parameters ?? [], separator: ", ") { param in
                         emit(param.name)
                         emit(": ")
                         emit(param.type)
                     }
                     emit(")")
-                    emit(" -> ")
-                    emitReturnType(exp.returnType)
+
+                    if let returnType = exp.returnType {
+                        emit(" -> ")
+                        emitReturnType(returnType)
+                    }
                 }
 
                 producer.emitLine(" in")
@@ -227,9 +240,17 @@ extension StatementEmitter: ExpressionVisitor {
         producer.emitWithSeparators(
             exp.elements,
             separator: ", ",
-            visitExpression
+            visitTupleElement
         )
         emit(")")
+    }
+
+    func visitTupleElement(_ element: TupleElement) {
+        if let label = element.label {
+            emit("\(label): ")
+        }
+
+        visitExpression(element.exp)
     }
 
     func visitSelector(_ exp: SelectorExpression) {

@@ -9,13 +9,13 @@ import Utils
 public class TypeSystem {
     /// A singleton instance to a default type system.
     public static let defaultTypeSystem: TypeSystem = TypeSystem()
-    
+
     private var compoundKnownTypesCache: CompoundKnownTypesCache?
     private var protocolConformanceCache: ProtocolConformanceCache?
     private var overloadResolverState = OverloadResolverState()
     private var memberSearchCache = MemberSearchCache()
     @ConcurrentValue private var baseClassTypesByNameCache: [String: ClassType] = [:]
-    
+
     @ConcurrentValue var aliasCache: [SwiftType: SwiftType] = [:]
     @ConcurrentValue var allConformancesCache: [String: [KnownProtocolConformance]] = [:]
     @ConcurrentValue var typeExistsCache: [String: Bool] = [:]
@@ -24,19 +24,19 @@ public class TypeSystem {
     /// Type-aliases
     var innerAliasesProvider = CollectionTypealiasProvider(aliases: [:])
     var typealiasProviders: CompoundTypealiasProvider
-    
+
     // Known types
     var innerKnownTypes = CollectionKnownTypeProvider(knownTypes: [])
     var knownTypeProviders: CompoundKnownTypeProvider
-    
+
     public init() {
         typealiasProviders = CompoundTypealiasProvider(providers: [])
         knownTypeProviders = CompoundKnownTypeProvider(providers: [])
-        
+
         registerInitialTypeProviders()
         registerInitialKnownTypes()
     }
-    
+
     public func makeCache() {
         knownTypeProviders.makeCache()
         typealiasProviders.makeCache()
@@ -49,7 +49,7 @@ public class TypeSystem {
         _typeExistsCache.setAsCaching(value: [:])
         _knownTypeForSwiftType.setAsCaching(value: [:])
     }
-    
+
     public func tearDownCache() {
         knownTypeProviders.tearDownCache()
         typealiasProviders.tearDownCache()
@@ -62,7 +62,7 @@ public class TypeSystem {
         _typeExistsCache.tearDownCaching(resetToValue: [:])
         _knownTypeForSwiftType.tearDownCaching(resetToValue: [:])
     }
-    
+
     /// Gets the overload resolver instance for this type system
     public func overloadResolver() -> OverloadResolver {
         OverloadResolver(
@@ -70,32 +70,32 @@ public class TypeSystem {
             state: overloadResolverState
         )
     }
-    
+
     public func addTypealiasProvider(_ provider: TypealiasProvider) {
         typealiasProviders.providers.append(provider)
     }
-    
+
     public func addKnownTypeProvider(_ provider: KnownTypeProvider) {
         knownTypeProviders.providers.append(provider)
     }
-    
+
     /// Resets the storage of all known types and type aliases to the default
     /// values.
     public func reset() {
         innerKnownTypes.removeAllTypes()
         innerAliasesProvider.removeAllTypealiases()
-        
+
         knownTypeProviders.providers.removeAll()
         typealiasProviders.providers.removeAll()
-        
+
         registerInitialTypeProviders()
         registerInitialKnownTypes()
     }
-    
+
     public func addType(_ type: KnownType) {
         innerKnownTypes.addType(type)
     }
-    
+
     /// Returns true if two given Swift types match semantically after expanding
     /// all typealiases.
     public func typesMatch(
@@ -103,33 +103,33 @@ public class TypeSystem {
         _ type2: SwiftType,
         ignoreNullability: Bool
     ) -> Bool {
-        
+
         // Structurally the same
         if !ignoreNullability && type1 == type2 {
             return true
         } else if ignoreNullability && type1.deepUnwrapped == type2.deepUnwrapped {
             return true
         }
-        
+
         let expanded1 = resolveAlias(in: type1)
         let expanded2 = resolveAlias(in: type2)
-        
+
         // Same structure, ignoring nullability
         if ignoreNullability {
             return expanded1.deepUnwrapped == expanded2.deepUnwrapped
         }
-        
+
         return expanded1 == expanded2
     }
-    
+
     /// Returns `true` if a type with a given name is known.
     public func nominalTypeExists(_ name: String) -> Bool {
         if _typeExistsCache.usingCache, let result = typeExistsCache[name] {
             return result
         }
-        
+
         var result: Bool
-        
+
         if _knownTypeWithNameUnaliased(name) != nil {
             result = true
         } else if let name = typeNameIn(swiftType: resolveAlias(in: name)) {
@@ -137,14 +137,14 @@ public class TypeSystem {
         } else {
             result = false
         }
-        
+
         if _typeExistsCache.usingCache {
             typeExistsCache[name] = result
         }
-        
+
         return result
     }
-    
+
     /// Returns `true` if a given type is known to exist.
     ///
     /// Returns `false` for type names other than `.nominal` and `.metatype` of
@@ -153,28 +153,28 @@ public class TypeSystem {
         guard let typeName = typeNameIn(swiftType: type) else {
             return false
         }
-        
+
         return nominalTypeExists(typeName)
     }
-    
+
     /// Returns all known types that match a specified type
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
         knownTypeProviders.knownTypes(ofKind: kind)
     }
-    
+
     /// Gets a known type with a given name from this type system.
     public func knownTypeWithName(_ name: String) -> KnownType? {
         if let type = _knownTypeWithNameUnaliased(name) {
             return type
         }
-        
+
         guard let name = typeNameIn(swiftType: resolveAlias(in: name)) else {
             return nil
         }
-        
+
         return _knownTypeWithNameUnaliased(name)
     }
-    
+
     /// Gets a known type from a nested type reference
     public func knownTypeFromNested(_ nested: [String]) -> KnownType? {
         guard let first = nested.first else {
@@ -183,11 +183,11 @@ public class TypeSystem {
         guard let base = knownTypeWithName(first) else {
             return nil
         }
-        
+
         var stack = nested.dropFirst()
-        
+
         var current = base
-        
+
         while !stack.isEmpty {
             let next = stack.removeFirst()
             if let reference = current.nestedTypes.first(where: { $0.typeName == next }) {
@@ -196,14 +196,14 @@ public class TypeSystem {
                 return nil
             }
         }
-        
+
         return current
     }
-    
+
     private func _knownTypeWithNameUnaliased(_ name: String) -> KnownType? {
         knownTypeProviders.knownType(withName: name)
     }
-    
+
     /// Given a non-canonical type name, returns the matching canonical name.
     ///
     /// The given typename is unaliased before canonical form replacing is
@@ -216,10 +216,10 @@ public class TypeSystem {
         guard let name = typeNameIn(swiftType: type) else {
             return nil
         }
-        
+
         return knownTypeProviders.canonicalName(for: name)
     }
-    
+
     /// Returns a composition of a set of types as a single known type.
     /// Returns nil, if any of the types is unknown, or the list is empty.
     public func composeTypeWithKnownTypes(_ typeNames: [String]) -> KnownType? {
@@ -229,21 +229,21 @@ public class TypeSystem {
         if typeNames.count == 1 {
             return knownTypeWithName(typeNames.first!)
         }
-        
+
         if let type = compoundKnownTypesCache?.fetch(names: typeNames) {
             return type
         }
-        
+
         var types: [KnownType] = []
-        
+
         for typeName in typeNames {
             guard let type = knownTypeWithName(typeName) else {
                 return nil
             }
-            
+
             types.append(type)
         }
-        
+
         // TODO: Expose a new protocol `KnownTypeComposition` to help expose
         // the type structure better, and get rid of this `typeName` hack-ish thing.
         let compoundType = CompoundKnownType(
@@ -251,12 +251,12 @@ public class TypeSystem {
             types: types,
             typeSystem: self
         )
-        
+
         compoundKnownTypesCache?.record(type: compoundType, names: typeNames)
-        
+
         return compoundType
     }
-    
+
     /// Returns `true` if a given type is considered a class instance type.
     /// Class instance types are considered to be any type that is either a Swift
     /// or Objective-C class/protocol, or a subclass implementer of one of them.
@@ -268,18 +268,18 @@ public class TypeSystem {
         if aliased == "AnyObject" {
             return true
         }
-        
+
         if TypeDefinitions.classesList.classes.contains(where: { $0.typeName == aliased }) {
             return true
         }
-        
+
         if let type = knownTypeWithName(typeName) {
             return type.kind == .class || type.kind == .protocol
         }
-        
+
         return false
     }
-    
+
     /// Returns `true` if a given type is considered a class instance type.
     ///
     /// Class instance types are considered to be any type that is either a Swift
@@ -289,28 +289,28 @@ public class TypeSystem {
         switch type.unwrapped {
         case .nominal(.typeName(let typeName)), .nominal(.generic(let typeName, _)):
             return isClassInstanceType(typeName)
-            
+
         case .protocolComposition:
             return true
-            
+
         default:
             return false
         }
     }
-    
+
     /// Returns `true` if a given type is a known scalar type.
     public func isScalarType(_ type: SwiftType) -> Bool {
         if isNumeric(type) {
             return true
         }
-        
+
         guard let knownType = findType(for: type) else {
             return false
         }
-        
+
         return knownType.kind == .struct
     }
-    
+
     /// Returns `true` if a given type conforms to a protocol with a given name,
     /// either by directly or indirectly conforming to the protocol via
     /// superclasses and other protocols.
@@ -318,19 +318,19 @@ public class TypeSystem {
         guard let typeName = typeNameIn(swiftType: type) else {
             return false
         }
-        
+
         return isType(typeName, conformingTo: protocolName)
     }
-    
+
     /// Returns `true` if a given type is a subtype of another type.
     public func isType(_ type: SwiftType, subtypeOf supertypeName: String) -> Bool {
         guard let typeName = typeNameIn(swiftType: type) else {
             return false
         }
-        
+
         return isType(typeName, subtypeOf: supertypeName)
     }
-    
+
     /// Returns `true` if a type with a given name conforms to a protocol with
     /// a given name, either by directly or indirectly conforming to the protocol
     /// via superclasses and other protocols.
@@ -338,13 +338,13 @@ public class TypeSystem {
         if typeName == protocolName {
             return true
         }
-        
+
         if let cache = protocolConformanceCache {
             if let result = cache.typeName(typeName, conformsTo: protocolName) {
                 return result
             }
         }
-        
+
         guard let unaliasedTypeName = typeNameIn(swiftType: resolveAlias(in: typeName)) else {
             return false
         }
@@ -354,12 +354,12 @@ public class TypeSystem {
         if unaliasedTypeName == unaliasedProtocolName {
             return true
         }
-        
+
         let conforms = _unaliasedIsType(
             unaliasedTypeName,
             conformingTo: unaliasedProtocolName
         )
-        
+
         if let cache = protocolConformanceCache {
             cache.record(
                 typeName: typeName,
@@ -367,43 +367,43 @@ public class TypeSystem {
                 conforms
             )
         }
-        
+
         return conforms
     }
-    
+
     private func _unaliasedIsType(
         _ unaliasedTypeName: String,
         conformingTo unaliasedProtocolName: String
     ) -> Bool {
-        
+
         guard let type = _knownTypeWithNameUnaliased(unaliasedTypeName) else {
             return false
         }
-        
+
         return conformance(toProtocolName: unaliasedProtocolName, in: type) != nil
     }
-    
+
     /// Returns `true` if a type represented by a given type name is a subtype of
     /// another type.
     public func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool {
         if typeName == supertypeName {
             return true
         }
-        
+
         guard let unaliasedTypeName = typeNameIn(swiftType: resolveAlias(in: typeName)) else {
             return false
         }
         guard let unaliasedSupertypeName = typeNameIn(swiftType: resolveAlias(in: supertypeName)) else {
             return false
         }
-        
+
         if unaliasedTypeName == unaliasedSupertypeName {
             return true
         }
-        
+
         return _unaliasedIsType(unaliasedTypeName, subtypeOf: unaliasedSupertypeName)
     }
-    
+
     private func _unaliasedIsType(
         _ unaliasedTypeName: String,
         subtypeOf unaliasedSupertypeName: String
@@ -412,26 +412,26 @@ public class TypeSystem {
         guard let type = _knownTypeWithNameUnaliased(unaliasedTypeName) else {
             return false
         }
-        
+
         // Direct supertype name fetching
         switch type.supertype {
         case .typeName(let tn)? where tn == unaliasedSupertypeName:
             return true
-            
+
         default:
             break
         }
-        
+
         guard let supertype = _knownTypeWithNameUnaliased(unaliasedSupertypeName) else {
             return false
         }
-        
+
         var current: KnownType? = type
         while let c = current {
             if c.typeName == supertype.typeName {
                 return true
             }
-            
+
             switch c.supertype {
             case .typeName(let name)?:
                 current = knownTypeWithName(name)
@@ -441,20 +441,20 @@ public class TypeSystem {
                 current = nil
             }
         }
-        
+
         // Search type definitions
         var currentClassType = classTypeDefinition(name: unaliasedTypeName)
         while let c = currentClassType {
             if c.typeName == unaliasedSupertypeName {
                 return true
             }
-            
+
             currentClassType = classTypeDefinition(name: c.superclass)
         }
-        
+
         return false
     }
-    
+
     /// Returns `true` if a given type can be assigned to a value of another type.
     ///
     /// Returns true if `let value: baseType = x as type` is a valid assignment.
@@ -462,7 +462,7 @@ public class TypeSystem {
         if type == baseType {
             return true
         }
-        
+
         // Any type can be assigned to a `Any` type, or any depth of optionality
         // for `Any`
         let unaliasedBaseType = resolveAlias(in: baseType)
@@ -471,20 +471,20 @@ public class TypeSystem {
         }
 
         let unaliasedType = resolveAlias(in: type)
-        
+
         if unaliasedType == unaliasedBaseType {
             return true
         }
-        
+
         if unaliasedType.optionalityDepth > unaliasedBaseType.optionalityDepth {
             return false
         }
-        
+
         switch (unaliasedType.deepUnwrapped, unaliasedBaseType.deepUnwrapped) {
         case (.nominal(let nominalType), .nominal(let nominalBaseType)):
             let typeName = typeNameIn(nominalType: nominalType)
             let baseTypeName = typeNameIn(nominalType: nominalBaseType)
-            
+
             return isType(typeName, subtypeOf: baseTypeName)
                 || isType(typeName, conformingTo: baseTypeName)
         default:
@@ -505,68 +505,68 @@ public class TypeSystem {
         if keepAliases {
             return type.deepUnwrapped
         }
-        
+
         if type.isOptional {
             return resolveAlias(in: type.deepUnwrapped).deepUnwrapped
         }
-        
+
         return resolveAlias(in: type).deepUnwrapped
     }
-    
+
     /// Returns the category for a given type name.
     public func category(forType type: String) -> TypeCategory {
         category(forType: .typeName(type))
     }
-    
+
     /// Returns the category for a given type.
     public func category(forType type: SwiftType) -> TypeCategory {
         if type == .void {
             return .void
         }
-        
+
         let aliasedType = resolveAlias(in: type)
-        
+
         if isInteger(aliasedType) {
             return .integer
         }
-        
+
         switch aliasedType {
         case .nominal(.typeName(let typeName)):
-            
+
             switch typeName {
             case "Bool", "ObjCBool", "CBool":
                 return .boolean
-                
+
             case "CGFloat", "Float", "Double", "CFloat", "CDouble", "Float80":
                 return .float
-                
+
             default:
                 break
             }
-            
+
         default:
             break
         }
-        
+
         if let type = self.findType(for: aliasedType) {
             switch type.kind {
             case .class:
                 return .class
-                
+
             case .enum:
                 return .enum
-                
+
             case .protocol:
                 return .protocol
-                
+
             case .struct:
                 return .struct
             }
         }
-        
+
         return .unknown
     }
-    
+
     /// Returns an expression representing the default value for a given Swift type.
     ///
     /// Default values are the equivalent to a zeroed-out representation of the
@@ -584,28 +584,28 @@ public class TypeSystem {
         if isNumeric(type) {
             let exp: Expression = isInteger(type) ? .constant(0) : .constant(0.0)
             exp.resolvedType = type
-            
+
             return exp
         }
         if type.isOptional {
             let exp = Expression.constant(.nil)
             exp.resolvedType = type
-            
+
             return exp
         }
         if type == .bool {
             let exp = Expression.constant(false)
             exp.resolvedType = type
-            
+
             return exp
         }
-        
+
         switch type {
         case .nominal(.typeName(let name)):
             guard let knownType = knownTypeWithName(name) else {
                 return nil
             }
-            
+
             // Structs with default constructors are default-initialized to its
             // respective value.
             if
@@ -614,15 +614,15 @@ public class TypeSystem {
             {
                 let exp = Expression.identifier(name).call()
                 exp.resolvedType = type
-                
+
                 return exp
             }
-            
+
             // Enums have their default value bound to the case that corresponds
             // to 0
             if knownType.kind == .enum {
                 let cases = knownType.knownProperties.filter { $0.isEnumCase }
-                
+
                 guard !cases.isEmpty else {
                     return nil
                 }
@@ -632,11 +632,11 @@ public class TypeSystem {
                 guard isInteger(rawValueType) else {
                     return nil
                 }
-                
+
                 var increment = 0
                 for cs in cases {
                     defer { increment += 1 }
-                    
+
                     var isZero = false
                     if cs.expression == nil && increment == 0 {
                         isZero = true
@@ -644,7 +644,7 @@ public class TypeSystem {
                         increment = integer
                         isZero = integer == 0
                     }
-                    
+
                     if isZero {
                         return Expression
                             .identifier(name)
@@ -654,36 +654,36 @@ public class TypeSystem {
                     }
                 }
             }
-            
+
             return nil
-            
+
         case .tuple(.empty):
-            let exp = Expression.tuple([])
+            let exp = Expression.voidTuple()
             exp.resolvedType = type
-            
+
             return exp
-            
+
         case .tuple(.types(let types)):
             var defValues: [Expression] = []
-            
+
             for type in types {
-                guard let defValue = defaultValue(for: type) else {
+                guard let defValue = defaultValue(for: type.swiftType) else {
                     return nil
                 }
-                
+
                 defValues.append(defValue)
             }
-            
+
             let exp = Expression.tuple(defValues)
             exp.resolvedType = type
-            
+
             return exp
-            
+
         default:
             return nil
         }
     }
-    
+
     /// Between two scalar numeric types, returns the type that the type system
     /// should favor when cast-converting.
     ///
@@ -693,21 +693,21 @@ public class TypeSystem {
         for type1: SwiftType,
         _ type2: SwiftType
     ) -> SwiftType? {
-        
+
         if !isNumeric(type1) || !isNumeric(type2) {
             return nil
         }
-        
+
         let isInt1 = isInteger(type1)
         let isInt2 = isInteger(type2)
-        
+
         let isFloat1 = isFloat(type1)
         let isFloat2 = isFloat(type2)
-        
+
         if (isInt1 && isInt2) || (isFloat1 && isFloat2) {
             let bw1 = bitWidth(numericType: type1)
             let bw2 = bitWidth(numericType: type2)
-            
+
             if bw1 > bw2 {
                 return type1
             } else if bw2 > bw1 {
@@ -716,17 +716,17 @@ public class TypeSystem {
                 return nil
             }
         }
-        
+
         if isInt1 && isFloat2 {
             return type2
         }
         if isFloat1 && isInt2 {
             return type1
         }
-        
+
         return nil
     }
-    
+
     /// Returns `true` if `type` represents a numerical type (`Int`, `Float`,
     /// `CGFloat`, etc.).
     public func isNumeric(_ type: SwiftType) -> Bool {
@@ -736,10 +736,10 @@ public class TypeSystem {
         if isFloat(type) {
             return true
         }
-        
+
         return false
     }
-    
+
     private func bitWidth(numericType: SwiftType) -> Int {
         func internalBitWidth(_ type: SwiftType) -> Int? {
             switch type {
@@ -784,10 +784,10 @@ public class TypeSystem {
                 return nil
             }
         }
-        
+
         return internalBitWidth(numericType) ?? internalBitWidth(resolveAlias(in: numericType)) ?? 8
     }
-    
+
     /// Returns `true` if `type` is an integer (signed or unsigned) type.
     public func isInteger(_ type: SwiftType) -> Bool {
         func internalIsInteger(_ type: SwiftType) -> Bool {
@@ -812,14 +812,14 @@ public class TypeSystem {
                 return false
             }
         }
-        
+
         return internalIsInteger(type) || internalIsInteger(resolveAlias(in: type))
     }
-    
+
     /// Returns `true` if `type` is a floating-point type.
     public func isFloat(_ type: SwiftType) -> Bool {
         let aliasedType = resolveAlias(in: type)
-        
+
         switch aliasedType {
         case .nominal(.typeName(let typeName)):
             switch typeName {
@@ -828,12 +828,12 @@ public class TypeSystem {
             default:
                 return false
             }
-            
+
         default:
             return false
         }
     }
-    
+
     /// Resolves type aliases in a given type name, returning a resulting type
     /// with all aliases expanded.
     /// Returns a plain `.typeName` with the passed type name within, in case no
@@ -842,10 +842,10 @@ public class TypeSystem {
         guard let type = typealiasProviders.unalias(typeName) else {
             return .typeName(typeName)
         }
-        
+
         return resolveAlias(in: type)
     }
-    
+
     /// Resolves type aliases in a given type, returning a resulting type with
     /// all aliases expanded.
     /// Returns a plain `.typeName` with the passed type name within, in case no
@@ -856,17 +856,17 @@ public class TypeSystem {
                 return result
             }
         }
-        
+
         let resolver = TypealiasExpander(aliasesSource: typealiasProviders)
         let result = resolver.expand(in: type)
-        
+
         if _aliasCache.usingCache {
             aliasCache[type] = result
         }
-        
+
         return result
     }
-    
+
     /// Gets the supertype of a given type on this type system.
     ///
     /// - Parameter type: A known type with available supertype information.
@@ -875,18 +875,18 @@ public class TypeSystem {
         guard let supertype = type.supertype else {
             return nil
         }
-        
+
         switch supertype {
         case .typeName(let type):
             return knownTypeWithName(type)
-            
+
         case .nested:
             return knownTypeFromNested(supertype.asNestedTypeNames)
         }
     }
-    
+
     // MARK: Member searching methods - KnownType
-    
+
     /// Gets a constructor matching a given argument label set on a given known
     /// type.
     public func constructor(
@@ -901,13 +901,13 @@ public class TypeSystem {
         {
             return constructor
         }
-        
+
         // Search on super types
         return supertype(of: type).flatMap {
             constructor(withArgumentLabels: labels, in: $0)
         }
     }
-    
+
     /// Gets a protocol conformance to a given protocol name on a given known type.
     public func conformance(
         toProtocolName name: String,
@@ -916,17 +916,17 @@ public class TypeSystem {
 
         _conformance(toProtocolName: name, in: type, visitedTypes: [])
     }
-    
+
     private func _conformance(
         toProtocolName name: String,
         in type: KnownType,
         visitedTypes: Set<String>
     ) -> KnownProtocolConformance? {
-        
+
         var visitedTypes = visitedTypes
-        
+
         visitedTypes.insert(type.typeName)
-        
+
         if
             let conformance = type.knownProtocolConformances.first(where: {
                 $0.protocolName == name
@@ -934,7 +934,7 @@ public class TypeSystem {
         {
             return conformance
         }
-        
+
         // Search on super types
         if
             let supertype = supertype(of: type),
@@ -950,17 +950,17 @@ public class TypeSystem {
                 return supertypeConformance
             }
         }
-        
+
         // Search on protocols
         for prot in type.knownProtocolConformances {
             if visitedTypes.contains(prot.protocolName) {
                 continue
             }
-            
+
             guard let type = knownTypeWithName(prot.protocolName) else {
                 continue
             }
-            
+
             if
                 let conformance = _conformance(
                     toProtocolName: name,
@@ -971,10 +971,10 @@ public class TypeSystem {
                 return conformance
             }
         }
-        
+
         return nil
     }
-    
+
     /// Gets a list of all protocol conformances of a given type.
     ///
     /// Looks through supertype and protocol hierarchies, if available, resulting
@@ -982,38 +982,38 @@ public class TypeSystem {
     public func allConformances(of type: KnownType) -> [KnownProtocolConformance] {
         _allConformances(of: type, visitedTypes: [])
     }
-    
+
     private func _allConformances(
         of type: KnownType,
         visitedTypes: Set<String>
     ) -> [KnownProtocolConformance] {
-        
+
         var visitedTypes = visitedTypes
-        
+
         visitedTypes.insert(type.typeName)
-        
+
         if _allConformancesCache.usingCache {
             if let result = allConformancesCache[type.typeName] {
                 return result
             }
         }
-        
+
         var protocols = type.knownProtocolConformances.filter {
             !visitedTypes.contains($0.protocolName)
         }
-        
+
         for prot in type.knownProtocolConformances {
             if visitedTypes.contains(prot.protocolName) {
                 continue
             }
-            
+
             if let type = knownTypeWithName(prot.protocolName) {
                 protocols.append(contentsOf:
                     _allConformances(of: type, visitedTypes: visitedTypes)
                 )
             }
         }
-        
+
         if
             let supertype = supertype(of: type),
             !visitedTypes.contains(supertype.typeName)
@@ -1025,14 +1025,14 @@ public class TypeSystem {
                 )
             )
         }
-        
+
         if _allConformancesCache.usingCache {
             allConformancesCache[type.typeName] = protocols
         }
-        
+
         return protocols
     }
-    
+
     /// Searches for a method with a given Swift function identifier, also
     /// specifying whether to include optional methods (from optional protocol
     /// methods that where not implemented by a concrete class).
@@ -1046,9 +1046,9 @@ public class TypeSystem {
         includeOptional: Bool,
         in type: KnownType
     ) -> KnownMethod? {
-        
+
         let lookup = makeTypeLookup(type)
-        
+
         return lookup.method(
             withIdentifier: identifier,
             invocationTypeHints: invocationTypeHints,
@@ -1056,7 +1056,7 @@ public class TypeSystem {
             includeOptional: includeOptional
         )
     }
-    
+
     /// Gets a property with a given name on a given known type, also specifying
     /// whether to include optional methods (from optional protocol methods that
     /// where not implemented by a concrete class).
@@ -1066,16 +1066,16 @@ public class TypeSystem {
         includeOptional: Bool,
         in type: KnownType
     ) -> KnownProperty? {
-        
+
         let lookup = makeTypeLookup(type)
-        
+
         return lookup.property(
             named: name,
             static: isStatic,
             includeOptional: includeOptional
         )
     }
-    
+
     /// Gets an instance field with a given name on a given known type.
     public func field(
         named name: String,
@@ -1084,10 +1084,10 @@ public class TypeSystem {
     ) -> KnownProperty? {
 
         let lookup = makeTypeLookup(type)
-        
+
         return lookup.field(named: name, static: isStatic)
     }
-    
+
     /// Searches for a member with a given name on a type.
     public func member(
         named name: String,
@@ -1096,13 +1096,13 @@ public class TypeSystem {
     ) -> KnownMember? {
 
         let lookup = makeTypeLookup(type)
-        
+
         return lookup.member(
             named: name,
             static: isStatic
         )
     }
-    
+
     /// Gets a subscription for a given index type on a given type
     public func subscription(
         withParameterLabels labels: [String?],
@@ -1110,16 +1110,16 @@ public class TypeSystem {
         static isStatic: Bool,
         in type: KnownType
     ) -> KnownSubscript? {
-        
+
         let lookup = makeTypeLookup(type)
-        
+
         return lookup.subscription(
             withParameterLabels: labels,
             invocationTypeHints: invocationTypeHints,
             static: isStatic
         )
     }
-    
+
     /// Returns a known type for a given SwiftType, if present.
     public func findType(for swiftType: SwiftType) -> KnownType? {
         if _knownTypeForSwiftType.usingCache {
@@ -1127,97 +1127,95 @@ public class TypeSystem {
                 return result
             }
         }
-        
+
         let swiftType = swiftType.deepUnwrapped
         let result: KnownType?
-        
+
         switch swiftType {
         case .nominal(.typeName(let typeName)):
             result = knownTypeWithName(typeName)
-            
+
         case .nested(let nested):
-            guard var current = findType(for: .nominal(nested[0])) else {
+            guard var current = findType(for: nested.base) else {
                 return nil
             }
-            
-            for next in nested.dropFirst() {
-                if
-                    let type = current.nestedTypes.first(where: {
-                        $0.typeName == next.typeNameValue
-                    })
-                {
-                    current = type
-                } else {
-                    return nil
-                }
+
+            if
+                let type = current.nestedTypes.first(where: {
+                    $0.typeName == nested.nested.typeNameValue
+                })
+            {
+                current = type
+            } else {
+                return nil
             }
-            
+
             result = current
-            
+
         // Meta-types recurse on themselves
         case .metatype(for: let inner):
             let type = inner.deepUnwrapped
-            
+
             switch type {
             case .nominal(.typeName(let name)):
                 result = knownTypeWithName(name)
             default:
                 result = findType(for: type)
             }
-            
+
         case .protocolComposition(let types):
             result = composeTypeWithKnownTypes(types.map(\.description))
-            
+
         // Other Swift types are not supported, at the moment.
         default:
             result = nil
         }
-        
+
         if _knownTypeForSwiftType.usingCache {
             knownTypeForSwiftType[swiftType] = result
         }
-        
+
         return result
     }
-    
+
     // MARK: Member searching methods - SwiftType
-    
+
     /// Gets a constructor matching a given argument label set on a given known
     /// type.
     public func constructor(
         withArgumentLabels labels: [String?],
         in type: SwiftType
     ) -> KnownConstructor? {
-        
+
         guard let knownType = self.findType(for: type) else {
             return nil
         }
 
         return constructor(withArgumentLabels: labels, in: knownType)
     }
-    
+
     /// Gets a protocol conformance to a given protocol name on a given known type.
     public func conformance(
         toProtocolName name: String,
         in type: SwiftType
     ) -> KnownProtocolConformance? {
-        
+
         guard let knownType = self.findType(for: type) else {
             return nil
         }
 
         return conformance(toProtocolName: name, in: knownType)
     }
-    
+
     /// Attempts to search for a nested type within a given type reference
     public func nestedType(named name: String, in type: SwiftType) -> KnownType? {
         guard let knownType = self.findType(for: type) else {
             return nil
         }
-        
+
         return knownType.nestedTypes.first(where: { $0.typeName == name })
     }
-    
+
     /// Searches for a method with a given Swift function identifier, also
     /// specifying whether to include optional methods (from optional protocol
     /// methods that where not implemented by a concrete class).
@@ -1231,9 +1229,9 @@ public class TypeSystem {
         includeOptional: Bool,
         in type: SwiftType
     ) -> KnownMethod? {
-        
+
         let lookup = makeTypeLookup(type)
-        
+
         return lookup.method(
             withIdentifier: identifier,
             invocationTypeHints: invocationTypeHints,
@@ -1241,7 +1239,7 @@ public class TypeSystem {
             includeOptional: includeOptional
         )
     }
-    
+
     /// Gets a property with a given name on a given known type, also specifying
     /// whether to include optional methods (from optional protocol methods that
     /// where not implemented by a concrete class).
@@ -1251,16 +1249,16 @@ public class TypeSystem {
         includeOptional: Bool,
         in type: SwiftType
     ) -> KnownProperty? {
-        
+
         let lookup = makeTypeLookup(type)
-        
+
         return lookup.property(
             named: name,
             static: isStatic,
             includeOptional: includeOptional
         )
     }
-    
+
     /// Gets an instance field with a given name on a given known type.
     public func field(
         named name: String,
@@ -1269,10 +1267,10 @@ public class TypeSystem {
     ) -> KnownProperty? {
 
         let lookup = makeTypeLookup(type)
-        
+
         return lookup.field(named: name, static: isStatic)
     }
-    
+
     /// Gets a subscription for a given index type on a given type
     public func subscription(
         withParameterLabels labels: [String?],
@@ -1280,9 +1278,9 @@ public class TypeSystem {
         static isStatic: Bool,
         in type: SwiftType
     ) -> KnownSubscript? {
-        
+
         let lookup = makeTypeLookup(type)
-        
+
         return lookup.subscription(
             withParameterLabels: labels,
             invocationTypeHints: invocationTypeHints,
@@ -1298,7 +1296,7 @@ public class TypeSystem {
     ) -> KnownMember? {
 
         let lookup = makeTypeLookup(type)
-        
+
         return lookup.member(
             named: name,
             static: isStatic
@@ -1313,7 +1311,7 @@ public class TypeSystem {
 
     private func makeTypeLookup(_ swiftType: SwiftType) -> MemberLookupType {
         let lookup = makeTypeMemberLookupContext()
-        
+
         return lookup.makeSwiftTypeLookup(swiftType)
     }
 
@@ -1324,7 +1322,7 @@ public class TypeSystem {
             visitedTypes: []
         )
     }
-    
+
     private func classTypeDefinition(name: String) -> ClassType? {
         if !_baseClassTypesByNameCache.usingCache {
             let mapped: [String: ClassType] =
@@ -1333,10 +1331,10 @@ public class TypeSystem {
                     .classes
                     .groupBy(\.typeName)
                     .mapValues { $0[0] }
-            
+
             _baseClassTypesByNameCache.setAsCaching(value: mapped)
         }
-        
+
         return baseClassTypesByNameCache[name]
     }
 }
@@ -1388,18 +1386,18 @@ extension TypeSystem {
                 isMutating: false
             ))
             .build()
-        
+
         let nsObject =
             KnownTypeBuilder(typeName: "NSObject")
                 .constructor()
                 .protocolConformance(protocolName: "NSObjectProtocol")
                 .property(named: "description", type: .string)
                 .build()
-        
+
         let nsSet =
             KnownTypeBuilder(typeName: "NSSet", supertype: nsObject)
                 .build()
-        
+
         let nsMutableSet =
             KnownTypeBuilder(
                 typeName: "NSMutableSet",
@@ -1417,17 +1415,17 @@ extension TypeSystem {
                 semantics: Semantics.collectionMutator
             )
             .build()
-        
+
         addType(nsObjectProtocol)
         addType(nsObject)
         addType(nsSet)
         addType(nsMutableSet)
-        
+
         // Foundation types
         registerFoundation(nsObject: nsObject)
         registerFormatters(nsObject: nsObject)
     }
-    
+
     private func registerFoundation(nsObject: KnownType) {
         let nsDate = KnownTypeBuilder(
             typeName: "NSDate",
@@ -1448,13 +1446,13 @@ extension TypeSystem {
             typeName: "NSMutableString",
             supertype: KnownTypeReference.typeName("NSString")
         ).constructor().build()
-        
+
         addType(nsDate)
         addType(nsData)
         addType(nsMutableData)
         addType(nsMutableString)
     }
-    
+
     private func registerFormatters(nsObject: KnownType) {
         let nsFormatter = KnownTypeBuilder(
             typeName: "NSFormatter",
@@ -1465,7 +1463,7 @@ extension TypeSystem {
             typeName: "NSDateFormatter",
             supertype: nsFormatter
         ).build()
-        
+
         addType(nsFormatter)
         addType(nsDateFormatter)
     }
@@ -1477,22 +1475,22 @@ extension TypeSystem {
 /// types, `nil` otherwise.
 func typeNameIn(swiftType: SwiftType) -> String? {
     let swiftType = swiftType.deepUnwrapped
-    
+
     switch swiftType {
     case .nominal(let nominalType):
         return typeNameIn(nominalType: nominalType)
-        
+
     // Meta-types recurse on themselves
     case .metatype(for: let inner):
         let type = inner.deepUnwrapped
-        
+
         switch type {
         case .nominal(.typeName(let name)):
             return name
         default:
             return typeNameIn(swiftType: type)
         }
-        
+
     // Other Swift types are not supported, at the moment.
     default:
         return nil
@@ -1506,91 +1504,95 @@ func typeNameIn(nominalType: NominalSwiftType) -> String {
 private class TypealiasExpander {
     // Used to discover cycles in alias expansion
     private var aliasesInStack: [String] = []
-    
+
     private var source: TypealiasProvider
-    
+
     init(aliasesSource: TypealiasProvider) {
         self.source = aliasesSource
     }
-    
+
     func expand(in type: SwiftType) -> SwiftType {
         switch type {
         case let .block(blockType):
             return .block(
                 returnType: expand(in: blockType.returnType),
-                parameters: blockType.parameters.map(expand),
+                parameters: blockType.parameters.map { expand(inBlockParameter: $0) },
                 attributes: blockType.attributes
             )
-            
+
         case .nominal(.typeName(let name)):
             if let type = source.unalias(name) {
                 return pushingAlias(name) {
                     return expand(in: type)
                 }
             }
-            
+
             return type
-            
+
         case .nominal(let nominal):
             return .nominal(expand(inNominal: nominal))
-            
+
         case .optional(let type):
             return .optional(expand(in: type))
-            
+
         case .implicitUnwrappedOptional(let type):
             return .implicitUnwrappedOptional(expand(in: type))
-            
+
         case .nullabilityUnspecified(let type):
             return .nullabilityUnspecified(expand(in: type))
-            
+
         case .nested(let nested):
-            return .nested(.fromCollection(nested.map(expand(inNominal:))))
-            
+            return .nested(
+                .init(base: expand(in: nested.base), nested: expand(inNominal: nested.nested))
+            )
+
         case .metatype(let type):
             return .metatype(for: expand(in: type))
-            
+
         case .tuple(.empty):
             return type
-            
+
         case .tuple(.types(let values)):
             return .tuple(.types(.fromCollection(values.map(expand))))
-            
+
         case .protocolComposition(let composition):
             return .protocolComposition(.fromCollection(composition.map(expand(inComposition:))))
-            
+
         case .array(let inner):
             return .array(expand(in: inner))
-            
+
         case let .dictionary(key, value):
             return .dictionary(key: expand(in: key), value: expand(in: value))
         }
     }
-    
+
     private func expand(inString string: String) -> String {
         guard let aliased = source.unalias(string) else {
             return string
         }
-        
+
         return pushingAlias(string) {
             return typeNameIn(swiftType: aliased).map(expand(inString:)) ?? string
         }
     }
-    
+
     private func expand(inComposition composition: ProtocolCompositionComponent) -> ProtocolCompositionComponent {
         switch composition {
         case .nested(let nested):
-            return .nested(.fromCollection(nested.map(expand(inNominal:))))
-            
+            return .nested(
+                .init(base: expand(in: nested.base), nested: expand(inNominal: nested.nested))
+            )
+
         case .nominal(let nominal):
             return .nominal(expand(inNominal: nominal))
         }
     }
-    
+
     private func expand(inNominal nominal: NominalSwiftType) -> NominalSwiftType {
         switch nominal {
         case .typeName(let name):
             return .typeName(expand(inString: name))
-            
+
         case let .generic(name, parameters):
             return .generic(
                 expand(inString: name),
@@ -1598,7 +1600,21 @@ private class TypealiasExpander {
             )
         }
     }
-    
+
+    private func expand(inTupleTypeEntry tupleTypeEntry: TupleTypeEntry) -> TupleTypeEntry {
+        switch tupleTypeEntry {
+        case .labeled(let label, let type):
+            return .labeled(label, expand(in: type))
+
+        case .unlabeled(let type):
+            return .unlabeled(expand(in: type))
+        }
+    }
+
+    private func expand(inBlockParameter blockParameter: BlockSwiftType.BlockParameter) -> BlockSwiftType.BlockParameter {
+        return .init(type: expand(in: blockParameter.type), modifier: blockParameter.modifier)
+    }
+
     private func pushingAlias<T>(_ name: String, do work: () -> T) -> T {
         if aliasesInStack.contains(name) {
             fatalError(
@@ -1608,23 +1624,23 @@ private class TypealiasExpander {
                 """
             )
         }
-        
+
         aliasesInStack.append(name)
         defer {
             aliasesInStack.removeLast()
         }
-        
+
         return work()
     }
 }
 
 private final class CompoundKnownTypesCache {
     @ConcurrentValue private var types: [[String]: KnownType] = [:]
-    
+
     func fetch(names: [String]) -> KnownType? {
         types[names]
     }
-    
+
     func record(type: KnownType, names: [String]) {
         types[names] = type
     }
@@ -1632,33 +1648,33 @@ private final class CompoundKnownTypesCache {
 
 private final class ProtocolConformanceCache {
     @ConcurrentValue private var cache: [String: Entry] = [:]
-    
+
     init() {
         _cache.setAsCaching(value: [:])
     }
-    
+
     func record(typeName: String, conformsTo protocolName: String, _ value: Bool) {
         cache[typeName, default: Entry()].conformances[protocolName] = value
     }
-    
+
     func typeName(_ type: String, conformsTo protocolName: String) -> Bool? {
         cache[type]?.conformances[protocolName]
     }
-    
+
     private struct Entry {
         var conformances: [String: Bool] = [:]
     }
 }
 
 private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider {
-    
+
     @ConcurrentValue private var cache: [String: KnownType] = [:]
-    
+
     // For remembering attempts to look for protocols that where not found on
     // the protocols list.
     // Avoids repetitive linear lookups on the protocols list over and over.
     @ConcurrentValue private var negativeLookupResults: Set<String> = []
-    
+
     func knownType(withName name: String) -> KnownType? {
         if let cached = cache[name] {
             return cached
@@ -1666,42 +1682,42 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
         if negativeLookupResults.contains(name) {
             return nil
         }
-        
+
         let protocols = TypeDefinitions.protocolsList.protocols
         guard let prot = protocols.first(where: { $0.protocolName == name }) else {
             negativeLookupResults.insert(name)
-            
+
             return nil
         }
-        
+
         let type = makeType(from: prot)
-        
+
         cache[name] = type
-        
+
         return type
     }
-    
+
     func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
         guard kind == .protocol else {
             return []
         }
-        
+
         // TODO: Return all protocols listed within TypeDefinitions.protocolsList
         return []
     }
-    
+
     func canonicalName(for typeName: String) -> String? {
         nil
     }
-    
+
     func makeType(from prot: ProtocolType) -> KnownType {
         let type = ProtocolType_KnownType(protocolType: prot)
         return type
     }
-    
+
     private class ProtocolType_KnownType: KnownType {
         let protocolType: ProtocolType
-        
+
         let origin = "\(TypeDefinitionsProtocolKnownTypeProvider.self)"
         let isExtension = false
         let supertype: KnownTypeReference? = nil
@@ -1719,17 +1735,17 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
         let semantics: Set<Semantic> = []
         let nestedTypes: [KnownType] = []
         var parentType: KnownTypeReference? = nil
-        
+
         init(protocolType: ProtocolType) {
             self.typeName = protocolType.protocolName
             self.protocolType = protocolType
-            
+
             knownProtocolConformances =
                 protocolType.conformances.map {
                     _KnownProtocolConformance(protocolName: $0)
                 }
         }
-        
+
         private struct _KnownProtocolConformance: KnownProtocolConformance {
             var protocolName: String
         }
@@ -1737,14 +1753,14 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
 }
 
 private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
-    
+
     @ConcurrentValue private var cache: [String: KnownType] = [:]
-    
+
     // For remembering attempts to look for classes that where not found on
     // the classes list.
     // Avoids repetitive linear lookups on the classes list over and over.
     @ConcurrentValue private var negativeLookupResults: Set<String> = []
-    
+
     func knownType(withName name: String) -> KnownType? {
         if let cached = cache[name] {
             return cached
@@ -1752,41 +1768,41 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         if negativeLookupResults.contains(name) {
             return nil
         }
-        
+
         guard let prot = TypeDefinitions.classesList.classes.first(where: { $0.typeName == name }) else {
             negativeLookupResults.insert(name)
-            
+
             return nil
         }
-        
+
         let type = makeType(from: prot)
-        
+
         cache[name] = type
-        
+
         return type
     }
-    
+
     func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
         guard kind == .class else {
             return []
         }
-        
+
         // TODO: Return all classes listed within TypeDefinitions.classesList
         return []
     }
-    
+
     func canonicalName(for typeName: String) -> String? {
         nil
     }
-    
+
     func makeType(from prot: ClassType) -> KnownType {
         let type = ClassType_KnownType(classType: prot)
         return type
     }
-    
+
     private class ClassType_KnownType: KnownType {
         let classType: ClassType
-        
+
         let origin = "\(TypeDefinitionsProtocolKnownTypeProvider.self)"
         let isExtension = false
         let supertype: KnownTypeReference?
@@ -1804,18 +1820,18 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         let semantics: Set<Semantic> = []
         let nestedTypes: [KnownType] = []
         var parentType: KnownTypeReference? = nil
-        
+
         init(classType: ClassType) {
             self.typeName = classType.typeName
             self.supertype = .typeName(classType.superclass)
             self.classType = classType
-            
+
             knownProtocolConformances =
                 classType.protocols.map {
                     _KnownProtocolConformance(protocolName: $0)
                 }
         }
-        
+
         private struct _KnownProtocolConformance: KnownProtocolConformance {
             var protocolName: String
         }

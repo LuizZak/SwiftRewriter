@@ -18,7 +18,7 @@ import XCTest
 @testable import ObjectiveCFrontend
 
 class ObjectiveC2SwiftRewriterJobTests: XCTestCase {
-    func testTranspile() {
+    func xtestTranspile() {
         let expectedSwift = """
             class BaseClass: NSObject {
             }

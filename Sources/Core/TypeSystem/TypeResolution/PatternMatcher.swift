@@ -32,7 +32,7 @@ class PatternMatcher {
     ) -> [Result] {
 
         switch pattern {
-        case .tuple(let patterns):
+        case .tuple(let patterns, _):
             // Tuple patterns can only match with equal-length tuple patterns.
             switch type {
             case .tuple(let values) where values.count == patterns.count:
@@ -54,7 +54,7 @@ class PatternMatcher {
                 break
             }
 
-        case .identifier(let name):
+        case .identifier(let name, _):
             let resultType: SwiftType
             if context.contains(.optionalBinding) {
                 resultType = type.unwrapped
