@@ -63,10 +63,10 @@ class PropertyAsMethodAccessCorrectingExpressionPassTests: ExpressionPassTestCas
         // Make sure we ignore invocations to closure properties
 
         let type = KnownTypeBuilder(typeName: "A")
-            .property(named: "aClosure", type: .swiftBlock(returnType: .void, parameters: []))
+            .property(named: "aClosure", type: .swiftBlock(returnType: .void))
             .property(
                 named: "anOptionalClosure",
-                type: .optional(.swiftBlock(returnType: .void, parameters: []))
+                type: .optional(.swiftBlock(returnType: .void))
             )
             .build()
         typeSystem.addType(type)
@@ -95,11 +95,11 @@ class PropertyAsMethodAccessCorrectingExpressionPassTests: ExpressionPassTestCas
         typeSystem.addType(type)
         typeSystem.addTypealias(
             aliasName: "BlockAlias",
-            originalType: .swiftBlock(returnType: .void, parameters: [])
+            originalType: .swiftBlock(returnType: .void)
         )
         typeSystem.addTypealias(
             aliasName: "OptionalBlockAlias",
-            originalType: .optional(.swiftBlock(returnType: .void, parameters: []))
+            originalType: .optional(.swiftBlock(returnType: .void))
         )
 
         assertNoTransform(

@@ -251,8 +251,8 @@ public class DefaultTypeMapper: TypeMapper {
 
     public func typeNameString(for composition: ProtocolCompositionComponent) -> String {
         switch composition {
-        case .nested(let types):
-            return types.map { typeNameString(for: $0) }.joined(separator: ".")
+        case .nested(let nested):
+            return typeNameString(for: nested.base) + "." + typeNameString(for: nested.nested)
 
         case .nominal(let nominal):
             return typeNameString(for: nominal)
@@ -310,7 +310,7 @@ public class DefaultTypeMapper: TypeMapper {
 
             let paramsString =
                 parameters.map {
-                    innerTypeNameString(for: $0, isBlockContext: true)
+                    innerTypeNameString(for: $0.type, isBlockContext: true)
                 }.joined(separator: ", ")
 
             return
@@ -362,16 +362,26 @@ public class DefaultTypeMapper: TypeMapper {
             return "Void"
 
         case .tuple(.types(let inner)):
-            return "(" + inner.map(typeNameString).joined(separator: ", ") + ")"
+            return "(" + inner.map(_innerTypeNameString).joined(separator: ", ") + ")"
 
-        case let .nested(types):
-            return types.map { typeNameString(for: $0) }.joined(separator: ".")
+        case let .nested(nested):
+            return typeNameString(for: nested.base) + "." + typeNameString(for: nested.nested)
 
         case .array(let type):
             return "[\(typeNameString(for: type))]"
 
         case let .dictionary(key, value):
             return "[\(typeNameString(for: key)): \(typeNameString(for: value))]"
+        }
+    }
+
+    private func _innerTypeNameString(for tupleTypeEntry: TupleTypeEntry) -> String {
+        switch tupleTypeEntry {
+        case .labeled(let label, let type):
+            return "\(label): \(typeNameString(for: type))"
+
+        case .unlabeled(let type):
+            return typeNameString(for: type)
         }
     }
 
@@ -747,7 +757,7 @@ public class DefaultTypeMapper: TypeMapper {
 
     private func swiftTuple(types: [ObjcType], context: TypeMappingContext) -> SwiftType {
         let types = types.map {
-            swiftType(forObjcType: $0, context: context)
+            TupleTypeEntry.unlabeled(swiftType(forObjcType: $0, context: context))
         }
 
         return .tuple(.types(.fromCollection(types)))

@@ -195,6 +195,10 @@ private class ValidatorExpressionVisitor: ExpressionVisitor {
         return exp.exp.accept(self)
     }
 
+    func visitImplicitMember(_ exp: SwiftAST.ImplicitMemberExpression) -> Bool {
+        false
+    }
+
     func visitIdentifier(_ exp: IdentifierExpression) -> Bool {
         return true
     }
@@ -228,7 +232,7 @@ private class ValidatorExpressionVisitor: ExpressionVisitor {
     }
 
     func visitTuple(_ exp: TupleExpression) -> Bool {
-        return exp.elements.reduce(true, { $0 && $1.accept(self) })
+        return exp.elements.reduce(true, { $0 && $1.exp.accept(self) })
     }
 
     func visitSelector(_ exp: SelectorExpression) -> Bool {

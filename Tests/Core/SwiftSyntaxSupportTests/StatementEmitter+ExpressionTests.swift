@@ -443,8 +443,8 @@ class StatementEmitter_ExpressionTests: XCTestCase {
 
         assert(
             Expression.block(body: [])
-            .typed(expected: SwiftType.swiftBlock(returnType: .void, parameters: []))
-            .typed(SwiftType.swiftBlock(returnType: .void, parameters: [])),
+            .typed(expected: SwiftType.swiftBlock(returnType: .void))
+            .typed(SwiftType.swiftBlock(returnType: .void)),
             matches: "{\n}"
         )
     }
@@ -485,8 +485,8 @@ class StatementEmitter_ExpressionTests: XCTestCase {
                     .expression(Expression.identifier("foo").call())
                 ]
             )
-            .typed(expected: SwiftType.swiftBlock(returnType: .void, parameters: []))
-            .typed(SwiftType.swiftBlock(returnType: .void, parameters: [])),
+            .typed(expected: SwiftType.swiftBlock(returnType: .void))
+            .typed(SwiftType.swiftBlock(returnType: .void)),
             matches: "{\n    foo()\n}"
         )
 
@@ -539,8 +539,8 @@ class StatementEmitter_ExpressionTests: XCTestCase {
                     .expression(Expression.identifier("foo").call())
                 ]
             )
-            .typed(expected: SwiftType.swiftBlock(returnType: .void, parameters: []))
-            .typed(SwiftType.swiftBlock(returnType: .int, parameters: [])),
+            .typed(expected: SwiftType.swiftBlock(returnType: .void))
+            .typed(SwiftType.swiftBlock(returnType: .int)),
             matches: "{ () -> Void in\n    foo()\n}"
         )
 
@@ -554,8 +554,8 @@ class StatementEmitter_ExpressionTests: XCTestCase {
                     .expression(Expression.identifier("foo").call())
                 ]
             )
-            .typed(expected: SwiftType.swiftBlock(returnType: .void, parameters: []))
-            .typed(SwiftType.swiftBlock(returnType: .int, parameters: [])),
+            .typed(expected: SwiftType.swiftBlock(returnType: .void))
+            .typed(SwiftType.swiftBlock(returnType: .int)),
             matches: "{ (p1: Int) -> Void in\n    foo()\n}"
         )
     }
@@ -572,8 +572,8 @@ class StatementEmitter_ExpressionTests: XCTestCase {
         )
         assert(
             Expression.block(body: CompoundStatement().withComments(["// A comment", "// Another comment"]))
-            .typed(expected: SwiftType.swiftBlock(returnType: .void, parameters: []))
-            .typed(SwiftType.swiftBlock(returnType: .void, parameters: [])),
+            .typed(expected: SwiftType.swiftBlock(returnType: .void))
+            .typed(SwiftType.swiftBlock(returnType: .void)),
             matches: """
             {
                 // A comment

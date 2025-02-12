@@ -1,5 +1,5 @@
 {
-  "originHash" : "77a1c9befdb61f7e62a0965a6914ae2ea602d0226512460344b1cb11ac37de51",
+  "originHash" : "bdfdc4503b60cfd111c8df7be14780023721fe659ab3d40c6875d4ca57d373dd",
   "pins" : [
     {
       "identity" : "antlr4-swift",
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LuizZak/MiniDigraph.git",
       "state" : {
-        "revision" : "1832c37618b0263fe8850ab8b3dfef28cd183fc7",
-        "version" : "0.6.0"
+        "revision" : "188262a9aaafa42d4d51b369f804edbd57901130",
+        "version" : "0.8.0"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LuizZak/SwiftAST.git",
       "state" : {
-        "revision" : "6bf27ed5c113c7830fcec2a9dc1a66be5880ee17",
-        "version" : "0.11.0"
+        "revision" : "75eb69c009d213b58a34a43bc164054c8d52c73a",
+        "version" : "0.14.0"
       }
     }
   ],

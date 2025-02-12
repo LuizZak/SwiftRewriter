@@ -7,7 +7,7 @@ class SwiftTypeStringProducer {
     init() {
         buffer = ""
     }
-    
+
     func convert(_ type: SwiftType) -> String {
         buffer = ""
 
@@ -102,7 +102,9 @@ class SwiftTypeStringProducer {
     }
 
     private func visit(_ type: NestedSwiftType) {
-        emitSeparated(type, separator: ".", visit(_:))
+        visit(type.base)
+        emit(".")
+        visit(type.nested)
     }
 
     private func visit(_ type: ProtocolCompositionSwiftType) {
@@ -131,6 +133,18 @@ class SwiftTypeStringProducer {
         }
     }
 
+    private func visit(_ element: TupleTypeEntry) {
+        switch element {
+        case .unlabeled(let type):
+            visit(type)
+
+        case .labeled(let label, let type):
+            emit(label)
+            emit(": ")
+            visit(type)
+        }
+    }
+
     private func visit(_ type: BlockSwiftType) {
         let attributes = type.attributes.sorted(by: { $0.description < $1.description })
 
@@ -143,6 +157,19 @@ class SwiftTypeStringProducer {
         emit(") -> ")
 
         visit(type.returnType)
+    }
+
+    private func visit(_ parameter: BlockSwiftType.BlockParameter) {
+        switch parameter.modifier {
+        case .none:
+            break
+
+        default:
+            emit(parameter.modifier.rawValue)
+            emit(" ")
+        }
+
+        visit(parameter.type)
     }
 
     private func visit(metatype type: SwiftType) {

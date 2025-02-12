@@ -605,7 +605,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             parseBlock: { try $0.declaration() },
             readsAs: .variableDeclaration(
                 identifier: "callback",
-                type: .nullabilityUnspecified(.swiftBlock(returnType: .void, parameters: [])),
+                type: .nullabilityUnspecified(.swiftBlock(returnType: .void)),
                 initialization: nil
             )
         )
@@ -617,7 +617,7 @@ class ObjectiveCStatementASTReaderTests: XCTestCase {
             parseBlock: { try $0.declaration() },
             readsAs: .variableDeclaration(
                 identifier: "callback",
-                type: .swiftBlock(returnType: .void, parameters: []),
+                type: .swiftBlock(returnType: .void),
                 initialization: nil
             )
         )

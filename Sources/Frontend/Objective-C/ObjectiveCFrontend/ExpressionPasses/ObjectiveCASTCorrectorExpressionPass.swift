@@ -455,7 +455,7 @@ public class ObjectiveCASTCorrectorExpressionPass: ASTRewriterPass {
         // Check the receiving argument is non-optional, but the argument's type
         // in the expression is an optional (but not an implicitly unwrapped, since
         // Swift takes care of unwrapping that automatically)
-        guard let resolvedType = argument.resolvedType, !blockType.parameters[0].isOptional
+        guard let resolvedType = argument.resolvedType, !blockType.parameters[0].type.isOptional
             && resolvedType.isOptional == true
             && argument.resolvedType?.canBeImplicitlyUnwrapped == false else {
             return nil

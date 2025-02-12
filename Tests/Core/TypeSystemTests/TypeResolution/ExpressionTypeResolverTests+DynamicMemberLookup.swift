@@ -60,7 +60,7 @@ class ExpressionTypeResolverTests_DynamicMemberLookup: XCTestCase {
             )
             .thenAssertExpression(
                 at: \.statements[2].asExpressions?.expressions[0],
-                resolvedAs: .block(returnType: .void, parameters: [])
+                resolvedAs: .block(returnType: .void)
             )
             .thenAssertExpression(
                 at: \.statements[3].asExpressions?.expressions[0],

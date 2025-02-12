@@ -14,7 +14,7 @@ class PatternMatcherTests: XCTestCase {
         let sut = makeSut()
 
         let result = sut.match(
-            pattern: .wildcard,
+            pattern: .wildcard(),
             to: .int,
             context: .declaration
         )

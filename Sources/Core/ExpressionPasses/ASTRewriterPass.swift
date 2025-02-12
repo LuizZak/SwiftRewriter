@@ -127,7 +127,7 @@ open class ASTRewriterPass: SyntaxNodeRewriter {
         case .expression(let exp):
             return .expression(visitBaseExpression(exp))
 
-        case .tuple(let patterns):
+        case .tuple(let patterns, _):
             return .tuple(patterns.map(visitPattern))
 
         case .asType(let pattern, let type):

@@ -153,7 +153,7 @@ class ObjectiveC2SwiftRewriter_StmtTests: XCTestCase {
         )
         assertSingleStatement(
             objc: "*value;",
-            swift: "*value"
+            swift: "value.pointee"
         )
     }
 

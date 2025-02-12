@@ -699,20 +699,28 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     }
 
     public override func visitBlock(_ exp: BlockLiteralExpression) -> Expression {
-        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+        if ignoreResolvedExpressions && exp.isTypeResolved {
+            return exp
+        }
 
-        var blockReturnType = exp.returnType
+        guard var blockReturnType = exp.returnType else {
+            return super.visitBlock(exp)
+        }
+
+        guard let parameters = exp.parameters else {
+            return super.visitBlock(exp)
+        }
 
         // Adjust signatures of block parameters based on expected type
         if case let .block(block)? = (exp.expectedType?.deepUnwrapped).map(expandAliases),
-            block.parameters.count == exp.parameters.count {
+            block.parameters.count == parameters.count {
 
-            for (i, expectedType) in zip(0..<exp.parameters.count, block.parameters) {
-                let param = exp.parameters[i]
+            for (i, expectedType) in zip(0..<parameters.count, block.parameters) {
+                let param = parameters[i]
                 guard param.type.isNullabilityUnspecified else { continue }
-                guard param.type.deepUnwrapped == expectedType.deepUnwrapped else { continue }
+                guard param.type.deepUnwrapped == expectedType.type.deepUnwrapped else { continue }
 
-                exp.parameters[i].type = expectedType
+                exp.signature?.parameters[i].type = expectedType.type
             }
 
             if blockReturnType.isNullabilityUnspecified &&
@@ -724,21 +732,21 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             exp.resolvedType =
                 .block(
                     returnType: blockReturnType,
-                    parameters: exp.parameters.map(\.type),
+                    parameters: parameters.map(\.type),
                     attributes: []
                 )
         } else {
             exp.resolvedType =
                 .block(
-                    returnType: exp.returnType,
-                    parameters: exp.parameters.map(\.type),
+                    returnType: blockReturnType,
+                    parameters: parameters.map(\.type),
                     attributes: []
                 )
         }
 
         // Apply definitions for function parameters
         exp.recordDefinitions(
-            CodeDefinition.forParameters(exp.parameters),
+            CodeDefinition.forParameters(parameters),
             overwrite: true
         )
 
@@ -1188,7 +1196,7 @@ private class MemberInvocationResolver {
                 if case .metatype(.nominal(let nominal)) = innerType,
                     typeSystem.nestedType(named: member.name, in: innerType) != nil {
 
-                    exp.resolvedType = .metatype(for: .nested([nominal, .typeName(member.name)]))
+                    exp.resolvedType = .metatype(for: .nested(.init(base: .nominal(nominal), nested: .typeName(member.name))))
                     exp.op.returnType = exp.resolvedType
 
                     break
@@ -1196,7 +1204,7 @@ private class MemberInvocationResolver {
                 if case .metatype(.nested(let nested)) = innerType,
                     typeSystem.nestedType(named: member.name, in: .nested(nested)) != nil {
 
-                    exp.resolvedType = .metatype(for: .nested(nested + [.typeName(member.name)]))
+                    exp.resolvedType = .metatype(for: .nested(.init(base: .nested(nested), nested: .typeName(member.name))))
                     exp.op.returnType = exp.resolvedType
 
                     break
@@ -1396,7 +1404,7 @@ private class MemberInvocationResolver {
 
         // Detect callable types
         if case .block(let block) = expType {
-            matchParameterTypes(types: block.parameters, callArguments: functionCall.arguments)
+            matchParameterTypes(types: block.parameters.map(\.type), callArguments: functionCall.arguments)
 
             functionCall = functionCall.replacingArguments(
                 functionCall.subExpressions.map(typeResolver.visitExpression)
@@ -1488,7 +1496,7 @@ private class MemberInvocationResolver {
         functionCall.callableSignature = blockType
 
         matchParameterTypes(
-            types: blockType.parameters,
+            types: blockType.parameters.map(\.type),
             callArguments: functionCall.arguments
         )
 

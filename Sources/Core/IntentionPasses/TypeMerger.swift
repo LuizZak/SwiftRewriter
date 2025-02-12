@@ -6,11 +6,11 @@ import TypeSystem
 class TypeMerger {
     let typeSystem: TypeSystem
     let invocatorTag: String
-    
+
     var historyTag: String {
         "TypeMerge:\(invocatorTag)"
     }
-    
+
     init(typeSystem: TypeSystem, invocatorTag: String) {
         self.typeSystem = typeSystem
         self.invocatorTag = invocatorTag
@@ -18,78 +18,78 @@ class TypeMerger {
 
     func mergeTypesToMatchingImplementations(from source: FileGenerationIntention,
                                              into target: FileGenerationIntention) {
-        
+
         // Group class and extensions by name
         // ClassName -> [Intention1, Intention2, ...]
         // ClassName -> [ExtIntention1, ExtIntention2, ...]
-        
+
         let sourceClasses = source.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
         let targetClasses = target.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
-        
+
         let sourceExtensions = source.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
         let targetExtensions = target.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
-        
+
         let sourceStructs = source.structIntentions
         let targetStructs = target.structIntentions
-        
+
         let allClasses = sourceClasses + targetClasses
         let allExtensions = sourceExtensions + targetExtensions
         let allStructs = sourceStructs + targetStructs
-        
+
         let allClassesByName = Dictionary(grouping: allClasses, by: \.typeName)
         let allExtensionsByName = Dictionary(grouping: allExtensions, by: \.typeName)
         let allStructsByName = Dictionary(grouping: allStructs, by: \.typeName)
-        
+
         for (_, classes) in allClassesByName {
             guard let target = classes.first(where: { !$0.isInterfaceSource }) else {
                 continue
             }
-            
+
             let remaining = classes.filter(\.isInterfaceSource)
-            
+
             mergeAllTypeDefinitions(in: remaining, on: target)
-            
+
             // Remove all interface types after merge
             source.removeTypes { type in remaining.contains { $0 === type } }
         }
-        
+
         for (_, extensions) in allExtensionsByName {
             // Work on extensions by category name, if available.
             let categories = Dictionary(grouping: extensions, by: { $0.categoryName ?? "" })
-            
+
             for (_, cat) in categories {
                 guard let target = cat.first(where: { !$0.isInterfaceSource }) else {
                     continue
                 }
-                
+
                 let remaining = cat.filter(\.isInterfaceSource)
-                
+
                 mergeAllTypeDefinitions(in: remaining, on: target)
-                
+
                 // Remove all interface types after merge
                 source.removeTypes { type in remaining.contains { $0 === type } }
             }
         }
-        
+
         // Merge global variables
         for gvar in source.globalVariableIntentions {
             guard let targetVar = target.globalVariableIntentions.first(where: { $0.name == gvar.name }) else {
                 continue
             }
-            
+
             mergeTypeSignatures(gvar.type, &targetVar.storage.type)
         }
-        
+
         // Merge struct definitions
         for (_, structs) in allStructsByName {
             guard let target = structs.first(where: { !$0.isEmptyType }) else {
                 continue
             }
-            
+
             let remaining = structs.filter { $0 !== target }
-            
+
             mergeAllTypeDefinitions(in: remaining, on: target)
-            
+
             // Remove merged structs
             source.removeTypes(where: { type in remaining.contains { $0 === type } })
         }
@@ -101,51 +101,51 @@ class TypeMerger {
         let classes = file.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
         let extensions = file.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
         let structs = file.structIntentions
-        
+
         let classesByName = Dictionary(grouping: classes, by: \.typeName)
         let extensionsByName = Dictionary(grouping: extensions, by: \.typeName)
         let structsByName = Dictionary(grouping: structs, by: \.typeName)
-        
+
         for (_, classes) in classesByName {
             guard let target = classes.first(where: { !$0.isInterfaceSource }) else {
                 continue
             }
-            
+
             let remaining = classes.filter(\.isInterfaceSource)
-            
+
             mergeAllTypeDefinitions(in: remaining, on: target)
-            
+
             // Remove all interface types after merge
             file.removeTypes { type in remaining.contains { $0 === type } }
         }
-        
+
         for (_, extensions) in extensionsByName {
             // Work on extensions by category name, if available.
             let categories = Dictionary(grouping: extensions, by: { $0.categoryName ?? "" })
-            
+
             for (_, cat) in categories {
                 guard let target = cat.first(where: { !$0.isInterfaceSource }) else {
                     continue
                 }
-                
+
                 let remaining = cat.filter(\.isInterfaceSource)
-                
+
                 mergeAllTypeDefinitions(in: remaining, on: target)
-                
+
                 // Remove all interface types after merge
                 file.removeTypes { type in remaining.contains { $0 === type } }
             }
         }
-        
+
         for (_, structs) in structsByName {
             guard let target = structs.first(where: { !$0.isEmptyType }) else {
                 continue
             }
-            
+
             let remaining = structs.filter { $0 !== target }
-            
+
             mergeAllTypeDefinitions(in: remaining, on: target)
-            
+
             // Remove merged structs
             file.removeTypes(where: { type in remaining.contains { $0 === type } })
         }
@@ -159,7 +159,7 @@ class TypeMerger {
                                  on target: TypeGenerationIntention) {
         for source in types {
             target.history.mergeHistories(source.history)
-            
+
             mergeTypes(from: source, into: target)
         }
     }
@@ -173,7 +173,7 @@ class TypeMerger {
     func mergeGlobalFunctionDefinitions(in intentions: IntentionCollection) {
         var declarations: [GlobalFunctionGenerationIntention] = []
         var implementations: [GlobalFunctionGenerationIntention] = []
-        
+
         // Search all declarations
         for function in intentions.globalFunctions() {
             if function.isDeclaration {
@@ -182,20 +182,20 @@ class TypeMerger {
                 implementations.append(function)
             }
         }
-        
+
         for impl in implementations {
             let visibleMatches =
                 declarations.filter {
                     $0.signature.matchesAsCFunction(impl.signature) && $0.isVisible(for: impl)
                 }
-            
+
             // Pick the first match and use it
             guard let match = visibleMatches.first else {
                 continue
             }
-            
+
             mergeFunction(match, into: impl)
-            
+
             // Remove declarations
             for match in visibleMatches {
                 match.file?.removeFunctions(where: { $0 === match })
@@ -207,32 +207,32 @@ class TypeMerger {
     /// are flattened to properly nullability-annotated methods.
     func mergeTypes(from first: TypeGenerationIntention,
                     into second: TypeGenerationIntention) {
-        
+
         prependComments(from: first, into: second)
-        
+
         // Protocols
         for prot in first.knownProtocolConformances {
             if !second.hasProtocol(named: prot.protocolName) {
                 let generated = second.generateProtocolConformance(from: prot)
-                
+
                 second.history
                     .recordChange(
                         tag: historyTag,
                         description: "Generating protocol conformance \(prot.protocolName) due to \(first.origin)")
-                
+
                 if let historic = prot as? Historic {
                     generated.history.mergeHistories(historic.history)
                 }
             }
         }
-        
+
         if let first = first as? ClassGenerationIntention,
             let second = second as? ClassGenerationIntention {
-            
+
             // Inheritance
             if let superclass = first.superclassName, second.superclassName == nil {
                 second.superclassName = superclass
-                
+
                 second.history
                     .recordChange(
                         tag: historyTag,
@@ -242,15 +242,15 @@ class TypeMerger {
                         """)
             }
         }
-        
+
         if let first = first as? BaseClassIntention,
             let second = second as? BaseClassIntention {
-            
+
             // Instance vars
             for ivar in first.instanceVariables {
                 if !second.hasInstanceVariable(named: ivar.name) {
                     second.addInstanceVariable(ivar)
-                    
+
                     second.history
                         .recordChange(
                             tag: historyTag,
@@ -260,9 +260,9 @@ class TypeMerger {
                 }
             }
         }
-        
+
         mergePropertySignatures(from: first, into: second)
-        
+
         // Methods
         mergeMethodSignatures(from: first, into: second)
     }
@@ -273,9 +273,9 @@ class TypeMerger {
         for prop in first.properties {
             if !second.hasProperty(named: prop.name) {
                 let generated = second.generateProperty(from: prop)
-                
+
                 prependComments(from: prop, into: generated)
-                
+
                 generated.history.mergeHistories(prop.history)
             }
         }
@@ -299,7 +299,7 @@ class TypeMerger {
                                createIfUnexistent: Bool = true,
                                skipCreatingOptionalMethods: Bool = true,
                                copyComments: Bool = true) {
-        
+
         for method in first.knownMethods {
             if let existing = second.method(matchingSelector: method.signature.asSelector) {
                 mergeMethods(method, into: existing, copyComments: copyComments)
@@ -307,9 +307,9 @@ class TypeMerger {
                 if skipCreatingOptionalMethods && method.optional {
                     continue
                 }
-                
+
                 let generated = second.generateMethod(from: method)
-                
+
                 second.history
                     .recordChange(
                         tag: historyTag,
@@ -317,11 +317,11 @@ class TypeMerger {
                         Creating definition for newly found method \
                         \(TypeFormatter.asString(method: method, ofType: first))
                         """)
-                
+
                 if copyComments, let intention = method as? FromSourceIntention {
                     prependComments(from: intention, into: generated)
                 }
-                
+
                 if let historic = method as? Historic {
                     generated.history.mergeHistories(historic.history)
                 }
@@ -361,15 +361,15 @@ class TypeMerger {
     func mergeMethods(_ source: KnownMethod,
                       into target: MethodGenerationIntention,
                       copyComments: Bool = true) {
-        
+
         let originalSignature = target.signature
-        
+
         if copyComments, let sourceAsIntention = source as? FromSourceIntention {
             prependComments(from: sourceAsIntention, into: target)
         }
-        
+
         target.signature = mergeSignatures(source.signature, target.signature)
-        
+
         // Track change
         if originalSignature != target.signature {
             target.history
@@ -379,13 +379,13 @@ class TypeMerger {
                     to: \(TypeFormatter.asString(signature: target.signature))
                     """)
         }
-        
+
         if let body = source.body, target.functionBody == nil {
             target.functionBody =
                 FunctionBodyIntention(body: body.body)
-            
+
             target.functionBody?.history.recordCreation(description: "Merged from existing type body")
-            
+
             target.history
                 .recordChange(
                     tag: historyTag,
@@ -400,13 +400,13 @@ class TypeMerger {
     /// annotations and the implementation body.
     func mergeFunction(_ source: GlobalFunctionGenerationIntention,
                        into target: GlobalFunctionGenerationIntention) {
-        
+
         let originalSignature = target.signature
-        
+
         prependComments(from: source, into: target)
-        
+
         target.signature = mergeSignatures(source.signature, target.signature)
-        
+
         // Track change
         if originalSignature != target.signature {
             target.history
@@ -416,17 +416,17 @@ class TypeMerger {
                     to: \(TypeFormatter.asString(signature: target.signature))
                     """, relatedIntentions: [source])
         }
-        
+
         if let body = source.functionBody, target.functionBody == nil {
             target.functionBody =
                 FunctionBodyIntention(body: body.body)
-            
+
             target.functionBody?.history.recordCreation(
                 description: "Merged from existing type body"
             )
-            
+
             let funcSign = TypeFormatter.asString(signature: source.signature, includeName: false)
-            
+
             target.history
                 .recordChange(tag: historyTag,
                               description: "Inserted body from function \(funcSign)",
@@ -438,34 +438,34 @@ class TypeMerger {
     /// defined on the first signature, but undefined on the second.
     func mergeSignatures(_ sign1: FunctionSignature,
                          _ sign2: FunctionSignature) -> FunctionSignature {
-        
+
         var result = sign2
-        
+
         mergeTypeSignatures(sign1.returnType, &result.returnType)
-        
+
         for (i, p1) in sign1.parameters.enumerated() {
             if i >= result.parameters.count {
                 break
             }
-            
+
             mergeTypeSignatures(p1.type, &result.parameters[i].type)
         }
-        
+
         return result
     }
 
     func mergeTypeSignatures(_ type1: SwiftType,
                              _ type2: inout SwiftType) {
-        
+
         let type1Unaliased = typeSystem.resolveAlias(in: type1)
         var type2Unaliased = typeSystem.resolveAlias(in: type2)
-        
+
         // Merge block types
         // TODO: Figure out what to do when two block types have different type
         // attributes.
         switch (type1Unaliased.deepUnwrapped, type2Unaliased.deepUnwrapped) {
         case (.block(let t1), .block(let t2)) where t1.parameters.count == t2.parameters.count:
-            
+
             let t1Ret = t1.returnType
             let t1Params = t1.parameters
             let t1Attributes = t1.attributes
@@ -475,56 +475,56 @@ class TypeMerger {
             var attributes = t2.attributes
 
             mergeTypeSignatures(t1Ret, &ret)
-            
+
             for (i, p1) in t1Params.enumerated() {
-                mergeTypeSignatures(p1, &params[i])
+                mergeTypeSignatures(p1.type, &params[i].type)
             }
-            
+
             attributes.formUnion(t1Attributes)
-            
+
             type2 = SwiftType.block(
                 returnType: ret,
                 parameters: params,
                 attributes: attributes
             ).withSameOptionalityAs(type2)
-            
+
             type2Unaliased = typeSystem.resolveAlias(in: type2)
         default:
             break
         }
-        
+
         if !type1.isNullabilityUnspecified && type2.isNullabilityUnspecified {
             let type1NonnullDeep =
                 SwiftType.asNonnullDeep(
                     type1Unaliased.deepUnwrapped,
                     removeUnspecifiedNullabilityOnly: true
                 )
-            
+
             let type2NonnullDeep =
                 SwiftType.asNonnullDeep(
                     type2Unaliased.deepUnwrapped,
                     removeUnspecifiedNullabilityOnly: true
                 )
-            
+
             if type1NonnullDeep == type2NonnullDeep {
                 type2 = type2NonnullDeep.withSameOptionalityAs(type1)
             }
         }
-        
+
         // Do a final check: If the resulting type2 is the same as an unaliased
         // type1 signature, favor using the typealias in the final type signature.
         if type2 == type1Unaliased {
             type2 = type1
         }
     }
-    
+
     func prependComments(from intention1: FromSourceIntention, into intention2: FromSourceIntention) {
         // Pre-pend comments
         let result = intention1.precedingComments + intention2.precedingComments
-        
+
         intention2.precedingComments = result
     }
-    
+
     func appendComments(from intention1: FromSourceIntention, into intention2: FromSourceIntention) {
         intention2.precedingComments.append(contentsOf: intention1.precedingComments)
     }

@@ -658,7 +658,7 @@ public class TypeSystem {
             return nil
 
         case .tuple(.empty):
-            let exp = Expression.tuple([])
+            let exp = Expression.voidTuple()
             exp.resolvedType = type
 
             return exp
@@ -667,7 +667,7 @@ public class TypeSystem {
             var defValues: [Expression] = []
 
             for type in types {
-                guard let defValue = defaultValue(for: type) else {
+                guard let defValue = defaultValue(for: type.swiftType) else {
                     return nil
                 }
 
@@ -1156,20 +1156,18 @@ public class TypeSystem {
             result = knownTypeWithName(typeName)
 
         case .nested(let nested):
-            guard var current = findType(for: .nominal(nested[0])) else {
+            guard var current = findType(for: nested.base) else {
                 return nil
             }
 
-            for next in nested.dropFirst() {
-                if
-                    let type = current.nestedTypes.first(where: {
-                        $0.typeName == next.typeNameValue
-                    })
-                {
-                    current = type
-                } else {
-                    return nil
-                }
+            if
+                let type = current.nestedTypes.first(where: {
+                    $0.typeName == nested.nested.typeNameValue
+                })
+            {
+                current = type
+            } else {
+                return nil
             }
 
             result = current
@@ -1538,7 +1536,7 @@ private class TypealiasExpander {
         case let .block(blockType):
             return .block(
                 returnType: expand(in: blockType.returnType),
-                parameters: blockType.parameters.map(expand),
+                parameters: blockType.parameters.map { expand(inBlockParameter: $0) },
                 attributes: blockType.attributes
             )
 
@@ -1564,7 +1562,9 @@ private class TypealiasExpander {
             return .nullabilityUnspecified(expand(in: type))
 
         case .nested(let nested):
-            return .nested(.fromCollection(nested.map(expand(inNominal:))))
+            return .nested(
+                .init(base: expand(in: nested.base), nested: expand(inNominal: nested.nested))
+            )
 
         case .metatype(let type):
             return .metatype(for: expand(in: type))
@@ -1599,7 +1599,9 @@ private class TypealiasExpander {
     private func expand(inComposition composition: ProtocolCompositionComponent) -> ProtocolCompositionComponent {
         switch composition {
         case .nested(let nested):
-            return .nested(.fromCollection(nested.map(expand(inNominal:))))
+            return .nested(
+                .init(base: expand(in: nested.base), nested: expand(inNominal: nested.nested))
+            )
 
         case .nominal(let nominal):
             return .nominal(expand(inNominal: nominal))
@@ -1617,6 +1619,20 @@ private class TypealiasExpander {
                 parameters: .fromCollection(parameters.map(expand))
             )
         }
+    }
+
+    private func expand(inTupleTypeEntry tupleTypeEntry: TupleTypeEntry) -> TupleTypeEntry {
+        switch tupleTypeEntry {
+        case .labeled(let label, let type):
+            return .labeled(label, expand(in: type))
+
+        case .unlabeled(let type):
+            return .unlabeled(expand(in: type))
+        }
+    }
+
+    private func expand(inBlockParameter blockParameter: BlockSwiftType.BlockParameter) -> BlockSwiftType.BlockParameter {
+        return .init(type: expand(in: blockParameter.type), modifier: blockParameter.modifier)
     }
 
     private func pushingAlias<T>(_ name: String, do work: () -> T) -> T {

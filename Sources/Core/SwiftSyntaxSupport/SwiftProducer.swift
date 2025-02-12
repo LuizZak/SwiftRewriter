@@ -11,7 +11,7 @@ public class SwiftProducer {
     weak var delegate: SwiftProducerDelegate?
 
     var indentationMode: IndentationMode = .spaces(4)
-    
+
     /// Current indentation level.
     var indentation: Int = 0
 
@@ -161,7 +161,7 @@ public class SwiftProducer {
     /// is inserted.
     func emitLineWith(_ block: () -> Void) {
         let bufferSizeBefore = buffer.count
-        
+
         block()
 
         guard buffer.count > bufferSizeBefore else {
@@ -225,12 +225,12 @@ public class SwiftProducer {
             emitSpaceSeparator()
         }
     }
-    
+
     /// Ensures an empty line sits in the end of the buffer.
     /// If the buffer is empty, no change is made.
     func ensureEmptyLine() {
         guard !buffer.isEmpty else { return }
-        
+
         ensureDoubleNewline()
     }
 
@@ -256,7 +256,7 @@ public class SwiftProducer {
         }
     }
 
-    /// Queues a given prefix to the appended to the next non-empty line 
+    /// Queues a given prefix to the appended to the next non-empty line
     func queuePrefix(_ prefix: PendingPrefix) {
         pendingPrefix.append(prefix)
     }
@@ -269,35 +269,35 @@ public class SwiftProducer {
             printIntentionHistory: false,
             emitObjcCompatibility: false
         )
-        
+
         /// If `true`, when outputting expression statements, print the resulting
         /// type of the expression before the expression statement as a comment
         /// for inspection.
         public var outputExpressionTypes: Bool
-        
+
         /// If `true`, when outputting final intentions, print any history
         /// information tracked on its `IntentionHistory` property before the
         /// intention's declaration as a comment for inspection.
         public var printIntentionHistory: Bool
-        
+
         /// If `true`, `@objc` attributes and `: NSObject` are emitted for
         /// declarations during output.
         ///
         /// This may increase compatibility with previous Objective-C code when
         /// compiled and executed.
         public var emitObjcCompatibility: Bool
-        
+
         public init(
             outputExpressionTypes: Bool,
             printIntentionHistory: Bool,
             emitObjcCompatibility: Bool
         ) {
-            
+
             self.outputExpressionTypes = outputExpressionTypes
             self.printIntentionHistory = printIntentionHistory
             self.emitObjcCompatibility = emitObjcCompatibility
         }
-        
+
         /// To ease modifications of single parameters from default settings
         /// without having to create a temporary variable first
         public func with<T>(_ keyPath: WritableKeyPath<Self, T>, _ value: T) -> Self {
@@ -451,7 +451,7 @@ extension SwiftProducer {
     /// <block()>
     /// }
     /// ```
-    /// 
+    ///
     /// Used to generate type member blocks.
     func emitMembersBlock(_ block: () -> Void) {
         emitLine("{")
@@ -516,9 +516,10 @@ extension SwiftProducer {
         if parameter.isVariadic {
             emit("...")
         }
-        
-        if parameter.hasDefaultValue {
-            emit(" = <default>")
+
+        if let defaultValue = parameter.defaultValue {
+            emit(" = ")
+            emit(defaultValue)
         }
     }
 
@@ -636,7 +637,7 @@ extension SwiftProducer {
             } else {
                 emitNewline()
             }
-            
+
         case let .multiple(patterns):
             emitWithSeparators(patterns, separator: ", ", emit)
             emitNewline()
@@ -726,7 +727,7 @@ extension SwiftProducer {
             emit(modifier, inline: true)
         }
     }
-    
+
     func shouldEmitObjcAttribute(_ intention: IntentionProtocol) -> Bool {
         if !settings.emitObjcCompatibility {
             // Protocols which feature optional members must be emitted with @objc
@@ -743,10 +744,10 @@ extension SwiftProducer {
             if let method = intention as? ProtocolMethodGenerationIntention {
                 return method.isOptional
             }
-            
+
             return false
         }
-        
+
         if intention is EnumCaseGenerationIntention {
             return false
         }
@@ -763,7 +764,7 @@ extension SwiftProducer {
             type.kind != .struct {
             return true
         }
-        
+
         return false
     }
 
@@ -857,7 +858,7 @@ extension SwiftProducer {
         }
 
         spacer.ensureEmptyLine()
-        
+
         // Global functions
         for intention in file.globalFunctionIntentions {
             emit(intention)
@@ -878,7 +879,7 @@ extension SwiftProducer {
         }
 
         spacer.ensureEmptyLine()
-        
+
         // Extensions
         for intention in file.extensionIntentions {
             emit(intention)
@@ -954,7 +955,7 @@ extension SwiftProducer {
 
             emitter.ensureEmptyLine()
             emitInitializers(intention)
-            
+
             emitter.ensureEmptyLine()
             emitMethods(intention)
         }
@@ -995,19 +996,19 @@ extension SwiftProducer {
         ensureSpaceSeparator()
         emitMembersBlock {
             let emitter = startConditionalEmitter()
-            
+
             emitIvars(intention)
             emitProperties(intention)
             emitSubscripts(intention)
-            
+
             emitter.ensureEmptyLine()
             emitInitializers(intention)
-            
+
             emitter.ensureEmptyLine()
             if let deinitIntention = intention.deinitIntention {
                 emit(deinitIntention)
             }
-            
+
             emitter.ensureEmptyLine()
             emitMethods(intention)
         }
@@ -1227,10 +1228,10 @@ extension SwiftProducer {
             modifiers: modifiers(for: stmtDecl),
             initialization: stmtDecl.initialization
         )
-        
+
         return decl
     }
-    
+
     func makeDeclaration(_ intention: ValueStorageIntention) -> SwiftVariableDeclaration {
         var accessors: SwiftVariableDeclaration.Accessor?
         if let intention = intention as? PropertyGenerationIntention {
@@ -1251,7 +1252,7 @@ extension SwiftProducer {
                 )
             }
         }
-        
+
         return makeDeclaration(
             name: intention.name,
             storage: intention.storage,
@@ -1262,7 +1263,7 @@ extension SwiftProducer {
             initialization: _initialValue(for: intention)
         )
     }
-    
+
     func makeDeclaration(
         name: String,
         storage: ValueStorage,
@@ -1272,13 +1273,13 @@ extension SwiftProducer {
         accessors: SwiftVariableDeclaration.Accessor? = nil,
         initialization: Expression? = nil
     ) -> SwiftVariableDeclaration {
-        
+
         var patternBinding = makePatternBinding(
             name: name,
             type: storage.type,
             initialization: initialization
         )
-        
+
         if
             delegate?.swiftProducer(
                 self,
@@ -1289,7 +1290,7 @@ extension SwiftProducer {
         {
             patternBinding.type = nil
         }
-        
+
         return SwiftVariableDeclaration(
             constant: storage.isConstant,
             attributes: attributes,
@@ -1300,7 +1301,7 @@ extension SwiftProducer {
             )
         )
     }
-    
+
     func makePatternBinding(_ intention: ValueStorageIntention) -> SwiftVariableDeclaration.PatternBindingElement {
         SwiftVariableDeclaration.PatternBindingElement(
             name: intention.name,
@@ -1315,7 +1316,7 @@ extension SwiftProducer {
         type: SwiftType?,
         initialization: Expression?
     ) -> SwiftVariableDeclaration.PatternBindingElement {
-        
+
         SwiftVariableDeclaration.PatternBindingElement(
             name: name,
             type: type,
@@ -1336,7 +1337,7 @@ extension SwiftProducer {
                 return nil
             }
         }
-        
+
         return delegate?.swiftProducer(self, initialValueFor: intention)
     }
 }
@@ -1345,19 +1346,19 @@ func group(_ declarations: [SwiftVariableDeclaration]) -> [SwiftVariableDeclarat
     guard let first = declarations.first else {
         return declarations
     }
-    
+
     var result: [SwiftVariableDeclaration] = [first]
-    
+
     for decl in declarations.dropFirst() {
         let last = result[result.count - 1]
-        
+
         if let grouped = groupDeclarations(last, decl) {
             result[result.count - 1] = grouped
         } else {
             result.append(decl)
         }
     }
-    
+
     return result
 }
 
@@ -1365,7 +1366,7 @@ func groupDeclarations(
     _ decl1: SwiftVariableDeclaration,
     _ decl2: SwiftVariableDeclaration
 ) -> SwiftVariableDeclaration? {
-    
+
     // Attributed or modified declarations cannot be merged
     guard decl1.attributes.isEmpty && decl2.attributes.isEmpty else {
         return nil
@@ -1373,30 +1374,30 @@ func groupDeclarations(
     guard decl1.modifiers.isEmpty && decl2.modifiers.isEmpty else {
         return nil
     }
-    
+
     if decl1.constant != decl2.constant {
         return nil
     }
-    
+
     switch (decl1.kind, decl2.kind) {
     case let (.single(l, nil), .single(r, nil)):
         var decl = decl1
         decl.kind = .multiple(patterns: [l, r])
-        
+
         return decl
-        
+
     case let (.single(l, nil), .multiple(r)):
         var decl = decl1
         decl.kind = .multiple(patterns: [l] + r)
-        
+
         return decl
-        
+
     case let (.multiple(l), .single(r, nil)):
         var decl = decl1
         decl.kind = .multiple(patterns: l + [r])
-        
+
         return decl
-        
+
     default:
         return nil
     }

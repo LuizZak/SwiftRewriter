@@ -146,10 +146,10 @@ public class ReachingDefinitionAnalyzer {
     ) -> [PatternBindingDefinition] {
 
         switch pattern {
-        case .identifier(let ident):
+        case .identifier(let ident, _):
             return [.init(identifier: ident, location: .self)]
 
-        case .tuple(let patterns):
+        case .tuple(let patterns, _):
             let result = patterns.flatMap {
                 expandBindingsInPattern($0, bindingContext: bindingContext)
             }
@@ -310,7 +310,7 @@ public class ReachingDefinitionAnalyzer {
 
         case let stmt as ForStatement:
             switch stmt.pattern {
-            case .identifier(let ident):
+            case .identifier(let ident, _):
                 return [
                     Definition(
                         node: node,
