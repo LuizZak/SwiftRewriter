@@ -183,6 +183,10 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             to: stmt.body
         )
 
+        if let whereClause = stmt.whereClause {
+            stmt.whereClause = resolveType(whereClause)
+        }
+
         _=super.visitFor(stmt)
 
         return stmt
@@ -646,8 +650,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
 
         // Propagate error type
         if exp.items.any({ e in e.isErrorTyped }) {
-            exp.makeErrorTyped()
-            return exp
+            return exp.makeErrorTyped()
         }
 
         guard let firstType = exp.items.first?.resolvedType else {
