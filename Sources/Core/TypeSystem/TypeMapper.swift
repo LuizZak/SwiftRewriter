@@ -364,6 +364,9 @@ public class DefaultTypeMapper: TypeMapper {
         case .tuple(.types(let inner)):
             return "(" + inner.map(_innerTypeNameString).joined(separator: ", ") + ")"
 
+        case .tuple(.parameterPackExpansion(_)):
+            return "<unsupported type>"
+
         case let .nested(nested):
             return typeNameString(for: nested.base) + "." + typeNameString(for: nested.nested)
 
@@ -372,6 +375,15 @@ public class DefaultTypeMapper: TypeMapper {
 
         case let .dictionary(key, value):
             return "[\(typeNameString(for: key)): \(typeNameString(for: value))]"
+
+        case .boxed(let inner):
+            return typeNameString(for: inner)
+
+        case .opaque(let inner):
+            return typeNameString(for: inner)
+
+        case .parameterPack(_):
+            return "<unsupported type>"
         }
     }
 

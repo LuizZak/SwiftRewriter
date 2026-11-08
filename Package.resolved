@@ -1,5 +1,5 @@
 {
-  "originHash" : "5eb982eced2b4938c31fcb4420ff9e5d7a3b789fc0f69ed98fd993c93ab54f0f",
+  "originHash" : "37833ca73150432e44e0de1590ef2d1930b42dec88fefa757aeae6c12dfb548c",
   "pins" : [
     {
       "identity" : "antlr4-swift",
@@ -58,16 +58,16 @@
     {
       "identity" : "swift-cmark",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-cmark.git",
+      "location" : "https://github.com/swiftlang/swift-cmark.git",
       "state" : {
-        "revision" : "3ccff77b2dc5b96b77db3da0d68d28068593fa53",
-        "version" : "0.5.0"
+        "revision" : "08ddb528923cc1a6527e02b7a1aee9e516ca749a",
+        "version" : "0.9.0"
       }
     },
     {
       "identity" : "swift-format",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-format.git",
+      "location" : "https://github.com/swiftlang/swift-format.git",
       "state" : {
         "revision" : "65f9da9aad84adb7e2028eb32ca95164aa590e3b",
         "version" : "600.0.0"
@@ -78,17 +78,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-markdown.git",
       "state" : {
-        "revision" : "8f79cb175981458a0a27e76cb42fee8e17b1a993",
-        "version" : "0.5.0"
+        "revision" : "25cb61d3482054b09ae76ca4f281b1bfe7fe5a43",
+        "version" : "0.9.0"
       }
     },
     {
       "identity" : "swift-syntax",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-syntax.git",
+      "location" : "https://github.com/swiftlang/swift-syntax.git",
       "state" : {
-        "revision" : "cb53fa1bd3219b0b23ded7dfdd3b2baff266fd25",
-        "version" : "600.0.0"
+        "revision" : "0687f71944021d616d34d922343dcef086855920",
+        "version" : "600.0.1"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LuizZak/SwiftAST.git",
       "state" : {
-        "revision" : "75eb69c009d213b58a34a43bc164054c8d52c73a",
-        "version" : "0.14.0"
+        "revision" : "b43b574ea9a2f94dd4aeacb987b84749991e1350",
+        "version" : "0.15.0"
       }
     }
   ],

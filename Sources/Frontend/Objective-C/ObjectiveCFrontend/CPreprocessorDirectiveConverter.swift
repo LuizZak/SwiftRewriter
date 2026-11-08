@@ -243,6 +243,18 @@ private class ValidatorExpressionVisitor: ExpressionVisitor {
         return exp.exp.accept(self)
     }
 
+    func visitAwait(_ exp: AwaitExpression) -> Bool {
+        return false
+    }
+
+    func visitRepeat(_ exp: RepeatExpression) -> Bool {
+        return false
+    }
+
+    func visitEach(_ exp: EachExpression) -> Bool {
+        return false
+    }
+
     func visitIf(_ exp: IfExpression) -> Bool {
         return false
     }
