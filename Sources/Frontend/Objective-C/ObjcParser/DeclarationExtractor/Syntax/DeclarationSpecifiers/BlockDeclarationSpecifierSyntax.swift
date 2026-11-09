@@ -1,5 +1,5 @@
 /// Syntax element for a block declaration specifier in a declaration.
-public enum BlockDeclarationSpecifierSyntax: Hashable, Codable {
+public enum BlockDeclarationSpecifierSyntax: Hashable, Codable, Sendable {
     case typePrefix(TypePrefixSyntax)
     case typeQualifier(TypeQualifierSyntax)
     case nullability(NullabilitySpecifierSyntax)
@@ -15,7 +15,7 @@ public enum BlockDeclarationSpecifierSyntax: Hashable, Codable {
             return nil
         }
     }
-    
+
     /// Returns the `TypeQualifierSyntax` associated with this enumerator if its
     /// a `.typeQualifier` case, otherwise returns `nil`.
     public var typeQualifier: TypeQualifierSyntax? {

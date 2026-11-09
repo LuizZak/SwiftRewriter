@@ -19,25 +19,25 @@ class IteratorTypeResolver {
         switch unaliasedType {
         case .array(let element):
             return element
-        
+
         case .dictionary(let key, let value):
             return .tuple([key, value])
-        
+
         case .nominal(.generic("ClosedRange", parameters: let parameters)) where parameters.count == 1:
             return parameters[0]
-        
+
         case .nominal(.generic("Range", parameters: let parameters)) where parameters.count == 1:
             return parameters[0]
-        
+
         case .nested, .nominal, .protocolComposition:
             guard let knownType = typeSystem.findType(for: swiftType) else {
                 return nil
             }
 
             return iterationElementType(for: knownType)
-        
+
         case .block, .tuple, .metatype, .optional, .implicitUnwrappedOptional,
-            .nullabilityUnspecified:
+            .nullabilityUnspecified, .boxed, .opaque, .parameterPack:
             // Non iterable types
             return nil
         }

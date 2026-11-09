@@ -1,5 +1,5 @@
 /// Syntax element for a block direct declarator.
-public struct BlockDeclaratorSyntax: Hashable, Codable {
+public struct BlockDeclaratorSyntax: Hashable, Codable, Sendable {
     /// An optional list of block declaration specifiers for this block declarator.
     public var blockDeclarationSpecifiers: [BlockDeclarationSpecifierSyntax] = []
 
@@ -19,7 +19,7 @@ extension BlockDeclaratorSyntax: CustomStringConvertible {
     public var description: String {
         var result: String = ""
         result += "(^"
-        
+
         result += blockDeclarationSpecifiers.map(\.description).joined(separator: " ")
         if !blockDeclarationSpecifiers.isEmpty {
             result += " "

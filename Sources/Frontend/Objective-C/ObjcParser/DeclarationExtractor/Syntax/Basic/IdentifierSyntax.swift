@@ -1,9 +1,9 @@
 import Utils
 
 /// Leaf syntax elements for identifiers in declarations.
-public struct IdentifierSyntax: Hashable, Codable {
+public struct IdentifierSyntax: Hashable, Codable, Sendable {
     public var sourceRange: SourceRange = .invalid
-    
+
     public var identifier: String
 }
 

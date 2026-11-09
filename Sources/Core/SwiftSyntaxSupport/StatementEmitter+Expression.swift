@@ -273,6 +273,21 @@ extension StatementEmitter: ExpressionVisitor {
         parenthesizeIfRequired(exp.exp)
     }
 
+    func visitAwait(_ exp: SwiftAST.AwaitExpression) -> () {
+        emit("await ")
+        visitExpression(exp.exp)
+    }
+
+    func visitRepeat(_ exp: SwiftAST.RepeatExpression) -> () {
+        emit("repeat ")
+        visitExpression(exp.exp)
+    }
+
+    func visitEach(_ exp: SwiftAST.EachExpression) -> () {
+        emit("each ")
+        visitExpression(exp.exp)
+    }
+
     func visitIf(_ stmt: IfExpression) {
         emit("if ")
         visitConditionalClauses(stmt.conditionalClauses)

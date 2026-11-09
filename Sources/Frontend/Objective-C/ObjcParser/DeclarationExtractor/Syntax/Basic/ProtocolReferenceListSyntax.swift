@@ -1,10 +1,10 @@
 /// Syntax element for protocol reference lists in declarations.
-public struct ProtocolReferenceListSyntax: Hashable, Codable {
+public struct ProtocolReferenceListSyntax: Hashable, Codable, Sendable {
     public var protocols: [ProtocolNameSyntax]
 }
 
 /// Syntax element for a protocol name in declarations.
-public struct ProtocolNameSyntax: Hashable, Codable {
+public struct ProtocolNameSyntax: Hashable, Codable, Sendable {
     public var identifier: IdentifierSyntax
 }
 

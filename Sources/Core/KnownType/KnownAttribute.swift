@@ -1,20 +1,20 @@
 /// Describes an attribute for a `KnownType` or one of its members.
-public struct KnownAttribute: Codable, Hashable {
+public struct KnownAttribute: Codable, Hashable, Sendable {
     public var name: String
     public var parameters: String?
 
     /// Specifies the kinds of declarations this attribute can decorate.
     public var declaration: Declaration
-    
+
     /// Returns the formatted attribute string as `@<name>(<parameters>)`
     public var attributeString: String {
         if let parameters = parameters {
             return "@\(name)(\(parameters))"
         }
-        
+
         return "@\(name)"
     }
-    
+
     public init(
         name: String,
         parameters: String? = nil,
@@ -28,7 +28,7 @@ public struct KnownAttribute: Codable, Hashable {
 
     /// Specifies the kind of declarations that can be decorated with a known
     /// attribute.
-    public struct Declaration: OptionSet, Hashable, Codable {
+    public struct Declaration: OptionSet, Hashable, Codable, Sendable {
         public var rawValue: UInt
 
         public init(rawValue: UInt) {
@@ -82,7 +82,7 @@ public extension KnownAttribute.Declaration {
 
     /// Attribute can decorate member methods.
     static let method: Self = [Self(rawValue: 0b1 << 7), memberFlag]
-    
+
     /// Attribute can decorate member initializers.
     static let initializer: Self = [Self(rawValue: 0b1 << 8), memberFlag]
 }

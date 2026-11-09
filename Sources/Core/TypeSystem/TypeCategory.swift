@@ -1,4 +1,4 @@
-public enum TypeCategory {
+public enum TypeCategory: Sendable {
     case integer
     case float
     case boolean

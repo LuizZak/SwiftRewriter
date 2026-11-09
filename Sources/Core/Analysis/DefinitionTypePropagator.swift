@@ -571,7 +571,7 @@ public class DefinitionTypePropagator {
     }
 
     /// Defines the result of a type suggestion by a `DefinitionTypePropagatorDelegate`.
-    public enum TypeSuggestion {
+    public enum TypeSuggestion: Sendable {
         /// Specifies no suggestion.
         case none
 

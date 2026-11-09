@@ -31,7 +31,7 @@ struct SwiftVariableDeclaration {
         var valueIdentifier: String
         var body: CompoundStatement
     }
-    
+
     struct PatternBindingElement {
         var name: String
         var type: SwiftType?
@@ -40,7 +40,7 @@ struct SwiftVariableDeclaration {
     }
 }
 
-enum SwiftDeclarationModifier: CustomStringConvertible {
+enum SwiftDeclarationModifier: CustomStringConvertible, Sendable {
     case mutating
     case `static`
     case optional

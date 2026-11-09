@@ -1,14 +1,14 @@
 import Utils
 
 /// Syntax elements for pointers in declarations.
-public struct PointerSyntax: Hashable, Codable {
+public struct PointerSyntax: Hashable, Codable, Sendable {
     /// List of pointers within this pointer syntax.
     /// Must have length >1.
     public var pointerEntries: [PointerSyntaxEntry]
 }
 
 /// Specifies a single pointer declaration in a pointer syntax node in a declaration.
-public struct PointerSyntaxEntry: Hashable, Codable {
+public struct PointerSyntaxEntry: Hashable, Codable, Sendable {
     public var location: SourceLocation = .invalid
 
     public var pointerSpecifiers: [PointerSpecifierSyntax] = []
@@ -52,11 +52,11 @@ extension PointerSyntaxEntry: CustomStringConvertible {
 }
 
 /// Syntax element for a pointer declaration specifier in a pointer syntax.
-public enum PointerSpecifierSyntax: Hashable, Codable {
+public enum PointerSpecifierSyntax: Hashable, Codable, Sendable {
     case typeQualifier(TypeQualifierSyntax)
     case nullability(NullabilitySpecifierSyntax)
     case arcBehaviour(ArcBehaviourSpecifierSyntax)
-    
+
     /// Returns the `TypeQualifierSyntax` associated with this enumerator if its
     /// a `.typeQualifier` case, otherwise returns `nil`.
     public var typeQualifier: TypeQualifierSyntax? {

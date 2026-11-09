@@ -1555,6 +1555,9 @@ private class TypealiasExpander {
         case .tuple(.types(let values)):
             return .tuple(.types(.fromCollection(values.map(expand))))
 
+        case .tuple(.parameterPackExpansion(let inner)):
+            return .tuple(.parameterPackExpansion(expand(in: inner)))
+
         case .protocolComposition(let composition):
             return .protocolComposition(.fromCollection(composition.map(expand(inComposition:))))
 
@@ -1563,6 +1566,15 @@ private class TypealiasExpander {
 
         case let .dictionary(key, value):
             return .dictionary(key: expand(in: key), value: expand(in: value))
+
+        case .opaque(let inner):
+            return .opaque(expand(in: inner))
+
+        case .boxed(let inner):
+            return .boxed(expand(in: inner))
+
+        case .parameterPack(let parameterPackType):
+            return .parameterPack(expand(inParameterPack: parameterPackType))
         }
     }
 
@@ -1613,6 +1625,16 @@ private class TypealiasExpander {
 
     private func expand(inBlockParameter blockParameter: BlockSwiftType.BlockParameter) -> BlockSwiftType.BlockParameter {
         return .init(type: expand(in: blockParameter.type), modifier: blockParameter.modifier)
+    }
+
+    private func expand(inParameterPack type: ParameterPackType) -> ParameterPackType {
+        switch type {
+        case .parameterPack(let inner):
+            return .parameterPack(expand(in: inner))
+
+        case .parameterPackExpansion(let inner):
+            return .parameterPackExpansion(expand(in: inner))
+        }
     }
 
     private func pushingAlias<T>(_ name: String, do work: () -> T) -> T {

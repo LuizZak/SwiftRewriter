@@ -1,5 +1,5 @@
 /// Syntax element for type identifiers in declarations.
-public struct TypeIdentifierSyntax: Hashable, Codable {
+public struct TypeIdentifierSyntax: Hashable, Codable, Sendable {
     public var identifier: IdentifierSyntax
 }
 

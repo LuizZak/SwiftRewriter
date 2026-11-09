@@ -1,7 +1,7 @@
 import Utils
 
 /// Function specifier syntax for declarations.
-public enum FunctionSpecifierSyntax: Hashable, Codable {
+public enum FunctionSpecifierSyntax: Hashable, Codable, Sendable {
     case inline(SourceRange = .invalid)
     case noreturn(SourceRange = .invalid)
     case gccInline(SourceRange = .invalid)

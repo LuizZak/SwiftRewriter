@@ -1,5 +1,5 @@
 /// Syntax element for a block direct abstract declarator.
-public struct BlockAbstractDeclaratorSyntax: Hashable, Codable {
+public struct BlockAbstractDeclaratorSyntax: Hashable, Codable, Sendable {
     /// An optional list of block declaration specifiers for this block declarator.
     public var blockDeclarationSpecifiers: [BlockDeclarationSpecifierSyntax] = []
 

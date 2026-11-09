@@ -1,7 +1,7 @@
 import Utils
 
 /// Syntax element for InterfaceBuilder qualifiers in declarations.
-public enum IBOutletQualifierSyntax: Hashable, Codable {
+public enum IBOutletQualifierSyntax: Hashable, Codable, Sendable {
     case ibOutletCollection(SourceLocation = .invalid, IdentifierSyntax)
     case ibOutlet(SourceRange = .invalid)
 }

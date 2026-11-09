@@ -5,7 +5,7 @@
 import ObjcParserAntlr
 
 /// Type specifier syntax for declarations.
-public enum TypeSpecifierSyntax: Hashable, Codable {
+public enum TypeSpecifierSyntax: Hashable, Codable, Sendable {
     case scalar(ScalarTypeSpecifierSyntax)
     case typeIdentifier(TypeIdentifierSyntax)
     case genericTypeIdentifier(GenericTypeSpecifierSyntax)

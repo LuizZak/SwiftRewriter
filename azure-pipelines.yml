@@ -1,42 +1,25 @@
 trigger:
 - master
 
-variables:
-  SWIFTPM_CACHE_FOLDER: '.build'
-
 jobs:
 - job: macOS
   pool:
     vmImage: 'macOS-15'
   steps:
-  - bash: 'sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer'
-  - task: Cache@2
-    inputs:
-      key: 'v2 | "swiftpm" | "$(Agent.OS)" | Package.resolved'
-      path: $(SWIFTPM_CACHE_FOLDER)
-    displayName: Cache Swift build
+  - bash: 'sudo xcode-select -s /Applications/Xcode_16.0.app/Contents/Developer'
   - bash: 'swift --version'
   - bash: 'swift package resolve'
   - bash: 'swift test --enable-code-coverage'
   - bash: 'xcrun llvm-profdata merge -sparse ./.build/debug/codecov/*.profraw -o coverage.profdata'
   - bash: 'xcrun llvm-cov show ./.build/debug/SwiftRewriter -instr-profile=./coverage.profdata --ignore-filename-regex=ObjcParserAntlr Sources > coverage.txt'
   - bash: 'bash <(curl -s https://codecov.io/bash)'
-  # Avoid caching build artifacts and focus on checkout state only
-  - bash: 'rm -r $(dirname $(swift build --show-bin-path))'
 
 - job: Linux
   container:
-    image: swift:6.0-focal
+    image: swift:6.4.2-resolute
   pool:
-    vmImage: ubuntu-20.04
+    vmImage: ubuntu-26.04
   steps:
-  - task: Cache@2
-    inputs:
-      key: 'v2 | "swiftpm" | "$(Agent.OS)" | Package.resolved'
-      path: $(SWIFTPM_CACHE_FOLDER)
-    displayName: Cache Swift build
   - bash: 'swift --version'
   - bash: 'swift package resolve'
   - bash: 'swift test'
-  # Avoid caching build artifacts and focus on checkout state only
-  - bash: 'rm -r $(dirname $(swift build --show-bin-path))'

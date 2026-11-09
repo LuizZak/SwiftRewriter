@@ -1,5 +1,5 @@
 /// Syntax element for type names in declarations.
-public struct TypeNameSyntax: Hashable, Codable {
+public struct TypeNameSyntax: Hashable, Codable, Sendable {
     public var declarationSpecifiers: DeclarationSpecifiersSyntax
     public var abstractDeclarator: AbstractDeclaratorSyntax?
 }

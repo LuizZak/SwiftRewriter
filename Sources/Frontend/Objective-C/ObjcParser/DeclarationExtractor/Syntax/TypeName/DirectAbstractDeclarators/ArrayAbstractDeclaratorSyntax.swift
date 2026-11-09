@@ -1,5 +1,5 @@
 /// Syntax element for an array abstract declarator.
-public struct ArrayAbstractDeclaratorSyntax: Hashable, Codable {
+public struct ArrayAbstractDeclaratorSyntax: Hashable, Codable, Sendable {
     /// A base direct declarator for this array declarator.
     public var directAbstractDeclarator: DirectAbstractDeclaratorSyntax?
 
@@ -15,7 +15,7 @@ extension ArrayAbstractDeclaratorSyntax: DeclarationSyntaxElementType {
 extension ArrayAbstractDeclaratorSyntax: CustomStringConvertible {
     public var description: String {
         var result: String = ""
-        
+
         if let directAbstractDeclarator {
             result += "\(directAbstractDeclarator)"
         }

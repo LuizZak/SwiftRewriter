@@ -1,5 +1,5 @@
 /// Syntax element for a function direct declarator.
-public struct FunctionAbstractDeclaratorSyntax: Hashable, Codable {
+public struct FunctionAbstractDeclaratorSyntax: Hashable, Codable, Sendable {
     // A base direct declarator for this function declarator.
     public var directAbstractDeclarator: DirectAbstractDeclaratorSyntax?
 

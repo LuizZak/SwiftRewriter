@@ -10,13 +10,13 @@ public struct DefinitionUsage {
     ///
     /// Can be nil, if no contextual intention was provided during analysis.
     public var intention: FunctionBodyCarryingIntention?
-    
+
     /// The definition that was effectively used
     public var definition: CodeDefinition
-    
+
     /// The expression the usage is effectively used.
     public var expression: ExpressionKind
-    
+
     /// The kind of access of this definition; either read, write, or simultaneous
     /// read/write.
     public var usageKind: UsageKind
@@ -47,13 +47,13 @@ public struct DefinitionUsage {
             switch self {
             case .identifier(let exp):
                 return exp
-                
+
             case .functionCall(let exp, _, _):
                 return exp
 
             case .memberAccess(_, _, let exp):
                 return exp
-            
+
             case .subscript(_, _, let exp):
                 return exp
             }
@@ -62,7 +62,7 @@ public struct DefinitionUsage {
 
     /// Specifies the type of usage of a definition; either read-only, write-only,
     /// or read/write.
-    public enum UsageKind {
+    public enum UsageKind: Sendable {
         /// Read only. Value is retrieved but not written to.
         case readOnly
 

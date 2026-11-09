@@ -1,7 +1,7 @@
 import Utils
 
 /// A generic C-compatible `constantExpression` syntax node for declarations.
-public struct ConstantExpressionSyntax: Hashable, Codable {
+public struct ConstantExpressionSyntax: Hashable, Codable, Sendable {
     public var sourceRange: SourceRange = .invalid
 
     /// A valid C `constantExpression`-compatible syntax string.

@@ -1,7 +1,7 @@
 import Utils
 
 /// Syntax node for storage class specifiers for declarations.
-public enum StorageClassSpecifierSyntax: Hashable, Codable {
+public enum StorageClassSpecifierSyntax: Hashable, Codable, Sendable {
     case auto(SourceRange = .invalid)
     case constexpr(SourceRange = .invalid)
     case extern(SourceRange = .invalid)

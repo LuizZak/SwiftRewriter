@@ -1,5 +1,5 @@
 /// Syntax element for an array direct declarator.
-public struct ArrayDeclaratorSyntax: Hashable, Codable {
+public struct ArrayDeclaratorSyntax: Hashable, Codable, Sendable {
     /// The base direct declarator for this array declarator.
     public var directDeclarator: DirectDeclaratorSyntax
 

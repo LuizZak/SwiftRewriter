@@ -149,6 +149,18 @@ private class _CoercionVerifierVisitor: ExpressionVisitor {
         }
     }
 
+    func visitAwait(_ exp: AwaitExpression) -> Bool {
+        false
+    }
+
+    func visitRepeat(_ exp: RepeatExpression) -> Bool {
+        false
+    }
+
+    func visitEach(_ exp: EachExpression) -> Bool {
+        false
+    }
+
     // TODO: Support if expression coercion verification
     func visitIf(_ exp: IfExpression) -> Bool {
         false

@@ -1,5 +1,5 @@
 /// Syntax element for a single declaration specifier in declarations.
-public enum DeclarationSpecifierSyntax: Hashable, Codable {
+public enum DeclarationSpecifierSyntax: Hashable, Codable, Sendable {
     case storage(StorageClassSpecifierSyntax)
     case typeSpecifier(TypeSpecifierSyntax)
     case typeQualifier(TypeQualifierSyntax)
@@ -94,7 +94,7 @@ public enum DeclarationSpecifierSyntax: Hashable, Codable {
             return false
         }
     }
-    
+
     /// Returns `true` if this `DeclarationSpecifierSyntax` is a `.typePrefix`
     /// case.
     public var isTypePrefix: Bool {

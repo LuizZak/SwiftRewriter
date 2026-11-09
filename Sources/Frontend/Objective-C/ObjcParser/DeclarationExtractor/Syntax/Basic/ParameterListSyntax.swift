@@ -1,5 +1,5 @@
 /// Syntax element for parameter lists in declarations.
-public struct ParameterListSyntax: Hashable, Codable {
+public struct ParameterListSyntax: Hashable, Codable, Sendable {
     /// List of parameter declarations.
     /// May be empty.
     public var parameterDeclarations: [ParameterDeclarationSyntax]

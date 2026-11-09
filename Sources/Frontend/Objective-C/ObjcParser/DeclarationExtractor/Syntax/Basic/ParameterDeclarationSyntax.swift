@@ -1,5 +1,5 @@
 /// Syntax element for parameters in a parameter list syntax of a declaration.
-public enum ParameterDeclarationSyntax: Hashable, Codable {
+public enum ParameterDeclarationSyntax: Hashable, Codable, Sendable {
     case declarator(DeclarationSpecifiersSyntax, DeclaratorSyntax)
     case abstractDeclarator(DeclarationSpecifiersSyntax, AbstractDeclaratorSyntax)
     case declarationSpecifiers(DeclarationSpecifiersSyntax)

@@ -86,6 +86,14 @@ class SwiftTypeStringProducer {
 
         case .dictionary(let key, let value):
             visit(dictionaryWithKey: key, value: value)
+        case .boxed(let inner):
+            visit(boxed: inner)
+
+        case .opaque(let inner):
+            visit(opaque: inner)
+
+        case .parameterPack(let inner):
+            visit(parameterPack: inner)
         }
     }
 
@@ -129,6 +137,12 @@ class SwiftTypeStringProducer {
         case .types(let inner):
             emit("(")
             emitSeparated(inner, separator: ", ", visit(_:))
+            emit(")")
+
+        case .parameterPackExpansion(let inner):
+            emit("(")
+            emit("repeat ")
+            visit(inner)
             emit(")")
         }
     }
@@ -207,5 +221,27 @@ class SwiftTypeStringProducer {
         emit(": ")
         visit(value)
         emit("]")
+    }
+
+    private func visit(opaque type: SwiftType) {
+        emit("some ")
+        visit(type)
+    }
+
+    private func visit(boxed type: SwiftType) {
+        emit("any ")
+        visit(type)
+    }
+
+    private func visit(parameterPack type: ParameterPackType) {
+        switch type {
+        case .parameterPack(let inner):
+            emit("each ")
+            visit(inner)
+
+        case .parameterPackExpansion(let inner):
+            emit("repeat ")
+            visit(inner)
+        }
     }
 }

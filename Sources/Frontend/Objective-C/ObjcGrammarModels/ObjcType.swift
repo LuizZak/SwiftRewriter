@@ -1,18 +1,18 @@
 /// Specifies an objetive-c type for a property or local.
 /// For objc class pointers, they are always specified as pointers to type names,
 /// like `.pointerType(.typeName("NSObject"))`
-public enum ObjcType: Hashable, Codable, CustomStringConvertible {
+public enum ObjcType: Hashable, Codable, CustomStringConvertible, Sendable {
     /// Objective-c's `id` type, with optional protocol array specifiers
     case id(protocols: [String] = [])
-    
+
     /// Special 'generic'-like specifier.
     /// Closely related to `id` type.
     case instancetype
-    
+
     /// A type-name identifier identifier.
     /// May be any type that is not an `id`.
     case typeName(String)
-    
+
     /// A special `void` type that indicates an empty value.
     case void
 
@@ -24,7 +24,7 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
 
     /// An incomplete named struct.
     case incompleteStruct(String)
-    
+
     /// A composed pointer, like `NSObject*` or `int*`.
     /// May be an objc class or a typename pointer.
     indirect case pointer(
@@ -32,17 +32,17 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
         qualifiers: [ObjcTypeQualifier] = [],
         nullabilitySpecifier: ObjcNullabilitySpecifier? = nil
     )
-    
+
     /// A generic objc type- e.g. `NSArray<NSNumber*>`
     indirect case genericTypeName(
         String,
         parameters: [ObjcGenericTypeParameter]
     )
-    
+
     /// An Objc type that has associated pointer qualifiers, such as `const int`,
     /// which is a signed integer with constant storage.
     indirect case qualified(ObjcType, qualifiers: [ObjcTypeQualifier])
-    
+
     /// An Objc type that has associated specifiers, such as `__weak NSObject*`,
     /// which is a __weak-tagged type of a pointer to a struct NSObject.
     indirect case specified(specifiers: [ObjcTypeSpecifier], ObjcType)
@@ -51,7 +51,7 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
     /// Associated type must be an Objective-C object pointer type or a block
     /// type.
     indirect case nullabilitySpecified(specifier: ObjcNullabilitySpecifier, ObjcType)
-    
+
     /// An objective-C block type.
     /// Block types may specify names, or not (in case of block literals).
     indirect case blockType(
@@ -60,7 +60,7 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
         parameters: [ObjcType] = [],
         nullabilitySpecifier: ObjcNullabilitySpecifier? = nil
     )
-    
+
     /// A C function pointer.
     /// Function pointer types may specify names, or not (in case of pointer literals).
     indirect case functionPointer(
@@ -68,41 +68,41 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
         returnType: ObjcType,
         parameters: [ObjcType] = []
     )
-    
+
     /// A fixed array type
     indirect case fixedArray(ObjcType, length: Int)
-    
+
     /// Gets the plain string definition for this type.
     /// Always maps to valid objc type
     public var description: String {
         switch self {
         case .instancetype:
             return "instancetype"
-            
+
         case .void:
             return "void"
-            
+
         case .typeName(let s):
             return s
-        
+
         case .anonymousStruct:
             return "struct"
-        
+
         case .anonymousEnum:
             return "enum"
-        
+
         case .incompleteStruct(let name):
             return "struct \(name)"
-            
+
         case let .genericTypeName(cl, parameters):
             let typeNames = parameters.map(\.description).joined(separator: ", ")
-            
+
             if !typeNames.isEmpty {
                 return "\(cl)<\(typeNames)>"
             } else {
                 return cl
             }
-            
+
         case .id(let protocols):
             if !protocols.isEmpty {
                 let protocolNames = protocols.joined(separator: ", ")
@@ -110,7 +110,7 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
             } else {
                 return "id"
             }
-            
+
         case .pointer(let type, let qualifiers, let nullability):
             var result = "\(type.description)*"
 
@@ -123,19 +123,19 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
             }
 
             return result
-            
+
         case let .qualified(type, qualifiers):
             return "\(qualifiers.map(\.description).joined(separator: " ")) \(type.description)"
-            
+
         case let .specified(specifiers, type):
             return "\(specifiers.map(\.description).joined(separator: " ")) \(type.description)"
-        
+
         case let .nullabilitySpecified(specifier, type):
             return "\(specifier) \(type)"
-            
+
         case let .blockType(name, returnType, parameters, nullability):
             var result = "\(returnType)"
-            
+
             result += "(^"
             if let nullability = nullability {
                 result += nullability.description
@@ -151,26 +151,26 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
             result += ")"
 
             return result
-            
+
         case let .functionPointer(name, returnType, parameters):
             return "\(returnType)(*\(name ?? ""))(\(parameters.map(\.description).joined(separator: ", ")))"
-            
+
         case let .fixedArray(type, length):
             return "\(type)[\(length)]"
         }
     }
-    
+
     /// Returns `true` if this is a pointer type.
     public var isPointer: Bool {
         switch self {
         case .pointer, .id, .instancetype, .blockType, .functionPointer, .fixedArray:
             return true
-            
+
         case .specified(_, let type),
             .nullabilitySpecified(_, let type),
             .qualified(let type, _):
             return type.isPointer
-            
+
         case .anonymousEnum, .anonymousStruct, .incompleteStruct, .void, .typeName, .genericTypeName:
             return false
         }
@@ -200,7 +200,7 @@ public enum ObjcType: Hashable, Codable, CustomStringConvertible {
             .qualified(let type, _),
             .specified(_, let type):
             return type.unspecifiedUnqualified
-        
+
         case .typeName,
             .instancetype,
             .id,
@@ -249,7 +249,7 @@ extension ObjcType: ExpressibleByStringLiteral {
 }
 
 /// An entry for a generic Objective-C type parameter list.
-public struct ObjcGenericTypeParameter: Codable, Hashable, CustomStringConvertible {
+public struct ObjcGenericTypeParameter: Codable, Hashable, CustomStringConvertible, Sendable {
     /// A type variance, if one was specified at declaration site.
     public var variance: ObjcGenericTypeVariance?
 
@@ -272,7 +272,7 @@ public struct ObjcGenericTypeParameter: Codable, Hashable, CustomStringConvertib
 
 /// A specifier for a generic type parameter for whether the type is covariant
 /// or contravariant.
-public enum ObjcGenericTypeVariance: String, Codable, Hashable, CustomStringConvertible {
+public enum ObjcGenericTypeVariance: String, Codable, Hashable, CustomStringConvertible, Sendable {
     case covariant = "__covariant"
     case contravariant = "__contravariant"
 
@@ -282,7 +282,7 @@ public enum ObjcGenericTypeVariance: String, Codable, Hashable, CustomStringConv
 }
 
 /// Nullability specifier for Objective-C types
-public enum ObjcNullabilitySpecifier: String, Hashable, Codable, CustomStringConvertible {
+public enum ObjcNullabilitySpecifier: String, Hashable, Codable, CustomStringConvertible, Sendable {
     /// `_Nonnull` nullability specifier.
     ///
     /// Indicates that a declaration of a reference to an object is assumed to
@@ -313,14 +313,14 @@ public enum ObjcNullabilitySpecifier: String, Hashable, Codable, CustomStringCon
     ///
     /// Only applicable to Objective-C @properties.
     case nullResettable = "_Null_resettable"
-    
+
     public var description: String {
         rawValue
     }
 }
 
 /// C/Objective-C type qualifier
-public enum ObjcTypeQualifier: Hashable, Codable, CustomStringConvertible {
+public enum ObjcTypeQualifier: Hashable, Codable, CustomStringConvertible, Sendable {
     /// "const" C type qualifier. May be used to qualify declarations in Swift
     /// as "let".
     case const
@@ -332,7 +332,7 @@ public enum ObjcTypeQualifier: Hashable, Codable, CustomStringConvertible {
     /// of a pointer by a declaration.
     case restrict
 
-    /// "_Atomic" C type qualifier. 
+    /// "_Atomic" C type qualifier.
     case atomic
 
     /// A protocol type qualifier.
@@ -405,12 +405,12 @@ public enum ObjcTypeQualifier: Hashable, Codable, CustomStringConvertible {
 }
 
 /// Objective-C type qualifier specific for protocol storage
-public enum ObjcProtocolQualifier: String, Hashable, Codable, CustomStringConvertible {
+public enum ObjcProtocolQualifier: String, Hashable, Codable, CustomStringConvertible, Sendable {
     /// "in" protocol qualifier. Used to indicate that a pointer value will
     /// be sent to the receiver of a message and not be used back by the original
     /// sender's process.
     case `in`
-    
+
     /// "out" protocol qualifier. Used to indicate that a pointer value will
     /// be passed out from the receiver of a message.
     case out
@@ -418,7 +418,7 @@ public enum ObjcProtocolQualifier: String, Hashable, Codable, CustomStringConver
     /// "inout" protocol qualifier. Used to indicate that a pointer value will
     /// be used by both the sender and receiver of a message.
     case `inout`
-    
+
     /// "bycopy" protocol qualifier. When used, indicates that objects crossing
     /// the message boundary should be memory-copied.
     case bycopy
@@ -438,7 +438,7 @@ public enum ObjcProtocolQualifier: String, Hashable, Codable, CustomStringConver
 }
 
 /// Type specifier for Objective-C types
-public enum ObjcTypeSpecifier: Hashable, Codable, CustomStringConvertible {
+public enum ObjcTypeSpecifier: Hashable, Codable, CustomStringConvertible, Sendable {
     /// Shorthand for `ObjcTypeSpecifier.arcSpecifier(.weak)`
     public static let `weak`: Self = .arcSpecifier(.weak)
 
@@ -464,7 +464,7 @@ public enum ObjcTypeSpecifier: Hashable, Codable, CustomStringConvertible {
 
 /// Objective-C ARC behavior specifier.
 /// Declarations using ARC specifiers must be of Objective-C class pointer types.
-public enum ObjcArcBehaviorSpecifier: String, Hashable, Codable, CustomStringConvertible {
+public enum ObjcArcBehaviorSpecifier: String, Hashable, Codable, CustomStringConvertible, Sendable {
     /// Strong reference counting storage.
     /// It's the default storage mode if none other is specified.
     case strong
@@ -512,7 +512,7 @@ public extension ObjcType {
 }
 
 /// C/Objective-C function specifier.
-public enum ObjcFunctionSpecifier: Hashable, Codable, CustomStringConvertible {
+public enum ObjcFunctionSpecifier: Hashable, Codable, CustomStringConvertible, Sendable {
     /// "inline" C specifier.
     case inline
 
@@ -542,7 +542,7 @@ public enum ObjcFunctionSpecifier: Hashable, Codable, CustomStringConvertible {
 
 /// An Objective-C Interface Builder outlet qualifier, used in Objective-C
 /// declarations that interact with Apple's Interface Builder stack.
-public enum ObjcIBOutletQualifier: Hashable, Codable, CustomStringConvertible {
+public enum ObjcIBOutletQualifier: Hashable, Codable, CustomStringConvertible, Sendable {
     /// An `IBCollection(<identifier>)` qualifier.
     case ibCollection(String)
 
@@ -576,7 +576,7 @@ public func typeNameIn(objcType: ObjcType) -> String? {
         .qualified(let type, _),
         .specified(_, let type):
         return typeNameIn(objcType: type)
-    
+
     case .instancetype,
         .id,
         .anonymousEnum,

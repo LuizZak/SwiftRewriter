@@ -1,5 +1,5 @@
 /// Declarator with optional initializers for declarations.
-public struct InitDeclaratorSyntax: Hashable, Codable {
+public struct InitDeclaratorSyntax: Hashable, Codable, Sendable {
     public var declarator: DeclaratorSyntax
     public var initializer: InitializerSyntax?
 }

@@ -1,7 +1,7 @@
 import Utils
 
 /// Syntax node for a type prefix for declarations.
-public enum TypePrefixSyntax: Hashable, Codable {
+public enum TypePrefixSyntax: Hashable, Codable, Sendable {
     case bridge(SourceRange = .invalid)
     case bridgeTransfer(SourceRange = .invalid)
     case bridgeRetained(SourceRange = .invalid)
@@ -17,19 +17,19 @@ extension TypePrefixSyntax: DeclarationSyntaxElementType {
     public var sourceRange: SourceRange {
         switch self {
         case .block(let range):
-            return range 
+            return range
         case .bridge(let range):
-            return range 
+            return range
         case .bridgeRetained(let range):
-            return range 
+            return range
         case .bridgeTransfer(let range):
-            return range 
+            return range
         case .inline(let range):
-            return range 
+            return range
         case .kindof(let range):
-            return range 
+            return range
         case .nsInline(let range):
-            return range 
+            return range
         }
     }
 }
