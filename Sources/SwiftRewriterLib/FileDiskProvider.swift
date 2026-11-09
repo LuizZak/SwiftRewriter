@@ -37,7 +37,7 @@ public class FileDiskProvider: FileProvider {
         guard let data = fileManager.contents(atPath: url.path) else {
             throw Error.invalidFileData
         }
-        
+
         return data
     }
 
@@ -60,7 +60,7 @@ public class FileDiskProvider: FileProvider {
         fileManager.homeDirectoryForCurrentUser
     }
 
-    public enum Error: Swift.Error {
+    public enum Error: Swift.Error, Sendable {
         case invalidFileData
     }
 }

@@ -1,7 +1,7 @@
 import Utils
 
 /// Syntax element for generic type specifiers in declarations.
-public struct GenericTypeSpecifierSyntax: Hashable, Codable {
+public struct GenericTypeSpecifierSyntax: Hashable, Codable, Sendable {
     public var identifier: IdentifierSyntax
 
     /// List of generic type parameters for this generic type specifier syntax.
@@ -11,15 +11,15 @@ public struct GenericTypeSpecifierSyntax: Hashable, Codable {
 
 /// Syntax element for generic type parameters in generic type specifiers in
 /// declarations.
-public struct GenericTypeParameterSyntax: Hashable, Codable {
+public struct GenericTypeParameterSyntax: Hashable, Codable, Sendable {
     /// Optional generic type variance specifier.
     public var variance: Variance?
 
     public var typeName: TypeNameSyntax
-    
+
     /// Used to specify whether a generic type parameter is covariant or
     /// contravariant.
-    public enum Variance: Hashable, Codable {
+    public enum Variance: Hashable, Codable, Sendable {
         case covariant(SourceRange = .invalid)
         case contravariant(SourceRange = .invalid)
     }

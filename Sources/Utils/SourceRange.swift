@@ -1,5 +1,5 @@
 /// Range in source code a node spans.
-public enum SourceRange: Hashable, Codable {
+public enum SourceRange: Hashable, Codable, Sendable {
     /// Source range is composed of a single source location with no span.
     case location(SourceLocation)
 
@@ -8,7 +8,7 @@ public enum SourceRange: Hashable, Codable {
 
     /// Invalid source range.
     case invalid
-    
+
     /// Gets a value that represents the start of this source range.
     /// For `location` cases, this is the same as the associated value, for `range`
     /// cases, this is `range.lowerBound`, and for `invalid` nodes this is nil.
@@ -22,7 +22,7 @@ public enum SourceRange: Hashable, Codable {
             return nil
         }
     }
-    
+
     /// Gets a value that represents the end of this source range.
     /// For `location` cases, this is the same as the associated value, for `range`
     /// cases, this is `range.upperBound`, and for `invalid` nodes this is nil.
@@ -82,7 +82,7 @@ public enum SourceRange: Hashable, Codable {
             (.location(let loc), .range(let start, let end)),
             (.range(let start, let end), .location(let loc)):
             return loc >= start && loc < end
-        
+
         case (.location(let l1), .location(let l2)):
             return l1 == l2
 
@@ -90,7 +90,7 @@ public enum SourceRange: Hashable, Codable {
             return false
         }
     }
-    
+
     public func union(with location: SourceLocation) -> SourceRange {
         if !location.isValid {
             return self
@@ -109,34 +109,34 @@ public enum SourceRange: Hashable, Codable {
 
         case (.invalid, _):
             return node
-            
+
         case let (.location(lhs), .location(rhs)):
             if lhs == rhs {
                 return .location(lhs)
             }
             let start = min(lhs, rhs)
             let end = max(lhs, rhs)
-            
+
             return .range(start: start, end: end)
-            
+
         case let (.range(lhsStart, lhsEnd), .range(rhsStart, rhsEnd)):
             let start = min(lhsStart, rhsStart)
             let end = max(lhsEnd, rhsEnd)
-            
+
             return .range(start: start, end: end)
 
         case let (.range(start, end), .location(loc)),
              let (.location(loc), .range(start, end)):
-            
+
             let start = min(start, loc)
             let end = max(end, loc)
-            
+
             return .range(start: start, end: end)
         default:
             return .invalid
         }
     }
-    
+
     /// If this is a valid source location, returns its substring insertion on a
     /// given source string based on its UTF8 offset value.
     /// If this location does not represent a range, nil is returned, instead.

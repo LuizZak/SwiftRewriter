@@ -1,7 +1,7 @@
 import Foundation
 import Utils
 
-public struct DiskInputFile: Equatable {
+public struct DiskInputFile: Equatable, Sendable {
     public var url: URL
 
     /// Whether this file is a primary file for conversion.
@@ -19,10 +19,10 @@ extension DiskInputFile: InputSource {
     public func sourcePath() -> String {
         url.path
     }
-    
+
     public func loadSource() throws -> CodeSource {
         let source = try String(contentsOf: url)
-        
+
         return StringCodeSource(source: source, fileName: url.path)
     }
 }

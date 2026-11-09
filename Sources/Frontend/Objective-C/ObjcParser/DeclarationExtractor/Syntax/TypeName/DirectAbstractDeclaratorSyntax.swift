@@ -1,5 +1,5 @@
 /// Syntax element for direct abstractor declarators in C declarations.
-indirect public enum DirectAbstractDeclaratorSyntax: Hashable, Codable {
+indirect public enum DirectAbstractDeclaratorSyntax: Hashable, Codable, Sendable {
     case abstractDeclarator(AbstractDeclaratorSyntax)
     case arrayDeclarator(ArrayAbstractDeclaratorSyntax)
     case functionDeclarator(FunctionAbstractDeclaratorSyntax)

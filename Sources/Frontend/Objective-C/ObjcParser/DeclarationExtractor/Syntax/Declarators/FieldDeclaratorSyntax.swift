@@ -1,7 +1,7 @@
 /// Syntax element for a field declarator in struct or field declarations.
 /// Is either a declarator, or a constant expression preceded by an optional
 /// declarator.
-public enum FieldDeclaratorSyntax: Hashable, Codable {
+public enum FieldDeclaratorSyntax: Hashable, Codable, Sendable {
     case declarator(DeclaratorSyntax)
     case declaratorConstantExpression(DeclaratorSyntax?, ConstantExpressionSyntax)
 }

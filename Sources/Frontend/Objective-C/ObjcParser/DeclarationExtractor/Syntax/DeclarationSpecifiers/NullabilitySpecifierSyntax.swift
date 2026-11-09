@@ -1,7 +1,7 @@
 import Utils
 
 /// Nullability specifier syntax for declarations.
-public enum NullabilitySpecifierSyntax: Hashable, Codable {
+public enum NullabilitySpecifierSyntax: Hashable, Codable, Sendable {
     case nullUnspecified(SourceRange = .invalid)
     case nullable(SourceRange = .invalid)
     case nonnull(SourceRange = .invalid)

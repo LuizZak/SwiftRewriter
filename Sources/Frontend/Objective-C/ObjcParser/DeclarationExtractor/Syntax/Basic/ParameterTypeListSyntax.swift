@@ -1,5 +1,5 @@
 /// A parameter type list syntax for declarations.
-public struct ParameterTypeListSyntax: Hashable, Codable {
+public struct ParameterTypeListSyntax: Hashable, Codable, Sendable {
     public var parameterList: ParameterListSyntax
 
     /// Whether this parameter type list contains an ellipsis variadic parameter

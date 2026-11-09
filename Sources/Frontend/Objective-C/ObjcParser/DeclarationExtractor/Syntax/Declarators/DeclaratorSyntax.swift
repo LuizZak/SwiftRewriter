@@ -1,5 +1,5 @@
 /// Syntax element for declarators in declarations.
-public struct DeclaratorSyntax: Hashable, Codable {
+public struct DeclaratorSyntax: Hashable, Codable, Sendable {
     public var pointer: PointerSyntax?
     public var directDeclarator: DirectDeclaratorSyntax
     // TODO: Support GCC declarator extensions

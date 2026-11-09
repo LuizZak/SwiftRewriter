@@ -1,7 +1,7 @@
 import Utils
 
 /// Syntax node for a list of type qualifiers for declarations.
-public struct TypeQualifierListSyntax: Hashable, Codable {
+public struct TypeQualifierListSyntax: Hashable, Codable, Sendable {
     public var typeQualifiers: [TypeQualifierSyntax]
 }
 

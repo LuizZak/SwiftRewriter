@@ -1,5 +1,5 @@
 /// Initializer syntax for declarations.
-public enum InitializerSyntax: Hashable, Codable {
+public enum InitializerSyntax: Hashable, Codable, Sendable {
     case expression(ExpressionSyntax)
     // TODO: Support array initializer
     // case arrayInitializer(ArrayInitializerSyntax)

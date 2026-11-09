@@ -1,5 +1,5 @@
 /// A known-keyword type
-public enum ObjcKeyword: String {
+public enum ObjcKeyword: String, Sendable {
     case `if`
     case `else`
     case `for`

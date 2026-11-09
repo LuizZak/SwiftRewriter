@@ -1,7 +1,7 @@
 import Utils
 
 /// Syntax element for struct or union specifiers in declarations.
-public struct StructOrUnionSpecifierSyntax: Hashable, Codable {
+public struct StructOrUnionSpecifierSyntax: Hashable, Codable, Sendable {
     public var structOrUnion: StructOrUnion
 
     // TODO: Support attributes
@@ -11,7 +11,7 @@ public struct StructOrUnionSpecifierSyntax: Hashable, Codable {
 
     /// Specifies whether a `StructOrUnionSpecifierSyntax` is a struct or union
     /// specifier.
-    public enum StructOrUnion: Hashable, Codable {
+    public enum StructOrUnion: Hashable, Codable, Sendable {
         case `struct`(SourceRange = .invalid)
         case union(SourceRange = .invalid)
     }
@@ -19,7 +19,7 @@ public struct StructOrUnionSpecifierSyntax: Hashable, Codable {
     /// The declaration part of the specifier syntax.
     /// Is either an identifier only (opaque), or a struct declaration list with
     /// an optional identifier associated with it (declared).
-    public enum Declaration: Hashable, Codable {
+    public enum Declaration: Hashable, Codable, Sendable {
         case opaque(IdentifierSyntax)
         case declared(IdentifierSyntax?, StructDeclarationListSyntax)
     }
@@ -27,14 +27,14 @@ public struct StructOrUnionSpecifierSyntax: Hashable, Codable {
 
 /// Syntax element for declaration lists for the body of a struct or union in
 /// declarations.
-public struct StructDeclarationListSyntax: Hashable, Codable {
+public struct StructDeclarationListSyntax: Hashable, Codable, Sendable {
     /// List of declarations within this declaration list.
     public var structDeclaration: [StructDeclarationSyntax]
 }
 
 /// Syntax element for a declaration in the body of a struct or union in
 /// declarations.
-public struct StructDeclarationSyntax: Hashable, Codable {
+public struct StructDeclarationSyntax: Hashable, Codable, Sendable {
     // TODO: Support attributes
     // public var attributeSpecifier: [AttributeSpecifierSyntax]
 

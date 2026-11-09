@@ -1,7 +1,7 @@
 import Utils
 
 /// ARC memory management behaviour specifier syntax for declarations.
-public enum ArcBehaviourSpecifierSyntax: Hashable, Codable {
+public enum ArcBehaviourSpecifierSyntax: Hashable, Codable, Sendable {
     case weakQualifier(SourceRange = .invalid)
     case strongQualifier(SourceRange = .invalid)
     case autoreleasingQualifier(SourceRange = .invalid)

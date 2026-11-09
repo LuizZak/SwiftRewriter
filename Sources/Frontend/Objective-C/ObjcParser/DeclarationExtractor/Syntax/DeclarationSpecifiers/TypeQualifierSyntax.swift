@@ -1,7 +1,7 @@
 import Utils
 
 /// Syntax node for a type qualifier for declarations.
-public enum TypeQualifierSyntax: Hashable, Codable {
+public enum TypeQualifierSyntax: Hashable, Codable, Sendable {
     case const(SourceRange = .invalid)
     case volatile(SourceRange = .invalid)
     case restrict(SourceRange = .invalid)

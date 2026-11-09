@@ -1,5 +1,5 @@
 {
-  "originHash" : "37833ca73150432e44e0de1590ef2d1930b42dec88fefa757aeae6c12dfb548c",
+  "originHash" : "d0fbd661760cdf3ed3f71130f632ff3e60c8158f5dfb669656f16046444d4431",
   "pins" : [
     {
       "identity" : "antlr4-swift",
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LuizZak/MiniGraphviz.git",
       "state" : {
-        "revision" : "aa15c50cf8027dae6dde860a40987c238070d849",
-        "version" : "0.1.0"
+        "revision" : "c545e50b88fd981c3f07e29efee24c926b0e4812",
+        "version" : "0.2.0"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LuizZak/SwiftAST.git",
       "state" : {
-        "revision" : "b43b574ea9a2f94dd4aeacb987b84749991e1350",
-        "version" : "0.15.0"
+        "revision" : "6c94079243aa6659ff53e956e908e533c57aa505",
+        "version" : "0.15.2"
       }
     }
   ],

@@ -1,5 +1,5 @@
 /// Syntax element for direct declarators.
-indirect public enum DirectDeclaratorSyntax: Hashable, Codable {
+indirect public enum DirectDeclaratorSyntax: Hashable, Codable, Sendable {
     case identifier(IdentifierSyntax)
     case declarator(DeclaratorSyntax)
     case arrayDeclarator(ArrayDeclaratorSyntax)

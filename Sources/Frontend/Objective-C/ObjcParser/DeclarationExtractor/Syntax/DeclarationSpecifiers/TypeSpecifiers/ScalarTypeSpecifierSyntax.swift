@@ -1,7 +1,7 @@
 import Utils
 
 /// Scalar type specifier syntax for declarations.
-public enum ScalarTypeSpecifierSyntax: Hashable, Codable {
+public enum ScalarTypeSpecifierSyntax: Hashable, Codable, Sendable {
     case void(SourceRange = .invalid)
     case char(SourceRange = .invalid)
     case short(SourceRange = .invalid)
@@ -41,7 +41,7 @@ extension ScalarTypeSpecifierSyntax: DeclarationSyntaxElementType {
             .signed(let range),
             .unsigned(let range),
             .void(let range):
-            
+
             return range
         }
     }

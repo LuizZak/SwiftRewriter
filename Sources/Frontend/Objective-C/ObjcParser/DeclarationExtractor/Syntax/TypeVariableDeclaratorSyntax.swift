@@ -1,5 +1,5 @@
 /// Syntax element for type variable declarators.
-public struct TypeVariableDeclaratorSyntax: Hashable, Codable {
+public struct TypeVariableDeclaratorSyntax: Hashable, Codable, Sendable {
     public var declarationSpecifiers: DeclarationSpecifiersSyntax
     public var declarator: DeclaratorSyntax
 }

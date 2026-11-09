@@ -28,3 +28,5 @@ struct NodeDefinition<Node: Hashable> {
     /// Extra set of attributes for a graphviz node.
     var attributes: GraphViz.Attributes = [:]
 }
+
+extension NodeDefinition: Sendable where Node: Sendable { }

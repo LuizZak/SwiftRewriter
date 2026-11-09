@@ -1,5 +1,5 @@
 /// Alignment specifier syntax element for declarations.
-public enum AlignmentSpecifierSyntax: Hashable, Codable {
+public enum AlignmentSpecifierSyntax: Hashable, Codable, Sendable {
     case typeName(TypeNameSyntax)
 
     /// _Alignas(<exp>) alignment specifier.

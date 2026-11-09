@@ -1,5 +1,5 @@
 /// Syntax elements for abstract declarators in declarations.
-public enum AbstractDeclaratorSyntax: Hashable, Codable {
+public enum AbstractDeclaratorSyntax: Hashable, Codable, Sendable {
     /// A pointer-only abstract declarator syntax
     case pointer(PointerSyntax)
 

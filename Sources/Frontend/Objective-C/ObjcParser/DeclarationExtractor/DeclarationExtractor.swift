@@ -49,7 +49,7 @@ public class DeclarationExtractor {
         clearContext()
 
         let declarationSpecifiers = ctx.declarationSpecifiers
-        
+
         collectSpecifiers(from: declarationSpecifiers)
 
         return self.declaration(from: ctx)
@@ -65,7 +65,7 @@ public class DeclarationExtractor {
         var result: [Declaration] = []
 
         clearContext()
-        
+
         collectSpecifiers(from: ctx)
 
         let isTypeDef = _context.isTypeDef
@@ -108,7 +108,7 @@ public class DeclarationExtractor {
     ) -> Declaration? {
 
         clearContext()
-        
+
         collectSpecifiers(from: ctx)
 
         return declaration(from: declarator, context: _context)
@@ -125,7 +125,7 @@ public class DeclarationExtractor {
     ) -> Declaration? {
 
         clearContext()
-        
+
         collectSpecifiers(from: ctx)
 
         return declaration(context: _context)
@@ -139,7 +139,7 @@ public class DeclarationExtractor {
         clearContext()
 
         let declarationSpecifiers = ctx.declarationSpecifiers
-        
+
         collectSpecifiers(from: declarationSpecifiers)
 
         return typeName(from: ctx)
@@ -153,7 +153,7 @@ public class DeclarationExtractor {
     ) -> TypeName? {
 
         clearContext()
-        
+
         collectSpecifiers(from: ctx)
 
         return typeName(from: ctx, abstractDeclarator: abstractDeclarator)
@@ -199,7 +199,7 @@ public class DeclarationExtractor {
         let specifiers: [DeclSpecifier]
         if let lastIdent = context.specifiers.last?.typeSpecifier?.asTypeNameSpecifier {
             specifiers = context.specifiers.dropLast()
-            
+
             declaration = .identifier(lastIdent.identifier)
         } else {
             specifiers = context.specifiers
@@ -244,7 +244,7 @@ public class DeclarationExtractor {
         guard let ctx = ctx else {
             return nil
         }
-        
+
         return declaration(
             from: ctx.directDeclarator,
             pointer: ctx.pointer,
@@ -356,7 +356,7 @@ public class DeclarationExtractor {
         from ctx: FieldDeclarationSyntax?,
         context: Context
     ) -> [Declaration]? {
-        
+
         guard let ctx = ctx else {
             return nil
         }
@@ -455,7 +455,7 @@ public class DeclarationExtractor {
         guard let ctx = ctx else {
             return nil
         }
-        
+
         let specifiers = declSpecifiers(from: ctx)
 
         let pointer = abstractDeclarator?.pointer.flatMap(self.pointer(from:))
@@ -755,12 +755,12 @@ public class DeclarationExtractor {
             return .arcBehaviourSpecifier(
                 arcSpecifier(from: specifier)
             )
-        
+
         case .typeQualifier(let qualifier):
             return .typeQualifier(
                 typeQualifier(from: qualifier)
             )
-        
+
         case .nullability(let nullability):
             return .nullabilitySpecifier(
                 nullabilitySpecifier(from: nullability)
@@ -823,16 +823,16 @@ public class DeclarationExtractor {
 
         case .typeSpecifier(let spec):
             return .typeSpecifier(typeSpecifier(from: spec))
-            
+
         case .typeQualifier(let spec):
             return .typeQualifier(typeQualifier(from: spec))
-            
+
         case .functionSpecifier(let spec):
             return .functionSpecifier(functionSpecifier(from: spec))
 
         case .arcBehaviour(let spec):
             return .arcSpecifier(arcSpecifier(from: spec))
-            
+
         case .nullability(let spec):
             return .nullabilitySpecifier(nullabilitySpecifier(from: spec))
 
@@ -841,7 +841,7 @@ public class DeclarationExtractor {
 
         case .alignment(let spec):
             return .alignmentSpecifier(alignmentSpecifier(from: spec))
-        
+
         case .typePrefix(let spec):
             return .typePrefix(typePrefix(from: spec))
         }
@@ -880,7 +880,7 @@ public class DeclarationExtractor {
 
         case .genericTypeIdentifier(let spec):
             let identifier = spec.identifier
-            
+
             let genericTypeSpecifier = genericTypeList(
                 from: spec.genericTypeParameters
             )
@@ -978,7 +978,7 @@ public class DeclarationExtractor {
     private func structFieldDeclarations(
         from syntax: StructDeclarationListSyntax?
     ) -> [StructFieldDeclaration]? {
-        
+
         guard let syntax = syntax else {
             return nil
         }
@@ -1240,24 +1240,24 @@ public class DeclarationExtractor {
 
         /// The syntax element where the current declaration specifiers where
         /// derived from.
-        /// 
+        ///
         /// Is mutually exclusive with `structDeclarationContext`, and defining
         /// both at the same time is an undefined state.
         var specifiersContext: DeclarationSpecifiersSyntax?
-        
+
         /// The syntax element where the current type prefix was derived from.
         var typePrefixContext: TypePrefixSyntax?
 
         /// The syntax element where the current declaration specifiers where
         /// derived from.
-        /// 
+        ///
         /// Is mutually exclusive with `specifiersContext`, and defining both at
         /// the same time is an undefined state.
         var structDeclarationContext: StructDeclarationSyntax?
 
         /// Whether the current declaration is a typedef declaration context.
         var isTypeDef: Bool { specifiers.storageSpecifiers().contains { $0.isTypedef } }
-        
+
         /// Gets the last type name specifier on the specifier list.
         var lastTypeNameSpecifier: TypeNameSpecifier? {
             specifiers.typeSpecifiers().last(where: { $0.isTypeName })?.asTypeNameSpecifier
@@ -1267,7 +1267,7 @@ public class DeclarationExtractor {
 
 public extension DeclarationExtractor {
     /// A declaration that was detected during construction
-    struct Declaration: Hashable, CustomStringConvertible {
+    struct Declaration: Hashable, CustomStringConvertible, Sendable {
         /// The type prefix that precedes a declaration.
         var typePrefix: TypePrefix?
 
@@ -1288,7 +1288,7 @@ public extension DeclarationExtractor {
         /// An initializer that was collected alongside this declaration,
         /// if it was present.
         var initializer: InitializerSyntax?
-        
+
         /// A constant syntax element that was collected alongside this
         /// declaration, if it was present.
         var constant: ConstantExpressionSyntax?
@@ -1327,7 +1327,7 @@ public extension DeclarationExtractor {
     }
 
     /// The source for a `Declaration` value.
-    enum DeclarationDeclNode: Hashable {
+    enum DeclarationDeclNode: Hashable, Sendable {
         /// A direct declarator syntax where the type was defined.
         case directDeclarator(DirectDeclaratorSyntax)
 
@@ -1400,7 +1400,7 @@ public extension DeclarationExtractor {
     }
 
     /// An abstract type name declaration
-    struct TypeName: Hashable, CustomStringConvertible {
+    struct TypeName: Hashable, CustomStringConvertible, Sendable {
         /// A list of declaration specifiers for reference purposes.
         var specifiers: [DeclSpecifier]
 
@@ -1427,10 +1427,10 @@ public extension DeclarationExtractor {
     }
 
     /// The source for a TypeName declaration
-    enum TypeNameDeclNode: Hashable {
+    enum TypeNameDeclNode: Hashable, Sendable {
         /// Type name was derived from a `typeName` syntax element
         case typeName(TypeNameSyntax)
-        
+
         /// Type name was derived from a combination of `declarationSpecifiers`
         /// and optionally a `abstractDeclarator`.
         case declSpecifiers(
@@ -1452,7 +1452,7 @@ public extension DeclarationExtractor {
     }
 
     /// The kind for a detected declaration
-    enum DeclarationKind: Hashable, CustomStringConvertible {
+    enum DeclarationKind: Hashable, CustomStringConvertible, Sendable {
         /// An identifier kind, e.g. for a variable.
         case identifier(
             String,
@@ -1465,7 +1465,7 @@ public extension DeclarationExtractor {
             typeQualifiers: [ObjcTypeQualifier]? = nil,
             length: ExpressionSyntax? = nil
         )
-        
+
         /// A function declaration.
         indirect case function(
             base: DeclarationKind,
@@ -1528,7 +1528,7 @@ public extension DeclarationExtractor {
                 result += "("
                 result.joinList(arguments, separator: ", ")
                 result += ")"
-                
+
             case .function(let base, let parameters, let isVariadic):
                 result.joinIfPresent(base)
                 result += "("
@@ -1555,7 +1555,7 @@ public extension DeclarationExtractor {
     }
 
     /// A parameter for a function declaration.
-    indirect enum FuncParameter: Hashable, CustomStringConvertible {
+    indirect enum FuncParameter: Hashable, CustomStringConvertible, Sendable {
         /// A named declaration
         case declaration(Declaration)
 
@@ -1566,7 +1566,7 @@ public extension DeclarationExtractor {
             switch self {
             case .declaration(let decl):
                 return decl.description
-            
+
             case .typeName(let typeName):
                 return typeName.description
             }
@@ -1575,7 +1575,7 @@ public extension DeclarationExtractor {
 
     /// Declaration for abstract declarators, e.g. for generic type arguments
     /// of type specifiers.
-    enum AbstractDeclarationKind: Hashable, CustomStringConvertible {
+    enum AbstractDeclarationKind: Hashable, CustomStringConvertible, Sendable {
         /// A static pointer array.
         indirect case staticArray(
             base: AbstractDeclarationKind?,
@@ -1612,7 +1612,7 @@ public extension DeclarationExtractor {
                     result.join("...", separator: parameters.isEmpty ? "" : ", ")
                 }
                 result += ")"
-            
+
             case .block(let base, let specifiers, let parameters):
                 result.joinIfPresent(base)
                 result += "("
@@ -1636,7 +1636,7 @@ public extension DeclarationExtractor {
     }
 
     /// An Objective-C type prefix
-    enum TypePrefix: Hashable, CustomStringConvertible {
+    enum TypePrefix: Hashable, CustomStringConvertible, Sendable {
         case bridge
         case bridgeRetained
         case bridgeTransfer
@@ -1669,7 +1669,7 @@ public extension DeclarationExtractor {
     }
 
     /// A pointer context
-    struct Pointer: Hashable, CustomStringConvertible {
+    struct Pointer: Hashable, CustomStringConvertible, Sendable {
         /// A list of pointers that where present
         var pointers: [PointerEntry]
 
@@ -1688,7 +1688,7 @@ public extension DeclarationExtractor {
         }
     }
     /// A pointer entry for a pointer context
-    enum PointerEntry: Hashable, CustomStringConvertible {
+    enum PointerEntry: Hashable, CustomStringConvertible, Sendable {
         case pointer(_ specifiers: [PointerEntrySpecifier] = [])
         // case blocks(_ specifiers: [PointerEntrySpecifier] = [])
 
@@ -1709,7 +1709,7 @@ public extension DeclarationExtractor {
         }
     }
     /// A pointer specifier/qualifier for a pointer context
-    enum PointerEntrySpecifier: Hashable, CustomStringConvertible {
+    enum PointerEntrySpecifier: Hashable, CustomStringConvertible, Sendable {
         case nullabilitySpecifier(ObjcNullabilitySpecifier)
         case arcBehaviourSpecifier(ObjcArcBehaviorSpecifier)
         case typeQualifier(ObjcTypeQualifier)
@@ -1752,7 +1752,7 @@ public extension DeclarationExtractor {
     }
 
     /// A specifier for a C/Objective-C declaration
-    enum DeclSpecifier: Hashable, CustomStringConvertible {
+    enum DeclSpecifier: Hashable, CustomStringConvertible, Sendable {
         case storageSpecifier(StorageSpecifier)
         case typeSpecifier(TypeSpecifier)
         case typeQualifier(ObjcTypeQualifier)
@@ -1861,7 +1861,7 @@ public extension DeclarationExtractor {
     }
 
     /// A C alignment specifier
-    enum AlignmentSpecifier: Hashable, CustomStringConvertible {
+    enum AlignmentSpecifier: Hashable, CustomStringConvertible, Sendable {
         case typeName(TypeName)
         case constant(ConstantExpressionSyntax)
 
@@ -1876,7 +1876,7 @@ public extension DeclarationExtractor {
     }
 
     /// A C storage specifier
-    enum StorageSpecifier: Hashable, CustomStringConvertible {
+    enum StorageSpecifier: Hashable, CustomStringConvertible, Sendable {
         case typedef
         case constexpr
         case register
@@ -1974,7 +1974,7 @@ public extension DeclarationExtractor {
     }
 
     /// A C type specifier
-    enum TypeSpecifier: Hashable, CustomStringConvertible {
+    enum TypeSpecifier: Hashable, CustomStringConvertible, Sendable {
         case scalar(ScalarType)
         case typeName(TypeNameSpecifier)
         case structOrUnionSpecifier(StructOrUnionSpecifier)
@@ -1988,10 +1988,10 @@ public extension DeclarationExtractor {
 
             case .typeName(let value):
                 return value.description
-            
+
             case .structOrUnionSpecifier(let value):
                 return value.syntax.description
-            
+
             case .enumSpecifier(let value):
                 return value.syntax.description
 
@@ -2055,7 +2055,7 @@ public extension DeclarationExtractor {
                 return false
             }
         }
-        
+
         /// Returns `true` if this type specifier is a `.typeName` case.
         public var isTypeName: Bool {
             switch self {
@@ -2109,7 +2109,7 @@ public extension DeclarationExtractor {
     }
 
     /// A C scalar type
-    enum ScalarType: Hashable, CustomStringConvertible {
+    enum ScalarType: Hashable, CustomStringConvertible, Sendable {
         case void
         case char
         case short
@@ -2163,7 +2163,7 @@ public extension DeclarationExtractor {
     }
 
     /// A C type name specifier context
-    struct TypeNameSpecifier: Hashable, CustomStringConvertible {
+    struct TypeNameSpecifier: Hashable, CustomStringConvertible, Sendable {
         var name: String
         var identifier: IdentifierSyntax
         var genericTypes: GenericTypeList? = nil
@@ -2172,13 +2172,13 @@ public extension DeclarationExtractor {
             var result = name
 
             result.joinIfPresent(genericTypes, separator: "")
-            
+
             return result
         }
     }
 
     /// A generic type specifier for Objective-C
-    struct GenericTypeList: Hashable, CustomStringConvertible {
+    struct GenericTypeList: Hashable, CustomStringConvertible, Sendable {
         /// A list of concretized Objective-C types for the type arguments.
         var types: [GenericTypeParameter]
 
@@ -2188,7 +2188,7 @@ public extension DeclarationExtractor {
     }
 
     /// A generic type specifier for Objective-C
-    struct GenericTypeParameter: Hashable, CustomStringConvertible {
+    struct GenericTypeParameter: Hashable, CustomStringConvertible, Sendable {
         var kind: GenericTypeKind?
         var type: TypeName
 
@@ -2204,7 +2204,7 @@ public extension DeclarationExtractor {
 
     /// A specifier for a generic type entry for whether the type is covariant
     /// or contravariant
-    enum GenericTypeKind: String, Hashable, CustomStringConvertible {
+    enum GenericTypeKind: String, Hashable, CustomStringConvertible, Sendable {
         case covariant = "__covariant"
         case contravariant = "__contravariant"
 
@@ -2214,7 +2214,7 @@ public extension DeclarationExtractor {
     }
 
     /// A C struct or union type specifier
-    struct StructOrUnionSpecifier: Hashable {
+    struct StructOrUnionSpecifier: Hashable, Sendable {
         var syntax: StructOrUnionSpecifierSyntax
         /// The identifier that represents the type name for this enum.
         var identifier: IdentifierSyntax?
@@ -2226,7 +2226,7 @@ public extension DeclarationExtractor {
     }
 
     /// A struct or union field declarator
-    struct StructFieldDeclaration: Hashable {
+    struct StructFieldDeclaration: Hashable, Sendable {
         /// The computed declaration for this field.
         var declaration: Declaration
 
@@ -2235,7 +2235,7 @@ public extension DeclarationExtractor {
     }
 
     /// An enum type specifier
-    struct EnumSpecifier: Hashable {
+    struct EnumSpecifier: Hashable, Sendable {
         var syntax: EnumSpecifierSyntax
         var typeName: TypeName?
         /// The identifier that represents the type name for this enum.
@@ -2248,14 +2248,14 @@ public extension DeclarationExtractor {
     }
 
     /// An enumerator declaration inside an enum declaration
-    struct EnumeratorDeclaration: Hashable {
+    struct EnumeratorDeclaration: Hashable, Sendable {
         var identifier: IdentifierSyntax
         var expression: ExpressionSyntax?
     }
 
     // TODO: Promote this to a specifier in `ObjcType.blockType`.
 
-    enum BlockDeclarationSpecifier: Hashable, CustomStringConvertible {
+    enum BlockDeclarationSpecifier: Hashable, CustomStringConvertible, Sendable {
         case nullabilitySpecifier(ObjcNullabilitySpecifier)
         case arcBehaviourSpecifier(ObjcArcBehaviorSpecifier)
         case typeQualifier(ObjcTypeQualifier)
@@ -2369,7 +2369,7 @@ private extension String {
         guard let values = values else {
             return
         }
-        
+
         joinList(values, separator: separator)
     }
 

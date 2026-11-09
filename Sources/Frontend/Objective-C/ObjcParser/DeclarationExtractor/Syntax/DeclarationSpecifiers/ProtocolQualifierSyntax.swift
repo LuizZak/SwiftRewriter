@@ -1,7 +1,7 @@
 import Utils
 
 /// Protocol type qualifier syntax for declarations.
-public enum ProtocolQualifierSyntax: Hashable, Codable {
+public enum ProtocolQualifierSyntax: Hashable, Codable, Sendable {
     case `in`(SourceRange = .invalid)
     case out(SourceRange = .invalid)
     case `inout`(SourceRange = .invalid)

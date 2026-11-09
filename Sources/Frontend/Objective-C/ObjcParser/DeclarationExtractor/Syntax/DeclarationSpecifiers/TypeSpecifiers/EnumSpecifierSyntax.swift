@@ -1,7 +1,7 @@
 import Utils
 
 /// Syntax element for enum specifiers in declarations.
-public enum EnumSpecifierSyntax: Hashable, Codable {
+public enum EnumSpecifierSyntax: Hashable, Codable, Sendable {
     /// A regular C `enum` declaration.
     case cEnum(IdentifierSyntax?, TypeNameSyntax?, Declaration)
 
@@ -10,7 +10,7 @@ public enum EnumSpecifierSyntax: Hashable, Codable {
 
     /// Specifies whether an enum specifier was declared using `NS_OPTIONS` or
     /// `NS_ENUM` macros provided by Objective-C.
-    public enum NSOptionsOrNSEnum: Hashable, Codable {
+    public enum NSOptionsOrNSEnum: Hashable, Codable, Sendable {
         case nsOptions(SourceRange = .invalid)
         case nsEnum(SourceRange = .invalid)
     }
@@ -18,19 +18,19 @@ public enum EnumSpecifierSyntax: Hashable, Codable {
     /// The declaration part of the specifier syntax.
     /// Is either an identifier only (opaque), or an enumerator list body with
     /// no identifier.
-    public enum Declaration: Hashable, Codable {
+    public enum Declaration: Hashable, Codable, Sendable {
         case opaque(IdentifierSyntax)
         case declared(IdentifierSyntax?, EnumeratorListSyntax)
     }
 }
 
 /// Syntax element for a list of enumerators in an enumeration declaration.
-public struct EnumeratorListSyntax: Hashable, Codable {
+public struct EnumeratorListSyntax: Hashable, Codable, Sendable {
     public var enumerators: [EnumeratorSyntax]
 }
 
 /// Syntax element for an enumerator in an enumeration declaration.
-public struct EnumeratorSyntax: Hashable, Codable {
+public struct EnumeratorSyntax: Hashable, Codable, Sendable {
     public var enumeratorIdentifier: IdentifierSyntax
     public var expression: ExpressionSyntax?
 }
@@ -53,7 +53,7 @@ extension EnumSpecifierSyntax: CustomStringConvertible {
         switch self {
         case .cEnum(let identifier?, let typeName?, let declaration):
             return "enum \(identifier) : \(typeName) \(declaration)"
-        
+
         case .cEnum(let identifier?, nil, let declaration):
             return "enum \(identifier) \(declaration)"
 

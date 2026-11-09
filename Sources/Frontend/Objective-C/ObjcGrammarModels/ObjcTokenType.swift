@@ -1,38 +1,38 @@
 /// The type for a Token read by the lexer
-public enum ObjcTokenType: Equatable {
+public enum ObjcTokenType: Equatable, Sendable {
     /// End-of-file token
     case eof
     case unknown
-    
+
     case decimalLiteral(String)
     case floatLiteral(String)
     case octalLiteral(String)
     case hexLiteral(String)
     case stringLiteral(String)
-    
+
     case id
-    
+
     case identifier(String)
     case typeQualifier(String)
     case keyword(ObjcKeyword)
-    
+
     case at
-    
+
     case colon
     case semicolon
     case comma
     case period
     case ellipsis
-    
+
     case openBrace
     case closeBrace
-    
+
     case openParens
     case closeParens
-    
+
     case openSquareBracket
     case closeSquareBracket
-    
+
     case `operator`(ObjcOperator)
 }
 
@@ -45,7 +45,7 @@ public extension ObjcTokenType {
             return false
         }
     }
-    
+
     var isIdentifier: Bool {
         switch self {
         case .identifier:

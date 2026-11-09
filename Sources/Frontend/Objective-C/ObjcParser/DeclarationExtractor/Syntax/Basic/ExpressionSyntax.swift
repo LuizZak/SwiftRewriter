@@ -1,9 +1,9 @@
 import Utils
 
 /// A generic C-compatible `expression` syntax node for declarations.
-public struct ExpressionSyntax: Hashable, Codable {
+public struct ExpressionSyntax: Hashable, Codable, Sendable {
     public var sourceRange: SourceRange = .invalid
-    
+
     /// A valid C `expression`-compatible syntax string.
     public var expressionString: String
 }

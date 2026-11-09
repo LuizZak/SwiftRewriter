@@ -1,12 +1,12 @@
 /// Syntax element for lists of type specifiers and type qualifiers.
-public struct SpecifierQualifierListSyntax: Hashable, Codable {
+public struct SpecifierQualifierListSyntax: Hashable, Codable, Sendable {
     /// List of type specifiers and qualifiers.
     /// Must have length >1.
     public var specifierQualifiers: [TypeSpecifierQualifierSyntax]
 }
 
 /// A type specifier or type qualifier for a specifier qualifier list.
-public enum TypeSpecifierQualifierSyntax: Hashable, Codable {
+public enum TypeSpecifierQualifierSyntax: Hashable, Codable, Sendable {
     indirect case typeSpecifier(TypeSpecifierSyntax)
     case typeQualifier(TypeQualifierSyntax)
     case alignment(AlignmentSpecifierSyntax)

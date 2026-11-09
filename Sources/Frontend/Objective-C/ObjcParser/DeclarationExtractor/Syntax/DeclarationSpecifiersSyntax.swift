@@ -1,5 +1,5 @@
 /// Syntax element for declaration specifiers in declarations.
-public struct DeclarationSpecifiersSyntax: Hashable, Codable {
+public struct DeclarationSpecifiersSyntax: Hashable, Codable, Sendable {
     /// List of declaration specifiers.
     public var declarationSpecifier: [DeclarationSpecifierSyntax]
 }

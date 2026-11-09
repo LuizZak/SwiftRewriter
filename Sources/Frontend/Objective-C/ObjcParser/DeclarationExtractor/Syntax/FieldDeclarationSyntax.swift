@@ -1,5 +1,5 @@
 /// Syntax element for field declarations.
-public struct FieldDeclarationSyntax: Hashable, Codable {
+public struct FieldDeclarationSyntax: Hashable, Codable, Sendable {
     public var declarationSpecifiers: DeclarationSpecifiersSyntax
     public var fieldDeclaratorList: [FieldDeclaratorSyntax]
 }

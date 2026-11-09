@@ -1,5 +1,5 @@
 /// Syntax for a declaration.
-public struct DeclarationSyntax: Hashable, Codable {
+public struct DeclarationSyntax: Hashable, Codable, Sendable {
     public var declarationSpecifiers: DeclarationSpecifiersSyntax
     public var initDeclaratorList: InitDeclaratorListSyntax?
 }
