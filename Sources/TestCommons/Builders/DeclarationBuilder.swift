@@ -2,11 +2,11 @@ import Intentions
 
 /// Base class for builders for types, members and global variables and functions.
 public class DeclarationBuilder<T> {
-   var declaration: T
+    var declaration: T
 
-   init(declaration: T) {
-       self.declaration = declaration
-   }
+    init(declaration: T) {
+        self.declaration = declaration
+    }
 }
 
 extension DeclarationBuilder where T: Intention {

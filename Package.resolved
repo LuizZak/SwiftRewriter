@@ -1,5 +1,5 @@
 {
-  "originHash" : "d0fbd661760cdf3ed3f71130f632ff3e60c8158f5dfb669656f16046444d4431",
+  "originHash" : "ad70929f06a651c378b5ee66b82bef95d27e32874b8db9412feacebedc3bf896",
   "pins" : [
     {
       "identity" : "antlr4-swift",
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LuizZak/SwiftAST.git",
       "state" : {
-        "revision" : "6c94079243aa6659ff53e956e908e533c57aa505",
-        "version" : "0.15.2"
+        "revision" : "39fd486b61b48543ce6cc79134632cc986dd894e",
+        "version" : "0.15.3"
       }
     }
   ],

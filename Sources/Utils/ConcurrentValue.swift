@@ -29,7 +29,7 @@ public final class ConcurrentValue<T> {
             pthread_rwlock_unlock(&lock)
         }
     }
-    
+
     @inlinable
     public var projectedValue: T {
         get {
@@ -62,23 +62,23 @@ public final class ConcurrentValue<T> {
     /// awaiting for current read operations to end, and blocking the access of
     /// the value until the access ends.
     @inlinable
-    public func withExclusiveAccess<U>(_ block: (T) -> U) -> U {
+    public func withExclusiveAccess<U>(_ block: (T) throws -> U) rethrows -> U {
         pthread_rwlock_wrlock(&lock)
         defer {
             pthread_rwlock_unlock(&lock)
         }
 
-        return block(_value)
+        return try block(_value)
     }
 
     @inlinable
-    public func modifyingValue<U>(_ block: (inout T) -> U) -> U {
+    public func modifyingValue<U>(_ block: (inout T) throws -> U) rethrows -> U {
         pthread_rwlock_wrlock(&lock)
         defer {
             pthread_rwlock_unlock(&lock)
         }
 
-        return block(&_value)
+        return try block(&_value)
     }
 
     @inlinable

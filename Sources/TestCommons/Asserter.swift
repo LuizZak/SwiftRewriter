@@ -114,6 +114,8 @@ public struct Asserter<Object> {
     }
 }
 
+extension Asserter: Sendable where Object: Sendable { }
+
 public extension Optional {
     /// Maps the optional result of an asserter into a separate asserter,
     /// mirroring the optionality of the result into `newAsserter`.
