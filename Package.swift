@@ -402,8 +402,8 @@ let package = Package(
         //
         .package(url: "https://github.com/LuizZak/MiniLexer.git", exact: "0.10.0"),
         .package(url: "https://github.com/LuizZak/MiniGraphviz.git", exact: "0.2.0"),
-        .package(url: "https://github.com/LuizZak/MiniDigraph.git", exact: "0.8.0"),
-        .package(url: "https://github.com/LuizZak/SwiftAST.git", exact: "0.15.3"),
+        .package(url: "https://github.com/LuizZak/MiniDigraph.git", exact: "0.9.1"),
+        .package(url: "https://github.com/LuizZak/SwiftAST.git", exact: "0.16.0"),
     ],
     targets: aggregateTargets + [
         swiftRewriterTarget,
